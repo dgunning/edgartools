@@ -7,17 +7,126 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.27.0] - 2025-11-08
+
+### Added
+
+- **Comprehensive Test Harness System**
+  - Added integrated test harness for live filing validation and quality monitoring
+  - Support for multiple selector strategies: by company, subset, date range, and form type
+  - Multiple reporter formats: JSON, CSV, summary, detailed, and custom templates
+  - Flexible storage backends for test results and history tracking
+  - Parallel execution support for large-scale testing
+  - **Impact**: Enables systematic validation across thousands of filings
+  - **Files Added**: `edgar/testing/`, test harness modules
+  - **Related**: Commit b042e9bb
+
+- **Beads Issue Tracking Integration**
+  - Integrated Beads workflow for lightweight, git-free issue tracking
+  - Seamless GitHub issue synchronization via external references
+  - Priority-based filtering and status management
+  - CLAUDE.md updated with comprehensive Beads command guide
+  - **Impact**: Improved development workflow and issue management
+  - **Files Added**: `.beads/` directory (git-ignored), operational scripts
+  - **Files Modified**: `CLAUDE.md`
+  - **Related**: Commits 3b1a20bf, 3e9652e0
+
+- **Notebook Validation Framework**
+  - Automated validation script for Jupyter notebooks
+  - AI-driven code updates and compatibility checking
+  - Ensures examples stay current with API changes
+  - **Files Added**: Notebook validation scripts
+  - **Related**: Commit cdcc44ce
+
 ### Fixed
 
-- **Excessive XBRL Footnote Warning Spam (Issue #482)**
-  - Reduced 100+ duplicate warnings to deduplicated DEBUG messages for old filings (2015 and earlier)
+- **Missing current_page Property in CurrentFilings (Issue #483)**
+  - Added missing `current_page` property to `CurrentFilings` class
+  - Property calculates page number from internal `_start` and `_page_size` attributes
+  - Fixes AttributeError when using `page.current_page` in `iter_current_filings_pages()`
+  - Added comprehensive regression test suite
+  - **Impact**: Documentation examples now work correctly
+  - **Files Modified**: `edgar/current_filings.py`
+  - **Files Added**: `tests/issues/regression/test_issue_483.py`
+  - **Related**: Issue #483, GitHub PR #483, Beads edgartools-0v5
+
+- **XBRL Footnote Identification Priority (Issue #482)**
+  - Changed XBRL footnote matching to prioritize `xlink:label` attribute over `id` attribute
+  - Resolves inconsistent footnote ID naming conventions in older filings (pre-2015)
+  - Reduced excessive warning spam (100+ duplicate warnings → deduplicated DEBUG messages)
   - Downgraded "Footnote arc references undefined footnote" from WARNING to DEBUG level
-  - Added summary message for undefined footnote count (non-critical)
-  - **Impact**: Clean console output, no more warning spam on older filings
-  - **Affected**: APD 2015 (121→20 messages), GE 2015 (237→unique count), modern filings unaffected
-  - **Root Cause**: Older filings have inconsistent footnote ID naming conventions
+  - Added summary message for undefined footnote counts
+  - **Impact**: Clean console output, improved compatibility with legacy filings
+  - **Affected Filings**: APD 2015 (121→20 messages), GE 2015 (237→unique count)
   - **Files Modified**: `edgar/xbrl/parsers/instance.py`
-  - **Related**: Issue #482, Beads edgartools-9on
+  - **Related**: Issue #482, GitHub PR #482, Beads edgartools-9on, edgartools-tm2
+
+- **SGML Parser Tag Support (Issue #477)**
+  - Added support for `<ITEM>` and `<RULE>` tags in SGML parser
+  - Improves parsing of older SEC filings with SGML format
+  - **Files Modified**: `edgar/files/sgml.py`
+  - **Files Added**: `tests/issues/regression/test_issue_477_item_rule_tags.py`
+  - **Related**: Issue #477
+
+- **Multi-Period Cash Flow Statements Missing Data (Issue #475)**
+  - Fixed issue where multi-period cash flow statements were missing data
+  - Improved period selection and data extraction logic
+  - **Impact**: Complete cash flow data now available across all periods
+  - **Files Modified**: XBRL statement handling
+  - **Files Added**: `tests/issues/reproductions/xbrl-parsing/test_issue_475_cashflow_multiperiod.py`
+  - **Related**: Issue #475
+
+- **Submission Cache Timeout Optimization (Issue #471)**
+  - Reduced submission cache timeout from 10 minutes to 30 seconds
+  - Ensures fresher data for recently filed submissions
+  - **Impact**: Users get more current filing data with minimal latency
+  - **Files Modified**: HTTP client cache configuration
+  - **Related**: Issue #471
+
+- **Test Harness Selector Tests**
+  - Fixed 5 failing tests in test harness selector module
+  - Resolved issues with random sampling and company subset selection
+  - All 2,184 tests now pass successfully
+  - **Files Modified**: Test harness selector implementation
+  - **Related**: Commits 10778815, 551d29e6
+
+### Changed
+
+- **Examples Directory Consolidation**
+  - Restructured examples into single consolidated directory
+  - Made examples and notebooks programmatically discoverable
+  - Improved organization and accessibility
+  - **Impact**: Easier navigation and example discovery
+  - **Files Modified**: Examples directory structure
+  - **Related**: Commits 14fb9d8c, 753f10e5
+
+- **Optional Test Harness Dependencies**
+  - Moved `click` to optional test-harness dependency group
+  - Reduces core dependency footprint
+  - Install with: `pip install edgartools[test-harness]`
+  - **Files Modified**: `pyproject.toml`
+  - **Related**: Commit e1f23068
+
+- **Documentation Improvements**
+  - Fixed Beads command syntax in CLAUDE.md
+  - Enhanced navigation guide with test structure overview
+  - Added issue tracking workflow documentation
+  - **Files Modified**: `CLAUDE.md`
+  - **Related**: Commit a994d0e5
+
+### Infrastructure
+
+- **Operational Scripts**
+  - Added MCP testing scripts for development workflow
+  - Portfolio manager maintenance utilities
+  - **Files Added**: Operational script directory
+  - **Related**: Commit 64cf9d4a
+
+- **Research Documentation**
+  - Documented XBRL footnote warning root cause analysis
+  - Documented 8-K parser investigation findings
+  - **Files Added**: Research notes (edgartools-tm2, edgartools-3pd)
+  - **Related**: Commits af2ce57c, a741e695
 
 ## [4.26.2] - 2025-11-06
 
