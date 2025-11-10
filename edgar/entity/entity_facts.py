@@ -47,7 +47,8 @@ def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
     """
     Download company facts from the SEC
     """
-    company_facts_url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010}.json"
+    from edgar.urls import build_company_facts_url
+    company_facts_url = build_company_facts_url(cik)
     try:
         return download_json(company_facts_url)
     except httpx.HTTPStatusError as err:

@@ -368,9 +368,10 @@ class EntityData:
         download_json = lazy_import('edgar.httprequests.download_json')
 
         # Load additional filings from the SEC
+        from edgar.config import SEC_DATA_URL
         filing_tables = [self.filings.data]
         for file in self._files:
-            submissions = download_json("https://data.sec.gov/submissions/" + file['name'])
+            submissions = download_json(f"{SEC_DATA_URL}/submissions/" + file['name'])
             filing_table = extract_company_filings_table(submissions)
             filing_tables.append(filing_table)
 

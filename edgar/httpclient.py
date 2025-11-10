@@ -37,15 +37,33 @@ MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) 
 # Note that: revalidation consumes rate limit "hit", but will be served from cache if the data hasn't changed.
 
 
-CACHE_RULES = {
-    r".*\.sec\.gov": {
-        "/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS,
-        r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
-        r"/files/company_tickers\.json.*": MAX_SUBMISSIONS_AGE_SECONDS,
-        ".*index/.*": MAX_INDEX_AGE_SECONDS,
-        "/Archives/edgar/data": True,  # cache forever
+def _get_cache_rules() -> dict:
+    """
+    Get cache rules based on configured SEC base URL.
+    This allows caching to work with custom SEC mirrors.
+    """
+    from edgar.config import SEC_BASE_URL
+    import re
+
+    # Extract domain pattern from base URL (e.g., "sec.gov" or "mysite.com")
+    domain_match = re.match(r'https?://([^/]+)', SEC_BASE_URL)
+    if domain_match:
+        domain = domain_match.group(1).replace('.', r'\.')
+    else:
+        domain = r'.*\.sec\.gov'  # Fallback to default
+
+    return {
+        f".*{domain}": {
+            "/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS,
+            r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
+            r"/files/company_tickers\.json.*": MAX_SUBMISSIONS_AGE_SECONDS,
+            ".*index/.*": MAX_INDEX_AGE_SECONDS,
+            "/Archives/edgar/data": True,  # cache forever
+        }
     }
-}
+
+# Cache rules evaluated at module load time
+CACHE_RULES = _get_cache_rules()
 
 def get_cache_directory() -> str:
     cachedir = Path(edgar_data_dir) / "_tcache"
