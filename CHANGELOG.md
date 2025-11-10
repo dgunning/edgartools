@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.27.1] - 2025-11-10
+
+### Fixed
+
+- **Gzip Decompression Error Handling (Issue #487)**
+  - Added retry logic for corrupted gzip index file downloads from SEC
+  - Implements up to 5 retry attempts with content-length validation
+  - Prevents EOFError and BadGzipFile exceptions from transient server issues
+  - **Impact**: Filing retrieval now resilient to SEC server data corruption
+  - **Files Modified**: `edgar/httprequests.py`
+  - **Files Added**: `tests/test_httprequests.py`
+
+- **UnboundLocalError in Footnote Extraction (Issue #488)**
+  - Fixed variable scoping issue when processing filings without footnoteLink elements
+  - Moved undefined_footnotes declaration outside loop to prevent UnboundLocalError
+  - **Impact**: Prevents crashes for almost all filings without footnote links
+  - **Files Modified**: `edgar/xbrl/parsers/instance.py`
+  - **Files Added**: `tests/issues/regression/test_issue_488_footnote_undefined_variable.py`
+
+- **ZeroDivisionError in Comprehensive Income Statements (Issue #486)**
+  - Added zero-check for weight_sum in statement resolution logic
+  - Prevents division by zero when weight_map is empty
+  - **Impact**: Restores comprehensive income statement access for ~9.5% of filings (2,038 filings, 28+ companies)
+  - **Files Modified**: `edgar/xbrl/statement_resolver.py`
+  - **Files Added**: `tests/issues/regression/test_issue_486_comprehensive_income_zerodiv.py`
+
+### Added
+
+- **Form 4 Owner name_unreversed Property (Enhancement #485)**
+  - Added `name_unreversed` property to Form 4 Owner class
+  - Preserves original SEC format owner names (e.g., "COOK TIMOTHY D") alongside formatted names
+  - Eliminates need for additional API calls to access unreversed names
+  - **Backward Compatible**: Existing `name` property continues to work as before
+  - **Impact**: Provides access to both formatted and original name formats
+  - **Files Modified**: `edgar/ownership/ownershipforms.py`
+  - **Files Added**: 4 comprehensive test cases in `tests/test_form4.py`
+
 ## [4.27.0] - 2025-11-08
 
 ### Added
