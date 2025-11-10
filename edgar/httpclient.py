@@ -76,11 +76,16 @@ def get_edgar_verify_ssl():
     """
     Returns True if using SSL verification on http requests
     """
+    return strtobool(os.environ.get("EDGAR_VERIFY_SSL", "true"))
 
-    if "EDGAR_VERIFY_SSL" in os.environ:
-        return strtobool(os.environ["EDGAR_VERIFY_SSL"])
-    else:
-        return True
+
+def get_edgar_rate_limit_per_sec():
+    """
+    Returns the rate limit in requests per second.
+    Defaults to 9 requests/sec (SEC's rate limit).
+    Use higher values for custom mirrors with relaxed limits.
+    """
+    return int(os.environ.get("EDGAR_RATE_LIMIT_PER_SEC", "9"))
 
 
 def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> HttpxThrottleCache:
@@ -120,7 +125,7 @@ def close_clients():
     HTTP_MGR.close()
 
 
-HTTP_MGR = get_http_mgr()
+HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())
 
 
 def clear_locale_corrupted_cache():

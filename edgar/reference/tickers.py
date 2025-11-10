@@ -165,7 +165,7 @@ def get_cik_tickers_from_ticker_txt():
         data['ticker'] = data['ticker'].str.upper()
         return data
     except Exception as e:
-        log.error(f"Error fetching company tickers from [{ticker_txt_url}]: {str(e)}")
+        log.error(f"Error fetching company tickers from [{build_ticker_url()}]: {str(e)}")
         return None
 
 @lru_cache(maxsize=1)
