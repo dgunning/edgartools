@@ -38,6 +38,7 @@ __all__ = [
     "download_text_between_tags",
     "download_bulk_data",
     "download_datafile",
+    "decompress_gzip_with_retry",
     "SSLVerificationError",
 ]
 
@@ -69,7 +70,9 @@ RETRYABLE_EXCEPTIONS = (
     # HTTPCORE exceptions that can slip through
     httpcore.ReadTimeout, httpcore.WriteTimeout, httpcore.ConnectTimeout,
     httpcore.PoolTimeout, httpcore.ConnectError, httpcore.NetworkError,
-    httpcore.TimeoutException
+    httpcore.TimeoutException,
+    # Gzip decompression exceptions - can occur with corrupted downloads
+    EOFError, gzip.BadGzipFile
 )
 
 
@@ -446,6 +449,55 @@ def decode_content(content: bytes) -> str:
         return content.decode("latin-1")
 
 
+@retry(
+    on=should_retry,
+    attempts=QUICK_RETRY_ATTEMPTS,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
+def decompress_gzip_with_retry(url: str, as_text: bool) -> Union[str, bytes]:
+    """
+    Download and decompress a gzip file with retry logic.
+
+    This handles cases where SEC serves corrupted gzip files that result in
+    EOFError or BadGzipFile exceptions during decompression.
+
+    Args:
+        url: The URL of the gzip file to download
+        as_text: Whether to return the content as text or bytes
+
+    Returns:
+        The decompressed content as text or bytes
+
+    Raises:
+        EOFError: If gzip decompression fails after all retries
+        gzip.BadGzipFile: If the gzip file is invalid after all retries
+    """
+    # Download the file
+    response = get_with_retry(url=url)
+    inspect_response(response)
+
+    # Validate content-length if available
+    content_length = response.headers.get("Content-Length")
+    actual_size = len(response.content)
+    if content_length and int(content_length) != actual_size:
+        logger.warning(
+            "Content-Length mismatch for %s: expected %s, got %s",
+            url, content_length, actual_size
+        )
+
+    # Decompress the gzip content
+    binary_file = BytesIO(response.content)
+    with gzip.open(binary_file, "rb") as f:
+        file_content = f.read()
+        if as_text:
+            file_content = decode_content(file_content)
+
+    return file_content
+
+
 def save_or_return_content(content: Union[str, bytes], path: Optional[Union[str, Path]]) -> Union[str, bytes, None]:
     """
     Save the content to a specified path or return the content.
@@ -495,21 +547,17 @@ def download_file(url: str, as_text: bool = None, path: Optional[Union[str, Path
         # Set the default based on the file extension
         as_text = url.endswith(text_extensions)
 
-    response = get_with_retry(url=url)
-    inspect_response(response)
-
     if not as_text:
         # Set the default to true if the url ends with a text extension
         as_text = any([url.endswith(ext) for ext in text_extensions])
 
     # Check if the content is gzip-compressed
     if url.endswith("gz"):
-        binary_file = BytesIO(response.content)
-        with gzip.open(binary_file, "rb") as f:
-            file_content = f.read()
-            if as_text:
-                file_content = decode_content(file_content)
+        # Use retry-enabled decompression for gzip files
+        file_content = decompress_gzip_with_retry(url, as_text)
     else:
+        response = get_with_retry(url=url)
+        inspect_response(response)
         # If we explicitly asked for text or there is an encoding, try to return text
         if as_text:
             file_content = response.text

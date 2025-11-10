@@ -20,6 +20,7 @@ from edgar.httprequests import (
     should_retry,
     download_file,
     download_text_between_tags,
+    decompress_gzip_with_retry,
 )
 
 
@@ -328,3 +329,96 @@ def test_should_retry_predicate_ssl_errors():
     # should_retry should return True for non-SSL ConnectError
     non_ssl_err = httpx.ConnectError("Connection refused")
     assert should_retry(non_ssl_err)
+
+
+def test_should_retry_gzip_errors():
+    """Test that should_retry returns True for gzip decompression errors"""
+    import gzip
+
+    # EOFError should be retryable
+    eof_error = EOFError("Compressed file ended before the end-of-stream marker was reached")
+    assert should_retry(eof_error)
+
+    # BadGzipFile should be retryable
+    bad_gzip = gzip.BadGzipFile("Not a gzipped file")
+    assert should_retry(bad_gzip)
+
+
+@pytest.mark.network
+def test_download_gzip_index_with_retry():
+    """Test downloading and decompressing a gzip index file with retry logic"""
+    # Download a real quarterly index file (should succeed)
+    content = download_file("https://www.sec.gov/Archives/edgar/full-index/2021/QTR1/xbrl.gz", as_text=True)
+    assert isinstance(content, str)
+    assert len(content) > 1000
+    # Check that it contains expected index file content
+    assert "CIK" in content or "Company Name" in content
+
+
+def test_decompress_gzip_with_retry_eoferror():
+    """Test that decompress_gzip_with_retry retries on EOFError"""
+    import gzip
+    from edgar.httprequests import decompress_gzip_with_retry
+
+    call_count = 0
+
+    def mock_get_with_retry_side_effect(url):
+        nonlocal call_count
+        call_count += 1
+
+        if call_count < 3:
+            # First 2 attempts: return corrupted gzip that causes EOFError
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.headers = {"Content-Length": "100"}
+            # Create a truncated gzip file that will cause EOFError
+            mock_response.content = b'\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\x00'  # Gzip header but no data
+            return mock_response
+        else:
+            # Third attempt: return valid gzip content
+            import gzip
+            from io import BytesIO
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            valid_content = b"Test content"
+            buf = BytesIO()
+            with gzip.open(buf, "wb") as f:
+                f.write(valid_content)
+            mock_response.content = buf.getvalue()
+            mock_response.headers = {"Content-Length": str(len(mock_response.content))}
+            return mock_response
+
+    with patch("edgar.httprequests.get_with_retry", side_effect=mock_get_with_retry_side_effect):
+        # Should eventually succeed after retries
+        content = decompress_gzip_with_retry("https://example.com/test.gz", as_text=True)
+        assert content == "Test content"
+        assert call_count == 3  # Verify it retried
+
+
+def test_decompress_gzip_content_length_validation():
+    """Test that content-length mismatches are logged as warnings"""
+    import gzip
+    from io import BytesIO
+    from edgar.httprequests import decompress_gzip_with_retry
+
+    # Create valid gzip content
+    valid_content = b"Test content for validation"
+    buf = BytesIO()
+    with gzip.open(buf, "wb") as f:
+        f.write(valid_content)
+    gzip_content = buf.getvalue()
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.content = gzip_content
+    # Set incorrect content-length
+    mock_response.headers = {"Content-Length": str(len(gzip_content) + 100)}
+
+    with patch("edgar.httprequests.get_with_retry", return_value=mock_response):
+        with patch("edgar.httprequests.logger.warning") as mock_warning:
+            content = decompress_gzip_with_retry("https://example.com/test.gz", as_text=True)
+            assert content == "Test content for validation"
+            # Verify warning was logged
+            mock_warning.assert_called_once()
+            warning_msg = mock_warning.call_args[0][0]
+            assert "Content-Length mismatch" in warning_msg
