@@ -891,6 +891,7 @@ class Owner:
     cik: str
     is_company: bool
     name: str
+    name_unreversed: str
     address: Address
     is_director: bool
     is_officer: bool
@@ -968,7 +969,7 @@ class ReportingOwners():
             reporting_owner_id_tag = reporting_owner_tag.find("reportingOwnerId")
 
             cik = child_text(reporting_owner_id_tag, "rptOwnerCik")
-            owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
+            unreversed_owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
 
             # Check if it is a company. If not, reverse the name
             entity = Entity(int(cik))
@@ -976,7 +977,9 @@ class ReportingOwners():
             # Check if the entity is a company or an individual
             is_company = entity and entity.data.is_company
             if not is_company:
-                owner_name = reverse_name(owner_name)
+                owner_name = reverse_name(unreversed_owner_name)
+            else:
+                owner_name = unreversed_owner_name
 
             reporting_owner_address_tag = reporting_owner_tag.find("reportingOwnerAddress")
 
@@ -997,6 +1000,7 @@ class ReportingOwners():
                 cik=cik,
                 is_company=is_company,
                 name=owner_name,
+                name_unreversed=unreversed_owner_name,
                 address=Address(
                     street1=child_text(reporting_owner_address_tag, "rptOwnerStreet1"),
                     street2=child_text(reporting_owner_address_tag, "rptOwnerStreet2"),
