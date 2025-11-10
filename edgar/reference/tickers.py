@@ -18,14 +18,15 @@ __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange', 'popular_us_stocks',
            'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'find_ticker_safe', 'get_cik_ticker_lookup',
            'get_company_cik_lookup', 'get_cik_tickers_from_ticker_txt', 'get_cik_tickers', 'get_company_tickers',
-           'ticker_txt_url', 'company_tickers_json_url', 'mutual_fund_tickers_url', 'company_tickers_exchange_url',
            'Exchange'
            ]
 
-ticker_txt_url = "https://www.sec.gov/include/ticker.txt"
-company_tickers_json_url = "https://www.sec.gov/files/company_tickers.json"
-mutual_fund_tickers_url = "https://www.sec.gov/files/company_tickers_mf.json"
-company_tickers_exchange_url = "https://www.sec.gov/files/company_tickers_exchange.json"
+from edgar.urls import (
+    build_ticker_url,
+    build_company_tickers_url,
+    build_mutual_fund_tickers_url,
+    build_company_tickers_exchange_url
+)
 
 
 @lru_cache(maxsize=1)
@@ -86,10 +87,10 @@ def get_company_tickers(
         if os.getenv("EDGAR_USE_LOCAL_DATA"):
             tickers_json = load_tickers_from_local()
             if not tickers_json:
-                tickers_json = download_json(company_tickers_json_url)
+                tickers_json = download_json(build_company_tickers_url())
         else:
             # Download JSON data
-            tickers_json = download_json(company_tickers_json_url)
+            tickers_json = download_json(build_company_tickers_url())
 
         # Pre-allocate lists for better memory efficiency
         ciks = []
@@ -153,9 +154,9 @@ def get_cik_tickers_from_ticker_txt():
         if os.getenv("EDGAR_USE_LOCAL_DATA"):
             ticker_txt = load_cik_tickers_from_local()
             if not ticker_txt:
-                ticker_txt = download_file(ticker_txt_url, as_text=True)
+                ticker_txt = download_file(build_ticker_url(), as_text=True)
         else:
-            ticker_txt = download_file(ticker_txt_url, as_text=True)
+            ticker_txt = download_file(build_ticker_url(), as_text=True)
         source = StringIO(ticker_txt)
         data = pd.read_csv(source,
                            sep='\t',
@@ -289,7 +290,7 @@ def get_company_ticker_name_exchange():
     """
     Return a DataFrame with columns [cik	name	ticker	exchange]
     """
-    data = download_json("https://www.sec.gov/files/company_tickers_exchange.json")
+    data = download_json(build_company_tickers_exchange_url())
     return pd.DataFrame(data['data'], columns=data['fields'])
 
 
@@ -313,7 +314,7 @@ def get_mutual_fund_tickers():
     This returns a dataframe with columns
         cik    seriesId     classId ticker
     """
-    data = download_json("https://www.sec.gov/files/company_tickers_mf.json")
+    data = download_json(build_mutual_fund_tickers_url())
     return pd.DataFrame(data['data'], columns=['cik', 'seriesId', 'classId', 'ticker'])
 
 

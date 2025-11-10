@@ -47,8 +47,8 @@ from edgar.core import (
     log,
     parallel_thread_map,
     quarters_in_year,
-    sec_edgar,
 )
+from edgar.config import SEC_ARCHIVE_URL
 from edgar.dates import InvalidDateException
 from edgar.files.html import Document
 from edgar.files.html_documents import get_clean_html
@@ -88,10 +88,9 @@ __all__ = [
     'filing_date_to_year_quarters'
 ]
 
-full_index_url = "https://www.sec.gov/Archives/edgar/full-index/{}/QTR{}/{}.{}"
-daily_index_url = "https://www.sec.gov/Archives/edgar/daily-index/{}/QTR{}/{}.{}.idx"
+from edgar.urls import build_full_index_url, build_daily_index_url
 
-filing_homepage_url_re = re.compile(f"{sec_edgar}/data/[0-9]{1,}/[0-9]{10}-[0-9]{2}-[0-9]{4}-index.html")
+filing_homepage_url_re = re.compile(f"{SEC_ARCHIVE_URL}/data/[0-9]{{1,}}/[0-9]{{10}}-[0-9]{{2}}-[0-9]{{4}}-index.html")
 
 full_or_daily = ['daily', 'full']
 index_types = ['form', 'company', 'xbrl']
@@ -354,7 +353,7 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
                        index: str
                        ):
     year, quarter = year_and_quarter
-    url = full_index_url.format(year, quarter, index, "gz")
+    url = build_full_index_url(year, quarter, index, "gz")
     try:
         index_table = fetch_filing_index_at_url(url, index)
         return (year, quarter), index_table
@@ -370,7 +369,7 @@ def fetch_daily_filing_index(date: str,
                              index: str = 'form'):
     year, month, day = date.split("-")
     quarter = (int(month) - 1) // 3 + 1
-    url = daily_index_url.format(year, quarter, index, date.replace("-", ""))
+    url = build_daily_index_url(int(year), quarter, date.replace("-", ""), "idx")
     index_table = fetch_filing_index_at_url(url, index, filing_date_format='%Y%m%d')
     return index_table
 
@@ -1685,7 +1684,7 @@ class Filing:
 
     @property
     def homepage_url(self) -> str:
-        return f"{sec_edgar}/data/{self.cik}/{self.accession_no}-index.html"
+        return f"{SEC_ARCHIVE_URL}/data/{self.cik}/{self.accession_no}-index.html"
 
     @property
     def text_url(self) -> str:
@@ -1697,7 +1696,7 @@ class Filing:
 
     @property
     def base_dir(self) -> str:
-        return f"{sec_edgar}/data/{self.cik}/{self.accession_no.replace('-', '')}"
+        return f"{SEC_ARCHIVE_URL}/data/{self.cik}/{self.accession_no.replace('-', '')}"
 
     @property
     def url(self) -> str:
