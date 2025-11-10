@@ -79,7 +79,8 @@ def download_entity_submissions_from_sec(cik: int) -> Optional[Dict[str, Any]]:
         Optional[Dict[str, Any]]: The entity submissions JSON data, or None if not found
     """
     try:
-        submission_json = download_json(f"https://data.sec.gov/submissions/CIK{cik:010}.json")
+        from edgar.urls import build_submissions_url
+        submission_json = download_json(build_submissions_url(cik))
     except httpx.HTTPStatusError as e:
         # Handle the case where the cik is invalid and not found on Edgar
         if e.response.status_code == 404:

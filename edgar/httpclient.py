@@ -37,15 +37,33 @@ MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) 
 # Note that: revalidation consumes rate limit "hit", but will be served from cache if the data hasn't changed.
 
 
-CACHE_RULES = {
-    r".*\.sec\.gov": {
-        "/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS,
-        r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
-        r"/files/company_tickers\.json.*": MAX_SUBMISSIONS_AGE_SECONDS,
-        ".*index/.*": MAX_INDEX_AGE_SECONDS,
-        "/Archives/edgar/data": True,  # cache forever
+def _get_cache_rules() -> dict:
+    """
+    Get cache rules based on configured SEC base URL.
+    This allows caching to work with custom SEC mirrors.
+    """
+    from edgar.config import SEC_BASE_URL
+    import re
+
+    # Extract domain pattern from base URL (e.g., "sec.gov" or "mysite.com")
+    domain_match = re.match(r'https?://([^/]+)', SEC_BASE_URL)
+    if domain_match:
+        domain = domain_match.group(1).replace('.', r'\.')
+    else:
+        domain = r'.*\.sec\.gov'  # Fallback to default
+
+    return {
+        f".*{domain}": {
+            "/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS,
+            r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
+            r"/files/company_tickers\.json.*": MAX_SUBMISSIONS_AGE_SECONDS,
+            ".*index/.*": MAX_INDEX_AGE_SECONDS,
+            "/Archives/edgar/data": True,  # cache forever
+        }
     }
-}
+
+# Cache rules evaluated at module load time
+CACHE_RULES = _get_cache_rules()
 
 def get_cache_directory() -> str:
     cachedir = Path(edgar_data_dir) / "_tcache"
@@ -58,11 +76,16 @@ def get_edgar_verify_ssl():
     """
     Returns True if using SSL verification on http requests
     """
+    return strtobool(os.environ.get("EDGAR_VERIFY_SSL", "true"))
 
-    if "EDGAR_VERIFY_SSL" in os.environ:
-        return strtobool(os.environ["EDGAR_VERIFY_SSL"])
-    else:
-        return True
+
+def get_edgar_rate_limit_per_sec():
+    """
+    Returns the rate limit in requests per second.
+    Defaults to 9 requests/sec (SEC's rate limit).
+    Use higher values for custom mirrors with relaxed limits.
+    """
+    return int(os.environ.get("EDGAR_RATE_LIMIT_PER_SEC", "9"))
 
 
 def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> HttpxThrottleCache:
@@ -102,7 +125,7 @@ def close_clients():
     HTTP_MGR.close()
 
 
-HTTP_MGR = get_http_mgr()
+HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())
 
 
 def clear_locale_corrupted_cache():

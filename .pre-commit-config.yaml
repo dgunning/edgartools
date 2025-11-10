@@ -25,3 +25,23 @@ repos:
         language: node
         pass_filenames: true
         additional_dependencies: ["pyright"]
+      - id: check-hardcoded-sec-urls
+        name: Check for hardcoded SEC URLs
+        entry: bash -c
+        args:
+          - |
+            if grep -rn --include="*.py" -E "https?://(www\.|data\.)?sec\.gov" edgar/ --exclude-dir=__pycache__ | \
+               grep -v "edgar/config.py" | \
+               grep -v "# sec.gov OK" | \
+               grep -v "See https://www.sec.gov" | \
+               grep -v "xbrl.sec.gov" | \
+               grep -v "e.g." | \
+               grep -v "e.g.," | \
+               grep -v "example:"; then
+              echo "Error: Found hardcoded SEC URLs. Use SEC_BASE_URL, SEC_DATA_URL, or URL builders from edgar.urls instead."
+              echo "To allow a specific URL, add comment: # sec.gov OK"
+              exit 1
+            fi
+        language: system
+        pass_filenames: false
+        always_run: true
