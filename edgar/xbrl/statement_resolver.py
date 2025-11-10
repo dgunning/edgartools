@@ -623,7 +623,10 @@ class StatementResolver:
 
                 # Apply weighting if available
                 if total_weight > 0:
-                    confidence = min(total_weight / sum(registry_entry.weight_map.values()), 1.0)
+                    weight_sum = sum(registry_entry.weight_map.values())
+                    if weight_sum > 0:
+                        confidence = min(total_weight / weight_sum, 1.0)
+                    # If weight_sum is 0, keep the base confidence (matches / len(key_concepts))
             else:
                 confidence = 0.0
 

@@ -507,6 +507,9 @@ class InstanceParser(BaseParser):
         try:
             from edgar.xbrl.models import Footnote
 
+            # Track undefined footnotes for deduplication
+            undefined_footnotes = set()
+
             # Find all footnoteLink elements
             for footnote_link in root.findall('.//{http://www.xbrl.org/2003/linkbase}footnoteLink'):
                 # First, extract all footnote definitions
@@ -546,7 +549,6 @@ class InstanceParser(BaseParser):
                     self.footnotes[footnote_id] = footnote
 
                 # Second, process footnoteArc elements to link facts to footnotes
-                undefined_footnotes = set()  # Track undefined footnotes for deduplication
                 for arc_elem in footnote_link.findall('{http://www.xbrl.org/2003/linkbase}footnoteArc'):
                     fact_id = arc_elem.get('{http://www.w3.org/1999/xlink}from')
                     footnote_id = arc_elem.get('{http://www.w3.org/1999/xlink}to')
