@@ -815,7 +815,7 @@ logger = logging.getLogger(__name__)
 )
 async def download_bulk_data(
         url: str,
-        data_directory: Path = get_edgar_data_directory(),
+        data_directory: Optional[Path] = None,
         client: Optional[AsyncClient] = None,
 ) -> Path:
     """
@@ -837,6 +837,10 @@ async def download_bulk_data(
     """
     if not url:
         raise ValueError("Data URL cannot be empty")
+
+    # Get the data directory if not provided
+    if data_directory is None:
+        data_directory = get_edgar_data_directory()
 
     filename = os.path.basename(url)
     if not filename:
