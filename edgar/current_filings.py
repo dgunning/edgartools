@@ -33,7 +33,7 @@ title_regex = re.compile(r"(.*?) - (.*) \((\d+)\) \((.*)\)")
 """
 Get the current filings from the SEC. Use this to get the filings filed after the 5:30 deadline
 """
-GET_CURRENT_URL = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&output=atom&owner=only&count=100"
+from edgar.config import SEC_BASE_URL
 
 
 def _empty_filing_index():
@@ -105,7 +105,7 @@ def get_current_url(atom: bool = True,
                     start: int = 0,
                     form: str = '',
                     owner: str = 'include'):
-    url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
+    url = f"{SEC_BASE_URL}/cgi-bin/browse-edgar?action=getcurrent"
 
     count = count if count in [10, 20, 40, 80, 100] else 40
     owner = owner if owner in ['include', 'exclude', 'only'] else 'include'

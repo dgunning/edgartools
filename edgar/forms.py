@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from rich.console import Group, Text
 from rich.markdown import Markdown
 
-from edgar.core import sec_dot_gov
+from edgar.config import SEC_BASE_URL
 from edgar.httprequests import download_file
 from edgar.richtools import df_to_rich_table, repr_rich
 
@@ -33,7 +33,7 @@ def list_forms():
             cells = tr.find_all('td')
             rows.append({"Form": cells[0].text.replace("Number:", "").strip(),
                          "Description": cells[1].text.replace("Description:", "").strip(),
-                         "Url": f"{sec_dot_gov}{cells[1].find('a').attrs['href']}" if cells[1].find('a') else "",
+                         "Url": f"{SEC_BASE_URL}{cells[1].find('a').attrs['href']}" if cells[1].find('a') else "",
                          "LastUpdated": cells[2].text.replace("Last Updated:", "").strip(),
                          "SECNumber": cells[3].text.replace("SEC Number:", "").strip(),
                          "Topics": cells[4].text.replace("Topic(s):", "").strip()

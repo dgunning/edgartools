@@ -27,7 +27,8 @@ from rich.panel import Panel
 from rich.table import Column, Table
 from rich.text import Text
 
-from edgar.core import binary_extensions, has_html_content, sec_dot_gov, text_extensions
+from edgar.core import binary_extensions, has_html_content, text_extensions
+from edgar.config import SEC_BASE_URL
 from edgar.files.html_documents import get_clean_html
 from edgar.files.markdown import to_markdown
 from edgar.httpclient import async_http_client
@@ -42,7 +43,7 @@ __all__ = ['Attachment', 'Attachments', 'FilingHomepage', 'FilerInfo', 'Attachme
 def sec_document_url(attachment_url: str) -> str:
     # Remove "ix?doc=/" or "ix.xhtml?doc=/" from the filing url
     attachment_url = re.sub(r"ix(\.xhtml)?\?doc=/", "", attachment_url)
-    return f"{sec_dot_gov}{attachment_url}"
+    return f"{SEC_BASE_URL}{attachment_url}"
 
 def sequence_sort_key(x):
     seq = x.sequence_number

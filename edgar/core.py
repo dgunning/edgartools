@@ -49,9 +49,7 @@ __all__ = [
     'NORMAL',
     'CRAWL',
     'CAUTION',
-    'sec_edgar',
     'IntString',
-    'sec_dot_gov',
     'get_identity',
     'python_version',
     'set_identity',
@@ -162,10 +160,6 @@ else:
     edgar_mode = NORMAL
 
 edgar_identity = 'EDGAR_IDENTITY'
-
-# SEC urls
-sec_dot_gov = "https://www.sec.gov"
-sec_edgar = "https://www.sec.gov/Archives/edgar"
 
 # Local storage directory.
 edgar_data_dir = os.path.join(os.path.expanduser("~"), ".edgar")

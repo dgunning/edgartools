@@ -16,7 +16,12 @@ from tqdm.auto import tqdm
 from edgar.core import filing_date_to_year_quarters, get_edgar_data_directory, log, strtobool
 from edgar.dates import extract_dates
 from edgar.httprequests import download_bulk_data, download_datafile, download_text
-from edgar.reference.tickers import company_tickers_exchange_url, company_tickers_json_url, mutual_fund_tickers_url, ticker_txt_url
+from edgar.urls import (
+    build_ticker_url,
+    build_company_tickers_url,
+    build_mutual_fund_tickers_url,
+    build_company_tickers_exchange_url
+)
 
 __all__ = ['download_edgar_data',
            'get_edgar_data_directory',
@@ -146,9 +151,10 @@ async def download_facts_async(client: Optional[AsyncClient]) -> Path:
     """
     Download company facts
     """
+    from edgar.config import SEC_ARCHIVE_URL
     log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
 
-    return await download_bulk_data(client=client, url="https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
+    return await download_bulk_data(client=client, url=f"{SEC_ARCHIVE_URL}/daily-index/xbrl/companyfacts.zip")
 
 def download_facts() -> Path:
     """
@@ -161,9 +167,10 @@ async def download_submissions_async(client: Optional[AsyncClient]) -> Path:
     """
     Download company submissions
     """
+    from edgar.config import SEC_ARCHIVE_URL
     log.info(f"Downloading Company submissions to {get_edgar_data_directory()}/submissions")
 
-    return await download_bulk_data(client=client, url="https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip")
+    return await download_bulk_data(client=client, url=f"{SEC_ARCHIVE_URL}/daily-index/bulkdata/submissions.zip")
 
 
 def download_submissions() -> Path:
@@ -177,10 +184,10 @@ def download_ticker_data(reference_data_directory: Path):
     Download reference data from the SEC website.
     """
     log.info(f"Downloading ticker data to {reference_data_directory}")
-    download_datafile(ticker_txt_url, reference_data_directory)
-    download_datafile(company_tickers_json_url, reference_data_directory)
-    download_datafile(mutual_fund_tickers_url, reference_data_directory)
-    download_datafile(company_tickers_exchange_url, reference_data_directory)
+    download_datafile(build_ticker_url(), reference_data_directory)
+    download_datafile(build_company_tickers_url(), reference_data_directory)
+    download_datafile(build_mutual_fund_tickers_url(), reference_data_directory)
+    download_datafile(build_company_tickers_exchange_url(), reference_data_directory)
 
 
 def download_reference_data():
@@ -447,7 +454,8 @@ def is_feed_file_in_date_range(filename: str,
 
 def list_filing_feed_files_for_quarter(year:int, quarter:int) -> pd.DataFrame:
     assert quarter in (1, 2, 3, 4), "Quarter must be between 1 and 4"
-    url = f"https://www.sec.gov/Archives/edgar/Feed/{year}/QTR{quarter}/"
+    from edgar.urls import build_feed_url
+    url = build_feed_url(year, quarter)
     return list_filing_feed_files(url)
 
 def get_sec_file_listing(url:str) -> pd.DataFrame:
@@ -543,8 +551,10 @@ def list_filing_feed_files(url: str) -> pd.DataFrame:
         RuntimeError: If page structure is invalid or no table found
     """
     # Validate URL
-    if not url.startswith('https://www.sec.gov/Archives/edgar/Feed/'):
-        raise ValueError("URL must be an SEC EDGAR feed directory")
+    from edgar.config import SEC_ARCHIVE_URL
+    expected_prefix = f"{SEC_ARCHIVE_URL}/Feed/"
+    if not url.startswith(expected_prefix):
+        raise ValueError(f"URL must be an SEC EDGAR feed directory starting with {expected_prefix}")
     return get_sec_file_listing(url)
 
 
