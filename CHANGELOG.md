@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.28.0] - 2025-11-17
+
+### Added
+
+- **Configurable SEC Domain URLs (PR #490)**
+  - Added environment variable configuration for custom SEC data sources
+  - Configure via `EDGAR_BASE_URL`, `EDGAR_DATA_URL`, and `EDGAR_XBRL_URL`
+  - Centralized URL building in new `edgar/urls.py` module
+  - Centralized configuration in new `edgar/config.py` module
+  - Pre-commit hook prevents future hardcoded URLs
+  - **Impact**: Enables enterprise/academic users to use private SEC mirrors, improves compliance workflows, reduces latency for international users
+  - **Use Cases**: Corporate mirrors, academic research institutions, regional mirrors, testing with mock servers
+  - **Backward Compatible**: Defaults to official SEC URLs, zero configuration needed for standard users
+  - **Files Added**: `edgar/config.py`, `edgar/urls.py`, 11 tests in `tests/test_config.py`
+  - **Files Modified**: 14 files systematically refactored to use URL builders
+  - **Pre-commit Hook**: `.pre-commit-config.yaml` (check-hardcoded-sec-urls)
+  - **Contributed by**: @yodaiken (Aaron Yodaiken)
+  - **Related**: GitHub PR #490, Beads edgartools-l8a
+
+- **Configurable Rate Limiting (PR #491)**
+  - Added `EDGAR_RATE_LIMIT_PER_SEC` environment variable for flexible rate control
+  - Defaults to 9 requests/second (SEC's official limit)
+  - Allows higher limits for authorized custom mirrors with relaxed rate restrictions
+  - Simplified `get_edgar_verify_ssl()` to use consistent `os.environ.get()` pattern
+  - **Impact**: High-volume users can adjust rate limits for custom infrastructure, better performance for private mirrors
+  - **Use Cases**: Custom mirrors with different rate limits, authorized high-volume applications, testing environments
+  - **Backward Compatible**: Defaults to SEC's standard 9 req/sec limit
+  - **Files Modified**: `edgar/httpclient.py`, `edgar/reference/tickers.py`
+  - **Files Added**: 2 tests in `tests/test_config.py`
+  - **Contributed by**: @yodaiken (Aaron Yodaiken)
+  - **Related**: GitHub PR #491, Beads edgartools-7gl
+
+### Fixed
+
+- **Bulk Download Respects Storage Configuration (PR #493, Issue #381)**
+  - Fixed `download_bulk_data()` to properly respect `use_local_storage()` configuration
+  - Changed data directory evaluation from import-time to call-time
+  - Prevents multi-gigabyte downloads from silently going to `~/.edgar` when custom path is configured
+  - **Impact**: Eliminates major user frustration - bulk downloads now go to configured directory as expected
+  - **Root Cause**: Data directory was evaluated at module import time, before user could call `use_local_storage()`
+  - **Solution**: Changed to runtime evaluation using `Optional[Path] = None` pattern
+  - **Backward Compatible**: No API changes, works transparently
+  - **Files Modified**: `edgar/httprequests.py` (6 lines changed)
+  - **Contributed by**: @OvO-vel
+  - **Related**: GitHub PR #493, Issue #381, Beads edgartools-7za, edgartools-atd, edgartools-a6e
+
+### Changed
+
+- **Daily Index Test Temporarily Disabled**
+  - Temporarily skipped `test_fetch_daily_filing_index` due to SEC 403 errors
+  - SEC is returning 403 Forbidden for daily index API endpoint
+  - Test will be re-enabled or removed once SEC endpoint status is clarified
+  - No impact on core functionality (unused API)
+  - **Files Modified**: Test suite configuration
+
 ## [4.27.1] - 2025-11-10
 
 ### Fixed
