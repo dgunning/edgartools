@@ -52,7 +52,7 @@ def load_tickers_from_local() -> Optional[Dict[str, Any]]:
     reference_dir = get_edgar_data_directory() / "reference"
     if not reference_dir.exists():
         return None
-    company_tickers_file = reference_dir / os.path.basename(company_tickers_json_url)
+    company_tickers_file = reference_dir / os.path.basename(build_company_tickers_url())
     if not company_tickers_file.exists():
         return None
     return json.loads(company_tickers_file.read_text())
@@ -133,7 +133,7 @@ def get_company_tickers(
         )
 
     except Exception as e:
-        log.error(f"Error fetching company tickers from [{company_tickers_json_url}]: {str(e)}")
+        log.error(f"Error fetching company tickers from [{build_company_tickers_url()}]: {str(e)}")
         raise
 
 def load_cik_tickers_from_local() -> Optional[str]:
@@ -143,7 +143,7 @@ def load_cik_tickers_from_local() -> Optional[str]:
     reference_dir = get_edgar_data_directory() / "reference"
     if not reference_dir.exists():
         return None
-    tickers_txt_file = reference_dir / os.path.basename(ticker_txt_url)
+    tickers_txt_file = reference_dir / os.path.basename(build_ticker_url())
     if not tickers_txt_file.exists():
         return None
     return tickers_txt_file.read_text()
@@ -165,7 +165,7 @@ def get_cik_tickers_from_ticker_txt():
         data['ticker'] = data['ticker'].str.upper()
         return data
     except Exception as e:
-        log.error(f"Error fetching company tickers from [{ticker_txt_url}]: {str(e)}")
+        log.error(f"Error fetching company tickers from [{build_ticker_url()}]: {str(e)}")
         return None
 
 @lru_cache(maxsize=1)
