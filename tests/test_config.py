@@ -7,7 +7,7 @@ import importlib
 @pytest.fixture
 def clean_env():
     """Clean environment variables before and after tests"""
-    env_vars = ['EDGAR_BASE_URL', 'EDGAR_DATA_URL', 'EDGAR_XBRL_URL']
+    env_vars = ['EDGAR_BASE_URL', 'EDGAR_DATA_URL', 'EDGAR_XBRL_URL', 'EDGAR_RATE_LIMIT_PER_SEC']
     # Store original values
     original = {k: os.environ.get(k) for k in env_vars}
 
@@ -66,6 +66,22 @@ class TestConfig:
         importlib.reload(edgar.config)
 
         assert edgar.config.SEC_BASE_URL == "https://mysite.com"
+
+    def test_rate_limit_default(self, clean_env):
+        """Test default rate limit is 9 req/sec"""
+        import edgar.httpclient
+        importlib.reload(edgar.httpclient)
+
+        assert edgar.httpclient.get_edgar_rate_limit_per_sec() == 9
+
+    def test_rate_limit_custom(self, clean_env):
+        """Test custom rate limit from environment"""
+        os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = '20'
+
+        import edgar.httpclient
+        importlib.reload(edgar.httpclient)
+
+        assert edgar.httpclient.get_edgar_rate_limit_per_sec() == 20
 
 
 @pytest.mark.fast
