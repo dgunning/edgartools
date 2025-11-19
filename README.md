@@ -206,11 +206,13 @@ form4 = form4_filing.obj()
 
 **Performance & Reliability**
 - 10-30x faster than alternatives
-- Automatic rate limiting
+- Configurable rate limiting (enterprise mirrors supported)
+- Custom SEC data sources (corporate/academic mirrors)
 - Smart caching (30-second fresh filing cache)
 - Robust error handling
 - SSL verification with fail-fast retry
 - Type hints throughout
+- [Enterprise configuration →](docs/configuration.md#enterprise-configuration)
 
 **Developer Experience**
 - Intuitive, consistent API
