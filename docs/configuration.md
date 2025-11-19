@@ -147,7 +147,349 @@ Rate limiting is implemented in `httpclient_ratelimiting`.
 The default rate limit is 9 requests per second. SEC has a maximum of 10 requests per second. To change the rate limit, call: `httpclient.update_rate_limiter(requests_per_second: int)`.
 
 ### Advanced: Distributed Rate Limiting
-Distributed Rate Limiting: rate limiting is implemented using [pyrate_limiter](https://pypi.org/project/pyrate-limiter/). To use a distributed rate limiter, such as for multiprocessing, define an httpclient._RATE_LIMITER. See the pyrate_limiter documentation and examples for details. 
+Distributed Rate Limiting: rate limiting is implemented using [pyrate_limiter](https://pypi.org/project/pyrate-limiter/). To use a distributed rate limiter, such as for multiprocessing, define an httpclient._RATE_LIMITER. See the pyrate_limiter documentation and examples for details.
+
+## Enterprise Configuration
+
+EdgarTools v4.28.0+ supports enterprise-grade configuration for custom SEC data sources and flexible rate limiting, enabling deployment with private mirrors, academic institutions, and high-volume applications.
+
+### Configurable Rate Limiting
+
+#### EDGAR_RATE_LIMIT_PER_SEC
+Control the maximum number of requests per second to SEC servers or custom mirrors.
+
+```bash
+export EDGAR_RATE_LIMIT_PER_SEC="9"
+```
+
+**Default:** `9` requests/second (SEC's official limit)
+
+**Typical Values:**
+- `9` - SEC's standard limit (default, recommended for official SEC servers)
+- `10` - SEC's maximum allowed limit
+- Higher values (e.g., `20`, `50`) - Only for authorized custom mirrors with relaxed rate restrictions
+
+**Use Cases:**
+- **Custom mirrors**: Higher rate limits for private infrastructure with different restrictions
+- **Authorized applications**: High-volume applications with special SEC authorization
+- **Testing environments**: Flexible rate limits for development and testing
+- **International mirrors**: Optimized rates for regional mirrors
+
+**Example:**
+```bash
+# Standard SEC access (default)
+export EDGAR_RATE_LIMIT_PER_SEC="9"
+
+# Custom mirror with relaxed limits
+export EDGAR_RATE_LIMIT_PER_SEC="50"
+export EDGAR_BASE_URL="https://sec-mirror.company.com"
+```
+
+**Python Alternative:**
+```python
+from edgar import httpclient
+
+# Update rate limiter programmatically
+httpclient.update_rate_limiter(requests_per_second=20)
+```
+
+**⚠️ Important:** Only use rate limits higher than 10 req/sec with custom mirrors or when authorized by SEC. Exceeding SEC's 10 req/sec limit may result in IP blocking.
+
+### Custom SEC Data Sources
+
+Configure EdgarTools to use custom SEC mirrors, private data sources, or testing servers instead of the official SEC website.
+
+#### EDGAR_BASE_URL
+Sets the base URL for SEC EDGAR website access.
+
+```bash
+export EDGAR_BASE_URL="https://www.sec.gov"
+```
+
+**Default:** `https://www.sec.gov`
+
+**Use Cases:**
+- Corporate SEC mirrors for compliance workflows
+- Academic research institutions with local mirrors
+- Regional mirrors for reduced latency (international users)
+- Testing environments with mock servers
+
+**Example:**
+```bash
+# Corporate mirror
+export EDGAR_BASE_URL="https://sec-mirror.company.com"
+
+# Academic institution mirror
+export EDGAR_BASE_URL="https://sec.university.edu"
+
+# Regional mirror (example)
+export EDGAR_BASE_URL="https://sec-eu.example.com"
+```
+
+#### EDGAR_DATA_URL
+Sets the base URL for SEC data archives (filing documents, submissions, company facts).
+
+```bash
+export EDGAR_DATA_URL="https://data.sec.gov"
+```
+
+**Default:** `https://data.sec.gov`
+
+**Use Cases:**
+- Separate data server from website server
+- CDN acceleration for filing downloads
+- Private data repositories
+- Bandwidth optimization
+
+**Example:**
+```bash
+# Use CDN for data downloads
+export EDGAR_DATA_URL="https://cdn.sec-data.company.com"
+
+# Corporate data repository
+export EDGAR_DATA_URL="https://sec-data.company.com"
+```
+
+#### EDGAR_XBRL_URL
+Sets the base URL for XBRL-specific data and services.
+
+```bash
+export EDGAR_XBRL_URL="https://www.sec.gov"
+```
+
+**Default:** `https://www.sec.gov`
+
+**Use Cases:**
+- Specialized XBRL processing servers
+- XBRL validation and parsing services
+- Enhanced XBRL data repositories
+
+**Example:**
+```bash
+# Dedicated XBRL server
+export EDGAR_XBRL_URL="https://xbrl.sec-mirror.company.com"
+```
+
+### Complete Enterprise Configuration Example
+
+#### Corporate Mirror Setup
+```bash
+# Corporate SEC mirror with higher rate limits
+export EDGAR_IDENTITY="Corporate Compliance compliance@company.com"
+export EDGAR_BASE_URL="https://sec-mirror.company.com"
+export EDGAR_DATA_URL="https://sec-data.company.com"
+export EDGAR_XBRL_URL="https://sec-xbrl.company.com"
+export EDGAR_RATE_LIMIT_PER_SEC="50"
+export EDGAR_ACCESS_MODE="NORMAL"
+export EDGAR_USE_LOCAL_DATA="True"
+export EDGAR_LOCAL_DATA_DIR="/var/lib/edgar"
+```
+
+#### Academic Research Institution
+```bash
+# University research mirror with custom rate limits
+export EDGAR_IDENTITY="Research Lab research@university.edu"
+export EDGAR_BASE_URL="https://sec.university.edu"
+export EDGAR_DATA_URL="https://sec-data.university.edu"
+export EDGAR_RATE_LIMIT_PER_SEC="25"
+export EDGAR_USE_LOCAL_DATA="True"
+export EDGAR_LOCAL_DATA_DIR="/research/edgar_data"
+```
+
+#### Regional Mirror (International Users)
+```bash
+# Regional mirror for reduced latency
+export EDGAR_IDENTITY="International Analyst analyst@company.com"
+export EDGAR_BASE_URL="https://sec-eu.example.com"
+export EDGAR_DATA_URL="https://sec-data-eu.example.com"
+export EDGAR_RATE_LIMIT_PER_SEC="15"
+export EDGAR_ACCESS_MODE="NORMAL"
+```
+
+#### Development/Testing Environment
+```bash
+# Mock SEC server for testing
+export EDGAR_IDENTITY="Developer dev@company.com"
+export EDGAR_BASE_URL="http://localhost:8080"
+export EDGAR_DATA_URL="http://localhost:8080/data"
+export EDGAR_XBRL_URL="http://localhost:8080/xbrl"
+export EDGAR_RATE_LIMIT_PER_SEC="100"  # No limits for testing
+export EDGAR_VERIFY_SSL="false"  # Self-signed certificates in dev
+export EDGAR_USE_RICH_LOGGING="1"
+```
+
+### Python Configuration API
+
+Configure enterprise settings programmatically:
+
+```python
+import os
+
+# Set custom SEC mirror
+os.environ['EDGAR_BASE_URL'] = "https://sec-mirror.company.com"
+os.environ['EDGAR_DATA_URL'] = "https://sec-data.company.com"
+os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = "50"
+
+# Now import and use EdgarTools
+from edgar import Company
+
+company = Company("AAPL")  # Uses custom mirror
+filings = company.get_filings(form="10-K")
+```
+
+**Note:** Environment variables must be set before importing EdgarTools modules, as configuration is evaluated at import time.
+
+### Docker/Container Configuration
+
+For containerized deployments with custom SEC mirrors:
+
+```dockerfile
+# Dockerfile
+FROM python:3.11-slim
+
+# Install EdgarTools
+RUN pip install edgartools
+
+# Configure enterprise SEC access
+ENV EDGAR_IDENTITY="Container App app@company.com"
+ENV EDGAR_BASE_URL="https://sec-mirror.company.com"
+ENV EDGAR_DATA_URL="https://sec-data.company.com"
+ENV EDGAR_RATE_LIMIT_PER_SEC="50"
+ENV EDGAR_ACCESS_MODE="CAUTION"
+ENV EDGAR_USE_LOCAL_DATA="True"
+ENV EDGAR_LOCAL_DATA_DIR="/app/edgar_data"
+
+# Create data directory
+RUN mkdir -p /app/edgar_data
+VOLUME /app/edgar_data
+
+WORKDIR /app
+```
+
+**Docker Compose Example:**
+```yaml
+version: '3.8'
+services:
+  edgar-app:
+    image: your-edgar-app:latest
+    environment:
+      - EDGAR_IDENTITY=Service app@company.com
+      - EDGAR_BASE_URL=https://sec-mirror.company.com
+      - EDGAR_DATA_URL=https://sec-data.company.com
+      - EDGAR_RATE_LIMIT_PER_SEC=50
+      - EDGAR_USE_LOCAL_DATA=True
+      - EDGAR_LOCAL_DATA_DIR=/data
+    volumes:
+      - edgar-data:/data
+
+volumes:
+  edgar-data:
+```
+
+### Validation and Testing
+
+Verify your enterprise configuration:
+
+```python
+import os
+from edgar import Company
+
+def validate_enterprise_config():
+    """Validate enterprise EdgarTools configuration."""
+    print("Enterprise Configuration:")
+    print(f"  Base URL: {os.getenv('EDGAR_BASE_URL', 'https://www.sec.gov')}")
+    print(f"  Data URL: {os.getenv('EDGAR_DATA_URL', 'https://data.sec.gov')}")
+    print(f"  XBRL URL: {os.getenv('EDGAR_XBRL_URL', 'https://www.sec.gov')}")
+    print(f"  Rate Limit: {os.getenv('EDGAR_RATE_LIMIT_PER_SEC', '9')} req/sec")
+
+    # Test basic functionality
+    try:
+        company = Company("AAPL")
+        print(f"\n✓ Successfully connected: {company.name}")
+
+        # Test filing access
+        filings = company.get_filings(form="10-K").head(1)
+        if filings:
+            print(f"✓ Successfully retrieved filings from: {filings[0].accession_number}")
+
+        return True
+    except Exception as e:
+        print(f"\n❌ Configuration test failed: {e}")
+        return False
+
+# Run validation
+validate_enterprise_config()
+```
+
+### Troubleshooting Enterprise Configuration
+
+#### Custom Mirror Connection Issues
+```python
+# Test connectivity to custom mirror
+import requests
+
+base_url = os.getenv('EDGAR_BASE_URL')
+try:
+    response = requests.get(f"{base_url}/cgi-bin/browse-edgar")
+    print(f"✓ Mirror accessible: {response.status_code}")
+except Exception as e:
+    print(f"❌ Mirror connection failed: {e}")
+```
+
+#### Rate Limit Verification
+```python
+# Verify rate limiter is using correct setting
+from edgar import httpclient
+
+print(f"Current rate limit: {os.getenv('EDGAR_RATE_LIMIT_PER_SEC', '9')} req/sec")
+
+# Monitor rate limiting in action
+import time
+start = time.time()
+for i in range(20):
+    # Make 20 requests
+    company = Company("AAPL")
+elapsed = time.time() - start
+actual_rate = 20 / elapsed
+print(f"Actual request rate: {actual_rate:.2f} req/sec")
+```
+
+#### SSL Certificate Issues with Custom Mirrors
+```bash
+# If custom mirror uses self-signed certificates
+export EDGAR_VERIFY_SSL="false"
+
+# Or configure SSL certificate bundle
+export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
+```
+
+### Best Practices for Enterprise Deployment
+
+1. **Always set EDGAR_IDENTITY** - Include company/team identification
+2. **Test mirror connectivity** - Validate URLs before production deployment
+3. **Monitor rate limits** - Ensure compliance with mirror's rate restrictions
+4. **Use local data storage** - Enable caching for improved performance
+5. **Secure credentials** - Use environment variables, not hardcoded values
+6. **Document configuration** - Maintain configuration profiles for different environments
+7. **Version control** - Use `.env.example` files to document required variables
+8. **Health checks** - Implement validation functions to verify configuration
+
+### Environment Variables Summary
+
+| Variable | Default | Purpose | Enterprise Use Case |
+|----------|---------|---------|---------------------|
+| `EDGAR_RATE_LIMIT_PER_SEC` | `9` | Request rate limit | Custom mirrors, authorized high-volume apps |
+| `EDGAR_BASE_URL` | `https://www.sec.gov` | SEC website base URL | Corporate mirrors, regional mirrors |
+| `EDGAR_DATA_URL` | `https://data.sec.gov` | Data archives URL | CDN acceleration, private repositories |
+| `EDGAR_XBRL_URL` | `https://www.sec.gov` | XBRL services URL | Specialized XBRL servers |
+
+### Backward Compatibility
+
+All enterprise configuration features are **fully backward compatible**:
+- Default values point to official SEC servers
+- Zero configuration needed for standard users
+- Existing code continues to work without changes
+- Environment variables are optional
 
 ### HTTP Caching 
 Web requests are cached by default, according to the rules defined in httpclient_cache. 
@@ -272,6 +614,18 @@ export EDGAR_ACCESS_MODE="NORMAL"
 export EDGAR_USE_LOCAL_DATA="True"
 export EDGAR_USE_RICH_LOGGING="1"
 export EDGAR_VERIFY_SSL="false"  # Only if needed for proxy
+```
+
+### Enterprise Mirror Profile
+For custom SEC mirrors with higher rate limits (see [Enterprise Configuration](#enterprise-configuration)):
+
+```bash
+export EDGAR_IDENTITY="Corporate Compliance compliance@company.com"
+export EDGAR_BASE_URL="https://sec-mirror.company.com"
+export EDGAR_DATA_URL="https://sec-data.company.com"
+export EDGAR_RATE_LIMIT_PER_SEC="50"
+export EDGAR_USE_LOCAL_DATA="True"
+export EDGAR_LOCAL_DATA_DIR="/var/lib/edgar"
 ```
 
 ## Configuration File Setup
