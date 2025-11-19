@@ -37,8 +37,47 @@ standardized_data = standardize_statement(statement_data, mapper)
 
 ## Concept Mappings
 
-The standardized concept mappings are stored in the `concept_mappings.json` file included 
+The standardized concept mappings are stored in the `concept_mappings.json` file included
 in this package. This file maps standard concept names to lists of company-specific concept IDs.
 
-The file is automatically loaded when initializing the `MappingStore` and can be extended 
+The file is automatically loaded when initializing the `MappingStore` and can be extended
 with new mappings as needed.
+
+## Customization and Advanced Usage
+
+For organizations managing custom XBRL taxonomies, company-specific concepts, or large-scale
+standardization projects, see the comprehensive customization guide:
+
+**[Customizing XBRL Standardization](../../../docs/advanced/customizing-standardization.md)**
+
+This guide covers:
+- CSV-based mapping workflows for Excel editing
+- Validation techniques and quality assurance
+- Handling ambiguous taxonomies and priority resolution
+- CIK vs ticker-based mapping strategies
+- Entity detection and automated mapping
+- Production deployment patterns
+
+### Utility Functions
+
+The `utils` module provides tools for working with standardization mappings:
+
+```python
+from edgar.xbrl.standardization.utils import (
+    export_mappings_to_csv,
+    import_mappings_from_csv,
+    validate_mappings
+)
+
+# Export mappings to CSV for editing in Excel
+export_mappings_to_csv(store, 'mappings.csv', include_metadata=True)
+
+# Import edited mappings back
+mappings_dict = import_mappings_from_csv('mappings_edited.csv', validate=True)
+
+# Validate mapping integrity
+report = validate_mappings(store)
+print(f"Valid: {report.is_valid}, Warnings: {len(report.warnings)}")
+```
+
+See the customization guide for complete documentation and examples.

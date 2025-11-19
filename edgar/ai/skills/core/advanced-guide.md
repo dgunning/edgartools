@@ -611,3 +611,4 @@ sec_skill = get_skill("SEC Filing Analysis")
 - [common-questions.md](common-questions.md) - Complete examples with full code
 - [workflows.md](workflows.md) - End-to-end analysis patterns
 - [objects.md](objects.md) - Object representations and token estimates
+- [Customizing XBRL Standardization](../../../../docs/advanced/customizing-standardization.md) - Advanced XBRL concept mapping and taxonomy customization
