@@ -45,7 +45,6 @@ bd update ISSUE_ID --notes "Progress note"  # Add notes (NOT --add-comment)
 bd update ISSUE_ID --assignee "username"
 
 # Show details
-bd show ISSUE_ID                         # View full issue details
 ```
 
 **Valid Status Values**: `open`, `in_progress`, `blocked`, `closed` (NOT "done")
