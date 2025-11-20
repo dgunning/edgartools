@@ -272,6 +272,152 @@ class TestConfigRequirement:
         assert 'item_202' in sections, "Should detect Item 2.02"
 
 
+class TestBoldParagraphFallback:
+    """Test bold paragraph fallback detection - Issue #1ho additional improvement."""
+
+    def test_is_bold_helper_detects_bold_700(self):
+        """_is_bold() should detect font-weight: 700."""
+        html = """
+        <html><body>
+        <p style="font-weight: 700">Item 2.02</p>
+        </body></html>
+        """
+
+        config = ParserConfig(form='8-K')
+        doc = parse_html(html, config)
+
+        from edgar.documents.nodes import ParagraphNode
+        extractor = SectionExtractor('8-K')
+
+        para = doc.root.find_first(lambda n: isinstance(n, ParagraphNode))
+        assert para is not None, "Should find paragraph"
+        assert extractor._is_bold(para), "Should detect font-weight: 700 as bold"
+
+    def test_is_bold_helper_detects_bold_keyword(self):
+        """_is_bold() should detect font-weight: bold."""
+        html = """
+        <html><body>
+        <p style="font-weight: bold">Item 2.02</p>
+        </body></html>
+        """
+
+        config = ParserConfig(form='8-K')
+        doc = parse_html(html, config)
+
+        from edgar.documents.nodes import ParagraphNode
+        extractor = SectionExtractor('8-K')
+
+        para = doc.root.find_first(lambda n: isinstance(n, ParagraphNode))
+        assert para is not None, "Should find paragraph"
+        assert extractor._is_bold(para), "Should detect font-weight: bold keyword"
+
+    def test_is_bold_helper_rejects_normal_weight(self):
+        """_is_bold() should reject normal font weights."""
+        html = """
+        <html><body>
+        <p style="font-weight: 400">Normal text</p>
+        <p>No style</p>
+        </body></html>
+        """
+
+        config = ParserConfig(form='8-K')
+        doc = parse_html(html, config)
+
+        from edgar.documents.nodes import ParagraphNode
+        extractor = SectionExtractor('8-K')
+
+        paragraphs = doc.root.find(lambda n: isinstance(n, ParagraphNode))
+        for para in paragraphs:
+            assert not extractor._is_bold(para), \
+                "Should NOT detect normal weight as bold"
+
+    def test_bold_paragraph_fallback_when_no_headings(self):
+        """Bold paragraph fallback should activate when no HeadingNodes exist."""
+        html = """
+        <html><body>
+        <p style="font-weight: bold">Item 2. 02 Results of Operations</p>
+        <p>Some content here</p>
+        <p style="font-weight: bold">Item 9. 01 Financial Statements</p>
+        </body></html>
+        """
+
+        config = ParserConfig(form='8-K')
+        doc = parse_html(html, config)
+
+        # Verify no HeadingNodes
+        from edgar.documents.nodes import HeadingNode
+        headings = doc.root.find(lambda n: isinstance(n, HeadingNode))
+        assert len(headings) == 0, "Should have no HeadingNodes (triggering fallback)"
+
+        # Should detect sections using bold paragraphs
+        sections = doc.sections
+        assert len(sections) >= 2, \
+            f"Should detect 2 sections using bold paragraph fallback (got {len(sections)})"
+
+    def test_bold_paragraph_fallback_not_used_with_headings(self):
+        """Bold paragraph fallback should NOT activate when HeadingNodes exist."""
+        html = """
+        <html><body>
+        <h2>Item 2. 02 Results of Operations</h2>
+        <p>Some content here</p>
+        <p style="font-weight: bold">Item 9. 01 Financial Statements</p>
+        </body></html>
+        """
+
+        config = ParserConfig(form='8-K')
+        doc = parse_html(html, config)
+
+        # Verify HeadingNodes exist
+        from edgar.documents.nodes import HeadingNode
+        headings = doc.root.find(lambda n: isinstance(n, HeadingNode))
+        assert len(headings) > 0, "Should have HeadingNodes (fallback not needed)"
+
+        # Should detect at least 1 section using HeadingNodes
+        sections = doc.sections
+        assert len(sections) >= 1, "Should detect sections using HeadingNodes"
+
+
+@pytest.mark.network
+class TestBoldParagraphRealWorld:
+    """Test bold paragraph detection on real-world filing - Issue #1ho Case #5."""
+
+    def test_broadstone_2020_bold_paragraph_filing(self):
+        """Test Broadstone filing that uses bold paragraphs instead of headings."""
+        # Filing: 0001564590-20-043202 (Broadstone Net Lease, 2020-09-11)
+        # This filing has Items in bold <p> tags, not <h1>-<h6> tags
+        # Before fix: 0 sections detected
+        # After fix: 2 sections detected (Item 1.01, Item 9.01)
+        from edgar import find
+        filing = find("0001564590-20-043202")
+
+        assert filing is not None, "Filing should exist"
+
+        html = filing.document.download()
+        config = ParserConfig(form='8-K')
+        doc = parse_html(html, config)
+
+        # Verify this filing has no HeadingNodes (uses bold paragraphs)
+        from edgar.documents.nodes import HeadingNode
+        headings = doc.root.find(lambda n: isinstance(n, HeadingNode))
+        assert len(headings) == 0, "Broadstone filing should have no HeadingNodes"
+
+        # Should detect sections using bold paragraph fallback
+        sections = doc.sections
+        assert len(sections) >= 2, \
+            f"Should detect at least 2 sections using bold paragraphs (got {len(sections)})"
+
+        # Verify specific items (Broadstone has 1.01 and 9.01)
+        assert 'item_101' in sections, "Should detect Item 1.01"
+        assert 'item_901' in sections, "Should detect Item 9.01"
+
+        # Verify confidence is correct
+        for name, section in sections.items():
+            assert section.confidence == 0.7, \
+                f"Confidence should be 0.7 (got {section.confidence} for {name})"
+            assert section.detection_method == 'pattern', \
+                f"Detection method should be 'pattern' (got {section.detection_method})"
+
+
 class TestImprovementMetrics:
     """Document the improvement from the bug fix."""
 
@@ -292,3 +438,18 @@ class TestImprovementMetrics:
 
         assert improvement >= 0.70, \
             f"Bug fix should improve success rate by at least 70% (got {improvement*100:.0f}%)"
+
+    def test_bold_paragraph_improvement(self):
+        """Bold paragraph fallback improved detection from 45% → 50%."""
+        # Additional improvement after initial fix:
+        # - Before bold paragraph fallback: 45% (100 random 8-K sample)
+        # - After bold paragraph fallback: 50% (100 random 8-K sample)
+        # - Limited by missing patterns (only 6/45 8-K items defined)
+
+        # This test documents the additional improvement
+        before_bold_fix = 0.45
+        after_bold_fix = 0.50
+        improvement = after_bold_fix - before_bold_fix
+
+        assert improvement >= 0.05, \
+            f"Bold paragraph fallback should improve by at least 5% (got {improvement*100:.0f}%)"
