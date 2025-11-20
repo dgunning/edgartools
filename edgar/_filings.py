@@ -5,7 +5,7 @@ import re
 import webbrowser
 from contextlib import nullcontext
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from functools import cached_property, lru_cache
 from io import BytesIO
 from os import PathLike
@@ -138,6 +138,87 @@ def is_valid_date(date_str: str, date_format: str = "%Y-%m-%d") -> bool:
         return True
     except ValueError:
         return False
+
+
+def _get_data_staleness_days(latest_date: Union[datetime, date, str]) -> int:
+    """
+    Calculate how many days old the latest filing date is.
+
+    Args:
+        latest_date: The most recent filing_date in the dataset
+
+    Returns:
+        Number of days between latest_date and today
+    """
+    # Convert string to date if needed
+    if isinstance(latest_date, str):
+        latest_date = datetime.strptime(latest_date, "%Y-%m-%d").date()
+    # Convert to date if datetime
+    elif isinstance(latest_date, datetime):
+        latest_date = latest_date.date()
+
+    today = date.today()
+    return (today - latest_date).days
+
+
+def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
+    """
+    Check if the user's date filter includes today's date.
+
+    Args:
+        filing_date_param: The filing_date parameter from filter() or get_filings()
+
+    Returns:
+        True if the parameter requests today's filings
+    """
+    if not filing_date_param:
+        return False
+
+    from edgar.dates import extract_dates
+
+    today = date.today()
+
+    try:
+        start_date, end_date, is_range = extract_dates(filing_date_param)
+
+        # Check if user is requesting today's filings
+        if not is_range and start_date.date() == today:
+            return True
+        elif is_range:
+            # Check if range includes today or is open-ended to today
+            start = start_date.date() if start_date else date.min
+            end = end_date.date() if end_date else date.max
+            return start <= today <= end
+    except:
+        # If date parsing fails, don't warn
+        return False
+
+    return False
+
+
+def _warn_use_current_filings(reason: str, latest_date: Optional[Union[datetime, date]] = None):
+    """
+    Display a warning suggesting the user should use get_current_filings() instead.
+
+    Args:
+        reason: Brief explanation of why current_filings is needed
+        latest_date: Optional latest date in the dataset for context
+    """
+    date_info = ""
+    if latest_date:
+        if isinstance(latest_date, datetime):
+            latest_date = latest_date.date()
+        days_old = _get_data_staleness_days(latest_date)
+        date_info = f" (latest filing: {latest_date}, {days_old} day{'s' if days_old != 1 else ''} ago)"
+
+    log.warning(f"""
+⚠️  {reason}{date_info}
+
+For today's real-time filings, use:
+    get_current_filings(page_size=None)  # Gets all current filings
+
+Note: Quarterly indexes are updated daily but typically lag by 1 business day.
+    """.strip())
 
 
 def get_previous_quarter(year, quarter) -> Tuple[int, int]:
@@ -533,6 +614,17 @@ class Filings:
         sort_indices_top = sort_indices[:min(n, len(sort_indices))]
         latest_filing_index = pc.take(data=self.data, indices=sort_indices_top)
         filings = Filings(latest_filing_index)
+
+        # Warn if data appears stale (>1 day old)
+        if len(filings) > 0:
+            latest_date = filings.date_range[1]
+            days_old = _get_data_staleness_days(latest_date)
+            if days_old >= 2:
+                _warn_use_current_filings(
+                    "This dataset's latest filing is from recent days",
+                    latest_date
+                )
+
         if len(filings) == 1:
             return filings[0]
         return filings
@@ -594,6 +686,13 @@ class Filings:
         if filing_date:
             try:
                 filing_index = filter_by_date(filing_index, filing_date, 'filing_date')
+                # Warn if user is requesting today's filings but data is from yesterday
+                if _is_requesting_current_filings(filing_date):
+                    latest_date = self.date_range[1]
+                    if _get_data_staleness_days(latest_date) >= 1:
+                        _warn_use_current_filings(
+                            f"Filtering for current-day filings, but data only includes filings through {latest_date.date() if isinstance(latest_date, datetime) else latest_date}"
+                        )
             except InvalidDateException as e:
                 log.error(e)
                 return Filings(_empty_filing_index())
@@ -1059,6 +1158,9 @@ def get_filings(year: Optional[Years] = None,
 
     So you can download for 2020, [2020,2021,2022] or range(2020, 2023)
 
+    ⚠️  DATA FRESHNESS: This function uses quarterly indexes that are updated daily but typically
+        lag by 1 business day. For today's filings or real-time data, use get_current_filings() instead.
+
     Examples
 
     >>> from edgar import get_filings
@@ -1081,6 +1183,10 @@ def get_filings(year: Optional[Years] = None,
 
     >>> filings_ = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") # Get filings for 2021 Q4 between
                                                                             # "2021-10-01" and "2021-10-10"
+
+    For today's filings:
+    >>> from edgar import get_current_filings
+    >>> current = get_current_filings(form="10-K", page_size=None)  # All current filings
 
 
     :param year The year of the filing
@@ -1130,6 +1236,16 @@ def get_filings(year: Optional[Years] = None,
 
     if form or filing_date:
         filings = filings.filter(form=form, amendments=amendments, filing_date=filing_date)
+
+    # Warn if using defaults and data appears stale
+    if defaults_used and filings and len(filings) > 0:
+        latest_date = filings.date_range[1]
+        days_old = _get_data_staleness_days(latest_date)
+        if days_old >= 2:
+            _warn_use_current_filings(
+                "The current quarter's filings are from recent days",
+                latest_date
+            )
 
     if not filings:
         if defaults_used:

@@ -397,11 +397,40 @@ def get_all_current_filings(form: str = '',
 
 def get_current_filings(form: str = '',
                         owner: str = 'include',
-                        page_size: int = 40):
+                        page_size: Optional[int] = 40):
     """
-    Get the current filings from the SEC
-    :return: The current filings from the SEC
+    Get real-time filings from the SEC (updated every few minutes).
+
+    ✅ DATA FRESHNESS: Returns filings from today and the past ~24 hours,
+       updated in near real-time (every few minutes).
+
+    Use this function when you need:
+    - Today's filings
+    - Real-time monitoring
+    - Latest filings by acceptance time
+
+    For historical bulk analysis or filings from yesterday and earlier, use get_filings() instead.
+
+    Examples:
+        >>> # Get first page of today's 10-K filings
+        >>> current = get_current_filings(form="10-K")
+
+        >>> # Get ALL current NT 10-Q filings (all pages)
+        >>> all_current = get_current_filings(form="NT 10-Q", page_size=None)
+
+        >>> # Get first 100 current filings
+        >>> current = get_current_filings(page_size=100)
+
+    :param form: Form type to filter by (e.g., "10-K", "8-K")
+    :param owner: Owner filter ('include', 'exclude', 'only')
+    :param page_size: Number of filings per page (10, 20, 40, 80, 100).
+                      Use None to fetch ALL current filings (iterates through all pages).
+    :return: CurrentFilings (single page) or Filings (all pages if page_size=None)
     """
+    # If page_size is None, fetch all current filings
+    if page_size is None:
+        return get_all_current_filings(form=form, owner=owner, page_size=100)
+
     owner = owner if owner in ['include', 'exclude', 'only'] else 'include'
     page_size = page_size if page_size in [10, 20, 40, 80, 100] else 100
     start = 0
