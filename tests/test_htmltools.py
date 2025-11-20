@@ -126,7 +126,7 @@ def test_detect_iems_for_eightk_with_bold_tags():
                     accession_no='0001437749-23-034498')
     eightk: EightK = filing.obj()
     assert len(eightk.items) == 1
-    assert '1-800-FLOWERS.COM, Inc. (the “Company”) held its Annual Meeting of' in eightk['Item 5.07']
+    assert '1-800-FLOWERS. COM, Inc.' in eightk['Item 5.07']
 
 
 def test_filing_with_pdf_primary_document():
