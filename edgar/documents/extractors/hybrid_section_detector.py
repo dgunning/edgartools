@@ -174,9 +174,10 @@ class HybridSectionDetector:
             # Use pattern extractor
             sections = self.pattern_extractor.extract(self.document)
 
-            # Mark with pattern detection confidence
+            # Mark detection method (but preserve confidence from pattern extractor)
             for section in sections.values():
-                section.confidence = 0.6  # Pattern-based = lower confidence
+                # Keep the pattern extractor's confidence (typically 0.70)
+                # instead of overwriting with hardcoded 0.6
                 section.detection_method = 'pattern'
 
             return sections if sections else None

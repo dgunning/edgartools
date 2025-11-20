@@ -95,27 +95,27 @@ class SectionExtractor:
         },
         '8-K': {
             'item_101': [
-                (r'^(Item|ITEM)\s+1\.01', 'Item 1.01 - Entry into Material Agreement'),
+                (r'^(Item|ITEM)\s+1\.\s*01', 'Item 1.01 - Entry into Material Agreement'),
                 (r'^Entry.*Material.*Agreement', 'Material Agreement')
             ],
             'item_201': [
-                (r'^(Item|ITEM)\s+2\.01', 'Item 2.01 - Completion of Acquisition'),
+                (r'^(Item|ITEM)\s+2\.\s*01', 'Item 2.01 - Completion of Acquisition'),
                 (r'^Completion.*Acquisition', 'Acquisition')
             ],
             'item_202': [
-                (r'^(Item|ITEM)\s+2\.02', 'Item 2.02 - Results of Operations'),
+                (r'^(Item|ITEM)\s+2\.\s*02', 'Item 2.02 - Results of Operations'),
                 (r'^Results.*Operations', 'Results of Operations')
             ],
             'item_503': [
-                (r'^(Item|ITEM)\s+5\.03', 'Item 5.03 - Director/Officer Changes'),
+                (r'^(Item|ITEM)\s+5\.\s*03', 'Item 5.03 - Director/Officer Changes'),
                 (r'^Amendments.*Articles', 'Charter Amendments')
             ],
             'item_801': [
-                (r'^(Item|ITEM)\s+8\.01', 'Item 8.01 - Other Events'),
+                (r'^(Item|ITEM)\s+8\.\s*01', 'Item 8.01 - Other Events'),
                 (r'^Other\s+Events', 'Other Events')
             ],
             'item_901': [
-                (r'^(Item|ITEM)\s+9\.01', 'Item 9.01 - Financial Statements and Exhibits'),
+                (r'^(Item|ITEM)\s+9\.\s*01', 'Item 9.01 - Financial Statements and Exhibits'),
                 (r'^Financial.*Exhibits', 'Financial Statements and Exhibits')
             ]
         }
