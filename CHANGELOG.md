@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.29.0] - 2025-11-20
+
+### Added
+
+- **Smart API Warnings for Filing Access (Issue #496)**
+  - Added intelligent warnings to guide users between `get_filings()` (quarterly indexes) and `get_current_filings()` (real-time feed)
+  - Detects when users try to access today's filings from quarterly indexes (which lag by ~1 business day)
+  - Warnings trigger in `.latest()`, `.filter()`, and `get_filings()` when data appears stale
+  - Suggests using `get_current_filings()` for accessing same-day filings
+  - **Impact**: Eliminates common user confusion around dual-API architecture, guides users to correct API for their needs
+  - **Use Cases**: Real-time monitoring, same-day analysis, avoiding stale data confusion
+  - **Implementation**: 153 lines of new logic, 265 lines of tests (17 new tests)
+  - **Commit**: b07b8e01
+  - **Related**: GitHub Issue #496, Product-manager UX analysis
+
+- **`page_size=None` Support for Current Filings**
+  - Added Pythonic `page_size=None` parameter to fetch all current filings in one request
+  - Eliminates need for manual pagination when fetching complete current filing feed
+  - Enhanced docstrings with clear data freshness guidance
+  - **Impact**: Simplified API for common "get all today's filings" use case
+  - **Backward Compatible**: Defaults to page_size=100 for existing code
+  - **Files Modified**: `edgar/current_filings.py`
+  - **Files Added**: `tests/test_current_filings_page_size_none.py`
+  - **Commit**: b07b8e01
+
+### Documentation
+
+- **Enterprise Configuration Guide (Beads edgartools-7oj, 1mj, 49v)**
+  - Added comprehensive enterprise configuration documentation for v4.28.0 features
+  - New file: `docs/configuration.md` with detailed examples for custom SEC mirrors
+  - Enhanced `docs/advanced-guide.md` with enterprise configuration section
+  - Updated README.md to improve discoverability of enterprise features
+  - **Impact**: Makes v4.28.0 enterprise features discoverable and usable
+  - **Audience**: Enterprise users, academic institutions, users with custom SEC mirrors
+  - **Topics Covered**: Custom URLs, rate limiting, SSL verification, use cases, troubleshooting
+  - **Commits**: 026de072, b290a608, 122cc899
+
+- **XBRL Standardization Customization Guide (Issue #494, Beads edgartools-i5s)**
+  - Added comprehensive 2,408-line guide: `docs/advanced/customizing-standardization.md`
+  - Covers standardization system architecture, custom mappings, company-specific patterns
+  - Includes real-world examples (Tesla, Microsoft, Berkshire Hathaway)
+  - Documents 200+ ambiguous XBRL tags and resolution strategies
+  - CSV workflow for Excel-based mapping management
+  - Validation techniques and quality assurance methods
+  - **Impact**: Enables advanced users to customize XBRL concept mappings for 200+ companies
+  - **Research**: Analyzed user @mpreiss9's production methodology for inspiration
+  - **Audience**: Financial analysts, researchers managing large company datasets
+  - **Commit**: 488832df
+  - **Related**: GitHub Issue #494 (closed), future roadmap documented
+
 ## [4.28.0] - 2025-11-17
 
 ### Added
