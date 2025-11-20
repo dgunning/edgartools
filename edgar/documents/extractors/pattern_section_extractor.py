@@ -398,6 +398,7 @@ class SectionExtractor:
         1. HeadingNode objects (semantic HTML headings)
         2. SectionNode objects with embedded headings
         3. Bold ParagraphNode objects (fallback for filings without semantic headings)
+        4. TableNode cells (fallback for filings using table-based layouts)
 
         Returns:
             List of tuples: (node, text, position)
@@ -427,7 +428,9 @@ class SectionExtractor:
 
         # Strategy 3: Fallback to bold ParagraphNode objects
         # Many 8-K filings (55%) use bold paragraphs instead of semantic headings
-        if not headers:
+        # Only run if no Item headers found yet
+        has_item_headers = any(re.search(r'Item\s+\d', text, re.IGNORECASE) for _, text, _ in headers)
+        if not has_item_headers:
             from edgar.documents.nodes import ParagraphNode
             paragraph_nodes = document.root.find(lambda n: isinstance(n, ParagraphNode))
 
@@ -437,6 +440,34 @@ class SectionExtractor:
                     if text:
                         position = self._get_node_position(node, document)
                         headers.append((node, text, position))
+
+        # Strategy 4: Fallback to table cells with Item patterns
+        # Many 8-K filings use tables for layout with Items in table cells
+        # Check again after Strategy 3
+        has_item_headers = any(re.search(r'Item\s+\d', text, re.IGNORECASE) for _, text, _ in headers)
+        if not has_item_headers:
+            from edgar.documents.table_nodes import TableNode
+            table_nodes = document.root.find(lambda n: isinstance(n, TableNode))
+
+            for table in table_nodes:
+                # Look through table rows for Items
+                for row in table.rows:
+                    # Check each cell for Item pattern
+                    row_text_parts = []
+                    for cell in row.cells:
+                        cell_text = cell.text().strip()
+                        if cell_text:
+                            row_text_parts.append(cell_text)
+
+                    # Combine cell texts (Items often split across cells)
+                    row_text = ' '.join(row_text_parts)
+
+                    # Check if this row contains an Item pattern
+                    if re.match(r'^\s*Item\s+\d', row_text, re.IGNORECASE):
+                        position = self._get_node_position(table, document)
+                        headers.append((table, row_text, position))
+                        # Only take the first Item from each table to avoid duplicates
+                        break
 
         # Sort by position
         headers.sort(key=lambda x: x[2])
