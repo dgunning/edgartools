@@ -234,22 +234,62 @@ class SectionExtractor:
                 (r'^Notes\s+to.*Statements', 'Notes')
             ]
         }
-    
+
+    def _is_bold(self, node: Node) -> bool:
+        """
+        Check if node has bold styling.
+
+        Args:
+            node: Node to check for bold styling
+
+        Returns:
+            True if node has bold font-weight (>= 700), False otherwise
+        """
+        if not hasattr(node, 'style') or not node.style:
+            return False
+
+        fw = node.style.font_weight
+        if not fw:
+            return False
+
+        # Check for string values
+        if fw in ['bold', '700']:
+            return True
+
+        # Handle numeric font-weight values
+        try:
+            if int(fw) >= 700:
+                return True
+        except (ValueError, TypeError):
+            pass
+
+        return False
+
     def _find_section_headers(self, document: Document) -> List[Tuple[Node, str, int]]:
-        """Find all potential section headers."""
+        """
+        Find all potential section headers.
+
+        Searches for section headers using multiple strategies:
+        1. HeadingNode objects (semantic HTML headings)
+        2. SectionNode objects with embedded headings
+        3. Bold ParagraphNode objects (fallback for filings without semantic headings)
+
+        Returns:
+            List of tuples: (node, text, position)
+        """
         headers = []
-        
-        # Find all heading nodes
+
+        # Strategy 1: Find all heading nodes (most reliable)
         heading_nodes = document.root.find(lambda n: isinstance(n, HeadingNode))
-        
+
         for node in heading_nodes:
             text = node.text()
             if text:
                 # Get position in document
                 position = self._get_node_position(node, document)
                 headers.append((node, text, position))
-        
-        # Also check for section nodes
+
+        # Strategy 2: Also check for section nodes with embedded headings
         section_nodes = document.root.find(lambda n: isinstance(n, SectionNode))
         for node in section_nodes:
             # Get first heading in section
@@ -259,10 +299,23 @@ class SectionExtractor:
                 if text:
                     position = self._get_node_position(node, document)
                     headers.append((node, text, position))
-        
+
+        # Strategy 3: Fallback to bold ParagraphNode objects
+        # Many 8-K filings (55%) use bold paragraphs instead of semantic headings
+        if not headers:
+            from edgar.documents.nodes import ParagraphNode
+            paragraph_nodes = document.root.find(lambda n: isinstance(n, ParagraphNode))
+
+            for node in paragraph_nodes:
+                if self._is_bold(node):
+                    text = node.text()
+                    if text:
+                        position = self._get_node_position(node, document)
+                        headers.append((node, text, position))
+
         # Sort by position
         headers.sort(key=lambda x: x[2])
-        
+
         return headers
     
     def _get_node_position(self, node: Node, document: Document) -> int:
