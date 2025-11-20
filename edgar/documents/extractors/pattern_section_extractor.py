@@ -94,10 +94,29 @@ class SectionExtractor:
             ]
         },
         '8-K': {
+            # Section 1: Registrant's Business and Operations
             'item_101': [
                 (r'^(Item|ITEM)\s+1\.\s*01', 'Item 1.01 - Entry into Material Agreement'),
                 (r'^Entry.*Material.*Agreement', 'Material Agreement')
             ],
+            'item_102': [
+                (r'^(Item|ITEM)\s+1\.\s*02', 'Item 1.02 - Termination of Material Agreement'),
+                (r'^Termination.*Material.*Agreement', 'Termination of Agreement')
+            ],
+            'item_103': [
+                (r'^(Item|ITEM)\s+1\.\s*03', 'Item 1.03 - Bankruptcy or Receivership'),
+                (r'^Bankruptcy.*Receivership', 'Bankruptcy')
+            ],
+            'item_104': [
+                (r'^(Item|ITEM)\s+1\.\s*04', 'Item 1.04 - Mine Safety'),
+                (r'^Mine\s+Safety', 'Mine Safety')
+            ],
+            'item_105': [
+                (r'^(Item|ITEM)\s+1\.\s*05', 'Item 1.05 - Material Cybersecurity Incidents'),
+                (r'^Material\s+Cybersecurity', 'Cybersecurity Incidents')
+            ],
+
+            # Section 2: Financial Information
             'item_201': [
                 (r'^(Item|ITEM)\s+2\.\s*01', 'Item 2.01 - Completion of Acquisition'),
                 (r'^Completion.*Acquisition', 'Acquisition')
@@ -106,14 +125,120 @@ class SectionExtractor:
                 (r'^(Item|ITEM)\s+2\.\s*02', 'Item 2.02 - Results of Operations'),
                 (r'^Results.*Operations', 'Results of Operations')
             ],
-            'item_503': [
-                (r'^(Item|ITEM)\s+5\.\s*03', 'Item 5.03 - Director/Officer Changes'),
-                (r'^Amendments.*Articles', 'Charter Amendments')
+            'item_203': [
+                (r'^(Item|ITEM)\s+2\.\s*03', 'Item 2.03 - Creation of Direct Financial Obligation'),
+                (r'^Creation.*Financial\s+Obligation', 'Financial Obligation')
             ],
+            'item_204': [
+                (r'^(Item|ITEM)\s+2\.\s*04', 'Item 2.04 - Triggering Events'),
+                (r'^Triggering\s+Events', 'Triggering Events')
+            ],
+            'item_205': [
+                (r'^(Item|ITEM)\s+2\.\s*05', 'Item 2.05 - Costs with Exit or Disposal'),
+                (r'^Costs.*Exit.*Disposal', 'Exit or Disposal Costs')
+            ],
+            'item_206': [
+                (r'^(Item|ITEM)\s+2\.\s*06', 'Item 2.06 - Material Impairments'),
+                (r'^Material\s+Impairments', 'Material Impairments')
+            ],
+
+            # Section 3: Securities and Trading Markets
+            'item_301': [
+                (r'^(Item|ITEM)\s+3\.\s*01', 'Item 3.01 - Notice of Delisting'),
+                (r'^Notice.*Delisting', 'Delisting Notice')
+            ],
+            'item_302': [
+                (r'^(Item|ITEM)\s+3\.\s*02', 'Item 3.02 - Unregistered Sales of Equity'),
+                (r'^Unregistered\s+Sales', 'Unregistered Sales')
+            ],
+            'item_303': [
+                (r'^(Item|ITEM)\s+3\.\s*03', 'Item 3.03 - Material Modification to Rights'),
+                (r'^Material\s+Modification.*Rights', 'Rights Modification')
+            ],
+
+            # Section 4: Accountants and Financial Statements
+            'item_401': [
+                (r'^(Item|ITEM)\s+4\.\s*01', 'Item 4.01 - Changes in Certifying Accountant'),
+                (r'^Changes.*Accountant', 'Accountant Changes')
+            ],
+            'item_402': [
+                (r'^(Item|ITEM)\s+4\.\s*02', 'Item 4.02 - Non-Reliance on Financial Statements'),
+                (r'^Non-Reliance.*Financial', 'Non-Reliance')
+            ],
+
+            # Section 5: Corporate Governance and Management
+            'item_501': [
+                (r'^(Item|ITEM)\s+5\.\s*01', 'Item 5.01 - Changes in Control'),
+                (r'^Changes.*Control', 'Changes in Control')
+            ],
+            'item_502': [
+                (r'^(Item|ITEM)\s+5\.\s*02', 'Item 5.02 - Departure/Election of Directors'),
+                (r'^Departure.*Directors.*Officers', 'Director/Officer Changes')
+            ],
+            'item_503': [
+                (r'^(Item|ITEM)\s+5\.\s*03', 'Item 5.03 - Amendments to Articles/Bylaws'),
+                (r'^Amendments.*Articles.*Bylaws', 'Charter Amendments')
+            ],
+            'item_504': [
+                (r'^(Item|ITEM)\s+5\.\s*04', 'Item 5.04 - Temporary Suspension of Trading'),
+                (r'^Temporary\s+Suspension', 'Suspension of Trading')
+            ],
+            'item_505': [
+                (r'^(Item|ITEM)\s+5\.\s*05', 'Item 5.05 - Amendment to Code of Ethics'),
+                (r'^Amendment.*Code.*Ethics', 'Code of Ethics')
+            ],
+            'item_506': [
+                (r'^(Item|ITEM)\s+5\.\s*06', 'Item 5.06 - Change in Shell Company Status'),
+                (r'^Change.*Shell\s+Company', 'Shell Company Status')
+            ],
+            'item_507': [
+                (r'^(Item|ITEM)\s+5\.\s*07', 'Item 5.07 - Submission of Matters to Vote'),
+                (r'^Submission.*Vote', 'Shareholder Vote')
+            ],
+            'item_508': [
+                (r'^(Item|ITEM)\s+5\.\s*08', 'Item 5.08 - Shareholder Nominations'),
+                (r'^Shareholder\s+Nominations', 'Shareholder Nominations')
+            ],
+
+            # Section 6: Asset-Backed Securities
+            'item_601': [
+                (r'^(Item|ITEM)\s+6\.\s*01', 'Item 6.01 - ABS Informational Material'),
+                (r'^ABS\s+Informational', 'ABS Information')
+            ],
+            'item_602': [
+                (r'^(Item|ITEM)\s+6\.\s*02', 'Item 6.02 - Change of Servicer/Trustee'),
+                (r'^Change.*Servicer.*Trustee', 'Servicer Change')
+            ],
+            'item_603': [
+                (r'^(Item|ITEM)\s+6\.\s*03', 'Item 6.03 - Change in Credit Enhancement'),
+                (r'^Change.*Credit\s+Enhancement', 'Credit Enhancement')
+            ],
+            'item_604': [
+                (r'^(Item|ITEM)\s+6\.\s*04', 'Item 6.04 - Failure to Make Distribution'),
+                (r'^Failure.*Distribution', 'Distribution Failure')
+            ],
+            'item_605': [
+                (r'^(Item|ITEM)\s+6\.\s*05', 'Item 6.05 - Securities Act Updating'),
+                (r'^Securities\s+Act\s+Updating', 'Securities Act Update')
+            ],
+            'item_606': [
+                (r'^(Item|ITEM)\s+6\.\s*06', 'Item 6.06 - Static Pool'),
+                (r'^Static\s+Pool', 'Static Pool')
+            ],
+
+            # Section 7: Regulation FD
+            'item_701': [
+                (r'^(Item|ITEM)\s+7\.\s*01', 'Item 7.01 - Regulation FD Disclosure'),
+                (r'^Regulation\s+FD', 'Regulation FD')
+            ],
+
+            # Section 8: Other Events
             'item_801': [
                 (r'^(Item|ITEM)\s+8\.\s*01', 'Item 8.01 - Other Events'),
                 (r'^Other\s+Events', 'Other Events')
             ],
+
+            # Section 9: Financial Statements and Exhibits
             'item_901': [
                 (r'^(Item|ITEM)\s+9\.\s*01', 'Item 9.01 - Financial Statements and Exhibits'),
                 (r'^Financial.*Exhibits', 'Financial Statements and Exhibits')
