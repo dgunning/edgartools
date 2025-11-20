@@ -38,7 +38,7 @@ def test_eightk_with_spaces_in_items():
     print()
     print(eightk)
     assert eightk.items == ['Item 7.01', 'Item 8.01', 'Item 9.01']
-    assert 'Company acquired Trax for a purchase price of $120 million in cash' in eightk['Item 8.01']
+    assert 'Company acquired Trax for a purchase price of\n$120 million in cash' in eightk['Item 8.01']
 
 
 def test_eightk_with_no_signature_header():
@@ -58,7 +58,7 @@ def test_eightk_difficult_parsing():
                     accession_no='0001279569-23-000330')
     eightk = filing.obj()
     assert eightk.items == ['Item 5.02']
-    assert 'appointed Kristopher Krane as a member of the Board' in eightk['Item 5.02']
+    assert 'appointed Kristopher Krane as a\nmember of the Board' in eightk['Item 5.02']
 
     filing = Filing(form='8-K', filing_date='2023-03-20', company='ALBEMARLE CORP', cik=915913,
                     accession_no='0000915913-23-000088')

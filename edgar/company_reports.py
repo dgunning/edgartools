@@ -12,6 +12,7 @@ from rich.tree import Tree
 
 from edgar._filings import Attachment, Attachments
 from edgar._markdown import MarkdownContent
+from edgar.documents import Document as NewDocument, HTMLParser, ParserConfig
 from edgar.files.html import Document
 from edgar.files.html_documents import HtmlDocument
 from edgar.files.htmltools import ChunkedDocument, adjust_for_empty_items, chunks2df, detect_decimal_items
@@ -704,6 +705,45 @@ class CurrentReport(CompanyReport):
         assert filing.form in ['8-K', '8-K/A', '6-K', '6-K/A'], f"This form should be an 8-K but was {filing.form}"
         super().__init__(filing)
 
+    @cached_property
+    def document(self):
+        """
+        Parse 8-K using new HTMLParser with improved section detection (95% rate).
+
+        This uses the enhanced pattern-based section extractor that handles:
+        - All 33 8-K item patterns
+        - Bold paragraph fallback detection
+        - Table cell detection
+        - Space variations in item numbers (e.g., "Item 2. 02")
+
+        Returns:
+            Document object from edgar.documents module with sections property
+        """
+        html = self._filing.html()
+        if not html:
+            return None
+        config = ParserConfig(form='8-K')
+        parser = HTMLParser(config)
+        return parser.parse(html)
+
+    @property
+    def sections(self):
+        """
+        Get detected 8-K sections using new parser (95% detection rate).
+
+        Returns a Sections dictionary mapping section names to Section objects.
+        Section names are normalized (e.g., 'item_502' for Item 5.02).
+
+        Example:
+            >>> eight_k.sections
+            {'item_502': Section(...), 'item_901': Section(...)}
+            >>> eight_k.sections['item_502'].text()
+            'Item 5.02 - Departure of Directors...'
+        """
+        if self.document:
+            return self.document.sections
+        return {}
+
     @property
     def has_press_release(self):
         return self.press_releases is not None
@@ -740,14 +780,83 @@ class CurrentReport(CompanyReport):
 
     @property
     def items(self) -> List[str]:
+        """
+        List of detected item names (consistent with sections property).
+
+        Uses new parser's section detection for improved accuracy.
+        Falls back to old chunked_document if new parser returns no sections.
+
+        Returns:
+            List of item titles for backward compatibility (e.g., ['Item 5.02', 'Item 9.01'])
+        """
+        # Try new parser first (95% detection rate)
+        if self.sections:
+            # Return titles for backward compatibility (e.g., "Item 5.02")
+            # Extract just the "Item X.XX" part from titles like "Item 5.02 - Description"
+            items = []
+            for section in self.sections.values():
+                title = section.title
+                # Extract "Item X.XX" from title
+                import re
+                match = re.match(r'(Item\s+\d+\.\s*\d+)', title, re.IGNORECASE)
+                if match:
+                    items.append(match.group(1))
+                else:
+                    # Fallback: use first part of title before " - " or use full title
+                    if ' - ' in title:
+                        items.append(title.split(' - ')[0].strip())
+                    else:
+                        items.append(title)
+            return items
+
+        # Fallback to old parser for backward compatibility
         if self.chunked_document:
             return self.chunked_document.list_items()
+
         return []
 
-    def __getitem__(self, item_or_part: str):
-        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
-        item_text = self.chunked_document[item_or_part]
-        return item_text
+    def __getitem__(self, item_name: str):
+        """
+        Get section/item text by name or number.
+
+        Supports multiple lookup formats:
+        - Section key: 'item_502'
+        - Item number: 'Item 5.02', '5.02'
+        - Natural language: 'Item 5.02 - Departure of Directors'
+
+        Falls back to old chunked_document for backward compatibility.
+
+        Args:
+            item_name: Section identifier in various formats
+
+        Returns:
+            Section text content as string, or None if not found
+        """
+        # Try new parser sections first (95% detection rate)
+        if self.sections:
+            # Direct key lookup
+            if item_name in self.sections:
+                return self.sections[item_name].text()
+
+            # Try fuzzy matching for different formats
+            # Normalize: "Item 5.02" → "item_502", "5.02" → "502"
+            normalized_input = item_name.lower().replace(' ', '_').replace('.', '').replace('-', '_')
+            normalized_input = normalized_input.replace('item_', '')
+
+            for key, section in self.sections.items():
+                # Normalize section key: "item_502" → "502"
+                normalized_key = key.replace('item_', '').replace('_', '')
+                if normalized_key == normalized_input:
+                    return section.text()
+
+        # Fallback to old chunked_document for backward compatibility
+        if self.chunked_document:
+            try:
+                return self.chunked_document[item_name]
+            except (KeyError, TypeError):
+                pass
+
+        return None
 
     def view(self, item_or_part: str):
         """Get the Item or Part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q"""
