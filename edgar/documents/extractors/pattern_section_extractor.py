@@ -399,6 +399,7 @@ class SectionExtractor:
         2. SectionNode objects with embedded headings
         3. Bold ParagraphNode objects (fallback for filings without semantic headings)
         4. TableNode cells (fallback for filings using table-based layouts)
+        5. Plain text ParagraphNode objects (final fallback for filings with no styling)
 
         Returns:
             List of tuples: (node, text, position)
@@ -468,6 +469,26 @@ class SectionExtractor:
                         headers.append((table, row_text, position))
                         # Only take the first Item from each table to avoid duplicates
                         break
+
+        # Strategy 5: Final fallback to ANY paragraph with Item pattern (plain text)
+        # For filings that use no bold styling, no headings, and no tables
+        # This is the last resort - check all paragraphs for Item patterns
+        has_item_headers = any(re.search(r'Item\s+\d', text, re.IGNORECASE) for _, text, _ in headers)
+        if not has_item_headers:
+            from edgar.documents.nodes import ParagraphNode
+            paragraph_nodes = document.root.find(lambda n: isinstance(n, ParagraphNode))
+
+            for node in paragraph_nodes:
+                text = node.text()
+                # Look for Item pattern at start of paragraph (first 100 chars)
+                # This catches plain text Items without any styling
+                if text and len(text) < 500:  # Reasonable header length
+                    text_start = text[:100].strip()
+                    # Match Item X.XX at the start
+                    if re.match(r'^\s*Item\s+\d', text_start, re.IGNORECASE):
+                        position = self._get_node_position(node, document)
+                        # Use the full paragraph text for matching
+                        headers.append((node, text.strip(), position))
 
         # Sort by position
         headers.sort(key=lambda x: x[2])
