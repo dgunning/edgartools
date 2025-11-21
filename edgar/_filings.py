@@ -1533,7 +1533,7 @@ class Filing:
         html_content = self.html()
         if html_content and is_probably_html(html_content):
             document = Document.parse(html_content)
-            return rich_to_text(document)
+            return rich_to_text(document, width=500)  # Wide enough for tables without truncation
         else:
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
             if len(text_extract_attachments) > 0 and text_extract_attachments.get_by_index(0) is not None:
