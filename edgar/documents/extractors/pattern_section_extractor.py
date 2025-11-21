@@ -604,16 +604,28 @@ class SectionExtractor:
         for section_name, (node, title, start_pos, end_pos) in matched_sections.items():
             # Create section node containing all content in range
             section_node = SectionNode(section_name=section_name)
-            
-            # Find all nodes in position range
+
+            # Find all nodes in position range - only add top-level nodes
+            # (nodes whose parent is outside the range)
+            # First collect all nodes in range
+            nodes_in_range = []
             position = 0
             for n in document.root.walk():
                 if start_pos <= position < end_pos:
-                    # Clone node and add to section
-                    # (In real implementation, would properly handle node hierarchy)
-                    section_node.add_child(n)
+                    nodes_in_range.append(n)
                 position += 1
-            
+
+            # Now add only top-level nodes (nodes whose parent is not in the range)
+            # This prevents adding both a parent and its children as direct section children
+            for n in nodes_in_range:
+                if n.parent not in nodes_in_range:
+                    section_node.add_child(n)
+
+            # Clear text cache to ensure fresh text generation
+            # (nodes may have stale cached text from earlier processing)
+            if hasattr(section_node, 'clear_text_cache'):
+                section_node.clear_text_cache()
+
             # Parse section name to extract part and item identifiers
             part, item = Section.parse_section_name(section_name)
 
