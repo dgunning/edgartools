@@ -7,6 +7,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.30.0] - 2025-11-21
+
+### Added
+
+- **Complete 8-K Section Detection Overhaul**
+  - Migrated 8-K section detection to new HTML parser (edgartools-4wd)
+  - Added complete 8-K item pattern coverage - now supports all 33 standard 8-K items
+  - Added table cell detection for more accurate 8-K section extraction
+  - Added bold paragraph fallback detection for filings without proper headings (edgartools-1ho)
+  - Added plain text paragraph fallback for complex section patterns (edgartools-5d6)
+  - **Impact**: Dramatically improved 8-K section extraction accuracy across diverse filing formats
+  - **Commits**: fbdc8abe, 57ca4182, 03af9cfd, a5713e3c, 75e5cdaf, 9810b6de
+
+### Fixed
+
+- **8-K Section Extraction Improvements**
+  - Fixed duplicate content in 8-K section extraction (edgartools-e08)
+  - Fixed TextExtractor item number spacing bug - preserves multi-part item numbers like "Item 2.02" without adding extra spaces (edgartools-2bb)
+  - Fixed 8-K section detection spacing variations and confidence scores
+  - Fixed 8-K test assertions and miscellaneous test issues
+  - **Impact**: More accurate and cleaner 8-K section extraction, eliminates content duplication and formatting artifacts
+  - **Commits**: 7483c1c8, 0d787ec9, 9c26542a, 9810b6de, 40eaa2bd
+
+- **Current Filings Form Filtering (Issue #501)**
+  - Applied client-side form filtering in `get_current_filings()` to ensure accurate results
+  - Prevents incorrect filtering behavior when requesting specific form types
+  - **Impact**: Ensures users get exactly the forms they request from the current filings feed
+  - **Commit**: 09009be6
+
+- **Table Display Fix (PR #500)**
+  - Fixed table truncation by increasing text() width from 80 to 500 characters
+  - **Impact**: Tables display more content without truncation
+  - **Commit**: af3c493f
+  - **Credit**: @bxxd
+
+- **Test Suite Improvements**
+  - Fixed test assertions to improve reliability (6e2dec32)
+  - Added regression test coverage for item number spacing (edgartools-2bb)
+  - Added bold paragraph detection tests to regression suite (074baa6b)
+
+### Refactored
+
+- **Company Reports Package Structure**
+  - Converted monolithic `company_reports.py` into organized package structure
+  - Improves maintainability and code organization
+  - **Commit**: b47e2510
+
+### Documentation
+
+- Streamlined documentation for clarity and maintainability
+  - **Commit**: 05797f4b
+
+## [4.29.1] - 2025-11-21
+
+### Fixed
+
+- **8-K Section Extraction Improvements**
+  - Fixed duplicate content in 8-K section extraction (edgartools-e08)
+  - Fixed TextExtractor item number spacing bug - preserves multi-part item numbers like "Item 2.02" without adding extra spaces (edgartools-2bb)
+  - Fixed 8-K test assertions and miscellaneous test issues
+  - **Impact**: More accurate and cleaner 8-K section extraction, eliminates content duplication and formatting artifacts
+  - **Commits**: 7483c1c8, 0d787ec9, 9c26542a
+
+- **Current Filings Form Filtering (Issue #501)**
+  - Applied client-side form filtering in `get_current_filings()` to ensure accurate results
+  - Prevents incorrect filtering behavior when requesting specific form types
+  - **Impact**: Ensures users get exactly the forms they request from the current filings feed
+  - **Commit**: 09009be6
+
+- **Test Suite Improvements**
+  - Fixed test assertions to improve reliability (6e2dec32)
+  - Added regression test coverage for item number spacing (edgartools-2bb)
+
+### Documentation
+
+- Streamlined documentation for clarity and maintainability
+  - **Commit**: 05797f4b
+
 ## [4.29.0] - 2025-11-20
 
 ### Added
