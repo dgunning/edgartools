@@ -646,5 +646,5 @@ def test_get_html_wrapped_in_document_tag():
     html = filing.html()
     assert html.upper().startswith("<HTML>")
     text = filing.text()
-    assert text[:100].strip().startswith("As filed with the")
+    assert text.strip().startswith("As filed with the")
 
