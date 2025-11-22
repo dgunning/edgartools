@@ -13,6 +13,9 @@ from edgar.company_reports._structures import (
     is_valid_item_for_filing,
 )
 
+# Import Financials for backward compatibility
+from edgar.financials import Financials
+
 # Filing classes
 from edgar.company_reports.ten_k import TenK
 from edgar.company_reports.ten_q import TenQ
@@ -23,6 +26,7 @@ from edgar.company_reports.press_release import PressRelease, PressReleases
 __all__ = [
     # Base and structures
     'CompanyReport',
+    'Financials',
     'FilingStructure',
     'ItemOnlyFilingStructure',
     'is_valid_item_for_filing',
