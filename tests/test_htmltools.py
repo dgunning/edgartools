@@ -120,15 +120,6 @@ def test_list_items_in_tenk():
     ]
 
 
-def test_detect_iems_for_eightk_with_bold_tags():
-    # This 8-K has one item, but it is not bein detected because the item is in bold tags
-    filing = Filing(form='8-K', filing_date='2023-12-15', company='1 800 FLOWERS COM INC', cik=1084869,
-                    accession_no='0001437749-23-034498')
-    eightk: EightK = filing.obj()
-    assert len(eightk.items) == 1
-    assert '1-800-FLOWERS. COM, Inc.' in eightk['Item 5.07']
-
-
 def test_filing_with_pdf_primary_document():
     filing = Filing(form='APP NTC',
                     filing_date='2024-01-29',

@@ -310,18 +310,20 @@ class TextExtractor:
         # Normalize quotes
         text = text.replace('"', '"').replace('"', '"')
         text = text.replace(''', "'").replace(''', "'")
-        
+
         # Normalize dashes
         text = text.replace('—', ' - ')  # em dash
         text = text.replace('–', ' - ')  # en dash
-        
+
         # Fix spacing around punctuation
         text = re.sub(r'\s+([.,;!?])', r'\1', text)
-        text = re.sub(r'([.,;!?])\s*', r'\1 ', text)
-        
+        # Add space after punctuation only when followed by a letter (not digits)
+        # This preserves item numbers like "Item 2.02" and decimals like "100.5"
+        text = re.sub(r'([.,;!?])(?=[A-Za-z])', r'\1 ', text)
+
         # Remove extra spaces
         text = re.sub(r' {2,}', ' ', text)
-        
+
         return text.strip()
     
     def _truncate_text(self, text: str, max_length: int) -> str:
