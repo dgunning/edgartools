@@ -391,8 +391,16 @@ def get_all_current_filings(form: str = '',
     if not all_entries:
         return Filings(_empty_filing_index())
 
-    # Return as regular Filings object (not CurrentFilings)
-    return Filings(pa.Table.from_pylist(all_entries))
+    # Create Filings object
+    filings = Filings(pa.Table.from_pylist(all_entries))
+
+    # Apply client-side filter since SEC API ignores form parameter
+    # Issue #501: SEC's current filings API doesn't respect the type parameter,
+    # so we must filter client-side to match user expectations
+    if form:
+        filings = filings.filter(form=form)
+
+    return filings
 
 
 def get_current_filings(form: str = '',

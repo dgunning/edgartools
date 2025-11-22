@@ -37,10 +37,11 @@ def test_get_current_filings_page_size_none_with_form_filter():
     # Should return a Filings object
     assert isinstance(all_8k, Filings)
 
-    # All filings should be 8-K or 8-K/A
+    # All filings should be 8-K or 8-K/A (validate ALL, not just some)
     if len(all_8k) > 0:
-        for filing in all_8k:
-            assert filing.form in ["8-K", "8-K/A"]
+        # Count non-8-K filings
+        non_8k = [f for f in all_8k if f.form not in ["8-K", "8-K/A"]]
+        assert len(non_8k) == 0, f"Expected only 8-K filings, but found {len(non_8k)} other forms: {set(f.form for f in non_8k)}"
 
 
 @pytest.mark.network
@@ -55,3 +56,32 @@ def test_get_current_filings_default_behavior_unchanged():
 
     # Should have at most 40 filings (or less if total < 40)
     assert len(current) <= 40
+
+
+@pytest.mark.network
+def test_get_current_filings_form_4_filtering_issue_501():
+    """
+    Regression test for Issue #501: Form 4 filtering.
+
+    Verifies that get_current_filings(form='4', page_size=None) returns
+    ONLY Form 4 and Form 4/A filings, not unfiltered results.
+
+    The SEC API ignores the type parameter, so we apply client-side filtering
+    to ensure the form filter works as documented.
+    """
+    # Get all current Form 4 filings
+    all_form4 = get_current_filings(form='4', page_size=None)
+
+    # Should return a Filings object
+    assert isinstance(all_form4, Filings)
+
+    # Should have some Form 4 filings
+    assert len(all_form4) > 0, "Expected at least some Form 4 filings"
+
+    # ALL results should be Form 4 or 4/A (not other forms)
+    non_form4 = [f for f in all_form4 if f.form not in ['4', '4/A']]
+    assert len(non_form4) == 0, (
+        f"Expected only Form 4 filings, but found {len(non_form4)} other forms "
+        f"out of {len(all_form4)} total. "
+        f"Other forms found: {set(f.form for f in non_form4)}"
+    )
