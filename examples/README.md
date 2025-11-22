@@ -1,6 +1,6 @@
 # EdgarTools Examples
 
-Learn EdgarTools with **61 examples**: 28 interactive notebooks + 8 Python scripts
+Learn EdgarTools with **62 examples**: 28 interactive notebooks + 9 Python scripts
 
 ## 📓 Interactive Notebooks (`notebooks/`)
 
@@ -24,7 +24,7 @@ Learn EdgarTools with **61 examples**: 28 interactive notebooks + 8 Python scrip
 
 ## 💻 Python Scripts (`scripts/`)
 
-**8 production-ready scripts** you can copy and adapt:
+**9 production-ready scripts** you can copy and adapt:
 
 ### 🎯 Basic (`scripts/basic/`)
 Simple examples for common tasks:
@@ -33,6 +33,7 @@ Simple examples for common tasks:
 
 ### 🚀 Advanced (`scripts/advanced/`)
 Complex use cases and advanced features:
+- **enterprise_config.py** - Configure custom SEC mirrors and rate limiting
 - **ranking_search_examples.py** - Search filings with BM25 ranking
 - **section_detection_demo.py** - Extract specific sections from filings
 - **start_page_number_example.py** - Work with filing page numbers
