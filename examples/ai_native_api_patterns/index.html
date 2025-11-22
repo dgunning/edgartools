@@ -1,0 +1,3358 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>AI-Native API Design Patterns for EdgarTools - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ai-native-api-design-patterns-for-edgartools" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AI-Native API Design Patterns for EdgarTools
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Filings
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search for Specific Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filter Filings by Date/Type
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Access Filing Attachments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finding the most recent filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Companies
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Companies
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting company facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating a Multi Year Financials Data Api
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting a list of company insiders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting subsets of companies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Financial Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extract Financial Statements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Ranking Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Local Data Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSL Issues and Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsing SGML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL and Financials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XBRL and Financials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting XBRL from Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying XBRL Facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting footnotes from XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Insider Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ThirteenF Holding Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding SEC Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Resources
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues & Solutions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SEC Rate Limits & Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Problem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traditional-api-design-human-optimized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traditional API Design (Human-Optimized)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-native-api-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI-Native API Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-pattern-to_context-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Pattern: to_context() Method
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design Pattern: to_context() Method">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-principle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Principle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method Signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#design-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Guidelines
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-structured-output-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Structured Output Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-detail-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Detail Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-include-computed-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Include Computed Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-handle-missing-data-gracefully" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Handle Missing Data Gracefully
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-use-contextual-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Use Contextual Formatting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-pattern-convenience-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Pattern: Convenience Properties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design Pattern: Convenience Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-principle_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Principle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Property Categories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Property Categories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-access-simplification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Access Simplification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-type-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Type Conversion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-field-combination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Field Combination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-intuitive-aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Intuitive Aliases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-computed-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Computed Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-boolean-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Boolean Helpers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-example-formc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Example: FormC
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Example: FormC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-traditional-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before (Traditional API)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-ai-native-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After (AI-Native API)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-this-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Use This Pattern
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When to Use This Pattern">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-to_context-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Use to_context() when:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-convenience-properties-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Use convenience properties when:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dont-use-when" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don't use when:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pattern-application-to-other-edgartools-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern Application to Other EdgarTools Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pattern Application to Other EdgarTools Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filing-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filing Class
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#company-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Company Class
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#xbrl-statements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        XBRL / Statements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-ai-native-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing AI-Native Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing AI-Native Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-counting-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token Counting Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benefits-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benefits Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Benefits Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-ai-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For AI Agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-human-developers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Human Developers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-library-maintainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Library Maintainers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-directions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Directions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Directions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-schema-driven-context-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Schema-Driven Context Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-context-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Context Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-multi-object-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Multi-Object Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ai-specific-serialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. AI-Specific Serialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="ai-native-api-design-patterns-for-edgartools">AI-Native API Design Patterns for EdgarTools</h1>
+<h2 id="overview">Overview</h2>
+<p>This document describes design patterns for creating AI-optimized APIs in EdgarTools. These patterns emerged from real-world experience analyzing crowdfunding filings and discovering that traditional APIs, while excellent for human developers, can be inefficient for AI agents working with LLM context windows.</p>
+<h2 id="the-problem">The Problem</h2>
+<h3 id="traditional-api-design-human-optimized">Traditional API Design (Human-Optimized)</h3>
+<p>When analyzing SEC filings, traditional APIs require AI agents to:</p>
+<ol>
+<li>
+<p><strong>Access deeply nested attributes</strong>:
+   <code>python
+   file_number = formc.issuer_information.funding_portal.file_number</code></p>
+</li>
+<li>
+<p><strong>Manually parse string representations</strong>:
+   <code>python
+   price = float(formc.offering_information.price)
+   num_securities = int(float(formc.offering_information.no_of_security_offered))</code></p>
+</li>
+<li>
+<p><strong>Combine related fields</strong>:
+   <code>python
+   security = formc.offering_information.security_offered_type
+   if formc.offering_information.security_offered_other_desc:
+       security += f" ({formc.offering_information.security_offered_other_desc})"</code></p>
+</li>
+<li>
+<p><strong>Calculate derived metrics</strong>:
+   <code>python
+   days_remaining = (formc.offering_information.deadline_date - date.today()).days
+   percent_to_max = (target / maximum) * 100 if maximum else None</code></p>
+</li>
+<li>
+<p><strong>Extract and format 10+ attributes</strong> to build context for analysis</p>
+</li>
+</ol>
+<p><strong>Result</strong>: ~500-1000 tokens of code + ~300-500 tokens of output for a single filing summary.</p>
+<h3 id="ai-native-api-design">AI-Native API Design</h3>
+<p>The same analysis with AI-optimized patterns:</p>
+<pre><code class="language-python"># Single method call, configurable detail level
+context = formc.to_context(detail='standard', filing_date=filing.filing_date)
+print(context)
+</code></pre>
+<p><strong>Result</strong>: ~150-500 tokens depending on detail level, computed metrics included.</p>
+<hr />
+<h2 id="design-pattern-to_context-method">Design Pattern: <code>to_context()</code> Method</h2>
+<h3 id="core-principle">Core Principle</h3>
+<p>Provide a single method that returns a token-efficient, structured text representation of complex objects, optimized for LLM context windows.</p>
+<h3 id="method-signature">Method Signature</h3>
+<pre><code class="language-python">def to_context(self, detail: Literal['minimal', 'standard', 'full'] = 'standard', **kwargs) -&gt; str:
+    &quot;&quot;&quot;
+    Returns a token-efficient, AI-optimized text representation.
+
+    Args:
+        detail: Level of detail to include
+            - 'minimal': ~100-200 tokens, essential fields only
+            - 'standard': ~300-500 tokens, most important data (default)
+            - 'full': ~600-1000 tokens, comprehensive view
+        **kwargs: Additional context (e.g., filing_date, related data)
+
+    Returns:
+        Formatted string suitable for AI context
+    &quot;&quot;&quot;
+</code></pre>
+<h3 id="design-guidelines">Design Guidelines</h3>
+<h4 id="1-structured-output-format">1. <strong>Structured Output Format</strong></h4>
+<p>Use consistent section headers and indentation:</p>
+<pre><code>FORM TYPE - DESCRIPTION (Context Info)
+
+SECTION 1: Primary Info
+  Field: Value
+  Field: Value
+
+SECTION 2: Detailed Info
+  Field: Value (computed metric)
+  Field: Value
+
+STATUS: Derived Status
+</code></pre>
+<h4 id="2-detail-levels">2. <strong>Detail Levels</strong></h4>
+<p><strong>Minimal (~150 tokens)</strong>:
+- Essential identification (name, CIK, form type)
+- Key financial metrics only
+- Most important status indicators
+- Use abbreviations ($50K vs $50,000)
+- Combine related fields</p>
+<p><strong>Standard (~350 tokens)</strong>:
+- All minimal fields with full formatting
+- Primary sections fully expanded
+- Key computed metrics
+- Important relationships</p>
+<p><strong>Full (~800 tokens)</strong>:
+- All available data
+- Complete financial tables
+- All computed metrics
+- Relationships and references
+- Signature information</p>
+<h4 id="3-include-computed-fields">3. <strong>Include Computed Fields</strong></h4>
+<p>Always include derived metrics that would require calculation:</p>
+<p>✅ <strong>Good</strong>:</p>
+<pre><code>Assets: $35,660 (+173% from $13,044)
+Revenue: $0 (pre-revenue)
+Net Income: $-654,437 (burn rate increasing)
+Debt-to-Asset Ratio: 5055%
+Deadline: 2026-04-30 (177 days remaining)
+</code></pre>
+<p>❌ <strong>Bad</strong>:</p>
+<pre><code>Assets Current: 35660
+Assets Prior: 13044
+Revenue Current: 0
+Revenue Prior: 0
+Net Income Current: -654437
+Net Income Prior: -329037
+Deadline: 2026-04-30
+</code></pre>
+<h4 id="4-handle-missing-data-gracefully">4. <strong>Handle Missing Data Gracefully</strong></h4>
+<p>Only show sections/fields that are populated:</p>
+<pre><code class="language-python"># Good pattern
+if self.offering_information:
+    lines.append(&quot;\nOFFERING:&quot;)
+    # ... offering details
+
+# Bad pattern - shows empty sections
+lines.append(&quot;\nOFFERING:&quot;)
+if self.offering_information:
+    # ... offering details
+else:
+    lines.append(&quot;  No offering information&quot;)
+</code></pre>
+<h4 id="5-use-contextual-formatting">5. <strong>Use Contextual Formatting</strong></h4>
+<p>Adapt formatting based on values:</p>
+<pre><code class="language-python"># Amount formatting
+if detail == 'minimal':
+    # Compact with K/M suffix
+    amt_str = f&quot;${amount/1000:.0f}K&quot; if amount &lt; 1000000 else f&quot;${amount/1000000:.1f}M&quot;
+else:
+    # Full precision with commas
+    amt_str = f&quot;${amount:,.2f}&quot;
+
+# Status formatting
+if days &gt; 0:
+    status = f&quot;{days} days remaining&quot;
+elif days == 0:
+    status = &quot;EXPIRES TODAY&quot;  # Urgent
+else:
+    status = f&quot;EXPIRED ({abs(days)} days ago)&quot;  # Past
+</code></pre>
+<hr />
+<h2 id="design-pattern-convenience-properties">Design Pattern: Convenience Properties</h2>
+<h3 id="core-principle_1">Core Principle</h3>
+<p>Wrap complex access patterns, type conversions, and computed metrics in intuitive properties.</p>
+<h3 id="property-categories">Property Categories</h3>
+<h4 id="1-access-simplification">1. <strong>Access Simplification</strong></h4>
+<p>Flatten deeply nested structures:</p>
+<pre><code class="language-python">@property
+def campaign_file_number(self) -&gt; Optional[str]:
+    &quot;&quot;&quot;File number for the crowdfunding campaign.&quot;&quot;&quot;
+    if self.issuer_information.funding_portal:
+        return self.issuer_information.funding_portal.file_number
+    return None
+
+# Usage: formc.campaign_file_number
+# Instead of: formc.issuer_information.funding_portal.file_number (with None checks)
+</code></pre>
+<h4 id="2-type-conversion">2. <strong>Type Conversion</strong></h4>
+<p>Auto-parse string representations:</p>
+<pre><code class="language-python">@property
+def price_per_security(self) -&gt; Optional[float]:
+    &quot;&quot;&quot;Parse price string to float&quot;&quot;&quot;
+    if not self.price:
+        return None
+    try:
+        return float(self.price)
+    except (ValueError, TypeError):
+        return None
+
+# Usage: formc.offering_information.price_per_security
+# Instead of: float(formc.offering_information.price)  # error-prone
+</code></pre>
+<h4 id="3-field-combination">3. <strong>Field Combination</strong></h4>
+<p>Merge related fields into logical units:</p>
+<pre><code class="language-python">@property
+def security_description(self) -&gt; str:
+    &quot;&quot;&quot;Combined security type and description&quot;&quot;&quot;
+    if not self.security_offered_type:
+        return &quot;Not specified&quot;
+    sec_type = self.security_offered_type
+    if self.security_offered_other_desc:
+        return f&quot;{sec_type} ({self.security_offered_other_desc})&quot;
+    return sec_type
+
+# Usage: formc.offering_information.security_description
+# Instead of: Manually combining security_offered_type + security_offered_other_desc
+</code></pre>
+<h4 id="4-intuitive-aliases">4. <strong>Intuitive Aliases</strong></h4>
+<p>Provide clearer names for confusing fields:</p>
+<pre><code class="language-python">@property
+def target_amount(self) -&gt; Optional[float]:
+    &quot;&quot;&quot;Alias for offering_amount - more intuitive name&quot;&quot;&quot;
+    return self.offering_amount
+
+# Usage: formc.offering_information.target_amount
+# Instead of: formc.offering_information.offering_amount  # unclear what this means
+</code></pre>
+<h4 id="5-computed-metrics">5. <strong>Computed Metrics</strong></h4>
+<p>Calculate derived values:</p>
+<pre><code class="language-python">@property
+def days_to_deadline(self) -&gt; Optional[int]:
+    &quot;&quot;&quot;Days remaining until offering deadline (negative if expired)&quot;&quot;&quot;
+    if not self.offering_information or not self.offering_information.deadline_date:
+        return None
+    return (self.offering_information.deadline_date - date.today()).days
+
+@property
+def debt_to_asset_ratio(self) -&gt; Optional[float]:
+    &quot;&quot;&quot;Debt-to-asset ratio as percentage&quot;&quot;&quot;
+    if self.total_asset_most_recent_fiscal_year == 0:
+        return None
+    return (self.total_debt_most_recent / self.total_asset_most_recent_fiscal_year) * 100
+</code></pre>
+<h4 id="6-boolean-helpers">6. <strong>Boolean Helpers</strong></h4>
+<p>Provide clear status checks:</p>
+<pre><code class="language-python">@property
+def is_expired(self) -&gt; bool:
+    &quot;&quot;&quot;True if offering deadline has passed&quot;&quot;&quot;
+    days = self.days_to_deadline
+    return days is not None and days &lt; 0
+
+@property
+def is_pre_revenue(self) -&gt; bool:
+    &quot;&quot;&quot;True if company has no revenue&quot;&quot;&quot;
+    return self.revenue_most_recent_fiscal_year == 0
+</code></pre>
+<hr />
+<h2 id="implementation-example-formc">Implementation Example: FormC</h2>
+<h3 id="before-traditional-api">Before (Traditional API)</h3>
+<pre><code class="language-python"># Accessing campaign data requires multiple operations
+filing = filings[0]
+formc = filing.obj()
+
+# Extract basic info (nested access)
+company = formc.issuer_information.name
+cik = formc.filer_information.cik
+if formc.issuer_information.funding_portal:
+    portal = formc.issuer_information.funding_portal.name
+    file_num = formc.issuer_information.funding_portal.file_number
+else:
+    portal = None
+    file_num = None
+
+# Parse and combine security info (manual)
+sec_type = formc.offering_information.security_offered_type or &quot;Not specified&quot;
+if formc.offering_information.security_offered_other_desc:
+    sec_type += f&quot; ({formc.offering_information.security_offered_other_desc})&quot;
+
+# Parse amounts (string to number)
+price = float(formc.offering_information.price) if formc.offering_information.price else None
+target = formc.offering_information.offering_amount
+maximum = formc.offering_information.maximum_offering_amount
+
+# Calculate metrics
+if target and maximum:
+    percent = (target / maximum) * 100
+deadline = formc.offering_information.deadline_date
+if deadline:
+    days_left = (deadline - date.today()).days
+    expired = days_left &lt; 0
+
+# Format output (200-300 lines of code)
+print(f&quot;Company: {company}&quot;)
+print(f&quot;CIK: {cik}&quot;)
+# ... 20+ more print statements
+</code></pre>
+<p><strong>Token count</strong>: ~500 tokens of code + ~300 tokens output = <strong>~800 tokens total</strong></p>
+<h3 id="after-ai-native-api">After (AI-Native API)</h3>
+<pre><code class="language-python">filing = filings[0]
+formc = filing.obj()
+
+# Option 1: Direct properties (clean access)
+print(f&quot;Company: {formc.issuer_information.name}&quot;)
+print(f&quot;File Number: {formc.campaign_file_number}&quot;)
+print(f&quot;Security: {formc.offering_information.security_description}&quot;)
+print(f&quot;Target: ${formc.offering_information.target_amount:,.0f}&quot;)
+print(f&quot;Price: ${formc.offering_information.price_per_security:.2f}&quot;)
+print(f&quot;Days to Deadline: {formc.days_to_deadline}&quot;)
+print(f&quot;Is Expired: {formc.is_expired}&quot;)
+print(f&quot;Status: {formc.campaign_status}&quot;)
+
+# Option 2: Single context call (AI-optimized)
+context = formc.to_context(detail='standard', filing_date=filing.filing_date)
+print(context)
+</code></pre>
+<p><strong>Token count</strong>: ~50 tokens of code + ~350 tokens output = <strong>~400 tokens total</strong></p>
+<p><strong>Savings</strong>: ~400 tokens (50% reduction)</p>
+<hr />
+<h2 id="when-to-use-this-pattern">When to Use This Pattern</h2>
+<h3 id="use-to_context-when">✅ Use <code>to_context()</code> when:</h3>
+<ol>
+<li><strong>AI agents need quick summaries</strong> of complex objects</li>
+<li><strong>Token efficiency matters</strong> (LLM context limits)</li>
+<li><strong>Multiple related fields</strong> should be presented together</li>
+<li><strong>Computed metrics</strong> are frequently needed</li>
+<li><strong>Different detail levels</strong> serve different use cases</li>
+</ol>
+<h3 id="use-convenience-properties-when">✅ Use convenience properties when:</h3>
+<ol>
+<li><strong>Access patterns are complex</strong> (deeply nested, with null checks)</li>
+<li><strong>Type conversions are needed</strong> (string to number, parsing dates)</li>
+<li><strong>Field names are unclear</strong> (offering_amount → target_amount)</li>
+<li><strong>Related fields should combine</strong> (type + description)</li>
+<li><strong>Calculations are common</strong> (ratios, growth rates, days remaining)</li>
+</ol>
+<h3 id="dont-use-when">❌ Don't use when:</h3>
+<ol>
+<li><strong>Data is already simple</strong> (single string, straightforward access)</li>
+<li><strong>Performance is critical</strong> and properties add overhead</li>
+<li><strong>Raw data access is needed</strong> for downstream processing</li>
+<li><strong>The object is rarely used</strong> by AI agents</li>
+</ol>
+<hr />
+<h2 id="pattern-application-to-other-edgartools-classes">Pattern Application to Other EdgarTools Classes</h2>
+<h3 id="filing-class">Filing Class</h3>
+<pre><code class="language-python">class Filing:
+    def to_context(self, detail='standard') -&gt; str:
+        &quot;&quot;&quot;
+        Minimal: Form, company, date, status
+        Standard: + key facts, document count, file size
+        Full: + all attachments, exhibits, related filings
+        &quot;&quot;&quot;
+
+    @property
+    def filing_age_days(self) -&gt; int:
+        &quot;&quot;&quot;Days since filing&quot;&quot;&quot;
+        return (date.today() - self.filing_date).days
+
+    @property
+    def document_summary(self) -&gt; str:
+        &quot;&quot;&quot;Concise summary of attached documents&quot;&quot;&quot;
+        return f&quot;{len(self.attachments)} documents, {self.primary_document.size} bytes&quot;
+</code></pre>
+<h3 id="company-class">Company Class</h3>
+<pre><code class="language-python">class Company:
+    def to_context(self, detail='standard') -&gt; str:
+        &quot;&quot;&quot;
+        Minimal: Name, CIK, industry, status
+        Standard: + key financials, recent filings count
+        Full: + full facts, insider list, detailed metrics
+        &quot;&quot;&quot;
+
+    @property
+    def latest_filing_date(self) -&gt; Optional[date]:
+        &quot;&quot;&quot;Date of most recent filing&quot;&quot;&quot;
+        recent = self.get_filings(limit=1)
+        return recent[0].filing_date if recent else None
+</code></pre>
+<h3 id="xbrl-statements">XBRL / Statements</h3>
+<pre><code class="language-python">class Statement:
+    def to_context(self, detail='standard') -&gt; str:
+        &quot;&quot;&quot;
+        Minimal: Statement type, period, key line items
+        Standard: + important metrics, growth rates
+        Full: + full statement, all periods, footnotes
+        &quot;&quot;&quot;
+
+    @property
+    def revenue_growth_rate(self) -&gt; Optional[float]:
+        &quot;&quot;&quot;YoY revenue growth as percentage&quot;&quot;&quot;
+        # Calculate from periods
+
+    @property
+    def is_profitable(self) -&gt; bool:
+        &quot;&quot;&quot;True if net income is positive&quot;&quot;&quot;
+        # Check net income
+</code></pre>
+<hr />
+<h2 id="testing-ai-native-features">Testing AI-Native Features</h2>
+<h3 id="unit-tests">Unit Tests</h3>
+<pre><code class="language-python">def test_to_context_minimal():
+    formc = FormC.from_xml(sample_xml, form=&quot;C&quot;)
+    context = formc.to_context(detail='minimal')
+
+    assert len(context) &lt; 1000  # Token budget check
+    assert &quot;ISSUER:&quot; in context
+    assert formc.issuer_information.name in context
+    assert &quot;CAMPAIGN STATUS:&quot; in context
+
+def test_to_context_with_none_values():
+    &quot;&quot;&quot;to_context handles missing data gracefully&quot;&quot;&quot;
+    formc = FormC(...)  # Create with many None values
+    context = formc.to_context()
+
+    assert &quot;None&quot; not in context  # No exposed None values
+    assert context  # Still returns useful content
+
+def test_convenience_properties():
+    formc = FormC.from_xml(sample_xml, form=&quot;C&quot;)
+
+    # Access simplification
+    assert formc.campaign_file_number == &quot;007-00033&quot;
+
+    # Type conversion
+    assert isinstance(formc.offering_information.price_per_security, float)
+
+    # Computed metrics
+    assert isinstance(formc.days_to_deadline, int)
+    assert isinstance(formc.is_expired, bool)
+</code></pre>
+<h3 id="token-counting-tests">Token Counting Tests</h3>
+<pre><code class="language-python">def test_token_efficiency():
+    &quot;&quot;&quot;Verify token budgets for detail levels&quot;&quot;&quot;
+    import tiktoken
+
+    formc = FormC.from_xml(sample_xml, form=&quot;C&quot;)
+    enc = tiktoken.get_encoding(&quot;cl100k_base&quot;)
+
+    minimal = formc.to_context(detail='minimal')
+    standard = formc.to_context(detail='standard')
+    full = formc.to_context(detail='full')
+
+    assert len(enc.encode(minimal)) &lt; 250
+    assert len(enc.encode(standard)) &lt; 600
+    assert len(enc.encode(full)) &lt; 1200
+</code></pre>
+<hr />
+<h2 id="benefits-summary">Benefits Summary</h2>
+<h3 id="for-ai-agents">For AI Agents</h3>
+<ul>
+<li><strong>50-70% token reduction</strong> for common analysis tasks</li>
+<li><strong>Single function call</strong> instead of 10+ attribute accesses</li>
+<li><strong>Built-in computed metrics</strong> (no manual calculation)</li>
+<li><strong>Graceful handling</strong> of missing data</li>
+<li><strong>Configurable detail</strong> for different use cases</li>
+</ul>
+<h3 id="for-human-developers">For Human Developers</h3>
+<ul>
+<li><strong>Cleaner code</strong> with convenience properties</li>
+<li><strong>Fewer errors</strong> from type conversions</li>
+<li><strong>Better discoverability</strong> through intuitive naming</li>
+<li><strong>Consistent patterns</strong> across the library</li>
+<li><strong>Backwards compatible</strong> (existing APIs unchanged)</li>
+</ul>
+<h3 id="for-library-maintainers">For Library Maintainers</h3>
+<ul>
+<li><strong>Centralized formatting</strong> logic</li>
+<li><strong>Easier to update</strong> presentation (one place)</li>
+<li><strong>Better testing</strong> of output quality</li>
+<li><strong>Clear extension pattern</strong> for new classes</li>
+<li><strong>Documentation by example</strong> (self-documenting output)</li>
+</ul>
+<hr />
+<h2 id="future-directions">Future Directions</h2>
+<h3 id="1-schema-driven-context-generation">1. Schema-Driven Context Generation</h3>
+<p>Define schemas for different analysis tasks:</p>
+<pre><code class="language-python">context = formc.to_context(
+    schema='financial_analysis',  # Pre-defined field selections
+    include_computed=True,
+    format='markdown'  # or 'json', 'yaml'
+)
+</code></pre>
+<h3 id="2-context-caching">2. Context Caching</h3>
+<p>Cache generated contexts to avoid regeneration:</p>
+<pre><code class="language-python">@lru_cache(maxsize=100)
+def to_context(self, detail='standard', **kwargs) -&gt; str:
+    # Expensive formatting done once
+</code></pre>
+<h3 id="3-multi-object-context">3. Multi-Object Context</h3>
+<p>Combine related objects:</p>
+<pre><code class="language-python">campaign_context = Campaign.to_context(
+    initial_filing=formc_initial,
+    updates=[formc_u1, formc_u2],
+    annual_reports=[formc_ar1],
+    detail='standard'
+)
+</code></pre>
+<h3 id="4-ai-specific-serialization">4. AI-Specific Serialization</h3>
+<p>Optimize for specific AI models:</p>
+<pre><code class="language-python">context = formc.to_context(
+    detail='standard',
+    target_model='gpt-4',  # Adjust formatting for model
+    include_reasoning_hints=True  # Add analysis guidance
+)
+</code></pre>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li><strong>Implementation</strong>: <code>edgar/offerings/formc.py</code> (FormC.to_context, convenience properties)</li>
+<li><strong>Example Usage</strong>: <code>docs/examples/crowdfunding.py</code> (Step 1 demonstration)</li>
+<li><strong>Research</strong>: <code>docs/examples/crowdfunding_research_goals.md</code> (Pattern discovery process)</li>
+</ul>
+<hr />
+<p><strong>Version</strong>: 1.0
+<strong>Last Updated</strong>: 2025-11-04
+<strong>Status</strong>: Active design pattern in EdgarTools</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>

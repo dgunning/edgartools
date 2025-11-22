@@ -1,0 +1,36 @@
+<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer hexagon frame -->
+  <polygon points="40,5 70,22.5 70,57.5 40,75 10,57.5 10,22.5"
+           fill="none" stroke="#3d5875" stroke-width="2.5" opacity="0.3"/>
+
+  <!-- Inner hexagon -->
+  <defs>
+    <linearGradient id="communityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#FFB700;stop-opacity:0.7" />
+    </linearGradient>
+  </defs>
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="url(#communityGradient)" opacity="0.25"/>
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="none" stroke="#FFD700" stroke-width="2"/>
+
+  <!-- Connected nodes (community network) -->
+  <!-- Center node -->
+  <circle cx="40" cy="40" r="4" fill="#3d5875"/>
+  <!-- Surrounding nodes -->
+  <circle cx="30" cy="32" r="3" fill="#3d5875"/>
+  <circle cx="50" cy="32" r="3" fill="#3d5875"/>
+  <circle cx="30" cy="48" r="3" fill="#3d5875"/>
+  <circle cx="50" cy="48" r="3" fill="#3d5875"/>
+
+  <!-- Connection lines -->
+  <g stroke="#3d5875" stroke-width="1.5" opacity="0.6">
+    <line x1="40" y1="40" x2="30" y2="32"/>
+    <line x1="40" y1="40" x2="50" y2="32"/>
+    <line x1="40" y1="40" x2="30" y2="48"/>
+    <line x1="40" y1="40" x2="50" y2="48"/>
+    <line x1="30" y1="32" x2="50" y2="32"/>
+    <line x1="30" y1="48" x2="50" y2="48"/>
+  </g>
+</svg>
