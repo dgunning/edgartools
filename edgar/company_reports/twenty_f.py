@@ -4,7 +4,7 @@ from functools import cached_property
 from typing import List
 
 from edgar.company_reports._base import CompanyReport
-from edgar.company_reports._structures import FilingStructure
+from edgar.company_reports._structures import FilingStructure, extract_items_from_sections
 from edgar.documents import HTMLParser, ParserConfig
 
 __all__ = ['TwentyF']
@@ -163,22 +163,9 @@ class TwentyF(CompanyReport):
         """
         # Try new parser first
         if self.sections:
-            # Return titles for backward compatibility (e.g., "Item 5")
-            # Extract just the "Item X" part from titles like "Item 5 - Description"
-            items = []
-            for section in self.sections.values():
-                title = section.title
-                # Extract "Item X" from title
-                match = re.match(r'(Item\s+\d+[A-Z]?)', title, re.IGNORECASE)
-                if match:
-                    items.append(match.group(1))
-                else:
-                    # Fallback: use first part of title before " - " or use full title
-                    if ' - ' in title:
-                        items.append(title.split(' - ')[0].strip())
-                    else:
-                        items.append(title)
-            return items
+            # Extract items using shared helper (eliminates code duplication)
+            item_pattern = re.compile(r'(Item\s+\d+[A-Z]?)', re.IGNORECASE)
+            return extract_items_from_sections(self.sections, item_pattern)
 
         # Fallback to old parser for backward compatibility
         if self.chunked_document:

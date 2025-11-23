@@ -1,7 +1,8 @@
 """Filing structure definitions and validation utilities."""
-from typing import Dict
+import re
+from typing import Dict, List, Pattern
 
-__all__ = ['FilingStructure', 'ItemOnlyFilingStructure', 'is_valid_item_for_filing']
+__all__ = ['FilingStructure', 'ItemOnlyFilingStructure', 'is_valid_item_for_filing', 'extract_items_from_sections']
 
 
 class FilingStructure:
@@ -49,3 +50,40 @@ def is_valid_item_for_filing(filing_structure: Dict, item: str, part: str = None
             if item in items:
                 return True
     return False
+
+
+def extract_items_from_sections(sections: Dict, item_pattern: Pattern[str]) -> List[str]:
+    r"""
+    Extract item numbers from filing sections using a regex pattern.
+
+    This is a shared utility to eliminate code duplication between different
+    filing types (8-K, 20-F, etc.) that have similar item extraction logic.
+
+    Args:
+        sections: Dictionary of sections with titles
+        item_pattern: Compiled regex pattern to match item numbers in titles
+                     (e.g., r'(Item\s+\d+\.\s*\d+)' for 8-K, r'(Item\s+\d+[A-Z]?)' for 20-F)
+
+    Returns:
+        List of extracted item strings (e.g., ["Item 2.02", "Item 9.01"])
+
+    Examples:
+        >>> pattern = re.compile(r'(Item\s+\d+\.\s*\d+)', re.IGNORECASE)
+        >>> sections = {'item_2_02': Section(title='Item 2.02 - Results')}
+        >>> extract_items_from_sections(sections, pattern)
+        ['Item 2.02']
+    """
+    items = []
+    for section in sections.values():
+        title = section.title
+        # Try to extract item number using the provided pattern
+        match = item_pattern.match(title)
+        if match:
+            items.append(match.group(1))
+        else:
+            # Fallback: use first part of title before " - " or use full title
+            if ' - ' in title:
+                items.append(title.split(' - ')[0].strip())
+            else:
+                items.append(title)
+    return items
