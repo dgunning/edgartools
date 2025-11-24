@@ -167,20 +167,23 @@ def _get_data_staleness_days(latest_date: Optional[Union[datetime, date, str]]) 
 
 def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
     """
-    Check if the user's date filter includes today's date.
+    Check if the user's date filter includes today's date or recent dates (past 6 months).
+    This is used to determine whether to show staleness warnings.
 
     Args:
         filing_date_param: The filing_date parameter from filter() or get_filings()
 
     Returns:
-        True if the parameter requests today's filings
+        True if the parameter requests today's filings OR dates within the past 6 months
     """
     if not filing_date_param:
         return False
 
+    from datetime import timedelta
     from edgar.dates import extract_dates
 
     today = date.today()
+    six_months_ago = today - timedelta(days=180)
 
     try:
         start_date, end_date, is_range = extract_dates(filing_date_param)
@@ -188,11 +191,21 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
         # Check if user is requesting today's filings
         if not is_range and start_date.date() == today:
             return True
-        elif is_range:
+
+        # Check if the single date is within past 6 months
+        if not is_range and start_date.date() >= six_months_ago:
+            return True
+
+        # For date ranges
+        if is_range:
             # Check if range includes today or is open-ended to today
             start = start_date.date() if start_date else date.min
             end = end_date.date() if end_date else date.max
-            return start <= today <= end
+
+            # Only warn if the range includes today AND starts within past 6 months
+            if start <= today <= end and start >= six_months_ago:
+                return True
+
     except:
         # If date parsing fails, don't warn
         return False

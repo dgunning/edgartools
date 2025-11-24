@@ -57,9 +57,9 @@ class TestHelperFunctions:
         assert _is_requesting_current_filings(date_range) is True
 
     def test_is_requesting_current_filings_historical_date(self):
-        """Test that historical dates don't trigger warning"""
-        last_month = date.today() - timedelta(days=30)
-        assert _is_requesting_current_filings(last_month.isoformat()) is False
+        """Test that old historical dates (>6 months) don't trigger warning"""
+        seven_months_ago = date.today() - timedelta(days=210)
+        assert _is_requesting_current_filings(seven_months_ago.isoformat()) is False
 
     def test_is_requesting_current_filings_none(self):
         """Test that None parameter doesn't trigger warning"""
@@ -180,27 +180,27 @@ class TestFilingsFilterWarning:
 
     @patch('edgar._filings.log')
     def test_filter_no_warning_for_historical_date(self, mock_log):
-        """Test that filter() doesn't warn for clearly historical queries"""
-        # Create mock filing data from 30 days ago
-        thirty_days_ago = datetime.now() - timedelta(days=30)
-        thirty_days_ago_str = (date.today() - timedelta(days=30)).isoformat()
+        """Test that filter() doesn't warn for old historical queries (>6 months)"""
+        # Create mock filing data from 7 months ago
+        seven_months_ago = datetime.now() - timedelta(days=210)
+        seven_months_ago_str = (date.today() - timedelta(days=210)).isoformat()
 
         filing_data = pa.Table.from_pylist([
             {
                 'cik': 1234567890,
                 'company': 'Test Company',
                 'form': '10-K',
-                'filing_date': thirty_days_ago,
+                'filing_date': seven_months_ago,
                 'accession_number': '0001234567-23-000001',
             }
         ])
 
         filings = Filings(filing_data)
 
-        # Filter for the same historical date
-        result = filings.filter(filing_date=thirty_days_ago_str)
+        # Filter for the same old historical date
+        result = filings.filter(filing_date=seven_months_ago_str)
 
-        # Verify NO warning (this is clearly a historical query)
+        # Verify NO warning (this is clearly an old historical query, >6 months)
         assert not mock_log.warning.called
 
 
