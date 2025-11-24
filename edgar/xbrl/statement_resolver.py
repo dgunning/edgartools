@@ -500,6 +500,60 @@ class StatementResolver:
 
         return [], None, 0.0
 
+    def _score_statement_quality(self, stmt: Dict[str, Any]) -> int:
+        """
+        Score a statement to prefer complete financial statements over fragments/details.
+
+        Higher scores = more likely to be a complete statement.
+        Lower scores = more likely to be a fragment/detail/disclosure.
+
+        Args:
+            stmt: Statement dictionary with role, definition, etc.
+
+        Returns:
+            Quality score (higher is better)
+        """
+        score = 100  # Start with base score
+
+        role_def = stmt.get('definition', '').lower()
+        role_uri = stmt.get('role', '').lower()
+
+        # Fragment indicators (decrease score significantly)
+        fragment_keywords = [
+            'details', 'detail', 'tables', 'table', 'schedule', 'schedules',
+            'textual', 'narrative', 'policy', 'policies', 'disclosure',
+            'supplemental', 'additional', 'breakdown', 'summary'
+        ]
+
+        for keyword in fragment_keywords:
+            if keyword in role_def or keyword in role_uri:
+                score -= 50
+                break  # One hit is enough
+
+        # Prefer "Consolidated" statements (primary statements)
+        if 'consolidated' in role_def or 'consolidated' in role_uri:
+            score += 30
+
+        # Prefer "Condensed" statements (legitimate abbreviated statements)
+        if 'condensed' in role_def or 'condensed' in role_uri:
+            score += 20
+
+        # Exact matches for primary statement names get highest priority
+        primary_names = [
+            'consolidatedbalancesheets',
+            'consolidatedstatementsofoperations',
+            'consolidatedstatementsofincome',
+            'consolidatedstatementsofcashflows',
+            'consolidatedstatementsofequity',
+            'consolidatedstatementsofstockholdersequity'
+        ]
+
+        clean_def = role_def.replace(' ', '').replace('-', '').replace('_', '')
+        if clean_def in primary_names:
+            score += 50
+
+        return score
+
     def _match_by_role_pattern(self, statement_type: str, is_parenthetical: bool = False) -> Tuple[List[Dict[str, Any]], Optional[str], float]:
         """
         Match statements using role URI or role name patterns.
@@ -539,7 +593,7 @@ class StatementResolver:
 
             # Check if role matches any pattern
             for pattern in role_patterns:
-                if (re.search(pattern, role, re.IGNORECASE) or 
+                if (re.search(pattern, role, re.IGNORECASE) or
                    (role_name and re.search(pattern, role_name, re.IGNORECASE))):
                     # For parenthetical statements, check the role definition
                     if registry_entry.supports_parenthetical:
@@ -553,8 +607,10 @@ class StatementResolver:
                     matched_statements.append(stmt)
                     break  # Found a match, no need to check other patterns
 
-        # If we found matching statements, return with good confidence
+        # If we found matching statements, sort by quality and return the best
         if matched_statements:
+            # Issue #503: Sort by statement quality to prefer complete statements over fragments
+            matched_statements.sort(key=self._score_statement_quality, reverse=True)
             return matched_statements, matched_statements[0]['role'], 0.75
 
         return [], None, 0.0

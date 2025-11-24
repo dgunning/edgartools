@@ -133,9 +133,11 @@ def test_statement_to_dataframe(aapl_xbrl):
     assert df.columns.tolist() ==['concept', 'label', '2023-09-30', '2022-09-24', '2021-09-25',
                                   'level','abstract', 'dimension']
 
-    assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2023-09-30'].item() == 96995000000.0
-    assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2022-09-24'].item() == 99803000000.0
-    assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2021-09-25'].item() == 94680000000.0
+    # Issue #504: Filter for non-dimensional rows to avoid duplicate NetIncomeLoss entries
+    net_income_filter = (df.concept == 'us-gaap_NetIncomeLoss') & (df.dimension == False)
+    assert df[net_income_filter]['2023-09-30'].item() == 96995000000.0
+    assert df[net_income_filter]['2022-09-24'].item() == 99803000000.0
+    assert df[net_income_filter]['2021-09-25'].item() == 94680000000.0
 
     #Labels
     labels = df.label.tolist()
