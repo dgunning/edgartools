@@ -282,7 +282,7 @@ class Statement:
 
         for item in raw_data:
             # Skip if filtering by dimensions
-            if not include_dimensions and item.get('dimension'):
+            if not include_dimensions and item.get('is_dimension'):
                 continue
 
             # Build base row
