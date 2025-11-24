@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Date Filter TypeError on Empty Results (Issue #505)**
+  - Fixed crash when `Filings.filter(date=...)` returns no records
+  - Added null check in `_get_data_staleness_days()` to handle empty result sets gracefully
+  - Returns large staleness value (999999) when no data available instead of crashing
+  - **Impact**: Core filtering functionality now handles edge cases without crashing
+  - **Commits**: 3b15612c
+
 - **XBRL Balance Sheet Dimensional Data (Issue #504)** ⚠️ **BREAKING CHANGE**
   - Changed default behavior to include dimensional data in balance sheets
   - Dimensional facts (related party transactions, segment breakdowns, class shares, etc.) now appear by default
@@ -39,6 +46,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Impact**: More accurate statement selection, but applications relying on specific statement structures may need updates
   - **Validated**: Tested across 8 companies and years (2015-2019 focus), all show complete balance sheets with essential concepts
   - **Commits**: dde245f8
+
+### Refactored
+
+- **Staleness Warning Logging**
+  - Reduced staleness warning logging to only trigger for recent queries (past 6 months)
+  - Historical queries (>6 months old) no longer generate unnecessary warnings
+  - Maintains warning utility for recent data where staleness is actually relevant
+  - **Impact**: Significantly reduces log noise for users querying historical filing data
+  - **Commits**: eb7ef3db
 
 ## [4.30.0] - 2025-11-21
 
