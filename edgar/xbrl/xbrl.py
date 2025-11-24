@@ -639,14 +639,10 @@ class XBRL:
         # Find the root element
         root_id = tree.root_element_id
 
-        # If should_display_dimensions wasn't provided, determine it from the statement type and role
+        # If should_display_dimensions wasn't provided, default to True
+        # Issue #504: Always include dimensional data by default - users can filter themselves if needed
         if should_display_dimensions is None:
-            role_definition = ""
-            if matching_statements:
-                role_definition = matching_statements[0]['definition']
-
-            # Determine whether to display dimensions
-            should_display_dimensions = self._is_dimension_display_statement(actual_statement_type, role_definition)
+            should_display_dimensions = True
 
         # Generate line items recursively
         line_items = []
@@ -1263,8 +1259,10 @@ class XBRL:
             role_definition = matching_statements[0]['definition']
 
         # Determine if this statement should display dimensions
-        should_display_dimensions = include_dimensions and self._is_dimension_display_statement(actual_statement_type,
-                                                                                                role_definition)
+        # Issue #504: Honor the user's explicit include_dimensions parameter
+        # Previously, even when include_dimensions=True, dimensional data was filtered out for balance sheets
+        # because _is_dimension_display_statement() returned False for core statements without segment keywords
+        should_display_dimensions = include_dimensions
 
         # Get the statement data with dimension display flag
         statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)
