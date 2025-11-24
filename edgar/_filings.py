@@ -140,16 +140,20 @@ def is_valid_date(date_str: str, date_format: str = "%Y-%m-%d") -> bool:
         return False
 
 
-def _get_data_staleness_days(latest_date: Union[datetime, date, str]) -> int:
+def _get_data_staleness_days(latest_date: Optional[Union[datetime, date, str]]) -> int:
     """
     Calculate how many days old the latest filing date is.
 
     Args:
-        latest_date: The most recent filing_date in the dataset
+        latest_date: The most recent filing_date in the dataset, or None if no records exist
 
     Returns:
-        Number of days between latest_date and today
+        Number of days between latest_date and today, or a large number if latest_date is None
     """
+    # Handle None case (no records in dataset)
+    if latest_date is None:
+        return 999999  # Return large number to indicate no data available
+
     # Convert string to date if needed
     if isinstance(latest_date, str):
         latest_date = datetime.strptime(latest_date, "%Y-%m-%d").date()
