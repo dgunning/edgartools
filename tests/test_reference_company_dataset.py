@@ -115,7 +115,7 @@ class TestSchema:
     def test_schema_fields(self):
         """Verify schema has all expected fields"""
         expected_fields = {
-            'cik', 'name', 'sic', 'sic_description',
+            'cik', 'name', 'is_company', 'sic', 'sic_description',
             'tickers', 'exchanges', 'state_of_incorporation',
             'state_of_incorporation_description', 'fiscal_year_end',
             'entity_type', 'ein'
@@ -132,6 +132,11 @@ class TestSchema:
         """SIC should be int32"""
         sic_field = COMPANY_SCHEMA.field('sic')
         assert sic_field.type == pa.int32()
+
+    def test_is_company_is_bool(self):
+        """is_company should be boolean"""
+        is_company_field = COMPANY_SCHEMA.field('is_company')
+        assert is_company_field.type == pa.bool_()
 
 
 @pytest.mark.fast
@@ -194,6 +199,8 @@ class TestBuildDatasetSmallSample:
         # Verify content
         assert table['cik'][0].as_py() == '0001318605'
         assert table['name'][0].as_py() == 'TESLA INC'
+        # Verify is_company field
+        assert table['is_company'][0].as_py() == True
 
     def test_build_parquet_without_filtering(self, sample_submissions_dir, tmp_path):
         """Build Parquet without individual filtering"""
@@ -208,6 +215,20 @@ class TestBuildDatasetSmallSample:
         # Should have both company and individual
         assert len(table) == 2
         assert output.exists()
+
+        # Verify is_company field for both records (order may vary)
+        import pyarrow.compute as pc
+        # Find Tesla (company)
+        tesla_mask = pc.equal(table['cik'], '0001318605')
+        tesla_rows = table.filter(tesla_mask)
+        assert len(tesla_rows) == 1
+        assert tesla_rows['is_company'][0].as_py() == True
+
+        # Find individual
+        individual_mask = pc.equal(table['cik'], '0001078519')
+        individual_rows = table.filter(individual_mask)
+        assert len(individual_rows) == 1
+        assert individual_rows['is_company'][0].as_py() == False
 
     def test_build_parquet_missing_directory(self, tmp_path):
         """Should raise error if submissions directory missing"""
@@ -311,7 +332,7 @@ class TestGetDataset:
         companies = get_company_dataset()
 
         expected_columns = {
-            'cik', 'name', 'sic', 'sic_description',
+            'cik', 'name', 'is_company', 'sic', 'sic_description',
             'tickers', 'exchanges', 'state_of_incorporation',
             'state_of_incorporation_description', 'fiscal_year_end',
             'entity_type', 'ein'
@@ -401,6 +422,7 @@ class TestDuckDBIntegration:
         sample_data = {
             'cik': ['0001318605', '0000789019'],
             'name': ['TESLA INC', 'MICROSOFT CORP'],
+            'is_company': [True, True],
             'sic': [3711, 7372],
             'sic_description': ['MOTOR VEHICLES', 'SOFTWARE'],
             'tickers': ['TSLA', 'MSFT'],

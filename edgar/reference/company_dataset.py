@@ -56,6 +56,7 @@ except ImportError:
 COMPANY_SCHEMA = pa.schema([
     ('cik', pa.string()),  # Keep as string to preserve leading zeros
     ('name', pa.string()),
+    ('is_company', pa.bool_()),  # True for companies, False for individuals
     ('sic', pa.int32()),  # Nullable - some companies have no SIC
     ('sic_description', pa.string()),
     ('tickers', pa.string()),  # Pipe-delimited (e.g., "AAPL|APPLE")
@@ -191,8 +192,11 @@ def build_company_dataset_parquet(
         try:
             data = load_json(json_file)
 
+            # Determine if this is an individual or company
+            is_individual = is_individual_from_json(data)
+
             # Skip individuals if filtering enabled
-            if filter_individuals and is_individual_from_json(data):
+            if filter_individuals and is_individual:
                 individuals_skipped += 1
                 continue
 
@@ -207,6 +211,7 @@ def build_company_dataset_parquet(
             companies.append({
                 'cik': data.get('cik'),
                 'name': data.get('name'),
+                'is_company': not is_individual,
                 'sic': sic_int,
                 'sic_description': data.get('sicDescription'),
                 'tickers': '|'.join(filter(None, tickers)) if tickers else None,
@@ -328,8 +333,11 @@ def build_company_dataset_duckdb(
         try:
             data = load_json(json_file)
 
+            # Determine if this is an individual or company
+            is_individual = is_individual_from_json(data)
+
             # Skip individuals if filtering enabled
-            if filter_individuals and is_individual_from_json(data):
+            if filter_individuals and is_individual:
                 individuals_skipped += 1
                 continue
 
@@ -344,6 +352,7 @@ def build_company_dataset_duckdb(
             companies.append({
                 'cik': data.get('cik'),
                 'name': data.get('name'),
+                'is_company': not is_individual,
                 'sic': sic_int,
                 'sic_description': data.get('sicDescription'),
                 'tickers': '|'.join(filter(None, tickers)) if tickers else None,
@@ -527,11 +536,18 @@ def get_company_dataset(rebuild: bool = False) -> pa.Table:
     On first use, this will take ~30 seconds to build the dataset. Subsequent
     calls load from cache in <100ms.
 
+    The dataset includes an `is_company` boolean column that distinguishes
+    between corporate entities (True) and individual filers (False). By default,
+    only companies are included (individuals filtered out during build).
+
     Args:
         rebuild: Force rebuild even if cache exists (default: False)
 
     Returns:
         PyArrow Table with company data (~562,413 companies)
+        Columns: cik, name, is_company, sic, sic_description, tickers,
+                 exchanges, state_of_incorporation, fiscal_year_end,
+                 entity_type, ein
 
     Raises:
         FileNotFoundError: If submissions directory not found or incomplete
@@ -561,6 +577,14 @@ def get_company_dataset(rebuild: bool = False) -> pa.Table:
         >>> # Filter by exchange
         >>> nasdaq = companies.filter(
         ...     pc.field('exchanges').contains('Nasdaq')
+        ... )
+        >>>
+        >>> # Filter by entity type (companies vs individuals)
+        >>> only_companies = companies.filter(
+        ...     pc.field('is_company') == True
+        ... )
+        >>> individuals = companies.filter(
+        ...     pc.field('is_company') == False
         ... )
         >>>
         >>> # Force rebuild with latest data
