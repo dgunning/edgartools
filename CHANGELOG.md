@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **XBRL Balance Sheet Dimensional Data (Issue #504)** ⚠️ **BREAKING CHANGE**
+  - Changed default behavior to include dimensional data in balance sheets
+  - Dimensional facts (related party transactions, segment breakdowns, class shares, etc.) now appear by default
+  - Fixes missing data issues where dimensional line items were incorrectly filtered out
+  - **Breaking**: Balance sheet row counts may increase (30-86% more rows depending on company)
+  - **Breaking**: Applications expecting specific row counts will need updates
+  - **Examples**:
+    - APD 2023: Now shows $150.7M related party debt (previously missing)
+    - Banking companies: Now show 80%+ dimensional rows for detailed breakdowns
+    - Consumer goods: Now show 30-40% more dimensional data
+  - **Impact**: More complete and accurate balance sheet data, but may affect downstream processing expecting filtered data
+  - **Validated**: Tested across 9 companies from different industries (banking, retail, tech, energy, healthcare, utilities, manufacturing)
+  - **Commits**: f0e26758
+
+- **XBRL Statement Selection Quality (Issue #503)** ⚠️ **BREAKING CHANGE**
+  - Improved balance sheet selection to prefer complete statements over fragments
+  - Added statement quality scoring to prevent fragment selection (pension schedules, benefit details, etc.)
+  - Fixes issues where pre-2020 filings selected wrong statement roles
+  - **Breaking**: Statement selection may change for some companies, especially pre-2020 filings
+  - **Breaking**: Row counts will increase where fragments were previously selected
+  - **Examples**:
+    - WST 2015: Now shows 72-row complete balance sheet (was 16-row pension fragment)
+    - BSX 2015-2019: Now selects full balance sheet (was equity detail fragment)
+  - **Scoring System**:
+    - Fragments (detail/schedule/disclosure keywords): -50 points
+    - Consolidated statements: +30 points
+    - Exact statement name matches: +50 points
+  - **Impact**: More accurate statement selection, but applications relying on specific statement structures may need updates
+  - **Validated**: Tested across 8 companies and years (2015-2019 focus), all show complete balance sheets with essential concepts
+  - **Commits**: dde245f8
+
 ## [4.30.0] - 2025-11-21
 
 ### Added
