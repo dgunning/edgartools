@@ -1,35 +1,30 @@
 """
-Reproduction test for GitHub Issue #447: 10-Q item parsing conflict
+Regression tests for GitHub Issue #447: 10-Q item parsing conflict
 https://github.com/dgunning/edgartools/issues/447
 
 Issue: 10-Q filings have duplicate item numbers across PART I and PART II.
-The parser incorrectly conflates these items or loses PART II items entirely.
+The OLD parser incorrectly conflated these items or lost PART II items entirely.
 
 Example structure:
 - PART I, Item 1: Financial Statements
 - PART II, Item 1: Legal Proceedings
 
-Current behavior (BUG):
-- tenQ['Item 1'] returns mixed content from both parts
-- tenQ.items missing PART II items
-
-Expected behavior (AFTER FIX):
-- tenQ['PART I, Item 1'] returns only Financial Statements
-- tenQ['PART II, Item 1'] returns only Legal Proceedings
-- All items accessible
+FIXED behavior (using new HTMLParser):
+- tenQ['Part I, Item 1'] returns only Financial Statements
+- tenQ['Part II, Item 1'] returns only Legal Proceedings
+- All items accessible via part-qualified names
 """
 import pytest
 from edgar import Company
 
 
-@pytest.mark.skip('This test will run once we cutover to the new HTML parser')
 @pytest.mark.network
-@pytest.mark.reproduction
+@pytest.mark.regression
 def test_issue_447_aapl_10q_item_conflict():
     """
-    Reproduce issue #447 with AAPL 10-Q filing.
+    Verify issue #447 is fixed with AAPL 10-Q filing.
 
-    This test currently documents the BUG. After fix, it should PASS.
+    This test ensures Part I Item 1 and Part II Item 1 are properly separated.
     """
     # Get AAPL's latest 10-Q
     company = Company("AAPL")
@@ -37,100 +32,81 @@ def test_issue_447_aapl_10q_item_conflict():
 
     assert tenq is not None, "Could not retrieve AAPL's latest 10-Q"
 
-    # Get Item 1 content
-    item_1_content = tenq['Item 1']
+    # Test part-qualified access
+    part_i_item_1 = tenq['Part I, Item 1']
+    part_ii_item_1 = tenq['Part II, Item 1']
 
-    if item_1_content:
-        item_1_lower = item_1_content.lower()
+    # Both should exist and be non-empty
+    assert part_i_item_1 is not None, "Part I, Item 1 should exist"
+    assert part_ii_item_1 is not None, "Part II, Item 1 should exist"
+    assert len(part_i_item_1) > 0, "Part I, Item 1 should have content"
+    assert len(part_ii_item_1) > 0, "Part II, Item 1 should have content"
 
-        # Check if content is mixed (contains both financial statements AND legal proceedings)
-        has_financial_keywords = any(kw in item_1_lower for kw in [
-            'financial statements',
-            'consolidated balance sheet',
-            'consolidated statement',
-            'unaudited'
-        ])
+    # Part I Item 1 should be Financial Statements (much larger)
+    assert len(part_i_item_1) > len(part_ii_item_1), \
+        "Part I Item 1 (Financial Statements) should be larger than Part II Item 1 (Legal Proceedings)"
 
-        has_legal_keywords = any(kw in item_1_lower for kw in [
-            'legal proceedings',
-            'litigation',
-            'lawsuits',
-            'legal matters'
-        ])
+    # Part I Item 1 should contain financial statement keywords
+    part_i_lower = part_i_item_1.lower()
+    has_financial = any(kw in part_i_lower for kw in [
+        'financial statement',
+        'consolidated balance',
+        'consolidated statement',
+        'unaudited'
+    ])
+    assert has_financial, "Part I Item 1 should contain financial statement content"
 
-        # Document the bug: Item 1 contains BOTH financial and legal content
-        if has_financial_keywords and has_legal_keywords:
-            print("\n🐛 BUG CONFIRMED: Item 1 contains mixed PART I + PART II content")
-            print(f"   - Contains financial keywords: {has_financial_keywords}")
-            print(f"   - Contains legal keywords: {has_legal_keywords}")
-            print(f"   - Content length: {len(item_1_content)} chars")
+    # Part II Item 1 should contain legal proceedings keywords
+    part_ii_lower = part_ii_item_1.lower()
+    has_legal = any(kw in part_ii_lower for kw in [
+        'legal proceeding',
+        'litigation',
+        'lawsuit',
+        'investigation'
+    ])
+    assert has_legal, "Part II Item 1 should contain legal proceedings content"
 
-            # This is the bug - Item 1 should NOT contain both
-            pytest.fail(
-                "PART I Item 1 (Financial Statements) is mixed with "
-                "PART II Item 1 (Legal Proceedings). Items should be part-qualified."
-            )
-
-    # Check if PART II items are accessible
-    items_list = tenq.items
-    print(f"\n📋 Items found: {items_list}")
-
-    # Count how many items we have
-    item_count = len(items_list) if items_list else 0
-    print(f"   Total items: {item_count}")
-
-    # 10-Q should have items from both PART I (4 items) and PART II (typically 5-6 items)
-    # If we have fewer than 7 items, PART II items are likely missing
-    if item_count < 7:
-        print(f"\n🐛 BUG CONFIRMED: Only {item_count} items found (expected 9+)")
-        print("   PART II items appear to be missing")
-        pytest.fail(
-            f"Only {item_count} items found in 10-Q. "
-            "PART II items are likely missing or conflated."
-        )
+    print(f"\n✓ Part I, Item 1: {len(part_i_item_1)} chars (Financial Statements)")
+    print(f"✓ Part II, Item 1: {len(part_ii_item_1)} chars (Legal Proceedings)")
 
 
-@pytest.mark.skip('This test will run once we cutover to the new HTML parser')
 @pytest.mark.network
-@pytest.mark.reproduction
+@pytest.mark.regression
 def test_issue_447_structure_representation():
     """
     Test that get_structure() properly represents PART I and PART II hierarchy.
-
-    This test documents what structure is returned (for debugging).
     """
+    from rich.console import Console
+    from io import StringIO
+
     company = Company("AAPL")
     tenq = company.latest_tenq
 
     assert tenq is not None
 
     structure = tenq.get_structure()
-    print(f"\n📊 10-Q Structure:")
-    print(f"   {structure}")
+    assert structure is not None
 
-    # Check if structure shows parts
-    if structure:
-        structure_str = str(structure)
-        has_part_i = 'PART I' in structure_str or 'Part I' in structure_str
-        has_part_ii = 'PART II' in structure_str or 'Part II' in structure_str
+    # Render the Rich Tree to a string
+    string_io = StringIO()
+    console = Console(file=string_io, force_terminal=True, width=200)
+    console.print(structure)
+    structure_str = string_io.getvalue()
 
-        print(f"   - Shows PART I: {has_part_i}")
-        print(f"   - Shows PART II: {has_part_ii}")
-
-        if not (has_part_i and has_part_ii):
-            pytest.fail(
-                "Structure does not properly represent PART I and PART II hierarchy"
-            )
+    assert 'PART I' in structure_str or 'Part I' in structure_str, \
+        f"Structure should show PART I. Got: {structure_str[:500]}"
+    assert 'PART II' in structure_str or 'Part II' in structure_str, \
+        f"Structure should show PART II. Got: {structure_str[:500]}"
 
 
 @pytest.mark.network
-@pytest.mark.reproduction
+@pytest.mark.regression
 @pytest.mark.parametrize("ticker", ["AAPL", "MSFT", "TSLA"])
 def test_issue_447_multiple_companies(ticker):
     """
-    Verify the bug exists across multiple companies' 10-Q filings.
+    Verify the fix works across multiple companies' 10-Q filings.
 
-    Tests AAPL, MSFT, and TSLA to ensure this is a systematic issue.
+    Tests AAPL, MSFT, and TSLA to ensure this is a systematic fix.
     """
     company = Company(ticker)
     tenq = company.latest_tenq
@@ -146,9 +122,59 @@ def test_issue_447_multiple_companies(ticker):
     print(f"   Items found: {item_count}")
     print(f"   Items: {items_list[:5]}...")  # Show first 5
 
-    # All 10-Q filings should have similar structure with 9+ items
-    if item_count < 7:
-        pytest.fail(
-            f"{ticker} 10-Q has only {item_count} items. "
-            "PART II items likely missing (bug confirmed)."
-        )
+    # All 10-Q filings should have similar structure with 7+ items
+    # (4 in PART I + at least 3 in PART II)
+    assert item_count >= 7, \
+        f"{ticker} 10-Q has only {item_count} items. Expected 7+ items."
+
+
+@pytest.mark.network
+@pytest.mark.regression
+def test_issue_447_backward_compatibility():
+    """
+    Test that legacy access patterns still work.
+
+    tenq['Item 1'] should return Part I Item 1 for backward compatibility.
+    """
+    company = Company("AAPL")
+    tenq = company.latest_tenq
+
+    assert tenq is not None
+
+    # Legacy access should still work
+    item_1 = tenq['Item 1']
+    assert item_1 is not None, "Legacy tenq['Item 1'] should still work"
+
+    # Legacy access should return Part I Item 1 (for backward compat)
+    part_i_item_1 = tenq['Part I, Item 1']
+    if part_i_item_1:
+        # Content should be similar (from same section)
+        assert len(item_1) > 0, "Legacy Item 1 should have content"
+
+    # get_item_with_part should still work
+    giwp_result = tenq.get_item_with_part('Part I', 'Item 1')
+    assert giwp_result is not None, "get_item_with_part should still work"
+
+
+@pytest.mark.network
+@pytest.mark.regression
+def test_issue_447_sections_property():
+    """
+    Test that sections property returns properly keyed sections.
+    """
+    company = Company("AAPL")
+    tenq = company.latest_tenq
+
+    assert tenq is not None
+
+    sections = tenq.sections
+    assert sections is not None, "sections property should return sections"
+    assert len(sections) > 0, "Should have detected sections"
+
+    print(f"\nSection keys: {list(sections.keys())}")
+
+    # Should have multiple sections
+    # Keys could be either pattern-based (part_i_item_1) or TOC-based (Item 1)
+    item_sections = [k for k in sections.keys() if 'item' in k.lower()]
+    assert len(item_sections) >= 4, \
+        f"Should have at least 4 item sections, found: {item_sections}"

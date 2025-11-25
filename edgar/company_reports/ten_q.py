@@ -1,5 +1,7 @@
 """Form 10-Q quarterly report class."""
+import re
 from functools import cached_property, lru_cache
+from typing import List, Optional
 
 from rich import box
 from rich.console import Group, Text
@@ -8,7 +10,8 @@ from rich.panel import Panel
 from rich.tree import Tree
 
 from edgar.company_reports._base import CompanyReport
-from edgar.company_reports._structures import FilingStructure
+from edgar.company_reports._structures import FilingStructure, extract_items_from_sections
+from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.htmltools import ChunkedDocument
 from edgar.formatting import datefmt
 
@@ -75,23 +78,243 @@ class TenQ(CompanyReport):
     def __str__(self):
         return f"""TenQ('{self.company}')"""
 
-    def __getitem__(self, item_or_part: str):
-        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
-        item_text = self.chunked_document[item_or_part]
-        return item_text
+    @cached_property
+    def document(self):
+        """
+        Parse 10-Q using new HTMLParser with enhanced section detection.
 
-    def get_item_with_part(self, part: str, item: str, markdown:bool=True):
+        This uses the pattern-based section extractor that handles:
+        - All 10-Q item patterns (Items 1-4 in Part I, Items 1-6 in Part II)
+        - Part I / Part II boundaries and context
+        - Bold paragraph fallback detection
+        - Table cell detection
+        - Various item number formatting variations
+
+        Returns:
+            Document object from edgar.documents module with sections property
+        """
+        html = self._filing.html()
+        if not html:
+            return None
+        config = ParserConfig(form='10-Q')
+        parser = HTMLParser(config)
+        return parser.parse(html)
+
+    @property
+    def sections(self):
+        """
+        Get detected 10-Q sections using new parser.
+
+        Returns a Sections dictionary mapping section names to Section objects.
+        Section names are part-qualified (e.g., 'part_i_item_1', 'part_ii_item_1').
+
+        Example:
+            >>> ten_q.sections
+            {'part_i_item_1': Section(...), 'part_ii_item_1': Section(...)}
+            >>> ten_q.sections['part_i_item_1'].text()
+            'Item 1 - Financial Statements...'
+            >>> ten_q.sections['part_ii_item_1'].text()
+            'Item 1 - Legal Proceedings...'
+        """
+        if self.document:
+            return self.document.sections
+        return {}
+
+    @property
+    def items(self) -> List[str]:
+        """
+        List of detected item names with part qualification.
+
+        Uses new parser's section detection for improved accuracy.
+        Returns items in the format "Part I, Item X" or "Part II, Item X"
+        to distinguish between same-numbered items in different parts.
+
+        Falls back to old chunked_document if new parser returns no sections.
+
+        Returns:
+            List of part-qualified item titles (e.g., ['Part I, Item 1', 'Part II, Item 1'])
+        """
+        # Try new parser first
+        if self.sections:
+            items = []
+            for key, section in self.sections.items():
+                # Handle pattern-based section keys: 'part_i_item_1' -> 'Part I, Item 1'
+                if key.startswith('part_'):
+                    part = 'Part I' if key.startswith('part_i_') else 'Part II'
+                    # Extract item number from key (e.g., 'part_i_item_1a' -> '1a')
+                    item_match = re.search(r'item_(\d+[a-z]?)', key, re.IGNORECASE)
+                    if item_match:
+                        item_num = item_match.group(1).upper()
+                        items.append(f"{part}, Item {item_num}")
+                # Handle TOC-based section keys: 'Item 1', 'Item 1A' -> 'Item 1', 'Item 1A'
+                elif key.lower().startswith('item'):
+                    # Extract item number
+                    item_match = re.match(r'item\s*(\d+[a-z]?)', key, re.IGNORECASE)
+                    if item_match:
+                        item_num = item_match.group(1).upper()
+                        # Try to determine part from section's part attribute
+                        part = None
+                        if hasattr(section, 'part') and section.part:
+                            part = f"Part {section.part}"
+                        if part:
+                            items.append(f"{part}, Item {item_num}")
+                        else:
+                            items.append(f"Item {item_num}")
+            return items if items else (self.chunked_document.list_items() if self.chunked_document else [])
+
+        # Fallback to old parser for backward compatibility
+        if self.chunked_document:
+            return self.chunked_document.list_items()
+
+        return []
+
+    def __getitem__(self, item_or_part: str) -> Optional[str]:
+        """
+        Get section/item text by name or number.
+
+        Supports multiple lookup formats:
+        - Part-qualified: 'Part I, Item 1', 'Part II, Item 1'
+        - Section key: 'part_i_item_1', 'part_ii_item_1'
+        - Item number: 'Item 1' (returns Part I Item 1 for backward compat)
+        - Simple number: '1' (returns Part I Item 1)
+
+        IMPORTANT: For 10-Q filings, Item 1 exists in both Part I (Financial Statements)
+        and Part II (Legal Proceedings). Use part-qualified format to distinguish:
+        - tenq['Part I, Item 1'] -> Financial Statements
+        - tenq['Part II, Item 1'] -> Legal Proceedings
+        - tenq['Item 1'] -> Financial Statements (Part I, backward compat)
+
+        Falls back to old chunked_document for backward compatibility.
+
+        Args:
+            item_or_part: Section identifier in various formats
+
+        Returns:
+            Section text content as string, or None if not found
+        """
+        # Try new parser sections first
+        if self.sections:
+            # Direct key lookup (e.g., 'part_i_item_1' or 'Item 1')
+            if item_or_part in self.sections:
+                return self.sections[item_or_part].text()
+
+            # Parse input to determine part and item
+            normalized = item_or_part.lower().strip()
+
+            # Handle 'Part I, Item X' or 'Part II, Item X' format
+            part_item_match = re.match(
+                r'part\s+(i{1,2}|1|2)\s*,?\s*item\s+(\d+[a-z]?)',
+                normalized,
+                re.IGNORECASE
+            )
+            if part_item_match:
+                part_num = part_item_match.group(1).lower()
+                item_num = part_item_match.group(2).lower()
+                # Convert part number to part prefix
+                if part_num in ['i', '1']:
+                    key = f'part_i_item_{item_num}'
+                else:
+                    key = f'part_ii_item_{item_num}'
+                if key in self.sections:
+                    return self.sections[key].text()
+
+            # Handle 'Item X' format
+            item_match = re.match(r'item\s+(\d+[a-z]?)', normalized, re.IGNORECASE)
+            if item_match:
+                item_num = item_match.group(1).lower()
+                # Try pattern-based keys first (part-qualified)
+                key = f'part_i_item_{item_num}'
+                if key in self.sections:
+                    return self.sections[key].text()
+                key = f'part_ii_item_{item_num}'
+                if key in self.sections:
+                    return self.sections[key].text()
+                # Try TOC-based keys (e.g., 'Item 1', 'Item 1A')
+                for section_key in self.sections:
+                    if section_key.lower() == f'item {item_num}' or section_key.lower() == f'item{item_num}':
+                        return self.sections[section_key].text()
+
+            # Handle simple number format (e.g., '1', '1a')
+            if re.match(r'^\d+[a-z]?$', normalized):
+                # Try Part I first
+                key = f'part_i_item_{normalized}'
+                if key in self.sections:
+                    return self.sections[key].text()
+                # Try Part II
+                key = f'part_ii_item_{normalized}'
+                if key in self.sections:
+                    return self.sections[key].text()
+                # Try TOC-based keys
+                for section_key in self.sections:
+                    if section_key.lower() == f'item {normalized}' or section_key.lower() == f'item{normalized}':
+                        return self.sections[section_key].text()
+
+        # Fallback to old chunked_document for backward compatibility
+        if self.chunked_document:
+            try:
+                return self.chunked_document[item_or_part]
+            except (KeyError, TypeError):
+                pass
+
+        return None
+
+    def get_item_with_part(self, part: str, item: str, markdown: bool = True) -> Optional[str]:
+        """
+        Get item text with explicit part specification.
+
+        This method allows accessing items that have the same number in different parts.
+        For 10-Q filings, Item 1 exists in both Part I (Financial Statements) and
+        Part II (Legal Proceedings).
+
+        Args:
+            part: Part identifier ('Part I', 'Part II', 'PART I', 'PART II', 'I', 'II')
+            item: Item identifier ('Item 1', 'Item 1A', '1', '1A')
+            markdown: If True, return markdown formatted text (default True)
+
+        Returns:
+            Item text content, or None if not found
+
+        Example:
+            >>> ten_q.get_item_with_part('Part I', 'Item 1')  # Financial Statements
+            >>> ten_q.get_item_with_part('Part II', 'Item 1')  # Legal Proceedings
+            >>> ten_q.get_item_with_part('I', '1')  # Also works
+        """
+        # Try new parser first
+        if self.sections:
+            # Normalize part
+            part_lower = part.lower().strip()
+            if part_lower in ['part i', 'part_i', 'i', '1']:
+                part_prefix = 'part_i'
+            elif part_lower in ['part ii', 'part_ii', 'ii', '2']:
+                part_prefix = 'part_ii'
+            else:
+                part_prefix = None
+
+            if part_prefix:
+                # Normalize item
+                item_lower = item.lower().strip()
+                item_match = re.match(r'(?:item\s+)?(\d+[a-z]?)', item_lower, re.IGNORECASE)
+                if item_match:
+                    item_num = item_match.group(1)
+                    key = f'{part_prefix}_item_{item_num}'
+                    if key in self.sections:
+                        return self.sections[key].text()
+
+        # Fallback to old implementations
         if not part:
             return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
-        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
-        item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
-        # remove first line or last line (redundant part information)
-        if not item_text or not item_text.strip():
-            return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
-        return item_text
+
+        # Try chunked_document
+        if self.chunked_document:
+            item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
+            if item_text and item_text.strip():
+                return item_text
+
+        # Final fallback to id_parse_document
+        return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
 
     @lru_cache(maxsize=1)
-    def id_parse_document(self, markdown:bool=True):
+    def id_parse_document(self, markdown: bool = True):
         from edgar.files.html_documents_id_parser import ParsedHtml10Q
         return ParsedHtml10Q().extract_html(self._filing.html(), self.structure, markdown=markdown)
 
@@ -106,28 +329,44 @@ class TenQ(CompanyReport):
         # Get the actual items from the filing
         actual_items = self.items
 
-        # Create a mapping of uppercase to actual case items
-        case_mapping = {item.upper(): item for item in actual_items}
+        # Create a set of found items (normalized) for checking
+        # Handle both old format 'Item 1' and new format 'Part I, Item 1'
+        found_items = set()
+        for item in actual_items:
+            # Parse 'Part I, Item 1' -> ('I', '1')
+            match = re.match(r'Part\s+(I{1,2}),\s*Item\s+(\d+[A-Z]?)', item, re.IGNORECASE)
+            if match:
+                found_items.add((match.group(1).upper(), match.group(2).upper()))
+            else:
+                # Old format 'Item 1' - assume Part I for backward compat
+                match = re.match(r'Item\s+(\d+[A-Z]?)', item, re.IGNORECASE)
+                if match:
+                    found_items.add(('I', match.group(1).upper()))
 
         # Process each part in the structure
         for part, items in self.structure.structure.items():
             # Create a branch for each part
             part_tree = tree.add(f"[bold blue]{part}[/]")
 
+            # Determine part number for lookup
+            part_num = 'I' if 'I' in part.upper() and 'II' not in part.upper() else 'II'
+
             # Add items under each part
             for item_key, item_data in items.items():
-                # Check if this item exists in the actual filing
-                if item_key in case_mapping:
-                    # Use the actual case from the filing
-                    actual_item = case_mapping[item_key]
+                # Extract item number from key (e.g., 'ITEM 1' -> '1', 'ITEM 1A' -> '1A')
+                item_num_match = re.match(r'ITEM\s+(\d+[A-Z]?)', item_key, re.IGNORECASE)
+                item_num = item_num_match.group(1).upper() if item_num_match else item_key
+
+                # Check if this part+item exists in the actual filing
+                if (part_num, item_num) in found_items:
                     item_text = Text.assemble(
-                        (f"{actual_item:<7} ", "bold green"),
+                        (f"Item {item_num:<3} ", "bold green"),
                         (f"{item_data['Title']}", "bold"),
                     )
                 else:
-                    # Item doesn't exist - show in grey with original structure case
+                    # Item doesn't exist - show in grey
                     item_text = Text.assemble(
-                        (f"{item_key}: ", "dim"),
+                        (f"Item {item_num}: ", "dim"),
                         (f"{item_data['Title']}", "dim"),
                     )
 

@@ -67,30 +67,52 @@ class SectionExtractor:
             ]
         },
         '10-Q': {
-            'financial_statements': [
-                (r'^(Item|ITEM)\s+1\.?\s*Financial\s+Statements', 'Item 1 - Financial Statements'),
+            # PART I - Financial Information
+            'part_i_item_1': [
+                (r'^(Item|ITEM)\s+1\.?\s*[-–—.]?\s*Financial\s+Statements', 'Item 1 - Financial Statements'),
                 (r'^Financial\s+Statements', 'Financial Statements'),
                 (r'^Condensed.*Financial\s+Statements', 'Condensed Financial Statements')
             ],
-            'mda': [
-                (r'^(Item|ITEM)\s+2\.?\s*Management.*Discussion', 'Item 2 - MD&A'),
+            'part_i_item_2': [
+                (r'^(Item|ITEM)\s+2\.?\s*[-–—.]?\s*Management.*Discussion', 'Item 2 - MD&A'),
                 (r'^Management.*Discussion.*Analysis', 'MD&A')
             ],
-            'market_risk': [
-                (r'^(Item|ITEM)\s+3\.?\s*Quantitative.*Disclosures', 'Item 3 - Market Risk'),
+            'part_i_item_3': [
+                (r'^(Item|ITEM)\s+3\.?\s*[-–—.]?\s*Quantitative.*Disclosures', 'Item 3 - Market Risk'),
                 (r'^Market\s+Risk', 'Market Risk')
             ],
-            'controls_procedures': [
-                (r'^(Item|ITEM)\s+4\.?\s*Controls.*Procedures', 'Item 4 - Controls and Procedures'),
+            'part_i_item_4': [
+                (r'^(Item|ITEM)\s+4\.?\s*[-–—.]?\s*Controls.*Procedures', 'Item 4 - Controls and Procedures'),
                 (r'^Controls.*Procedures', 'Controls and Procedures')
             ],
-            'legal_proceedings': [
-                (r'^(Item|ITEM)\s+1\.?\s*Legal\s+Proceedings', 'Item 1 - Legal Proceedings'),
+            # PART II - Other Information
+            'part_ii_item_1': [
+                (r'^(Item|ITEM)\s+1\.?\s*[-–—.]?\s*Legal\s+Proceedings', 'Item 1 - Legal Proceedings'),
                 (r'^Legal\s+Proceedings', 'Legal Proceedings')
             ],
-            'risk_factors': [
-                (r'^(Item|ITEM)\s+1A\.?\s*Risk\s+Factors', 'Item 1A - Risk Factors'),
+            'part_ii_item_1a': [
+                (r'^(Item|ITEM)\s+1A\.?\s*[-–—.]?\s*Risk\s+Factors', 'Item 1A - Risk Factors'),
                 (r'^Risk\s+Factors', 'Risk Factors')
+            ],
+            'part_ii_item_2': [
+                (r'^(Item|ITEM)\s+2\.?\s*[-–—.]?\s*Unregistered\s+Sales', 'Item 2 - Unregistered Sales'),
+                (r'^Unregistered\s+Sales.*Equity', 'Unregistered Sales')
+            ],
+            'part_ii_item_3': [
+                (r'^(Item|ITEM)\s+3\.?\s*[-–—.]?\s*Defaults', 'Item 3 - Defaults Upon Senior Securities'),
+                (r'^Defaults\s+Upon\s+Senior', 'Defaults Upon Senior Securities')
+            ],
+            'part_ii_item_4': [
+                (r'^(Item|ITEM)\s+4\.?\s*[-–—.]?\s*Mine\s+Safety', 'Item 4 - Mine Safety Disclosures'),
+                (r'^Mine\s+Safety', 'Mine Safety Disclosures')
+            ],
+            'part_ii_item_5': [
+                (r'^(Item|ITEM)\s+5\.?\s*[-–—.]?\s*Other\s+Information', 'Item 5 - Other Information'),
+                (r'^Other\s+Information', 'Other Information')
+            ],
+            'part_ii_item_6': [
+                (r'^(Item|ITEM)\s+6\.?\s*[-–—.]?\s*Exhibits', 'Item 6 - Exhibits'),
+                (r'^Exhibits', 'Exhibits')
             ]
         },
         '8-K': {
@@ -552,18 +574,26 @@ class SectionExtractor:
                     if i in used_headers:
                         continue
 
+                    # For 10-Q part-qualified patterns, validate against part context
+                    if part_context and section_name.startswith('part_'):
+                        expected_part = "Part I" if section_name.startswith('part_i_') else "Part II"
+                        actual_part = part_context.get(i)
+                        # Skip if part context doesn't match expected part
+                        if actual_part and actual_part != expected_part:
+                            continue
+
                     # Try to match pattern
                     if re.match(pattern, text.strip(), re.IGNORECASE):
                         # Find end position (next section or end of document)
                         end_position = self._find_section_end(i, headers, document)
 
-                        # For 10-Q, prefix with Part I or Part II
+                        # For 10-Q, prefix with Part I or Part II in title
                         final_title = title
                         if part_context and i in part_context:
                             final_title = f"{part_context[i]} - {title}"
 
-                        # Use final_title as key to avoid conflicts
-                        section_key = final_title if part_context and i in part_context else section_name
+                        # Use section_name as key (already part-qualified for 10-Q)
+                        section_key = section_name
                         matched_sections[section_key] = (node, final_title, position, end_position)
                         used_headers.add(i)
                         break
