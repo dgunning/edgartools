@@ -378,11 +378,13 @@ class ChunkedDocument:
         # Handle cases where the item has the decimal point e.g. 5.02
         part = part.replace('.', r'\.')
         item = item.replace('.', r'\.')
-        pattern_part = re.compile(rf'^{part}$', flags=re.IGNORECASE)
-        pattern_item = re.compile(rf'^{item}$', flags=re.IGNORECASE)
+        # Use string patterns with case=False since pandas str.match ignores
+        # flags from compiled regex patterns (fixes issue #454)
+        pattern_part = rf'^{part}$'
+        pattern_item = rf'^{item}$'
 
-        item_mask = chunk_df["Item"].str.match(pattern_item)
-        part_mask = chunk_df["Part"].str.match(pattern_part)
+        item_mask = chunk_df["Item"].str.match(pattern_item, case=False)
+        part_mask = chunk_df["Part"].str.match(pattern_part, case=False)
         toc_mask = ~(~chunk_df.Toc.notnull() & chunk_df.Toc)
         empty_mask = ~chunk_df.Empty
         mask = part_mask & item_mask & toc_mask & empty_mask
