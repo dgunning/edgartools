@@ -14,7 +14,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import DataPager, PagingState, log, strtobool
-from edgar.files.html import Document
+from edgar.documents import HTMLParser, ParserConfig
 from edgar.richtools import print_rich, repr_rich, rich_to_text
 from edgar.xmltools import child_text
 
@@ -260,7 +260,8 @@ class Report:
         """
         Get the first table in the document
         """
-        document = Document.parse(self.content)
+        parser = HTMLParser(ParserConfig())
+        document = parser.parse(self.content)
         if len(document.tables) == 0:
             log.warning(f"No tables found in {self.html_file_name}")
             return None
