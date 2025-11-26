@@ -15,7 +15,7 @@ from rich.panel import Panel
 from rich.table import Table as RichTable
 from rich.text import Text
 
-from edgar.files.html import Document
+from edgar.documents import HTMLParser, ParserConfig
 from edgar.formatting import cik_text
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
@@ -583,8 +583,9 @@ def html_to_text(html: str) -> str:
     """
     # Wrap in html tag if not present
     html = f"<html>{html}</html>" if not html.startswith("<html>") else html
-    document = Document.parse(html)
-    return rich_to_text(document.__str__(), width=80)
+    parser = HTMLParser(ParserConfig())
+    document = parser.parse(html)
+    return rich_to_text(document, width=80)
 
 
 def _format_period_labels(

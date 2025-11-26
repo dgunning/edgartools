@@ -10,7 +10,8 @@ from typing import Optional, Union
 
 import pandas as pd
 
-from edgar.files.html import Document, TableNode
+from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents.table_nodes import TableNode
 from edgar.files.tables import ProcessedTable
 
 
@@ -304,7 +305,8 @@ def extract_statement_dataframe(report_content: str) -> pd.DataFrame:
         pd.DataFrame containing the financial data
     """
     # Parse HTML document
-    document = Document.parse(report_content)
+    parser = HTMLParser(ParserConfig())
+    document = parser.parse(report_content)
 
     if not document.tables:
         return pd.DataFrame()
