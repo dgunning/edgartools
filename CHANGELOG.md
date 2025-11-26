@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.32.0] - 2025-11-26
+
+### Added
+
+- **Schedule 13D/G Beneficial Ownership Report Parsing**
+  - Complete XML-based parsing for Schedule 13D (active ownership) and Schedule 13G (passive institutional ownership) filings
+  - Track activist investors and institutional holders with 5%+ stakes in public companies
+  - Full support for all disclosure items (Items 1-7 for 13D, Items 1-10 for 13G)
+  - Multiple reporting persons support for joint filer arrangements
+  - Amendment tracking with ownership change comparison between filings
+  - Rich console rendering with formatted signatures display
+  - New package: edgar.beneficial_ownership with models, parsers, amendments, and rendering
+  - Integration with filing.obj() dispatcher for automatic form type handling
+  - Safe numeric parsing handling decimals, commas, and whitespace in ownership percentages
+  - Frozen dataclasses for immutable data structures ensuring data integrity
+  - Comprehensive type annotations for IDE support and type safety
+  - 15 tests covering parsing, amendments, rendering, and error handling
+  - **Usage**: filing.obj() on SCHEDULE 13D/13G filings returns Schedule13D/Schedule13G objects
+  - **Impact**: Enables tracking of activist campaigns, institutional ownership, and beneficial ownership changes
+  - **Commits**: fb73484b, ad66faf5, 37b4c806, 2618b1d5
+
 ## [4.31.0] - 2025-11-24
 
 ### Fixed
