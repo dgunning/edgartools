@@ -164,30 +164,29 @@ def get_original_filing(schedule: 'Schedule13D | Schedule13G') -> Optional['Sche
     if not schedule.is_amendment:
         return None
 
-    # Search for original filing
-    # Same issuer CIK, form without /A, earlier date
+    # Search for original filing using related_filings for efficiency
     try:
-        from edgar import get_filings
-
         # Determine base form
         base_form = schedule._filing.form.split('/A')[0].strip()
 
-        filings = get_filings(
-            cik=schedule.issuer_info.cik,
-            form=base_form,
-            filing_date=f':{schedule.filing_date}'  # Before this date
+        # Use related_filings() for more efficient lookup (same filer)
+        # Filter for non-amendments before this filing date
+        filings = schedule._filing.related_filings(
+            filing_date=f':{schedule.filing_date}',
+            amendments=False
         )
 
-        # Return most recent non-amendment
-        for filing in filings:
-            if '/A' not in filing.form:
-                # Create instance of same type
-                if base_form == 'SCHEDULE 13D':
-                    from edgar.beneficial_ownership.schedule13 import Schedule13D
-                    return Schedule13D.from_filing(filing)
-                else:
-                    from edgar.beneficial_ownership.schedule13 import Schedule13G
-                    return Schedule13G.from_filing(filing)
+        # Get the most recent non-amendment (last in chronological order)
+        if filings:
+            original_filing = filings[-1]
+
+            # Create instance of same type
+            if base_form == 'SCHEDULE 13D':
+                from edgar.beneficial_ownership.schedule13 import Schedule13D
+                return Schedule13D.from_filing(original_filing)
+            else:
+                from edgar.beneficial_ownership.schedule13 import Schedule13G
+                return Schedule13G.from_filing(original_filing)
 
     except Exception:
         # If filing search fails, return None
