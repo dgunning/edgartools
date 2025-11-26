@@ -148,6 +148,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '20-F': ('TwentyF', 'foreign issuer annual report'),
         '13F-HR': ('ThirteenF', 'institutional holdings'),
         '13F-HR/A': ('ThirteenF', 'institutional holdings'),
+        'SCHEDULE 13D': ('Schedule13D', 'beneficial ownership report (5%+ stake, active)'),
+        'SCHEDULE 13G': ('Schedule13G', 'beneficial ownership report (5%+ stake, passive)'),
         '144': ('Form144', 'restricted stock sale notice'),
         'MA-I': ('MunicipalAdvisorForm', 'municipal advisor registration'),
         '3': ('Form3', 'initial insider ownership'),
@@ -179,6 +181,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :param sec_filing: The filing
     :return:
     """
+    from edgar.beneficial_ownership import Schedule13D, Schedule13G
     from edgar.company_reports import CurrentReport, EightK, TenK, TenQ, TwentyF
     from edgar.effect import Effect
     from edgar.form144 import Form144
@@ -215,6 +218,10 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return Form5(**Ownership.parse_xml(xml))
+    elif matches_form(sec_filing, ["SCHEDULE 13D"]):
+        return Schedule13D.from_filing(sec_filing)
+    elif matches_form(sec_filing, ["SCHEDULE 13G"]):
+        return Schedule13G.from_filing(sec_filing)
     elif matches_form(sec_filing, "EFFECT"):
         xml = sec_filing.xml()
         if xml:
