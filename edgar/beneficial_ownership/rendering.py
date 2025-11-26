@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 __all__ = ['render_schedule13d', 'render_schedule13g']
 
 
-def render_schedule13d(schedule: 'Schedule13D'):
+def render_schedule13d(schedule: 'Schedule13D') -> Panel:
     """
     Render Schedule 13D for Rich console display.
 
@@ -126,7 +126,7 @@ def render_schedule13d(schedule: 'Schedule13D'):
     )
 
 
-def render_schedule13g(schedule: 'Schedule13G'):
+def render_schedule13g(schedule: 'Schedule13G') -> Panel:
     """
     Render Schedule 13G for Rich console display.
 

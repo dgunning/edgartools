@@ -4,9 +4,12 @@ Main classes for Schedule 13D and Schedule 13G beneficial ownership reports.
 This module implements the parsing and representation of SEC Schedule 13D
 and Schedule 13G filings using XML-based parsing.
 """
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 from datetime import date, datetime
 from bs4 import BeautifulSoup
+
+if TYPE_CHECKING:
+    from edgar._filings import Filing
 
 from edgar.xmltools import child_text
 from edgar.core import get_bool
@@ -296,7 +299,7 @@ class Schedule13D:
         return result
 
     @classmethod
-    def from_filing(cls, filing):
+    def from_filing(cls, filing: 'Filing') -> Optional['Schedule13D']:
         """
         Create Schedule13D instance from a Filing object.
 
@@ -601,7 +604,7 @@ class Schedule13G:
         return result
 
     @classmethod
-    def from_filing(cls, filing):
+    def from_filing(cls, filing: 'Filing') -> Optional['Schedule13G']:
         """
         Create Schedule13G instance from a Filing object.
 
