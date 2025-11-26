@@ -230,8 +230,11 @@ class TableProcessor:
     def _process_cell(self, elem: HtmlElement, is_header: bool) -> Optional[Cell]:
         """Process table cell."""
         # Extract cell properties
-        colspan = int(elem.get('colspan', '1'))
-        rowspan = int(elem.get('rowspan', '1'))
+        # Handle empty string attributes (colspan="" or rowspan="")
+        colspan_str = elem.get('colspan', '1').strip()
+        rowspan_str = elem.get('rowspan', '1').strip()
+        colspan = int(colspan_str) if colspan_str and colspan_str.isdigit() else 1
+        rowspan = int(rowspan_str) if rowspan_str and rowspan_str.isdigit() else 1
         align = elem.get('align')
         
         # Extract style

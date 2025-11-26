@@ -97,7 +97,8 @@ def test_chunk_document_for_10k_amendment():
                     cik=1098009, accession_no='0001185185-23-001212')
 
     tenk = filing.obj()
-    chunked_document: ChunkedDocument = tenk.doc
+    # Use the deprecated chunked_document property for backwards compatibility
+    chunked_document: ChunkedDocument = tenk.chunked_document
     item15 = chunked_document['Item 15']
     assert chunked_document.list_items() == ['Item 15']
 
