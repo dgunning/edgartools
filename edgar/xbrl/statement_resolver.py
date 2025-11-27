@@ -433,8 +433,10 @@ class StatementResolver:
 
                     matched_statements.append(stmt)
 
-        # If we found matching statements, return with high confidence
+        # If we found matching statements, sort by quality and return with high confidence
         if matched_statements:
+            # Issue #506: Sort by statement quality to prefer correct statement type
+            matched_statements.sort(key=lambda s: self._score_statement_quality(s, statement_type), reverse=True)
             return matched_statements, matched_statements[0]['role'], 0.9
 
         return [], None, 0.0
@@ -494,13 +496,15 @@ class StatementResolver:
                     matched_statements.append(stmt)
                     break  # Found a match, no need to check other patterns
 
-        # If we found matching statements, return with high confidence
+        # If we found matching statements, sort by quality and return with high confidence
         if matched_statements:
+            # Issue #506: Sort by statement quality to prefer correct statement type
+            matched_statements.sort(key=lambda s: self._score_statement_quality(s, statement_type), reverse=True)
             return matched_statements, matched_statements[0]['role'], 0.85
 
         return [], None, 0.0
 
-    def _score_statement_quality(self, stmt: Dict[str, Any]) -> int:
+    def _score_statement_quality(self, stmt: Dict[str, Any], statement_type: str = "") -> int:
         """
         Score a statement to prefer complete financial statements over fragments/details.
 
@@ -509,6 +513,7 @@ class StatementResolver:
 
         Args:
             stmt: Statement dictionary with role, definition, etc.
+            statement_type: The type of statement being searched for (e.g., "IncomeStatement")
 
         Returns:
             Quality score (higher is better)
@@ -529,6 +534,17 @@ class StatementResolver:
             if keyword in role_def or keyword in role_uri:
                 score -= 50
                 break  # One hit is enough
+
+        # Issue #506: When looking for IncomeStatement, deprioritize ComprehensiveIncome
+        # ComprehensiveIncome contains "Income" in its name but is a different statement type
+        if statement_type == "IncomeStatement":
+            comprehensive_indicators = ['comprehensiveincome', 'othercomprehensive']
+            clean_def = role_def.replace(' ', '').replace('-', '').replace('_', '')
+            clean_uri = role_uri.replace(' ', '').replace('-', '').replace('_', '')
+            for indicator in comprehensive_indicators:
+                if indicator in clean_def or indicator in clean_uri:
+                    score -= 100  # Strong penalty to avoid selecting wrong statement
+                    break
 
         # Prefer "Consolidated" statements (primary statements)
         if 'consolidated' in role_def or 'consolidated' in role_uri:
@@ -610,7 +626,8 @@ class StatementResolver:
         # If we found matching statements, sort by quality and return the best
         if matched_statements:
             # Issue #503: Sort by statement quality to prefer complete statements over fragments
-            matched_statements.sort(key=self._score_statement_quality, reverse=True)
+            # Issue #506: Pass statement_type to deprioritize ComprehensiveIncome for IncomeStatement
+            matched_statements.sort(key=lambda s: self._score_statement_quality(s, statement_type), reverse=True)
             return matched_statements, matched_statements[0]['role'], 0.75
 
         return [], None, 0.0
@@ -713,6 +730,8 @@ class StatementResolver:
         if statement_type in self._statement_by_type:
             statements = self._statement_by_type[statement_type]
             if statements:
+                # Issue #506: Sort by statement quality to prefer correct statement type
+                statements = sorted(statements, key=lambda s: self._score_statement_quality(s, statement_type), reverse=True)
                 return statements, statements[0]['role'], 0.95
 
         return [], None, 0.0
