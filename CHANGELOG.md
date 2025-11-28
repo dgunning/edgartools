@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.33.1] - 2025-11-28
+
+### Fixed
+
+- **Income Statement Selection Bug (Issue #506)**
+  - Fixed statement resolver selecting ComprehensiveIncomeLoss instead of IncomeStatement for some filings
+  - Affected filings: EFX 10-K filings 2015-2018 where both statements share the same primary concept
+  - Extended `_score_statement_quality()` to deprioritize ComprehensiveIncome when searching for IncomeStatement
+  - Applied quality sorting to all statement matching methods
+  - **Impact**: Correct income statement now returned for all tested filings
+  - **Commits**: d95f0680
+
+- **HTTP Cache Directory Configuration (Issue #508)**
+  - Fixed `get_cache_directory()` to respect `EDGAR_LOCAL_DATA_DIR` environment variable
+  - Previously used hardcoded `edgar_data_dir` global instead of `get_edgar_data_directory()`
+  - **Impact**: HTTP cache now correctly follows user-configured data directory
+  - **Commits**: 104e5018
+  - **Thanks**: @kevinchiu
+
+### Documentation
+
+- **StatementType Quick Reference Corrections (Issue #509)**
+  - Clarified that `Company.get_statement()` does not exist
+  - Documented correct APIs: `Company.income_statement()`, `Company.balance_sheet()`, `Company.cash_flow()`
+  - Added section explaining Company API vs XBRL API usage patterns
+  - **Commits**: 6667ff91
+
+- **Investment Fund Research Example Fix (Issue #510)**
+  - Fixed incorrect example showing non-existent `fund.get_portfolio()` method
+  - `find("VFIAX")` returns `FundClass`, not a Fund object with portfolio access
+  - Added correct workflow: FundClass → series → get_filings(form='NPORT-P') → parse holdings
+  - **Commits**: 6667ff91
+
 ## [4.33.0] - 2025-11-27
 
 ### Added
