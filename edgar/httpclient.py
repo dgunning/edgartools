@@ -22,7 +22,7 @@ from httpxthrottlecache import HttpxThrottleCache
 
 from edgar.core import get_identity, strtobool
 
-from .core import edgar_data_dir
+from .core import edgar_data_dir, get_edgar_data_directory
 
 MAX_SUBMISSIONS_AGE_SECONDS = 30  # Check for submissions every 30 seconds (reduced from 10 min for Issue #471)
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes
@@ -66,7 +66,7 @@ def _get_cache_rules() -> dict:
 CACHE_RULES = _get_cache_rules()
 
 def get_cache_directory() -> str:
-    cachedir = Path(edgar_data_dir) / "_tcache"
+    cachedir = get_edgar_data_directory() / "_tcache"
     cachedir.mkdir(parents=True, exist_ok=True)
 
     return str(cachedir)
