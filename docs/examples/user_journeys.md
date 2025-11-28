@@ -44,19 +44,37 @@ plt.show()
 ```python
 from edgar import find
 
-# Find a fund by ticker
-fund = find("VFIAX")  # Vanguard 500 Index Fund
+# Find a fund by ticker - returns a FundClass
+fund_class = find("VFIAX")  # Vanguard 500 Index Fund Admiral Shares
+print(fund_class)  # FundClass(Admiral Shares [C000245415] - VFIAX)
 
-# Get the fund's structure
-classes = fund.get_classes()
+# Navigate to the fund series (the underlying fund)
+series = fund_class.series
+print(series)  # FundSeries(Vanguard 500 Index Fund [S000082144])
+
+# Get all share classes for this fund
+classes = series.get_classes()
 print(f"Fund has {len(classes)} share classes")
+for cls in classes:
+    print(f"  - {cls.name}: {cls.ticker}")
 
-# Get the latest portfolio holdings
-portfolio = fund.get_portfolio()
+# Get the fund company (investment company that manages the fund)
+fund_company = series.fund_company
+print(f"Managed by: {fund_company}")
 
-# Show top 10 holdings by value
-top_holdings = portfolio.sort_values('value', ascending=False).head(10)
-top_holdings
+# Get portfolio holdings from NPORT filings
+nport_filings = series.get_filings(form='NPORT-P')
+if nport_filings:
+    latest_nport = nport_filings[0]
+    nport = latest_nport.obj()  # Parse the NPORT filing
+
+    # Access holdings data
+    holdings = nport.investments_dataframe
+    print(f"Total holdings: {len(holdings)}")
+
+    # Show top 10 holdings by value
+    top_holdings = holdings.nlargest(10, 'value')[['name', 'value', 'pctVal']]
+    print(top_holdings)
 ```
 
 <!-- MEDIA PLACEHOLDER: Fund portfolio visualization -->

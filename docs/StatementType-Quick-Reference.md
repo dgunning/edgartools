@@ -1,9 +1,9 @@
 # StatementType Quick Reference
 
-**FEAT-005: Statement Type Classifications for EdgarTools**  
+**FEAT-005: Statement Type Classifications for EdgarTools**
 Enhanced developer experience through IDE autocomplete and parameter validation for financial statement types.
 
-## 📋 Available Statement Types
+## Available Statement Types
 
 ### Primary Financial Statements (The Big Four)
 | Enum Value | String Value | Description | Use Case |
@@ -18,7 +18,7 @@ Enhanced developer experience through IDE autocomplete and parameter validation 
 |------------|-------------|-------------|----------|
 | `StatementType.COMPREHENSIVE_INCOME` | `"comprehensive_income"` | Statement of Comprehensive Income | Total comprehensive income including OCI |
 
-### Analytical Statements  
+### Analytical Statements
 | Enum Value | String Value | Description | Use Case |
 |------------|-------------|-------------|----------|
 | `StatementType.SEGMENTS` | `"segment_reporting"` | Segment Information | Business segment performance |
@@ -42,37 +42,100 @@ Enhanced developer experience through IDE autocomplete and parameter validation 
 | `StatementType.CASH_FLOWS` | `StatementType.CASH_FLOW` | Plural form |
 | `StatementType.EQUITY_CHANGES` | `StatementType.CHANGES_IN_EQUITY` | Shorter form |
 
-## 🚀 Basic Usage
+## Basic Usage
 
 ### Import
 ```python
 from edgar.enums import StatementType, StatementInput, validate_statement_type
 ```
 
-### Unified Statement Access (New Style)
+## Two Ways to Access Financial Statements
+
+EdgarTools provides **two different APIs** for accessing financial statements, each with different use cases:
+
+### 1. Company Facts API (Multi-Period Historical Data)
+
+Use the **Company** class for historical financial data across multiple periods. This uses the SEC's Company Facts API.
+
+```python
+from edgar import Company
+
+company = Company("AAPL")
+
+# Direct convenience methods (recommended for beginners)
+income = company.income_statement(periods=4, annual=True)
+balance = company.balance_sheet(periods=4, annual=True)
+cash = company.cash_flow(periods=4, annual=True)
+
+# These return MultiPeriodStatement objects with rich display
+print(income)  # Beautiful table output
+```
+
+**Best for:**
+- Multi-period trend analysis
+- Quick access to historical financials
+- Beginners who want simple API
+
+**Limitations:**
+- Only supports primary statements (income, balance sheet, cash flow)
+- Does not support segment or analytical statements
+
+### 2. XBRL API (Full Statement Access)
+
+Use the **XBRL** class for complete access to all statement types from a specific filing. This is where `StatementType` and `get_statement()` are used.
+
 ```python
 from edgar import Company
 from edgar.enums import StatementType
 
-# Enhanced with autocomplete
 company = Company("AAPL")
-income = company.get_statement(StatementType.INCOME_STATEMENT)      # IDE autocomplete!
-balance = company.get_statement(StatementType.BALANCE_SHEET)
-cash_flow = company.get_statement(StatementType.CASH_FLOW)
+filing = company.get_filings(form="10-K").latest()
+xbrl = filing.xbrl()
+
+# Using StatementType enum with get_statement()
+income = xbrl.get_statement(StatementType.INCOME_STATEMENT)
+balance = xbrl.get_statement(StatementType.BALANCE_SHEET)
+cash_flow = xbrl.get_statement(StatementType.CASH_FLOW)
+
+# Analytical statements (only available via XBRL)
+segments = xbrl.get_statement(StatementType.SEGMENTS)
+footnotes = xbrl.get_statement(StatementType.FOOTNOTES)
+
+# Or use the statements property for common statements
+income = xbrl.statements.income_statement()
+balance = xbrl.statements.balance_sheet()
 ```
 
-### Backwards Compatibility (Existing Style)
+**Best for:**
+- Accessing specific filing periods
+- Analytical statements (segments, footnotes, etc.)
+- Full XBRL dimensional data
+- Advanced analysis
+
+## Accessing Segment Statements
+
+Segment data is only available through the XBRL API:
+
 ```python
-# Still works - no breaking changes
-income = company.get_statement("income_statement")
-balance = company.get_statement("balance_sheet")
+from edgar import Company
+from edgar.enums import StatementType
 
-# Legacy methods also still work
-income = company.get_income_statement()
-balance = company.get_balance_sheet()
+company = Company("AAPL")
+filing = company.get_filings(form="10-K").latest()
+xbrl = filing.xbrl()
+
+# Get segment statement data
+segment_data = xbrl.get_statement(StatementType.SEGMENTS)
+# Or use the string value
+segment_data = xbrl.get_statement("segment_reporting")
+
+# Segment dimensional data also appears in income statements
+income = xbrl.statements.income_statement()
+# Shows segment breakdowns by product, geography, etc.
+print(income)
 ```
 
-## 🛡️ Enhanced Validation
+## Enhanced Validation
 
 ### Smart Error Messages
 ```python
@@ -83,151 +146,144 @@ try:
     validate_statement_type("income")  # partial match
 except ValidationError as e:
     # Error: "Invalid statement type 'income'. Did you mean: income_statement?"
-    
+
 try:
     validate_statement_type("balanc")  # misspelling
 except ValidationError as e:
     # Error: "Invalid statement type 'balanc'. Did you mean: balance_sheet?"
-    
+
 # Context-aware help
 try:
     validate_statement_type("unknown")
 except ValidationError as e:
-    # Error: "Invalid statement type 'unknown'. Primary statements: 
+    # Error: "Invalid statement type 'unknown'. Primary statements:
     # 'income_statement' (P&L), 'balance_sheet' (financial position), ..."
 ```
 
-## 🔧 Function Integration
+## Function Integration
 
 ### Type Hints
 ```python
 from edgar.enums import StatementInput
 
-def analyze_statement(company: str, statement: StatementInput) -> dict:
+def analyze_statement(filing, statement: StatementInput) -> dict:
     """Function with StatementType parameter."""
+    xbrl = filing.xbrl()
     validated_statement = validate_statement_type(statement)
-    return {"company": company, "statement": validated_statement, "analysis": "..."}
+    statement_data = xbrl.get_statement(validated_statement)
+    return {"statement": validated_statement, "data": statement_data}
 
 # Usage
-result = analyze_statement("AAPL", StatementType.INCOME_STATEMENT)  # IDE autocomplete
-result = analyze_statement("MSFT", "balance_sheet")                 # String still works
+result = analyze_statement(filing, StatementType.INCOME_STATEMENT)  # IDE autocomplete
+result = analyze_statement(filing, "balance_sheet")                  # String still works
 ```
 
-### Unified Statement API
-```python
-def get_statement(statement_type: StatementInput, periods: int = 4) -> Statement:
-    """Unified statement access with enhanced validation."""
-    validated_type = validate_statement_type(statement_type)
-    # Implementation...
-    return statement
-
-# Benefits:
-# ✅ Single method instead of get_income_statement(), get_balance_sheet(), etc.
-# ✅ IDE autocomplete for all statement types
-# ✅ Consistent parameter validation
-# ✅ Extensible to new statement types
-```
-
-## 📚 Convenience Collections
+## Convenience Collections
 
 ```python
 from edgar.enums import (
-    PRIMARY_STATEMENTS, 
+    PRIMARY_STATEMENTS,
     COMPREHENSIVE_STATEMENTS,
-    ANALYTICAL_STATEMENTS, 
+    ANALYTICAL_STATEMENTS,
     SPECIALIZED_STATEMENTS,
     ALL_STATEMENTS
 )
 
 # Analyze primary financial statements
-for statement in PRIMARY_STATEMENTS:
-    result = company.get_statement(statement)
-    print(f"Analyzed {statement.name}")
+for statement_type in PRIMARY_STATEMENTS:
+    try:
+        result = xbrl.get_statement(statement_type)
+        print(f"Found: {statement_type.name}")
+    except Exception:
+        print(f"Not available: {statement_type.name}")
 
 # Check comprehensive statement availability
 available_statements = []
-for statement in COMPREHENSIVE_STATEMENTS:
+for statement_type in COMPREHENSIVE_STATEMENTS:
     try:
-        result = company.get_statement(statement)
-        available_statements.append(statement)
-    except StatementNotAvailable:
+        result = xbrl.get_statement(statement_type)
+        available_statements.append(statement_type)
+    except Exception:
         pass
-
-# Full financial analysis
-all_results = {}
-for statement in ALL_STATEMENTS:
-    try:
-        all_results[statement.value] = company.get_statement(statement)
-    except Exception as e:
-        all_results[statement.value] = f"Not available: {e}"
 ```
 
-## 🌍 Real-World Examples
+## Real-World Examples
 
 ### Financial Analysis Workflow
 ```python
+from edgar import Company
+from edgar.enums import StatementType, PRIMARY_STATEMENTS
+
 def comprehensive_financial_analysis(ticker: str) -> dict:
-    """Analyze company across all primary statements."""
+    """Analyze company across all primary statements from latest 10-K."""
     company = Company(ticker)
+    filing = company.get_filings(form="10-K").latest()
+    xbrl = filing.xbrl()
+
     results = {}
-    
     for statement_type in PRIMARY_STATEMENTS:
         try:
-            statement = company.get_statement(statement_type)
-            results[statement_type.value] = analyze_statement_data(statement)
+            statement = xbrl.get_statement(statement_type)
+            results[statement_type.value] = statement
         except Exception as e:
-            results[statement_type.value] = f"Analysis failed: {e}"
-    
+            results[statement_type.value] = f"Not available: {e}"
+
     return results
 
-# Usage with enhanced error handling
-try:
-    analysis = comprehensive_financial_analysis("AAPL")
-    print(f"Successfully analyzed {len(analysis)} statement types")
-except ValidationError as e:
-    print(f"Invalid input: {e}")
+# Usage
+analysis = comprehensive_financial_analysis("AAPL")
+```
+
+### Multi-Period Historical Analysis
+```python
+from edgar import Company
+
+def trend_analysis(ticker: str, periods: int = 5) -> dict:
+    """Analyze company trends using Company Facts API."""
+    company = Company(ticker)
+
+    return {
+        "income": company.income_statement(periods=periods, annual=True),
+        "balance": company.balance_sheet(periods=periods, annual=True),
+        "cash_flow": company.cash_flow(periods=periods, annual=True)
+    }
+
+# Usage - returns MultiPeriodStatement objects
+trends = trend_analysis("AAPL", periods=5)
+print(trends["income"])  # Shows 5 years of income statement data
 ```
 
 ### Statement Categorization
 ```python
-def categorize_available_statements(company: Company) -> dict:
+from edgar.enums import PRIMARY_STATEMENTS, ANALYTICAL_STATEMENTS
+
+def categorize_available_statements(xbrl) -> dict:
     """Categorize available statements by type."""
     categories = {
         "primary": [],
         "analytical": [],
-        "specialized": []
     }
-    
+
     # Check primary statements
-    for statement in PRIMARY_STATEMENTS:
-        if is_statement_available(company, statement):
-            categories["primary"].append(statement.value)
-    
+    for statement_type in PRIMARY_STATEMENTS:
+        try:
+            xbrl.get_statement(statement_type)
+            categories["primary"].append(statement_type.value)
+        except Exception:
+            pass
+
     # Check analytical statements
-    for statement in ANALYTICAL_STATEMENTS:
-        if is_statement_available(company, statement):
-            categories["analytical"].append(statement.value)
-    
+    for statement_type in ANALYTICAL_STATEMENTS:
+        try:
+            xbrl.get_statement(statement_type)
+            categories["analytical"].append(statement_type.value)
+        except Exception:
+            pass
+
     return categories
 ```
 
-### Educational Usage
-```python
-def explain_statement_types() -> None:
-    """Educational function explaining financial statements."""
-    explanations = {
-        StatementType.INCOME_STATEMENT: "Shows company profitability - revenues minus expenses",
-        StatementType.BALANCE_SHEET: "Shows financial position - assets, liabilities, equity",
-        StatementType.CASH_FLOW: "Shows cash movements - operating, investing, financing",
-        StatementType.CHANGES_IN_EQUITY: "Shows equity changes - dividends, retained earnings"
-    }
-    
-    print("Financial Statement Types:")
-    for statement, explanation in explanations.items():
-        print(f"  {statement.name}: {explanation}")
-```
-
-## 💡 IDE Benefits
+## IDE Benefits
 
 With StatementType, your IDE will provide:
 
@@ -235,7 +291,7 @@ With StatementType, your IDE will provide:
 When you type `StatementType.`, your IDE shows:
 ```
 StatementType.INCOME_STATEMENT     # 'income_statement' - P&L Statement
-StatementType.BALANCE_SHEET        # 'balance_sheet' - Financial Position  
+StatementType.BALANCE_SHEET        # 'balance_sheet' - Financial Position
 StatementType.CASH_FLOW            # 'cash_flow_statement' - Cash Flows
 StatementType.CHANGES_IN_EQUITY    # 'changes_in_equity' - Equity Changes
 StatementType.COMPREHENSIVE_INCOME # 'comprehensive_income' - Total Income
@@ -251,54 +307,41 @@ Hover over enum values to see descriptions:
 ### Type Safety
 Your IDE will warn about:
 - Invalid statement types
-- Wrong parameter types  
+- Wrong parameter types
 - Potential typos before runtime
 
-## 🔄 Migration Guide
+## API Comparison
 
-### From Multiple Methods to Unified API
+| Feature | Company API | XBRL API |
+|---------|-------------|----------|
+| **Methods** | `income_statement()`, `balance_sheet()`, `cash_flow()` | `get_statement(StatementType.XXX)` |
+| **Source** | Company Facts API | Filing XBRL data |
+| **Multi-Period** | Yes (built-in) | No (single filing) |
+| **Segments** | No | Yes |
+| **Footnotes** | No | Yes |
+| **StatementType Enum** | Not used | Used |
+| **Best For** | Historical trends | Full statement access |
 
-**Before:**
+## Migration Guide
+
+### Choosing the Right API
+
+**Use Company API when:**
 ```python
-# Multiple methods, hard to discover
-income = company.get_income_statement()
-balance = company.get_balance_sheet()
-cash_flow = company.get_cash_flow_statement()
-# equity = company.get_changes_in_equity()  # Does this method exist?
+# You need multi-period historical data
+company = Company("AAPL")
+income = company.income_statement(periods=5, annual=True)  # 5 years of data
 ```
 
-**After:**
+**Use XBRL API when:**
 ```python
-# Unified API with autocomplete
-income = company.get_statement(StatementType.INCOME_STATEMENT)
-balance = company.get_statement(StatementType.BALANCE_SHEET)
-cash_flow = company.get_statement(StatementType.CASH_FLOW)
-equity = company.get_statement(StatementType.CHANGES_IN_EQUITY)  # Discoverable!
-
-# String compatibility maintained
-income = company.get_statement("income_statement")  # Still works
+# You need specific filing data or analytical statements
+filing = company.get_filings(form="10-K").latest()
+xbrl = filing.xbrl()
+segments = xbrl.get_statement(StatementType.SEGMENTS)  # Only available here
 ```
 
-### From String Parameters
-
-**Before:**
-```python
-# Typo-prone, no autocomplete
-get_statement_data("income")        # Could typo as "inccome" 
-get_statement_data("balance")       # Could typo as "balanc"
-```
-
-**After:**
-```python
-# Autocomplete prevents typos
-get_statement_data(StatementType.INCOME_STATEMENT)    # IDE autocomplete
-get_statement_data(StatementType.BALANCE_SHEET)       # IDE autocomplete
-
-# Strings still work with validation
-get_statement_data("income_statement")    # Validated, helpful errors if typo
-```
-
-## ⚖️ Consistency with Other Types
+## Consistency with Other Types
 
 StatementType follows the same design pattern as FormType and PeriodType:
 
@@ -309,48 +352,36 @@ StatementType follows the same design pattern as FormType and PeriodType:
 | **Type Hints** | `FormInput` | `PeriodInput` | `StatementInput` |
 | **Collections** | `PRIMARY_FORMS`, etc. | `STANDARD_PERIODS`, etc. | `PRIMARY_STATEMENTS`, etc. |
 | **Error Handling** | Smart suggestions | Smart suggestions | Smart suggestions |
-| **Backwards Compat** | ✅ Union types | ✅ Union types | ✅ Union types |
+| **Backwards Compat** | Union types | Union types | Union types |
 
-## 🎯 Best Practices
+## Best Practices
 
-### 1. Use Enums for New Code
+### 1. Use Appropriate API for Your Use Case
 ```python
-# Recommended: Enhanced developer experience
-def analyze_financials(statement: StatementInput = StatementType.INCOME_STATEMENT):
-    ...
+# Historical analysis - use Company API
+company = Company("AAPL")
+income = company.income_statement(periods=4)
+
+# Specific filing analysis - use XBRL API
+xbrl = company.get_filings(form="10-K").latest().xbrl()
+income = xbrl.get_statement(StatementType.INCOME_STATEMENT)
 ```
 
-### 2. Maintain String Compatibility  
+### 2. Use Enums for IDE Support
 ```python
-# Support both for flexibility
-def flexible_statement_function(statement: StatementInput):
-    validated = validate_statement_type(statement)  # Handles both
-    ...
+# Recommended: Enhanced developer experience
+from edgar.enums import StatementType
+segment = xbrl.get_statement(StatementType.SEGMENTS)
 ```
 
 ### 3. Leverage Collections
 ```python
 # Use predefined collections
-for statement in PRIMARY_STATEMENTS:
-    process_statement(statement)
+for statement_type in PRIMARY_STATEMENTS:
+    process_statement(xbrl.get_statement(statement_type))
 ```
 
-### 4. Provide Educational Context
-```python
-# Help beginners understand financial statements
-def get_statement_with_help(statement_type: StatementInput) -> Tuple[Statement, str]:
-    """Get statement with educational context."""
-    validated = validate_statement_type(statement_type)
-    
-    context = {
-        "income_statement": "This shows the company's profitability over time",
-        "balance_sheet": "This shows what the company owns and owes at a point in time"
-    }.get(validated, "Financial statement data")
-    
-    return get_statement(statement_type), context
-```
-
-## 🚦 Error Handling
+## Error Handling
 
 ### Common Errors and Solutions
 
@@ -378,20 +409,18 @@ except ValidationError as e:
 
 ---
 
-## 📈 Impact Summary
+## Impact Summary
 
 **FEAT-005 delivers on EdgarTools principles:**
 
-- ✅ **Beginner-friendly**: Makes financial statement exploration discoverable
-- ✅ **Simple yet powerful**: Unified API with comprehensive statement coverage
-- ✅ **Joyful UX**: Reduces confusion about available statement types
+- **Beginner-friendly**: Makes financial statement exploration discoverable
+- **Simple yet powerful**: Two APIs for different use cases
+- **Joyful UX**: IDE autocomplete and helpful error messages
 
 **Key improvements:**
-- 📊 IDE autocomplete for financial statement types
-- 🛡️ Enhanced validation with financial context
-- 🔧 Unified statement access API
-- 📚 Educational categorization of statement types  
-- 🔄 Full backwards compatibility maintained
-- ⚖️ Consistent design with FormType and PeriodType
-
-**Phase 3 (Expansion) of Discussion 423 type hinting roadmap complete!**
+- IDE autocomplete for financial statement types
+- Enhanced validation with financial context
+- Clear separation between Company and XBRL APIs
+- Educational categorization of statement types
+- Full backwards compatibility maintained
+- Consistent design with FormType and PeriodType
