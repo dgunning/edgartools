@@ -15,7 +15,7 @@ from edgar.entity.core import (
     public_companies,
 )
 from edgar.entity.utils import has_company_filings, normalize_cik
-from edgar.entity.data import Address, CompanyData, EntityData
+from edgar.entity.data import Address, CompanyData, EntityData, parse_entity_submissions
 from edgar.entity.entity_facts import (
     EntityFacts,
     NoCompanyFactsFound,
@@ -81,6 +81,7 @@ __all__ = [
     'create_entity_from_submissions_json',
     'create_entity_from_file',
     'create_company_from_file',
+    'parse_entity_submissions',
 
     # Fact functions
     'get_company_facts',

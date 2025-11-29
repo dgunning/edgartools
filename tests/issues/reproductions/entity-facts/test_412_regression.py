@@ -11,6 +11,7 @@ from edgar import Company
 import pandas as pd
 
 
+@pytest.mark.network
 class TestIssue412Regression:
     """Regression tests for Issue #412 - Missing historical balance sheet data."""
 

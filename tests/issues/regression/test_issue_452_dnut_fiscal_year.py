@@ -32,7 +32,7 @@ import pytest
 from edgar import Company
 
 
-@pytest.mark.fast
+@pytest.mark.network
 def test_dnut_fy2023_revenue_issue_452():
     """
     Test that DNUT FY 2023 revenue is correct after fiscal year-end change.

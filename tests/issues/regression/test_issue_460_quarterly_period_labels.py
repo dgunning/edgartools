@@ -18,6 +18,7 @@ from datetime import date
 from edgar import Company
 
 
+@pytest.mark.network
 class TestQuarterlyPeriodLabels:
     """Test suite for quarterly period label calculations."""
 
