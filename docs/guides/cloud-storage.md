@@ -14,23 +14,24 @@ Cloud storage provides several advantages over local storage:
 | **Cost Efficiency** | Pay only for storage used; cheaper than provisioning servers |
 | **Global Access** | Access data from anywhere, any environment |
 
-## Current Integration Approaches
+## Integration Approaches
 
-EdgarTools supports cloud storage through two mechanisms available today:
+EdgarTools supports cloud storage through three mechanisms:
 
-1. **`EDGAR_DATA_URL`** - Point to any HTTP endpoint for **reading** data
-2. **`EDGAR_LOCAL_DATA_DIR` + FUSE** - Mount cloud storage as a local path for **reading and writing**
+1. **`use_cloud_storage()`** - Native cloud integration via fsspec for **reading and writing** (recommended)
+2. **`EDGAR_DATA_URL`** - Point to any HTTP endpoint for **reading** data
+3. **`EDGAR_LOCAL_DATA_DIR` + FUSE** - Mount cloud storage as a local path (legacy)
 
 ### Approach Comparison
 
-| Feature | EDGAR_DATA_URL | FUSE Mount |
-|---------|----------------|------------|
-| **Setup Complexity** | Simple | Complex |
-| **Read Data** | Yes | Yes |
-| **Write Data** | No | Yes |
-| **Requires Mount** | No | Yes |
-| **Platform Support** | All | Linux/macOS |
-| **Best For** | Read-only access | Full read/write |
+| Feature | Native (`use_cloud_storage`) | EDGAR_DATA_URL | FUSE Mount |
+|---------|------------------------------|----------------|------------|
+| **Setup Complexity** | Simple | Simple | Complex |
+| **Read Data** | Yes | Yes | Yes |
+| **Write Data** | Yes | No | Yes |
+| **Requires Mount** | No | No | Yes |
+| **Platform Support** | All | All | Linux/macOS |
+| **Best For** | Full cloud integration | Read-only HTTP | Legacy systems |
 
 ---
 
@@ -850,6 +851,74 @@ import edgar
 edgar.use_cloud_storage(disable=True)
 ```
 
+### Uploading Data to Cloud Storage
+
+EdgarTools provides two ways to populate your cloud storage with SEC data:
+
+#### Option 1: Download and Upload in One Step
+
+Use the `upload_to_cloud` parameter with `download_filings()`:
+
+```python
+import edgar
+
+# Configure cloud storage first
+edgar.use_cloud_storage('s3://my-edgar-bucket/')
+
+# Download filings and upload to cloud automatically
+edgar.download_filings('2025-01-15', upload_to_cloud=True)
+
+# Download a date range
+edgar.download_filings('2025-01-01:2025-01-15', upload_to_cloud=True)
+```
+
+#### Option 2: Sync Existing Local Data
+
+Use `sync_to_cloud()` to upload data you've already downloaded locally:
+
+```python
+import edgar
+
+# Configure cloud storage
+edgar.use_cloud_storage('s3://my-edgar-bucket/')
+
+# Sync all local filings to cloud
+result = edgar.sync_to_cloud('filings')
+print(f"Uploaded: {result['uploaded']}, Skipped: {result['skipped']}")
+
+# Sync specific date directory
+edgar.sync_to_cloud('filings/20250115')
+
+# Preview what would be uploaded (dry run)
+edgar.sync_to_cloud('filings', dry_run=True)
+
+# Overwrite existing files in cloud
+edgar.sync_to_cloud('filings', overwrite=True)
+```
+
+#### sync_to_cloud() Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `source_path` | str | None | Subdirectory to sync (e.g., 'filings', 'filings/20250115') |
+| `pattern` | str | '**/*' | Glob pattern for files to sync |
+| `batch_size` | int | 20 | Number of concurrent uploads |
+| `overwrite` | bool | False | Overwrite existing files in cloud |
+| `dry_run` | bool | False | Preview without uploading |
+
+#### Return Value
+
+`sync_to_cloud()` returns a dict with upload statistics:
+
+```python
+{
+    'uploaded': 150,    # Files successfully uploaded
+    'skipped': 50,      # Files already in cloud (when overwrite=False)
+    'failed': 0,        # Files that failed to upload
+    'errors': []        # Error messages for failed uploads
+}
+```
+
 ### Features
 
 | Feature | Description |
@@ -880,6 +949,15 @@ import edgar
 
 # Install: pip install edgartools[s3]
 edgar.use_cloud_storage('s3://my-edgar-bucket/')
+
+# Read from cloud
+company = edgar.Company("AAPL")
+
+# Write to cloud
+edgar.download_filings('2025-01-15', upload_to_cloud=True)
+
+# Or sync existing local data
+edgar.sync_to_cloud('filings')
 ```
 
 **Read-only via HTTP:**

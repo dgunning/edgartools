@@ -222,7 +222,8 @@ def download_filings(filing_date: Optional[str] = None,
                      overwrite_existing:bool=False,
                      filings: Optional['Filings'] = None,
                      compress: bool = True,
-                     compression_level: int = 6):
+                     compression_level: int = 6,
+                     upload_to_cloud: bool = False):
     """
     Download feed files for the specified date or date range, or for specific filings.
     Optionally compresses the extracted files to save disk space.
@@ -234,6 +235,7 @@ def download_filings(filing_date: Optional[str] = None,
     download_filings('2024-01-01:2025-01-05', overwrite_existing=True)
     download_filings(filings=my_filings_object)
     download_filings('2025-01-03', compress=True, compression_level=9)  # Maximum compression
+    download_filings('2025-01-03', upload_to_cloud=True)  # Upload to cloud after download
 
     Args:
         filing_date: String in format 'YYYY-MM-DD', 'YYYY-MM-DD:', ':YYYY-MM-DD',
@@ -244,6 +246,8 @@ def download_filings(filing_date: Optional[str] = None,
         filings: Optional Filings object. If provided, will download only filings with matching accession numbers.
         compress: Whether to compress the extracted files to save disk space. Default is True.
         compression_level: Compression level for gzip (1-9, with 9 being highest compression). Default is 6.
+        upload_to_cloud: If True, upload downloaded filings to cloud storage after download.
+            Requires cloud storage to be configured via use_cloud_storage(). Default is False.
     """
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
@@ -357,6 +361,35 @@ def download_filings(filing_date: Optional[str] = None,
     log.info('Download complete. Downloaded %d feed files.', total_feed_files_downloaded)
     if accession_numbers:
         log.info('Kept %d filings out of %d requested.', total_filings_kept, len(accession_numbers))
+
+    # Upload to cloud if requested
+    if upload_to_cloud:
+        from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud
+
+        if not is_cloud_storage_enabled():
+            log.warning('upload_to_cloud=True but cloud storage is not configured. '
+                       'Call use_cloud_storage() first to configure cloud storage.')
+        else:
+            log.info('Uploading filings to cloud storage...')
+            # Compute relative path from edgar data directory for sync
+            edgar_data_dir = get_edgar_data_directory()
+            try:
+                sync_path = str(Path(data_directory).relative_to(edgar_data_dir))
+            except ValueError:
+                # data_directory is outside edgar data dir - warn and skip
+                log.warning('Cannot upload to cloud: data_directory %s is outside edgar data directory %s',
+                           data_directory, edgar_data_dir)
+                sync_path = None
+
+            if sync_path:
+                result = sync_to_cloud(sync_path, overwrite=overwrite_existing)
+                log.info('Cloud upload complete. Uploaded: %d, Skipped: %d, Failed: %d',
+                        result['uploaded'], result['skipped'], result['failed'])
+                if result['errors']:
+                    for error in result['errors'][:5]:
+                        log.warning('Upload error: %s', error)
+                    if len(result['errors']) > 5:
+                        log.warning('... and %d more errors', len(result['errors']) - 5)
 
 
 def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], compress: bool = True, compression_level: int = 6) -> int:

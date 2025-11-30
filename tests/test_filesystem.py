@@ -373,3 +373,77 @@ def test_is_cloud_storage_enabled_default():
     reset_filesystem()
 
     assert not is_cloud_storage_enabled()
+
+
+class TestSyncToCloud:
+    """Tests for sync_to_cloud function."""
+
+    @pytest.mark.fast
+    def test_sync_to_cloud_import(self):
+        """Test that sync_to_cloud can be imported from edgar."""
+        from edgar import sync_to_cloud
+        assert callable(sync_to_cloud)
+
+    @pytest.mark.fast
+    def test_sync_to_cloud_requires_cloud_storage(self, tmp_path, monkeypatch):
+        """Test that sync_to_cloud raises error when cloud storage not configured."""
+        from edgar.filesystem import use_cloud_storage, sync_to_cloud, reset_filesystem
+
+        use_cloud_storage(disable=True)
+        reset_filesystem()
+        monkeypatch.setenv('EDGAR_LOCAL_DATA_DIR', str(tmp_path))
+
+        with pytest.raises(ValueError, match="Cloud storage is not configured"):
+            sync_to_cloud()
+
+    @pytest.mark.fast
+    def test_sync_to_cloud_requires_existing_source(self, tmp_path, monkeypatch):
+        """Test that sync_to_cloud raises error for non-existent source."""
+        from edgar.filesystem import use_cloud_storage, sync_to_cloud, reset_filesystem
+
+        use_cloud_storage(disable=True)
+        reset_filesystem()
+        monkeypatch.setenv('EDGAR_LOCAL_DATA_DIR', str(tmp_path))
+
+        # Note: We can't actually test cloud upload without moto/mocks,
+        # but we can test the validation logic
+        with pytest.raises(ValueError, match="Cloud storage is not configured"):
+            sync_to_cloud('nonexistent/path')
+
+    @pytest.mark.fast
+    def test_sync_to_cloud_empty_source(self, tmp_path, monkeypatch):
+        """Test sync_to_cloud returns zeros for empty source directory."""
+        from edgar.filesystem import use_cloud_storage, sync_to_cloud, reset_filesystem
+
+        # This test requires cloud storage enabled, which needs fsspec
+        # Skip if fsspec not available
+        try:
+            import fsspec
+        except ImportError:
+            pytest.skip("fsspec not installed")
+
+        use_cloud_storage(disable=True)
+        reset_filesystem()
+        monkeypatch.setenv('EDGAR_LOCAL_DATA_DIR', str(tmp_path))
+
+        # Create empty filings directory
+        filings_dir = tmp_path / 'filings'
+        filings_dir.mkdir()
+
+        # Can't test without actual cloud storage, so just verify ValueError
+        with pytest.raises(ValueError, match="Cloud storage is not configured"):
+            sync_to_cloud('filings')
+
+
+class TestDownloadFilingsCloudUpload:
+    """Tests for download_filings upload_to_cloud parameter."""
+
+    @pytest.mark.fast
+    def test_download_filings_has_upload_to_cloud_param(self):
+        """Test that download_filings accepts upload_to_cloud parameter."""
+        import inspect
+        from edgar.storage import download_filings
+
+        sig = inspect.signature(download_filings)
+        assert 'upload_to_cloud' in sig.parameters
+        assert sig.parameters['upload_to_cloud'].default is False

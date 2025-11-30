@@ -34,6 +34,7 @@ __all__ = [
     'get_storage_root',
     'EdgarPath',
     'reset_filesystem',
+    'sync_to_cloud',
 ]
 
 # Thread lock for configuration changes
@@ -659,3 +660,171 @@ class EdgarPath:
             )
         from edgar.core import get_edgar_data_directory
         return get_edgar_data_directory() / self._path
+
+
+def sync_to_cloud(
+    source_path: Optional[str] = None,
+    *,
+    pattern: str = '**/*',
+    batch_size: int = 20,
+    overwrite: bool = False,
+    dry_run: bool = False,
+) -> dict:
+    """
+    Sync local filing data to configured cloud storage.
+
+    This function uploads files from local storage to cloud storage using
+    parallel batch uploads for efficiency. It's useful for populating cloud
+    storage with data downloaded via download_filings() or download_edgar_data().
+
+    Args:
+        source_path: Local path to sync. Defaults to the Edgar data directory.
+            Can be a subdirectory like 'filings' or 'filings/20250115'.
+        pattern: Glob pattern for files to sync. Default is '**/*' (all files).
+        batch_size: Number of concurrent file transfers. Default is 20.
+            Higher values increase throughput but use more connections.
+        overwrite: If True, overwrite existing files in cloud. Default is False.
+        dry_run: If True, only report what would be uploaded without uploading.
+
+    Returns:
+        dict with keys:
+            - 'uploaded': Number of files uploaded
+            - 'skipped': Number of files skipped (already exist)
+            - 'failed': Number of files that failed to upload
+            - 'errors': List of error messages for failed uploads
+
+    Raises:
+        ValueError: If cloud storage is not configured.
+        ImportError: If fsspec is not installed.
+
+    Examples:
+        >>> import edgar
+        >>> # First configure cloud storage
+        >>> edgar.use_cloud_storage('s3://my-bucket/edgar/')
+
+        >>> # Sync all local data to cloud
+        >>> result = edgar.sync_to_cloud()
+        >>> print(f"Uploaded {result['uploaded']} files")
+
+        >>> # Sync only filings directory
+        >>> edgar.sync_to_cloud('filings')
+
+        >>> # Sync specific date
+        >>> edgar.sync_to_cloud('filings/20250115')
+
+        >>> # Preview what would be uploaded
+        >>> edgar.sync_to_cloud(dry_run=True)
+    """
+    if not is_cloud_storage_enabled():
+        raise ValueError(
+            "Cloud storage is not configured. Call use_cloud_storage() first.\n\n"
+            "Example:\n"
+            "  import edgar\n"
+            "  edgar.use_cloud_storage('s3://my-bucket/edgar/')\n"
+            "  edgar.sync_to_cloud()"
+        )
+
+    from edgar.core import get_edgar_data_directory
+
+    # Determine source directory
+    local_base = get_edgar_data_directory()
+    if source_path:
+        local_base = local_base / source_path
+
+    if not local_base.exists():
+        raise ValueError(f"Source path does not exist: {local_base}")
+
+    # Get filesystem and cloud root
+    fs = get_filesystem()
+    cloud_root = get_storage_root().rstrip('/')
+
+    # Find files to sync
+    files_to_upload = []
+    for local_file in local_base.glob(pattern):
+        if local_file.is_file():
+            # Compute relative path from edgar data directory
+            try:
+                rel_path = local_file.relative_to(get_edgar_data_directory())
+            except ValueError:
+                rel_path = local_file.relative_to(local_base)
+
+            # Use as_posix() to ensure forward slashes on all platforms (Windows fix)
+            cloud_path = f"{cloud_root}/{rel_path.as_posix()}"
+            files_to_upload.append((str(local_file), cloud_path))
+
+    if not files_to_upload:
+        return {'uploaded': 0, 'skipped': 0, 'failed': 0, 'errors': []}
+
+    # Filter out existing files if not overwriting
+    if not overwrite:
+        filtered = []
+        for local_path, cloud_path in files_to_upload:
+            if not fs.exists(cloud_path):
+                filtered.append((local_path, cloud_path))
+        skipped = len(files_to_upload) - len(filtered)
+        files_to_upload = filtered
+    else:
+        skipped = 0
+
+    if dry_run:
+        print(f"Would upload {len(files_to_upload)} files to {cloud_root}")
+        for local_path, cloud_path in files_to_upload[:10]:
+            print(f"  {local_path} -> {cloud_path}")
+        if len(files_to_upload) > 10:
+            print(f"  ... and {len(files_to_upload) - 10} more files")
+        return {
+            'uploaded': 0,
+            'skipped': skipped,
+            'failed': 0,
+            'errors': [],
+            'would_upload': len(files_to_upload),
+        }
+
+    # Upload files in batches
+    uploaded = 0
+    failed = 0
+    errors = []
+
+    # Use fsspec's put() for batch uploads
+    try:
+        from tqdm import tqdm
+    except ImportError:
+        tqdm = None
+
+    # Process in batches for progress tracking
+    total = len(files_to_upload)
+    iterator = range(0, total, batch_size)
+    if tqdm:
+        iterator = tqdm(iterator, desc="Uploading to cloud", unit="batch")
+
+    for i in iterator:
+        batch = files_to_upload[i:i + batch_size]
+        local_paths = [p[0] for p in batch]
+        cloud_paths = [p[1] for p in batch]
+
+        try:
+            # fs.put supports batch uploads with lists
+            fs.put(local_paths, cloud_paths)
+            uploaded += len(batch)
+        except Exception as e:
+            # Fall back to individual uploads on batch failure
+            # Skip files that already exist (may have been partially uploaded)
+            for local_path, cloud_path in batch:
+                try:
+                    # Check if file already exists to avoid re-uploading
+                    if fs.exists(cloud_path):
+                        uploaded += 1  # Count as success since it's there
+                    else:
+                        fs.put(local_path, cloud_path)
+                        uploaded += 1
+                except Exception as file_error:
+                    failed += 1
+                    if len(errors) < 100:  # Limit error messages to prevent memory growth
+                        errors.append(f"{local_path}: {file_error}")
+
+    return {
+        'uploaded': uploaded,
+        'skipped': skipped,
+        'failed': failed,
+        'errors': errors,
+    }
