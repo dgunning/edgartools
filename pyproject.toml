@@ -67,6 +67,33 @@ test-harness = [
     "click>=8.0.0",              # CLI interface for test harness
 ]
 
+# Cloud storage support via fsspec
+cloud = [
+    "fsspec>=2023.1.0",          # Core filesystem abstraction
+]
+
+s3 = [
+    "fsspec>=2023.1.0",
+    "s3fs>=2023.1.0",            # AWS S3, Cloudflare R2, MinIO
+]
+
+gcs = [
+    "fsspec>=2023.1.0",
+    "gcsfs>=2023.1.0",           # Google Cloud Storage
+]
+
+azure = [
+    "fsspec>=2023.1.0",
+    "adlfs>=2023.1.0",           # Azure Blob Storage
+]
+
+all-cloud = [
+    "fsspec>=2023.1.0",
+    "s3fs>=2023.1.0",
+    "gcsfs>=2023.1.0",
+    "adlfs>=2023.1.0",
+]
+
 [project.urls]
 Documentation = "https://dgunning.github.io/edgartools/"
 Issues = "https://github.com/dgunning/edgartools/issues"

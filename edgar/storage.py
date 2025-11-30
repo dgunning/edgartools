@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
     from edgar._filings import Filings
+    from edgar.filesystem import EdgarPath
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -726,27 +727,44 @@ def check_filings_exist_locally(filing_date: Union[str, date], accession_numbers
     return True
 
 
-def local_filing_path(filing_date:Union[str, date],
-                      accession_number:str,
-                      correction:bool=False) -> Path:
+def local_filing_path(filing_date: Union[str, date],
+                      accession_number: str,
+                      correction: bool = False) -> Union[Path, 'EdgarPath']:
     """
-    Get the local path for a filing
-    If correction is True, will look for the corrected filing with extension 'corr'
+    Get the path for a filing in local or cloud storage.
 
+    If correction is True, will look for the corrected filing with extension 'corr'.
     Returns the compressed version (.gz) if it exists, otherwise returns the uncompressed path.
+
+    When cloud storage is enabled via use_cloud_storage(), returns an EdgarPath
+    that works with the configured cloud backend. Otherwise returns a pathlib.Path.
+
+    Args:
+        filing_date: The filing date (YYYY-MM-DD format or date object)
+        accession_number: The SEC accession number
+        correction: If True, look for correction file (.corr extension)
+
+    Returns:
+        Path or EdgarPath pointing to the filing location
     """
+    from edgar.filesystem import is_cloud_storage_enabled, EdgarPath
+
     ext = 'corr' if correction else 'nc'
     if isinstance(filing_date, date):
         filing_date = filing_date.strftime('%Y-%m-%d')
     filing_date = filing_date.replace('-', '')
 
-    # Base path without compression extension
-    base_path = get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"
-
-    # Check for compressed version first
-    compressed_path = Path(f"{base_path}.gz")
-    if compressed_path.exists():
-        return compressed_path
-
-    # Fall back to uncompressed version
-    return base_path
+    if is_cloud_storage_enabled():
+        # Cloud storage path via EdgarPath
+        base_path = EdgarPath('filings', filing_date, f"{accession_number}.{ext}")
+        compressed_path = EdgarPath('filings', filing_date, f"{accession_number}.{ext}.gz")
+        if compressed_path.exists():
+            return compressed_path
+        return base_path
+    else:
+        # Original local filesystem path
+        base_path = get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"
+        compressed_path = Path(f"{base_path}.gz")
+        if compressed_path.exists():
+            return compressed_path
+        return base_path
