@@ -36,6 +36,7 @@ nav:
     - Advanced:
         - "Advanced Ranking Search": advanced-search.md
         - "Using Local Data Storage": guides/local-storage.md
+        - "Using Cloud Storage": guides/cloud-storage.md
         - SSL Issues and Configuration: guides/ssl_verification.md
         - Parsing SGML: guides/sgml.md
   - XBRL and Financials:

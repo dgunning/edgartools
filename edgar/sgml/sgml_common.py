@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, DefaultDict, Dict, Iterator, List, Optional, T
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
+    from edgar.filesystem import EdgarPath
 
 from edgar.attachments import Attachment, Attachments, get_document_type
 from edgar.httprequests import stream_with_retry
@@ -37,13 +38,13 @@ def parse_document(document_str: str) -> SGMLDocument:
     )
 
 
-def read_content(source: Union[str, Path]) -> Iterator[str]:
+def read_content(source: Union[str, Path, 'EdgarPath']) -> Iterator[str]:
     """
-    Read content from either a URL or file path, yielding lines as strings.
+    Read content from a URL, file path, or EdgarPath, yielding lines as strings.
     Automatically handles gzip-compressed files with .gz extension.
 
     Args:
-        source: Either a URL string or a file path
+        source: Either a URL string, a file path, or an EdgarPath (for cloud storage)
 
     Yields:
         str: Lines of content from the source
@@ -53,6 +54,9 @@ def read_content(source: Union[str, Path]) -> Iterator[str]:
         FileNotFoundError: If the file path doesn't exist
         gzip.BadGzipFile: If the file is not a valid gzip file
     """
+    # Import EdgarPath here to avoid circular imports
+    from edgar.filesystem import EdgarPath
+
     if isinstance(source, str) and (source.startswith('http://') or source.startswith('https://')):
         # Handle URL using stream_with_retry
         for response in stream_with_retry(source):
@@ -60,8 +64,22 @@ def read_content(source: Union[str, Path]) -> Iterator[str]:
             for line in response.iter_lines():
                 if line is not None:
                     yield line + "\n"
+    elif isinstance(source, EdgarPath):
+        # Handle EdgarPath (cloud or local via fsspec)
+        import gzip
+        full_path = source.full_path
+        if full_path.endswith('.gz'):
+            # Gzip-compressed file
+            with source.open('rb') as f:
+                decompressed = gzip.decompress(f.read())
+                for line in decompressed.decode('utf-8', errors='replace').splitlines(keepends=True):
+                    yield line
+        else:
+            # Regular file
+            with source.open('r', encoding='utf-8', errors='replace') as f:
+                yield from f
     else:
-        # Handle file path
+        # Handle local file path (pathlib.Path or string)
         path = Path(source)
 
         # Check if the file is gzip-compressed

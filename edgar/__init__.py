@@ -30,6 +30,7 @@ from edgar.files.html import Document
 from edgar.financials import Financials, MultiFinancials
 from edgar.funds import FundClass, FundCompany, FundSeries, find_fund
 from edgar.funds.reports import NPORT_FORMS, FundReport
+from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
 from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
 from edgar.storage_management import (
     StorageAnalysis,
