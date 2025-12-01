@@ -19,6 +19,7 @@ Usage:
 from __future__ import annotations
 
 import gzip
+import logging
 import os
 import threading
 from pathlib import Path
@@ -26,6 +27,8 @@ from typing import TYPE_CHECKING, Any, BinaryIO, Dict, Iterator, Optional, TextI
 
 if TYPE_CHECKING:
     import fsspec
+
+log = logging.getLogger(__name__)
 
 __all__ = [
     'use_cloud_storage',
@@ -50,7 +53,8 @@ def use_cloud_storage(
     uri: Optional[str] = None,
     *,
     client_kwargs: Optional[Dict[str, Any]] = None,
-    disable: bool = False
+    disable: bool = False,
+    verify: bool = True
 ) -> None:
     """
     Configure cloud storage for EdgarTools.
@@ -72,6 +76,8 @@ def use_cloud_storage(
             - For GCS: project, token
             - For Azure: account_name, account_key
         disable: If True, disable cloud storage and revert to local filesystem.
+        verify: If True (default), verify the connection by listing the bucket.
+            Set to False to skip verification (useful for faster startup).
 
     Examples:
         >>> import edgar
@@ -147,6 +153,66 @@ def use_cloud_storage(
         # Enable local storage mode since we're using our own storage
         os.environ['EDGAR_USE_LOCAL_DATA'] = '1'
 
+        log.info("Cloud storage configured: %s", _cloud_uri)
+
+    # Verify connection outside of lock (network call)
+    if verify:
+        _verify_connection()
+
+
+def _verify_connection() -> None:
+    """
+    Verify the cloud storage connection works.
+
+    Tests connectivity by listing the configured bucket/container.
+    Raises ConnectionError with a helpful message if it fails.
+    """
+    try:
+        fs = get_filesystem()
+        # Extract bucket/container from URI for listing
+        # e.g., 's3://bucket/prefix/' -> 'bucket'
+        uri_path = _cloud_uri.split('://')[1].rstrip('/')
+        bucket = uri_path.split('/')[0] if '/' in uri_path else uri_path
+
+        protocol = _cloud_uri.split('://')[0]
+        if protocol == 's3':
+            # For S3, list the bucket root
+            fs.ls(bucket)
+        elif protocol in ('gs', 'gcs'):
+            fs.ls(bucket)
+        elif protocol in ('az', 'abfs'):
+            fs.ls(bucket)
+        else:
+            # For unknown protocols, try listing the full path
+            fs.ls(_cloud_uri.rstrip('/'))
+
+        log.debug("Connection verified successfully")
+
+    except Exception as e:
+        error_msg = str(e)
+
+        # Provide helpful error messages for common issues
+        if 'NoCredentialsError' in error_msg or 'credentials' in error_msg.lower():
+            raise ConnectionError(
+                f"Cloud storage authentication failed: {error_msg}\n\n"
+                "Check your credentials in client_kwargs or environment variables."
+            ) from e
+        elif 'NoSuchBucket' in error_msg or 'not found' in error_msg.lower():
+            raise ConnectionError(
+                f"Bucket/container not found: {error_msg}\n\n"
+                "Verify the bucket exists and you have access to it."
+            ) from e
+        elif 'Connection' in error_msg or 'timeout' in error_msg.lower():
+            raise ConnectionError(
+                f"Could not connect to cloud storage: {error_msg}\n\n"
+                "Check your network connection and endpoint_url."
+            ) from e
+        else:
+            raise ConnectionError(
+                f"Cloud storage connection failed: {error_msg}\n\n"
+                "Use verify=False to skip connection verification."
+            ) from e
+
 
 def _validate_backend(protocol: str) -> None:
     """
@@ -221,7 +287,33 @@ def get_filesystem() -> 'fsspec.AbstractFileSystem':
         # Cloud storage requires fsspec
         import fsspec
         protocol = _cloud_uri.split('://')[0]
-        _fs = fsspec.filesystem(protocol, **(_client_kwargs or {}))
+
+        # Normalize kwargs for the specific backend
+        kwargs = dict(_client_kwargs or {})
+
+        if protocol == 's3':
+            # s3fs uses 'key' and 'secret', not aws_access_key_id/aws_secret_access_key
+            # Also, endpoint_url must be in a nested 'client_kwargs' dict
+            s3_client_kwargs = {}
+
+            # Map credential names
+            if 'aws_access_key_id' in kwargs:
+                kwargs['key'] = kwargs.pop('aws_access_key_id')
+            if 'aws_secret_access_key' in kwargs:
+                kwargs['secret'] = kwargs.pop('aws_secret_access_key')
+
+            # Move endpoint_url and region_name to client_kwargs
+            if 'endpoint_url' in kwargs:
+                s3_client_kwargs['endpoint_url'] = kwargs.pop('endpoint_url')
+            if 'region_name' in kwargs:
+                s3_client_kwargs['region_name'] = kwargs.pop('region_name')
+
+            if s3_client_kwargs:
+                kwargs['client_kwargs'] = s3_client_kwargs
+
+        log.debug("Initializing %s filesystem", protocol)
+        _fs = fsspec.filesystem(protocol, **kwargs)
+        log.debug("Filesystem initialized successfully")
 
         return _fs
 
@@ -739,6 +831,7 @@ def sync_to_cloud(
     cloud_root = get_storage_root().rstrip('/')
 
     # Find files to sync
+    log.debug("Scanning %s with pattern '%s'", local_base, pattern)
     files_to_upload = []
     for local_file in local_base.glob(pattern):
         if local_file.is_file():
@@ -752,14 +845,39 @@ def sync_to_cloud(
             cloud_path = f"{cloud_root}/{rel_path.as_posix()}"
             files_to_upload.append((str(local_file), cloud_path))
 
+    log.debug("Found %d files to potentially upload", len(files_to_upload))
+
     if not files_to_upload:
         return {'uploaded': 0, 'skipped': 0, 'failed': 0, 'errors': []}
 
     # Filter out existing files if not overwriting
     if not overwrite:
+        # Batch check for existing files using fs.ls() instead of per-file fs.exists()
+        # This reduces N API calls to ~1 call per unique directory
+        existing_files = set()
+        directories_checked = set()
+
+        for _, cloud_path in files_to_upload:
+            # Get parent directory
+            parent_dir = cloud_path.rsplit('/', 1)[0] if '/' in cloud_path else cloud_root
+            if parent_dir not in directories_checked:
+                directories_checked.add(parent_dir)
+                try:
+                    # List all files in this directory (single API call per directory)
+                    for item in fs.ls(parent_dir, detail=False):
+                        existing_files.add(item)
+                except FileNotFoundError:
+                    # Directory doesn't exist yet - all files are new
+                    pass
+                except Exception as e:
+                    log.debug("Could not list directory %s: %s", parent_dir, e)
+
+        log.debug("Checked %d directories, found %d existing files",
+                  len(directories_checked), len(existing_files))
+
         filtered = []
         for local_path, cloud_path in files_to_upload:
-            if not fs.exists(cloud_path):
+            if cloud_path not in existing_files:
                 filtered.append((local_path, cloud_path))
         skipped = len(files_to_upload) - len(filtered)
         files_to_upload = filtered
@@ -821,6 +939,8 @@ def sync_to_cloud(
                     failed += 1
                     if len(errors) < 100:  # Limit error messages to prevent memory growth
                         errors.append(f"{local_path}: {file_error}")
+
+    log.info("Sync complete: uploaded=%d, skipped=%d, failed=%d", uploaded, skipped, failed)
 
     return {
         'uploaded': uploaded,
