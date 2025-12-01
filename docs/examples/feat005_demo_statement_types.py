@@ -121,42 +121,54 @@ def demo_statement_categorization():
             print(f"  - {stmt.name}: {description}")
         print()
 
-def demo_unified_api():
-    """Show unified statement access API."""
-    print("🔧 Unified Statement Access API")
+def demo_two_apis():
+    """Show the two ways to access financial statements."""
+    print("🔧 Two APIs for Financial Statement Access")
     print("=" * 60)
-    
-    # Mock unified statement API
-    def mock_get_statement(statement_type: StatementInput, periods: int = 4) -> str:
-        """Mock unified statement access function."""
+
+    # Mock APIs
+    def mock_company_method(method_name: str, periods: int = 4) -> str:
+        """Mock Company convenience method."""
+        return f"Retrieved {method_name} for {periods} periods (via Company Facts API)"
+
+    def mock_xbrl_get_statement(statement_type: StatementInput) -> str:
+        """Mock XBRL get_statement method."""
         validated_type = validate_statement_type(statement_type)
-        return f"Retrieved {validated_type} for {periods} periods"
-    
-    print("Unified statement access replaces multiple methods:")
+        return f"Retrieved {validated_type} from filing XBRL"
+
+    print("EdgarTools provides TWO APIs for financial statements:")
     print()
-    
-    # Show old vs new approach
-    print("OLD APPROACH (Multiple methods):")
-    print("  company.get_income_statement()")
-    print("  company.get_balance_sheet()")
-    print("  company.get_cash_flow_statement()")
-    print("  company.get_changes_in_equity()  # If it exists")
+
+    # Show Company API
+    print("1. COMPANY API (Multi-period historical data):")
+    print("   Uses SEC's Company Facts API for trend analysis")
     print()
-    
-    print("NEW APPROACH (Unified with autocomplete):")
+    company_methods = ["income_statement", "balance_sheet", "cash_flow"]
+    for method in company_methods:
+        result = mock_company_method(method)
+        print(f"     company.{method}(periods=4) -> '{result}'")
+    print()
+
+    # Show XBRL API
+    print("2. XBRL API (Full statement access from filing):")
+    print("   Uses StatementType enum with get_statement()")
+    print()
     examples = [
         StatementType.INCOME_STATEMENT,
         StatementType.BALANCE_SHEET,
-        StatementType.CASH_FLOW,
-        "comprehensive_income"  # String still works
+        StatementType.SEGMENTS,  # Only available via XBRL
+        "comprehensive_income"   # String still works
     ]
-    
+
     for example in examples:
-        result = mock_get_statement(example)
+        result = mock_xbrl_get_statement(example)
         if isinstance(example, StatementType):
-            print(f"  get_statement(StatementType.{example.name}) -> '{result}'")
+            print(f"     xbrl.get_statement(StatementType.{example.name}) -> '{result}'")
         else:
-            print(f"  get_statement('{example}') -> '{result}'")
+            print(f"     xbrl.get_statement('{example}') -> '{result}'")
+    print()
+
+    print("NOTE: Segment and analytical statements are ONLY available via XBRL API")
     print()
 
 def demo_financial_analysis_workflow():
@@ -320,7 +332,7 @@ def main():
     demo_statement_discovery()
     demo_enhanced_validation()
     demo_statement_categorization()
-    demo_unified_api()
+    demo_two_apis()
     demo_financial_analysis_workflow()
     demo_alias_support()
     demo_educational_benefits()
