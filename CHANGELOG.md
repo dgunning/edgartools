@@ -36,6 +36,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Impact**: Enables enterprise-scale storage, team collaboration, and cloud-native deployments
   - **Commits**: 26a3f60c, 641f5498, f139184e, 430b0e9d
 
+- **Runtime HTTP Configuration for SSL/VPN Environments**
+  - New `configure_http()` function for runtime modification of SSL verification, proxy settings, and timeouts
+  - New `get_http_config()` function to inspect current HTTP configuration
+  - Solves common issue where users set `EDGAR_VERIFY_SSL` after importing edgar (which had no effect)
+  - **Use Case**: Corporate VPN users can now disable SSL verification at runtime without restarting
+  - **Documentation**: Rewritten SSL verification guide with corporate network scenarios and troubleshooting
+  - **Tests**: 7 new tests for configuration functions
+  - **Commits**: 0def744c
+
+### Fixed
+
+- **Test Markers for Storage Management Tests**
+  - Corrected `@pytest.mark.fast` to `@pytest.mark.slow` for `test_storage_info_rich_display`
+  - Corrected `@pytest.mark.fast` to `@pytest.mark.network` for `test_check_filings_batch` and `test_availability_summary`
+  - **Commits**: e3d8f3e4
+
+### Documentation
+
+- **Two-API Clarification for Financial Statements**
+  - Renamed `demo_unified_api` to `demo_two_apis` in examples
+  - Clarified distinction between Company API (multi-period historical data) and XBRL API (full statement access)
+  - Added note that segment statements are only available via XBRL API
+  - **Commits**: e3d8f3e4
+
 ## [4.33.1] - 2025-11-28
 
 ### Fixed
