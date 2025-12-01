@@ -58,6 +58,48 @@ for filing in filings:
 
 - Try again during off-peak hours (SEC EDGAR can be slow during market hours)
 
+### SSL Certificate Errors
+
+**Symptom**: Errors like `SSL: CERTIFICATE_VERIFY_FAILED`, `certificate verify failed`, or `unable to get local issuer certificate`.
+
+**Common Causes**:
+- Corporate VPN with SSL inspection
+- Corporate proxy server
+- Self-signed certificates in development environments
+
+**Solutions**:
+
+1. **Use `configure_http()` (Recommended)**:
+```python
+from edgar import configure_http
+
+# Disable SSL verification
+configure_http(verify_ssl=False)
+
+# Then use edgartools normally
+from edgar import Company
+company = Company("AAPL")
+```
+
+2. **Set environment variable before import**:
+```python
+import os
+os.environ['EDGAR_VERIFY_SSL'] = 'false'
+
+# MUST be set BEFORE importing edgar!
+from edgar import Company
+```
+
+3. **Configure a proxy** if your network requires it:
+```python
+from edgar import configure_http
+configure_http(proxy="http://proxy.company.com:8080")
+```
+
+**Important**: If you set `EDGAR_VERIFY_SSL` *after* importing edgar, it won't work because the HTTP client initializes at import time. Use `configure_http()` instead.
+
+See the [SSL Configuration Guide](../guides/ssl_verification.md) for detailed instructions.
+
 ## Data Retrieval Issues
 
 ### Filing Not Found
@@ -377,6 +419,8 @@ If you're still experiencing issues:
 | `HTTPError 403` | SEC has blocked your requests | Set proper identity and respect rate limits |
 | `HTTPError 429` | Too many requests in a short time | Implement rate limiting and backoff |
 | `ConnectionError` | Network issues | Check your internet connection |
+| `SSLVerificationError` | Corporate VPN/proxy with SSL inspection | Use `configure_http(verify_ssl=False)` |
+| `CERTIFICATE_VERIFY_FAILED` | SSL certificate issues | Use `configure_http(verify_ssl=False)` |
 | `UnsupportedFilingTypeError` | Data Object not available for this filing type | Use generic access methods |
 
 Remember that SEC filings can vary significantly in structure and content, especially across different years and companies. Always implement robust error handling in your code to deal with these variations.

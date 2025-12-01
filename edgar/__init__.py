@@ -47,6 +47,9 @@ from edgar.storage_management import (
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
 
+# HTTP configuration functions for runtime SSL/proxy configuration
+from edgar.httpclient import configure_http, get_http_config
+
 # Fix for Issue #457: Clear locale-corrupted cache files on first import
 # This is a one-time operation that only runs if the marker file doesn't exist
 try:

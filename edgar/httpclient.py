@@ -125,6 +125,74 @@ def close_clients():
     HTTP_MGR.close()
 
 
+def configure_http(
+    verify_ssl: bool = None,
+    proxy: str = None,
+    timeout: float = None,
+) -> None:
+    """
+    Configure HTTP client settings at runtime.
+
+    This function allows you to modify HTTP settings after importing edgar,
+    which is useful when you can't set environment variables before import.
+
+    Args:
+        verify_ssl: Enable/disable SSL certificate verification.
+                   Set to False for corporate networks with SSL inspection.
+                   WARNING: Disabling SSL verification reduces security.
+        proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
+               Supports authentication: "http://user:pass@proxy.company.com:8080"
+        timeout: Request timeout in seconds (default: 30.0)
+
+    Examples:
+        # Disable SSL verification for corporate VPN
+        from edgar import configure_http
+        configure_http(verify_ssl=False)
+
+        # Configure proxy
+        configure_http(proxy="http://proxy.company.com:8080")
+
+        # Multiple settings at once
+        configure_http(verify_ssl=False, proxy="http://proxy:8080", timeout=60.0)
+
+    Note:
+        Changes take effect immediately for new requests.
+        Existing cached responses are not affected.
+    """
+    global HTTP_MGR
+
+    if verify_ssl is not None:
+        HTTP_MGR.httpx_params["verify"] = verify_ssl
+
+    if proxy is not None:
+        # Configure proxy for httpx
+        HTTP_MGR.httpx_params["proxy"] = proxy
+
+    if timeout is not None:
+        from httpx import Timeout
+        HTTP_MGR.httpx_params["timeout"] = Timeout(timeout, connect=10.0)
+
+
+def get_http_config() -> dict:
+    """
+    Get current HTTP client configuration.
+
+    Returns:
+        dict: Current configuration including verify_ssl, proxy, and timeout settings.
+
+    Example:
+        >>> from edgar import get_http_config
+        >>> config = get_http_config()
+        >>> print(f"SSL verification: {config['verify_ssl']}")
+    """
+    params = HTTP_MGR.httpx_params
+    return {
+        "verify_ssl": params.get("verify", True),
+        "proxy": params.get("proxy"),
+        "timeout": params.get("timeout"),
+    }
+
+
 HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())
 
 
