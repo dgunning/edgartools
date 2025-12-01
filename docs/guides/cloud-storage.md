@@ -842,6 +842,20 @@ edgar.use_cloud_storage(
 )
 ```
 
+### Connection Verification
+
+By default, `use_cloud_storage()` verifies the connection by listing the bucket. This catches configuration errors early:
+
+```python
+import edgar
+
+# Fails immediately if credentials are wrong or bucket doesn't exist
+edgar.use_cloud_storage('s3://my-bucket/')
+
+# Skip verification for faster startup (not recommended)
+edgar.use_cloud_storage('s3://my-bucket/', verify=False)
+```
+
 ### Disabling Cloud Storage
 
 ```python
