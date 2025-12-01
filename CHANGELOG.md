@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.34.0] - 2025-12-01
+
+### Added
+
+- **Native Cloud Storage Support via fsspec**
+  - Added comprehensive cloud storage integration supporting S3, GCS, Azure Blob Storage, Cloudflare R2, MinIO, and other S3-compatible providers
+  - New `use_cloud_storage()` function to configure cloud storage with connection validation
+  - Cloud storage automatically used for downloading filings when enabled
+  - Support for both downloading to cloud and syncing existing local data to cloud
+  - New module: edgar.filesystem with CloudFilesystem abstraction layer
+  - **Key Features**:
+    - Automatic cloud/local filesystem detection and routing
+    - Connection validation with `verify=True` parameter
+    - Comprehensive logging throughout filesystem operations
+    - Performance optimization: batch existence checking for cloud operations
+    - Thread-safe configuration management
+  - **New APIs**:
+    - `use_cloud_storage(protocol, bucket, **kwargs)` - Configure cloud storage backend
+    - `is_cloud_storage_enabled()` - Check if cloud storage is active
+    - `sync_to_cloud()` - Sync existing local data to configured cloud storage
+    - `download_filings(..., upload_to_cloud=True)` - Download and upload to cloud in one operation
+  - **Storage Integration**:
+    - Updated `download_filings()` to support `upload_to_cloud` parameter
+    - Modified FilingStorage to use cloud paths when cloud storage enabled
+    - Updated SGML header parsing to work with both local and cloud storage
+  - **Dependencies**: Added fsspec with optional cloud provider extras (s3fs, gcsfs, adlfs)
+  - **Documentation**: Comprehensive cloud storage guide at docs/guides/cloud-storage.md
+  - **Tests**: 449 lines of new tests covering all cloud providers and edge cases
+  - **Impact**: Enables enterprise-scale storage, team collaboration, and cloud-native deployments
+  - **Commits**: 26a3f60c, 641f5498, f139184e, 430b0e9d
+
 ## [4.33.1] - 2025-11-28
 
 ### Fixed
