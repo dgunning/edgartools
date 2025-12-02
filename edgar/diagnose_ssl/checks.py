@@ -18,6 +18,7 @@ from .report import (
     EnvironmentInfo,
     HttpClientState,
     NetworkTestResults,
+    ProxyConfig,
     Recommendation,
     SSLHandshakeResult,
 )
@@ -41,6 +42,14 @@ def get_environment_info() -> EnvironmentInfo:
     except ImportError:
         pass
 
+    # Get cryptography version if available
+    cryptography_version = None
+    try:
+        import cryptography
+        cryptography_version = getattr(cryptography, "__version__", "unknown")
+    except ImportError:
+        pass
+
     # Format platform info
     platform_info = f"{platform.system()} {platform.release()}"
     if platform.system() == "Darwin":
@@ -54,6 +63,7 @@ def get_environment_info() -> EnvironmentInfo:
         edgartools_version=edgartools_version,
         httpx_version=httpx.__version__,
         certifi_version=certifi_version,
+        cryptography_version=cryptography_version,
     )
 
 
@@ -61,9 +71,10 @@ def get_certificate_config() -> CertificateConfig:
     """Check certificate configuration."""
     config = CertificateConfig()
 
-    # Check environment variables
+    # Check environment variables for CA bundles
     config.requests_ca_bundle = os.environ.get("REQUESTS_CA_BUNDLE")
     config.ssl_cert_file = os.environ.get("SSL_CERT_FILE")
+    config.curl_ca_bundle = os.environ.get("CURL_CA_BUNDLE")
 
     # Check certifi path
     try:
@@ -74,6 +85,25 @@ def get_certificate_config() -> CertificateConfig:
             config.bundle_exists = True
             config.bundle_size_kb = int(cert_path.stat().st_size / 1024)
     except ImportError:
+        pass
+
+    return config
+
+
+def get_proxy_config() -> ProxyConfig:
+    """Check proxy configuration from environment and runtime settings."""
+    config = ProxyConfig()
+
+    # Check environment variables (case-insensitive on some systems)
+    config.http_proxy = os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy")
+    config.https_proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+    config.no_proxy = os.environ.get("NO_PROXY") or os.environ.get("no_proxy")
+
+    # Check runtime-configured proxy
+    try:
+        from edgar.httpclient import HTTP_MGR
+        config.configured_proxy = HTTP_MGR.httpx_params.get("proxy")
+    except Exception:
         pass
 
     return config
@@ -117,13 +147,27 @@ def get_http_client_state() -> HttpClientState:
     return state
 
 
-def test_dns_resolution() -> Tuple[bool, Optional[str]]:
-    """Test DNS resolution for SEC.gov."""
+def test_dns_resolution() -> Tuple[bool, Optional[str], Optional[str]]:
+    """Test DNS resolution for SEC.gov (IPv4 and IPv6)."""
+    ipv4 = None
+    ipv6 = None
+
+    # Try IPv4
     try:
-        ip = socket.gethostbyname(SEC_HOST)
-        return True, ip
+        ipv4 = socket.gethostbyname(SEC_HOST)
     except socket.gaierror:
-        return False, None
+        pass
+
+    # Try IPv6
+    try:
+        infos = socket.getaddrinfo(SEC_HOST, SEC_PORT, socket.AF_INET6, socket.SOCK_STREAM)
+        if infos:
+            ipv6 = infos[0][4][0]
+    except (socket.gaierror, IndexError):
+        pass
+
+    resolved = ipv4 is not None or ipv6 is not None
+    return resolved, ipv4, ipv6
 
 
 def test_tcp_connection() -> bool:
@@ -186,17 +230,52 @@ def get_certificate_chain(host: str, port: int) -> List[CertificateInfo]:
 
 
 def _is_corporate_proxy_cert(subject: str, issuer: str) -> bool:
-    """Check if certificate appears to be from a corporate proxy."""
-    # Common patterns in corporate proxy certificates
-    proxy_keywords = [
-        "proxy", "firewall", "zscaler", "bluecoat", "forcepoint",
-        "palo alto", "checkpoint", "fortinet", "websense", "mcafee",
-        "symantec", "cisco", "f5", "barracuda", "sophos", "corporate",
-        "enterprise", "internal", "mitm", "inspection"
-    ]
+    """
+    Check if certificate appears to be from a corporate proxy.
 
+    Uses a tiered approach:
+    1. Strong indicators (SSL inspection product names) - high confidence
+    2. Context-dependent indicators - check for proxy/firewall context
+
+    Avoids false positives from company names like "Enterprise Products Partners"
+    by requiring proxy-related context for generic terms.
+    """
     combined = (subject + issuer).lower()
-    return any(keyword in combined for keyword in proxy_keywords)
+
+    # Tier 1: SSL inspection product names - high confidence
+    ssl_inspection_products = [
+        "zscaler", "bluecoat", "forcepoint", "websense",
+        "palo alto networks", "fortiguard", "fortigate",
+        "checkpoint", "barracuda", "sophos", "mcafee web gateway",
+        "symantec ssl", "cisco umbrella", "netskope",
+    ]
+    if any(product in combined for product in ssl_inspection_products):
+        return True
+
+    # Tier 2: Check for proxy/firewall/inspection context
+    proxy_context_words = ["proxy", "firewall", "mitm", "inspection", "intercept", "ssl visibility"]
+    has_proxy_context = any(word in combined for word in proxy_context_words)
+
+    if has_proxy_context:
+        return True
+
+    # Tier 3: Generic corporate terms - only flag if issuer doesn't match expected SEC.gov issuers
+    # Real SEC.gov certs are issued by known CAs like DigiCert, Let's Encrypt, etc.
+    legitimate_issuers = [
+        "digicert", "let's encrypt", "globalsign", "comodo", "godaddy",
+        "amazon", "entrust", "sectigo", "baltimore", "verisign",
+    ]
+    issuer_lower = issuer.lower()
+    issued_by_known_ca = any(ca in issuer_lower for ca in legitimate_issuers)
+
+    # If not issued by a known CA and has corporate-sounding issuer, could be proxy
+    if not issued_by_known_ca:
+        # Check if issuer looks like a company internal CA
+        internal_ca_hints = ["internal", "corp", "root ca", "enterprise ca", "private ca"]
+        if any(hint in issuer_lower for hint in internal_ca_hints):
+            return True
+
+    return False
 
 
 def test_ssl_handshake() -> SSLHandshakeResult:
@@ -241,14 +320,19 @@ def test_ssl_handshake() -> SSLHandshakeResult:
         )
 
 
-def test_http_request() -> Tuple[bool, Optional[int]]:
-    """Test actual HTTP request to SEC.gov (only if SSL works)."""
+def test_http_request_raw() -> Tuple[bool, Optional[int], Optional[str]]:
+    """
+    Test HTTP request to SEC.gov with default SSL settings (no user config).
+    This tests the "raw" connection to show the actual SSL problem.
+    Returns: (success, status_code, error_message)
+    """
     try:
         import httpx
 
         from edgar.core import get_identity
 
         # Quick request to SEC.gov robots.txt (small file)
+        # Uses default httpx settings (SSL verification enabled)
         headers = {"User-Agent": get_identity()}
         response = httpx.get(
             f"https://{SEC_HOST}/robots.txt",
@@ -256,17 +340,52 @@ def test_http_request() -> Tuple[bool, Optional[int]]:
             follow_redirects=True,
             headers=headers,
         )
-        return response.status_code in (200, 301, 302), response.status_code
-    except Exception:
-        return False, None
+        success = response.status_code in (200, 301, 302)
+        return success, response.status_code, None
+    except Exception as e:
+        return False, None, str(e)
+
+
+def test_http_request_configured() -> Tuple[bool, Optional[int], Optional[str]]:
+    """
+    Test HTTP request using user's configured settings (verify_ssl, proxy).
+    This tests whether their workaround actually works.
+    Returns: (success, status_code, error_message)
+    """
+    try:
+        import httpx
+
+        from edgar.core import get_identity
+        from edgar.httpclient import HTTP_MGR
+
+        # Get user's configured settings
+        verify = HTTP_MGR.httpx_params.get("verify", True)
+        proxy = HTTP_MGR.httpx_params.get("proxy")
+        timeout = HTTP_MGR.httpx_params.get("timeout", 10.0)
+
+        headers = {"User-Agent": get_identity()}
+
+        # Build request with user's settings
+        response = httpx.get(
+            f"https://{SEC_HOST}/robots.txt",
+            timeout=timeout,
+            follow_redirects=True,
+            headers=headers,
+            verify=verify,
+            proxy=proxy,
+        )
+        success = response.status_code in (200, 301, 302)
+        return success, response.status_code, None
+    except Exception as e:
+        return False, None, str(e)
 
 
 def run_network_tests(skip_http: bool = False) -> NetworkTestResults:
     """Run all network connectivity tests."""
     results = NetworkTestResults()
 
-    # DNS resolution
-    results.dns_resolved, results.dns_ip = test_dns_resolution()
+    # DNS resolution (now returns IPv4 and IPv6)
+    results.dns_resolved, results.dns_ip, results.dns_ipv6 = test_dns_resolution()
     if not results.dns_resolved:
         return results
 
@@ -278,9 +397,15 @@ def run_network_tests(skip_http: bool = False) -> NetworkTestResults:
     # SSL handshake
     results.ssl_handshake = test_ssl_handshake()
 
-    # HTTP request (only if SSL succeeded)
-    if not skip_http and results.ssl_handshake.success:
-        results.http_request_ok, results.http_status_code = test_http_request()
+    # HTTP request tests
+    if not skip_http:
+        # Test 1: Raw request (default SSL settings) - shows the actual problem
+        if results.ssl_handshake.success:
+            results.http_request_ok, results.http_status_code, results.http_error_message = test_http_request_raw()
+
+        # Test 2: Request with user's configured settings - shows if workaround works
+        # Run this even if SSL handshake failed (user might have verify_ssl=False)
+        results.configured_http_ok, results.configured_http_status, results.configured_http_error = test_http_request_configured()
 
     return results
 
@@ -300,6 +425,21 @@ def generate_checks(
         status=CheckStatus.PASS,
         message=f"Python {env.python_version}",
     ))
+
+    # Cryptography library check
+    if env.cryptography_version:
+        checks.append(CheckResult(
+            name="Cryptography Library",
+            status=CheckStatus.PASS,
+            message=f"cryptography {env.cryptography_version} installed",
+        ))
+    else:
+        checks.append(CheckResult(
+            name="Cryptography Library",
+            status=CheckStatus.WARN,
+            message="cryptography library not installed",
+            details="Certificate details unavailable. Install with: pip install cryptography",
+        ))
 
     # Certificate bundle check
     if cert_config.bundle_exists:
@@ -400,18 +540,38 @@ def generate_checks(
                 details=network.ssl_handshake.error_message,
             ))
 
-    # HTTP request check
+    # HTTP request check (raw - default SSL settings)
     if network.http_request_ok:
         checks.append(CheckResult(
-            name="HTTP Request",
+            name="HTTP Request (Default)",
             status=CheckStatus.PASS,
             message=f"HTTPS request successful (status {network.http_status_code})",
         ))
     elif network.ssl_handshake and network.ssl_handshake.success:
+        msg = "HTTP request failed despite successful SSL handshake"
+        if network.http_error_message:
+            msg = f"HTTP request failed: {network.http_error_message[:100]}"
         checks.append(CheckResult(
-            name="HTTP Request",
+            name="HTTP Request (Default)",
             status=CheckStatus.FAIL,
-            message="HTTP request failed despite successful SSL handshake",
+            message=msg,
+            details=network.http_error_message,
+        ))
+
+    # HTTP request check (with user's configured settings)
+    if network.configured_http_ok:
+        checks.append(CheckResult(
+            name="HTTP Request (Configured)",
+            status=CheckStatus.PASS,
+            message=f"Request with your settings successful (status {network.configured_http_status})",
+            details=f"verify_ssl={client_state.configured_verify}",
+        ))
+    elif network.configured_http_error:
+        checks.append(CheckResult(
+            name="HTTP Request (Configured)",
+            status=CheckStatus.FAIL,
+            message=f"Request with your settings failed",
+            details=network.configured_http_error[:200] if network.configured_http_error else None,
         ))
 
     return checks
@@ -516,6 +676,7 @@ def run_diagnostics() -> DiagnosticResult:
     # Gather information
     env = get_environment_info()
     cert_config = get_certificate_config()
+    proxy_config = get_proxy_config()
     client_state = get_http_client_state()
     network = run_network_tests()
 
@@ -528,6 +689,7 @@ def run_diagnostics() -> DiagnosticResult:
         certificate_config=cert_config,
         http_client_state=client_state,
         network_tests=network,
+        proxy_config=proxy_config,
         checks=checks,
         recommendations=recommendations,
     )

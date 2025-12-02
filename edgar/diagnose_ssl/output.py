@@ -83,14 +83,20 @@ class TerminalFormatter:
         lines.append(f"  httpx version:      {result.environment.httpx_version}")
         if result.environment.certifi_version:
             lines.append(f"  certifi version:    {result.environment.certifi_version}")
+        if result.environment.cryptography_version:
+            lines.append(f"  cryptography:       {result.environment.cryptography_version}")
+        else:
+            lines.append(f"  cryptography:       {self._color('Not installed', 'yellow')}")
         lines.append("")
 
         # Certificate configuration
         lines.append(self._color("Certificate Configuration:", "bold"))
         ca_bundle = result.certificate_config.requests_ca_bundle or "Not set"
         ssl_cert = result.certificate_config.ssl_cert_file or "Not set"
+        curl_ca = result.certificate_config.curl_ca_bundle or "Not set"
         lines.append(f"  REQUESTS_CA_BUNDLE: {ca_bundle}")
         lines.append(f"  SSL_CERT_FILE:      {ssl_cert}")
+        lines.append(f"  CURL_CA_BUNDLE:     {curl_ca}")
         if result.certificate_config.certifi_path:
             lines.append(f"  certifi bundle:     {result.certificate_config.certifi_path}")
             if result.certificate_config.bundle_exists:
@@ -98,6 +104,22 @@ class TerminalFormatter:
             else:
                 lines.append(f"  Bundle exists:      No")
         lines.append("")
+
+        # Proxy configuration
+        if result.proxy_config:
+            has_proxy = (result.proxy_config.http_proxy or result.proxy_config.https_proxy or
+                        result.proxy_config.configured_proxy)
+            if has_proxy:
+                lines.append(self._color("Proxy Configuration:", "bold"))
+                if result.proxy_config.http_proxy:
+                    lines.append(f"  HTTP_PROXY:         {result.proxy_config.http_proxy}")
+                if result.proxy_config.https_proxy:
+                    lines.append(f"  HTTPS_PROXY:        {result.proxy_config.https_proxy}")
+                if result.proxy_config.no_proxy:
+                    lines.append(f"  NO_PROXY:           {result.proxy_config.no_proxy}")
+                if result.proxy_config.configured_proxy:
+                    lines.append(f"  Runtime proxy:      {result.proxy_config.configured_proxy}")
+                lines.append("")
 
         # HTTP Client State
         lines.append(self._color("HTTP Client State:", "bold"))
@@ -121,7 +143,10 @@ class TerminalFormatter:
         # DNS
         if result.network_tests.dns_resolved:
             lines.append(f"  1. DNS Resolution:")
-            lines.append(f"     {self._color('PASS', 'green')} www.sec.gov resolves to {result.network_tests.dns_ip}")
+            dns_info = f"IPv4: {result.network_tests.dns_ip}" if result.network_tests.dns_ip else "IPv4: None"
+            if result.network_tests.dns_ipv6:
+                dns_info += f", IPv6: {result.network_tests.dns_ipv6}"
+            lines.append(f"     {self._color('PASS', 'green')} www.sec.gov resolves ({dns_info})")
         else:
             lines.append(f"  1. DNS Resolution:")
             lines.append(f"     {self._color('FAIL', 'red')} Could not resolve www.sec.gov")
@@ -167,16 +192,29 @@ class TerminalFormatter:
             lines.append(f"     {self._color('SKIP', 'blue')} Skipped (TCP failed)")
         lines.append("")
 
-        # HTTP Request
+        # HTTP Request (default settings)
         if result.network_tests.http_request_ok:
-            lines.append(f"  4. HTTP Request:")
+            lines.append(f"  4. HTTP Request (default SSL):")
             lines.append(f"     {self._color('PASS', 'green')} Request successful (status {result.network_tests.http_status_code})")
         elif result.network_tests.ssl_handshake and result.network_tests.ssl_handshake.success:
-            lines.append(f"  4. HTTP Request:")
-            lines.append(f"     {self._color('FAIL', 'red')} Request failed")
+            lines.append(f"  4. HTTP Request (default SSL):")
+            error_msg = result.network_tests.http_error_message or "Request failed"
+            lines.append(f"     {self._color('FAIL', 'red')} {error_msg[:80]}")
         else:
-            lines.append(f"  4. HTTP Request:")
+            lines.append(f"  4. HTTP Request (default SSL):")
             lines.append(f"     {self._color('SKIP', 'blue')} Skipped (SSL handshake failed)")
+        lines.append("")
+
+        # HTTP Request (with user's configured settings)
+        verify_setting = "enabled" if result.http_client_state.configured_verify else "disabled"
+        lines.append(f"  5. HTTP Request (your settings, verify={verify_setting}):")
+        if result.network_tests.configured_http_ok:
+            lines.append(f"     {self._color('PASS', 'green')} Request successful (status {result.network_tests.configured_http_status})")
+        elif result.network_tests.configured_http_error:
+            error_msg = result.network_tests.configured_http_error[:80] if result.network_tests.configured_http_error else "Request failed"
+            lines.append(f"     {self._color('FAIL', 'red')} {error_msg}")
+        else:
+            lines.append(f"     {self._color('SKIP', 'blue')} Not tested")
         lines.append("")
 
         # Summary
@@ -242,6 +280,8 @@ class NotebookFormatter:
         ]
         if result.environment.certifi_version:
             env_rows.append(("certifi version", result.environment.certifi_version))
+        crypto_ver = result.environment.cryptography_version or "<span style='color: orange;'>Not installed</span>"
+        env_rows.append(("cryptography", crypto_ver))
 
         for label, value in env_rows:
             html_parts.append(
@@ -255,9 +295,11 @@ class NotebookFormatter:
         html_parts.append("<table style='border-collapse: collapse; margin: 10px 0;'>")
         ca_bundle = result.certificate_config.requests_ca_bundle or "<em>Not set</em>"
         ssl_cert = result.certificate_config.ssl_cert_file or "<em>Not set</em>"
+        curl_ca = result.certificate_config.curl_ca_bundle or "<em>Not set</em>"
         cert_rows = [
             ("REQUESTS_CA_BUNDLE", ca_bundle),
             ("SSL_CERT_FILE", ssl_cert),
+            ("CURL_CA_BUNDLE", curl_ca),
         ]
         if result.certificate_config.certifi_path:
             cert_rows.append(("certifi bundle", result.certificate_config.certifi_path))
@@ -270,6 +312,27 @@ class NotebookFormatter:
                 f"<td style='padding: 4px;'>{value}</td></tr>"
             )
         html_parts.append("</table>")
+
+        # Proxy Configuration (if any)
+        if result.proxy_config:
+            has_proxy = (result.proxy_config.http_proxy or result.proxy_config.https_proxy or
+                        result.proxy_config.configured_proxy)
+            if has_proxy:
+                html_parts.append("<h3>Proxy Configuration</h3>")
+                html_parts.append("<table style='border-collapse: collapse; margin: 10px 0;'>")
+                if result.proxy_config.http_proxy:
+                    html_parts.append(f"<tr><td style='padding: 4px 12px 4px 0; font-weight: bold;'>HTTP_PROXY:</td>"
+                                     f"<td style='padding: 4px;'>{_escape_html(result.proxy_config.http_proxy)}</td></tr>")
+                if result.proxy_config.https_proxy:
+                    html_parts.append(f"<tr><td style='padding: 4px 12px 4px 0; font-weight: bold;'>HTTPS_PROXY:</td>"
+                                     f"<td style='padding: 4px;'>{_escape_html(result.proxy_config.https_proxy)}</td></tr>")
+                if result.proxy_config.no_proxy:
+                    html_parts.append(f"<tr><td style='padding: 4px 12px 4px 0; font-weight: bold;'>NO_PROXY:</td>"
+                                     f"<td style='padding: 4px;'>{_escape_html(result.proxy_config.no_proxy)}</td></tr>")
+                if result.proxy_config.configured_proxy:
+                    html_parts.append(f"<tr><td style='padding: 4px 12px 4px 0; font-weight: bold;'>Runtime proxy:</td>"
+                                     f"<td style='padding: 4px;'>{_escape_html(str(result.proxy_config.configured_proxy))}</td></tr>")
+                html_parts.append("</table>")
 
         # Check Results
         html_parts.append("<h3>Check Results</h3>")
