@@ -68,9 +68,9 @@ class RevenueDeduplicator:
         # Identify items to remove
         items_to_remove = set()
 
-        for (_period, _value), items in period_value_groups.items():
+        for (_period, _value, _dim_key), items in period_value_groups.items():
             if len(items) > 1 and cls._are_revenue_duplicates(items):
-                # This is a group of revenue items with the same value
+                # This is a group of revenue items with the same value and dimensions
                 # Keep only the highest precedence item
                 items_to_remove.update(cls._select_duplicates_to_remove(items))
 
@@ -91,18 +91,28 @@ class RevenueDeduplicator:
     @classmethod
     def _group_by_period_value(cls, statement_items: List[Dict[str, Any]]) -> Dict[tuple, List[tuple]]:
         """
-        Group statement items by (period, value) pairs.
+        Group statement items by (period, value, dimension) tuples.
+
+        Issue #513: Include dimensions in grouping to avoid removing valid segment data
+        that happens to have the same value. For example, segment revenues that sum
+        to the same total revenue shouldn't be deduplicated.
 
         Returns:
-            Dict mapping (period, value) to list of (index, item) tuples
+            Dict mapping (period, value, dimension_key) to list of (index, item) tuples
         """
         groups = defaultdict(list)
 
         for i, item in enumerate(statement_items):
             values = item.get('values', {})
+            # Get dimension info for this item - convert to hashable tuple
+            dimension = item.get('dimension', {})
+            # Create a hashable key from dimensions
+            dim_key = tuple(sorted(dimension.items())) if dimension and isinstance(dimension, dict) else None
+
             for period, value in values.items():
                 if value is not None and value != 0:
-                    groups[(period, value)].append((i, item))
+                    # Group by (period, value, dimensions) to preserve dimensional differences
+                    groups[(period, value, dim_key)].append((i, item))
 
         return groups
 
