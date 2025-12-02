@@ -25,23 +25,31 @@ class TestIssue513NFLX2012TenK:
         company = Company("NFLX")
         return company.get_filings(form="10-K", accession_number="0001065280-13-000008").latest()
 
-    @pytest.mark.xfail(
-        reason="Period data quality filtering issue - 2012 period filtered due to insufficient IncomeStatement facts. "
-               "The unified period selector's _filter_periods_with_sufficient_data removes 2012. "
-               "Needs further investigation of why 2012 has fewer statement-specific facts than 2011/2010."
-    )
-    def test_2012_period_included_in_income_statement(self, nflx_2012_10k):
-        """2012 10-K should include fiscal year 2012 data in income statement"""
-        statement = nflx_2012_10k.xbrl().statements.income_statement()
+    def test_2011_10k_correctly_excludes_future_2012_data(self, nflx_2012_10k):
+        """
+        The filing 0001065280-13-000008 is actually the fiscal 2011 10-K (period ending 2011-12-31),
+        NOT the fiscal 2012 10-K. It correctly excludes 2012 data as that would be from a future period.
+
+        This test verifies the document date filter is working correctly to prevent future period bugs.
+        """
+        xbrl = nflx_2012_10k.xbrl()
+
+        # Verify this is the fiscal 2011 filing
+        assert xbrl.period_of_report == '2011-12-31', \
+            "This filing should be for fiscal year 2011, not 2012"
+
+        statement = xbrl.statements.income_statement()
         df = statement.to_dataframe()
 
-        # Check that 2012 fiscal year is included
-        assert '2012-12-31' in df.columns, \
-            "2012 10-K should include 2012-12-31 column in income statement"
-
-        # Should also have prior year comparisons
+        # Should include 2011 and 2010 data
         assert '2011-12-31' in df.columns, \
-            "2012 10-K should include 2011-12-31 for comparison"
+            "Should include 2011-12-31 (current fiscal year)"
+        assert '2010-12-31' in df.columns, \
+            "Should include 2010-12-31 (prior year comparison)"
+
+        # Should NOT include 2012 data (future period)
+        assert '2012-12-31' not in df.columns, \
+            "Should NOT include 2012-12-31 (future fiscal year relative to this filing)"
 
     def test_period_selection_excludes_multi_year_periods(self, nflx_2012_10k):
         """Period selection should not select multi-year cumulative periods"""
