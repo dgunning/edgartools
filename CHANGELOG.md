@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.34.1] - 2025-12-02
+
+### Added
+
+- **SSL Diagnostic Tool**
+  - New `edgar.diagnose_ssl` module for comprehensive SSL/VPN troubleshooting
+  - Includes dual HTTP testing (httpx and urllib3) to isolate SSL issues
+  - Rich-formatted diagnostic reports with actionable recommendations
+  - New notebook: `examples/notebooks/beginner/Diagnosing-SSL-Issues.ipynb`
+  - **Use Case**: Help users diagnose and resolve SSL certificate verification errors in corporate/VPN environments
+  - **Commits**: a9209a08, 36d60058, 4799a124
+
+### Fixed
+
+- **XBRL Revenue Deduplication Refinement (Issues #438 and #513)**
+  - Enhanced revenue deduplication algorithm to handle both Issue #438 (duplicate revenues) and Issue #513 (missing dimensional data)
+  - Improved deduplication strategy to preserve dimensional data while removing duplicates
+  - Added label-based deduplication to catch duplicates with different concepts but identical labels
+  - **Impact**: Accurate revenue reporting across diverse XBRL statement structures
+  - **Commits**: 58b6e939, fe9ef447, 0fde7050
+
+- **XBRL Display Period Filtering (Issue #edgartools-d4w)**
+  - Filter XBRL display periods by document date to exclude historical periods
+  - Prevents old periods from 2012-2014 appearing in current financial statements
+  - **Impact**: Only relevant periods displayed in financial statement rendering
+  - **Commits**: 7ade36a0
+
+### Testing
+
+- **Regression Test Categorization**
+  - Marked regression tests with `@pytest.mark.regression` for selective execution
+  - Added comprehensive test coverage for Issue #513 (184 lines)
+  - Updated Issue #513 test to confirm 2012 period exclusion is correct behavior
+  - **Impact**: Improved test organization and CI/CD efficiency
+  - **Commits**: bedcd47a, 6fdef87b
+
+### Documentation
+
+- **CLAUDE.md Simplification**
+  - Streamlined CLAUDE.md to essential navigation guide
+  - Expanded beads workflow quick reference with practical examples
+  - **Impact**: Faster onboarding and clearer development guidance
+  - **Commits**: ecb33dff, fc86f113
+
+- **SSL Diagnostics Guide**
+  - Comprehensive SSL troubleshooting notebook with step-by-step diagnostics
+  - Covers common SSL issues in corporate networks, VPNs, and firewall environments
+  - **Commits**: 4799a124
+
 ## [4.34.0] - 2025-12-01
 
 ### Added
