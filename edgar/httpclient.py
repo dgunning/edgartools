@@ -157,20 +157,31 @@ def configure_http(
 
     Note:
         Changes take effect immediately for new requests.
-        Existing cached responses are not affected.
+        If an HTTP client was already created, it will be recreated with the new settings.
     """
     global HTTP_MGR
 
+    settings_changed = False
+
     if verify_ssl is not None:
         HTTP_MGR.httpx_params["verify"] = verify_ssl
+        settings_changed = True
 
     if proxy is not None:
         # Configure proxy for httpx
         HTTP_MGR.httpx_params["proxy"] = proxy
+        settings_changed = True
 
     if timeout is not None:
         from httpx import Timeout
         HTTP_MGR.httpx_params["timeout"] = Timeout(timeout, connect=10.0)
+        settings_changed = True
+
+    # Force client recreation if settings changed and client already exists
+    # This ensures new settings take effect even if client was already created
+    if settings_changed and HTTP_MGR._client is not None:
+        HTTP_MGR._client.close()
+        HTTP_MGR._client = None
 
 
 def get_http_config() -> dict:

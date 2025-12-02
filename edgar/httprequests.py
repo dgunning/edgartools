@@ -6,6 +6,8 @@ import tarfile
 import tempfile
 import uuid
 import zipfile
+from dataclasses import dataclass
+from enum import Enum
 from functools import wraps
 from io import BytesIO
 from pathlib import Path
@@ -133,46 +135,376 @@ class IdentityNotSetException(Exception):
     pass
 
 
+# =============================================================================
+# SSL Error Handling with Diagnostic Messages
+# =============================================================================
+
+class SSLErrorCategory(Enum):
+    """Categories of SSL errors based on root cause."""
+    CORPORATE_NETWORK = "corporate_network"  # VPN/proxy SSL inspection
+    SELF_SIGNED = "self_signed"              # Self-signed certificates
+    EXPIRED = "expired"                       # Expired certificate
+    HOSTNAME_MISMATCH = "hostname_mismatch"  # Certificate hostname mismatch
+    CERT_REVOKED = "revoked"                 # Revoked certificate
+    UNKNOWN = "unknown"                       # Other SSL errors
+
+
+@dataclass
+class SSLDiagnostic:
+    """Diagnostic information about SSL configuration state."""
+    configured_verify: bool           # What httpx_params["verify"] says
+    client_exists: bool               # Whether HTTP client has been created
+    client_verify: Optional[bool]     # What the client is actually using
+    requests_ca_bundle: Optional[str] # REQUESTS_CA_BUNDLE env var
+    ssl_cert_file: Optional[str]      # SSL_CERT_FILE env var
+    certifi_path: Optional[str]       # Default Python cert bundle path
+
+    @property
+    def mismatch(self) -> bool:
+        """True if configured setting doesn't match what client is using."""
+        if self.client_verify is None:
+            return False
+        return self.configured_verify != self.client_verify
+
+    @property
+    def custom_ca_configured(self) -> bool:
+        """True if a custom CA bundle is configured."""
+        return bool(self.requests_ca_bundle or self.ssl_cert_file)
+
+    @property
+    def status(self) -> str:
+        """Get the diagnostic status for message selection."""
+        if self.mismatch and not self.configured_verify and self.client_verify:
+            return "MISMATCH"  # User tried to disable but client has old setting
+        if self.custom_ca_configured and self.configured_verify:
+            return "CUSTOM_CA_NOT_WORKING"
+        if not self.configured_verify:
+            if self.client_verify is False or not self.client_exists:
+                return "SSL_DISABLED_BUT_FAILED"
+            # configured=False, client exists, but we couldn't read client setting
+            # This likely means client was created before configure_http() was called
+            if self.client_exists and self.client_verify is None:
+                return "LIKELY_MISMATCH"
+        return "SSL_ENABLED"
+
+
+def _categorize_ssl_error(error_message: str) -> SSLErrorCategory:
+    """Categorize SSL error based on error message content."""
+    msg = error_message.lower()
+
+    # Corporate network / VPN SSL inspection
+    if "unable to get local issuer certificate" in msg or "unable to get issuer certificate" in msg:
+        return SSLErrorCategory.CORPORATE_NETWORK
+
+    # Self-signed certificates
+    if "self signed certificate" in msg or "self-signed certificate" in msg:
+        return SSLErrorCategory.SELF_SIGNED
+
+    # Expired certificate
+    if "certificate has expired" in msg or "has expired" in msg:
+        return SSLErrorCategory.EXPIRED
+
+    # Hostname mismatch
+    if "hostname mismatch" in msg or "doesn't match" in msg or "does not match" in msg:
+        return SSLErrorCategory.HOSTNAME_MISMATCH
+
+    # Revoked certificate
+    if "certificate revoked" in msg or "revoked" in msg:
+        return SSLErrorCategory.CERT_REVOKED
+
+    return SSLErrorCategory.UNKNOWN
+
+
+def _get_ssl_diagnostic() -> SSLDiagnostic:
+    """Gather diagnostic information about current SSL configuration."""
+    from edgar.httpclient import HTTP_MGR
+
+    # Get configured setting
+    configured_verify = HTTP_MGR.httpx_params.get('verify', True)
+
+    # Check if client exists and try to get its actual setting
+    client_exists = HTTP_MGR._client is not None
+    client_verify = None
+
+    if client_exists:
+        # Try multiple paths to find SSL context (handles different transport wrappers)
+        transport = HTTP_MGR._client._transport
+        try:
+            # Direct HTTPTransport
+            ssl_ctx = transport._pool._ssl_context
+            client_verify = ssl_ctx.check_hostname
+        except (AttributeError, TypeError):
+            try:
+                # CacheTransport wrapping HTTPTransport
+                ssl_ctx = transport._transport._pool._ssl_context
+                client_verify = ssl_ctx.check_hostname
+            except (AttributeError, TypeError):
+                # Can't determine - if configured=False and error occurred,
+                # likely the client was created before configure_http() was called
+                # We'll indicate this uncertainty in the message
+                pass
+
+    # Get certificate bundle info
+    requests_ca_bundle = os.environ.get('REQUESTS_CA_BUNDLE')
+    ssl_cert_file = os.environ.get('SSL_CERT_FILE')
+
+    # Get certifi path
+    certifi_path = None
+    try:
+        import certifi
+        certifi_path = certifi.where()
+    except ImportError:
+        pass
+
+    return SSLDiagnostic(
+        configured_verify=configured_verify,
+        client_exists=client_exists,
+        client_verify=client_verify,
+        requests_ca_bundle=requests_ca_bundle,
+        ssl_cert_file=ssl_cert_file,
+        certifi_path=certifi_path,
+    )
+
+
+def _build_cause_section(category: SSLErrorCategory) -> str:
+    """Build the cause section based on error category."""
+    causes = {
+        SSLErrorCategory.CORPORATE_NETWORK: """
+Cause: CORPORATE NETWORK
+------------------------
+Your network is intercepting HTTPS traffic (SSL inspection). This is common
+with corporate VPNs and proxy servers. The SEC website's certificate cannot
+be verified because your network proxy presents its own certificate.""",
+
+        SSLErrorCategory.SELF_SIGNED: """
+Cause: SELF-SIGNED CERTIFICATE
+------------------------------
+A self-signed certificate was encountered. This typically occurs in
+development or testing environments.""",
+
+        SSLErrorCategory.EXPIRED: """
+Cause: EXPIRED CERTIFICATE
+--------------------------
+The SSL certificate has expired. This is unusual for SEC.gov and may
+indicate a network issue or system clock problem.
+
+Check: Is your system date/time correct?""",
+
+        SSLErrorCategory.HOSTNAME_MISMATCH: """
+Cause: CERTIFICATE HOSTNAME MISMATCH
+------------------------------------
+The certificate doesn't match the requested domain. This may indicate
+a network configuration issue or man-in-the-middle attack.""",
+
+        SSLErrorCategory.CERT_REVOKED: """
+Cause: CERTIFICATE REVOKED
+--------------------------
+The certificate has been revoked by the certificate authority.""",
+
+        SSLErrorCategory.UNKNOWN: """
+Cause: SSL/TLS ERROR
+--------------------
+An SSL certificate verification error occurred.""",
+    }
+    return causes.get(category, causes[SSLErrorCategory.UNKNOWN])
+
+
+def _build_diagnostic_section(diag: SSLDiagnostic) -> str:
+    """Build the diagnostic section showing configuration state."""
+    lines = ["", "Configuration Status:"]
+
+    # Show configured setting
+    verify_str = "True (verification enabled)" if diag.configured_verify else "False (verification disabled)"
+    lines.append(f"  verify_ssl setting:     {verify_str}")
+
+    # Show client setting if available
+    if diag.client_exists and diag.client_verify is not None:
+        client_str = "True" if diag.client_verify else "False"
+        mismatch_marker = "  ⚠️ MISMATCH" if diag.mismatch else ""
+        lines.append(f"  HTTP client actual:     {client_str}{mismatch_marker}")
+
+    # Show custom CA if configured
+    if diag.custom_ca_configured:
+        if diag.requests_ca_bundle:
+            lines.append(f"  REQUESTS_CA_BUNDLE:     {diag.requests_ca_bundle}")
+        if diag.ssl_cert_file:
+            lines.append(f"  SSL_CERT_FILE:          {diag.ssl_cert_file}")
+    elif diag.certifi_path:
+        lines.append(f"  Python cert bundle:     {diag.certifi_path}")
+
+    # Add mismatch explanation if applicable
+    if diag.mismatch:
+        lines.extend([
+            "",
+            "  The HTTP client was created BEFORE configure_http() was called,",
+            "  so it's still using the old verify=True setting.",
+        ])
+    elif diag.status == "LIKELY_MISMATCH":
+        lines.extend([
+            "",
+            "  ⚠️  verify_ssl=False is configured, but an SSL error still occurred.",
+            "  The HTTP client was likely created before configure_http() was called.",
+        ])
+
+    return "\n".join(lines)
+
+
+def _build_solution_section(category: SSLErrorCategory, diag: SSLDiagnostic) -> str:
+    """Build the solution section based on category and diagnostic state."""
+    status = diag.status
+
+    # MISMATCH or LIKELY_MISMATCH: User tried to disable but client has old setting
+    if status in ("MISMATCH", "LIKELY_MISMATCH"):
+        return """
+Solution:
+---------
+The HTTP client was likely created BEFORE configure_http() was called.
+Restart Python/Jupyter and call configure_http() FIRST:
+
+  from edgar import configure_http
+  configure_http(verify_ssl=False)
+
+  # THEN your other imports and code
+  from edgar import Company
+  company = Company("AAPL")"""
+
+    # SSL_DISABLED_BUT_FAILED: Correctly disabled but still failing
+    if status == "SSL_DISABLED_BUT_FAILED":
+        return """
+Solution:
+---------
+SSL verification is disabled but connection still failed. Try:
+
+  1. Your network may require a proxy:
+
+     from edgar import configure_http
+     configure_http(verify_ssl=False, proxy="http://proxy.company.com:8080")
+
+  2. Check with IT if proxy authentication is required
+
+  3. Verify SEC.gov is not blocked by your firewall"""
+
+    # CUSTOM_CA_NOT_WORKING: CA bundle configured but not working
+    if status == "CUSTOM_CA_NOT_WORKING":
+        certifi_path = diag.certifi_path or "/path/to/certifi/cacert.pem"
+        return f"""
+Solution:
+---------
+Custom CA bundle is configured but verification still failed. Check:
+
+  1. Verify the CA file contains your corporate root certificate
+
+  2. Ensure file includes BOTH corporate CA AND standard CAs:
+
+     cat "{certifi_path}" \\
+         /path/to/corporate-ca.crt > ~/combined-bundle.pem
+     export REQUESTS_CA_BUNDLE="$HOME/combined-bundle.pem"
+
+  3. Fallback - disable verification:
+
+     from edgar import configure_http
+     configure_http(verify_ssl=False)"""
+
+    # SSL_ENABLED: Default state, user hasn't tried to disable
+    certifi_path = diag.certifi_path or "/path/to/certifi/cacert.pem"
+
+    if category == SSLErrorCategory.CORPORATE_NETWORK:
+        return f"""
+Solutions:
+----------
+
+1. QUICK FIX - Disable SSL verification:
+
+   from edgar import configure_http
+   configure_http(verify_ssl=False)
+
+   # Then your code
+   from edgar import Company
+   company = Company("AAPL")
+
+2. SECURE OPTION - Add corporate root CA certificate:
+
+   Ask IT for your corporate root CA certificate file, then:
+
+   export REQUESTS_CA_BUNDLE="/path/to/corporate-ca-bundle.pem"
+
+   Or create a combined bundle:
+
+   cat "{certifi_path}" \\
+       /path/to/corporate-ca.crt > ~/combined-bundle.pem
+   export REQUESTS_CA_BUNDLE="$HOME/combined-bundle.pem"
+
+3. ASK IT - Request SEC.gov be added to SSL inspection bypass list"""
+
+    elif category == SSLErrorCategory.EXPIRED:
+        return """
+Solutions:
+----------
+
+1. Verify your system clock is correct
+
+2. If the issue persists, this may be a temporary SEC.gov issue
+
+3. Temporary workaround:
+
+   from edgar import configure_http
+   configure_http(verify_ssl=False)"""
+
+    else:
+        # Generic solution for other categories
+        return """
+Solution:
+---------
+Disable SSL verification:
+
+  from edgar import configure_http
+  configure_http(verify_ssl=False)
+
+Or via environment variable (set before importing edgar):
+
+  import os
+  os.environ['EDGAR_VERIFY_SSL'] = 'false'
+  from edgar import Company"""
+
+
 class SSLVerificationError(Exception):
-    """Raised when SSL certificate verification fails"""
+    """
+    Raised when SSL certificate verification fails.
+
+    Provides detailed diagnostic information and targeted solutions based on:
+    - Error category (corporate network, self-signed, expired, etc.)
+    - Current configuration state (what user configured vs what's being used)
+    - Whether there's a mismatch between configuration and actual client settings
+    """
+
     def __init__(self, original_error, url):
         self.original_error = original_error
         self.url = url
-        message = f"""
+
+        # Categorize the error
+        self.category = _categorize_ssl_error(str(original_error))
+
+        # Get diagnostic info
+        self.diagnostic = _get_ssl_diagnostic()
+
+        # Build message sections
+        header = f"""
 SSL Certificate Verification Failed
 ====================================
 
 URL: {self.url}
-Error: {str(self.original_error)}
+Error: {str(self.original_error)}"""
 
-Common Causes:
-  • Corporate network with SSL inspection proxy
-  • Self-signed certificates in development environments
-  • Custom certificate authorities
+        cause = _build_cause_section(self.category)
+        diagnostic = _build_diagnostic_section(self.diagnostic)
+        solution = _build_solution_section(self.category, self.diagnostic)
 
-Solution:
----------
-If you trust this network, disable SSL verification:
+        footer = """
+⚠️  Only disable SSL verification in trusted network environments.
 
-  export EDGAR_VERIFY_SSL="false"
+Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verification.md"""
 
-Or in Python:
-
-  import os
-  os.environ['EDGAR_VERIFY_SSL'] = 'false'
-  from edgar import Company  # Import after setting
-
-⚠️  WARNING: Only disable in trusted environments.
-    This makes connections vulnerable to attacks.
-
-Alternative Solutions:
----------------------
-  • Install your organization's root CA certificate
-  • Contact IT for proper certificate configuration
-  • Use a network without SSL inspection
-
-For details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verification.md
-"""
+        message = f"{header}{cause}{diagnostic}{solution}{footer}"
         super().__init__(message)
 
 
