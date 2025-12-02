@@ -16,6 +16,7 @@ import pytest
 from edgar import Company
 
 
+@pytest.mark.regression
 class TestIssue513NFLX2012TenK:
     """Test that 2012 10-K shows fiscal year 2012 data"""
 
@@ -90,6 +91,7 @@ class TestIssue513NFLX2012TenK:
             "2012 fiscal year should have revenue facts"
 
 
+@pytest.mark.regression
 class TestIssue513NFLXRevenueDeduplication:
     """Test that revenue deduplication preserves dimensional segment data"""
 
