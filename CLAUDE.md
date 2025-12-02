@@ -46,12 +46,27 @@ When modifying these, read in chunks:
 - `_filings.py` (72KB), `xbrl/rendering.py` (72KB), `xbrl/xbrl.py` (66KB)
 - `entity/entity_facts.py` (63KB), `xbrl/facts.py` (55KB), `xbrl/statements.py` (46KB)
 
+## Issue Tracking (Beads)
+
+We use `bd` (beads) for issue tracking. Full docs: `docs/beads-workflow.md`
+
+```bash
+bd list --status open              # Ready/open issues
+bd list --status in_progress       # Currently active
+bd list --status open -p 0         # Critical priority (0=critical, 4=backlog)
+bd list -t bug                     # Filter by type (bug/feature/task)
+bd show ISSUE_ID                   # View details
+bd update ISSUE_ID --status in_progress  # Change status
+bd create --title "..." --type bug --priority P1  # Create issue
+```
+
+**Statuses**: `open`, `in_progress`, `blocked`, `closed`
+
 ## Development
 
 | Task | Reference |
 |------|-----------|
 | Testing | `docs/testing-guide.md` |
-| Issue tracking (Beads) | `docs/beads-workflow.md` |
 | API examples | `edgar/ai/skills/core/quickstart-by-task.md` |
 | Data objects | `edgar/ai/skills/core/data-objects.md` |
 | Workflows | `edgar/ai/skills/core/workflows.md` |
