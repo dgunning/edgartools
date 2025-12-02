@@ -68,9 +68,9 @@ class RevenueDeduplicator:
         # Identify items to remove
         items_to_remove = set()
 
-        for (_period, _value, _dim_key), items in period_value_groups.items():
+        for (_period, _value, _dim_key, _label), items in period_value_groups.items():
             if len(items) > 1 and cls._are_revenue_duplicates(items):
-                # This is a group of revenue items with the same value and dimensions
+                # This is a group of revenue items with the same value, dimensions, AND label
                 # Keep only the highest precedence item
                 items_to_remove.update(cls._select_duplicates_to_remove(items))
 
@@ -91,14 +91,16 @@ class RevenueDeduplicator:
     @classmethod
     def _group_by_period_value(cls, statement_items: List[Dict[str, Any]]) -> Dict[tuple, List[tuple]]:
         """
-        Group statement items by (period, value, dimension) tuples.
+        Group statement items by (period, value, dimension, label) tuples.
 
-        Issue #513: Include dimensions in grouping to avoid removing valid segment data
-        that happens to have the same value. For example, segment revenues that sum
-        to the same total revenue shouldn't be deduplicated.
+        Issue #513: Include dimensions AND labels in grouping to avoid removing valid
+        segment data that happens to have the same value. For example:
+        - Geographic segment revenues that sum to the same total
+        - Items with descriptive labels like "Streaming - United States and Canada"
+          vs generic "Reportable Segment"
 
         Returns:
-            Dict mapping (period, value, dimension_key) to list of (index, item) tuples
+            Dict mapping (period, value, dimension_key, label) to list of (index, item) tuples
         """
         groups = defaultdict(list)
 
@@ -109,10 +111,13 @@ class RevenueDeduplicator:
             # Create a hashable key from dimensions
             dim_key = tuple(sorted(dimension.items())) if dimension and isinstance(dimension, dict) else None
 
+            # Include label in grouping to preserve items with different labels
+            label = item.get('label', '')
+
             for period, value in values.items():
                 if value is not None and value != 0:
-                    # Group by (period, value, dimensions) to preserve dimensional differences
-                    groups[(period, value, dim_key)].append((i, item))
+                    # Group by (period, value, dimensions, label) to preserve items with different labels
+                    groups[(period, value, dim_key, label)].append((i, item))
 
         return groups
 
