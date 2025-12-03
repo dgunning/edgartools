@@ -58,9 +58,9 @@ pip install -e ".[s3,gcs,azure]"
 
 **After release:**
 ```bash
-pip install edgartools[s3]    # For S3/R2/MinIO
-pip install edgartools[gcs]   # For Google Cloud
-pip install edgartools[azure] # For Azure
+pip install "edgartools[s3]"    # For S3/R2/MinIO
+pip install "edgartools[gcs]"   # For Google Cloud
+pip install "edgartools[azure]" # For Azure
 ```
 
 ### 3a. MinIO (Local Docker - Recommended First)

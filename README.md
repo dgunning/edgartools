@@ -269,7 +269,7 @@ Claude will write the Python code, execute it, and explain the results - all pow
 Install the EdgarTools skill for Claude Code or Claude Desktop:
 
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 python -c "from edgar.ai import install_skill; install_skill()"
 ```
 
@@ -280,7 +280,7 @@ This adds SEC analysis capabilities to Claude, including 3,450+ lines of API doc
 Run EdgarTools as an MCP server for Claude Code or Claude Desktop:
 
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 python -m edgar.ai
 ```
 

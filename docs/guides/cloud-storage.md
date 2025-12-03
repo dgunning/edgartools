@@ -738,16 +738,16 @@ Install the cloud storage dependencies for your provider:
 
 ```bash
 # AWS S3, Cloudflare R2, MinIO, DigitalOcean Spaces
-pip install edgartools[s3]
+pip install "edgartools[s3]"
 
 # Google Cloud Storage
-pip install edgartools[gcs]
+pip install "edgartools[gcs]"
 
 # Azure Blob Storage
-pip install edgartools[azure]
+pip install "edgartools[azure]"
 
 # All cloud providers
-pip install edgartools[all-cloud]
+pip install "edgartools[all-cloud]"
 ```
 
 ### Basic Usage
@@ -961,7 +961,7 @@ edgar.sync_to_cloud('filings', overwrite=True)
 ```python
 import edgar
 
-# Install: pip install edgartools[s3]
+# Install: pip install "edgartools[s3]"
 edgar.use_cloud_storage('s3://my-edgar-bucket/')
 
 # Read from cloud

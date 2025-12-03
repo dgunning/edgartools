@@ -350,7 +350,7 @@ def test_server():
         print("✓ MCP framework available")
     except ImportError as e:
         print(f"✗ MCP framework not installed: {e}")
-        print("  Install with: pip install edgartools[ai]")
+        print('  Install with: pip install "edgartools[ai]"')
         all_passed = False
 
     # Test 3: Identity configuration check

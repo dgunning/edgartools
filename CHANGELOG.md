@@ -557,7 +557,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Optional Test Harness Dependencies**
   - Moved `click` to optional test-harness dependency group
   - Reduces core dependency footprint
-  - Install with: `pip install edgartools[test-harness]`
+  - Install with: `pip install "edgartools[test-harness]"`
   - **Files Modified**: `pyproject.toml`
   - **Related**: Commit e1f23068
 

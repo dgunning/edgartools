@@ -15,7 +15,7 @@ Both integrate directly with the EdgarTools API - choose based on your workflow 
 
 ```bash
 # Install AI features
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 
 # For development
 pip install -e ".[ai,ai-dev]"

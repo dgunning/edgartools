@@ -6,7 +6,7 @@ This guide helps you get started with EdgarTools MCP server in under 5 minutes.
 
 ```bash
 # Install EdgarTools with AI features
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 ```
 
 ## Starting the Server
@@ -310,9 +310,9 @@ tail -50 ~/Library/Logs/Claude/mcp-server-edgartools.log | grep error
 
 **Solution:** Install AI dependencies
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 # or with pip3
-pip3 install edgartools[ai]
+pip3 install "edgartools[ai]"
 ```
 
 ### Client can't find server

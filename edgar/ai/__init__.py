@@ -10,7 +10,7 @@ This package provides AI capabilities for EdgarTools including:
 - Token counting and optimization
 
 Installation:
-    pip install edgartools[ai]
+    pip install "edgartools[ai]"
 
 Dependencies included:
     - mcp: Model Context Protocol server support
@@ -217,7 +217,7 @@ else:
     def MCPServer(*args, **kwargs):
         raise ImportError(
             "MCP support requires additional dependencies. "
-            "Install with: pip install edgartools[ai]"
+            'Install with: pip install "edgartools[ai]"'
         )
     EdgarToolsServer = MCPServer
 
@@ -259,5 +259,5 @@ def get_ai_info():
         "mcp_available": MCP_AVAILABLE,
         "tiktoken_available": TIKTOKEN_AVAILABLE,
         "missing_dependencies": MISSING_DEPS,
-        "install_command": "pip install edgartools[ai]" if MISSING_DEPS else None
+        "install_command": 'pip install "edgartools[ai]"' if MISSING_DEPS else None
     }

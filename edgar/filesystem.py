@@ -128,11 +128,11 @@ def use_cloud_storage(
         except ImportError:
             raise ImportError(
                 "Cloud storage requires fsspec. Install with:\n\n"
-                "  pip install edgartools[cloud]\n\n"
+                '  pip install "edgartools[cloud]"\n\n'
                 "Or for specific providers:\n"
-                "  pip install edgartools[s3]     # AWS S3, R2, MinIO\n"
-                "  pip install edgartools[gcs]    # Google Cloud Storage\n"
-                "  pip install edgartools[azure]  # Azure Blob Storage\n"
+                '  pip install "edgartools[s3]"     # AWS S3, R2, MinIO\n'
+                '  pip install "edgartools[gcs]"    # Google Cloud Storage\n'
+                '  pip install "edgartools[azure]"  # Azure Blob Storage\n'
             )
 
         # Validate URI format

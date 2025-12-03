@@ -26,7 +26,7 @@ All AI features are **optional dependencies**:
 
 ```bash
 # Install with AI features
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 
 # Core EdgarTools works without AI dependencies
 pip install edgartools
@@ -361,7 +361,7 @@ Run EdgarTools as an MCP server for Claude Desktop and other MCP clients.
 ### Installation
 
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 ```
 
 ### Starting the Server
@@ -727,7 +727,7 @@ print(f"Processed {len(results)} filings using ~{tokens_used:.0f} tokens")
 
 **Solution**: Install AI dependencies:
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 ```
 
 ### Issue: MCP server won't start
@@ -742,7 +742,7 @@ python -m edgar.ai
 
 **Solution**: Documentation requires optional AI dependencies. Install with:
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 ```
 
 ### Issue: Token counts seem high
