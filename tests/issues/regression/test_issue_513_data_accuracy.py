@@ -13,27 +13,20 @@ Root causes:
 """
 
 import pytest
-from edgar import Company
 
 
 @pytest.mark.regression
 class TestIssue513NFLX2012TenK:
     """Test that 2012 10-K shows fiscal year 2012 data"""
 
-    @pytest.fixture
-    def nflx_2012_10k(self):
-        """Get Netflix 2012 10-K filing"""
-        company = Company("NFLX")
-        return company.get_filings(form="10-K", accession_number="0001065280-13-000008").latest()
-
-    def test_2011_10k_correctly_excludes_future_2012_data(self, nflx_2012_10k):
+    def test_2011_10k_correctly_excludes_future_2012_data(self, nflx_2012_10k_filing):
         """
         The filing 0001065280-13-000008 is actually the fiscal 2011 10-K (period ending 2011-12-31),
         NOT the fiscal 2012 10-K. It correctly excludes 2012 data as that would be from a future period.
 
         This test verifies the document date filter is working correctly to prevent future period bugs.
         """
-        xbrl = nflx_2012_10k.xbrl()
+        xbrl = nflx_2012_10k_filing.xbrl()
 
         # Verify this is the fiscal 2011 filing
         assert xbrl.period_of_report == '2011-12-31', \
@@ -52,11 +45,11 @@ class TestIssue513NFLX2012TenK:
         assert '2012-12-31' not in df.columns, \
             "Should NOT include 2012-12-31 (future fiscal year relative to this filing)"
 
-    def test_period_selection_excludes_multi_year_periods(self, nflx_2012_10k):
+    def test_period_selection_excludes_multi_year_periods(self, nflx_2012_10k_filing):
         """Period selection should not select multi-year cumulative periods"""
         from edgar.xbrl.period_selector import select_periods
 
-        xbrl = nflx_2012_10k.xbrl()
+        xbrl = nflx_2012_10k_filing.xbrl()
         periods = select_periods(xbrl, 'IncomeStatement', max_periods=4)
 
         period_keys = [pk for pk, _ in periods]
@@ -80,9 +73,9 @@ class TestIssue513NFLX2012TenK:
                     assert 300 < days <= 370, \
                         f"Period {label} has {days} days, should be 300-370 for annual periods"
 
-    def test_fiscal_year_2012_has_revenue_data(self, nflx_2012_10k):
+    def test_fiscal_year_2012_has_revenue_data(self, nflx_2012_10k_filing):
         """2012 fiscal year should have revenue data"""
-        xbrl = nflx_2012_10k.xbrl()
+        xbrl = nflx_2012_10k_filing.xbrl()
 
         # Get revenue facts for 2012 period
         revenue_facts = xbrl.facts.query().by_concept("Revenue").by_period_key("duration_2012-01-01_2012-12-31").to_dataframe()
@@ -95,15 +88,9 @@ class TestIssue513NFLX2012TenK:
 class TestIssue513NFLXRevenueDeduplication:
     """Test that revenue deduplication preserves dimensional segment data"""
 
-    @pytest.fixture
-    def nflx_2025_q3_10q(self):
-        """Get Netflix Q3 2025 10-Q filing"""
-        company = Company("NFLX")
-        return company.get_filings(form="10-Q", accession_number="0001065280-25-000406").latest()
-
-    def test_revenue_segments_preserved_in_income_statement(self, nflx_2025_q3_10q):
+    def test_revenue_segments_preserved_in_income_statement(self, nflx_2025_q3_10q_filing):
         """Revenue segment breakdown should be preserved, not deduplicated"""
-        statement = nflx_2025_q3_10q.xbrl().statements.income_statement()
+        statement = nflx_2025_q3_10q_filing.xbrl().statements.income_statement()
         df = statement.to_dataframe()
 
         # Check that revenue segment labels are present
@@ -126,11 +113,11 @@ class TestIssue513NFLXRevenueDeduplication:
         assert len(found_segments) >= 3, \
             f"Should find multiple revenue segments, found: {found_segments}"
 
-    def test_deduplication_considers_dimensions(self, nflx_2025_q3_10q):
+    def test_deduplication_considers_dimensions(self, nflx_2025_q3_10q_filing):
         """Deduplication should group by (period, value, dimensions), not just (period, value)"""
         from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
 
-        xbrl = nflx_2025_q3_10q.xbrl()
+        xbrl = nflx_2025_q3_10q_filing.xbrl()
         income_data = xbrl.get_statement("IncomeStatement")
 
         # Get revenue items with the same value
@@ -163,9 +150,9 @@ class TestIssue513NFLXRevenueDeduplication:
                     # The fix ensures dimensional differences are preserved
                     assert True, "Items with different dimensions are correctly preserved"
 
-    def test_revenue_fact_count_reasonable(self, nflx_2025_q3_10q):
+    def test_revenue_fact_count_reasonable(self, nflx_2025_q3_10q_filing):
         """Revenue facts should be present and not over-deduplicated"""
-        xbrl = nflx_2025_q3_10q.xbrl()
+        xbrl = nflx_2025_q3_10q_filing.xbrl()
 
         # Get all revenue facts
         revenue_facts = xbrl.facts.query().by_concept("Revenue").to_dataframe()
