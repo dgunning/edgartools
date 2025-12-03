@@ -8,9 +8,9 @@ from abc import ABC, abstractmethod
 from functools import cached_property
 from typing import TYPE_CHECKING, Iterable, List, Optional, Tuple, TypeVar, Union
 
-if TYPE_CHECKING:
-    import pyarrow
+import pyarrow as pa
 
+if TYPE_CHECKING:
     from edgar.entity.enhanced_statement import StructuredStatement
     from edgar.entity.filings import EntityFilings
     from edgar.enums import FormType, PeriodType
@@ -261,8 +261,8 @@ class Entity(SecFiler):
         Returns:
             EntityFilings: An empty filings container
         """
-        from edgar.entity.filings import COMPANY_FILINGS_SCHEMA
-        table = pyarrow.Table.from_arrays([[] for _ in range(13)], schema=COMPANY_FILINGS_SCHEMA)
+        from edgar.entity.filings import COMPANY_FILINGS_SCHEMA, EntityFilings
+        table = pa.Table.from_arrays([[] for _ in range(13)], schema=COMPANY_FILINGS_SCHEMA)
         return EntityFilings(table, cik=self.cik, company_name=self.name)
 
     def get_facts(self, period_type: Optional[Union[str, 'PeriodType']] = None) -> Optional[EntityFacts]:
