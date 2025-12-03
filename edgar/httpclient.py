@@ -66,6 +66,7 @@ def _get_cache_rules() -> dict:
 CACHE_RULES = _get_cache_rules()
 
 def get_cache_directory() -> str:
+    """Get the HTTP cache directory, respecting EDGAR_LOCAL_DATA_DIR env var."""
     cachedir = get_edgar_data_directory() / "_tcache"
     cachedir.mkdir(parents=True, exist_ok=True)
 
