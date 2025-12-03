@@ -49,8 +49,9 @@ def export_claude_skills(skill, output_dir: Optional[Path] = None, install: bool
 
     # Determine output directory
     if install and output_dir is None:
-        # Default: Install to ~/.claude/skills/
-        output_dir = Path.home() / ".claude" / "skills"
+        # Default: Install to ~/.claude/skills/ (or CLAUDE_SKILLS_DIR)
+        from edgar.paths import get_claude_skills_directory
+        output_dir = get_claude_skills_directory(create=False)
     elif output_dir is None:
         # No install flag, no output_dir: use current directory
         output_dir = Path.cwd()

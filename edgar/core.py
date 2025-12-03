@@ -161,8 +161,9 @@ else:
 
 edgar_identity = 'EDGAR_IDENTITY'
 
-# Local storage directory.
-edgar_data_dir = os.path.join(os.path.expanduser("~"), ".edgar")
+# Local storage directory - use centralized path configuration
+from edgar.paths import get_data_directory as _get_data_directory
+edgar_data_dir = str(_get_data_directory(create=False))
 
 
 def set_identity(user_identity: str):
@@ -311,11 +312,16 @@ def get_resource(file: str):
 
 
 def get_edgar_data_directory() -> Path:
-    """Get the edgar data directory"""
-    default_local_data_dir = Path(os.path.join(os.path.expanduser("~"), ".edgar"))
-    edgar_data_dir = Path(os.getenv('EDGAR_LOCAL_DATA_DIR', default_local_data_dir))
-    os.makedirs(edgar_data_dir, exist_ok=True)
-    return edgar_data_dir
+    """Get the edgar data directory.
+
+    The directory can be customized via the EDGAR_LOCAL_DATA_DIR environment
+    variable or by using edgar.paths.set_data_directory().
+
+    Returns:
+        Path to the Edgar data directory. Creates it if it doesn't exist.
+    """
+    from edgar.paths import get_data_directory
+    return get_data_directory(create=True)
 
 
 class TooManyRequestsException(Exception):
