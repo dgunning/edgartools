@@ -179,9 +179,9 @@ else:
 - [EdgarTools Documentation](https://github.com/dgunning/edgartools)
 - [Report Issues](https://github.com/dgunning/edgartools/issues)
 
-## For Luciana (and others with similar issues)
+## Troubleshooting Workflow
 
-If you're reading this because you got a link from support:
+If you're having SSL issues:
 
 1. **Start fresh** - Close Jupyter, restart your Python session
 2. **Run diagnostic**: `python scripts/test_edgar_diagnostic.py`
