@@ -22,10 +22,12 @@ class HarnessStorage:
 
         Args:
             db_path: Path to SQLite database file. Defaults to ~/.edgar_test/harness.db
+                    (or EDGAR_TEST_DIR/harness.db if environment variable is set).
                     Use ":memory:" for in-memory database (testing only)
         """
         if db_path is None:
-            db_path = Path("~/.edgar_test/harness.db")
+            from edgar.paths import get_test_db_path
+            db_path = get_test_db_path()
 
         if db_path == ":memory:":
             self.db_path = ":memory:"

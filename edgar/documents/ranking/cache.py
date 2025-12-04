@@ -54,9 +54,10 @@ class SearchIndexCache:
                  cache_dir: Optional[Path] = None,
                  ttl_hours: int = 24):
         """Initialize cache."""
+        from edgar.paths import get_search_cache_directory
         self.memory_cache_size = memory_cache_size
         self.disk_cache_enabled = disk_cache_enabled
-        self.cache_dir = cache_dir or Path.home() / ".edgar_cache" / "search"
+        self.cache_dir = cache_dir or get_search_cache_directory(create=False)
         self.ttl = timedelta(hours=ttl_hours)
 
         # In-memory cache (LRU)
