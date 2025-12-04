@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.34.3] - 2025-12-04
+
+### Fixed
+
+- **Test Isolation for SSL Verification Settings**
+  - Fixed test fixture that could leak SSL verification state between tests
+  - Added autouse fixture to reset HTTP_MGR state between all tests
+  - Always resets verify_ssl to True (the actual default) before and after each test
+  - Prevents CI failures when tests run in different orders
+  - **Files**: `tests/conftest.py`, `scripts/test_ssl_verify_fix.py`
+  - **Impact**: More reliable test suite, prevents intermittent CI failures
+
+### Documentation
+
+- Removed user-specific references from SSL troubleshooting documentation
+
 ## [4.34.2] - 2025-12-03
 
 ### Fixed
