@@ -39,6 +39,7 @@ def parse_infotable_xml(infotable_xml: str) -> pd.DataFrame:
 
         info_table["PutCall"] = child_text(info_tag, "putCall") or ""
         info_table['InvestmentDiscretion'] = child_text(info_tag, "investmentDiscretion")
+        info_table['OtherManager'] = child_text(info_tag, "otherManager")  # Issue #512: Manager assignment per holding
 
         # Voting authority
         voting_auth_tag = info_tag.find("votingAuthority")

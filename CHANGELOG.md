@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.35.0] - 2025-12-04
+
+### Added
+
+- **XBRL Statement Hierarchy - parent_concept Column** (#514)
+  - Added `parent_concept` column to XBRL statement DataFrames
+  - Exposes calculation/presentation hierarchy relationships from presentation linkbase
+  - Enables programmatic analysis of XBRL concept parent-child relationships
+  - Parent concept shows element_id of parent in the presentation tree
+  - Works alongside existing metadata columns (balance, weight, preferred_sign)
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/statements.py`
+  - **Tests**: `tests/issues/regression/test_issue_514_parent_concept.py`
+  - **Impact**: Users can now model financial statement hierarchies and analyze concept relationships
+
+- **13F Manager Assignment Enhancements** (#512)
+  - Added `OtherManager` column to 13F-HR holdings DataFrame
+  - Captures manager assignments for each holding in multi-manager institutional filings
+  - Supports comma-separated manager IDs (e.g., "43", "43,01")
+  - Fixed cover page XML parsing bug: `otherManagersInfo` → `otherManagers2Info`
+  - Maintains backward compatibility with old format
+  - **Files**: `edgar/thirteenf/parsers/infotable_xml.py`, `edgar/thirteenf/parsers/primary_xml.py`
+  - **Tests**: `tests/issues/regression/test_issue_512_13f_manager_assignment.py`
+  - **Impact**: Enables analysis of manager-specific holdings in multi-manager 13F filings
+
+- **Configurable EDGAR Data Paths** (#516)
+  - Added centralized path configuration via `edgar.configure_paths()`
+  - Support for `EDGAR_LOCAL_DATA_DIR` environment variable
+  - Consolidated path management in `edgar.io.paths` module
+  - **Files**: `edgar/io/paths.py`, `edgar/io/__init__.py`
+  - **Tests**: `tests/test_paths.py`
+  - **Impact**: Users can customize where EDGAR data is stored locally
+
 ## [4.34.3] - 2025-12-04
 
 ### Fixed

@@ -859,6 +859,7 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
+                'parent': node.parent,  # Include parent concept for hierarchy (Issue #514)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
@@ -880,6 +881,7 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
+                'parent': node.parent,  # Include parent concept for hierarchy (Issue #514)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
