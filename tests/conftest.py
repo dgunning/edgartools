@@ -18,9 +18,6 @@ def reset_http_client_state():
     This is especially important for SSL verification tests which modify
     HTTP_MGR.httpx_params["verify"] and need a clean state.
     """
-    # Store original state
-    original_verify = httpclient.HTTP_MGR.httpx_params.get("verify", True)
-
     # Close any existing client to force fresh creation
     if httpclient.HTTP_MGR._client is not None:
         try:
@@ -29,16 +26,22 @@ def reset_http_client_state():
             pass
         httpclient.HTTP_MGR._client = None
 
+    # Always reset to default (True) before each test
+    # Don't restore to "original" as that might be False from a leaked previous test
+    httpclient.HTTP_MGR.httpx_params["verify"] = True
+
     yield
 
-    # Restore original state and close client
-    httpclient.HTTP_MGR.httpx_params["verify"] = original_verify
+    # Cleanup and reset to default after test
     if httpclient.HTTP_MGR._client is not None:
         try:
             httpclient.HTTP_MGR._client.close()
         except Exception:
             pass
         httpclient.HTTP_MGR._client = None
+
+    # Always reset to default (True) to prevent state leaking to next test
+    httpclient.HTTP_MGR.httpx_params["verify"] = True
 # Base paths
 FIXTURE_DIR = Path("tests/fixtures/xbrl")
 DATA_DIR = Path("data/xbrl/datafiles")
