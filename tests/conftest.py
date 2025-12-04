@@ -8,6 +8,37 @@ from edgar._filings import Filing, get_filings
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture(autouse=True)
+def reset_http_client_state():
+    """
+    Reset HTTP client state between tests to ensure test isolation.
+
+    This is especially important for SSL verification tests which modify
+    HTTP_MGR.httpx_params["verify"] and need a clean state.
+    """
+    # Store original state
+    original_verify = httpclient.HTTP_MGR.httpx_params.get("verify", True)
+
+    # Close any existing client to force fresh creation
+    if httpclient.HTTP_MGR._client is not None:
+        try:
+            httpclient.HTTP_MGR._client.close()
+        except Exception:
+            pass
+        httpclient.HTTP_MGR._client = None
+
+    yield
+
+    # Restore original state and close client
+    httpclient.HTTP_MGR.httpx_params["verify"] = original_verify
+    if httpclient.HTTP_MGR._client is not None:
+        try:
+            httpclient.HTTP_MGR._client.close()
+        except Exception:
+            pass
+        httpclient.HTTP_MGR._client = None
 # Base paths
 FIXTURE_DIR = Path("tests/fixtures/xbrl")
 DATA_DIR = Path("data/xbrl/datafiles")

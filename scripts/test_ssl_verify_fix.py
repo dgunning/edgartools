@@ -5,7 +5,30 @@ This tests that configure_http(verify_ssl=False) properly propagates the
 verify parameter to the HTTP transport layer, fixing the httpxthrottlecache bug.
 """
 
+import pytest
 from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+
+@pytest.fixture(autouse=True)
+def reset_http_client():
+    """Reset HTTP client state before and after each test."""
+    # Close any existing client
+    if HTTP_MGR._client is not None:
+        HTTP_MGR._client.close()
+        HTTP_MGR._client = None
+
+    # Reset to default verify=True
+    configure_http(verify_ssl=True)
+
+    yield
+
+    # Cleanup after test
+    if HTTP_MGR._client is not None:
+        HTTP_MGR._client.close()
+        HTTP_MGR._client = None
+
+    # Reset to default
+    configure_http(verify_ssl=True)
 
 
 def test_ssl_verify_propagation():
