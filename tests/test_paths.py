@@ -25,6 +25,7 @@ from edgar.paths import (
 )
 
 
+@pytest.mark.fast
 class TestDefaultPaths:
     """Test default path behavior (when no env vars are set)."""
 
@@ -74,6 +75,7 @@ class TestDefaultPaths:
         assert db_path == test_dir / 'harness.db'
 
 
+@pytest.mark.fast
 class TestCustomPathsViaEnvVars:
     """Test custom paths set via environment variables."""
 
@@ -126,6 +128,7 @@ class TestCustomPathsViaEnvVars:
         assert anchor_dir == custom_path / 'anchors'
 
 
+@pytest.mark.fast
 class TestSetterFunctions:
     """Test programmatic path setting via setter functions."""
 
@@ -188,6 +191,7 @@ class TestSetterFunctions:
         assert os.environ[ENV_CLAUDE_SKILLS_DIR] == str(custom_path)
 
 
+@pytest.mark.fast
 class TestDirectoryCreation:
     """Test automatic directory creation behavior."""
 
@@ -224,6 +228,7 @@ class TestDirectoryCreation:
         assert search_dir == custom_cache / 'search'
 
 
+@pytest.mark.fast
 class TestPathExpansion:
     """Test that paths with ~ are properly expanded."""
 
@@ -236,6 +241,7 @@ class TestPathExpansion:
         assert '~' not in str(path)
 
 
+@pytest.mark.fast
 class TestIntegrationWithEdgarCore:
     """Test integration with edgar.core.get_edgar_data_directory."""
 
