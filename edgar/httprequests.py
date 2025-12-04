@@ -501,6 +501,7 @@ Error: {str(self.original_error)}"""
 
         footer = """
 ⚠️  Only disable SSL verification in trusted network environments.
+   You can also set EDGAR_VERIFY_SSL=false before importing edgar.
 
 Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verification.md"""
 
