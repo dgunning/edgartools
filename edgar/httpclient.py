@@ -18,11 +18,45 @@ except (locale.Error, ValueError):
     # This shouldn't happen on most systems, but better safe than sorry
     pass
 
+from typing import Any
+
 from httpxthrottlecache import HttpxThrottleCache
+
+# =============================================================================
+# WORKAROUND for httpxthrottlecache bug: SSL verify parameter not passed to transport
+#
+# Bug: httpxthrottlecache v0.2.1 (and possibly earlier versions) fails to pass the
+# 'verify' parameter to the HTTP transport, causing SSL verification to remain enabled
+# even when configure_http(verify_ssl=False) is called.
+#
+# Impact: Users behind corporate VPNs/proxies with SSL inspection cannot disable
+# SSL verification, making edgartools unusable in those environments.
+#
+# Upstream issue: https://github.com/paultiq/httpxthrottlecache/issues/XXX (TODO: create)
+#
+# TODO: Remove this monkey patch once httpxthrottlecache releases a fix (check for v0.3.0+)
+# =============================================================================
+def _patched_get_httpx_transport_params(self, params: dict[str, Any]) -> dict[str, Any]:
+    """
+    Patched version that includes the 'verify' parameter for SSL configuration.
+
+    This fixes a bug where httpxthrottlecache._get_httpx_transport_params() only
+    extracts 'http2' and 'proxy' parameters, ignoring 'verify'.
+    """
+    http2 = params.get("http2", False)
+    proxy = self.proxy
+    verify = params.get("verify", True)  # Extract verify parameter (defaults to True for security)
+
+    return {"http2": http2, "proxy": proxy, "verify": verify}
+
+
+# Apply the monkey patch at module import time
+HttpxThrottleCache._get_httpx_transport_params = _patched_get_httpx_transport_params
+# =============================================================================
 
 from edgar.core import get_identity, strtobool
 
-from .core import edgar_data_dir, get_edgar_data_directory
+from .core import get_edgar_data_directory
 
 MAX_SUBMISSIONS_AGE_SECONDS = 30  # Check for submissions every 30 seconds (reduced from 10 min for Issue #471)
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes

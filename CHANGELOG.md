@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.34.2] - 2025-12-03
+
+### Fixed
+
+- **SSL Verification Bug - Critical Fix for Corporate VPN Users**
+  - Fixed critical bug where `configure_http(verify_ssl=False)` failed to actually disable SSL verification
+  - **Root Cause**: httpxthrottlecache v0.2.1 bug - `_get_httpx_transport_params()` method didn't pass `verify` parameter to HTTP transport
+  - **Impact**: Users behind corporate VPNs/proxies with SSL inspection can now successfully disable SSL verification
+  - **Solution**: Added monkey patch to `edgar/httpclient.py` that ensures `verify` parameter reaches the transport layer
+  - **Workaround Status**: Temporary until httpxthrottlecache upstream fix is released
+  - **File**: `edgar/httpclient.py` lines 25-55
+  - **Tests**: `scripts/test_ssl_verify_fix.py`
+  - **Documentation**: `data/ssl/RESOLUTION.md`, `data/ssl/httpxthrottlecache-issue.md`
+
 ## [4.34.1] - 2025-12-02
 
 ### Added
