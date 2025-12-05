@@ -167,14 +167,15 @@ def _get_data_staleness_days(latest_date: Optional[Union[datetime, date, str]]) 
 
 def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
     """
-    Check if the user's date filter includes today's date or recent dates (past 6 months).
+    Check if the user's date filter likely expects current-day data.
     This is used to determine whether to show staleness warnings.
 
     Args:
         filing_date_param: The filing_date parameter from filter() or get_filings()
 
     Returns:
-        True if the parameter requests today's filings OR dates within the past 6 months
+        True if the parameter requests today's filings (single date = today) OR
+        a date range starting within past 6 months that includes today
     """
     if not filing_date_param:
         return False
@@ -188,22 +189,18 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
     try:
         start_date, end_date, is_range = extract_dates(filing_date_param)
 
-        # Check if user is requesting today's filings
+        # Check if user is requesting today's filings (single date)
         if not is_range and start_date.date() == today:
             return True
 
-        # Check if the single date is within past 6 months
-        if not is_range and start_date.date() >= six_months_ago:
-            return True
-
-        # For date ranges
+        # For date ranges: warn if start is within past 6 months AND range includes today
         if is_range:
-            # Check if range includes today or is open-ended to today
             start = start_date.date() if start_date else date.min
             end = end_date.date() if end_date else date.max
 
-            # Only warn if the range includes today AND starts within past 6 months
-            if start <= today <= end and start >= six_months_ago:
+            # Only warn if range starts within past 6 months AND includes today
+            # This catches cases like "2025-10-02:" which likely expects current data
+            if start >= six_months_ago and start <= today <= end:
                 return True
 
     except:
@@ -559,7 +556,11 @@ class Filings:
         """Save the filing index as parquet"""
         self.save_parquet(location)
 
-    def download(self, data_directory: Optional[str] = None):
+    def download(self, data_directory: Optional[str] = None,
+                 compress: bool = True,
+                 compression_level: int = 6,
+                 upload_to_cloud: bool = False,
+                 disable_progress: bool = False):
         """
         Download the filings based on the accession numbers in this Filings object.
 
@@ -568,11 +569,19 @@ class Filings:
 
         Args:
             data_directory: Directory to save the downloaded files. Defaults to the Edgar data directory.
+            compress: Whether to compress the extracted files to save disk space. Default is True.
+            compression_level: Compression level for gzip (1-9, with 9 being highest compression). Default is 6.
+            upload_to_cloud: If True, upload downloaded filings to cloud storage after download. Default is False.
+            disable_progress: If True, suppress progress bars. Useful for logging environments. Default is False.
         """
         from edgar.storage import download_filings
-        download_filings(data_directory=data_directory, 
+        download_filings(data_directory=data_directory,
                          overwrite_existing=True,
-                         filings=self)
+                         filings=self,
+                         compress=compress,
+                         compression_level=compression_level,
+                         upload_to_cloud=upload_to_cloud,
+                         disable_progress=disable_progress)
 
     def get_filing_at(self, item: int, enrich: bool = True):
         """Get filing at index, optionally enriching with related entities"""

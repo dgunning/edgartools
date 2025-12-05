@@ -961,7 +961,8 @@ CHUNK_SIZE_DEFAULT = CHUNK_SIZE
 )
 @with_identity
 async def stream_file(
-    url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, client: Optional[AsyncClient] = None, **kwargs
+    url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, client: Optional[AsyncClient] = None,
+    disable_progress: bool = False, **kwargs
 ) -> Union[str, bytes, None]:
     """
     Download a file from a URL asynchronously with progress bar using httpx.
@@ -972,6 +973,7 @@ async def stream_file(
             If None, the default is determined based on the file extension. Defaults to None.
         path (str or Path, optional): The path where the file should be saved.
         client: The httpx.AsyncClient instance
+        disable_progress (bool, optional): If True, suppress progress bar. Defaults to False.
 
     Returns:
         str or bytes: The content of the downloaded file, either as text or binary data.
@@ -1018,6 +1020,7 @@ async def stream_file(
                         bar_format="{l_bar}{bar}| {n:.2f}/{total:.2f}MB [{elapsed}<{remaining}, {rate_fmt}]",
                         desc=f"Downloading {os.path.basename(url)}",
                         ascii=False,
+                        disable=disable_progress,
                     )
 
                     # Always stream to temporary file
@@ -1150,6 +1153,7 @@ async def download_bulk_data(
         url: str,
         data_directory: Optional[Path] = None,
         client: Optional[AsyncClient] = None,
+        disable_progress: bool = False,
 ) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
@@ -1158,6 +1162,7 @@ async def download_bulk_data(
         client: The httpx.AsyncClient instance
         url: URL to download from (e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
         data_directory: Base directory for downloads
+        disable_progress: If True, suppress progress bars. Defaults to False.
 
     Returns:
         Path to the directory containing the extracted data
@@ -1189,7 +1194,7 @@ async def download_bulk_data(
 
         # Download the file
         try:
-            await stream_file(url, client=client, path=download_path)
+            await stream_file(url, client=client, path=download_path, disable_progress=disable_progress)
         except Exception as e:
             raise IOError(f"Failed to download file: {e}") from e
 
@@ -1201,7 +1206,7 @@ async def download_bulk_data(
                     total_size = sum(info.file_size for info in z.filelist)
                     extracted_size = 0
 
-                    with tqdm(total=total_size, unit="B", unit_scale=True, desc="Extracting") as pbar:
+                    with tqdm(total=total_size, unit="B", unit_scale=True, desc="Extracting", disable=disable_progress) as pbar:
                         for info in z.filelist:
                             z.extract(info, download_path)
                             extracted_size += info.file_size
@@ -1219,7 +1224,7 @@ async def download_bulk_data(
                     members = tar.getmembers()
                     total_size = sum(member.size for member in members)
 
-                    with tqdm(total=total_size, unit="B", unit_scale=True, desc="Extracting") as pbar:
+                    with tqdm(total=total_size, unit="B", unit_scale=True, desc="Extracting", disable=disable_progress) as pbar:
                         for member in members:
                             # Check for path traversal
                             member_path = os.path.join(str(download_path), member.name)
