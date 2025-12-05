@@ -10,24 +10,30 @@ __all__ = ['render_rich', 'infotable_summary']
 
 def infotable_summary(thirteen_f):
     """
-    Create a summary DataFrame of the information table for display.
+    Create a summary DataFrame of holdings for display (aggregated by security).
+
+    Uses the aggregated holdings view which provides one row per security,
+    matching industry-standard presentation.
 
     Args:
         thirteen_f: ThirteenF instance
 
     Returns:
-        pd.DataFrame or None: Summary of holdings sorted by value
+        pd.DataFrame or None: Summary of holdings sorted by value (aggregated view)
     """
     if thirteen_f.has_infotable():
-        infotable = thirteen_f.infotable
-        if infotable is not None and len(infotable) > 0:
-            return (infotable
-                    .filter(['Issuer', 'Class', 'Cusip', 'Ticker', 'Value', 'SharesPrnAmount', 'Type', 'PutCall',
-                             'SoleVoting', 'SharedVoting', 'NonVoting'])
-                    .rename(columns={'SharesPrnAmount': 'Shares'})
-                    .assign(Value=lambda df: df.Value,
-                            Type=lambda df: df.Type.fillna('-'),
-                            Ticker=lambda df: df.Ticker.fillna(''))
+        holdings = thirteen_f.holdings
+        if holdings is not None and len(holdings) > 0:
+            # Select columns that exist (filter automatically handles missing columns)
+            display_cols = ['Issuer', 'Class', 'Cusip', 'Ticker', 'Value', 'SharesPrnAmount',
+                           'Type', 'PutCall', 'SoleVoting', 'SharedVoting', 'NonVoting']
+            available_cols = [col for col in display_cols if col in holdings.columns]
+
+            return (holdings[available_cols]
+                    .rename(columns={'SharesPrnAmount': 'Shares'} if 'SharesPrnAmount' in available_cols else {})
+                    .assign(Value=lambda df: df.Value if 'Value' in df.columns else 0,
+                            Type=lambda df: df.Type.fillna('-') if 'Type' in df.columns else '-',
+                            Ticker=lambda df: df.Ticker.fillna('') if 'Ticker' in df.columns else '')
                     .sort_values(['Value'], ascending=False)
                     )
     return None

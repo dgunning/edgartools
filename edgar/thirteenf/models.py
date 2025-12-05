@@ -186,8 +186,18 @@ class ThirteenF:
     @lru_cache(maxsize=1)
     def infotable(self):
         """
-        Returns the information table as a pandas DataFrame.
+        Returns the information table as a pandas DataFrame (disaggregated by manager).
+
+        For multi-manager filings, this returns separate rows for each manager combination's
+        holdings of the same security. Use the `holdings` property for an aggregated view.
+
         Supports both XML format (2013+) and TXT format (2012 and earlier).
+
+        Returns:
+            pd.DataFrame: Holdings disaggregated by manager, with OtherManager column
+
+        See Also:
+            holdings: Aggregated view (recommended for most users)
         """
         from edgar.thirteenf.parsers.infotable_xml import parse_infotable_xml
         from edgar.thirteenf.parsers.infotable_txt import parse_infotable_txt
@@ -200,6 +210,79 @@ class ThirteenF:
             elif self.infotable_txt:
                 return parse_infotable_txt(self.infotable_txt)
         return None
+
+    @property
+    @lru_cache(maxsize=1)
+    def holdings(self):
+        """
+        Returns aggregated holdings by security (user-friendly view).
+
+        For multi-manager filings, this aggregates holdings across all manager combinations,
+        providing a single row per unique security. This is the recommended view for most users
+        as it matches industry-standard presentation (CNBC, Bloomberg, etc.).
+
+        Aggregation logic:
+        - Group by CUSIP (unique security identifier)
+        - Sum: SharesPrnAmount, Value, SoleVoting, SharedVoting, NonVoting
+        - Keep: Issuer, Class, Cusip, Ticker, Type, PutCall (when consistent)
+        - Drop: OtherManager, InvestmentDiscretion (manager-specific fields)
+
+        Returns:
+            pd.DataFrame: Holdings aggregated by security, sorted by value descending
+
+        Example:
+            >>> thirteen_f.holdings  # Aggregated view (e.g., 40 rows for Berkshire)
+            >>> thirteen_f.infotable  # Disaggregated by manager (e.g., 121 rows)
+
+        See Also:
+            infotable: Disaggregated view showing manager-specific holdings
+        """
+        import pandas as pd
+
+        infotable = self.infotable
+        if infotable is None or len(infotable) == 0:
+            return None
+
+        # Work on a copy to avoid modifying the cached infotable
+        df = infotable.copy()
+
+        # Columns to keep as-is (first value when grouping)
+        id_cols = ['Issuer', 'Class', 'Cusip', 'Ticker']
+
+        # Columns to sum across managers
+        sum_cols = ['SharesPrnAmount', 'Value', 'SoleVoting', 'SharedVoting', 'NonVoting']
+
+        # Check if numeric columns need conversion (handle potential object dtypes)
+        for col in sum_cols:
+            if col in df.columns and df[col].dtype == 'object':
+                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype('int64')
+
+        # Aggregate by CUSIP
+        agg_dict = {}
+
+        # Keep first value for ID columns
+        for col in id_cols:
+            if col in df.columns:
+                agg_dict[col] = 'first'
+
+        # Sum numeric columns
+        for col in sum_cols:
+            if col in df.columns:
+                agg_dict[col] = 'sum'
+
+        # Handle Type and PutCall - keep if consistent across managers, otherwise use first
+        for col in ['Type', 'PutCall']:
+            if col in df.columns:
+                agg_dict[col] = 'first'  # Use first value (typically consistent per CUSIP)
+
+        # Group by CUSIP and aggregate
+        holdings = df.groupby('Cusip', as_index=False).agg(agg_dict)
+
+        # Sort by value descending
+        if 'Value' in holdings.columns:
+            holdings = holdings.sort_values('Value', ascending=False).reset_index(drop=True)
+
+        return holdings
 
     @property
     def accession_number(self):

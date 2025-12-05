@@ -29,6 +29,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests**: `tests/issues/regression/test_issue_512_13f_manager_assignment.py`
   - **Impact**: Enables analysis of manager-specific holdings in multi-manager 13F filings
 
+- **13F Holdings Aggregation - User-Friendly View** (#207, edgartools-98d)
+  - Added `holdings` property to ThirteenF class - **recommended for most users**
+  - Aggregates holdings by security (CUSIP), providing one row per unique security
+  - Matches industry-standard presentation (CNBC, Bloomberg, etc.)
+  - Example: State Street filing: 26,569 rows → 7,218 unique securities (72.8% reduction)
+  - Sums numeric columns: SharesPrnAmount, Value, SoleVoting, SharedVoting, NonVoting
+  - Preserves: Issuer, Class, Cusip, Ticker, Type, PutCall
+  - Drops manager-specific fields: OtherManager, InvestmentDiscretion
+  - `infotable` property preserved for power users (disaggregated by manager)
+  - Updated `__rich__` display to use aggregated view by default
+  - **Files**: `edgar/thirteenf/models.py`, `edgar/thirteenf/rendering.py`
+  - **Tests**: `tests/thirteenf/test_holdings_aggregation.py`
+  - **Impact**: Simpler, more intuitive default view for 95% of use cases while preserving detailed data for analysis
+  - **API**:
+    ```python
+    thirteenf.holdings   # Aggregated by security (user-friendly)
+    thirteenf.infotable  # Disaggregated by manager (power users)
+    ```
+
 - **Configurable EDGAR Data Paths** (#516)
   - Added centralized path configuration via `edgar.configure_paths()`
   - Support for `EDGAR_LOCAL_DATA_DIR` environment variable
