@@ -56,6 +56,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Tests**: `tests/test_paths.py`
   - **Impact**: Users can customize where EDGAR data is stored locally
 
+- **Progress Bar Suppression for Logging Environments** (#507)
+  - Added `disable_progress` parameter to all download functions
+  - Suppresses tqdm progress bars in environments where they create excessive log entries
+  - Applies to: `download_filings()`, `download_facts()`, `download_submissions()`, `download_edgar_data()`, `compress_all_filings()`
+  - Extended `Filings.download()` with additional options: `disable_progress`, `compress`, `compression_level`, `upload_to_cloud`
+  - **Files**: `edgar/_filings.py`, `edgar/httprequests.py`, `edgar/storage.py`
+  - **Impact**: Cleaner logs in production environments (cloud functions, batch jobs, real-time logging platforms)
+  - **API**:
+    ```python
+    filings.download(disable_progress=True)  # No progress bars
+    ```
+
+### Fixed
+
+- **Current Filings Date Range Detection**
+  - Fixed bug where warning displayed for any date in past 6 months
+  - Now only warns when date range starts within past 6 months AND includes today
+  - Prevents false warnings for specific historical date ranges
+  - **Files**: `edgar/_filings.py`
+
+### Changed
+
+- **13F Test Data Update**
+  - Updated batch 13F test data to align with latest holdings aggregation features
+  - **Files**: `tests/batch/batch_13FHR.py`
+
 ## [4.34.3] - 2025-12-04
 
 ### Fixed
