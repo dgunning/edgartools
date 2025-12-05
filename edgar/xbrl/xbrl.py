@@ -1195,6 +1195,15 @@ class XBRL:
                 if matching_statements:
                     found_role = matching_statements[0]['role']
 
+            # Issue #518: Special fallback for IncomeStatement -> ComprehensiveIncome
+            # Many filings have ComprehensiveIncome instead of separate IncomeStatement
+            if not matching_statements and statement_type == 'IncomeStatement':
+                if 'ComprehensiveIncome' in self._statement_by_standard_name:
+                    matching_statements = self._statement_by_standard_name['ComprehensiveIncome']
+                    if matching_statements:
+                        found_role = matching_statements[0]['role']
+                        log.info("IncomeStatement not found, using ComprehensiveIncome as fallback")
+
             # If not found by standard name, try by role URI
             if not matching_statements and statement_type.startswith(
                     'http') and statement_type in self._statement_by_role_uri:
@@ -1224,6 +1233,18 @@ class XBRL:
                         matching_statements = statements
                         found_role = statements[0]['role']
                         break
+
+            # Issue #518: Validate statement type matches to prevent returning wrong statement
+            # Don't return CashFlowStatement when IncomeStatement was requested
+            if matching_statements and matching_statements[0].get('type'):
+                matched_type = matching_statements[0]['type']
+                financial_statement_types = ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement',
+                                             'ComprehensiveIncome', 'StatementOfEquity']
+                # If requesting a specific financial statement and got a different one, reject it
+                if statement_type in financial_statement_types and matched_type != statement_type:
+                    log.warning(f"Found {matched_type} when looking for {statement_type}, rejecting type mismatch")
+                    matching_statements = []
+                    found_role = None
 
             # Update actual statement type if we found a match
             if matching_statements and matching_statements[0]['type']:
