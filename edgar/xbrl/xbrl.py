@@ -26,6 +26,7 @@ from rich.table import Column, Table
 from rich.table import Table as RichTable
 
 from edgar.attachments import Attachments
+from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich, strip_ansi_text
 from edgar.xbrl.core import STANDARD_LABEL
@@ -1202,7 +1203,8 @@ class XBRL:
                     matching_statements = self._statement_by_standard_name['ComprehensiveIncome']
                     if matching_statements:
                         found_role = matching_statements[0]['role']
-                        log.info("IncomeStatement not found, using ComprehensiveIncome as fallback")
+                        if VERBOSE_EXCEPTIONS:
+                            log.info("IncomeStatement not found, using ComprehensiveIncome as fallback")
 
             # If not found by standard name, try by role URI
             if not matching_statements and statement_type.startswith(
@@ -1242,7 +1244,8 @@ class XBRL:
                                              'ComprehensiveIncome', 'StatementOfEquity']
                 # If requesting a specific financial statement and got a different one, reject it
                 if statement_type in financial_statement_types and matched_type != statement_type:
-                    log.warning(f"Found {matched_type} when looking for {statement_type}, rejecting type mismatch")
+                    if VERBOSE_EXCEPTIONS:
+                        log.warning(f"Found {matched_type} when looking for {statement_type}, rejecting type mismatch")
                     matching_statements = []
                     found_role = None
 

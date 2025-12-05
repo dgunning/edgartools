@@ -937,7 +937,8 @@ class StatementResolver:
                 statements, role, conf = comp_match
                 # Issue #518: Return actual type (ComprehensiveIncome) for transparency and accuracy
                 # Users can check if they received a fallback by comparing requested vs actual type
-                log.info(f"IncomeStatement not found, using ComprehensiveIncome as fallback (confidence: {conf:.2f})")
+                if VERBOSE_EXCEPTIONS:
+                    log.info(f"IncomeStatement not found, using ComprehensiveIncome as fallback (confidence: {conf:.2f})")
                 result = (statements, role, 'ComprehensiveIncome', conf)
                 self._cache[cache_key] = result
                 return result
