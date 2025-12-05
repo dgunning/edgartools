@@ -1,0 +1,3374 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>XBRL Mapping Files Analysis - mpreiss9 Contribution - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#xbrl-mapping-files-analysis-mpreiss9-contribution" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              XBRL Mapping Files Analysis - mpreiss9 Contribution
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Filings
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search for Specific Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filter Filings by Date/Type
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Access Filing Attachments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finding the most recent filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Companies
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Companies
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting company facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating a Multi Year Financials Data Api
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting a list of company insiders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting subsets of companies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Financial Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extract Financial Statements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Ranking Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Local Data Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/cloud-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Cloud Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSL Issues and Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsing SGML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL and Financials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XBRL and Financials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting XBRL from Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying XBRL Facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting footnotes from XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Insider Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ThirteenF Holding Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding SEC Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Resources
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues & Solutions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SEC Rate Limits & Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executive Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-gaap-taxonomy-mapping-gaap_taxonomy_mappingcsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. GAAP Taxonomy Mapping (gaap_taxonomy_mapping.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-custom-taxonomy-mapping-custom_taxonomy_mappingcsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Custom Taxonomy Mapping (custom_taxonomy_mapping.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ambiguity-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ambiguity Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ambiguity Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern Breakdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#currentnoncurrent-the-core-challenge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current/NonCurrent: The Core Challenge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assetsliabilities-ambiguity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assets/Liabilities Ambiguity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standard-tag-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standard Tag Distribution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Standard Tag Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-15-most-used-standard-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top 15 Most-Used Standard Tags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dropthisitem-tags-276-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "DropThisItem" Tags (276 total)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#company-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Company Coverage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Company Coverage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-10-companies-by-custom-mapping-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top 10 Companies by Custom Mapping Count
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-innovations-in-mpreiss9s-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Innovations in mpreiss9's Approach
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Innovations in mpreiss9&#39;s Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-reverse-mapping-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Reverse Mapping Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-colon-separator-for-ambiguity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Colon Separator for Ambiguity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-comprehensive-comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Comprehensive Comments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-cik-based-company-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. CIK-Based Company Mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-footnote-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Footnote Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-flexible-mapping-philosophy-two-reasons-for-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Flexible Mapping Philosophy: Two Reasons for Mapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Flexible Mapping Philosophy: Two Reasons for Mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reason-1-standardization-same-facts-different-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reason 1: Standardization (Same Facts, Different Tags)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reason-2-consolidation-different-facts-users-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reason 2: Consolidation (Different Facts, User's Choice)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implications-for-edgartools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implications for EdgarTools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#design-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#value-for-edgartools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Value for EdgarTools
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Value for EdgarTools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediate-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Immediate Applications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mapping-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mapping Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#balance-sheet-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Balance Sheet Sections
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-integration-immediate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Integration (Immediate)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-implementation-v4310" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Implementation (v4.31.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-enhancement-v500" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Enhancement (v5.0.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions-for-community" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Questions for Community
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-this-fits-in-the-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How This Fits in the Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="xbrl-mapping-files-analysis-mpreiss9-contribution">XBRL Mapping Files Analysis - mpreiss9 Contribution</h1>
+<p><strong>Date</strong>: 2025-11-21
+<strong>Source</strong>: GitHub Issue #494
+<strong>Contributor</strong>: @mpreiss9
+<strong>Files</strong>: custom_taxonomy_mapping.csv, gaap_taxonomy_mapping.csv
+<strong>Architecture</strong>: <code>docs-internal/planning/architecture/xbrl-standardization-pipeline.md</code></p>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>mpreiss9 shared production XBRL mapping files containing <strong>6,177 mappings</strong> refined over work with <strong>390+ companies</strong>. These files represent a goldmine of real-world standardization knowledge.</p>
+<h3 id="key-statistics">Key Statistics</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total mappings</strong></td>
+<td>6,177</td>
+</tr>
+<tr>
+<td><strong>GAAP mappings</strong></td>
+<td>2,343</td>
+</tr>
+<tr>
+<td><strong>Custom (company-specific)</strong></td>
+<td>3,834</td>
+</tr>
+<tr>
+<td><strong>Unique companies</strong></td>
+<td>390 CIKs</td>
+</tr>
+<tr>
+<td><strong>Ambiguous tags</strong></td>
+<td>215 (9.2%)</td>
+</tr>
+<tr>
+<td><strong>Current/NonCurrent ambiguities</strong></td>
+<td>202 (94% of ambiguous)</td>
+</tr>
+<tr>
+<td><strong>Tags marked "DropThisItem"</strong></td>
+<td>276</td>
+</tr>
+<tr>
+<td><strong>Unique standard tags</strong></td>
+<td>129</td>
+</tr>
+</tbody>
+</table>
+<h2 id="file-structure">File Structure</h2>
+<h3 id="1-gaap-taxonomy-mapping-gaap_taxonomy_mappingcsv">1. GAAP Taxonomy Mapping (gaap_taxonomy_mapping.csv)</h3>
+<p><strong>Purpose</strong>: Standard XBRL → Standardized tag mappings</p>
+<p><strong>Format</strong>:</p>
+<pre><code class="language-csv">xbrl_tag,std_tag,comments,deprecated
+AccountsPayableCurrentAndNoncurrent,TradePayables:OtherOperatingNonCurrentLiabilities,Curr/NonCurr ambiguity,
+</code></pre>
+<p><strong>Key Features</strong>:
+- <strong>2,343 mappings</strong> covering standard GAAP taxonomy
+- <strong>Ambiguous tags</strong> use <code>:</code> separator (e.g., <code>TagA:TagB</code>)
+- <strong>Comments</strong> column explains ambiguity patterns
+- <strong>Deprecated</strong> column flags outdated tags</p>
+<h3 id="2-custom-taxonomy-mapping-custom_taxonomy_mappingcsv">2. Custom Taxonomy Mapping (custom_taxonomy_mapping.csv)</h3>
+<p><strong>Purpose</strong>: Company-specific XBRL → Standardized tag mappings</p>
+<p><strong>Format</strong>:</p>
+<pre><code class="language-csv">cik,xbrl_tag,std_tag,comments
+1800,AccruedAllOtherLiabilities,OtherNonOperatingCurrentLiabilities,
+</code></pre>
+<p><strong>Key Features</strong>:
+- <strong>3,834 mappings</strong> across 390 companies
+- <strong>CIK-based</strong> (not ticker, for stability)
+- Top company: CIK 40545 with 82 custom mappings
+- Avg 9.8 mappings per company</p>
+<h2 id="ambiguity-analysis">Ambiguity Analysis</h2>
+<h3 id="pattern-breakdown">Pattern Breakdown</h3>
+<table>
+<thead>
+<tr>
+<th>Ambiguity Type</th>
+<th>Count</th>
+<th>% of Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Curr/NonCurr</strong></td>
+<td>202</td>
+<td>93.9%</td>
+</tr>
+<tr>
+<td><strong>Assets/Liabilities</strong></td>
+<td>11</td>
+<td>5.1%</td>
+</tr>
+<tr>
+<td><strong>Both</strong></td>
+<td>1</td>
+<td>0.5%</td>
+</tr>
+<tr>
+<td><strong>Other</strong></td>
+<td>1</td>
+<td>0.5%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="currentnoncurrent-the-core-challenge">Current/NonCurrent: The Core Challenge</h3>
+<p><strong>Problem</strong>: Same XBRL tag can represent current OR non-current items depending on context.</p>
+<p><strong>Examples</strong>:</p>
+<pre><code>AccountsPayableCurrentAndNoncurrent
+  → TradePayables (if current section)
+  → OtherOperatingNonCurrentLiabilities (if non-current section)
+
+AccountsReceivableNet
+  → TradeReceivables (if current)
+  → OtherOperatingNonCurrentAssets (if non-current)
+</code></pre>
+<p><strong>Resolution Strategy</strong> (from mpreiss9's methodology):
+1. Parse balance sheet to identify <strong>section boundaries</strong> (Assets, Liabilities, Equity)
+2. Use <strong>subtotals</strong> as section markers
+3. Apply <strong>context-aware mapping</strong> based on position
+4. Validate with <strong>Assets = Liabilities + Equity</strong></p>
+<h3 id="assetsliabilities-ambiguity">Assets/Liabilities Ambiguity</h3>
+<p><strong>Examples</strong>:</p>
+<pre><code>InterestAndDividendsPayableCurrentAndNoncurrent
+  → CashAndMarketableSecurities (if asset)
+  → OtherNonOperatingCurrentLiabilities (if liability)
+</code></pre>
+<h2 id="standard-tag-distribution">Standard Tag Distribution</h2>
+<h3 id="top-15-most-used-standard-tags">Top 15 Most-Used Standard Tags</h3>
+<table>
+<thead>
+<tr>
+<th>Standard Tag</th>
+<th>Mappings</th>
+<th>Category</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DropThisItem</td>
+<td>276</td>
+<td>Special</td>
+</tr>
+<tr>
+<td>NonoperatingIncomeExpense</td>
+<td>199</td>
+<td>Income Statement</td>
+</tr>
+<tr>
+<td>CostOfGoodsAndServicesSold</td>
+<td>142</td>
+<td>Income Statement</td>
+</tr>
+<tr>
+<td>OtherNonOperatingNonCurrentAssets</td>
+<td>140</td>
+<td>Balance Sheet</td>
+</tr>
+<tr>
+<td>Revenue</td>
+<td>139</td>
+<td>Income Statement</td>
+</tr>
+<tr>
+<td>OtherNonOperatingCurrentAssets</td>
+<td>131</td>
+<td>Balance Sheet</td>
+</tr>
+<tr>
+<td>OtherNonOperatingCurrentLiabilities</td>
+<td>82</td>
+<td>Balance Sheet</td>
+</tr>
+<tr>
+<td>OtherNonOperatingNonCurrentLiabilities</td>
+<td>81</td>
+<td>Balance Sheet</td>
+</tr>
+<tr>
+<td>IncomeTaxes</td>
+<td>78</td>
+<td>Income Statement</td>
+</tr>
+<tr>
+<td>LongTermDebt</td>
+<td>71</td>
+<td>Balance Sheet</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dropthisitem-tags-276-total">"DropThisItem" Tags (276 total)</h3>
+<p>Tags deliberately excluded from standardization:
+- EPS-related details (per-share amounts, pro-forma)
+- Accelerated share repurchase specifics
+- Antidilutive securities details
+- Auction market preferred stock details</p>
+<p><strong>Rationale</strong> (from mpreiss9):</p>
+<blockquote>
+<p>"Some xbrl tags are deliberately mapped to DropThisItem, meaning I not only don't use the item, it would confuse my code if it got mapped."</p>
+</blockquote>
+<h2 id="company-coverage">Company Coverage</h2>
+<h3 id="top-10-companies-by-custom-mapping-count">Top 10 Companies by Custom Mapping Count</h3>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>CIK</th>
+<th>Mappings</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>40545</td>
+<td>82</td>
+<td>Highest complexity</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1164727</td>
+<td>67</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>1398659</td>
+<td>45</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>1166691</td>
+<td>43</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>78003</td>
+<td>40</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>831259</td>
+<td>37</td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td>14272</td>
+<td>34</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>895126</td>
+<td>33</td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>37785</td>
+<td>32</td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>1099800</td>
+<td>32</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Distribution</strong>: 390 companies, avg 9.8 custom mappings each</p>
+<h2 id="key-innovations-in-mpreiss9s-approach">Key Innovations in mpreiss9's Approach</h2>
+<h3 id="1-reverse-mapping-structure">1. Reverse Mapping Structure</h3>
+<ul>
+<li><strong>XBRL tag as primary key</strong> (unique, unchanging)</li>
+<li><strong>Multiple standard tags</strong> per XBRL tag (context-dependent)</li>
+<li><strong>O(1) lookup</strong> vs iteration</li>
+</ul>
+<h3 id="2-colon-separator-for-ambiguity">2. Colon Separator for Ambiguity</h3>
+<pre><code class="language-csv">AccountsPayableCurrentAndNoncurrent,TradePayables:OtherOperatingNonCurrentLiabilities
+</code></pre>
+<ul>
+<li>Easy to parse programmatically</li>
+<li>No multi-column complexity</li>
+<li>Self-documenting</li>
+</ul>
+<p><strong>From mpreiss9's follow-up comment</strong>:</p>
+<blockquote>
+<p>"I forgot to mention that in the mapping files, ambiguous standard tags are separated by a colon ':'. This is easy to identify and process programatically vs multiple columns in the csv."</p>
+</blockquote>
+<h3 id="3-comprehensive-comments">3. Comprehensive Comments</h3>
+<ul>
+<li><strong>7 distinct ambiguity patterns</strong> documented</li>
+<li>Clear explanation of resolution strategy</li>
+<li>Aids debugging and validation</li>
+</ul>
+<h3 id="4-cik-based-company-mapping">4. CIK-Based Company Mapping</h3>
+<ul>
+<li><strong>Stable identifier</strong> (ticker can change)</li>
+<li>Company-level customization</li>
+<li>Scales to 390+ companies</li>
+</ul>
+<h3 id="5-footnote-integration">5. Footnote Integration</h3>
+<p>From mpreiss9:</p>
+<blockquote>
+<p>"Once my code has verified that I have an in balance primary statement, I look for footnotes or tree children of line items that add up to the primary item, and when found I swap in the footnote values."</p>
+</blockquote>
+<p>Example:
+- Primary: "Non-operating Income and Interest" (single line)
+- Footnote breakdown: Interest Income + Interest Expense + Other
+- <strong>Swaps if sums match</strong> for greater granularity</p>
+<h3 id="6-flexible-mapping-philosophy-two-reasons-for-mapping">6. Flexible Mapping Philosophy: Two Reasons for Mapping</h3>
+<p><strong>Critical Insight</strong> from mpreiss9's follow-up comment:</p>
+<blockquote>
+<p>"There are really two reasons to map an xbrl tag to a standard tag. The first reason is to take what is exactly the same kind of fact coded different ways into a common tag (for example the seemingly countless revenue tag flavors). The second reason is often overlooked but very important - a user may want to consolidate multiple kinds of facts into a single concept because the distinction is immaterial to them."</p>
+</blockquote>
+<h4 id="reason-1-standardization-same-facts-different-tags">Reason 1: Standardization (Same Facts, Different Tags)</h4>
+<p><strong>Goal</strong>: Normalize identical concepts with different XBRL names</p>
+<p><strong>Example</strong>: Revenue variations</p>
+<pre><code>us-gaap:Revenue                → &quot;Revenue&quot;
+us-gaap:Revenues               → &quot;Revenue&quot;
+us-gaap:SalesRevenueNet        → &quot;Revenue&quot;
+us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax → &quot;Revenue&quot;
+</code></pre>
+<p>All represent the same concept, just coded differently across companies.</p>
+<h4 id="reason-2-consolidation-different-facts-users-choice">Reason 2: Consolidation (Different Facts, User's Choice)</h4>
+<p><strong>Goal</strong>: Combine distinct concepts when granularity doesn't matter to the user</p>
+<p><strong>Example</strong>: Non-Operating Liabilities (mpreiss9's granular mapping)</p>
+<pre><code>us-gaap:TaxLiabilities          → &quot;Tax Liabilities&quot;
+us-gaap:RetirementLiabilities   → &quot;Retirement Liabilities&quot;
+us-gaap:OtherNonOperatingLiab   → &quot;Other Non-Operating Liabilities&quot;
+</code></pre>
+<p><strong>Alternative</strong>: Another user's consolidated mapping</p>
+<pre><code>us-gaap:TaxLiabilities          → &quot;Non-Operating Liabilities&quot;
+us-gaap:RetirementLiabilities   → &quot;Non-Operating Liabilities&quot;
+us-gaap:OtherNonOperatingLiab   → &quot;Non-Operating Liabilities&quot;
+</code></pre>
+<p>Both are valid! The choice depends on the user's analytical needs.</p>
+<h4 id="implications-for-edgartools">Implications for EdgarTools</h4>
+<p><strong>Current Approach</strong>: One "standard" mapping for all users
+- Fixed granularity level
+- EdgarTools decides the level of detail
+- Users can't easily adjust</p>
+<p><strong>Flexible Approach</strong> (mpreiss9's insight):
+- Users choose granularity based on their needs
+- Some users want detailed breakdowns
+- Others want high-level summaries
+- Same data, different views</p>
+<p><strong>Quote from mpreiss9</strong>:</p>
+<blockquote>
+<p>"For example, I gave you a pretty granular mapping, distinguishing between tax liabilities, retirement liabilities and other non-operating liabilities. Another user might just collapse all those xbrl tags into a single non-operating liability tag. This is why a flexible mapping scheme is so important."</p>
+</blockquote>
+<h4 id="design-considerations">Design Considerations</h4>
+<p><strong>User Profiles</strong> (suggested):
+- <strong>Detailed</strong>: Maximum granularity (like mpreiss9's mappings)
+- <strong>Standard</strong>: Balanced level of detail (EdgarTools default)
+- <strong>Summarized</strong>: High-level consolidation (for overview analysis)</p>
+<p><strong>Configurable Granularity</strong>:
+- Users should be able to define their own rollup rules
+- CSV format supports easy customization
+- Multiple mapping files for different use cases</p>
+<p><strong>Hierarchical Mappings</strong>:
+- Define parent-child relationships
+- Allow drill-down: "Non-Operating Liabilities" → Tax, Retirement, Other
+- Allow roll-up: Multiple detailed tags → Single summary tag</p>
+<h2 id="value-for-edgartools">Value for EdgarTools</h2>
+<h3 id="immediate-applications">Immediate Applications</h3>
+<p><strong>1. Balance Sheet Validation (edgartools-y3k)</strong>
+- Use as test data for Assets = Liabilities + Equity validation
+- Verify section boundary detection
+- Test rollup calculations</p>
+<p><strong>2. Ambiguous Tag Catalog (edgartools-3yx)</strong>
+- 215 real-world ambiguous cases documented
+- Resolution patterns identified
+- Test coverage for edge cases</p>
+<p><strong>3. Context-Aware Resolution</strong>
+- Proof that reverse mapping + context works in production
+- 390 companies validated
+- Current/NonCurrent pattern handles 94% of ambiguities</p>
+<p><strong>4. Flexible Granularity Model</strong> (Pipeline Stage 4)
+- mpreiss9's mappings provide "detailed" profile example
+- Shows how to support different analytical needs
+- Template for user-configurable mapping levels
+- Integrates with architecture as Stage 4: Granularity Transformation</p>
+<h3 id="future-enhancements">Future Enhancements</h3>
+<p><strong>1. Section Membership Dictionaries</strong>
+- Build from these mappings
+- Assets vs Liabilities classification
+- Current vs NonCurrent heuristics</p>
+<p><strong>2. CSV Workflow Tools</strong>
+- Import/export utilities
+- Excel-friendly editing
+- Merge with EdgarTools standard mappings</p>
+<p><strong>3. Enhanced Context Threading</strong>
+- Parent concept tracking
+- Section position awareness
+- Sign and value validation</p>
+<p><strong>4. User-Configurable Granularity</strong> (NEW from mpreiss9's insight - Pipeline Stage 4)
+- <strong>Mapping profiles</strong>: Detailed, Standard, Summarized
+- <strong>Custom granularity settings</strong>: Let users define rollup rules
+- <strong>Hierarchical mappings</strong>: Support drill-down and roll-up
+- <strong>Use case templates</strong>: Financial analyst, researcher, casual user
+- <strong>API design</strong>: <code>xbrl.statements.balance_sheet(granularity='detailed')</code>
+- <strong>Architecture integration</strong>: See Stage 4 in <code>xbrl-standardization-pipeline.md</code>
+- <strong>Three user levels</strong>:
+  - Level 1: Choose profile (<code>granularity='detailed'</code>)
+  - Level 2: Custom profile file (<code>Profile.from_csv()</code>)
+  - Level 3: Programmatic transformation (user owns logic)</p>
+<h2 id="technical-notes">Technical Notes</h2>
+<h3 id="mapping-logic">Mapping Logic</h3>
+<p><strong>Standard approach (current EdgarTools)</strong>:</p>
+<pre><code class="language-python">standard_tag = mapping[xbrl_tag]  # 1:1 mapping
+</code></pre>
+<p><strong>mpreiss9 approach</strong>:</p>
+<pre><code class="language-python">possible_tags = mapping[xbrl_tag].split(':')  # 1:N mapping
+standard_tag = resolve_with_context(possible_tags, context)
+</code></pre>
+<h3 id="context-structure">Context Structure</h3>
+<p>Based on mpreiss9's methodology:</p>
+<pre><code class="language-python">context = {
+    'section': 'current_assets',  # or 'current_liabilities', etc.
+    'parent': 'TotalCurrentAssets',
+    'position': 5,  # Line number in statement
+    'sign': 'debit',
+    'value': 12500.00
+}
+</code></pre>
+<h3 id="balance-sheet-sections">Balance Sheet Sections</h3>
+<pre><code>ASSETS
+  Current Assets
+    Cash, Receivables, Inventory, etc.
+    [Subtotal: CurrentAssets]
+  Non-Current Assets
+    PPE, Intangibles, LongTermInvestments, etc.
+    [Subtotal: NoncurrentAssets]
+  [Total: Assets]
+
+LIABILITIES
+  Current Liabilities
+    Payables, ShortTermDebt, etc.
+    [Subtotal: CurrentLiabilities]
+  Non-Current Liabilities
+    LongTermDebt, Pensions, etc.
+    [Subtotal: NoncurrentLiabilities]
+  [Total: Liabilities]
+
+EQUITY
+  [Total: StockholdersEquity]
+
+VALIDATION: Assets = Liabilities + Equity
+</code></pre>
+<h2 id="recommendations">Recommendations</h2>
+<h3 id="phase-1-integration-immediate">Phase 1: Integration (Immediate)</h3>
+<ol>
+<li><strong>Add to test fixtures</strong></li>
+<li>Copy files to <code>tests/fixtures/xbrl-mappings/</code></li>
+<li>
+<p>Use for validation test cases</p>
+</li>
+<li>
+<p><strong>Document in advanced guide</strong></p>
+</li>
+<li>Reference as example of production usage</li>
+<li>
+<p>Show reverse mapping pattern</p>
+</li>
+<li>
+<p><strong>Create comparison analysis</strong></p>
+</li>
+<li>EdgarTools mappings vs mpreiss9 mappings</li>
+<li>Identify gaps and improvements</li>
+</ol>
+<h3 id="phase-2-implementation-v4310">Phase 2: Implementation (v4.31.0)</h3>
+<ol>
+<li><strong>Balance sheet validation</strong></li>
+<li>Assets = Liabilities + Equity</li>
+<li>Section total validation</li>
+<li>
+<p>Use these mappings for test data</p>
+</li>
+<li>
+<p><strong>Section membership dictionaries</strong></p>
+</li>
+<li>Build from ambiguity comments</li>
+<li>Current/NonCurrent classification</li>
+<li>Assets/Liabilities classification</li>
+</ol>
+<h3 id="phase-3-enhancement-v500">Phase 3: Enhancement (v5.0.0)</h3>
+<ol>
+<li><strong>Context-aware disambiguation</strong></li>
+<li>Implement colon-separated mapping support</li>
+<li>Add context resolution logic</li>
+<li>
+<p>Validate with 215 ambiguous cases</p>
+</li>
+<li>
+<p><strong>CSV import/export</strong></p>
+</li>
+<li>User-friendly mapping management</li>
+<li>Merge capability</li>
+<li>Company override support</li>
+</ol>
+<h2 id="questions-for-community">Questions for Community</h2>
+<ol>
+<li><strong>Privacy</strong>: Can we include anonymized subset in test fixtures?</li>
+<li><strong>Collaboration</strong>: Interest in contributing to context-aware resolution?</li>
+<li><strong>Priorities</strong>: Which enhancement is most valuable?</li>
+<li>Balance sheet validation</li>
+<li>Ambiguous tag handling</li>
+<li>CSV workflow tools</li>
+</ol>
+<h2 id="files">Files</h2>
+<p><strong>Location</strong>: <code>/data/xbrl-mappings/</code>
+- <code>custom_taxonomy_mapping.csv</code> (294KB, 3,834 rows)
+- <code>gaap_taxonomy_mapping.csv</code> (173KB, 2,343 rows)</p>
+<p><strong>Git Status</strong>: Not committed (data files, user contribution)</p>
+<p><strong>Usage</strong>: Test data, research, validation</p>
+<h2 id="references">References</h2>
+<ul>
+<li><strong>GitHub Issue</strong>: #494 - Create documentation on how to customize standardization tagging</li>
+<li><strong>Architecture</strong>: <code>docs-internal/planning/architecture/xbrl-standardization-pipeline.md</code></li>
+<li><strong>Enhancement Roadmap</strong>: <code>docs-internal/planning/future-enhancements/context-aware-standardization.md</code></li>
+<li><strong>Epic</strong>: edgartools-ocf - Context-Aware XBRL Standardization Enhancements</li>
+<li><strong>Related Issues</strong>: edgartools-y3k, edgartools-3yx, edgartools-qcd</li>
+<li><strong>Documentation</strong>: <code>docs/advanced/customizing-standardization.md</code></li>
+</ul>
+<h3 id="how-this-fits-in-the-pipeline">How This Fits in the Pipeline</h3>
+<p>mpreiss9's contributions integrate into the 7-stage XBRL processing pipeline:</p>
+<ul>
+<li><strong>Stage 3 (Base Standardization)</strong>: CSV mappings show production-scale standardization</li>
+<li><strong>Stage 4 (Granularity)</strong>: "Detailed" profile example - maximum granularity for advanced users</li>
+<li><strong>Stage 5 (Context Resolution)</strong>: 215 ambiguous tags document what needs context-aware handling</li>
+</ul>
+<p>See the complete pipeline architecture for how these pieces fit together.</p>
+<hr />
+<p><strong>Analysis Date</strong>: 2025-11-21
+<strong>Analyst</strong>: Claude (EdgarTools AI Assistant)
+<strong>Status</strong>: Complete - Ready for integration planning</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,3589 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Future Enhancement: Context-Aware XBRL Standardization - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#future-enhancement-context-aware-xbrl-standardization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Future Enhancement: Context-Aware XBRL Standardization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../guides/working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Filings
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search for Specific Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filter Filings by Date/Type
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Access Filing Attachments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finding the most recent filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Companies
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Companies
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting company facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating a Multi Year Financials Data Api
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting a list of company insiders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting subsets of companies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Financial Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extract Financial Statements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../advanced-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Ranking Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Local Data Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/cloud-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Cloud Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSL Issues and Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsing SGML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL and Financials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XBRL and Financials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting XBRL from Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying XBRL Facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting footnotes from XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Insider Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ThirteenF Holding Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding SEC Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Resources
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues & Solutions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SEC Rate Limits & Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Problem Statement
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Problem Statement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Impact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-200-ambiguous-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 200+ Ambiguous Tags
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proposed-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposed Solution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposed Solution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hybrid-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hybrid Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-innovations-from-mpreiss9s-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Innovations from mpreiss9's Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-phases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Phases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Phases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-validation-foundation-v4300-or-v4310" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Validation Foundation (v4.30.0 or v4.31.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-section-membership-dictionary-v4300" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Section Membership Dictionary (v4.30.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-enhanced-context-threading-v4310" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Enhanced Context Threading (v4.31.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-context-aware-disambiguation-v4310-v500" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Context-Aware Disambiguation (v4.31.0 - v5.0.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-unmapped-tag-logging-v500" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Unmapped Tag Logging (v5.0.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-user-configurable-granularity-v510-or-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 6: User-Configurable Granularity (v5.1.0 or later)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success Criteria
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Success Criteria">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#functional-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Functional Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-experience-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Experience Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backwards-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backwards Compatibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#risks-and-mitigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risks and Mitigation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Risks and Mitigation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#risk-1-breaking-existing-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risk 1: Breaking Existing Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risk-2-performance-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risk 2: Performance Degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risk-3-increased-complexity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risk 3: Increased Complexity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risk-4-incomplete-ambiguous-tag-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risk 4: Incomplete Ambiguous Tag Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#community-feedback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community Feedback
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Community Feedback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open Questions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-involvement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community Involvement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Success Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adoption-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adoption Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#timeline-and-milestones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timeline and Milestones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Timeline and Milestones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q1-2025-v4300-or-v4310" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q1 2025 (v4.30.0 or v4.31.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q2-2025-v4310-or-v4320" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q2 2025 (v4.31.0 or v4.32.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q3-2025-v500" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q3 2025 (v5.0.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q4-2025-v510" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q4 2025 (v5.1.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#research-and-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Research and Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-test-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Test Data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code References
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#approval-and-sign-off" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Approval and Sign-off
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="future-enhancement-context-aware-xbrl-standardization">Future Enhancement: Context-Aware XBRL Standardization</h1>
+<p><strong>Status</strong>: Proposed
+<strong>Proposed Versions</strong>: v4.30.0 - v5.1.0 (Multi-release)
+<strong>Effort Estimate</strong>: Large (8-12 weeks across multiple releases)
+<strong>Priority</strong>: P2 (Medium) - Enhances accuracy, benefits advanced users
+<strong>GitHub Issue</strong>: #494
+<strong>Architecture</strong>: <code>docs-internal/planning/architecture/xbrl-standardization-pipeline.md</code>
+<strong>Research</strong>: <code>docs-internal/research/issues/issue-494-standardization-comparison.md</code></p>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>EdgarTools currently cannot handle 200+ ambiguous XBRL tags that require context to disambiguate (e.g., <code>DeferredTaxAssetsLiabilitiesNet</code> could be an asset OR liability depending on where it appears in the balance sheet).</p>
+<p>This proposal outlines a <strong>hybrid approach</strong> that combines EdgarTools' simplicity with context-aware resolution for ambiguous tags, inspired by @mpreiss9's proven methodology managing 390+ companies.</p>
+<p><strong>Key Principles</strong>:
+1. Maintain simplicity for 95% of tags, add sophistication for 5% of edge cases
+2. <strong>Support flexible granularity</strong> - Users have different analytical needs (detailed vs. summarized)
+3. <strong>Pipeline architecture</strong> - See full 7-stage pipeline in architecture document</p>
+<p><strong>Available Data</strong>: mpreiss9 has shared production CSV mapping files containing <strong>6,177 mappings</strong> (2,343 GAAP + 3,834 custom across 390 companies) which provide real-world validation data. See: <code>docs-internal/research/xbrl-mapping-analysis-mpreiss9.md</code></p>
+<p><strong>Critical Insight</strong> from mpreiss9: There are two reasons for mapping:
+1. <strong>Standardization</strong> (Stage 3): Same facts coded differently (e.g., countless revenue tag flavors)
+2. <strong>Consolidation</strong> (Stage 4): Different facts combined when distinction is immaterial to the user</p>
+<p>This means the mapping system must be <strong>flexible</strong> - different users need different granularity levels.</p>
+<p><strong>Architecture</strong>: This enhancement integrates with the XBRL processing pipeline as:
+- <strong>Stage 3</strong>: Base Standardization (existing - Phase 1-2)
+- <strong>Stage 4</strong>: Granularity Transformation (new - Phase 6)
+- <strong>Stage 5</strong>: Context-Aware Resolution (new - Phases 3-4)</p>
+<p>See: <code>docs-internal/planning/architecture/xbrl-standardization-pipeline.md</code> for complete pipeline design.</p>
+<hr />
+<h2 id="problem-statement">Problem Statement</h2>
+<h3 id="current-limitations">Current Limitations</h3>
+<p><strong>EdgarTools Standardization Today</strong>:
+- Forward mapping: <code>StandardConcept → [CompanyConcepts]</code>
+- Priority-based resolution works well for unambiguous tags
+- Context parameter exists but is <strong>completely ignored</strong> during mapping
+- Cannot distinguish between:
+  - <code>DeferredTaxAssetsLiabilitiesNet</code> as asset vs liability
+  - <code>AccountsPayableCurrentAndNoncurrent</code> as current vs noncurrent
+  - <code>DerivativeLiabilityFairValueGrossAsset</code> (3-way ambiguous)</p>
+<h3 id="user-impact">User Impact</h3>
+<p><strong>For Basic Users</strong> (95% of use cases):
+- No impact - current system works well</p>
+<p><strong>For Advanced Users</strong> (5% of use cases):
+- Cannot reliably map 200+ ambiguous tags
+- Manual intervention required
+- Statement validation difficult
+- Mapping coverage incomplete</p>
+<h3 id="the-200-ambiguous-tags">The 200+ Ambiguous Tags</h3>
+<p>Identified by @mpreiss9 in Issue #494:</p>
+<p><strong>Asset/Liability Ambiguity</strong> (12 tags):
+- <code>DeferredTaxAssetsLiabilitiesNet</code> - Sign-dependent
+- <code>DerivativeAssetsLiabilitiesAtFairValueNet</code> - Net position
+- <code>UnamortizedDebtIssuanceExpense</code> - Asset or liability offset</p>
+<p><strong>Current/Noncurrent Ambiguity</strong> (180+ tags):
+- <code>AccountsPayableCurrentAndNoncurrent</code> - Section-dependent
+- <code>DeferredRevenue</code> - Unspecified duration
+- <code>ConvertibleDebt</code> - Short-term or long-term</p>
+<p><strong>Triple Ambiguity</strong> (1 tag):
+- <code>DerivativeLiabilityFairValueGrossAsset</code> - 3 dimensions of ambiguity</p>
+<hr />
+<h2 id="proposed-solution">Proposed Solution</h2>
+<h3 id="hybrid-approach">Hybrid Approach</h3>
+<p><strong>Keep Current System</strong> for non-ambiguous tags (fast, simple)
+<strong>Add Context-Aware Resolution</strong> for ambiguous tags (accurate, sophisticated)</p>
+<pre><code class="language-python">def get_standard_concept(self, company_concept: str, context: Dict = None) -&gt; Optional[str]:
+    &quot;&quot;&quot;Enhanced mapping with optional context-aware disambiguation.&quot;&quot;&quot;
+
+    # Step 1: Check if this is a known ambiguous tag
+    if company_concept in AMBIGUOUS_TAGS:
+        # Use context-aware resolution (mpreiss9's method)
+        return self._resolve_ambiguous_tag(company_concept, context)
+
+    # Step 2: Standard priority-based resolution (EdgarTools current method)
+    return self._priority_based_resolution(company_concept)
+</code></pre>
+<h3 id="key-innovations-from-mpreiss9s-approach">Key Innovations from mpreiss9's Approach</h3>
+<ol>
+<li><strong>Reverse mapping structure</strong> - O(1) hash lookup instead of O(n×m) iteration</li>
+<li><strong>Section-based resolution</strong> - Uses balance sheet sections to disambiguate</li>
+<li><strong>Backwards processing</strong> - Process bottom-to-top; subtotals mark section boundaries</li>
+<li><strong>Balance sheet validation</strong> - Assets = Liabilities + Equity triggers mapping corrections</li>
+<li><strong>Unmapped tag logging</strong> - CSV logs with suggested mappings for continuous improvement</li>
+<li><strong>Enhanced context</strong> - Include parent concept, section, sign, value</li>
+<li><strong>CSV workflow</strong> - Excel-friendly for managing large mapping sets</li>
+</ol>
+<hr />
+<h2 id="implementation-phases">Implementation Phases</h2>
+<h3 id="phase-1-validation-foundation-v4300-or-v4310">Phase 1: Validation Foundation (v4.30.0 or v4.31.0)</h3>
+<p><strong>Goal</strong>: Add balance sheet validation without changing mapping logic</p>
+<p><strong>Effort</strong>: 1-2 weeks | <strong>Risk</strong>: Low | <strong>Value</strong>: High</p>
+<p><strong>Available Test Data</strong>: mpreiss9's CSV mappings (6,177 mappings from 390 companies) in <code>data/xbrl-mappings/</code></p>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li>
+<p><strong>New Module</strong>: <code>edgar/xbrl/validation.py</code>
+   <code>python
+   def validate_balance_sheet(statement_data):
+       """Validate accounting equation: Assets = Liabilities + Equity"""
+       # Level 1: Fundamental equation
+       # Level 2: Section totals
+       # Level 3: Detail rollup</code></p>
+</li>
+<li>
+<p><strong>Statement Integration</strong>: Add optional <code>validate=True</code> parameter
+   <code>python
+   statement = xbrl.statements.balance_sheet(validate=True)
+   # Returns ValidationResult with warnings/errors</code></p>
+</li>
+<li>
+<p><strong>Validation Report</strong>:
+   <code>python
+   ValidationResult(
+       is_valid: bool,
+       errors: List[ValidationError],
+       warnings: List[ValidationWarning],
+       checks_performed: List[str]
+   )</code></p>
+</li>
+</ol>
+<p><strong>Benefits</strong>:
+- High value for all users (catches data quality issues)
+- Low risk (no changes to mapping logic)
+- Foundation for future enhancements
+- Opt-in feature</p>
+<p><strong>Tests Required</strong>:
+- Balance sheet equation validation
+- Section total validation
+- Detail rollup validation
+- Edge cases (missing sections, rounding)</p>
+<hr />
+<h3 id="phase-2-section-membership-dictionary-v4300">Phase 2: Section Membership Dictionary (v4.30.0)</h3>
+<p><strong>Goal</strong>: Define which standard concepts belong in which sections</p>
+<p><strong>Effort</strong>: 1 week | <strong>Risk</strong>: Low | <strong>Value</strong>: Medium</p>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li>
+<p><strong>New Data Structure</strong>: <code>edgar/xbrl/standardization/section_membership.json</code>
+   <code>json
+   {
+     "Balance Sheet": {
+       "Current Assets": [
+         "Cash and Cash Equivalents",
+         "Accounts Receivable",
+         "Inventory",
+         "Prepaid Expenses",
+         "Deferred Tax Assets"
+       ],
+       "Current Liabilities": [
+         "Accounts Payable, Current",
+         "Accrued Liabilities",
+         "Short Term Debt",
+         "Deferred Tax Liabilities"
+       ],
+       ...
+     },
+     "Income Statement": {
+       "Revenue": [...],
+       "Operating Expenses": [...],
+       ...
+     }
+   }</code></p>
+</li>
+<li>
+<p><strong>Section Lookup API</strong>:
+   <code>python
+   def get_section_for_concept(standard_concept: str, statement_type: str) -&gt; Optional[str]:
+       """Get the section a standard concept belongs to"""</code></p>
+</li>
+</ol>
+<p><strong>Benefits</strong>:
+- Documents standard concept organization
+- Enables section-based disambiguation
+- Foundation for context-aware resolution
+- Useful reference for users</p>
+<p><strong>Tests Required</strong>:
+- Section membership completeness
+- No duplicate memberships
+- All standard concepts mapped</p>
+<hr />
+<h3 id="phase-3-enhanced-context-threading-v4310">Phase 3: Enhanced Context Threading (v4.31.0)</h3>
+<p><strong>Goal</strong>: Thread calculation parent through to standardization layer</p>
+<p><strong>Effort</strong>: 2-3 weeks | <strong>Risk</strong>: Medium | <strong>Value</strong>: High (enables Phase 4)</p>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li><strong>XBRL Parser Enhancement</strong>: <code>edgar/xbrl/xbrl.py</code></li>
+<li>Extract calculation parent from calculation trees</li>
+<li>
+<p>Include in line item data</p>
+</li>
+<li>
+<p><strong>Statement Builder</strong>: <code>edgar/xbrl/statements.py</code></p>
+</li>
+<li>Pass calculation parent to standardization</li>
+<li>
+<p>Add section assignment (backwards processing)</p>
+</li>
+<li>
+<p><strong>Enhanced Context</strong>:
+   <code>python
+   context = {
+       "statement_type": "BalanceSheet",
+       "level": 1,
+       "is_total": False,
+       "calculation_parent": "us-gaap:AssetsCurrent",  # NEW
+       "parent_standard_concept": "Total Current Assets",  # NEW
+       "section": "Current Assets",  # NEW (derived)
+       "fact_value": 150000000,  # NEW (for sign-based)
+       "label": "Deferred Tax"  # NEW (already available)
+   }</code></p>
+</li>
+<li>
+<p><strong>Backwards Section Assignment</strong>:
+   <code>python
+   def assign_sections_backwards(line_items):
+       """Process bottom-to-top: subtotals mark section boundaries"""
+       current_section = None
+       for item in reversed(line_items):
+           if item.is_total and item.level == 1:
+               current_section = item.standard_label
+           item.section = current_section</code></p>
+</li>
+</ol>
+<p><strong>Benefits</strong>:
+- Enables context-aware disambiguation
+- Improves statement structure understanding
+- Foundation for advanced features</p>
+<p><strong>Tests Required</strong>:
+- Calculation parent extraction
+- Section assignment correctness
+- Backwards processing logic
+- Context threading end-to-end</p>
+<hr />
+<h3 id="phase-4-context-aware-disambiguation-v4310-v500">Phase 4: Context-Aware Disambiguation (v4.31.0 - v5.0.0)</h3>
+<p><strong>Goal</strong>: Use context to resolve ambiguous tags</p>
+<p><strong>Effort</strong>: 3-4 weeks | <strong>Risk</strong>: Medium-High | <strong>Value</strong>: High</p>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li>
+<p><strong>Ambiguous Tag Registry</strong>: <code>edgar/xbrl/standardization/ambiguous_tags.json</code>
+   <code>json
+   {
+     "us-gaap:DeferredTaxAssetsLiabilitiesNet": {
+       "candidates": [
+         "Deferred Tax Assets",
+         "Deferred Tax Liabilities"
+       ],
+       "resolution_strategy": "section_membership",
+       "notes": "Depends on where it appears in balance sheet"
+     }
+   }</code></p>
+</li>
+<li>
+<p><strong>Reverse Mapping Store</strong>: <code>edgar/xbrl/standardization/reverse_mappings.py</code>
+   ```python
+   class ReverseMappingStore:
+       """For ambiguous tags: CompanyConcept → [StandardConcepts]"""</p>
+<p>def get_candidates(self, company_concept: str) -&gt; List[str]:
+       """Get all possible standard concepts for ambiguous tag"""
+   ```</p>
+</li>
+<li>
+<p><strong>Disambiguation Logic</strong>: <code>edgar/xbrl/standardization/core.py</code>
+   ```python
+   def _resolve_ambiguous_tag(self, company_concept: str, context: Dict) -&gt; Optional[str]:
+       """Use section membership to resolve ambiguity"""
+       candidates = self.reverse_mappings.get_candidates(company_concept)</p>
+<p>if not context or len(candidates) &lt;= 1:
+       return candidates[0] if candidates else None</p>
+<p># Determine section from context
+   section = self._determine_section(context)</p>
+<p># Find which candidate belongs in this section
+   for std_concept in candidates:
+       if std_concept in self.section_membership.get(section, set()):
+           return std_concept</p>
+<p># Log for manual review if ambiguous
+   self.unmapped_logger.log_ambiguous(company_concept, context, candidates)
+   return None
+   ```</p>
+</li>
+<li>
+<p><strong>Special Case Handling</strong>:
+   <code>python
+   def _resolve_noncurrent_liabilities_special_case(self, item, context):
+       """Handle tags used as both line item and total"""
+       # Check label for clues
+       if "Other" in item.label:
+           return "Other Noncurrent Liabilities"
+       elif "Total" in item.label:
+           return "Total Noncurrent Liabilities"
+       else:
+           # Check if value matches calculation
+           if self._matches_calculation(item, "TotalLiabilities - CurrentLiabilities"):
+               return "Total Noncurrent Liabilities"
+           return "Other Noncurrent Liabilities"</code></p>
+</li>
+</ol>
+<p><strong>Benefits</strong>:
+- Handles 200+ ambiguous tags correctly
+- Maintains simplicity for non-ambiguous cases
+- Opt-in via ambiguous tag registry
+- Extensible for user-defined ambiguous tags</p>
+<p><strong>Tests Required</strong>:
+- 12 asset/liability tags
+- Special case handling (Noncurrent Liabilities)
+- Section-based resolution
+- Fallback behavior
+- Performance benchmarks</p>
+<hr />
+<h3 id="phase-5-unmapped-tag-logging-v500">Phase 5: Unmapped Tag Logging (v5.0.0)</h3>
+<p><strong>Goal</strong>: CSV-based workflow for continuous mapping improvement</p>
+<p><strong>Effort</strong>: 1-2 weeks | <strong>Risk</strong>: Low | <strong>Value</strong>: Medium</p>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li>
+<p><strong>Unmapped Tag Logger</strong>: <code>edgar/xbrl/standardization/unmapped_logger.py</code>
+   ```python
+   class UnmappedTagLogger:
+       """Log unmapped and ambiguous tags for review"""</p>
+<p>def log_unmapped(self, company_concept, label, context, suggested_mapping=None):
+       """Log tag with suggested mapping and confidence"""</p>
+<p>def log_ambiguous(self, company_concept, context, candidates):
+       """Log ambiguous resolution for review"""</p>
+<p>def save_to_csv(self, output_path):
+       """Export logs in Excel-friendly CSV format"""
+   ```</p>
+</li>
+<li>
+<p><strong>CSV Format</strong>:
+   <code>csv
+   company_concept,suggested_mapping,confidence,label,cik,statement_type,parent_concept,section,notes
+   us-gaap:NewConcept,Revenue,0.85,Total Revenue,1318605,Income,RevenueFromContractWithCustomer,Revenue,Review: high confidence
+   us-gaap:AmbiguousTag,Deferred Tax Assets,0.50,Deferred Tax,320193,Balance,AssetsCurrent,Current Assets,Ambiguous: review context</code></p>
+</li>
+<li>
+<p><strong>Integration Points</strong>:</p>
+</li>
+<li>Call during statement processing when mapping returns None</li>
+<li>Optional output path configuration</li>
+<li>Batch export for multiple filings</li>
+</ol>
+<p><strong>Benefits</strong>:
+- Excel-friendly workflow
+- Accelerates mapping coverage
+- Continuous improvement process
+- User feedback loop</p>
+<p><strong>Tests Required</strong>:
+- CSV export format
+- Suggested mapping inference
+- Confidence calculation
+- Batch processing</p>
+<hr />
+<h3 id="phase-6-user-configurable-granularity-v510-or-later">Phase 6: User-Configurable Granularity (v5.1.0 or later)</h3>
+<p><strong>Pipeline Integration</strong>: This implements <strong>Stage 4: Granularity Transformation</strong> from the architecture</p>
+<p><strong>Goal</strong>: Support different detail levels for different user needs</p>
+<p><strong>Effort</strong>: 2-3 weeks | <strong>Risk</strong>: Medium | <strong>Value</strong>: High (different user personas)</p>
+<p><strong>Motivation</strong> (from mpreiss9):</p>
+<blockquote>
+<p>"There are really two reasons to map an xbrl tag to a standard tag. The first reason is to take what is exactly the same kind of fact coded different ways into a common tag (for example the seemingly countless revenue tag flavors). The second reason is often overlooked but very important - a user may want to consolidate multiple kinds of facts into a single concept because the distinction is immaterial to them."</p>
+</blockquote>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li><strong>Granularity Profiles</strong>: <code>edgar/xbrl/standardization/profiles/</code>
+   ```python
+   # detailed.json - Maximum granularity (like mpreiss9's mappings)
+   {
+     "us-gaap:TaxLiabilities": "Tax Liabilities",
+     "us-gaap:RetirementLiabilities": "Retirement Liabilities",
+     "us-gaap:OtherNonOperatingLiab": "Other Non-Operating Liabilities"
+   }</li>
+</ol>
+<p># summarized.json - Consolidated for overview analysis
+   {
+     "us-gaap:TaxLiabilities": "Non-Operating Liabilities",
+     "us-gaap:RetirementLiabilities": "Non-Operating Liabilities",
+     "us-gaap:OtherNonOperatingLiab": "Non-Operating Liabilities"
+   }
+   ```</p>
+<ol>
+<li><strong>Granularity Parameter</strong> (matches architecture):
+   ```python
+   # Level 1: Choose a profile (simple)
+   statement = xbrl.statements.balance_sheet(granularity='detailed')  # Max detail
+   statement = xbrl.statements.balance_sheet(granularity='standard')  # Default
+   statement = xbrl.statements.balance_sheet(granularity='summarized')  # High-level</li>
+</ol>
+<p># Level 2: Custom profile file (advanced)
+   from edgar.xbrl.standardization import Profile
+   profile = Profile.from_csv('my_mappings.csv')
+   statement = xbrl.statements.balance_sheet().with_profile(profile)</p>
+<p># Composable transformations (immutable)
+   custom = (statement
+       .with_granularity('detailed')
+       .with_profile('my_rollups.json'))
+   ```</p>
+<ol>
+<li>
+<p><strong>Hierarchical Mapping Support</strong>:
+   <code>python
+   # Define parent-child relationships
+   {
+     "Non-Operating Liabilities": {
+       "children": ["Tax Liabilities", "Retirement Liabilities", "Other Non-Operating Liabilities"],
+       "allow_rollup": true,
+       "allow_drilldown": true
+     }
+   }</code></p>
+</li>
+<li>
+<p><strong>Use Case Templates</strong>:</p>
+</li>
+<li><strong>Financial Analyst</strong>: Detailed breakdowns for valuation</li>
+<li><strong>Academic Researcher</strong>: Balanced detail for studies</li>
+<li><strong>Casual User</strong>: High-level summaries for quick insights</li>
+<li><strong>Custom</strong>: User-defined mappings</li>
+</ol>
+<p><strong>Benefits</strong>:
+- Same data, different analytical perspectives
+- Users get exactly the granularity they need
+- No "one size fits all" constraint
+- Preserves simplicity (default still works)</p>
+<p><strong>Tests Required</strong>:
+- Profile switching
+- Hierarchical rollup/drilldown
+- Custom mapping loading
+- Backwards compatibility with default profile</p>
+<hr />
+<h2 id="success-criteria">Success Criteria</h2>
+<h3 id="functional-requirements">Functional Requirements</h3>
+<ul>
+<li>[ ] 12 asset/liability ambiguous tags handled correctly</li>
+<li>[ ] Balance sheet validation available (opt-in)</li>
+<li>[ ] Section-based resolution working</li>
+<li>[ ] Unmapped tag logging functional</li>
+<li>[ ] Context threading complete</li>
+<li>[ ] Backwards processing implemented</li>
+<li>[ ] User-configurable granularity (profiles: detailed, standard, summarized)</li>
+<li>[ ] Hierarchical mapping support (rollup/drilldown)</li>
+</ul>
+<h3 id="quality-requirements">Quality Requirements</h3>
+<ul>
+<li>[ ] No regression in current functionality</li>
+<li>[ ] Test coverage &gt;90% for new code</li>
+<li>[ ] Documentation complete (API docs + user guide)</li>
+<li>[ ] Examples provided for all new features</li>
+</ul>
+<h3 id="performance-requirements">Performance Requirements</h3>
+<ul>
+<li>[ ] Performance within 10% of baseline for non-ambiguous tags</li>
+<li>[ ] Context-aware resolution &lt;50ms per tag</li>
+<li>[ ] Validation overhead &lt;5% of statement processing time</li>
+</ul>
+<h3 id="user-experience-requirements">User Experience Requirements</h3>
+<ul>
+<li>[ ] Opt-in features with sensible defaults</li>
+<li>[ ] Clear error messages for ambiguous cases</li>
+<li>[ ] Rich output for validation results</li>
+<li>[ ] CSV workflow user-friendly</li>
+<li>[ ] Simple granularity selection (detailed/standard/summarized)</li>
+<li>[ ] Easy custom mapping file loading</li>
+<li>[ ] Documentation explaining when to use which granularity</li>
+</ul>
+<hr />
+<h2 id="implementation-considerations">Implementation Considerations</h2>
+<h3 id="dependencies">Dependencies</h3>
+<p><strong>Existing</strong>:
+- ✅ XBRL calculation tree parsing
+- ✅ Statement type detection
+- ✅ Fact value access
+- ✅ Presentation tree traversal</p>
+<p><strong>New</strong>:
+- ⬜ Section membership definitions
+- ⬜ Ambiguous tag registry
+- ⬜ Reverse mapping structure
+- ⬜ Backwards processing algorithm</p>
+<h3 id="backwards-compatibility">Backwards Compatibility</h3>
+<p><strong>Approach</strong>: All enhancements are <strong>opt-in</strong> with <strong>backwards-compatible defaults</strong></p>
+<ol>
+<li><strong>Validation</strong>: <code>validate=False</code> by default</li>
+<li><strong>Context-aware resolution</strong>: Only for tags in ambiguous registry</li>
+<li><strong>Unmapped logging</strong>: Explicit configuration required</li>
+<li><strong>Existing mappings</strong>: Continue to work unchanged</li>
+</ol>
+<h3 id="migration-path">Migration Path</h3>
+<p><strong>Phase 1-2</strong>: No migration needed (additive only)
+<strong>Phase 3</strong>: Transparent (context automatically threaded)
+<strong>Phase 4</strong>: Opt-in via ambiguous tag registry
+<strong>Phase 5</strong>: Explicit configuration</p>
+<h3 id="api-design">API Design</h3>
+<p><strong>Maintain EdgarTools Principles</strong>:
+- Simple defaults that "just work"
+- Power features for advanced users
+- Clear errors with actionable messages
+- Rich output with beautiful formatting
+- Beginner-friendly documentation</p>
+<p><strong>Flexible Granularity Examples</strong>:</p>
+<pre><code class="language-python"># Simple: Default granularity (balanced detail)
+statement = company.financials.balance_sheet
+
+# Power user: Choose detail level
+statement = company.financials.balance_sheet.detailed()      # Max detail
+statement = company.financials.balance_sheet.summarized()    # High-level
+
+# Advanced: Custom mapping
+from edgar.xbrl.standardization import StandardizationProfile
+profile = StandardizationProfile.from_csv('my_mappings.csv')
+statement = company.financials.balance_sheet.with_profile(profile)
+
+# Compare granularities
+detailed = company.financials.balance_sheet.detailed()
+summarized = company.financials.balance_sheet.summarized()
+print(f&quot;Detailed: {len(detailed.line_items)} items&quot;)  # e.g., 45 items
+print(f&quot;Summarized: {len(summarized.line_items)} items&quot;)  # e.g., 15 items
+</code></pre>
+<hr />
+<h2 id="risks-and-mitigation">Risks and Mitigation</h2>
+<h3 id="risk-1-breaking-existing-behavior">Risk 1: Breaking Existing Behavior</h3>
+<p><strong>Risk</strong>: Context-aware resolution changes existing mappings
+<strong>Likelihood</strong>: Medium | <strong>Impact</strong>: High</p>
+<p><strong>Mitigation</strong>:
+- Only apply to tags explicitly registered as ambiguous
+- Extensive regression testing
+- Beta testing with community
+- Feature flag for experimental mode
+- Clear migration documentation</p>
+<h3 id="risk-2-performance-degradation">Risk 2: Performance Degradation</h3>
+<p><strong>Risk</strong>: Context threading and resolution slow down statement processing
+<strong>Likelihood</strong>: Low | <strong>Impact</strong>: Medium</p>
+<p><strong>Mitigation</strong>:
+- Benchmark at each phase
+- Only enable for ambiguous tags
+- Aggressive caching
+- Performance tests in CI
+- Optimization before release</p>
+<h3 id="risk-3-increased-complexity">Risk 3: Increased Complexity</h3>
+<p><strong>Risk</strong>: Additional features make system harder to understand
+<strong>Likelihood</strong>: Medium | <strong>Impact</strong>: Medium</p>
+<p><strong>Mitigation</strong>:
+- Maintain simple defaults
+- Comprehensive documentation
+- Clear examples for each feature
+- Gradual rollout across releases
+- Community feedback incorporation</p>
+<h3 id="risk-4-incomplete-ambiguous-tag-coverage">Risk 4: Incomplete Ambiguous Tag Coverage</h3>
+<p><strong>Risk</strong>: Registry doesn't cover all ambiguous cases
+<strong>Likelihood</strong>: High | <strong>Impact</strong>: Low</p>
+<p><strong>Mitigation</strong>:
+- Start with 12 well-known tags
+- Iterative expansion based on feedback
+- User-extensible registry
+- Unmapped tag logging identifies gaps
+- Community contribution process</p>
+<hr />
+<h2 id="community-feedback">Community Feedback</h2>
+<h3 id="open-questions">Open Questions</h3>
+<ol>
+<li><strong>Priority</strong>: Which is higher priority - validation or disambiguation?</li>
+<li><strong>Opt-in vs Opt-out</strong>: Should features be opt-in or opt-out?</li>
+<li><strong>Performance</strong>: What's acceptable performance impact?</li>
+<li><strong>CSV Workflow</strong>: How important is Excel-friendly CSV support?</li>
+<li><strong>Scope</strong>: Start with 12 tags or all 200+?</li>
+</ol>
+<h3 id="community-involvement">Community Involvement</h3>
+<p><strong>Soliciting Input From</strong>:
+- @mpreiss9 - Real-world experience with 200+ companies
+- Advanced users - Production use cases and priorities
+- Beginners - Ensure simplicity not compromised
+- Contributors - Implementation approach feedback</p>
+<p><strong>Engagement Channels</strong>:
+- GitHub Issue #494 comments
+- GitHub Discussion (if created)
+- Pull request reviews
+- Beta testing program</p>
+<hr />
+<h2 id="success-metrics">Success Metrics</h2>
+<h3 id="adoption-metrics">Adoption Metrics</h3>
+<ul>
+<li>Number of users enabling validation</li>
+<li>Number of ambiguous tags in registry</li>
+<li>Number of CSV logs exported</li>
+<li>Community contributions to registry</li>
+</ul>
+<h3 id="quality-metrics">Quality Metrics</h3>
+<ul>
+<li>Reduction in unmapped tag issues</li>
+<li>Balance sheet validation success rate</li>
+<li>Ambiguous tag resolution accuracy</li>
+<li>User satisfaction (surveys/feedback)</li>
+</ul>
+<h3 id="performance-metrics">Performance Metrics</h3>
+<ul>
+<li>Statement processing time (baseline vs enhanced)</li>
+<li>Context resolution overhead</li>
+<li>Cache hit rate</li>
+<li>Memory usage</li>
+</ul>
+<hr />
+<h2 id="timeline-and-milestones">Timeline and Milestones</h2>
+<h3 id="q1-2025-v4300-or-v4310">Q1 2025 (v4.30.0 or v4.31.0)</h3>
+<ul>
+<li>[ ] Phase 1: Validation Foundation (2 weeks)</li>
+<li>[ ] Phase 2: Section Membership (1 week)</li>
+<li>[ ] Testing and documentation (1 week)</li>
+<li><strong>Release</strong>: v4.30.0/v4.31.0 with validation and section definitions</li>
+</ul>
+<h3 id="q2-2025-v4310-or-v4320">Q2 2025 (v4.31.0 or v4.32.0)</h3>
+<ul>
+<li>[ ] Phase 3: Enhanced Context Threading (3 weeks)</li>
+<li>[ ] Phase 4: Context-Aware Disambiguation (4 weeks)</li>
+<li>[ ] Testing and documentation (2 weeks)</li>
+<li>[ ] Beta testing period (2 weeks)</li>
+<li><strong>Release</strong>: v4.31.0/v4.32.0 with context-aware resolution</li>
+</ul>
+<h3 id="q3-2025-v500">Q3 2025 (v5.0.0)</h3>
+<ul>
+<li>[ ] Phase 5: Unmapped Tag Logging (2 weeks)</li>
+<li>[ ] Polish and optimization (2 weeks)</li>
+<li>[ ] Final testing and documentation (2 weeks)</li>
+<li>[ ] Community feedback incorporation (2 weeks)</li>
+<li><strong>Release</strong>: v5.0.0 with complete enhancement suite</li>
+</ul>
+<h3 id="q4-2025-v510">Q4 2025 (v5.1.0)</h3>
+<ul>
+<li>[ ] Phase 6: User-Configurable Granularity (3 weeks)</li>
+<li>[ ] Granularity profile creation (detailed, standard, summarized)</li>
+<li>[ ] Hierarchical mapping support</li>
+<li>[ ] API design and implementation</li>
+<li>[ ] Testing with different user personas</li>
+<li>[ ] Documentation with use case examples</li>
+<li><strong>Release</strong>: v5.1.0 with flexible granularity support</li>
+</ul>
+<hr />
+<h2 id="references">References</h2>
+<h3 id="research-and-documentation">Research and Documentation</h3>
+<ul>
+<li><strong>Research Document</strong>: <code>docs-internal/research/issues/issue-494-standardization-comparison.md</code></li>
+<li><strong>CSV Analysis</strong>: <code>docs-internal/research/xbrl-mapping-analysis-mpreiss9.md</code> (NEW - 2025-11-21)</li>
+<li><strong>User Documentation</strong>: <code>docs/advanced/customizing-standardization.md</code></li>
+<li><strong>Implementation Plan</strong>: <code>docs-internal/planning/active-tasks/2025-11-20-issue-494-research-completion.md</code></li>
+</ul>
+<h3 id="github-resources">GitHub Resources</h3>
+<ul>
+<li><strong>Issue #494</strong>: https://github.com/dgunning/edgartools/issues/494</li>
+<li><strong>Comment with 200+ tags</strong>: @mpreiss9's methodology explanation (2025-11-19)</li>
+<li><strong>Research summary</strong>: Comment #3557758658 (2025-11-20)</li>
+<li><strong>CSV Files</strong>: @mpreiss9's production mappings (2025-11-21) - 6,177 mappings from 390 companies</li>
+</ul>
+<h3 id="available-test-data">Available Test Data</h3>
+<ul>
+<li><strong>Location</strong>: <code>data/xbrl-mappings/</code> (not committed - contributed data)</li>
+<li><strong>Files</strong>:</li>
+<li><code>gaap_taxonomy_mapping.csv</code> (2,343 standard GAAP mappings)</li>
+<li><code>custom_taxonomy_mapping.csv</code> (3,834 company-specific mappings, 390 CIKs)</li>
+<li><strong>Analysis</strong>: <code>docs-internal/research/xbrl-mapping-analysis-mpreiss9.md</code></li>
+<li><strong>Key Statistics</strong>:</li>
+<li>215 ambiguous tags (9.2% of total)</li>
+<li>202 Current/NonCurrent ambiguities (94% of ambiguous tags)</li>
+<li>276 tags marked "DropThisItem"</li>
+<li>129 unique standard tags used</li>
+<li>Colon separator format for multi-mapping (e.g., <code>TagA:TagB</code>)</li>
+</ul>
+<h3 id="code-references">Code References</h3>
+<ul>
+<li><strong>Current Implementation</strong>: <code>edgar/xbrl/standardization/core.py</code></li>
+<li><strong>Validation Hooks</strong>: <code>edgar/xbrl/parsers/concepts.py</code> (balance types)</li>
+<li><strong>Statement Processing</strong>: <code>edgar/xbrl/statements.py</code>, <code>edgar/xbrl/rendering.py</code></li>
+</ul>
+<hr />
+<h2 id="approval-and-sign-off">Approval and Sign-off</h2>
+<p><strong>Decision Makers</strong>: Project maintainers
+<strong>Stakeholders</strong>: @mpreiss9, advanced users, community
+<strong>Status</strong>: <strong>Proposed</strong> - Awaiting feedback and prioritization</p>
+<p><strong>Next Steps</strong>:
+1. Gather community feedback on GitHub Issue #494
+2. Prioritize phases based on user needs
+3. Create detailed implementation tasks in Beads
+4. Begin Phase 1 development (if approved)</p>
+<hr />
+<p><strong>Document Status</strong>: Draft for Review
+<strong>Last Updated</strong>: 2025-11-20
+<strong>Author</strong>: Claude (based on @mpreiss9's methodology and research findings)</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>

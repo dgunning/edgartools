@@ -1,0 +1,29 @@
+<svg width="600" height="30" xmlns="http://www.w3.org/2000/svg">
+  <!-- Center large hexagon -->
+  <polygon points="300,8 312,14 312,20 300,26 288,20 288,14"
+           fill="none" stroke="#FFD700" stroke-width="2"/>
+  <polygon points="300,11 308,15.5 308,18.5 300,23 292,18.5 292,15.5"
+           fill="none" stroke="#FFD700" stroke-width="1.2" opacity="0.5"/>
+  <polygon points="300,13 305,15.5 305,18.5 300,21 295,18.5 295,15.5"
+           fill="#FFD700" opacity="0.3"/>
+
+  <!-- Horizontal lines extending from center -->
+  <line x1="20" y1="17" x2="283" y2="17" stroke="#3d5875" stroke-width="1.5" opacity="0.4"/>
+  <line x1="317" y1="17" x2="580" y2="17" stroke="#3d5875" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Small hexagons on left side -->
+  <polygon points="250,14 255,16.5 255,19 250,21 245,19 245,16.5"
+           fill="none" stroke="#3d5875" stroke-width="1.2" opacity="0.3"/>
+  <polygon points="220,14 225,16.5 225,19 220,21 215,19 215,16.5"
+           fill="#3d5875" opacity="0.15"/>
+
+  <!-- Small hexagons on right side -->
+  <polygon points="350,14 355,16.5 355,19 350,21 345,19 345,16.5"
+           fill="none" stroke="#3d5875" stroke-width="1.2" opacity="0.3"/>
+  <polygon points="380,14 385,16.5 385,19 380,21 375,19 375,16.5"
+           fill="#3d5875" opacity="0.15"/>
+
+  <!-- Accent dots -->
+  <circle cx="180" cy="17" r="2" fill="#FFD700" opacity="0.4"/>
+  <circle cx="420" cy="17" r="2" fill="#FFD700" opacity="0.4"/>
+</svg>
