@@ -16,6 +16,15 @@ from edgar.datatools import compress_dataframe
 from edgar.files.html_documents import Block, HtmlDocument, LinkBlock, TableBlock, table_to_markdown
 from edgar.richtools import repr_rich
 
+# Deprecation warning for legacy ChunkedDocument
+warnings.warn(
+    "edgar.files.htmltools module (including ChunkedDocument) is deprecated and will be removed in v6.0. "
+    "Please use edgar.documents.HTMLParser instead. "
+    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 __all__ = [
     "Element",
     "extract_tables",

@@ -20,6 +20,15 @@ from edgar.files.styles import StyleInfo, Width, get_heading_level, parse_style
 from edgar.files.tables import ColumnOptimizer, ProcessedTable, TableProcessor
 from edgar.richtools import repr_rich
 
+# Deprecation warning for legacy HTML parser
+warnings.warn(
+    "edgar.files.html module is deprecated and will be removed in v6.0. "
+    "Please use edgar.documents.HTMLParser instead. "
+    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
 
 

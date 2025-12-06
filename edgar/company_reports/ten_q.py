@@ -252,6 +252,13 @@ class TenQ(CompanyReport):
         # Fallback to old chunked_document for backward compatibility
         if self.chunked_document:
             try:
+                # Log fallback usage for Phase 1 deprecation tracking
+                log.warning(
+                    f"TenQ falling back to legacy parser for '{item_or_part}' "
+                    f"(filing: {self._filing.accession_number}). "
+                    f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
+                    f"This fallback will be removed in v6.0."
+                )
                 return self.chunked_document[item_or_part]
             except (KeyError, TypeError):
                 pass

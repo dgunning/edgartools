@@ -454,6 +454,13 @@ class TenK(CompanyReport):
                     return item_text
 
         # Fall back to chunked document for backward compatibility
+        # Log fallback usage for Phase 1 deprecation tracking
+        log.warning(
+            f"TenK falling back to legacy parser for '{item_or_part}' "
+            f"(filing: {self._filing.accession_number}). "
+            f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
+            f"This fallback will be removed in v6.0."
+        )
         item_text = self.chunked_document[item_or_part]
 
         # Clean up the text if found
