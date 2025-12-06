@@ -56,7 +56,7 @@ def test_storage_info_force_refresh():
 
     assert timestamp1 != timestamp2  # Different scan
 
-@pytest.mark.fast
+@pytest.mark.slow
 def test_storage_info_rich_display():
     """Test that StorageInfo has working __rich__ method"""
     from rich.console import Console
@@ -91,7 +91,7 @@ def test_check_filing_not_exists():
 
     assert check_filing(filing) is False
 
-@pytest.mark.fast
+@pytest.mark.network
 def test_check_filings_batch():
     """Test check_filings_batch returns dict with availability"""
     from edgar import get_filings
@@ -111,7 +111,7 @@ def test_check_filings_batch():
     # Should be fast
     assert elapsed < 1.0  # Under 1 second for 10 filings
 
-@pytest.mark.fast
+@pytest.mark.network
 def test_availability_summary():
     """Test availability_summary returns formatted string"""
     from edgar import get_filings

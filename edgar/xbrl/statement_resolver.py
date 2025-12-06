@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
+from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.xbrl.exceptions import StatementNotFound
 from edgar.xbrl.statements import statement_to_concepts
@@ -712,6 +713,14 @@ class StatementResolver:
         # Return best match if above threshold
         if statement_scores and statement_scores[0][1] >= 0.4:
             best_match, confidence = statement_scores[0]
+
+            # Issue #518: Verify the statement type matches (don't return CashFlow for Income)
+            matched_type = best_match.get('type', '')
+            if matched_type and matched_type != statement_type:
+                # Statement type mismatch - the concepts overlap but it's the wrong statement
+                log.debug(f"Content match found {matched_type} when looking for {statement_type}, rejecting due to type mismatch")
+                return [], None, 0.0
+
             return [best_match], best_match['role'], min(confidence + 0.2, 0.85)  # Boost confidence but cap at 0.85
 
         return [], None, 0.0
@@ -782,17 +791,22 @@ class StatementResolver:
             if clean_type in role_name or role_name in clean_type:
                 return statements, statements[0]['role'], 0.4
 
-        # If we have statements of any type, return the first one with very low confidence
+        # Issue #518: Don't return completely wrong statement types
+        # If looking for a specific financial statement type and it's not found,
+        # return empty rather than returning a different statement type
+        financial_statement_types = ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement',
+                                     'ComprehensiveIncome', 'StatementOfEquity']
+
+        if statement_type in financial_statement_types:
+            # For financial statements, don't guess - return empty if not found
+            # This prevents returning CashFlowStatement when IncomeStatement is requested
+            log.debug(f"Financial statement '{statement_type}' not found, returning empty (no fallback to wrong type)")
+            return [], None, 0.0
+
+        # For non-financial statement types (notes, disclosures, etc.), we can be more lenient
         all_statements = self.xbrl.get_all_statements()
         if all_statements:
-            # Try to find a primary financial statement
-            for stmt_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement']:
-                if stmt_type in self._statement_by_type:
-                    statements = self._statement_by_type[stmt_type]
-                    if statements:
-                        return statements, statements[0]['role'], 0.2
-
-            # Last resort: return first statement
+            # Return first statement with very low confidence
             return [all_statements[0]], all_statements[0]['role'], 0.1
 
         return [], None, 0.0
@@ -907,6 +921,28 @@ class StatementResolver:
             self._cache[cache_key] = result
             return result
 
+        # Issue #518: Special fallback for IncomeStatement -> ComprehensiveIncome
+        # Many filings have ComprehensiveIncome instead of separate IncomeStatement
+        if statement_type == 'IncomeStatement':
+            # Try to find ComprehensiveIncome as a valid substitute
+            comp_match = self._match_by_standard_name('ComprehensiveIncome')
+            if not comp_match[0] or comp_match[2] < 0.9:
+                comp_match = self._match_by_primary_concept('ComprehensiveIncome', is_parenthetical)
+            if not comp_match[0] or comp_match[2] < 0.8:
+                comp_match = self._match_by_concept_pattern('ComprehensiveIncome', is_parenthetical)
+            if not comp_match[0] or comp_match[2] < 0.8:
+                comp_match = self._match_by_role_pattern('ComprehensiveIncome', is_parenthetical)
+
+            if comp_match[0] and comp_match[2] > 0.6:
+                statements, role, conf = comp_match
+                # Issue #518: Return actual type (ComprehensiveIncome) for transparency and accuracy
+                # Users can check if they received a fallback by comparing requested vs actual type
+                if VERBOSE_EXCEPTIONS:
+                    log.info(f"IncomeStatement not found, using ComprehensiveIncome as fallback (confidence: {conf:.2f})")
+                result = (statements, role, 'ComprehensiveIncome', conf)
+                self._cache[cache_key] = result
+                return result
+
         # No good match found, return best guess with low confidence
         statements, role, conf = self._get_best_guess(statement_type)
         if conf < 0.4:
@@ -937,8 +973,9 @@ class StatementResolver:
                     reason="Confidence threshold not met"
                 )
             else:
-                log.warn(
-                    f"No good match found for statement type '{statement_type}'. The best guess has low confidence: {conf:.2f}")
+                if VERBOSE_EXCEPTIONS:
+                    log.warn(
+                        f"No good match found for statement type '{statement_type}'. The best guess has low confidence: {conf:.2f}")
         if statements:
             # For canonical types, preserve the original statement_type
             canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)

@@ -7,7 +7,7 @@ This directory contains examples demonstrating EdgarTools' AI-native features.
 Install EdgarTools with AI dependencies:
 
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 ```
 
 Set your SEC identity (required by SEC regulations):

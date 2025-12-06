@@ -55,16 +55,30 @@ def parse_primary_document_xml(primary_document_xml: str):
         zipcode=child_text(address_el, "zipCode")
     )
     filing_manager = FilingManager(name=child_text(filing_manager_el, "name"), address=address)
-    # Other managers
-    other_manager_info_el = cover_page_el.find("otherManagersInfo")
-    other_managers = [
-        OtherManager(
-            cik=child_text(other_manager_el, "cik"),
-            name=child_text(other_manager_el, "name"),
-            file_number=child_text(other_manager_el, "form13FFileNumber")
-        )
-        for other_manager_el in other_manager_info_el.find_all("otherManager")
-    ] if other_manager_info_el else []
+    # Other managers - Issue #512: Fix XML tag to otherManagers2Info
+    # Try new format first (otherManagers2Info), fall back to old format (otherManagersInfo)
+    other_manager_info_el = cover_page_el.find("otherManagers2Info")
+    if other_manager_info_el:
+        # New format: otherManagers2Info -> otherManager2 -> otherManager
+        other_managers = [
+            OtherManager(
+                cik=child_text(other_manager_wrapper.find("otherManager"), "cik"),
+                name=child_text(other_manager_wrapper.find("otherManager"), "name"),
+                file_number=child_text(other_manager_wrapper.find("otherManager"), "form13FFileNumber")
+            )
+            for other_manager_wrapper in other_manager_info_el.find_all("otherManager2")
+        ]
+    else:
+        # Fall back to old format: otherManagersInfo -> otherManager (backward compatibility)
+        other_manager_info_el = cover_page_el.find("otherManagersInfo")
+        other_managers = [
+            OtherManager(
+                cik=child_text(other_manager_el, "cik"),
+                name=child_text(other_manager_el, "name"),
+                file_number=child_text(other_manager_el, "form13FFileNumber")
+            )
+            for other_manager_el in other_manager_info_el.find_all("otherManager")
+        ] if other_manager_info_el else []
 
     # Summary Page
     summary_page_el = form_data.find("summaryPage")

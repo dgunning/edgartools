@@ -5,6 +5,217 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.35.0] - 2025-12-04
+
+### Added
+
+- **XBRL Statement Hierarchy - parent_concept Column** (#514)
+  - Added `parent_concept` column to XBRL statement DataFrames
+  - Exposes calculation/presentation hierarchy relationships from presentation linkbase
+  - Enables programmatic analysis of XBRL concept parent-child relationships
+  - Parent concept shows element_id of parent in the presentation tree
+  - Works alongside existing metadata columns (balance, weight, preferred_sign)
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/statements.py`
+  - **Tests**: `tests/issues/regression/test_issue_514_parent_concept.py`
+  - **Impact**: Users can now model financial statement hierarchies and analyze concept relationships
+
+- **13F Manager Assignment Enhancements** (#512)
+  - Added `OtherManager` column to 13F-HR holdings DataFrame
+  - Captures manager assignments for each holding in multi-manager institutional filings
+  - Supports comma-separated manager IDs (e.g., "43", "43,01")
+  - Fixed cover page XML parsing bug: `otherManagersInfo` → `otherManagers2Info`
+  - Maintains backward compatibility with old format
+  - **Files**: `edgar/thirteenf/parsers/infotable_xml.py`, `edgar/thirteenf/parsers/primary_xml.py`
+  - **Tests**: `tests/issues/regression/test_issue_512_13f_manager_assignment.py`
+  - **Impact**: Enables analysis of manager-specific holdings in multi-manager 13F filings
+
+- **13F Holdings Aggregation - User-Friendly View** (#207, edgartools-98d)
+  - Added `holdings` property to ThirteenF class - **recommended for most users**
+  - Aggregates holdings by security (CUSIP), providing one row per unique security
+  - Matches industry-standard presentation (CNBC, Bloomberg, etc.)
+  - Example: State Street filing: 26,569 rows → 7,218 unique securities (72.8% reduction)
+  - Sums numeric columns: SharesPrnAmount, Value, SoleVoting, SharedVoting, NonVoting
+  - Preserves: Issuer, Class, Cusip, Ticker, Type, PutCall
+  - Drops manager-specific fields: OtherManager, InvestmentDiscretion
+  - `infotable` property preserved for power users (disaggregated by manager)
+  - Updated `__rich__` display to use aggregated view by default
+  - **Files**: `edgar/thirteenf/models.py`, `edgar/thirteenf/rendering.py`
+  - **Tests**: `tests/thirteenf/test_holdings_aggregation.py`
+  - **Impact**: Simpler, more intuitive default view for 95% of use cases while preserving detailed data for analysis
+  - **API**:
+    ```python
+    thirteenf.holdings   # Aggregated by security (user-friendly)
+    thirteenf.infotable  # Disaggregated by manager (power users)
+    ```
+
+- **Configurable EDGAR Data Paths** (#516)
+  - Added centralized path configuration via `edgar.configure_paths()`
+  - Support for `EDGAR_LOCAL_DATA_DIR` environment variable
+  - Consolidated path management in `edgar.io.paths` module
+  - **Files**: `edgar/io/paths.py`, `edgar/io/__init__.py`
+  - **Tests**: `tests/test_paths.py`
+  - **Impact**: Users can customize where EDGAR data is stored locally
+
+- **Progress Bar Suppression for Logging Environments** (#507)
+  - Added `disable_progress` parameter to all download functions
+  - Suppresses tqdm progress bars in environments where they create excessive log entries
+  - Applies to: `download_filings()`, `download_facts()`, `download_submissions()`, `download_edgar_data()`, `compress_all_filings()`
+  - Extended `Filings.download()` with additional options: `disable_progress`, `compress`, `compression_level`, `upload_to_cloud`
+  - **Files**: `edgar/_filings.py`, `edgar/httprequests.py`, `edgar/storage.py`
+  - **Impact**: Cleaner logs in production environments (cloud functions, batch jobs, real-time logging platforms)
+  - **API**:
+    ```python
+    filings.download(disable_progress=True)  # No progress bars
+    ```
+
+### Fixed
+
+- **Current Filings Date Range Detection**
+  - Fixed bug where warning displayed for any date in past 6 months
+  - Now only warns when date range starts within past 6 months AND includes today
+  - Prevents false warnings for specific historical date ranges
+  - **Files**: `edgar/_filings.py`
+
+### Changed
+
+- **13F Test Data Update**
+  - Updated batch 13F test data to align with latest holdings aggregation features
+  - **Files**: `tests/batch/batch_13FHR.py`
+
+## [4.34.3] - 2025-12-04
+
+### Fixed
+
+- **Test Isolation for SSL Verification Settings**
+  - Fixed test fixture that could leak SSL verification state between tests
+  - Added autouse fixture to reset HTTP_MGR state between all tests
+  - Always resets verify_ssl to True (the actual default) before and after each test
+  - Prevents CI failures when tests run in different orders
+  - **Files**: `tests/conftest.py`, `scripts/test_ssl_verify_fix.py`
+  - **Impact**: More reliable test suite, prevents intermittent CI failures
+
+### Documentation
+
+- Removed user-specific references from SSL troubleshooting documentation
+
+## [4.34.2] - 2025-12-03
+
+### Fixed
+
+- **SSL Verification Bug - Critical Fix for Corporate VPN Users**
+  - Fixed critical bug where `configure_http(verify_ssl=False)` failed to actually disable SSL verification
+  - **Root Cause**: httpxthrottlecache v0.2.1 bug - `_get_httpx_transport_params()` method didn't pass `verify` parameter to HTTP transport
+  - **Impact**: Users behind corporate VPNs/proxies with SSL inspection can now successfully disable SSL verification
+  - **Solution**: Added monkey patch to `edgar/httpclient.py` that ensures `verify` parameter reaches the transport layer
+  - **Workaround Status**: Temporary until httpxthrottlecache upstream fix is released
+  - **File**: `edgar/httpclient.py` lines 25-55
+  - **Tests**: `scripts/test_ssl_verify_fix.py`
+  - **Documentation**: `data/ssl/RESOLUTION.md`, `data/ssl/httpxthrottlecache-issue.md`
+
+## [4.34.1] - 2025-12-02
+
+### Added
+
+- **SSL Diagnostic Tool**
+  - New `edgar.diagnose_ssl` module for comprehensive SSL/VPN troubleshooting
+  - Includes dual HTTP testing (httpx and urllib3) to isolate SSL issues
+  - Rich-formatted diagnostic reports with actionable recommendations
+  - New notebook: `examples/notebooks/beginner/Diagnosing-SSL-Issues.ipynb`
+  - **Use Case**: Help users diagnose and resolve SSL certificate verification errors in corporate/VPN environments
+  - **Commits**: a9209a08, 36d60058, 4799a124
+
+### Fixed
+
+- **XBRL Revenue Deduplication Refinement (Issues #438 and #513)**
+  - Enhanced revenue deduplication algorithm to handle both Issue #438 (duplicate revenues) and Issue #513 (missing dimensional data)
+  - Improved deduplication strategy to preserve dimensional data while removing duplicates
+  - Added label-based deduplication to catch duplicates with different concepts but identical labels
+  - **Impact**: Accurate revenue reporting across diverse XBRL statement structures
+  - **Commits**: 58b6e939, fe9ef447, 0fde7050
+
+- **XBRL Display Period Filtering (Issue #edgartools-d4w)**
+  - Filter XBRL display periods by document date to exclude historical periods
+  - Prevents old periods from 2012-2014 appearing in current financial statements
+  - **Impact**: Only relevant periods displayed in financial statement rendering
+  - **Commits**: 7ade36a0
+
+### Testing
+
+- **Regression Test Categorization**
+  - Marked regression tests with `@pytest.mark.regression` for selective execution
+  - Added comprehensive test coverage for Issue #513 (184 lines)
+  - Updated Issue #513 test to confirm 2012 period exclusion is correct behavior
+  - **Impact**: Improved test organization and CI/CD efficiency
+  - **Commits**: bedcd47a, 6fdef87b
+
+### Documentation
+
+- **CLAUDE.md Simplification**
+  - Streamlined CLAUDE.md to essential navigation guide
+  - Expanded beads workflow quick reference with practical examples
+  - **Impact**: Faster onboarding and clearer development guidance
+  - **Commits**: ecb33dff, fc86f113
+
+- **SSL Diagnostics Guide**
+  - Comprehensive SSL troubleshooting notebook with step-by-step diagnostics
+  - Covers common SSL issues in corporate networks, VPNs, and firewall environments
+  - **Commits**: 4799a124
+
+## [4.34.0] - 2025-12-01
+
+### Added
+
+- **Native Cloud Storage Support via fsspec**
+  - Added comprehensive cloud storage integration supporting S3, GCS, Azure Blob Storage, Cloudflare R2, MinIO, and other S3-compatible providers
+  - New `use_cloud_storage()` function to configure cloud storage with connection validation
+  - Cloud storage automatically used for downloading filings when enabled
+  - Support for both downloading to cloud and syncing existing local data to cloud
+  - New module: edgar.filesystem with CloudFilesystem abstraction layer
+  - **Key Features**:
+    - Automatic cloud/local filesystem detection and routing
+    - Connection validation with `verify=True` parameter
+    - Comprehensive logging throughout filesystem operations
+    - Performance optimization: batch existence checking for cloud operations
+    - Thread-safe configuration management
+  - **New APIs**:
+    - `use_cloud_storage(protocol, bucket, **kwargs)` - Configure cloud storage backend
+    - `is_cloud_storage_enabled()` - Check if cloud storage is active
+    - `sync_to_cloud()` - Sync existing local data to configured cloud storage
+    - `download_filings(..., upload_to_cloud=True)` - Download and upload to cloud in one operation
+  - **Storage Integration**:
+    - Updated `download_filings()` to support `upload_to_cloud` parameter
+    - Modified FilingStorage to use cloud paths when cloud storage enabled
+    - Updated SGML header parsing to work with both local and cloud storage
+  - **Dependencies**: Added fsspec with optional cloud provider extras (s3fs, gcsfs, adlfs)
+  - **Documentation**: Comprehensive cloud storage guide at docs/guides/cloud-storage.md
+  - **Tests**: 449 lines of new tests covering all cloud providers and edge cases
+  - **Impact**: Enables enterprise-scale storage, team collaboration, and cloud-native deployments
+  - **Commits**: 26a3f60c, 641f5498, f139184e, 430b0e9d
+
+- **Runtime HTTP Configuration for SSL/VPN Environments**
+  - New `configure_http()` function for runtime modification of SSL verification, proxy settings, and timeouts
+  - New `get_http_config()` function to inspect current HTTP configuration
+  - Solves common issue where users set `EDGAR_VERIFY_SSL` after importing edgar (which had no effect)
+  - **Use Case**: Corporate VPN users can now disable SSL verification at runtime without restarting
+  - **Documentation**: Rewritten SSL verification guide with corporate network scenarios and troubleshooting
+  - **Tests**: 7 new tests for configuration functions
+  - **Commits**: 0def744c
+
+### Fixed
+
+- **Test Markers for Storage Management Tests**
+  - Corrected `@pytest.mark.fast` to `@pytest.mark.slow` for `test_storage_info_rich_display`
+  - Corrected `@pytest.mark.fast` to `@pytest.mark.network` for `test_check_filings_batch` and `test_availability_summary`
+  - **Commits**: e3d8f3e4
+
+### Documentation
+
+- **Two-API Clarification for Financial Statements**
+  - Renamed `demo_unified_api` to `demo_two_apis` in examples
+  - Clarified distinction between Company API (multi-period historical data) and XBRL API (full statement access)
+  - Added note that segment statements are only available via XBRL API
+  - **Commits**: e3d8f3e4
+
 ## [4.33.1] - 2025-11-28
 
 ### Fixed
@@ -453,7 +664,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Optional Test Harness Dependencies**
   - Moved `click` to optional test-harness dependency group
   - Reduces core dependency footprint
-  - Install with: `pip install edgartools[test-harness]`
+  - Install with: `pip install "edgartools[test-harness]"`
   - **Files Modified**: `pyproject.toml`
   - **Related**: Commit e1f23068
 

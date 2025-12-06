@@ -256,10 +256,10 @@ def test_ssl_error_message_enhancement(monkeypatch):
         # Verify helpful message is present
         error_msg = str(exc_info.value)
         assert "EDGAR_VERIFY_SSL" in error_msg
-        assert "export EDGAR_VERIFY_SSL" in error_msg
-        assert "WARNING" in error_msg
+        assert "configure_http" in error_msg  # New: recommends configure_http()
+        assert "Only disable SSL verification" in error_msg  # Warning text
         assert "https://www.sec.gov" in error_msg
-        assert "Corporate network" in error_msg or "Self-signed certificates" in error_msg
+        assert "SELF-SIGNED" in error_msg or "SSL" in error_msg  # Category detection
 
 
 def test_post_with_retry_ssl_error():
@@ -278,7 +278,7 @@ def test_post_with_retry_ssl_error():
 
         error_msg = str(exc_info.value)
         assert "EDGAR_VERIFY_SSL" in error_msg
-        assert "WARNING" in error_msg
+        assert "Only disable SSL verification" in error_msg  # Warning text
 
 
 @pytest.mark.asyncio
@@ -299,7 +299,7 @@ async def test_post_with_retry_async_ssl_error():
 
             error_msg = str(exc_info.value)
             assert "EDGAR_VERIFY_SSL" in error_msg
-            assert "WARNING" in error_msg
+            assert "Only disable SSL verification" in error_msg  # Warning text
 
 
 def test_httpcore_network_error_ssl_detection():
@@ -422,3 +422,152 @@ def test_decompress_gzip_content_length_validation():
             mock_warning.assert_called_once()
             warning_msg = mock_warning.call_args[0][0]
             assert "Content-Length mismatch" in warning_msg
+
+
+# Tests for runtime HTTP configuration (configure_http and get_http_config)
+
+def test_configure_http_ssl_verification():
+    """Test that configure_http can toggle SSL verification at runtime"""
+    from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+    # Store original value
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+
+    try:
+        # Disable SSL verification
+        configure_http(verify_ssl=False)
+        assert HTTP_MGR.httpx_params["verify"] is False
+
+        # Re-enable SSL verification
+        configure_http(verify_ssl=True)
+        assert HTTP_MGR.httpx_params["verify"] is True
+    finally:
+        # Restore original value
+        HTTP_MGR.httpx_params["verify"] = original_verify
+
+
+def test_configure_http_proxy():
+    """Test that configure_http can set proxy at runtime"""
+    from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+    # Store original value
+    original_proxy = HTTP_MGR.httpx_params.get("proxy")
+
+    try:
+        # Set proxy
+        configure_http(proxy="http://proxy.example.com:8080")
+        assert HTTP_MGR.httpx_params["proxy"] == "http://proxy.example.com:8080"
+
+        # Verify via get_http_config
+        config = get_http_config()
+        assert config["proxy"] == "http://proxy.example.com:8080"
+    finally:
+        # Restore original value
+        if original_proxy is None:
+            HTTP_MGR.httpx_params.pop("proxy", None)
+        else:
+            HTTP_MGR.httpx_params["proxy"] = original_proxy
+
+
+def test_configure_http_timeout():
+    """Test that configure_http can set timeout at runtime"""
+    from edgar.httpclient import configure_http, HTTP_MGR
+    from httpx import Timeout
+
+    # Store original value
+    original_timeout = HTTP_MGR.httpx_params.get("timeout")
+
+    try:
+        # Set timeout
+        configure_http(timeout=60.0)
+        timeout = HTTP_MGR.httpx_params["timeout"]
+        assert isinstance(timeout, Timeout)
+        assert timeout.read == 60.0
+        assert timeout.connect == 10.0  # Default connect timeout
+    finally:
+        # Restore original value
+        if original_timeout is None:
+            HTTP_MGR.httpx_params.pop("timeout", None)
+        else:
+            HTTP_MGR.httpx_params["timeout"] = original_timeout
+
+
+def test_configure_http_multiple_settings():
+    """Test that configure_http can set multiple settings at once"""
+    from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+    # Store original values
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+    original_proxy = HTTP_MGR.httpx_params.get("proxy")
+
+    try:
+        # Set multiple settings
+        configure_http(verify_ssl=False, proxy="http://proxy:8080")
+
+        config = get_http_config()
+        assert config["verify_ssl"] is False
+        assert config["proxy"] == "http://proxy:8080"
+    finally:
+        # Restore original values
+        HTTP_MGR.httpx_params["verify"] = original_verify
+        if original_proxy is None:
+            HTTP_MGR.httpx_params.pop("proxy", None)
+        else:
+            HTTP_MGR.httpx_params["proxy"] = original_proxy
+
+
+def test_get_http_config_returns_current_settings():
+    """Test that get_http_config returns accurate current settings"""
+    from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+    # Store original values
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+
+    try:
+        # Get config and verify it reflects current state
+        config = get_http_config()
+        assert "verify_ssl" in config
+        assert "proxy" in config
+        assert "timeout" in config
+
+        # Change a setting and verify get_http_config reflects it
+        configure_http(verify_ssl=False)
+        config = get_http_config()
+        assert config["verify_ssl"] is False
+    finally:
+        # Restore original value
+        HTTP_MGR.httpx_params["verify"] = original_verify
+
+
+def test_configure_http_none_values_preserve_existing():
+    """Test that passing None values doesn't change existing settings"""
+    from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+    # Store original values
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+
+    try:
+        # Set initial values
+        configure_http(verify_ssl=False)
+        assert HTTP_MGR.httpx_params["verify"] is False
+
+        # Call with None - should not change existing value
+        configure_http(verify_ssl=None, proxy=None)
+        assert HTTP_MGR.httpx_params["verify"] is False
+    finally:
+        # Restore original value
+        HTTP_MGR.httpx_params["verify"] = original_verify
+
+
+@pytest.mark.fast
+def test_configure_http_exported_from_edgar():
+    """Test that configure_http and get_http_config are exported from main edgar package"""
+    from edgar import configure_http, get_http_config
+
+    # Verify they are callable
+    assert callable(configure_http)
+    assert callable(get_http_config)
+
+    # Verify get_http_config returns a dict
+    config = get_http_config()
+    assert isinstance(config, dict)

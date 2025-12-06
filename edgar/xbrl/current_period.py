@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pandas as pd
 
+from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.exceptions import StatementNotFound
@@ -454,7 +455,8 @@ class CurrentPeriodView:
             return pd.DataFrame(rows)
 
         except Exception as e:
-            log.error(f"Error retrieving {statement_type} for current period: {str(e)}")
+            if VERBOSE_EXCEPTIONS:
+                log.error(f"Error retrieving {statement_type} for current period: {str(e)}")
             entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
             raise StatementNotFound(
                 statement_type=statement_type,
@@ -509,7 +511,8 @@ class CurrentPeriodView:
             return statement
 
         except Exception as e:
-            log.error(f"Error retrieving {statement_type} statement object for current period: {str(e)}")
+            if VERBOSE_EXCEPTIONS:
+                log.error(f"Error retrieving {statement_type} statement object for current period: {str(e)}")
             entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
             raise StatementNotFound(
                 statement_type=statement_type,

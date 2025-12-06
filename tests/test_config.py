@@ -7,7 +7,7 @@ import importlib
 @pytest.fixture
 def clean_env():
     """Clean environment variables before and after tests"""
-    env_vars = ['EDGAR_BASE_URL', 'EDGAR_DATA_URL', 'EDGAR_XBRL_URL', 'EDGAR_RATE_LIMIT_PER_SEC']
+    env_vars = ['EDGAR_BASE_URL', 'EDGAR_DATA_URL', 'EDGAR_XBRL_URL', 'EDGAR_RATE_LIMIT_PER_SEC', 'EDGAR_VERBOSE_EXCEPTIONS']
     # Store original values
     original = {k: os.environ.get(k) for k in env_vars}
 
@@ -82,6 +82,49 @@ class TestConfig:
         importlib.reload(edgar.httpclient)
 
         assert edgar.httpclient.get_edgar_rate_limit_per_sec() == 20
+
+    def test_verbose_exceptions_default(self, clean_env):
+        """Test default VERBOSE_EXCEPTIONS is False"""
+        import edgar.config
+        importlib.reload(edgar.config)
+
+        assert edgar.config.VERBOSE_EXCEPTIONS is False
+
+    def test_verbose_exceptions_true(self, clean_env):
+        """Test VERBOSE_EXCEPTIONS set to true"""
+        os.environ['EDGAR_VERBOSE_EXCEPTIONS'] = 'true'
+
+        import edgar.config
+        importlib.reload(edgar.config)
+
+        assert edgar.config.VERBOSE_EXCEPTIONS is True
+
+    def test_verbose_exceptions_various_true_values(self, clean_env):
+        """Test various truthy values for VERBOSE_EXCEPTIONS"""
+        true_values = ['true', 'True', 'TRUE', '1', 'yes', 'Yes', 'YES', 'on', 'On', 'ON']
+
+        for value in true_values:
+            os.environ['EDGAR_VERBOSE_EXCEPTIONS'] = value
+
+            import edgar.config
+            importlib.reload(edgar.config)
+
+            assert edgar.config.VERBOSE_EXCEPTIONS is True, f"Failed for value: {value}"
+
+    def test_verbose_exceptions_various_false_values(self, clean_env):
+        """Test various falsy values for VERBOSE_EXCEPTIONS"""
+        false_values = ['false', 'False', 'FALSE', '0', 'no', 'No', 'NO', 'off', 'Off', 'OFF', '']
+
+        for value in false_values:
+            if value:  # Don't set empty string
+                os.environ['EDGAR_VERBOSE_EXCEPTIONS'] = value
+            else:
+                os.environ.pop('EDGAR_VERBOSE_EXCEPTIONS', None)
+
+            import edgar.config
+            importlib.reload(edgar.config)
+
+            assert edgar.config.VERBOSE_EXCEPTIONS is False, f"Failed for value: {value}"
 
 
 @pytest.mark.fast

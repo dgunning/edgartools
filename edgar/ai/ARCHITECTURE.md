@@ -736,7 +736,7 @@ async def handle_custom_analysis(args: dict) -> list[TextContent]:
 
 **Setup:**
 ```bash
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 ```
 
 **MCP Configuration:**

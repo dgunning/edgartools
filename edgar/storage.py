@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
     from edgar._filings import Filings
+    from edgar.filesystem import EdgarPath
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -147,37 +148,51 @@ def set_local_storage_path(path: Union[str, Path]) -> None:
     os.environ['EDGAR_LOCAL_DATA_DIR'] = str(storage_path)
 
 
-async def download_facts_async(client: Optional[AsyncClient]) -> Path:
+async def download_facts_async(client: Optional[AsyncClient], disable_progress: bool = False) -> Path:
     """
     Download company facts
+
+    Args:
+        client: Optional AsyncClient instance
+        disable_progress: If True, suppress progress bars. Defaults to False.
     """
     from edgar.config import SEC_ARCHIVE_URL
     log.info(f"Downloading Company facts to {get_edgar_data_directory()}/companyfacts")
 
-    return await download_bulk_data(client=client, url=f"{SEC_ARCHIVE_URL}/daily-index/xbrl/companyfacts.zip")
+    return await download_bulk_data(client=client, url=f"{SEC_ARCHIVE_URL}/daily-index/xbrl/companyfacts.zip", disable_progress=disable_progress)
 
-def download_facts() -> Path:
+def download_facts(disable_progress: bool = False) -> Path:
     """
     Download company facts
+
+    Args:
+        disable_progress: If True, suppress progress bars. Defaults to False.
     """
 
-    return asyncio.run(download_facts_async(client = None))
+    return asyncio.run(download_facts_async(client = None, disable_progress=disable_progress))
 
-async def download_submissions_async(client: Optional[AsyncClient]) -> Path:
+async def download_submissions_async(client: Optional[AsyncClient], disable_progress: bool = False) -> Path:
     """
     Download company submissions
+
+    Args:
+        client: Optional AsyncClient instance
+        disable_progress: If True, suppress progress bars. Defaults to False.
     """
     from edgar.config import SEC_ARCHIVE_URL
     log.info(f"Downloading Company submissions to {get_edgar_data_directory()}/submissions")
 
-    return await download_bulk_data(client=client, url=f"{SEC_ARCHIVE_URL}/daily-index/bulkdata/submissions.zip")
+    return await download_bulk_data(client=client, url=f"{SEC_ARCHIVE_URL}/daily-index/bulkdata/submissions.zip", disable_progress=disable_progress)
 
 
-def download_submissions() -> Path:
+def download_submissions(disable_progress: bool = False) -> Path:
     """
-    Download company facts
+    Download company submissions
+
+    Args:
+        disable_progress: If True, suppress progress bars. Defaults to False.
     """
-    return asyncio.run(download_submissions_async(client = None))
+    return asyncio.run(download_submissions_async(client = None, disable_progress=disable_progress))
 
 def download_ticker_data(reference_data_directory: Path):
     """
@@ -201,17 +216,21 @@ def download_reference_data():
 
 def download_edgar_data(submissions: bool = True,
                         facts: bool = True,
-                        reference: bool = True):
+                        reference: bool = True,
+                        disable_progress: bool = False):
     """
     Download Edgar data to the local storage directory
-    :param submissions: Download submissions
-    :param facts: Download facts
-    :param reference: Download reference data
+
+    Args:
+        submissions: Download submissions. Defaults to True.
+        facts: Download facts. Defaults to True.
+        reference: Download reference data. Defaults to True.
+        disable_progress: If True, suppress progress bars. Defaults to False.
     """
     if submissions:
-        download_submissions()
+        download_submissions(disable_progress=disable_progress)
     if facts:
-        download_facts()
+        download_facts(disable_progress=disable_progress)
     if reference:
         download_reference_data()
 
@@ -221,7 +240,9 @@ def download_filings(filing_date: Optional[str] = None,
                      overwrite_existing:bool=False,
                      filings: Optional['Filings'] = None,
                      compress: bool = True,
-                     compression_level: int = 6):
+                     compression_level: int = 6,
+                     upload_to_cloud: bool = False,
+                     disable_progress: bool = False):
     """
     Download feed files for the specified date or date range, or for specific filings.
     Optionally compresses the extracted files to save disk space.
@@ -233,6 +254,8 @@ def download_filings(filing_date: Optional[str] = None,
     download_filings('2024-01-01:2025-01-05', overwrite_existing=True)
     download_filings(filings=my_filings_object)
     download_filings('2025-01-03', compress=True, compression_level=9)  # Maximum compression
+    download_filings('2025-01-03', upload_to_cloud=True)  # Upload to cloud after download
+    download_filings('2025-01-03', disable_progress=True)  # Suppress progress bars for logging
 
     Args:
         filing_date: String in format 'YYYY-MM-DD', 'YYYY-MM-DD:', ':YYYY-MM-DD',
@@ -243,6 +266,10 @@ def download_filings(filing_date: Optional[str] = None,
         filings: Optional Filings object. If provided, will download only filings with matching accession numbers.
         compress: Whether to compress the extracted files to save disk space. Default is True.
         compression_level: Compression level for gzip (1-9, with 9 being highest compression). Default is 6.
+        upload_to_cloud: If True, upload downloaded filings to cloud storage after download.
+            Requires cloud storage to be configured via use_cloud_storage(). Default is False.
+        disable_progress: If True, suppress progress bars. Useful for logging environments where progress
+            updates create excessive log entries. Default is False.
     """
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
@@ -295,7 +322,7 @@ def download_filings(filing_date: Optional[str] = None,
 
         if not filtered_files.empty:
             # Process the filtered files...
-            for _, row in tqdm(filtered_files.iterrows(), desc='Downloading feed file(s)'):
+            for _, row in tqdm(filtered_files.iterrows(), desc='Downloading feed file(s)', disable=disable_progress):
                 bulk_filing_file = row['File']
                 bulk_file_directory = data_directory / row['Name'][:8]
                 filing_date_str = row['Name'][:8]  # Extract YYYYMMDD from filename
@@ -325,7 +352,7 @@ def download_filings(filing_date: Optional[str] = None,
                 if accession_numbers and bulk_file_directory.exists():
                     existing_files = {str(f) for f in bulk_file_directory.glob('*.nc')}
 
-                path = asyncio.run(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory))
+                path = asyncio.run(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory, disable_progress=disable_progress))
                 log.info('Downloaded feed file to %s', path)
                 total_feed_files_downloaded += 1
 
@@ -356,6 +383,35 @@ def download_filings(filing_date: Optional[str] = None,
     log.info('Download complete. Downloaded %d feed files.', total_feed_files_downloaded)
     if accession_numbers:
         log.info('Kept %d filings out of %d requested.', total_filings_kept, len(accession_numbers))
+
+    # Upload to cloud if requested
+    if upload_to_cloud:
+        from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud
+
+        if not is_cloud_storage_enabled():
+            log.warning('upload_to_cloud=True but cloud storage is not configured. '
+                       'Call use_cloud_storage() first to configure cloud storage.')
+        else:
+            log.info('Uploading filings to cloud storage...')
+            # Compute relative path from edgar data directory for sync
+            edgar_data_dir = get_edgar_data_directory()
+            try:
+                sync_path = str(Path(data_directory).relative_to(edgar_data_dir))
+            except ValueError:
+                # data_directory is outside edgar data dir - warn and skip
+                log.warning('Cannot upload to cloud: data_directory %s is outside edgar data directory %s',
+                           data_directory, edgar_data_dir)
+                sync_path = None
+
+            if sync_path:
+                result = sync_to_cloud(sync_path, overwrite=overwrite_existing)
+                log.info('Cloud upload complete. Uploaded: %d, Skipped: %d, Failed: %d',
+                        result['uploaded'], result['skipped'], result['failed'])
+                if result['errors']:
+                    for error in result['errors'][:5]:
+                        log.warning('Upload error: %s', error)
+                    if len(result['errors']) > 5:
+                        log.warning('... and %d more errors', len(result['errors']) - 5)
 
 
 def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], compress: bool = True, compression_level: int = 6) -> int:
@@ -677,13 +733,14 @@ def decompress_filing(file_path: Path, output_path: Optional[Path] = None, delet
     return output_path
 
 
-def compress_all_filings(data_directory: Optional[Path] = None, compression_level: int = 6) -> int:
+def compress_all_filings(data_directory: Optional[Path] = None, compression_level: int = 6, disable_progress: bool = False) -> int:
     """
     Compress all uncompressed filing files in the data directory.
 
     Args:
         data_directory: Path to the data directory (defaults to the Edgar data directory)
         compression_level: Compression level (1-9, with 9 being highest compression)
+        disable_progress: If True, suppress progress bar. Defaults to False.
 
     Returns:
         Number of files compressed
@@ -693,7 +750,7 @@ def compress_all_filings(data_directory: Optional[Path] = None, compression_leve
 
     # Find all .nc files (not already compressed)
     files_compressed = 0
-    for file_path in tqdm(list(data_directory.glob('**/*.nc')), desc="Compressing files"):
+    for file_path in tqdm(list(data_directory.glob('**/*.nc')), desc="Compressing files", disable=disable_progress):
         if not is_compressed_file(file_path) and file_path.is_file():
             try:
                 compress_filing(file_path, compression_level=compression_level)
@@ -726,27 +783,44 @@ def check_filings_exist_locally(filing_date: Union[str, date], accession_numbers
     return True
 
 
-def local_filing_path(filing_date:Union[str, date],
-                      accession_number:str,
-                      correction:bool=False) -> Path:
+def local_filing_path(filing_date: Union[str, date],
+                      accession_number: str,
+                      correction: bool = False) -> Union[Path, 'EdgarPath']:
     """
-    Get the local path for a filing
-    If correction is True, will look for the corrected filing with extension 'corr'
+    Get the path for a filing in local or cloud storage.
 
+    If correction is True, will look for the corrected filing with extension 'corr'.
     Returns the compressed version (.gz) if it exists, otherwise returns the uncompressed path.
+
+    When cloud storage is enabled via use_cloud_storage(), returns an EdgarPath
+    that works with the configured cloud backend. Otherwise returns a pathlib.Path.
+
+    Args:
+        filing_date: The filing date (YYYY-MM-DD format or date object)
+        accession_number: The SEC accession number
+        correction: If True, look for correction file (.corr extension)
+
+    Returns:
+        Path or EdgarPath pointing to the filing location
     """
+    from edgar.filesystem import is_cloud_storage_enabled, EdgarPath
+
     ext = 'corr' if correction else 'nc'
     if isinstance(filing_date, date):
         filing_date = filing_date.strftime('%Y-%m-%d')
     filing_date = filing_date.replace('-', '')
 
-    # Base path without compression extension
-    base_path = get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"
-
-    # Check for compressed version first
-    compressed_path = Path(f"{base_path}.gz")
-    if compressed_path.exists():
-        return compressed_path
-
-    # Fall back to uncompressed version
-    return base_path
+    if is_cloud_storage_enabled():
+        # Cloud storage path via EdgarPath
+        base_path = EdgarPath('filings', filing_date, f"{accession_number}.{ext}")
+        compressed_path = EdgarPath('filings', filing_date, f"{accession_number}.{ext}.gz")
+        if compressed_path.exists():
+            return compressed_path
+        return base_path
+    else:
+        # Original local filesystem path
+        base_path = get_edgar_data_directory() / 'filings' / filing_date / f"{accession_number}.{ext}"
+        compressed_path = Path(f"{base_path}.gz")
+        if compressed_path.exists():
+            return compressed_path
+        return base_path

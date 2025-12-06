@@ -342,9 +342,10 @@ class Statement:
 
     def _add_metadata_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Add metadata columns (balance, weight, preferred_sign) to DataFrame.
+        Add metadata columns (balance, weight, preferred_sign, parent_concept) to DataFrame.
 
         Issue #463: Users need access to XBRL metadata to understand value transformations.
+        Issue #514: Users need parent_concept to understand hierarchy relationships.
 
         Note: preferred_sign comes from statement's raw data (presentation linkbase),
         not from facts. It's period-specific in raw data, but we use a representative
@@ -353,7 +354,7 @@ class Statement:
         if df.empty or 'concept' not in df.columns:
             return df
 
-        # Get statement's raw data to access preferred_signs
+        # Get statement's raw data to access preferred_signs and parent
         raw_data = self.get_raw_data()
         raw_data_by_concept = {item.get('concept'): item for item in raw_data}
 
@@ -361,6 +362,7 @@ class Statement:
         balance_map = {}
         weight_map = {}
         preferred_sign_map = {}
+        parent_concept_map = {}
 
         # For each unique concept in the DataFrame
         for concept in df['concept'].unique():
@@ -375,19 +377,24 @@ class Statement:
                 balance_map[concept] = fact.get('balance')
                 weight_map[concept] = fact.get('weight')
 
-            # Get preferred_sign from statement raw data (presentation linkbase)
-            # preferred_sign is period-specific, so we take the first available value
+            # Get preferred_sign and parent from statement raw data (presentation linkbase)
             if concept in raw_data_by_concept:
                 item = raw_data_by_concept[concept]
+
+                # preferred_sign is period-specific, so we take the first available value
                 preferred_signs = item.get('preferred_signs', {})
                 if preferred_signs:
                     # Use first period's preferred_sign as representative value
                     preferred_sign_map[concept] = next(iter(preferred_signs.values()))
 
+                # parent_concept from presentation tree (Issue #514)
+                parent_concept_map[concept] = item.get('parent')
+
         # Add metadata columns
         df['balance'] = df['concept'].map(balance_map)
         df['weight'] = df['concept'].map(weight_map)
         df['preferred_sign'] = df['concept'].map(preferred_sign_map)
+        df['parent_concept'] = df['concept'].map(parent_concept_map)
 
         return df
 
@@ -407,7 +414,7 @@ class Statement:
         result = df.copy()
 
         # Get period columns (exclude metadata and structural columns)
-        metadata_cols = ['concept', 'label', 'balance', 'weight', 'preferred_sign',
+        metadata_cols = ['concept', 'label', 'balance', 'weight', 'preferred_sign', 'parent_concept',
                         'level', 'abstract', 'dimension', 'unit', 'point_in_time']
         period_cols = [col for col in df.columns if col not in metadata_cols]
 

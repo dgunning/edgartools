@@ -17,6 +17,7 @@ from edgar.entity.parser import EntityFactsParser
 from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
 
 
+@pytest.mark.regression
 class TestIssue438Regression:
     """Regression tests for Issue #438."""
     

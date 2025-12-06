@@ -73,7 +73,7 @@
 
 ```bash
 # Full installation with AI/MCP support
-pip install edgartools[ai]
+pip install "edgartools[ai]"
 
 # Basic installation
 pip install edgartools

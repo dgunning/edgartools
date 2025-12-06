@@ -4,7 +4,7 @@ from tqdm.auto import tqdm
 
 
 if __name__ == '__main__':
-    filings = get_filings(form='13F-HR', year=[2010,2012]).sample(1000)
+    filings = get_filings(form='13F-HR', year=[2024]).sample(500)
     #thirteenf = filing.obj()
     #Error processing filing 0000902664-12-001664: 'NoneType' object has no attribute 'filter'
 

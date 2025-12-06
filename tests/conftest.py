@@ -8,6 +8,40 @@ from edgar._filings import Filing, get_filings
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture(autouse=True)
+def reset_http_client_state():
+    """
+    Reset HTTP client state between tests to ensure test isolation.
+
+    This is especially important for SSL verification tests which modify
+    HTTP_MGR.httpx_params["verify"] and need a clean state.
+    """
+    # Close any existing client to force fresh creation
+    if httpclient.HTTP_MGR._client is not None:
+        try:
+            httpclient.HTTP_MGR._client.close()
+        except Exception:
+            pass
+        httpclient.HTTP_MGR._client = None
+
+    # Always reset to default (True) before each test
+    # Don't restore to "original" as that might be False from a leaked previous test
+    httpclient.HTTP_MGR.httpx_params["verify"] = True
+
+    yield
+
+    # Cleanup and reset to default after test
+    if httpclient.HTTP_MGR._client is not None:
+        try:
+            httpclient.HTTP_MGR._client.close()
+        except Exception:
+            pass
+        httpclient.HTTP_MGR._client = None
+
+    # Always reset to default (True) to prevent state leaking to next test
+    httpclient.HTTP_MGR.httpx_params["verify"] = True
 # Base paths
 FIXTURE_DIR = Path("tests/fixtures/xbrl")
 DATA_DIR = Path("data/xbrl/datafiles")
@@ -26,10 +60,15 @@ def pytest_configure(config):
         httpclient.HTTP_MGR = httpclient.get_http_mgr(cache_enabled=False)
 
     if hasattr(config, 'workerinput'):
-        logger.info("pytest-xdist is enabled, enabling a distributed sqlite ratelimiter")    
-        from pyrate_limiter import limiter_factory
+        logger.info("pytest-xdist is enabled, enabling a distributed sqlite ratelimiter")
+        from pyrate_limiter import Duration, limiter_factory
+        # Use 8 requests per second (below SEC's 10/sec limit) with burst capacity
+        # This provides more headroom for parallel tests while respecting rate limits
         httpclient.HTTP_MGR.rate_limiter = limiter_factory.create_sqlite_limiter(
-            rate_per_duration=10, db_path="ratelimiter.sqlite", use_file_lock=True
+            rate_per_duration=8,
+            duration=Duration.SECOND,
+            db_path="ratelimiter.sqlite",
+            use_file_lock=True
         )
 
 
@@ -91,6 +130,12 @@ def msft_company():
 def amzn_company():
     """Amazon.com Inc. company fixture - cached per test module"""
     return Company("AMZN")
+
+
+@pytest.fixture(scope="session")
+def nflx_company():
+    """Netflix Inc. company fixture - cached for entire test session"""
+    return Company("NFLX")
 
 
 # Filing fixtures for performance optimization
@@ -155,8 +200,20 @@ def frontier_masters_10k_filing():
                  cik=1450722, accession_no='0001213900-23-028058')
 
 
-@pytest.fixture(scope="module") 
+@pytest.fixture(scope="module")
 def apple_2024_10k_filing():
     """Apple Inc. 2024 10-K filing - cached per test module"""
-    return Filing(company='Apple Inc.', cik=320193, form='10-K', 
+    return Filing(company='Apple Inc.', cik=320193, form='10-K',
                  filing_date='2024-11-01', accession_no='0000320193-24-000123')
+
+
+@pytest.fixture(scope="session")
+def nflx_2012_10k_filing(nflx_company):
+    """Netflix 2012 10-K filing (fiscal 2011) - cached for entire test session"""
+    return nflx_company.get_filings(form="10-K", accession_number="0001065280-13-000008").latest()
+
+
+@pytest.fixture(scope="session")
+def nflx_2025_q3_10q_filing(nflx_company):
+    """Netflix Q3 2025 10-Q filing - cached for entire test session"""
+    return nflx_company.get_filings(form="10-Q", accession_number="0001065280-25-000406").latest()

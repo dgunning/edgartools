@@ -511,9 +511,10 @@ def determine_periods_to_display(
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
                         end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
                         days = (end_date - start_date).days
-                        # STRICT CHECK: Annual periods must be > 300 days
-                        # This filters out quarterly periods incorrectly marked as FY
-                        if days > 300:  # Truly annual period (not quarterly)
+                        # STRICT CHECK: Annual periods must be between 300 and 370 days
+                        # This filters out quarterly periods AND multi-year cumulative periods
+                        # Issue #513: Periods like "Jan 2007 to Dec 2012" (2190 days) were being selected
+                        if 300 < days <= 370:  # Truly annual period (not quarterly or multi-year)
                             # Add a score to each period for later sorting
                             # Default score is 0 (will be increased for fiscal year matches)
                             period_with_score = period.copy()
@@ -594,7 +595,8 @@ def determine_periods_to_display(
                             period['period_type'] = 'three-quarters'
                             period['days'] = days
                             ytd_periods.append(period)
-                        elif days > 300:  # Annual period for comparisons (strict check)
+                        elif 300 < days <= 370:  # Annual period for comparisons (strict check)
+                            # Issue #513: Filter out multi-year periods
                             period['period_type'] = 'annual'
                             period['days'] = days
                             annual_periods.append(period)

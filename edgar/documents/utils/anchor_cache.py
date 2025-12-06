@@ -15,13 +15,13 @@ from pathlib import Path
 class AnchorCache:
     """
     Cache for anchor link analysis results.
-    
+
     Stores navigation patterns by HTML hash to avoid re-analysis.
     """
-    
+
     def __init__(self, cache_dir: Optional[Path] = None):
-        self.cache_dir = cache_dir or Path.home() / '.edgar_cache' / 'anchors'
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        from edgar.paths import get_anchor_cache_directory
+        self.cache_dir = cache_dir or get_anchor_cache_directory(create=True)
         self._memory_cache = {}  # In-memory cache for current session
     
     def _get_html_hash(self, html_content: str) -> str:

@@ -166,7 +166,7 @@ class CompanyReport:
         return Panel(
             Group(
                 self._filing.__rich__(),
-                self.financials() or Text("No financial data available")
+                self.financials or Text("No financial data available")
             )
         )
 

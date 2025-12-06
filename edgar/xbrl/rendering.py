@@ -1708,17 +1708,25 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
 
         components.append(filing_table)
 
-    # Period coverage - cleaner, more scannable format
+    # Period coverage - filtered by document date to show only usable periods
     if xbrl.reporting_periods:
         components.append(Text(""))  # Spacing
-        components.append(Text("Available Data Coverage:", style="bold"))
+        components.append(Text("Periods Available for Statements:", style="bold"))
 
-        # Parse periods into annual and quarterly
+        # Apply document date filtering (same logic used when rendering statements)
+        from edgar.xbrl.period_selector import _filter_by_document_date
+
+        document_end_date = xbrl.period_of_report
+        all_periods_count = len(xbrl.reporting_periods)
+        filtered_periods = _filter_by_document_date(xbrl.reporting_periods, document_end_date)
+        filtered_count = len(filtered_periods)
+
+        # Parse filtered periods into annual and quarterly
         annual_periods = []
         quarterly_periods = []
         other_periods = []
 
-        for period in xbrl.reporting_periods[:10]:  # Show more periods
+        for period in filtered_periods[:10]:  # Show up to 10 filtered periods
             label = period.get('label', '')
             if not label:
                 continue
@@ -1752,6 +1760,12 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
             components.append(Text(f"  Annual: {', '.join(annual_periods[:3])}", style="default"))
         if quarterly_periods:
             components.append(Text(f"  Quarterly: {', '.join(quarterly_periods[:3])}", style="default"))
+
+        # Add explanatory note if periods were filtered out
+        if document_end_date and filtered_count < all_periods_count:
+            excluded_count = all_periods_count - filtered_count
+            components.append(Text(f"  ({excluded_count} future period{'s' if excluded_count > 1 else ''} after {document_end_date} excluded)",
+                                 style="dim italic"))
 
     statements = xbrl.get_all_statements()
     statement_types = {stmt['type'] for stmt in statements if stmt['type']}

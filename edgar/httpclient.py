@@ -18,11 +18,45 @@ except (locale.Error, ValueError):
     # This shouldn't happen on most systems, but better safe than sorry
     pass
 
+from typing import Any
+
 from httpxthrottlecache import HttpxThrottleCache
+
+# =============================================================================
+# WORKAROUND for httpxthrottlecache bug: SSL verify parameter not passed to transport
+#
+# Bug: httpxthrottlecache v0.2.1 (and possibly earlier versions) fails to pass the
+# 'verify' parameter to the HTTP transport, causing SSL verification to remain enabled
+# even when configure_http(verify_ssl=False) is called.
+#
+# Impact: Users behind corporate VPNs/proxies with SSL inspection cannot disable
+# SSL verification, making edgartools unusable in those environments.
+#
+# Upstream issue: https://github.com/paultiq/httpxthrottlecache/issues/XXX (TODO: create)
+#
+# TODO: Remove this monkey patch once httpxthrottlecache releases a fix (check for v0.3.0+)
+# =============================================================================
+def _patched_get_httpx_transport_params(self, params: dict[str, Any]) -> dict[str, Any]:
+    """
+    Patched version that includes the 'verify' parameter for SSL configuration.
+
+    This fixes a bug where httpxthrottlecache._get_httpx_transport_params() only
+    extracts 'http2' and 'proxy' parameters, ignoring 'verify'.
+    """
+    http2 = params.get("http2", False)
+    proxy = self.proxy
+    verify = params.get("verify", True)  # Extract verify parameter (defaults to True for security)
+
+    return {"http2": http2, "proxy": proxy, "verify": verify}
+
+
+# Apply the monkey patch at module import time
+HttpxThrottleCache._get_httpx_transport_params = _patched_get_httpx_transport_params
+# =============================================================================
 
 from edgar.core import get_identity, strtobool
 
-from .core import edgar_data_dir, get_edgar_data_directory
+from .core import get_edgar_data_directory
 
 MAX_SUBMISSIONS_AGE_SECONDS = 30  # Check for submissions every 30 seconds (reduced from 10 min for Issue #471)
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes
@@ -66,6 +100,7 @@ def _get_cache_rules() -> dict:
 CACHE_RULES = _get_cache_rules()
 
 def get_cache_directory() -> str:
+    """Get the HTTP cache directory, respecting EDGAR_LOCAL_DATA_DIR env var."""
     cachedir = get_edgar_data_directory() / "_tcache"
     cachedir.mkdir(parents=True, exist_ok=True)
 
@@ -123,6 +158,85 @@ def get_http_params():
 
 def close_clients():
     HTTP_MGR.close()
+
+
+def configure_http(
+    verify_ssl: bool = None,
+    proxy: str = None,
+    timeout: float = None,
+) -> None:
+    """
+    Configure HTTP client settings at runtime.
+
+    This function allows you to modify HTTP settings after importing edgar,
+    which is useful when you can't set environment variables before import.
+
+    Args:
+        verify_ssl: Enable/disable SSL certificate verification.
+                   Set to False for corporate networks with SSL inspection.
+                   WARNING: Disabling SSL verification reduces security.
+        proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
+               Supports authentication: "http://user:pass@proxy.company.com:8080"
+        timeout: Request timeout in seconds (default: 30.0)
+
+    Examples:
+        # Disable SSL verification for corporate VPN
+        from edgar import configure_http
+        configure_http(verify_ssl=False)
+
+        # Configure proxy
+        configure_http(proxy="http://proxy.company.com:8080")
+
+        # Multiple settings at once
+        configure_http(verify_ssl=False, proxy="http://proxy:8080", timeout=60.0)
+
+    Note:
+        Changes take effect immediately for new requests.
+        If an HTTP client was already created, it will be recreated with the new settings.
+    """
+    global HTTP_MGR
+
+    settings_changed = False
+
+    if verify_ssl is not None:
+        HTTP_MGR.httpx_params["verify"] = verify_ssl
+        settings_changed = True
+
+    if proxy is not None:
+        # Configure proxy for httpx
+        HTTP_MGR.httpx_params["proxy"] = proxy
+        settings_changed = True
+
+    if timeout is not None:
+        from httpx import Timeout
+        HTTP_MGR.httpx_params["timeout"] = Timeout(timeout, connect=10.0)
+        settings_changed = True
+
+    # Force client recreation if settings changed and client already exists
+    # This ensures new settings take effect even if client was already created
+    if settings_changed and HTTP_MGR._client is not None:
+        HTTP_MGR._client.close()
+        HTTP_MGR._client = None
+
+
+def get_http_config() -> dict:
+    """
+    Get current HTTP client configuration.
+
+    Returns:
+        dict: Current configuration including verify_ssl, proxy, and timeout settings.
+
+    Example:
+        >>> from edgar import get_http_config
+        >>> config = get_http_config()
+        >>> print(f"SSL verification: {config['verify_ssl']}")
+    """
+    params = HTTP_MGR.httpx_params
+    return {
+        "verify_ssl": params.get("verify", True),
+        "proxy": params.get("proxy"),
+        "timeout": params.get("timeout"),
+    }
 
 
 HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())

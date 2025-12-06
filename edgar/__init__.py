@@ -30,7 +30,20 @@ from edgar.files.html import Document
 from edgar.financials import Financials, MultiFinancials
 from edgar.funds import FundClass, FundCompany, FundSeries, find_fund
 from edgar.funds.reports import NPORT_FORMS, FundReport
+from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
 from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
+from edgar.paths import (
+    get_data_directory,
+    get_cache_directory,
+    get_search_cache_directory,
+    get_anchor_cache_directory,
+    get_test_directory,
+    get_claude_skills_directory,
+    set_data_directory,
+    set_cache_directory,
+    set_test_directory,
+    set_claude_skills_directory,
+)
 from edgar.storage_management import (
     StorageAnalysis,
     StorageInfo,
@@ -45,6 +58,12 @@ from edgar.storage_management import (
 )
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
+
+# HTTP configuration functions for runtime SSL/proxy configuration
+from edgar.httpclient import configure_http, get_http_config
+
+# SSL diagnostic function
+from edgar.diagnose_ssl import diagnose_ssl
 
 # Fix for Issue #457: Clear locale-corrupted cache files on first import
 # This is a one-time operation that only runs if the marker file doesn't exist

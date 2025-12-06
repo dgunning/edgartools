@@ -1,55 +1,236 @@
-# SSL Verification Configuration in edgartools
+# SSL and Network Configuration
 
-## Overview
-This document outlines the design and recommendations for configuring SSL verification in the edgartools library, particularly useful for corporate environments with SSL inspection or similar network configurations.
+This guide covers SSL verification, proxy configuration, and network troubleshooting for edgartools - especially useful for corporate environments with VPNs, SSL inspection, or proxy servers.
 
-## Implementation
+## Quick Fix: SSL Verification Errors
 
-### 1. Environment Variable Control
-The primary method is using the `EDGAR_VERIFY_SSL` environment variable:
+If you're getting SSL certificate errors, use `configure_http()`:
 
 ```python
-verify = os.environ.get("EDGAR_VERIFY_SSL", "true").lower() != "false"
+from edgar import configure_http
+
+# Disable SSL verification (use only in trusted networks)
+configure_http(verify_ssl=False)
+
+# Now use edgartools normally
+from edgar import Company
+company = Company("AAPL")
 ```
 
-- Default: SSL verification enabled (safer default)
-- To disable: Set `EDGAR_VERIFY_SSL=false`
+## Understanding SSL Issues
 
-### 2. Internal Configuration
-The library's HTTP client layer can be configured to disable SSL verification when needed. This is handled internally by the library and doesn't require direct interaction with the HTTP clients.
+### Common Causes
 
-## Usage Examples
+1. **Corporate VPN with SSL inspection** - Your organization intercepts HTTPS traffic
+2. **Corporate proxy servers** - Traffic routed through a proxy that modifies certificates
+3. **Self-signed certificates** - Development or testing environments
+4. **Outdated CA certificates** - System certificate store is outdated
 
-### Using Environment Variable
-```bash
+### Error Messages
+
+You might see errors like:
+- `SSL: CERTIFICATE_VERIFY_FAILED`
+- `certificate verify failed`
+- `unable to get local issuer certificate`
+
+## Configuration Options
+
+### Option 1: Runtime Configuration (Recommended)
+
+Use `configure_http()` to change settings at any time, even after importing:
+
+```python
+from edgar import configure_http, get_http_config
+
 # Disable SSL verification
+configure_http(verify_ssl=False)
+
+# Configure a proxy
+configure_http(proxy="http://proxy.company.com:8080")
+
+# Configure both at once
+configure_http(verify_ssl=False, proxy="http://proxy:8080")
+
+# Check current configuration
+print(get_http_config())
+# {'verify_ssl': False, 'proxy': 'http://proxy:8080', 'timeout': ...}
+```
+
+### Option 2: Environment Variable (Before Import)
+
+Set the environment variable **before** importing edgartools:
+
+```python
+import os
+os.environ['EDGAR_VERIFY_SSL'] = 'false'
+
+# IMPORTANT: Set env var BEFORE this import!
+from edgar import Company
+```
+
+Or in your shell:
+```bash
 export EDGAR_VERIFY_SSL=false
 python your_script.py
-
-# Enable SSL verification (default)
-export EDGAR_VERIFY_SSL=true
-python your_script.py
 ```
 
-### Using Direct Configuration
-```python
-from edgar import httpclient
+**Common Mistake**: Setting the environment variable *after* importing edgar has no effect because the HTTP client is initialized at import time. Use `configure_http()` instead if you've already imported.
 
-# Disable SSL verification for specific client
-with httpclient.http_client(verify=False) as client:
-    # Make requests...
-    ...
+### Option 3: System Proxy Environment Variables
+
+Edgartools respects standard proxy environment variables:
+
+```bash
+export HTTP_PROXY="http://proxy.company.com:8080"
+export HTTPS_PROXY="http://proxy.company.com:8080"
+export NO_PROXY="localhost,127.0.0.1"
+```
+
+For authenticated proxies:
+```bash
+export HTTPS_PROXY="http://username:password@proxy.company.com:8080"
+```
+
+## Corporate Network Scenarios
+
+### Scenario 1: VPN with SSL Inspection
+
+Your IT department inspects HTTPS traffic, causing certificate errors:
+
+```python
+from edgar import configure_http, Company
+
+# Disable SSL verification for corporate VPN
+configure_http(verify_ssl=False)
+
+company = Company("AAPL")
+filings = company.get_filings(form="10-K")
+```
+
+### Scenario 2: Corporate Proxy Server
+
+Traffic must go through a proxy:
+
+```python
+from edgar import configure_http, Company
+
+# Configure proxy
+configure_http(proxy="http://proxy.company.com:8080")
+
+company = Company("AAPL")
+```
+
+### Scenario 3: VPN + Proxy + SSL Issues
+
+Common in enterprise environments:
+
+```python
+from edgar import configure_http, Company
+
+# Configure everything
+configure_http(
+    verify_ssl=False,
+    proxy="http://proxy.company.com:8080",
+    timeout=60.0  # Longer timeout for slow proxies
+)
+
+company = Company("AAPL")
+```
+
+### Scenario 4: Custom CA Certificates
+
+If your organization uses custom CA certificates, you can configure the system:
+
+```bash
+# Add your organization's CA certificate to the system trust store
+# Then set the certificate bundle path
+export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
+export SSL_CERT_FILE="/path/to/company-ca-bundle.crt"
+```
+
+## Troubleshooting
+
+### Check Current Configuration
+
+```python
+from edgar import get_http_config
+
+config = get_http_config()
+print(f"SSL Verification: {config['verify_ssl']}")
+print(f"Proxy: {config['proxy']}")
+print(f"Timeout: {config['timeout']}")
+```
+
+### Test Connectivity
+
+```python
+from edgar import Company
+
+try:
+    company = Company("AAPL")
+    print(f"Success! Connected to SEC EDGAR")
+    print(f"Company: {company.name}")
+except Exception as e:
+    print(f"Connection failed: {e}")
+```
+
+### Enable Debug Logging
+
+For detailed connection information:
+
+```python
+import logging
+
+# Enable HTTP debug logging
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
+logging.getLogger("httpcore").setLevel(logging.DEBUG)
+
+from edgar import Company
+company = Company("AAPL")  # Will show detailed HTTP logs
 ```
 
 ## Security Considerations
 
-1. **Default Security**: SSL verification is enabled by default to maintain security.
-2. **Targeted Usage**: Disable SSL verification only in controlled environments where necessary (e.g., corporate networks with SSL inspection).
-3. **Risk Awareness**: Disabling SSL verification makes HTTPS connections potentially insecure. Only use when you understand the security implications.
+Disabling SSL verification reduces security by making connections vulnerable to man-in-the-middle attacks. Only use these options when:
 
-## Best Practices
+1. You're on a **trusted corporate network**
+2. You understand the security implications
+3. You have no alternative (e.g., can't install corporate CA certificates)
 
-1. **Prefer Environment Variables**: Use environment variables for global configuration to avoid hardcoding security settings.
-2. **Configuration Scope**: The SSL verification setting applies globally to all HTTP requests made by the library.
-3. **Documentation**: Always document when and why SSL verification is disabled in your code.
-4. **Security Review**: Have your security team review any permanent SSL verification disablement.
+**Best Practice**: Work with your IT department to properly install corporate CA certificates rather than disabling SSL verification.
+
+## API Reference
+
+### `configure_http()`
+
+```python
+def configure_http(
+    verify_ssl: bool = None,
+    proxy: str = None,
+    timeout: float = None,
+) -> None
+```
+
+Configure HTTP client settings at runtime.
+
+**Parameters:**
+- `verify_ssl`: Enable/disable SSL certificate verification
+- `proxy`: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080")
+- `timeout`: Request timeout in seconds
+
+### `get_http_config()`
+
+```python
+def get_http_config() -> dict
+```
+
+Returns current HTTP configuration as a dictionary with keys:
+- `verify_ssl`: Current SSL verification setting
+- `proxy`: Current proxy URL (or None)
+- `timeout`: Current timeout setting
+
+## See Also
+
+- [Configuration Guide](../configuration.md) - Full configuration options
+- [Troubleshooting](../resources/troubleshooting.md) - Common issues and solutions

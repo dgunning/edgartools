@@ -26,6 +26,7 @@ from rich.table import Column, Table
 from rich.table import Table as RichTable
 
 from edgar.attachments import Attachments
+from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich, strip_ansi_text
 from edgar.xbrl.core import STANDARD_LABEL
@@ -859,6 +860,7 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
+                'parent': node.parent,  # Include parent concept for hierarchy (Issue #514)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
@@ -880,6 +882,7 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
+                'parent': node.parent,  # Include parent concept for hierarchy (Issue #514)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
@@ -1193,6 +1196,16 @@ class XBRL:
                 if matching_statements:
                     found_role = matching_statements[0]['role']
 
+            # Issue #518: Special fallback for IncomeStatement -> ComprehensiveIncome
+            # Many filings have ComprehensiveIncome instead of separate IncomeStatement
+            if not matching_statements and statement_type == 'IncomeStatement':
+                if 'ComprehensiveIncome' in self._statement_by_standard_name:
+                    matching_statements = self._statement_by_standard_name['ComprehensiveIncome']
+                    if matching_statements:
+                        found_role = matching_statements[0]['role']
+                        if VERBOSE_EXCEPTIONS:
+                            log.info("IncomeStatement not found, using ComprehensiveIncome as fallback")
+
             # If not found by standard name, try by role URI
             if not matching_statements and statement_type.startswith(
                     'http') and statement_type in self._statement_by_role_uri:
@@ -1222,6 +1235,19 @@ class XBRL:
                         matching_statements = statements
                         found_role = statements[0]['role']
                         break
+
+            # Issue #518: Validate statement type matches to prevent returning wrong statement
+            # Don't return CashFlowStatement when IncomeStatement was requested
+            if matching_statements and matching_statements[0].get('type'):
+                matched_type = matching_statements[0]['type']
+                financial_statement_types = ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement',
+                                             'ComprehensiveIncome', 'StatementOfEquity']
+                # If requesting a specific financial statement and got a different one, reject it
+                if statement_type in financial_statement_types and matched_type != statement_type:
+                    if VERBOSE_EXCEPTIONS:
+                        log.warning(f"Found {matched_type} when looking for {statement_type}, rejecting type mismatch")
+                    matching_statements = []
+                    found_role = None
 
             # Update actual statement type if we found a match
             if matching_statements and matching_statements[0]['type']:
