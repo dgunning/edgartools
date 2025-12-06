@@ -10,6 +10,7 @@ from rich.tree import Tree
 
 from edgar.company_reports._base import CompanyReport
 from edgar.company_reports._structures import FilingStructure
+from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.htmltools import ChunkedDocument
 from edgar.formatting import datefmt
 
@@ -162,6 +163,118 @@ class TenK(CompanyReport):
         assert filing.form in ['10-K', '10-K/A'], f"This form should be a 10-K but was {filing.form}"
         super().__init__(filing)
 
+    @cached_property
+    def document(self):
+        """
+        Parse 10-K using new HTMLParser with enhanced section detection.
+
+        This uses the pattern-based section extractor that handles:
+        - All 10-K item patterns (Items 1, 1A, 1B, 1C, 2, 3, 4 in Part I, etc.)
+        - Part boundaries and context
+        - Bold paragraph fallback detection
+        - Table cell detection
+        - Various item number formatting variations
+
+        Returns:
+            Document object from edgar.documents module with sections property,
+            or None if parsing fails (falls back to ChunkedDocument)
+        """
+        try:
+            html = self._filing.html()
+            if not html:
+                return None
+            config = ParserConfig(form='10-K')
+            parser = HTMLParser(config)
+            return parser.parse(html)
+        except Exception as e:
+            # If new parser fails, log and return None to fall back to old parser
+            import warnings
+            warnings.warn(
+                f"HTMLParser failed for 10-K filing (falling back to ChunkedDocument): {e}",
+                RuntimeWarning,
+                stacklevel=2
+            )
+            return None
+
+    @property
+    def sections(self):
+        """
+        Get detected 10-K sections using new parser.
+
+        Returns a Sections dictionary mapping section names to Section objects.
+        Section names use friendly names (e.g., 'business', 'risk_factors', 'mda').
+
+        Example:
+            >>> ten_k.sections
+            {'business': Section(...), 'risk_factors': Section(...), 'mda': Section(...)}
+            >>> ten_k.sections['business'].text()
+            'Item 1 - Business...'
+            >>> ten_k.sections['mda'].text()
+            'Item 7 - Management Discussion and Analysis...'
+        """
+        if self.document:
+            return self.document.sections
+        return {}
+
+    @property
+    def items(self):
+        """
+        List of detected item names in standard "Item X" format.
+
+        Uses new parser's section detection for improved accuracy.
+        Falls back to old chunked_document if new parser returns no sections.
+
+        Returns:
+            List of item titles (e.g., ['Item 1', 'Item 1A', 'Item 2', ...])
+        """
+        # Mapping from friendly section names to Item numbers
+        section_to_item = {
+            'business': 'Item 1',
+            'risk_factors': 'Item 1A',
+            'unresolved_staff_comments': 'Item 1B',
+            'cybersecurity': 'Item 1C',
+            'properties': 'Item 2',
+            'legal_proceedings': 'Item 3',
+            'mine_safety': 'Item 4',
+            'market_equity': 'Item 5',
+            'selected_financial_data': 'Item 6',
+            'mda': 'Item 7',
+            'market_risk': 'Item 7A',
+            'financial_statements': 'Item 8',
+            'controls_procedures': 'Item 9',
+            'controls_procedures_9a': 'Item 9A',
+            'other_information': 'Item 9B',
+            'foreign_jurisdictions': 'Item 9C',
+            'directors_officers': 'Item 10',
+            'executive_compensation': 'Item 11',
+            'security_ownership': 'Item 12',
+            'relationships_transactions': 'Item 13',
+            'accounting_fees': 'Item 14',
+            'exhibits': 'Item 15',
+            'summary': 'Item 16'
+        }
+
+        # Try new parser first
+        if self.sections:
+            items = []
+            for key, section in self.sections.items():
+                # Check if section has an item attribute
+                if hasattr(section, 'item') and section.item:
+                    items.append(f"Item {section.item}")
+                # Map friendly names to Item numbers
+                elif key in section_to_item:
+                    items.append(section_to_item[key])
+                # Handle keys that are already in "Item X" format
+                elif key.startswith('Item '):
+                    items.append(key)
+            return items if items else (self.chunked_document.list_items() if self.chunked_document else [])
+
+        # Fallback to old parser for backward compatibility
+        if self.chunked_document:
+            return self.chunked_document.list_items()
+
+        return []
+
     @property
     def business(self):
         return self['Item 1']
@@ -212,18 +325,136 @@ class TenK(CompanyReport):
         return f"""TenK('{self.company}')"""
 
     def __getitem__(self, item_or_part: str):
-        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+        """
+        Get section/item text by name or number.
 
-        # Try standard chunked document extraction first
-        item_text = self.chunked_document[item_or_part]
+        Supports multiple lookup formats:
+        - Standard format: 'Item 1', 'Item 1A', 'Item 7'
+        - Short format: '1', '1A', '7', '7A'
+        - Friendly names: 'business', 'risk_factors', 'mda'
 
-        # If standard extraction returned None, try Cross Reference Index format
-        if item_text is None and self._cross_reference_index is not None:
-            # Map "Item 1A" to "1A" for Cross Reference Index lookup
+        Falls back to old chunked_document and Cross Reference Index for backward compatibility.
+
+        Args:
+            item_or_part: Section identifier in various formats
+
+        Returns:
+            Section text content as string, or None if not found
+        """
+        # Mapping from Item numbers to friendly section names
+        item_to_section = {
+            'Item 1': 'business',
+            'Item 1A': 'risk_factors',
+            'Item 1B': 'unresolved_staff_comments',
+            'Item 1C': 'cybersecurity',
+            'Item 2': 'properties',
+            'Item 3': 'legal_proceedings',
+            'Item 4': 'mine_safety',
+            'Item 5': 'market_equity',
+            'Item 6': 'selected_financial_data',
+            'Item 7': 'mda',
+            'Item 7A': 'market_risk',
+            'Item 8': 'financial_statements',
+            'Item 9': 'controls_procedures',
+            'Item 9A': 'controls_procedures_9a',
+            'Item 9B': 'other_information',
+            'Item 9C': 'foreign_jurisdictions',
+            'Item 10': 'directors_officers',
+            'Item 11': 'executive_compensation',
+            'Item 12': 'security_ownership',
+            'Item 13': 'relationships_transactions',
+            'Item 14': 'accounting_fees',
+            'Item 15': 'exhibits',
+            'Item 16': 'summary'
+        }
+
+        # Try new parser sections first
+        if self.sections:
+            # Direct key lookup (e.g., 'business', 'Item 1')
+            if item_or_part in self.sections:
+                return self.sections[item_or_part].text()
+
+            # Normalize input
+            normalized = item_or_part.strip()
+
+            # Handle 'Item X' format -> try friendly name
+            if normalized in item_to_section:
+                friendly_name = item_to_section[normalized]
+                if friendly_name in self.sections:
+                    return self.sections[friendly_name].text()
+
+            # Handle short format '1', '1A', etc. -> convert to 'Item X'
+            if re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
+                item_key = f'Item {normalized.upper()}'
+                # Try direct lookup
+                if item_key in self.sections:
+                    return self.sections[item_key].text()
+                # Try friendly name
+                if item_key in item_to_section:
+                    friendly_name = item_to_section[item_key]
+                    if friendly_name in self.sections:
+                        return self.sections[friendly_name].text()
+
+            # Try part-based naming convention (e.g., "part_i_item_1", "part_i_item_1a")
+            # Some filings use this format for section detection
+            if normalized.startswith('Item '):
+                # Extract item number: "Item 1" -> "1", "Item 1A" -> "1a"
+                item_num = normalized[5:].strip().lower()
+                # Try Part I first (most common for Items 1-4)
+                part_i_key = f'part_i_item_{item_num}'
+                if part_i_key in self.sections:
+                    text = self.sections[part_i_key].text()
+                    # Only return if non-empty (otherwise fall back to chunked_document)
+                    if text and text.strip():
+                        return text
+                # Try Part II for Items 5-9C
+                part_ii_key = f'part_ii_item_{item_num}'
+                if part_ii_key in self.sections:
+                    text = self.sections[part_ii_key].text()
+                    if text and text.strip():
+                        return text
+                # Try Part III for Items 10-14
+                part_iii_key = f'part_iii_item_{item_num}'
+                if part_iii_key in self.sections:
+                    text = self.sections[part_iii_key].text()
+                    if text and text.strip():
+                        return text
+                # Try Part IV for Items 15-16
+                part_iv_key = f'part_iv_item_{item_num}'
+                if part_iv_key in self.sections:
+                    text = self.sections[part_iv_key].text()
+                    if text and text.strip():
+                        return text
+
+            # Also handle if user provides just a number like "1" or "1A"
+            elif re.match(r'^\d+[a-z]?$', normalized, re.IGNORECASE):
+                item_num = normalized.lower()
+                # Try all parts
+                for part in ['i', 'ii', 'iii', 'iv']:
+                    part_key = f'part_{part}_item_{item_num}'
+                    if part_key in self.sections:
+                        text = self.sections[part_key].text()
+                        # Only return if non-empty
+                        if text and text.strip():
+                            return text
+
+        # If Cross Reference Index format is detected, prefer it over chunked_document
+        # (Some filings like GE, Henry Schein use Cross Reference Index - issue #107)
+        if self._cross_reference_index is not None:
             item_id = _CROSS_REF_ITEM_MAP.get(item_or_part)
             if item_id:
                 # Extract content using Cross Reference Index parser
                 item_text = self._cross_reference_index.extract_item_content(item_id)
+                if item_text:
+                    # Successfully extracted via Cross Reference Index
+                    item_text = item_text.rstrip()
+                    last_line = item_text.split("\n")[-1]
+                    if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+                        item_text = item_text.rstrip(last_line)
+                    return item_text
+
+        # Fall back to chunked document for backward compatibility
+        item_text = self.chunked_document[item_or_part]
 
         # Clean up the text if found
         if item_text:
@@ -235,14 +466,39 @@ class TenK(CompanyReport):
         return item_text
 
     def get_item_with_part(self, part: str, item: str, markdown:bool=True):
+        """
+        Get item text with explicit part specification.
+
+        Note: For 10-K filings, items are unique across parts, so the part parameter
+        is less critical than for 10-Q. This method delegates to __getitem__ for new parser
+        support while maintaining backward compatibility.
+
+        Args:
+            part: Part identifier (e.g., 'Part I', 'Part II') - largely ignored for 10-K
+            item: Item identifier (e.g., 'Item 1', '1', 'business')
+            markdown: If True, return markdown formatted text (default True)
+
+        Returns:
+            Item text content, or None if not found
+        """
+        # Try new parser via __getitem__ (which handles various formats)
+        if self.sections:
+            # Since 10-K items are unique, just use the item lookup
+            result = self[item]
+            if result:
+                return result
+
+        # Fallback to old implementations
         if not part:
             return self.id_parse_document(markdown).get(item.lower())
-        # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+
+        # Try chunked_document
         item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
-        # remove first line or last line (redundant part information)
-        if not item_text or not item_text.strip():
-            return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
-        return item_text
+        if item_text and item_text.strip():
+            return item_text
+
+        # Final fallback to id_parse_document
+        return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
 
     def get_structure(self):
         # Create the main tree
