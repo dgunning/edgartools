@@ -16,6 +16,34 @@ from edgar.formatting import datefmt
 __all__ = ['TenK']
 
 
+# Item number mapping for Cross Reference Index format
+_CROSS_REF_ITEM_MAP = {
+    'Item 1': '1',
+    'Item 1A': '1A',
+    'Item 1B': '1B',
+    'Item 1C': '1C',
+    'Item 2': '2',
+    'Item 3': '3',
+    'Item 4': '4',
+    'Item 5': '5',
+    'Item 6': '6',
+    'Item 7': '7',
+    'Item 7A': '7A',
+    'Item 8': '8',
+    'Item 9': '9',
+    'Item 9A': '9A',
+    'Item 9B': '9B',
+    'Item 9C': '9C',
+    'Item 10': '10',
+    'Item 11': '11',
+    'Item 12': '12',
+    'Item 13': '13',
+    'Item 14': '14',
+    'Item 15': '15',
+    'Item 16': '16',
+}
+
+
 class TenK(CompanyReport):
     structure = FilingStructure({
         "PART I": {
@@ -154,6 +182,27 @@ class TenK(CompanyReport):
     def chunked_document(self):
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
+    @cached_property
+    def _cross_reference_index(self):
+        """
+        Lazy-load Cross Reference Index parser.
+
+        Some companies (e.g., GE) use a "Form 10-K Cross Reference Index" table
+        instead of standard Item headings. This parser detects and extracts
+        Item-to-page mappings when present.
+
+        Returns None if filing uses standard format.
+        """
+        from edgar.documents import CrossReferenceIndex
+
+        html = self._filing.html()
+        index = CrossReferenceIndex(html)
+
+        # Only create parser if Cross Reference Index format is detected
+        if index.has_index():
+            return index
+        return None
+
     @lru_cache(maxsize=1)
     def id_parse_document(self, markdown:bool=False):
         from edgar.files.html_documents_id_parser import ParsedHtml10K
@@ -164,12 +213,25 @@ class TenK(CompanyReport):
 
     def __getitem__(self, item_or_part: str):
         # Show the item or part from the filing document. e.g. Item 1 Business from 10-K or Part I from 10-Q
+
+        # Try standard chunked document extraction first
         item_text = self.chunked_document[item_or_part]
+
+        # If standard extraction returned None, try Cross Reference Index format
+        if item_text is None and self._cross_reference_index is not None:
+            # Map "Item 1A" to "1A" for Cross Reference Index lookup
+            item_id = _CROSS_REF_ITEM_MAP.get(item_or_part)
+            if item_id:
+                # Extract content using Cross Reference Index parser
+                item_text = self._cross_reference_index.extract_item_content(item_id)
+
+        # Clean up the text if found
         if item_text:
             item_text = item_text.rstrip()
             last_line = item_text.split("\n")[-1]
             if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
                 item_text = item_text.rstrip(last_line)
+
         return item_text
 
     def get_item_with_part(self, part: str, item: str, markdown:bool=True):
