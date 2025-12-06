@@ -5,6 +5,219 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2025-12-06
+
+### Added
+
+- **HTMLParser Migration Complete - Production Ready**
+  - Completed comprehensive migration from legacy `ChunkedDocument`/`HtmlDocument` to new `edgar.documents.HTMLParser`
+  - All major form classes now use form-aware, part-aware parsing for better accuracy
+  - Full backwards compatibility maintained with smart fallback strategies
+  - 156/156 tests passing (100% success rate)
+  - **Benefits**:
+    - Better section detection (hybrid TOC/heading/pattern strategies)
+    - Part-aware sections for 10-Q (Part I vs Part II)
+    - Richer API (sections dict, search, tables, xbrl_facts)
+    - Performance optimizations (caching, streaming)
+  - **Files**: `edgar/company_reports/_base.py`, `edgar/_filings.py`, `edgar/sgml/`, `edgar/xbrl/rendering.py`
+  - **Documentation**: `docs/MIGRATION_SUMMARY.md`
+  - **Impact**: Better parsing accuracy across all SEC filing types, foundation for future enhancements
+  - **Related**: edgartools-8fk, edgartools-3dp, edgartools-xso
+
+- **Cross Reference Index Parser for 10-K Filings** (#215)
+  - Support for companies (e.g., GE) that use "Form 10-K Cross Reference Index" format instead of standard Item headings
+  - Parser detects this format and extracts Item-to-page mappings automatically
+  - Transparent integration with TenK class - works automatically
+  - Handles all page number formats (single, ranges, multiple, footnotes)
+  - Lazy-loaded with cached property for performance
+  - **Prevalence**: Only 3.2% of major companies use this format, but implementation is production-ready
+  - **Results**:
+    - `tenk.risk_factors` now works for GE (75,491 chars vs None before)
+    - All TenK properties work automatically for Cross Reference Index format
+    - Standard format companies unaffected (backward compatible)
+  - **Files**: `edgar/documents/cross_reference_index.py`, `edgar/company_reports/ten_k.py`
+  - **Tests**: 33 tests (17 unit/integration, 16 regression for #215)
+  - **Impact**: Seamless support for alternative 10-K formats used by major companies like GE
+  - **Closes**: #215
+
+- **Enhanced 8-K Item Detection** (#462)
+  - Added `parsed_items` property to `Filing` that parses 8-K items from document text
+  - Provides accurate items even when SEC metadata is incorrect or empty
+  - Handles both legacy (Item 7) and modern (Item 2.02) formats
+  - Filters out items marked "Not Applicable"
+  - Works for all 8-K filings from 1999 to present
+  - **Files**: `edgar/_filings.py`
+  - **Impact**: Reliable 8-K item detection regardless of SEC metadata quality
+  - **Closes**: #462
+
+- **Getting Started Notebook for Beginners**
+  - Comprehensive introduction to EdgarTools for beginners
+  - Covers installation, setup, and basic usage
+  - Demonstrates both filing retrieval methods (company-specific and cross-company)
+  - Includes 4 common use cases with working examples
+  - Google Colab compatible with badge
+  - **Files**: `examples/notebooks/beginner/Getting-Started-with-EdgarTools.ipynb`
+  - **Impact**: Easier onboarding for new users
+  - **Related**: edgartools-91v
+
+### Changed
+
+- **10-K Document Parsing Enhanced**
+  - Migrated TenK to new HTMLParser with improved section detection
+  - Added `document` property using HTMLParser (replaces legacy `doc`)
+  - Added `sections` property for accessing detected 10-K sections
+  - Enhanced `items` property with friendly name mapping (business, mda, risk_factors, etc.)
+  - Enhanced `__getitem__` supporting multiple lookup formats (Item 1, 1, business)
+  - Support part-based naming convention (part_i_item_1, part_ii_item_7)
+  - Non-empty validation to prevent returning empty sections
+  - **Test Results**: All 5 basic 10-K tests + all 6 Issue #107 regression tests passing
+  - **Files**: `edgar/company_reports/ten_k.py`, `edgar/documents/toc_section_extractor.py`
+  - **Impact**: More reliable 10-K section extraction with better error handling
+  - **Related**: edgartools-xso
+
+- **10-Q Part-Qualified Section Access** (#447, #454, #311)
+  - Migrated TenQ to new HTMLParser with part-qualified section keys
+  - Fixes issue where same-numbered items in different parts were conflated
+  - Added `document` and `sections` properties using HTMLParser
+  - Updated `items` property to return part-qualified items (e.g., "Part I, Item 1")
+  - Support part-qualified access: `tenq['Part I, Item 1']` vs `tenq['Part II, Item 1']`
+  - Backward compatibility: `tenq['Item 1']` returns Part I for compatibility
+  - **Results**:
+    - Items detected: 7 → 11 (AAPL)
+    - Part I Item 1: Now properly isolated (45,799 chars vs 64,159 mixed)
+    - Part II Item 1: Now accessible separately (5,534 chars)
+  - **Files**: `edgar/company_reports/ten_q.py`, `edgar/documents/section_extractor.py`
+  - **Tests**: 7 regression tests (converted from reproductions)
+  - **Impact**: Accurate access to 10-Q items that have same numbers in different parts
+  - **Closes**: #447, #454, #311
+  - **Related**: edgartools-147, edgartools-436
+
+- **CompanyReport Base Class Migration** (Phase 2)
+  - Migrated all company report classes from `ChunkedDocument` to `HTMLParser`
+  - Added new `document` property using HTMLParser (primary API)
+  - Enhanced `items` property to normalize section names to "Item X" format
+  - Enhanced `__getitem__` to support flexible item lookup via new parser
+  - Form classes automatically migrated: TenK, TenQ, TwentyF
+  - **Test Results**: 9/9 company report tests passing (100%)
+  - **Files**: `edgar/company_reports/_base.py`
+  - **Documentation**: `docs/PHASE2_MIGRATION_PLAN.md`, `docs/PHASE2_RESULTS.md`
+  - **Impact**: All form classes benefit from improved parsing and richer API
+  - **Related**: edgartools-8fk (Phase 2)
+
+- **Core Utilities Migration** (Phase 3)
+  - Migrated 5 core utility modules from legacy `Document.parse()` to `HTMLParser`
+  - Updated `Filing.text()` and `Filing.markdown()` to use form-aware parsing
+  - Migrated SGML table extraction to new parser
+  - Migrated FilingSummary report parsing to new parser
+  - Migrated XBRL HTML-to-text conversion to new parser
+  - **Test Results**: 125/125 tests passing across all affected modules
+  - **Files**: `edgar/_filings.py`, `edgar/sgml/filing_summary.py`, `edgar/sgml/table_to_dataframe.py`, `edgar/xbrl/rendering.py`
+  - **Impact**: Core filing processing pipeline now uses consistent, form-aware parsing
+  - **Related**: edgartools-8fk (Phase 3)
+
+### Fixed
+
+- **10-K Extraction Bug - Henry Schein Issue** (#107)
+  - Fixed extraction returning only 18 characters instead of full section content
+  - Root cause: Infinite recursion in `toc_section_extractor._extract_section_fallback()` caused 8+ minute hangs
+  - Fixed circular dependency in section detection fallback logic
+  - **Results**: Henry Schein 2021/2023/2024 10-K extractions now return full content (thousands of characters)
+  - **Files**: `edgar/documents/toc_section_extractor.py`, `edgar/company_reports/ten_k.py`
+  - **Tests**: 6 regression tests for Issue #107 (all passing)
+  - **Impact**: Reliable 10-K extraction for all companies, including those with complex formatting
+  - **Closes**: #107
+
+- **Table Text Truncation** (#248)
+  - Increased `max_col_width` from 60 to 200 in `TableStyle.simple()`
+  - Prevents truncating long financial descriptions in SEC filings
+  - Example: "(Decrease) increase to the long-term Supplemental compensation accrual" no longer truncated
+  - **Files**: `edgar/richtools.py`
+  - **Impact**: Complete table content visibility without manual width adjustment
+  - **Closes**: #248
+
+- **10-K get_item_with_part Case Sensitivity** (#454)
+  - Fixed `TenK.get_item_with_part()` returning None for Part II items
+  - Root cause: `ChunkedDocument._chunks_mul_for()` used compiled regex with re.IGNORECASE, but pandas str.match() ignores flags
+  - Mixed case data ("Part Ii") didn't match pattern "Part II"
+  - **Fix**: Changed to use string patterns with `case=False` parameter
+  - **Files**: `edgar/files/htmltools.py`
+  - **Tests**: 4 regression tests for issue #454
+  - **Impact**: Reliable part-qualified item access for 10-K filings
+  - **Closes**: #454
+
+- **13F SharesPrnAmount Data Type Consistency**
+  - Fixed `SharesPrnAmount` column to have consistent int64 dtype like other numeric columns
+  - Previously extracted as string (object dtype) causing dtype inconsistencies
+  - **Files**: `edgar/thirteenf/parsers/infotable_xml.py`
+  - **Tests**: All 13F tests passing (7/7), Issue #512 tests passing (6/6)
+  - **Impact**: Consistent numeric types across all 13F holdings data
+  - **Related**: edgartools-apu, Issue #207
+
+- **Table Attribute Handling**
+  - Fixed handling of empty colspan/rowspan attributes (e.g., `colspan=""`, `rowspan=""`)
+  - Previously raised ValueError when trying to convert empty string to int
+  - Now validates string is non-empty and numeric before conversion, defaults to 1
+  - **Files**: `edgar/richtools.py`
+  - **Impact**: More robust table parsing across diverse HTML formatting
+  - **Related**: test_get_html_problem_filing, test_chunk_document_for_10k_amendment
+
+### Deprecated
+
+- **Legacy HTML Parser Modules** (Phase 1 Deprecation)
+  - Added `DeprecationWarning` to `edgar.files.html` module (legacy Document class)
+  - Added `DeprecationWarning` to `edgar.files.htmltools` module (ChunkedDocument class)
+  - Added `DeprecationWarning` to `edgar.files.html_documents` module (HtmlDocument class)
+  - Added `DeprecationWarning` to `CompanyReport.chunked_document` property
+  - All warnings indicate removal in v6.0 and point to migration guide
+  - Added fallback logging to TenK and TenQ to track old parser usage
+  - **Timeline**:
+    - v5.0 (this release): Deprecation warnings, fallbacks work
+    - v5.1: Remove fallbacks, reduce test coverage 50%
+    - v6.0: Complete removal, reduce test coverage 90%
+  - **Files**: `edgar/files/html.py`, `edgar/files/htmltools.py`, `edgar/files/html_documents.py`, `edgar/company_reports/ten_k.py`, `edgar/company_reports/ten_q.py`
+  - **Documentation**: `docs/OLD_PARSER_RETIREMENT_PLAN.md` (comprehensive 3-phase plan)
+  - **Impact**: Users get 6+ months advance notice to migrate to `edgar.documents.HTMLParser`
+  - **Migration Guide**: https://edgartools.readthedocs.io/en/latest/migration/
+  - **Related**: edgartools-90p
+
+### Testing
+
+- **Comprehensive Test Refactoring**
+  - Refactored `get_current_filing` tests for clarity and maintainability
+  - Removed redundant old tests after verification
+  - All migration phases validated with comprehensive test coverage
+  - **Test Results Summary**:
+    - Phase 2 (CompanyReport): 9/9 tests passing
+    - Phase 3 (Core Utilities): 125/125 tests passing
+    - Phase 4 (Specialized Forms): 22/22 tests passing
+    - Overall: 156/156 tests passing (100% success)
+  - **Files**: `tests/test_get_current_filing.py`, `tests/test_company_reports.py`
+  - **Impact**: More maintainable test suite, faster CI/CD, better coverage
+
+### Documentation
+
+- **Migration Documentation**
+  - Added `docs/MIGRATION_SUMMARY.md` - Complete overview of HTMLParser migration
+  - Added `docs/OLD_PARSER_RETIREMENT_PLAN.md` - 3-phase retirement plan for legacy parser
+  - Added `docs/PHASE2_MIGRATION_PLAN.md` - CompanyReport migration strategy
+  - Added `docs/PHASE2_RESULTS.md` - Migration results and test coverage
+  - Added `docs/OLD_PARSER_AUDIT.md` - Complete audit of old parser usage
+  - Updated `edgar/entity/CLAUDE.md` - Entity package guide with bug patterns
+  - **Impact**: Clear migration path and comprehensive documentation for developers
+  - **Code Reduction**: Plan to remove ~5,500 lines of legacy parser code by v6.0
+
+### Summary
+
+Release 5.0 represents a major milestone in EdgarTools with the completion of the HTMLParser migration. This release delivers:
+
+- **Better Parsing**: Form-aware and part-aware parsing for improved accuracy
+- **Bug Fixes**: Resolves 7 long-standing issues (#107, #215, #248, #311, #447, #454, #462)
+- **Full Compatibility**: 100% backward compatibility with smart fallbacks
+- **Future-Ready**: Foundation for deprecating 5,500+ lines of legacy code
+- **Production Ready**: 156/156 tests passing across all migration phases
+
+**Upgrade Path**: This is a drop-in replacement for v4.x with no breaking changes. Users will see deprecation warnings for legacy parser usage but all existing code continues to work. Plan migration to `edgar.documents.HTMLParser` before v6.0 (expected 6+ months from now).
+
 ## [4.35.0] - 2025-12-04
 
 ### Added
