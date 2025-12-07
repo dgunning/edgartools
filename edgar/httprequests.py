@@ -767,8 +767,11 @@ async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, 
 def inspect_response(response: Response):
     """
     Check if the response is successful and raise an exception if not.
+
+    Accepts both 200 (OK) and 304 (Not Modified) as successful responses.
+    304 indicates the cached content is still valid.
     """
-    if response.status_code != 200:
+    if response.status_code not in (200, 304):
         response.raise_for_status()
 
 
