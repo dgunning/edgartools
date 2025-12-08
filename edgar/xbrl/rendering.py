@@ -1306,9 +1306,6 @@ def render_statement(
             # Clear the cache to ensure it's rebuilt with updated facts
             facts_view.clear_cache()
 
-        # Indicate that standardization is being used in the title
-        statement_title = f"{statement_title} (Standardized)"
-
     # Determine if this is likely a monetary statement
     is_monetary_statement = statement_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement']
 

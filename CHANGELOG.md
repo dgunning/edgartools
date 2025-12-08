@@ -117,6 +117,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **XBRL Statement Standardization Label Accuracy**
+  - Removed misleading "(Standardized)" suffix from statement titles
+  - Previously added unconditionally when `standard=True`, even when no concepts were actually standardized
+  - Now statements display without the suffix, as standardization is applied transparently where mappings exist
+  - **Reason**: Partial standardization (only some concepts mapped) made the label inaccurate
+  - **Files**: `edgar/xbrl/rendering.py`
+  - **Impact**: More accurate statement titles reflecting actual standardization status
+
 - **10-K Extraction Bug - Henry Schein Issue** (#107)
   - Fixed extraction returning only 18 characters instead of full section content
   - Root cause: Infinite recursion in `toc_section_extractor._extract_section_fallback()` caused 8+ minute hangs
