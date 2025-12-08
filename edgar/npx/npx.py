@@ -20,7 +20,7 @@ from rich.text import Text
 
 from edgar.richtools import repr_rich
 
-from .data import (
+from .models import (
     IncludedManager,
     PrimaryDoc,
     ProxyTable,

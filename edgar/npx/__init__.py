@@ -20,7 +20,7 @@ Usage:
     >>> df = npx.proxy_votes.to_dataframe()
 """
 
-from .data import (
+from .models import (
     ClassInfo,
     IncludedManager,
     PrimaryDoc,

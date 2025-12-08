@@ -5,7 +5,7 @@ from typing import Any, Dict, Generator, Optional
 
 from lxml import etree as ET
 
-from .data import (
+from .models import (
     ClassInfo,
     IncludedManager,
     PrimaryDoc,
