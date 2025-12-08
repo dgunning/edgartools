@@ -21,9 +21,12 @@ from rich.text import Text
 from edgar.richtools import repr_rich
 
 from .data import (
+    IncludedManager,
     PrimaryDoc,
     ProxyTable,
     ProxyVoteTable,
+    ReportSeriesClassInfo,
+    SeriesReport,
 )
 from .parsing import (
     PrimaryDocExtractor,
@@ -35,7 +38,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-__all__ = ['NPX', 'ProxyVotes']
+__all__ = ['NPX', 'ProxyVotes', 'IncludedManager', 'ReportSeriesClassInfo', 'SeriesReport']
 
 
 @dataclass
@@ -165,9 +168,10 @@ class ProxyVotes:
             box=box.SIMPLE,
             show_header=True,
         )
-        table.add_column("Issuer", style="bold")
+        table.add_column("Issuer", style="bold", max_width=30, overflow="ellipsis", no_wrap=True)
+        table.add_column("CUSIP", style="dim")
         table.add_column("Meeting Date")
-        table.add_column("Description", max_width=40)
+        table.add_column("Description", max_width=35, overflow="ellipsis", no_wrap=True)
         table.add_column("Votes", justify="right")
 
         for pt in self.proxy_tables[:20]:  # Show first 20
@@ -178,15 +182,19 @@ class ProxyVotes:
             if len(pt.vote_records) > 2:
                 vote_summary += f" (+{len(pt.vote_records) - 2} more)"
 
+            # Get security identifier (prefer CUSIP, fallback to ISIN or FIGI)
+            security_id = pt.cusip or pt.isin or pt.figi or ""
+
             table.add_row(
-                pt.issuer_name[:30],
+                pt.issuer_name,
+                security_id,
                 pt.meeting_date,
-                pt.vote_description[:40] + ("..." if len(pt.vote_description) > 40 else ""),
+                pt.vote_description,
                 vote_summary or f"{pt.shares_voted:,.0f} shares",
             )
 
         if len(self.proxy_tables) > 20:
-            table.add_row("", "", f"... and {len(self.proxy_tables) - 20} more", "")
+            table.add_row("", "", "", f"... and {len(self.proxy_tables) - 20} more", "")
 
         return table
 
@@ -415,6 +423,136 @@ class NPX:
         return self._primary_doc.agent_for_service_address_zip_code
 
     @property
+    def phone_number(self) -> Optional[str]:
+        """Phone number of the reporting person."""
+        return self._primary_doc.phone_number
+
+    @property
+    def crd_number(self) -> Optional[str]:
+        """CRD (Central Registration Depository) number."""
+        return self._primary_doc.crd_number
+
+    @property
+    def filer_sec_file_number(self) -> Optional[str]:
+        """SEC file number of the filer."""
+        return self._primary_doc.filer_sec_file_number
+
+    @property
+    def lei_number(self) -> Optional[str]:
+        """LEI (Legal Entity Identifier) number."""
+        return self._primary_doc.lei_number
+
+    @property
+    def report_type(self) -> Optional[str]:
+        """Type of report (FUND VOTING REPORT, MANAGER VOTING REPORT, etc.)."""
+        return self._primary_doc.report_type
+
+    @property
+    def confidential_treatment(self) -> Optional[str]:
+        """Confidential treatment flag (Y/N)."""
+        return self._primary_doc.confidential_treatment
+
+    @property
+    def notice_explanation(self) -> Optional[str]:
+        """Notice explanation text."""
+        return self._primary_doc.notice_explanation
+
+    @property
+    def npx_file_number(self) -> Optional[str]:
+        """N-PX file number."""
+        return self._primary_doc.npx_file_number
+
+    @property
+    def explanatory_choice(self) -> Optional[str]:
+        """Explanatory choice flag."""
+        return self._primary_doc.explanatory_choice
+
+    @property
+    def other_included_managers_count(self) -> Optional[str]:
+        """Count of other included managers."""
+        return self._primary_doc.other_included_managers_count
+
+    @property
+    def tx_printed_signature(self) -> Optional[str]:
+        """Printed signature text."""
+        return self._primary_doc.tx_printed_signature
+
+    @property
+    def amendment_no(self) -> Optional[str]:
+        """Amendment number if this is an amendment filing."""
+        return self._primary_doc.amendment_no
+
+    @property
+    def amendment_type(self) -> Optional[str]:
+        """Type of amendment."""
+        return self._primary_doc.amendment_type
+
+    @property
+    def de_novo_request_choice(self) -> Optional[str]:
+        """De novo request choice."""
+        return self._primary_doc.de_novo_request_choice
+
+    @property
+    def year_or_quarter(self) -> Optional[str]:
+        """Year or quarter indicator (YEAR or QUARTER)."""
+        return self._primary_doc.year_or_quarter
+
+    @property
+    def conf_denied_expired(self) -> Optional[str]:
+        """Confidential treatment denied/expired flag."""
+        return self._primary_doc.conf_denied_expired
+
+    @property
+    def registrant_type(self) -> Optional[str]:
+        """Registrant type (RMIC, IA, etc.)."""
+        return self._primary_doc.registrant_type
+
+    @property
+    def live_test_flag(self) -> Optional[str]:
+        """Live/Test flag (LIVE or TEST)."""
+        return self._primary_doc.live_test_flag
+
+    @property
+    def contact_name(self) -> Optional[str]:
+        """Contact person name."""
+        return self._primary_doc.contact_name
+
+    @property
+    def contact_phone_number(self) -> Optional[str]:
+        """Contact phone number."""
+        return self._primary_doc.contact_phone_number
+
+    @property
+    def contact_email_address(self) -> Optional[str]:
+        """Contact email address."""
+        return self._primary_doc.contact_email_address
+
+    @property
+    def investment_company_type(self) -> Optional[str]:
+        """Investment company type (N-1A, N-2, etc.)."""
+        return self._primary_doc.investment_company_type
+
+    @property
+    def series_count(self) -> Optional[str]:
+        """Number of series in the filing."""
+        return self._primary_doc.series_count
+
+    @property
+    def included_managers(self) -> List['IncludedManager']:
+        """List of other investment managers included in this filing."""
+        return self._primary_doc.included_managers
+
+    @property
+    def report_series_class_infos(self) -> List['ReportSeriesClassInfo']:
+        """List of series/class information for reporting."""
+        return self._primary_doc.report_series_class_infos
+
+    @property
+    def series_reports(self) -> List['SeriesReport']:
+        """List of series report details."""
+        return self._primary_doc.series_reports
+
+    @property
     def proxy_votes(self) -> Optional[ProxyVotes]:
         """Proxy voting records from the filing."""
         return self._proxy_votes
@@ -428,6 +566,42 @@ class NPX:
     def filing(self) -> Optional['Filing']:
         """The source Filing object."""
         return self._filing
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Convert the primary document data to a pandas DataFrame.
+
+        Returns a DataFrame with one row containing all metadata fields from the N-PX filing.
+        For proxy vote data, use `npx.proxy_votes.to_dataframe()` instead.
+        """
+        data = {
+            'cik': self.cik,
+            'fund_name': self.fund_name,
+            'period_of_report': self.period_of_report,
+            'report_calendar_year': self.report_calendar_year,
+            'submission_type': self.submission_type,
+            'is_amendment': self.is_amendment,
+            'report_type': self.report_type,
+            'npx_file_number': self.npx_file_number,
+            'lei_number': self.lei_number,
+            'crd_number': self.crd_number,
+            'investment_company_type': self.investment_company_type,
+            'year_or_quarter': self.year_or_quarter,
+            'signer_name': self.signer_name,
+            'signer_title': self.signer_title,
+            'signature_date': self.signature_date,
+            'address': self.address,
+            'phone_number': self.phone_number,
+            'agent_for_service_name': self.agent_for_service_name,
+            'agent_for_service_address': self.agent_for_service_address,
+            'contact_name': self.contact_name,
+            'contact_phone_number': self.contact_phone_number,
+            'contact_email_address': self.contact_email_address,
+            'confidential_treatment': self.confidential_treatment,
+            'other_included_managers_count': self.other_included_managers_count,
+            'series_count': self.series_count,
+            'proxy_vote_count': len(self._proxy_votes) if self._proxy_votes else 0,
+        }
+        return pd.DataFrame([data])
 
     def __str__(self) -> str:
         vote_count = len(self._proxy_votes) if self._proxy_votes else 0
@@ -451,11 +625,27 @@ class NPX:
         info_table.add_row("CIK", self.cik)
         info_table.add_row("Period", self.period_of_report)
         info_table.add_row("Calendar Year", self.report_calendar_year)
+        if self.report_type:
+            info_table.add_row("Report Type", self.report_type)
+        if self.npx_file_number:
+            info_table.add_row("File Number", self.npx_file_number)
+        if self.lei_number:
+            info_table.add_row("LEI", self.lei_number)
+        if self.investment_company_type:
+            info_table.add_row("Company Type", self.investment_company_type)
         info_table.add_row("Signed By", f"{self.signer_name} ({self.signer_title})")
         info_table.add_row("Signature Date", self.signature_date)
 
         if self._proxy_votes:
             info_table.add_row("Proxy Votes", f"{len(self._proxy_votes):,} matters")
+
+        # Show included managers count if present
+        if self.other_included_managers_count and self.other_included_managers_count != "0":
+            info_table.add_row("Other Managers", self.other_included_managers_count)
+
+        # Show series count if present
+        if self.series_count and self.series_count != "0":
+            info_table.add_row("Series", self.series_count)
 
         header_panel = Panel(
             info_table,
