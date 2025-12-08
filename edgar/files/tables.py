@@ -108,10 +108,14 @@ class TableProcessor:
                 if '\n' not in content and cell.is_currency and content.replace(',', '').replace('.', '').isdigit():
                     content = f"${float(content.replace(',', '')):,.2f}"
 
-                if cell.colspan > 1:
-                    virtual_row[current_col + 1] = content
-                else:
+                # Bounds check to prevent IndexError
+                if current_col < max_cols:
                     virtual_row[current_col] = content
+
+                    # Fill additional columns for colspan > 1
+                    for i in range(1, cell.colspan):
+                        if current_col + i < max_cols:
+                            virtual_row[current_col + i] = ""
 
                 current_col += cell.colspan
 

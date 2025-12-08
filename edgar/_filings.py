@@ -50,7 +50,7 @@ from edgar.core import (
 )
 from edgar.config import SEC_ARCHIVE_URL
 from edgar.dates import InvalidDateException
-from edgar.files.html import Document
+from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
@@ -1558,7 +1558,8 @@ class Filing:
         """Convert the html of the main filing document to text"""
         html_content = self.html()
         if html_content and is_probably_html(html_content):
-            document = Document.parse(html_content)
+            parser = HTMLParser(ParserConfig(form=self.form))
+            document = parser.parse(html_content)
             return rich_to_text(document, width=500)  # Wide enough for tables without truncation
         else:
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
@@ -1607,7 +1608,8 @@ class Filing:
         """Preview this filing's primary document as markdown. This should display in the console"""
         html_content = self.html()
         if html_content and is_probably_html(html_content):
-            document = Document.parse(html_content)
+            parser = HTMLParser(ParserConfig(form=self.form))
+            document = parser.parse(html_content)
             print_rich(document)
         else:
             # Fallback to text content for forms without HTML (like UPLOAD forms)

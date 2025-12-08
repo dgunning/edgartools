@@ -311,14 +311,23 @@ class SECSectionExtractor:
     def _extract_section_fallback(self, section_name: str, clean: bool) -> Optional[str]:
         """
         Fallback section extraction using document nodes.
-        
+
         This is used when HTML-based extraction fails.
+
+        NOTE: This method CANNOT access self.document.sections because it's called
+        DURING section detection, which would create infinite recursion.
+        The circular dependency was: document.sections -> detect_sections() ->
+        get_section_text() -> _extract_section_fallback() -> document.sections
+
+        Returns:
+            None - fallback disabled to prevent infinite recursion
         """
-        # Search through document sections
-        for name, section in self.document.sections.items():
-            if section_name.lower() in name.lower():
-                return section.text(clean=clean)
-        
+        # BUGFIX: Removed circular dependency that caused infinite recursion
+        # Previously this accessed self.document.sections.items() which created
+        # an infinite loop during section detection.
+        #
+        # If HTML-based extraction fails, we simply return None rather than
+        # trying to use sections that haven't been computed yet.
         return None
     
     def get_section_info(self, section_name: str) -> Optional[Dict]:

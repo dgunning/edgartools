@@ -11,6 +11,15 @@ from rich.table import Table
 from edgar.datatools import clean_column_text, table_html_to_dataframe
 from edgar.richtools import repr_rich
 
+# Deprecation warning for legacy HtmlDocument
+warnings.warn(
+    "edgar.files.html_documents module (including HtmlDocument) is deprecated and will be removed in v6.0. "
+    "Please use edgar.documents.HTMLParser instead. "
+    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 __all__ = ['DocumentData',

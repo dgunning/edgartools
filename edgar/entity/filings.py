@@ -43,13 +43,12 @@ class EntityFiling(Filing):
             **Data Source**: This value comes from SEC filing metadata, not from parsing
             the filing document itself.
 
-            **Legacy SGML Limitation**: For legacy SGML filings (1999-2001), the SEC's
-            historical metadata may be incorrect or incomplete. Modern XML filings (2005+)
-            have accurate metadata.
+            **Legacy Limitation**: For legacy filings (1999-2011), the SEC's historical
+            metadata may be incorrect or incomplete. Modern filings (2012+) have
+            accurate metadata.
 
-            **Workaround for Legacy Filings**: For accurate item extraction from legacy
-            SGML 8-K filings, parse the filing text directly using regex patterns.
-            See GitHub Issue #462 for example code.
+            **Solution for Legacy Filings**: Use the ``parsed_items`` property to extract
+            accurate items from the filing document text. This works for all 8-K filings.
     """
 
     def __init__(self,
@@ -81,6 +80,75 @@ class EntityFiling(Filing):
     def related_filings(self):
         """Get all the filings related to this one by file number."""
         return self.get_entity().get_filings(file_number=self.file_number, sort_by="filing_date")
+
+    @property
+    def parsed_items(self) -> str:
+        """
+        Extract 8-K items by parsing the filing document text.
+
+        This property parses the actual filing document to extract item numbers,
+        providing accurate items even when SEC metadata is incorrect or empty.
+        Items marked "Not Applicable" are filtered out, returning only substantive items.
+
+        Returns:
+            str: Comma-separated item numbers (e.g., "2.02,9.01" or "5,7").
+                 Returns empty string if no items found or if not an 8-K filing.
+
+        Note:
+            - For modern 8-K filings (2005+), this usually matches `items` from SEC metadata
+            - For legacy SGML filings (1999-2004), this provides accurate items when
+              SEC metadata is incorrect or incomplete
+            - Items marked "Not Applicable" are automatically filtered out
+            - This property requires downloading and parsing the filing document,
+              which is slower than accessing the `items` attribute
+
+        Example:
+            >>> filing = Company(864509).get_filings(form="8-K", filing_date='1999-10-13')[0]
+            >>> filing.items  # SEC metadata (may be wrong)
+            '3'
+            >>> filing.parsed_items  # Parsed from document (accurate)
+            '7'
+        """
+        import re
+        from edgar.documents.parser import HTMLParser
+
+        # Only parse 8-K filings
+        if not self.form or not self.form.startswith('8-K'):
+            return ""
+
+        try:
+            # Get the primary document content
+            content = self.document.download()
+
+            # Parse with new parser
+            parser = HTMLParser()
+            doc = parser.parse(content)
+            text = doc.text()
+
+            # Extract item numbers with their context to filter out "Not Applicable"
+            # Pattern captures: Item number and following text on same line
+            pattern = r'(?:ITEM|Item)\s+(\d+(?:\.\d+)?)\s*[:\.]?\s*([^\n]*)'
+            matches = re.findall(pattern, text, re.IGNORECASE)
+
+            # Filter out items marked "Not Applicable" (common in legacy filings)
+            substantive_items = []
+            for item_num, description in matches:
+                desc_lower = description.lower().strip()
+                # Skip items explicitly marked as not applicable
+                if 'not applicable' in desc_lower:
+                    continue
+                # Skip grouped items like "Item 1-Item 4 Not Applicable"
+                if '-item' in desc_lower or 'item ' in desc_lower:
+                    continue
+                substantive_items.append(item_num)
+
+            # Deduplicate and sort
+            unique_items = sorted(set(substantive_items), key=lambda x: (float(x.split('.')[0]), float(x.split('.')[-1]) if '.' in x else 0))
+
+            return ','.join(unique_items)
+        except Exception as e:
+            log.warning(f"Failed to parse items from filing {self.accession_no}: {e}")
+            return ""
 
     def __str__(self):
         return (f"Filing(company='{self.company}', cik={self.cik}, form='{self.form}', "

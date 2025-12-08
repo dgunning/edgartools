@@ -31,7 +31,7 @@ def parse_infotable_xml(infotable_xml: str) -> pd.DataFrame:
 
         # Shares or principal
         shares_tag = info_tag.find("shrsOrPrnAmt")
-        info_table['SharesPrnAmount'] = child_text(shares_tag, "sshPrnamt")
+        info_table['SharesPrnAmount'] = int(child_text(shares_tag, "sshPrnamt"))
 
         # Shares or principal
         ssh_prnamt_type = child_text(shares_tag, "sshPrnamtType")

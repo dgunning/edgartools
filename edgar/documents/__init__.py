@@ -11,22 +11,34 @@ from edgar.documents.exceptions import ParsingError
 from edgar.documents.types import NodeType, SemanticType, TableType
 from edgar.documents.search import DocumentSearch, SearchResult, SearchMode
 from edgar.documents.renderers import MarkdownRenderer, TextRenderer
+from edgar.documents.cross_reference_index import (
+    CrossReferenceIndex,
+    PageRange,
+    IndexEntry,
+    detect_cross_reference_index,
+    parse_cross_reference_index
+)
 
 __version__ = "2.0.0"
 __all__ = [
-    'HTMLParser', 
-    'Document', 
-    'ParserConfig', 
+    'HTMLParser',
+    'Document',
+    'ParserConfig',
     'ParsingError',
     'NodeType',
-    'SemanticType', 
+    'SemanticType',
     'TableType',
     'DocumentSearch',
     'SearchResult',
     'SearchMode',
     'MarkdownRenderer',
     'TextRenderer',
-    'parse_html'
+    'parse_html',
+    'CrossReferenceIndex',
+    'PageRange',
+    'IndexEntry',
+    'detect_cross_reference_index',
+    'parse_cross_reference_index'
 ]
 
 
