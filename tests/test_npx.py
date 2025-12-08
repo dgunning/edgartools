@@ -124,6 +124,70 @@ def test_proxy_votes_to_dataframe():
     assert df.iloc[0]["how_voted"] == "WITHHOLD"
 
 
+def test_npx_to_dataframe():
+    """Test NPX.to_dataframe() method for primary document data."""
+    # Parse primary doc using KIM, LLC sample
+    xml_file_path = SAMPLE_FILES_DIR / "KIM_LLC_sample.xml"
+    primary_doc_extractor = PrimaryDocExtractor.from_file(xml_file_path)
+    primary_doc = primary_doc_extractor.extract()
+
+    # Parse proxy vote table
+    proxy_xml_path = SAMPLE_FILES_DIR / "KIM_LLC_proxy_votes.xml"
+    proxy_extractor = ProxyVoteTableExtractor.from_file(proxy_xml_path)
+    proxy_vote_table = proxy_extractor.extract()
+
+    # Create NPX instance
+    proxy_votes = ProxyVotes(proxy_tables=proxy_vote_table.proxy_tables)
+    npx = NPX(primary_doc=primary_doc, proxy_votes=proxy_votes)
+
+    # Convert to DataFrame
+    df = npx.to_dataframe()
+
+    # Should have one row with all metadata fields
+    assert len(df) == 1
+    assert "cik" in df.columns
+    assert "fund_name" in df.columns
+    assert "period_of_report" in df.columns
+    assert "submission_type" in df.columns
+    assert "proxy_vote_count" in df.columns
+
+    # Check values
+    assert df.iloc[0]["cik"] == "0001888968"
+    assert df.iloc[0]["fund_name"] == "KIM, LLC"
+    assert df.iloc[0]["period_of_report"] == "06/30/2024"
+    assert df.iloc[0]["submission_type"] == "N-PX"
+    assert df.iloc[0]["proxy_vote_count"] == 7
+    assert df.iloc[0]["report_type"] == "INSTITUTIONAL MANAGER VOTING REPORT"
+
+
+def test_npx_kim_llc_properties():
+    """Test NPX property access with KIM, LLC sample data."""
+    xml_file_path = SAMPLE_FILES_DIR / "KIM_LLC_sample.xml"
+    primary_doc_extractor = PrimaryDocExtractor.from_file(xml_file_path)
+    primary_doc = primary_doc_extractor.extract()
+
+    proxy_xml_path = SAMPLE_FILES_DIR / "KIM_LLC_proxy_votes.xml"
+    proxy_extractor = ProxyVoteTableExtractor.from_file(proxy_xml_path)
+    proxy_vote_table = proxy_extractor.extract()
+
+    proxy_votes = ProxyVotes(proxy_tables=proxy_vote_table.proxy_tables)
+    npx = NPX(primary_doc=primary_doc, proxy_votes=proxy_votes)
+
+    # Test new properties
+    assert npx.phone_number == "316-828-5500"
+    assert npx.report_type == "INSTITUTIONAL MANAGER VOTING REPORT"
+    assert npx.npx_file_number == "028-22610"
+    assert npx.confidential_treatment == "N"
+    assert npx.other_included_managers_count == "1"
+    assert npx.year_or_quarter == "YEAR"
+    assert npx.registrant_type == "IM"
+
+    # Test included managers
+    assert len(npx.included_managers) == 1
+    assert npx.included_managers[0].name == "Koch Industries, LLC"
+    assert npx.included_managers[0].form13f_file_number == "028-10337"
+
+
 def test_proxy_votes_filter_methods():
     """Test ProxyVotes filter methods."""
     proxy_xml_path = SAMPLE_FILES_DIR / "ProxyVoteTable.xml"

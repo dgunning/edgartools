@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns:com="http://www.sec.gov/edgar/common" xmlns="http://www.sec.gov/edgar/npx">
+  <headerData>
+    <submissionType>N-PX</submissionType>
+    <filerInfo>
+      <registrantType>IM</registrantType>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <filer>
+        <issuerCredentials>
+          <cik>0001888968</cik>
+          <ccc>XXXXXXXX</ccc>
+        </issuerCredentials>
+      </filer>
+      <flags>
+        <overrideInternetFlag>false</overrideInternetFlag>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+      </flags>
+      <periodOfReport>06/30/2024</periodOfReport>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPage>
+      <yearOrQuarter>YEAR</yearOrQuarter>
+      <reportCalendarYear>2024</reportCalendarYear>
+      <reportingPerson>
+        <name>KIM, LLC</name>
+        <phoneNumber>316-828-5500</phoneNumber>
+        <address>
+          <com:street1>4111 East 37th Street North</com:street1>
+          <com:city>Wichita</com:city>
+          <com:stateOrCountry>KS</com:stateOrCountry>
+          <com:zipCode>67220</com:zipCode>
+        </address>
+      </reportingPerson>
+      <agentForService/>
+      <reportInfo>
+        <reportType>INSTITUTIONAL MANAGER VOTING REPORT</reportType>
+        <confidentialTreatment>N</confidentialTreatment>
+      </reportInfo>
+      <fileNumber>028-22610</fileNumber>
+      <explanatoryInformation>
+        <explanatoryChoice>N</explanatoryChoice>
+      </explanatoryInformation>
+    </coverPage>
+    <summaryPage>
+      <otherIncludedManagersCount>1</otherIncludedManagersCount>
+      <otherManagers2>
+        <investmentManagers>
+          <serialNo>1</serialNo>
+          <form13FFileNumber>028-10337</form13FFileNumber>
+          <name>Koch Industries, LLC</name>
+        </investmentManagers>
+      </otherManagers2>
+    </summaryPage>
+    <signaturePage>
+      <reportingPerson>KIM, LLC</reportingPerson>
+      <txSignature>Raffaele G. Fazio</txSignature>
+      <txPrintedSignature>Raffaele G. Fazio</txPrintedSignature>
+      <txTitle>Secretary</txTitle>
+      <txAsOfDate>01/27/2025</txAsOfDate>
+    </signaturePage>
+  </formData>
+</edgarSubmission>
