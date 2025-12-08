@@ -6,7 +6,7 @@ from typing import List, Optional
 @dataclass
 class PrimaryDoc:
     cik: str
-    fund_name: str
+    fund_name: Optional[str]
     street1: str
     city: str
     state: str
