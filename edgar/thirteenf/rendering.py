@@ -72,6 +72,32 @@ def render_rich(thirteen_f):
 
     content = [summary]
 
+    # Other Included Managers (only show if there are any)
+    other_managers = None
+    if thirteen_f.primary_form_information:
+        summary_page = thirteen_f.primary_form_information.summary_page
+        if summary_page and summary_page.other_managers:
+            other_managers = summary_page.other_managers
+
+    if other_managers:
+        managers_table = Table(
+            Column("#", style="dim"),
+            Column("Other Included Manager", style="bold"),
+            "CIK",
+            "File Number",
+            title=f"Other Included Managers ({len(other_managers)})",
+            box=box.SIMPLE,
+            title_style="bold italic"
+        )
+        for mgr in other_managers:
+            managers_table.add_row(
+                str(mgr.sequence_number) if mgr.sequence_number else "-",
+                mgr.name or "-",
+                mgr.cik or "-",
+                mgr.file_number or "-"
+            )
+        content.append(managers_table)
+
     # info table
     infotable_summary_df = infotable_summary(thirteen_f)
     if infotable_summary_df is not None:

@@ -40,6 +40,7 @@ class OtherManager:
     cik: str
     name: str
     file_number: str
+    sequence_number: int = None
 
 
 @dataclass(frozen=True)
@@ -55,6 +56,7 @@ class SummaryPage:
     other_included_managers_count: int
     total_value: Decimal
     total_holdings: int
+    other_managers: List['OtherManager'] = None
 
 
 @dataclass(frozen=True)

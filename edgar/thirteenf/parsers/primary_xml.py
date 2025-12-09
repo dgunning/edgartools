@@ -55,33 +55,10 @@ def parse_primary_document_xml(primary_document_xml: str):
         zipcode=child_text(address_el, "zipCode")
     )
     filing_manager = FilingManager(name=child_text(filing_manager_el, "name"), address=address)
-    # Other managers - Issue #512: Fix XML tag to otherManagers2Info
-    # Try new format first (otherManagers2Info), fall back to old format (otherManagersInfo)
-    other_manager_info_el = cover_page_el.find("otherManagers2Info")
-    if other_manager_info_el:
-        # New format: otherManagers2Info -> otherManager2 -> otherManager
-        other_managers = [
-            OtherManager(
-                cik=child_text(other_manager_wrapper.find("otherManager"), "cik"),
-                name=child_text(other_manager_wrapper.find("otherManager"), "name"),
-                file_number=child_text(other_manager_wrapper.find("otherManager"), "form13FFileNumber")
-            )
-            for other_manager_wrapper in other_manager_info_el.find_all("otherManager2")
-        ]
-    else:
-        # Fall back to old format: otherManagersInfo -> otherManager (backward compatibility)
-        other_manager_info_el = cover_page_el.find("otherManagersInfo")
-        other_managers = [
-            OtherManager(
-                cik=child_text(other_manager_el, "cik"),
-                name=child_text(other_manager_el, "name"),
-                file_number=child_text(other_manager_el, "form13FFileNumber")
-            )
-            for other_manager_el in other_manager_info_el.find_all("otherManager")
-        ] if other_manager_info_el else []
 
     # Summary Page
     summary_page_el = form_data.find("summaryPage")
+    other_managers = []
     if summary_page_el:
         other_included_managers_count = child_text(summary_page_el,
                                                    "otherIncludedManagersCount")
@@ -95,6 +72,28 @@ def parse_primary_document_xml(primary_document_xml: str):
         total_value = child_text(summary_page_el, "tableValueTotal")
         if total_value:
             total_value = Decimal(total_value)
+
+        # Issue #523: Parse other managers from summaryPage instead of coverPage
+        other_manager_info_el = summary_page_el.find("otherManagers2Info")
+        if other_manager_info_el:
+            # New format: otherManagers2Info -> otherManager2 -> sequenceNumber + otherManager
+            for other_manager_wrapper in other_manager_info_el.find_all("otherManager2"):
+                seq_raw = child_text(other_manager_wrapper, "sequenceNumber")
+                try:
+                    sequence_number = int(seq_raw) if seq_raw is not None else None
+                except ValueError:
+                    sequence_number = None
+
+                other_manager_el = other_manager_wrapper.find("otherManager")
+                if other_manager_el:
+                    other_managers.append(
+                        OtherManager(
+                            cik=child_text(other_manager_el, "cik"),
+                            name=child_text(other_manager_el, "name"),
+                            file_number=child_text(other_manager_el, "form13FFileNumber"),
+                            sequence_number=sequence_number
+                        )
+                    )
     else:
         other_included_managers_count = 0
         total_holdings = 0
@@ -118,13 +117,14 @@ def parse_primary_document_xml(primary_document_xml: str):
             filing_manager=filing_manager,
             report_calendar_or_quarter=report_calendar_or_quarter,
             report_type=report_type,
-            other_managers=other_managers
+            other_managers=[]  # Deprecated: other_managers now parsed from summaryPage
         ),
         signature=signature,
         summary_page=SummaryPage(
             other_included_managers_count=other_included_managers_count or 0,
             total_holdings=total_holdings or 0,
-            total_value=total_value or 0
+            total_value=total_value or 0,
+            other_managers=other_managers or None  # Issue #523: Parse from summaryPage
         ),
         additional_information=child_text(cover_page_el, "additionalInformation")
     )
