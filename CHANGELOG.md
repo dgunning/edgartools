@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] - 2025-12-09
+
+### Added
+
+- **N-PX Filing Support - SEC Proxy Voting Records** (#526)
+  - Added comprehensive support for Form N-PX (Annual Report of Proxy Voting Record)
+  - New `edgar.npx` module with `NPX` and `ProxyVotes` classes
+  - Access via `filing.obj()` for N-PX filings, following standard EdgarTools pattern
+  - Full data model including fund metadata, series/class info, and proxy vote tables
+  - Rich display with formatted tables showing fund details and vote summaries
+  - DataFrame export via `npx.proxy_votes.to_dataframe()` for analysis
+  - Analysis methods on ProxyVotes: `by_company()`, `by_vote_category()`, filtering
+  - Handles complex multi-series fund structures (e.g., Vanguard with 195+ series)
+  - Complete test coverage validating parsing and DataFrame conversion
+  - **Files**: `edgar/npx/` module (npx.py, models.py, parsing.py)
+  - **Tests**: `tests/npx/` with comprehensive validation against real N-PX filings
+  - **Impact**: Enables analysis of institutional proxy voting records for investment companies
+  - **Contributors**: Jacob Cohen (@jacob187)
+  - **Related**: Multi-commit feature development (398c0ac6 through c7d3992c)
+
+- **13F Other Managers Property** (#523)
+  - Added `other_managers` property to `ThirteenF` class
+  - Provides convenient access to list of other included managers in multi-manager filings
+  - Returns list of manager names from form metadata
+  - Complements existing `other_included_managers_count` property
+  - Rich display now shows "Other Included Managers" section when present
+  - **Files**: `edgar/thirteenf/models.py`
+  - **Impact**: Easier access to multi-manager filing metadata
+
+### Fixed
+
+- **13F Other Managers Parsing Corrected** (#523)
+  - Fixed bug where Other Managers metadata was parsed from wrong XML location
+  - Changed from `coverPage` (always empty) to `summaryPage->otherManagers2Info` (correct)
+  - Added `sequence_number` field to `OtherManager` model for proper ordering
+  - Now correctly displays all included managers in multi-manager 13F filings
+  - **Files**: `edgar/thirteenf/parsers/primary_xml.py`, `edgar/thirteenf/models.py`, `edgar/thirteenf/rendering.py`
+  - **Tests**: `tests/issues/regression/test_issue_523_13f_other_managers_summary_page.py`
+  - **Impact**: Fixes metadata extraction for multi-manager institutional filings
+  - **Closes**: #523
+
+### Summary
+
+Release 5.0.1 is a minor feature and bugfix release that adds N-PX proxy voting support and fixes 13F multi-manager metadata parsing. Key highlights:
+
+- **N-PX Support**: Complete implementation for analyzing mutual fund proxy voting records
+- **13F Fixes**: Corrected parsing of other managers metadata and improved property access
+- **Test Results**: 472/472 fast tests passing (100% success rate)
+
+This release maintains full backward compatibility with v5.0.0 and requires no code changes for existing users.
+
 ## [5.0.0] - 2025-12-06
 
 ### Added
