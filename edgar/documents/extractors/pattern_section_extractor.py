@@ -115,6 +115,156 @@ class SectionExtractor:
                 (r'^Exhibits', 'Exhibits')
             ]
         },
+        '20-F': {
+            # PART I
+            'item_1': [
+                (r'^(Item|ITEM)\s+1\.?\s*[-–—.]?\s*Identity.*Directors', 'Item 1 - Identity of Directors, Senior Management and Advisers'),
+                (r'^Identity.*Directors.*Senior\s+Management', 'Identity of Directors')
+            ],
+            'item_2': [
+                (r'^(Item|ITEM)\s+2\.?\s*[-–—.]?\s*Offer\s+Statistics', 'Item 2 - Offer Statistics and Expected Timetable'),
+                (r'^Offer\s+Statistics.*Timetable', 'Offer Statistics')
+            ],
+            'item_3': [
+                (r'^(Item|ITEM)\s+3\.?\s*[-–—.]?\s*Key\s+Information', 'Item 3 - Key Information'),
+                (r'^Key\s+Information', 'Key Information'),
+                (r'^Risk\s+Factors', 'Risk Factors')
+            ],
+            'item_4': [
+                (r'^(Item|ITEM)\s+4\.?\s*[-–—.]?\s*Information\s+on\s+the\s+Company', 'Item 4 - Information on the Company'),
+                (r'^Information\s+on\s+the\s+Company', 'Information on the Company'),
+                (r'^Business\s+Overview', 'Business Overview')
+            ],
+            'item_4a': [
+                (r'^(Item|ITEM)\s+4A\.?\s*[-–—.]?\s*Unresolved\s+Staff', 'Item 4A - Unresolved Staff Comments'),
+                (r'^Unresolved\s+Staff\s+Comments', 'Unresolved Staff Comments')
+            ],
+            # PART II
+            'item_5': [
+                (r'^(Item|ITEM)\s+5\.?\s*[-–—.]?\s*Operating.*Financial\s+Review', 'Item 5 - Operating and Financial Review and Prospects'),
+                (r'^Operating.*Financial\s+Review', 'Operating and Financial Review'),
+                (r'^Management.*Discussion.*Analysis', 'MD&A')
+            ],
+            'item_6': [
+                (r'^(Item|ITEM)\s+6\.?\s*[-–—.]?\s*Directors.*Senior\s+Management.*Employees', 'Item 6 - Directors, Senior Management and Employees'),
+                (r'^Directors.*Senior\s+Management.*Employees', 'Directors and Employees')
+            ],
+            'item_7': [
+                (r'^(Item|ITEM)\s+7\.?\s*[-–—.]?\s*Major\s+Shareholders', 'Item 7 - Major Shareholders and Related Party Transactions'),
+                (r'^Major\s+Shareholders.*Related\s+Party', 'Major Shareholders')
+            ],
+            'item_8': [
+                (r'^(Item|ITEM)\s+8\.?\s*[-–—.]?\s*Financial\s+Information', 'Item 8 - Financial Information'),
+                (r'^Financial\s+Information', 'Financial Information')
+            ],
+            'item_9': [
+                (r'^(Item|ITEM)\s+9\.?\s*[-–—.]?\s*The\s+Offer\s+and\s+Listing', 'Item 9 - The Offer and Listing'),
+                (r'^The\s+Offer\s+and\s+Listing', 'Offer and Listing')
+            ],
+            # PART III
+            'item_10': [
+                (r'^(Item|ITEM)\s+10\.?\s*[-–—.]?\s*Additional\s+Information', 'Item 10 - Additional Information'),
+                (r'^Additional\s+Information', 'Additional Information')
+            ],
+            'item_11': [
+                (r'^(Item|ITEM)\s+11\.?\s*[-–—.]?\s*Quantitative.*Qualitative.*Market\s+Risk', 'Item 11 - Quantitative and Qualitative Disclosures About Market Risk'),
+                (r'^Quantitative.*Qualitative.*Market\s+Risk', 'Market Risk Disclosures')
+            ],
+            'item_12': [
+                (r'^(Item|ITEM)\s+12\.?\s*[-–—.]?\s*Description.*Securities', 'Item 12 - Description of Securities Other Than Equity Securities'),
+                (r'^Description.*Securities.*Equity', 'Securities Description')
+            ],
+            # PART IV
+            'item_13': [
+                (r'^(Item|ITEM)\s+13\.?\s*[-–—.]?\s*Defaults', 'Item 13 - Defaults, Dividend Arrearages and Delinquencies'),
+                (r'^Defaults.*Dividend.*Arrearages', 'Defaults and Arrearages')
+            ],
+            'item_14': [
+                (r'^(Item|ITEM)\s+14\.?\s*[-–—.]?\s*Material\s+Modifications', 'Item 14 - Material Modifications to the Rights of Security Holders'),
+                (r'^Material\s+Modifications.*Rights', 'Material Modifications')
+            ],
+            'item_15': [
+                (r'^(Item|ITEM)\s+15\.?\s*[-–—.]?\s*Controls.*Procedures', 'Item 15 - Controls and Procedures'),
+                (r'^Controls.*Procedures', 'Controls and Procedures')
+            ],
+            'item_16': [
+                (r'^(Item|ITEM)\s+16\.?\s*[-–—.]?\s*\[?Reserved\]?', 'Item 16 - [Reserved]')
+            ],
+            'item_16a': [
+                (r'^(Item|ITEM)\s+16A\.?\s*[-–—.]?\s*Audit\s+Committee', 'Item 16A - Audit Committee Financial Expert'),
+                (r'^Audit\s+Committee\s+Financial\s+Expert', 'Audit Committee Expert')
+            ],
+            'item_16b': [
+                (r'^(Item|ITEM)\s+16B\.?\s*[-–—.]?\s*Code\s+of\s+Ethics', 'Item 16B - Code of Ethics'),
+                (r'^Code\s+of\s+Ethics', 'Code of Ethics')
+            ],
+            'item_16c': [
+                (r'^(Item|ITEM)\s+16C\.?\s*[-–—.]?\s*Principal\s+Accountant', 'Item 16C - Principal Accountant Fees and Services'),
+                (r'^Principal\s+Accountant\s+Fees', 'Accountant Fees')
+            ],
+            'item_16d': [
+                (r'^(Item|ITEM)\s+16D\.?\s*[-–—.]?\s*Exemptions.*Audit\s+Committees', 'Item 16D - Exemptions from the Listing Standards for Audit Committees'),
+                (r'^Exemptions.*Listing\s+Standards', 'Audit Committee Exemptions')
+            ],
+            'item_16e': [
+                (r'^(Item|ITEM)\s+16E\.?\s*[-–—.]?\s*Purchases.*Equity\s+Securities', 'Item 16E - Purchases of Equity Securities by the Issuer'),
+                (r'^Purchases.*Equity\s+Securities.*Issuer', 'Equity Purchases')
+            ],
+            'item_16f': [
+                (r'^(Item|ITEM)\s+16F\.?\s*[-–—.]?\s*Change.*Certifying\s+Accountant', 'Item 16F - Change in Registrant\'s Certifying Accountant'),
+                (r'^Change.*Certifying\s+Accountant', 'Accountant Change')
+            ],
+            'item_16g': [
+                (r'^(Item|ITEM)\s+16G\.?\s*[-–—.]?\s*Corporate\s+Governance', 'Item 16G - Corporate Governance'),
+                (r'^Corporate\s+Governance', 'Corporate Governance')
+            ],
+            'item_16h': [
+                (r'^(Item|ITEM)\s+16H\.?\s*[-–—.]?\s*Mine\s+Safety', 'Item 16H - Mine Safety Disclosure'),
+                (r'^Mine\s+Safety\s+Disclosure', 'Mine Safety')
+            ],
+            'item_16i': [
+                (r'^(Item|ITEM)\s+16I\.?\s*[-–—.]?\s*Disclosure.*Foreign\s+Jurisdictions', 'Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections'),
+                (r'^Disclosure.*Foreign\s+Jurisdictions.*Inspections', 'Foreign Jurisdiction Disclosure')
+            ],
+            'item_16j': [
+                (r'^(Item|ITEM)\s+16J\.?\s*[-–—.]?\s*Insider\s+Trading', 'Item 16J - Insider Trading Policies'),
+                (r'^Insider\s+Trading\s+Policies', 'Insider Trading Policies')
+            ],
+            'item_16k': [
+                (r'^(Item|ITEM)\s+16K\.?\s*[-–—.]?\s*Cybersecurity', 'Item 16K - Cybersecurity'),
+                (r'^Cybersecurity', 'Cybersecurity')
+            ],
+            # PART V
+            'item_17': [
+                (r'^(Item|ITEM)\s+17\.?\s*[-–—.]?\s*Financial\s+Statements', 'Item 17 - Financial Statements'),
+            ],
+            'item_18': [
+                (r'^(Item|ITEM)\s+18\.?\s*[-–—.]?\s*Financial\s+Statements', 'Item 18 - Financial Statements'),
+            ],
+            'item_19': [
+                (r'^(Item|ITEM)\s+19\.?\s*[-–—.]?\s*Exhibits', 'Item 19 - Exhibits'),
+                (r'^Exhibits', 'Exhibits')
+            ],
+            # PARTS
+            'part_i': [
+                (r'^PART\s+I\s*$', 'Part I')
+            ],
+            'part_ii': [
+                (r'^PART\s+II\s*$', 'Part II')
+            ],
+            'part_iii': [
+                (r'^PART\s+III\s*$', 'Part III')
+            ],
+            'part_iv': [
+                (r'^PART\s+IV\s*$', 'Part IV')
+            ],
+            'part_v': [
+                (r'^PART\s+V\s*$', 'Part V')
+            ],
+            'signatures': [
+                (r'^SIGNATURES?\s*$', 'Signatures')
+            ]
+        },
         '8-K': {
             # Section 1: Registrant's Business and Operations
             'item_101': [
@@ -299,7 +449,7 @@ class SectionExtractor:
             form = document._config.form
 
         # Only extract sections for forms that have standard sections
-        if not form or form not in ['10-K', '10-Q', '8-K']:
+        if not form or form not in ['10-K', '10-Q', '8-K', '20-F']:
             return {}  # No filing type or unsupported form = no section detection
 
         # Get patterns for filing type

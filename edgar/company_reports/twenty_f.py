@@ -155,21 +155,21 @@ class TwentyF(CompanyReport):
         """
         List of detected item names (consistent with sections property).
 
-        Uses new parser's section detection for improved accuracy.
-        Falls back to old chunked_document if new parser returns no sections.
+        Uses chunked_document for 20-F since the pattern-based extractor
+        doesn't handle the Table of Contents format well.
+        Falls back to new parser sections if chunked_document unavailable.
 
         Returns:
             List of item titles for backward compatibility (e.g., ['Item 5', 'Item 8'])
         """
-        # Try new parser first
-        if self.sections:
-            # Extract items using shared helper (eliminates code duplication)
-            item_pattern = re.compile(r'(Item\s+\d+[A-Z]?)', re.IGNORECASE)
-            return extract_items_from_sections(self.sections, item_pattern)
-
-        # Fallback to old parser for backward compatibility
+        # For 20-F, prefer chunked_document which handles TOC format better
         if self.chunked_document:
             return self.chunked_document.list_items()
+
+        # Fallback to new parser sections
+        if self.sections and len(self.sections) > 0:
+            item_pattern = re.compile(r'(Item\s+\d+[A-Z]?)', re.IGNORECASE)
+            return extract_items_from_sections(self.sections, item_pattern)
 
         return []
 
