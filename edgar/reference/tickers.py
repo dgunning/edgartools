@@ -45,9 +45,25 @@ def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
     return df
 
 
+def load_company_tickers_from_package() -> Optional[pd.DataFrame]:
+    """
+    Load company tickers from the bundled parquet file.
+
+    This provides instant, offline access to ticker data without network calls.
+    The bundled data is updated with each release.
+
+    Returns:
+        DataFrame with columns [cik, ticker, company] or None if not available
+    """
+    try:
+        return read_parquet_from_package('company_tickers.pq')
+    except Exception:
+        return None
+
+
 def load_tickers_from_local() -> Optional[Dict[str, Any]]:
     """
-    Load tickers from local data
+    Load tickers from local downloaded data (used with EDGAR_USE_LOCAL_DATA).
     """
     reference_dir = get_edgar_data_directory() / "reference"
     if not reference_dir.exists():
@@ -58,14 +74,18 @@ def load_tickers_from_local() -> Optional[Dict[str, Any]]:
     return json.loads(company_tickers_file.read_text())
 
 
-@lru_cache(maxsize=1)
 def get_company_tickers(
         as_dataframe: bool = True,
         clean_name: bool = True,
         clean_suffix: bool = False
 ) -> Union[pd.DataFrame, pa.Table]:
     """
-    Fetch and process company ticker data from SEC.
+    Get company ticker data with CIK mappings.
+
+    Data is loaded in this priority order:
+    1. Bundled parquet file (instant, offline)
+    2. Local downloaded data (if EDGAR_USE_LOCAL_DATA is set)
+    3. Live SEC API (network call)
 
     Args:
         as_dataframe (bool): If True, returns pandas DataFrame; if False, returns pyarrow Table
@@ -73,72 +93,92 @@ def get_company_tickers(
         clean_suffix (bool): If True, removes common company suffixes
 
     Returns:
-        Union[pd.DataFrame, pa.Table]: Processed company data
+        Union[pd.DataFrame, pa.Table]: Processed company data with columns [cik, ticker, company]
     """
+    # Get raw data (cached internally)
+    df = _get_company_tickers_raw()
 
-    # Pre-define schema for better performance
-    SCHEMA = pa.schema([
+    # Only copy if we need to transform (avoids 1.5MB copy for lookup-only paths)
+    needs_transform = clean_name or clean_suffix
+    if needs_transform:
+        df = df.copy()
+        if clean_name:
+            df['company'] = df['company'].apply(clean_company_name)
+        if clean_suffix:
+            df['company'] = df['company'].apply(clean_company_suffix)
+
+    if as_dataframe:
+        return df
+
+    # Convert to pyarrow Table
+    cik_array = pa.array(df['cik'].tolist(), type=pa.int64())
+    ticker_array = pa.array(df['ticker'].tolist(), type=pa.string())
+    company_array = pa.array(df['company'].tolist(), type=pa.string())
+
+    schema = pa.schema([
         ('cik', pa.int64()),
         ('ticker', pa.string()),
         ('company', pa.string())
     ])
+    return pa.Table.from_arrays(
+        [cik_array, ticker_array, company_array],
+        schema=schema
+    )
 
-    try:
-        if os.getenv("EDGAR_USE_LOCAL_DATA"):
-            tickers_json = load_tickers_from_local()
-            if not tickers_json:
-                tickers_json = download_json(build_company_tickers_url())
-        else:
-            # Download JSON data
+
+@lru_cache(maxsize=1)
+def _get_company_tickers_raw() -> pd.DataFrame:
+    """
+    Internal function to get raw company ticker data with caching.
+
+    Tries sources in order:
+    1. Bundled parquet file (instant, offline)
+    2. Local downloaded data (if EDGAR_USE_LOCAL_DATA is set)
+    3. Live SEC API (network call)
+
+    Returns:
+        pd.DataFrame: Raw company data with columns [cik, ticker, company]
+    """
+    # Priority 1: Try bundled parquet data (instant, offline)
+    df = load_company_tickers_from_package()
+    if df is not None:
+        return df
+
+    # Priority 2: Try local downloaded data (if EDGAR_USE_LOCAL_DATA)
+    tickers_json = None
+    if os.getenv("EDGAR_USE_LOCAL_DATA"):
+        tickers_json = load_tickers_from_local()
+
+    # Priority 3: Fetch from SEC API
+    if tickers_json is None:
+        try:
             tickers_json = download_json(build_company_tickers_url())
+        except Exception as e:
+            log.error(f"Error fetching company tickers from [{build_company_tickers_url()}]: {str(e)}")
+            raise
 
-        # Pre-allocate lists for better memory efficiency
-        ciks = []
-        tickers = []
-        companies = []
+    # Process JSON data
+    ciks = []
+    tickers = []
+    companies = []
 
-        # Process JSON data
-        for item in tickers_json.values():
-            company_name = item['title']
+    for item in tickers_json.values():
+        ciks.append(int(item['cik_str']))
+        tickers.append(item['ticker'])
+        companies.append(item['title'])
 
-            # Apply name cleaning if requested
-            if clean_name or clean_suffix:
-                if clean_name:
-                    company_name = clean_company_name(company_name)
-                if clean_suffix:
-                    company_name = clean_company_suffix(company_name)
-
-            # Append to respective lists
-            ciks.append(int(item['cik_str']))
-            tickers.append(item['ticker'])
-            companies.append(company_name)
-
-        if as_dataframe:
-            # Create DataFrame directly from lists
-            return pd.DataFrame({
-                'cik': ciks,
-                'ticker': tickers,
-                'company': companies
-            })
-
-        # Create pyarrow arrays
-        cik_array = pa.array(ciks, type=pa.int64())
-        ticker_array = pa.array(tickers, type=pa.string())
-        company_array = pa.array(companies, type=pa.string())
-
-        # Create and return pyarrow Table
-        return pa.Table.from_arrays(
-            [cik_array, ticker_array, company_array],
-            schema=SCHEMA
-        )
-
-    except Exception as e:
-        log.error(f"Error fetching company tickers from [{build_company_tickers_url()}]: {str(e)}")
-        raise
+    return pd.DataFrame({
+        'cik': ciks,
+        'ticker': tickers,
+        'company': companies
+    })
 
 def load_cik_tickers_from_local() -> Optional[str]:
     """
-    Load tickers.txt from local data
+    Load tickers.txt from local data.
+
+    Note: ticker.txt is deprecated by SEC (returns 503/apology page as of Dec 2024).
+    This function is kept for backward compatibility with existing local data.
     """
     reference_dir = get_edgar_data_directory() / "reference"
     if not reference_dir.exists():
@@ -148,15 +188,25 @@ def load_cik_tickers_from_local() -> Optional[str]:
         return None
     return tickers_txt_file.read_text()
 
+
 def get_cik_tickers_from_ticker_txt():
-    """Get CIK and ticker data from ticker.txt file"""
+    """
+    Get CIK and ticker data from ticker.txt file.
+
+    DEPRECATED: The SEC's ticker.txt endpoint now returns a 503 "apology" page.
+    This function is kept for backward compatibility but will typically return None.
+    Use get_company_tickers() instead, which uses the bundled parquet data.
+    """
     try:
         if os.getenv("EDGAR_USE_LOCAL_DATA"):
             ticker_txt = load_cik_tickers_from_local()
             if not ticker_txt:
-                ticker_txt = download_file(build_ticker_url(), as_text=True)
+                # Don't try to fetch from SEC - endpoint is deprecated
+                return None
         else:
-            ticker_txt = download_file(build_ticker_url(), as_text=True)
+            # Don't try to fetch from SEC - endpoint is deprecated
+            return None
+
         source = StringIO(ticker_txt)
         data = pd.read_csv(source,
                            sep='\t',
@@ -165,32 +215,20 @@ def get_cik_tickers_from_ticker_txt():
         data['ticker'] = data['ticker'].str.upper()
         return data
     except Exception as e:
-        log.error(f"Error fetching company tickers from [{build_ticker_url()}]: {str(e)}")
+        log.debug(f"ticker.txt not available (deprecated): {str(e)}")
         return None
+
 
 @lru_cache(maxsize=1)
 def get_cik_tickers():
-    """Merge unique records from both sources"""
-    txt_data = get_cik_tickers_from_ticker_txt()
-    try:
-        json_data = get_company_tickers(clean_name=False, clean_suffix=False)[['ticker', 'cik']]
-    except Exception:
-        json_data = None
+    """
+    Get ticker to CIK mappings.
 
-    if txt_data is None and json_data is None:
-        raise Exception("Both data sources are unavailable")
-
-    if txt_data is None:
-        return json_data
-
-    if json_data is None:
-        return txt_data
-
-    # Merge both dataframes and keep unique records
-    merged_data = pd.concat([txt_data, json_data], ignore_index=True)
-    merged_data = merged_data.drop_duplicates(subset=['ticker', 'cik'])
-
-    return merged_data
+    Uses bundled parquet data for instant offline access.
+    Falls back to SEC API only if bundled data is unavailable.
+    """
+    # Primary source: company_tickers.json (via bundled parquet or SEC API)
+    return get_company_tickers(clean_name=False, clean_suffix=False)[['ticker', 'cik']]
 
 @lru_cache(maxsize=None)
 def list_all_tickers():

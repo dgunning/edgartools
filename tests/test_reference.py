@@ -88,40 +88,36 @@ def test_get_mutual_fund_tickers():
     assert not data.query("ticker == 'CRBRX'").empty
 
 
-def test_get_cik_tickers_fallback():
-    # We need to patch both download_file and download_json since they're used in different functions
+def test_get_cik_tickers_uses_bundled_data():
+    """
+    Test that get_cik_tickers() uses bundled parquet data by default.
+
+    The bundled data provides instant offline access without network calls.
+    This is the primary data source since ticker.txt is deprecated by SEC.
+    """
+    from edgar.reference.tickers import _get_company_tickers_raw
+
+    # Clear the lru_cache to ensure we're not getting cached results
+    get_cik_tickers.cache_clear()
+    _get_company_tickers_raw.cache_clear()
+
+    # Patch network calls to verify they're NOT called when bundled data exists
     with patch('edgar.reference.tickers.download_file') as mock_download_file, \
             patch('edgar.reference.tickers.download_json') as mock_download_json:
-        # Mock ticker.txt failure
-        mock_download_file.side_effect = Exception("Ticker.txt URL failed")
 
-        # Mock successful JSON response
-        test_data = {
-            "0": {"cik_str": 320193, "ticker": "AAPL", "title": "Apple Inc."},
-            "1": {"cik_str": 789019, "ticker": "MSFT", "title": "MICROSOFT CORP"}
-        }
-        mock_download_json.return_value = test_data
+        data = get_cik_tickers()
 
-        # Clear the lru_cache to ensure we're not getting cached results
-        get_cik_tickers.cache_clear()
-        get_company_tickers.cache_clear()
+        # Verify the result uses bundled data
+        assert isinstance(data, pd.DataFrame), "Result should be a pandas DataFrame"
+        assert set(data.columns) == {'ticker', 'cik'}, \
+            f"Columns should be 'ticker' and 'cik', got {data.columns}"
+        assert len(data) > 10000, \
+            f"Bundled data should have >10000 entries, got {len(data)}"
 
-        fallback_data = get_cik_tickers()
+        # Verify key tickers are present
+        assert 'AAPL' in data['ticker'].values, "AAPL should be in the data"
+        assert 'MSFT' in data['ticker'].values, "MSFT should be in the data"
 
-        # Verify the result
-        assert isinstance(fallback_data, pd.DataFrame), "Fallback result should be a pandas DataFrame"
-        assert set(fallback_data.columns) == {'ticker', 'cik'}, \
-            f"Fallback columns should be 'ticker' and 'cik', got {fallback_data.columns}"
-        assert len(fallback_data) == 2, \
-            f"Fallback data should have 2 entries, got {len(fallback_data)}"
-
-        # Sort the dataframe by ticker to ensure consistent ordering for comparison
-        fallback_data = fallback_data.sort_values('ticker').reset_index(drop=True)
-        assert fallback_data['ticker'].tolist() == ['AAPL', 'MSFT'], \
-            f"Fallback tickers should be ['AAPL', 'MSFT'], got {fallback_data['ticker'].tolist()}"
-        assert fallback_data['cik'].tolist() == [320193, 789019], \
-            f"Fallback CIKs should be [320193, 789019], got {fallback_data['cik'].tolist()}"
-
-        # Verify that both download methods were called
-        mock_download_file.assert_called_once()
-        mock_download_json.assert_called_once()
+        # Verify no network calls were made (bundled data was used)
+        mock_download_file.assert_not_called()
+        mock_download_json.assert_not_called()
