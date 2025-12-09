@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.2] - 2025-12-09
+
+### Added
+
+- **Bundled Company Ticker Data for Instant Offline Lookups**
+  - Added bundled `company_tickers.pq` file with 10,000+ ticker-to-CIK mappings
+  - Prioritizes bundled data over SEC API for instant offline access
+  - Removes dependency on deprecated ticker.txt endpoint (now returns 503)
+  - Improves cold start time from ~30 seconds to ~28 milliseconds (1000x faster)
+  - **Files**: `edgar/reference/data/company_tickers.pq`, `edgar/reference/tickers.py`
+  - **Impact**: Near-instant ticker lookups without network calls, resilient to SEC endpoint changes
+  - **Performance**: Sub-30ms lookups vs 30+ second API calls for initial ticker resolution
+
+### Fixed
+
+- **N-PX Parsing for Quarterly Filings**
+  - Fixed parsing of quarterly N-PX filings that use `reportQuarterYear` instead of `reportCalendarYear`
+  - Parser now falls back appropriately for quarterly filings
+  - **Files**: `edgar/npx/parsing.py`
+  - **Impact**: Correctly parses both annual and quarterly N-PX proxy voting filings
+
+### Summary
+
+Release 5.0.2 is a minor enhancement and bugfix release that significantly improves ticker lookup performance and fixes quarterly N-PX parsing. Key highlights:
+
+- **Performance**: 1000x faster ticker lookups with bundled data (30s to 28ms)
+- **Reliability**: Eliminates dependency on deprecated SEC ticker.txt endpoint
+- **N-PX Fix**: Correctly handles quarterly proxy voting filings
+
+This release maintains full backward compatibility with v5.0.1 and requires no code changes for existing users.
+
 ## [5.0.1] - 2025-12-09
 
 ### Added
