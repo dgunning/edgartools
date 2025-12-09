@@ -73,12 +73,7 @@ def render_rich(thirteen_f):
     content = [summary]
 
     # Other Included Managers (only show if there are any)
-    other_managers = None
-    if thirteen_f.primary_form_information:
-        summary_page = thirteen_f.primary_form_information.summary_page
-        if summary_page and summary_page.other_managers:
-            other_managers = summary_page.other_managers
-
+    other_managers = thirteen_f.other_managers
     if other_managers:
         managers_table = Table(
             Column("#", style="dim"),

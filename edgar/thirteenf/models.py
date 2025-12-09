@@ -313,6 +313,28 @@ class ThirteenF:
         return None
 
     @property
+    def other_managers(self) -> list:
+        """
+        List of other included managers in this consolidated 13F filing.
+
+        For multi-manager institutional filings (e.g., State Street, Bank of America),
+        this returns the affiliated entities whose holdings are reported together.
+        Each manager includes CIK, name, file number, and sequence number.
+
+        Returns:
+            list[OtherManager]: List of other managers, or empty list if none
+
+        Example:
+            >>> thirteenf.other_managers
+            [OtherManager(cik='0001102113', name='BANK OF AMERICA NA', ...)]
+        """
+        if self.primary_form_information:
+            summary_page = self.primary_form_information.summary_page
+            if summary_page and summary_page.other_managers:
+                return summary_page.other_managers
+        return []
+
+    @property
     def report_period(self):
         """Report period end date"""
         if self.primary_form_information:
