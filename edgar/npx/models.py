@@ -13,7 +13,7 @@ class PrimaryDoc:
     zip_code: str
     period_of_report: str
     submission_type: str
-    report_calendar_year: str
+    report_calendar_year: Optional[str]
     signer_name: str
     signer_title: str
     signature_date: str
