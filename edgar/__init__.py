@@ -57,6 +57,7 @@ from edgar.storage_management import (
     storage_info,
 )
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
+from edgar.npx import NPX
 from edgar.xbrl import XBRL
 
 # HTTP configuration functions for runtime SSL/proxy configuration
@@ -182,6 +183,7 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'C-TR': ('FormC', 'crowdfunding termination'),
         'NPORT-P': ('FundReport', 'fund portfolio holdings'),
         'NPORT-EX': ('FundReport', 'fund portfolio holdings'),
+        'N-PX': ('NPX', 'annual proxy voting record'),
     }
 
     if base_form in form_map:
@@ -254,6 +256,9 @@ def obj(sec_filing: Filing) -> Optional[object]:
 
     elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
         return FundReport.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ["N-PX"]):
+        return NPX.from_filing(sec_filing)
 
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:
