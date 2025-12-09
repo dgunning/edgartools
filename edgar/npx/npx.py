@@ -135,13 +135,181 @@ class ProxyVotes:
         return ProxyVotes(proxy_tables=filtered)
 
     def filter_by_vote(self, how_voted: str) -> 'ProxyVotes':
-        """Filter to proxy tables containing votes matching the specified vote type."""
+        """Filter to proxy tables containing votes matching the specified vote type.
+
+        Args:
+            how_voted: Vote type to filter by (FOR, AGAINST, ABSTAIN, WITHHOLD, etc.)
+
+        Returns:
+            ProxyVotes containing only matters with matching vote records.
+        """
         how_voted_upper = how_voted.upper()
         filtered = [
             pt for pt in self.proxy_tables
             if any(vr.how_voted.upper() == how_voted_upper for vr in pt.vote_records)
         ]
         return ProxyVotes(proxy_tables=filtered)
+
+    def filter_by_category(self, category: str) -> 'ProxyVotes':
+        """Filter votes by vote category (case-insensitive partial match).
+
+        Args:
+            category: Category to filter by. Common categories include:
+                - DIRECTOR ELECTIONS
+                - SECTION 14A SAY-ON-PAY VOTES
+                - AUDIT-RELATED
+                - COMPENSATION
+                - ENVIRONMENT OR CLIMATE
+                - CORPORATE GOVERNANCE
+                - OTHER
+
+        Returns:
+            ProxyVotes containing only matters matching the category.
+
+        Example:
+            >>> climate_votes = npx.proxy_votes.filter_by_category("CLIMATE")
+            >>> esg_votes = npx.proxy_votes.filter_by_category("ENVIRONMENT")
+        """
+        category_lower = category.lower()
+        filtered = [
+            pt for pt in self.proxy_tables
+            if any(category_lower in vc.category_type.lower() for vc in pt.vote_categories)
+        ]
+        return ProxyVotes(proxy_tables=filtered)
+
+    def against_management(self) -> 'ProxyVotes':
+        """Filter to proxy tables where votes went against management recommendation.
+
+        Returns proxy tables containing at least one vote record where how_voted
+        differs from management_recommendation.
+
+        Returns:
+            ProxyVotes containing only matters with votes against management.
+
+        Example:
+            >>> dissent_votes = npx.proxy_votes.against_management()
+            >>> print(f"Fund voted against management {len(dissent_votes)} times")
+        """
+        filtered = []
+        for pt in self.proxy_tables:
+            for vr in pt.vote_records:
+                # Normalize for comparison (handle FOR vs FOR, AGAINST vs AGAINST, etc.)
+                how_voted = vr.how_voted.upper() if vr.how_voted else ""
+                mgmt_rec = vr.management_recommendation.upper() if vr.management_recommendation else ""
+
+                # Skip if either is empty or "NONE"
+                if not how_voted or not mgmt_rec or mgmt_rec == "NONE":
+                    continue
+
+                # Check for mismatch
+                if how_voted != mgmt_rec:
+                    filtered.append(pt)
+                    break  # Only need one dissenting vote to include this proxy table
+
+        return ProxyVotes(proxy_tables=filtered)
+
+    def management_alignment_rate(self) -> float:
+        """Calculate the rate at which votes align with management recommendations.
+
+        Returns:
+            Float between 0.0 and 1.0 representing the alignment rate.
+            Returns 1.0 if there are no vote records with management recommendations.
+
+        Example:
+            >>> alignment = npx.proxy_votes.management_alignment_rate()
+            >>> print(f"Fund aligned with management {alignment:.1%} of the time")
+        """
+        aligned_count = 0
+        total_count = 0
+
+        for pt in self.proxy_tables:
+            for vr in pt.vote_records:
+                how_voted = vr.how_voted.upper() if vr.how_voted else ""
+                mgmt_rec = vr.management_recommendation.upper() if vr.management_recommendation else ""
+
+                # Skip if either is empty or management has no recommendation
+                if not how_voted or not mgmt_rec or mgmt_rec == "NONE":
+                    continue
+
+                total_count += 1
+                if how_voted == mgmt_rec:
+                    aligned_count += 1
+
+        if total_count == 0:
+            return 1.0  # No votes with recommendations = 100% alignment (vacuously true)
+
+        return aligned_count / total_count
+
+    def summary_by_category(self) -> pd.DataFrame:
+        """Get a summary of voting patterns grouped by vote category.
+
+        Returns a DataFrame with columns:
+        - category: The vote category type
+        - total_votes: Number of vote records in this category
+        - for_votes: Number of FOR votes
+        - against_votes: Number of AGAINST votes
+        - abstain_votes: Number of ABSTAIN votes
+        - other_votes: Number of other vote types (WITHHOLD, etc.)
+        - with_management: Votes aligned with management
+        - against_management: Votes against management
+
+        Example:
+            >>> summary = npx.proxy_votes.summary_by_category()
+            >>> print(summary)
+        """
+        category_stats = {}
+
+        for pt in self.proxy_tables:
+            # Get categories for this proxy table
+            categories = [vc.category_type for vc in pt.vote_categories] if pt.vote_categories else ["UNCATEGORIZED"]
+
+            for category in categories:
+                if category not in category_stats:
+                    category_stats[category] = {
+                        'total_votes': 0,
+                        'for_votes': 0,
+                        'against_votes': 0,
+                        'abstain_votes': 0,
+                        'other_votes': 0,
+                        'with_management': 0,
+                        'against_management': 0,
+                    }
+
+                stats = category_stats[category]
+
+                for vr in pt.vote_records:
+                    stats['total_votes'] += 1
+
+                    how_voted = vr.how_voted.upper() if vr.how_voted else ""
+                    mgmt_rec = vr.management_recommendation.upper() if vr.management_recommendation else ""
+
+                    # Count by vote type
+                    if how_voted == "FOR":
+                        stats['for_votes'] += 1
+                    elif how_voted == "AGAINST":
+                        stats['against_votes'] += 1
+                    elif how_voted == "ABSTAIN":
+                        stats['abstain_votes'] += 1
+                    else:
+                        stats['other_votes'] += 1
+
+                    # Count management alignment
+                    if mgmt_rec and mgmt_rec != "NONE":
+                        if how_voted == mgmt_rec:
+                            stats['with_management'] += 1
+                        else:
+                            stats['against_management'] += 1
+
+        # Convert to DataFrame
+        records = [
+            {'category': cat, **stats}
+            for cat, stats in sorted(category_stats.items(), key=lambda x: -x[1]['total_votes'])
+        ]
+
+        return pd.DataFrame(records) if records else pd.DataFrame(columns=[
+            'category', 'total_votes', 'for_votes', 'against_votes',
+            'abstain_votes', 'other_votes', 'with_management', 'against_management'
+        ])
 
     def summary(self) -> pd.DataFrame:
         """Get a summary of voting patterns.

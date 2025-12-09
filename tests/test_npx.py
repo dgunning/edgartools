@@ -222,6 +222,130 @@ def test_proxy_votes_summary():
     assert summary.iloc[0]["count"] == 3
 
 
+def test_proxy_votes_filter_by_category():
+    """Test ProxyVotes.filter_by_category() method."""
+    # Use KIM_LLC sample which has SAY-ON-PAY category votes
+    proxy_xml_path = SAMPLE_FILES_DIR / "KIM_LLC_proxy_votes.xml"
+    proxy_extractor = ProxyVoteTableExtractor.from_file(proxy_xml_path)
+    proxy_vote_table = proxy_extractor.extract()
+
+    proxy_votes = ProxyVotes(proxy_tables=proxy_vote_table.proxy_tables)
+
+    # All votes in KIM_LLC sample are SAY-ON-PAY
+    say_on_pay_votes = proxy_votes.filter_by_category("SAY-ON-PAY")
+    assert len(say_on_pay_votes) == 7  # All 7 votes are say-on-pay
+
+    # Case insensitive partial match
+    pay_votes = proxy_votes.filter_by_category("pay")
+    assert len(pay_votes) == 7
+
+    # Non-existent category
+    climate_votes = proxy_votes.filter_by_category("CLIMATE")
+    assert len(climate_votes) == 0
+
+
+def test_proxy_votes_against_management():
+    """Test ProxyVotes.against_management() method."""
+    # Use KIM_LLC sample - has mix of aligned and dissenting votes
+    proxy_xml_path = SAMPLE_FILES_DIR / "KIM_LLC_proxy_votes.xml"
+    proxy_extractor = ProxyVoteTableExtractor.from_file(proxy_xml_path)
+    proxy_vote_table = proxy_extractor.extract()
+
+    proxy_votes = ProxyVotes(proxy_tables=proxy_vote_table.proxy_tables)
+
+    # Find votes against management
+    dissent_votes = proxy_votes.against_management()
+
+    # KIM_LLC has at least one vote against management (ABSTAIN vs AGAINST recommendation)
+    # Check that we found some dissenting votes
+    assert len(dissent_votes) >= 1
+
+    # Verify all returned votes actually have a mismatch
+    for pt in dissent_votes:
+        has_mismatch = False
+        for vr in pt.vote_records:
+            if vr.how_voted and vr.management_recommendation:
+                if vr.how_voted.upper() != vr.management_recommendation.upper():
+                    has_mismatch = True
+                    break
+        assert has_mismatch, f"Expected vote mismatch in {pt.issuer_name}"
+
+
+def test_proxy_votes_management_alignment_rate():
+    """Test ProxyVotes.management_alignment_rate() method."""
+    # Use KIM_LLC sample
+    proxy_xml_path = SAMPLE_FILES_DIR / "KIM_LLC_proxy_votes.xml"
+    proxy_extractor = ProxyVoteTableExtractor.from_file(proxy_xml_path)
+    proxy_vote_table = proxy_extractor.extract()
+
+    proxy_votes = ProxyVotes(proxy_tables=proxy_vote_table.proxy_tables)
+
+    alignment_rate = proxy_votes.management_alignment_rate()
+
+    # Rate should be between 0 and 1
+    assert 0.0 <= alignment_rate <= 1.0
+
+    # KIM_LLC has mostly aligned votes (FOR when mgmt says FOR, etc.)
+    # But also some misalignment (ABSTAIN when mgmt says AGAINST)
+    # Rate should be high but not 100%
+    assert alignment_rate > 0.5  # More aligned than not
+
+
+def test_proxy_votes_management_alignment_rate_empty():
+    """Test management_alignment_rate with empty proxy votes."""
+    empty_votes = ProxyVotes(proxy_tables=[])
+
+    # Empty should return 1.0 (vacuously true)
+    assert empty_votes.management_alignment_rate() == 1.0
+
+
+def test_proxy_votes_summary_by_category():
+    """Test ProxyVotes.summary_by_category() method."""
+    # Use KIM_LLC sample
+    proxy_xml_path = SAMPLE_FILES_DIR / "KIM_LLC_proxy_votes.xml"
+    proxy_extractor = ProxyVoteTableExtractor.from_file(proxy_xml_path)
+    proxy_vote_table = proxy_extractor.extract()
+
+    proxy_votes = ProxyVotes(proxy_tables=proxy_vote_table.proxy_tables)
+
+    summary = proxy_votes.summary_by_category()
+
+    # Should have at least one category
+    assert len(summary) >= 1
+
+    # Check expected columns
+    expected_columns = [
+        'category', 'total_votes', 'for_votes', 'against_votes',
+        'abstain_votes', 'other_votes', 'with_management', 'against_management'
+    ]
+    for col in expected_columns:
+        assert col in summary.columns, f"Missing column: {col}"
+
+    # SAY-ON-PAY should be the primary category
+    assert "SECTION 14A SAY-ON-PAY VOTES" in summary['category'].values
+
+    # Check that vote counts are non-negative
+    assert (summary['total_votes'] >= 0).all()
+    assert (summary['for_votes'] >= 0).all()
+    assert (summary['against_votes'] >= 0).all()
+
+
+def test_proxy_votes_summary_by_category_empty():
+    """Test summary_by_category with empty proxy votes."""
+    empty_votes = ProxyVotes(proxy_tables=[])
+
+    summary = empty_votes.summary_by_category()
+
+    # Should return empty DataFrame with correct columns
+    assert len(summary) == 0
+    expected_columns = [
+        'category', 'total_votes', 'for_votes', 'against_votes',
+        'abstain_votes', 'other_votes', 'with_management', 'against_management'
+    ]
+    for col in expected_columns:
+        assert col in summary.columns
+
+
 @pytest.mark.network
 def test_npx_from_filing():
     """Test NPX.from_filing() with a real SEC filing."""
