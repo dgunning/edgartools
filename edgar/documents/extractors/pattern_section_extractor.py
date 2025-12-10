@@ -224,15 +224,21 @@ class SectionExtractor:
             ],
             'item_16i': [
                 (r'^(Item|ITEM)\s+16I\.?\s*[-–—.]?\s*Disclosure.*Foreign\s+Jurisdictions', 'Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections'),
-                (r'^Disclosure.*Foreign\s+Jurisdictions.*Inspections', 'Foreign Jurisdiction Disclosure')
+                (r'^Disclosure.*Foreign\s+Jurisdictions.*Inspections', 'Foreign Jurisdiction Disclosure'),
+                # Fallback: match just "Item 16I" for filings where title is on separate line
+                (r'^(Item|ITEM)\s+16I\.?\s*$', 'Item 16I')
             ],
             'item_16j': [
                 (r'^(Item|ITEM)\s+16J\.?\s*[-–—.]?\s*Insider\s+Trading', 'Item 16J - Insider Trading Policies'),
-                (r'^Insider\s+Trading\s+Policies', 'Insider Trading Policies')
+                (r'^Insider\s+Trading\s+Policies', 'Insider Trading Policies'),
+                # Fallback: match just "Item 16J" for filings where title is on separate line
+                (r'^(Item|ITEM)\s+16J\.?\s*$', 'Item 16J')
             ],
             'item_16k': [
                 (r'^(Item|ITEM)\s+16K\.?\s*[-–—.]?\s*Cybersecurity', 'Item 16K - Cybersecurity'),
-                (r'^Cybersecurity', 'Cybersecurity')
+                (r'^Cybersecurity', 'Cybersecurity'),
+                # Fallback: match just "Item 16K" for filings where title is on separate line
+                (r'^(Item|ITEM)\s+16K\.?\s*$', 'Item 16K')
             ],
             # PART V
             'item_17': [
@@ -601,9 +607,20 @@ class SectionExtractor:
 
         # Strategy 3: Fallback to bold ParagraphNode objects
         # Many 8-K filings (55%) use bold paragraphs instead of semantic headings
-        # Only run if no Item headers found yet
-        has_item_headers = any(re.search(r'Item\s+\d', text, re.IGNORECASE) for _, text, _ in headers)
-        if not has_item_headers:
+        # Only run if no COMPLETE Item headers found yet
+        # A complete header has title text after the Item number (e.g., "Item 3. Key Information")
+        # An incomplete header is just "Item 3." without title - common in 20-F headings
+        def is_complete_item_header(text):
+            """Check if header has title text after Item number."""
+            match = re.match(r'^(Item|ITEM)\s+\d+[A-Za-z]?\.?\s*[-–—.]?\s*(.+)?$', text.strip(), re.IGNORECASE)
+            if match:
+                title = match.group(2)
+                # Must have substantive title text (not just punctuation or whitespace)
+                return title and len(title.strip()) > 3
+            return False
+
+        has_complete_item_headers = any(is_complete_item_header(text) for _, text, _ in headers)
+        if not has_complete_item_headers:
             from edgar.documents.nodes import ParagraphNode
             paragraph_nodes = document.root.find(lambda n: isinstance(n, ParagraphNode))
 
