@@ -342,14 +342,19 @@ class Statement:
 
     def _add_metadata_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Add metadata columns (balance, weight, preferred_sign, parent_concept) to DataFrame.
+        Add metadata columns (balance, weight, preferred_sign, parent_concept, parent_abstract_concept) to DataFrame.
 
         Issue #463: Users need access to XBRL metadata to understand value transformations.
         Issue #514: Users need parent_concept to understand hierarchy relationships.
+        Issue #514 refinement: Distinguish between calculation parent (metric) and presentation parent (abstract).
 
         Note: preferred_sign comes from statement's raw data (presentation linkbase),
         not from facts. It's period-specific in raw data, but we use a representative
         value (from first period) for the metadata column.
+
+        Parent concepts:
+        - parent_concept: Calculation tree parent (always a metric concept for summation math)
+        - parent_abstract_concept: Presentation tree parent (may be abstract, for display hierarchy)
         """
         if df.empty or 'concept' not in df.columns:
             return df
@@ -362,7 +367,8 @@ class Statement:
         balance_map = {}
         weight_map = {}
         preferred_sign_map = {}
-        parent_concept_map = {}
+        parent_concept_map = {}  # Calculation tree parent (metric)
+        parent_abstract_concept_map = {}  # Presentation tree parent (may be abstract)
 
         # For each unique concept in the DataFrame
         for concept in df['concept'].unique():
@@ -387,14 +393,18 @@ class Statement:
                     # Use first period's preferred_sign as representative value
                     preferred_sign_map[concept] = next(iter(preferred_signs.values()))
 
-                # parent_concept from presentation tree (Issue #514)
-                parent_concept_map[concept] = item.get('parent')
+                # parent_concept from calculation tree (Issue #514 refinement) - metric parent for math
+                parent_concept_map[concept] = item.get('calculation_parent')
+
+                # parent_abstract_concept from presentation tree (Issue #514) - may be abstract, for display
+                parent_abstract_concept_map[concept] = item.get('parent')
 
         # Add metadata columns
         df['balance'] = df['concept'].map(balance_map)
         df['weight'] = df['concept'].map(weight_map)
         df['preferred_sign'] = df['concept'].map(preferred_sign_map)
         df['parent_concept'] = df['concept'].map(parent_concept_map)
+        df['parent_abstract_concept'] = df['concept'].map(parent_abstract_concept_map)
 
         return df
 
@@ -415,7 +425,7 @@ class Statement:
 
         # Get period columns (exclude metadata and structural columns)
         metadata_cols = ['concept', 'label', 'balance', 'weight', 'preferred_sign', 'parent_concept',
-                        'level', 'abstract', 'dimension', 'unit', 'point_in_time']
+                        'parent_abstract_concept', 'level', 'abstract', 'dimension', 'unit', 'point_in_time']
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
         # Get statement type

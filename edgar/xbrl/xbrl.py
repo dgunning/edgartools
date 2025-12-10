@@ -706,13 +706,15 @@ class XBRL:
                 from edgar.xbrl.parsers.concepts import get_balance_type
                 balance = get_balance_type(element_id)
 
-        # Get weight from calculation trees (Issue #463)
+        # Get weight and calculation parent from calculation trees (Issue #463, #514)
+        calculation_parent = None
         if hasattr(self, 'calculation_trees') and self.calculation_trees:
             for calc_tree in self.calculation_trees.values():
                 if element_id_normalized in calc_tree.all_nodes:
                     calc_node = calc_tree.all_nodes[element_id_normalized]
                     weight = calc_node.weight
-                    break  # Use first weight found
+                    calculation_parent = calc_node.parent  # Metric parent (Issue #514 refinement)
+                    break  # Use first weight/parent found
 
         # Calculate preferred_sign from preferred_label (for Issue #463)
         # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
@@ -860,7 +862,8 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
-                'parent': node.parent,  # Include parent concept for hierarchy (Issue #514)
+                'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
+                'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
@@ -882,7 +885,8 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
-                'parent': node.parent,  # Include parent concept for hierarchy (Issue #514)
+                'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
+                'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
                 'level': node.depth,
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
