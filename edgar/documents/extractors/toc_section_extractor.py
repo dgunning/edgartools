@@ -289,9 +289,12 @@ class SECSectionExtractor:
     
     def _extract_element_text(self, element) -> str:
         """Extract clean text from an HTML element."""
-        # This would integrate with your existing text extraction logic
-        # For now, simple text extraction
-        return element.text_content() or ""
+        # Skip non-element nodes (comments, processing instructions, etc.)
+        try:
+            return element.text_content() or ""
+        except (ValueError, AttributeError):
+            # HtmlComment and other non-element nodes don't have text_content()
+            return ""
     
     def _clean_section_text(self, text: str) -> str:
         """Clean extracted section text."""
