@@ -58,6 +58,7 @@ from edgar.storage_management import (
 )
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.npx import NPX
+from edgar.proxy import PROXY_FORMS, ProxyStatement
 from edgar.xbrl import XBRL
 
 # HTTP configuration functions for runtime SSL/proxy configuration
@@ -184,6 +185,9 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'NPORT-P': ('FundReport', 'fund portfolio holdings'),
         'NPORT-EX': ('FundReport', 'fund portfolio holdings'),
         'N-PX': ('NPX', 'annual proxy voting record'),
+        'DEF 14A': ('ProxyStatement', 'proxy statement with executive compensation'),
+        'DEFA14A': ('ProxyStatement', 'additional proxy soliciting materials'),
+        'DEFM14A': ('ProxyStatement', 'merger-related proxy statement'),
     }
 
     if base_form in form_map:
@@ -259,6 +263,9 @@ def obj(sec_filing: Filing) -> Optional[object]:
 
     elif matches_form(sec_filing, ["N-PX"]):
         return NPX.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, PROXY_FORMS):
+        return ProxyStatement.from_filing(sec_filing)
 
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:
