@@ -18,6 +18,7 @@ nav:
     - Installation: installation.md
     - Configuration: configuration.md
     - Quick Start: quickstart.md
+    - Quick Reference: quick-guide.md
   - How to Guides:
     - Filings:
       - "Working with a Filing": guides/working-with-filing.md
@@ -56,6 +57,8 @@ nav:
       - Filing: api/filing.md
       - Filings: api/filings.md
       - XBRL: api/xbrl.md
+  - AI Integration: ai-integration.md
+
   - Resources:
     - "Common Issues & Solutions": resources/troubleshooting.md
     - "Performance Best Practices": resources/performance.md
