@@ -15,6 +15,7 @@ theme:
 nav:
   - Home:
     - Overview: index.md
+    - Why EdgarTools: why-edgartools.md
     - Installation: installation.md
     - Configuration: configuration.md
     - Quick Start: quickstart.md

@@ -1,254 +1,191 @@
 # Why Choose EdgarTools?
 
-If you're working with SEC data, you have several options. Here's why EdgarTools stands out as the best choice for Python developers, researchers, and financial professionals.
+EdgarTools makes working with SEC data straightforward. Here's what sets it apart.
 
 ## The SEC Data Challenge
 
-Working with SEC filings has traditionally been painful:
+Working with SEC filings is harder than it should be:
 
-- **Complex file formats**: Raw XBRL is verbose and hard to parse
-- **Inconsistent data**: Different companies use different concepts for the same items
+- **Complex file formats**: Raw XBRL is verbose and difficult to parse
+- **Inconsistent data**: Companies use different concepts for the same items
 - **Poor tooling**: Existing solutions are either too basic or overly complex
-- **Performance issues**: Large datasets take forever to process
-- **Documentation gaps**: Sparse examples and unclear APIs
+- **Rate limits**: SEC enforces strict access limits that require careful handling
 
-EdgarTools solves all of these problems.
+EdgarTools addresses these problems.
 
 ## How EdgarTools is Different
 
-### 🎯 **Built for Real Users**
+### Clean, Intuitive API
 
-Unlike academic projects or corporate tools, EdgarTools is designed by practitioners for practitioners. Every feature addresses real pain points from actual SEC data analysis workflows.
+Get company financials in a few lines:
 
-**Other tools:**
 ```python
-# Complex setup, raw data
-import sec_api
-api = sec_api.QueryApi(api_key="your_key")
-query = {
-    "query": {"field": "cik", "operator": "=", "value": "0000320193"},
-    "from": "2020-01-01", 
-    "to": "2023-12-31"
-}
-filings = api.get_filings(query)
-# Now parse raw XBRL...
-```
-
-**EdgarTools:**
-```python
-# Simple, clean API
 from edgar import Company
+
 apple = Company("AAPL")
 financials = apple.get_financials()
-revenue = financials.get_revenue()  # Done!
+
+# Get key metrics directly
+revenue = financials.get_revenue()           # 416,161,000,000
+net_income = financials.get_net_income()     # 93,736,000,000
+total_assets = financials.get_total_assets() # 352,583,000,000
 ```
 
-### 📊 **Data Quality First**
+Access filings just as easily:
 
-EdgarTools doesn't just give you data—it gives you **clean, standardized, analysis-ready data**.
-
-#### Before EdgarTools:
-- Spend 80% of time cleaning and standardizing data
-- Deal with inconsistent concept mappings across companies
-- Handle missing values and edge cases manually
-- Write custom parsers for each filing type
-
-#### With EdgarTools:
-- Get standardized financial concepts automatically
-- Clean data with proper data types and formatting
-- Consistent APIs across all filing types
-- Built-in handling of edge cases and variations
-
-**Example: Revenue standardization**
 ```python
-# Tesla uses "AutomotiveRevenue", Microsoft uses "ProductRevenue" 
-# EdgarTools maps both to standardized "Revenue" concept
-tesla_revenue = Company("TSLA").get_financials().get_revenue()
-msft_revenue = Company("MSFT").get_financials().get_revenue()
+# Get recent 10-K filings
+filings = apple.get_filings(form="10-K")
 
-# Both return the same format, ready for comparison
-comparison = pd.concat([tesla_revenue, msft_revenue], axis=1)
+# Work with the latest filing
+latest_10k = filings[0]
+tenk = latest_10k.obj()  # Parsed TenK object
+
+# Access specific sections
+print(tenk.business)          # Item 1 - Business description
+print(tenk.risk_factors)      # Item 1A - Risk factors
 ```
 
-### ⚡ **Performance That Scales**
+### Standardized Financial Data
 
-Built for analysts who need to process hundreds or thousands of filings efficiently.
+EdgarTools normalizes financial concepts across companies:
 
-| Operation | EdgarTools | Alternative Solutions |
-|-----------|------------|----------------------|
-| Get 5 years of financials | 2-3 seconds | 30-60 seconds |
-| Parse 100 10-K filings | 2-5 minutes | 30-60 minutes |
-| Extract all insider trades | 10-15 seconds | 5-10 minutes |
-| Query XBRL facts | Instant (cached) | 5-15 seconds each |
-
-**Performance features:**
-- Smart caching reduces redundant API calls
-- Parallel processing for bulk operations
-- Memory-efficient streaming for large datasets
-- Pre-computed indexes for common queries
-
-### 🛠 **Developer Experience**
-
-EdgarTools is built by developers, for developers.
-
-#### Type Safety & IntelliSense
 ```python
 from edgar import Company
 
-company = Company("AAPL")  # Type: Company
-filings = company.get_filings()  # Type: Filings
-filing = filings.latest()  # Type: Filing
-financials = filing.obj().financials  # Full autocomplete support
-```
-
-#### Rich Display in Jupyter
-```python
-# Automatic pretty-printing
-company  # Shows company card with key info
-filings  # Shows interactive table
-financials.income_statement  # Rich formatted statements
-```
-
-#### Comprehensive Error Handling
-```python
-try:
-    company = Company("INVALID")
-except CompanyNotFoundError as e:
-    print(f"Company not found: {e}")
-    suggestions = search_companies("Invalid Corp")
-```
-
-### 🔍 **Complete Feature Set**
-
-EdgarTools covers the entire SEC ecosystem, not just basic filings.
-
-| Feature | EdgarTools | EDGAR-Tool | sec-api | python-edgar |
-|---------|------------|------------|---------|--------------|
-| **10-K/10-Q Analysis** | ✅ Full support | ✅ Basic | ✅ Raw data | ❌ Limited |
-| **XBRL Financial Data** | ✅ Standardized | ⚠️ Raw only | ⚠️ Raw only | ❌ No |
-| **Insider Trading (Forms 3,4,5)** | ✅ Structured | ❌ No | ⚠️ Raw only | ❌ No |
-| **13F Fund Holdings** | ✅ Full analysis | ❌ No | ⚠️ Basic | ❌ No |
-| **8-K Event Monitoring** | ✅ Event parsing | ⚠️ Text only | ⚠️ Raw only | ❌ No |
-| **Attachment Processing** | ✅ All types | ❌ No | ❌ No | ❌ No |
-| **Text Extraction** | ✅ Clean HTML→Text | ⚠️ Basic | ❌ No | ✅ Basic |
-| **Local Caching** | ✅ Intelligent | ❌ No | ⚠️ Basic | ❌ No |
-| **Rate Limiting** | ✅ Built-in | ❌ Manual | ⚠️ Manual | ❌ Manual |
-
-## Real-World Success Stories
-
-### Financial Analysis Firm
-> "EdgarTools reduced our data preparation time from 6 hours to 15 minutes. We can now analyze 500+ companies in the time it used to take for 10."
-
-**Before:** Custom scrapers, manual data cleaning, inconsistent results
-**After:** Automated pipelines, standardized data, 95% time savings
-
-### Academic Research
-> "For our corporate governance study of 3,000 companies over 10 years, EdgarTools made the impossible possible. The standardized data quality is exceptional."
-
-**Challenge:** Needed consistent financial metrics across thousands of filings
-**Solution:** EdgarTools' standardization engine handled concept mapping automatically
-
-### Investment Fund
-> "We track insider trading across our entire portfolio in real-time. EdgarTools' Form 4 parsing is the most accurate we've found."
-
-**Use case:** Daily monitoring of insider transactions for 200+ holdings
-**Result:** Automated alerts, structured data for analysis, better investment decisions
-
-## Technical Superiority
-
-### Smart XBRL Processing
-```python
-# EdgarTools understands XBRL semantics
-financials = company.get_financials()
-
-# Automatically handles:
-# - Concept hierarchies (Revenue > Product Revenue > Software Revenue)
-# - Time period alignment
-# - Unit conversion (thousands to actual values)
-# - Calculation relationships
-# - Dimensional breakdowns
-
-revenue_breakdown = financials.get_concept_breakdown("Revenue")
-# Returns: Product Revenue, Service Revenue, Subscription Revenue, etc.
-```
-
-### Intelligent Data Standardization
-```python
-# Works across companies with different taxonomies
-companies = ["AAPL", "MSFT", "GOOGL", "AMZN", "META"]
-
-# Same code works for all companies
-for ticker in companies:
+# Different companies use different XBRL concepts
+# EdgarTools standardizes them
+for ticker in ["AAPL", "MSFT", "GOOGL"]:
     company = Company(ticker)
-    metrics = {
-        'revenue': company.get_financials().get_revenue(),
-        'net_income': company.get_financials().get_net_income(),
-        'total_assets': company.get_financials().get_total_assets()
-    }
-    # Consistent data structure for all companies
+    financials = company.get_financials()
+
+    # Same API works for all companies
+    revenue = financials.get_revenue()
+    print(f"{ticker}: ${revenue:,.0f}")
 ```
 
-### Advanced Query Capabilities
+### Rich Filing Support
+
+Access structured data from various SEC forms:
+
 ```python
-# Complex financial analysis made simple
-from edgar import query
+from edgar import Company
 
-# Find all companies with debt-to-equity > 2.0
-high_leverage = query.companies.where(
-    debt_to_equity__gt=2.0,
-    market_cap__gt=1_000_000_000  # > $1B market cap
-)
+company = Company("AAPL")
 
-# Get all tech companies that filed 8-K for acquisitions
-tech_acquisitions = query.filings.where(
-    form="8-K",
-    industry="technology",
-    contains="acquisition",
-    filing_date__gte="2023-01-01"
-)
+# 10-K Annual Reports
+tenk = company.get_filings(form="10-K")[0].obj()
+print(tenk.financials.income_statement())
+
+# 10-Q Quarterly Reports
+tenq = company.get_filings(form="10-Q")[0].obj()
+
+# 8-K Current Reports (events)
+eightk = company.get_filings(form="8-K")[0].obj()
+print(eightk.items)  # List of reported items
+
+# Insider Trading (Form 4)
+form4s = company.get_filings(form="4")
+
+# Institutional Holdings (13F)
+from edgar import get_filings
+thirteenf = get_filings(form="13F-HR")[0].obj()
+print(thirteenf.holdings)  # DataFrame of holdings
 ```
 
-## ROI Calculation
+### Developer-Friendly Features
 
-### Time Savings
-- **Data Collection**: 90% faster than manual methods
-- **Data Cleaning**: 95% reduction in preprocessing time  
-- **Analysis Setup**: From hours to minutes
+**Type hints and autocomplete:**
+```python
+from edgar import Company, Filing
 
-### Cost Savings
-- **No API fees**: Free access to SEC data
-- **Reduced development time**: Pre-built solutions
-- **Lower maintenance**: Stable, well-tested codebase
+company: Company = Company("AAPL")
+filings = company.get_filings()  # Returns Filings object
+filing: Filing = filings[0]      # Full type support
+```
 
-### Quality Improvements
-- **Fewer errors**: Automated data validation
-- **Better insights**: Standardized comparisons
-- **Faster iteration**: Rapid prototyping and testing
+**Rich display in Jupyter notebooks:**
+```python
+# Objects render nicely in notebooks
+company          # Shows company info card
+filings          # Interactive table
+filing.obj()     # Formatted report view
+```
+
+**Built-in rate limiting:**
+```python
+# EdgarTools handles SEC rate limits automatically
+# No need to add delays or retry logic
+filings = company.get_filings(form="10-K")  # Just works
+```
+
+### XBRL Made Simple
+
+Access structured financial data without dealing with raw XBRL:
+
+```python
+from edgar import Company
+
+company = Company("AAPL")
+filing = company.get_filings(form="10-K")[0]
+
+# Get XBRL data
+xbrl = filing.xbrl()
+
+# Access financial statements
+income_stmt = xbrl.statements.income_statement
+balance_sheet = xbrl.statements.balance_sheet
+cash_flow = xbrl.statements.cashflow_statement
+
+# Query specific facts
+facts = xbrl.facts
+revenue_facts = facts.get_facts_by_concept("Revenues")
+```
+
+## Feature Overview
+
+| Feature | Description |
+|---------|-------------|
+| **Company Data** | Look up any public company by ticker or CIK |
+| **Filing Access** | Search and filter SEC filings by form type, date, company |
+| **Financial Statements** | Parsed income statement, balance sheet, cash flow |
+| **XBRL Data** | Structured access to all XBRL facts and dimensions |
+| **Insider Trading** | Parse Forms 3, 4, 5 for ownership transactions |
+| **Fund Holdings** | 13F institutional holdings reports |
+| **Document Extraction** | Extract text and exhibits from filings |
+| **Local Caching** | Intelligent caching reduces API calls |
+| **Rate Limiting** | Automatic compliance with SEC limits |
 
 ## Getting Started
 
-Ready to experience the difference? Here's how to get started:
+Install and try it:
 
-1. **[Install EdgarTools](installation.md)** - 2 minutes
-2. **[Quick Tutorial](quickstart.md)** - 5 minutes  
-3. **[Real Analysis](tutorials/company-analysis.md)** - 15 minutes
+```bash
+pip install edgartools
+```
 
-Or jump straight into a specific use case:
+```python
+from edgar import Company, set_identity
 
-- **[Financial Statement Analysis](guides/extract-statements.md)**
-- **[Insider Trading Monitoring](guides/track-form4.md)**
-- **[Fund Holdings Research](guides/analyze-13f.md)**
-- **[Bulk Data Processing](guides/bulk-processing.md)**
+# SEC requires identification
+set_identity("Your Name your.email@example.com")
 
-## Community & Support
+# Start exploring
+company = Company("AAPL")
+print(company)
+```
 
-- **Active development**: Regular releases with new features
-- **Responsive support**: GitHub issues typically resolved within 24 hours
-- **Growing community**: 1000+ users, contributors from finance and tech
-- **Enterprise support**: Available for institutional users
+**Next steps:**
+
+- [Installation Guide](installation.md) - Setup instructions
+- [Quick Start](quickstart.md) - Your first 5 minutes
+- [Financial Statement Analysis](guides/extract-statements.md) - Work with financials
+- [Insider Trading](guides/track-form4.md) - Monitor Form 4 filings
+
+## Open Source
+
+EdgarTools is free and open source under the MIT license. Contributions welcome on [GitHub](https://github.com/dgunning/edgartools).
 
 ---
 
-**Stop fighting with SEC data. Start analyzing.**
-
-[Get started with EdgarTools →](installation.md)
+[Get started with EdgarTools](installation.md)
