@@ -40,6 +40,9 @@
 
 ## Why EdgarTools?
 
+[![Run in Smithery](https://smithery.ai/badge/skills/dgunning)](https://smithery.ai/skills?ns=dgunning&utm_source=github&utm_medium=badge)
+
+
 EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR data extraction. Built for financial analysts, data scientists, and AI developers who need reliable, production-ready access to SEC filings.
 
 <table align="center">
