@@ -1,0 +1,39 @@
+<svg width="1000" height="60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradientComm" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2a3f54;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#3d5875;stop-opacity:0.95" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="60" rx="6" fill="url(#bgGradientComm)"/>
+  <rect width="1000" height="1" rx="6" fill="#FFD700" opacity="0.15"/>
+
+  <!-- Hexagonal icon (connected people) -->
+  <g transform="translate(30, 15)">
+    <polygon points="15,5 27,12 27,26 15,33 3,26 3,12"
+             fill="none" stroke="#FFD700" stroke-width="2"/>
+    <!-- People nodes -->
+    <circle cx="9" cy="16" r="2" fill="#FFD700"/>
+    <circle cx="15" cy="13" r="2" fill="#FFD700"/>
+    <circle cx="21" cy="16" r="2" fill="#FFD700"/>
+    <circle cx="12" cy="22" r="2" fill="#FFD700"/>
+    <circle cx="18" cy="22" r="2" fill="#FFD700"/>
+    <!-- Connections -->
+    <g stroke="#FFD700" stroke-width="1" opacity="0.5">
+      <line x1="9" y1="16" x2="15" y2="13"/>
+      <line x1="15" y1="13" x2="21" y2="16"/>
+      <line x1="9" y1="16" x2="12" y2="22"/>
+      <line x1="21" y1="16" x2="18" y2="22"/>
+      <line x1="12" y1="22" x2="18" y2="22"/>
+    </g>
+  </g>
+
+  <!-- Text with subtle outline -->
+  <text x="80" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
+        font-size="24" font-weight="700" fill="#FFD700" letter-spacing="1"
+        stroke="#1a2732" stroke-width="1" paint-order="stroke fill">
+    COMMUNITY &amp; SUPPORT
+  </text>
+</svg>

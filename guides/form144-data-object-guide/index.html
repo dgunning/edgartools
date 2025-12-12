@@ -1,0 +1,3855 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Access and analyze SEC filings, financial statements, insider trading, and investment fund data">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Form144 Data Object Guide - EdgarTools - Python Library for SEC Data Analysis</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#form144-data-object-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-header__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            EdgarTools - Python Library for SEC Data Analysis
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Form144 Data Object Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../working-with-filing/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  How to Guides
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-xbrl/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  XBRL and Financials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../data-objects/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Data Objects
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/sec-filings/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/company/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../ai-integration/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  AI Integration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../resources/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Resources
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="EdgarTools - Python Library for SEC Data Analysis" class="md-nav__button md-logo" aria-label="EdgarTools - Python Library for SEC Data Analysis" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    EdgarTools - Python Library for SEC Data Analysis
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../why-edgartools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why EdgarTools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Filings
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../working-with-filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../searching-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search for Specific Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filtering-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filter Filings by Date/Type
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../filing-attachments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Access Filing Attachments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../current-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Finding the most recent filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Companies
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Companies
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../finding-companies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with a company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-facts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting company facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-year-financial-data-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Creating a Multi Year Financials Data Api
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../company-insiders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting a list of company insiders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../company-subsets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting subsets of companies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Financial Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extract-statements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extract Financial Statements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Ranking Search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../local-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Local Data Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloud-storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using Cloud Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ssl_verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSL Issues and Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sgml/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsing SGML
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL and Financials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XBRL and Financials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting XBRL from Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../xbrl-querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying XBRL Facts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xbrl-footnotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting footnotes from XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../insider-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Insider Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13f-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ThirteenF Holding Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/sec-filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding SEC Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/data-objects/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understanding Data Objects
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Objects
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Objects
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/company/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Company
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/filings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Filings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/xbrl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XBRL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Resources
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues & Solutions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/sec-compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SEC Rate Limits & Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#seller-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seller Information
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Seller Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#address-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Address Object
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issuer-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issuer Information
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#securities-information-proposed-sale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securities Information (Proposed Sale)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Securities Information (Proposed Sale)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-access-properties-single-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Access Properties (Single Security)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-properties-multi-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation Properties (Multi-Security)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#securities-information-holder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securities Information Holder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#securities-information-dataframe-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securities Information DataFrame Columns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#securities-to-be-sold-acquisition-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securities To Be Sold (Acquisition History)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Securities To Be Sold (Acquisition History)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#securities-to-be-sold-dataframe-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securities To Be Sold DataFrame Columns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#securities-sold-past-3-months" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securities Sold Past 3 Months
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Securities Sold Past 3 Months">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#securities-sold-past-3-months-dataframe-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Securities Sold Past 3 Months DataFrame Columns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyst-metrics-computed-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyst Metrics (Computed Properties)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analyst Metrics (Computed Properties)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#percentage-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Percentage Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#holding-period-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Holding Period Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10b5-1-plan-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10b5-1 Plan Compliance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anomaly-detection-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anomaly Detection Flags
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notice-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notice Signature
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remarks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_summary()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to_analyst_summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        to_analyst_summary()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to_dataframe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        to_dataframe()
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#view-design-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Design Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="View Design Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-view-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Primary View Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-priority-for-display" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Priority for Display
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visual-indicators-suggested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visual Indicators (Suggested)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anomaly-flags-color-coding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anomaly Flags Color Coding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-data-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Data Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes-for-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes for Implementation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="form144-data-object-guide">Form144 Data Object Guide</h1>
+<p>Form 144 is a notice of proposed sale of restricted securities under SEC Rule 144. Filed by company insiders (officers, directors, 10%+ shareholders) before selling restricted or control securities. This guide details all data available from the <code>Form144</code> class for building views.</p>
+<hr />
+<h2 id="overview">Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Class Name</td>
+<td><code>Form144</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Forms Handled</td>
+<td><code>144</code>, <code>144/A</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Module</td>
+<td><code>edgar.form144</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Source Data</td>
+<td>XML document</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="basic-metadata">Basic Metadata</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filing_date</code></td>
+<td><code>str</code></td>
+<td>Date filed with SEC</td>
+<td><code>"2023-04-18"</code></td>
+</tr>
+<tr>
+<td><code>is_amendment</code></td>
+<td><code>bool</code></td>
+<td>Whether this is a 144/A amendment</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="seller-information">Seller Information</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>person_selling</code></td>
+<td><code>str</code></td>
+<td>Name of person selling</td>
+<td><code>"John Smith"</code></td>
+</tr>
+<tr>
+<td><code>relationships</code></td>
+<td><code>List[str]</code></td>
+<td>Relationship(s) to issuer</td>
+<td><code>["Director", "Officer"]</code></td>
+</tr>
+<tr>
+<td><code>address</code></td>
+<td><code>Address</code></td>
+<td>Seller's address</td>
+<td>See Address object</td>
+</tr>
+<tr>
+<td><code>filer</code></td>
+<td><code>Filer</code></td>
+<td>SEC filer credentials</td>
+<td>CIK, entity name, file number</td>
+</tr>
+<tr>
+<td><code>contact</code></td>
+<td><code>Contact</code></td>
+<td>Contact information</td>
+<td>Name, phone, email</td>
+</tr>
+</tbody>
+</table>
+<h3 id="address-object">Address Object</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>street1</code></td>
+<td><code>str</code></td>
+<td>Street line 1</td>
+</tr>
+<tr>
+<td><code>street2</code></td>
+<td><code>str</code></td>
+<td>Street line 2</td>
+</tr>
+<tr>
+<td><code>city</code></td>
+<td><code>str</code></td>
+<td>City</td>
+</tr>
+<tr>
+<td><code>state_or_country</code></td>
+<td><code>str</code></td>
+<td>State/country code</td>
+</tr>
+<tr>
+<td><code>zipcode</code></td>
+<td><code>str</code></td>
+<td>ZIP code</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="issuer-information">Issuer Information</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>issuer_name</code></td>
+<td><code>str</code></td>
+<td>Company name</td>
+<td><code>"Owens Corning"</code></td>
+</tr>
+<tr>
+<td><code>issuer_cik</code></td>
+<td><code>str</code></td>
+<td>Company CIK</td>
+<td><code>"1370946"</code></td>
+</tr>
+<tr>
+<td><code>sec_file_number</code></td>
+<td><code>str</code></td>
+<td>SEC file number</td>
+<td><code>"001-36390"</code></td>
+</tr>
+<tr>
+<td><code>issuer_contact_phone</code></td>
+<td><code>str</code></td>
+<td>Issuer contact phone</td>
+<td><code>"419-248-8000"</code></td>
+</tr>
+<tr>
+<td><code>company</code></td>
+<td><code>Company</code></td>
+<td>Full Company object</td>
+<td>Lazy-loaded from CIK</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="securities-information-proposed-sale">Securities Information (Proposed Sale)</h2>
+<p>The core data about the securities to be sold.</p>
+<h3 id="quick-access-properties-single-security">Quick Access Properties (Single Security)</h3>
+<p>For filings with one security type (most common):</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>units_to_be_sold</code></td>
+<td><code>int</code></td>
+<td>Total shares to sell</td>
+<td><code>3000</code></td>
+</tr>
+<tr>
+<td><code>market_value</code></td>
+<td><code>float</code></td>
+<td>Total market value</td>
+<td><code>300000.0</code></td>
+</tr>
+<tr>
+<td><code>security_class</code></td>
+<td><code>str</code></td>
+<td>Security type</td>
+<td><code>"Common"</code></td>
+</tr>
+<tr>
+<td><code>approx_sale_date</code></td>
+<td><code>str</code></td>
+<td>Approximate sale date</td>
+<td><code>"04/18/2023"</code></td>
+</tr>
+<tr>
+<td><code>exchange_name</code></td>
+<td><code>str</code></td>
+<td>Exchange for sale</td>
+<td><code>"NYSE"</code></td>
+</tr>
+<tr>
+<td><code>broker_name</code></td>
+<td><code>str</code></td>
+<td>Broker executing sale</td>
+<td><code>"Fidelity Brokerage Services LLC"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="aggregation-properties-multi-security">Aggregation Properties (Multi-Security)</h3>
+<p>For filings with multiple security types:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>total_units_to_be_sold</code></td>
+<td><code>int</code></td>
+<td>Sum across all securities</td>
+</tr>
+<tr>
+<td><code>total_market_value</code></td>
+<td><code>float</code></td>
+<td>Sum across all securities</td>
+</tr>
+<tr>
+<td><code>num_securities</code></td>
+<td><code>int</code></td>
+<td>Count of security types</td>
+</tr>
+<tr>
+<td><code>is_multi_security</code></td>
+<td><code>bool</code></td>
+<td>Whether multiple security types</td>
+</tr>
+</tbody>
+</table>
+<h3 id="securities-information-holder">Securities Information Holder</h3>
+<p>Access the full DataFrame via <code>securities_info</code>:</p>
+<pre><code class="language-python">form144 = filing.obj()
+
+# Holder object with aggregation methods
+holder = form144.securities_info
+
+# Properties
+holder.empty                    # bool - is data empty?
+holder.total_units_to_be_sold   # int - sum of all units
+holder.total_market_value       # float - sum of market values
+holder.security_classes         # List[str] - all security types
+holder.exchanges                # List[str] - unique exchanges
+holder.brokers                  # List[str] - unique brokers
+holder.percent_of_outstanding   # float - % of outstanding shares
+holder.avg_price_per_unit       # float - market_value / units
+
+# Iteration
+for row in holder:
+    print(row.security_class, row.units_to_be_sold)
+
+# Raw DataFrame
+df = form144.securities_information  # pd.DataFrame
+</code></pre>
+<h3 id="securities-information-dataframe-columns">Securities Information DataFrame Columns</h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>security_class</code></td>
+<td><code>str</code></td>
+<td>Security type (Common, Preferred, etc.)</td>
+</tr>
+<tr>
+<td><code>units_to_be_sold</code></td>
+<td><code>int</code></td>
+<td>Number of units</td>
+</tr>
+<tr>
+<td><code>market_value</code></td>
+<td><code>float</code></td>
+<td>Aggregate market value</td>
+</tr>
+<tr>
+<td><code>units_outstanding</code></td>
+<td><code>int</code></td>
+<td>Total outstanding shares</td>
+</tr>
+<tr>
+<td><code>approx_sale_date</code></td>
+<td><code>str</code></td>
+<td>Expected sale date (MM/DD/YYYY)</td>
+</tr>
+<tr>
+<td><code>exchange_name</code></td>
+<td><code>str</code></td>
+<td>Exchange code (NYSE, NASDAQ, etc.)</td>
+</tr>
+<tr>
+<td><code>broker_name</code></td>
+<td><code>str</code></td>
+<td>Broker/market maker name</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="securities-to-be-sold-acquisition-history">Securities To Be Sold (Acquisition History)</h2>
+<p>Details about how/when the seller acquired the securities.</p>
+<h3 id="access">Access</h3>
+<pre><code class="language-python"># Holder with aggregation
+holder = form144.securities_selling
+
+holder.empty                  # bool
+holder.total_amount_acquired  # int - sum of all acquired
+holder.acquisition_dates      # List[str] - unique dates
+holder.has_gift_transactions  # bool - any gifts?
+
+# Iteration
+for row in holder:
+    print(row.acquired_date, row.amount_acquired)
+
+# Raw DataFrame
+df = form144.securities_to_be_sold
+</code></pre>
+<h3 id="securities-to-be-sold-dataframe-columns">Securities To Be Sold DataFrame Columns</h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>security_class</code></td>
+<td><code>str</code></td>
+<td>Security type</td>
+</tr>
+<tr>
+<td><code>acquired_date</code></td>
+<td><code>str</code></td>
+<td>Date acquired (MM/DD/YYYY)</td>
+</tr>
+<tr>
+<td><code>amount_acquired</code></td>
+<td><code>int</code></td>
+<td>Shares acquired</td>
+</tr>
+<tr>
+<td><code>nature_of_acquisition</code></td>
+<td><code>str</code></td>
+<td>How acquired (e.g., "Employee Stock Award")</td>
+</tr>
+<tr>
+<td><code>acquired_from</code></td>
+<td><code>str</code></td>
+<td>Person/entity acquired from</td>
+</tr>
+<tr>
+<td><code>is_gift</code></td>
+<td><code>str</code></td>
+<td>Gift transaction? ("Y"/"N")</td>
+</tr>
+<tr>
+<td><code>donar_acquired_date</code></td>
+<td><code>str</code></td>
+<td>If gift, when donor acquired</td>
+</tr>
+<tr>
+<td><code>payment_date</code></td>
+<td><code>str</code></td>
+<td>Date payment made</td>
+</tr>
+<tr>
+<td><code>nature_of_payment</code></td>
+<td><code>str</code></td>
+<td>Payment type (e.g., "CASH")</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="securities-sold-past-3-months">Securities Sold Past 3 Months</h2>
+<p>Prior sales within the last 90 days (SEC Rule 144 volume limits).</p>
+<h3 id="access_1">Access</h3>
+<pre><code class="language-python"># Holder with aggregation
+holder = form144.recent_sales
+
+holder.empty                 # bool
+holder.total_amount_sold     # int - sum of amounts
+holder.total_gross_proceeds  # float - sum of proceeds
+holder.sellers               # List[str] - unique seller names
+
+# Iteration
+for row in holder:
+    print(row.sale_date, row.amount_sold, row.gross_proceeds)
+
+# Raw DataFrame
+df = form144.securities_sold_past_3_months
+
+# Flag for no activity
+form144.nothing_to_report    # bool - no sales in past 3 months
+</code></pre>
+<h3 id="aggregation-properties">Aggregation Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>total_amount_sold_past_3_months</code></td>
+<td><code>int</code></td>
+<td>Total shares sold recently</td>
+</tr>
+<tr>
+<td><code>total_gross_proceeds_past_3_months</code></td>
+<td><code>float</code></td>
+<td>Total proceeds</td>
+</tr>
+</tbody>
+</table>
+<h3 id="securities-sold-past-3-months-dataframe-columns">Securities Sold Past 3 Months DataFrame Columns</h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>security_class</code></td>
+<td><code>str</code></td>
+<td>Security type</td>
+</tr>
+<tr>
+<td><code>seller_name</code></td>
+<td><code>str</code></td>
+<td>Seller name</td>
+</tr>
+<tr>
+<td><code>sale_date</code></td>
+<td><code>str</code></td>
+<td>Date of sale (MM/DD/YYYY)</td>
+</tr>
+<tr>
+<td><code>amount_sold</code></td>
+<td><code>int</code></td>
+<td>Shares sold</td>
+</tr>
+<tr>
+<td><code>gross_proceeds</code></td>
+<td><code>float</code></td>
+<td>Sale proceeds</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="analyst-metrics-computed-properties">Analyst Metrics (Computed Properties)</h2>
+<p>Pre-computed metrics for investment analysis:</p>
+<h3 id="percentage-metrics">Percentage Metrics</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>percent_of_holdings</code></td>
+<td><code>float</code></td>
+<td>% of outstanding shares being sold</td>
+</tr>
+<tr>
+<td><code>avg_price_per_unit</code></td>
+<td><code>float</code></td>
+<td>Market value / units to sell</td>
+</tr>
+</tbody>
+</table>
+<h3 id="holding-period-analysis">Holding Period Analysis</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>holding_period_days</code></td>
+<td><code>int</code> or <code>None</code></td>
+<td>Avg days held before sale</td>
+</tr>
+<tr>
+<td><code>holding_period_years</code></td>
+<td><code>float</code> or <code>None</code></td>
+<td>Avg years held</td>
+</tr>
+</tbody>
+</table>
+<h3 id="10b5-1-plan-compliance">10b5-1 Plan Compliance</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>is_10b5_1_plan</code></td>
+<td><code>bool</code></td>
+<td>Sale under 10b5-1 trading plan</td>
+</tr>
+<tr>
+<td><code>days_since_plan_adoption</code></td>
+<td><code>int</code> or <code>None</code></td>
+<td>Days from plan adoption to sale</td>
+</tr>
+<tr>
+<td><code>cooling_off_compliant</code></td>
+<td><code>bool</code> or <code>None</code></td>
+<td>90-day cooling off observed (post-2022 rule)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="anomaly-detection-flags">Anomaly Detection Flags</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>is_large_liquidation</code></td>
+<td><code>bool</code></td>
+<td>Selling &gt;5% of outstanding</td>
+</tr>
+<tr>
+<td><code>is_short_hold</code></td>
+<td><code>bool</code></td>
+<td>Holding period &lt;1 year</td>
+</tr>
+<tr>
+<td><code>has_multiple_plans</code></td>
+<td><code>bool</code></td>
+<td>Multiple 10b5-1 plan dates</td>
+</tr>
+<tr>
+<td><code>anomaly_flags</code></td>
+<td><code>List[str]</code></td>
+<td>All triggered flags</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Possible Anomaly Flags:</strong>
+- <code>LARGE_LIQUIDATION</code> - Selling &gt;5% of outstanding shares
+- <code>SHORT_HOLD</code> - Held &lt;1 year before selling
+- <code>COOLING_OFF_VIOLATION</code> - &lt;90 days since 10b5-1 plan adoption
+- <code>MULTIPLE_PLANS</code> - Multiple 10b5-1 plan adoption dates</p>
+<hr />
+<h2 id="notice-signature">Notice Signature</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notice_signature.notice_date</code></td>
+<td><code>str</code></td>
+<td>Date notice signed</td>
+</tr>
+<tr>
+<td><code>notice_signature.signature</code></td>
+<td><code>str</code></td>
+<td>Signature text</td>
+</tr>
+<tr>
+<td><code>notice_signature.plan_adoption_dates</code></td>
+<td><code>List[str]</code></td>
+<td>10b5-1 plan dates</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="remarks">Remarks</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>remarks</code></td>
+<td><code>str</code></td>
+<td>Additional remarks from filer</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="summary-methods">Summary Methods</h2>
+<h3 id="get_summary">get_summary()</h3>
+<p>Returns dict with key filing info:</p>
+<pre><code class="language-python">summary = form144.get_summary()
+# Returns:
+{
+    'person_selling': str,
+    'issuer': str,
+    'issuer_cik': str,
+    'relationships': List[str],
+    'num_securities': int,
+    'total_units_to_be_sold': int,
+    'total_market_value': float,
+    'security_classes': List[str],
+    'exchanges': List[str],
+    'nothing_to_report_past_3_months': bool,
+    'total_sold_past_3_months': int,
+    'is_amendment': bool,
+    'filing_date': str,
+}
+</code></pre>
+<h3 id="to_analyst_summary">to_analyst_summary()</h3>
+<p>Returns dict optimized for investment screening:</p>
+<pre><code class="language-python">summary = form144.to_analyst_summary()
+# Returns:
+{
+    # Identity
+    'person_selling': str,
+    'issuer': str,
+    'issuer_cik': str,
+    'relationships': List[str],
+    'filing_date': str,
+
+    # Sale metrics
+    'units_to_sell': int,
+    'market_value': float,
+    'percent_of_holdings': float,
+    'avg_price_per_unit': float,
+
+    # Timing
+    'sale_date': str,
+    'holding_period_years': float or None,
+
+    # 10b5-1 Plan
+    'is_10b5_1_plan': bool,
+    'days_since_plan_adoption': int or None,
+    'cooling_off_compliant': bool or None,
+
+    # Recent activity
+    'sold_past_3_months': int,
+    'proceeds_past_3_months': float,
+
+    # Flags
+    'anomaly_flags': List[str],
+
+    # Metadata
+    'is_amendment': bool,
+    'exchange': str,
+    'broker': str,
+}
+</code></pre>
+<h3 id="to_dataframe">to_dataframe()</h3>
+<p>Returns DataFrame with one row per security:</p>
+<pre><code class="language-python">df = form144.to_dataframe()
+# Columns: security_class, units_to_be_sold, market_value, units_outstanding,
+#          approx_sale_date, exchange_name, broker_name, person_selling,
+#          issuer, issuer_cik, filing_date, is_amendment
+</code></pre>
+<hr />
+<h2 id="view-design-recommendations">View Design Recommendations</h2>
+<h3 id="primary-view-components">Primary View Components</h3>
+<ol>
+<li><strong>Header Section</strong></li>
+<li>Issuer name + CIK</li>
+<li>Form type (144 or 144/A amendment)</li>
+<li>Filing date</li>
+<li>
+<p>Amendment indicator if applicable</p>
+</li>
+<li>
+<p><strong>Seller Panel</strong></p>
+</li>
+<li>Person selling (prominent)</li>
+<li>Relationship(s) to issuer (badges/tags)</li>
+<li>
+<p>Contact info (collapsible)</p>
+</li>
+<li>
+<p><strong>Sale Summary Card</strong></p>
+</li>
+<li>Units to be sold (large, highlighted)</li>
+<li>Market value</li>
+<li>% of holdings</li>
+<li>Avg price per unit</li>
+<li>Approximate sale date</li>
+<li>
+<p>Exchange / Broker</p>
+</li>
+<li>
+<p><strong>Compliance Panel</strong></p>
+</li>
+<li>10b5-1 Plan: Yes/No indicator</li>
+<li>Days since plan adoption</li>
+<li>Cooling off status (green checkmark or red warning)</li>
+<li>
+<p>Anomaly flags (warning badges)</p>
+</li>
+<li>
+<p><strong>Securities Information Table</strong></p>
+</li>
+<li>Security class, units, market value, sale date</li>
+<li>
+<p>Exchange, broker for each</p>
+</li>
+<li>
+<p><strong>Acquisition History Table</strong> (collapsible)</p>
+</li>
+<li>How/when securities were acquired</li>
+<li>
+<p>Gift transaction indicators</p>
+</li>
+<li>
+<p><strong>Recent Sales Table</strong> (collapsible)</p>
+</li>
+<li>Past 3 months activity</li>
+<li>
+<p>Or "Nothing to report" message</p>
+</li>
+<li>
+<p><strong>Signature Footer</strong></p>
+</li>
+<li>Notice date</li>
+<li>Signature</li>
+<li>Plan adoption dates</li>
+</ol>
+<h3 id="data-priority-for-display">Data Priority for Display</h3>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Data</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>High</td>
+<td>Person selling + relationships</td>
+<td>Who is selling</td>
+</tr>
+<tr>
+<td>High</td>
+<td>Units, market value, % holdings</td>
+<td>Sale magnitude</td>
+</tr>
+<tr>
+<td>High</td>
+<td>Anomaly flags</td>
+<td>Risk indicators</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>10b5-1 compliance</td>
+<td>Regulatory context</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>Sale date, exchange, broker</td>
+<td>Transaction details</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>Recent sales (past 3 months)</td>
+<td>Volume limit context</td>
+</tr>
+<tr>
+<td>Low</td>
+<td>Acquisition history</td>
+<td>Background detail</td>
+</tr>
+<tr>
+<td>Low</td>
+<td>Full address, contact</td>
+<td>Administrative</td>
+</tr>
+</tbody>
+</table>
+<h3 id="visual-indicators-suggested">Visual Indicators (Suggested)</h3>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Visual Treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>is_amendment</code></td>
+<td>Yellow "Amendment" badge</td>
+</tr>
+<tr>
+<td><code>is_large_liquidation</code></td>
+<td>Red warning icon</td>
+</tr>
+<tr>
+<td><code>is_short_hold</code></td>
+<td>Orange warning icon</td>
+</tr>
+<tr>
+<td><code>cooling_off_compliant == False</code></td>
+<td>Red "Violation" badge</td>
+</tr>
+<tr>
+<td><code>is_10b5_1_plan</code></td>
+<td>Blue "10b5-1" badge</td>
+</tr>
+<tr>
+<td>Large <code>market_value</code> (&gt;$1M)</td>
+<td>Emphasized styling</td>
+</tr>
+</tbody>
+</table>
+<h3 id="anomaly-flags-color-coding">Anomaly Flags Color Coding</h3>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Color</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LARGE_LIQUIDATION</code></td>
+<td>Red</td>
+<td>&gt;5% of company being sold</td>
+</tr>
+<tr>
+<td><code>SHORT_HOLD</code></td>
+<td>Orange</td>
+<td>Held less than 1 year</td>
+</tr>
+<tr>
+<td><code>COOLING_OFF_VIOLATION</code></td>
+<td>Red</td>
+<td>10b5-1 rule violation</td>
+</tr>
+<tr>
+<td><code>MULTIPLE_PLANS</code></td>
+<td>Yellow</td>
+<td>Unusual plan activity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="example-data-structure">Example Data Structure</h2>
+<pre><code class="language-python">{
+    # Identity
+    &quot;person_selling&quot;: &quot;Brian O. Chambers&quot;,
+    &quot;issuer_name&quot;: &quot;Owens Corning&quot;,
+    &quot;issuer_cik&quot;: &quot;1370946&quot;,
+    &quot;relationships&quot;: [&quot;Officer&quot;],
+    &quot;filing_date&quot;: &quot;2023-04-18&quot;,
+    &quot;is_amendment&quot;: False,
+
+    # Sale summary
+    &quot;units_to_be_sold&quot;: 3000,
+    &quot;market_value&quot;: 300000.0,
+    &quot;percent_of_holdings&quot;: 0.0028,
+    &quot;avg_price_per_unit&quot;: 100.0,
+    &quot;security_class&quot;: &quot;Common&quot;,
+    &quot;approx_sale_date&quot;: &quot;04/18/2023&quot;,
+    &quot;exchange_name&quot;: &quot;NYSE&quot;,
+    &quot;broker_name&quot;: &quot;Fidelity Brokerage Services LLC&quot;,
+
+    # Compliance
+    &quot;is_10b5_1_plan&quot;: True,
+    &quot;days_since_plan_adoption&quot;: 120,
+    &quot;cooling_off_compliant&quot;: True,
+    &quot;holding_period_years&quot;: 2.5,
+
+    # Flags
+    &quot;anomaly_flags&quot;: [],
+
+    # Recent activity
+    &quot;nothing_to_report&quot;: True,
+    &quot;total_sold_past_3_months&quot;: 0,
+    &quot;total_proceeds_past_3_months&quot;: 0.0,
+
+    # Securities info (array)
+    &quot;securities_information&quot;: [
+        {
+            &quot;security_class&quot;: &quot;Common&quot;,
+            &quot;units_to_be_sold&quot;: 3000,
+            &quot;market_value&quot;: 300000.0,
+            &quot;units_outstanding&quot;: 107000000,
+            &quot;approx_sale_date&quot;: &quot;04/18/2023&quot;,
+            &quot;exchange_name&quot;: &quot;NYSE&quot;,
+            &quot;broker_name&quot;: &quot;Fidelity Brokerage Services LLC&quot;
+        }
+    ],
+
+    # Acquisition history (array)
+    &quot;securities_to_be_sold&quot;: [
+        {
+            &quot;security_class&quot;: &quot;Common&quot;,
+            &quot;acquired_date&quot;: &quot;03/15/2021&quot;,
+            &quot;amount_acquired&quot;: 500,
+            &quot;nature_of_acquisition&quot;: &quot;Employee Stock Award&quot;,
+            &quot;acquired_from&quot;: &quot;Issuer&quot;,
+            &quot;is_gift&quot;: &quot;N&quot;
+        }
+        // ... more entries
+    ],
+
+    # Signature
+    &quot;notice_date&quot;: &quot;04/17/2023&quot;,
+    &quot;signature&quot;: &quot;/s/ Brian O. Chambers&quot;,
+    &quot;plan_adoption_dates&quot;: [&quot;01/15/2023&quot;]
+}
+</code></pre>
+<hr />
+<h2 id="notes-for-implementation">Notes for Implementation</h2>
+<ol>
+<li>
+<p><strong>XML-Only</strong>: Form 144 data comes exclusively from XML. Filings before ~2015 may not have XML and will return <code>None</code> from <code>filing.obj()</code>.</p>
+</li>
+<li>
+<p><strong>Multiple Securities</strong>: Some filings contain multiple security types. Always use aggregation properties (<code>total_*</code>) or iterate through <code>securities_info</code>.</p>
+</li>
+<li>
+<p><strong>Placeholder Dates</strong>: SEC forms use <code>01/01/1933</code> as placeholder dates. The class filters these out in computed metrics.</p>
+</li>
+<li>
+<p><strong>Holding Period</strong>: Calculated from acquisition dates to sale date. Returns <code>None</code> if dates are invalid or missing.</p>
+</li>
+<li>
+<p><strong>Cooling Off Rule</strong>: The 90-day requirement took effect in 2022. Earlier filings may show "violations" that weren't violations at the time.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.indexes", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>
