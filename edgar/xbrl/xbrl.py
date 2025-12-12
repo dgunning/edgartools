@@ -123,6 +123,11 @@ class XBRL:
         self._statement_by_role_name = {}
         self._all_statements_cached = None
 
+        # SGML period_of_report for date discrepancy detection
+        self._sgml_period_of_report: Optional[str] = None
+        self._validated_period_of_report_cache: Optional[str] = None
+        self._period_of_report_warning_logged: bool = False
+
     def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
         """
         Determine if a statement should display dimensioned line items.
@@ -246,10 +251,103 @@ class XBRL:
 
     @property
     def period_of_report(self) -> Optional[str]:
+        """Get the document period end date, with discrepancy detection."""
+        return self._get_validated_period_of_report()
+
+    def _get_xbrl_period_of_report(self) -> Optional[str]:
+        """Get the raw XBRL document_period_end_date without validation."""
         if 'document_period_end_date' in self.entity_info:
             period = self.entity_info['document_period_end_date']
             return period.strftime('%Y-%m-%d') if isinstance(period, datetime.date) else period
         return None
+
+    def _get_validated_period_of_report(self) -> Optional[str]:
+        """
+        Get period_of_report with discrepancy detection and correction.
+
+        When XBRL and SGML header dates differ, uses heuristics to choose
+        the correct date by examining which year has actual annual data.
+        Results are cached to avoid repeated computation and warning spam.
+        """
+        # Return cached result if available
+        if self._validated_period_of_report_cache is not None:
+            return self._validated_period_of_report_cache
+
+        xbrl_date = self._get_xbrl_period_of_report()
+        sgml_date = self._sgml_period_of_report
+
+        # If no SGML date or dates match, return XBRL date
+        if not sgml_date or xbrl_date == sgml_date:
+            self._validated_period_of_report_cache = xbrl_date
+            return xbrl_date
+
+        # Dates differ - apply heuristics
+        log.debug(f"Date discrepancy: XBRL={xbrl_date}, SGML={sgml_date}")
+
+        # Find annual periods in actual data
+        annual_periods = self._find_annual_periods()
+
+        if not annual_periods:
+            # No annual periods found, fall back to XBRL date
+            self._validated_period_of_report_cache = xbrl_date
+            return xbrl_date
+
+        # Extract years from both dates
+        xbrl_year = int(xbrl_date[:4]) if xbrl_date else None
+        sgml_year = int(sgml_date[:4]) if sgml_date else None
+
+        # Check if any annual period ends in the SGML year
+        sgml_year_has_annual = False
+
+        for period in annual_periods:
+            end_date = period.get('end_date', '')
+            if end_date:
+                period_year = int(end_date[:4])
+                if period_year == sgml_year:
+                    sgml_year_has_annual = True
+                    break
+
+        # Decision logic:
+        # The SGML header is authoritative. If SGML year has annual data present,
+        # prefer SGML date over potentially incorrect XBRL DocumentPeriodEndDate.
+        if sgml_year_has_annual:
+            if not self._period_of_report_warning_logged:
+                log.warning(
+                    f"Correcting document_period_end_date: XBRL has {xbrl_date}, "
+                    f"but SGML header indicates {sgml_date} and data contains {sgml_year} annual period. "
+                    f"Using SGML date: {sgml_date}"
+                )
+                self._period_of_report_warning_logged = True
+            self._validated_period_of_report_cache = sgml_date
+            return sgml_date
+
+        # Fall back to XBRL date
+        self._validated_period_of_report_cache = xbrl_date
+        return xbrl_date
+
+    def _find_annual_periods(self) -> List[Dict]:
+        """
+        Find periods that are 300-370 days (annual periods).
+
+        Returns:
+            List of period dicts with annual duration
+        """
+        annual = []
+        for period in self.reporting_periods:
+            period_key = period.get('key', '')
+            if 'duration' in period_key:
+                start = period.get('start_date')
+                end = period.get('end_date')
+                if start and end:
+                    try:
+                        start_dt = datetime.datetime.strptime(start, '%Y-%m-%d')
+                        end_dt = datetime.datetime.strptime(end, '%Y-%m-%d')
+                        days = (end_dt - start_dt).days
+                        if 300 <= days <= 370:
+                            annual.append(period)
+                    except (ValueError, TypeError):
+                        pass
+        return annual
 
     @property
     def entity_name(self):
@@ -372,6 +470,12 @@ class XBRL:
 
         if xbrl_attachments.get('instance'):
             xbrl.parser.parse_instance_content(xbrl_attachments.get('instance').content)
+
+        # Capture SGML period_of_report for date discrepancy detection
+        try:
+            xbrl._sgml_period_of_report = filing.period_of_report
+        except Exception:
+            pass
 
         return xbrl
 

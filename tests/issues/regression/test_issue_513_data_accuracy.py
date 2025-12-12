@@ -1,15 +1,19 @@
 """
 Regression test for Issue #513: NFLX Missing Critical Data
 
-Tests two critical data accuracy bugs:
+Tests critical data accuracy bugs:
 1. 2012 10-K report missing fiscal year 2012 data (only showed 2011 and 2010)
 2. Revenue deduplication removing valid segment data that happened to have matching values
+3. XBRL vs SGML date discrepancy causing wrong fiscal year
 
 Root causes:
 1. Period selection logic allowed multi-year cumulative periods (e.g., "Jan 2007 to Dec 2012" - 2190 days)
    - Fix: Changed filter from `days > 300` to `300 < days <= 370` to exclude multi-year periods
 2. Deduplication logic grouped by (period, value) only, ignoring dimensional differences
    - Fix: Changed grouping to (period, value, dimensions) to preserve segment data
+3. XBRL DocumentPeriodEndDate (2011-12-31) was wrong, SGML header had correct date (2012-12-31)
+   - Fix: Added date discrepancy detection in XBRL.period_of_report to prefer SGML date when
+     there's a mismatch and SGML year has annual data in the filing
 """
 
 import pytest
@@ -19,31 +23,46 @@ import pytest
 class TestIssue513NFLX2012TenK:
     """Test that 2012 10-K shows fiscal year 2012 data"""
 
-    def test_2011_10k_correctly_excludes_future_2012_data(self, nflx_2012_10k_filing):
+    def test_date_discrepancy_corrected_to_2012(self, nflx_2012_10k_filing):
         """
-        The filing 0001065280-13-000008 is actually the fiscal 2011 10-K (period ending 2011-12-31),
-        NOT the fiscal 2012 10-K. It correctly excludes 2012 data as that would be from a future period.
+        The filing 0001065280-13-000008 has a date discrepancy:
+        - SGML header: 2012-12-31 (correct - this is the fiscal 2012 10-K)
+        - XBRL DocumentPeriodEndDate: 2011-12-31 (incorrect)
 
-        This test verifies the document date filter is working correctly to prevent future period bugs.
+        The date discrepancy detection should correct this to use the SGML date
+        since the filing contains 2012 annual period data.
         """
         xbrl = nflx_2012_10k_filing.xbrl()
 
-        # Verify this is the fiscal 2011 filing
-        assert xbrl.period_of_report == '2011-12-31', \
-            "This filing should be for fiscal year 2011, not 2012"
+        # Verify the raw XBRL date is wrong
+        assert xbrl._get_xbrl_period_of_report() == '2011-12-31', \
+            "Raw XBRL DocumentPeriodEndDate should be 2011-12-31 (the incorrect value)"
+
+        # Verify the SGML date was captured
+        assert xbrl._sgml_period_of_report == '2012-12-31', \
+            "SGML period_of_report should be 2012-12-31 (from filing header)"
+
+        # Verify the corrected period_of_report uses SGML date
+        assert xbrl.period_of_report == '2012-12-31', \
+            "period_of_report should be corrected to 2012-12-31 (SGML date)"
+
+    def test_2012_10k_includes_2012_fiscal_data(self, nflx_2012_10k_filing):
+        """
+        With the date discrepancy fix, this filing should now correctly show
+        fiscal year 2012 data as the primary year.
+        """
+        xbrl = nflx_2012_10k_filing.xbrl()
 
         statement = xbrl.statements.income_statement()
         df = statement.to_dataframe()
 
-        # Should include 2011 and 2010 data
-        assert '2011-12-31' in df.columns, \
-            "Should include 2011-12-31 (current fiscal year)"
-        assert '2010-12-31' in df.columns, \
-            "Should include 2010-12-31 (prior year comparison)"
+        # Should now include 2012 data (the current fiscal year for this filing)
+        assert '2012-12-31' in df.columns, \
+            "Should include 2012-12-31 (current fiscal year after fix)"
 
-        # Should NOT include 2012 data (future period)
-        assert '2012-12-31' not in df.columns, \
-            "Should NOT include 2012-12-31 (future fiscal year relative to this filing)"
+        # Should also include 2011 as prior year comparison
+        assert '2011-12-31' in df.columns, \
+            "Should include 2011-12-31 (prior year comparison)"
 
     def test_period_selection_excludes_multi_year_periods(self, nflx_2012_10k_filing):
         """Period selection should not select multi-year cumulative periods"""
