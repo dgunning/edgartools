@@ -5,6 +5,79 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2025-12-11
+
+### Added
+
+- **ProxyStatement Data Object for DEF 14A Filings** (#f9fc27f0)
+  - Added comprehensive support for Form DEF 14A (Proxy Statement) filings
+  - New `ProxyStatement` class accessible via `filing.obj()` for DEF 14A filings
+  - Full data model including meeting information, proposals, voting procedures, and executive compensation
+  - Rich display with formatted tables showing proxy details and proposal summaries
+  - Follows standard EdgarTools pattern for typed filing objects
+  - **Files**: `edgar/proxy/` module
+  - **Impact**: Enables structured access to proxy statement data for corporate governance analysis
+  - **Example**: `proxy = filing.obj()` for DEF 14A filings
+
+- **parent_abstract_concept Column in XBRL Facts** (#9b773ec2)
+  - Added `parent_abstract_concept` column to XBRL facts DataFrames
+  - Provides better understanding of financial statement hierarchy
+  - Distinguishes between metric parents (calculations) and abstract/section parents (presentation)
+  - Refines `parent_concept` to return only metric parents used in calculations
+  - **Files**: `edgar/xbrl/facts.py`, `edgar/xbrl/xbrl.py`
+  - **Impact**: Improved navigation and understanding of XBRL concept hierarchies
+  - **Example**: Filter facts by abstract parent to get all items in a section
+
+### Fixed
+
+- **XBRL Date Discrepancy Correction** (#513, de5b14ce)
+  - Fixed incorrect `DocumentPeriodEndDate` in XBRL instance documents
+  - Now uses SGML header `<PERIOD>` field as authoritative source for document period
+  - Corrects cases where XBRL instance has wrong date (e.g., Netflix 2012 10-K)
+  - Ensures consistent period end dates across filings
+  - **Files**: `edgar/xbrl/xbrl.py`
+  - **Impact**: Accurate period matching and financial statement date alignment
+  - **Example**: Netflix 2012 10-K now shows correct 2012-12-31 period instead of wrong 2013-12-31
+
+- **20-F Section Detection Enhancement** (#9acce02e)
+  - Improved section detection for Form 20-F (foreign issuer annual reports)
+  - Now checks for complete item headers before matching sections
+  - Reduces false positives in section identification
+  - **Files**: `edgar/documents/sections/`
+  - **Impact**: More accurate section extraction for international company filings
+
+- **TOC Section Text Extraction** (#fd269e01)
+  - Fixed handling of HTML comment nodes in table of contents section text extraction
+  - Prevents errors when processing documents with embedded HTML comments
+  - **Files**: `edgar/documents/toc/`
+  - **Impact**: Robust TOC parsing across diverse filing formats
+
+- **Notebooks Directory Structure** (#531, c9f0cf50)
+  - Restored Jupyter notebooks to root `notebooks/` directory
+  - Fixed organization of example notebooks
+  - **Files**: `notebooks/` directory structure
+  - **Impact**: Easier discovery and access to example notebooks
+
+### Changed
+
+- **Documentation Improvements**
+  - Rewrote `why-edgartools.md` with accurate code examples (76478112)
+  - Added AI Integration and Quick Reference to documentation navigation (62b516d5)
+  - Removed duplicate documentation files for cleaner structure (92570559, 5542b6eb)
+  - **Impact**: Better onboarding experience and clearer documentation
+
+### Summary
+
+Release 5.1.0 is a minor feature release that adds proxy statement support, enhances XBRL data quality, and improves foreign filing handling. Key highlights:
+
+- **ProxyStatement Support**: New data object for DEF 14A proxy filings with structured data access
+- **XBRL Date Fix**: Corrects wrong DocumentPeriodEndDate using authoritative SGML header
+- **Better Hierarchies**: New `parent_abstract_concept` for improved XBRL fact navigation
+- **20-F Improvements**: Enhanced section detection for international company filings
+- **Documentation**: Improved examples and cleaner structure
+
+This release maintains full backward compatibility with v5.0.2 and requires no code changes for existing users.
+
 ## [5.0.2] - 2025-12-09
 
 ### Added
