@@ -118,6 +118,7 @@ def pytest_collection_modifyitems(items):
     ]
 
     # Files that need network (fetch from SEC)
+    # Note: test_xbrl_stitching needs network despite matching test_xbrl pattern
     NETWORK_PATTERNS = [
         'test_entity', 'test_company', 'test_filing', 'test_ownership',
         'test_funds', 'test_fundreports', 'test_thirteenf', 'test_eightk',
@@ -127,7 +128,7 @@ def pytest_collection_modifyitems(items):
         'test_saving', 'test_ratelimit', 'test_storage', 'test_ai',
         'test_mcp', 'test_etf', 'test_multi_entity', 'test_paper',
         'test_harness_selectors', 'test_read_filing', 'test_form_upload',
-        'test_current',
+        'test_current', 'test_xbrl_stitching',
     ]
 
     for item in items:
@@ -148,12 +149,13 @@ def pytest_collection_modifyitems(items):
             continue
 
         # Auto-mark based on file patterns
-        if any(pattern in test_file for pattern in FAST_PATTERNS):
-            item.add_marker(pytest.mark.fast)
-            logger.debug(f"Auto-marked fast test: {item.nodeid}")
-        elif any(pattern in test_file for pattern in NETWORK_PATTERNS):
+        # Check NETWORK_PATTERNS first (more specific overrides)
+        if any(pattern in test_file for pattern in NETWORK_PATTERNS):
             item.add_marker(pytest.mark.network)
             logger.debug(f"Auto-marked network test: {item.nodeid}")
+        elif any(pattern in test_file for pattern in FAST_PATTERNS):
+            item.add_marker(pytest.mark.fast)
+            logger.debug(f"Auto-marked fast test: {item.nodeid}")
 
 
 # Session-scoped company fixtures for performance optimization
