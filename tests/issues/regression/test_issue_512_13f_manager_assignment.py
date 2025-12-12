@@ -4,38 +4,27 @@ Test for Issue #512: 13F Manager Assignment per Holding
 Enhance 13F-HR parsing to support multi-manager institutional filings:
 1. Add otherManager field to infotable holdings
 2. Fix cover page XML tag bug: otherManagersInfo → otherManagers2Info
+
+Performance: Uses session-scoped fixtures from conftest.py to avoid
+parsing the same 13F filing multiple times (~10s savings per test).
 """
 import pandas as pd
 import pytest
-from edgar import *
 
 
 @pytest.mark.network
-def test_13f_other_manager_column_exists():
+def test_13f_other_manager_column_exists(state_street_13f_infotable):
     """Test that OtherManager column is added to holdings DataFrame."""
-    # State Street filing with multiple managers (from issue example)
-    # CIK 70858 = STATE STREET CORP, accession 0001102113-24-000030
-    filing = Filing(form='13F-HR', filing_date='2024-11-14', company='STATE STREET CORP',
-                    cik=70858, accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-
-    # Get holdings DataFrame
-    holdings_df = thirteenf.infotable
+    holdings_df = state_street_13f_infotable
 
     # Verify OtherManager column exists
     assert 'OtherManager' in holdings_df.columns, "OtherManager column should be present in holdings DataFrame"
 
 
 @pytest.mark.network
-def test_13f_other_manager_values():
+def test_13f_other_manager_values(state_street_13f_infotable):
     """Test that otherManager values are correctly extracted from holdings."""
-    # State Street filing with multiple managers
-    filing = Filing(form='13F-HR', filing_date='2024-11-14', company='STATE STREET CORP',
-                    cik=70858, accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-    holdings_df = thirteenf.infotable
+    holdings_df = state_street_13f_infotable
 
     # Check for OtherManager values
     has_other_managers = holdings_df['OtherManager'].notna().any()
@@ -50,13 +39,9 @@ def test_13f_other_manager_values():
 
 
 @pytest.mark.network
-def test_13f_cover_page_other_managers_2():
+def test_13f_cover_page_other_managers_2(state_street_13f):
     """Test that cover page correctly parses otherManagers2Info section."""
-    # State Street filing with multiple managers in otherManagers2Info
-    filing = Filing(form='13F-HR', filing_date='2024-11-14', company='STATE STREET CORP',
-                    cik=70858, accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
+    thirteenf = state_street_13f
 
     # Verify primary form information has cover page with other_managers
     assert hasattr(thirteenf, 'primary_form_information'), "Should have primary_form_information"
@@ -79,19 +64,15 @@ def test_13f_cover_page_other_managers_2():
 
 
 @pytest.mark.network
-def test_13f_manager_assignment_integration():
+def test_13f_manager_assignment_integration(state_street_13f, state_street_13f_infotable):
     """Test integration: holdings with manager assignments and cover page manager list."""
-    # State Street filing
-    filing = Filing(form='13F-HR', filing_date='2024-11-14', company='STATE STREET CORP',
-                    cik=70858, accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
+    thirteenf = state_street_13f
 
     # Get cover page managers
     cover_page_managers = thirteenf.primary_form_information.cover_page.other_managers
 
     # Get holdings with manager assignments
-    holdings_df = thirteenf.infotable
+    holdings_df = state_street_13f_infotable
     holdings_with_managers = holdings_df[holdings_df['OtherManager'].notna()]
 
     # Verify data structure is correct
@@ -110,15 +91,11 @@ def test_13f_manager_assignment_integration():
 
 
 @pytest.mark.network
-def test_13f_backward_compatibility():
+def test_13f_backward_compatibility(state_street_13f):
     """Test that old format (otherManagersInfo) still works if present."""
     # Test with a filing that might use the old format
     # Most recent filings should use otherManagers2Info, but code should handle both
-    filing = Filing(form='13F-HR', filing_date='2024-11-14', company='STATE STREET CORP',
-                    cik=70858, accession_no='0001102113-24-000030')
-
-    # Should not raise an exception
-    thirteenf = filing.obj()
+    thirteenf = state_street_13f
 
     # Should have valid data
     assert thirteenf is not None

@@ -217,3 +217,36 @@ def nflx_2012_10k_filing(nflx_company):
 def nflx_2025_q3_10q_filing(nflx_company):
     """Netflix Q3 2025 10-Q filing - cached for entire test session"""
     return nflx_company.get_filings(form="10-Q", accession_number="0001065280-25-000406").latest()
+
+
+# 13F fixtures for performance optimization (Issue edgartools-lza)
+# State Street multi-manager filing used by multiple test files
+@pytest.fixture(scope="session")
+def state_street_13f_filing():
+    """State Street Corp 13F-HR filing - cached for entire test session.
+
+    This filing is used by:
+    - tests/thirteenf/test_holdings_aggregation.py
+    - tests/issues/regression/test_issue_512_13f_manager_assignment.py
+    """
+    return Filing(form='13F-HR', filing_date='2024-11-14',
+                  company='STATE STREET CORP', cik=70858,
+                  accession_no='0001102113-24-000030')
+
+
+@pytest.fixture(scope="session")
+def state_street_13f(state_street_13f_filing):
+    """Parsed ThirteenF object - cached for entire test session."""
+    return state_street_13f_filing.obj()
+
+
+@pytest.fixture(scope="session")
+def state_street_13f_infotable(state_street_13f):
+    """State Street infotable (disaggregated holdings) - cached for entire test session."""
+    return state_street_13f.infotable
+
+
+@pytest.fixture(scope="session")
+def state_street_13f_holdings(state_street_13f):
+    """State Street holdings (aggregated) - cached for entire test session."""
+    return state_street_13f.holdings

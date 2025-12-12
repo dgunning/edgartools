@@ -6,25 +6,20 @@ Verifies that:
 2. infotable property preserves disaggregated manager-specific data
 3. Aggregation sums numeric columns correctly
 4. Single-manager filings work correctly with both views
+
+Performance: Uses session-scoped fixtures from conftest.py to avoid
+parsing the same 13F filing multiple times (~10s savings per test).
 """
 import pytest
 import pandas as pd
-from edgar import Filing
 
 
 @pytest.mark.network
-def test_holdings_aggregates_multi_manager_filing():
+def test_holdings_aggregates_multi_manager_filing(state_street_13f_infotable, state_street_13f_holdings):
     """Test that holdings aggregates multi-manager filing (State Street example)."""
-    # State Street multi-manager filing
-    filing = Filing(form='13F-HR', filing_date='2024-11-14',
-                    company='STATE STREET CORP', cik=70858,
-                    accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-
-    # Get both views
-    infotable = thirteenf.infotable  # Disaggregated
-    holdings = thirteenf.holdings     # Aggregated
+    # Use fixtures for both views
+    infotable = state_street_13f_infotable  # Disaggregated
+    holdings = state_street_13f_holdings     # Aggregated
 
     # Verify both exist
     assert infotable is not None, "infotable should exist"
@@ -59,16 +54,10 @@ def test_holdings_aggregates_multi_manager_filing():
 
 
 @pytest.mark.network
-def test_holdings_aggregation_math_correct():
+def test_holdings_aggregation_math_correct(state_street_13f_infotable, state_street_13f_holdings):
     """Test that holdings correctly sums values across managers for same CUSIP."""
-    # State Street multi-manager filing
-    filing = Filing(form='13F-HR', filing_date='2024-11-14',
-                    company='STATE STREET CORP', cik=70858,
-                    accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-    infotable = thirteenf.infotable
-    holdings = thirteenf.holdings
+    infotable = state_street_13f_infotable
+    holdings = state_street_13f_holdings
 
     # Find a CUSIP that appears multiple times in infotable
     cusip_counts = infotable['Cusip'].value_counts()
@@ -111,14 +100,9 @@ def test_holdings_aggregation_math_correct():
 
 
 @pytest.mark.network
-def test_holdings_sorted_by_value():
+def test_holdings_sorted_by_value(state_street_13f_holdings):
     """Test that holdings are sorted by value descending."""
-    filing = Filing(form='13F-HR', filing_date='2024-11-14',
-                    company='STATE STREET CORP', cik=70858,
-                    accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-    holdings = thirteenf.holdings
+    holdings = state_street_13f_holdings
 
     # Verify sorted by value descending
     values = holdings['Value'].tolist()
@@ -131,15 +115,10 @@ def test_holdings_sorted_by_value():
 
 
 @pytest.mark.network
-def test_holdings_preserves_all_securities():
+def test_holdings_preserves_all_securities(state_street_13f_infotable, state_street_13f_holdings):
     """Test that holdings includes all unique securities from infotable."""
-    filing = Filing(form='13F-HR', filing_date='2024-11-14',
-                    company='STATE STREET CORP', cik=70858,
-                    accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-    infotable = thirteenf.infotable
-    holdings = thirteenf.holdings
+    infotable = state_street_13f_infotable
+    holdings = state_street_13f_holdings
 
     # Get unique CUSIPs from each view
     infotable_cusips = set(infotable['Cusip'].unique())
@@ -158,16 +137,10 @@ def test_holdings_preserves_all_securities():
 
 
 @pytest.mark.network
-def test_single_manager_filing_consistency():
+def test_single_manager_filing_consistency(state_street_13f_infotable, state_street_13f_holdings):
     """Test that single-manager filings have same data in both views."""
-    # State Street filing (single manager)
-    filing = Filing(form='13F-HR', filing_date='2024-11-14',
-                    company='STATE STREET CORP', cik=70858,
-                    accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-    infotable = thirteenf.infotable
-    holdings = thirteenf.holdings
+    infotable = state_street_13f_infotable
+    holdings = state_street_13f_holdings
 
     # For single-manager filings, row counts might be similar or same
     # (only difference is if same CUSIP appears multiple times for other reasons)
@@ -202,14 +175,9 @@ def test_holdings_returns_none_when_no_infotable():
 
 
 @pytest.mark.network
-def test_holdings_numeric_columns_are_numeric():
+def test_holdings_numeric_columns_are_numeric(state_street_13f_holdings):
     """Test that aggregated numeric columns have correct dtypes."""
-    filing = Filing(form='13F-HR', filing_date='2024-11-14',
-                    company='STATE STREET CORP', cik=70858,
-                    accession_no='0001102113-24-000030')
-
-    thirteenf = filing.obj()
-    holdings = thirteenf.holdings
+    holdings = state_street_13f_holdings
 
     # Verify numeric columns have numeric dtypes
     numeric_cols = ['SharesPrnAmount', 'Value', 'SoleVoting', 'SharedVoting', 'NonVoting']
