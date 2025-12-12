@@ -253,6 +253,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 env = [
     "EDGAR_IDENTITY=Dev Gunning developer-gunning@gmail.com",
 ]

@@ -93,19 +93,67 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(items):
     """
-    Automatically add regression marker to tests in regression folders.
-    
-    This ensures that any test file in a 'regression' folder is automatically
-    marked with @pytest.mark.regression, even if developers or agents forget
-    to add the marker manually. This provides a robust safety net for CI
-    test exclusion.
+    Automatically add markers to tests based on file patterns.
+
+    This ensures consistent marker coverage without manual annotation:
+    1. Tests in regression folders get @pytest.mark.regression
+    2. Tests in parsing/processing files get @pytest.mark.fast (no network)
+    3. Tests in entity/company/filings files get @pytest.mark.network
+
+    Only adds markers to tests that don't already have fast/network/slow markers.
     """
+    # Files that are definitely fast (no network calls - parsing, processing, rendering)
+    FAST_PATTERNS = [
+        'test_html', 'test_documents', 'test_xbrl', 'test_tables', 'test_table',
+        'test_markdown', 'test_richtools', 'test_xml', 'test_section',
+        'test_ranking', 'test_period', 'test_rendering', 'test_style',
+        'test_headings', 'test_cache', 'test_parsing', 'test_extraction',
+        'test_standardization', 'test_hierarchy', 'test_stitching',
+        'test_balance', 'test_statement', 'test_footnotes', 'test_ratios',
+        'test_hidden', 'test_reference', 'test_filesystem', 'test_sgml',
+        'test_harness_storage', 'test_harness_reporter', 'test_harness_runner',
+        'test_10q', 'test_10k', 'test_fast', 'test_cross_reference',
+        'test_issue', 'test_bug', 'test_revenue', 'test_net_income', 'test_sga',
+        'test_has_html', 'test_periodtype', 'test_fund_reference',
+    ]
+
+    # Files that need network (fetch from SEC)
+    NETWORK_PATTERNS = [
+        'test_entity', 'test_company', 'test_filing', 'test_ownership',
+        'test_funds', 'test_fundreports', 'test_thirteenf', 'test_eightk',
+        'test_proxy', 'test_effect', 'test_formc', 'test_formd', 'test_form144',
+        'test_muni', 'test_npx', 'test_ticker', 'test_datasearch',
+        'test_httprequests', 'test_attachments', 'test_local_storage',
+        'test_saving', 'test_ratelimit', 'test_storage', 'test_ai',
+        'test_mcp', 'test_etf', 'test_multi_entity', 'test_paper',
+        'test_harness_selectors', 'test_read_filing', 'test_form_upload',
+        'test_current',
+    ]
+
     for item in items:
         test_path = str(item.fspath)
+        test_file = Path(test_path).stem.lower()
+
         # Check if test is in any regression folder (supports nested paths)
-        if "/regression/" in test_path or "\\regression\\" in test_path:
+        is_regression = "/regression/" in test_path or "\\regression\\" in test_path
+        if is_regression:
             item.add_marker(pytest.mark.regression)
             logger.debug(f"Auto-marked regression test: {item.nodeid}")
+            # Don't auto-mark regression tests with fast/network - they need explicit markers
+            continue
+
+        # Skip if test already has fast/network/slow marker
+        existing_markers = {m.name for m in item.iter_markers()}
+        if existing_markers & {'fast', 'network', 'slow'}:
+            continue
+
+        # Auto-mark based on file patterns
+        if any(pattern in test_file for pattern in FAST_PATTERNS):
+            item.add_marker(pytest.mark.fast)
+            logger.debug(f"Auto-marked fast test: {item.nodeid}")
+        elif any(pattern in test_file for pattern in NETWORK_PATTERNS):
+            item.add_marker(pytest.mark.network)
+            logger.debug(f"Auto-marked network test: {item.nodeid}")
 
 
 # Session-scoped company fixtures for performance optimization
