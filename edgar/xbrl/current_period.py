@@ -423,7 +423,10 @@ class CurrentPeriodView:
                          If False, filter to primary non-dimensional values only.
 
         Returns:
-            pandas DataFrame with statement data filtered to current period
+            pandas DataFrame with statement data filtered to current period.
+            Schema matches Statement.to_dataframe() for consistency (Issue #522):
+            - concept, label, value, level, abstract, dimension, dimension_label
+            - balance, weight, preferred_sign, parent_concept, parent_abstract_concept
 
         Raises:
             StatementNotFound: If the requested statement type is not available
@@ -445,11 +448,16 @@ class CurrentPeriodView:
                     reason=f"No data found for {statement_type} in period {self.period_label}"
                 )
 
+            # Build concept metadata lookup for balance/weight (Issue #522)
+            concept_metadata = self._build_concept_metadata(statement_data)
+
             # Convert to DataFrame
             rows = []
             for item in statement_data:
+                is_dimension = item.get('is_dimension', False)
+
                 # Skip dimensional items if include_dimensions=False
-                if not include_dimensions and item.get('is_dimension', False):
+                if not include_dimensions and is_dimension:
                     continue
 
                 # Get the value for appropriate period
@@ -457,34 +465,42 @@ class CurrentPeriodView:
                 current_value = values.get(period_filter)
 
                 if current_value is not None:
+                    concept_name = self._get_concept_name(item, raw_concepts)
+
+                    # Build row with consistent schema matching Statement.to_dataframe() (Issue #522)
                     row = {
-                        'concept': self._get_concept_name(item, raw_concepts),
+                        'concept': concept_name,
                         'label': item.get('label', ''),
                         'value': current_value,
                         'level': item.get('level', 0),
-                        'is_abstract': item.get('is_abstract', False)
+                        'abstract': item.get('is_abstract', False),  # Renamed for consistency
+                        'dimension': is_dimension,  # Renamed for consistency
                     }
 
-                    # Add original concept name if raw_concepts is requested
-                    if raw_concepts:
-                        row['standardized_label'] = item.get('label', '')
-                        # Try to get original concept names from all_names
-                        all_names = item.get('all_names', [])
-                        if all_names:
-                            row['original_concept'] = all_names[0]  # First is usually original
+                    # Add dimension label (always include column for schema consistency)
+                    row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
 
-                    # Add dimension information if present
-                    if item.get('is_dimension', False):
-                        row['dimension_label'] = item.get('full_dimension_label', '')
-                        row['is_dimension'] = True
+                    # Add metadata columns from lookup (Issue #522)
+                    original_concept = item.get('concept', concept_name)
+                    metadata = concept_metadata.get(original_concept, {})
+                    row['balance'] = metadata.get('balance')
+                    row['weight'] = metadata.get('weight')
+
+                    # Get preferred_sign from statement raw data
+                    preferred_signs = item.get('preferred_signs', {})
+                    row['preferred_sign'] = next(iter(preferred_signs.values()), None) if preferred_signs else None
+
+                    # Get parent concepts (Issue #514)
+                    row['parent_concept'] = item.get('calculation_parent')
+                    row['parent_abstract_concept'] = item.get('parent')
 
                     rows.append(row)
 
             if not rows:
-                # Create empty DataFrame with expected structure
-                columns = ['concept', 'label', 'value', 'level', 'is_abstract']
-                if raw_concepts:
-                    columns.extend(['standardized_label', 'original_concept'])
+                # Create empty DataFrame with expected structure (Issue #522)
+                columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
+                           'dimension_label', 'balance', 'weight', 'preferred_sign',
+                           'parent_concept', 'parent_abstract_concept']
                 return pd.DataFrame(columns=columns)
 
             return pd.DataFrame(rows)
@@ -559,6 +575,41 @@ class CurrentPeriodView:
                 entity_name=entity_name,
                 reason=f"Failed to retrieve {statement_type} statement: {str(e)}"
             ) from e
+
+    def _build_concept_metadata(self, statement_data: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+        """
+        Build a lookup dictionary of concept metadata (balance, weight) from facts.
+
+        Issue #522: Needed to provide consistent metadata columns across access paths.
+
+        Args:
+            statement_data: List of statement line item dictionaries
+
+        Returns:
+            Dictionary mapping concept names to their metadata (balance, weight)
+        """
+        metadata = {}
+
+        # Get unique concepts from statement data
+        concepts = set()
+        for item in statement_data:
+            concept = item.get('concept')
+            if concept:
+                concepts.add(concept)
+
+        # Batch query facts for all concepts to get balance/weight
+        for concept in concepts:
+            facts_df = self.xbrl.facts.query().by_concept(concept, exact=True).limit(1).to_dataframe()
+            if not facts_df.empty:
+                fact = facts_df.iloc[0]
+                metadata[concept] = {
+                    'balance': fact.get('balance'),
+                    'weight': fact.get('weight')
+                }
+            else:
+                metadata[concept] = {'balance': None, 'weight': None}
+
+        return metadata
 
     def _get_concept_name(self, item: Dict[str, Any], raw_concepts: bool) -> str:
         """
@@ -861,7 +912,10 @@ class CurrentPeriodStatement:
                          If None (default), uses the value set at construction time.
 
         Returns:
-            pandas DataFrame with current period data only
+            pandas DataFrame with current period data only.
+            Schema matches Statement.to_dataframe() for consistency (Issue #522):
+            - concept, label, value, level, abstract, dimension, dimension_label
+            - balance, weight, preferred_sign, parent_concept, parent_abstract_concept
         """
         # Use instance setting if not explicitly overridden
         dims = include_dimensions if include_dimensions is not None else self.include_dimensions
@@ -869,11 +923,16 @@ class CurrentPeriodStatement:
         # Get raw data for current period
         raw_data = self.get_raw_data()
 
-        # Convert to DataFrame format similar to CurrentPeriodView
+        # Build concept metadata lookup for balance/weight (Issue #522)
+        concept_metadata = self._build_concept_metadata(raw_data)
+
+        # Convert to DataFrame format matching Statement.to_dataframe() schema
         rows = []
         for item in raw_data:
+            is_dimension = item.get('is_dimension', False)
+
             # Skip dimensional items if include_dimensions=False
-            if not dims and item.get('is_dimension', False):
+            if not dims and is_dimension:
                 continue
 
             values = item.get('values', {})
@@ -895,29 +954,78 @@ class CurrentPeriodStatement:
                         else:
                             concept_name = original
 
+                # Build row with consistent schema matching Statement.to_dataframe() (Issue #522)
                 row = {
                     'concept': concept_name,
                     'label': item.get('label', ''),
                     'value': current_value,
                     'level': item.get('level', 0),
-                    'is_abstract': item.get('is_abstract', False)
+                    'abstract': item.get('is_abstract', False),  # Renamed for consistency
+                    'dimension': is_dimension,  # Renamed for consistency
                 }
 
-                # Add original concept name if raw_concepts is requested
-                if raw_concepts:
-                    row['standardized_label'] = item.get('label', '')
-                    all_names = item.get('all_names', [])
-                    if all_names:
-                        row['original_concept'] = all_names[0]
+                # Add dimension label (always include column for schema consistency)
+                row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
 
-                # Add dimension information if present
-                if item.get('is_dimension', False):
-                    row['dimension_label'] = item.get('full_dimension_label', '')
-                    row['is_dimension'] = True
+                # Add metadata columns from lookup (Issue #522)
+                original_concept = item.get('concept', concept_name)
+                metadata = concept_metadata.get(original_concept, {})
+                row['balance'] = metadata.get('balance')
+                row['weight'] = metadata.get('weight')
+
+                # Get preferred_sign from statement raw data
+                preferred_signs = item.get('preferred_signs', {})
+                row['preferred_sign'] = next(iter(preferred_signs.values()), None) if preferred_signs else None
+
+                # Get parent concepts (Issue #514)
+                row['parent_concept'] = item.get('calculation_parent')
+                row['parent_abstract_concept'] = item.get('parent')
 
                 rows.append(row)
 
+        if not rows:
+            # Create empty DataFrame with expected structure (Issue #522)
+            columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
+                       'dimension_label', 'balance', 'weight', 'preferred_sign',
+                       'parent_concept', 'parent_abstract_concept']
+            return pd.DataFrame(columns=columns)
+
         return pd.DataFrame(rows)
+
+    def _build_concept_metadata(self, raw_data: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+        """
+        Build a lookup dictionary of concept metadata (balance, weight) from facts.
+
+        Issue #522: Needed to provide consistent metadata columns across access paths.
+
+        Args:
+            raw_data: List of statement line item dictionaries
+
+        Returns:
+            Dictionary mapping concept names to their metadata (balance, weight)
+        """
+        metadata = {}
+
+        # Get unique concepts from raw data
+        concepts = set()
+        for item in raw_data:
+            concept = item.get('concept')
+            if concept:
+                concepts.add(concept)
+
+        # Batch query facts for all concepts to get balance/weight
+        for concept in concepts:
+            facts_df = self.xbrl.facts.query().by_concept(concept, exact=True).limit(1).to_dataframe()
+            if not facts_df.empty:
+                fact = facts_df.iloc[0]
+                metadata[concept] = {
+                    'balance': fact.get('balance'),
+                    'weight': fact.get('weight')
+                }
+            else:
+                metadata[concept] = {'balance': None, 'weight': None}
+
+        return metadata
 
     def calculate_ratios(self) -> Dict[str, float]:
         """Calculate common financial ratios for this statement."""

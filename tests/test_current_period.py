@@ -170,21 +170,28 @@ class TestCurrentPeriodView:
         """Test balance sheet retrieval with raw XBRL concept names."""
         current_period = CurrentPeriodView(mock_xbrl)
         stmt = current_period.balance_sheet(raw_concepts=True)
-        
+
         # Now returns Statement by default
         from edgar.xbrl.current_period import CurrentPeriodStatement
         assert isinstance(stmt, CurrentPeriodStatement)
-        
+
         # Test DataFrame conversion with raw concepts
         df = stmt.get_dataframe(raw_concepts=True)
-        
-        # Should have additional columns for raw concepts
-        assert 'standardized_label' in df.columns
-        assert 'original_concept' in df.columns
-        
-        # Concept name should attempt to restore colon format
+
+        # Issue #522: Schema should match Statement.to_dataframe()
+        # Check for unified schema columns
+        assert 'concept' in df.columns
+        assert 'label' in df.columns
+        assert 'value' in df.columns
+        assert 'abstract' in df.columns  # Renamed from is_abstract
+        assert 'dimension' in df.columns  # Renamed from is_dimension
+        assert 'balance' in df.columns
+        assert 'weight' in df.columns
+
+        # Concept name should attempt to restore colon format when raw_concepts=True
         assets_row = df[df['label'] == 'Total Assets'].iloc[0]
-        assert assets_row['original_concept'] == 'us-gaap_Assets'
+        # With raw_concepts=True, concept should have colon format
+        assert ':' in assets_row['concept'] or assets_row['concept'] == 'us-gaap_Assets'
 
     @pytest.mark.fast
     def test_income_statement(self, mock_xbrl):

@@ -335,6 +335,8 @@ class Statement:
             row['level'] = item.get('level', 0)
             row['abstract'] = item.get('is_abstract', False)
             row['dimension'] = item.get('is_dimension', False)
+            # Issue #522: Add dimension_label for consistency with CurrentPeriodView
+            row['dimension_label'] = item.get('full_dimension_label', '') if item.get('is_dimension', False) else None
 
             df_rows.append(row)
 

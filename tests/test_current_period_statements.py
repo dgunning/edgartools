@@ -91,7 +91,17 @@ class TestCurrentPeriodStatementObjects:
         mock_xbrl = Mock()
         mock_xbrl.entity_name = 'Test Company'
         mock_xbrl.render_statement.return_value = Mock(spec=RenderedStatement)
-        
+
+        # Mock the facts query for _build_concept_metadata (Issue #522)
+        mock_facts_df = pd.DataFrame()  # Empty DataFrame - no metadata found
+        mock_query = Mock()
+        mock_query.by_concept.return_value = mock_query
+        mock_query.limit.return_value = mock_query
+        mock_query.to_dataframe.return_value = mock_facts_df
+        mock_facts = Mock()
+        mock_facts.query.return_value = mock_query
+        mock_xbrl.facts = mock_facts
+
         # Mock the underlying Statement
         mock_statement = Mock()
         mock_statement.get_raw_data.return_value = [
@@ -105,7 +115,7 @@ class TestCurrentPeriodStatementObjects:
             }
         ]
         mock_statement.calculate_ratios.return_value = {'current_ratio': 2.5}
-        
+
         # Create CurrentPeriodStatement
         stmt = CurrentPeriodStatement(
             mock_xbrl,
@@ -115,14 +125,14 @@ class TestCurrentPeriodStatementObjects:
             period_label='December 31, 2024'
         )
         stmt._statement = mock_statement
-        
+
         # Test methods
         raw_data = stmt.get_raw_data()
         assert len(raw_data) == 1
-        
+
         ratios = stmt.calculate_ratios()
         assert ratios['current_ratio'] == 2.5
-        
+
         # Test get_dataframe
         df = stmt.get_dataframe()
         assert isinstance(df, pd.DataFrame)
@@ -135,7 +145,17 @@ class TestCurrentPeriodStatementObjects:
         """Test get_dataframe with raw_concepts=True"""
         mock_xbrl = Mock()
         mock_xbrl.entity_name = 'Test Company'
-        
+
+        # Mock the facts query for _build_concept_metadata (Issue #522)
+        mock_facts_df = pd.DataFrame()  # Empty DataFrame - no metadata found
+        mock_query = Mock()
+        mock_query.by_concept.return_value = mock_query
+        mock_query.limit.return_value = mock_query
+        mock_query.to_dataframe.return_value = mock_facts_df
+        mock_facts = Mock()
+        mock_facts.query.return_value = mock_query
+        mock_xbrl.facts = mock_facts
+
         mock_statement = Mock()
         mock_statement.get_raw_data.return_value = [
             {
@@ -147,7 +167,7 @@ class TestCurrentPeriodStatementObjects:
                 'all_names': ['us-gaap_Assets']
             }
         ]
-        
+
         stmt = CurrentPeriodStatement(
             mock_xbrl,
             'BalanceSheet',
@@ -156,12 +176,19 @@ class TestCurrentPeriodStatementObjects:
             period_label='December 31, 2024'
         )
         stmt._statement = mock_statement
-        
+
         # Test with raw_concepts=True
         df = stmt.get_dataframe(raw_concepts=True)
         assert df.iloc[0]['concept'] == 'us-gaap:Assets'  # Should convert underscore to colon
-        assert 'original_concept' in df.columns
-        assert df.iloc[0]['original_concept'] == 'us-gaap_Assets'
+
+        # Issue #522: Schema should match Statement.to_dataframe()
+        # Check for unified schema columns (original_concept column was removed)
+        assert 'abstract' in df.columns  # Renamed from is_abstract
+        assert 'dimension' in df.columns  # Renamed from is_dimension
+        assert 'balance' in df.columns
+        assert 'weight' in df.columns
+        assert 'preferred_sign' in df.columns
+        assert 'parent_concept' in df.columns
 
     @pytest.mark.fast
     def test_debug_info_method(self):
