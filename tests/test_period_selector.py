@@ -89,8 +89,9 @@ class TestBalanceSheetSelection:
             {'type': 'duration', 'start_date': '2024-01-01', 'end_date': '2024-12-31', 'key': 'duration_2024', 'label': '2024'},
             {'type': 'instant', 'date': '2023-12-31', 'key': 'instant_2023', 'label': 'Dec 31, 2023'},
         ]
+        entity_info = {'fiscal_year_end_month': 12, 'fiscal_year_end_day': 31}
 
-        result = _select_balance_sheet_periods(periods, 2)
+        result = _select_balance_sheet_periods(periods, entity_info, 2)
 
         assert len(result) == 2
         assert all('instant' in period_key for period_key, _ in result)
@@ -102,8 +103,9 @@ class TestBalanceSheetSelection:
             {'type': 'instant', 'date': '2024-12-31', 'key': 'instant_2024', 'label': 'Dec 31, 2024'},
             {'type': 'instant', 'date': '2023-12-31', 'key': 'instant_2023', 'label': 'Dec 31, 2023'},
         ]
+        entity_info = {'fiscal_year_end_month': 12, 'fiscal_year_end_day': 31}
 
-        result = _select_balance_sheet_periods(periods, 3)
+        result = _select_balance_sheet_periods(periods, entity_info, 3)
 
         assert len(result) == 3
         assert result[0][0] == 'instant_2024'  # Most recent first
@@ -115,10 +117,55 @@ class TestBalanceSheetSelection:
         periods = [
             {'type': 'duration', 'start_date': '2024-01-01', 'end_date': '2024-12-31', 'key': 'duration_2024', 'label': '2024'},
         ]
+        entity_info = {}
 
-        result = _select_balance_sheet_periods(periods, 2)
+        result = _select_balance_sheet_periods(periods, entity_info, 2)
 
         assert len(result) == 0
+
+    def test_prioritizes_fiscal_year_end_periods(self):
+        """Should explicitly seek and prioritize fiscal year end periods.
+
+        Issue edgartools-2sn: When many mid-period instants exist, the prior
+        fiscal year end could be pushed beyond the candidate pool. This test
+        verifies that fiscal year end periods are explicitly sought and prioritized.
+        """
+        # Simulate VENU scenario: many mid-period dates push fiscal year end beyond top 10
+        periods = [
+            {'type': 'instant', 'date': '2024-09-30', 'key': 'instant_2024-09-30', 'label': 'Sep 30, 2024'},
+            {'type': 'instant', 'date': '2024-08-26', 'key': 'instant_2024-08-26', 'label': 'Aug 26, 2024'},
+            {'type': 'instant', 'date': '2024-08-22', 'key': 'instant_2024-08-22', 'label': 'Aug 22, 2024'},
+            {'type': 'instant', 'date': '2024-08-16', 'key': 'instant_2024-08-16', 'label': 'Aug 16, 2024'},
+            {'type': 'instant', 'date': '2024-08-12', 'key': 'instant_2024-08-12', 'label': 'Aug 12, 2024'},
+            {'type': 'instant', 'date': '2024-06-30', 'key': 'instant_2024-06-30', 'label': 'Jun 30, 2024'},
+            {'type': 'instant', 'date': '2024-06-26', 'key': 'instant_2024-06-26', 'label': 'Jun 26, 2024'},
+            {'type': 'instant', 'date': '2024-03-31', 'key': 'instant_2024-03-31', 'label': 'Mar 31, 2024'},
+            {'type': 'instant', 'date': '2024-03-05', 'key': 'instant_2024-03-05', 'label': 'Mar 05, 2024'},
+            {'type': 'instant', 'date': '2024-01-17', 'key': 'instant_2024-01-17', 'label': 'Jan 17, 2024'},
+            # Prior fiscal year end at position 11 - would be missed with candidate_count=10
+            {'type': 'instant', 'date': '2023-12-31', 'key': 'instant_2023-12-31', 'label': 'Dec 31, 2023'},
+        ]
+        entity_info = {'fiscal_year_end_month': 12, 'fiscal_year_end_day': 31}
+
+        result = _select_balance_sheet_periods(periods, entity_info, 2)
+
+        # Fiscal year end Dec 31, 2023 should be in candidates due to explicit seeking
+        result_keys = [key for key, _ in result]
+        assert 'instant_2023-12-31' in result_keys, "Prior fiscal year end should be prioritized in candidates"
+
+    def test_handles_missing_fiscal_info(self):
+        """Should handle case where fiscal year info is not available."""
+        periods = [
+            {'type': 'instant', 'date': '2024-12-31', 'key': 'instant_2024', 'label': 'Dec 31, 2024'},
+            {'type': 'instant', 'date': '2023-12-31', 'key': 'instant_2023', 'label': 'Dec 31, 2023'},
+        ]
+        entity_info = {}  # No fiscal info
+
+        result = _select_balance_sheet_periods(periods, entity_info, 2)
+
+        # Should still return periods based on date sorting
+        assert len(result) == 2
+        assert result[0][0] == 'instant_2024'  # Most recent first
 
 
 class TestDurationPeriodSelection:

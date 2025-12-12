@@ -46,7 +46,7 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
     try:
         # Step 2: Statement-specific logic
         if statement_type == 'BalanceSheet':
-            candidate_periods = _select_balance_sheet_periods(filtered_periods, max_periods)
+            candidate_periods = _select_balance_sheet_periods(filtered_periods, xbrl.entity_info, max_periods)
         else:  # Income/Cash Flow statements
             candidate_periods = _select_duration_periods(filtered_periods, xbrl.entity_info, max_periods)
 
@@ -100,12 +100,15 @@ def _filter_by_document_date(periods: List[Dict], document_end_date: Optional[st
     return filtered_periods
 
 
-def _select_balance_sheet_periods(periods: List[Dict], max_periods: int) -> List[Tuple[str, str]]:
+def _select_balance_sheet_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int) -> List[Tuple[str, str]]:
     """
     Select instant periods for balance sheet statements.
 
     Balance sheets are point-in-time snapshots, so we need instant periods.
-    We select the most recent instant periods with basic fiscal year intelligence.
+    We select the most recent instant periods with fiscal year intelligence.
+
+    Issue edgartools-2sn: Enhanced to explicitly seek fiscal year end dates
+    when many mid-period instants push the prior FY end beyond the candidate pool.
     """
     instant_periods = [p for p in periods if p['type'] == 'instant']
 
@@ -116,15 +119,53 @@ def _select_balance_sheet_periods(periods: List[Dict], max_periods: int) -> List
     # Sort by date (most recent first)
     instant_periods = _sort_periods_by_date(instant_periods, 'instant')
 
-    # Take more candidate periods initially (up to 10) to ensure we capture fiscal year ends
-    # Many filings have several instant periods (quarterly, mid-year, etc.) with minimal data
-    # We need to cast a wider net initially and let data filtering select the best ones
-    # Issue #464: Was only checking first 4 periods, missing prior fiscal year ends
-    candidate_count = min(10, len(instant_periods))
+    # Get fiscal year end information for explicit seeking
+    fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
+    fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
 
+    # Issue edgartools-2sn: Explicitly seek prior fiscal year end dates
+    # This handles cases where many mid-period instants push the prior FY end
+    # beyond the initial candidate pool (e.g., VENU 10-Q with 10+ mid-period dates)
+    fiscal_year_end_periods = []
+    if fiscal_year_end_month and fiscal_year_end_day:
+        for period in instant_periods:
+            try:
+                period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
+                # Check if this period matches fiscal year end (within 5 days tolerance)
+                if (period_date.month == fiscal_year_end_month and
+                    abs(period_date.day - fiscal_year_end_day) <= 5):
+                    fiscal_year_end_periods.append(period)
+                    logger.debug("Found fiscal year end period: %s (%s)",
+                               period['label'], period['date'])
+            except (ValueError, TypeError, KeyError):
+                continue
+
+    # Issue edgartools-2sn: Increased from 10 to 20 as additional fallback
+    # This catches edge cases where fiscal info is unavailable or imprecise
+    candidate_count = min(20, len(instant_periods))
+
+    # Build candidate list, prioritizing fiscal year end periods
+    selected_keys = set()
     selected_periods = []
+
+    # First, add most recent period (current period end)
+    if instant_periods:
+        current = instant_periods[0]
+        selected_periods.append((current['key'], current['label']))
+        selected_keys.add(current['key'])
+
+    # Next, add fiscal year end periods (these are high-value for comparison)
+    for period in fiscal_year_end_periods:
+        if period['key'] not in selected_keys:
+            selected_periods.append((period['key'], period['label']))
+            selected_keys.add(period['key'])
+            logger.debug("Added fiscal year end period to candidates: %s", period['label'])
+
+    # Then add remaining periods up to candidate limit
     for period in instant_periods[:candidate_count]:
-        selected_periods.append((period['key'], period['label']))
+        if period['key'] not in selected_keys:
+            selected_periods.append((period['key'], period['label']))
+            selected_keys.add(period['key'])
         if len(selected_periods) >= max_periods * 3:  # Check up to 3x max_periods
             break
 
