@@ -129,6 +129,8 @@ dependencies = [
   "pytest-xdist",
   "pytest-asyncio",
   "pytest-retry",
+  "pytest-vcr",
+  "vcrpy",
   "filelock",
   "pyinstrument",
   "pyright",
@@ -272,4 +274,5 @@ markers = [
     "reproduction: Tests that reproduce specific issues",
     "integration: Integration tests",
     "data_quality: Data quality validation tests",
+    "vcr: Tests using VCR cassettes for recorded HTTP responses",
 ]

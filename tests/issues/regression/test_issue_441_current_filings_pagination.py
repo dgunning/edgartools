@@ -50,6 +50,8 @@ class TestCurrentFilingsPagination:
         assert total_filings > 0, "Should have processed some filings"
         assert page_count > 0, "Should have processed at least one page"
 
+    @pytest.mark.slow
+    @pytest.mark.vcr
     def test_out_of_bounds_indexing_raises_proper_errors(self):
         """
         Test that out-of-bounds indexing raises IndexError instead of AssertionError

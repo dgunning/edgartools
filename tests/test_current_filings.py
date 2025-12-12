@@ -193,6 +193,7 @@ def test_current_filings_get_accession_number():
 
 @pytest.mark.network
 @pytest.mark.slow
+@pytest.mark.vcr
 def test_current_filings_get_accession_number_not_found():
     filings:CurrentFilings = get_current_filings().next()
     accession_number = '0000000900-24-000000'
@@ -236,6 +237,8 @@ def test_get_current_filing_by_accession_number():
     print(filing_on_next_page)
 
 @pytest.mark.network
+@pytest.mark.slow
+@pytest.mark.vcr
 def test_get_all_current_filings():
     all_filings = get_all_current_filings()
     assert isinstance(all_filings, Filings)
@@ -249,6 +252,8 @@ def test_iter_current_filings_pages():
 
 
 @pytest.mark.network
+@pytest.mark.slow
+@pytest.mark.vcr
 def test_get_current_filings_with_page_size_none():
     """Test that page_size=None fetches all current filings"""
     # Get all current filings
@@ -299,6 +304,8 @@ def test_get_current_filings_default_behavior_unchanged():
 
 
 @pytest.mark.network
+@pytest.mark.slow
+@pytest.mark.vcr
 def test_get_current_filings_form_4_filtering_issue_501():
     """
     Regression test for Issue #501: Form 4 filtering.

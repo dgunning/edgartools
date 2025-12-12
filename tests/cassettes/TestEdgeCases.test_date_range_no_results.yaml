@@ -1,0 +1,222 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/full-index/2099/QTR1/form.gz
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>Z7ZMFTM4BVTXHMP6</RequestId><HostId>2q7x65FZ+1Ko9+Pe+ZUjJOmFe6/jJNVYrnDyM1fsFn/F9+CaFe2HxR7O0W3bMOpXxfxvebr1z9E=</HostId></Error>'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '243'
+      Content-Type:
+      - application/xml
+      Date:
+      - Fri, 12 Dec 2025 23:04:43 GMT
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      x-amz-id-2:
+      - 2q7x65FZ+1Ko9+Pe+ZUjJOmFe6/jJNVYrnDyM1fsFn/F9+CaFe2HxR7O0W3bMOpXxfxvebr1z9E=
+      x-amz-request-id:
+      - Z7ZMFTM4BVTXHMP6
+    status:
+      code: 403
+      message: Forbidden
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/full-index/2099/QTR1/form.gz
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>5H72DT8Z1XM58ABT</RequestId><HostId>BxrtIc8/7QOA1+y4ZZkmX7apTIVr8e6v3wmguvQjlp5thxflBLOnPrY4TBZjnObS3WZko7jcueKs8O7oRVGtEUF+E3LSZa30</HostId></Error>'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '263'
+      Content-Type:
+      - application/xml
+      Date:
+      - Fri, 12 Dec 2025 23:04:44 GMT
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      x-amz-id-2:
+      - BxrtIc8/7QOA1+y4ZZkmX7apTIVr8e6v3wmguvQjlp5thxflBLOnPrY4TBZjnObS3WZko7jcueKs8O7oRVGtEUF+E3LSZa30
+      x-amz-request-id:
+      - 5H72DT8Z1XM58ABT
+    status:
+      code: 403
+      message: Forbidden
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/full-index/2099/QTR1/form.gz
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>VH3J4YNJPK36GTQK</RequestId><HostId>UJb9lmKIcHtwmvguk57M0VzwZnCBVlw5RmY4mfpCzI+ttl6rLGOGIymCzPwpC8+gfiYxi7LD7q8=</HostId></Error>'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '243'
+      Content-Type:
+      - application/xml
+      Date:
+      - Fri, 12 Dec 2025 23:04:47 GMT
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      x-amz-id-2:
+      - UJb9lmKIcHtwmvguk57M0VzwZnCBVlw5RmY4mfpCzI+ttl6rLGOGIymCzPwpC8+gfiYxi7LD7q8=
+      x-amz-request-id:
+      - VH3J4YNJPK36GTQK
+    status:
+      code: 403
+      message: Forbidden
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/full-index/2099/QTR1/form.gz
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>EQ6JQ717Z20EN2RA</RequestId><HostId>i1DizwGZ2z2WYZiJDkqr6oPvC4Mt1XmqB7XGnK4CojbZmBV3N88Pj9C5uqSGbaNRydVhzpwS6Ew=</HostId></Error>'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '243'
+      Content-Type:
+      - application/xml
+      Date:
+      - Fri, 12 Dec 2025 23:04:51 GMT
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      x-amz-id-2:
+      - i1DizwGZ2z2WYZiJDkqr6oPvC4Mt1XmqB7XGnK4CojbZmBV3N88Pj9C5uqSGbaNRydVhzpwS6Ew=
+      x-amz-request-id:
+      - EQ6JQ717Z20EN2RA
+    status:
+      code: 403
+      message: Forbidden
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/full-index/2099/QTR1/form.gz
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>Z8EPGA1AV4JZ4GMA</RequestId><HostId>nE4ZekAIjCvEQCdo8y2jmwUPN1RjOxMNvEUsu/EzAZeKYmwG8ymTFZdsqoGbydoEyrcLdSXlzUf+DTNmz/VoYfG+DDB6SZJdk35o8nVUuz8=</HostId></Error>'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '275'
+      Content-Type:
+      - application/xml
+      Date:
+      - Fri, 12 Dec 2025 23:04:59 GMT
+      Server:
+      - Apache
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      x-amz-id-2:
+      - nE4ZekAIjCvEQCdo8y2jmwUPN1RjOxMNvEUsu/EzAZeKYmwG8ymTFZdsqoGbydoEyrcLdSXlzUf+DTNmz/VoYfG+DDB6SZJdk35o8nVUuz8=
+      x-amz-request-id:
+      - Z8EPGA1AV4JZ4GMA
+    status:
+      code: 403
+      message: Forbidden
+version: 1

@@ -9,6 +9,25 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# VCR configuration for recording/replaying HTTP interactions
+CASSETTES_DIR = Path(__file__).parent / "cassettes"
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    """Configure VCR for recording SEC API responses.
+
+    This enables tests to record real API responses once and replay them
+    on subsequent runs, dramatically speeding up network-dependent tests.
+    """
+    return {
+        "cassette_library_dir": str(CASSETTES_DIR),
+        "record_mode": "once",  # Record only if cassette doesn't exist
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "filter_headers": ["User-Agent", "Authorization"],
+        "decode_compressed_response": True,
+    }
+
 
 @pytest.fixture(autouse=True)
 def reset_http_client_state():

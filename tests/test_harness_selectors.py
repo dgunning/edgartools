@@ -252,6 +252,8 @@ class TestEdgeCases:
         assert len(filings) == 0
 
     @pytest.mark.network
+    @pytest.mark.slow
+    @pytest.mark.vcr
     def test_date_range_no_results(self):
         """Test date range with no filings."""
         # Use a future date range that shouldn't have filings
