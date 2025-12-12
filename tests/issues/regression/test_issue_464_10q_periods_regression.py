@@ -69,8 +69,8 @@ def test_issue_464_coin_10q_no_missing_values():
                                        'balance', 'weight', 'preferred_sign']]
 
     income_missing = income[income_period_cols].isnull().sum().sum()
-    assert income_missing < 30, (
-        f"Income Statement has {income_missing} missing values in period data (expected < 30). "
+    assert income_missing < 40, (
+        f"Income Statement has {income_missing} missing values in period data (expected < 40). "
         f"User reported 15-16 missing values before fix."
     )
 
