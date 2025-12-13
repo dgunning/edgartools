@@ -1,4 +1,4 @@
 # SPDX-FileCopyrightText: 2022-present Dwight Gunning <dgunning@gmail.com>
 #
 # SPDX-License-Identifier: MIT
-__version__ = '5.1.0'
+__version__ = '5.2.0'

@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0] - 2025-12-13
+
+### Added
+
+- **Include Dimensions Parameter for Current Period Statements** (#aad0c73e)
+  - Added `include_dimensions` parameter to current period statement methods
+  - Allows filtering dimensional data when retrieving financial statements
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: More control over dimensional data in statement retrieval
+  - **Example**: Get current period statements without dimensional breakdowns
+
+### Fixed
+
+- **10-Q Section Ordering** (#1b132b35)
+  - Fixed handling of part-aware section names in 10-Q section ordering
+  - Part II items 1A, 2, 3 were being skipped due to incorrect boundary calculations
+  - **Files**: `edgar/documents/sections/`
+  - **Impact**: Complete and correctly ordered section extraction for 10-Q filings
+
+- **Section Extraction Traversal** (#ef747a12)
+  - Use document-order traversal for section extraction
+  - Correctly handles multi-container sections
+  - **Files**: `edgar/documents/sections/`
+  - **Impact**: More robust section extraction across diverse document structures
+
+- **Balance Sheet Period Selection** (#f5cca00c)
+  - Balance sheet period selection now correctly finds prior fiscal year end
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate balance sheet retrieval for fiscal year-end statements
+
+### Changed
+
+- **XBRL DataFrame Schema Rationalization** (#54c111d7, #522)
+  - Rationalized XBRL dataframe schemas for consistency across methods
+  - Standardized column names and data types
+  - **Files**: `edgar/xbrl/facts.py`, `edgar/xbrl/statements.py`
+  - **Impact**: More predictable and consistent XBRL data structures
+
+- **Documentation Improvements**
+  - Added comprehensive testing guide (`docs/testing-guide.md`)
+  - Added beads workflow documentation (`docs/beads-workflow.md`)
+  - **Impact**: Better developer onboarding and testing practices
+
+### Performance
+
+- **Test Suite Optimization**
+  - Optimized NPORT regression test from 120s to 0.03s (4000x faster)
+  - Shared 13F test fixtures to reduce runtime from 69s to 11s (6x faster)
+  - Added VCR cassettes for current filings tests (83s to 47s, 43% faster)
+  - **Impact**: Significantly faster test execution for development workflow
+
+### Summary
+
+Release 5.2.0 is a minor feature release focused on bug fixes, performance improvements, and enhanced consistency. Key highlights:
+
+- **Section Extraction Fixes**: Improved 10-Q section ordering and multi-container handling
+- **XBRL Improvements**: Better period selection and rationalized dataframe schemas
+- **Test Performance**: Major test suite optimizations (4000x speedup for NPORT tests)
+- **Documentation**: New testing and workflow guides for contributors
+
+This release maintains full backward compatibility with v5.1.0 and requires no code changes for existing users.
+
 ## [5.1.0] - 2025-12-11
 
 ### Added
