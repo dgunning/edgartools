@@ -218,6 +218,8 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+# Coverage threshold - CI will fail if coverage drops below this
+fail_under = 70
 
 
 [tool.ruff]
