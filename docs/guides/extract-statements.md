@@ -396,12 +396,23 @@ print(income_with_dates)
 
 ### Standardized vs Company-Specific Labels
 
+When using stitched statements (multi-period analysis), you can control label standardization:
+
 ```python
+from edgar import Company
+from edgar.xbrl import XBRLS
+
+# Get multiple filings for stitched analysis
+company = Company("AAPL")
+filings = company.get_filings(form="10-K").head(3)
+xbrls = XBRLS.from_filings(filings)
+stitched = xbrls.statements
+
 # Use standardized labels for cross-company comparison (default)
-standardized = statements.income_statement(standard=True)
+standardized = stitched.income_statement(standard=True)
 
 # Use company-specific labels as reported in filing
-company_specific = statements.income_statement(standard=False)
+company_specific = stitched.income_statement(standard=False)
 
 print("Standardized Labels:")
 print(standardized.to_dataframe()['label'].head(10))
@@ -409,6 +420,8 @@ print(standardized.to_dataframe()['label'].head(10))
 print("\nCompany-Specific Labels:")
 print(company_specific.to_dataframe()['label'].head(10))
 ```
+
+Note: The `standard` parameter is available on stitched statements (`XBRLS.statements`), not on single-filing statements (`xbrl.statements`).
 
 ## Cross-Company Analysis
 
