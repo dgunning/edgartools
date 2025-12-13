@@ -846,6 +846,169 @@ class EntityFacts:
             fallback_calculation=self._calculate_gross_profit_from_components
         )
 
+    # ═══════════════════════════════════════════════════════════════════════════
+    # Unified Synonym-Based Access (uses shared edgar.standardization infrastructure)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    def get_concept(
+        self,
+        concept_name: str,
+        period: Optional[str] = None,
+        unit: Optional[str] = None,
+        return_metadata: bool = False
+    ) -> Union[Optional[float], Dict[str, Any]]:
+        """
+        Get a financial concept value using the unified synonym management system.
+
+        This method provides a simpler interface than the specific methods
+        (get_revenue, get_net_income, etc.) by looking up concept synonyms
+        automatically from the shared SynonymGroups infrastructure.
+
+        Supports 40+ pre-built concepts including:
+        - Income statement: 'revenue', 'net_income', 'operating_income', 'gross_profit', 'ebitda'
+        - Balance sheet: 'total_assets', 'total_liabilities', 'stockholders_equity', 'cash_and_equivalents'
+        - Cash flow: 'operating_cash_flow', 'capex', 'free_cash_flow', 'dividends_paid'
+        - Leases: 'operating_lease_payments', 'operating_lease_liability' (Phil Oakley framework)
+
+        Args:
+            concept_name: The canonical concept name (e.g., 'revenue', 'capex', 'operating_lease_payments')
+            period: Optional period in format "YYYY-QN" or "YYYY-FY"
+            unit: Optional unit filter (defaults to USD if not specified)
+            return_metadata: If True, return dict with value and metadata (tag used, etc.)
+
+        Returns:
+            Concept value as float, or None if not found.
+            If return_metadata=True, returns dict with 'value', 'tag_used', 'period'.
+
+        Example:
+            >>> facts = company.get_facts()
+            >>> # Simple usage
+            >>> revenue = facts.get_concept('revenue')
+            >>> capex = facts.get_concept('capex')
+            >>> lease_payments = facts.get_concept('operating_lease_payments')
+            >>>
+            >>> # With period
+            >>> q1_revenue = facts.get_concept('revenue', period='2024-Q1')
+            >>>
+            >>> # With metadata
+            >>> result = facts.get_concept('revenue', return_metadata=True)
+            >>> print(f"Value: {result['value']}, Tag: {result['tag_used']}")
+
+        See Also:
+            - edgar.standardization.SynonymGroups for available concepts
+            - get_revenue(), get_net_income() for specific methods (backwards compatible)
+        """
+        from edgar.standardization import get_synonym_groups
+        from edgar.entity.unit_handling import UnitNormalizer
+
+        synonyms = get_synonym_groups()
+        group = synonyms.get_group(concept_name)
+
+        if group is None:
+            log.warning(
+                f"Unknown concept '{concept_name}'. "
+                f"Use SynonymGroups.list_groups() to see available concepts."
+            )
+            return None
+
+        # Use the existing _get_standardized_concept_value infrastructure
+        # Try each synonym in priority order
+        target_unit = unit or 'USD'
+        synonyms_tried = []
+
+        for concept in group.synonyms:
+            synonyms_tried.append(concept)
+            # Try both with and without namespace prefix
+            for concept_variant in [concept, f'us-gaap:{concept}']:
+                fact = self.get_fact(concept_variant, period)
+                if fact and fact.numeric_value is not None:
+                    unit_result = UnitNormalizer.get_normalized_value(
+                        fact=fact,
+                        target_unit=target_unit,
+                        apply_scale=True,
+                        strict_unit_match=False
+                    )
+
+                    if unit_result.success:
+                        if return_metadata:
+                            return {
+                                'value': unit_result.value,
+                                'tag_used': concept_variant,
+                                'period': period,
+                                'unit': unit_result.normalized_unit,
+                                'concept_name': concept_name,
+                                'synonyms_tried': synonyms_tried.copy()
+                            }
+                        return unit_result.value
+
+        return None
+
+    def discover_concept_tags(self, concept_name: str) -> List[str]:
+        """
+        Discover which tags from a concept's synonym group exist in this company's facts.
+
+        This is useful for understanding which XBRL tags a specific company uses
+        for a given financial concept.
+
+        Args:
+            concept_name: The canonical concept name (e.g., 'revenue', 'capex')
+
+        Returns:
+            List of tags that exist in this company's facts
+
+        Example:
+            >>> facts = company.get_facts()
+            >>> available = facts.discover_concept_tags('revenue')
+            >>> print(available)
+            ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues']
+        """
+        from edgar.standardization import get_synonym_groups
+
+        synonyms = get_synonym_groups()
+        group = synonyms.get_group(concept_name)
+
+        if group is None:
+            return []
+
+        found_tags = []
+        for tag in group.synonyms:
+            # Check if tag exists in facts
+            for variant in [tag, f'us-gaap:{tag}']:
+                fact = self.get_fact(variant)
+                if fact is not None:
+                    found_tags.append(tag)
+                    break
+
+        return found_tags
+
+    def list_supported_concepts(self, category: Optional[str] = None) -> List[str]:
+        """
+        List concept names supported by get_concept().
+
+        Returns all concepts from the SynonymGroups registry, not just those
+        present in this company's facts. Use discover_concept_tags() to find
+        which tags actually exist for a specific company.
+
+        Args:
+            category: Optional filter by category ('income_statement', 'balance_sheet', 'cash_flow')
+
+        Returns:
+            List of concept names sorted alphabetically
+
+        Example:
+            >>> facts = company.get_facts()
+            >>> # All supported concepts
+            >>> all_concepts = facts.list_supported_concepts()
+            >>> # Just cash flow concepts
+            >>> cf_concepts = facts.list_supported_concepts(category='cash_flow')
+            >>> print(cf_concepts)
+            ['capex', 'dividends_paid', 'financing_cash_flow', 'operating_cash_flow', ...]
+        """
+        from edgar.standardization import get_synonym_groups
+
+        synonyms = get_synonym_groups()
+        return synonyms.list_groups(category=category)
+
     # Convenient properties for common DEI facts
     @property
     def shares_outstanding(self) -> Optional[float]:
