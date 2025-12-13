@@ -8,7 +8,7 @@ all SEC filings regardless of whether they use semantic anchors or generated IDs
 import re
 from typing import Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass
-from lxml import html as lxml_html
+from lxml import html as lxml_html, etree
 
 from edgar.documents.nodes import Node, SectionNode
 from edgar.documents.document import Document
@@ -200,76 +200,85 @@ class SECSectionExtractor:
     def _extract_section_content(self, html_content: str, boundary: SectionBoundary,
                                include_subsections: bool, clean: bool) -> str:
         """
-        Extract section content from HTML between anchors.
-        
+        Extract section content from HTML between anchors using document-order traversal.
+
+        This method traverses the document in reading order (depth-first) from the start
+        anchor to the end anchor, correctly handling multi-container sections where content
+        spans across different parent elements.
+
         Args:
             html_content: Full HTML content
             boundary: Section boundary info
             include_subsections: Whether to include subsections
             clean: Whether to clean the text
-            
+
         Returns:
             Extracted section text
         """
         # Handle XML declaration issues
         if html_content.startswith('<?xml'):
             html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-        
+
         tree = lxml_html.fromstring(html_content)
-        
-        # Find start element
+
+        # Verify start anchor exists
         start_elements = tree.xpath(f'//*[@id="{boundary.anchor_id}"]')
         if not start_elements:
             return ""
-        
-        start_element = start_elements[0]
 
-        # Collect content until we hit the end boundary (if specified)
-        content_elements = []
+        # Use document-order traversal (iterwalk) to collect all text between anchors
+        # This correctly handles multi-container sections where start and end anchors
+        # are in different parent containers
+        all_text = []
+        in_range = False
 
-        # If anchor has no siblings (nested in empty container), traverse up to find content container
-        # This handles cases like <div id="item7"><div></div></div> where content is after the container
-        current = start_element.getnext()
-        if current is None:
-            # No sibling - traverse up to find a container with siblings
-            container = start_element.getparent()
-            while container is not None and container.getnext() is None:
-                container = container.getparent()
+        # Block-level elements that should have paragraph breaks
+        block_elements = {'p', 'div', 'table', 'tr', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                         'blockquote', 'pre', 'section', 'article', 'header', 'footer'}
 
-            # Start from the container's next sibling if found
-            if container is not None:
-                current = container.getnext()
+        for event, el in etree.iterwalk(tree, events=('start', 'end')):
+            # Skip non-element nodes (comments, etc.)
+            if not hasattr(el, 'get'):
+                continue
 
-        # Collect content from siblings
-        if current is not None:
-            # Normal case - anchor has siblings
-            while current is not None:
+            el_id = el.get('id', '')
+            tag_name = el.tag.lower() if isinstance(el.tag, str) else ''
+
+            if event == 'start':
+                # Check if we've reached the start anchor
+                if el_id == boundary.anchor_id:
+                    in_range = True
+                    continue
+
                 # Check if we've reached the end boundary
-                if boundary.end_element_id:
-                    current_id = current.get('id', '')
-                    if current_id == boundary.end_element_id:
-                        break
+                if boundary.end_element_id and el_id == boundary.end_element_id:
+                    in_range = False
+                    break
 
-                    # Also check if this is a sibling section we should stop at
-                    if not include_subsections and self._is_sibling_section(current_id, boundary.name):
-                        break
+                # Check for sibling section boundaries (when not including subsections)
+                if in_range and not include_subsections and self._is_sibling_section(el_id, boundary.name):
+                    in_range = False
+                    break
 
-                content_elements.append(current)
-                current = current.getnext()
-        
-        # Extract text from collected elements
-        section_texts = []
-        for element in content_elements:
-            text = self._extract_element_text(element)
-            if text.strip():
-                section_texts.append(text)
-        
-        combined_text = '\n\n'.join(section_texts)
-        
+                # Collect text content from element's direct text
+                if in_range and el.text:
+                    all_text.append(el.text)
+
+            elif event == 'end':
+                # Add paragraph break after block-level elements
+                if in_range and tag_name in block_elements:
+                    all_text.append('\n\n')
+
+                # Collect tail text (text after closing tag)
+                if in_range and el.tail:
+                    all_text.append(el.tail)
+
+        combined_text = ''.join(all_text)
+
         # Apply cleaning if requested
         if clean:
             combined_text = self._clean_section_text(combined_text)
-        
+
         return combined_text
     
     def _is_sibling_section(self, element_id: str, current_section: str) -> bool:
