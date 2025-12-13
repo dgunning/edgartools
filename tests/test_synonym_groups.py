@@ -606,3 +606,125 @@ class TestConceptInfo:
         assert info.synonyms == ['Revenues']
         assert info.description == 'Total revenue'
         assert info.category == 'income_statement'
+
+
+class TestEntityFactsIntegration:
+    """Tests for EntityFacts integration with SynonymGroups."""
+
+    @pytest.fixture
+    def mock_entity_facts(self):
+        """Create a mock EntityFacts instance with test data."""
+        from edgar.entity.entity_facts import EntityFacts
+        from edgar.entity.models import FinancialFact
+        from datetime import date
+
+        # Create mock facts
+        facts = [
+            FinancialFact(
+                concept='RevenueFromContractWithCustomerExcludingAssessedTax',
+                taxonomy='us-gaap',
+                label='Revenue',
+                value=100000000,
+                numeric_value=100000000.0,
+                unit='USD',
+                period_type='duration',
+                period_start=date(2024, 1, 1),
+                period_end=date(2024, 12, 31),
+                fiscal_year=2024,
+                fiscal_period='FY',
+                accession='0001234-24-000001',
+                filing_date=date(2024, 3, 1),
+                form_type='10-K'
+            ),
+            FinancialFact(
+                concept='Revenues',
+                taxonomy='us-gaap',
+                label='Total Revenues',
+                value=95000000,
+                numeric_value=95000000.0,
+                unit='USD',
+                period_type='duration',
+                period_start=date(2023, 1, 1),
+                period_end=date(2023, 12, 31),
+                fiscal_year=2023,
+                fiscal_period='FY',
+                accession='0001234-23-000001',
+                filing_date=date(2023, 3, 1),
+                form_type='10-K'
+            ),
+            FinancialFact(
+                concept='NetIncomeLoss',
+                taxonomy='us-gaap',
+                label='Net Income',
+                value=10000000,
+                numeric_value=10000000.0,
+                unit='USD',
+                period_type='duration',
+                period_start=date(2024, 1, 1),
+                period_end=date(2024, 12, 31),
+                fiscal_year=2024,
+                fiscal_period='FY',
+                accession='0001234-24-000001',
+                filing_date=date(2024, 3, 1),
+                form_type='10-K'
+            ),
+        ]
+
+        return EntityFacts(cik=123456, name='Test Company', facts=facts)
+
+    def test_get_concept_returns_value(self, mock_entity_facts):
+        """Test get_concept returns correct value for known concept."""
+        value = mock_entity_facts.get_concept('revenue')
+        assert value is not None
+        assert value == 100000000.0
+
+    def test_get_concept_returns_none_for_unknown(self, mock_entity_facts):
+        """Test get_concept returns None for unknown concept."""
+        value = mock_entity_facts.get_concept('unknown_concept_xyz')
+        assert value is None
+
+    def test_get_concept_with_metadata(self, mock_entity_facts):
+        """Test get_concept with return_metadata=True."""
+        result = mock_entity_facts.get_concept('revenue', return_metadata=True)
+        assert isinstance(result, dict)
+        assert 'value' in result
+        assert 'tag_used' in result
+        assert 'concept_name' in result
+        assert 'synonyms_tried' in result
+        assert result['concept_name'] == 'revenue'
+        assert result['value'] == 100000000.0
+
+    def test_discover_concept_tags_finds_present_tags(self, mock_entity_facts):
+        """Test discover_concept_tags finds tags present in facts."""
+        tags = mock_entity_facts.discover_concept_tags('revenue')
+        assert 'RevenueFromContractWithCustomerExcludingAssessedTax' in tags
+        assert 'Revenues' in tags
+
+    def test_discover_concept_tags_empty_for_unknown(self, mock_entity_facts):
+        """Test discover_concept_tags returns empty for unknown concept."""
+        tags = mock_entity_facts.discover_concept_tags('unknown_concept_xyz')
+        assert tags == []
+
+    def test_list_supported_concepts_returns_list(self, mock_entity_facts):
+        """Test list_supported_concepts returns list of strings."""
+        concepts = mock_entity_facts.list_supported_concepts()
+        assert isinstance(concepts, list)
+        assert len(concepts) > 0
+        assert 'revenue' in concepts
+        assert 'net_income' in concepts
+
+    def test_list_supported_concepts_filters_by_category(self, mock_entity_facts):
+        """Test list_supported_concepts filters by category."""
+        cash_flow = mock_entity_facts.list_supported_concepts(category='cash_flow')
+        income_stmt = mock_entity_facts.list_supported_concepts(category='income_statement')
+
+        # Cash flow concepts should not include income statement concepts
+        assert 'operating_cash_flow' in cash_flow
+        assert 'revenue' in income_stmt
+        assert 'revenue' not in cash_flow
+
+    def test_get_concept_net_income(self, mock_entity_facts):
+        """Test get_concept works for net_income."""
+        value = mock_entity_facts.get_concept('net_income')
+        assert value is not None
+        assert value == 10000000.0
