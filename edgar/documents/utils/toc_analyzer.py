@@ -334,18 +334,32 @@ class TOCAnalyzer:
     def _get_section_type_and_order(self, text: str) -> Tuple[str, int]:
         """Get section type and order for sorting."""
         text_lower = text.lower()
-        
-        # Items
-        item_match = re.search(r'item\s*(\d+)([a-z]?)', text_lower)
+
+        # Part-aware section names (e.g., part_i_item_1, part_ii_item_1a)
+        # These names are generated for 10-Q filings to distinguish Part I and Part II items
+        part_aware_match = re.search(r'part_([ivx]+)_item[_\s]*(\d+)([a-z]?)', text_lower)
+        if part_aware_match:
+            part_roman = part_aware_match.group(1)
+            item_num = int(part_aware_match.group(2))
+            item_letter = part_aware_match.group(3) or ''
+            part_num = self._roman_to_int(part_roman)
+            # Order: Part I Item 1=100_1000, Part II Item 1=200_1000
+            # Part multiplier ensures Part I items come before Part II items
+            item_order = item_num * 1000 + (ord(item_letter.upper()) - ord('A') + 1 if item_letter else 0)
+            order = part_num * 100000 + item_order
+            return 'item', order
+
+        # Standard Items (Item 1, Item 1A, etc.)
+        item_match = re.search(r'item[\s_]*(\d+)([a-z]?)', text_lower)
         if item_match:
             item_num = int(item_match.group(1))
             item_letter = item_match.group(2) or ''
             # Order: Item 1=1000, Item 1A=1001, Item 2=2000, etc.
             order = item_num * 1000 + (ord(item_letter.upper()) - ord('A') + 1 if item_letter else 0)
             return 'item', order
-        
-        # Parts
-        part_match = re.search(r'part\s*([ivx]+)', text_lower)
+
+        # Parts (Part I, Part II, etc.)
+        part_match = re.search(r'part[\s_]*([ivx]+)', text_lower)
         if part_match:
             part_roman = part_match.group(1)
             part_num = self._roman_to_int(part_roman)
