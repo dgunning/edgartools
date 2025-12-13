@@ -173,11 +173,42 @@ See `tests/conftest.py` for the complete list.
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| Fast | ~1,168 | No network, run in ~2 min |
-| Network | ~1,154 | SEC API calls |
-| Slow | ~104 | Heavy processing |
-| Regression | ~372 | Bug fix verification |
+| Fast | ~1,116 | No network, run in ~2 min |
+| Network | ~965 | SEC API calls |
+| Slow | ~87 | Heavy processing |
+| Regression | ~306 | Bug fix verification |
 | **Total** | ~2,547 | All tests |
+
+## Coverage
+
+Test coverage is measured per group and **combined in CI** to enforce a 70% threshold.
+
+### Why Combined Coverage?
+
+Each test group only exercises a portion of the codebase:
+- Fast tests: ~52% (parsing, rendering, but no network code)
+- Network tests: ~55% (API calls, but not all parsing paths)
+- Slow tests: ~35% (limited test count)
+
+No single group reaches 70%, but combined they cover most of the codebase.
+
+### Local Coverage Check
+
+```bash
+# Run all tests with coverage
+hatch run cov
+
+# Check specific group
+hatch run test-fast -- --cov
+```
+
+### CI Coverage Flow
+
+1. `fast`, `network`, and `slow` tests run in parallel jobs
+2. Each uploads its `.coverage` file as an artifact
+3. A final `Combine Coverage` job merges all coverage data
+4. Combined coverage is checked against 70% threshold
+5. Report uploaded to Codecov
 
 ## Troubleshooting
 

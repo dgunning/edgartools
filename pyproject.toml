@@ -174,15 +174,15 @@ test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 # SELECTIVE PARALLELIZATION STRATEGY:
 # 1. Marker-based: -m 'not regression' excludes tests marked as regression
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
-# 3. Auto-marking: conftest.py automatically marks tests in regression folders
+# 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
 # 4. Selective parallel: Only parallelize tests safe from SEC rate limits
+# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 70% threshold
 #
-# This ensures regression tests are excluded and network tests respect SEC rate limits.
+# Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
 
 test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
 test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
-test-ci-core = "pytest -n 2 --cov --cov-report=xml -m 'not (fast or network or slow or regression or performance or batch)' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
 test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
 
 # Regression tests (run separately/on-demand for comprehensive bug prevention)
@@ -218,8 +218,8 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
-# Coverage threshold - CI will fail if coverage drops below this
-fail_under = 70
+# Coverage threshold moved to CI combined coverage check
+# Individual test groups don't meet 70% alone, only combined
 
 
 [tool.ruff]
