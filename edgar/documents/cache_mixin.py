@@ -5,7 +5,7 @@ This module consolidates the text caching pattern used across multiple node type
 (DocumentNode, ParagraphNode, ContainerNode, TableNode, and Document).
 """
 
-from typing import Callable, Any
+from typing import Any, Callable
 
 
 class CacheableMixin:

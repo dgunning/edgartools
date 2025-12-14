@@ -196,7 +196,7 @@ async def handle_compare_industry_companies(args: dict[str, Any]) -> list[TextCo
         # Compare financials
         response_parts = [
             f"# {industry.replace('_', ' ').title()} Industry Comparison",
-            f"",
+            "",
             f"Comparing {len(selected)} companies over {periods} {'annual' if annual else 'quarterly'} periods",
             "",
         ]

@@ -111,7 +111,7 @@ def get_certificate_config():
                 size_kb = os.path.getsize(value) // 1024
                 print(f"    (file exists, {size_kb} KB)")
             else:
-                print(f"    WARNING: File does not exist!")
+                print("    WARNING: File does not exist!")
 
     if not has_custom:
         print("  No custom certificate bundles configured.")
@@ -210,9 +210,9 @@ def test_ssl_handshake(host: str) -> Tuple[bool, bool, Optional[str]]:
                         is_corporate_proxy = True
 
                 if is_corporate_proxy:
-                    print_status("SSL Handshake", False, f"CORPORATE PROXY DETECTED")
+                    print_status("SSL Handshake", False, "CORPORATE PROXY DETECTED")
                     print(f"       Certificate issuer: {issuer_cn or issuer_org}")
-                    print(f"       Your network intercepts HTTPS traffic.")
+                    print("       Your network intercepts HTTPS traffic.")
                 else:
                     print_status("SSL Handshake", True, f"Certificate valid (issuer: {issuer_cn or issuer_org})")
 
@@ -232,7 +232,7 @@ def test_ssl_handshake(host: str) -> Tuple[bool, bool, Optional[str]]:
         except Exception:
             pass
 
-        print_status("SSL Handshake", False, f"Certificate verification failed")
+        print_status("SSL Handshake", False, "Certificate verification failed")
         print(f"       Error: {error_message[:100]}")
         return False, False, error_message
 

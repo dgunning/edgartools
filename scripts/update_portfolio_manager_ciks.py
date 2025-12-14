@@ -12,9 +12,10 @@ Usage:
 """
 
 import json
-import edgar
-import pandas as pd
 from pathlib import Path
+
+
+import edgar
 
 
 def get_recent_filing_ciks():
@@ -29,7 +30,7 @@ def get_recent_filing_ciks():
 
 def create_cik_mappings(filing_data):
     """Create mappings from our database keys to CIKs found in filings."""
-    
+
     # Manually verified mappings from recent filings
     mappings = {
         'millennium_management': {'cik': 1273087, 'filing_name': 'MILLENNIUM MANAGEMENT LLC'},
@@ -57,7 +58,7 @@ def create_cik_mappings(filing_data):
         'tiger_global': {'cik': 1167483, 'filing_name': 'TIGER GLOBAL MANAGEMENT LLC'},
         'coatue': {'cik': 1135730, 'filing_name': 'COATUE MANAGEMENT LLC'},
     }
-    
+
     # Verify mappings exist in filing data
     verified_mappings = {}
     for key, data in mappings.items():
@@ -71,67 +72,67 @@ def create_cik_mappings(filing_data):
             print(f"✅ {key}: CIK {cik} verified")
         else:
             print(f"❌ {key}: CIK {cik} not found in recent filings")
-    
+
     return verified_mappings
 
 
 def update_portfolio_manager_database(cik_mappings):
     """Update the portfolio manager database with CIKs."""
-    
+
     db_path = Path(__file__).parent.parent / 'edgar' / 'reference' / 'data' / 'portfolio_managers.json'
-    
+
     # Load current database
     with open(db_path, 'r', encoding='utf-8') as f:
         db = json.load(f)
-    
+
     # Update companies with CIKs
     updated_count = 0
     for db_key, company_data in db['managers'].items():
         if db_key in cik_mappings:
             mapping = cik_mappings[db_key]
-            
+
             # Add CIK
             company_data['cik'] = mapping['cik']
-            
+
             # Update company name to match SEC filing name for consistency
             original_name = company_data['company_name']
             filing_name = mapping['filing_name']
-            
+
             if original_name.lower() != filing_name.lower():
                 print(f"Updating name: '{original_name}' -> '{filing_name}'")
                 company_data['company_name'] = filing_name
-            
+
             updated_count += 1
             print(f"Updated {db_key}: CIK {mapping['cik']}")
-    
+
     # Update metadata
     db['metadata']['last_updated'] = '2025-01-09'
     db['metadata']['version'] = '2025.01.09'
     companies_with_ciks = sum(1 for data in db['managers'].values() if 'cik' in data)
-    
+
     print(f"\nUpdated {updated_count} companies with CIKs")
     print(f"Total companies with CIKs: {companies_with_ciks} / {len(db['managers'])}")
-    
+
     # Save updated database
     with open(db_path, 'w', encoding='utf-8') as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
-    
+
     print(f"Database saved to {db_path}")
 
 
 def main():
     """Main function to update portfolio manager database with CIKs."""
     print("=== Updating Portfolio Manager Database with CIKs ===\n")
-    
+
     # Get CIKs from recent filings
     filing_data = get_recent_filing_ciks()
-    
+
     # Create mappings
     cik_mappings = create_cik_mappings(filing_data)
-    
+
     # Update database
     update_portfolio_manager_database(cik_mappings)
-    
+
     print("\n=== Update Complete ===")
 
 

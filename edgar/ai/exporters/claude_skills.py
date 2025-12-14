@@ -8,10 +8,10 @@ Exports EdgarTools skills in official Anthropic Claude Skills format:
 - Validates YAML frontmatter structure
 """
 
+import re
 import shutil
 from pathlib import Path
 from typing import Optional
-import re
 
 
 def export_claude_skills(skill, output_dir: Optional[Path] = None, install: bool = True) -> Path:

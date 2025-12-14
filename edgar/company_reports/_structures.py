@@ -1,5 +1,4 @@
 """Filing structure definitions and validation utilities."""
-import re
 from typing import Dict, List, Pattern
 
 __all__ = ['FilingStructure', 'ItemOnlyFilingStructure', 'is_valid_item_for_filing', 'extract_items_from_sections']

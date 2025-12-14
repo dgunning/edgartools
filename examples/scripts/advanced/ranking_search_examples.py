@@ -75,7 +75,7 @@ def example_hybrid_search():
         top_k=5
     )
 
-    print(f"\nHybrid results (BM25 + semantic boosting):\n")
+    print("\nHybrid results (BM25 + semantic boosting):\n")
     for result in results:
         print(f"Score: {result.score:.3f} | Section: {result.section}")
         print(f"  {result.snippet[:100]}...\n")
@@ -106,7 +106,7 @@ def example_semantic_search():
         top_k=5
     )
 
-    print(f"\nStructurally important sections:\n")
+    print("\nStructurally important sections:\n")
     for result in results:
         print(f"Score: {result.score:.3f}")
         print(f"Section: {result.section}")
@@ -136,7 +136,7 @@ def example_section_specific_search():
         top_k=3
     )
 
-    print(f"\nResults from 'Risk Factors' section:\n")
+    print("\nResults from 'Risk Factors' section:\n")
     for result in results:
         print(f"Score: {result.score:.3f}")
         print(f"{result.snippet[:150]}...\n")
@@ -165,7 +165,7 @@ def example_section_boosting():
         top_k=5
     )
 
-    print(f"\nResults with section boosting:\n")
+    print("\nResults with section boosting:\n")
     for result in results:
         print(f"Score: {result.score:.3f} | Section: {result.section}")
         print(f"  {result.snippet[:100]}...\n")
@@ -199,14 +199,14 @@ def example_cache_performance():
     results2 = searcher.ranked_search("revenue", algorithm="bm25")
     warm_time = time.perf_counter() - start
 
-    print(f"\nCache Performance:")
+    print("\nCache Performance:")
     print(f"  Cold cache (first search): {cold_time:.3f}s")
     print(f"  Warm cache (repeat search): {warm_time:.3f}s")
     print(f"  Speedup: {cold_time / warm_time:.1f}x faster\n")
 
     # Get cache statistics
     stats = searcher.get_cache_stats()
-    print(f"Cache Statistics:")
+    print("Cache Statistics:")
     print(f"  Instance cache entries: {stats['instance_cache_entries']}")
 
     global_stats = stats.get('global_cache_stats', {})
@@ -238,7 +238,7 @@ def example_agent_workflow():
         top_k=3
     )
 
-    print(f"\nAgent workflow: Find → Investigate → Navigate\n")
+    print("\nAgent workflow: Find → Investigate → Navigate\n")
 
     for i, result in enumerate(results, 1):
         print(f"{i}. Found: {result.section}")
@@ -250,7 +250,7 @@ def example_agent_workflow():
             section = result._section_obj
             full_text = section.text()
             print(f"   Full section: {len(full_text)} characters available")
-            print(f"   Can navigate: section.children for sub-sections\n")
+            print("   Can navigate: section.children for sub-sections\n")
         else:
             print()
 
@@ -339,19 +339,19 @@ def example_clear_cache():
     searcher.ranked_search("content", algorithm="bm25")
 
     stats_before = searcher.get_cache_stats()
-    print(f"\nBefore clear:")
+    print("\nBefore clear:")
     print(f"  Instance cache entries: {stats_before['instance_cache_entries']}")
 
     # Clear only instance cache
     searcher.clear_cache(memory_only=True)
 
     stats_after = searcher.get_cache_stats()
-    print(f"\nAfter clear (memory only):")
+    print("\nAfter clear (memory only):")
     print(f"  Instance cache entries: {stats_after['instance_cache_entries']}")
 
     # Clear all caches
     searcher.clear_cache(memory_only=False)
-    print(f"\nCleared all caches (memory + disk)")
+    print("\nCleared all caches (memory + disk)")
 
 
 if __name__ == "__main__":

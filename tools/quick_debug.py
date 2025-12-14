@@ -31,16 +31,16 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from tools.visual_inspector import (
-    show_statement, show_dataframe, show_xbrl, show_filing_overview,
-    show_company_overview, compare_statements_visually, quick_look, peek
-)
-from tools.investigation_toolkit import (
-    visual_debug, debug_empty_periods, debug_entity_facts, debug_xbrl_parsing,
-    quick_analyze
-)
 from rich.console import Console
 from rich.panel import Panel
+
+from tools.investigation_toolkit import debug_empty_periods, debug_entity_facts, debug_xbrl_parsing
+from tools.visual_inspector import (
+    compare_statements_visually,
+    peek,
+    quick_look,
+    show_statement,
+)
 
 console = Console()
 
@@ -110,15 +110,15 @@ Examples:
     try:
         # Handle different debug modes
         if args.empty_periods:
-            console.print(f"[cyan]🔍 Debugging empty periods issue[/cyan]")
+            console.print("[cyan]🔍 Debugging empty periods issue[/cyan]")
             debug_empty_periods(args.empty_periods)
 
         elif args.entity_facts:
-            console.print(f"[cyan]🔍 Debugging entity facts issue[/cyan]")
+            console.print("[cyan]🔍 Debugging entity facts issue[/cyan]")
             debug_entity_facts(args.entity_facts)
 
         elif args.xbrl_structure:
-            console.print(f"[cyan]🔍 Debugging XBRL structure[/cyan]")
+            console.print("[cyan]🔍 Debugging XBRL structure[/cyan]")
             debug_xbrl_parsing(args.xbrl_structure)
 
         elif args.statement:
@@ -128,18 +128,18 @@ Examples:
 
         elif args.compare:
             accession1, accession2 = args.compare
-            console.print(f"[cyan]🔍 Comparing filings[/cyan]")
+            console.print("[cyan]🔍 Comparing filings[/cyan]")
             compare_statements_visually(
                 accession1, accession2, "cashflow",
                 "Filing 1", "Filing 2"
             )
 
         elif args.peek:
-            console.print(f"[cyan]🔍 Quick peek[/cyan]")
+            console.print("[cyan]🔍 Quick peek[/cyan]")
             peek(args.peek)
 
         elif args.identifier:
-            console.print(f"[cyan]🔍 Auto-detecting what to show[/cyan]")
+            console.print("[cyan]🔍 Auto-detecting what to show[/cyan]")
             quick_look(args.identifier)
 
         else:

@@ -7,7 +7,6 @@ Provides tokenization and text normalization for BM25 and semantic analysis.
 import re
 from typing import List, Set
 
-
 # Common English stopwords (minimal set for financial documents)
 # We keep many financial terms that might be stopwords in other contexts
 STOPWORDS: Set[str] = {

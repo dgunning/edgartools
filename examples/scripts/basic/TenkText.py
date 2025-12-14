@@ -1,6 +1,5 @@
 from edgar import *
 
-
 c = Company("ORCL")
 f = c.latest("10-K")
 text = f.text()

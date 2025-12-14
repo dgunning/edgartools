@@ -21,12 +21,7 @@ __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers
            'Exchange'
            ]
 
-from edgar.urls import (
-    build_ticker_url,
-    build_company_tickers_url,
-    build_mutual_fund_tickers_url,
-    build_company_tickers_exchange_url
-)
+from edgar.urls import build_company_tickers_exchange_url, build_company_tickers_url, build_mutual_fund_tickers_url, build_ticker_url
 
 
 @lru_cache(maxsize=1)

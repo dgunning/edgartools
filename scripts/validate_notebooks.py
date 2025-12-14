@@ -5,9 +5,10 @@ Checks all notebooks for API compatibility and common issues
 """
 import json
 import re
-from pathlib import Path
-from typing import List, Dict, Tuple
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List
+
 
 @dataclass
 class NotebookIssue:
@@ -180,7 +181,7 @@ def main():
 
     summary = validator.get_summary()
     print("\n" + "=" * 80)
-    print(f"📊 Summary:")
+    print("📊 Summary:")
     print(f"   Total issues: {summary['total_issues']}")
     print(f"   Errors: {summary['errors']}")
     print(f"   Warnings: {summary['warnings']}")

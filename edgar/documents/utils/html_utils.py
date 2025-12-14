@@ -5,8 +5,9 @@ This module consolidates common HTML processing utilities used across
 the parser, preprocessor, and simple parser implementations.
 """
 
-import lxml.html
 from typing import Optional
+
+import lxml.html
 
 
 def remove_xml_declaration(html: str) -> str:

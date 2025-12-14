@@ -463,7 +463,7 @@ def generate_checks(
             checks.append(CheckResult(
                 name="Custom CA Bundle",
                 status=CheckStatus.PASS,
-                message=f"REQUESTS_CA_BUNDLE is set",
+                message="REQUESTS_CA_BUNDLE is set",
                 details=cert_config.requests_ca_bundle,
             ))
         else:
@@ -570,7 +570,7 @@ def generate_checks(
         checks.append(CheckResult(
             name="HTTP Request (Configured)",
             status=CheckStatus.FAIL,
-            message=f"Request with your settings failed",
+            message="Request with your settings failed",
             details=network.configured_http_error[:200] if network.configured_http_error else None,
         ))
 

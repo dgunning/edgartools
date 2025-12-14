@@ -15,13 +15,14 @@ Research Questions:
 
 Related: GitHub #482, Beads edgartools-tm2
 """
-from edgar import Company
+import xml.etree.ElementTree as ET
+from collections import defaultdict
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-import xml.etree.ElementTree as ET
-from pathlib import Path
-from collections import defaultdict
+
+from edgar import Company
 
 console = Console()
 
@@ -36,7 +37,7 @@ def analyze_filing_footnotes(filing, company_name: str, year: int):
     try:
         # Get XBRL data
         xbrl = filing.xbrl()
-        console.print(f"[green]✓ XBRL parsed successfully[/green]")
+        console.print("[green]✓ XBRL parsed successfully[/green]")
 
         # Get the instance document XML
         # We need to download the actual XBRL instance file
@@ -140,17 +141,17 @@ def analyze_filing_footnotes(filing, company_name: str, year: int):
                 if sources:
                     console.print(f"    From: {sources[0]['from']}")
         else:
-            console.print(f"\n[bold green]✓ All footnote references are defined[/bold green]")
+            console.print("\n[bold green]✓ All footnote references are defined[/bold green]")
 
         # Show sample defined footnote IDs and their attributes
         if footnote_ids:
-            console.print(f"\n[dim]Sample defined footnote IDs:[/dim]")
+            console.print("\n[dim]Sample defined footnote IDs:[/dim]")
             for fn_id in sorted(list(footnote_ids)[:10]):
                 console.print(f"  • [green]{fn_id}[/green]")
 
         # Show attribute analysis
         if footnote_attrs:
-            console.print(f"\n[bold]Footnote ID Attribute Analysis:[/bold]")
+            console.print("\n[bold]Footnote ID Attribute Analysis:[/bold]")
             has_xlink_label = sum(1 for a in footnote_attrs if a['xlink_label'])
             has_id_attr = sum(1 for a in footnote_attrs if a['id'])
             has_both = sum(1 for a in footnote_attrs if a['xlink_label'] and a['id'])
@@ -160,7 +161,7 @@ def analyze_filing_footnotes(filing, company_name: str, year: int):
             console.print(f"  • Footnotes with both: {has_both}/{len(footnote_attrs)}")
 
             # Show sample
-            console.print(f"\n[dim]Sample footnote attributes:[/dim]")
+            console.print("\n[dim]Sample footnote attributes:[/dim]")
             for attrs in footnote_attrs[:3]:
                 console.print(f"  • xlink:label={attrs['xlink_label']}, id={attrs['id']}")
 
@@ -223,7 +224,7 @@ def compare_filings(old_result, new_result):
     console.print(table)
 
     # ID pattern analysis
-    console.print(f"\n[bold]ID Naming Patterns:[/bold]")
+    console.print("\n[bold]ID Naming Patterns:[/bold]")
 
     # Analyze old filing
     old_ids = old_result['defined_ids'][:5] if old_result['defined_ids'] else []
@@ -297,7 +298,7 @@ def main():
 
         if result_2015['undefined_refs'] > 0 and result_2023['undefined_refs'] == 0:
             console.print(f"\n[bold yellow]✓ Confirmed:[/bold yellow] 2015 filing has {result_2015['undefined_refs']} undefined references")
-            console.print(f"[bold green]✓ Confirmed:[/bold green] 2023 filing has no undefined references")
+            console.print("[bold green]✓ Confirmed:[/bold green] 2023 filing has no undefined references")
             console.print("\n[bold]Next Steps:[/bold]")
             console.print("  1. Examine the actual XML structure differences")
             console.print("  2. Research SEC XBRL taxonomy version changes")

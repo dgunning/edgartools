@@ -65,30 +65,30 @@ def example_3_docs_on_different_objects():
 
     # Every major object has documentation
     print("\n1. Company documentation:")
-    print(f"   Available via: company.docs")
-    print(f"   Size: ~1,070 lines")
+    print("   Available via: company.docs")
+    print("   Size: ~1,070 lines")
 
     # Get a filing
     filings = company.get_filings(form="10-K")
     filing = filings.latest()
 
     print("\n2. Filing documentation:")
-    print(f"   Available via: filing.docs")
-    print(f"   Size: ~557 lines")
+    print("   Available via: filing.docs")
+    print("   Size: ~557 lines")
 
     # Get XBRL data
     xbrl = filing.xbrl()
 
     print("\n3. XBRL documentation:")
-    print(f"   Available via: xbrl.docs")
-    print(f"   Size: ~587 lines")
+    print("   Available via: xbrl.docs")
+    print("   Size: ~587 lines")
 
     # Get a statement
     income = xbrl.statements.income_statement()
 
     print("\n4. Statement documentation:")
-    print(f"   Available via: income.docs")
-    print(f"   Size: ~567 lines")
+    print("   Available via: income.docs")
+    print("   Size: ~567 lines")
 
     print("\n📚 Total documentation: 3,450+ lines!")
 

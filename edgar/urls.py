@@ -4,7 +4,7 @@ URL builder utilities for SEC EDGAR.
 This module provides centralized URL construction functions that use the
 configured SEC mirror URLs from edgar.config.
 """
-from edgar.config import SEC_BASE_URL, SEC_DATA_URL, SEC_ARCHIVE_URL
+from edgar.config import SEC_ARCHIVE_URL, SEC_BASE_URL, SEC_DATA_URL
 
 __all__ = [
     'build_archive_url',

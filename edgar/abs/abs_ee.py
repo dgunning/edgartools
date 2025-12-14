@@ -27,8 +27,7 @@ Usage:
 
 from dataclasses import dataclass, field
 from datetime import date
-from functools import cached_property
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 from xml.etree import ElementTree as ET
 
 import pandas as pd

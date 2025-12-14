@@ -6,7 +6,7 @@ import re
 from typing import Dict, List, Optional, Tuple
 
 from edgar.documents.document import Document, Section
-from edgar.documents.nodes import Node, HeadingNode, SectionNode
+from edgar.documents.nodes import HeadingNode, Node, SectionNode
 
 
 class SectionExtractor:
@@ -19,7 +19,7 @@ class SectionExtractor:
     - MD&A (Item 7)
     - Financial Statements (Item 8)
     """
-    
+
     # Common section patterns for different filing types
     SECTION_PATTERNS = {
         '10-K': {
@@ -423,7 +423,7 @@ class SectionExtractor:
             ]
         }
     }
-    
+
     def __init__(self, form: Optional[str] = None):
         """
         Initialize section extractor.
@@ -432,7 +432,7 @@ class SectionExtractor:
             form: Type of filing (10-K, 10-Q, 8-K, etc.)
         """
         self.form = form
-    
+
     def extract(self, document: Document) -> Dict[str, Section]:
         """
         Extract sections from document.
@@ -476,7 +476,7 @@ class SectionExtractor:
 
         # Create section objects
         return self._create_sections(sections, document)
-    
+
     # NOTE: _detect_form() removed - form type should be known from context
     # Filing metadata should be set by the caller (Filing class, TenK/TenQ, etc.)
 
@@ -519,7 +519,7 @@ class SectionExtractor:
             return '8-K'
         else:
             return 'UNKNOWN'
-    
+
     def _get_general_patterns(self) -> Dict[str, List[Tuple[str, str]]]:
         """Get general section patterns."""
         return {
@@ -683,7 +683,7 @@ class SectionExtractor:
         headers.sort(key=lambda x: x[2])
 
         return headers
-    
+
     def _get_node_position(self, node: Node, document: Document) -> int:
         """Get position of node in document."""
         position = 0
@@ -692,7 +692,7 @@ class SectionExtractor:
                 return position
             position += 1
         return position
-    
+
     def _detect_10q_parts(self, headers: List[Tuple[Node, str, int]]) -> Dict[int, str]:
         """
         Detect Part I and Part II boundaries in 10-Q filings.
@@ -770,7 +770,7 @@ class SectionExtractor:
                     break
 
         return matched_sections
-    
+
     def _find_section_end(self, 
                          section_index: int, 
                          headers: List[Tuple[Node, str, int]],
@@ -780,24 +780,24 @@ class SectionExtractor:
         if section_index + 1 < len(headers):
             current_node = headers[section_index][0]
             current_level = current_node.level if isinstance(current_node, HeadingNode) else 1
-            
+
             for i in range(section_index + 1, len(headers)):
                 next_node = headers[i][0]
                 next_level = next_node.level if isinstance(next_node, HeadingNode) else 1
-                
+
                 # If next header is at same or higher level, that's our end
                 if next_level <= current_level:
                     return headers[i][2]
-        
+
         # Otherwise, section goes to end of document
         return sum(1 for _ in document.root.walk())
-    
+
     def _create_sections(self, 
                         matched_sections: Dict[str, Tuple[Node, str, int, int]], 
                         document: Document) -> Dict[str, Section]:
         """Create Section objects from matches."""
         sections = {}
-        
+
         for section_name, (node, title, start_pos, end_pos) in matched_sections.items():
             # Create section node containing all content in range
             section_node = SectionNode(section_name=section_name)
@@ -838,7 +838,7 @@ class SectionExtractor:
                 part=part,
                 item=item
             )
-            
+
             sections[section_name] = section
-        
+
         return sections

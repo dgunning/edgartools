@@ -23,10 +23,10 @@ Usage:
 
 from .core import ProxyStatement
 from .models import (
+    PROXY_FORMS,
     ExecutiveCompensation,
     NamedExecutive,
     PayVsPerformance,
-    PROXY_FORMS,
 )
 
 __all__ = [

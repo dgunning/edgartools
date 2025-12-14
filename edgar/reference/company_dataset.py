@@ -23,8 +23,6 @@ Example:
 """
 
 from pathlib import Path
-from typing import Optional, Union
-import logging
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -487,7 +485,6 @@ def to_duckdb(
 
     # Read Parquet file and convert to pandas
     table = pq.read_table(parquet_path)
-    import pandas as pd
     df = table.to_pandas()
 
     # Create DuckDB database

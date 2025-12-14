@@ -4,10 +4,9 @@ Data models for DEF 14A (Proxy Statement) filings.
 Contains dataclasses for executive compensation, pay vs performance metrics,
 and related governance data extracted from XBRL.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from decimal import Decimal
-from typing import List, Optional
-
+from typing import Optional
 
 __all__ = [
     'ExecutiveCompensation',

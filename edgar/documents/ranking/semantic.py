@@ -12,13 +12,12 @@ that helps agents find investigation starting points.
 """
 
 import re
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 if TYPE_CHECKING:
     from edgar.documents.nodes import Node
 
 from edgar.documents.types import NodeType, SemanticType
-
 
 # Gateway terms that indicate summary/overview content
 GATEWAY_TERMS = [

@@ -20,15 +20,8 @@ Example usage:
     print(schedule.items.item4_purpose_of_transaction)
 """
 
+from edgar.beneficial_ownership.models import IssuerInfo, ReportingPerson, Schedule13DItems, Schedule13GItems, SecurityInfo, Signature
 from edgar.beneficial_ownership.schedule13 import Schedule13D, Schedule13G
-from edgar.beneficial_ownership.models import (
-    ReportingPerson,
-    IssuerInfo,
-    SecurityInfo,
-    Schedule13DItems,
-    Schedule13GItems,
-    Signature
-)
 
 __all__ = [
     'Schedule13D',

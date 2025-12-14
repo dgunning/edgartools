@@ -5,12 +5,13 @@ Diagnostic script to investigate 8-K section detection failures.
 Tests the three detection strategies (TOC, heading, pattern) separately
 to identify which fails and why.
 """
-from edgar import Company
-from edgar.documents import parse_html
+import logging
+
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
-import logging
+
+from edgar import Company
+from edgar.documents import parse_html
 
 # Enable debug logging
 logging.basicConfig(level=logging.DEBUG, format='%(name)s - %(levelname)s - %(message)s')
@@ -32,7 +33,7 @@ def diagnose_filing(cik, accession, label="Filing"):
     filing = next((f for f in filings if f.accession_no == accession), None)
 
     if not filing:
-        console.print(f"[red]✗ Filing not found[/red]")
+        console.print("[red]✗ Filing not found[/red]")
         return
 
     console.print(f"[green]✓ Found filing: {filing.accession_no}[/green]")
@@ -43,7 +44,7 @@ def diagnose_filing(cik, accession, label="Filing"):
     console.print(f"[green]✓ Downloaded: {len(html_content):,} chars[/green]")
 
     doc = parse_html(html_content)
-    console.print(f"[green]✓ Parsed document[/green]")
+    console.print("[green]✓ Parsed document[/green]")
 
     # Extract text to verify items exist
     text = doc.text()
@@ -66,12 +67,12 @@ def diagnose_filing(cik, accession, label="Filing"):
             break
 
     if samples:
-        console.print(f"\n[dim]Sample item formatting in text:[/dim]")
+        console.print("\n[dim]Sample item formatting in text:[/dim]")
         for sample in samples:
             console.print(f"  [dim]...{sample.strip()}...[/dim]")
 
     # Test each detection strategy separately
-    console.print(f"\n[bold yellow]Testing Detection Strategies:[/bold yellow]\n")
+    console.print("\n[bold yellow]Testing Detection Strategies:[/bold yellow]\n")
 
     # Strategy 1: TOC-based
     console.print("[bold]1. TOC-Based Detection[/bold]")
@@ -111,7 +112,7 @@ def diagnose_filing(cik, accession, label="Filing"):
             console.print(f"    • {name}: {section.title}")
 
     # Final result via doc.sections
-    console.print(f"\n[bold]Final doc.sections result:[/bold]")
+    console.print("\n[bold]Final doc.sections result:[/bold]")
     sections = doc.sections
     console.print(f"  Result: [cyan]{len(sections)} sections in doc.sections[/cyan]")
     if sections:
@@ -119,7 +120,7 @@ def diagnose_filing(cik, accession, label="Filing"):
             console.print(f"    • {name}: {section.title} (method={section.detection_method}, conf={section.confidence:.2f})")
 
     # Summary
-    console.print(f"\n[bold green]Summary:[/bold green]")
+    console.print("\n[bold green]Summary:[/bold green]")
     console.print(f"  Items in text: {len(items_in_text)}")
     console.print(f"  TOC sections: {len(toc_sections)}")
     console.print(f"  Heading sections: {heading_sections}")
@@ -128,15 +129,15 @@ def diagnose_filing(cik, accession, label="Filing"):
 
     # Diagnosis
     if len(sections) == 0 and len(items_in_text) > 0:
-        console.print(f"\n[bold red]⚠ FAILURE: Items exist in text but not detected by any strategy[/bold red]")
+        console.print("\n[bold red]⚠ FAILURE: Items exist in text but not detected by any strategy[/bold red]")
         if len(toc_sections) == 0:
-            console.print(f"  • TOC detection failed (no TOC structure found)")
+            console.print("  • TOC detection failed (no TOC structure found)")
         if heading_sections == 0:
-            console.print(f"  • Heading detection failed (no item headings found)")
+            console.print("  • Heading detection failed (no item headings found)")
         if len(pattern_sections) == 0:
-            console.print(f"  • Pattern detection failed (regex patterns don't match)")
+            console.print("  • Pattern detection failed (regex patterns don't match)")
     elif len(sections) > 0:
-        console.print(f"\n[bold green]✓ SUCCESS: Section detection working[/bold green]")
+        console.print("\n[bold green]✓ SUCCESS: Section detection working[/bold green]")
 
 
 def main():

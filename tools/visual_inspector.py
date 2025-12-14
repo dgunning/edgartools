@@ -14,21 +14,15 @@ Usage:
     show_xbrl(xbrl, sections=["facts", "periods", "contexts"])
 """
 
-from typing import Dict, List, Any, Optional, Union
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.tree import Tree
-from rich.columns import Columns
-from rich.text import Text
-from rich.pretty import Pretty
+
 import pandas as pd
-from datetime import datetime
-import json
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
 
 # Ensure proper imports
 try:
-    from edgar import set_identity, Company, get_by_accession_number
+    from edgar import Company, get_by_accession_number, set_identity
 except ImportError:
     print("Warning: Edgar imports not available. Some functionality may be limited.")
 
@@ -80,7 +74,7 @@ def show_statement(filing_or_accession, statement_type="cashflow", max_rows=20, 
         console.print(f"Shape: {df.shape}")
 
         # Show the actual statement (what user sees)
-        console.print(f"\n[bold green]📋 What the user sees (rendered statement):[/bold green]")
+        console.print("\n[bold green]📋 What the user sees (rendered statement):[/bold green]")
 
         # Try to show the rendered statement
         try:
@@ -96,7 +90,7 @@ def show_statement(filing_or_accession, statement_type="cashflow", max_rows=20, 
         data_cols = [col for col in df.columns
                     if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
 
-        console.print(f"\n[bold yellow]📅 Period Analysis:[/bold yellow]")
+        console.print("\n[bold yellow]📅 Period Analysis:[/bold yellow]")
         period_table = Table(title="Periods Found")
         period_table.add_column("Period", style="cyan")
         period_table.add_column("Data Points", style="green")
@@ -165,7 +159,7 @@ def show_dataframe(df, title="DataFrame", max_rows=20, max_cols=None, show_dtype
 
     # Show column info
     if show_dtypes:
-        console.print(f"\n[cyan]📋 Column Info:[/cyan]")
+        console.print("\n[cyan]📋 Column Info:[/cyan]")
         col_table = Table(title="Columns")
         col_table.add_column("Column", style="cyan")
         col_table.add_column("Type", style="green")
@@ -230,7 +224,7 @@ def show_dataframe(df, title="DataFrame", max_rows=20, max_cols=None, show_dtype
     # Show summary stats for numeric columns
     numeric_cols = df.select_dtypes(include=['number']).columns
     if len(numeric_cols) > 0:
-        console.print(f"\n[cyan]📈 Numeric Summary:[/cyan]")
+        console.print("\n[cyan]📈 Numeric Summary:[/cyan]")
         stats_df = df[numeric_cols].describe()
         show_dataframe(stats_df, title="Statistics", max_rows=10, show_dtypes=False)
 
@@ -246,12 +240,12 @@ def show_xbrl(xbrl, sections=None, max_items=10):
     if sections is None:
         sections = ['basic', 'periods', 'facts', 'contexts']
 
-    console.print(f"\n[bold blue]🔍 XBRL Structure Inspection[/bold blue]")
+    console.print("\n[bold blue]🔍 XBRL Structure Inspection[/bold blue]")
 
     try:
         # Basic info
         if 'basic' in sections:
-            console.print(f"\n[cyan]📋 Basic Information:[/cyan]")
+            console.print("\n[cyan]📋 Basic Information:[/cyan]")
             basic_table = Table(title="XBRL Overview")
             basic_table.add_column("Property", style="cyan")
             basic_table.add_column("Value", style="green")
@@ -271,7 +265,7 @@ def show_xbrl(xbrl, sections=None, max_items=10):
 
         # Reporting periods
         if 'periods' in sections and hasattr(xbrl, 'reporting_periods'):
-            console.print(f"\n[cyan]📅 Reporting Periods:[/cyan]")
+            console.print("\n[cyan]📅 Reporting Periods:[/cyan]")
             periods_table = Table(title="Available Periods")
             periods_table.add_column("Index", style="blue")
             periods_table.add_column("Key", style="cyan")
@@ -292,7 +286,7 @@ def show_xbrl(xbrl, sections=None, max_items=10):
 
         # Facts overview
         if 'facts' in sections and hasattr(xbrl, 'facts'):
-            console.print(f"\n[cyan]📊 Facts Overview:[/cyan]")
+            console.print("\n[cyan]📊 Facts Overview:[/cyan]")
             facts = xbrl.facts
 
             # Sample facts
@@ -318,7 +312,7 @@ def show_xbrl(xbrl, sections=None, max_items=10):
 
         # Contexts overview
         if 'contexts' in sections and hasattr(xbrl, 'contexts'):
-            console.print(f"\n[cyan]🗂️  Contexts Overview:[/cyan]")
+            console.print("\n[cyan]🗂️  Contexts Overview:[/cyan]")
             contexts = xbrl.contexts
 
             # Context types analysis
@@ -366,7 +360,7 @@ def show_xbrl(xbrl, sections=None, max_items=10):
 
         # Elements (if available)
         if 'elements' in sections and hasattr(xbrl, 'element_catalog'):
-            console.print(f"\n[cyan]🏷️  Element Catalog:[/cyan]")
+            console.print("\n[cyan]🏷️  Element Catalog:[/cyan]")
             catalog = xbrl.element_catalog
 
             elements_table = Table(title=f"Sample Elements (showing {min(max_items, len(catalog))} of {len(catalog)})")
@@ -395,7 +389,7 @@ def show_filing_overview(filing_or_accession):
     Args:
         filing_or_accession: Filing object or accession number
     """
-    console.print(f"\n[bold blue]📄 Filing Overview[/bold blue]")
+    console.print("\n[bold blue]📄 Filing Overview[/bold blue]")
 
     try:
         # Get the filing
@@ -422,7 +416,7 @@ def show_filing_overview(filing_or_accession):
         console.print(filing_table)
 
         # Test XBRL availability
-        console.print(f"\n[cyan]🔍 XBRL Availability Test:[/cyan]")
+        console.print("\n[cyan]🔍 XBRL Availability Test:[/cyan]")
 
         try:
             xbrl = filing.xbrl()
@@ -465,7 +459,7 @@ def show_company_overview(ticker_or_cik):
     Args:
         ticker_or_cik: Company ticker or CIK
     """
-    console.print(f"\n[bold blue]🏢 Company Overview[/bold blue]")
+    console.print("\n[bold blue]🏢 Company Overview[/bold blue]")
 
     try:
         company = Company(ticker_or_cik)
@@ -486,7 +480,7 @@ def show_company_overview(ticker_or_cik):
         console.print(company_table)
 
         # Test facts availability
-        console.print(f"\n[cyan]📊 Facts Availability Test:[/cyan]")
+        console.print("\n[cyan]📊 Facts Availability Test:[/cyan]")
 
         try:
             facts = company.facts
@@ -511,7 +505,7 @@ def show_company_overview(ticker_or_cik):
             console.print(f"❌ Facts not accessible: {str(e)}")
 
         # Recent filings
-        console.print(f"\n[cyan]📄 Recent Filings:[/cyan]")
+        console.print("\n[cyan]📄 Recent Filings:[/cyan]")
 
         try:
             recent_filings = company.get_filings(form=['10-K', '10-Q']).head(5)
@@ -554,7 +548,7 @@ def compare_statements_visually(accession1, accession2, statement_type="cashflow
         desc1: Description for first filing
         desc2: Description for second filing
     """
-    console.print(f"\n[bold blue]📊 Visual Statement Comparison[/bold blue]")
+    console.print("\n[bold blue]📊 Visual Statement Comparison[/bold blue]")
     console.print(f"Comparing {statement_type} statements:")
     console.print(f"  📄 {desc1}: {accession1}")
     console.print(f"  📄 {desc2}: {accession2}")
@@ -574,7 +568,7 @@ def compare_statements_visually(accession1, accession2, statement_type="cashflow
 
     # Summary comparison
     if all(results.values()):
-        console.print(f"\n[bold green]📋 Summary Comparison[/bold green]")
+        console.print("\n[bold green]📋 Summary Comparison[/bold green]")
 
         comparison_table = Table(title="Statement Comparison")
         comparison_table.add_column("Metric", style="cyan")

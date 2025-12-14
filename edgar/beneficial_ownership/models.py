@@ -6,6 +6,7 @@ from Schedule 13D/G XML filings.
 """
 from dataclasses import dataclass
 from typing import Optional
+
 from edgar._party import Address
 
 __all__ = [

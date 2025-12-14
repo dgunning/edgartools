@@ -16,7 +16,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._filings import Filing, Filings, PagingState
-from edgar.core import IntString, log, listify
+from edgar.core import IntString, listify, log
 from edgar.formatting import accession_number_text, display_size
 from edgar.reference.forms import describe_form
 from edgar.richtools import Docs, df_to_rich_table, repr_rich
@@ -110,6 +110,7 @@ class EntityFiling(Filing):
             '7'
         """
         import re
+
         from edgar.documents.parser import HTMLParser
 
         # Only parse 8-K filings

@@ -15,7 +15,7 @@ class MatrixCell:
     is_spanned: bool = False  # True if this is part of a colspan/rowspan
     row_origin: int = -1  # Original row index
     col_origin: int = -1  # Original column index
-    
+
 
 class TableMatrix:
     """
@@ -24,7 +24,7 @@ class TableMatrix:
     This class converts a table with colspan/rowspan into a regular 2D grid
     where each merged cell occupies multiple positions in the matrix.
     """
-    
+
     def __init__(self):
         """Initialize empty matrix"""
         self.matrix: List[List[MatrixCell]] = []
@@ -52,52 +52,52 @@ class TableMatrix:
         # Add header rows
         for header_row in header_rows:
             all_rows.append(header_row)
-        
+
         # Add data rows
         for row in data_rows:
             all_rows.append(row.cells)
-        
+
         if not all_rows:
             return self
-        
+
         # Calculate dimensions
         self.row_count = len(all_rows)
-        
+
         # First pass: determine actual column count
         self._calculate_dimensions(all_rows)
-        
+
         # Initialize matrix
         self.matrix = [[MatrixCell() for _ in range(self.col_count)] 
                        for _ in range(self.row_count)]
-        
+
         # Second pass: place cells in matrix
         self._place_cells(all_rows)
-        
+
         return self
-    
+
     def _calculate_dimensions(self, rows: List[List[Cell]]):
         """Calculate the actual dimensions considering colspan"""
         max_cols = 0
-        
+
         for row_idx, row in enumerate(rows):
             col_pos = 0
             for cell in row:
                 # Skip positions that might be occupied by rowspan from above
                 while col_pos < max_cols and self._is_occupied(row_idx, col_pos):
                     col_pos += 1
-                
+
                 # This cell will occupy from col_pos to col_pos + colspan
                 col_end = col_pos + cell.colspan
                 max_cols = max(max_cols, col_end)
                 col_pos = col_end
-        
+
         self.col_count = max_cols
-    
+
     def _is_occupied(self, row: int, col: int) -> bool:
         """Check if a position is occupied by a cell from a previous row (rowspan)"""
         if row == 0:
             return False
-        
+
         # Check if any cell above has rowspan that reaches this position
         for prev_row in range(row):
             if prev_row < len(self.matrix) and col < len(self.matrix[prev_row]):
@@ -107,31 +107,31 @@ class TableMatrix:
                     if prev_row + cell.original_cell.rowspan > row:
                         return True
         return False
-    
+
     def _place_cells(self, rows: List[List[Cell]]):
         """Place cells in the matrix handling colspan and rowspan"""
         for row_idx, row in enumerate(rows):
             col_pos = 0
-            
+
             for cell_idx, cell in enumerate(row):
                 # Find next available column position
                 while col_pos < self.col_count and self.matrix[row_idx][col_pos].original_cell is not None:
                     col_pos += 1
-                
+
                 if col_pos >= self.col_count:
                     # Need to expand matrix
                     self._expand_columns(col_pos + cell.colspan)
-                
+
                 # Special handling for cells with colspan > 1 containing numeric values
                 # Only apply this logic for Table 15-style alignment issues
                 # Check if this looks like a financial value that should be right-aligned
                 cell_text = cell.text().strip()
-                
+
                 # Check for numeric values that need special alignment
                 # This is specifically for cases like "167,045" that should align with "$167,045"
                 has_comma_separator = ',' in cell_text
                 digit_ratio = sum(c.isdigit() for c in cell_text) / len(cell_text) if cell_text else 0
-                
+
                 # Only apply special placement for colspan=2 numeric values in data rows
                 # This handles Table 15's specific case without breaking Table 13
                 is_special_numeric = (cell.colspan == 2 and  # Specifically colspan=2
@@ -142,7 +142,7 @@ class TableMatrix:
                                            ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
                                             'jul', 'aug', 'sep', 'oct', 'nov', 'dec']) and
                                     row_idx > 1)  # Not a header row (allow for multi-row headers)
-                
+
                 if is_special_numeric:
                     # Place empty cell at first position, content at second position
                     # This is specifically for Table 15 alignment
@@ -150,7 +150,7 @@ class TableMatrix:
                         # First column of span: empty
                         if row_idx + r < self.row_count and col_pos < self.col_count:
                             self.matrix[row_idx + r][col_pos] = MatrixCell()
-                        
+
                         # Second column of span: the actual content
                         if row_idx + r < self.row_count and col_pos + 1 < self.col_count:
                             matrix_cell = MatrixCell(
@@ -160,7 +160,7 @@ class TableMatrix:
                                 col_origin=col_pos + 1
                             )
                             self.matrix[row_idx + r][col_pos + 1] = matrix_cell
-                        
+
                         # Remaining columns of span: mark as spanned (though colspan=2 has no remaining)
                         for c in range(2, cell.colspan):
                             if row_idx + r < self.row_count and col_pos + c < self.col_count:
@@ -183,23 +183,23 @@ class TableMatrix:
                                     col_origin=col_pos
                                 )
                                 self.matrix[row_idx + r][col_pos + c] = matrix_cell
-                
+
                 col_pos += cell.colspan
-    
+
     def _expand_columns(self, new_col_count: int):
         """Expand matrix to accommodate more columns"""
         if new_col_count <= self.col_count:
             return
-        
+
         for row in self.matrix:
             row.extend([MatrixCell() for _ in range(new_col_count - self.col_count)])
-        
+
         self.col_count = new_col_count
-    
+
     def get_actual_columns(self) -> int:
         """Get the actual number of data columns (excluding empty/spacing columns)"""
         non_empty_cols = 0
-        
+
         for col_idx in range(self.col_count):
             has_content = False
             for row_idx in range(self.row_count):
@@ -210,20 +210,20 @@ class TableMatrix:
                     if text and text not in ['', ' ', '\xa0']:
                         has_content = True
                         break
-            
+
             if has_content:
                 non_empty_cols += 1
-        
+
         return non_empty_cols
-    
+
     def get_column_widths(self) -> List[float]:
         """Estimate column widths based on content"""
         widths = []
-        
+
         for col_idx in range(self.col_count):
             max_width = 0
             content_count = 0
-            
+
             for row_idx in range(self.row_count):
                 cell = self.matrix[row_idx][col_idx]
                 if cell.original_cell and not cell.is_spanned:
@@ -231,15 +231,15 @@ class TableMatrix:
                     if text:
                         max_width = max(max_width, len(text))
                         content_count += 1
-            
+
             # If column has no content, it's likely a spacing column
             if content_count == 0:
                 widths.append(0)
             else:
                 widths.append(max_width)
-        
+
         return widths
-    
+
     def get_cell(self, row_idx: int, col_idx: int) -> Optional[Cell]:
         """
         Get a cell at specific position in the matrix.
@@ -253,16 +253,16 @@ class TableMatrix:
         """
         if row_idx >= self.row_count or col_idx >= self.col_count or row_idx < 0 or col_idx < 0:
             return None
-        
+
         matrix_cell = self.matrix[row_idx][col_idx]
-        
+
         # Return the original cell
         if matrix_cell.original_cell:
             return matrix_cell.original_cell
-        
+
         # Return empty cell for empty positions
         return Cell("")
-    
+
     def get_expanded_row(self, row_idx: int) -> List[Optional[Cell]]:
         """
         Get a row with cells expanded to match column count.
@@ -272,7 +272,7 @@ class TableMatrix:
         """
         if row_idx >= self.row_count:
             return []
-        
+
         expanded = []
         for col_idx in range(self.col_count):
             matrix_cell = self.matrix[row_idx][col_idx]
@@ -286,9 +286,9 @@ class TableMatrix:
             else:
                 # Empty cell
                 expanded.append(None)
-        
+
         return expanded
-    
+
     def get_data_columns(self) -> List[int]:
         """
         Get indices of columns that contain actual data (not spacing).
@@ -310,24 +310,24 @@ class TableMatrix:
                         break
             if not has_content:
                 empty_cols.append(col_idx)
-        
+
         # Apply old parser's strategy
         cols_to_remove = set()
-        
+
         # Remove leading empty columns
         for col in range(self.col_count):
             if col in empty_cols:
                 cols_to_remove.add(col)
             else:
                 break
-        
+
         # Remove trailing empty columns
         for col in reversed(range(self.col_count)):
             if col in empty_cols:
                 cols_to_remove.add(col)
             else:
                 break
-        
+
         # Remove consecutive empty columns in the middle (keep single empty cols for spacing)
         i = 0
         while i < self.col_count - 1:
@@ -343,12 +343,12 @@ class TableMatrix:
                 i = j
             else:
                 i += 1
-        
+
         # Return columns that are NOT in the removal set
         data_cols = [col for col in range(self.col_count) if col not in cols_to_remove]
-        
+
         return data_cols
-    
+
     def filter_spacing_columns(self) -> 'TableMatrix':
         """
         Create a new matrix with spacing columns removed.
@@ -362,7 +362,7 @@ class TableMatrix:
         primary_header_cols = set()
         all_header_cols = set()
         data_cols = set()
-        
+
         # Find primary header columns (those that start a colspan)
         for row_idx in range(min(3, self.row_count)):
             for col_idx in range(self.col_count):
@@ -373,7 +373,7 @@ class TableMatrix:
                         # Check if this is a primary header (colspan > 1)
                         if cell.original_cell.colspan > 1:
                             primary_header_cols.add(col_idx)
-        
+
         # If no primary headers found, use all headers as primary
         if not primary_header_cols:
             primary_header_cols = all_header_cols
@@ -422,9 +422,9 @@ class TableMatrix:
             if has_numeric_data:
                 break
             actual_header_rows += 1
-        
+
         data_start_row = max(1, actual_header_rows)
-        
+
         # Track columns with significant data (not just isolated cells)
         col_data_count = {}
         for row_idx in range(data_start_row, self.row_count):
@@ -434,44 +434,44 @@ class TableMatrix:
                     if cell.original_cell.text().strip():
                         data_cols.add(col_idx)
                         col_data_count[col_idx] = col_data_count.get(col_idx, 0) + 1
-        
+
         # Build initial list of columns to keep
         # Always include column 0 if it contains row labels
         cols_to_keep = set(primary_header_cols)
 
         # Add columns with header content (prevents removing legitimate headers)
         cols_to_keep.update(header_content_columns)
-        
+
         # Identify misaligned data columns that need to be consolidated
         # These are data columns that are not primary header columns
         misaligned_data_cols = data_cols - primary_header_cols
-        
+
         # Map misaligned data columns to their nearest column for consolidation
         # Only consolidate directly adjacent columns with specific patterns
         consolidation_map = {}
-        
+
         # First pass: identify all potential consolidations
         potential_consolidations = {}
         for data_col in sorted(misaligned_data_cols):
             # Check if this column should be consolidated with an adjacent column
             # Check the column immediately before this one
             prev_col = data_col - 1
-            
+
             # Sample some cells to see if consolidation makes sense
             consolidation_type = None
-            
+
             for row_idx in range(data_start_row, min(data_start_row + 10, self.row_count)):
                 prev_cell = self.matrix[row_idx][prev_col] if prev_col >= 0 else None
                 curr_cell = self.matrix[row_idx][data_col]
-                
+
                 if prev_cell and prev_cell.original_cell and curr_cell.original_cell:
                     prev_text = prev_cell.original_cell.text().strip()
                     curr_text = curr_cell.original_cell.text().strip()
-                    
+
                     # Skip empty cells
                     if not prev_text or not curr_text:
                         continue
-                    
+
                     # Check for patterns that indicate consolidation
                     if prev_text == '$' and curr_text and curr_text[0].isdigit():
                         consolidation_type = 'currency'
@@ -482,10 +482,10 @@ class TableMatrix:
                     elif curr_text == '%' and prev_text and prev_text[-1].isdigit():
                         consolidation_type = 'percentage'
                         break
-            
+
             if consolidation_type:
                 potential_consolidations[data_col] = (prev_col, consolidation_type)
-        
+
         # Second pass: resolve conflicts
         # If column Y is a target for consolidation from Y+1 (e.g., parentheses),
         # then don't consolidate Y into another column
@@ -494,7 +494,7 @@ class TableMatrix:
             if cons_type == 'parentheses':
                 # This target column is needed for parentheses consolidation
                 columns_needed_as_targets.add(target_col)
-        
+
         # Build final consolidation map, skipping consolidations that would remove needed targets
         for data_col, (target_col, cons_type) in potential_consolidations.items():
             # Don't consolidate this column if it's needed as a target for parentheses
@@ -511,7 +511,7 @@ class TableMatrix:
             # import os
             # if os.environ.get('DEBUG_TABLE_CONSOLIDATION'):
             #     print(f"Consolidating column {data_col} into {target_col}")
-        
+
         # Special case: Keep data columns that are associated with header columns
         # This handles cases where headers span multiple columns but data is in specific columns
         for header_col in primary_header_cols:
@@ -531,7 +531,7 @@ class TableMatrix:
                                 break
                     if has_data:
                         cols_to_keep.add(data_col)
-        
+
         # Keep data columns that have significant content but aren't near header columns
         # This includes columns with dates, text descriptions, etc.
         for col_idx in data_cols:
@@ -540,7 +540,7 @@ class TableMatrix:
                 has_important_data = False
                 non_empty_count = 0
                 text_samples = []
-                
+
                 for row_idx in range(data_start_row, min(data_start_row + 10, self.row_count)):
                     cell = self.matrix[row_idx][col_idx]
                     if cell.original_cell and not cell.is_spanned:
@@ -549,7 +549,7 @@ class TableMatrix:
                             non_empty_count += 1
                             if len(text_samples) < 3:
                                 text_samples.append(text)
-                            
+
                             # Check for important patterns
                             # Dates, years, text descriptions, etc.
                             if any([
@@ -561,11 +561,11 @@ class TableMatrix:
                                 '20' in text and any(c.isdigit() for c in text),  # Likely contains year
                             ]):
                                 has_important_data = True
-                
+
                 # Keep columns with consistent important data
                 if has_important_data and non_empty_count >= 3:
                     cols_to_keep.add(col_idx)
-        
+
         # Special case: If we have very few primary headers but lots of data columns,
         # we might have a table where headers are in data rows (like years)
         # Keep columns that have significant financial data
@@ -574,7 +574,7 @@ class TableMatrix:
             for col_idx in data_cols:
                 has_financial_data = False
                 sample_count = 0
-                
+
                 # Sample a few cells from this column
                 for row_idx in range(data_start_row, min(data_start_row + 5, self.row_count)):
                     cell = self.matrix[row_idx][col_idx]
@@ -593,11 +593,11 @@ class TableMatrix:
                             ]):
                                 has_financial_data = True
                                 break
-                
+
                 # Keep columns with financial data
                 if has_financial_data and sample_count > 0:
                     cols_to_keep.add(col_idx)
-        
+
         # Check if column 0 contains row labels (non-empty cells in data rows)
         col_0_has_labels = False
         data_start_row = max(1, actual_header_rows)
@@ -608,38 +608,38 @@ class TableMatrix:
                 if text and not text.isdigit() and not text.startswith('$') and len(text) > 1:
                     col_0_has_labels = True
                     break
-        
+
         # Include column 0 if it has labels
         if col_0_has_labels:
             cols_to_keep.add(0)
-        
+
         # Remove columns that will be consolidated into other columns
         # These columns' data will be merged into their target columns
         cols_to_remove = set(consolidation_map.keys())
         cols_to_keep = cols_to_keep - cols_to_remove
-        
+
         cols_to_keep = sorted(cols_to_keep)
-        
+
         # Create new matrix with consolidated columns
         if not cols_to_keep:
             return self
-        
+
         new_matrix = TableMatrix()
         new_matrix.row_count = self.row_count
         new_matrix.col_count = len(cols_to_keep)
         new_matrix.header_row_count = self.header_row_count  # Preserve header row count
         new_matrix.matrix = []
-        
+
         # Create mapping from old to new column indices
         old_to_new = {old_col: new_idx for new_idx, old_col in enumerate(cols_to_keep)}
-        
+
         # Build new matrix with consolidation
         for row_idx in range(self.row_count):
             new_row = [MatrixCell() for _ in range(new_matrix.col_count)]
-            
+
             # Track which cells we've already placed to handle colspan properly
             placed_origins = {}  # Maps (row_origin, col_origin) to new column index
-            
+
             # First, copy cells from kept columns
             for old_col in sorted(cols_to_keep):
                 if old_col not in old_to_new:
@@ -648,7 +648,7 @@ class TableMatrix:
                 cell = self.matrix[row_idx][old_col]
                 if cell.original_cell:
                     origin_key = (cell.row_origin, cell.col_origin)
-                    
+
                     # Check if we've already placed this cell (due to colspan)
                     if origin_key in placed_origins:
                         # This is a continuation of a colspan - mark as spanned
@@ -667,14 +667,14 @@ class TableMatrix:
                             col_origin=new_col
                         )
                         placed_origins[origin_key] = new_col
-            
+
             # Then, consolidate misaligned data into header columns
             for data_col, header_col in consolidation_map.items():
                 if header_col in old_to_new:
                     new_col = old_to_new[header_col]
                     data_cell = self.matrix[row_idx][data_col] if data_col < len(self.matrix[row_idx]) else None
-                    
-                    
+
+
                     # If data cell has content, merge it with header column
                     if data_cell and data_cell.original_cell and not data_cell.is_spanned:
                         # Skip empty data cells
@@ -683,13 +683,13 @@ class TableMatrix:
                         # Check the original header column cell to see if it has content to merge
                         header_cell = self.matrix[row_idx][header_col]
                         existing_cell = new_row[new_col]
-                        
+
                         # Check if we need to merge (e.g., $ with value)
                         if header_cell.original_cell and header_cell.original_cell.text().strip():
                             existing_text = header_cell.original_cell.text().strip()
                             new_text = data_cell.original_cell.text().strip()
-                            
-                            
+
+
                             # Merge currency symbol with value OR value with percentage OR parentheses
                             if existing_text == '$' and new_text:
                                 # Currency merge: $ + number
@@ -758,11 +758,11 @@ class TableMatrix:
                                 row_origin=row_idx,
                                 col_origin=new_col
                             )
-            
+
             new_matrix.matrix.append(new_row)
-        
+
         return new_matrix
-    
+
     def to_cell_grid(self) -> List[List[Optional[Cell]]]:
         """
         Convert matrix to a simple 2D grid of cells.
@@ -771,7 +771,7 @@ class TableMatrix:
             2D list where each position contains either a Cell or None
         """
         grid = []
-        
+
         for row_idx in range(self.row_count):
             row = []
             for col_idx in range(self.col_count):
@@ -781,13 +781,13 @@ class TableMatrix:
                 else:
                     row.append(None)
             grid.append(row)
-        
+
         return grid
-    
+
     def debug_print(self):
         """Print matrix structure for debugging"""
         print(f"Matrix: {self.row_count}×{self.col_count}")
-        
+
         for row_idx in range(self.row_count):
             row_str = []
             for col_idx in range(self.col_count):
@@ -805,11 +805,11 @@ class TableMatrix:
 
 class ColumnAnalyzer:
     """Analyze column structure to identify data vs spacing columns"""
-    
+
     def __init__(self, matrix: TableMatrix):
         """Initialize with a table matrix"""
         self.matrix = matrix
-    
+
     def identify_spacing_columns(self) -> List[int]:
         """
         Identify columns used only for spacing.
@@ -820,13 +820,13 @@ class ColumnAnalyzer:
         spacing_cols = []
         widths = self.matrix.get_column_widths()
         total_width = sum(widths)
-        
+
         for col_idx in range(self.matrix.col_count):
             if self._is_spacing_column(col_idx, widths, total_width):
                 spacing_cols.append(col_idx)
-        
+
         return spacing_cols
-    
+
     def _is_spacing_column(self, col_idx: int, widths: List[float], total_width: float) -> bool:
         """
         Check if a column is used for spacing.
@@ -843,10 +843,10 @@ class ColumnAnalyzer:
                 # If there's any text at all, it's not a spacing column
                 if text:
                     return False
-        
+
         # Column is completely empty
         return True
-    
+
     def get_clean_column_indices(self) -> List[int]:
         """
         Get indices of non-spacing columns.

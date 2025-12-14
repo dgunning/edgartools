@@ -5,7 +5,6 @@ Removes repetitive "Table of Contents" anchor links from document text,
 matching the behavior of the old parser.
 """
 import re
-from typing import List
 
 
 def filter_toc_links(text: str) -> str:
@@ -33,7 +32,7 @@ def filter_toc_links(text: str) -> str:
     """
     if not text:
         return text
-    
+
     # Navigation link patterns based on analysis
     patterns = [
         r'^Table of Contents$',
@@ -42,18 +41,18 @@ def filter_toc_links(text: str) -> str:
         r'^INDEX TO EXHIBITS$', 
         r'^Index to Exhibits$',
     ]
-    
+
     # Compile all patterns into one regex
     combined_pattern = re.compile('|'.join(f'({pattern})' for pattern in patterns), re.IGNORECASE)
-    
+
     lines = text.split('\n')
     filtered_lines = []
-    
+
     for line in lines:
         stripped_line = line.strip()
         if not combined_pattern.match(stripped_line):
             filtered_lines.append(line)
-    
+
     return '\n'.join(filtered_lines)
 
 
@@ -69,18 +68,18 @@ def get_toc_link_stats(text: str) -> dict:
     """
     if not text:
         return {'total_matches': 0, 'patterns': {}, 'examples': []}
-    
+
     # All navigation patterns we filter
     patterns = {
         'Table of Contents': re.compile(r'^Table of Contents$', re.IGNORECASE),
         'Index to Financial Statements': re.compile(r'^Index to Financial Statements$', re.IGNORECASE), 
         'Index to Exhibits': re.compile(r'^Index to Exhibits$', re.IGNORECASE),
     }
-    
+
     lines = text.split('\n')
     all_matches = []
     pattern_counts = {}
-    
+
     for pattern_name, pattern_regex in patterns.items():
         pattern_matches = []
         for i, line in enumerate(lines):
@@ -92,10 +91,10 @@ def get_toc_link_stats(text: str) -> dict:
                     'stripped': stripped_line,
                     'pattern': pattern_name
                 })
-        
+
         pattern_counts[pattern_name] = len(pattern_matches)
         all_matches.extend(pattern_matches[:5])  # First 5 examples per pattern
-    
+
     return {
         'total_matches': sum(pattern_counts.values()),
         'patterns': pattern_counts,

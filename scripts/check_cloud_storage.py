@@ -20,6 +20,7 @@ For MinIO, start Docker container first:
 """
 import sys
 import time
+
 import edgar
 from edgar.filesystem import reset_filesystem
 

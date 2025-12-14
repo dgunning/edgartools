@@ -1,5 +1,6 @@
 from edgar.funds import *
 
+
 def research_investment_fund(ticker):
     """
     Research investment fund performance and compare with competitors.

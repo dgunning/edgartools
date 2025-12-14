@@ -6,7 +6,8 @@ SEC filings and financial statements using EdgarTools.
 """
 
 from pathlib import Path
-from typing import Dict, Callable
+from typing import Callable, Dict
+
 from edgar.ai.skills.base import BaseSkill
 
 __all__ = ['EdgarToolsSkill', 'edgartools_skill']

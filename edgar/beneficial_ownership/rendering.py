@@ -5,11 +5,12 @@ This module provides beautiful terminal output for beneficial ownership reports
 using the Rich library.
 """
 from typing import TYPE_CHECKING
-from rich.table import Table
-from rich.panel import Panel
-from rich.console import Group
-from rich.text import Text
+
 from rich import box
+from rich.console import Group
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
 if TYPE_CHECKING:
     from edgar.beneficial_ownership.schedule13 import Schedule13D, Schedule13G

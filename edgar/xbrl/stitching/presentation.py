@@ -54,8 +54,8 @@ class VirtualPresentationTree:
         self.root_nodes: List[PresentationNode] = []
         self.all_nodes: Dict[str, PresentationNode] = {}
 
-    def build_tree(self, concept_metadata: Dict, concept_ordering: Dict, 
-                   original_statement_order: List[str] = None) -> List[PresentationNode]:
+    def build_tree(self, concept_metadata: Dict, concept_ordering: Dict,
+                   original_statement_order: Optional[List[str]] = None) -> List[PresentationNode]:
         """
         Build presentation tree from concept metadata and ordering.
 
@@ -80,7 +80,7 @@ class VirtualPresentationTree:
         return self._flatten_tree()
 
     def _create_nodes(self, concept_metadata: Dict, concept_ordering: Dict,
-                     original_statement_order: List[str] = None):
+                      original_statement_order: Optional[List[str]] = None):
         """Create nodes for all concepts"""
         self.all_nodes = {}
 

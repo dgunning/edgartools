@@ -201,8 +201,8 @@ class ThirteenF:
         See Also:
             holdings: Aggregated view (recommended for most users)
         """
-        from edgar.thirteenf.parsers.infotable_xml import parse_infotable_xml
         from edgar.thirteenf.parsers.infotable_txt import parse_infotable_txt
+        from edgar.thirteenf.parsers.infotable_xml import parse_infotable_xml
 
         if self.has_infotable():
             # Try XML format first

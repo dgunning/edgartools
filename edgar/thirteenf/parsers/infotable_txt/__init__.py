@@ -6,10 +6,11 @@ Supports two TXT formats from 2012 filings:
 """
 
 import re
+
 import pandas as pd
 
-from .format_multiline import parse_multiline_format
 from .format_columnar import parse_columnar_format
+from .format_multiline import parse_multiline_format
 
 __all__ = ['parse_infotable_txt']
 

@@ -7,11 +7,11 @@ Exports EdgarTools skills for Claude Desktop upload:
 - Includes all supporting markdown files and API reference
 """
 
+import re
 import shutil
 import zipfile
 from pathlib import Path
 from typing import Optional
-import re
 
 
 def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: bool = True) -> Path:

@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import date, datetime
-from functools import lru_cache, cached_property
-from typing import List, Optional, Dict
+from functools import cached_property, lru_cache
+from typing import Dict, List, Optional
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, ConfigDict
@@ -16,7 +16,7 @@ from edgar.core import get_bool
 from edgar.entity import Company
 from edgar.formatting import yes_no
 from edgar.reference import states
-from edgar.richtools import repr_rich, Docs
+from edgar.richtools import Docs, repr_rich
 from edgar.xmltools import child_text
 
 __all__ = ['FormC', 'Signer', 'FundingPortal', 'IssuerCompany']
@@ -787,7 +787,7 @@ class FormC:
 
             # Over-subscription (full only)
             if detail == 'full' and self.offering_information.over_subscription_accepted == "Y":
-                lines.append(f"  Over-subscription: Accepted")
+                lines.append("  Over-subscription: Accepted")
 
             # Portal fees (full only)
             if detail == 'full' and self.offering_information.compensation_amount:
@@ -820,7 +820,7 @@ class FormC:
 
             # Revenue status
             if fin.is_pre_revenue:
-                lines.append(f"  Revenue: $0 (pre-revenue)")
+                lines.append("  Revenue: $0 (pre-revenue)")
             else:
                 rev_curr = fin.revenue_most_recent_fiscal_year
                 rev_prior = fin.revenue_prior_fiscal_year

@@ -9,8 +9,7 @@ and FastTableRenderer.render_table_node()).
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from edgar.documents.utils.table_matrix import TableMatrix, ColumnAnalyzer
-    from edgar.documents.utils.currency_merger import CurrencyColumnMerger
+    from edgar.documents.utils.table_matrix import TableMatrix
 
 
 def process_table_matrix(matrix: "TableMatrix", headers, rows) -> "TableMatrix":
@@ -42,8 +41,8 @@ def process_table_matrix(matrix: "TableMatrix", headers, rows) -> "TableMatrix":
         - renderers/fast_table.py:XXX (FastTableRenderer.render_table_node())
     """
     # Import at runtime to avoid circular imports
-    from edgar.documents.utils.table_matrix import ColumnAnalyzer
     from edgar.documents.utils.currency_merger import CurrencyColumnMerger
+    from edgar.documents.utils.table_matrix import ColumnAnalyzer
 
     # Step 1: Build matrix from rows (expands colspan/rowspan)
     matrix.build_from_rows(headers, rows)

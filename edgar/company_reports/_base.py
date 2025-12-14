@@ -1,13 +1,13 @@
 """Base class for company report filings."""
+import warnings
 from functools import cached_property
 from typing import List
-import warnings
 
 from rich import print
 from rich.console import Group, Text
 from rich.panel import Panel
 
-from edgar.documents import HTMLParser, Document
+from edgar.documents import Document, HTMLParser
 from edgar.files.htmltools import ChunkedDocument  # Keep for backwards compat
 from edgar.financials import Financials
 from edgar.richtools import repr_rich

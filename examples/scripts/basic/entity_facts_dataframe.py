@@ -30,7 +30,7 @@ def main():
 
     print(f"\n✅ Exported {len(df):,} facts to DataFrame")
     print(f"Columns: {list(df.columns)}")
-    print(f"\nFirst 5 rows:")
+    print("\nFirst 5 rows:")
     print(df.head())
 
     # Example 2: Filter for revenue data
@@ -60,7 +60,7 @@ def main():
     df_slim = annual_facts.to_dataframe(
         columns=['concept', 'fiscal_year', 'numeric_value', 'unit']
     )
-    print(f"\n✅ Slim DataFrame with selected columns:")
+    print("\n✅ Slim DataFrame with selected columns:")
     print(df_slim.head())
 
     # Example 5: Group and analyze

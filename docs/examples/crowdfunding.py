@@ -45,9 +45,11 @@ This script demonstrates AI-native enhancements to the Form C API:
 See docs/examples/ai_native_api_patterns.md for reusable design patterns.
 See docs/examples/crowdfunding_research_goals.md for complete research plan.
 """
-from edgar import *
 from rich import print
+
+from edgar import *
 from edgar.offerings import FormC
+
 set_identity('Crowdfunding Consultant@funding.org')
 
 # =============================================================================
@@ -89,8 +91,8 @@ print()
 # Let's check what's present in this specific filing.
 
 print("🔬 FormC Data Availability:")
-print(f"   Filer Information: ✓ Present")
-print(f"   Issuer Information: ✓ Present")
+print("   Filer Information: ✓ Present")
+print("   Issuer Information: ✓ Present")
 print(f"   Offering Information: {'✓ Present' if formc.offering_information else '✗ Missing'}")
 print(f"   Annual Report Data: {'✓ Present' if formc.annual_report_disclosure else '✗ Missing'}")
 print(f"   Signatures: {'✓ Present' if formc.signature_info else '✗ Missing'}")
@@ -108,7 +110,7 @@ if formc.issuer_information.funding_portal:
     print(f"   Portal CIK: {formc.issuer_information.funding_portal.cik}")
     print(f"   File Number: {formc.issuer_information.funding_portal.file_number}")
 else:
-    print(f"   Funding Portal: None")
+    print("   Funding Portal: None")
 print()
 
 # Use filing.related_filings() to find related filings by file number.
@@ -194,7 +196,7 @@ print("="*80 + "\n")
 print("✨ NEW: Easier attribute access with computed fields")
 print()
 print(f"📁 Campaign File Number: {formc.campaign_file_number}")
-print(f"   (Previously: formc.issuer_information.funding_portal.file_number)")
+print("   (Previously: formc.issuer_information.funding_portal.file_number)")
 print()
 print(f"📅 Days to Deadline: {formc.days_to_deadline}")
 print(f"   Is Expired: {formc.is_expired}")
@@ -204,19 +206,19 @@ print()
 if formc.offering_information:
     print("💰 Offering Information (new properties):")
     print(f"   Security: {formc.offering_information.security_description}")
-    print(f"   (Previously: manually combine security_offered_type + security_offered_other_desc)")
+    print("   (Previously: manually combine security_offered_type + security_offered_other_desc)")
     print()
     print(f"   Target Amount: ${formc.offering_information.target_amount:,.0f}")
-    print(f"   (Alias for offering_amount - more intuitive)")
+    print("   (Alias for offering_amount - more intuitive)")
     print()
     print(f"   Price Per Security: ${formc.offering_information.price_per_security:,.2f}")
-    print(f"   (Previously: float(formc.offering_information.price) - now auto-parsed)")
+    print("   (Previously: float(formc.offering_information.price) - now auto-parsed)")
     print()
     print(f"   Number of Securities: {formc.offering_information.number_of_securities:,}")
-    print(f"   (Previously: string, now parsed to int)")
+    print("   (Previously: string, now parsed to int)")
     print()
     print(f"   Target is {formc.offering_information.percent_to_maximum:.1f}% of maximum")
-    print(f"   (Computed property)")
+    print("   (Computed property)")
     print()
 
 if formc.annual_report_disclosure:

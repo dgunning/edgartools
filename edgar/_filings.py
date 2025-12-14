@@ -5,7 +5,7 @@ import re
 import webbrowser
 from contextlib import nullcontext
 from dataclasses import dataclass
-from datetime import datetime, date, timedelta
+from datetime import date, datetime
 from functools import cached_property, lru_cache
 from io import BytesIO
 from os import PathLike
@@ -30,6 +30,7 @@ from rich.text import Text
 from edgar._markdown import text_to_markdown
 from edgar._party import Address
 from edgar.attachments import Attachment, Attachments, AttachmentServer, FilingHomepage
+from edgar.config import SEC_ARCHIVE_URL
 from edgar.core import (
     DataPager,
     IntString,
@@ -48,7 +49,6 @@ from edgar.core import (
     parallel_thread_map,
     quarters_in_year,
 )
-from edgar.config import SEC_ARCHIVE_URL
 from edgar.dates import InvalidDateException
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.html_documents import get_clean_html
@@ -88,7 +88,7 @@ __all__ = [
     'filing_date_to_year_quarters'
 ]
 
-from edgar.urls import build_full_index_url, build_daily_index_url
+from edgar.urls import build_daily_index_url, build_full_index_url
 
 filing_homepage_url_re = re.compile(f"{SEC_ARCHIVE_URL}/data/[0-9]{{1,}}/[0-9]{{10}}-[0-9]{{2}}-[0-9]{{4}}-index.html")
 
@@ -181,6 +181,7 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
         return False
 
     from datetime import timedelta
+
     from edgar.dates import extract_dates
 
     today = date.today()
@@ -1996,11 +1997,11 @@ class Filing:
             # Check if this form has a structured data object
             has_obj, obj_type, obj_desc = get_obj_info(self.form)
             if has_obj:
-                lines.append(f"  - Use .obj() to parse as structured data")
+                lines.append("  - Use .obj() to parse as structured data")
                 lines.append(f"    Returns: {obj_type} ({obj_desc})")
 
             # Mention .docs for API documentation
-            lines.append(f"  - Use .docs for detailed API documentation")
+            lines.append("  - Use .docs for detailed API documentation")
 
             # Check for XBRL availability (non-blocking check)
             has_xbrl = False
@@ -2015,14 +2016,14 @@ class Filing:
             xbrl_hint = "for financial statements" if has_xbrl or self.form in ['10-K', '10-Q', '20-F', '8-K', '6-K'] else "(if available)"
             lines.append(f"  - Use .xbrl() {xbrl_hint}")
 
-            lines.append(f"  - Use .document() for structured text extraction")
+            lines.append("  - Use .document() for structured text extraction")
 
             # Add attachments info if available
             try:
                 num_attachments = len(self.attachments)
                 lines.append(f"  - Use .attachments for exhibits ({num_attachments} documents)")
             except:
-                lines.append(f"  - Use .attachments for exhibits")
+                lines.append("  - Use .attachments for exhibits")
 
         if detail == 'full':
             lines.append("")
@@ -2032,15 +2033,15 @@ class Filing:
                 if primary_docs and len(primary_docs) > 0:
                     lines.append(f"  Primary: {primary_docs[0].document}")
                 else:
-                    lines.append(f"  Primary: N/A")
+                    lines.append("  Primary: N/A")
             except:
-                lines.append(f"  Primary: N/A")
+                lines.append("  Primary: N/A")
 
             # Add XBRL status
             if has_xbrl:
-                lines.append(f"  XBRL: Available")
+                lines.append("  XBRL: Available")
             elif self.form in ['10-K', '10-Q', '20-F', '8-K', '6-K']:
-                lines.append(f"  XBRL: Check with .xbrl()")
+                lines.append("  XBRL: Check with .xbrl()")
 
         return "\n".join(lines)
 

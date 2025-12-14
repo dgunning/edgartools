@@ -27,8 +27,8 @@ from rich.panel import Panel
 from rich.table import Column, Table
 from rich.text import Text
 
-from edgar.core import binary_extensions, has_html_content, text_extensions
 from edgar.config import SEC_BASE_URL
+from edgar.core import binary_extensions, has_html_content, text_extensions
 from edgar.files.html_documents import get_clean_html
 from edgar.files.markdown import to_markdown
 from edgar.httpclient import async_http_client

@@ -7,6 +7,7 @@ Enables running the server via: python -m edgar.ai
 
 if __name__ == "__main__":
     import sys
+
     from edgar.ai.mcp import main, test_server
 
     # Check for --test flag before starting server

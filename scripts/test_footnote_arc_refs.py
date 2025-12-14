@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Quick test to see what footnoteArcs actually reference."""
 
-from edgar import Company
 import xml.etree.ElementTree as ET
+
+from edgar import Company
 
 # Get APD 2015 10-K
 apd = Company("APD")

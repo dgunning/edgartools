@@ -11,9 +11,11 @@ Replace the placeholders below with actual values from the issue report:
 - ERROR_MESSAGE: Specific error message if any
 """
 
-from edgar import set_identity, get_by_accession_number
-from rich.console import Console
 import traceback
+
+from rich.console import Console
+
+from edgar import get_by_accession_number, set_identity
 
 # Set proper identity (CRITICAL for SEC API access)
 set_identity("Research Team research@edgartools-investigation.com")
@@ -100,12 +102,12 @@ def reproduce_xbrl_parsing_issue():
 
             # Test facts query
             query_result = facts.query()
-            console.print(f"  ✅ Facts query accessible")
+            console.print("  ✅ Facts query accessible")
 
         except Exception as e:
             console.print(f"  ❌ Facts access failed: {str(e)}")
 
-        console.print(f"\n[green]✅ XBRL parsing completed successfully[/green]")
+        console.print("\n[green]✅ XBRL parsing completed successfully[/green]")
 
         return {
             'success': True,
@@ -124,10 +126,10 @@ def reproduce_xbrl_parsing_issue():
         reported_error = "ERROR_MESSAGE".lower()
 
         if reported_error in error_str:
-            console.print(f"\n[yellow]🎯 Error matches reported issue![/yellow]")
+            console.print("\n[yellow]🎯 Error matches reported issue![/yellow]")
             issue_reproduced = True
         else:
-            console.print(f"\n[blue]ℹ️  Different error than reported[/blue]")
+            console.print("\n[blue]ℹ️  Different error than reported[/blue]")
             issue_reproduced = False
 
         return {
@@ -241,9 +243,9 @@ if __name__ == "__main__":
 
     # Summary
     if result.get('issue_reproduced'):
-        print(f"\n✅ Issue #ISSUE_NUMBER reproduced successfully")
+        print("\n✅ Issue #ISSUE_NUMBER reproduced successfully")
         print(f"Error: {result.get('error', 'Unknown')}")
     elif result.get('success'):
-        print(f"\n❓ Issue #ISSUE_NUMBER could not be reproduced - XBRL parsing worked correctly")
+        print("\n❓ Issue #ISSUE_NUMBER could not be reproduced - XBRL parsing worked correctly")
     else:
-        print(f"\n❌ XBRL parsing failed with different error than reported")
+        print("\n❌ XBRL parsing failed with different error than reported")

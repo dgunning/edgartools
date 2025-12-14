@@ -24,7 +24,7 @@ Example:
 
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 __all__ = [
     # Environment variable names

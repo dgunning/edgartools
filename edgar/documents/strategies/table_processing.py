@@ -10,7 +10,7 @@ from lxml.html import HtmlElement
 
 from edgar.documents.config import ParserConfig
 from edgar.documents.strategies.style_parser import StyleParser
-from edgar.documents.table_nodes import TableNode, Cell, Row
+from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.documents.types import TableType
 
 
@@ -18,7 +18,7 @@ class TableProcessor:
     """
     Advanced table processing with type detection and structure analysis.
     """
-    
+
     # HTML entities that need replacement
     ENTITY_REPLACEMENTS = {
         '&horbar;': '-----',
@@ -39,7 +39,7 @@ class TableProcessor:
         '&#x2013;': '---',
         '&#x2212;': '-',
     }
-    
+
     # Financial keywords for table type detection
     FINANCIAL_KEYWORDS = {
         'revenue', 'income', 'expense', 'asset', 'liability',
@@ -49,19 +49,19 @@ class TableProcessor:
         'provision', 'tax', 'taxes', 'compensation', 'stock',
         'share', 'shares', 'rsu', 'option', 'grant', 'vest'
     }
-    
+
     # Metrics keywords
     METRICS_KEYWORDS = {
         'ratio', 'percentage', 'percent', '%', 'rate',
         'growth', 'change', 'increase', 'decrease',
         'average', 'median', 'total', 'count', 'number'
     }
-    
+
     def __init__(self, config: ParserConfig):
         """Initialize table processor."""
         self.config = config
         self.style_parser = StyleParser()
-    
+
     def process(self, element: HtmlElement) -> TableNode:
         """
         Process table element into TableNode.
@@ -76,42 +76,42 @@ class TableProcessor:
         table_id = element.get('id')
         table_class = element.get('class', '').split()
         table_style = self.style_parser.parse(element.get('style', ''))
-        
+
         # Create table node
         table = TableNode(style=table_style)
-        
+
         # Set config for rendering decisions
         table._config = self.config
-        
+
         # Add metadata
         if table_id:
             table.set_metadata('id', table_id)
         if table_class:
             table.set_metadata('classes', table_class)
-        
+
         # Extract caption
         caption_elem = element.find('.//caption')
         if caption_elem is not None:
             table.caption = self._extract_text(caption_elem)
-        
+
         # Extract summary
         summary = element.get('summary')
         if summary:
             table.summary = summary
-        
+
         # Process table structure
         self._process_table_structure(element, table)
-        
+
         # Detect table type if configured
         if self.config.detect_table_types:
             table.table_type = self._detect_table_type(table)
-        
+
         # Extract relationships if configured
         if self.config.extract_table_relationships:
             self._extract_relationships(table)
-        
+
         return table
-    
+
     def _process_table_structure(self, element: HtmlElement, table: TableNode):
         """Process table structure (thead, tbody, tfoot)."""
         # Process thead
@@ -121,30 +121,30 @@ class TableProcessor:
                 cells = self._process_row(tr, is_header=True)
                 if cells:
                     table.headers.append(cells)
-        
+
         # Process tbody (or direct rows)
         tbody = element.find('.//tbody')
         rows_container = tbody if tbody is not None else element
-        
+
         # Track if we've seen headers and data rows
         headers_found = bool(table.headers)
         consecutive_header_rows = 0
         data_rows_started = False
-        
+
         for tr in rows_container.findall('.//tr'):
             # Skip if already processed in thead
             if thead is not None and tr.getparent() == thead:
                 continue
-            
+
             # Check if this might be a header row
             is_header_row = False
-            
+
             # Continue checking for headers if:
             # 1. We haven't found any headers yet, OR
             # 2. We've found headers but haven't seen data rows yet (multi-row headers)
             if not data_rows_started:
                 is_header_row = self._is_header_row(tr)
-                
+
                 # Additional check for multi-row headers in financial tables
                 # If the previous row was a header and this row has years or units,
                 # it's likely part of the header
@@ -162,7 +162,7 @@ class TableProcessor:
                             years_found = re.findall(year_pattern, row_text)
                             if years_found:
                                 is_header_row = True
-            
+
             cells = self._process_row(tr, is_header=is_header_row)
             if cells:
                 if is_header_row:
@@ -174,7 +174,7 @@ class TableProcessor:
                     # Empty rows at the beginning shouldn't stop header detection
                     row = Row(cells=cells, is_header=False)
                     table.rows.append(row)
-                    
+
                     # Check if row has significant content that indicates data rows have started
                     # But be smart about it - descriptive rows like "(in millions)" or pure spacing
                     # shouldn't stop header detection
@@ -183,7 +183,7 @@ class TableProcessor:
                         # Get the row text for smarter analysis
                         row_text = ' '.join(cell.text().strip() for cell in cells).strip()
                         row_text_lower = row_text.lower()
-                        
+
                         # Don't consider this as "data started" if it's likely a header-related row
                         is_header_related = (
                             # Unit descriptions
@@ -199,13 +199,13 @@ class TableProcessor:
                             # Contains years (might be misclassified header)
                             bool(re.search(r'\b(19\d{2}|20\d{2})\b', row_text))
                         )
-                        
+
                         # Only mark data_rows_started if this seems like actual data, not header-related
                         if not is_header_related:
                             data_rows_started = True
-                    
+
                     consecutive_header_rows = 0
-        
+
         # Process tfoot
         tfoot = element.find('.//tfoot')
         if tfoot is not None:
@@ -214,19 +214,19 @@ class TableProcessor:
                 if cells:
                     row = Row(cells=cells, is_header=False)
                     table.footer.append(row)
-    
+
     def _process_row(self, tr: HtmlElement, is_header: bool) -> List[Cell]:
         """Process table row into cells."""
         cells = []
-        
+
         # Process both td and th elements
         for cell_elem in tr.findall('.//td') + tr.findall('.//th'):
             cell = self._process_cell(cell_elem, is_header or cell_elem.tag == 'th')
             if cell:
                 cells.append(cell)
-        
+
         return cells
-    
+
     def _process_cell(self, elem: HtmlElement, is_header: bool) -> Optional[Cell]:
         """Process table cell."""
         # Extract cell properties
@@ -236,15 +236,15 @@ class TableProcessor:
         colspan = int(colspan_str) if colspan_str and colspan_str.isdigit() else 1
         rowspan = int(rowspan_str) if rowspan_str and rowspan_str.isdigit() else 1
         align = elem.get('align')
-        
+
         # Extract style
         style = self.style_parser.parse(elem.get('style', ''))
         if style.text_align:
             align = style.text_align
-        
+
         # Extract content
         content = self._extract_cell_content(elem)
-        
+
         # Create cell
         cell = Cell(
             content=content,
@@ -253,9 +253,9 @@ class TableProcessor:
             is_header=is_header,
             align=align
         )
-        
+
         return cell
-    
+
     def _extract_cell_content(self, elem: HtmlElement) -> str:
         """Extract and clean cell content."""
         # Check for nested structure
@@ -268,16 +268,16 @@ class TableProcessor:
                 if text:
                     lines.append(text)
             return '\n'.join(lines)
-        
+
         # Handle line breaks
         for br in elem.findall('.//br'):
             br.tail = '\n' + (br.tail or '')
-        
+
         # Extract text
         text = self._extract_text(elem)
-        
+
         return text
-    
+
     def _extract_text(self, elem: HtmlElement) -> str:
         """Extract and clean text from element."""
         # Use itertext() to get all text fragments
@@ -286,13 +286,13 @@ class TableProcessor:
         for text in elem.itertext():
             if text:
                 text_parts.append(text)
-        
+
         # Join parts, ensuring we don't lose spaces
         # If a part doesn't end with whitespace and the next doesn't start with whitespace,
         # we need to add a space between them
         if not text_parts:
             return ''
-        
+
         result = []
         for i, part in enumerate(text_parts):
             if i == 0:
@@ -307,16 +307,16 @@ class TableProcessor:
                         if part[0] not in ',.;:!?%)]':
                             result.append(' ')
                 result.append(part)
-        
+
         text = ''.join(result)
-        
+
         # Replace entities
         for entity, replacement in self.ENTITY_REPLACEMENTS.items():
             text = text.replace(entity, replacement)
-        
+
         # Clean whitespace
         text = text.strip()
-        
+
         # Normalize internal whitespace but preserve line breaks
         lines = text.split('\n')
         cleaned_lines = []
@@ -324,7 +324,7 @@ class TableProcessor:
             # Collapse multiple spaces to single space
             line = ' '.join(line.split())
             cleaned_lines.append(line)
-        
+
         return '\n'.join(cleaned_lines)
 
     @staticmethod
@@ -374,11 +374,11 @@ class TableProcessor:
         # Check if contains th elements (most reliable indicator)
         if tr.find('.//th') is not None:
             return True
-        
+
         cells = tr.findall('.//td')
         if not cells:
             return False
-        
+
         # Get row text for analysis
         row_text = tr.text_content()
         row_text_lower = row_text.lower()
@@ -413,7 +413,7 @@ class TableProcessor:
             # Multiple different years suggest multi-year comparison header
             elif 'total' not in row_text_lower[:20]:  # Check first 20 chars
                 return True
-        
+
         # Enhanced year detection - check individual cells for year patterns
         # This handles cases where years are in separate cells
         year_cells = 0
@@ -427,12 +427,12 @@ class TableProcessor:
                 # Check for date phrases like "June 30, 2025"
                 elif 'june 30' in cell_text.lower() or 'december 31' in cell_text.lower():
                     date_phrases += 1
-        
+
         # If we have multiple year cells or year + date phrases, likely a header
         if year_cells >= 2 or (year_cells >= 1 and date_phrases >= 1):
             if 'total' not in row_text_lower[:20]:
                 return True
-        
+
         # Check for comprehensive financial period patterns (from old parser)
         period_pattern = self._get_period_header_pattern()
         if period_pattern.search(row_text_lower):
@@ -446,41 +446,41 @@ class TableProcessor:
         units_pattern = r'\(in\s+(?:millions|thousands|billions)\)'
         if re.search(units_pattern, row_text_lower):
             return True
-        
+
         # Check for period indicators (quarters, months)
         # But be careful with "fiscal" - it could be data like "Fiscal 2025"
         period_keywords = ['quarter', 'q1', 'q2', 'q3', 'q4', 'month', 
                           'january', 'february', 'march', 'april', 'may', 'june',
                           'july', 'august', 'september', 'october', 'november', 'december',
                           'ended', 'three months', 'six months', 'nine months']
-        
+
         # Special handling for "fiscal" - only treat as header if it's part of a phrase like "fiscal year ended"
         if 'fiscal' in row_text_lower:
             # Check if row has numeric values (suggests it's data, not header)
             # Look for patterns like "Fiscal 2025 $10,612" 
             has_currency_values = bool(re.search(r'\$[\s]*[\d,]+', row_text))
             has_large_numbers = bool(re.search(r'\b\d{1,3}(,\d{3})+\b', row_text))
-            
+
             # If it has currency or large numbers, it's likely data
             if has_currency_values or has_large_numbers:
                 return False
-            
+
             # Check if it's just "Fiscal YYYY" which is likely data, not a header
             fiscal_year_only = re.match(r'^\s*fiscal\s+\d{4}\s*$', row_text_lower.strip())
             if fiscal_year_only:
                 return False  # This is data, not a header
-            
+
             # Check for header-like phrases with fiscal
             if 'fiscal year' in row_text_lower and ('ended' in row_text_lower or 'ending' in row_text_lower):
                 return True
-        
+
         if any(keyword in row_text_lower for keyword in period_keywords):
             # Validate it's not a data row with period keywords
             # Check for strong data indicators
             data_pattern = r'(?:\$\s*\d|\d+(?:,\d{3})+|\d+\.\d+|[(]\s*\d+(?:,\d{3})*\s*[)])'
             if not re.search(data_pattern, row_text):
                 return True
-        
+
         # Check for column descriptors (but NOT total)
         # These are words commonly found in headers but not data rows
         header_keywords = ['description', 'item', 'category', 'type', 'classification',
@@ -497,7 +497,7 @@ class TableProcessor:
                 if re.search(data_pattern, row_text):
                     return False
                 return True
-        
+
         # Check if all cells are bold (common header formatting)
         bold_count = 0
         for cell in cells:
@@ -506,11 +506,11 @@ class TableProcessor:
                 bold_count += 1
             elif cell.find('.//b') is not None or cell.find('.//strong') is not None:
                 bold_count += 1
-        
+
         # Only consider it a header if ALL cells are bold (not just some)
         if bold_count == len(cells) and bold_count > 0:
             return True
-        
+
         # Check content type ratio - headers usually have more text than numbers
         # Count cells with primarily text vs primarily numbers
         text_cells = 0
@@ -524,7 +524,7 @@ class TableProcessor:
                     number_cells += 1
                 else:
                     text_cells += 1
-        
+
         # Be very careful about treating text-heavy rows as headers
         # Many data rows start with text labels (e.g., "Impact of...", "Effect of...")
         # Only consider it a header if it has mostly text AND doesn't look like a data label
@@ -535,55 +535,55 @@ class TableProcessor:
                 'expense', 'income from', 'loss on', 'gain on', 'charge', 'credit',
                 'earnings', 'computed', 'state taxes', 'research', 'excess tax'
             ]
-            
+
             # If it starts with any of these, it's likely a data row, not a header
             for indicator in data_row_indicators:
                 if row_text_lower.startswith(indicator) or indicator in row_text_lower[:50]:
                     return False
-            
+
             # Also not a header if it starts with "total"
             if not row_text_lower.startswith('total'):
                 return True
-        
+
         return False
-    
+
     def _detect_table_type(self, table: TableNode) -> TableType:
         """Detect the type of table based on content."""
         # Collect text from headers and first few rows
         text_parts = []
-        
+
         # Add caption
         if table.caption:
             text_parts.append(table.caption.lower())
-        
+
         # Add headers
         for header_row in table.headers:
             for cell in header_row:
                 text_parts.append(cell.text().lower())
-        
+
         # Add first few rows
         for row in table.rows[:3]:
             for cell in row.cells:
                 text_parts.append(cell.text().lower())
-        
+
         combined_text = ' '.join(text_parts)
-        
+
         # Check for financial table
         financial_count = sum(1 for keyword in self.FINANCIAL_KEYWORDS if keyword in combined_text)
         if financial_count >= 2:  # Lowered threshold for better detection
             return TableType.FINANCIAL
-        
+
         # Check for metrics table  
         metrics_count = sum(1 for keyword in self.METRICS_KEYWORDS if keyword in combined_text)
         numeric_cells = sum(1 for row in table.rows for cell in row.cells if cell.is_numeric)
         total_cells = sum(len(row.cells) for row in table.rows)
-        
+
         if total_cells > 0:
             numeric_ratio = numeric_cells / total_cells
             # More lenient metrics detection
             if metrics_count >= 1 or numeric_ratio > 0.3:
                 return TableType.METRICS
-        
+
         # Check for table of contents
         if 'content' in combined_text or 'index' in combined_text:
             # Look for page numbers
@@ -594,38 +594,38 @@ class TableProcessor:
             )
             if has_page_numbers:
                 return TableType.TABLE_OF_CONTENTS
-        
+
         # Check for exhibit index
         if 'exhibit' in combined_text:
             return TableType.EXHIBIT_INDEX
-        
+
         # Check for reference table (citations, definitions, etc.)
         if any(word in combined_text for word in ['reference', 'definition', 'glossary', 'citation']):
             return TableType.REFERENCE
-        
+
         return TableType.GENERAL
-    
+
     def _extract_relationships(self, table: TableNode):
         """Extract relationships within table data."""
         # This would implement relationship extraction
         # For now, just set a flag that relationships were processed
         table.set_metadata('relationships_extracted', True)
-        
+
         # Example relationships to extract:
         # - Parent-child relationships (indented rows)
         # - Total rows that sum other rows
         # - Cross-references between cells
         # - Time series relationships
-        
+
         # Detect total rows
         total_rows = []
         for i, row in enumerate(table.rows):
             if row.is_total_row:
                 total_rows.append(i)
-        
+
         if total_rows:
             table.set_metadata('total_rows', total_rows)
-        
+
         # Detect indentation patterns (parent-child)
         indentation_levels = []
         for row in table.rows:
@@ -634,7 +634,7 @@ class TableProcessor:
                 # Count leading spaces
                 indent = len(first_cell_text) - len(first_cell_text.lstrip())
                 indentation_levels.append(indent)
-        
+
         if any(level > 0 for level in indentation_levels):
             table.set_metadata('has_hierarchy', True)
             table.set_metadata('indentation_levels', indentation_levels)

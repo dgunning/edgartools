@@ -328,7 +328,6 @@ def test_server():
     Returns:
         bool: True if all checks pass, False otherwise
     """
-    import sys
 
     print("Testing EdgarTools MCP Server Configuration...\n")
 
@@ -364,7 +363,6 @@ def test_server():
 
     # Test 4: Quick functionality test
     try:
-        from edgar import get_current_filings
         print("✓ Core EdgarTools functionality available")
     except Exception as e:
         print(f"✗ EdgarTools functionality check failed: {e}")

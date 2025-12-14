@@ -4,6 +4,7 @@ Diagnostic result data structures for SSL troubleshooting.
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional
+
 from edgar.richtools import repr_rich
 
 
@@ -232,7 +233,7 @@ class DiagnosticResult:
             else:
                 error_msg = self.network_tests.ssl_handshake.error_message or "Failed"
                 if self.network_tests.ssl_handshake.is_corporate_proxy:
-                    tests_table.add_row("3. SSL Handshake:", f"[red]FAIL[/red] Corporate proxy detected")
+                    tests_table.add_row("3. SSL Handshake:", "[red]FAIL[/red] Corporate proxy detected")
                 else:
                     tests_table.add_row("3. SSL Handshake:", f"[red]FAIL[/red] {error_msg[:50]}")
         elif self.network_tests.tcp_connected:

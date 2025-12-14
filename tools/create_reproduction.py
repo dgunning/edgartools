@@ -12,7 +12,6 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, Any
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -179,12 +178,12 @@ def interactive_creation():
             error_message=error_message
         )
 
-        console.print(f"\n[green]✅ Reproduction script created:[/green]")
+        console.print("\n[green]✅ Reproduction script created:[/green]")
         console.print(f"   {output_path}")
-        console.print(f"\n[yellow]Next steps:[/yellow]")
-        console.print(f"1. Review and customize the script")
+        console.print("\n[yellow]Next steps:[/yellow]")
+        console.print("1. Review and customize the script")
         console.print(f"2. Run: python {output_path}")
-        console.print(f"3. Use results to develop fix")
+        console.print("3. Use results to develop fix")
 
     except Exception as e:
         console.print(f"[red]❌ Failed to create script: {str(e)}[/red]")
@@ -253,15 +252,15 @@ def main():
             custom_name=args.name
         )
 
-        console.print(f"[green]✅ Reproduction script created:[/green]")
+        console.print("[green]✅ Reproduction script created:[/green]")
         console.print(f"   📄 {output_path}")
 
         # Show next steps
-        console.print(f"\n[bold]Next Steps:[/bold]")
+        console.print("\n[bold]Next Steps:[/bold]")
         console.print(f"1. Review script: [cyan]{output_path}[/cyan]")
-        console.print(f"2. Customize placeholders if needed")
+        console.print("2. Customize placeholders if needed")
         console.print(f"3. Run script: [cyan]python {output_path}[/cyan]")
-        console.print(f"4. Use results for issue analysis")
+        console.print("4. Use results for issue analysis")
 
     except Exception as e:
         console.print(f"[red]❌ Failed to create reproduction script: {str(e)}[/red]")

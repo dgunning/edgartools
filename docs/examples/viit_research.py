@@ -35,14 +35,13 @@ ViiT Health Context:
 - All use portal file # 007-00033 (Wefunder)
 """
 
-from edgar import Company, set_identity, get_filings
-from edgar.offerings import Offering, FormC, group_offerings_by_file_number
-from rich import print
+
+from rich import box, print
 from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
-from rich import box
-from datetime import date
+
+from edgar import Company, set_identity
+from edgar.offerings import Offering, group_offerings_by_file_number
 
 console = Console()
 
@@ -251,7 +250,7 @@ if len(recent_c_filings) > 0:
     formc_2025 = filing_2025.obj()
     offering_2025 = formc_2025.get_offering(filing_2025)
 
-    print(f"  ✓ Offering initialized")
+    print("  ✓ Offering initialized")
     print(f"  ✓ Issuer file number: {offering_2025.issuer_file_number}")
     print(f"  ✓ Portal file number: {offering_2025.portal_file_number}")
     print(f"  ✓ Total filings: {len(offering_2025.all_filings)}")

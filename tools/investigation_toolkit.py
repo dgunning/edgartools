@@ -16,21 +16,18 @@ Usage:
     analyzer.generate_report()
 """
 
-from typing import Dict, List, Any, Optional, Tuple, Union
+import traceback
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
 from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
-from rich.tree import Tree
-import pandas as pd
-from datetime import datetime
-import json
-import traceback
-from pathlib import Path
 
 # Ensure proper imports
 try:
-    from edgar import set_identity, Company, get_by_accession_number
+    from edgar import Company, get_by_accession_number, set_identity
 except ImportError:
     print("Warning: Edgar imports not available. Some functionality may be limited.")
 
@@ -156,7 +153,7 @@ class IssueAnalyzer:
             result = self._analyze_single_case(test_case)
             self.results.append(result)
 
-        self.console.print(f"\n[green]✅ Analysis complete[/green]")
+        self.console.print("\n[green]✅ Analysis complete[/green]")
 
     def _analyze_single_case(self, test_case: TestCase) -> InvestigationResult:
         """Analyze a single test case"""
@@ -454,12 +451,12 @@ class IssueAnalyzer:
         broken_cases = [r for r in self.results
                        if r.success and r.metrics.get('cf_has_empty_string_issue', False)]
 
-        self.console.print(f"\n[bold]Analysis Summary:[/bold]")
+        self.console.print("\n[bold]Analysis Summary:[/bold]")
         self.console.print(f"✅ Working cases: {len(working_cases)}")
         self.console.print(f"❌ Broken cases: {len(broken_cases)}")
 
         if broken_cases:
-            self.console.print(f"\n[bold red]🔍 Issue Pattern Identified:[/bold red]")
+            self.console.print("\n[bold red]🔍 Issue Pattern Identified:[/bold red]")
             for broken in broken_cases:
                 empty_periods = broken.metrics.get('cf_empty_periods', [])
                 self.console.print(f"  📁 {broken.test_case.name}: {len(empty_periods)} empty periods")
@@ -468,12 +465,12 @@ class IssueAnalyzer:
                         self.console.print(f"    • {period}")
 
         if working_cases and broken_cases:
-            self.console.print(f"\n[bold green]💡 Recommended Action:[/bold green]")
+            self.console.print("\n[bold green]💡 Recommended Action:[/bold green]")
             self.console.print("Implement empty period filtering to resolve the issue")
 
     def _detect_patterns(self):
         """Detect common issue patterns"""
-        self.console.print(f"\n[bold blue]🔍 Pattern Detection[/bold blue]")
+        self.console.print("\n[bold blue]🔍 Pattern Detection[/bold blue]")
 
         # Empty periods pattern (Issue #408)
         empty_period_cases = [r for r in self.results
@@ -503,7 +500,7 @@ class IssueAnalyzer:
             f"# Issue #{self.issue_number} Investigation Report",
             f"**Date**: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
             f"**Test Cases**: {len(self.test_cases)}",
-            f"**Investigation Tool**: EdgarTools Investigation Toolkit",
+            "**Investigation Tool**: EdgarTools Investigation Toolkit",
             "",
             "## Executive Summary",
             ""
@@ -716,7 +713,7 @@ def analyze_entity_facts(ticker: str) -> Dict[str, Any]:
                 analysis[f'has_{stmt_type}'] = False
                 analysis[f'{stmt_type}_error'] = str(e)
 
-        console.print(f"✅ Entity facts analysis complete")
+        console.print("✅ Entity facts analysis complete")
         return analysis
 
     except Exception as e:
@@ -764,7 +761,7 @@ def analyze_xbrl_parsing(accession: str) -> Dict[str, Any]:
                     analysis[f'has_{stmt_name}'] = False
                     analysis[f'{stmt_name}_error'] = str(e)
 
-        console.print(f"✅ XBRL parsing analysis complete")
+        console.print("✅ XBRL parsing analysis complete")
         return analysis
 
     except Exception as e:
@@ -791,7 +788,7 @@ def compare_filings(accession1: str, accession2: str,
     """
     console = Console()
 
-    console.print(f"\n[bold blue]📊 Comparative Analysis[/bold blue]")
+    console.print("\n[bold blue]📊 Comparative Analysis[/bold blue]")
     console.print(f"📁 {description1}: {accession1}")
     console.print(f"📁 {description2}: {accession2}")
 
@@ -835,9 +832,9 @@ def compare_filings(accession1: str, accession2: str,
     elif issue2 and not issue1:
         console.print(f"[red]🔍 Issue found in {description2} but not {description1}[/red]")
     elif issue1 and issue2:
-        console.print(f"[yellow]⚠️  Issue found in both filings[/yellow]")
+        console.print("[yellow]⚠️  Issue found in both filings[/yellow]")
     else:
-        console.print(f"[green]✅ No issues found in either filing[/green]")
+        console.print("[green]✅ No issues found in either filing[/green]")
 
     return {
         'filing1': analysis1,
@@ -885,12 +882,9 @@ def visual_debug(identifier, issue_type="auto"):
         identifier: Accession number, ticker, or filing
         issue_type: Type of issue to debug ('empty_periods', 'xbrl_parsing', 'entity_facts', 'auto')
     """
-    from tools.visual_inspector import (
-        show_statement, show_filing_overview, show_company_overview,
-        show_xbrl, compare_statements_visually
-    )
+    from tools.visual_inspector import compare_statements_visually, show_company_overview, show_filing_overview, show_statement, show_xbrl
 
-    console.print(f"\n[bold green]🔍 Visual Debug Session[/bold green]")
+    console.print("\n[bold green]🔍 Visual Debug Session[/bold green]")
     console.print(f"Identifier: {identifier}")
 
     if issue_type == "auto":
@@ -903,12 +897,12 @@ def visual_debug(identifier, issue_type="auto"):
 
     if issue_type in ["empty_periods", "filing_analysis"]:
         # Show cash flow statement (most common empty periods issue)
-        console.print(f"\n[cyan]📊 Cash Flow Statement Visual Analysis[/cyan]")
+        console.print("\n[cyan]📊 Cash Flow Statement Visual Analysis[/cyan]")
         show_statement(identifier, "cashflow")
 
         # Compare with a known working filing
         if identifier != "0000320193-25-000073":  # Don't compare with itself
-            console.print(f"\n[cyan]📊 Comparison with Known Working Filing[/cyan]")
+            console.print("\n[cyan]📊 Comparison with Known Working Filing[/cyan]")
             compare_statements_visually(
                 identifier,
                 "0000320193-25-000073",  # Known working Apple filing
@@ -919,12 +913,12 @@ def visual_debug(identifier, issue_type="auto"):
 
     elif issue_type in ["entity_facts", "company_analysis"]:
         # Show company facts analysis
-        console.print(f"\n[cyan]🏢 Company Facts Visual Analysis[/cyan]")
+        console.print("\n[cyan]🏢 Company Facts Visual Analysis[/cyan]")
         show_company_overview(identifier)
 
     elif issue_type == "xbrl_parsing":
         # Show XBRL structure analysis
-        console.print(f"\n[cyan]🔍 XBRL Structure Analysis[/cyan]")
+        console.print("\n[cyan]🔍 XBRL Structure Analysis[/cyan]")
         filing = get_by_accession_number(identifier) if isinstance(identifier, str) else identifier
         show_filing_overview(filing)
 

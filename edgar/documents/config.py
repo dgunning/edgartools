@@ -3,7 +3,7 @@ Configuration for the HTML parser.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -45,14 +45,14 @@ class ParserConfig:
         max_token_estimation: Maximum estimated tokens for AI optimization
         features: Feature flags for optional functionality
     """
-    
+
     # Performance settings
     max_document_size: int = 100 * 1024 * 1024  # 100MB (handles large filings like JPM)
     streaming_threshold: int = 10 * 1024 * 1024  # 10MB
     cache_size: int = 1000
     enable_parallel: bool = True
     max_workers: Optional[int] = None  # None = use CPU count
-    
+
     # Parsing settings
     strict_mode: bool = False
     extract_xbrl: bool = True
@@ -61,19 +61,19 @@ class ParserConfig:
     normalize_text: bool = True
     extract_links: bool = True
     extract_images: bool = False
-    
+
     # AI optimization
     optimize_for_ai: bool = True
     max_token_estimation: int = 100_000
     chunk_size: int = 512
     chunk_overlap: int = 128
-    
+
     # Table processing
     table_extraction: bool = True
     detect_table_types: bool = True
     extract_table_relationships: bool = True
     fast_table_rendering: bool = True  # Fast renderer is now production-ready (7-10x faster than Rich)
-    
+
     # Section detection
     detect_sections: bool = True
     eager_section_extraction: bool = False  # Extract sections during parsing vs. on first access (default: lazy)
@@ -110,7 +110,7 @@ class ParserConfig:
             r'financial\s+statements'
         ]
     })
-    
+
     # Feature flags
     features: Dict[str, bool] = field(default_factory=lambda: {
         'ml_header_detection': True,
@@ -122,7 +122,7 @@ class ParserConfig:
         'footnote_linking': True,
         'cross_reference_resolution': True
     })
-    
+
     # Header detection settings
     header_detection_threshold: float = 0.6  # Minimum confidence
     header_detection_methods: List[str] = field(default_factory=lambda: [
@@ -131,16 +131,16 @@ class ParserConfig:
         'structural',
         'contextual'
     ])
-    
+
     # Text extraction settings
     min_text_length: int = 10  # Minimum text length to keep
     merge_adjacent_nodes: bool = True
     merge_distance: int = 2  # Max distance between nodes to merge
-    
+
     # Performance monitoring
     enable_profiling: bool = False
     log_performance: bool = False
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
@@ -155,7 +155,7 @@ class ParserConfig:
             'optimize_for_ai': self.optimize_for_ai,
             'features': self.features.copy()
         }
-    
+
     @classmethod
     def for_performance(cls) -> 'ParserConfig':
         """Create config optimized for performance."""
@@ -173,7 +173,7 @@ class ParserConfig:
                 'xbrl_validation': False
             }
         )
-    
+
     @classmethod
     def for_accuracy(cls) -> 'ParserConfig':
         """Create config optimized for accuracy."""
@@ -193,7 +193,7 @@ class ParserConfig:
                 'cross_reference_resolution': True
             }
         )
-    
+
     @classmethod
     def for_ai(cls) -> 'ParserConfig':
         """Create config optimized for AI/LLM processing."""

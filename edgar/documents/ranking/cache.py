@@ -4,13 +4,13 @@ Search index caching for performance optimization.
 Provides memory and disk caching with LRU eviction and TTL expiration.
 """
 
+import hashlib
+import logging
+import pickle
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, Dict, Any, List
-import hashlib
-import pickle
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

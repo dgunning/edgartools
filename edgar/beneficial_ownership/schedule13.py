@@ -4,24 +4,18 @@ Main classes for Schedule 13D and Schedule 13G beneficial ownership reports.
 This module implements the parsing and representation of SEC Schedule 13D
 and Schedule 13G filings using XML-based parsing.
 """
-from typing import List, Optional, TYPE_CHECKING
-from datetime import date, datetime
+from datetime import date
+from typing import TYPE_CHECKING, List, Optional
+
 from bs4 import BeautifulSoup
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
-from edgar.xmltools import child_text
-from edgar.core import get_bool
 from edgar._party import Address
-from edgar.beneficial_ownership.models import (
-    ReportingPerson,
-    IssuerInfo,
-    SecurityInfo,
-    Schedule13DItems,
-    Schedule13GItems,
-    Signature
-)
+from edgar.beneficial_ownership.models import IssuerInfo, ReportingPerson, Schedule13DItems, Schedule13GItems, SecurityInfo, Signature
+from edgar.core import get_bool
+from edgar.xmltools import child_text
 
 __all__ = ['Schedule13D', 'Schedule13G']
 

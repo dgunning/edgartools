@@ -12,10 +12,9 @@ These utilities support the workflow described in the customizing-standardizatio
 
 import csv
 import json
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional
 
 try:
     from edgar.xbrl.standardization.core import MappingStore, StandardConcept
@@ -450,7 +449,7 @@ def _check_core_duplicates(store: "MappingStore", report: ValidationReport):
                 report.issues.append(ValidationIssue(
                     severity="warning",
                     category="duplicate",
-                    message=f"Duplicate company concepts in core mappings",
+                    message="Duplicate company concepts in core mappings",
                     concept=standard_concept
                 ))
 
@@ -492,7 +491,7 @@ def _check_company_mappings(store: "MappingStore", report: ValidationReport):
             report.issues.append(ValidationIssue(
                 severity="warning",
                 category="missing",
-                message=f"Company mapping missing metadata",
+                message="Company mapping missing metadata",
                 file=f"{entity_id}_mappings.json"
             ))
 

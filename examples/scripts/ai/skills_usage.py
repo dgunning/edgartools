@@ -61,11 +61,7 @@ def example_3_use_helper_functions():
     print("Example 3: Using Helper Functions")
     print("=" * 60)
 
-    from edgar.ai.helpers import (
-        get_revenue_trend,
-        get_filing_statement,
-        compare_companies_revenue
-    )
+    from edgar.ai.helpers import compare_companies_revenue, get_filing_statement, get_revenue_trend
 
     # 1. Get revenue trend
     print("\n1. Get Revenue Trend (3 years):")
@@ -139,8 +135,9 @@ def example_6_export_skill():
     print("Example 6: Exporting Skills")
     print("=" * 60)
 
-    from edgar.ai import get_skill
     import tempfile
+
+    from edgar.ai import get_skill
 
     skill = get_skill("SEC Filing Analysis")
 
@@ -153,7 +150,7 @@ def example_6_export_skill():
         )
 
         print(f"\n✅ Skill exported to: {output_dir}")
-        print(f"   Format: Claude Desktop Skills")
+        print("   Format: Claude Desktop Skills")
 
         # List exported files
         import os
@@ -173,10 +170,7 @@ def example_7_skill_workflow():
     print("Example 7: Complete Analysis Workflow")
     print("=" * 60)
 
-    from edgar.ai.helpers import (
-        get_revenue_trend,
-        compare_companies_revenue
-    )
+    from edgar.ai.helpers import compare_companies_revenue, get_revenue_trend
 
     # Scenario: Compare tech giants' revenue trends
 
@@ -209,7 +203,7 @@ def example_8_custom_workflow():
     print("Example 8: Custom Analysis Workflow")
     print("=" * 60)
 
-    from edgar.ai.helpers import get_revenue_trend, get_filing_statement
+    from edgar.ai.helpers import get_filing_statement, get_revenue_trend
 
     ticker = "TSLA"
 
@@ -219,19 +213,19 @@ def example_8_custom_workflow():
     print("1. Revenue Trend Analysis:")
     income = get_revenue_trend(ticker, periods=3)
     if income:
-        print(f"   ✅ Retrieved 3-year income statement")
+        print("   ✅ Retrieved 3-year income statement")
 
     # 2. Get balance sheet
     print("\n2. Balance Sheet Analysis:")
     balance = get_filing_statement(ticker, 2023, "10-K", "balance")
     if balance:
-        print(f"   ✅ Retrieved balance sheet")
+        print("   ✅ Retrieved balance sheet")
 
     # 3. Get cash flow
     print("\n3. Cash Flow Analysis:")
     cash_flow = get_filing_statement(ticker, 2023, "10-K", "cash_flow")
     if cash_flow:
-        print(f"   ✅ Retrieved cash flow statement")
+        print("   ✅ Retrieved cash flow statement")
 
     print("\n4. ✅ Custom analysis complete!")
     print("   📊 All financial statements retrieved and ready for analysis")

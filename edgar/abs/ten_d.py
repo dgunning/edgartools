@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import date
 from enum import Enum
 from functools import cached_property
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from bs4 import BeautifulSoup
 from rich import box

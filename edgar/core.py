@@ -163,6 +163,7 @@ edgar_identity = 'EDGAR_IDENTITY'
 
 # Local storage directory - use centralized path configuration
 from edgar.paths import get_data_directory as _get_data_directory
+
 edgar_data_dir = str(_get_data_directory(create=False))
 
 

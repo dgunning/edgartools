@@ -284,11 +284,6 @@ class Identifiers(BaseModel):
 # Import derivative models from separate module
 from edgar.funds.models.derivatives import (
     DerivativeInfo,
-    ForwardDerivative,
-    SwapDerivative,
-    FutureDerivative,
-    SwaptionDerivative,
-    OptionDerivative,
 )
 
 

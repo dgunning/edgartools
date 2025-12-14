@@ -5,8 +5,9 @@ This module analyzes the TOC structure to map section names to anchor IDs,
 enabling section extraction for API filings with generated anchor IDs.
 """
 import re
-from typing import Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
+
 from lxml import html as lxml_html
 
 
@@ -28,7 +29,7 @@ class TOCAnalyzer:
     This enables section extraction for filings where anchor IDs are generated
     rather than semantic (like API filings vs local HTML files).
     """
-    
+
     def __init__(self):
         # SEC section patterns for normalization
         self.section_patterns = [
@@ -44,7 +45,7 @@ class TOCAnalyzer:
             (r'signatures?', 'item'),
             (r'part\s+[ivx]+', 'part'),
         ]
-    
+
     def analyze_toc_structure(self, html_content: str) -> Dict[str, str]:
         """
         Analyze HTML content to extract section mappings from TOC.
@@ -113,7 +114,7 @@ class TOCAnalyzer:
             # Build mapping prioritizing the most standard section names
             section_mapping = self._build_section_mapping(toc_sections)
 
-        except Exception as e:
+        except Exception:
             # Return empty mapping on error - fallback to other methods
             pass
 
@@ -254,7 +255,7 @@ class TOCAnalyzer:
             return True
 
         return False
-    
+
     def _normalize_section_name(self, text: str, anchor_id: str = '', preceding_item: str = '') -> str:
         """
         Normalize section name for consistent lookup.
@@ -330,7 +331,7 @@ class TOCAnalyzer:
             return "Item 15"
 
         return text  # Return as-is if no normalization applies
-    
+
     def _get_section_type_and_order(self, text: str) -> Tuple[str, int]:
         """Get section type and order for sorting."""
         text_lower = text.lower()
@@ -364,7 +365,7 @@ class TOCAnalyzer:
             part_roman = part_match.group(1)
             part_num = self._roman_to_int(part_roman)
             return 'part', part_num * 100  # Part I=100, Part II=200, etc.
-        
+
         # Known sections without explicit item numbers
         if 'business' in text_lower:
             return 'item', 1000  # Item 1
@@ -380,16 +381,16 @@ class TOCAnalyzer:
             return 'item', 8000  # Item 8
         elif 'exhibits' in text_lower:
             return 'item', 15000  # Item 15
-        
+
         return 'other', 99999
-    
+
     def _roman_to_int(self, roman: str) -> int:
         """Convert roman numerals to integers."""
         roman_map = {'i': 1, 'v': 5, 'x': 10, 'l': 50, 'c': 100, 'd': 500, 'm': 1000}
         roman = roman.lower()
         result = 0
         prev = 0
-        
+
         for char in reversed(roman):
             value = roman_map.get(char, 0)
             if value < prev:
@@ -397,9 +398,9 @@ class TOCAnalyzer:
             else:
                 result += value
             prev = value
-        
+
         return result
-    
+
     def _build_section_mapping(self, toc_sections: List[TOCSection]) -> Dict[str, str]:
         """Build final section mapping, handling duplicates intelligently.
 
@@ -433,7 +434,7 @@ class TOCAnalyzer:
             seen_names.add(section_name)
 
         return mapping
-    
+
     def get_section_suggestions(self, html_content: str) -> List[str]:
         """Get list of available sections that can be extracted."""
         mapping = self.analyze_toc_structure(html_content)

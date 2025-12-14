@@ -6,7 +6,8 @@ verify parameter to the HTTP transport layer, fixing the httpxthrottlecache bug.
 """
 
 import pytest
-from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+from edgar.httpclient import HTTP_MGR, configure_http, get_http_config
 
 
 @pytest.fixture(autouse=True)

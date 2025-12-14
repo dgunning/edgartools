@@ -9,6 +9,7 @@ Example:
 """
 
 import re
+
 import pandas as pd
 
 from edgar.reference import cusip_ticker_mapping

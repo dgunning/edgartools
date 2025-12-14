@@ -14,22 +14,22 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from edgar.enums import (
-    StatementType,
-    StatementInput,
-    validate_statement_type,
-    ValidationError,
-    PRIMARY_STATEMENTS,
-    COMPREHENSIVE_STATEMENTS,
     ANALYTICAL_STATEMENTS,
+    COMPREHENSIVE_STATEMENTS,
+    PRIMARY_STATEMENTS,
     SPECIALIZED_STATEMENTS,
-    ALL_STATEMENTS
+    StatementInput,
+    StatementType,
+    ValidationError,
+    validate_statement_type,
 )
+
 
 def demo_basic_usage():
     """Demonstrate basic StatementType usage."""
     print("🎯 Basic StatementType Usage")
     print("=" * 60)
-    
+
     # Show enum values
     print(f"Income Statement: {StatementType.INCOME_STATEMENT}")
     print(f"Balance Sheet: {StatementType.BALANCE_SHEET}")
@@ -42,7 +42,7 @@ def demo_statement_discovery():
     """Show how StatementType enhances statement discovery."""
     print("💡 Enhanced Statement Discovery")
     print("=" * 60)
-    
+
     print("With StatementType enum, your IDE will show:")
     print("  StatementType.")
     for stmt in sorted([s for s in StatementType], key=lambda x: x.name):
@@ -63,9 +63,9 @@ def demo_statement_discovery():
                 'REGULATORY_CAPITAL': 'Regulatory Capital (banks)',
                 'INSURANCE_RESERVES': 'Insurance Reserves (insurance cos)'
             }.get(stmt.name, 'Financial Statement')
-            
+
             print(f"    ├── {stmt.name:<20} = '{stmt.value}' # {description}")
-    
+
     print()
     print("This eliminates the need to:")
     print("  - Remember exact method names (get_income_statement, get_balance_sheet, etc.)")
@@ -77,10 +77,10 @@ def demo_enhanced_validation():
     """Demonstrate enhanced validation for financial statements."""
     print("🛡️ Enhanced Validation for Financial Statements")
     print("=" * 60)
-    
+
     # Show helpful error messages for financial context
     test_cases = ["income", "balanc", "cash", "equity", "unknown_statement"]
-    
+
     for test_case in test_cases:
         try:
             validate_statement_type(test_case)
@@ -94,14 +94,14 @@ def demo_statement_categorization():
     """Show statement categorization and collections."""
     print("📚 Statement Categorization & Collections")
     print("=" * 60)
-    
+
     categories = [
         ("Primary Statements (The Big Four)", PRIMARY_STATEMENTS),
         ("Comprehensive Statements", COMPREHENSIVE_STATEMENTS),
         ("Analytical Statements", ANALYTICAL_STATEMENTS),
         ("Specialized Statements", SPECIALIZED_STATEMENTS)
     ]
-    
+
     for category_name, statements in categories:
         print(f"{category_name}:")
         for stmt in statements:
@@ -175,11 +175,11 @@ def demo_financial_analysis_workflow():
     """Show realistic financial analysis workflow."""
     print("🌍 Financial Analysis Workflow")
     print("=" * 60)
-    
+
     def comprehensive_financial_analysis(company_ticker: str) -> dict:
         """Mock comprehensive financial analysis function."""
         results = {}
-        
+
         print(f"Analyzing {company_ticker} across all primary statements:")
         for statement in PRIMARY_STATEMENTS:
             try:
@@ -190,20 +190,20 @@ def demo_financial_analysis_workflow():
                 print(f"  {analysis_result}")
             except Exception as e:
                 results[statement.value] = f"❌ Not available: {e}"
-                
+
         return results
-    
+
     # Run analysis
     analysis = comprehensive_financial_analysis("AAPL")
     print()
     print(f"Analysis completed for {len(analysis)} statement types")
-    
+
     # Show how to check for specific statement types
     def check_statement_availability(statement_type: StatementInput) -> bool:
         """Check if a statement type is available."""
         validated = validate_statement_type(statement_type)
         return validated in analysis and "✅" in analysis[validated]
-    
+
     print()
     print("Statement availability check:")
     print(f"  Income Statement: {'Available' if check_statement_availability(StatementType.INCOME_STATEMENT) else 'Not Available'}")
@@ -214,7 +214,7 @@ def demo_alias_support():
     """Demonstrate alias support for different naming conventions."""
     print("🔄 Alias Support for Different Naming Conventions")
     print("=" * 60)
-    
+
     # Show aliases
     aliases = [
         (StatementType.PROFIT_LOSS, "Profit & Loss (alias for Income Statement)"),
@@ -223,12 +223,12 @@ def demo_alias_support():
         (StatementType.CASH_FLOWS, "Cash Flows (alias for Cash Flow Statement)"),
         (StatementType.EQUITY_CHANGES, "Equity Changes (alias for Changes in Equity)")
     ]
-    
+
     print("Different naming conventions supported:")
     for alias, description in aliases:
         result = validate_statement_type(alias)
         print(f"  {alias.name} -> '{result}' ({description})")
-    
+
     print()
     print("This supports users familiar with different accounting standards:")
     print("  - US GAAP terminology")
@@ -241,11 +241,11 @@ def demo_educational_benefits():
     """Show educational benefits for learning financial statements.""" 
     print("🎓 Educational Benefits")
     print("=" * 60)
-    
+
     def explain_statement_purpose(statement_type: StatementInput) -> str:
         """Educational explanation of statement purposes."""
         validated = validate_statement_type(statement_type)
-        
+
         explanations = {
             "income_statement": "Shows company profitability over a period - revenues minus expenses equals profit",
             "balance_sheet": "Shows company's financial position at a point in time - what it owns (assets) vs what it owes (liabilities)",
@@ -253,15 +253,15 @@ def demo_educational_benefits():
             "changes_in_equity": "Shows how shareholders' equity changed over the period - dividends, stock issuances, retained earnings",
             "comprehensive_income": "Shows net income plus other gains/losses that bypass the income statement"
         }
-        
+
         return explanations.get(validated, "A financial statement providing specific business information")
-    
+
     print("Educational explanations for beginners:")
     for statement in PRIMARY_STATEMENTS:
         explanation = explain_statement_purpose(statement)
         print(f"\n{statement.name.replace('_', ' ').title()}:")
         print(f"  {explanation}")
-    
+
     print()
     print("This makes EdgarTools beginner-friendly while maintaining professional capabilities!")
     print()
@@ -270,10 +270,10 @@ def demo_ide_integration_benefits():
     """Show IDE integration benefits."""
     print("💻 IDE Integration Benefits")
     print("=" * 60)
-    
+
     print("FEAT-005 provides IDE developers with:")
     print()
-    
+
     ide_benefits = [
         ("Autocomplete", "All statement types appear in IDE dropdown with descriptions"),
         ("Type Safety", "Catch invalid statement types at development time"),
@@ -282,10 +282,10 @@ def demo_ide_integration_benefits():
         ("Code Navigation", "Jump to statement type definitions"),
         ("Error Prevention", "Prevent typos in statement names before runtime")
     ]
-    
+
     for benefit, description in ide_benefits:
         print(f"  ✅ {benefit}: {description}")
-    
+
     print()
     print("Result: Faster, more confident financial application development!")
     print()
@@ -294,10 +294,10 @@ def demo_migration_and_compatibility():
     """Show migration path and backwards compatibility."""
     print("🔄 Migration Path & Backwards Compatibility") 
     print("=" * 60)
-    
+
     print("FEAT-005 maintains full backwards compatibility:")
     print()
-    
+
     # Show that existing string usage still works
     def mock_legacy_function(statement_name: str) -> str:
         """Mock function that traditionally took string parameters."""
@@ -306,13 +306,13 @@ def demo_migration_and_compatibility():
             return f"✅ Legacy string '{statement_name}' still works -> {validated}"
         except ValidationError as e:
             return f"❌ String '{statement_name}' with enhanced guidance: {str(e).split('.')[0]}"
-    
+
     legacy_examples = ["income_statement", "balance_sheet", "cash_flow_statement", "income", "balanc"]
-    
+
     for example in legacy_examples:
         result = mock_legacy_function(example)
         print(f"  {result}")
-    
+
     print()
     print("Migration benefits:")
     print("  📈 Optional adoption - use new features when ready")
@@ -327,7 +327,7 @@ def main():
     print("Transforming Financial Statement Navigation in EdgarTools")
     print("=" * 80)
     print()
-    
+
     demo_basic_usage()
     demo_statement_discovery()
     demo_enhanced_validation()
@@ -338,7 +338,7 @@ def main():
     demo_educational_benefits()
     demo_ide_integration_benefits()
     demo_migration_and_compatibility()
-    
+
     print("🎉 FEAT-005 Demo Complete!")
     print()
     print("Key Achievements:")
@@ -349,16 +349,16 @@ def main():
     print("  🔄 Full backwards compatibility with string parameters")
     print("  🎯 Unified API for statement access")
     print("  ⚡ Excellent performance for financial applications")
-    
+
     print()
     print("FEAT-005 delivers on EdgarTools' principles:")
     print("  • 'Beginner-friendly' - Makes financial statement exploration discoverable")
     print("  • 'Simple yet powerful' - Unified API with comprehensive coverage")
     print("  • 'Joyful UX' - Reduces confusion about available statement types")
-    
+
     print()
     print("Ready for financial analysis workflows! 📈")
-    
+
     return 0
 
 if __name__ == "__main__":

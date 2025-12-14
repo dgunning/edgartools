@@ -60,7 +60,7 @@ console.print(f"  Portal: {formc.portal_name}\n")
 # STEP 3: AGGREGATE - Get complete offering lifecycle
 # ============================================================================
 offering: Offering = formc.get_offering()
-console.print(f"[blue]Offering Details:[/blue]")
+console.print("[blue]Offering Details:[/blue]")
 console.print(f"  File Number: {offering.file_number}")
 console.print(f"  Status: {offering.status}")
 console.print(f"  Total Filings: {len(offering.all_filings)}\n")

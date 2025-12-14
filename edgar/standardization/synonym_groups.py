@@ -47,10 +47,10 @@ See Also:
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Union, Iterator
-import logging
+from typing import Dict, Iterator, List, Optional, Set, Union
 
 log = logging.getLogger(__name__)
 

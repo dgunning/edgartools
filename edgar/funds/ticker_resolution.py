@@ -4,7 +4,6 @@ Ticker resolution service for ETF/Fund holdings.
 This module provides services for resolving ticker symbols from various identifiers
 like CUSIP, ISIN, and company names, addressing GitHub issue #418.
 """
-import logging
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Optional

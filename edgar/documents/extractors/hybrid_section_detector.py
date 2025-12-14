@@ -8,15 +8,13 @@ This module implements a multi-strategy approach to section detection:
 """
 
 import logging
-from typing import Dict, Optional, List
-from dataclasses import dataclass
-from functools import lru_cache
+from typing import Dict, List, Optional
 
-from edgar.documents.document import Document, Section
-from edgar.documents.nodes import SectionNode, HeadingNode
-from edgar.documents.extractors.toc_section_detector import TOCSectionDetector
-from edgar.documents.extractors.pattern_section_extractor import SectionExtractor
 from edgar.documents.config import DetectionThresholds
+from edgar.documents.document import Document, Section
+from edgar.documents.extractors.pattern_section_extractor import SectionExtractor
+from edgar.documents.extractors.toc_section_detector import TOCSectionDetector
+from edgar.documents.nodes import HeadingNode, SectionNode
 
 logger = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ Provides research-backed text formats optimized for LLM accuracy and token effic
 Based on research from improvingagents.com/blog/best-input-data-format-for-llms
 """
 
-from typing import List, Dict
+from typing import Dict, List
 
 __all__ = ['to_markdown_kv', 'to_tsv']
 

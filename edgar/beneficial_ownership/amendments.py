@@ -5,7 +5,7 @@ This module provides utilities for linking amendments to original filings
 and comparing ownership changes between filings.
 """
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from edgar.beneficial_ownership.schedule13 import Schedule13D, Schedule13G

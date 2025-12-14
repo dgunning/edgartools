@@ -25,9 +25,9 @@ See Also:
 """
 
 from edgar.standardization.synonym_groups import (
+    ConceptInfo,
     SynonymGroup,
     SynonymGroups,
-    ConceptInfo,
     get_synonym_groups,
 )
 

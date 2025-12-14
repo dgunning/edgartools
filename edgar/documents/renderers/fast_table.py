@@ -8,8 +8,8 @@ Performance target: ~32x faster than Rich rendering (0.2ms vs 6.5ms per table)
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Union, Tuple
 from enum import Enum
+from typing import List, Optional
 
 
 class Alignment(Enum):
@@ -37,7 +37,7 @@ class TableStyle:
     padding: int = 1
     min_col_width: int = 8
     max_col_width: int = 50
-    
+
     @classmethod
     def pipe_table(cls) -> 'TableStyle':
         """Markdown-compatible pipe table style."""
@@ -49,7 +49,7 @@ class TableStyle:
             min_col_width=8,
             max_col_width=50
         )
-    
+
     @classmethod
     def minimal(cls) -> 'TableStyle':
         """Minimal table style with spacing only."""
@@ -99,14 +99,14 @@ class FastTableRenderer:
     - Markdown-compatible output
     - Memory efficient
     """
-    
+
     def __init__(self, style: Optional[TableStyle] = None):
         """Initialize renderer with optional style configuration."""
         self.style = style or TableStyle.pipe_table()
-        
+
         # Pre-compile format strings for performance
         self._format_cache = {}
-    
+
     def render_table_node(self, table_node) -> str:
         """
         Render a TableNode to text format with proper colspan/rowspan handling.
@@ -150,7 +150,7 @@ class FastTableRenderer:
             return f"{table_node.caption}\n{table_text}"
 
         return table_text
-    
+
     def render_table_data(self, headers: List[List[str]], rows: List[List[str]]) -> str:
         """
         Render table data with headers and rows.
@@ -208,7 +208,7 @@ class FastTableRenderer:
 
         # Build table with filtered data - pass headers as multiple rows
         return self._build_table(filtered_headers, filtered_rows, col_widths, alignments)
-    
+
     def _combine_headers(self, headers: List[List[str]]) -> List[str]:
         """
         Combine multi-row headers intelligently.
@@ -217,21 +217,21 @@ class FastTableRenderer:
         """
         if not headers:
             return []
-        
+
         if len(headers) == 1:
             return headers[0]
-        
+
         # Determine max columns across all header rows
         max_cols = max(len(row) for row in headers) if headers else 0
         combined = [""] * max_cols
-        
+
         for col in range(max_cols):
             # Collect all values for this column
             values = []
             for header_row in headers:
                 if col < len(header_row) and header_row[col].strip():
                     values.append(header_row[col].strip())
-            
+
             if values:
                 # Prioritize date-like values over generic terms
                 date_values = [v for v in values if self._looks_like_date(v)]
@@ -244,26 +244,26 @@ class FastTableRenderer:
                     specific_values = [v for v in values 
                                      if v.lower() not in {'year ended', 'years ended', 'period ended'}]
                     combined[col] = specific_values[0] if specific_values else values[0]
-        
+
         return combined
-    
+
     def _looks_like_date(self, text: str) -> bool:
         """Quick date detection for header processing."""
         if not text or len(text) < 4:
             return False
-        
+
         text_lower = text.lower().replace('\n', ' ').strip()
-        
+
         # Common date indicators
         date_indicators = [
             'january', 'february', 'march', 'april', 'may', 'june',
             'july', 'august', 'september', 'october', 'november', 'december',
             '20', '19',  # Year prefixes
         ]
-        
+
         return any(indicator in text_lower for indicator in date_indicators) and \
                any(c.isdigit() for c in text)
-    
+
     def _identify_meaningful_columns(self, all_rows: List[List[str]], max_cols: int) -> List[int]:
         """
         Identify columns that contain meaningful content (not just spacing).
@@ -272,17 +272,17 @@ class FastTableRenderer:
             List of column indices that have meaningful content
         """
         column_scores = []
-        
+
         for col_idx in range(max_cols):
             content_score = 0
             total_rows = 0
-            
+
             # Score each column based on content quality
             for row in all_rows:
                 if col_idx < len(row):
                     total_rows += 1
                     cell_content = str(row[col_idx]).strip()
-                    
+
                     if cell_content:
                         # Higher score for longer, more substantial content
                         if len(cell_content) >= 3:  # Substantial content
@@ -292,14 +292,14 @@ class FastTableRenderer:
                         elif len(cell_content) == 1 and (cell_content.isalnum() or cell_content == '$'):
                             content_score += 1
                         # Skip single spaces, dashes, or other likely spacing characters
-            
+
             # Calculate average score per row for this column
             avg_score = content_score / max(total_rows, 1)
             column_scores.append((col_idx, avg_score, content_score))
-        
+
         # Sort by score descending
         column_scores.sort(key=lambda x: x[1], reverse=True)
-        
+
         # Take columns with meaningful content (score >= 0.5 or among top columns)
         meaningful_columns = []
         for col_idx, avg_score, total_score in column_scores:
@@ -309,12 +309,12 @@ class FastTableRenderer:
             # Limit to reasonable number of columns for readability
             if len(meaningful_columns) >= 8:
                 break
-        
+
         # Sort by original column order
         meaningful_columns.sort()
-        
+
         return meaningful_columns
-    
+
     def _filter_row_to_columns(self, row: List[str], column_indices: List[int]) -> List[str]:
         """
         Filter a row to only include the specified column indices.
@@ -328,16 +328,16 @@ class FastTableRenderer:
         """
         if not row:
             return []
-        
+
         filtered_row = []
         for col_idx in column_indices:
             if col_idx < len(row):
                 filtered_row.append(row[col_idx])
             else:
                 filtered_row.append("")  # Missing column
-        
+
         return filtered_row
-    
+
     def _merge_related_columns(self, headers: List[str], rows: List[List[str]]) -> tuple:
         """
         Merge related columns (e.g., currency symbols with their amounts).
@@ -347,21 +347,21 @@ class FastTableRenderer:
         """
         if not rows or not any(rows):
             return headers, rows
-        
+
         # Find columns that should be merged
         merge_pairs = []
         max_cols = max(len(row) for row in [headers] + rows if row) if rows else len(headers) if headers else 0
-        
+
         for col_idx in range(max_cols - 1):
             # Check if this column and the next should be merged
             should_merge = self._should_merge_columns(headers, rows, col_idx, col_idx + 1)
             if should_merge:
                 merge_pairs.append((col_idx, col_idx + 1))
-        
+
         # Apply merges (from right to left to avoid index shifting)
         merged_headers = headers[:] if headers else []
         merged_rows = [row[:] for row in rows]
-        
+
         for left_idx, right_idx in reversed(merge_pairs):
             # Merge headers
             if merged_headers and left_idx < len(merged_headers) and right_idx < len(merged_headers):
@@ -370,13 +370,13 @@ class FastTableRenderer:
                 merged_header = f"{left_header} {right_header}".strip()
                 merged_headers[left_idx] = merged_header
                 merged_headers.pop(right_idx)
-            
+
             # Merge rows
             for row in merged_rows:
                 if left_idx < len(row) and right_idx < len(row):
                     left_cell = str(row[left_idx]).strip()
                     right_cell = str(row[right_idx]).strip()
-                    
+
                     # Smart merging based on content
                     if left_cell == '$' and right_cell:
                         merged_cell = f"${right_cell}"
@@ -384,13 +384,13 @@ class FastTableRenderer:
                         merged_cell = f"{left_cell} {right_cell}"
                     else:
                         merged_cell = left_cell or right_cell
-                    
+
                     row[left_idx] = merged_cell
                     if right_idx < len(row):
                         row.pop(right_idx)
-        
+
         return merged_headers, merged_rows
-    
+
     def _should_merge_columns(self, headers: List[str], rows: List[List[str]], left_idx: int, right_idx: int) -> bool:
         """
         Determine if two adjacent columns should be merged.
@@ -401,41 +401,41 @@ class FastTableRenderer:
         # Check if left column is mostly currency symbols
         currency_count = 0
         total_count = 0
-        
+
         for row in rows:
             if left_idx < len(row) and right_idx < len(row):
                 total_count += 1
                 left_cell = str(row[left_idx]).strip()
                 right_cell = str(row[right_idx]).strip()
-                
+
                 # If left is '$' and right is a number, they should be merged
                 if left_cell == '$' and right_cell and (right_cell.replace(',', '').replace('.', '').isdigit()):
                     currency_count += 1
-        
+
         # If most rows have currency symbol + number pattern, merge them
         if total_count > 0 and currency_count / total_count >= 0.5:
             return True
-        
+
         # Check for other merge patterns (e.g., empty left column with content right column)
         empty_left_count = 0
         for row in rows:
             if left_idx < len(row) and right_idx < len(row):
                 left_cell = str(row[left_idx]).strip()
                 right_cell = str(row[right_idx]).strip()
-                
+
                 if not left_cell and right_cell:
                     empty_left_count += 1
-        
+
         # If left column is mostly empty, consider merging
         if total_count > 0 and empty_left_count / total_count >= 0.7:
             return True
-        
+
         return False
-    
+
     def _calculate_column_widths(self, all_rows: List[List[str]], max_cols: int) -> List[int]:
         """Calculate optimal column widths based on content."""
         col_widths = [self.style.min_col_width] * max_cols
-        
+
         # Find the maximum content width for each column
         for row in all_rows:
             for col_idx in range(min(len(row), max_cols)):
@@ -443,58 +443,58 @@ class FastTableRenderer:
                 # Handle multi-line content
                 max_line_width = max((len(line) for line in content.split('\n')), default=0)
                 content_width = max_line_width + (self.style.padding * 2)
-                
+
                 # Apply limits
                 content_width = min(content_width, self.style.max_col_width)
                 col_widths[col_idx] = max(col_widths[col_idx], content_width)
-        
+
         return col_widths
-    
+
     def _detect_alignments(self, all_rows: List[List[str]], max_cols: int) -> List[Alignment]:
         """Detect appropriate alignment for each column based on content."""
         alignments = [Alignment.LEFT] * max_cols
-        
+
         for col_idx in range(max_cols):
             # Analyze column content (skip header row if present)
             data_rows = all_rows[1:] if len(all_rows) > 1 else all_rows
-            
+
             numeric_count = 0
             total_count = 0
-            
+
             for row in data_rows:
                 if col_idx < len(row) and row[col_idx].strip():
                     total_count += 1
                     content = row[col_idx].strip()
-                    
+
                     # Check if content looks numeric (currency, percentages, numbers)
                     if self._looks_numeric(content):
                         numeric_count += 1
-            
+
             # If most values in column are numeric, right-align
             if total_count > 0 and numeric_count / total_count >= 0.7:
                 alignments[col_idx] = Alignment.RIGHT
-        
+
         return alignments
-    
+
     def _looks_numeric(self, text: str) -> bool:
         """Check if text content looks numeric."""
         if not text:
             return False
-        
+
         # Remove common formatting characters
         clean_text = text.replace(',', '').replace('$', '').replace('%', '').replace('(', '').replace(')', '').strip()
-        
+
         # Handle negative numbers in parentheses
         if text.strip().startswith('(') and text.strip().endswith(')'):
             clean_text = text.strip()[1:-1].replace(',', '').replace('$', '').strip()
-        
+
         # Check if remaining text is numeric
         try:
             float(clean_text)
             return True
         except ValueError:
             return False
-    
+
     def _build_table(self, headers: List[List[str]], rows: List[List[str]],
                     col_widths: List[int], alignments: List[Alignment]) -> str:
         """
@@ -528,52 +528,52 @@ class FastTableRenderer:
             if any(cell.strip() for cell in row):
                 row_line = self._format_row(row, col_widths, alignments)
                 lines.append(row_line)
-        
+
         return '\n'.join(lines)
-    
+
     def _format_row(self, row: List[str], col_widths: List[int], 
                    alignments: List[Alignment]) -> str:
         """Format a single row with proper alignment and padding."""
         cells = []
         border = self.style.border_char
-        
+
         for col_idx, width in enumerate(col_widths):
             # Get cell content
             content = str(row[col_idx]) if col_idx < len(row) else ""
-            
+
             # Handle multi-line content (take first line only for table)
             if '\n' in content:
                 content = content.split('\n')[0]
-            
+
             content = content.strip()
-            
+
             # Calculate available width for content
             available_width = width - (self.style.padding * 2)
-            
+
             # Truncate if too long
             if len(content) > available_width:
                 content = content[:available_width-3] + "..."
-            
+
             # Apply alignment
             alignment = alignments[col_idx] if col_idx < len(alignments) else Alignment.LEFT
-            
+
             if alignment == Alignment.RIGHT:
                 aligned_content = content.rjust(available_width)
             elif alignment == Alignment.CENTER:
                 aligned_content = content.center(available_width)
             else:  # LEFT
                 aligned_content = content.ljust(available_width)
-            
+
             # Add padding
             padded_cell = ' ' * self.style.padding + aligned_content + ' ' * self.style.padding
             cells.append(padded_cell)
-        
+
         # Join with borders
         if border:
             return border + border.join(cells) + border
         else:
             return '  '.join(cells)
-    
+
     def _format_multiline_row(self, row: List[str], col_widths: List[int],
                               alignments: List[Alignment]) -> List[str]:
         """

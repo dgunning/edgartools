@@ -16,13 +16,14 @@ Key Findings:
 
 Related: GitHub #462, Beads edgartools-3pd
 """
+import re
+
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
 from edgar import Company
 from edgar.documents import parse_html
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from datetime import datetime
-import re
 
 console = Console()
 
@@ -124,7 +125,7 @@ def test_filing(cik, accession=None, filing_date=None, expected_items=None, era=
         # Parse with edgar.documents parser
         try:
             doc = parse_html(html_content)
-            console.print(f"[green]✓ Parsed document successfully[/green]")
+            console.print("[green]✓ Parsed document successfully[/green]")
         except Exception as e:
             console.print(f"[red]✗ Parse error: {e}[/red]")
             return None
@@ -141,7 +142,7 @@ def test_filing(cik, accession=None, filing_date=None, expected_items=None, era=
         pattern = re.compile(r'(Item\s+\d+\.?\s*\d*[^\n]{0,50})', re.IGNORECASE)
         samples = pattern.findall(doc_text)
         if samples:
-            console.print(f"\n[dim]Sample formatting:[/dim]")
+            console.print("\n[dim]Sample formatting:[/dim]")
             for sample in samples[:3]:
                 console.print(f"  [dim]{sample.strip()}[/dim]")
 
@@ -369,10 +370,10 @@ def main():
             # Text extraction summary
             total_text = sum(r.get('text_length', 0) for r in results)
             avg_text = total_text / len(results) if results else 0
-            console.print(f"\n[bold]Text Extraction:[/bold]")
-            console.print(f"  • All filings successfully parsed")
+            console.print("\n[bold]Text Extraction:[/bold]")
+            console.print("  • All filings successfully parsed")
             console.print(f"  • Average text extracted: {avg_text:,.0f} chars")
-            console.print(f"  • Works across all eras (1999-2025)")
+            console.print("  • Works across all eras (1999-2025)")
 
 
 if __name__ == "__main__":

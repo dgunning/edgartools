@@ -18,12 +18,14 @@ print("=" * 60)
 # STEP 1: Configure HTTP settings FIRST, before any other imports
 print("\n[1/3] Configuring HTTP with verify_ssl=False...")
 from edgar import configure_http
+
 configure_http(verify_ssl=False)
 print("      ✓ HTTP client configured")
 
 # STEP 2: Import edgar classes
 print("\n[2/3] Importing edgar classes...")
 from edgar import Company
+
 print("      ✓ Imports successful")
 
 # STEP 3: Test fetching company data

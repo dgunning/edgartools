@@ -8,7 +8,7 @@ create specialized skills (e.g., insider trading detection, fraud analysis).
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
 
 __all__ = ['BaseSkill']
 

@@ -1,0 +1,893 @@
+[
+  {
+    "accession_number": "0001104659-24-041120",
+    "form": "424B5",
+    "company_name": "Adagene Inc.",
+    "filing_date": "2024-03-29",
+    "test_timestamp": "2025-12-10 16:27:06",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "100000000",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$100,000,000 ",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "American Depositary Shares",
+          "confidence": "High",
+          "raw_text": "American Depositary Shares"
+        },
+        "offering_price": {
+          "price": "0.0001",
+          "currency": "USD",
+          "price_type": "fixed",
+          "confidence": "High",
+          "raw_text": "$0.0001 per share"
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": "333-264486",
+          "confidence": "High",
+          "raw_text": "Registration No. 333-264486"
+        },
+        "atm_indicator": {
+          "is_atm": true,
+          "confidence": "High",
+          "raw_text": "at the market offering"
+        }
+      },
+      "underwriters": {
+        "from_section": {
+          "underwriters": [
+            "UBS",
+            "Leerink Partners"
+          ],
+          "lead_underwriters": [],
+          "confidence": "High",
+          "section_found": true
+        },
+        "from_table": {
+          "underwriters": [],
+          "total_shares": null,
+          "confidence": "None",
+          "table_found": false
+        },
+        "underwriting_discount": {
+          "discount_percent": "3.0",
+          "discount_per_share": null,
+          "confidence": "Medium",
+          "raw_text": "commission rate of up to 3.0%"
+        }
+      },
+      "offering_terms": {
+        "greenshoe": {
+          "has_greenshoe": false,
+          "greenshoe_shares": null,
+          "greenshoe_percent": null,
+          "confidence": "High",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001140361-24-031669",
+    "form": "424B5",
+    "company_name": "Jefferies Financial Group Inc.",
+    "filing_date": "2024-06-28",
+    "test_timestamp": "2025-12-10 16:27:10",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "217000",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$217,000",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "offering_price": {
+          "price": null,
+          "currency": "USD",
+          "price_type": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "underwriters": {
+        "from_section": {
+          "underwriters": [
+            "Jefferies"
+          ],
+          "lead_underwriters": [],
+          "confidence": "Medium",
+          "section_found": true
+        },
+        "from_table": {
+          "underwriters": [],
+          "total_shares": null,
+          "confidence": "None",
+          "table_found": false
+        },
+        "underwriting_discount": {
+          "discount_percent": null,
+          "discount_per_share": null,
+          "confidence": "None",
+          "raw_text": null
+        }
+      },
+      "offering_terms": {
+        "greenshoe": {
+          "has_greenshoe": false,
+          "greenshoe_shares": null,
+          "greenshoe_percent": null,
+          "confidence": "High",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001104659-24-103798",
+    "form": "424B5",
+    "company_name": "EYENOVIA, INC.",
+    "filing_date": "2024-09-30",
+    "test_timestamp": "2025-12-10 16:27:12",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "0",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$0",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "Common Stock",
+          "confidence": "High",
+          "raw_text": "Common Stock"
+        },
+        "offering_price": {
+          "price": "0.0001",
+          "currency": "USD",
+          "price_type": "fixed",
+          "confidence": "High",
+          "raw_text": "$0.0001 per share"
+        },
+        "share_count": {
+          "share_count": "65653",
+          "confidence": "High",
+          "raw_text": "65,653 shares of"
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": "333-261638",
+          "confidence": "High",
+          "raw_text": "Registration No. 333-261638"
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "underwriters": {
+        "from_section": {
+          "underwriters": [],
+          "lead_underwriters": [],
+          "confidence": "None",
+          "section_found": false
+        },
+        "from_table": {
+          "underwriters": [],
+          "total_shares": null,
+          "confidence": "None",
+          "table_found": false
+        },
+        "underwriting_discount": {
+          "discount_percent": null,
+          "discount_per_share": null,
+          "confidence": "None",
+          "raw_text": null
+        }
+      },
+      "offering_terms": {
+        "greenshoe": {
+          "has_greenshoe": false,
+          "greenshoe_shares": null,
+          "greenshoe_percent": null,
+          "confidence": "High",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001104659-24-132494",
+    "form": "424B5",
+    "company_name": "EYENOVIA, INC.",
+    "filing_date": "2024-12-30",
+    "test_timestamp": "2025-12-10 16:27:15",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "33586557",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$33,586,557",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "Common Stock",
+          "confidence": "High",
+          "raw_text": "Common Stock"
+        },
+        "offering_price": {
+          "price": "0.092",
+          "currency": "USD",
+          "price_type": "fixed",
+          "confidence": "High",
+          "raw_text": "$0.092\nper share"
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "atm_indicator": {
+          "is_atm": true,
+          "confidence": "High",
+          "raw_text": "at the market offering"
+        }
+      },
+      "underwriters": {
+        "from_section": {
+          "underwriters": [],
+          "lead_underwriters": [],
+          "confidence": "None",
+          "section_found": true
+        },
+        "from_table": {
+          "underwriters": [],
+          "total_shares": null,
+          "confidence": "Low",
+          "table_found": true
+        },
+        "underwriting_discount": {
+          "discount_percent": "3.0",
+          "discount_per_share": null,
+          "confidence": "Medium",
+          "raw_text": "3.0% of the gross proceeds"
+        }
+      },
+      "offering_terms": {
+        "greenshoe": {
+          "has_greenshoe": false,
+          "greenshoe_shares": null,
+          "greenshoe_percent": null,
+          "confidence": "High",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001493152-24-052234",
+    "form": "424B5",
+    "company_name": "AMERICAN BATTERY TECHNOLOGY Co",
+    "filing_date": "2024-12-27",
+    "test_timestamp": "2025-12-10 16:27:17",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "0",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$0",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "Common Stock",
+          "confidence": "High",
+          "raw_text": "Common Stock"
+        },
+        "offering_price": {
+          "price": "0.001",
+          "currency": "USD",
+          "price_type": "fixed",
+          "confidence": "High",
+          "raw_text": "$0.001 per share"
+        },
+        "share_count": {
+          "share_count": "3773586",
+          "confidence": "High",
+          "raw_text": "3,773,586 shares of"
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "underwriters": {
+        "from_section": {
+          "underwriters": [],
+          "lead_underwriters": [],
+          "confidence": "None",
+          "section_found": false
+        },
+        "from_table": {
+          "underwriters": [],
+          "total_shares": null,
+          "confidence": "Low",
+          "table_found": true
+        },
+        "underwriting_discount": {
+          "discount_percent": null,
+          "discount_per_share": null,
+          "confidence": "None",
+          "raw_text": null
+        }
+      },
+      "offering_terms": {
+        "greenshoe": {
+          "has_greenshoe": false,
+          "greenshoe_shares": null,
+          "greenshoe_percent": null,
+          "confidence": "High",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001213900-24-113730",
+    "form": "424B3",
+    "company_name": "ADIAL PHARMACEUTICALS, INC.",
+    "filing_date": "2024-12-31",
+    "test_timestamp": "2025-12-10 16:27:19",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "0",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$0",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "Common Stock",
+          "confidence": "High",
+          "raw_text": "Common Stock"
+        },
+        "offering_price": {
+          "price": "0.001",
+          "currency": "USD",
+          "price_type": "fixed",
+          "confidence": "High",
+          "raw_text": "$0.001 per share"
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": "333-283968",
+          "confidence": "High",
+          "raw_text": "Registration No. 333-283968"
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "selling_shareholders": {
+        "section_detection": {
+          "section_found": true,
+          "section_text": "Selling Stockholder&rdquo;) of up to 5,000,000&nbsp;shares (the &ldquo;Shares&rdquo;) of\nour common stock, par value $0.001 per share (the &ldquo;Common Stock&rdquo;), which includes 68,807&nbsp;shares of our Common Stock issued\nto the Selling Stockholder as commitment shares (the &ldquo;Commitment Shares&rdquo;).</P>\n\n<P STYLE=\"font: 10pt Times New Roman, Times, Serif; margin: 0pt 0\">&nbsp;</P>\n\n<P STYLE=\"font: 10pt Times New Roman, Times, Serif; margin: 0pt 0\">The shares of Common Stock being ",
+          "confidence": "High",
+          "pattern_matched": "SELLING\\s+STOCKHOLDERS?"
+        },
+        "table_extraction": {
+          "shareholders": [
+            {
+              "name": "Cell(content='Special Note Regarding Forward-Looking Statements', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": ""
+            },
+            {
+              "name": "Cell(content='Prospectus Summary', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "1"
+            },
+            {
+              "name": "Cell(content='The Offering', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "7"
+            },
+            {
+              "name": "Cell(content='Risk Factors', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "8"
+            },
+            {
+              "name": "Cell(content='The Alumni Capital Transaction', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "11"
+            },
+            {
+              "name": "Cell(content='Use of Proceeds', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "17"
+            },
+            {
+              "name": "Cell(content='Dividend Policy', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "18"
+            },
+            {
+              "name": "Cell(content='Selling Stockholder', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "19"
+            },
+            {
+              "name": "Cell(content='Plan of Distribution', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "20"
+            },
+            {
+              "name": "Cell(content='Description of Our Securities', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "22"
+            },
+            {
+              "name": "Cell(content='Legal Matters', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "27"
+            },
+            {
+              "name": "Cell(content='Experts', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "27"
+            },
+            {
+              "name": "Cell(content='Where You Can Find Additional Information', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "27"
+            },
+            {
+              "name": "Cell(content='Incorporation of Certain Information by Reference', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "28"
+            },
+            {
+              "name": "Cell(content='Disclosure of Commission Position on Indemnification for Securities Act Liabilities', colspan=1, rowspan=1, is_header=False, align=None)",
+              "shares_offered": "29"
+            }
+          ],
+          "total_shares": null,
+          "confidence": "High",
+          "table_found": true
+        },
+        "resale_amount": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001213900-24-113929",
+    "form": "424B3",
+    "company_name": "JPMorgan Chase Financial Co. LLC",
+    "filing_date": "2024-12-31",
+    "test_timestamp": "2025-12-10 16:27:20",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "1000",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$1,000 ",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "preferred stock",
+          "confidence": "High",
+          "raw_text": "preferred stock"
+        },
+        "offering_price": {
+          "price": null,
+          "currency": "USD",
+          "price_type": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "selling_shareholders": {
+        "section_detection": {
+          "section_found": false,
+          "section_text": null,
+          "confidence": "None",
+          "pattern_matched": null
+        },
+        "table_extraction": {
+          "shareholders": [],
+          "total_shares": null,
+          "confidence": "None",
+          "table_found": false
+        },
+        "resale_amount": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001140361-24-050668",
+    "form": "424B3",
+    "company_name": "TORONTO DOMINION BANK",
+    "filing_date": "2024-12-31",
+    "test_timestamp": "2025-12-10 16:27:21",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "1902000",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$1,902,000",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "offering_price": {
+          "price": null,
+          "currency": "USD",
+          "price_type": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "selling_shareholders": {
+        "section_detection": {
+          "section_found": true,
+          "section_text": "selling shareholders, including block sales and spot secondaries, will be eligible for accelerated\n        implementation treatment if the size of the event meets the materiality threshold criteria:</div>\n      <table cellspacing=\"0\" cellpadding=\"0\" id=\"zd4d99ce62862487bac7db4b943b973e0\" class=\"DSPFListTable\" style=\"font-family: Arial; font-size: 9pt; width: 100%; text-align: left; color: #000000; margin-top: 6pt;\">\n\n          <tr>\n            <td style=\"width: 18pt; vertical-align: top;\">(a)</t",
+          "confidence": "High",
+          "pattern_matched": "SELLING\\s+SHAREHOLDERS?"
+        },
+        "table_extraction": {
+          "shareholders": [],
+          "total_shares": null,
+          "confidence": "None",
+          "table_found": false
+        },
+        "resale_amount": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001104659-24-132173",
+    "form": "424B3",
+    "company_name": "Oklo Inc.",
+    "filing_date": "2024-12-27",
+    "test_timestamp": "2025-12-10 16:27:22",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "24",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$24",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "Common Stock",
+          "confidence": "High",
+          "raw_text": "Common Stock"
+        },
+        "offering_price": {
+          "price": null,
+          "currency": "USD",
+          "price_type": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": "333-280344",
+          "confidence": "High",
+          "raw_text": "Registration No. 333-280344"
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "selling_shareholders": {
+        "section_detection": {
+          "section_found": false,
+          "section_text": null,
+          "confidence": "None",
+          "pattern_matched": null
+        },
+        "table_extraction": {
+          "shareholders": [],
+          "total_shares": null,
+          "confidence": "None",
+          "table_found": false
+        },
+        "resale_amount": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  },
+  {
+    "accession_number": "0001839882-24-047337",
+    "form": "424B3",
+    "company_name": "UBS AG",
+    "filing_date": "2024-12-26",
+    "test_timestamp": "2025-12-10 16:27:23",
+    "extraction_results": {
+      "cover_page": {
+        "offering_amount": {
+          "amount": "565000",
+          "currency": "USD",
+          "confidence": "High",
+          "raw_text": "$565,000 ",
+          "multiplier": "exact"
+        },
+        "security_type": {
+          "security_type": "common stock",
+          "confidence": "High",
+          "raw_text": "common stock"
+        },
+        "offering_price": {
+          "price": null,
+          "currency": "USD",
+          "price_type": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "share_count": {
+          "share_count": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "gross_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "net_proceeds": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        },
+        "registration_number": {
+          "registration_number": null,
+          "confidence": "None",
+          "raw_text": null
+        },
+        "atm_indicator": {
+          "is_atm": false,
+          "confidence": "High",
+          "raw_text": null
+        }
+      },
+      "selling_shareholders": {
+        "section_detection": {
+          "section_found": false,
+          "section_text": null,
+          "confidence": "None",
+          "pattern_matched": null
+        },
+        "table_extraction": {
+          "shareholders": [],
+          "total_shares": null,
+          "confidence": "None",
+          "table_found": false
+        },
+        "resale_amount": {
+          "amount": null,
+          "currency": "USD",
+          "confidence": "None",
+          "raw_text": null
+        }
+      }
+    },
+    "errors": []
+  }
+]

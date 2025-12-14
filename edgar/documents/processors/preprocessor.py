@@ -19,14 +19,14 @@ class HTMLPreprocessor:
     - Script/style removal
     - Entity normalization
     """
-    
+
     def __init__(self, config: ParserConfig):
         """Initialize preprocessor with configuration."""
         self.config = config
-        
+
         # Pre-compile regex patterns for performance
         self._compiled_patterns = self._compile_patterns()
-    
+
     def _compile_patterns(self):
         """Pre-compile frequently used regex patterns."""
         return {
@@ -80,7 +80,7 @@ class HTMLPreprocessor:
             'space_before_punct': re.compile(r'\s+([.,;!?])'),
             'missing_space_after_punct': re.compile(r'([.,;!?])([A-Z])'),
         }
-    
+
     def process(self, html: str) -> str:
         """
         Preprocess HTML content.
@@ -94,34 +94,34 @@ class HTMLPreprocessor:
         # Remove BOM if present
         if html.startswith('\ufeff'):
             html = html[1:]
-        
+
         # Remove XML declaration if present
         html = remove_xml_declaration(html)
-        
+
         # Fix common character encoding issues
         html = self._fix_encoding_issues(html)
-        
+
         # Remove script and style tags
         html = self._remove_script_style(html)
-        
+
         # Normalize entities
         html = self._normalize_entities(html)
-        
+
         # Fix malformed tags
         html = self._fix_malformed_tags(html)
-        
+
         # Normalize whitespace if not preserving
         if not self.config.preserve_whitespace:
             html = self._normalize_whitespace(html)
-        
+
         # Remove empty tags
         html = self._remove_empty_tags(html)
-        
+
         # Fix common HTML issues
         html = self._fix_common_issues(html)
-        
+
         return html
-    
+
     def _fix_encoding_issues(self, html: str) -> str:
         """Fix common character encoding issues."""
         # Replace Windows-1252 characters with Unicode equivalents
@@ -135,15 +135,15 @@ class HTMLPreprocessor:
             '\x97': '—',  # Em dash
             '\xa0': ' ',  # Non-breaking space
         }
-        
+
         for old, new in replacements.items():
             html = html.replace(old, new)
-        
+
         # Remove other control characters
         html = self._compiled_patterns['control_chars'].sub('', html)
-        
+
         return html
-    
+
     def _remove_script_style(self, html: str) -> str:
         """Remove script and style tags with content."""
         # Use pre-compiled patterns for better performance
@@ -155,7 +155,7 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['ix_header'].sub('', html)
 
         return html
-    
+
     def _normalize_entities(self, html: str) -> str:
         """Normalize HTML entities."""
         # Common entity replacements
@@ -170,18 +170,18 @@ class HTMLPreprocessor:
             '&zwnj;': '',  # Zero-width non-joiner
             '&#8203;': '',  # Zero-width space
         }
-        
+
         for entity, replacement in entities.items():
             html = html.replace(entity, replacement)
-        
+
         # Fix double-encoded entities
         html = html.replace('&amp;amp;', '&amp;')
         html = html.replace('&amp;nbsp;', ' ')
         html = html.replace('&amp;lt;', '&lt;')
         html = html.replace('&amp;gt;', '&gt;')
-        
+
         return html
-    
+
     def _fix_malformed_tags(self, html: str) -> str:
         """Fix common malformed tag issues."""
         # Use pre-compiled patterns for better performance
@@ -193,7 +193,7 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['nested_p_close'].sub('</p>', html)
 
         return html
-    
+
     def _normalize_whitespace(self, html: str) -> str:
         """Normalize whitespace in HTML."""
         # Use pre-compiled patterns for better performance
@@ -215,7 +215,7 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['multiple_newlines'].sub('\n\n', html)
 
         return html.strip()
-    
+
     def _remove_empty_tags(self, html: str) -> str:
         """Remove empty tags that don't contribute content."""
         # Use pre-compiled combined patterns instead of looping
@@ -223,7 +223,7 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['empty_self_closing'].sub('', html)
 
         return html
-    
+
     def _fix_common_issues(self, html: str) -> str:
         """Fix other common HTML issues."""
         # Use pre-compiled patterns for better performance

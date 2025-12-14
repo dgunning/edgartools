@@ -11,13 +11,7 @@ from datetime import date
 
 # Check if AI features are available
 try:
-    from edgar.ai import (
-        AI_AVAILABLE,
-        MCP_AVAILABLE,
-        get_ai_info,
-        enhance_financial_fact_llm_context,
-        check_ai_capabilities
-    )
+    from edgar.ai import AI_AVAILABLE, MCP_AVAILABLE, check_ai_capabilities, enhance_financial_fact_llm_context, get_ai_info
 except ImportError:
     print("EdgarTools AI features not available.")
     print("Install with: pip install edgartools[llm]")
@@ -31,11 +25,11 @@ def demonstrate_ai_capabilities():
     print(f"AI Available: {info['ai_available']}")
     print(f"MCP Available: {info['mcp_available']}")
     print(f"Token Optimization: {info['tiktoken_available']}")
-    
+
     if info['missing_dependencies']:
         print(f"\nMissing dependencies: {', '.join(info['missing_dependencies'])}")
         print(f"Install with: {info['install_command']}")
-    
+
     print("\nDetailed capabilities:")
     capabilities = check_ai_capabilities()
     for capability, available in capabilities.items():
@@ -46,14 +40,14 @@ def demonstrate_ai_capabilities():
 def demonstrate_financial_fact_enhancement():
     """Demonstrate enhancing financial facts for LLM consumption."""
     print("\n=== Financial Fact Enhancement ===")
-    
+
     # Create a mock financial fact (in real usage, this would come from EdgarTools)
     from dataclasses import dataclass
     from enum import Enum
-    
+
     class DataQuality(Enum):
         HIGH = "high"
-    
+
     @dataclass
     class MockFinancialFact:
         concept: str = "us-gaap:Revenue"
@@ -72,7 +66,7 @@ def demonstrate_financial_fact_enhancement():
         data_quality: DataQuality = DataQuality.HIGH
         confidence_score: float = 0.95
         statement_type: str = "IncomeStatement"
-        
+
         def to_llm_context(self):
             """Basic LLM context (existing in EdgarTools)."""
             return {
@@ -84,18 +78,18 @@ def demonstrate_financial_fact_enhancement():
                 "confidence": self.confidence_score,
                 "source": f"{self.form_type} filed {self.filing_date}"
             }
-    
+
     fact = MockFinancialFact()
-    
+
     # Show different detail levels
     print("\nMinimal context:")
     minimal = enhance_financial_fact_llm_context(fact, detail_level='minimal')
     print(json.dumps(minimal, indent=2))
-    
+
     print("\nStandard context (with semantic enrichment):")
     standard = enhance_financial_fact_llm_context(fact, detail_level='standard')
     print(json.dumps(standard, indent=2))
-    
+
     print("\nToken-limited context (100 tokens):")
     limited = enhance_financial_fact_llm_context(fact, detail_level='detailed', max_tokens=100)
     print(json.dumps(limited, indent=2))
@@ -104,21 +98,21 @@ def demonstrate_financial_fact_enhancement():
 def demonstrate_mcp_server():
     """Demonstrate MCP server setup."""
     print("\n=== MCP Server Setup ===")
-    
+
     if not MCP_AVAILABLE:
         print("MCP not available. Install with: pip install edgartools[llm]")
         return
-    
+
     try:
         from edgar.ai.mcp import get_simple_server
-        
+
         server = get_simple_server()
         print("MCP Server created successfully!")
         print(f"Server name: {server.name}")
-        
+
         print("\nTo run the server:")
         print("  python edgar/ai/run_mcp_server.py")
-        
+
         print("\nOr use in Claude Desktop config:")
         print("""  {
     "tools": [
@@ -132,7 +126,7 @@ def demonstrate_mcp_server():
       }
     ]
   }""")
-        
+
     except ImportError as e:
         print(f"Error creating MCP server: {e}")
 
@@ -140,14 +134,14 @@ def demonstrate_mcp_server():
 def demonstrate_usage_with_company():
     """Demonstrate AI features with real EdgarTools objects."""
     print("\n=== Usage with EdgarTools Company ===")
-    
+
     try:
         from edgar import Company
-        
+
         # Get a company
         company = Company("AAPL")
         print(f"Company: {company.name} ({company.get_ticker()})")
-        
+
         # If the company has a to_llm_context method (future enhancement)
         if hasattr(company, 'to_llm_context'):
             context = company.to_llm_context()
@@ -156,7 +150,7 @@ def demonstrate_usage_with_company():
         else:
             print("\nNote: Company.to_llm_context() will be available in future versions")
             print("For now, use the AI wrapper functions to enhance EdgarTools objects")
-            
+
     except Exception as e:
         print(f"Error demonstrating company usage: {e}")
         print("This example requires a working internet connection and valid SEC API access")
@@ -166,19 +160,19 @@ def main():
     """Run all demonstrations."""
     print("EdgarTools AI Features Demonstration")
     print("=" * 50)
-    
+
     # Check capabilities
     demonstrate_ai_capabilities()
-    
+
     # Show financial fact enhancement
     demonstrate_financial_fact_enhancement()
-    
+
     # Show MCP server setup
     demonstrate_mcp_server()
-    
+
     # Show usage with real EdgarTools objects
     demonstrate_usage_with_company()
-    
+
     print("\n" + "=" * 50)
     print("For more examples, see the documentation in edgar/ai/docs/")
 

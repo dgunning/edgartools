@@ -11,9 +11,10 @@ Replace the placeholders below with actual values from the issue report:
 - ACTUAL_BEHAVIOR: What actually happens
 """
 
-from edgar import set_identity, get_by_accession_number, Company
-from rich.console import Console
 import pandas as pd
+from rich.console import Console
+
+from edgar import get_by_accession_number, set_identity
 
 # Set proper identity (CRITICAL for SEC API access)
 set_identity("Research Team research@edgartools-investigation.com")
@@ -72,18 +73,18 @@ def reproduce_empty_periods_issue():
                 console.print(f"  ✅ {col}: {numeric_values} meaningful values")
 
         # Report findings
-        console.print(f"\n[bold]Results:[/bold]")
+        console.print("\n[bold]Results:[/bold]")
         console.print(f"Total periods: {len(data_cols)}")
         console.print(f"Meaningful periods: {len(meaningful_periods)}")
         console.print(f"Empty periods: {len(empty_periods)}")
 
         if empty_periods:
-            console.print(f"\n[red]ISSUE CONFIRMED:[/red]")
+            console.print("\n[red]ISSUE CONFIRMED:[/red]")
             console.print(f"Empty periods found: {empty_periods}")
             console.print("This matches the Issue #408 pattern")
 
             # Show expected vs actual
-            console.print(f"\n[yellow]Expected:[/yellow] All periods should have meaningful financial data")
+            console.print("\n[yellow]Expected:[/yellow] All periods should have meaningful financial data")
             console.print(f"[red]Actual:[/red] {len(empty_periods)} periods contain only empty values")
 
             return {
@@ -93,7 +94,7 @@ def reproduce_empty_periods_issue():
                 'pattern': 'empty_string_periods'
             }
         else:
-            console.print(f"\n[green]NO ISSUE FOUND:[/green]")
+            console.print("\n[green]NO ISSUE FOUND:[/green]")
             console.print("All periods contain meaningful data")
 
             return {
@@ -137,8 +138,8 @@ def compare_with_working_filing():
     # Use a recent filing that should work correctly
     working_accession = "0000320193-25-000073"  # Apple Q2 2025
 
-    console.print(f"Comparing problematic vs working:")
-    console.print(f"  Problematic: ACCESSION_NUMBER")
+    console.print("Comparing problematic vs working:")
+    console.print("  Problematic: ACCESSION_NUMBER")
     console.print(f"  Working: {working_accession}")
 
     # Add comparison logic here
@@ -153,7 +154,7 @@ if __name__ == "__main__":
 
     # Summary
     if result.get('issue_confirmed'):
-        print(f"\n✅ Issue #ISSUE_NUMBER reproduced successfully")
+        print("\n✅ Issue #ISSUE_NUMBER reproduced successfully")
         print(f"Pattern: {result.get('pattern', 'unknown')}")
     else:
-        print(f"\n❌ Issue #ISSUE_NUMBER could not be reproduced")
+        print("\n❌ Issue #ISSUE_NUMBER could not be reproduced")

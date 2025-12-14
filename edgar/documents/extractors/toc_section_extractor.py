@@ -6,12 +6,14 @@ This system uses TOC structure to extract specific sections like "Item 1",
 all SEC filings regardless of whether they use semantic anchors or generated IDs.
 """
 import re
-from typing import Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass
-from lxml import html as lxml_html, etree
+from typing import Dict, List, Optional
 
-from edgar.documents.nodes import Node, SectionNode
+from lxml import etree
+from lxml import html as lxml_html
+
 from edgar.documents.document import Document
+from edgar.documents.nodes import Node
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
 
@@ -37,14 +39,14 @@ class SECSectionExtractor:
     This uses TOC structure to identify section boundaries and extract content
     between them. Works consistently for all SEC filings.
     """
-    
+
     def __init__(self, document: Document):
         self.document = document
         self.section_map = {}  # Maps section names to canonical names
         self.section_boundaries = {}  # Maps section names to boundaries
         self.toc_analyzer = TOCAnalyzer()
         self._analyze_sections()
-    
+
     def _analyze_sections(self) -> None:
         """
         Analyze the document using TOC structure to identify section boundaries.
@@ -56,30 +58,30 @@ class SECSectionExtractor:
         html_content = getattr(self.document.metadata, 'original_html', None)
         if not html_content:
             return
-        
+
         # Use TOC analysis to find sections
         toc_mapping = self.toc_analyzer.analyze_toc_structure(html_content)
-        
+
         if not toc_mapping:
             return  # No sections found
-        
+
         # Handle XML declaration issues  
         if html_content.startswith('<?xml'):
             html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-        
+
         tree = lxml_html.fromstring(html_content)
-        
+
         sec_sections = {}
-        
+
         for section_name, anchor_id in toc_mapping.items():
             # Verify the anchor target exists
             target_elements = tree.xpath(f'//*[@id="{anchor_id}"]')
             if target_elements:
                 element = target_elements[0]
-                
+
                 # Use TOC-based section info
                 section_type, order = self.toc_analyzer._get_section_type_and_order(section_name)
-                
+
                 sec_sections[section_name] = {
                     'anchor_id': anchor_id,
                     'element': element,
@@ -89,23 +91,23 @@ class SECSectionExtractor:
                     'confidence': 0.95,  # TOC-based detection = high confidence
                     'detection_method': 'toc'  # Method: Table of Contents
                 }
-        
+
         if not sec_sections:
             return  # No valid sections found
-        
+
         # Sort sections by their logical order
         sorted_sections = sorted(sec_sections.items(), key=lambda x: x[1]['order'])
-        
+
         # Calculate section boundaries
         for i, (section_name, section_data) in enumerate(sorted_sections):
             start_anchor = section_data['anchor_id']
-            
+
             # End boundary is the start of the next section (if any)
             end_anchor = None
             if i + 1 < len(sorted_sections):
                 next_section = sorted_sections[i + 1][1]
                 end_anchor = next_section['anchor_id']
-            
+
             self.section_boundaries[section_name] = SectionBoundary(
                 name=section_name,
                 anchor_id=start_anchor,
@@ -113,11 +115,11 @@ class SECSectionExtractor:
                 confidence=section_data.get('confidence', 0.95),
                 detection_method=section_data.get('detection_method', 'toc')
             )
-        
+
         self.section_map = {name: data['canonical_name'] for name, data in sec_sections.items()}
-    
-    
-    
+
+
+
     def get_available_sections(self) -> List[str]:
         """
         Get list of available sections that can be extracted.
@@ -127,7 +129,7 @@ class SECSectionExtractor:
         """
         return sorted(self.section_boundaries.keys(), 
                      key=lambda x: self.section_boundaries[x].anchor_id)
-    
+
     def get_section_text(self, section_name: str,
                         include_subsections: bool = True,
                         clean: bool = True) -> Optional[str]:
@@ -173,18 +175,18 @@ class SECSectionExtractor:
                         section_text = '\n\n'.join(subsection_texts)
 
             return section_text
-        except Exception as e:
+        except Exception:
             # Fallback to simple text extraction
             return self._extract_section_fallback(section_name, clean)
-    
+
     def _normalize_section_name(self, section_name: str) -> str:
         """Normalize section name for lookup."""
         # Handle common variations
         name = section_name.strip()
-        
+
         # "Item 1" vs "Item 1." vs "Item 1:"
         name = re.sub(r'[.:]$', '', name)
-        
+
         # Case normalization
         if re.match(r'item\s+\d+', name, re.IGNORECASE):
             match = re.match(r'item\s+(\d+[a-z]?)', name, re.IGNORECASE)
@@ -194,9 +196,9 @@ class SECSectionExtractor:
             match = re.match(r'part\s+([ivx]+)', name, re.IGNORECASE)
             if match:
                 name = f"Part {match.group(1).upper()}"
-        
+
         return name
-    
+
     def _extract_section_content(self, html_content: str, boundary: SectionBoundary,
                                include_subsections: bool, clean: bool) -> str:
         """
@@ -280,22 +282,22 @@ class SECSectionExtractor:
             combined_text = self._clean_section_text(combined_text)
 
         return combined_text
-    
+
     def _is_sibling_section(self, element_id: str, current_section: str) -> bool:
         """Check if element ID represents a sibling section."""
         if not element_id:
             return False
-        
+
         # Check if this looks like another item at the same level
         if 'item' in current_section.lower() and 'item' in element_id.lower():
             current_item = re.search(r'item\s*(\d+)', current_section, re.IGNORECASE)
             other_item = re.search(r'item[\s_]*(\d+)', element_id, re.IGNORECASE)
-            
+
             if current_item and other_item:
                 return current_item.group(1) != other_item.group(1)
-        
+
         return False
-    
+
     def _extract_element_text(self, element) -> str:
         """Extract clean text from an HTML element."""
         # Skip non-element nodes (comments, processing instructions, etc.)
@@ -304,22 +306,22 @@ class SECSectionExtractor:
         except (ValueError, AttributeError):
             # HtmlComment and other non-element nodes don't have text_content()
             return ""
-    
+
     def _clean_section_text(self, text: str) -> str:
         """Clean extracted section text."""
         # Apply the same cleaning as the main document
         from edgar.documents.utils.anchor_cache import filter_with_cached_patterns
-        
+
         # Remove excessive whitespace
         text = re.sub(r'\n\s*\n\s*\n', '\n\n', text)
-        
+
         # Filter navigation links
         html_content = getattr(self.document.metadata, 'original_html', None)
         if html_content:
             text = filter_with_cached_patterns(text, html_content)
-        
+
         return text.strip()
-    
+
     def _extract_section_fallback(self, section_name: str, clean: bool) -> Optional[str]:
         """
         Fallback section extraction using document nodes.
@@ -341,7 +343,7 @@ class SECSectionExtractor:
         # If HTML-based extraction fails, we simply return None rather than
         # trying to use sections that haven't been computed yet.
         return None
-    
+
     def get_section_info(self, section_name: str) -> Optional[Dict]:
         """
         Get detailed information about a section.
@@ -353,12 +355,12 @@ class SECSectionExtractor:
             Dict with section metadata
         """
         normalized_name = self._normalize_section_name(section_name)
-        
+
         if normalized_name not in self.section_boundaries:
             return None
-        
+
         boundary = self.section_boundaries[normalized_name]
-        
+
         return {
             'name': boundary.name,
             'anchor_id': boundary.anchor_id,
@@ -366,7 +368,7 @@ class SECSectionExtractor:
             'estimated_length': None,  # Could calculate if needed
             'subsections': self._get_subsections(normalized_name)
         }
-    
+
     def _get_subsections(self, parent_section: str) -> List[str]:
         """
         Get subsections of a parent section.

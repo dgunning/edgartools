@@ -20,11 +20,12 @@ Classes:
     StorageAnalysis - Storage analysis with recommendations
 """
 
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
-import time
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+
 from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
@@ -47,7 +48,6 @@ class StorageAnalysis:
         """Rich Panel display with analysis and recommendations"""
         from rich.panel import Panel
         from rich.table import Table
-        from rich.text import Text
 
         # Create main table
         analysis = Table(show_header=False, box=None, padding=(0, 2))
@@ -504,6 +504,7 @@ def optimize_storage(dry_run: bool = True) -> Dict[str, int]:
     """
     import gzip
     import shutil
+
     from edgar.core import get_edgar_data_directory
 
     storage_path = get_edgar_data_directory()
@@ -546,7 +547,7 @@ def optimize_storage(dry_run: bool = True) -> Dict[str, int]:
 
                     files_compressed += 1
 
-                except Exception as e:
+                except Exception:
                     errors += 1
                     continue
 
@@ -581,6 +582,7 @@ def cleanup_storage(days: int = 365, dry_run: bool = True) -> Dict[str, int]:
         >>> print(f"Freed {result['bytes_freed'] / 1e9:.1f} GB")
     """
     from datetime import datetime, timedelta
+
     from edgar.core import get_edgar_data_directory
 
     storage_path = get_edgar_data_directory()

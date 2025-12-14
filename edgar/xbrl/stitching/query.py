@@ -7,6 +7,7 @@ users to query standardized, multi-period financial data.
 
 import re
 from collections import defaultdict
+from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import pandas as pd
@@ -458,8 +459,9 @@ class StitchedFactQuery(FactQuery):
             results = self._prepare_trend_data(results)
 
         # Apply sorting if specified
-        if results and self._sort_by and self._sort_by in results[0]:
-            results.sort(key=lambda f: f.get(self._sort_by, ''),
+        sort_by = self._sort_by
+        if results and sort_by and sort_by in results[0]:
+            results.sort(key=lambda f: f.get(sort_by, ''),
                          reverse=not self._sort_ascending)
 
         # Apply limit if specified
@@ -539,6 +541,7 @@ class StitchedFactQuery(FactQuery):
 
         return df
 
+    @lru_cache(maxsize=8)
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.

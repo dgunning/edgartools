@@ -69,12 +69,13 @@ AI_AVAILABLE = MCP_AVAILABLE or TIKTOKEN_AVAILABLE
 
 # Core functionality (always available)
 from edgar.ai.core import AIEnabled, SemanticEnricher, TokenOptimizer, check_ai_capabilities, enhance_financial_fact_llm_context
+from edgar.ai.exporters import export_skill
+from edgar.ai.skills import get_skill, list_skills
 
 # Skills infrastructure (always available)
 from edgar.ai.skills.base import BaseSkill
-from edgar.ai.skills import list_skills, get_skill
 from edgar.ai.skills.core import edgartools_skill
-from edgar.ai.exporters import export_skill
+
 
 # Convenience functions for common workflows
 def install_skill(skill=None, to=None, quiet=False):
@@ -130,7 +131,7 @@ def install_skill(skill=None, to=None, quiet=False):
 
     if not quiet:
         print(f"📁 Installed to: {result}")
-        print(f"✅ Ready to use in Claude Desktop and Claude Code!")
+        print("✅ Ready to use in Claude Desktop and Claude Code!")
         print("="*60 + "\n")
 
     return result
@@ -190,7 +191,7 @@ def package_skill(skill=None, output=None, quiet=False):
     if not quiet:
         print(f"✅ Created: {result.name}")
         print(f"📍 Location: {result.parent}")
-        print(f"💡 Ready to upload via Claude Desktop's skill upload interface!")
+        print("💡 Ready to upload via Claude Desktop's skill upload interface!")
         print("="*60 + "\n")
 
     return result

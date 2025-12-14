@@ -14,7 +14,7 @@ def render_stitched_statement(
     stitched_data: Dict[str, Any],
     statement_title: str,
     statement_type: str,
-    entity_info: Dict[str, Any] = None,
+    entity_info: Optional[Dict[str, Any]] = None,
     show_date_range: bool = False,
     xbrl_instance: Optional[Any] = None
 ):

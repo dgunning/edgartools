@@ -24,7 +24,6 @@ from .models import (
     IncludedManager,
     PrimaryDoc,
     ProxyTable,
-    ProxyVoteTable,
     ReportSeriesClassInfo,
     SeriesReport,
 )
@@ -547,11 +546,11 @@ class NPX:
         """Formatted address of the agent for service."""
         if not self._primary_doc.agent_for_service_address_street1:
             return None
-        
+
         parts = [self._primary_doc.agent_for_service_address_street1]
         if self._primary_doc.agent_for_service_address_street2:
             parts.append(self._primary_doc.agent_for_service_address_street2)
-        
+
         city_state_zip = []
         if self._primary_doc.agent_for_service_address_city:
             city_state_zip.append(self._primary_doc.agent_for_service_address_city)
@@ -559,10 +558,10 @@ class NPX:
             city_state_zip.append(self._primary_doc.agent_for_service_address_state_country)
         if self._primary_doc.agent_for_service_address_zip_code:
             city_state_zip.append(self._primary_doc.agent_for_service_address_zip_code)
-        
+
         if city_state_zip:
             parts.append(", ".join(city_state_zip))
-        
+
         return "\n".join(parts)
 
     @property

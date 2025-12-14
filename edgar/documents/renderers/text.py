@@ -3,6 +3,7 @@ Plain text renderer for parsed documents.
 """
 
 from typing import Optional
+
 from edgar.documents.document import Document
 from edgar.documents.extractors.text_extractor import TextExtractor
 
@@ -14,7 +15,7 @@ class TextRenderer:
     This is a simple wrapper around TextExtractor for consistency
     with other renderers.
     """
-    
+
     def __init__(self,
                  clean: bool = True,
                  include_tables: bool = True,
@@ -37,7 +38,7 @@ class TextRenderer:
             max_length=max_length,
             preserve_structure=preserve_structure
         )
-    
+
     def render(self, document: Document) -> str:
         """
         Render document to plain text.

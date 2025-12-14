@@ -1,0 +1,4783 @@
+{
+  "table_assessments": [
+    {
+      "accession_number": "0001104659-24-041120",
+      "company_name": "Adagene Inc.",
+      "form": "424B5",
+      "table_count": 6,
+      "tables": [
+        {
+          "table_index": 0,
+          "row_count": 15,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='Page', colspan=4, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='About This Prospectus Supplement', colspan=1, rowspan=1, is_header=False, align='left'"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "capitalization"
+        },
+        {
+          "table_index": 1,
+          "row_count": 21,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='Page', colspan=4, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='About This Prospectus', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "selling_shareholders"
+        },
+        {
+          "table_index": 2,
+          "row_count": 12,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='Actual', colspan=4, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='US$\u2019000', colspan=10, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "capitalization"
+        },
+        {
+          "table_index": 3,
+          "row_count": 6,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='Per Ordinary\\nShare', colspan=4, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Assumed public offering price per share', colspan=1, rowspan=1, is_header=False, align"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "dilution"
+        },
+        {
+          "table_index": 4,
+          "row_count": 21,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='Page', colspan=4, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='About This Prospectus', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "selling_shareholders"
+        },
+        {
+          "table_index": 5,
+          "row_count": 7,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='SEC registration fee', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='FINRA fees', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        }
+      ]
+    },
+    {
+      "accession_number": "0001140361-24-031669",
+      "company_name": "Jefferies Financial Group Inc.",
+      "form": "424B5",
+      "table_count": 56,
+      "tables": [
+        {
+          "table_index": 0,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 1,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 2,
+          "row_count": 40,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Issuer:', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Jefferies Financial Group Inc.', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Title of the Notes:', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Senior Autocallable Contingent Coupon BarrierNotes due December 31, 2025 Linked to the"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "use_of_proceeds"
+        },
+        {
+          "table_index": 3,
+          "row_count": 4,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='PER NOTE', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='TOTAL', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Public Offering Price', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='100.00%', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='$217,000.00\\n$217,000.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 4,
+          "row_count": 12,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='SPECIAL NOTE ON FORWARD-LOOKING STATEMENTS', colspan=1, rowspan=1, is_header=False, al"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='PS-ii', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='RECENT DEVELOPMENTS', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='PS-1', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 5,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Investment Banking Net Revenues of $803 million', colspan=1, rowspan=1, is_header=Fals"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 6,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Capital Markets Net Revenues of $691 million', colspan=1, rowspan=1, is_header=False, "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 7,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Asset Management Net Revenues of $157 million', colspan=1, rowspan=1, is_header=False,"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 8,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Income Before Income Taxes of $228 million', colspan=1, rowspan=1, is_header=False, al"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 9,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Net Income of $146 million (reflects a 32.1% effective tax rate)', colspan=1, rowspan="
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 10,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Investment Banking Net Revenues of $1.54 billion', colspan=1, rowspan=1, is_header=Fal"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 11,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Capital Markets Net Revenues of $1.40 billion', colspan=1, rowspan=1, is_header=False,"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 12,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Asset Management Net Revenues of $430 million', colspan=1, rowspan=1, is_header=False,"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 13,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Income Before Income Taxes of $448 million', colspan=1, rowspan=1, is_header=False, al"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 14,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='\u2022', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Net Income of $295 million (reflects a 28.8% effective tax rate)', colspan=1, rowspan="
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 15,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 16,
+          "row_count": 5,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Stated Principal Amount:', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='$1,000 per Note.', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Hypothetical Initial Value of the Worst-Performing Underlying:', colspan=1, rowspan=1,"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='100', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 17,
+          "row_count": 9,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='0.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='$0.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='-100.00%', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='50.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='$500.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='-50.00%', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 18,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 19,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the security must be of a non-financial company;', colspan=1, rowspan=1, is_header=Fal"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 20,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 21,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the security must have a minimum three-month average daily trading volume of at least "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 22,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='if the issuer of the security is organized under the laws of a jurisdiction outside th"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 23,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 24,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 25,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 26,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the security\u2019s U. S. listing must be exclusively on the Nasdaq Global Select Market or"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 27,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the security must be of a non-financial company;', colspan=1, rowspan=1, is_header=Fal"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 28,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 29,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the security must have a minimum three-month average daily trading volume of at least "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 30,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='if the issuer of the security is organized under the laws of a jurisdiction outside th"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 31,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the security must have an adjusted market capitalization equal to or exceeding 0.10% o"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "capitalization"
+        },
+        {
+          "table_index": 32,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 33,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a dealer in securities or currencies;', colspan=1, rowspan=1, is_header=False, align=N"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 34,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a trader in securities that elects to use a mark-to-market method of accounting for yo"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 35,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a bank;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 36,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a life insurance company;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 37,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a tax exempt organization;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 38,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a partnership;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 39,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a regulated investment company;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 40,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='an accrual method taxpayer subject to special tax accounting rules as a result of its "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 41,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a common trust fund;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 42,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a person that owns a Note as a hedge or that is hedged against interest rate risks;', "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 43,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a person that owns a Note as part of a straddle or conversion transaction for tax purp"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 44,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a U. S. holder (as defined below) whose functional currency for tax purposes is not th"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 45,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='You should consult your tax advisor concerning the U. S. federal income tax and any ot"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 46,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a citizen or resident of the United States;', colspan=1, rowspan=1, is_header=False, a"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 47,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a domestic corporation;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 48,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='an estate whose income is subject to U. S. federal income tax regardless of its source"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 49,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a trust if a United States court can exercise primary supervision over the trust\u2019s adm"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 50,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a nonresident alien individual;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 51,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a foreign corporation; or', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 52,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='an estate or trust that in either case is not subject to U. S. federal income tax on a"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 53,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a holder who is an individual present in the United States for 183 days or more in the"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 54,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='certain former citizens or residents of the United States; or', colspan=1, rowspan=1, "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 55,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25a0', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='a holder for whom income or gain in respect of the notes is effectively connected with"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        }
+      ]
+    },
+    {
+      "accession_number": "0001104659-24-103798",
+      "company_name": "EYENOVIA, INC.",
+      "form": "424B5",
+      "table_count": 6,
+      "tables": [
+        {
+          "table_index": 0,
+          "row_count": 3,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Offering price', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='$', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Placement agents\u2019 fees (1)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='$', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 1,
+          "row_count": 12,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='ABOUT THIS PROSPECTUS SUPPLEMENT', colspan=1, rowspan=1, is_header=False, align='left'"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='PROSPECTUS SUPPLEMENT SUMMARY', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "dilution"
+        },
+        {
+          "table_index": 2,
+          "row_count": 17,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='ABOUT THIS PROSPECTUS', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='PROSPECTUS SUMMARY', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "use_of_proceeds"
+        },
+        {
+          "table_index": 3,
+          "row_count": 7,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Offering price per Share and accompanying Warrant', colspan=1, rowspan=1, is_header=Fa"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Historical net tangible book deficit per share as of June 30, 2024', colspan=1, rowspa"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "dilution"
+        },
+        {
+          "table_index": 4,
+          "row_count": 3,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Offering price', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='$', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Placement agents\u2019 fees', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='$', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 5,
+          "row_count": 18,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='Page', colspan=4, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='ABOUT THIS PROSPECTUS', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "use_of_proceeds"
+        }
+      ]
+    },
+    {
+      "accession_number": "0001213900-24-113730",
+      "company_name": "ADIAL PHARMACEUTICALS, INC.",
+      "form": "424B3",
+      "table_count": 91,
+      "tables": [
+        {
+          "table_index": 0,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Filed Pursuant to Rule 424(b)(3)', colspan=1, rowspan=1, is_header=False, align='right"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='PROSPECTUS', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Registration No. 333-283968', colspan=1, rowspan=1, is_header=False, align='right')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 1,
+          "row_count": 16,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='About this Prospectus', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='ii', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Special Note Regarding Forward-Looking Statements', colspan=1, rowspan=1, is_header=Fa"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='iii', colspan=1, rowspan=1, is_header=False, align='center')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "selling_shareholders"
+        },
+        {
+          "table_index": 2,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our independent registered public accounting firm has expressed doubt about our abilit"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 3,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our projected financial position and estimated cash burn rate;', colspan=1, rowspan=1,"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 4,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our estimates regarding expenses, future revenues and capital requirements;', colspan="
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 5,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our need to raise substantial additional capital to fund our operations;', colspan=1, "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 6,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the success, cost and timing of our clinical trials;', colspan=1, rowspan=1, is_header"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 7,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our dependence on third parties in the conduct of our clinical trials;', colspan=1, ro"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 8,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our ability to obtain the necessary regulatory approvals to market and commercialize o"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 9,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 10,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the results of market research conducted by us or others;', colspan=1, rowspan=1, is_h"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 11,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our ability to obtain and maintain intellectual property protection for our current pr"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 12,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our ability to protect our intellectual property rights and the potential for us to in"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 13,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 14,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our reliance on third-party suppliers and manufacturers;', colspan=1, rowspan=1, is_he"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 15,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the success of competing therapies and products that are or become available;', colspa"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 16,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='ability to sell shares of Common Stock to Alumni Capital pursuant to the terms of the "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 17,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our ability to expand our organization to accommodate potential growth and our ability"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 18,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the potential for us to incur substantial costs resulting from product liability lawsu"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 19,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 20,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the successful development of our commercialization capabilities, including sales and "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 21,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='It is not possible to predict the actual number of shares we will sell under the Purch"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "selling_shareholders"
+        },
+        {
+          "table_index": 22,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 23,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Our charter limits our ability to issue shares.', colspan=1, rowspan=1, is_header=Fals"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 24,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Investors who buy shares in this offering at different times will likely pay different"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 25,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 26,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 27,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='We have additional securities available for issuance, which, if issued, could adversel"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 28,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Future sales of our Common Stock could cause the market price for our Common Stock to "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 29,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Because we will not declare cash dividends on our Common Stock in the foreseeable futu"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 30,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 31,
+          "row_count": 7,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Issuer', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Adial Pharmaceuticals, Inc.', colspan=2, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "selling_shareholders"
+        },
+        {
+          "table_index": 32,
+          "row_count": 11,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Offering price', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='The Selling Stockholder will sell the shares at prevailing market prices or privately "
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "selling_shareholders"
+        },
+        {
+          "table_index": 33,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(1)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Except as otherwise indicated herein, the number of shares of our Common\\nStock to be "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 34,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='4,201,568 shares of Common Stock issuable as of the date hereof upon the exercise of C"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 35,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='733,971 shares of Common Stock issuable upon the exercise of stock options outstanding"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 36,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='1,128,165 shares of Common Stock available for future issuance under the 2017 Equity I"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 37,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the accuracy in all material respects of our representations and warranties included i"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 38,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the Company having performed, satisfied and complied in all material respects with all"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 39,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 40,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the number of Shares then to be purchased by Alumni Capital shall not exceed the numbe"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 41,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 42,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the issuance of the Shares (including the Increase Commitment Shares, as defined in th"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 43,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 44,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the Common Stock must be DWAC Eligible and not subject to a \u201c DTC chill\u201d;', colspan=1,"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 45,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the issuance of the Purchase Notice Shares shall not violate the shareholder approval "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 46,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='since our most recent filing with the SEC of any document required under the Securitie"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 47,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='we shall have no knowledge of any event more likely than not to have the effect of cau"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 48,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='all reports, schedules, registrations, forms, statements, information and other docume"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 49,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 50,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the date on which Alumni Capital shall have purchased Shares for an aggregate purchase"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 51,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the date on which we commence a voluntary bankruptcy case or any third party commences"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 52,
+          "row_count": 5,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='$', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='0.55', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='$', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='0.65', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 53,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(1)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Although the Purchase Agreement provides that we may sell up\\nto $5,000,000 of our Com"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 54,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Stockholder', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Number (1)', colspan=2, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Alumni Capital LP (4)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='68,807', colspan=1, rowspan=1, is_header=False, align='right')"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 55,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='*', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Represents beneficial ownership of less than 1% of the outstanding\\nshares of our Comm"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 56,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(1)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='This number represents the 68,807 shares of Common Stock\\nwe issued to Alumni Capital "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 57,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(2)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Applicable percentage ownership is based on 6,474,588 shares of\\nour Common Stock outs"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 58,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(3)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Assumes the sale of all Shares being offered pursuant to this\\nprospectus.', colspan=1"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 59,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(4)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='The business address of Alumni Capital LP is 80 SW 8th Street,\\n20th Floor, Miami, Flo"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 60,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='ordinary brokers\u2019 transactions;', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 61,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='transactions involving cross or block trades;', colspan=1, rowspan=1, is_header=False,"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 62,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 63,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='\u201cat the market\u201d into an existing market for our Common Stock;', colspan=1, rowspan=1, "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 64,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='in other ways not involving market makers or established business markets, including d"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 65,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='in privately negotiated transactions; or', colspan=1, rowspan=1, is_header=False, alig"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 66,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='any combination of the foregoing.', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 67,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='before such date, the board of directors of the corporation approved either the busine"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 68,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='upon completion of the transaction that resulted in the stockholder becoming an intere"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 69,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='on or after such date, the business combination is approved by the board of directors "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 70,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='any merger or consolidation involving the corporation and the interested stockholder;'"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 71,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='any sale, transfer, pledge or other disposition of 10% or more of the assets of the co"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 72,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='subject to certain exceptions, any transaction that results in the issuance or transfe"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 73,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='any transaction involving the corporation that has the effect of increasing the propor"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 74,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='the receipt by the interested stockholder of the benefit of any loans, advances, guara"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 75,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our board of directors is divided into three classes, one class of which is elected ea"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 76,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 77,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 78,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 79,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 80,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our board of directors will be authorized to issue, without stockholder approval, pref"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 81,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our stockholders do not have cumulative voting rights, and therefore our stockholders "
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 82,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='our stockholders must comply with advance notice provisions to bring business before o"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 83,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='breach of their duty of loyalty to us or our stockholders;', colspan=1, rowspan=1, is_"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 84,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='act or omission not in good faith or that involves intentional misconduct or a knowing"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 85,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='unlawful payments of dividends or unlawful stock repurchases or redemptions as provide"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 86,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='\u25cf', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='transaction from which the directors derived an improper personal benefit.', colspan=1"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 87,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 88,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 89,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 90,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        }
+      ]
+    },
+    {
+      "accession_number": "0001104659-24-132173",
+      "company_name": "Oklo Inc.",
+      "form": "424B3",
+      "table_count": 4,
+      "tables": [
+        {
+          "table_index": 0,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Delaware', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='001-40583', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='86-2292473', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='(State or other jurisdiction\\nof incorporation)', colspan=1, rowspan=1, is_header=Fals"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='(Commission File Number)', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='(I. R. S. Employer\\nIdentification No.)', colspan=1, rowspan=1, is_header=False, align"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 1,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='3190 Coronado Dr.\\nSanta Clara, CA', colspan=1, rowspan=1, is_header=False, align='cen"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='95054', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='(Address of principal executive offices)', colspan=1, rowspan=1, is_header=False, alig"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='(Zip Code)', colspan=1, rowspan=1, is_header=False, align='center')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 2,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='Class\\nA Common Stock, par value $0.0001 per share', colspan=1, rowspan=1, is_header=F"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='OKLO', colspan=1, rowspan=1, is_header=False, align='center')"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='New York Stock Exchange', colspan=1, rowspan=1, is_header=False, align='center')"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 3,
+          "row_count": 5,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='Oklo Inc.', colspan=2, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        }
+      ]
+    },
+    {
+      "accession_number": "0001839882-24-047337",
+      "company_name": "UBS AG",
+      "form": "424B3",
+      "table_count": 18,
+      "tables": [
+        {
+          "table_index": 0,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 1,
+          "row_count": 4,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='\u2751', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Potential for Periodic Contingent Coupons \u2014 UBS will pay a contingent coupon on the re"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 2,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='**', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Subject to postponement in the event of a market disruption event, as described in the"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 3,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 4,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 4,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Notes linked to the common stock of SoFi Technologies, Inc.', colspan=1, rowspan=1, is"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='$565,000.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='$1,000.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='$1,412.50', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 4,
+              "text": "Cell(content='$2.50', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 5,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='UBS Securities LLC', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='UBS Investment Bank', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 6,
+          "row_count": 3,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='This document, together with the documents listed above, contains the terms of the Not"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 7,
+          "row_count": 10,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Issuer', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='UBS AG London Branch', colspan=2, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 8,
+          "row_count": 8,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Payment\\nat Maturity (per Note)', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='If the Notes are not subject to an automatic call and the final level is equal to or g"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 9,
+          "row_count": 6,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Trade Date', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='The initial level of the underlying asset is observed and the final terms of the Notes"
+            },
+            {
+              "row": 1,
+              "col": 3,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 10,
+          "row_count": 20,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Observation Dates', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Coupon Payment Dates', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 11,
+          "row_count": 0,
+          "has_caption": false,
+          "sample_cells": [],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 12,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(1)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Subject\\nto the market disruption event provisions set forth in the accompanying produ"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 13,
+          "row_count": 1,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='(2)', colspan=1, rowspan=1, is_header=False, align='left')"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='Three\\nbusiness day(s) following each observation date, except that the coupon payment"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 14,
+          "row_count": 10,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Principal Amount:', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='$1,000', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 15,
+          "row_count": 2,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Total Payment:', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='$1,030.00 (3.00% total return)', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 16,
+          "row_count": 4,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Second through Seventeenth Observation Date', colspan=1, rowspan=1, is_header=False, a"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Various (all less than Call Threshold Level and Coupon Barrier)', colspan=1, rowspan=1"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='$0.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        },
+        {
+          "table_index": 17,
+          "row_count": 4,
+          "has_caption": false,
+          "sample_cells": [
+            {
+              "row": 0,
+              "col": 0,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 1,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 0,
+              "col": 2,
+              "text": "Cell(content='', colspan=1, rowspan=1, is_header=False, align=None)"
+            },
+            {
+              "row": 1,
+              "col": 0,
+              "text": "Cell(content='Second through Seventeenth Observation Date', colspan=1, rowspan=1, is_header=False, a"
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "text": "Cell(content='Various (all less than Call Threshold Level and Coupon Barrier)', colspan=1, rowspan=1"
+            },
+            {
+              "row": 1,
+              "col": 2,
+              "text": "Cell(content='$0.00', colspan=1, rowspan=1, is_header=False, align=None)"
+            }
+          ],
+          "structure_quality": "Unknown",
+          "likely_type": "other"
+        }
+      ]
+    }
+  ],
+  "section_assessments": [
+    {
+      "accession_number": "0001104659-24-041120",
+      "company_name": "Adagene Inc.",
+      "form": "424B5",
+      "expected_sections": [
+        "use of proceeds",
+        "underwriting",
+        "dilution",
+        "risk factors",
+        "plan of distribution",
+        "description of"
+      ],
+      "sections_found": [
+        "use of proceeds",
+        "underwriting",
+        "dilution",
+        "risk factors",
+        "plan of distribution",
+        "description of"
+      ],
+      "detection_rate": 100.0
+    },
+    {
+      "accession_number": "0001140361-24-031669",
+      "company_name": "Jefferies Financial Group Inc.",
+      "form": "424B5",
+      "expected_sections": [
+        "use of proceeds",
+        "underwriting",
+        "dilution",
+        "risk factors",
+        "plan of distribution",
+        "description of"
+      ],
+      "sections_found": [
+        "use of proceeds",
+        "underwriting",
+        "risk factors",
+        "plan of distribution",
+        "description of"
+      ],
+      "detection_rate": 83.33333333333334
+    },
+    {
+      "accession_number": "0001104659-24-103798",
+      "company_name": "EYENOVIA, INC.",
+      "form": "424B5",
+      "expected_sections": [
+        "use of proceeds",
+        "underwriting",
+        "dilution",
+        "risk factors",
+        "plan of distribution",
+        "description of"
+      ],
+      "sections_found": [
+        "use of proceeds",
+        "underwriting",
+        "dilution",
+        "risk factors",
+        "plan of distribution",
+        "description of"
+      ],
+      "detection_rate": 100.0
+    },
+    {
+      "accession_number": "0001213900-24-113730",
+      "company_name": "ADIAL PHARMACEUTICALS, INC.",
+      "form": "424B3",
+      "expected_sections": [
+        "selling shareholders",
+        "selling stockholders",
+        "risk factors",
+        "plan of distribution"
+      ],
+      "sections_found": [
+        "risk factors",
+        "plan of distribution"
+      ],
+      "detection_rate": 50.0
+    },
+    {
+      "accession_number": "0001104659-24-132173",
+      "company_name": "Oklo Inc.",
+      "form": "424B3",
+      "expected_sections": [
+        "selling shareholders",
+        "selling stockholders",
+        "risk factors",
+        "plan of distribution"
+      ],
+      "sections_found": [
+        "risk factors"
+      ],
+      "detection_rate": 25.0
+    },
+    {
+      "accession_number": "0001839882-24-047337",
+      "company_name": "UBS AG",
+      "form": "424B3",
+      "expected_sections": [
+        "selling shareholders",
+        "selling stockholders",
+        "risk factors",
+        "plan of distribution"
+      ],
+      "sections_found": [
+        "risk factors",
+        "plan of distribution"
+      ],
+      "detection_rate": 50.0
+    }
+  ]
+}

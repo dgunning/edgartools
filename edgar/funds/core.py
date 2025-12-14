@@ -7,7 +7,7 @@ This module provides the main classes used to interact with investment funds:
 - FundSeries: Represents a fund series
 """
 import logging
-from typing import TYPE_CHECKING, List, Optional, Union, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from rich import box
 from rich.console import Group

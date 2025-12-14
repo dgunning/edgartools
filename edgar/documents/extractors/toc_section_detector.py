@@ -14,8 +14,8 @@ import logging
 from typing import Dict, Optional
 
 from edgar.documents.document import Document, Section
-from edgar.documents.nodes import SectionNode
 from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
+from edgar.documents.nodes import SectionNode
 
 logger = logging.getLogger(__name__)
 

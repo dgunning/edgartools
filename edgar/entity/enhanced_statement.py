@@ -927,6 +927,7 @@ class MultiPeriodStatement:
             String representation optimized for LLM token usage
         """
         from io import StringIO
+
         from rich.console import Console
 
         buffer = StringIO()

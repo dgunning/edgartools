@@ -3,16 +3,16 @@ Document model for parsed HTML.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Iterator
+from typing import Any, Dict, Iterator, List, Optional
 
-from rich.table import Table as RichTable
 from rich.console import Group
+from rich.table import Table as RichTable
 from rich.text import Text
-from edgar.richtools import repr_rich
 
 from edgar.documents.nodes import Node, SectionNode
 from edgar.documents.table_nodes import TableNode
-from edgar.documents.types import XBRLFact, SearchResult
+from edgar.documents.types import SearchResult, XBRLFact
+from edgar.richtools import repr_rich
 
 
 @dataclass
@@ -97,11 +97,11 @@ class Section:
         from edgar.documents.extractors.text_extractor import TextExtractor
         extractor = TextExtractor(**kwargs)
         return extractor.extract_from_node(self.node)
-    
+
     def tables(self) -> List[TableNode]:
         """Get all tables in section."""
         return self.node.find(lambda n: isinstance(n, TableNode))
-    
+
     def search(self, query: str) -> List[SearchResult]:
         """Search within section."""
         # Implementation would use semantic search
@@ -109,14 +109,14 @@ class Section:
         # Simple text search for now
         text = self.text().lower()
         query_lower = query.lower()
-        
+
         if query_lower in text:
             # Find snippet around match
             index = text.find(query_lower)
             start = max(0, index - 50)
             end = min(len(text), index + len(query) + 50)
             snippet = text[start:end]
-            
+
             results.append(SearchResult(
                 node=self.node,
                 score=1.0,
@@ -401,7 +401,7 @@ class Document:
     Represents a parsed HTML document with methods for content extraction,
     search, and transformation.
     """
-    
+
     # Core properties
     root: Node
     metadata: DocumentMetadata = field(default_factory=DocumentMetadata)
@@ -413,7 +413,7 @@ class Document:
     _xbrl_facts: Optional[List[XBRLFact]] = field(default=None, init=False, repr=False)
     _text_cache: Optional[str] = field(default=None, init=False, repr=False)
     _config: Optional[Any] = field(default=None, init=False, repr=False)  # ParserConfig reference
-    
+
     @property
     def sections(self) -> Sections:
         """
@@ -456,14 +456,14 @@ class Document:
             self._sections = Sections(detected_sections)
 
         return self._sections
-    
+
     @property
     def tables(self) -> List[TableNode]:
         """Get all tables in document."""
         if self._tables is None:
             self._tables = self.root.find(lambda n: isinstance(n, TableNode))
         return self._tables
-    
+
     @property
     def headings(self) -> List[Node]:
         """Get all headings in document."""
@@ -471,14 +471,14 @@ class Document:
             from edgar.documents.nodes import HeadingNode
             self._headings = self.root.find(lambda n: isinstance(n, HeadingNode))
         return self._headings
-    
+
     @property
     def xbrl_facts(self) -> List[XBRLFact]:
         """Get all XBRL facts in document."""
         if self._xbrl_facts is None:
             self._xbrl_facts = self._extract_xbrl_facts()
         return self._xbrl_facts
-    
+
     def text(self, 
              clean: bool = True,
              include_tables: bool = True,
@@ -500,12 +500,12 @@ class Document:
         if (self._text_cache is not None and 
             clean and not include_tables and not include_metadata and max_length is None):
             return self._text_cache
-        
+
         # If whitespace was preserved during parsing and clean is default (True),
         # respect the preserve_whitespace setting
         if self.metadata.preserve_whitespace and clean:
             clean = False
-        
+
         from edgar.documents.extractors.text_extractor import TextExtractor
         extractor = TextExtractor(
             clean=clean,
@@ -514,7 +514,7 @@ class Document:
             max_length=max_length
         )
         text = extractor.extract(self)
-        
+
         # Apply navigation link filtering when cleaning 
         if clean:
             # Use cached/integrated navigation filtering (optimized approach)
@@ -527,13 +527,13 @@ class Document:
                 # Fallback to pattern-based filtering
                 from edgar.documents.utils.toc_filter import filter_toc_links
                 text = filter_toc_links(text)
-        
+
         # Cache if using default parameters
         if clean and not include_tables and not include_metadata and max_length is None:
             self._text_cache = text
-        
+
         return text
-    
+
     def search(self, query: str, top_k: int = 10) -> List[SearchResult]:
         """
         Search document for query.
@@ -548,7 +548,7 @@ class Document:
         from edgar.documents.search import DocumentSearch
         searcher = DocumentSearch(self)
         return searcher.search(query, top_k=top_k)
-    
+
     def get_section(self, section_name: str, part: Optional[str] = None) -> Optional[Section]:
         """
         Get section by name with optional part specification for 10-Q filings.
@@ -601,14 +601,14 @@ class Document:
                 )
 
         return None
-    
+
     def extract_section_text(self, section_name: str) -> Optional[str]:
         """Extract text from specific section."""
         section = self.get_section(section_name)
         if section:
             return section.text()
         return None
-    
+
     def get_sec_section(self, section_name: str, clean: bool = True, 
                        include_subsections: bool = True) -> Optional[str]:
         """
@@ -631,11 +631,11 @@ class Document:
         if not hasattr(self, '_section_extractor'):
             from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
             self._section_extractor = SECSectionExtractor(self)
-        
+
         return self._section_extractor.get_section_text(
             section_name, include_subsections, clean
         )
-    
+
     def get_available_sec_sections(self) -> List[str]:
         """
         Get list of SEC sections available for extraction.
@@ -651,9 +651,9 @@ class Document:
         if not hasattr(self, '_section_extractor'):
             from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
             self._section_extractor = SECSectionExtractor(self)
-        
+
         return self._section_extractor.get_available_sections()
-    
+
     def get_sec_section_info(self, section_name: str) -> Optional[Dict]:
         """
         Get detailed information about an SEC section.
@@ -667,15 +667,15 @@ class Document:
         if not hasattr(self, '_section_extractor'):
             from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
             self._section_extractor = SECSectionExtractor(self)
-        
+
         return self._section_extractor.get_section_info(section_name)
-    
+
     def to_markdown(self) -> str:
         """Convert document to Markdown."""
         from edgar.documents.renderers.markdown_renderer import MarkdownRenderer
         renderer = MarkdownRenderer()
         return renderer.render(self)
-    
+
     def to_json(self, include_content: bool = True) -> Dict[str, Any]:
         """
         Convert document to JSON.
@@ -692,7 +692,7 @@ class Document:
             'table_count': len(self.tables),
             'xbrl_fact_count': len(self.xbrl_facts)
         }
-        
+
         if include_content:
             result['sections_detail'] = {
                 name: {
@@ -702,7 +702,7 @@ class Document:
                 }
                 for name, section in self.sections.items()
             }
-            
+
             result['tables'] = [
                 {
                     'type': table.table_type.name,
@@ -712,9 +712,9 @@ class Document:
                 }
                 for table in self.tables
             ]
-        
+
         return result
-    
+
     def to_dataframe(self) -> 'pd.DataFrame':
         """
         Convert document tables to pandas DataFrame.
@@ -722,10 +722,10 @@ class Document:
         Returns a DataFrame with all tables concatenated.
         """
         import pandas as pd
-        
+
         if not self.tables:
             return pd.DataFrame()
-        
+
         # Convert each table to DataFrame
         dfs = []
         for i, table in enumerate(self.tables):
@@ -736,10 +736,10 @@ class Document:
             if table.caption:
                 df['_table_caption'] = table.caption
             dfs.append(df)
-        
+
         # Concatenate all tables
         return pd.concat(dfs, ignore_index=True)
-    
+
     def chunks(self, chunk_size: int = 512, overlap: int = 128) -> Iterator['DocumentChunk']:
         """
         Generate document chunks for processing.
@@ -754,7 +754,7 @@ class Document:
         from edgar.documents.extractors.chunk_extractor import ChunkExtractor
         extractor = ChunkExtractor(chunk_size=chunk_size, overlap=overlap)
         return extractor.extract(self)
-    
+
     def prepare_for_llm(self, 
                        max_tokens: int = 4000,
                        preserve_structure: bool = True,
@@ -778,7 +778,7 @@ class Document:
             preserve_structure=preserve_structure,
             focus_sections=focus_sections
         )
-    
+
     def extract_key_information(self) -> Dict[str, Any]:
         """Extract key information from document."""
         return {
@@ -791,16 +791,16 @@ class Document:
             'xbrl_facts': len(self.xbrl_facts),
             'document_length': len(self.text())
         }
-    
+
     def _extract_xbrl_facts(self) -> List[XBRLFact]:
         """Extract XBRL facts from document."""
         facts = []
-        
+
         # Find all nodes with XBRL metadata
         xbrl_nodes = self.root.find(
             lambda n: n.get_metadata('ix_tag') is not None
         )
-        
+
         for node in xbrl_nodes:
             fact = XBRLFact(
                 concept=node.get_metadata('ix_tag'),
@@ -811,47 +811,47 @@ class Document:
                 scale=node.get_metadata('ix_scale')
             )
             facts.append(fact)
-        
+
         return facts
-    
+
     def __len__(self) -> int:
         """Get number of top-level nodes."""
         return len(self.root.children)
-    
+
     def __iter__(self) -> Iterator[Node]:
         """Iterate over top-level nodes."""
         return iter(self.root.children)
 
     def __repr__(self) -> str:
         return self.text()
-    
+
     def walk(self) -> Iterator[Node]:
         """Walk entire document tree."""
         return self.root.walk()
-    
+
     def find_nodes(self, predicate) -> List[Node]:
         """Find all nodes matching predicate."""
         return self.root.find(predicate)
-    
+
     def find_first_node(self, predicate) -> Optional[Node]:
         """Find first node matching predicate."""
         return self.root.find_first(predicate)
-    
+
     @property
     def is_empty(self) -> bool:
         """Check if document is empty."""
         return len(self.root.children) == 0
-    
+
     @property
     def has_tables(self) -> bool:
         """Check if document has tables."""
         return len(self.tables) > 0
-    
+
     @property
     def has_xbrl(self) -> bool:
         """Check if document has XBRL data."""
         return len(self.xbrl_facts) > 0
-    
+
     def validate(self) -> List[str]:
         """
         Validate document structure.
@@ -859,27 +859,27 @@ class Document:
         Returns list of validation issues.
         """
         issues = []
-        
+
         # Check for empty document
         if self.is_empty:
             issues.append("Document is empty")
-        
+
         # Check for sections
         if not self.sections:
             issues.append("No sections detected")
-        
+
         # Check for common sections in filings
         if self.metadata.form in ['10-K', '10-Q']:
             expected_sections = ['business', 'risk_factors', 'mda']
             missing = [s for s in expected_sections if s not in self.sections]
             if missing:
                 issues.append(f"Missing expected sections: {', '.join(missing)}")
-        
+
         # Check for orphaned nodes
         orphaned = self.root.find(lambda n: n.parent is None and n != self.root)
         if orphaned:
             issues.append(f"Found {len(orphaned)} orphaned nodes")
-        
+
         return issues
 
 
@@ -891,7 +891,7 @@ class DocumentChunk:
     end_node: Node
     section: Optional[str] = None
     token_count: int = 0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert chunk to dictionary."""
         return {
@@ -911,21 +911,21 @@ class LLMDocument:
     token_count: int
     sections: List[str]
     truncated: bool = False
-    
+
     def to_prompt(self) -> str:
         """Convert to LLM prompt."""
         parts = []
-        
+
         # Add metadata context
         parts.append(f"Document: {self.metadata.get('form', 'Unknown')}")
         parts.append(f"Company: {self.metadata.get('company', 'Unknown')}")
         parts.append(f"Date: {self.metadata.get('filing_date', 'Unknown')}")
         parts.append("")
-        
+
         # Add content
         parts.append(self.content)
-        
+
         if self.truncated:
             parts.append("\n[Content truncated due to length]")
-        
+
         return '\n'.join(parts)

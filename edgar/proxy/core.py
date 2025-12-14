@@ -18,11 +18,10 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.richtools import repr_rich
+
 from .models import (
-    ExecutiveCompensation,
-    NamedExecutive,
-    PayVsPerformance,
     PROXY_FORMS,
+    NamedExecutive,
 )
 
 if TYPE_CHECKING:

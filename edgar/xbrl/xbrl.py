@@ -28,7 +28,7 @@ from rich.table import Table as RichTable
 from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
-from edgar.richtools import repr_rich, strip_ansi_text
+from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.models import PresentationNode
 from edgar.xbrl.parsers import XBRLParser

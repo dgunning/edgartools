@@ -1,7 +1,6 @@
 """
 Output formatting for SSL diagnostics - supports terminal and Jupyter notebook.
 """
-from typing import Optional
 
 from .report import CheckStatus, DiagnosticResult
 
@@ -102,7 +101,7 @@ class TerminalFormatter:
             if result.certificate_config.bundle_exists:
                 lines.append(f"  Bundle exists:      Yes ({result.certificate_config.bundle_size_kb} KB)")
             else:
-                lines.append(f"  Bundle exists:      No")
+                lines.append("  Bundle exists:      No")
         lines.append("")
 
         # Proxy configuration
@@ -142,32 +141,32 @@ class TerminalFormatter:
 
         # DNS
         if result.network_tests.dns_resolved:
-            lines.append(f"  1. DNS Resolution:")
+            lines.append("  1. DNS Resolution:")
             dns_info = f"IPv4: {result.network_tests.dns_ip}" if result.network_tests.dns_ip else "IPv4: None"
             if result.network_tests.dns_ipv6:
                 dns_info += f", IPv6: {result.network_tests.dns_ipv6}"
             lines.append(f"     {self._color('PASS', 'green')} www.sec.gov resolves ({dns_info})")
         else:
-            lines.append(f"  1. DNS Resolution:")
+            lines.append("  1. DNS Resolution:")
             lines.append(f"     {self._color('FAIL', 'red')} Could not resolve www.sec.gov")
         lines.append("")
 
         # TCP
         if result.network_tests.tcp_connected:
-            lines.append(f"  2. TCP Connection (port 443):")
+            lines.append("  2. TCP Connection (port 443):")
             lines.append(f"     {self._color('PASS', 'green')} Connection established")
         elif result.network_tests.dns_resolved:
-            lines.append(f"  2. TCP Connection (port 443):")
+            lines.append("  2. TCP Connection (port 443):")
             lines.append(f"     {self._color('FAIL', 'red')} Could not connect")
         else:
-            lines.append(f"  2. TCP Connection (port 443):")
+            lines.append("  2. TCP Connection (port 443):")
             lines.append(f"     {self._color('SKIP', 'blue')} Skipped (DNS failed)")
         lines.append("")
 
         # SSL Handshake
         if result.network_tests.ssl_handshake:
             ssl_result = result.network_tests.ssl_handshake
-            lines.append(f"  3. SSL Handshake:")
+            lines.append("  3. SSL Handshake:")
             if ssl_result.success:
                 lines.append(f"     {self._color('PASS', 'green')} Handshake successful")
             else:
@@ -185,23 +184,23 @@ class TerminalFormatter:
                         lines.append(f"       Subject: {cert.subject[:60]}...{self._color(marker, 'yellow')}")
                         lines.append(f"       Issuer:  {cert.issuer[:60]}...")
         elif result.network_tests.tcp_connected:
-            lines.append(f"  3. SSL Handshake:")
+            lines.append("  3. SSL Handshake:")
             lines.append(f"     {self._color('SKIP', 'blue')} Not tested")
         else:
-            lines.append(f"  3. SSL Handshake:")
+            lines.append("  3. SSL Handshake:")
             lines.append(f"     {self._color('SKIP', 'blue')} Skipped (TCP failed)")
         lines.append("")
 
         # HTTP Request (default settings)
         if result.network_tests.http_request_ok:
-            lines.append(f"  4. HTTP Request (default SSL):")
+            lines.append("  4. HTTP Request (default SSL):")
             lines.append(f"     {self._color('PASS', 'green')} Request successful (status {result.network_tests.http_status_code})")
         elif result.network_tests.ssl_handshake and result.network_tests.ssl_handshake.success:
-            lines.append(f"  4. HTTP Request (default SSL):")
+            lines.append("  4. HTTP Request (default SSL):")
             error_msg = result.network_tests.http_error_message or "Request failed"
             lines.append(f"     {self._color('FAIL', 'red')} {error_msg[:80]}")
         else:
-            lines.append(f"  4. HTTP Request (default SSL):")
+            lines.append("  4. HTTP Request (default SSL):")
             lines.append(f"     {self._color('SKIP', 'blue')} Skipped (SSL handshake failed)")
         lines.append("")
 
@@ -375,7 +374,7 @@ class NotebookFormatter:
         if result.recommendations:
             html_parts.append("<h3>Recommendations</h3>")
             for i, rec in enumerate(result.recommendations, 1):
-                html_parts.append(f"<div style='margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;'>")
+                html_parts.append("<div style='margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;'>")
                 html_parts.append(f"<strong>{i}. {rec.title}</strong>")
                 html_parts.append(f"<p>{rec.description}</p>")
                 if rec.code_snippet:

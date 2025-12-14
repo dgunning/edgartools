@@ -4,12 +4,13 @@ Section Detection Demo
 Demonstrates the hybrid section detection system with confidence scoring.
 """
 from pathlib import Path
+
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
 
 from edgar.documents import parse_html
-from edgar.documents.config import ParserConfig, DetectionThresholds
+from edgar.documents.config import DetectionThresholds, ParserConfig
 
 
 def demo_basic_detection():

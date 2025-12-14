@@ -18,9 +18,9 @@ format variability across issuers (~42% extraction accuracy). The code is
 preserved in distribution.py for future work.
 """
 
-from edgar.abs.ten_d import TenD
-from edgar.abs.cmbs import CMBSAssetData, CMBSSummary
 from edgar.abs.abs_ee import AutoLeaseAssetData, AutoLeaseSummary
+from edgar.abs.cmbs import CMBSAssetData, CMBSSummary
+from edgar.abs.ten_d import TenD
 
 __all__ = [
     'TenD',

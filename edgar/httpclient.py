@@ -1,7 +1,6 @@
 import locale
 import os
 from contextlib import asynccontextmanager, contextmanager
-from pathlib import Path
 from typing import AsyncGenerator, Generator, Literal, Optional
 
 import httpx
@@ -21,6 +20,7 @@ except (locale.Error, ValueError):
 from typing import Any
 
 from httpxthrottlecache import HttpxThrottleCache
+
 
 # =============================================================================
 # WORKAROUND for httpxthrottlecache bug: SSL verify parameter not passed to transport
@@ -76,8 +76,9 @@ def _get_cache_rules() -> dict:
     Get cache rules based on configured SEC base URL.
     This allows caching to work with custom SEC mirrors.
     """
-    from edgar.config import SEC_BASE_URL
     import re
+
+    from edgar.config import SEC_BASE_URL
 
     # Extract domain pattern from base URL (e.g., "sec.gov" or "mysite.com")
     domain_match = re.match(r'https?://([^/]+)', SEC_BASE_URL)

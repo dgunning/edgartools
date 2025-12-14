@@ -17,12 +17,7 @@ from tqdm.auto import tqdm
 from edgar.core import filing_date_to_year_quarters, get_edgar_data_directory, log, strtobool
 from edgar.dates import extract_dates
 from edgar.httprequests import download_bulk_data, download_datafile, download_text
-from edgar.urls import (
-    build_ticker_url,
-    build_company_tickers_url,
-    build_mutual_fund_tickers_url,
-    build_company_tickers_exchange_url
-)
+from edgar.urls import build_company_tickers_exchange_url, build_company_tickers_url, build_mutual_fund_tickers_url, build_ticker_url
 
 __all__ = ['download_edgar_data',
            'get_edgar_data_directory',
@@ -803,7 +798,7 @@ def local_filing_path(filing_date: Union[str, date],
     Returns:
         Path or EdgarPath pointing to the filing location
     """
-    from edgar.filesystem import is_cloud_storage_enabled, EdgarPath
+    from edgar.filesystem import EdgarPath, is_cloud_storage_enabled
 
     ext = 'corr' if correction else 'nc'
     if isinstance(filing_date, date):

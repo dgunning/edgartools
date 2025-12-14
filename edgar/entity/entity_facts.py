@@ -898,8 +898,8 @@ class EntityFacts:
             - edgar.standardization.SynonymGroups for available concepts
             - get_revenue(), get_net_income() for specific methods (backwards compatible)
         """
-        from edgar.standardization import get_synonym_groups
         from edgar.entity.unit_handling import UnitNormalizer
+        from edgar.standardization import get_synonym_groups
 
         synonyms = get_synonym_groups()
         group = synonyms.get_group(concept_name)

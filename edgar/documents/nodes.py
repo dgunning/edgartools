@@ -5,10 +5,10 @@ Node hierarchy for the document tree.
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any, Callable, Iterator
+from typing import Any, Callable, Dict, Iterator, List, Optional
 
-from edgar.documents.types import NodeType, SemanticType, Style
 from edgar.documents.cache_mixin import CacheableMixin
+from edgar.documents.types import NodeType, SemanticType, Style
 
 
 @dataclass
@@ -19,50 +19,50 @@ class Node(ABC):
     All nodes in the document inherit from this class and implement
     the abstract methods for text and HTML generation.
     """
-    
+
     # Identity
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     type: NodeType = NodeType.DOCUMENT
-    
+
     # Hierarchy
     parent: Optional['Node'] = field(default=None, repr=False)
     children: List['Node'] = field(default_factory=list, repr=False)
-    
+
     # Content
     content: Any = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     style: Style = field(default_factory=Style)
-    
+
     # Semantic info
     semantic_type: Optional[SemanticType] = None
     semantic_role: Optional[str] = None
-    
+
     def add_child(self, child: 'Node') -> None:
         """Add child node, maintaining parent reference."""
         child.parent = self
         self.children.append(child)
-    
+
     def remove_child(self, child: 'Node') -> None:
         """Remove child node."""
         if child in self.children:
             self.children.remove(child)
             child.parent = None
-    
+
     def insert_child(self, index: int, child: 'Node') -> None:
         """Insert child at specific index."""
         child.parent = self
         self.children.insert(index, child)
-    
+
     @abstractmethod
     def text(self) -> str:
         """Extract text content from node and its children."""
         pass
-    
+
     @abstractmethod
     def html(self) -> str:
         """Generate HTML representation of node."""
         pass
-    
+
     def find(self, predicate: Callable[['Node'], bool]) -> List['Node']:
         """Find all nodes matching predicate."""
         results = []
@@ -71,7 +71,7 @@ class Node(ABC):
         for child in self.children:
             results.extend(child.find(predicate))
         return results
-    
+
     def find_first(self, predicate: Callable[['Node'], bool]) -> Optional['Node']:
         """Find first node matching predicate."""
         if predicate(self):
@@ -81,7 +81,7 @@ class Node(ABC):
             if result:
                 return result
         return None
-    
+
     def xpath(self, expression: str) -> List['Node']:
         """
         Simple XPath-like node selection.
@@ -99,13 +99,13 @@ class Node(ABC):
             node_type = expression[1:].lower()
             return [c for c in self.children if c.type.name.lower() == node_type]
         return []
-    
+
     def walk(self) -> Iterator['Node']:
         """Walk the tree depth-first."""
         yield self
         for child in self.children:
             yield from child.walk()
-    
+
     @property
     def depth(self) -> int:
         """Get depth of node in tree."""
@@ -115,7 +115,7 @@ class Node(ABC):
             depth += 1
             current = current.parent
         return depth
-    
+
     @property
     def path(self) -> str:
         """Get path from root to this node."""
@@ -125,15 +125,15 @@ class Node(ABC):
             parts.append(current.type.name)
             current = current.parent
         return '/'.join(reversed(parts))
-    
+
     def get_metadata(self, key: str, default: Any = None) -> Any:
         """Get metadata value with default."""
         return self.metadata.get(key, default)
-    
+
     def set_metadata(self, key: str, value: Any) -> None:
         """Set metadata value."""
         self.metadata[key] = value
-    
+
     def has_metadata(self, key: str) -> bool:
         """Check if metadata key exists."""
         return key in self.metadata
@@ -155,7 +155,7 @@ class DocumentNode(Node, CacheableMixin):
             return '\n\n'.join(parts)
 
         return self._get_cached_text(_generate_text)
-    
+
     def html(self) -> str:
         """Generate complete HTML document."""
         body_content = '\n'.join(child.html() for child in self.children)
@@ -176,11 +176,11 @@ class TextNode(Node):
     """Plain text content node."""
     type: NodeType = field(default=NodeType.TEXT, init=False)
     content: str = ""
-    
+
     def text(self) -> str:
         """Return text content."""
         return self.content
-    
+
     def html(self) -> str:
         """Generate HTML for text."""
         # Escape HTML entities
@@ -244,18 +244,18 @@ class ParagraphNode(Node, CacheableMixin):
             return ''.join(parts)
 
         return self._get_cached_text(_generate_text)
-    
+
     def html(self) -> str:
         """Generate paragraph HTML."""
         content = ''.join(child.html() for child in self.children)
         style_attr = self._generate_style_attr()
         return f'<p{style_attr}>{content}</p>'
-    
+
     def _generate_style_attr(self) -> str:
         """Generate style attribute from style object."""
         if not self.style:
             return ''
-        
+
         styles = []
         if self.style.text_align:
             styles.append(f'text-align: {self.style.text_align}')
@@ -263,7 +263,7 @@ class ParagraphNode(Node, CacheableMixin):
             styles.append(f'margin-top: {self.style.margin_top}px')
         if self.style.margin_bottom:
             styles.append(f'margin-bottom: {self.style.margin_bottom}px')
-        
+
         if styles:
             return f' style="{"; ".join(styles)}"'
         return ''
@@ -274,26 +274,26 @@ class HeadingNode(Node):
     """Heading node with level."""
     type: NodeType = field(default=NodeType.HEADING, init=False)
     level: int = 1
-    
+
     def text(self) -> str:
         """Extract heading text."""
         if isinstance(self.content, str):
             return self.content
-        
+
         parts = []
         for child in self.children:
             text = child.text()
             if text:
                 parts.append(text)
         return ' '.join(parts)
-    
+
     def html(self) -> str:
         """Generate heading HTML."""
         level = max(1, min(6, self.level))  # Ensure level is 1-6
         content = self.text()
         style_attr = self._generate_style_attr()
         return f'<h{level}{style_attr}>{content}</h{level}>'
-    
+
     def _generate_style_attr(self) -> str:
         """Generate style attribute."""
         styles = []
@@ -323,19 +323,19 @@ class ContainerNode(Node, CacheableMixin):
             return '\n'.join(parts)
 
         return self._get_cached_text(_generate_text)
-    
+
     def html(self) -> str:
         """Generate container HTML."""
         content = '\n'.join(child.html() for child in self.children)
         style_attr = self._generate_style_attr()
         class_attr = f' class="{self.semantic_role}"' if self.semantic_role else ''
         return f'<{self.tag_name}{style_attr}{class_attr}>{content}</{self.tag_name}>'
-    
+
     def _generate_style_attr(self) -> str:
         """Generate style attribute."""
         if not self.style:
             return ''
-        
+
         styles = []
         if self.style.margin_top:
             styles.append(f'margin-top: {self.style.margin_top}px')
@@ -343,7 +343,7 @@ class ContainerNode(Node, CacheableMixin):
             styles.append(f'margin-bottom: {self.style.margin_bottom}px')
         if self.style.padding_left:
             styles.append(f'padding-left: {self.style.padding_left}px')
-        
+
         if styles:
             return f' style="{"; ".join(styles)}"'
         return ''
@@ -355,7 +355,7 @@ class SectionNode(ContainerNode):
     type: NodeType = field(default=NodeType.SECTION, init=False)
     section_name: Optional[str] = None
     tag_name: str = field(default='section', init=False)
-    
+
     def __post_init__(self):
         if self.section_name:
             self.set_metadata('section_name', self.section_name)
@@ -366,7 +366,7 @@ class ListNode(Node):
     """List node (ordered or unordered)."""
     type: NodeType = field(default=NodeType.LIST, init=False)
     ordered: bool = False
-    
+
     def text(self) -> str:
         """Extract list text."""
         parts = []
@@ -379,7 +379,7 @@ class ListNode(Node):
             if text:
                 parts.append(f"{prefix}{text}")
         return '\n'.join(parts)
-    
+
     def html(self) -> str:
         """Generate list HTML."""
         tag = 'ol' if self.ordered else 'ul'
@@ -391,7 +391,7 @@ class ListNode(Node):
 class ListItemNode(Node):
     """List item node."""
     type: NodeType = field(default=NodeType.LIST_ITEM, init=False)
-    
+
     def text(self) -> str:
         """Extract list item text."""
         parts = []
@@ -400,7 +400,7 @@ class ListItemNode(Node):
             if text:
                 parts.append(text)
         return ' '.join(parts)
-    
+
     def html(self) -> str:
         """Generate list item HTML."""
         content = ''.join(child.html() for child in self.children)
@@ -413,19 +413,19 @@ class LinkNode(Node):
     type: NodeType = field(default=NodeType.LINK, init=False)
     href: Optional[str] = None
     title: Optional[str] = None
-    
+
     def text(self) -> str:
         """Extract link text."""
         if isinstance(self.content, str):
             return self.content
-        
+
         parts = []
         for child in self.children:
             text = child.text()
             if text:
                 parts.append(text)
         return ' '.join(parts)
-    
+
     def html(self) -> str:
         """Generate link HTML."""
         content = self.text()
@@ -442,11 +442,11 @@ class ImageNode(Node):
     alt: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
-    
+
     def text(self) -> str:
         """Extract image alt text."""
         return self.alt or ''
-    
+
     def html(self) -> str:
         """Generate image HTML."""
         src_attr = f' src="{self.src}"' if self.src else ''

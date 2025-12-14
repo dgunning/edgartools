@@ -8,6 +8,7 @@ Example:
 """
 
 import re
+
 import pandas as pd
 
 from edgar.reference import cusip_ticker_mapping
@@ -269,7 +270,7 @@ def parse_columnar_format(infotable_txt: str) -> pd.DataFrame:
 
                 parsed_rows.append(row_dict)
 
-            except (ValueError, IndexError) as e:
+            except (ValueError, IndexError):
                 # Skip rows that don't parse correctly
                 continue
 

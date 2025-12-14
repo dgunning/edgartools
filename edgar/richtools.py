@@ -444,7 +444,7 @@ class Docs:
         return sections
 
     def search(self, query: str, use_bm25: bool = True):
-        """
+        r"""
         Search documentation content for relevant sections.
 
         Uses BM25 semantic search by default to find sections matching the query.

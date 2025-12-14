@@ -1,0 +1,69 @@
+{
+  "accession_number": "0001104659-20-139163",
+  "form_type": "424B3",
+  "company_name": "Nikola Corp",
+  "analysis_date": "2025-12-03T10:02:08.965134",
+  "html_length": 25588,
+  "results": {
+    "cover_page": {
+      "offering_status": "final_supplement",
+      "rule_reference": "424(b)(3)",
+      "registration_number": "333-239940",
+      "offering_amount": "$0",
+      "is_atm": false
+    },
+    "tables": [
+      {
+        "index": 0,
+        "rows": 0,
+        "columns": "unknown",
+        "caption": null,
+        "likely_type": "other"
+      },
+      {
+        "index": 1,
+        "rows": 1,
+        "columns": "unknown",
+        "caption": null,
+        "likely_type": "other"
+      },
+      {
+        "index": 2,
+        "rows": 0,
+        "columns": "unknown",
+        "caption": null,
+        "likely_type": "other"
+      },
+      {
+        "index": 3,
+        "rows": 1,
+        "columns": "unknown",
+        "caption": null,
+        "likely_type": "other"
+      },
+      {
+        "index": 4,
+        "rows": 1,
+        "columns": "unknown",
+        "caption": null,
+        "likely_type": "other"
+      },
+      {
+        "index": 5,
+        "rows": 6,
+        "columns": "unknown",
+        "caption": null,
+        "likely_type": "other"
+      }
+    ],
+    "sections": [
+      "risk factors"
+    ],
+    "424b3_specific": {
+      "has_selling_shareholders_section": false,
+      "likely_pipe_offering": true,
+      "has_resale_language": true,
+      "shareholder_mentions": 0
+    }
+  }
+}

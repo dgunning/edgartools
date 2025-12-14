@@ -9,8 +9,8 @@ from rich.panel import Panel
 from rich.tree import Tree
 
 from edgar.company_reports._base import CompanyReport
-from edgar.core import log
 from edgar.company_reports._structures import FilingStructure
+from edgar.core import log
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.htmltools import ChunkedDocument
 from edgar.formatting import datefmt

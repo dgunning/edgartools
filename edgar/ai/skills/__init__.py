@@ -6,7 +6,7 @@ that enable AI agents to perform domain-specific tasks with EdgarTools.
 """
 
 from edgar.ai.skills.base import BaseSkill
-from edgar.ai.skills.core import edgartools_skill, EdgarToolsSkill
+from edgar.ai.skills.core import EdgarToolsSkill, edgartools_skill
 
 __all__ = [
     'BaseSkill',

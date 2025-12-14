@@ -5,14 +5,7 @@ from decimal import Decimal
 from functools import lru_cache
 
 from edgar._party import Address
-from edgar.thirteenf.models import (
-    FilingManager,
-    OtherManager,
-    CoverPage,
-    SummaryPage,
-    Signature,
-    PrimaryDocument13F
-)
+from edgar.thirteenf.models import CoverPage, FilingManager, OtherManager, PrimaryDocument13F, Signature, SummaryPage
 from edgar.xmltools import child_text, find_element
 
 __all__ = ['parse_primary_document_xml']

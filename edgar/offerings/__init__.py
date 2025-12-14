@@ -1,7 +1,8 @@
 from typing import Dict
-from edgar.offerings.formc import FormC, FundingPortal, Signer, IssuerCompany
+
+from edgar.offerings.campaign import Campaign, Offering  # Campaign for backwards compatibility
+from edgar.offerings.formc import FormC, FundingPortal, IssuerCompany, Signer
 from edgar.offerings.formd import FormD
-from edgar.offerings.campaign import Offering, Campaign  # Campaign for backwards compatibility
 
 
 def group_offerings_by_file_number(filings) -> Dict[str, 'EntityFilings']:

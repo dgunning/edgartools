@@ -23,12 +23,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from tools.investigation_toolkit import (
-    IssueAnalyzer, quick_analyze, compare_filings,
-    STANDARD_TEST_COMPANIES, get_test_company_info
-)
 from rich.console import Console
 from rich.panel import Panel
+
+from tools.investigation_toolkit import STANDARD_TEST_COMPANIES, IssueAnalyzer, compare_filings, quick_analyze
 
 console = Console()
 
@@ -63,7 +61,7 @@ def investigate_empty_periods(issue_number: int, **kwargs):
         result = quick_analyze("empty_periods", filing)
 
         if result['success']:
-            console.print(f"✅ Analysis complete")
+            console.print("✅ Analysis complete")
             console.print(f"   Total periods: {result['total_periods']}")
             console.print(f"   Empty periods: {len(result['empty_periods'])}")
             console.print(f"   Has issue: {result['has_empty_string_issue']}")
@@ -108,7 +106,7 @@ def investigate_xbrl_parsing(issue_number: int, **kwargs):
         result = quick_analyze("xbrl_parsing", filing)
 
         if result['success']:
-            console.print(f"✅ XBRL parsing successful")
+            console.print("✅ XBRL parsing successful")
             console.print(f"   Form: {result.get('form', 'Unknown')}")
             console.print(f"   Company: {result.get('company', 'Unknown')}")
             console.print(f"   Has statements: {result.get('has_statements', False)}")
@@ -145,7 +143,7 @@ def investigate_entity_facts(issue_number: int, **kwargs):
         result = quick_analyze("entity_facts", ticker)
 
         if result['success']:
-            console.print(f"✅ Entity facts loaded successfully")
+            console.print("✅ Entity facts loaded successfully")
             console.print(f"   CIK: {result.get('cik', 'Unknown')}")
             console.print(f"   Company: {result.get('name', 'Unknown')}")
             console.print(f"   Has income statement: {result.get('has_income_statement', False)}")

@@ -924,7 +924,7 @@ def sync_to_cloud(
             # fs.put supports batch uploads with lists
             fs.put(local_paths, cloud_paths)
             uploaded += len(batch)
-        except Exception as e:
+        except Exception:
             # Fall back to individual uploads on batch failure
             # Skip files that already exist (may have been partially uploaded)
             for local_path, cloud_path in batch:

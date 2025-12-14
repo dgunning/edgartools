@@ -12,9 +12,11 @@ Replace the placeholders below with actual values from the issue report:
 - ERROR_MESSAGE: Specific error message if any
 """
 
-from edgar import set_identity, Company, get_entity
-from rich.console import Console
 import traceback
+
+from rich.console import Console
+
+from edgar import Company, get_entity, set_identity
 
 # Set proper identity (CRITICAL for SEC API access)
 set_identity("Research Team research@edgartools-investigation.com")
@@ -115,18 +117,18 @@ def reproduce_entity_facts_issue():
         try:
             # Look for common facts
             revenue_facts = facts.get_fact('Revenue')
-            console.print(f"  ✅ Revenue facts accessible")
+            console.print("  ✅ Revenue facts accessible")
         except Exception as e:
             console.print(f"  ❌ Revenue facts failed: {str(e)}")
 
         # Test period selection
         try:
             income = facts.income_statement(annual=True, periods=3)
-            console.print(f"  ✅ Multi-period selection works")
+            console.print("  ✅ Multi-period selection works")
         except Exception as e:
             console.print(f"  ❌ Multi-period selection failed: {str(e)}")
 
-        console.print(f"\n[green]✅ Entity facts access completed successfully[/green]")
+        console.print("\n[green]✅ Entity facts access completed successfully[/green]")
 
         return {
             'success': True,
@@ -145,10 +147,10 @@ def reproduce_entity_facts_issue():
         reported_error = "ERROR_MESSAGE".lower()
 
         if reported_error in error_str and reported_error != "error_message":
-            console.print(f"\n[yellow]🎯 Error matches reported issue![/yellow]")
+            console.print("\n[yellow]🎯 Error matches reported issue![/yellow]")
             issue_reproduced = True
         else:
-            console.print(f"\n[blue]ℹ️  Different error than reported[/blue]")
+            console.print("\n[blue]ℹ️  Different error than reported[/blue]")
             issue_reproduced = False
 
         return {
@@ -256,9 +258,9 @@ if __name__ == "__main__":
 
     # Summary
     if result.get('issue_reproduced'):
-        print(f"\n✅ Issue #ISSUE_NUMBER reproduced successfully")
+        print("\n✅ Issue #ISSUE_NUMBER reproduced successfully")
         print(f"Error: {result.get('error', 'Unknown')}")
     elif result.get('success'):
-        print(f"\n❓ Issue #ISSUE_NUMBER could not be reproduced - Entity facts worked correctly")
+        print("\n❓ Issue #ISSUE_NUMBER could not be reproduced - Entity facts worked correctly")
     else:
-        print(f"\n❌ Entity facts failed with different error than reported")
+        print("\n❌ Entity facts failed with different error than reported")

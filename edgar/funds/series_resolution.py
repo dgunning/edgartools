@@ -4,7 +4,6 @@ Series resolution service for ETF/Fund ticker-to-series mapping.
 This module provides services for resolving ticker symbols to series IDs,
 addressing GitHub issue #417.
 """
-import logging
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import List, Optional

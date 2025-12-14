@@ -131,7 +131,7 @@ class HeadingSectionDetector:
             try:
                 heading_index = parent.children.index(heading)
             except ValueError:
-                logger.debug(f"Could not find heading in parent's children")
+                logger.debug("Could not find heading in parent's children")
                 return None
 
             # Collect nodes until next section heading

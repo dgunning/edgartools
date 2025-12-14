@@ -72,18 +72,19 @@ Performance Optimization:
 
     This avoids repeated expensive operations throughout the lifecycle.
 """
+from collections import defaultdict
 from datetime import date
 from functools import cached_property
 from typing import Dict, List, Optional, Union
-from collections import defaultdict
 
-from edgar import Filing, Company
-from edgar.entity import EntityFilings
-from edgar.offerings.formc import FormC, AnnualReportDisclosure
+from rich import box
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
-from rich import box
+
+from edgar import Company, Filing
+from edgar.entity import EntityFilings
+from edgar.offerings.formc import AnnualReportDisclosure, FormC
 
 __all__ = ['Offering', 'Campaign']  # Campaign kept for backwards compatibility
 
@@ -604,7 +605,7 @@ class Offering:
                     lines.append(f"  Assets: ${fin.total_asset_most_recent_fiscal_year:,.0f}")
 
                 if fin.is_pre_revenue:
-                    lines.append(f"  Revenue: $0 (pre-revenue)")
+                    lines.append("  Revenue: $0 (pre-revenue)")
                 else:
                     lines.append(f"  Revenue: ${fin.revenue_most_recent_fiscal_year:,.0f}")
 

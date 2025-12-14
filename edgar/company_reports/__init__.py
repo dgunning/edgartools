@@ -12,16 +12,16 @@ from edgar.company_reports._structures import (
     ItemOnlyFilingStructure,
     is_valid_item_for_filing,
 )
-
-# Import Financials for backward compatibility
-from edgar.financials import Financials
+from edgar.company_reports.current_report import CurrentReport, EightK, SixK
+from edgar.company_reports.press_release import PressRelease, PressReleases
 
 # Filing classes
 from edgar.company_reports.ten_k import TenK
 from edgar.company_reports.ten_q import TenQ
 from edgar.company_reports.twenty_f import TwentyF
-from edgar.company_reports.current_report import CurrentReport, EightK, SixK
-from edgar.company_reports.press_release import PressRelease, PressReleases
+
+# Import Financials for backward compatibility
+from edgar.financials import Financials
 
 __all__ = [
     # Base and structures
