@@ -40,7 +40,16 @@ except ImportError:
 import difflib
 from typing import Any, List, Optional, Set, Union
 
-__all__ = ['FormType', 'PeriodType', 'StatementType', 'ValidationError', 'enhanced_validate']
+__all__ = [
+    'FormType',
+    'PeriodType',
+    'StatementType',
+    'FilerStatus',
+    'FilerQualification',
+    'FilerCategory',
+    'ValidationError',
+    'enhanced_validate'
+]
 
 
 class FormType(StrEnum):
@@ -167,6 +176,174 @@ class StatementType(StrEnum):
     STATEMENT_OF_POSITION = "balance_sheet"        # Another balance sheet alias
     CASH_FLOWS = "cash_flow_statement"            # Alias for cash flow
     EQUITY_CHANGES = "changes_in_equity"          # Alias for equity statement
+
+
+class FilerStatus(StrEnum):
+    """
+    SEC filer status classification based on public float thresholds.
+
+    The SEC classifies filers into categories based on their public float
+    (market value of voting and non-voting common equity held by non-affiliates):
+
+    - Large Accelerated: >= $700 million
+    - Accelerated: >= $75 million and < $700 million
+    - Non-Accelerated: < $75 million
+
+    Reference: SEC Rule 12b-2
+    """
+    LARGE_ACCELERATED = "Large accelerated filer"
+    ACCELERATED = "Accelerated filer"
+    NON_ACCELERATED = "Non-accelerated filer"
+
+    @classmethod
+    def from_string(cls, value: str) -> Optional['FilerStatus']:
+        """Parse filer status from string, returning None if not recognized."""
+        if not value:
+            return None
+        value_lower = value.lower().strip()
+        for status in cls:
+            if status.value.lower() == value_lower:
+                return status
+        return None
+
+
+class FilerQualification(StrEnum):
+    """
+    Optional SEC filer qualifications/modifiers.
+
+    These modifiers can apply in addition to the base FilerStatus:
+
+    - Smaller Reporting Company (SRC): < $250M public float or < $100M revenue
+    - Emerging Growth Company (EGC): < $1.235B revenue, IPO within 5 years
+
+    A company can have both qualifications (e.g., SRC + EGC).
+
+    Reference: SEC Rules 12b-2 and 405
+    """
+    SMALLER_REPORTING_COMPANY = "Smaller reporting company"
+    EMERGING_GROWTH_COMPANY = "Emerging growth company"
+
+
+class FilerCategory:
+    """
+    Parsed representation of SEC filer category.
+
+    The SEC category field is a compound value combining a base filer status
+    with optional modifiers using " | " as separator.
+
+    Examples:
+        "Large accelerated filer"
+        "Accelerated filer | Emerging growth company"
+        "Non-accelerated filer | Smaller reporting company | Emerging growth company"
+
+    Usage:
+        >>> category = FilerCategory.from_string("Accelerated filer | Smaller reporting company")
+        >>> category.status
+        <FilerStatus.ACCELERATED: 'Accelerated filer'>
+        >>> category.is_smaller_reporting_company
+        True
+        >>> category.is_emerging_growth_company
+        False
+    """
+
+    def __init__(
+        self,
+        status: Optional[FilerStatus] = None,
+        is_smaller_reporting_company: bool = False,
+        is_emerging_growth_company: bool = False,
+        raw_value: Optional[str] = None
+    ):
+        self.status = status
+        self.is_smaller_reporting_company = is_smaller_reporting_company
+        self.is_emerging_growth_company = is_emerging_growth_company
+        self._raw_value = raw_value
+
+    @classmethod
+    def from_string(cls, category_string: Optional[str]) -> 'FilerCategory':
+        """
+        Parse a SEC category string into a FilerCategory object.
+
+        Args:
+            category_string: The raw category string from SEC submission data
+                           (e.g., "Accelerated filer | Smaller reporting company")
+
+        Returns:
+            FilerCategory with parsed status and qualifications
+        """
+        if not category_string:
+            return cls(raw_value=category_string)
+
+        # Split by " | " separator
+        parts = [p.strip() for p in category_string.split("|")]
+
+        status = None
+        is_src = False
+        is_egc = False
+
+        for part in parts:
+            part_lower = part.lower()
+
+            # Check for filer status
+            if "large accelerated" in part_lower:
+                status = FilerStatus.LARGE_ACCELERATED
+            elif "non-accelerated" in part_lower:
+                status = FilerStatus.NON_ACCELERATED
+            elif "accelerated" in part_lower:
+                status = FilerStatus.ACCELERATED
+            # Check for qualifications
+            elif "smaller reporting" in part_lower:
+                is_src = True
+            elif "emerging growth" in part_lower:
+                is_egc = True
+
+        return cls(
+            status=status,
+            is_smaller_reporting_company=is_src,
+            is_emerging_growth_company=is_egc,
+            raw_value=category_string
+        )
+
+    @property
+    def is_large_accelerated_filer(self) -> bool:
+        """Check if entity is a large accelerated filer."""
+        return self.status == FilerStatus.LARGE_ACCELERATED
+
+    @property
+    def is_accelerated_filer(self) -> bool:
+        """Check if entity is an accelerated filer (not large accelerated)."""
+        return self.status == FilerStatus.ACCELERATED
+
+    @property
+    def is_non_accelerated_filer(self) -> bool:
+        """Check if entity is a non-accelerated filer."""
+        return self.status == FilerStatus.NON_ACCELERATED
+
+    @property
+    def qualifications(self) -> List[FilerQualification]:
+        """Get list of filer qualifications."""
+        result = []
+        if self.is_smaller_reporting_company:
+            result.append(FilerQualification.SMALLER_REPORTING_COMPANY)
+        if self.is_emerging_growth_company:
+            result.append(FilerQualification.EMERGING_GROWTH_COMPANY)
+        return result
+
+    def __str__(self) -> str:
+        if self._raw_value:
+            return self._raw_value
+        parts = []
+        if self.status:
+            parts.append(self.status.value)
+        for qual in self.qualifications:
+            parts.append(qual.value)
+        return " | ".join(parts) if parts else ""
+
+    def __repr__(self) -> str:
+        return f"FilerCategory(status={self.status}, src={self.is_smaller_reporting_company}, egc={self.is_emerging_growth_company})"
+
+    def __bool__(self) -> bool:
+        """Return True if any filer information is present."""
+        return self.status is not None or self.is_smaller_reporting_company or self.is_emerging_growth_company
 
 
 # Type aliases for function signatures

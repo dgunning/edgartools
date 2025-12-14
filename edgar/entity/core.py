@@ -13,7 +13,7 @@ import pyarrow as pa
 if TYPE_CHECKING:
     from edgar.entity.enhanced_statement import StructuredStatement
     from edgar.entity.filings import EntityFilings
-    from edgar.enums import FormType, PeriodType
+    from edgar.enums import FilerCategory, FormType, PeriodType
 
 from rich import box
 from rich.columns import Columns
@@ -194,6 +194,58 @@ class Entity(SecFiler):
         """
         return not self.is_company
 
+    @cached_property
+    def filer_category(self) -> 'FilerCategory':
+        """
+        Get the parsed filer category for this entity.
+
+        The SEC classifies filers into categories based on their public float:
+        - Large Accelerated Filer: >= $700 million
+        - Accelerated Filer: >= $75 million and < $700 million
+        - Non-Accelerated Filer: < $75 million
+
+        Additional qualifications may apply:
+        - Smaller Reporting Company (SRC)
+        - Emerging Growth Company (EGC)
+
+        Returns:
+            FilerCategory object with parsed status and qualifications
+
+        Example:
+            >>> company = Company("AAPL")
+            >>> company.filer_category.status
+            <FilerStatus.LARGE_ACCELERATED: 'Large accelerated filer'>
+            >>> company.is_large_accelerated_filer
+            True
+        """
+        from edgar.enums import FilerCategory
+        category_str = getattr(self.data, 'category', None)
+        return FilerCategory.from_string(category_str)
+
+    @property
+    def is_large_accelerated_filer(self) -> bool:
+        """Check if this entity is a large accelerated filer (public float >= $700M)."""
+        return self.filer_category.is_large_accelerated_filer
+
+    @property
+    def is_accelerated_filer(self) -> bool:
+        """Check if this entity is an accelerated filer (public float >= $75M and < $700M)."""
+        return self.filer_category.is_accelerated_filer
+
+    @property
+    def is_non_accelerated_filer(self) -> bool:
+        """Check if this entity is a non-accelerated filer (public float < $75M)."""
+        return self.filer_category.is_non_accelerated_filer
+
+    @property
+    def is_smaller_reporting_company(self) -> bool:
+        """Check if this entity qualifies as a Smaller Reporting Company (SRC)."""
+        return self.filer_category.is_smaller_reporting_company
+
+    @property
+    def is_emerging_growth_company(self) -> bool:
+        """Check if this entity qualifies as an Emerging Growth Company (EGC)."""
+        return self.filer_category.is_emerging_growth_company
 
     def get_filings(self, 
                    *,
