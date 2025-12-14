@@ -66,15 +66,15 @@ def cmbs_ten_d():
 
 
 @pytest.fixture(scope="module")
-def credit_card_ten_d():
-    """Get a Credit Card 10-D filing for testing."""
+def credit_card_filing():
+    """Get a Credit Card 10-D filing for testing (raw filing, not obj())."""
     from edgar import Company
     # Find a Chase Issuance Trust 10-D filing
     try:
         company = Company(1174821)  # Chase Issuance Trust
         filings = company.get_filings(form='10-D')
         if filings and len(filings) > 0:
-            return filings[0].obj()
+            return filings[0]
     except Exception:
         pass
     return None
@@ -410,37 +410,49 @@ class TestCMBSAssetDataStandalone:
 
 
 class TestTenDWithoutAssetData:
-    """Tests for 10-D filings without CMBS asset data."""
+    """Tests for 10-D filings without CMBS asset data.
 
-    def test_loans_empty_for_non_cmbs(self, credit_card_ten_d):
-        """Test loans is empty for non-CMBS filings."""
-        import pandas as pd
+    Note: filing.obj() returns None for non-CMBS 10-D filings since they
+    don't have structured XML data worth extracting. Users can still
+    instantiate TenD directly if needed for header parsing.
+    """
 
-        if credit_card_ten_d is None:
+    def test_obj_returns_none_for_non_cmbs(self, credit_card_filing):
+        """Test filing.obj() returns None for non-CMBS 10-D filings."""
+        if credit_card_filing is None:
             pytest.skip("Credit card filing not available")
 
-        loans = credit_card_ten_d.loans
+        # filing.obj() should return None for non-CMBS filings
+        obj = credit_card_filing.obj()
+        assert obj is None
+
+    def test_direct_instantiation_still_works(self, credit_card_filing):
+        """Test TenD can be directly instantiated for non-CMBS if needed."""
+        if credit_card_filing is None:
+            pytest.skip("Credit card filing not available")
+
+        # Direct instantiation still works for advanced users
+        ten_d = TenD(credit_card_filing)
+        assert ten_d is not None
+        assert ten_d.abs_type != ABSType.CMBS
+        assert ten_d.has_asset_data is False
+
+    def test_loans_empty_when_no_asset_data(self, credit_card_filing):
+        """Test loans is empty when directly instantiating non-CMBS."""
+        import pandas as pd
+
+        if credit_card_filing is None:
+            pytest.skip("Credit card filing not available")
+
+        ten_d = TenD(credit_card_filing)
+        loans = ten_d.loans
         assert isinstance(loans, pd.DataFrame)
-        # Credit card filings don't have XML asset data
-        if credit_card_ten_d.abs_type != ABSType.CMBS:
-            assert len(loans) == 0
+        assert len(loans) == 0
 
-    def test_properties_empty_for_non_cmbs(self, credit_card_ten_d):
-        """Test properties is empty for non-CMBS filings."""
-        import pandas as pd
-
-        if credit_card_ten_d is None:
+    def test_asset_data_none_when_no_xml(self, credit_card_filing):
+        """Test asset_data is None when directly instantiating non-CMBS."""
+        if credit_card_filing is None:
             pytest.skip("Credit card filing not available")
 
-        props = credit_card_ten_d.properties
-        assert isinstance(props, pd.DataFrame)
-        if credit_card_ten_d.abs_type != ABSType.CMBS:
-            assert len(props) == 0
-
-    def test_asset_data_none_for_non_cmbs(self, credit_card_ten_d):
-        """Test asset_data is None for non-CMBS filings."""
-        if credit_card_ten_d is None:
-            pytest.skip("Credit card filing not available")
-
-        if credit_card_ten_d.abs_type != ABSType.CMBS:
-            assert credit_card_ten_d.asset_data is None
+        ten_d = TenD(credit_card_filing)
+        assert ten_d.asset_data is None

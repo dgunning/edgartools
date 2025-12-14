@@ -32,10 +32,19 @@ from edgar.richtools import repr_rich
 
 __all__ = ['TenD', 'ABSType', 'ABSEntity', 'DistributionPeriod']
 
-# Import CMBS parser (avoid circular import)
+
+# Import parsers (avoid circular import)
 def _get_cmbs_parser():
     from edgar.abs.cmbs import CMBSAssetData
     return CMBSAssetData
+
+
+# NOTE: Distribution report parsing deferred due to HTML format variability
+# Validation showed only ~42% extraction accuracy across ABS types.
+# See scripts/validate_distribution_report.py for details.
+# def _get_distribution_report():
+#     from edgar.abs.distribution import DistributionReport
+#     return DistributionReport
 
 
 class ABSType(Enum):
@@ -485,6 +494,11 @@ class TenD:
         if self.asset_data:
             return self.asset_data.properties
         return pd.DataFrame()
+
+    # NOTE: distribution_report property deferred due to HTML format variability
+    # Validation showed only ~42% extraction accuracy across ABS types.
+    # Code preserved in edgar/abs/distribution.py for future work.
+    # See scripts/validate_distribution_report.py for validation harness.
 
     def __str__(self):
         issuer_name = self.issuing_entity.name if self.issuing_entity else self.company
