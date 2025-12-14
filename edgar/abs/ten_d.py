@@ -32,6 +32,11 @@ from edgar.richtools import repr_rich
 
 __all__ = ['TenD', 'ABSType', 'ABSEntity', 'DistributionPeriod']
 
+# Import CMBS parser (avoid circular import)
+def _get_cmbs_parser():
+    from edgar.abs.cmbs import CMBSAssetData
+    return CMBSAssetData
+
 
 class ABSType(Enum):
     """Types of Asset-Backed Securities."""
@@ -414,6 +419,73 @@ class TenD:
                 return attachment.text()
         return None
 
+    @cached_property
+    def asset_data(self):
+        """
+        Get the CMBS asset data parser for this filing.
+
+        Only available for CMBS filings that have EX-102 XML asset data.
+
+        Returns:
+            CMBSAssetData: Parser for loan and property data, or None if not available
+
+        Example:
+            >>> ten_d = filing.obj()
+            >>> if ten_d.asset_data:
+            ...     loans_df = ten_d.asset_data.loans
+            ...     props_df = ten_d.asset_data.properties
+            ...     summary = ten_d.asset_data.summary()
+        """
+        if not self.has_asset_data:
+            return None
+
+        xml_content = self._get_exhibit('EX-102')
+        if not xml_content:
+            return None
+
+        CMBSAssetData = _get_cmbs_parser()
+        return CMBSAssetData(xml_content)
+
+    @property
+    def loans(self):
+        """
+        Loan-level data from CMBS asset data as a DataFrame.
+
+        Convenience accessor for self.asset_data.loans.
+        Returns empty DataFrame if no asset data available.
+
+        Returns:
+            pandas.DataFrame: Loan-level data with columns including:
+                - loan_id, originator, original_amount, actual_balance
+                - maturity_date, current_rate, payment_status
+                - is_modified, primary_servicer, and more
+        """
+        import pandas as pd
+
+        if self.asset_data:
+            return self.asset_data.loans
+        return pd.DataFrame()
+
+    @property
+    def properties(self):
+        """
+        Property-level data from CMBS asset data as a DataFrame.
+
+        Convenience accessor for self.asset_data.properties.
+        Returns empty DataFrame if no asset data available.
+
+        Returns:
+            pandas.DataFrame: Property-level data with columns including:
+                - loan_id, name, address, city, state, property_type
+                - valuation, occupancy_securitization, noi_securitization
+                - dscr_noi_securitization, and more
+        """
+        import pandas as pd
+
+        if self.asset_data:
+            return self.asset_data.properties
+        return pd.DataFrame()
+
     def __str__(self):
         issuer_name = self.issuing_entity.name if self.issuing_entity else self.company
         return f"TenD('{issuer_name}')"
@@ -472,8 +544,23 @@ class TenD:
                 classes_display += f" (+{len(self.security_classes) - 5} more)"
             info_table.add_row("Security Classes", classes_display)
 
-        # Asset Data indicator
-        if self.has_asset_data:
+        # Asset Data summary for CMBS
+        if self.has_asset_data and self.asset_data:
+            summary = self.asset_data.summary()
+            info_table.add_row("", "")  # Spacer
+            info_table.add_row("Asset Data", Text("EX-102 CMBS", style="green bold"))
+            info_table.add_row("  Loans", f"{summary.num_loans:,}")
+            info_table.add_row("  Properties", f"{summary.num_properties:,}")
+            info_table.add_row("  Total Balance", f"${summary.total_loan_balance:,.0f}")
+            if summary.avg_interest_rate is not None:
+                info_table.add_row("  Avg Rate", f"{summary.avg_interest_rate:.2%}")
+            if summary.avg_dscr is not None:
+                info_table.add_row("  Avg DSCR", f"{summary.avg_dscr:.2f}")
+            if summary.property_types:
+                top_types = sorted(summary.property_types.items(), key=lambda x: -x[1])[:3]
+                types_str = ", ".join(f"{t}: {c}" for t, c in top_types)
+                info_table.add_row("  Property Types", types_str)
+        elif self.has_asset_data:
             info_table.add_row("Asset Data", Text("Available (EX-102)", style="green"))
 
         panel = Panel(

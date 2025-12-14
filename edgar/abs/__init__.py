@@ -6,5 +6,6 @@ ABS-related SEC filings, including Form 10-D distribution reports.
 """
 
 from edgar.abs.ten_d import TenD
+from edgar.abs.cmbs import CMBSAssetData, CMBSSummary
 
-__all__ = ['TenD']
+__all__ = ['TenD', 'CMBSAssetData', 'CMBSSummary']
