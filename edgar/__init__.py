@@ -166,6 +166,7 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '8-K': ('EightK', 'current report with event details'),
         '10-Q': ('TenQ', 'quarterly report with financials'),
         '10-K': ('TenK', 'annual report with financials'),
+        '10-D': ('TenD', 'ABS distribution report'),
         '20-F': ('TwentyF', 'foreign issuer annual report'),
         '13F-HR': ('ThirteenF', 'institutional holdings'),
         '13F-HR/A': ('ThirteenF', 'institutional holdings'),
@@ -222,6 +223,17 @@ def obj(sec_filing: Filing) -> Optional[object]:
         return TenQ(sec_filing)
     elif matches_form(sec_filing, "10-K"):
         return TenK(sec_filing)
+    elif matches_form(sec_filing, "10-D"):
+        # Only return TenD for CMBS filings (have EX-102 XML asset data)
+        # Non-CMBS 10-D filings don't have structured data worth extracting
+        attachments = sec_filing.attachments
+        has_cmbs_data = any(
+            a.document_type and 'EX-102' in a.document_type.upper()
+            for a in attachments
+        )
+        if has_cmbs_data:
+            from edgar.abs import TenD
+            return TenD(sec_filing)
     elif matches_form(sec_filing, "20-F"):
         return TwentyF(sec_filing)
     elif matches_form(sec_filing, THIRTEENF_FORMS):
