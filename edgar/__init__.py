@@ -166,6 +166,7 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '8-K': ('EightK', 'current report with event details'),
         '10-Q': ('TenQ', 'quarterly report with financials'),
         '10-K': ('TenK', 'annual report with financials'),
+        '10-D': ('TenD', 'ABS distribution report'),
         '20-F': ('TwentyF', 'foreign issuer annual report'),
         '13F-HR': ('ThirteenF', 'institutional holdings'),
         '13F-HR/A': ('ThirteenF', 'institutional holdings'),
@@ -222,6 +223,9 @@ def obj(sec_filing: Filing) -> Optional[object]:
         return TenQ(sec_filing)
     elif matches_form(sec_filing, "10-K"):
         return TenK(sec_filing)
+    elif matches_form(sec_filing, "10-D"):
+        from edgar.abs import TenD
+        return TenD(sec_filing)
     elif matches_form(sec_filing, "20-F"):
         return TwentyF(sec_filing)
     elif matches_form(sec_filing, THIRTEENF_FORMS):
