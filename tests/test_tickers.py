@@ -56,6 +56,23 @@ def test_get_icon_bad_ticker():
         icon = get_icon_from_ticker(123)
 
 @pytest.mark.fast
+def test_get_icon_hyphenated_ticker():
+    """Test that hyphenated tickers like BRK-B are accepted (fixes GitHub issue #246)."""
+    # BRK-B should not raise ValueError - validation allows hyphens
+    # Icon repository stores as BRKB.png (without hyphen)
+    icon = get_icon_from_ticker("BRK-B")
+    assert icon is not None
+    assert isinstance(icon, bytes)
+    assert icon[:8] == b"\x89PNG\r\n\x1a\n"
+
+@pytest.mark.fast
+def test_get_icon_hyphenated_ticker_no_icon():
+    """Test hyphenated ticker that has no icon in repository returns None."""
+    # JPM-PC is a valid ticker but has no icon in the repository
+    icon = get_icon_from_ticker("JPM-PC")
+    assert icon is None  # No icon available, but no ValueError raised
+
+@pytest.mark.fast
 def test_popular_us_stocks():
     stocks = popular_us_stocks()
     assert not stocks.empty

@@ -476,12 +476,14 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
     if not isinstance(ticker, str):
         raise ValueError("The ticker must be a valid string.")
 
-    if not ticker.isalpha():
-        raise ValueError("The ticker must only contain alphabetic characters.")
+    if not ticker or not all(c.isalpha() or c == '-' for c in ticker):
+        raise ValueError("The ticker must only contain alphabetic characters and hyphens.")
 
     try:
+        # Strip hyphens from ticker - icon repository uses BRKB.png not BRK-B.png
+        ticker_for_url = ticker.upper().replace('-', '')
         downloaded = download_file(
-            f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{ticker.upper()}.png", as_text=False)
+            f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{ticker_for_url}.png", as_text=False)
         return downloaded
     except HTTPStatusError as e:
         # If the status code is 404, the icon is not available
