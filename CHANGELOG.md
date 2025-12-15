@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.0] - 2025-12-15
+
+### Added
+
+- **FilerCategory enum and Entity Properties** (#86aecf06)
+  - Added FilerStatus enum (Large Accelerated, Accelerated, Non-Accelerated) and FilerQualification enum (SRC, EGC)
+  - New Entity properties: `is_large_accelerated_filer`, `is_accelerated_filer`, `is_smaller_reporting_company`, `is_emerging_growth_company`
+  - **Files**: `edgar/entity/core.py`, `edgar/enums.py`
+  - **Impact**: Easy identification of filer status for regulatory analysis
+  - **Example**: `company.is_large_accelerated_filer`
+
+- **Form 10-D (ABS Distribution Report) Data Object** (#f7900c98, #fee7563e, #617cf063)
+  - New parser for Asset-Backed Securities Distribution Reports
+  - CMBS XML asset data parsing from EX-102 exhibits
+  - ABS-EE parser for ongoing reporting
+  - Extracts issuing entity, depositor, sponsors, distribution periods, and ABS type
+  - **Files**: `edgar/abs/ten_d.py`
+  - **Impact**: Structured access to ABS distribution data for fixed income analysis
+  - **Example**: `ten_d = filing.obj()` for 10-D filings
+
+- **Unified Synonym Management for XBRL Tags** (#7bc2d05a, #df2f377c, #823b3fa8)
+  - New `edgar.standardization` module with 59 pre-built synonym groups
+  - Maps XBRL tags to standardized financial concepts for cross-company analysis
+  - User-extensible via `register_group()` and JSON import/export
+  - Integrated with EntityFacts
+  - **Files**: `edgar/standardization/synonym_groups.py`
+  - **Impact**: Consistent financial analysis without knowing company-specific tag variants
+
+### Fixed
+
+- **Hyphenated Ticker Support** (#246, #7e16b497)
+  - Fixed `get_icon_from_ticker` to support tickers with hyphens (e.g., BRK-B)
+
+- **Test Suite Improvements** (#556af1f3, #efd95d0f)
+  - Fixed 22 failing regression tests
+
+- **Code Quality** (#d70bae4f, #0d673f9e)
+  - Addressed ruff linting issues and pyright type errors
+  - Fixed high priority code quality issues in edgar/ directory
+
+- **Documentation** (#e9851537)
+  - Corrected API signature for `standard` parameter in extract-statements guide
+
+### Summary
+
+Release 5.3.0 adds ABS filing support, filer categorization, and XBRL standardization capabilities. Key highlights:
+
+- Form 10-D parser with CMBS XML and ABS-EE support
+- Filer category enums and Entity properties for accelerated filer identification
+- Synonym management system for standardized XBRL analysis
+- 22 regression test fixes and code quality improvements
+
+This release maintains full backward compatibility with v5.2.0.
+
 ## [5.2.0] - 2025-12-13
 
 ### Added
