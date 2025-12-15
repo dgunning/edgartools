@@ -19,15 +19,19 @@ class TestIssue412Regression:
     def test_tsla_historical_balance_sheet_completeness(self):
         """
         Test that TSLA balance sheet shows comprehensive data for historical years.
-        
+
         Before fix: Historical years showed only 1-2 populated rows (sparse data)
         After fix: Historical years should show ~25+ populated rows (comprehensive data)
         """
         company = Company("TSLA")
-        
+
         # Get balance sheet with enough periods to include historical data
         balance_sheet = company.balance_sheet(annual=True, periods=6)
-        
+
+        # Skip if balance sheet not available
+        if balance_sheet is None:
+            pytest.skip("Balance sheet not available for TSLA - company facts may be unavailable")
+
         # Convert to dataframe for detailed analysis
         df = balance_sheet.to_dataframe()
         
@@ -63,12 +67,17 @@ class TestIssue412Regression:
     def test_tsla_balance_sheet_key_items_present(self):
         """
         Test that key balance sheet items are present in historical periods.
-        
+
         Before fix: Only "Cash and Cash Equivalents" was populated
         After fix: Assets, Liabilities, Equity should all be populated
         """
         company = Company("TSLA")
         balance_sheet = company.balance_sheet(annual=True, periods=4)
+
+        # Skip if balance sheet not available
+        if balance_sheet is None:
+            pytest.skip("Balance sheet not available for TSLA - company facts may be unavailable")
+
         df = balance_sheet.to_dataframe()
         
         periods = balance_sheet.periods
@@ -99,12 +108,16 @@ class TestIssue412Regression:
     def test_rich_output_shows_historical_data(self):
         """
         Test that rich output (__rich__) shows data in historical columns.
-        
+
         This is what users see when they print the balance sheet.
         """
         company = Company("TSLA")
         balance_sheet = company.balance_sheet(annual=True, periods=4)
-        
+
+        # Skip if balance sheet not available
+        if balance_sheet is None:
+            pytest.skip("Balance sheet not available for TSLA - company facts may be unavailable")
+
         # Get the rich representation
         rich_repr = balance_sheet.__rich__()
         
