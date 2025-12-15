@@ -10,6 +10,14 @@ from edgar import *
 import pandas as pd
 
 
+# Metadata columns that should be excluded when looking at period/data columns
+METADATA_COLUMNS = [
+    'concept', 'label', 'level', 'abstract', 'dimension',
+    'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept',
+    'dimension_label', 'unit', 'point_in_time'
+]
+
+
 class TestCashFlowEmptyPeriods:
     """Test cash flow statement handling of empty periods"""
 
@@ -17,16 +25,16 @@ class TestCashFlowEmptyPeriods:
     def test_recent_filing_shows_all_periods_with_data(self):
         """Recent filings should show all periods that have meaningful data"""
         # Test recent Apple filing that works correctly
-        filing = Filing(form='10-Q', filing_date='2025-08-01', company='Apple Inc.', cik=320193, accession_no='0000320193-25-000073')  # Apple Q2 2025
+        # Use relative lookup to get latest Q2/Q3 filing instead of hardcoded accession
+        company = Company("AAPL")
+        filing = company.get_filings(form="10-Q").latest(1)
         print(str(filing))
         cashflow_stmt = filing.xbrl().statements.cashflow_statement()
         print(cashflow_stmt)
         df = cashflow_stmt.to_dataframe()
 
         # Get data columns (excluding metadata)
-        data_cols = [col for col in df.columns
-                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
-                                   'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']]
+        data_cols = [col for col in df.columns if col not in METADATA_COLUMNS]
 
         # All periods should have meaningful numeric data
         for col in data_cols:
@@ -41,9 +49,7 @@ class TestCashFlowEmptyPeriods:
         df = cashflow_stmt.to_dataframe()
 
         # Get data columns
-        data_cols = [col for col in df.columns
-                    if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
-                                   'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']]
+        data_cols = [col for col in df.columns if col not in METADATA_COLUMNS]
 
         # Check that all remaining periods have meaningful data
         empty_periods = []
@@ -88,9 +94,7 @@ class TestCashFlowEmptyPeriods:
             cashflow_stmt = filing.xbrl().statements.cashflow_statement()
             df = cashflow_stmt.to_dataframe()
 
-            data_cols = [col for col in df.columns
-                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
-                                       'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']]
+            data_cols = [col for col in df.columns if col not in METADATA_COLUMNS]
 
             # Identify empty periods
             empty_periods = []
@@ -120,9 +124,7 @@ class TestCashFlowEmptyPeriods:
         df = cashflow_stmt.to_dataframe()
 
         # Get data columns
-        data_cols = [col for col in df.columns
-                     if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
-                                    'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']]
+        data_cols = [col for col in df.columns if col not in METADATA_COLUMNS]
 
         # After v4.20.1 dynamic thresholds, we filter more intelligently - not just empty periods
         # but also periods with insufficient data quality. Expect at least 1 meaningful period.
@@ -147,12 +149,10 @@ class TestCashFlowEmptyPeriods:
 
         def filter_meaningful_periods(dataframe):
             """Same filtering logic as above"""
-            data_cols = [col for col in dataframe.columns
-                        if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
-                                       'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']]
+            data_cols = [col for col in dataframe.columns if col not in METADATA_COLUMNS]
 
-            meaningful_cols = ['concept', 'label', 'level', 'abstract', 'dimension',
-                              'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']
+            # Start with all metadata columns that exist in the dataframe
+            meaningful_cols = [col for col in METADATA_COLUMNS if col in dataframe.columns]
 
             for col in data_cols:
                 numeric_values = pd.to_numeric(dataframe[col], errors='coerce').notna().sum()
@@ -161,8 +161,9 @@ class TestCashFlowEmptyPeriods:
 
             return dataframe[meaningful_cols]
 
-        # Test on recent working filing
-        filing = get_by_accession_number('0000320193-25-000073')  # Apple Q2 2025
+        # Test on recent working filing - use relative lookup
+        company = Company("AAPL")
+        filing = company.get_filings(form="10-Q").latest(1)
         cashflow_stmt = filing.xbrl().statements.cashflow_statement()
         original_df = cashflow_stmt.to_dataframe()
 
@@ -170,12 +171,8 @@ class TestCashFlowEmptyPeriods:
         filtered_df = filter_meaningful_periods(original_df)
 
         # Should be unchanged - all periods have data
-        original_data_cols = [col for col in original_df.columns
-                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
-                                            'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']]
-        filtered_data_cols = [col for col in filtered_df.columns
-                             if col not in ['concept', 'label', 'level', 'abstract', 'dimension',
-                                            'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept']]
+        original_data_cols = [col for col in original_df.columns if col not in METADATA_COLUMNS]
+        filtered_data_cols = [col for col in filtered_df.columns if col not in METADATA_COLUMNS]
 
         assert len(original_data_cols) == len(filtered_data_cols)
         assert set(original_data_cols) == set(filtered_data_cols)

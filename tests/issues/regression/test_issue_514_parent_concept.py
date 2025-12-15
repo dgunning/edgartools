@@ -80,10 +80,15 @@ def test_parent_concept_with_metadata():
     for col in metadata_cols:
         assert col in df.columns, f"{col} should be present in DataFrame"
 
+    # Full list of metadata columns to exclude when looking for period columns
+    all_metadata_cols = [
+        'concept', 'label', 'balance', 'weight', 'preferred_sign',
+        'parent_concept', 'parent_abstract_concept', 'level', 'abstract',
+        'dimension', 'unit', 'point_in_time', 'dimension_label'
+    ]
+
     # Verify parent columns don't interfere with period columns
-    period_cols = [col for col in df.columns if col not in
-                   ['concept', 'label', 'balance', 'weight', 'preferred_sign',
-                    'parent_concept', 'parent_abstract_concept', 'level', 'abstract', 'dimension', 'unit', 'point_in_time']]
+    period_cols = [col for col in df.columns if col not in all_metadata_cols]
 
     assert len(period_cols) > 0, "Should have at least one period column"
 

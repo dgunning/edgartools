@@ -17,13 +17,26 @@ Root causes:
 """
 
 import pytest
+from edgar import Filing
+
+
+# Create the filing directly for reliability (session-scoped fixture can have issues)
+def get_nflx_2012_10k():
+    """Get Netflix 2012 10-K filing (fiscal 2011) directly."""
+    return Filing(
+        company='NETFLIX INC',
+        cik=1065280,
+        form='10-K',
+        filing_date='2013-02-01',
+        accession_no='0001065280-13-000008'
+    )
 
 
 @pytest.mark.regression
 class TestIssue513NFLX2012TenK:
     """Test that 2012 10-K shows fiscal year 2012 data"""
 
-    def test_date_discrepancy_corrected_to_2012(self, nflx_2012_10k_filing):
+    def test_date_discrepancy_corrected_to_2012(self):
         """
         The filing 0001065280-13-000008 has a date discrepancy:
         - SGML header: 2012-12-31 (correct - this is the fiscal 2012 10-K)
@@ -32,7 +45,8 @@ class TestIssue513NFLX2012TenK:
         The date discrepancy detection should correct this to use the SGML date
         since the filing contains 2012 annual period data.
         """
-        xbrl = nflx_2012_10k_filing.xbrl()
+        filing = get_nflx_2012_10k()
+        xbrl = filing.xbrl()
 
         # Verify the raw XBRL date is wrong
         assert xbrl._get_xbrl_period_of_report() == '2011-12-31', \
@@ -46,12 +60,13 @@ class TestIssue513NFLX2012TenK:
         assert xbrl.period_of_report == '2012-12-31', \
             "period_of_report should be corrected to 2012-12-31 (SGML date)"
 
-    def test_2012_10k_includes_2012_fiscal_data(self, nflx_2012_10k_filing):
+    def test_2012_10k_includes_2012_fiscal_data(self):
         """
         With the date discrepancy fix, this filing should now correctly show
         fiscal year 2012 data as the primary year.
         """
-        xbrl = nflx_2012_10k_filing.xbrl()
+        filing = get_nflx_2012_10k()
+        xbrl = filing.xbrl()
 
         statement = xbrl.statements.income_statement()
         df = statement.to_dataframe()
@@ -64,11 +79,12 @@ class TestIssue513NFLX2012TenK:
         assert '2011-12-31' in df.columns, \
             "Should include 2011-12-31 (prior year comparison)"
 
-    def test_period_selection_excludes_multi_year_periods(self, nflx_2012_10k_filing):
+    def test_period_selection_excludes_multi_year_periods(self):
         """Period selection should not select multi-year cumulative periods"""
         from edgar.xbrl.period_selector import select_periods
 
-        xbrl = nflx_2012_10k_filing.xbrl()
+        filing = get_nflx_2012_10k()
+        xbrl = filing.xbrl()
         periods = select_periods(xbrl, 'IncomeStatement', max_periods=4)
 
         period_keys = [pk for pk, _ in periods]
@@ -92,9 +108,10 @@ class TestIssue513NFLX2012TenK:
                     assert 300 < days <= 370, \
                         f"Period {label} has {days} days, should be 300-370 for annual periods"
 
-    def test_fiscal_year_2012_has_revenue_data(self, nflx_2012_10k_filing):
+    def test_fiscal_year_2012_has_revenue_data(self):
         """2012 fiscal year should have revenue data"""
-        xbrl = nflx_2012_10k_filing.xbrl()
+        filing = get_nflx_2012_10k()
+        xbrl = filing.xbrl()
 
         # Get revenue facts for 2012 period
         revenue_facts = xbrl.facts.query().by_concept("Revenue").by_period_key("duration_2012-01-01_2012-12-31").to_dataframe()
