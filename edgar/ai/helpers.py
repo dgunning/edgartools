@@ -4,7 +4,14 @@ Helper functions for common SEC filing analysis tasks.
 These convenience wrappers provide simple, high-level access to EdgarTools functionality
 for common SEC filing analysis patterns.
 """
-from typing import Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
+
+if TYPE_CHECKING:
+    from edgar._filings import Filings
+    from edgar.entity.company_subset import CompanySubset
+    from edgar.xbrl.stitching import MultiPeriodStatement
 
 import pandas as pd
 

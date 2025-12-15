@@ -125,7 +125,7 @@ def use_cloud_storage(
         # Validate and import fsspec
         try:
             import fsspec  # noqa: F401
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
                 "Cloud storage requires fsspec. Install with:\n\n"
                 '  pip install "edgartools[cloud]"\n\n'
@@ -133,7 +133,7 @@ def use_cloud_storage(
                 '  pip install "edgartools[s3]"     # AWS S3, R2, MinIO\n'
                 '  pip install "edgartools[gcs]"    # Google Cloud Storage\n'
                 '  pip install "edgartools[azure]"  # Azure Blob Storage\n'
-            )
+            ) from e
 
         # Validate URI format
         if '://' not in uri:
@@ -236,11 +236,11 @@ def _validate_backend(protocol: str) -> None:
         package = packages[protocol]
         try:
             __import__(package)
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
                 f"Protocol '{protocol}' requires {package}. "
                 f"Install with: pip install {package}"
-            )
+            ) from e
 
 
 def is_cloud_storage_enabled() -> bool:

@@ -1,7 +1,14 @@
+from __future__ import annotations
+
 from collections import defaultdict
 from datetime import date, datetime
 from functools import cached_property, lru_cache
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from edgar._filings import Filing
+    from edgar.entity.entity_filings import EntityFilings
+    from edgar.offerings.campaign import Offering
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, ConfigDict

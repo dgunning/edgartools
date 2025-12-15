@@ -216,7 +216,7 @@ class DocumentSearch:
             flags = 0 if case_sensitive else re.IGNORECASE
             regex = re.compile(pattern, flags)
         except re.error as e:
-            raise ValueError(f"Invalid regex pattern: {e}")
+            raise ValueError(f"Invalid regex pattern: {e}") from e
 
         # Search only leaf nodes to avoid duplicates
         for node in self.document.root.walk():

@@ -364,7 +364,7 @@ class Offering:
                 formc = filing.obj()
                 if formc.annual_report_disclosure:
                     return formc.annual_report_disclosure
-            except:
+            except Exception:
                 continue
 
         # Try updates
@@ -373,7 +373,7 @@ class Offering:
                 formc = filing.obj()
                 if formc.annual_report_disclosure:
                     return formc.annual_report_disclosure
-            except:
+            except Exception:
                 continue
 
         # Try initial
@@ -382,7 +382,7 @@ class Offering:
                 formc = self.filings_by_stage['initial'][0].obj()
                 if formc.annual_report_disclosure:
                     return formc.annual_report_disclosure
-            except:
+            except Exception:
                 pass
 
         return None

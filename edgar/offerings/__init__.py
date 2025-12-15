@@ -1,11 +1,16 @@
-from typing import Dict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict
+
+if TYPE_CHECKING:
+    from edgar.entity.entity_filings import EntityFilings
 
 from edgar.offerings.campaign import Campaign, Offering  # Campaign for backwards compatibility
 from edgar.offerings.formc import FormC, FundingPortal, IssuerCompany, Signer
 from edgar.offerings.formd import FormD
 
 
-def group_offerings_by_file_number(filings) -> Dict[str, 'EntityFilings']:
+def group_offerings_by_file_number(filings) -> Dict[str, EntityFilings]:
     """
     Group Form C filings by issuer file number.
 

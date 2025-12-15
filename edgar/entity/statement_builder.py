@@ -265,7 +265,7 @@ class StructuredStatement:
                                 value_style = "green"
                         else:
                             value_style = ""
-                    except:
+                    except Exception:
                         value_style = ""
                 else:
                     value_style = ""

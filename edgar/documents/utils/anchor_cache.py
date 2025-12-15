@@ -52,7 +52,7 @@ class AnchorCache:
                     patterns = pickle.load(f)
                 self._memory_cache[html_hash] = patterns
                 return patterns
-            except:
+            except Exception:
                 # Corrupted cache file, remove it
                 cache_file.unlink(missing_ok=True)
 
@@ -76,7 +76,7 @@ class AnchorCache:
             cache_file = self.cache_dir / f"{html_hash}.pkl"
             with open(cache_file, 'wb') as f:
                 pickle.dump(patterns, f)
-        except:
+        except Exception:
             # Ignore cache write errors
             pass
 

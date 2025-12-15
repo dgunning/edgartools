@@ -91,8 +91,8 @@ def normalize_cik(cik_or_identifier: Union[str, int]) -> int:
         # Remove leading zeros and convert to int
         try:
             return int(cik_or_identifier.lstrip('0') or '0')
-        except ValueError:
-            raise ValueError(f"Invalid CIK format: {cik_or_identifier}")
+        except ValueError as e:
+            raise ValueError(f"Invalid CIK format: {cik_or_identifier}") from e
 
     raise ValueError(f"CIK must be string or integer, got {type(cik_or_identifier)}")
 

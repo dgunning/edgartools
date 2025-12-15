@@ -295,11 +295,11 @@ def build_company_dataset_duckdb(
     """
     try:
         import duckdb
-    except ImportError:
+    except ImportError as e:
         raise ImportError(
             "DuckDB export requires duckdb package.\n"
             "Install with: pip install duckdb"
-        )
+        ) from e
 
     if not submissions_dir.exists():
         raise FileNotFoundError(
@@ -472,11 +472,11 @@ def to_duckdb(
     """
     try:
         import duckdb
-    except ImportError:
+    except ImportError as e:
         raise ImportError(
             "DuckDB export requires duckdb package.\n"
             "Install with: pip install duckdb"
-        )
+        ) from e
 
     if not parquet_path.exists():
         raise FileNotFoundError(f"Parquet file not found: {parquet_path}")

@@ -1696,7 +1696,7 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
                 try:
                     date_obj = datetime.strptime(str(period_end), '%Y-%m-%d')
                     period_display += f" (ended {date_obj.strftime('%b %d, %Y')})"
-                except:
+                except Exception:
                     period_display += f" (ended {period_end})"
             filing_table.add_row("Fiscal Period:", period_display)
 
@@ -1741,7 +1741,7 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
                             annual_periods.append(f"FY {year}")
                         else:
                             annual_periods.append(label)
-                    except:
+                    except Exception:
                         annual_periods.append(label)
                 else:
                     annual_periods.append(label)

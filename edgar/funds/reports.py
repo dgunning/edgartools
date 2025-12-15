@@ -1,11 +1,16 @@
 """
 Enhanced Fund reporting module with better derivative transaction handling.
 """
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
+if TYPE_CHECKING:
+    from edgar.funds.ticker_resolution import TickerResolutionResult
 
 import pandas as pd
 from bs4 import Tag

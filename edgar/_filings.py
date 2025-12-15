@@ -204,7 +204,7 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
             if start >= six_months_ago and start <= today <= end:
                 return True
 
-    except:
+    except Exception:
         # If date parsing fails, don't warn
         return False
 
@@ -984,7 +984,7 @@ class Filings:
             try:
                 start_date, end_date = self.date_range
                 lines.append(f"Date Range: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
-            except:
+            except Exception:
                 pass  # Date range not available
 
         lines.append("")
@@ -1005,7 +1005,7 @@ class Filings:
                     filing_date = self.data['filing_date'][i].as_py()
                     company = self.data['company'][i].as_py()
                     lines.append(f"  {i}. Form {form} - {filing_date} - {company}")
-                except:
+                except Exception:
                     pass  # Skip if there's an issue with this entry
 
             if count > sample_size:
@@ -1982,7 +1982,7 @@ class Filing:
                 period = self.period_of_report
                 if period:
                     lines.append(f"Period: {period}")
-            except:
+            except Exception:
                 pass  # Period not available for all filing types
 
         # Add multi-entity info if present
@@ -2010,7 +2010,7 @@ class Filing:
                     # Only do full check in 'full' mode
                     xbrl_data = self.xbrl()
                     has_xbrl = xbrl_data is not None
-                except:
+                except Exception:
                     pass
 
             xbrl_hint = "for financial statements" if has_xbrl or self.form in ['10-K', '10-Q', '20-F', '8-K', '6-K'] else "(if available)"
@@ -2022,7 +2022,7 @@ class Filing:
             try:
                 num_attachments = len(self.attachments)
                 lines.append(f"  - Use .attachments for exhibits ({num_attachments} documents)")
-            except:
+            except Exception:
                 lines.append("  - Use .attachments for exhibits")
 
         if detail == 'full':
@@ -2034,7 +2034,7 @@ class Filing:
                     lines.append(f"  Primary: {primary_docs[0].document}")
                 else:
                     lines.append("  Primary: N/A")
-            except:
+            except Exception:
                 lines.append("  Primary: N/A")
 
             # Add XBRL status

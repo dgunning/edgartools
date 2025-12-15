@@ -1,9 +1,13 @@
 """
 Document model for parsed HTML.
 """
+from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 from rich.console import Group
 from rich.table import Table as RichTable
@@ -523,7 +527,7 @@ class Document:
                 # Use minimal cached approach (no memory overhead)
                 original_html = getattr(self.metadata, 'original_html', None)
                 text = filter_with_cached_patterns(text, html_content=original_html)
-            except:
+            except Exception:
                 # Fallback to pattern-based filtering
                 from edgar.documents.utils.toc_filter import filter_toc_links
                 text = filter_toc_links(text)

@@ -172,7 +172,7 @@ class HTMLParser:
             raise HTMLParsingError(
                 f"Failed to parse HTML: {str(e)}",
                 context={'error_type': type(e).__name__}
-            )
+            ) from e
 
     def _parse_html(self, html: str) -> HtmlElement:
         """Parse HTML with lxml."""
@@ -204,7 +204,7 @@ class HTMLParser:
             raise HTMLParsingError(
                 f"lxml parsing failed: {str(e)}",
                 context={'parser': 'lxml.html'}
-            )
+            ) from e
 
     def _extract_metadata(self, tree: HtmlElement, html: str) -> DocumentMetadata:
         """Extract metadata from HTML tree."""

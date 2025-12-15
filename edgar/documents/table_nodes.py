@@ -362,7 +362,7 @@ class TableNode(Node, CacheableMixin):
                                     # Re-add percentage symbol if it was there
                                     if is_percentage:
                                         text = f"{text}%"
-                            except:
+                            except Exception:
                                 pass
                     row_data.append(text)
                 else:

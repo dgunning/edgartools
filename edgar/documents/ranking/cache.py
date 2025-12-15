@@ -198,7 +198,7 @@ class SearchIndexCache:
             # Delete corrupted file
             try:
                 cache_file.unlink()
-            except:
+            except Exception:
                 pass
             return None
 
@@ -250,7 +250,7 @@ class SearchIndexCache:
         if self.disk_cache_enabled:
             try:
                 disk_entries = len(list(self.cache_dir.glob("*.pkl")))
-            except:
+            except Exception:
                 pass
 
         total_requests = self._hits + self._misses
@@ -275,7 +275,7 @@ class SearchIndexCache:
                 for entry in self._memory_cache.values()
             )
             return total_bytes / (1024 * 1024)
-        except:
+        except Exception:
             # Rough estimate if sys.getsizeof fails
             return len(self._memory_cache) * 5.0  # Assume ~5MB per entry
 

@@ -210,7 +210,7 @@ def check_period_data_quality(xbrl_instance, period_key: str, statement_type: st
                             numeric_value = pd.to_numeric(str_value, errors='coerce')
                             if not pd.isna(numeric_value):
                                 meaningful_fact_count += 1
-                        except:
+                        except Exception:
                             # If not numeric but not empty, might still be meaningful
                             if len(str_value) > 0:
                                 meaningful_fact_count += 1
