@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-from functools import lru_cache
 from typing import Optional
 
 import pyarrow as pa
@@ -116,7 +115,6 @@ def get_current_url(atom: bool = True,
     return url
 
 
-@lru_cache(maxsize=32)
 def get_current_entries_on_page(count: int, start: int, form: Optional[str] = None, owner: str = 'include'):
     url = get_current_url(count=count, start=start, form=form if form else '', owner=owner, atom=True)
     response = get_with_retry(url)
