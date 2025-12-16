@@ -324,14 +324,26 @@ class Footnotes:
         )
 
 
-def transaction_footnote_id(tag: Tag) -> Tuple[str, str]:
-    return 'footnote', tag.attrs.get("id") if tag else None
+def transaction_footnote_id(tag: Tag) -> Tuple[str, Optional[str]]:
+    footnote_id = tag.attrs.get("id") if tag else None
+    # Ensure we get a string, not AttributeValueList
+    if isinstance(footnote_id, list):
+        footnote_id = footnote_id[0] if footnote_id else None
+    return 'footnote', str(footnote_id) if footnote_id else None
 
 
 def get_footnotes(tag: Tag) -> str:
-    return '\n'.join([
-        el.attrs.get('id') for el in tag.find_all("footnoteId")
-    ])
+    footnotes = []
+    for el in tag.find_all("footnoteId"):
+        if isinstance(el, Tag):
+            footnote_id = el.attrs.get('id')
+            if footnote_id:
+                # Ensure string type (handle AttributeValueList)
+                if isinstance(footnote_id, list):
+                    footnote_id = footnote_id[0] if footnote_id else None
+                if footnote_id:
+                    footnotes.append(str(footnote_id))
+    return '\n'.join(footnotes)
 
 
 @dataclass(frozen=True)
@@ -1065,7 +1077,7 @@ class TransactionActivity:
     expiration_date: Optional[str] = None
 
     @property
-    def shares_numeric(self) -> Optional[int]:
+    def shares_numeric(self) -> Optional[Union[int, float]]:
         """Get shares as a numeric value, handling footnotes"""
         return safe_numeric(self.shares)
 
@@ -1185,7 +1197,7 @@ class InitialOwnershipSummary(OwnershipSummary):
     @property
     def total_shares(self) -> int:
         """Get total non-derivative shares owned"""
-        return sum(safe_numeric(h.shares) or 0 for h in self.holdings if not h.is_derivative)
+        return int(sum(safe_numeric(h.shares) or 0 for h in self.holdings if not h.is_derivative))
 
     @property
     def has_derivatives(self) -> bool:
@@ -1367,7 +1379,7 @@ class TransactionSummary(OwnershipSummary):
                         if t.transaction_type == "purchase")
         sales = sum(t.shares_numeric or 0 for t in self.transactions
                     if t.transaction_type == "sale")
-        return purchases - sales
+        return int(purchases - sales)
 
     @property
     def net_value(self) -> float:
