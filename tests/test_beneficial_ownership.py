@@ -516,3 +516,231 @@ def test_form_assertion():
 
     with pytest.raises(AssertionError, match="Expected Schedule 13G form"):
         Schedule13G.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_amendment_number_extraction():
+    """Test extraction of amendment numbers from form names"""
+    from edgar.beneficial_ownership.schedule13 import extract_amendment_number
+
+    # Test non-amendment forms
+    assert extract_amendment_number('SCHEDULE 13D') is None
+    assert extract_amendment_number('SC 13G') is None
+    assert extract_amendment_number('SCHEDULE 13G') is None
+
+    # Test amendment without number
+    assert extract_amendment_number('SCHEDULE 13D/A') is None
+    assert extract_amendment_number('SC 13D/A') is None
+
+    # Test "Amendment No. X" pattern
+    assert extract_amendment_number('SCHEDULE 13D/A Amendment No. 9') == 9
+    assert extract_amendment_number('SC 13G/A Amendment No. 12') == 12
+    assert extract_amendment_number('SCHEDULE 13D/A amendment no. 3') == 3
+
+    # Test "/A #X" pattern
+    assert extract_amendment_number('SCHEDULE 13D/A #5') == 5
+    assert extract_amendment_number('SC 13D/A#8') == 8
+    assert extract_amendment_number('SCHEDULE 13G/A #15') == 15
+
+
+@pytest.mark.fast
+def test_amendment_number_field():
+    """Test that amendment_number field is set correctly"""
+    xml_content = SCHEDULE_13D_XML_PATH.read_text()
+
+    # Original filing - no amendment number
+    filing = Mock()
+    filing.form = 'SCHEDULE 13D'
+    filing.filing_date = date(2024, 12, 31)
+    filing.xml = Mock(return_value=xml_content)
+
+    schedule = Schedule13D.from_filing(filing)
+    assert schedule.amendment_number is None
+    assert schedule.is_amendment is False
+
+    # Amendment without number (typical case)
+    filing_amend2 = Mock()
+    filing_amend2.form = 'SCHEDULE 13D/A'
+    filing_amend2.filing_date = date(2025, 1, 20)
+    filing_amend2.xml = Mock(return_value=xml_content)
+
+    amendment2 = Schedule13D.from_filing(filing_amend2)
+    assert amendment2.amendment_number is None  # No number in form name
+    assert amendment2.is_amendment is True
+
+
+@pytest.mark.fast
+def test_amendment_number_field_13g():
+    """Test that amendment_number field is set correctly for Schedule 13G"""
+    xml_content = SCHEDULE_13G_XML_PATH.read_text()
+
+    # Original filing
+    filing = Mock()
+    filing.form = 'SC 13G'
+    filing.filing_date = date(2025, 11, 26)
+    filing.xml = Mock(return_value=xml_content)
+
+    schedule = Schedule13G.from_filing(filing)
+    assert schedule.amendment_number is None
+    assert schedule.is_amendment is False
+
+    # Amendment (typical case - no number in form name)
+    filing_amend = Mock()
+    filing_amend.form = 'SC 13G/A'
+    filing_amend.filing_date = date(2025, 11, 30)
+    filing_amend.xml = Mock(return_value=xml_content)
+
+    amendment = Schedule13G.from_filing(filing_amend)
+    assert amendment.amendment_number is None  # No number in standard form name
+    assert amendment.is_amendment is True
+
+
+@pytest.mark.fast
+def test_reporting_person_new_boolean_fields():
+    """Test new boolean fields on ReportingPerson"""
+    # Test default values
+    person = ReportingPerson(
+        cik='0001234567',
+        name='Test Investor',
+        citizenship='US',
+        sole_voting_power=1000000,
+        shared_voting_power=500000,
+        sole_dispositive_power=1200000,
+        shared_dispositive_power=300000,
+        aggregate_amount=1500000,
+        percent_of_class=7.5,
+        type_of_reporting_person='IN'
+    )
+
+    assert person.is_aggregate_exclude_shares is False
+    assert person.no_cik is False
+
+    # Test with explicit values
+    person2 = ReportingPerson(
+        cik='',
+        name='No CIK Person',
+        citizenship='US',
+        sole_voting_power=100000,
+        shared_voting_power=0,
+        sole_dispositive_power=100000,
+        shared_dispositive_power=0,
+        aggregate_amount=100000,
+        percent_of_class=1.0,
+        type_of_reporting_person='IN',
+        is_aggregate_exclude_shares=True,
+        no_cik=True
+    )
+
+    assert person2.is_aggregate_exclude_shares is True
+    assert person2.no_cik is True
+
+
+@pytest.mark.fast
+def test_excluded_shares_not_aggregated():
+    """Test that shares with is_aggregate_exclude_shares=True are not counted in total_shares"""
+    # Create a mock Schedule13D with reporting persons where some have excluded shares
+    from edgar.beneficial_ownership.models import Schedule13DItems
+    from unittest.mock import Mock
+
+    filing = Mock()
+    filing.form = 'SCHEDULE 13D'
+    filing.filing_date = date(2024, 12, 31)
+
+    # Person 1: 1,000,000 shares - INCLUDED
+    person1 = ReportingPerson(
+        cik='0001',
+        name='Person 1',
+        citizenship='US',
+        sole_voting_power=1000000,
+        shared_voting_power=0,
+        sole_dispositive_power=1000000,
+        shared_dispositive_power=0,
+        aggregate_amount=1000000,
+        percent_of_class=5.0,
+        type_of_reporting_person='IN',
+        is_aggregate_exclude_shares=False
+    )
+
+    # Person 2: 500,000 shares - EXCLUDED
+    person2 = ReportingPerson(
+        cik='0002',
+        name='Person 2',
+        citizenship='US',
+        sole_voting_power=500000,
+        shared_voting_power=0,
+        sole_dispositive_power=500000,
+        shared_dispositive_power=0,
+        aggregate_amount=500000,
+        percent_of_class=2.5,
+        type_of_reporting_person='IN',
+        is_aggregate_exclude_shares=True  # EXCLUDED
+    )
+
+    # Person 3: 2,000,000 shares - INCLUDED
+    person3 = ReportingPerson(
+        cik='0003',
+        name='Person 3',
+        citizenship='US',
+        sole_voting_power=2000000,
+        shared_voting_power=0,
+        sole_dispositive_power=2000000,
+        shared_dispositive_power=0,
+        aggregate_amount=2000000,
+        percent_of_class=10.0,
+        type_of_reporting_person='IN',
+        is_aggregate_exclude_shares=False
+    )
+
+    schedule = Schedule13D(
+        filing=filing,
+        issuer_info=IssuerInfo(cik='0001234', name='Test Corp', cusip='123456789'),
+        security_info=SecurityInfo(title='Common Stock', cusip='123456789'),
+        reporting_persons=[person1, person2, person3],
+        items=Schedule13DItems(),
+        signatures=[],
+        date_of_event='12/31/2024'
+    )
+
+    # Total should be 1,000,000 + 2,000,000 = 3,000,000
+    # Person 2's 500,000 shares should be excluded
+    assert schedule.total_shares == 3000000
+    assert schedule.total_percent == pytest.approx(15.0, rel=0.01)  # 5.0% + 10.0%
+
+
+@pytest.mark.fast
+def test_all_excluded_shares_returns_zero():
+    """Test that total_shares returns 0 when all shares are excluded"""
+    from edgar.beneficial_ownership.models import Schedule13DItems
+    from unittest.mock import Mock
+
+    filing = Mock()
+    filing.form = 'SCHEDULE 13D'
+    filing.filing_date = date(2024, 12, 31)
+
+    # All persons have excluded shares
+    person1 = ReportingPerson(
+        cik='0001',
+        name='Person 1',
+        citizenship='US',
+        sole_voting_power=1000000,
+        shared_voting_power=0,
+        sole_dispositive_power=1000000,
+        shared_dispositive_power=0,
+        aggregate_amount=1000000,
+        percent_of_class=5.0,
+        type_of_reporting_person='IN',
+        is_aggregate_exclude_shares=True
+    )
+
+    schedule = Schedule13D(
+        filing=filing,
+        issuer_info=IssuerInfo(cik='0001234', name='Test Corp', cusip='123456789'),
+        security_info=SecurityInfo(title='Common Stock', cusip='123456789'),
+        reporting_persons=[person1],
+        items=Schedule13DItems(),
+        signatures=[],
+        date_of_event='12/31/2024'
+    )
+
+    assert schedule.total_shares == 0
+    assert schedule.total_percent == pytest.approx(0.0)

@@ -4,6 +4,7 @@ Main classes for Schedule 13D and Schedule 13G beneficial ownership reports.
 This module implements the parsing and representation of SEC Schedule 13D
 and Schedule 13G filings using XML-based parsing.
 """
+import re
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
@@ -66,6 +67,39 @@ def safe_float(value: Optional[str], default: float = 0.0) -> float:
         return default
 
 
+def extract_amendment_number(form_name: str) -> Optional[int]:
+    """
+    Extract amendment number from filing form name.
+
+    Handles various amendment number formats:
+    - "SCHEDULE 13D/A" with "Amendment No. 9" in title
+    - "SC 13D/A #9"
+    - Just "/A" with no number (returns None)
+
+    Args:
+        form_name: Form name/title from filing (e.g., "SCHEDULE 13D/A")
+
+    Returns:
+        Amendment number as integer, or None if not found or not an amendment
+    """
+    if '/A' not in form_name:
+        return None
+
+    # Try to extract number from patterns like:
+    # "Amendment No. 9", "Amendment No. 12", etc.
+    match = re.search(r'Amendment\s+No\.\s+(\d+)', form_name, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+
+    # Try patterns like "/A #9", "/A#12"
+    match = re.search(r'/A\s*#?(\d+)', form_name)
+    if match:
+        return int(match.group(1))
+
+    # Amendment without number
+    return None
+
+
 class Schedule13D:
     """
     Schedule 13D - Active Beneficial Ownership Report.
@@ -90,7 +124,8 @@ class Schedule13D:
         items: Schedule13DItems,
         signatures: List[Signature],
         date_of_event: str,
-        previously_filed: bool = False
+        previously_filed: bool = False,
+        amendment_number: Optional[int] = None
     ):
         self._filing = filing
         self.issuer_info = issuer_info
@@ -100,6 +135,7 @@ class Schedule13D:
         self.signatures = signatures
         self.date_of_event = date_of_event
         self.previously_filed = previously_filed
+        self.amendment_number = amendment_number
 
     @staticmethod
     def parse_xml(xml: str) -> dict:
@@ -184,7 +220,9 @@ class Schedule13D:
                     percent_of_class=safe_float(child_text(person_el, 'percentOfClass')),
                     type_of_reporting_person=child_text(person_el, 'typeOfReportingPerson') or '',
                     comment=child_text(person_el, 'commentContent'),
-                    member_of_group=child_text(person_el, 'memberOfGroup')
+                    member_of_group=child_text(person_el, 'memberOfGroup'),
+                    is_aggregate_exclude_shares=get_bool(child_text(person_el, 'isAggregateExcludeShares')),
+                    no_cik=get_bool(child_text(person_el, 'reportingPersonNoCIK'))
                 ))
         result['reporting_persons'] = reporting_persons
 
@@ -313,7 +351,9 @@ class Schedule13D:
         xml = filing.xml()
         if xml:
             parsed = cls.parse_xml(xml)
-            return cls(filing=filing, **parsed)
+            # Extract amendment number from filing form name
+            amendment_number = extract_amendment_number(filing.form)
+            return cls(filing=filing, amendment_number=amendment_number, **parsed)
         return None
 
     @property
@@ -336,13 +376,22 @@ class Schedule13D:
         - "a" = group member (joint filers) → take unique count
         - "b" or None = separate filers → sum all positions
 
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
+
         For legacy filings without member_of_group field, defaults to summing.
         """
         if not self.reporting_persons:
             return 0
 
+        # Filter out shares excluded from aggregation
+        included_persons = [p for p in self.reporting_persons
+                           if not p.is_aggregate_exclude_shares]
+
+        if not included_persons:
+            return 0
+
         # Check for group members using official SEC indicator
-        group_members = [p for p in self.reporting_persons
+        group_members = [p for p in included_persons
                         if p.member_of_group == "a"]
 
         if group_members:
@@ -351,7 +400,7 @@ class Schedule13D:
             return max(p.aggregate_amount for p in group_members)
 
         # Separate filers or legacy data: sum all positions
-        return sum(p.aggregate_amount for p in self.reporting_persons)
+        return sum(p.aggregate_amount for p in included_persons)
 
     @property
     def total_percent(self) -> float:
@@ -363,13 +412,22 @@ class Schedule13D:
         - "a" = group member (joint filers) → take unique percentage
         - "b" or None = separate filers → sum all percentages
 
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
+
         For legacy filings without member_of_group field, defaults to summing.
         """
         if not self.reporting_persons:
             return 0.0
 
+        # Filter out shares excluded from aggregation
+        included_persons = [p for p in self.reporting_persons
+                           if not p.is_aggregate_exclude_shares]
+
+        if not included_persons:
+            return 0.0
+
         # Check for group members using official SEC indicator
-        group_members = [p for p in self.reporting_persons
+        group_members = [p for p in included_persons
                         if p.member_of_group == "a"]
 
         if group_members:
@@ -378,7 +436,7 @@ class Schedule13D:
             return max(p.percent_of_class for p in group_members)
 
         # Separate filers or legacy data: sum all percentages
-        return sum(p.percent_of_class for p in self.reporting_persons)
+        return sum(p.percent_of_class for p in included_persons)
 
     def __rich__(self):
         """Rich console rendering"""
@@ -414,7 +472,8 @@ class Schedule13G:
         items: Schedule13GItems,
         signatures: List[Signature],
         event_date: str,
-        rule_designation: Optional[str] = None
+        rule_designation: Optional[str] = None,
+        amendment_number: Optional[int] = None
     ):
         self._filing = filing
         self.issuer_info = issuer_info
@@ -424,6 +483,7 @@ class Schedule13G:
         self.signatures = signatures
         self.event_date = event_date
         self.rule_designation = rule_designation
+        self.amendment_number = amendment_number
 
     @staticmethod
     def parse_xml(xml: str) -> dict:
@@ -528,7 +588,9 @@ class Schedule13G:
                 type_of_reporting_person=child_text(person_el, 'typeOfReportingPerson') or '',
                 fund_type=None,
                 comment=None,
-                member_of_group=child_text(person_el, 'memberGroup')  # Note: different element name than 13D!
+                member_of_group=child_text(person_el, 'memberGroup'),  # Note: different element name than 13D!
+                is_aggregate_exclude_shares=get_bool(child_text(person_el, 'isAggregateExcludeShares')),
+                no_cik=get_bool(child_text(person_el, 'reportingPersonNoCIK'))
             ))
         result['reporting_persons'] = reporting_persons
 
@@ -663,7 +725,9 @@ class Schedule13G:
         xml = filing.xml()
         if xml:
             parsed = cls.parse_xml(xml)
-            return cls(filing=filing, **parsed)
+            # Extract amendment number from filing form name
+            amendment_number = extract_amendment_number(filing.form)
+            return cls(filing=filing, amendment_number=amendment_number, **parsed)
         return None
 
     @property
@@ -686,13 +750,22 @@ class Schedule13G:
         - "a" = group member (joint filers) → take unique count
         - "b" or None = separate filers → sum all positions
 
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
+
         For legacy filings without member_of_group field, defaults to summing.
         """
         if not self.reporting_persons:
             return 0
 
+        # Filter out shares excluded from aggregation
+        included_persons = [p for p in self.reporting_persons
+                           if not p.is_aggregate_exclude_shares]
+
+        if not included_persons:
+            return 0
+
         # Check for group members using official SEC indicator
-        group_members = [p for p in self.reporting_persons
+        group_members = [p for p in included_persons
                         if p.member_of_group == "a"]
 
         if group_members:
@@ -701,7 +774,7 @@ class Schedule13G:
             return max(p.aggregate_amount for p in group_members)
 
         # Separate filers or legacy data: sum all positions
-        return sum(p.aggregate_amount for p in self.reporting_persons)
+        return sum(p.aggregate_amount for p in included_persons)
 
     @property
     def total_percent(self) -> float:
@@ -713,13 +786,22 @@ class Schedule13G:
         - "a" = group member (joint filers) → take unique percentage
         - "b" or None = separate filers → sum all percentages
 
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
+
         For legacy filings without member_of_group field, defaults to summing.
         """
         if not self.reporting_persons:
             return 0.0
 
+        # Filter out shares excluded from aggregation
+        included_persons = [p for p in self.reporting_persons
+                           if not p.is_aggregate_exclude_shares]
+
+        if not included_persons:
+            return 0.0
+
         # Check for group members using official SEC indicator
-        group_members = [p for p in self.reporting_persons
+        group_members = [p for p in included_persons
                         if p.member_of_group == "a"]
 
         if group_members:
@@ -728,7 +810,7 @@ class Schedule13G:
             return max(p.percent_of_class for p in group_members)
 
         # Separate filers or legacy data: sum all percentages
-        return sum(p.percent_of_class for p in self.reporting_persons)
+        return sum(p.percent_of_class for p in included_persons)
 
     @property
     def is_passive_investor(self) -> bool:

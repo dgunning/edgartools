@@ -40,6 +40,8 @@ class ReportingPerson:
     fund_type: Optional[str] = None
     comment: Optional[str] = None
     member_of_group: Optional[str] = None  # "a" = group member (joint filer), "b" = separate filer
+    is_aggregate_exclude_shares: bool = False  # True if shares excluded from aggregate count
+    no_cik: bool = False  # True if reporting person has no CIK assigned
 
     @property
     def total_voting_power(self) -> int:
