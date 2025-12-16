@@ -5,7 +5,7 @@ This module provides functions for filtering pyarrow Tables containing SEC EDGAR
 based on various criteria like dates, forms, CIK numbers, etc.
 """
 import datetime
-from typing import List, Union
+from typing import List, Optional, Union
 
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -202,8 +202,8 @@ def filter_by_quarter(data: pa.Table,
 
 
 def filter_by_year_quarter(data: pa.Table,
-                          year: Union[int, List[int]] = None,
-                          quarter: Union[int, List[int]] = None,
+                          year: Optional[Union[int, List[int]]] = None,
+                          quarter: Optional[Union[int, List[int]]] = None,
                           date_col: str = 'filing_date') -> pa.Table:
     """Filter by year and optionally quarter
 

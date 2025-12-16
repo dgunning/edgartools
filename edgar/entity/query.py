@@ -1160,7 +1160,7 @@ class HierarchicalFactsResult:
         """
         records = []
 
-        def process_node(concept: str, level: int = 0, parent: str = None):
+        def process_node(concept: str, level: int = 0, parent: Optional[str] = None):
             fact = self.fact_map.get(concept)
             if not fact:
                 return

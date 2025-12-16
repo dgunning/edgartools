@@ -184,7 +184,7 @@ class InvestigationDisclosure:
     is_investigated: bool
 
 
-def employment_date(date: str = None) -> str:
+def employment_date(date: Optional[str] = None) -> str:
     # Convert date from this format 06-2015 to Jun 2015
     if not date:
         return ""

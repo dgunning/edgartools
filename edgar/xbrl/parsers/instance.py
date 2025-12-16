@@ -7,7 +7,7 @@ units, footnotes, and entity information extraction.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 from lxml import etree as ET
 
@@ -53,7 +53,7 @@ class InstanceParser(BaseParser):
         # DEI facts extracted during entity info processing
         self.dei_facts: Dict[str, Fact] = {}
 
-    def _create_normalized_fact_key(self, element_id: str, context_ref: str, instance_id: int = None) -> str:
+    def _create_normalized_fact_key(self, element_id: str, context_ref: str, instance_id: Optional[int] = None) -> str:
         """
         Create a normalized fact key using underscore format.
 

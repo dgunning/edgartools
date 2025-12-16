@@ -4,6 +4,8 @@ EdgarTools HTML Parser v2.0
 A high-performance, semantically-aware HTML parser for SEC filings.
 """
 
+from typing import Optional
+
 from edgar.documents.config import ParserConfig
 from edgar.documents.cross_reference_index import (
     CrossReferenceIndex,
@@ -42,7 +44,7 @@ __all__ = [
 ]
 
 
-def parse_html(html: str, config: ParserConfig = None) -> Document:
+def parse_html(html: str, config: Optional[ParserConfig] = None) -> Document:
     """
     Convenience function for parsing HTML.
     

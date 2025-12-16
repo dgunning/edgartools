@@ -90,7 +90,7 @@ def child_text(parent: Tag,
 
 def child_value(parent: Tag,
                 child: str,
-                default_value: str = None) -> str:
+                default_value: Optional[str] = None) -> str:
     """
     Get the text of the value tag within the child tag if it exists or None
 

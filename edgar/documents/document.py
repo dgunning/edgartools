@@ -267,7 +267,7 @@ class Sections(Dict[str, Section]):
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-    def get_item(self, item: str, part: str = None) -> Optional[Section]:
+    def get_item(self, item: str, part: Optional[str] = None) -> Optional[Section]:
         """
         Get section by item number with optional part specification.
 

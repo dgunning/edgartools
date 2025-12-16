@@ -3,7 +3,7 @@ Main HTML parser implementation.
 """
 
 import time
-from typing import List, Union
+from typing import List, Optional, Union
 
 import lxml.html
 from lxml import etree
@@ -29,7 +29,7 @@ class HTMLParser:
     and processors.
     """
 
-    def __init__(self, config: ParserConfig = None):
+    def __init__(self, config: Optional[ParserConfig] = None):
         """
         Initialize parser with configuration.
         

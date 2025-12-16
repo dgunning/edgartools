@@ -291,7 +291,7 @@ class FinancialRatios:
         ))
 
     def _prepare_ratio_df(self, required_concepts: List[str], statement_dfs: List[Tuple[pd.DataFrame, str]],
-                          optional_concepts: List[str] = None) -> Tuple[pd.DataFrame, Dict[str, str]]:
+                          optional_concepts: Optional[List[str]] = None) -> Tuple[pd.DataFrame, Dict[str, str]]:
         """Prepare DataFrame for ratio calculations.
 
         Args:

@@ -117,7 +117,7 @@ class PeriodType(BaseModel):
     period30Yr: Decimal
 
     @classmethod
-    def from_xml(cls, tag: Tag = None):
+    def from_xml(cls, tag: Optional[Tag] = None):
         if tag:
             return cls(period1Yr=Decimal(tag.attrs.get("period1Yr")),
                        period3Mon=Decimal(tag.attrs.get("period3Mon")),

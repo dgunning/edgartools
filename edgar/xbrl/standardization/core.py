@@ -405,7 +405,7 @@ class MappingStore:
         self.mappings[standard_concept].add(company_concept)
         self._save_mappings()
 
-    def get_standard_concept(self, company_concept: str, context: Dict = None) -> Optional[str]:
+    def get_standard_concept(self, company_concept: str, context: Optional[Dict] = None) -> Optional[str]:
         """
         Get the standard concept for a given company concept with priority-based resolution.
 

@@ -129,7 +129,7 @@ def repr_rich(renderable, strip_ansi:bool=False, **console_args) -> str:
     return str_output
 
 
-def rich_to_text(rich_object, width:int=None) -> str:
+def rich_to_text(rich_object, width: Optional[int] = None) -> str:
     """
     Convert a Rich renderable object to plain text while preserving layout.
 
@@ -189,7 +189,7 @@ def rich_to_svg(rich_object, width: int = 120) -> str:
     return svg_output
 
 
-def rich_to_png(rich_object, width: int = 120, output_path: str = None) -> Optional[bytes]:
+def rich_to_png(rich_object, width: int = 120, output_path: Optional[str] = None) -> Optional[bytes]:
     """
     Convert a Rich renderable object to PNG format.
 
@@ -303,7 +303,7 @@ class Docs:
     ```
     """
 
-    def __init__(self, obj, docs_content: str = None):
+    def __init__(self, obj, docs_content: Optional[str] = None):
         """
         Initialize the Docs class with an object and optional documentation content.
 

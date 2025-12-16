@@ -3,6 +3,7 @@
 import json
 from functools import lru_cache
 from pathlib import Path
+from typing import Optional
 
 __all__ = [
     'lookup_portfolio_managers',
@@ -10,7 +11,7 @@ __all__ = [
 ]
 
 
-def lookup_portfolio_managers(company_name: str, cik: int = None, include_approximate: bool = False) -> list[dict]:
+def lookup_portfolio_managers(company_name: str, cik: Optional[int] = None, include_approximate: bool = False) -> list[dict]:
     """
     Lookup portfolio managers for a given company.
 

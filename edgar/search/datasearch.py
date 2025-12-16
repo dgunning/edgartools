@@ -1,7 +1,7 @@
 import hashlib
 import re
 from functools import lru_cache
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 
 import pyarrow as pa
 from rapidfuzz import fuzz
@@ -9,8 +9,8 @@ from unidecode import unidecode
 
 
 class FastSearch:
-    def __init__(self, data: pa.Table, columns: List[str], preprocess_func: Callable[[str], str] = None,
-                 score_func: Callable[[str, str, str], float] = None):
+    def __init__(self, data: pa.Table, columns: List[str], preprocess_func: Optional[Callable[[str], str]] = None,
+                 score_func: Optional[Callable[[str, str, str], float]] = None):
         self.data = data
         self.columns = columns
         self.preprocess = preprocess_func or self._default_preprocess
@@ -86,8 +86,8 @@ class FastSearch:
         return self._data_hash == other._data_hash
 
 
-def create_search_index(data: pa.Table, columns: List[str], preprocess_func: Callable[[str], str] = None,
-                        score_func: Callable[[str, str, str], float] = None) -> FastSearch:
+def create_search_index(data: pa.Table, columns: List[str], preprocess_func: Optional[Callable[[str], str]] = None,
+                        score_func: Optional[Callable[[str, str, str], float]] = None) -> FastSearch:
     return FastSearch(data, columns, preprocess_func, score_func)
 
 

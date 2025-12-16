@@ -36,8 +36,8 @@ class FundCompany(Entity):
 
     def __init__(self,
                  cik_or_identifier: Union[str, int],
-                 fund_name:str=None,
-                 all_series:Optional[List['FundSeries']] = None):
+                 fund_name: Optional[str] = None,
+                 all_series: Optional[List['FundSeries']] = None):
         # Import locally to avoid circular imports
         from edgar.funds.data import resolve_fund_identifier
 

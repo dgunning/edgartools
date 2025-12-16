@@ -762,7 +762,7 @@ class XBRL:
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
-                             path: List[str] = None, should_display_dimensions: bool = False) -> None:
+                             path: Optional[List[str]] = None, should_display_dimensions: bool = False) -> None:
         """
         Recursively generate line items for a statement.
 

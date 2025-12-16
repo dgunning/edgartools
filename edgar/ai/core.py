@@ -103,8 +103,8 @@ class SemanticEnricher:
         return cls.CONCEPT_RELATIONSHIPS.get(concept_key, [])
 
     @classmethod
-    def interpret_value(cls, concept: str, value: Union[int, float], 
-                       unit: str, period_type: str = None) -> str:
+    def interpret_value(cls, concept: str, value: Union[int, float],
+                       unit: str, period_type: Optional[str] = None) -> str:
         """
         Generate business interpretation of a financial value.
 

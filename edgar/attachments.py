@@ -108,7 +108,7 @@ def get_document_type(filename: str, declared_document_type:str) -> str:
         return document_type
     return declared_document_type
 
-def get_file_icon(file_type: str, sequence: str = None, filename: str = None) -> str:
+def get_file_icon(file_type: str, sequence: Optional[str] = None, filename: Optional[str] = None) -> str:
     """
     Get the Unicode symbol for a given file type and sequence number.
 

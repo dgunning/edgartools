@@ -162,9 +162,9 @@ def close_clients():
 
 
 def configure_http(
-    verify_ssl: bool = None,
-    proxy: str = None,
-    timeout: float = None,
+    verify_ssl: Optional[bool] = None,
+    proxy: Optional[str] = None,
+    timeout: Optional[float] = None,
 ) -> None:
     """
     Configure HTTP client settings at runtime.

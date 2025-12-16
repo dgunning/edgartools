@@ -1,5 +1,5 @@
 import re
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Optional
 
 import pandas as pd
 from rich import box
@@ -202,7 +202,7 @@ class BM25Search:
 
     def __init__(self,
                  document_objs: List[str],
-                 text_fn: Callable = None):
+                 text_fn: Optional[Callable] = None):
         from rank_bm25 import BM25Okapi
         if text_fn:
             self.corpus: Corpus = [BM25Search.preprocess(text_fn(doc)) for doc in document_objs]

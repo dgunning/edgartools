@@ -1243,8 +1243,8 @@ class FactsView:
 
         return period_views
 
-    def pivot_by_period(self, concept_pattern: str = None,
-                        statement_type: str = None) -> pd.DataFrame:
+    def pivot_by_period(self, concept_pattern: Optional[str] = None,
+                        statement_type: Optional[str] = None) -> pd.DataFrame:
         """
         Create a pivoted view of facts by period.
 
@@ -1285,8 +1285,8 @@ class FactsView:
         return df  # Return original DataFrame if pivoting isn't possible
 
     def pivot_by_dimension(self, dimension: str,
-                           concept_pattern: str = None,
-                           period_key: str = None) -> pd.DataFrame:
+                           concept_pattern: Optional[str] = None,
+                           period_key: Optional[str] = None) -> pd.DataFrame:
         """
         Create a pivoted view of facts by dimension values.
 

@@ -26,7 +26,7 @@ class LegacyHTMLDocument:
         self._doc = new_document
         self._warn_on_use = True
 
-    def _deprecation_warning(self, old_method: str, new_method: str = None):
+    def _deprecation_warning(self, old_method: str, new_method: Optional[str] = None):
         """Issue deprecation warning."""
         if self._warn_on_use:
             msg = f"Document.{old_method} is deprecated."

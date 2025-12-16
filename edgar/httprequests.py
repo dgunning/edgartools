@@ -866,7 +866,7 @@ def save_or_return_content(content: Union[str, bytes], path: Optional[Union[str,
     return content
 
 
-def download_file(url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None) -> Union[str, bytes, None]:
+def download_file(url: str, as_text: Optional[bool] = None, path: Optional[Union[str, Path]] = None) -> Union[str, bytes, None]:
     """
     Download a file from a URL.
 
@@ -908,7 +908,7 @@ def download_file(url: str, as_text: bool = None, path: Optional[Union[str, Path
 
 
 async def download_file_async(
-    client: AsyncClient, url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None
+    client: AsyncClient, url: str, as_text: Optional[bool] = None, path: Optional[Union[str, Path]] = None
 ) -> Union[str, bytes, None]:
     """
     Download a file from a URL asynchronously.
@@ -964,7 +964,7 @@ CHUNK_SIZE_DEFAULT = CHUNK_SIZE
 )
 @with_identity
 async def stream_file(
-    url: str, as_text: bool = None, path: Optional[Union[str, Path]] = None, client: Optional[AsyncClient] = None,
+    url: str, as_text: Optional[bool] = None, path: Optional[Union[str, Path]] = None, client: Optional[AsyncClient] = None,
     disable_progress: bool = False, **kwargs
 ) -> Union[str, bytes, None]:
     """
@@ -1266,7 +1266,7 @@ async def download_bulk_data(
         raise
 
 
-def download_datafile(data_url: str, local_directory: Path = None) -> Path:
+def download_datafile(data_url: str, local_directory: Optional[Path] = None) -> Path:
     """Download a file to the local storage directory"""
     filename = os.path.basename(data_url)
     # Create the directory if it doesn't exist

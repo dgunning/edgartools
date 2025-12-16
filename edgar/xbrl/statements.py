@@ -186,8 +186,8 @@ class Statement:
         return data[0]['all_names'][0]
 
     def to_dataframe(self,
-                     period_filter:str=None,
-                     period_view:str=None,
+                     period_filter: Optional[str] = None,
+                     period_view: Optional[str] = None,
                      standard:bool=True,
                      include_dimensions:bool=True,
                      include_unit:bool=False,

@@ -330,10 +330,10 @@ class FilingHeader:
     def __init__(self,
                  text: str,
                  filing_metadata: Dict[str, str],
-                 filers: List[Filer] = None,
-                 reporting_owners: List[ReportingOwner] = None,
-                 issuer: Issuer = None,
-                 subject_companies: List[SubjectCompany] = None):
+                 filers: Optional[List[Filer]] = None,
+                 reporting_owners: Optional[List[ReportingOwner]] = None,
+                 issuer: Optional[Issuer] = None,
+                 subject_companies: Optional[List[SubjectCompany]] = None):
         self.text: str = text
         self.filing_metadata: FilingMetadata = FilingMetadata(filing_metadata)
         self.filers: List[Filer] = filers

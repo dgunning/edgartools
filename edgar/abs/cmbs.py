@@ -65,7 +65,7 @@ def _parse_bool(value: Optional[str]) -> Optional[bool]:
     return value.lower() == 'true'
 
 
-def _get_element_text(element: ET.Element, tag: str, ns: Dict[str, str] = None) -> Optional[str]:
+def _get_element_text(element: ET.Element, tag: str, ns: Optional[Dict[str, str]] = None) -> Optional[str]:
     """Get text content from a child element."""
     if ns:
         child = element.find(f"cmbs:{tag}", ns)

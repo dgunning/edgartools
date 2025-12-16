@@ -50,7 +50,7 @@ class Element:
 
 
 def extract_tables(html_str: str,
-                   table_filters: List = None) -> List[pd.DataFrame]:
+                   table_filters: Optional[List] = None) -> List[pd.DataFrame]:
     table_filters = table_filters or [filter_tiny_table]
     tables = pd.read_html(StringIO(html_str))
     # Compress and filter the tables
@@ -266,8 +266,8 @@ def _render_blocks_using_old_markdown_tables(blocks:List[Block]):
     ]).strip()
 
 def chunks2df(chunks: List[List[Block]],
-              item_detector: Callable[[pd.Series], pd.Series] = detect_int_items,
-              item_adjuster: Callable[[pd.DataFrame, Dict[str, Any]], pd.DataFrame] = adjust_detected_items,
+              item_detector: Optional[Callable] = detect_int_items,
+              item_adjuster: Optional[Callable] = adjust_detected_items,
               item_structure=None,
               ) -> pd.DataFrame:
     """Convert the chunks to a dataframe

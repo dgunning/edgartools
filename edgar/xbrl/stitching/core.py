@@ -66,7 +66,7 @@ class StatementStitcher:
         self, 
         statements: List[Dict[str, Any]], 
         period_type: Union[PeriodType, str] = PeriodType.RECENT_PERIODS,
-        max_periods: int = None,
+        max_periods: Optional[int] = None,
         standard: bool = True
     ) -> Dict[str, Any]:
         """

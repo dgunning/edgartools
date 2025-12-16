@@ -56,7 +56,7 @@ class FundReferenceData:
     like ticker, CIK, series ID, and class ID.
     """
 
-    def __init__(self, data: pd.DataFrame = None):
+    def __init__(self, data: Optional[pd.DataFrame] = None):
         """
         Initialize with a DataFrame of fund data.
 

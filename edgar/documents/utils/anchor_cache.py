@@ -147,7 +147,7 @@ def _analyze_navigation_minimal(html_content: str, min_frequency: int = 5) -> Se
     return patterns
 
 
-def filter_with_cached_patterns(text: str, html_content: str = None) -> str:
+def filter_with_cached_patterns(text: str, html_content: Optional[str] = None) -> str:
     """
     Filter text using cached navigation patterns.
     

@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
@@ -17,7 +17,7 @@ from edgar.files.htmltools import ChunkedDocument
 class AssembleText:
 
     @staticmethod
-    def assemble_block_text(chunks: List[Block], prefix_src: str = None):
+    def assemble_block_text(chunks: List[Block], prefix_src: Optional[str] = None):
         if prefix_src:
             for block in chunks:
                 if isinstance(block, LinkBlock):
@@ -29,7 +29,7 @@ class AssembleText:
                 yield block.get_text()
 
     @staticmethod
-    def assemble_block_markdown(chunks: List[Block], prefix_src: str = None):
+    def assemble_block_markdown(chunks: List[Block], prefix_src: Optional[str] = None):
         if prefix_src:
             for block in chunks:
                 if isinstance(block, LinkBlock):

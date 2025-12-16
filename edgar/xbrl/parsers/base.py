@@ -5,7 +5,7 @@ This module provides common utilities and base functionality shared across
 all XBRL parser components.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from lxml import etree as ET
 
@@ -133,7 +133,7 @@ class BaseParser:
             return f"{prefix}_{name}"
         return element_id
 
-    def _log_parsing_progress(self, component: str, count: int, total: int = None):
+    def _log_parsing_progress(self, component: str, count: int, total: Optional[int] = None):
         """
         Log parsing progress for debugging.
 

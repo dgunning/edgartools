@@ -48,7 +48,7 @@ class Effect:
                  submission_type: str,
                  effectiveness_data: EffectiveData,
                  is_live: bool,
-                 schema_version: str = None
+                 schema_version: Optional[str] = None
                  ):
         self.submission_type = submission_type
         self.effectiveness_data = effectiveness_data

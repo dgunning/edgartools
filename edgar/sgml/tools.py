@@ -1,5 +1,6 @@
 import base64
 import re
+from typing import Optional
 
 __all__ = ['extract_text_between_tags', 'get_content_between_tags', 'strip_tags', 'is_xml', 'decode_uu']
 
@@ -28,7 +29,7 @@ def extract_text_between_tags(content: str, tag: str) -> str:
     return extracted_content.strip()
 
 
-def get_content_between_tags(content: str, outer_tag: str = None) -> str:
+def get_content_between_tags(content: str, outer_tag: Optional[str] = None) -> str:
     """
     Extract content between specified tags, starting from most nested tags.
 

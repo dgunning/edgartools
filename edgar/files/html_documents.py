@@ -71,8 +71,8 @@ class DocumentData:
     def __init__(self,
                  data: pd.DataFrame,
                  schema_refs: Optional[List[str]] = None,
-                 context: Dict[str, Dict[str, Union[str, None]]] = None,
-                 units: Dict[str, str] = None):
+                 context: Optional[Dict[str, Dict[str, Union[str, None]]]] = None,
+                 units: Optional[Dict[str, str]] = None):
         self.data = data
         self.context = context or {}
         self.units = units or {}
