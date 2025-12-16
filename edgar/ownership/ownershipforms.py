@@ -319,8 +319,8 @@ class Footnotes:
         footnotes_el = tag.find("footnotes")
         return cls(
             {el.attrs['id']: el.text.strip()
-             for el in footnotes_el.find_all("footnote")
-             } if footnotes_el else {}
+             for el in footnotes_el.find_all("footnote") if isinstance(el, Tag)
+             } if footnotes_el and isinstance(footnotes_el, Tag) else {}
         )
 
 
@@ -660,7 +660,11 @@ class NonDerivativeTable:
 
         holdings = []
         for holding_tag in holding_tags:
+            if not isinstance(holding_tag, Tag):
+                continue
             ownership_nature_tag = holding_tag.find("ownershipNature")
+            if not isinstance(ownership_nature_tag, Tag):
+                continue
             holding = dict(
                 [
                     ('Security', child_value(holding_tag, 'securityTitle')),
@@ -695,9 +699,17 @@ class NonDerivativeTable:
             )
         transactions = []
         for transaction_tag in transaction_tags:
+            if not isinstance(transaction_tag, Tag):
+                continue
             transaction_amt_tag = transaction_tag.find("transactionAmounts")
+            if not isinstance(transaction_amt_tag, Tag):
+                continue
             ownership_nature_tag = transaction_tag.find("ownershipNature")
+            if not isinstance(ownership_nature_tag, Tag):
+                continue
             post_transaction_tag = transaction_tag.find("postTransactionAmounts")
+            if not isinstance(post_transaction_tag, Tag):
+                continue
 
             transaction = dict(
                 [
@@ -712,7 +724,7 @@ class NonDerivativeTable:
                 ]
             )
             transaction_coding_tag = transaction_tag.find("transactionCoding")
-            if transaction_coding_tag:
+            if transaction_coding_tag and isinstance(transaction_coding_tag, Tag):
                 transaction_coding = dict(
                     [
                         ('form', child_text(transaction_coding_tag, 'transactionFormType')),
@@ -801,10 +813,20 @@ class DerivativeTable:
 
         transactions = []
         for transaction_tag in trans_tags:
+            if not isinstance(transaction_tag, Tag):
+                continue
             transaction_amt_tag = transaction_tag.find("transactionAmounts")
+            if not isinstance(transaction_amt_tag, Tag):
+                continue
             underlying_tag = transaction_tag.find("underlyingSecurity")
+            if not isinstance(underlying_tag, Tag):
+                continue
             ownership_nature_tag = transaction_tag.find("ownershipNature")
+            if not isinstance(ownership_nature_tag, Tag):
+                continue
             post_transaction_tag = transaction_tag.find("postTransactionAmounts")
+            if not isinstance(post_transaction_tag, Tag):
+                continue
 
             transaction = dict(
                 [
@@ -825,7 +847,7 @@ class DerivativeTable:
 
             # Add transaction coding
             transaction_coding_tag = transaction_tag.find("transactionCoding")
-            if transaction_coding_tag:
+            if transaction_coding_tag and isinstance(transaction_coding_tag, Tag):
                 transaction_coding = dict(
                     [
                         ('form', child_text(transaction_coding_tag, 'transactionFormType')),
@@ -860,8 +882,14 @@ class DerivativeTable:
             return DerivativeHoldings()
         holdings = []
         for holding_tag in holding_tags:
+            if not isinstance(holding_tag, Tag):
+                continue
             underlying_security_tag = holding_tag.find("underlyingSecurity")
+            if not isinstance(underlying_security_tag, Tag):
+                continue
             ownership_nature = holding_tag.find("ownershipNature")
+            if not isinstance(ownership_nature, Tag):
+                continue
 
             holding = dict(
                 [
@@ -1921,11 +1949,13 @@ class Ownership:
         soup = BeautifulSoup(content, "xml")
 
         root = soup.find("ownershipDocument")
+        if not isinstance(root, Tag):
+            raise ValueError("Could not find ownershipDocument in XML")
 
         # Period of report
         report_period = child_text(root, "periodOfReport")
 
-        remarks = child_text(root, "remarks")
+        remarks = child_text(root, "remarks") or ""
 
         no_securities = child_text(root, "noSecuritiesOwned") == "1"
 
@@ -1934,30 +1964,32 @@ class Ownership:
 
         # Issuer
         issuer_tag = root.find("issuer")
+        if not isinstance(issuer_tag, Tag):
+            raise ValueError("Could not find issuer in XML")
         issuer = Issuer(
-            cik=child_text(issuer_tag, "issuerCik"),
-            name=child_text(issuer_tag, "issuerName"),
-            ticker=child_text(issuer_tag, "issuerTradingSymbol")
+            cik=child_text(issuer_tag, "issuerCik") or "",
+            name=child_text(issuer_tag, "issuerName") or "",
+            ticker=child_text(issuer_tag, "issuerTradingSymbol") or ""
         )
 
         # Signature
         ownership_signatures = OwnerSignatures([OwnerSignature(
-            signature=child_text(el, "signatureName").strip(),
-            date=child_text(el, "signatureDate")
-        ) for el in root.find_all("ownerSignature")]
+            signature=(child_text(el, "signatureName") or "").strip(),
+            date=child_text(el, "signatureDate") or ""
+        ) for el in root.find_all("ownerSignature") if isinstance(el, Tag)]
         )
 
         # Reporting Owner
         reporting_owner = ReportingOwners.from_reporting_owner_tags(root.find_all("reportingOwner"), remarks=remarks)
 
-        form = child_text(root, "documentType")
+        form = child_text(root, "documentType") or ""
         # Non derivatives
         non_derivative_table_tag = root.find("nonDerivativeTable")
-        non_derivative_table = NonDerivativeTable.extract(non_derivative_table_tag, form=form)
+        non_derivative_table = NonDerivativeTable.extract(non_derivative_table_tag, form=form) if isinstance(non_derivative_table_tag, Tag) else NonDerivativeTable(holdings=NonDerivativeHoldings(), transactions=NonDerivativeTransactions(), form=form)
 
         # Derivatives
         derivative_table_tag = root.find("derivativeTable")
-        derivative_table = DerivativeTable.extract(derivative_table_tag, form=form)
+        derivative_table = DerivativeTable.extract(derivative_table_tag, form=form) if isinstance(derivative_table_tag, Tag) else DerivativeTable(holdings=DerivativeHoldings(), transactions=DerivativeTransactions(), form=form)
 
         ownership_document = {
             'form': form,

@@ -139,25 +139,27 @@ class Issuer:
         edgar_previous_names_el = issuer_el.find("edgarPreviousNameList")
         edgar_previous_names = [el.text
                                 for el in edgar_previous_names_el.find_all("value")
-                                if el.text != 'None'] if edgar_previous_names_el else []
+                                if el.text != 'None'] if edgar_previous_names_el and isinstance(edgar_previous_names_el, Tag) else []
 
         # issuer previous names
         issuer_previous_names_el = issuer_el.find("issuerPreviousNameList")
         issuer_previous_names = [el.text
                                  for el in issuer_previous_names_el.find_all("value")
-                                 if el.text != 'None'] if issuer_previous_names_el else []
+                                 if el.text != 'None'] if issuer_previous_names_el and isinstance(issuer_previous_names_el, Tag) else []
 
         year_of_inc_el = issuer_el.find("yearOfInc")
 
         # Address
         issuer_address_el = issuer_el.find("issuerAddress")
+        if not isinstance(issuer_address_el, Tag):
+            issuer_address_el = None
         address: Address = Address(
-            street1=child_text(issuer_address_el, "street1"),
-            street2=child_text(issuer_address_el, "street2"),
-            city=child_text(issuer_address_el, "city"),
-            state_or_country=child_text(issuer_address_el, "stateOrCountry"),
-            state_or_country_description=child_text(issuer_address_el, "stateOrCountryDescription"),
-            zipcode=child_text(issuer_address_el, "zipCode")
+            street1=child_text(issuer_address_el, "street1") if issuer_address_el else None,
+            street2=child_text(issuer_address_el, "street2") if issuer_address_el else None,
+            city=child_text(issuer_address_el, "city") if issuer_address_el else None,
+            state_or_country=child_text(issuer_address_el, "stateOrCountry") if issuer_address_el else None,
+            state_or_country_description=child_text(issuer_address_el, "stateOrCountryDescription") if issuer_address_el else None,
+            zipcode=child_text(issuer_address_el, "zipCode") if issuer_address_el else None
         )
 
         return cls(

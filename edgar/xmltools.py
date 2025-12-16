@@ -27,17 +27,19 @@ def find_element(
     :return: An element
     """
     if isinstance(xml_tag_or_string, Tag):
-        return xml_tag_or_string.find(element_name)
+        result = xml_tag_or_string.find(element_name)
+        return result if isinstance(result, Tag) else None
     elif isinstance(xml_tag_or_string, str) and "<" in xml_tag_or_string:
         soup: BeautifulSoup = BeautifulSoup(xml_tag_or_string, features="xml")
-        return soup.find(element_name)
+        result = soup.find(element_name)
+        return result if isinstance(result, Tag) else None
 
 
 def get_footnote_ids(tag: Tag,
                      sep: str = ',') -> str:
     """Get the footnotes from the tag as a string"""
     return sep.join([
-        el.attrs.get('id', '') for el in tag.find_all("footnoteId") if isinstance(el, Tag) and el.attrs.get('id')
+        str(el.attrs.get('id', '')) for el in tag.find_all("footnoteId") if isinstance(el, Tag) and el.attrs.get('id')
     ])
 
 
@@ -71,8 +73,8 @@ def value_or_footnote(el: Tag) -> Optional[str]:
         footnote = el.find('footnote')
         if not footnote:
             footnote = el.find("footnoteId")
-        if footnote:
-            return footnote.attrs['id']
+        if footnote and isinstance(footnote, Tag):
+            return str(footnote.attrs['id'])
 
 
 def child_text(parent: Tag,
@@ -84,13 +86,13 @@ def child_text(parent: Tag,
     :return: the text of the child element if it exists or None
     """
     el = parent.find(child)
-    if el:
+    if el and isinstance(el, Tag):
         return el.text.strip()
 
 
 def child_value(parent: Tag,
                 child: str,
-                default_value: Optional[str] = None) -> str:
+                default_value: Optional[str] = None) -> Optional[str]:
     """
     Get the text of the value tag within the child tag if it exists or None
 
@@ -100,7 +102,7 @@ def child_value(parent: Tag,
     :return: the text of the child element if it exists or None
     """
     el = parent.find(child)
-    if el:
+    if el and isinstance(el, Tag):
         return value_with_footnotes(el)
     return default_value
 
@@ -128,7 +130,7 @@ def optional_decimal(parent: Tag,
 
 def extract_child_text(tag: Tag,
                        key: str,
-                       child_tag_name: str) -> Tuple[str, str]:
+                       child_tag_name: str) -> Tuple[str, Optional[str]]:
     """Get the child text from the tag and return a Tuple (key, child_value)
       Useful for populating dicts
 
@@ -141,7 +143,7 @@ def extract_child_text(tag: Tag,
 
 def extract_child_value(tag: Tag,
                         key: str,
-                        child_tag_name: str) -> Tuple[str, str]:
+                        child_tag_name: str) -> Tuple[str, Optional[str]]:
     """Get the child value from the tag and return a Tuple (key, child_value)
       Useful for populating dicts
       :param tag The element
