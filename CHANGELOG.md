@@ -7,9 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.3.1] - 2025-12-16
+
+### Fixed
+
+- **Empty Document Handling in Filing.text() and Filing.markdown()** (#3d576d0e)
+  - Fixed handling of filings with HTML content but no extractable body text
+  - Methods now return empty string ('') instead of raising errors for empty documents
+  - **Files**: `edgar/_filings.py`
+  - **Impact**: Prevents errors when processing filings with minimal or no text content
+  - **Example**: `filing.text()` returns '' for documents without body text
+
+- **Filing List Cache for New Filings** (#a3e94c23)
+  - Removed `lru_cache` decorator from `get_current_entries_on_page()` function
+  - Allows newly submitted filings to appear in listings without restart
+  - **Files**: `edgar/current_filings.py`
+  - **Impact**: Real-time visibility of latest filings in current filing lists
+
+- **Schedule 13D/G Joint Filer Aggregation** (#fd69921a)
+  - Implemented `member_of_group` field to fix joint filer aggregation (Phase 1)
+  - Ensures correct ownership calculations for joint filing groups
+  - **Files**: `edgar/beneficial_ownership/schedule13.py`
+  - **Impact**: Accurate beneficial ownership aggregation for joint filers
+
 ### Added
 
-- **Schedule 13D/G P1 Fields from SEC Technical Specification** (#edgartools-a1oc, #f5d1f749)
+- **Schedule 13D/G P1 Fields from SEC Technical Specification** (#f5d1f749)
   - Added `is_aggregate_exclude_shares` boolean field to ReportingPerson for shares excluded from aggregate count
   - Added `no_cik` boolean field to ReportingPerson for reporting persons without CIK numbers
   - Added `amendment_number` field to Schedule13D and Schedule13G classes for tracking amendment sequence
@@ -18,33 +41,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Impact**: Complete SEC specification compliance for Schedule 13D/G beneficial ownership reporting
   - **Example**: `person.is_aggregate_exclude_shares`, `schedule.amendment_number`
 
-### Fixed
-
-- **Schedule 13D/G Boolean Parsing** (#edgartools-a1oc, #f5d1f749)
-  - Fixed boolean field parsing to use `get_bool()` for proper Y/N format handling (was incorrectly using `== 'true'`)
-  - Ensures `is_aggregate_exclude_shares` correctly identifies excluded shares
-  - **Impact**: Prevents parsing errors and ensures accurate share exclusion logic
-
 ### Changed
 
-- **Schedule 13D/G Aggregation Logic Enhanced** (#edgartools-a1oc, #f5d1f749)
+- **Schedule 13D/G Aggregation Logic Enhanced** (#f5d1f749)
   - Updated `total_shares` and `total_percent` properties to exclude shares flagged with `is_aggregate_exclude_shares == True`
   - Works correctly with Phase 1 joint filer logic using `member_of_group` field
   - Returns 0 when all shares are excluded (edge case handling)
   - **Files**: `edgar/beneficial_ownership/schedule13.py`
   - **Impact**: More accurate ownership calculations per SEC specification
 
+### Code Quality
+
+- **Type System Improvements** (#529b622d, #0e40e7e6, #29a2f11f, #9fac257e, #ed9f599d, #89000171, #08bd83fe, #0910553e)
+  - Added Optional[] wrappers to 130+ parameters and return types with None defaults
+  - Fixed TYPE MISMATCH errors in ownershipforms.py
+  - Fixed invalid-return-type and invalid-parameter-default errors across core modules
+  - **Files**: Multiple files across edgar/ directory
+  - **Impact**: Improved type safety and IDE support
+
 ### Documentation
 
-- **Schedule 13D/G Documentation Updates** (#edgartools-rmga)
-  - Added Section 4.5 "SEC Technical Specification Compliance" to research document
-  - Updated priority classification table with CRITICAL designation for Group Membership field
-  - Added comprehensive joint filer display guidance to rendering guide
-  - Created implementation notes quick reference for developers
-  - **Files**: `docs/internal/knowledge/sec-forms/ownership/schedule-13d-13g-research.md`,
-    `docs/guides/schedule-13-rendering-guide.md`,
-    `docs/internal/analysis/schedule-13dg-implementation-notes.md`
-  - **Impact**: Clear guidance for correct Schedule 13D/G implementation and display
+- **Schedule 13D/G Documentation Updates** (#06840198, #a06dda55, #d6f257e1)
+  - Updated Schedule 13D/G documentation per SEC specification
+  - Entity API guide improvements
+  - General documentation enhancements
+  - **Impact**: Better developer guidance for Schedule 13D/G implementation
+
+### Summary
+
+Release 5.3.1 is a patch release focusing on bug fixes and code quality improvements. Key highlights:
+
+- Fixed empty document handling in Filing.text() and Filing.markdown()
+- Fixed filing list cache to show newly submitted filings in real-time
+- Enhanced Schedule 13D/G with SEC specification compliance fields
+- 130+ type system improvements for better code quality
+- Schedule 13D/G joint filer aggregation fixes
+
+This release maintains full backward compatibility with v5.3.0.
 
 ## [5.3.0] - 2025-12-15
 
