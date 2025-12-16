@@ -78,22 +78,29 @@ class SecuritiesInformation:
 
         # Get the broker or market maker
         broker_or_marketmaker_tag = tag.find('brokerOrMarketmakerDetails')
-        broker_name = child_text(broker_or_marketmaker_tag, 'name')
+        if isinstance(broker_or_marketmaker_tag, Tag):
+            broker_name = child_text(broker_or_marketmaker_tag, 'name')
+            # Get the address
+            address_el = broker_or_marketmaker_tag.find('address')
+            if isinstance(address_el, Tag):
+                address = Address(
+                    street1=child_text(address_el, 'street1'),
+                    street2=child_text(address_el, 'street2'),
+                    city=child_text(address_el, 'city'),
+                    state_or_country=child_text(address_el, 'stateOrCountry'),
+                    zipcode=child_text(address_el, 'zipCode')
+                )
+            else:
+                address = None
+        else:
+            broker_name = None
+            address = None
 
-        # Get the address
-        address_el = broker_or_marketmaker_tag.find('address')
-        address = Address(
-            street1=child_text(address_el, 'street1'),
-            street2=child_text(address_el, 'street2'),
-            city=child_text(address_el, 'city'),
-            state_or_country=child_text(address_el, 'stateOrCountry'),
-            zipcode=child_text(address_el, 'zipCode')
-        )
         return cls(
-            security_class=security_class,
-            units_to_be_sold=int(units_to_be_sold),
+            security_class=security_class or "",
+            units_to_be_sold=int(units_to_be_sold or "0"),
             aggregate_market_value=float(aggregate_market_value) if aggregate_market_value else None,
-            units_outstanding=int(units_outstanding),
+            units_outstanding=int(units_outstanding or "0"),
             approx_sale_date=approx_sale_date,
             exchange_name=exchange_name,
             broker_name=broker_name,
