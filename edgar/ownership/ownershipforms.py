@@ -126,7 +126,7 @@ class ReportingRelationship:
                  is_officer: bool,
                  is_other: bool,
                  is_ten_pct_owner: bool,
-                 officer_title: str = None):
+                 officer_title: Optional[str] = None):
         self.is_director: bool = is_director
         self.is_officer: bool = is_officer
         self.is_ten_pct_owner: bool = is_ten_pct_owner
@@ -291,7 +291,7 @@ class Footnotes:
 
     def get(self,
             footnote_id: str,
-            default_value: str = None):
+            default_value: Optional[str] = None):
         return self._footnotes.get(footnote_id, default_value)
 
     def summary(self) -> pd.DataFrame:
@@ -393,7 +393,7 @@ class NonDerivativeTransaction:
 class DerivativeHoldings(DataHolder):
 
     def __init__(self,
-                 data: pd.DataFrame = None):
+                 data: Optional[pd.DataFrame] = None):
         super().__init__(data, "DerivativeHoldings")
 
     def __getitem__(self, item):
@@ -433,7 +433,7 @@ class DerivativeHoldings(DataHolder):
 class NonDerivativeHoldings(DataHolder):
 
     def __init__(self,
-                 data: pd.DataFrame = None):
+                 data: Optional[pd.DataFrame] = None):
         super().__init__(data, "NonDerivativeHoldings")
 
     def __getitem__(self, item):
@@ -465,7 +465,7 @@ class NonDerivativeHoldings(DataHolder):
 class DerivativeTransactions(DataHolder):
 
     def __init__(self,
-                 data: pd.DataFrame = None):
+                 data: Optional[pd.DataFrame] = None):
         super().__init__(data, "DerivativeTransactions")
 
     def __getitem__(self, item):
@@ -530,7 +530,7 @@ class DerivativeTransactions(DataHolder):
 class NonDerivativeTransactions(DataHolder):
 
     def __init__(self,
-                 data: pd.DataFrame = None):
+                 data: Optional[pd.DataFrame] = None):
         super().__init__(data, "NonDerivativeTransactions")
 
     def trades(self):
@@ -908,7 +908,7 @@ class Owner:
                                    is_ten_pct_owner=self.is_ten_pct_owner)
 
     @staticmethod
-    def display_title(officer_title: str = None,
+    def display_title(officer_title: Optional[str] = None,
                       is_officer: bool = False,
                       is_director: bool = False,
                       is_other: bool = False,

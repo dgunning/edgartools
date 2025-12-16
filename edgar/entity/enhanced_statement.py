@@ -605,7 +605,7 @@ class MultiPeriodStatement:
             if any(v is not None for v in item.values.values()):
                 yield item
 
-    def get_items_by_depth(self, max_depth: int = None) -> List['MultiPeriodItem']:
+    def get_items_by_depth(self, max_depth: Optional[int] = None) -> List['MultiPeriodItem']:
         """
         Get all items up to a specified depth level.
 
@@ -625,7 +625,7 @@ class MultiPeriodStatement:
                 result.append(item)
         return result
 
-    def find_item(self, concept: str = None, label: str = None) -> Optional['MultiPeriodItem']:
+    def find_item(self, concept: Optional[str] = None, label: Optional[str] = None) -> Optional['MultiPeriodItem']:
         """
         Find a specific item by concept name or label.
 
@@ -1904,7 +1904,7 @@ class EnhancedStatementBuilder:
                              period_maps: Dict[str, Dict[str, FinancialFact]],
                              periods: List[str],
                              depth: int = 0,
-                             statement_type: str = None) -> Optional[MultiPeriodItem]:
+                             statement_type: Optional[str] = None) -> Optional[MultiPeriodItem]:
         """Build a single canonical item with multi-period values."""
         node = nodes.get(concept, {})
 
@@ -2078,7 +2078,7 @@ class EnhancedStatementBuilder:
         concept_lower = concept.lower()
         return any(keyword.lower() in concept_lower for keyword in important_keywords)
 
-    def _is_total_concept(self, concept: str, label: str = None) -> bool:
+    def _is_total_concept(self, concept: str, label: Optional[str] = None) -> bool:
         """Determine if a concept represents a total."""
         indicators = ['total', 'net', 'gross', 'subtotal', 'aggregate']
         concept_lower = concept.lower()

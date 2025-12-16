@@ -106,7 +106,7 @@ class SalesCompensationRecipient:
                  associated_bd_name: str,
                  associated_bd_crd: str,
                  address: Address,
-                 states_of_solicitation: List[str] = None):
+                 states_of_solicitation: Optional[List[str]] = None):
         self.name: str = name
         self.crd: str = crd
         self.associated_bd_name: associated_bd_name
@@ -166,11 +166,11 @@ class OfferingData:
                  is_pooled_investment: bool,
                  business_combination_transaction: BusinessCombinationTransaction,
                  minimum_investment: str,
-                 sales_compensation_recipients: List[SalesCompensationRecipient] = None,
-                 offering_sales_amounts: OfferingSalesAmounts = None,
-                 investors: Investors = None,
-                 sales_commission_finders_fees: SalesCommissionFindersFees = None,
-                 use_of_proceeds: UseOfProceeds = None):
+                 sales_compensation_recipients: Optional[List[SalesCompensationRecipient]] = None,
+                 offering_sales_amounts: Optional[OfferingSalesAmounts] = None,
+                 investors: Optional[Investors] = None,
+                 sales_commission_finders_fees: Optional[SalesCommissionFindersFees] = None,
+                 use_of_proceeds: Optional[UseOfProceeds] = None):
         self.industry_group: IndustryGroup = industry_group
         self.revenue_range: str = revenue_range
         self.federal_exemptions: List[str] = federal_exemptions
