@@ -703,7 +703,7 @@ class Filings:
 
         # Filter by form
         if forms:
-            filing_index = filter_by_form(filing_index, form=forms, amendments=amendments)
+            filing_index = filter_by_form(filing_index, form=forms, amendments=amendments if amendments is not None else False)
         elif amendments is not None:
             # Get the unique values of the form as a pylist
             forms = list(set([form.replace("/A", "") for form in pc.unique(filing_index['form']).to_pylist()]))
@@ -731,6 +731,12 @@ class Filings:
 
         # Filter by exchange
         if exchange:
+            # Convert Exchange enum to string if needed
+            from edgar.reference.tickers import Exchange as ExchangeEnum
+            if isinstance(exchange, ExchangeEnum):
+                exchange = exchange.value
+            elif isinstance(exchange, list):
+                exchange = [e.value if isinstance(e, ExchangeEnum) else e for e in exchange]
             filing_index = filter_by_exchange(filing_index, exchange)
 
         if ticker:
@@ -1246,7 +1252,10 @@ def get_filings(year: Optional[Years] = None,
         # Expand quarters for the year to date so use expand_quarters(year, quarter=None)
         year_and_quarters: YearAndQuarters = expand_quarters(year, quarter=None)
     else:
-        year_and_quarters: YearAndQuarters = expand_quarters(year, quarter)
+        # Convert range to list if needed for type compatibility
+        year_param = list(year) if isinstance(year, range) else year
+        quarter_param = list(quarter) if isinstance(quarter, range) else quarter
+        year_and_quarters: YearAndQuarters = expand_quarters(year_param, quarter_param)
 
     if len(year_and_quarters) == 0:
         log.warning(f"""
@@ -1756,6 +1765,8 @@ class Filing:
         """
         index_headers_url = f"{self.base_dir}/{self.accession_no}-index-headers.html"
         index_header_text = download_text(index_headers_url)
+        if index_header_text is None:
+            raise ValueError(f"Could not download index headers from {index_headers_url}")
         return IndexHeaders.load(index_header_text)
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
@@ -1910,6 +1921,9 @@ class Filing:
                 log.warning(f"Filing {self.accession_no} not found in local storage. Downloading from SEC ...")
                 from edgar.entity import download_entity_submissions_from_sec, parse_entity_submissions
                 submissions_json = download_entity_submissions_from_sec(self.cik)
+                if submissions_json is None:
+                    log.error(f"Could not download entity submissions for CIK {self.cik}")
+                    return company._empty_company_filings()
                 c_from_sec = parse_entity_submissions(submissions_json)
                 filings = c_from_sec.get_filings(accession_number=self.accession_no)
 

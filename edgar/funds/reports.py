@@ -66,8 +66,8 @@ class SeriesClassInfo(BaseModel):
     @classmethod
     def from_xml(cls, tag):
         if tag and tag.name == "seriesClassInfo":
-            return cls(series_id=child_text(tag, "seriesId"),
-                       class_id=child_text(tag, "classId"))
+            return cls(series_id=child_text(tag, "seriesId") or "",
+                       class_id=child_text(tag, "classId") or "")
 
 
 class FilerInfo(BaseModel):
