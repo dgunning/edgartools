@@ -376,9 +376,10 @@ class Schedule13D:
         - "a" = group member (joint filers) → take unique count
         - "b" or None = separate filers → sum all positions
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Also detects undeclared joint filers: when all reporting persons have
+        identical share amounts, they are joint filers regardless of member_of_group.
 
-        For legacy filings without member_of_group field, defaults to summing.
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
         if not self.reporting_persons:
             return 0
@@ -399,7 +400,16 @@ class Schedule13D:
             # Take max in case of any data inconsistencies
             return max(p.aggregate_amount for p in group_members)
 
-        # Separate filers or legacy data: sum all positions
+        # Check for undeclared joint filers: identical values across all persons
+        # When XML doesn't specify member_of_group but all persons report same position
+        shares_list = [p.aggregate_amount for p in included_persons]
+        unique_shares = set(shares_list)
+
+        if len(unique_shares) == 1:
+            # All persons have identical share counts - joint filers
+            return shares_list[0]
+
+        # Separate filers: sum all positions
         return sum(p.aggregate_amount for p in included_persons)
 
     @property
@@ -412,9 +422,10 @@ class Schedule13D:
         - "a" = group member (joint filers) → take unique percentage
         - "b" or None = separate filers → sum all percentages
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Also detects undeclared joint filers: when all reporting persons have
+        identical percentages, they are joint filers regardless of member_of_group.
 
-        For legacy filings without member_of_group field, defaults to summing.
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
         if not self.reporting_persons:
             return 0.0
@@ -435,7 +446,16 @@ class Schedule13D:
             # Take max in case of any data inconsistencies
             return max(p.percent_of_class for p in group_members)
 
-        # Separate filers or legacy data: sum all percentages
+        # Check for undeclared joint filers: identical values across all persons
+        # When XML doesn't specify member_of_group but all persons report same position
+        percent_list = [p.percent_of_class for p in included_persons]
+        unique_percents = set(percent_list)
+
+        if len(unique_percents) == 1:
+            # All persons have identical percentages - joint filers
+            return percent_list[0]
+
+        # Separate filers: sum all percentages
         return sum(p.percent_of_class for p in included_persons)
 
     def __rich__(self):
@@ -750,9 +770,10 @@ class Schedule13G:
         - "a" = group member (joint filers) → take unique count
         - "b" or None = separate filers → sum all positions
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Also detects undeclared joint filers: when all reporting persons have
+        identical share amounts, they are joint filers regardless of member_of_group.
 
-        For legacy filings without member_of_group field, defaults to summing.
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
         if not self.reporting_persons:
             return 0
@@ -773,7 +794,16 @@ class Schedule13G:
             # Take max in case of any data inconsistencies
             return max(p.aggregate_amount for p in group_members)
 
-        # Separate filers or legacy data: sum all positions
+        # Check for undeclared joint filers: identical values across all persons
+        # When XML doesn't specify member_of_group but all persons report same position
+        shares_list = [p.aggregate_amount for p in included_persons]
+        unique_shares = set(shares_list)
+
+        if len(unique_shares) == 1:
+            # All persons have identical share counts - joint filers
+            return shares_list[0]
+
+        # Separate filers: sum all positions
         return sum(p.aggregate_amount for p in included_persons)
 
     @property
@@ -786,9 +816,10 @@ class Schedule13G:
         - "a" = group member (joint filers) → take unique percentage
         - "b" or None = separate filers → sum all percentages
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Also detects undeclared joint filers: when all reporting persons have
+        identical percentages, they are joint filers regardless of member_of_group.
 
-        For legacy filings without member_of_group field, defaults to summing.
+        Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
         if not self.reporting_persons:
             return 0.0
@@ -809,7 +840,16 @@ class Schedule13G:
             # Take max in case of any data inconsistencies
             return max(p.percent_of_class for p in group_members)
 
-        # Separate filers or legacy data: sum all percentages
+        # Check for undeclared joint filers: identical values across all persons
+        # When XML doesn't specify member_of_group but all persons report same position
+        percent_list = [p.percent_of_class for p in included_persons]
+        unique_percents = set(percent_list)
+
+        if len(unique_percents) == 1:
+            # All persons have identical percentages - joint filers
+            return percent_list[0]
+
+        # Separate filers: sum all percentages
         return sum(p.percent_of_class for p in included_persons)
 
     @property

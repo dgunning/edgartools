@@ -744,3 +744,170 @@ def test_all_excluded_shares_returns_zero():
 
     assert schedule.total_shares == 0
     assert schedule.total_percent == pytest.approx(0.0)
+
+
+@pytest.mark.fast
+def test_undeclared_joint_filers_detection():
+    """
+    Test detection of joint filers when member_of_group is None but all
+    reporting persons have identical share amounts and percentages.
+
+    This handles real-world cases like Sora Vision Ltd (0001213900-25-121883)
+    where the XML doesn't specify member_of_group but all persons report
+    the same position.
+    """
+    from edgar.beneficial_ownership.models import Schedule13DItems
+
+    # Create mock filing
+    filing = Mock()
+    filing.form = 'SCHEDULE 13D/A'
+    filing.filing_date = date(2025, 12, 16)
+
+    # Four reporting persons with identical values, member_of_group=None
+    # This simulates the Sora Vision Ltd case
+    persons = [
+        ReportingPerson(
+            name="Sora Ventures Global Limited",
+            cik="",
+            citizenship="Cayman Islands",
+            aggregate_amount=14450000,
+            percent_of_class=58.1,
+            sole_voting_power=0,
+            shared_voting_power=14450000,
+            sole_dispositive_power=0,
+            shared_dispositive_power=14450000,
+            member_of_group=None,  # Not declared in XML
+            type_of_reporting_person="CO"
+        ),
+        ReportingPerson(
+            name="JASON KIN HOI FANG",
+            cik="",
+            citizenship="Hong Kong",
+            aggregate_amount=14450000,
+            percent_of_class=58.1,
+            sole_voting_power=0,
+            shared_voting_power=14450000,
+            sole_dispositive_power=0,
+            shared_dispositive_power=14450000,
+            member_of_group=None,  # Not declared in XML
+            type_of_reporting_person="IN"
+        ),
+        ReportingPerson(
+            name="Sora Vision Limited",
+            cik="0002070153",
+            citizenship="Cayman Islands",
+            aggregate_amount=14450000,
+            percent_of_class=58.1,
+            sole_voting_power=0,
+            shared_voting_power=14450000,
+            sole_dispositive_power=0,
+            shared_dispositive_power=14450000,
+            member_of_group=None,  # Not declared in XML
+            type_of_reporting_person="CO"
+        ),
+        ReportingPerson(
+            name="Sora Ventures II Master Fund",
+            cik="",
+            citizenship="Cayman Islands",
+            aggregate_amount=14450000,
+            percent_of_class=58.1,
+            sole_voting_power=0,
+            shared_voting_power=14450000,
+            sole_dispositive_power=0,
+            shared_dispositive_power=14450000,
+            member_of_group=None,  # Not declared in XML
+            type_of_reporting_person="OO"
+        ),
+    ]
+
+    schedule = Schedule13D(
+        filing=filing,
+        issuer_info=IssuerInfo(name="Sora Vision Ltd", cik="2070153", cusip="000000000"),
+        security_info=SecurityInfo(title="Common Stock", cusip="000000000"),
+        reporting_persons=persons,
+        items=Schedule13DItems(),
+        signatures=[],
+        date_of_event='12/16/2025'
+    )
+
+    # With undeclared joint filers, should detect identical values and not sum
+    # Should return 14,450,000 (58.1%) not 57,800,000 (232.4%)
+    assert schedule.total_shares == 14450000, \
+        "Should detect undeclared joint filers and return unique count"
+    assert schedule.total_percent == pytest.approx(58.1, rel=0.01), \
+        "Should detect undeclared joint filers and return unique percentage"
+
+    # Verify there are actually multiple persons
+    assert len(schedule.reporting_persons) == 4
+
+
+@pytest.mark.fast
+def test_separate_filers_with_different_values():
+    """
+    Test that separate filers with different share amounts are correctly summed.
+    This ensures the joint filer detection doesn't break normal separate filer cases.
+    """
+    from edgar.beneficial_ownership.models import Schedule13DItems
+
+    filing = Mock()
+    filing.form = 'SCHEDULE 13D'
+    filing.filing_date = date(2025, 12, 16)
+
+    # Three reporting persons with DIFFERENT values (separate filers)
+    persons = [
+        ReportingPerson(
+            name="Investor A",
+            cik="0001111111",
+            citizenship="US",
+            aggregate_amount=5000000,
+            percent_of_class=10.0,
+            sole_voting_power=5000000,
+            shared_voting_power=0,
+            sole_dispositive_power=5000000,
+            shared_dispositive_power=0,
+            member_of_group=None,
+            type_of_reporting_person="IN"
+        ),
+        ReportingPerson(
+            name="Investor B",
+            cik="0002222222",
+            citizenship="US",
+            aggregate_amount=3000000,
+            percent_of_class=6.0,
+            sole_voting_power=3000000,
+            shared_voting_power=0,
+            sole_dispositive_power=3000000,
+            shared_dispositive_power=0,
+            member_of_group=None,
+            type_of_reporting_person="IN"
+        ),
+        ReportingPerson(
+            name="Investor C",
+            cik="0003333333",
+            citizenship="Delaware",
+            aggregate_amount=2000000,
+            percent_of_class=4.0,
+            sole_voting_power=2000000,
+            shared_voting_power=0,
+            sole_dispositive_power=2000000,
+            shared_dispositive_power=0,
+            member_of_group=None,
+            type_of_reporting_person="CO"
+        ),
+    ]
+
+    schedule = Schedule13D(
+        filing=filing,
+        issuer_info=IssuerInfo(name="Test Company", cik="9999999", cusip="999999999"),
+        security_info=SecurityInfo(title="Common Stock", cusip="999999999"),
+        reporting_persons=persons,
+        items=Schedule13DItems(),
+        signatures=[],
+        date_of_event='12/16/2025'
+    )
+
+    # Separate filers should be summed
+    assert schedule.total_shares == 5000000 + 3000000 + 2000000
+    assert schedule.total_shares == 10000000
+    assert schedule.total_percent == pytest.approx(10.0 + 6.0 + 4.0, rel=0.01)
+    assert schedule.total_percent == pytest.approx(20.0, rel=0.01)
