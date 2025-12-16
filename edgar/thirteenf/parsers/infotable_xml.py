@@ -1,6 +1,7 @@
 """Parser for 13F information table XML format."""
 
 import pandas as pd
+from bs4 import Tag
 
 from edgar.reference import cusip_ticker_mapping
 from edgar.xmltools import child_text, find_element
@@ -22,16 +23,20 @@ def parse_infotable_xml(infotable_xml: str) -> pd.DataFrame:
     rows = []
     shares_or_principal = {"SH": "Shares", "PRN": "Principal"}
     for info_tag in root.find_all("infoTable"):
+        if not isinstance(info_tag, Tag):
+            continue
         info_table = dict()
 
         info_table['Issuer'] = child_text(info_tag, "nameOfIssuer")
         info_table['Class'] = child_text(info_tag, "titleOfClass")
         info_table['Cusip'] = child_text(info_tag, "cusip")
-        info_table['Value'] = int(child_text(info_tag, "value"))
+        info_table['Value'] = int(child_text(info_tag, "value") or "0")
 
         # Shares or principal
         shares_tag = info_tag.find("shrsOrPrnAmt")
-        info_table['SharesPrnAmount'] = int(child_text(shares_tag, "sshPrnamt"))
+        if not isinstance(shares_tag, Tag):
+            continue
+        info_table['SharesPrnAmount'] = int(child_text(shares_tag, "sshPrnamt") or "0")
 
         # Shares or principal
         ssh_prnamt_type = child_text(shares_tag, "sshPrnamtType")
@@ -43,9 +48,14 @@ def parse_infotable_xml(infotable_xml: str) -> pd.DataFrame:
 
         # Voting authority
         voting_auth_tag = info_tag.find("votingAuthority")
-        info_table['SoleVoting'] = int(float(child_text(voting_auth_tag, "Sole")))
-        info_table['SharedVoting'] = int(float(child_text(voting_auth_tag, "Shared")))
-        info_table['NonVoting'] = int(float(child_text(voting_auth_tag, "None")))
+        if isinstance(voting_auth_tag, Tag):
+            info_table['SoleVoting'] = int(float(child_text(voting_auth_tag, "Sole") or "0"))
+            info_table['SharedVoting'] = int(float(child_text(voting_auth_tag, "Shared") or "0"))
+            info_table['NonVoting'] = int(float(child_text(voting_auth_tag, "None") or "0"))
+        else:
+            info_table['SoleVoting'] = 0
+            info_table['SharedVoting'] = 0
+            info_table['NonVoting'] = 0
         rows.append(info_table)
 
     table = pd.DataFrame(rows)
