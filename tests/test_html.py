@@ -395,8 +395,10 @@ def test_get_text_from_filing_with_no_body_tag():
                     cik=949738, accession_no='0000949738-24-000005')
     html = filing.html()
     assert html
+
+    # No body tag
     text = filing.text()
-    assert text
+    assert not text
 
 
 def test_parse_document_within_just_paragraph_tags():
