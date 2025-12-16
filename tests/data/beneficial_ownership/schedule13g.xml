@@ -47,6 +47,7 @@
       </reportingPersonBeneficiallyOwnedNumberOfShares>
       <reportingPersonBeneficiallyOwnedAggregateNumberOfShares>10000000.00</reportingPersonBeneficiallyOwnedAggregateNumberOfShares>
       <classPercent>5.1</classPercent>
+      <memberGroup>a</memberGroup>
       <typeOfReportingPerson>CO</typeOfReportingPerson>
     </coverPageHeaderReportingPersonDetails>
     <coverPageHeaderReportingPersonDetails>
@@ -61,6 +62,7 @@
       </reportingPersonBeneficiallyOwnedNumberOfShares>
       <reportingPersonBeneficiallyOwnedAggregateNumberOfShares>10000000.00</reportingPersonBeneficiallyOwnedAggregateNumberOfShares>
       <classPercent>5.1</classPercent>
+      <memberGroup>a</memberGroup>
       <typeOfReportingPerson>OO</typeOfReportingPerson>
     </coverPageHeaderReportingPersonDetails>
     <items>

@@ -208,12 +208,17 @@ def test_schedule13g_properties():
 
     schedule = Schedule13G.from_filing(filing)
 
-    # Test total_shares (both persons have same shares - not additive)
-    assert schedule.total_shares == 10000000 + 10000000  # Sum reported
-    assert schedule.total_shares == 20000000
+    # Test total_shares - both persons have same shares (joint filers)
+    # Should return unique count, not sum
+    assert schedule.total_shares == 10000000  # Not summed!
 
-    # Test total_percent
-    assert schedule.total_percent == pytest.approx(5.1 + 5.1, rel=0.01)
+    # Verify they're actually joint filers (same shares)
+    assert len(schedule.reporting_persons) == 2
+    assert schedule.reporting_persons[0].aggregate_amount == 10000000
+    assert schedule.reporting_persons[1].aggregate_amount == 10000000
+
+    # Test total_percent - should be unique percentage, not sum
+    assert schedule.total_percent == pytest.approx(5.1, rel=0.01)  # Not 10.2%!
 
     # Test passive investor flag
     assert schedule.is_passive_investor is True
@@ -239,6 +244,94 @@ def test_amendment_detection():
 
     amendment = Schedule13D.from_filing(filing_amend)
     assert amendment.is_amendment is True
+
+
+@pytest.mark.fast
+def test_accepts_both_form_name_conventions():
+    """Test that both 'SC 13D' and 'SCHEDULE 13D' form names are accepted"""
+    xml_content = SCHEDULE_13D_XML_PATH.read_text()
+
+    # Test SC 13D convention
+    filing_sc = Mock()
+    filing_sc.form = 'SC 13D'
+    filing_sc.filing_date = date(2024, 12, 31)
+    filing_sc.xml = Mock(return_value=xml_content)
+
+    schedule_sc = Schedule13D.from_filing(filing_sc)
+    assert schedule_sc is not None
+    assert schedule_sc.issuer_info.name == 'Aadi Bioscience, Inc.'
+
+    # Test SC 13D/A convention
+    filing_sc_a = Mock()
+    filing_sc_a.form = 'SC 13D/A'
+    filing_sc_a.filing_date = date(2024, 12, 31)
+    filing_sc_a.xml = Mock(return_value=xml_content)
+
+    schedule_sc_a = Schedule13D.from_filing(filing_sc_a)
+    assert schedule_sc_a is not None
+    assert schedule_sc_a.is_amendment is True
+
+    # Test SCHEDULE 13D convention
+    filing_schedule = Mock()
+    filing_schedule.form = 'SCHEDULE 13D'
+    filing_schedule.filing_date = date(2024, 12, 31)
+    filing_schedule.xml = Mock(return_value=xml_content)
+
+    schedule_schedule = Schedule13D.from_filing(filing_schedule)
+    assert schedule_schedule is not None
+
+    # Test SCHEDULE 13D/A convention
+    filing_schedule_a = Mock()
+    filing_schedule_a.form = 'SCHEDULE 13D/A'
+    filing_schedule_a.filing_date = date(2024, 12, 31)
+    filing_schedule_a.xml = Mock(return_value=xml_content)
+
+    schedule_schedule_a = Schedule13D.from_filing(filing_schedule_a)
+    assert schedule_schedule_a is not None
+
+
+@pytest.mark.fast
+def test_schedule13g_accepts_both_form_name_conventions():
+    """Test that both 'SC 13G' and 'SCHEDULE 13G' form names are accepted"""
+    xml_content = SCHEDULE_13G_XML_PATH.read_text()
+
+    # Test SC 13G convention
+    filing_sc = Mock()
+    filing_sc.form = 'SC 13G'
+    filing_sc.filing_date = date(2025, 11, 26)
+    filing_sc.xml = Mock(return_value=xml_content)
+
+    schedule_sc = Schedule13G.from_filing(filing_sc)
+    assert schedule_sc is not None
+    assert schedule_sc.issuer_info.name == 'Jushi Holdings Inc.'
+
+    # Test SC 13G/A convention
+    filing_sc_a = Mock()
+    filing_sc_a.form = 'SC 13G/A'
+    filing_sc_a.filing_date = date(2025, 11, 26)
+    filing_sc_a.xml = Mock(return_value=xml_content)
+
+    schedule_sc_a = Schedule13G.from_filing(filing_sc_a)
+    assert schedule_sc_a is not None
+    assert schedule_sc_a.is_amendment is True
+
+    # Test SCHEDULE 13G convention
+    filing_schedule = Mock()
+    filing_schedule.form = 'SCHEDULE 13G'
+    filing_schedule.filing_date = date(2025, 11, 26)
+    filing_schedule.xml = Mock(return_value=xml_content)
+
+    schedule_schedule = Schedule13G.from_filing(filing_schedule)
+    assert schedule_schedule is not None
+
+    # Test SCHEDULE 13G/A convention
+    filing_schedule_a = Mock()
+    filing_schedule_a.form = 'SCHEDULE 13G/A'
+    filing_schedule_a.filing_date = date(2025, 11, 26)
+    filing_schedule_a.xml = Mock(return_value=xml_content)
+
+    schedule_schedule_a = Schedule13G.from_filing(filing_schedule_a)
+    assert schedule_schedule_a is not None
 
 
 @pytest.mark.fast
@@ -374,14 +467,52 @@ def test_missing_xml():
 
 
 @pytest.mark.fast
+def test_joint_filers_vs_separate_positions():
+    """Test that joint filers (same shares) are handled differently from separate positions"""
+
+    # Test 1: Schedule13D with SEPARATE positions (different share counts)
+    # This is the existing test data - 2 persons with different shares
+    xml_13d = SCHEDULE_13D_XML_PATH.read_text()
+    filing_13d = Mock()
+    filing_13d.form = 'SCHEDULE 13D'
+    filing_13d.filing_date = date(2024, 12, 31)
+    filing_13d.xml = Mock(return_value=xml_13d)
+
+    schedule_13d = Schedule13D.from_filing(filing_13d)
+
+    # Person 1: 2,100,000 shares (8.5%)
+    # Person 2: 2,435,000 shares (9.9%)
+    # These are DIFFERENT, so should be summed
+    assert schedule_13d.total_shares == 2100000 + 2435000
+    assert schedule_13d.total_shares == 4535000
+    assert schedule_13d.total_percent == pytest.approx(8.5 + 9.9, rel=0.01)
+
+    # Test 2: Schedule13G with JOINT filers (same share count)
+    # This is the existing test data - 2 persons with same shares
+    xml_13g = SCHEDULE_13G_XML_PATH.read_text()
+    filing_13g = Mock()
+    filing_13g.form = 'SCHEDULE 13G'
+    filing_13g.filing_date = date(2025, 11, 26)
+    filing_13g.xml = Mock(return_value=xml_13g)
+
+    schedule_13g = Schedule13G.from_filing(filing_13g)
+
+    # Person 1: 10,000,000 shares (5.1%)
+    # Person 2: 10,000,000 shares (5.1%)
+    # These are SAME (joint filers), so should NOT be summed
+    assert schedule_13g.total_shares == 10000000  # Not doubled!
+    assert schedule_13g.total_percent == pytest.approx(5.1, rel=0.01)  # Not 10.2%!
+
+
+@pytest.mark.fast
 def test_form_assertion():
     """Test that from_filing asserts correct form type"""
     filing = Mock()
     filing.form = '10-K'  # Wrong form
     filing.xml = Mock(return_value=SCHEDULE_13D_XML_PATH.read_text())
 
-    with pytest.raises(AssertionError, match="Expected SCHEDULE 13D"):
+    with pytest.raises(AssertionError, match="Expected Schedule 13D form"):
         Schedule13D.from_filing(filing)
 
-    with pytest.raises(AssertionError, match="Expected SCHEDULE 13G"):
+    with pytest.raises(AssertionError, match="Expected Schedule 13G form"):
         Schedule13G.from_filing(filing)

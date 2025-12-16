@@ -183,7 +183,8 @@ class Schedule13D:
                     aggregate_amount=safe_int(child_text(person_el, 'aggregateAmountOwned')),
                     percent_of_class=safe_float(child_text(person_el, 'percentOfClass')),
                     type_of_reporting_person=child_text(person_el, 'typeOfReportingPerson') or '',
-                    comment=child_text(person_el, 'commentContent')
+                    comment=child_text(person_el, 'commentContent'),
+                    member_of_group=child_text(person_el, 'memberOfGroup')
                 ))
         result['reporting_persons'] = reporting_persons
 
@@ -298,7 +299,7 @@ class Schedule13D:
         Create Schedule13D instance from a Filing object.
 
         Args:
-            filing: Filing object with form 'SCHEDULE 13D' or 'SCHEDULE 13D/A'
+            filing: Filing object with form 'SCHEDULE 13D', 'SCHEDULE 13D/A', 'SC 13D', or 'SC 13D/A'
 
         Returns:
             Schedule13D instance or None if no XML found
@@ -306,8 +307,8 @@ class Schedule13D:
         Raises:
             AssertionError: If filing is not a Schedule 13D form
         """
-        assert filing.form in ['SCHEDULE 13D', 'SCHEDULE 13D/A'], \
-            f"Expected SCHEDULE 13D form, got {filing.form}"
+        assert filing.form in ['SCHEDULE 13D', 'SCHEDULE 13D/A', 'SC 13D', 'SC 13D/A'], \
+            f"Expected Schedule 13D form, got {filing.form}"
 
         xml = filing.xml()
         if xml:
@@ -327,12 +328,56 @@ class Schedule13D:
 
     @property
     def total_shares(self) -> int:
-        """Total shares across all reporting persons"""
+        """
+        Total beneficial ownership across all reporting persons.
+
+        Uses the official SEC memberOfGroup field to determine if reporting
+        persons are filing jointly or separately:
+        - "a" = group member (joint filers) → take unique count
+        - "b" or None = separate filers → sum all positions
+
+        For legacy filings without member_of_group field, defaults to summing.
+        """
+        if not self.reporting_persons:
+            return 0
+
+        # Check for group members using official SEC indicator
+        group_members = [p for p in self.reporting_persons
+                        if p.member_of_group == "a"]
+
+        if group_members:
+            # Joint filers: all report the same shares
+            # Take max in case of any data inconsistencies
+            return max(p.aggregate_amount for p in group_members)
+
+        # Separate filers or legacy data: sum all positions
         return sum(p.aggregate_amount for p in self.reporting_persons)
 
     @property
     def total_percent(self) -> float:
-        """Total ownership percentage across all reporting persons"""
+        """
+        Total ownership percentage across all reporting persons.
+
+        Uses the official SEC memberOfGroup field to determine if reporting
+        persons are filing jointly or separately:
+        - "a" = group member (joint filers) → take unique percentage
+        - "b" or None = separate filers → sum all percentages
+
+        For legacy filings without member_of_group field, defaults to summing.
+        """
+        if not self.reporting_persons:
+            return 0.0
+
+        # Check for group members using official SEC indicator
+        group_members = [p for p in self.reporting_persons
+                        if p.member_of_group == "a"]
+
+        if group_members:
+            # Joint filers: all report the same percentage
+            # Take max in case of any data inconsistencies
+            return max(p.percent_of_class for p in group_members)
+
+        # Separate filers or legacy data: sum all percentages
         return sum(p.percent_of_class for p in self.reporting_persons)
 
     def __rich__(self):
@@ -482,7 +527,8 @@ class Schedule13G:
                 percent_of_class=safe_float(percent),
                 type_of_reporting_person=child_text(person_el, 'typeOfReportingPerson') or '',
                 fund_type=None,
-                comment=None
+                comment=None,
+                member_of_group=child_text(person_el, 'memberGroup')  # Note: different element name than 13D!
             ))
         result['reporting_persons'] = reporting_persons
 
@@ -603,7 +649,7 @@ class Schedule13G:
         Create Schedule13G instance from a Filing object.
 
         Args:
-            filing: Filing object with form 'SCHEDULE 13G' or 'SCHEDULE 13G/A'
+            filing: Filing object with form 'SCHEDULE 13G', 'SCHEDULE 13G/A', 'SC 13G', or 'SC 13G/A'
 
         Returns:
             Schedule13G instance or None if no XML found
@@ -611,8 +657,8 @@ class Schedule13G:
         Raises:
             AssertionError: If filing is not a Schedule 13G form
         """
-        assert filing.form in ['SCHEDULE 13G', 'SCHEDULE 13G/A'], \
-            f"Expected SCHEDULE 13G form, got {filing.form}"
+        assert filing.form in ['SCHEDULE 13G', 'SCHEDULE 13G/A', 'SC 13G', 'SC 13G/A'], \
+            f"Expected Schedule 13G form, got {filing.form}"
 
         xml = filing.xml()
         if xml:
@@ -632,12 +678,56 @@ class Schedule13G:
 
     @property
     def total_shares(self) -> int:
-        """Total shares across all reporting persons"""
+        """
+        Total beneficial ownership across all reporting persons.
+
+        Uses the official SEC memberGroup field to determine if reporting
+        persons are filing jointly or separately:
+        - "a" = group member (joint filers) → take unique count
+        - "b" or None = separate filers → sum all positions
+
+        For legacy filings without member_of_group field, defaults to summing.
+        """
+        if not self.reporting_persons:
+            return 0
+
+        # Check for group members using official SEC indicator
+        group_members = [p for p in self.reporting_persons
+                        if p.member_of_group == "a"]
+
+        if group_members:
+            # Joint filers: all report the same shares
+            # Take max in case of any data inconsistencies
+            return max(p.aggregate_amount for p in group_members)
+
+        # Separate filers or legacy data: sum all positions
         return sum(p.aggregate_amount for p in self.reporting_persons)
 
     @property
     def total_percent(self) -> float:
-        """Total ownership percentage across all reporting persons"""
+        """
+        Total ownership percentage across all reporting persons.
+
+        Uses the official SEC memberGroup field to determine if reporting
+        persons are filing jointly or separately:
+        - "a" = group member (joint filers) → take unique percentage
+        - "b" or None = separate filers → sum all percentages
+
+        For legacy filings without member_of_group field, defaults to summing.
+        """
+        if not self.reporting_persons:
+            return 0.0
+
+        # Check for group members using official SEC indicator
+        group_members = [p for p in self.reporting_persons
+                        if p.member_of_group == "a"]
+
+        if group_members:
+            # Joint filers: all report the same percentage
+            # Take max in case of any data inconsistencies
+            return max(p.percent_of_class for p in group_members)
+
+        # Separate filers or legacy data: sum all percentages
         return sum(p.percent_of_class for p in self.reporting_persons)
 
     @property

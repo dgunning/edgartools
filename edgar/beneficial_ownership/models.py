@@ -39,6 +39,7 @@ class ReportingPerson:
     type_of_reporting_person: str
     fund_type: Optional[str] = None
     comment: Optional[str] = None
+    member_of_group: Optional[str] = None  # "a" = group member (joint filer), "b" = separate filer
 
     @property
     def total_voting_power(self) -> int:
