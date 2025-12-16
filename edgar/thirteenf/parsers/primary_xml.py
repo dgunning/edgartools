@@ -4,6 +4,8 @@ from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
 
+from bs4 import Tag
+
 from edgar._party import Address
 from edgar.thirteenf.models import CoverPage, FilingManager, OtherManager, PrimaryDocument13F, Signature, SummaryPage
 from edgar.xmltools import child_text, find_element
@@ -25,21 +27,33 @@ def parse_primary_document_xml(primary_document_xml: str):
     root = find_element(primary_document_xml, "edgarSubmission")
     # Header data
     header_data = root.find("headerData")
+    if not isinstance(header_data, Tag):
+        raise ValueError("Could not find headerData in XML")
     filer_info = header_data.find("filerInfo")
-    report_period = datetime.strptime(child_text(filer_info, "periodOfReport"), "%m-%d-%Y")
+    if not isinstance(filer_info, Tag):
+        raise ValueError("Could not find filerInfo in XML")
+    report_period = datetime.strptime(child_text(filer_info, "periodOfReport") or "", "%m-%d-%Y")
 
     # Form Data
     form_data = root.find("formData")
+    if not isinstance(form_data, Tag):
+        raise ValueError("Could not find formData in XML")
     cover_page_el = form_data.find("coverPage")
+    if not isinstance(cover_page_el, Tag):
+        raise ValueError("Could not find coverPage in XML")
 
     report_calendar_or_quarter = child_text(form_data, "reportCalendarOrQuarter")
     report_type = child_text(cover_page_el, "reportType")
 
     # Filing Manager
     filing_manager_el = cover_page_el.find("filingManager")
+    if not isinstance(filing_manager_el, Tag):
+        raise ValueError("Could not find filingManager in XML")
 
     # Address
     address_el = filing_manager_el.find("address")
+    if not isinstance(address_el, Tag):
+        raise ValueError("Could not find address in XML")
     address = Address(
         street1=child_text(address_el, "street1"),
         street2=child_text(address_el, "street2"),
@@ -47,12 +61,12 @@ def parse_primary_document_xml(primary_document_xml: str):
         state_or_country=child_text(address_el, "stateOrCountry"),
         zipcode=child_text(address_el, "zipCode")
     )
-    filing_manager = FilingManager(name=child_text(filing_manager_el, "name"), address=address)
+    filing_manager = FilingManager(name=child_text(filing_manager_el, "name") or "", address=address)
 
     # Summary Page
     summary_page_el = form_data.find("summaryPage")
     other_managers = []
-    if summary_page_el:
+    if summary_page_el and isinstance(summary_page_el, Tag):
         other_included_managers_count = child_text(summary_page_el,
                                                    "otherIncludedManagersCount")
         if other_included_managers_count:
@@ -78,12 +92,12 @@ def parse_primary_document_xml(primary_document_xml: str):
                     sequence_number = None
 
                 other_manager_el = other_manager_wrapper.find("otherManager")
-                if other_manager_el:
+                if other_manager_el and isinstance(other_manager_el, Tag):
                     other_managers.append(
                         OtherManager(
-                            cik=child_text(other_manager_el, "cik"),
-                            name=child_text(other_manager_el, "name"),
-                            file_number=child_text(other_manager_el, "form13FFileNumber"),
+                            cik=child_text(other_manager_el, "cik") or "",
+                            name=child_text(other_manager_el, "name") or "",
+                            file_number=child_text(other_manager_el, "form13FFileNumber") or "",
                             sequence_number=sequence_number
                         )
                     )
