@@ -19,7 +19,7 @@ def is_numeric(series: pd.Series) -> bool:
     except ValueError:
         return False
 
-def compute_average_price(shares: pd.Series, price: pd.Series) -> Decimal:
+def compute_average_price(shares: pd.Series, price: pd.Series) -> Optional[Decimal]:
     """
     Compute the average price of the trades
     :param shares: The number of shares as a series
@@ -33,7 +33,7 @@ def compute_average_price(shares: pd.Series, price: pd.Series) -> Decimal:
         return Decimal(str(value)).quantize(Decimal('0.01'))
 
 
-def compute_total_value(shares: pd.Series, price: pd.Series) -> Decimal:
+def compute_total_value(shares: pd.Series, price: pd.Series) -> Optional[Decimal]:
     """
     Compute the total value of the trades
     :param shares: The number of shares as a series

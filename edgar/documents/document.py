@@ -462,7 +462,7 @@ class Document:
         return self._sections
 
     @property
-    def tables(self) -> List[TableNode]:
+    def tables(self) -> Optional[List[TableNode]]:
         """Get all tables in document."""
         if self._tables is None:
             self._tables = self.root.find(lambda n: isinstance(n, TableNode))

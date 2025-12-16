@@ -53,7 +53,7 @@ class FundCompany(Entity):
         """Get the name of the company."""
         return self._name or super().name
 
-    def list_series(self) -> List['FundSeries']:
+    def list_series(self) -> Optional[List['FundSeries']]:
         """
         List all fund series associated with this company.
 
@@ -394,7 +394,7 @@ class Fund:
         return self._class
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         """Get the name of the fund entity"""
         return self._entity.name
 
