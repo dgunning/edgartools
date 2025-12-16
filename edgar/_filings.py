@@ -1562,6 +1562,11 @@ class Filing:
         if html_content and is_probably_html(html_content):
             parser = HTMLParser(ParserConfig(form=self.form))
             document = parser.parse(html_content)
+
+            # Return empty string for empty documents (e.g., XML-only filings like TA-1/A)
+            if document.is_empty:
+                return ""
+
             return rich_to_text(document, width=500)  # Wide enough for tables without truncation
         else:
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
@@ -1606,6 +1611,9 @@ class Filing:
                 if markdown_result:
                     return markdown_result
         text_content = self.text()
+        # Return empty string for empty content (e.g., XML-only filings)
+        if not text_content:
+            return ""
         return text_to_markdown(text_content)
 
     def view(self):
