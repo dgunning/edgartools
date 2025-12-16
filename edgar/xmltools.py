@@ -19,7 +19,7 @@ __all__ = [
 
 def find_element(
         xml_tag_or_string: Union[str, BeautifulSoup, Tag],
-        element_name) -> Tag:
+        element_name) -> Optional[Tag]:
     """
     Find the element with that name in the string or Tag
     :param xml_tag_or_string: either an exml tag or string containing xml
@@ -37,7 +37,7 @@ def get_footnote_ids(tag: Tag,
                      sep: str = ',') -> str:
     """Get the footnotes from the tag as a string"""
     return sep.join([
-        el.attrs.get('id') for el in tag.find_all("footnoteId")
+        el.attrs.get('id', '') for el in tag.find_all("footnoteId") if isinstance(el, Tag) and el.attrs.get('id')
     ])
 
 

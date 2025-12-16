@@ -63,6 +63,7 @@ from edgar.reference.tickers import Exchange, find_ticker, find_ticker_safe
 from edgar.richtools import Docs, print_rich, repr_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingHeader, FilingSGML, Reports, Statements
+from edgar.filesystem import EdgarPath
 from edgar.storage import is_using_local_storage, local_filing_path
 from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
 
@@ -628,12 +629,12 @@ class Filings:
     @property
     def start_date(self) -> Optional[str]:
         """Return the start date for the filings"""
-        return str(self.date_range[0]) if self.date_range[0] else self.date_range[0]
+        return str(self.date_range[0]) if self.date_range[0] else None
 
     @property
-    def end_date(self) -> str:
+    def end_date(self) -> Optional[str]:
         """Return the end date for the filings"""
-        return str(self.date_range[1]) if self.date_range[1] else self.date_range[1]
+        return str(self.date_range[1]) if self.date_range[1] else None
 
     def latest(self, n: int = 1):
         """Get the latest n filings"""
@@ -1660,7 +1661,7 @@ class Filing:
     def filing_directory(self) -> FilingDirectory:
         return FilingDirectory.load(self.base_dir)
 
-    def _local_path(self) -> Path:
+    def _local_path(self) -> Union[Path, EdgarPath]:
         """
         Get the local path for the filing
         """

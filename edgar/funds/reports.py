@@ -576,13 +576,13 @@ class FundReport:
     def _get_notional_amount(self, investment: InvestmentOrSecurity) -> Optional[Decimal]:
         """Extract notional amount - check investment level first, then derivative-specific"""
         # First check if investment balance represents notional (when desc_other_units indicates it)
-        if (investment.desc_other_units and 
-            'notional' in investment.desc_other_units.lower() and 
+        if (investment.desc_other_units and
+            'notional' in investment.desc_other_units.lower() and
             investment.balance):
             return investment.balance
 
         if not investment.derivative_info:
-            return pd.NA
+            return None
 
         deriv = investment.derivative_info
         if deriv.swap_derivative:
@@ -591,18 +591,18 @@ class FundReport:
             # For swaptions, notional is from the underlying swap
             if deriv.swaption_derivative.nested_swap:
                 return deriv.swaption_derivative.nested_swap.notional_amount
-            return pd.NA
+            return None
         elif deriv.future_derivative:
             return deriv.future_derivative.notional_amount
         elif deriv.forward_derivative:
             # For forwards, use the larger absolute amount as notional
             sold = abs(deriv.forward_derivative.amount_sold) if deriv.forward_derivative.amount_sold else 0
             purchased = abs(deriv.forward_derivative.amount_purchased) if deriv.forward_derivative.amount_purchased else 0
-            return max(sold, purchased) if max(sold, purchased) > 0 else pd.NA
+            return max(sold, purchased) if max(sold, purchased) > 0 else None
         elif deriv.option_derivative:
             # Options themselves don't have notional amounts at the derivative level
-            return pd.NA
-        return pd.NA
+            return None
+        return None
 
     def _get_payoff_profile(self, investment: InvestmentOrSecurity) -> Optional[str]:
         """Extract payoff profile from any derivative type"""
