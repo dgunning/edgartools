@@ -119,11 +119,11 @@ class PeriodType(BaseModel):
     @classmethod
     def from_xml(cls, tag: Optional[Tag] = None):
         if tag:
-            return cls(period1Yr=Decimal(tag.attrs.get("period1Yr")),
-                       period3Mon=Decimal(tag.attrs.get("period3Mon")),
-                       period5Yr=Decimal(tag.attrs.get("period5Yr")),
-                       period10Yr=Decimal(tag.attrs.get("period10Yr")),
-                       period30Yr=Decimal(tag.attrs.get("period30Yr"))
+            return cls(period1Yr=Decimal(str(tag.attrs.get("period1Yr", "0"))),
+                       period3Mon=Decimal(str(tag.attrs.get("period3Mon", "0"))),
+                       period5Yr=Decimal(str(tag.attrs.get("period5Yr", "0"))),
+                       period10Yr=Decimal(str(tag.attrs.get("period10Yr", "0"))),
+                       period30Yr=Decimal(str(tag.attrs.get("period30Yr", "0")))
                        )
 
 
@@ -133,11 +133,15 @@ class CurrentMetric(BaseModel):
     intrstRtRiskdv100: PeriodType
 
 
-def decimal_or_na(value: str):
+def decimal_or_na(value: Optional[str]):
+    if value is None:
+        return "N/A"
     return value if value == "N/A" else Decimal(value)
 
 
-def datetime_or_na(value: str):
+def datetime_or_na(value: Optional[str]):
+    if value is None:
+        return "N/A"
     return value if value == "N/A" else datetime.strptime(value, "%Y-%m-%d")
 
 
@@ -156,10 +160,10 @@ class MonthlyTotalReturn(BaseModel):
     @classmethod
     def from_xml(cls, tag: Tag):
         return cls(
-            class_id=tag.attrs.get("classId"),
-            return1=decimal_or_na(tag.attrs.get("rtn1")),
-            return2=decimal_or_na(tag.attrs.get("rtn2")),
-            return3=decimal_or_na(tag.attrs.get("rtn3"))
+            class_id=str(tag.attrs.get("classId", "")),
+            return1=decimal_or_na(str(tag.attrs.get("rtn1", "N/A"))),
+            return2=decimal_or_na(str(tag.attrs.get("rtn2", "N/A"))),
+            return3=decimal_or_na(str(tag.attrs.get("rtn3", "N/A")))
         )
 
 
@@ -241,7 +245,7 @@ class DebtSecurity(BaseModel):
         if tag and tag.name == "debtSec":
             return cls(
                 maturity_date=datetime_or_na(child_text(tag, "maturityDt")),
-                coupon_kind=child_text(tag, "couponKind"),
+                coupon_kind=child_text(tag, "couponKind") or "",
                 annualized_rate=optional_decimal(tag, "annualizedRt"),
                 is_default=child_text(tag, "isDefault") == "Y",
                 are_instrument_payents_in_arrears=child_text(tag, "areIntrstPmntsInArrs") == "Y",
@@ -438,8 +442,8 @@ class FundReport:
                 )
 
     def get_fund_series(self) -> FundSeries:
-        return FundSeries(series_id=self.general_info.series_id,
-                          name=self.general_info.series_name,
+        return FundSeries(series_id=self.general_info.series_id or "",
+                          name=self.general_info.series_name or "",
                           fund_company=self.fund_company)
 
     def get_ticker_for_series(self) -> Optional[str]:
