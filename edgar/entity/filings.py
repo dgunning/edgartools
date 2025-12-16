@@ -4,7 +4,7 @@ Filings-related classes for the Entity package.
 This module contains classes related to SEC filings for entities, including
 collections of filings and filing facts.
 """
-from typing import List, Union
+from typing import List, Optional, Union
 
 import pandas as pd
 import pyarrow as pa
@@ -169,7 +169,7 @@ class EntityFilings(Filings):
                  data: pa.Table,
                  cik: int,
                  company_name: str,
-                 original_state: PagingState = None):
+                 original_state: Optional[PagingState] = None):
         super().__init__(data, original_state=original_state)
         self.cik = cik
         self.company_name = company_name
@@ -205,14 +205,14 @@ class EntityFilings(Filings):
         )
 
     def filter(self,
-               form: Union[str, List[str]] = None,
-               amendments: bool = None,
-               filing_date: str = None,
-               date: str = None,
-               cik: Union[int, str, List[Union[int, str]]] = None,
-               ticker: Union[str, List[str]] = None,
-               accession_number: Union[str, List[str]] = None,
-               file_number: Union[str, List[str]] = None):
+               form: Optional[Union[str, List[str]]] = None,
+               amendments: Optional[bool] = None,
+               filing_date: Optional[str] = None,
+               date: Optional[str] = None,
+               cik: Optional[Union[int, str, List[Union[int, str]]]] = None,
+               ticker: Optional[Union[str, List[str]]] = None,
+               accession_number: Optional[Union[str, List[str]]] = None,
+               file_number: Optional[Union[str, List[str]]] = None):
         """
         Filter the filings based on various criteria.
 

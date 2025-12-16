@@ -658,13 +658,13 @@ class Filings:
 
     def filter(self, *,
                form: Optional[Union[str, List[IntString]]] = None,
-               amendments: bool = None,
+               amendments: Optional[bool] = None,
                filing_date: Optional[str] = None,
                date: Optional[str] = None,
-               cik: Union[IntString, List[IntString]] = None,
-               exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
-               ticker: Union[str, List[str]] = None,
-               accession_number: Union[str, List[str]] = None) -> 'Filings':
+               cik: Optional[Union[IntString, List[IntString]]] = None,
+               exchange: Optional[Union[str, List[str], Exchange, List[Exchange]]] = None,
+               ticker: Optional[Union[str, List[str]]] = None,
+               accession_number: Optional[Union[str, List[str]]] = None) -> 'Filings':
         """
         Get some filings
 
@@ -1363,7 +1363,7 @@ class Filing:
                  form: str,
                  filing_date: str,
                  accession_no: str,
-                 related_entities: List[Dict] = None):
+                 related_entities: Optional[List[Dict]] = None):
         self.cik = cik
         self.company = company
         self.form = form

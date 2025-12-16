@@ -279,3 +279,16 @@ markers = [
     "data_quality: Data quality validation tests",
     "vcr: Tests using VCR cassettes for recorded HTTP responses",
 ]
+
+[tool.pyright]
+# Suppress false positives for C extension modules
+reportAttributeAccessIssue = "none"
+# PyArrow is a C extension - type stubs are incomplete
+ignoreExternal = true
+
+[tool.ty]
+# Suppress unresolved-attribute errors for pyarrow.compute (C extension with incomplete stubs)
+# These are false positives - the methods exist at runtime
+[[tool.ty.overrides]]
+include = ["edgar/_filings.py"]
+rules = { unresolved-attribute = "ignore" }

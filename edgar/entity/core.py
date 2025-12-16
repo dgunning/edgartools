@@ -247,19 +247,19 @@ class Entity(SecFiler):
         """Check if this entity qualifies as an Emerging Growth Company (EGC)."""
         return self.filer_category.is_emerging_growth_company
 
-    def get_filings(self, 
+    def get_filings(self,
                    *,
-                   year: Union[int, List[int]] = None,
-                   quarter: Union[int, List[int]] = None,
-                   form: Union[str, 'FormType', List[Union[str, 'FormType']]] = None,
-                   accession_number: Union[str, List] = None,
-                   file_number: Union[str, List] = None,
-                   filing_date: Union[str, Tuple[str, str]] = None,
-                   date: Union[str, Tuple[str, str]] = None,
+                   year: Optional[Union[int, List[int]]] = None,
+                   quarter: Optional[Union[int, List[int]]] = None,
+                   form: Optional[Union[str, 'FormType', List[Union[str, 'FormType']]]] = None,
+                   accession_number: Optional[Union[str, List]] = None,
+                   file_number: Optional[Union[str, List]] = None,
+                   filing_date: Optional[Union[str, Tuple[str, str]]] = None,
+                   date: Optional[Union[str, Tuple[str, str]]] = None,
                    amendments: bool = True,
-                   is_xbrl: bool = None,
-                   is_inline_xbrl: bool = None,
-                   sort_by: Union[str, List[Tuple[str, str]]] = None,
+                   is_xbrl: Optional[bool] = None,
+                   is_inline_xbrl: Optional[bool] = None,
+                   sort_by: Optional[Union[str, List[Tuple[str, str]]]] = None,
                    trigger_full_load: bool = True) -> 'EntityFilings':
         """
         Get the entity's filings and optionally filter by multiple criteria.
