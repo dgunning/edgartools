@@ -23,7 +23,7 @@ import logging
 import os
 import threading
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, BinaryIO, Dict, Iterator, Optional, TextIO, Union
+from typing import TYPE_CHECKING, Any, BinaryIO, Dict, Iterator, Optional, TextIO, Union, cast
 
 if TYPE_CHECKING:
     import fsspec
@@ -253,7 +253,7 @@ def is_cloud_storage_enabled() -> bool:
     return _cloud_uri is not None
 
 
-def get_filesystem() -> 'fsspec.AbstractFileSystem':
+def get_filesystem() -> Optional['fsspec.AbstractFileSystem']:
     """
     Get the configured fsspec filesystem instance.
 
@@ -606,8 +606,8 @@ class EdgarPath:
         """
         fs = get_filesystem()
         if fs is None:
-            # Local filesystem
-            return self._local_path().open(mode, **kwargs)
+            # Local filesystem - Path.open() returns IO[Any]
+            return cast(Union[BinaryIO, TextIO], self._local_path().open(mode, **kwargs))
 
         return fs.open(self.full_path, mode, **kwargs)
 

@@ -11,7 +11,7 @@ from enum import Enum
 from functools import wraps
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 import httpcore
 import orjson as json
@@ -1091,7 +1091,8 @@ def download_json(data_url: str) -> dict:
 
 
 def download_text(url: str) -> Optional[str]:
-    return download_file(url, as_text=True)
+    # download_file with as_text=True returns str | None (not bytes)
+    return cast(Optional[str], download_file(url, as_text=True))
 
 
 async def download_json_async(client: AsyncClient, data_url: str) -> dict:

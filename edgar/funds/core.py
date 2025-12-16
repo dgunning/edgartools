@@ -544,7 +544,8 @@ class Fund:
             List of FundSeries instances
         """
         if self._company and hasattr(self._company, 'list_series'):
-            return self._company.list_series()
+            series_list = self._company.list_series()
+            return series_list if series_list is not None else []
 
         if self._series:
             return [self._series]

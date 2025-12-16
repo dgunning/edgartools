@@ -1602,7 +1602,9 @@ class Filing:
         if html:
             clean_html = get_clean_html(html)
             if clean_html:
-                return to_markdown(clean_html, include_page_breaks=include_page_breaks, start_page_number=start_page_number)
+                markdown_result = to_markdown(clean_html, include_page_breaks=include_page_breaks, start_page_number=start_page_number)
+                if markdown_result:
+                    return markdown_result
         text_content = self.text()
         return text_to_markdown(text_content)
 

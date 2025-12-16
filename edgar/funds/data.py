@@ -401,7 +401,7 @@ def direct_get_fund_with_filings(contract_or_series_id: str):
         return None
 
 @lru_cache(maxsize=16)
-def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, FundCompany]]:
+def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, FundClass]]:
     """
     Get a Fund related object by it's identifier.
 
