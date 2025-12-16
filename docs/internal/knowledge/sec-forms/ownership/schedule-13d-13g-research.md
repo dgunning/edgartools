@@ -331,8 +331,10 @@ These data points are consistently available and structured:
 | **Shared Dispositive Power** | Cover page, Item 8 | Easy | MEDIUM - joint disposition rights |
 | **Source of Funds (13D)** | Cover page, Item 4 | Easy | MEDIUM - financing source |
 | **Type of Reporting Person** | Cover page, Item 14 (13D) or Item 12 (13G) | Easy | MEDIUM - institution type |
-| **Group Membership** | Cover page, Item 2 | Easy | MEDIUM - acting in concert |
+| **Group Membership** ⚠️ | Cover page, Item 2 | Easy | **CRITICAL** - joint vs. separate filers |
 | **Citizenship/Organization** | Cover page, Item 6 (13G) | Easy | LOW - entity domicile |
+
+⚠️ **UPDATE (2025-12-16)**: After reviewing the SEC technical specification, the **Group Membership** field has been upgraded from MEDIUM to **CRITICAL** priority. It is required for correct ownership aggregation when multiple reporting persons exist. See Section 4.5 for details.
 
 ### 4.2 High-Value Narrative Data (Item Disclosures)
 
@@ -378,6 +380,144 @@ By tracking amendments over time:
 - Evolution of strategic intent (passive → activist)
 - Group formation or dissolution
 - Transfer of ownership between related entities
+
+### 4.5 SEC Technical Specification Compliance (December 2023)
+
+**UPDATE (2025-12-16):** After reviewing the official SEC XML Technical Specification (v1.0, December 2023), several critical fields and requirements were identified that must be implemented for full compliance with the SEC's structured data format.
+
+#### Critical Fields for Ownership Calculation
+
+##### 1. Group Membership (CRITICAL - Upgraded from MEDIUM)
+
+The `memberOfGroup` (13D) and `memberGroup` (13G) fields are **REQUIRED** for correct ownership aggregation:
+
+- **XML Element**: `<memberOfGroup>` (Schedule 13D) or `<memberGroup>` (Schedule 13G)
+- **Data Type**: String, values `"a"` or `"b"`
+- **Meaning**:
+  - `"a"` = Member of a group filing jointly (same shares reported by all group members)
+  - `"b"` = Not a member of a group (separate filer with distinct position)
+- **Business Value**: **CRITICAL** (not MEDIUM as previously assessed)
+- **Reason**: Determines whether to sum or take unique shares when multiple reporting persons exist
+- **Bug Impact**: Without this field, the library produces incorrect ownership calculations (e.g., 232% instead of 116% when two joint filers each report the same shares)
+
+**Implementation Notes:**
+```python
+# CORRECT: Use member_of_group field
+joint_filers = [p for p in reporting_persons if p.member_of_group == "a"]
+if joint_filers:
+    total = max(p.aggregate_amount for p in joint_filers)  # Take unique count
+else:
+    total = sum(p.aggregate_amount for p in reporting_persons)  # Sum separate positions
+
+# INCORRECT: Using heuristics (unreliable)
+# if all_have_same_shares(reporting_persons):  # Don't do this!
+#     total = reporting_persons[0].aggregate_amount
+```
+
+##### 2. Aggregate Exclusion Flag
+
+The `isAggregateExcludeShares` field indicates shares that should NOT be included in total beneficial ownership:
+
+- **XML Element**: `<isAggregateExcludeShares>`
+- **Data Type**: Boolean (`"Y"` or `"N"`)
+- **Purpose**: Marks shares excluded from aggregate count (e.g., shares held but not beneficially owned)
+- **Business Value**: **P1** - Required for accurate ownership calculation
+- **Implementation**: Filter out reporting persons where `is_aggregate_exclude_shares == True` before aggregation
+
+##### 3. Reporting Person Without CIK
+
+The `reportingPersonNoCIK` field indicates when a reporting person does not have an assigned CIK number:
+
+- **XML Element**: `<reportingPersonNoCIK>`
+- **Data Type**: Boolean (`"Y"` or `"N"`)
+- **Purpose**: Flags reporting persons without CIK (typically foreign entities or individuals)
+- **Business Value**: **P1** - Required for proper data validation
+- **Usage**: When `no_cik == True`, the `cik` field will be `None` or empty string
+
+##### 4. Amendment Number
+
+The amendment number tracks the sequence of amendments to an original filing:
+
+- **Location**: Form name or document title (e.g., "Amendment No. 9", "SCHEDULE 13D/A #5")
+- **Data Type**: Optional[int]
+- **Purpose**: Track filing history and amendment sequence
+- **Business Value**: **P1** - Important for time-series analysis
+- **Extraction**: Parse from form name using regex patterns
+
+#### Corrected Aggregation Algorithm
+
+The SEC-compliant aggregation algorithm is:
+
+```python
+def calculate_total_shares(reporting_persons):
+    """
+    Calculate total beneficial ownership per SEC specification.
+
+    Algorithm:
+    1. Filter out shares flagged for exclusion
+    2. Check for joint filers (member_of_group == "a")
+    3. If joint filers exist, take unique count (they report the same shares)
+    4. Otherwise, sum all separate positions
+    """
+    # Step 1: Exclude flagged shares
+    included = [p for p in reporting_persons
+                if not p.is_aggregate_exclude_shares]
+
+    if not included:
+        return 0
+
+    # Step 2: Identify joint filers
+    group_members = [p for p in included if p.member_of_group == "a"]
+
+    # Step 3: Aggregate appropriately
+    if group_members:
+        # Joint filers: all report the same shares
+        # Take max in case of any data inconsistencies
+        return max(p.aggregate_amount for p in group_members)
+    else:
+        # Separate filers or legacy data without member_of_group: sum all
+        return sum(p.aggregate_amount for p in included)
+```
+
+#### Real-World Example: Joint Filers
+
+**Filing**: Ryan Cohen / RC Ventures - Bed Bath & Beyond (0001193125-22-071007)
+
+```xml
+<reportingPersonInfo>
+  <reportingPersonName>RC Ventures LLC</reportingPersonName>
+  <aggregateAmountOwned>9800000</aggregateAmountOwned>
+  <percentOfClass>11.8</percentOfClass>
+  <memberOfGroup>a</memberOfGroup>  <!-- CRITICAL FIELD -->
+</reportingPersonInfo>
+<reportingPersonInfo>
+  <reportingPersonName>Ryan Cohen</reportingPersonName>
+  <aggregateAmountOwned>9800000</aggregateAmountOwned>  <!-- SAME shares -->
+  <percentOfClass>11.8</percentOfClass>
+  <memberOfGroup>a</memberOfGroup>  <!-- Both are group members -->
+</reportingPersonInfo>
+```
+
+**Correct Calculation**: 9,800,000 shares (11.8%) - unique count
+**Incorrect Without Field**: 19,600,000 shares (23.6%) - double counted!
+
+#### Element Name Differences Between 13D and 13G
+
+Note that some XML elements have different names in Schedule 13D vs. Schedule 13G:
+
+| Field | Schedule 13D Element | Schedule 13G Element |
+|-------|---------------------|---------------------|
+| Group membership | `<memberOfGroup>` | `<memberGroup>` |
+| Exclude shares | `<isAggregateExcludeShares>` | `<isAggregateExcludeShares>` |
+| No CIK flag | `<reportingPersonNoCIK>` | `<reportingPersonNoCIK>` |
+
+**Implementation must handle both element names correctly.**
+
+#### References
+
+- **SEC Technical Specification**: `data/SCHEDULE13DG/Schedule13Dand13GTechnicalSpecification.pdf`
+- **Gap Analysis**: `docs/internal/analysis/schedule-13dg-gap-analysis.md`
+- **Implementation**: `edgar/beneficial_ownership/schedule13.py`
 
 ---
 

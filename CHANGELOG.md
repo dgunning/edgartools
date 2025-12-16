@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Schedule 13D/G P1 Fields from SEC Technical Specification** (#edgartools-a1oc, #f5d1f749)
+  - Added `is_aggregate_exclude_shares` boolean field to ReportingPerson for shares excluded from aggregate count
+  - Added `no_cik` boolean field to ReportingPerson for reporting persons without CIK numbers
+  - Added `amendment_number` field to Schedule13D and Schedule13G classes for tracking amendment sequence
+  - Added `extract_amendment_number()` helper function to parse amendment numbers from form names
+  - **Files**: `edgar/beneficial_ownership/models.py`, `edgar/beneficial_ownership/schedule13.py`
+  - **Impact**: Complete SEC specification compliance for Schedule 13D/G beneficial ownership reporting
+  - **Example**: `person.is_aggregate_exclude_shares`, `schedule.amendment_number`
+
+### Fixed
+
+- **Schedule 13D/G Boolean Parsing** (#edgartools-a1oc, #f5d1f749)
+  - Fixed boolean field parsing to use `get_bool()` for proper Y/N format handling (was incorrectly using `== 'true'`)
+  - Ensures `is_aggregate_exclude_shares` correctly identifies excluded shares
+  - **Impact**: Prevents parsing errors and ensures accurate share exclusion logic
+
+### Changed
+
+- **Schedule 13D/G Aggregation Logic Enhanced** (#edgartools-a1oc, #f5d1f749)
+  - Updated `total_shares` and `total_percent` properties to exclude shares flagged with `is_aggregate_exclude_shares == True`
+  - Works correctly with Phase 1 joint filer logic using `member_of_group` field
+  - Returns 0 when all shares are excluded (edge case handling)
+  - **Files**: `edgar/beneficial_ownership/schedule13.py`
+  - **Impact**: More accurate ownership calculations per SEC specification
+
+### Documentation
+
+- **Schedule 13D/G Documentation Updates** (#edgartools-rmga)
+  - Added Section 4.5 "SEC Technical Specification Compliance" to research document
+  - Updated priority classification table with CRITICAL designation for Group Membership field
+  - Added comprehensive joint filer display guidance to rendering guide
+  - Created implementation notes quick reference for developers
+  - **Files**: `docs/internal/knowledge/sec-forms/ownership/schedule-13d-13g-research.md`,
+    `docs/guides/schedule-13-rendering-guide.md`,
+    `docs/internal/analysis/schedule-13dg-implementation-notes.md`
+  - **Impact**: Clear guidance for correct Schedule 13D/G implementation and display
+
 ## [5.3.0] - 2025-12-15
 
 ### Added
