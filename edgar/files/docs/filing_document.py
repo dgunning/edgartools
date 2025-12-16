@@ -303,11 +303,11 @@ class TableOfContents:
 class Item:
     """Represents a logical item in an SEC filing."""
 
-    def __init__(self, 
-                 name: str, 
+    def __init__(self,
+                 name: str,
                  heading_node: Optional[HeadingNode],
                  content_nodes: List[BaseNode],
-                 metadata: Dict[str, Any] = None):
+                 metadata: Optional[Dict[str, Any]] = None):
         self.name = name
         self.heading_node = heading_node
         self.content_nodes = content_nodes
@@ -524,7 +524,7 @@ class DocumentIndex:
         self._items = {}     # Map of item name to Item object
 
     @classmethod
-    def build(cls, document: Document, filing_type: str = None) -> 'DocumentIndex':
+    def build(cls, document: Document, filing_type: Optional[str] = None) -> 'DocumentIndex':
         """Build an index from a document."""
         index = cls()
         index._build_heading_index(document)
@@ -537,7 +537,7 @@ class DocumentIndex:
             if node.type == 'heading':
                 self._headings[node.content] = i
 
-    def _build_item_index(self, document: Document, filing_type: str = None) -> None:
+    def _build_item_index(self, document: Document, filing_type: Optional[str] = None) -> None:
         """Build an index of items in the document."""
         # Get appropriate item pattern based on filing type
         item_pattern = self._get_item_pattern(filing_type)
@@ -880,7 +880,7 @@ class DocumentIndex:
 class FilingDocument:
     """High-level document class specialized for SEC filings."""
 
-    def __init__(self, html: str, filing_type: str = None):
+    def __init__(self, html: str, filing_type: Optional[str] = None):
         self._document = Document.parse(html)
         self._filing_type = filing_type
         self._index = None  # Lazy-loaded

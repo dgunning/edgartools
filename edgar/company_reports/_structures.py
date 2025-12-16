@@ -1,5 +1,5 @@
 """Filing structure definitions and validation utilities."""
-from typing import Dict, List, Pattern
+from typing import Dict, List, Optional, Pattern
 
 __all__ = ['FilingStructure', 'ItemOnlyFilingStructure', 'is_valid_item_for_filing', 'extract_items_from_sections']
 
@@ -12,7 +12,7 @@ class FilingStructure:
     def get_part(self, part: str):
         return self.structure.get(part.upper())
 
-    def get_item(self, item: str, part: str = None):
+    def get_item(self, item: str, part: Optional[str] = None):
         item = item.upper()
         if part:
             part_dict = self.get_part(part)
@@ -24,7 +24,7 @@ class FilingStructure:
                     return items[item]
         return None
 
-    def is_valid_item(self, item: str, part: str = None):
+    def is_valid_item(self, item: str, part: Optional[str] = None):
         return self.get_item(item, part) is not None
 
 
@@ -33,11 +33,11 @@ class ItemOnlyFilingStructure(FilingStructure):
     def get_part(self, part: str):
         return None
 
-    def get_item(self, item: str, part: str = None):
+    def get_item(self, item: str, part: Optional[str] = None):
         return self.structure.get(item.upper())
 
 
-def is_valid_item_for_filing(filing_structure: Dict, item: str, part: str = None):
+def is_valid_item_for_filing(filing_structure: Dict, item: str, part: Optional[str] = None):
     """Return true if the item is valid"""
     item = item.upper()
     if part:
