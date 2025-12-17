@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.3.2] - 2025-12-17
+
+### Fixed
+
+- **parent_concept Column Missing Values Due to Dictionary Key Collision** (#542, #4af5fa1a)
+  - Fixed critical data accuracy bug where parent_concept showed None for 85%+ of financial statement concepts
+  - Root cause: Dictionary key collision in _add_metadata_columns() when same concept appeared multiple times
+  - Dimensional items (Products, Services, regions) were overwriting main line items, losing parent hierarchy info
+  - Changed from last-occurrence dictionary comprehension to explicit first-occurrence loop
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: parent_concept population rate improved from ~14% to 72% for dimensional data
+  - **Example**: Revenue parent_concept now correctly shows 'us-gaap_GrossProfit' instead of None
+  - **Testing**: New regression test verifies AAPL Revenue parent_concept accuracy
+  - **Beads Issue**: edgartools-0468
+
+### Summary
+
+Release 5.3.2 is a critical patch release fixing a data accuracy bug in financial statement parent_concept metadata. The fix ensures correct hierarchy information is preserved for concepts that appear multiple times (main item + dimensional breakdowns), improving metadata population rate from 14% to 72%.
+
+This release maintains full backward compatibility with v5.3.1.
+
 ## [5.3.1] - 2025-12-16
 
 ### Fixed
