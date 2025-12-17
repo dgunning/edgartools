@@ -28,6 +28,8 @@ from edgar.entity.mappings_loader import (
     load_virtual_trees,
     get_industry_for_sic,
     load_industry_extension,
+    get_all_statements_for_concept,
+    get_primary_statement,
 )
 from edgar.entity.models import FinancialFact
 
@@ -51,6 +53,61 @@ except ImportError:
             "empty_value": "bright_black",
         }
 from edgar.richtools import repr_rich
+
+
+# Define which statements accept linked concepts from which source statements
+# Key = target statement, Value = set of source statements that can flow into it
+# Flow direction: Income/Balance -> CashFlow/Equity/Comprehensive (not reverse)
+_ACCEPTS_LINKED_FROM = {
+    'CashFlowStatement': {'IncomeStatement', 'BalanceSheet'},
+    'StatementOfEquity': {'IncomeStatement', 'BalanceSheet'},
+    'ComprehensiveIncome': {'IncomeStatement'},
+    # IncomeStatement and BalanceSheet don't accept linked concepts from other statements
+    'IncomeStatement': set(),
+    'BalanceSheet': set(),
+}
+
+
+def _fact_belongs_to_statement(fact: 'FinancialFact', target_stmt_type: str) -> bool:
+    """
+    Check if a fact belongs to a statement type (primary or linked).
+
+    A fact belongs to a statement if:
+    1. It's primarily assigned to that statement, OR
+    2. The concept appears in that statement via linkages AND the primary
+       statement flows into the target (e.g., Income -> CashFlow)
+
+    Args:
+        fact: The financial fact to check
+        target_stmt_type: Target statement type (e.g., 'IncomeStatement', 'CashFlow')
+
+    Returns:
+        True if the fact belongs to the target statement
+    """
+    # Normalize statement type names
+    normalized_target = target_stmt_type
+    if target_stmt_type == 'CashFlow':
+        normalized_target = 'CashFlowStatement'
+
+    # Check primary assignment - always include
+    if fact.statement_type == normalized_target:
+        return True
+    if target_stmt_type == 'CashFlow' and fact.statement_type == 'CashFlowStatement':
+        return True
+
+    # Check if concept appears in this statement via linkages
+    concept = fact.concept
+    if ':' in concept:
+        concept = concept.split(':')[-1]
+
+    all_statements = get_all_statements_for_concept(concept)
+    if normalized_target not in all_statements:
+        return False
+
+    # Only include if concept's primary statement flows into target
+    primary = get_primary_statement(concept)
+    accepted_sources = _ACCEPTS_LINKED_FROM.get(normalized_target, set())
+    return primary in accepted_sources
 
 
 @dataclass
@@ -1347,48 +1404,8 @@ class EnhancedStatementBuilder:
         Returns:
             MultiPeriodStatement with hierarchical structure and multiple periods
         """
-        from edgar.entity.mappings_loader import get_all_statements_for_concept, get_primary_statement
-
-        # Define which statements accept linked concepts from which source statements
-        # Key = target statement, Value = set of source statements that can flow into it
-        ACCEPTS_LINKED_FROM = {
-            'CashFlowStatement': {'IncomeStatement', 'BalanceSheet'},
-            'StatementOfEquity': {'IncomeStatement', 'BalanceSheet'},
-            'ComprehensiveIncome': {'IncomeStatement'},
-            # IncomeStatement and BalanceSheet don't accept linked concepts from other statements
-            'IncomeStatement': set(),
-            'BalanceSheet': set(),
-        }
-
-        def fact_belongs_to_statement(fact, target_stmt_type: str) -> bool:
-            """Check if a fact belongs to a statement type (primary or linked)."""
-            # Normalize statement type names
-            normalized_target = target_stmt_type
-            if target_stmt_type == 'CashFlow':
-                normalized_target = 'CashFlowStatement'
-
-            # Check primary assignment - always include
-            if fact.statement_type == normalized_target:
-                return True
-            if target_stmt_type == 'CashFlow' and fact.statement_type == 'CashFlowStatement':
-                return True
-
-            # Check if concept appears in this statement via linkages
-            concept = fact.concept
-            if ':' in concept:
-                concept = concept.split(':')[-1]
-
-            all_statements = get_all_statements_for_concept(concept)
-            if normalized_target not in all_statements:
-                return False
-
-            # Only include if concept's primary statement flows into target
-            primary = get_primary_statement(concept)
-            accepted_sources = ACCEPTS_LINKED_FROM.get(normalized_target, set())
-            return primary in accepted_sources
-
         # Filter facts by statement type (including multi-statement concepts from feeder statements)
-        stmt_facts = [f for f in facts if fact_belongs_to_statement(f, statement_type)]
+        stmt_facts = [f for f in facts if _fact_belongs_to_statement(f, statement_type)]
 
         # Use the same logic as FactQuery.latest_periods for consistency
         # Group facts by unique periods and calculate period info
