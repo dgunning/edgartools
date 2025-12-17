@@ -24,12 +24,12 @@ from rich.text import Text
 
 from edgar.core import log
 from edgar.entity.mappings_loader import (
+    get_all_statements_for_concept,
+    get_industry_for_sic,
+    get_primary_statement,
+    load_industry_extension,
     load_learned_mappings,
     load_virtual_trees,
-    get_industry_for_sic,
-    load_industry_extension,
-    get_all_statements_for_concept,
-    get_primary_statement,
 )
 from edgar.entity.models import FinancialFact
 
@@ -54,7 +54,6 @@ except ImportError:
         }
 from edgar.richtools import repr_rich
 
-
 # Define which statements accept linked concepts from which source statements
 # Key = target statement, Value = set of source statements that can flow into it
 # Flow direction: Income/Balance -> CashFlow/Equity/Comprehensive (not reverse)
@@ -66,6 +65,33 @@ _ACCEPTS_LINKED_FROM = {
     'IncomeStatement': set(),
     'BalanceSheet': set(),
 }
+
+# Income statement concept lists for deduplication and promotion
+# Revenue concepts (in priority order - first found wins)
+_REVENUE_CONCEPTS = [
+    'RevenueFromContractWithCustomerExcludingAssessedTax',
+    'SalesRevenueNet',
+    'Revenues'
+]
+
+# Cost concepts for deduplication (in priority order - first found wins)
+_COST_CONCEPTS = [
+    'CostOfGoodsAndServicesSold',
+    'CostOfRevenue',
+]
+
+# EPS concepts (deduplicated together, don't need the abstract parent)
+_EPS_CONCEPTS = [
+    'EarningsPerShareBasic',
+    'EarningsPerShareDiluted'
+]
+
+# Profit concepts to promote (no deduplication needed)
+_PROFIT_CONCEPTS = [
+    'GrossProfit',
+    'OperatingIncomeLoss',
+    'NetIncomeLoss',
+]
 
 
 def _fact_belongs_to_statement(fact: 'FinancialFact', target_stmt_type: str) -> bool:
@@ -727,7 +753,7 @@ class MultiPeriodStatement:
             data = statement.to_dict()
             json.dumps(data)  # Ready for web API response
         """
-        def item_to_dict(item: 'MultiPeriodItem') -> Dict[str, Any]:
+        def item_to_dict(item: 'MultiPeriodItem') -> Optional[Dict[str, Any]]:
             # Skip items with no values unless requested
             if not include_empty and not any(v is not None for v in item.values.values()):
                 return None
@@ -1812,32 +1838,6 @@ class EnhancedStatementBuilder:
         items = []
         nodes = virtual_tree['nodes']
 
-        # Revenue concepts for deduplication (in priority order - first found wins)
-        REVENUE_CONCEPTS = [
-            'RevenueFromContractWithCustomerExcludingAssessedTax',
-            'SalesRevenueNet',
-            'Revenues'
-        ]
-
-        # Cost concepts for deduplication (in priority order - first found wins)
-        COST_CONCEPTS = [
-            'CostOfGoodsAndServicesSold',
-            'CostOfRevenue',
-        ]
-
-        # EPS concepts (deduplicated together, don't need the abstract parent)
-        EPS_CONCEPTS = [
-            'EarningsPerShareBasic',
-            'EarningsPerShareDiluted'
-        ]
-
-        # Profit concepts to promote (no deduplication needed)
-        PROFIT_CONCEPTS = [
-            'GrossProfit',
-            'OperatingIncomeLoss',
-            'NetIncomeLoss',
-        ]
-
         # First, add the abstract root for structure
         for root_concept in virtual_tree.get('roots', []):
             if 'Abstract' in root_concept:
@@ -1858,24 +1858,24 @@ class EnhancedStatementBuilder:
 
                     # Handle revenue deduplication (pick first available)
                     revenue_item = self._create_deduplicated_revenue_item(
-                        REVENUE_CONCEPTS, nodes, period_maps, periods, statement_type
+                        _REVENUE_CONCEPTS, nodes, period_maps, periods, statement_type
                     )
                     if revenue_item:
                         item.children.append(revenue_item)
                         # Mark all revenue concepts as processed (including synonyms)
-                        promoted_added.update(REVENUE_CONCEPTS)
+                        promoted_added.update(_REVENUE_CONCEPTS)
 
                     # Handle cost deduplication (pick first available, display as "Cost of Revenue")
                     cost_item = self._create_deduplicated_concept_item(
-                        COST_CONCEPTS, nodes, period_maps, periods, statement_type,
+                        _COST_CONCEPTS, nodes, period_maps, periods, statement_type,
                         display_label='Cost of Revenue'
                     )
                     if cost_item:
                         item.children.append(cost_item)
-                        promoted_added.update(COST_CONCEPTS)
+                        promoted_added.update(_COST_CONCEPTS)
 
                     # Add profit concepts
-                    for concept in PROFIT_CONCEPTS:
+                    for concept in _PROFIT_CONCEPTS:
                         if concept in nodes:
                             has_values = any(concept in period_maps[p] for p in periods)
                             if has_values:
@@ -1889,7 +1889,7 @@ class EnhancedStatementBuilder:
                                     promoted_added.add(concept)
 
                     # Add EPS concepts individually (skip abstract parent)
-                    for concept in EPS_CONCEPTS:
+                    for concept in _EPS_CONCEPTS:
                         if concept in nodes:
                             has_values = any(concept in period_maps[p] for p in periods)
                             if has_values:
@@ -1951,7 +1951,7 @@ class EnhancedStatementBuilder:
                                          period_maps: Dict[str, Dict[str, FinancialFact]],
                                          periods: List[str],
                                          statement_type: str,
-                                         display_label: str = None) -> Optional[MultiPeriodItem]:
+                                         display_label: Optional[str] = None) -> Optional[MultiPeriodItem]:
         """
         Create a single item from multiple synonym concepts, picking first available.
 
