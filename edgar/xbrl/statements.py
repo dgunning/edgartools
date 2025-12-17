@@ -363,7 +363,14 @@ class Statement:
 
         # Get statement's raw data to access preferred_signs and parent
         raw_data = self.get_raw_data()
-        raw_data_by_concept = {item.get('concept'): item for item in raw_data}
+        # Build concept lookup using first occurrence to preserve parent info (Issue #542)
+        # Same concept may appear multiple times due to dimensional data (Products, Services, regions)
+        # First occurrence (main line item) has parent info; later dimensional occurrences may not
+        raw_data_by_concept = {}
+        for item in raw_data:
+            concept = item.get('concept')
+            if concept and concept not in raw_data_by_concept:
+                raw_data_by_concept[concept] = item
 
         # Create metadata dictionaries to populate
         balance_map = {}
