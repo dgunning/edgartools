@@ -512,8 +512,28 @@ class Company(Entity):
         return get_icon_from_ticker(self.tickers[0])
 
     # Enhanced financial data properties and methods
+    def get_facts(self, period_type: Optional[Union[str, 'PeriodType']] = None) -> Optional['EntityFacts']:
+        """
+        Get structured facts about this company with industry-specific enhancements.
+
+        Overrides Entity.get_facts() to inject SIC code for industry-specific
+        virtual tree extensions.
+
+        Args:
+            period_type: Optional filter by period type. Can be PeriodType enum
+                        or string ('annual', 'quarterly', 'monthly').
+
+        Returns:
+            EntityFacts object with SIC code set, optionally filtered by period type
+        """
+        facts = super().get_facts(period_type)
+        if facts:
+            # Inject SIC code for industry-specific statement building
+            facts._sic_code = self.sic
+        return facts
+
     @property
-    def facts(self) -> Optional[EntityFacts]:
+    def facts(self) -> Optional['EntityFacts']:
         """Get enhanced structured facts about this company."""
         return self.get_facts()
 

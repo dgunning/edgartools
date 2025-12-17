@@ -23,3 +23,5 @@ ratelimiter.sqlite*
 *_generated.html
 /coverage.xml
 .pyscn/
+# Training output (generated, not tracked)
+training/output/

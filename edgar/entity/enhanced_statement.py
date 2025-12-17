@@ -23,7 +23,12 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import log
-from edgar.entity.mappings_loader import load_learned_mappings, load_virtual_trees
+from edgar.entity.mappings_loader import (
+    load_learned_mappings,
+    load_virtual_trees,
+    get_industry_for_sic,
+    load_industry_extension,
+)
 from edgar.entity.models import FinancialFact
 
 try:
@@ -1287,9 +1292,28 @@ class EnhancedStatementBuilder:
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
     }
 
-    def __init__(self):
+    def __init__(self, sic_code: Optional[str] = None):
+        """
+        Initialize the statement builder.
+
+        Args:
+            sic_code: Optional SIC code for industry-specific extensions.
+                     If provided and matches a known industry, industry-specific
+                     concepts will be merged into the virtual trees.
+        """
         self.learned_mappings = load_learned_mappings()
         self.virtual_trees = load_virtual_trees()
+        self.sic_code = sic_code
+        self.industry = None
+        self.industry_extension = None
+
+        # Load industry extension if SIC code provided
+        if sic_code:
+            self.industry = get_industry_for_sic(sic_code)
+            if self.industry:
+                self.industry_extension = load_industry_extension(self.industry)
+                if self.industry_extension:
+                    log.debug(f"Loaded {self.industry} industry extension")
 
     def _normalize_concept(self, concept: str) -> str:
         """Normalize concept names for matching."""
@@ -1323,13 +1347,48 @@ class EnhancedStatementBuilder:
         Returns:
             MultiPeriodStatement with hierarchical structure and multiple periods
         """
+        from edgar.entity.mappings_loader import get_all_statements_for_concept, get_primary_statement
 
-        # Filter facts by statement type
-        # Handle both 'CashFlow' and 'CashFlowStatement' for compatibility
-        if statement_type == 'CashFlow':
-            stmt_facts = [f for f in facts if f.statement_type in ['CashFlow', 'CashFlowStatement']]
-        else:
-            stmt_facts = [f for f in facts if f.statement_type == statement_type]
+        # Define which statements accept linked concepts from which source statements
+        # Key = target statement, Value = set of source statements that can flow into it
+        ACCEPTS_LINKED_FROM = {
+            'CashFlowStatement': {'IncomeStatement', 'BalanceSheet'},
+            'StatementOfEquity': {'IncomeStatement', 'BalanceSheet'},
+            'ComprehensiveIncome': {'IncomeStatement'},
+            # IncomeStatement and BalanceSheet don't accept linked concepts from other statements
+            'IncomeStatement': set(),
+            'BalanceSheet': set(),
+        }
+
+        def fact_belongs_to_statement(fact, target_stmt_type: str) -> bool:
+            """Check if a fact belongs to a statement type (primary or linked)."""
+            # Normalize statement type names
+            normalized_target = target_stmt_type
+            if target_stmt_type == 'CashFlow':
+                normalized_target = 'CashFlowStatement'
+
+            # Check primary assignment - always include
+            if fact.statement_type == normalized_target:
+                return True
+            if target_stmt_type == 'CashFlow' and fact.statement_type == 'CashFlowStatement':
+                return True
+
+            # Check if concept appears in this statement via linkages
+            concept = fact.concept
+            if ':' in concept:
+                concept = concept.split(':')[-1]
+
+            all_statements = get_all_statements_for_concept(concept)
+            if normalized_target not in all_statements:
+                return False
+
+            # Only include if concept's primary statement flows into target
+            primary = get_primary_statement(concept)
+            accepted_sources = ACCEPTS_LINKED_FROM.get(normalized_target, set())
+            return primary in accepted_sources
+
+        # Filter facts by statement type (including multi-statement concepts from feeder statements)
+        stmt_facts = [f for f in facts if fact_belongs_to_statement(f, statement_type)]
 
         # Use the same logic as FactQuery.latest_periods for consistency
         # Group facts by unique periods and calculate period info
@@ -1613,12 +1672,62 @@ class EnhancedStatementBuilder:
         )
 
 
-    def _build_with_canonical(self, 
+    def _get_merged_virtual_tree(self, virtual_tree_key: str) -> Dict[str, Any]:
+        """
+        Get virtual tree with industry extensions merged if available.
+
+        Args:
+            virtual_tree_key: Statement type key (e.g., 'BalanceSheet')
+
+        Returns:
+            Virtual tree dict, potentially merged with industry extension
+        """
+        import copy
+
+        base_tree = self.virtual_trees.get(virtual_tree_key, {})
+
+        # If no industry extension, return base tree
+        if not self.industry_extension:
+            return base_tree
+
+        # Get industry extension for this statement type
+        industry_stmt = self.industry_extension.get(virtual_tree_key, {})
+        industry_nodes = industry_stmt.get('nodes', {})
+
+        if not industry_nodes:
+            return base_tree
+
+        # Merge industry nodes into base tree
+        merged = copy.deepcopy(base_tree)
+        merged_nodes = merged.get('nodes', {})
+
+        for concept, node_info in industry_nodes.items():
+            if concept not in merged_nodes:
+                # Add industry-specific concept
+                merged_nodes[concept] = node_info
+
+                # Add to parent's children list if parent exists
+                parent = node_info.get('parent')
+                if parent and parent in merged_nodes:
+                    parent_children = merged_nodes[parent].get('children', [])
+                    if concept not in parent_children:
+                        parent_children.append(concept)
+                        merged_nodes[parent]['children'] = parent_children
+
+        merged['nodes'] = merged_nodes
+        log.debug(
+            f"Merged {len(industry_nodes)} {self.industry} concepts into {virtual_tree_key}"
+        )
+
+        return merged
+
+    def _build_with_canonical(self,
                              period_facts: Dict[str, List[FinancialFact]],
                              periods: List[str],
                              virtual_tree_key: str) -> List[MultiPeriodItem]:
         """Build items using canonical structure."""
-        virtual_tree = self.virtual_trees[virtual_tree_key]
+        # Get virtual tree with industry extensions merged
+        virtual_tree = self._get_merged_virtual_tree(virtual_tree_key)
         items = []
 
         # Create fact maps for each period
@@ -1668,6 +1777,13 @@ class EnhancedStatementBuilder:
         # Remove redundant table duplicates for cleaner presentation
         items = self._deduplicate_table_items(items)
 
+        # Filter out empty items and sections for cleaner display
+        items = self._filter_empty_items(items)
+
+        # Reorder Income Statement for logical flow
+        if virtual_tree_key == 'IncomeStatement':
+            items = self._reorder_income_statement(items)
+
         return items
 
     def _build_with_promoted_concepts(self,
@@ -1679,29 +1795,30 @@ class EnhancedStatementBuilder:
         items = []
         nodes = virtual_tree['nodes']
 
-        # Essential revenue/income concepts to promote
-        ESSENTIAL_CONCEPTS = [
-            # Revenue concepts (in priority order)
-            'RevenueFromContractWithCustomerExcludingAssessedTax',
-            'SalesRevenueNet',
-            'Revenues',
-            # Cost concepts
-            'CostOfGoodsAndServicesSold',
-            'CostOfRevenue',
-            # Profit concepts
-            'GrossProfit',
-            'OperatingIncomeLoss',
-            'NetIncomeLoss',
-            # Earnings per share
-            'EarningsPerShareBasic',
-            'EarningsPerShareDiluted'
-        ]
-
-        # Revenue concepts for deduplication (in priority order)
+        # Revenue concepts for deduplication (in priority order - first found wins)
         REVENUE_CONCEPTS = [
             'RevenueFromContractWithCustomerExcludingAssessedTax',
             'SalesRevenueNet',
             'Revenues'
+        ]
+
+        # Cost concepts for deduplication (in priority order - first found wins)
+        COST_CONCEPTS = [
+            'CostOfGoodsAndServicesSold',
+            'CostOfRevenue',
+        ]
+
+        # EPS concepts (deduplicated together, don't need the abstract parent)
+        EPS_CONCEPTS = [
+            'EarningsPerShareBasic',
+            'EarningsPerShareDiluted'
+        ]
+
+        # Profit concepts to promote (no deduplication needed)
+        PROFIT_CONCEPTS = [
+            'GrossProfit',
+            'OperatingIncomeLoss',
+            'NetIncomeLoss',
         ]
 
         # First, add the abstract root for structure
@@ -1719,53 +1836,77 @@ class EnhancedStatementBuilder:
                     # Clear children to rebuild with promoted concepts
                     item.children = []
 
-                    # Handle revenue deduplication first
+                    # Track what we've added to prevent duplicates
                     promoted_added = set()
+
+                    # Handle revenue deduplication (pick first available)
                     revenue_item = self._create_deduplicated_revenue_item(
                         REVENUE_CONCEPTS, nodes, period_maps, periods, statement_type
                     )
                     if revenue_item:
                         item.children.append(revenue_item)
-                        # Mark all revenue concepts as processed
+                        # Mark all revenue concepts as processed (including synonyms)
                         promoted_added.update(REVENUE_CONCEPTS)
 
-                    # Add other promoted concepts that have values
-                    for concept in ESSENTIAL_CONCEPTS:
-                        if concept not in promoted_added and concept in nodes:
-                            # Check if it has values in any period
-                            has_values = any(
-                                concept in period_maps[p] for p in periods
-                            )
-                            if has_values:
-                                promoted_item = self._build_canonical_item(
-                                    concept,
-                                    nodes,
-                                    period_maps,
-                                    periods,
-                                    depth=1,
-                                    statement_type=statement_type
-                                )
-                                if promoted_item:
-                                    # Override label for better display
-                                    if concept == 'CostOfGoodsAndServicesSold':
-                                        promoted_item.label = 'Cost of Revenue'
+                    # Handle cost deduplication (pick first available, display as "Cost of Revenue")
+                    cost_item = self._create_deduplicated_concept_item(
+                        COST_CONCEPTS, nodes, period_maps, periods, statement_type,
+                        display_label='Cost of Revenue'
+                    )
+                    if cost_item:
+                        item.children.append(cost_item)
+                        promoted_added.update(COST_CONCEPTS)
 
-                                    promoted_item.children = []  # Don't show deep hierarchy
-                                    item.children.append(promoted_item)
+                    # Add profit concepts
+                    for concept in PROFIT_CONCEPTS:
+                        if concept in nodes:
+                            has_values = any(concept in period_maps[p] for p in periods)
+                            if has_values:
+                                profit_item = self._build_canonical_item(
+                                    concept, nodes, period_maps, periods,
+                                    depth=1, statement_type=statement_type
+                                )
+                                if profit_item:
+                                    profit_item.children = []  # Don't show deep hierarchy
+                                    item.children.append(profit_item)
                                     promoted_added.add(concept)
 
-                    # Then add other important concepts not in essential list
+                    # Add EPS concepts individually (skip abstract parent)
+                    for concept in EPS_CONCEPTS:
+                        if concept in nodes:
+                            has_values = any(concept in period_maps[p] for p in periods)
+                            if has_values:
+                                eps_item = self._build_canonical_item(
+                                    concept, nodes, period_maps, periods,
+                                    depth=1, statement_type=statement_type
+                                )
+                                if eps_item:
+                                    eps_item.children = []
+                                    item.children.append(eps_item)
+                                    promoted_added.add(concept)
+                    # Mark EPS abstract as processed to prevent duplicate section
+                    promoted_added.add('EarningsPerShareAbstract')
+
+                    # Then add other concepts from canonical tree that weren't promoted
                     for child_concept in nodes.get(root_concept, {}).get('children', []):
                         if child_concept not in promoted_added:
+                            # Skip abstract parents if all their children were already promoted
+                            if 'Abstract' in child_concept:
+                                child_children = nodes.get(child_concept, {}).get('children', [])
+                                if all(c in promoted_added for c in child_children):
+                                    promoted_added.add(child_concept)
+                                    continue
+
                             child_item = self._build_canonical_item(
-                                child_concept,
-                                nodes,
-                                period_maps,
-                                periods,
-                                depth=1,
-                                statement_type=statement_type
+                                child_concept, nodes, period_maps, periods,
+                                depth=1, statement_type=statement_type
                             )
                             if child_item:
+                                # Filter out any promoted concepts from children (recursive dedup)
+                                child_item.children = [
+                                    c for c in child_item.children
+                                    if c.concept not in promoted_added
+                                ]
                                 item.children.append(child_item)
 
                     items.append(item)
@@ -1786,6 +1927,43 @@ class EnhancedStatementBuilder:
                     items.append(item)
 
         return items
+
+    def _create_deduplicated_concept_item(self,
+                                         concepts: List[str],
+                                         nodes: Dict[str, Any],
+                                         period_maps: Dict[str, Dict[str, FinancialFact]],
+                                         periods: List[str],
+                                         statement_type: str,
+                                         display_label: str = None) -> Optional[MultiPeriodItem]:
+        """
+        Create a single item from multiple synonym concepts, picking first available.
+
+        Args:
+            concepts: List of concept names in priority order
+            nodes: Virtual tree nodes
+            period_maps: Period to fact mapping
+            periods: List of periods
+            statement_type: Statement type
+            display_label: Optional label to use for display (overrides concept label)
+
+        Returns:
+            MultiPeriodItem for the first concept with values, or None
+        """
+        for concept in concepts:
+            if concept not in nodes:
+                continue
+            has_values = any(concept in period_maps[p] for p in periods)
+            if has_values:
+                item = self._build_canonical_item(
+                    concept, nodes, period_maps, periods,
+                    depth=1, statement_type=statement_type
+                )
+                if item:
+                    if display_label:
+                        item.label = display_label
+                    item.children = []  # Don't show deep hierarchy
+                    return item
+        return None
 
     def _create_deduplicated_revenue_item(self,
                                         revenue_concepts: List[str],
@@ -2311,6 +2489,138 @@ class EnhancedStatementBuilder:
                 cleaned_items.append(cleaned_item)
 
         return cleaned_items
+
+    def _filter_empty_items(self, items: List[MultiPeriodItem]) -> List[MultiPeriodItem]:
+        """
+        Filter out items with no values and empty abstract sections.
+
+        This removes:
+        - Non-abstract items where all period values are None
+        - Abstract sections where all children have been filtered out
+        """
+        def item_has_values(item: MultiPeriodItem) -> bool:
+            """Check if item has any non-None values."""
+            return any(v is not None for v in item.values.values())
+
+        def filter_item(item: MultiPeriodItem) -> Optional[MultiPeriodItem]:
+            """Recursively filter an item and its children."""
+            # First, filter children
+            filtered_children = []
+            for child in item.children:
+                filtered_child = filter_item(child)
+                if filtered_child:
+                    filtered_children.append(filtered_child)
+
+            item.children = filtered_children
+
+            # For abstract items, keep only if they have children with values
+            if item.is_abstract:
+                if filtered_children:
+                    return item
+                else:
+                    return None
+
+            # For data items, keep if they have values OR children with values
+            if item_has_values(item) or filtered_children:
+                return item
+
+            return None
+
+        # Filter all top-level items
+        filtered_items = []
+        for item in items:
+            filtered_item = filter_item(item)
+            if filtered_item:
+                filtered_items.append(filtered_item)
+
+        return filtered_items
+
+    def _reorder_income_statement(self, items: List[MultiPeriodItem]) -> List[MultiPeriodItem]:
+        """
+        Reorder Income Statement items for logical flow.
+
+        Desired order:
+        1. Revenue
+        2. Cost of Revenue
+        3. Gross Profit (if present/calculated)
+        4. Operating Expenses
+        5. Operating Income
+        6. Other Income/Expense
+        7. Income Before Tax
+        8. Tax
+        9. Net Income
+        10. EPS
+        """
+        # Find the main abstract container
+        main_container = None
+        other_items = []
+
+        for item in items:
+            if item.is_abstract and 'Statement' in item.label and 'Abstract' in item.label:
+                main_container = item
+            else:
+                other_items.append(item)
+
+        if not main_container:
+            return items
+
+        # Define the preferred order of concepts
+        concept_order = [
+            # Revenue first
+            'RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues', 'SalesRevenueNet', 'TotalRevenue',
+            # Cost of Revenue
+            'CostOfGoodsAndServicesSold', 'CostOfRevenue',
+            # Gross Profit (calculated or actual)
+            'GrossProfit', 'GrossProfit_Calculated',
+            # Operating Expenses section
+            'OperatingExpensesAbstract', 'OperatingExpenses',
+            # Key expense items
+            'ResearchAndDevelopmentExpense', 'SellingGeneralAndAdministrativeExpense',
+            # Operating Income
+            'OperatingIncomeLoss',
+            # Other income/expense
+            'OtherNonoperatingIncomeExpense', 'NonoperatingIncomeExpense',
+            # Income before tax
+            'IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest',
+            # Tax
+            'IncomeTaxExpenseBenefit',
+            # Non-controlling interest
+            'NetIncomeLossAttributableToNoncontrollingInterest',
+            # Net Income
+            'NetIncomeLoss', 'NetIncomeLossAvailableToCommonStockholdersBasic',
+            # EPS
+            'EarningsPerShareBasic', 'EarningsPerShareDiluted',
+        ]
+
+        def get_sort_key(item: MultiPeriodItem) -> int:
+            """Get sort key for an item based on concept order."""
+            concept = item.concept or ''
+            try:
+                return concept_order.index(concept)
+            except ValueError:
+                # Unknown concepts go at the end, but before calculated items
+                if 'Calculated' in concept:
+                    return 900
+                return 800
+
+        # Sort children of main container
+        main_container.children.sort(key=get_sort_key)
+
+        # Move Gross Profit (Calculated) into main container if it's in other_items
+        new_other_items = []
+        for item in other_items:
+            if item.concept == 'GrossProfit_Calculated':
+                # Insert after Cost of Revenue in main container children
+                insert_idx = 0
+                for i, child in enumerate(main_container.children):
+                    if child.concept in ['CostOfGoodsAndServicesSold', 'CostOfRevenue']:
+                        insert_idx = i + 1
+                        break
+                main_container.children.insert(insert_idx, item)
+            else:
+                new_other_items.append(item)
+
+        return [main_container] + new_other_items
 
     def _should_aggregate_children(self, item: MultiPeriodItem) -> bool:
         """Determine if children should be aggregated for this parent."""

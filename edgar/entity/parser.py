@@ -24,40 +24,7 @@ class EntityFactsParser:
     the new unified fact model with proper typing and AI-ready metadata.
     """
 
-    # Concept mapping for common financial statement items
-    STATEMENT_MAPPING = {
-        # Income Statement
-        'Revenue': 'IncomeStatement',
-        'Revenues': 'IncomeStatement',  # Fix for Issue #438 - ensure us-gaap:Revenues maps properly
-        'RevenueFromContractWithCustomerExcludingAssessedTax': 'IncomeStatement',
-        'SalesRevenueNet': 'IncomeStatement',
-        'CostOfRevenue': 'IncomeStatement',
-        'GrossProfit': 'IncomeStatement',
-        'OperatingExpenses': 'IncomeStatement',
-        'OperatingIncomeLoss': 'IncomeStatement',
-        'NetIncomeLoss': 'IncomeStatement',
-        'EarningsPerShareDiluted': 'IncomeStatement',
-
-        # Balance Sheet
-        'Assets': 'BalanceSheet',
-        'AssetsCurrent': 'BalanceSheet',
-        'CurrentAssets': 'BalanceSheet',
-        'AssetsNoncurrent': 'BalanceSheet',
-        'Liabilities': 'BalanceSheet',
-        'LiabilitiesCurrent': 'BalanceSheet',
-        'CurrentLiabilities': 'BalanceSheet',
-        'LiabilitiesNoncurrent': 'BalanceSheet',
-        'StockholdersEquity': 'BalanceSheet',
-        'CashAndCashEquivalentsAtCarryingValue': 'BalanceSheet',
-
-        # Cash Flow
-        'NetCashProvidedByUsedInOperatingActivities': 'CashFlow',
-        'NetCashProvidedByUsedInInvestingActivities': 'CashFlow',
-        'NetCashProvidedByUsedInFinancingActivities': 'CashFlow',
-        'CashAndCashEquivalentsPeriodIncreaseDecrease': 'CashFlow'
-    }
-
-    # Semantic tags for concepts
+    # Semantic tags for concepts (used for search and categorization)
     SEMANTIC_TAGS = {
         'Revenue': ['revenue', 'sales', 'operating'],
         'NetIncomeLoss': ['profit', 'earnings', 'bottom_line'],
@@ -260,29 +227,21 @@ class EntityFactsParser:
         """
         Determine which financial statement a concept belongs to.
 
-        First checks static mappings, then falls back to learned mappings
-        with confidence threshold.
+        Uses the unified concept mapper which combines:
+        - concept_linkages.json (multi-statement concepts)
+        - learned_mappings.json (learned from XBRL analysis)
+        - fallback mappings (common US-GAAP concepts)
         """
         # Remove namespace if present
         if ':' in concept:
             concept = concept.split(':')[-1]
 
-        # Check static mappings first (highest confidence)
-        if concept in cls.STATEMENT_MAPPING:
-            return cls.STATEMENT_MAPPING[concept]
-
-        # Check learned mappings
         try:
-            learned_mappings = load_learned_mappings()
-            if concept in learned_mappings:
-                mapping = learned_mappings[concept]
-                # Only use high-confidence learned mappings
-                if mapping.get('confidence', 0) >= 0.5:  # 50% threshold
-                    return mapping['statement_type']
+            from edgar.entity.mappings_loader import get_primary_statement
+            return get_primary_statement(concept)
         except Exception as e:
-            log.debug("Error loading learned mappings: %s", e)
-
-        return None
+            log.debug("Error getting primary statement from mapper: %s", e)
+            return None
 
     @classmethod
     def _get_semantic_tags(cls, concept: str) -> List[str]:
