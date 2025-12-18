@@ -7,6 +7,83 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.4.0] - 2025-12-18
+
+### Added
+
+- **Industry Extensions for EntityFacts** (#multiple commits)
+  - Added 9 new industry extensions: realestate, utilities, telecom, transportation, aerospace, hospitality, mining, automotive, consumergoods
+  - Total of 15 industry extensions covering 396 industry-specific concepts
+  - **Files**: `edgar/entity/industry_extensions/`, concept linkage data files
+  - **Impact**: Enhanced financial statement generation from EntityFacts with industry-specific metrics
+  - **Example**: Real estate companies now show industry-specific concepts like rental income, occupancy rates
+
+- **Unified JSON-based Concept-to-Statement Mapper** (#87417626, #0194c030)
+  - Implemented unified concept mapper with multi-statement support
+  - JSON-based configuration for flexible concept-to-statement mappings
+  - Supports concepts appearing in multiple financial statements
+  - **Files**: `edgar/xbrl/concept_mapper.py`, concept linkage JSON files
+  - **Impact**: More accurate and maintainable statement classification
+  - **Example**: Concepts can now be correctly mapped to multiple statement types
+
+- **Concept Linkages and Industry Extension Data Files** (#87417626)
+  - Added initial 6 industry extension data files with concept linkages
+  - Statement linkage constants moved to module level for better organization
+  - **Files**: `edgar/entity/industry_extensions/*.json`
+  - **Impact**: Foundation for industry-specific financial statement generation
+
+- **EntityFacts API Stability Tests** (#9c8b0335)
+  - Added 48 comprehensive tests for EntityFacts API stability
+  - Validates EntityFacts functionality across different company types
+  - **Files**: `tests/entity/test_entity_facts_api.py`
+  - **Impact**: Ensures reliable EntityFacts API behavior
+
+### Fixed
+
+- **Regression Tests for Unified Concept Mapper API** (#0194c030)
+  - Updated regression tests to use new unified concept mapper API
+  - Ensures backward compatibility with existing code
+  - **Files**: `tests/regression/`
+  - **Impact**: Maintains test coverage with new mapper implementation
+
+- **Income Statement Test Parameter** (#e1e586ef)
+  - Updated test_income_statement to use annual=False parameter
+  - Aligns with current API expectations
+  - **Files**: `tests/test_income_statement.py`
+  - **Impact**: Fixes failing test case
+
+- **Code Quality Issues** (#multiple commits)
+  - Addressed ruff linter issues across codebase
+  - Fixed type checker warnings and errors
+  - **Impact**: Improved code quality and maintainability
+
+### Changed
+
+- **Statement Linkage Constants Refactored** (#87417626)
+  - Moved statement linkage constants to module level
+  - Better code organization and maintainability
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Cleaner code structure
+
+### Code Quality
+
+- **Code Cleanup** (#210e9ac0)
+  - Pruned reproduction tests no longer needed
+  - Removed obsolete test code
+  - **Impact**: Leaner test suite, faster test execution
+
+### Summary
+
+Release 5.4.0 is a feature release significantly expanding EntityFacts capabilities with industry-specific extensions. Key highlights:
+
+- 9 new industry extensions (15 total) covering 396 industry-specific concepts
+- Unified JSON-based concept mapper with multi-statement support
+- 48 new EntityFacts API stability tests
+- Enhanced financial statement generation for industry-specific metrics
+- Code quality improvements and test suite cleanup
+
+This release maintains full backward compatibility with v5.3.x while adding powerful new capabilities for industry-specific financial analysis.
+
 ## [5.3.2] - 2025-12-17
 
 ### Fixed
