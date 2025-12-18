@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Maps SIC codes to industry categories for virtual tree extensions",
+    "generated": "2025-12-17"
+  },
+  "industries": {
+    "banking": {
+      "name": "Banking & Financial Services",
+      "sic_ranges": [[6020, 6029]],
+      "extension_file": "banking.json",
+      "description": "Commercial banks, savings institutions"
+    },
+    "tech": {
+      "name": "Technology & Software",
+      "sic_ranges": [[7370, 7379], [3570, 3579]],
+      "extension_file": "tech.json",
+      "description": "Software, computer services, hardware"
+    },
+    "healthcare": {
+      "name": "Healthcare & Pharmaceuticals",
+      "sic_ranges": [[2833, 2836], [8000, 8099]],
+      "extension_file": "healthcare.json",
+      "description": "Pharmaceuticals, biotechnology, health services"
+    },
+    "energy": {
+      "name": "Energy & Oil/Gas",
+      "sic_ranges": [[1300, 1399], [4900, 4949]],
+      "extension_file": "energy.json",
+      "description": "Oil & gas extraction, utilities"
+    },
+    "insurance": {
+      "name": "Insurance",
+      "sic_ranges": [[6300, 6399]],
+      "extension_file": "insurance.json",
+      "description": "Insurance carriers and agents"
+    },
+    "retail": {
+      "name": "Retail Trade",
+      "sic_ranges": [[5200, 5999]],
+      "extension_file": "retail.json",
+      "description": "Retail stores, e-commerce"
+    }
+  }
+}

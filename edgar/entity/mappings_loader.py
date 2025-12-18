@@ -295,6 +295,8 @@ def load_concept_linkages() -> Dict[str, Any]:
 
 # Common concept mappings not covered by learned data
 # These are standard US-GAAP concepts with well-known statement assignments
+
+
 _FALLBACK_CONCEPT_MAPPINGS = {
     # Income Statement
     'Revenue': 'IncomeStatement',
