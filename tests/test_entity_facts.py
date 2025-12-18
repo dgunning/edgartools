@@ -306,8 +306,9 @@ class TestEntityFacts:
     
     def test_income_statement(self, entity_facts):
         """Test getting income statement data"""
-        df = entity_facts.income_statement(periods=4).to_dataframe()
-        
+        # Use annual=False since test data has quarterly data (annual needs >= 5 facts per period)
+        df = entity_facts.income_statement(periods=4, annual=False).to_dataframe()
+
         # Should return pivoted data
         assert not df.empty
         assert df.index.name == "concept"
