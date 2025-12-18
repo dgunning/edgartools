@@ -48,7 +48,7 @@ INDUSTRIES = {
     },
     'energy': {
         'name': 'Energy & Oil/Gas',
-        'sic_ranges': [(1300, 1399), (4900, 4949)],
+        'sic_ranges': [(1300, 1399)],
         'min_companies': 50,
     },
     'insurance': {
@@ -60,6 +60,51 @@ INDUSTRIES = {
         'name': 'Retail Trade',
         'sic_ranges': [(5200, 5999)],
         'min_companies': 50,
+    },
+    'realestate': {
+        'name': 'Real Estate & REITs',
+        'sic_ranges': [(6500, 6553), (6798, 6798)],
+        'min_companies': 50,
+    },
+    'utilities': {
+        'name': 'Utilities',
+        'sic_ranges': [(4910, 4941)],
+        'min_companies': 50,
+    },
+    'consumergoods': {
+        'name': 'Consumer Goods',
+        'sic_ranges': [(2000, 2399)],
+        'min_companies': 50,
+    },
+    'telecom': {
+        'name': 'Telecommunications',
+        'sic_ranges': [(4810, 4899)],
+        'min_companies': 30,
+    },
+    'transportation': {
+        'name': 'Transportation',
+        'sic_ranges': [(4000, 4799)],
+        'min_companies': 50,
+    },
+    'aerospace': {
+        'name': 'Aerospace & Defense',
+        'sic_ranges': [(3720, 3729), (3760, 3769)],
+        'min_companies': 30,
+    },
+    'hospitality': {
+        'name': 'Hospitality',
+        'sic_ranges': [(7010, 7041)],
+        'min_companies': 30,
+    },
+    'mining': {
+        'name': 'Mining & Materials',
+        'sic_ranges': [(1000, 1299), (1400, 1499)],
+        'min_companies': 50,
+    },
+    'automotive': {
+        'name': 'Automotive',
+        'sic_ranges': [(3710, 3716)],
+        'min_companies': 30,
     },
 }
 

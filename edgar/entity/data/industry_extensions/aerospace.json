@@ -1,0 +1,219 @@
+{
+  "metadata": {
+    "industry": "aerospace",
+    "industry_name": "Aerospace & Defense",
+    "sic_ranges": [
+      [
+        3720,
+        3729
+      ],
+      [
+        3760,
+        3769
+      ]
+    ],
+    "companies_analyzed": 30,
+    "min_occurrence_rate": 0.3,
+    "generated": "2025-12-18T15:12:12.609130"
+  },
+  "BalanceSheet": {
+    "statement_type": "BalanceSheet",
+    "nodes": {
+      "ContractWithCustomerLiabilityCurrent": {
+        "concept": "ContractWithCustomerLiabilityCurrent",
+        "label": "Contract liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.3333333333333335,
+        "occurrence_rate": 0.4667,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LongTermDebtNoncurrent": {
+        "concept": "LongTermDebtNoncurrent",
+        "label": "Long Term Debt",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.0833333333333335,
+        "occurrence_rate": 0.3667,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherAssetsCurrent": {
+        "concept": "OtherAssetsCurrent",
+        "label": "Other Current Assets",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 4.0,
+        "occurrence_rate": 0.4,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "DeferredIncomeTaxAssetsNet": {
+        "concept": "DeferredIncomeTaxAssetsNet",
+        "label": "Deferred Tax Assets",
+        "parent": "AssetsAbstract",
+        "depth": 2.8,
+        "occurrence_rate": 0.3333,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AccruedLiabilitiesCurrent": {
+        "concept": "AccruedLiabilitiesCurrent",
+        "label": "Accrued Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.5,
+        "occurrence_rate": 0.4667,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "OtherLiabilitiesCurrent": {
+        "concept": "OtherLiabilitiesCurrent",
+        "label": "Other Current Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.761904761904762,
+        "occurrence_rate": 0.4,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "ContractWithCustomerAssetNetCurrent": {
+        "concept": "ContractWithCustomerAssetNetCurrent",
+        "label": "Contract assets",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.111111111111111,
+        "occurrence_rate": 0.3,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "IncomeStatement": {
+    "statement_type": "IncomeStatement",
+    "nodes": {
+      "GrossProfit": {
+        "concept": "GrossProfit",
+        "label": "Gross Profit",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.1052631578947367,
+        "occurrence_rate": 0.5667,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "ResearchAndDevelopmentExpense": {
+        "concept": "ResearchAndDevelopmentExpense",
+        "label": "Research and Development Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.5609756097560976,
+        "occurrence_rate": 0.5,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "CostOfRevenue": {
+        "concept": "CostOfRevenue",
+        "label": "Total Cost of Revenue",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.7777777777777777,
+        "occurrence_rate": 0.3,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "CashFlowStatement": {
+    "statement_type": "CashFlowStatement",
+    "nodes": {
+      "IncreaseDecreaseInContractWithCustomerLiability": {
+        "concept": "IncreaseDecreaseInContractWithCustomerLiability",
+        "label": "Contract liabilities",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.5714285714285716,
+        "occurrence_rate": 0.4667,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ProceedsFromIssuanceOfCommonStock": {
+        "concept": "ProceedsFromIssuanceOfCommonStock",
+        "label": "Proceeds from Issuance of Common Stock",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.814814814814815,
+        "occurrence_rate": 0.4667,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInOperatingLeaseLiability": {
+        "concept": "IncreaseDecreaseInOperatingLeaseLiability",
+        "label": "Operating lease liabilities",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.4444444444444446,
+        "occurrence_rate": 0.3,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInContractWithCustomerAsset": {
+        "concept": "IncreaseDecreaseInContractWithCustomerAsset",
+        "label": "Contract assets",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.066666666666666,
+        "occurrence_rate": 0.4333,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PaymentsOfDebtIssuanceCosts": {
+        "concept": "PaymentsOfDebtIssuanceCosts",
+        "label": "Debt issuance costs",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.3076923076923075,
+        "occurrence_rate": 0.3667,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "StatementOfEquity": {
+    "statement_type": "StatementOfEquity",
+    "nodes": {
+      "StockIssuedDuringPeriodSharesNewIssues": {
+        "concept": "StockIssuedDuringPeriodSharesNewIssues",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.296296296296297,
+        "occurrence_rate": 0.4667,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "StockIssuedDuringPeriodSharesStockOptionsExercised": {
+        "concept": "StockIssuedDuringPeriodSharesStockOptionsExercised",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.555555555555555,
+        "occurrence_rate": 0.3,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "StockIssuedDuringPeriodValueStockOptionsExercised": {
+        "concept": "StockIssuedDuringPeriodValueStockOptionsExercised",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.333333333333333,
+        "occurrence_rate": 0.3667,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  }
+}

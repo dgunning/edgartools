@@ -1,0 +1,170 @@
+{
+  "metadata": {
+    "industry": "automotive",
+    "industry_name": "Automotive",
+    "sic_ranges": [
+      [
+        3710,
+        3716
+      ]
+    ],
+    "companies_analyzed": 68,
+    "min_occurrence_rate": 0.3,
+    "generated": "2025-12-18T15:12:53.754726"
+  },
+  "BalanceSheet": {
+    "statement_type": "BalanceSheet",
+    "nodes": {
+      "DeferredIncomeTaxAssetsNet": {
+        "concept": "DeferredIncomeTaxAssetsNet",
+        "label": "Deferred Tax Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.1666666666666665,
+        "occurrence_rate": 0.3235,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AccruedLiabilitiesCurrent": {
+        "concept": "AccruedLiabilitiesCurrent",
+        "label": "Accrued Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.933333333333333,
+        "occurrence_rate": 0.3676,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "OtherLiabilitiesCurrent": {
+        "concept": "OtherLiabilitiesCurrent",
+        "label": "Other Current Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.673469387755102,
+        "occurrence_rate": 0.3824,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherAssetsCurrent": {
+        "concept": "OtherAssetsCurrent",
+        "label": "Other Current Assets",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.823529411764706,
+        "occurrence_rate": 0.4118,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LongTermDebtNoncurrent": {
+        "concept": "LongTermDebtNoncurrent",
+        "label": "Long Term Debt",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 2.9743589743589745,
+        "occurrence_rate": 0.3382,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "IncomeStatement": {
+    "statement_type": "IncomeStatement",
+    "nodes": {
+      "GrossProfit": {
+        "concept": "GrossProfit",
+        "label": "Gross Profit",
+        "parent": "IncomeStatementAbstract",
+        "depth": 1.936842105263158,
+        "occurrence_rate": 0.7206,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "ResearchAndDevelopmentExpense": {
+        "concept": "ResearchAndDevelopmentExpense",
+        "label": "Research and Development Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 2.9210526315789473,
+        "occurrence_rate": 0.3529,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OperatingExpenses": {
+        "concept": "OperatingExpenses",
+        "label": "Operating Expenses",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.4347826086956523,
+        "occurrence_rate": 0.4265,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "CostOfRevenue": {
+        "concept": "CostOfRevenue",
+        "label": "Total Cost of Revenue",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.4081632653061225,
+        "occurrence_rate": 0.3088,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "CashFlowStatement": {
+    "statement_type": "CashFlowStatement",
+    "nodes": {
+      "Depreciation": {
+        "concept": "Depreciation",
+        "label": "Depreciation and Amortization",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.2222222222222223,
+        "occurrence_rate": 0.3088,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets": {
+        "concept": "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+        "label": "Prepaid expenses and other assets",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.782608695652174,
+        "occurrence_rate": 0.3235,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "StatementOfEquity": {
+    "statement_type": "StatementOfEquity",
+    "nodes": {
+      "SharesOutstanding": {
+        "concept": "SharesOutstanding",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 3.8666666666666667,
+        "occurrence_rate": 0.3088,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "ComprehensiveIncome": {
+    "statement_type": "ComprehensiveIncome",
+    "nodes": {
+      "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax": {
+        "concept": "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+        "label": "Foreign currency translation adjustments",
+        "parent": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "depth": 2.5306122448979593,
+        "occurrence_rate": 0.3529,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  }
+}

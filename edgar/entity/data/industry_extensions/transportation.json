@@ -1,0 +1,260 @@
+{
+  "metadata": {
+    "industry": "transportation",
+    "industry_name": "Transportation",
+    "sic_ranges": [
+      [
+        4000,
+        4799
+      ]
+    ],
+    "companies_analyzed": 47,
+    "min_occurrence_rate": 0.3,
+    "generated": "2025-12-18T15:12:37.489690"
+  },
+  "BalanceSheet": {
+    "statement_type": "BalanceSheet",
+    "nodes": {
+      "OtherAssetsCurrent": {
+        "concept": "OtherAssetsCurrent",
+        "label": "Other Current Assets",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 4.173913043478261,
+        "occurrence_rate": 0.4043,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LongTermDebtCurrent": {
+        "concept": "LongTermDebtCurrent",
+        "label": "Short Term Debt",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.411764705882353,
+        "occurrence_rate": 0.4468,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AccruedLiabilitiesCurrent": {
+        "concept": "AccruedLiabilitiesCurrent",
+        "label": "Accrued Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.357142857142857,
+        "occurrence_rate": 0.4681,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ContractWithCustomerLiabilityCurrent": {
+        "concept": "ContractWithCustomerLiabilityCurrent",
+        "label": "Air traffic liability",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.7407407407407405,
+        "occurrence_rate": 0.3617,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LongTermDebtNoncurrent": {
+        "concept": "LongTermDebtNoncurrent",
+        "label": "Long Term Debt",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.629032258064516,
+        "occurrence_rate": 0.4681,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherLiabilitiesCurrent": {
+        "concept": "OtherLiabilitiesCurrent",
+        "label": "Other Current Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.588235294117647,
+        "occurrence_rate": 0.4255,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "IncomeStatement": {
+    "statement_type": "IncomeStatement",
+    "nodes": {
+      "srt_ProductOrServiceAxis": {
+        "concept": "srt_ProductOrServiceAxis",
+        "label": "Product and Service [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "occurrence_rate": 0.4043,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "srt_ProductsAndServicesDomain": {
+        "concept": "srt_ProductsAndServicesDomain",
+        "label": "Product and Service [Domain]",
+        "parent": "srt_ProductOrServiceAxis",
+        "depth": 3.0,
+        "occurrence_rate": 0.4043,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "CostsAndExpensesAbstract": {
+        "concept": "CostsAndExpensesAbstract",
+        "label": "Costs and expenses:",
+        "parent": "StatementLineItems",
+        "depth": 2.3333333333333335,
+        "occurrence_rate": 0.383,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "DepreciationAndAmortization": {
+        "concept": "DepreciationAndAmortization",
+        "label": "Depreciation and Amortization",
+        "parent": "CostsAndExpensesAbstract",
+        "depth": 3.7454545454545456,
+        "occurrence_rate": 0.4255,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "CostsAndExpenses": {
+        "concept": "CostsAndExpenses",
+        "label": "Costs and Expenses",
+        "parent": "CostsAndExpensesAbstract",
+        "depth": 3.608695652173913,
+        "occurrence_rate": 0.4894,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "NonoperatingIncomeExpenseAbstract": {
+        "concept": "NonoperatingIncomeExpenseAbstract",
+        "label": "Other income (expense):",
+        "parent": "StatementLineItems",
+        "depth": 2.05,
+        "occurrence_rate": 0.4255,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "InvestmentIncomeInterest": {
+        "concept": "InvestmentIncomeInterest",
+        "label": "Interest income",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.466666666666667,
+        "occurrence_rate": 0.4043,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "NonoperatingIncomeExpense": {
+        "concept": "NonoperatingIncomeExpense",
+        "label": "Nonoperating Income/Expense",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.3636363636363638,
+        "occurrence_rate": 0.5745,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "GeneralAndAdministrativeExpense": {
+        "concept": "GeneralAndAdministrativeExpense",
+        "label": "General and Administrative Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.619047619047619,
+        "occurrence_rate": 0.383,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LaborAndRelatedExpense": {
+        "concept": "LaborAndRelatedExpense",
+        "label": "Salaries, wages and benefits",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.849056603773585,
+        "occurrence_rate": 0.383,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OperatingExpenses": {
+        "concept": "OperatingExpenses",
+        "label": "Operating Expenses",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 4.085714285714285,
+        "occurrence_rate": 0.3404,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      }
+    }
+  },
+  "CashFlowStatement": {
+    "statement_type": "CashFlowStatement",
+    "nodes": {
+      "GainsLossesOnExtinguishmentOfDebt": {
+        "concept": "GainsLossesOnExtinguishmentOfDebt",
+        "label": "Loss on extinguishment of debt",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.8378378378378377,
+        "occurrence_rate": 0.3404,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInContractWithCustomerLiability": {
+        "concept": "IncreaseDecreaseInContractWithCustomerLiability",
+        "label": "Customer deposits",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.304347826086956,
+        "occurrence_rate": 0.3617,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ProceedsFromSaleOfPropertyPlantAndEquipment": {
+        "concept": "ProceedsFromSaleOfPropertyPlantAndEquipment",
+        "label": "Proceeds from the sale of property and equipment",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.85,
+        "occurrence_rate": 0.3617,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ProceedsFromIssuanceOfLongTermDebt": {
+        "concept": "ProceedsFromIssuanceOfLongTermDebt",
+        "label": "Proceeds from Issuance of Long-Term Debt",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 3.130434782608696,
+        "occurrence_rate": 0.3191,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets": {
+        "concept": "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+        "label": "Prepaid expenses and other assets",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.9047619047619047,
+        "occurrence_rate": 0.4043,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherNoncashIncomeExpense": {
+        "concept": "OtherNoncashIncomeExpense",
+        "label": "Other",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.4375,
+        "occurrence_rate": 0.3191,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  }
+}
