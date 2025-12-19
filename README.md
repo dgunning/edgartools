@@ -95,13 +95,6 @@ EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR d
   <img src="docs/images/how-it-works.svg" alt="EdgarTools transforms SEC EDGAR complexity into clean Python code">
 </p>
 
-<details>
-<summary><b>View Detailed Architecture</b></summary>
-
-For a comprehensive view of EdgarTools' internal architecture, see the [Architecture Documentation](docs/architecture-diagram.md).
-
-</details>
-
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
