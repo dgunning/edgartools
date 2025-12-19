@@ -11,6 +11,32 @@ There are times when you want to minimize or eliminate these requests:
 
 **edgartools** provides comprehensive local storage capabilities to address these needs.
 
+## Understanding What Gets Downloaded
+
+!!! warning "Important: Metadata vs Filing Content"
+
+    **edgartools has two separate download functions that serve different purposes:**
+
+    | Function | What it downloads | Size | Use case |
+    |----------|-------------------|------|----------|
+    | `download_edgar_data()` | **Metadata only**: company info, filing indexes, financial facts from SEC's bulk APIs | ~24 GB | Company lookups, `EntityFacts` financials, browsing filing lists |
+    | `download_filings()` | **Actual filing documents**: the complete filing content including XBRL files | Varies | Parsing `filing.xbrl()`, reading filing text, document analysis |
+
+    **Common misconception**: Running `download_edgar_data()` does NOT give you offline access to XBRL data from individual filings. The financial facts from `download_edgar_data()` come from SEC's pre-processed CompanyFacts API, which is different from parsing XBRL directly from filings.
+
+    **For offline XBRL access**, you must also run `download_filings()` to download the actual filing documents.
+
+### Quick Reference: What Do I Need?
+
+| I want to... | Function needed |
+|--------------|-----------------|
+| Look up companies by ticker/CIK offline | `download_edgar_data(reference=True)` |
+| Use `company.get_facts()` / `EntityFacts` offline | `download_edgar_data(facts=True)` |
+| Browse filing lists offline | `download_edgar_data(submissions=True)` |
+| Parse `filing.xbrl()` offline | `download_filings()` |
+| Read filing HTML/text offline | `download_filings()` |
+| Analyze filing attachments offline | `download_filings()` |
+
 ## Supported Local Data Types
 
 | Data Type               | Description                                                        |
@@ -194,14 +220,31 @@ import os
 os.makedirs("~/research/edgar_offline", exist_ok=True)
 use_local_storage("~/research/edgar_offline")
 
-# Download comprehensive dataset
-download_edgar_data()  # All bulk data
+# Step 1: Download metadata (company info, filing indexes, facts API data)
+download_edgar_data()  # ~24 GB - enables company lookups and EntityFacts
+
+# Step 2: Download actual filing documents for XBRL parsing
+# This is required if you want to use filing.xbrl() offline!
 download_filings("2024-01-01:2024-12-31")  # Full year of filings
 
 # Now works completely offline
 from edgar import Company, get_filings
-companies = get_filings(form="10-K", year=2024)  # From local storage
+
+# These work with just download_edgar_data():
+company = Company("AAPL")           # Company lookup
+facts = company.get_facts()         # EntityFacts from bulk API
+filings = get_filings(form="10-K")  # Filing list browsing
+
+# This requires download_filings():
+for filing in filings:
+    xbrl = filing.xbrl()            # Parses actual filing document
 ```
+
+!!! tip "Storage Planning"
+
+    - `download_edgar_data()`: ~24 GB one-time download
+    - `download_filings()`: ~100-500 MB per day of filings
+    - A full year of filings: ~50-150 GB depending on form types
 
 ## Filtering Downloads
 
@@ -358,6 +401,35 @@ if is_using_local_storage():
 else:
     print("Using remote SEC data")
     # Enable if needed: use_local_storage(True)
+```
+
+**Network timeout when calling `filing.xbrl()` after `download_edgar_data()`:**
+
+This is a common misconception. `download_edgar_data()` only downloads metadata (company info, filing indexes, facts API data). It does **not** download the actual filing documents needed for `filing.xbrl()`.
+
+```python
+# ❌ This won't work offline - download_edgar_data() doesn't include filing content
+download_edgar_data()
+filing = get_filings()[0]
+xbrl = filing.xbrl()  # Still needs network access!
+
+# ✅ You need to also download the filing documents
+download_edgar_data()                    # Metadata
+download_filings("2024-01-01:")          # Actual filing documents
+filing = get_filings()[0]
+xbrl = filing.xbrl()                     # Now works offline!
+```
+
+**Alternative: Use EntityFacts for offline financial data**
+
+If you only need standard financial metrics and don't need to parse raw XBRL, `EntityFacts` works with just `download_edgar_data()`:
+
+```python
+download_edgar_data(facts=True)          # Just the facts API data
+
+company = Company("AAPL")
+facts = company.get_facts()              # Works offline!
+income = facts.income_statement()        # Pre-processed financials
 ```
 
 ## Migration and Backup

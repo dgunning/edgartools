@@ -12,6 +12,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+import httpcore
 import httpx
 import numpy as np
 import pandas as pd
@@ -1647,6 +1648,21 @@ class Filing:
             return XBRL.from_filing(self)
         except XBRLFilingWithNoXbrlData:
             return None
+        except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
+                httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError) as e:
+            # Provide helpful message when local storage is enabled but filing content is missing
+            if is_using_local_storage():
+                log.error(
+                    f"Network error accessing filing content for {self.accession_no}. "
+                    f"You have local storage enabled, but filing documents are not downloaded.\n\n"
+                    f"download_edgar_data() only downloads metadata (company info, filing indexes).\n"
+                    f"To access filing.xbrl() offline, you must also download the actual filing documents:\n\n"
+                    f"    from edgar import download_filings\n"
+                    f"    download_filings('{self.filing_date}')\n\n"
+                    f"Alternatively, use EntityFacts for offline financial data:\n"
+                    f"    company.get_facts().income_statement()\n"
+                )
+            raise
 
     def serve(self, port: int = 8000) -> AttachmentServer:
         """Serve the filings on a local server

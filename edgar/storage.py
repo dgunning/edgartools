@@ -214,7 +214,23 @@ def download_edgar_data(submissions: bool = True,
                         reference: bool = True,
                         disable_progress: bool = False):
     """
-    Download Edgar data to the local storage directory
+    Download Edgar bulk data (metadata) to the local storage directory.
+
+    This downloads INDEX/METADATA only - NOT actual filing documents.
+    For offline access to filing.xbrl() or filing content, use download_filings().
+
+    What this function downloads:
+        - submissions: Company metadata and filing indexes (~5 GB)
+        - facts: Pre-processed financial facts from SEC's CompanyFacts API (~2 GB)
+        - reference: Ticker/CIK mappings, exchange data (~50 MB)
+
+    What this does NOT download:
+        - Actual filing documents (10-K, 10-Q HTML/XML content)
+        - XBRL files needed for filing.xbrl()
+        - Filing attachments and exhibits
+
+    For complete offline capability including XBRL parsing, also run:
+        download_filings('YYYY-MM-DD')  # Downloads actual filing documents
 
     Args:
         submissions: Download submissions. Defaults to True.
@@ -222,12 +238,19 @@ def download_edgar_data(submissions: bool = True,
         reference: Download reference data. Defaults to True.
         disable_progress: If True, suppress progress bars. Defaults to False.
     """
+    log.info("Downloading SEC bulk data (metadata/indexes). "
+             "Note: This does NOT include filing documents needed for filing.xbrl(). "
+             "Use download_filings() for that.")
+
     if submissions:
         download_submissions(disable_progress=disable_progress)
     if facts:
         download_facts(disable_progress=disable_progress)
     if reference:
         download_reference_data()
+
+    log.info("Bulk data download complete. For offline XBRL access, also run: "
+             "download_filings('YYYY-MM-DD')")
 
 
 def download_filings(filing_date: Optional[str] = None,
