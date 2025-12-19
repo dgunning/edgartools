@@ -91,27 +91,9 @@ EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR d
 
 ## How It Works
 
-EdgarTools provides a clean abstraction layer over the SEC EDGAR database, handling all the complexity of SEC data access, parsing, and transformation:
-
-```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#FFD700', 'primaryTextColor':'#3d5875', 'primaryBorderColor':'#3d5875', 'lineColor':'#3d5875', 'secondaryColor':'#f8f9fa', 'tertiaryColor':'#ffffff'}}}%%
-
-graph LR
-    A[Your Code] -->|Simple API| B[EdgarTools]
-    B -->|Fetches| C[SEC EDGAR]
-    B -->|Parses| D[Structured Data]
-    D -->|Returns| E[DataFrames]
-    D -->|Returns| F[Objects]
-    D -->|Returns| G[Clean Text]
-
-    style A fill:#FFD700,stroke:#3d5875,stroke-width:2px,color:#3d5875
-    style B fill:#3d5875,stroke:#FFD700,stroke-width:2px,color:#FFD700
-    style C fill:#3d5875,stroke:#3d5875,stroke-width:2px,color:#FFD700
-    style D fill:#f8f9fa,stroke:#3d5875,stroke-width:2px,color:#3d5875
-    style E fill:#ffffff,stroke:#FFD700,stroke-width:2px,color:#3d5875
-    style F fill:#ffffff,stroke:#FFD700,stroke-width:2px,color:#3d5875
-    style G fill:#ffffff,stroke:#FFD700,stroke-width:2px,color:#3d5875
-```
+<p align="center">
+  <img src="docs/images/how-it-works.svg" alt="EdgarTools transforms SEC EDGAR complexity into clean Python code">
+</p>
 
 <details>
 <summary><b>View Detailed Architecture</b></summary>

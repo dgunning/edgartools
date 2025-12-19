@@ -1,0 +1,83 @@
+<svg width="700" height="340" viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="700" height="340" fill="#0d0d1a"/>
+
+    <!-- "Before" label -->
+    <text x="150" y="30" text-anchor="middle" fill="#ff6b6b" font-size="14" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">THE PROBLEM</text>
+
+    <!-- SEC Box with pain points -->
+    <g transform="translate(30, 45)">
+        <rect x="0" y="0" width="240" height="200" rx="12"
+              fill="#2a2020" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="5,3"/>
+        <text x="120" y="35" text-anchor="middle" fill="#fff" font-size="18" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">SEC EDGAR</text>
+        <line x1="20" y1="60" x2="220" y2="60" stroke="#444" stroke-width="1"/>
+
+        <!-- Pain points with X icons -->
+        <text x="25" y="87" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
+        <text x="45" y="87" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Complex XBRL parsing</text>
+
+        <text x="25" y="110" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
+        <text x="45" y="110" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Messy HTML documents</text>
+
+        <text x="25" y="133" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
+        <text x="45" y="133" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Rate limiting headaches</text>
+
+        <text x="25" y="156" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
+        <text x="45" y="156" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Inconsistent formats</text>
+
+        <text x="25" y="179" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
+        <text x="45" y="179" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">100+ lines to get started</text>
+    </g>
+
+    <!-- EdgarTools Hero Box (Center) -->
+    <g transform="translate(285, 85)">
+        <!-- Main box -->
+        <rect x="0" y="0" width="130" height="120" rx="12"
+              fill="#3d5875" stroke="#FFD700" stroke-width="3"/>
+
+        <!-- Logo pill -->
+        <rect x="15" y="15" width="100" height="32" rx="6" fill="#FFD700"/>
+        <text x="65" y="37" text-anchor="middle" fill="#3d5875" font-size="14" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">EdgarTools</text>
+
+        <!-- Tagline -->
+        <text x="65" y="80" text-anchor="middle" fill="#fff" font-size="11" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Simple API</text>
+    </g>
+
+    <!-- Arrow Left to Center -->
+    <line x1="270" y1="145" x2="282" y2="145" stroke="#FFD700" stroke-width="2"/>
+    <polygon points="285,145 275,139 275,151" fill="#FFD700"/>
+
+    <!-- Arrow Center to Right -->
+    <line x1="415" y1="145" x2="427" y2="145" stroke="#FFD700" stroke-width="2"/>
+    <polygon points="430,145 420,139 420,151" fill="#FFD700"/>
+
+    <!-- "After" label -->
+    <text x="550" y="30" text-anchor="middle" fill="#98c379" font-size="14" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">THE SOLUTION</text>
+
+    <!-- Your Code Box with benefits -->
+    <g transform="translate(430, 45)">
+        <rect x="0" y="0" width="240" height="200" rx="12"
+              fill="#1a2a1a" stroke="#98c379" stroke-width="2"/>
+        <text x="120" y="35" text-anchor="middle" fill="#fff" font-size="18" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Your Code</text>
+        <line x1="20" y1="60" x2="220" y2="60" stroke="#3a5a3a" stroke-width="1"/>
+
+        <!-- Benefits with check icons -->
+        <text x="25" y="87" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
+        <text x="45" y="87" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Clean financials</text>
+
+        <text x="25" y="110" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
+        <text x="45" y="110" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Structured text</text>
+
+        <text x="25" y="133" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
+        <text x="45" y="133" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Automatic throttling</text>
+
+        <text x="25" y="156" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
+        <text x="45" y="156" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Standardized objects</text>
+
+        <text x="25" y="179" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
+        <text x="45" y="179" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">3 lines to start</text>
+    </g>
+
+    <!-- Bottom tagline -->
+    <text x="350" y="320" text-anchor="middle" fill="#888" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Free &amp; Open Source · MIT License · 1000+ Tests</text>
+</svg>
