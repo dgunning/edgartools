@@ -74,11 +74,24 @@ print(f"Q1 2024 filings: {len(q1_filings)}")
 ```
 
 ### Year and Quarter Search
+
+!!! note "Calendar Year vs Fiscal Year"
+
+    The `year` and `quarter` parameters refer to **when the filing was submitted to the SEC** (calendar year),
+    **not** the fiscal year the filing covers.
+
+    For example, a company with a fiscal year ending March 31, 2024 would file their annual 10-K in
+    May or June 2024. Using `get_filings(2024)` would find this filing because it was **filed** in
+    calendar year 2024, even though the 10-K covers fiscal year 2024.
+
+    To find filings by fiscal year, use the company's `get_filings()` method and filter by the
+    filing's fiscal period information available in the XBRL data.
+
 ```python
-# Get filings for entire year
+# Get filings for entire calendar year (by filing date)
 filings_2023 = get_filings(2023)
 
-# Get filings for specific quarter
+# Get filings for specific calendar quarter
 q4_2023 = get_filings(2023, 4)
 
 # Get multiple quarters

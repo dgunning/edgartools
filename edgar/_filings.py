@@ -1193,6 +1193,11 @@ def get_filings(year: Optional[Years] = None,
 
     So you can download for 2020, [2020,2021,2022] or range(2020, 2023)
 
+    ⚠️  CALENDAR YEAR, NOT FISCAL YEAR: The year and quarter parameters refer to when the filing
+        was submitted to the SEC (calendar year), NOT the fiscal year the filing covers.
+        For example, a 10-K for fiscal year ending March 2024 filed in June 2024 would be found
+        with get_filings(2024), not get_filings(2023).
+
     ⚠️  DATA FRESHNESS: This function uses quarterly indexes that are updated daily but typically
         lag by 1 business day. For today's filings or real-time data, use get_current_filings() instead.
 
@@ -1200,15 +1205,15 @@ def get_filings(year: Optional[Years] = None,
 
     >>> from edgar import get_filings
 
-    >>> filings_ = get_filings(2021) # Get filings for 2021
+    >>> filings_ = get_filings(2021) # Get filings filed in calendar year 2021
 
-    >>> filings_ = get_filings(2021, 4) # Get filings for 2021 Q4
+    >>> filings_ = get_filings(2021, 4) # Get filings filed in Q4 2021 (Oct-Dec)
 
-    >>> filings_ = get_filings(2021, [3,4]) # Get filings for 2021 Q3 and Q4
+    >>> filings_ = get_filings(2021, [3,4]) # Get filings filed in Q3 and Q4 2021
 
-    >>> filings_ = get_filings([2020, 2021]) # Get filings for 2020 and 2021
+    >>> filings_ = get_filings([2020, 2021]) # Get filings filed in 2020 and 2021
 
-    >>> filings_ = get_filings([2020, 2021], 4) # Get filings for Q4 of 2020 and 2021
+    >>> filings_ = get_filings([2020, 2021], 4) # Get filings filed in Q4 of 2020 and 2021
 
     >>> filings_ = get_filings(range(2010, 2021)) # Get filings between 2010 and 2021 - does not include 2021
 
@@ -1224,8 +1229,8 @@ def get_filings(year: Optional[Years] = None,
     >>> current = get_current_filings(form="10-K", page_size=None)  # All current filings
 
 
-    :param year The year of the filing
-    :param quarter The quarter of the filing
+    :param year The calendar year when filing was submitted (not fiscal year)
+    :param quarter The calendar quarter when filing was submitted (1-4)
     :param form The form or forms as a string e.g. "10-K" or a List ["10-K", "8-K"]
     :param amendments If True will expand the list of forms to include amendments e.g. "10-K/A"
     :param filing_date The filing date to filter by in YYYY-MM-DD format
