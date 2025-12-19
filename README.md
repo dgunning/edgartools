@@ -308,7 +308,7 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
-## 💛 Support AI Powered Development
+## <img src="docs/images/icons/emoji-heart.svg" width="24" height="24"> Support AI Powered Development
 
 **I build and maintain EdgarTools solo using AI-assisted development.** Your support directly funds the Claude Max subscription that makes this extraordinary velocity possible.
 
@@ -316,26 +316,30 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 <table align="center">
 <tr>
-Fix  <td align="center" width="25%" valign="top">
-    <b>1️⃣ You Support</b><br><br>
+  <td align="center" width="25%" valign="top">
+    <img src="docs/images/icons/emoji-1.svg" width="24" height="24"><br>
+    <b>You Support</b><br><br>
     Buy Me A Coffee<br>
     contributions fund<br>
     Claude Max
   </td>
   <td align="center" width="25%" valign="top">
-    <b>2️⃣ AI Acceleration</b><br><br>
+    <img src="docs/images/icons/emoji-2.svg" width="24" height="24"><br>
+    <b>AI Acceleration</b><br><br>
     Specialized agents<br>
     deliver <b>3-10x faster</b><br>
     development
   </td>
   <td align="center" width="25%" valign="top">
-    <b>3️⃣ Rapid Delivery</b><br><br>
+    <img src="docs/images/icons/emoji-3.svg" width="24" height="24"><br>
+    <b>Rapid Delivery</b><br><br>
     Features in <b>days</b><br>
     instead of weeks<br>
     24 releases / 60 days
   </td>
   <td align="center" width="25%" valign="top">
-    <b>4️⃣ You Benefit</b><br><br>
+    <img src="docs/images/icons/emoji-4.svg" width="24" height="24"><br>
+    <b>You Benefit</b><br><br>
     More features,<br>
     faster fixes,<br>
     free forever
@@ -348,22 +352,26 @@ Fix  <td align="center" width="25%" valign="top">
 <table align="center">
 <tr>
   <td align="center" width="25%" valign="top">
-    <h3>🚀 24</h3>
+    <img src="docs/images/icons/emoji-rocket.svg" width="24" height="24"><br>
+    <h3>24</h3>
     <b>Releases</b><br>
     <sub>1 every 2.5 days</sub>
   </td>
   <td align="center" width="25%" valign="top">
-    <h3>⚡ 322</h3>
+    <img src="docs/images/icons/emoji-lightning.svg" width="24" height="24"><br>
+    <h3>322</h3>
     <b>Commits</b><br>
     <sub>5.4 per day</sub>
   </td>
   <td align="center" width="25%" valign="top">
-    <h3>🎯 3-10x</h3>
+    <img src="docs/images/icons/emoji-target.svg" width="24" height="24"><br>
+    <h3>3-10x</h3>
     <b>Velocity</b><br>
     <sub>vs traditional dev</sub>
   </td>
   <td align="center" width="25%" valign="top">
-    <h3>⏱️ Days</h3>
+    <img src="docs/images/icons/emoji-timer.svg" width="24" height="24"><br>
+    <h3>Days</h3>
     <b>Not Weeks</b><br>
     <sub>for major features</sub>
   </td>
@@ -390,18 +398,18 @@ Fix  <td align="center" width="25%" valign="top">
 </p>
 
 **What your support enables:**
-- ✅ Claude Max subscription (AI agents that write, test, and document code)
-- ✅ Continued 3-10x development velocity (features in days, not weeks)
-- ✅ Rapid response to SEC format changes and bug reports
-- ✅ New features based on community needs
-- ✅ Free access for everyone, forever (no API keys, no rate limits)
+- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Claude Max subscription (AI agents that write, test, and document code)
+- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Continued 3-10x development velocity (features in days, not weeks)
+- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Rapid response to SEC format changes and bug reports
+- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> New features based on community needs
+- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Free access for everyone, forever (no API keys, no rate limits)
 
 **Alternative ways to support:**
-- ⭐ Star the repo on GitHub
-- 🐛 Report bugs and contribute fixes
-- 📖 Improve documentation
-- 💬 Answer questions in Discussions
-- 🔗 Share EdgarTools with colleagues
+- <img src="docs/images/icons/emoji-star.svg" width="16" height="16"> Star the repo on GitHub
+- <img src="docs/images/icons/emoji-bug.svg" width="16" height="16"> Report bugs and contribute fixes
+- <img src="docs/images/icons/emoji-book.svg" width="16" height="16"> Improve documentation
+- <img src="docs/images/icons/emoji-speech.svg" width="16" height="16"> Answer questions in Discussions
+- <img src="docs/images/icons/emoji-link.svg" width="16" height="16"> Share EdgarTools with colleagues
 
 **Corporate users**: If your organization depends on EdgarTools for SEC compliance or regulatory reporting, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers strategic sponsorship options designed for mission-critical dependencies.
 
