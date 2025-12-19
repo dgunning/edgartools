@@ -45,9 +45,11 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
 
     try:
         # Step 2: Statement-specific logic
-        if statement_type == 'BalanceSheet':
+        # Instant-based statements (point-in-time snapshots)
+        instant_statement_types = {'BalanceSheet', 'ScheduleOfInvestments', 'FinancialHighlights'}
+        if statement_type in instant_statement_types:
             candidate_periods = _select_balance_sheet_periods(filtered_periods, xbrl.entity_info, max_periods)
-        else:  # Income/Cash Flow statements
+        else:  # Income/Cash Flow statements (duration-based)
             candidate_periods = _select_duration_periods(filtered_periods, xbrl.entity_info, max_periods)
 
         # Step 3: Filter out periods with insufficient data
@@ -511,8 +513,51 @@ ESSENTIAL_CONCEPT_PATTERNS = {
          'CashProvidedByUsedInInvestingActivities'],
         ['FinancingCashFlow', 'NetCashProvidedByUsedInFinancingActivities',
          'CashProvidedByUsedInFinancingActivities']
+    ],
+    # Fund-specific statement patterns (for BDCs, closed-end funds, etc.)
+    'ScheduleOfInvestments': [
+        ['InvestmentOwnedAtFairValue', 'InvestmentsFairValueDisclosure', 'InvestmentOwnedAtCost'],
+        ['InvestmentOwnedBalancePrincipalAmount', 'InvestmentOwnedBalanceShares'],
+        ['InvestmentOwnedPercentOfNetAssets', 'ScheduleOfInvestmentsLineItems']
+    ],
+    'FinancialHighlights': [
+        ['NetAssetValuePerShare', 'InvestmentCompanyNetAssets'],
+        ['InvestmentCompanyTotalReturn', 'InvestmentCompanyExpenseRatio']
     ]
 }
+
+# Fund statement types that should use concept-based fact gathering
+# These statements often have facts tagged with different statement_types
+# Note: ScheduleOfInvestments facts are properly tagged with statement_type,
+# so it doesn't need concept-based fallback
+CONCEPT_BASED_STATEMENT_TYPES = {'FinancialHighlights'}
+
+
+def _get_facts_by_concepts(all_period_facts: List[Dict], statement_type: str) -> List[Dict]:
+    """
+    Get facts that match the key concepts for a statement type.
+
+    For fund statements like FinancialHighlights, the actual numeric facts
+    may be tagged with different statement_types (e.g., BalanceSheet, None).
+    This function finds facts by their concepts regardless of statement_type.
+    """
+    concept_groups = ESSENTIAL_CONCEPT_PATTERNS.get(statement_type, [])
+    if not concept_groups:
+        return []
+
+    # Flatten all patterns from all groups
+    key_patterns = [pattern.lower() for group in concept_groups for pattern in group]
+
+    matching_facts = []
+    for fact in all_period_facts:
+        concept = fact.get('concept', '')
+        if concept:
+            concept_lower = concept.lower()
+            # Check if any key pattern matches this concept
+            if any(pattern in concept_lower for pattern in key_patterns):
+                matching_facts.append(fact)
+
+    return matching_facts
 
 
 def _check_essential_concepts_flexible(statement_facts: List[Dict], statement_type: str) -> int:
@@ -581,10 +626,22 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
     # Pre-group facts by statement type within each period
     statement_facts_by_period = {}
     for period_key, period_facts in facts_by_period.items():
-        statement_facts_by_period[period_key] = [
+        # First, try to find facts by statement_type
+        typed_facts = [
             f for f in period_facts
             if f.get('statement_type') == statement_type
         ]
+
+        # For fund statements (FinancialHighlights, etc.), fall back to concept-based gathering
+        # when statement_type filtering returns empty. Fund statement facts are often tagged
+        # with different statement_types (e.g., BalanceSheet, None).
+        if not typed_facts and statement_type in CONCEPT_BASED_STATEMENT_TYPES:
+            typed_facts = _get_facts_by_concepts(period_facts, statement_type)
+            if typed_facts:
+                logger.debug("Period %s: Using concept-based gathering for %s (%d facts)",
+                           period_key, statement_type, len(typed_facts))
+
+        statement_facts_by_period[period_key] = typed_facts
 
     # DYNAMIC THRESHOLDS: Calculate based on this company's data distribution
     statement_min_facts = _calculate_dynamic_thresholds(facts_by_period, statement_type)
@@ -629,7 +686,22 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
             # FLEXIBLE CONCEPT MATCHING: Check essential concepts using pattern groups
             essential_concept_count = _check_essential_concepts_flexible(statement_facts, statement_type)
 
-            # Require at least half the essential concept groups
+            # For statement types without defined patterns, use relaxed filtering
+            # This allows fund-specific statements (ScheduleOfInvestments, etc.) and other
+            # non-standard statements to pass when they have sufficient facts
+            if required_concept_groups == 0:
+                # No essential concept patterns defined - use relaxed filtering (just check fact count)
+                if statement_fact_count >= MIN_FACTS_THRESHOLD:
+                    periods_with_data.append((period_key, period_label))
+                    unique_concepts_count = len(set(f.get('concept') for f in statement_facts if f.get('concept')))
+                    logger.debug("Period %s accepted with relaxed filtering: %d %s facts, %d unique concepts",
+                               period_label, statement_fact_count, statement_type, unique_concepts_count)
+                else:
+                    logger.debug("Period %s has insufficient facts for relaxed filtering (%d < %d)",
+                               period_label, statement_fact_count, MIN_FACTS_THRESHOLD)
+                continue
+
+            # Require at least half the essential concept groups for defined statement types
             min_essential_required = max(1, required_concept_groups // 2)
             if essential_concept_count >= min_essential_required:
                 periods_with_data.append((period_key, period_label))

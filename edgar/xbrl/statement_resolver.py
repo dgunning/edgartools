@@ -292,13 +292,70 @@ statement_registry = {
     ),
 
     "CoverPage": StatementType(
-        name="CoverPage", 
+        name="CoverPage",
         category=StatementCategory.DOCUMENT,
         primary_concepts=["dei_CoverAbstract"],
         concept_patterns=[r".*_CoverAbstract$"],
         key_concepts=["dei_EntityRegistrantName", "dei_DocumentType"],
         role_patterns=[r".*[Cc]over.*"],
         title="Cover Page",
+        supports_parenthetical=False
+    ),
+
+    # Fund-specific statements (for BDCs, closed-end funds, investment companies)
+    "ScheduleOfInvestments": StatementType(
+        name="ScheduleOfInvestments",
+        category=StatementCategory.FINANCIAL_STATEMENT,
+        primary_concepts=["us-gaap_ScheduleOfInvestmentsAbstract"],
+        alternative_concepts=[
+            "us-gaap_InvestmentsDebtAndEquitySecuritiesAbstract",
+            "us-gaap_InvestmentHoldingsAbstract"
+        ],
+        concept_patterns=[
+            r".*_ScheduleOfInvestmentsAbstract$",
+            r".*_ConsolidatedScheduleofInvestmentsAbstract$",
+            r".*_InvestmentHoldingsAbstract$"
+        ],
+        key_concepts=[
+            "us-gaap_InvestmentOwnedAtFairValue",
+            "us-gaap_InvestmentOwnedAtCost",
+            "us-gaap_InvestmentOwnedBalancePrincipalAmount",
+            "us-gaap_InvestmentOwnedBalanceShares",
+            "us-gaap_InvestmentOwnedPercentOfNetAssets",
+            "us-gaap_ScheduleOfInvestmentsLineItems"
+        ],
+        role_patterns=[
+            r".*[Ss]chedule[Oo]f[Ii]nvestments.*",
+            r".*[Cc]onsolidated[Ss]chedule[Oo]f[Ii]nvestments.*",
+            r".*[Ii]nvestment[Hh]oldings.*",
+            r".*[Pp]ortfolio[Ii]nvestments.*"
+        ],
+        title="Consolidated Schedule of Investments",
+        supports_parenthetical=True
+    ),
+
+    "FinancialHighlights": StatementType(
+        name="FinancialHighlights",
+        category=StatementCategory.FINANCIAL_STATEMENT,
+        primary_concepts=["us-gaap_InvestmentCompanyFinancialHighlightsAbstract"],
+        alternative_concepts=[
+            "us-gaap_InvestmentCompanyAbstract"
+        ],
+        concept_patterns=[
+            r".*_FinancialHighlightsAbstract$",
+            r".*_InvestmentCompanyFinancialHighlightsAbstract$"
+        ],
+        key_concepts=[
+            "us-gaap_NetAssetValuePerShare",
+            "us-gaap_InvestmentCompanyNetAssets",
+            "us-gaap_InvestmentCompanyTotalReturn",
+            "us-gaap_InvestmentCompanyExpenseRatio"
+        ],
+        role_patterns=[
+            r".*[Ff]inancial[Hh]ighlights.*",
+            r".*[Ii]nvestment[Cc]ompany[Ff]inancial[Hh]ighlights.*"
+        ],
+        title="Financial Highlights",
         supports_parenthetical=False
     )
 }

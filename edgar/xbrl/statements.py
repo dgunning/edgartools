@@ -45,7 +45,15 @@ statement_to_concepts = {
                                concept="dei_CoverAbstract",
                                  title="Cover Page"
                                  ),
-
+    # Fund-specific statements (for BDCs, closed-end funds, investment companies)
+    "ScheduleOfInvestments": StatementInfo(name="ScheduleOfInvestments",
+                                           concept="us-gaap_ScheduleOfInvestmentsAbstract",
+                                           title="Consolidated Schedule of Investments"
+                                           ),
+    "FinancialHighlights": StatementInfo(name="FinancialHighlights",
+                                         concept="us-gaap_InvestmentCompanyFinancialHighlightsAbstract",
+                                         title="Financial Highlights"
+                                         ),
 }
 
 
@@ -1174,6 +1182,32 @@ class Statements:
             return self["ComprehensiveIncome"]
         except Exception as e:
             return self._handle_statement_error(e, "ComprehensiveIncome")
+
+    def schedule_of_investments(self, parenthetical: bool = False) -> Optional[Statement]:
+        """
+        Get a Schedule of Investments statement.
+
+        This statement shows investment holdings with fair values, cost basis,
+        and other details. Common in fund filings (BDCs, closed-end funds) but
+        also appears in regular company filings as investment/securities disclosures.
+
+        Args:
+            parenthetical: Whether to get the parenthetical version
+
+        Returns:
+            The Schedule of Investments statement, or None if not found
+        """
+        try:
+            if hasattr(self.xbrl, 'find_statement'):
+                matching_statements, found_role, _ = self.xbrl.find_statement(
+                    "ScheduleOfInvestments", parenthetical
+                )
+                if found_role:
+                    return Statement(self.xbrl, found_role, canonical_type="ScheduleOfInvestments")
+
+            return self["ScheduleOfInvestments"]
+        except Exception as e:
+            return self._handle_statement_error(e, "ScheduleOfInvestments")
 
     def get_period_views(self, statement_type: str) -> List[Dict[str, Any]]:
         """

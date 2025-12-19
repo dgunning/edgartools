@@ -485,6 +485,29 @@ class XBRL:
         return Statements(self)
 
     @property
+    def fund_statements(self):
+        """
+        Access fund-specific statements (Schedule of Investments, Financial Highlights).
+
+        This property provides specialized access to financial statements that are
+        specific to investment companies (BDCs, closed-end funds, interval funds, etc.).
+
+        Returns:
+            FundStatements: Interface for fund statement access
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> if xbrl.fund_statements.is_fund_filing():
+            ...     soi = xbrl.fund_statements.schedule_of_investments()
+            ...     if soi:
+            ...         print(soi)
+        """
+        from edgar.xbrl.fund_statements import FundStatements
+        if not hasattr(self, '_fund_statements'):
+            self._fund_statements = FundStatements(self)
+        return self._fund_statements
+
+    @property
     def facts(self):
         from edgar.xbrl.facts import FactsView
         if not hasattr(self, '_facts_view'):
