@@ -1,22 +1,18 @@
 <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Style A: Gold-on-Dark -->
+
   <!-- Outer hexagon frame -->
   <polygon points="40,5 70,22.5 70,57.5 40,75 10,57.5 10,22.5"
-           fill="none" stroke="#3d5875" stroke-width="2.5" opacity="0.3"/>
+           fill="none" stroke="#FFD700" stroke-width="2" opacity="0.4"/>
 
-  <!-- Inner hexagon -->
-  <defs>
-    <linearGradient id="xbrlGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:0.9" />
-      <stop offset="100%" style="stop-color:#FFB700;stop-opacity:0.7" />
-    </linearGradient>
-  </defs>
+  <!-- Inner hexagon with dark fill -->
   <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
-           fill="url(#xbrlGradient)" opacity="0.25"/>
+           fill="#2d3748" opacity="0.9"/>
   <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
            fill="none" stroke="#FFD700" stroke-width="2"/>
 
-  <!-- XML brackets symbol -->
-  <g stroke="#3d5875" stroke-width="2.5" fill="none" stroke-linecap="round">
+  <!-- XML brackets symbol - GOLD -->
+  <g stroke="#FFD700" stroke-width="2.5" fill="none" stroke-linecap="round">
     <!-- Left bracket < -->
     <polyline points="35,30 28,40 35,50"/>
     <!-- Right bracket > -->
