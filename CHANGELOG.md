@@ -7,6 +7,92 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.5.0] - 2025-12-20
+
+### Added
+
+- **Fund Statement Support for BDCs and Investment Companies** (#0522465e)
+  - Added support for Business Development Companies (BDCs) financial statements
+  - Enhanced investment company statement generation
+  - **Files**: Fund-related statement parsing modules
+  - **Impact**: EdgarTools can now properly parse and display financial statements for BDCs and investment companies
+  - **Example**: Retrieve and analyze fund-specific financial data for investment vehicles
+
+- **Progressive Disclosure for Company.to_context()** (#d56b6d0d)
+  - Added `detail` parameter to Company.to_context() method
+  - Enables progressive disclosure of company information for AI/LLM contexts
+  - Supports different levels of detail: basic, standard, detailed
+  - **Files**: `edgar/entity/core.py`
+  - **Impact**: More flexible company context generation for AI integration
+  - **Example**: `company.to_context(detail='basic')` for concise company info
+
+### Fixed
+
+- **Type Checker Issues** (#f417b287)
+  - Resolved invalid-parameter-default warnings
+  - Fixed invalid-return-type errors
+  - **Files**: Multiple modules with type annotations
+  - **Impact**: Improved type safety and code quality
+
+- **Company.to_context() Test Updates** (#ff458c47)
+  - Updated tests to match new plain text format output
+  - **Files**: `tests/entity/test_company.py`
+  - **Impact**: Tests now correctly validate Company.to_context() behavior
+
+### Changed
+
+- **MCP Dependency Version** (#65e7f118)
+  - Unpinned mcp dependency to allow newer versions
+  - **Files**: `pyproject.toml` or dependency configuration
+  - **Impact**: Better compatibility with latest mcp releases
+
+### Documentation
+
+- **Calendar Year vs Fiscal Year Clarification** (#787ed374, Issue #541)
+  - Clarified that year parameter means calendar year, not fiscal year
+  - **Files**: API documentation
+  - **Impact**: Prevents user confusion about year parameter semantics
+
+- **Offline XBRL Workflow** (#1cba09de, Issue #436)
+  - Clarified offline XBRL workflow documentation
+  - Improved error messages for offline operations
+  - **Files**: XBRL documentation
+  - **Impact**: Better user experience for offline XBRL usage
+
+- **Company.to_context() API Examples** (#0aa6115f)
+  - Fixed incorrect API usage examples in ai-integration.md
+  - **Files**: `docs/ai-integration.md`
+  - **Impact**: Accurate documentation for AI integration
+
+### Style
+
+- **README Visual Improvements** (#f151aaf0, #52239a55, #5c22b098)
+  - Replaced Mermaid diagram with custom SVG in How It Works section
+  - Replaced emoticons with custom SVG icons
+  - Redesigned Why EdgarTools icons with gold-on-dark theme
+  - **Files**: `README.md`, icon assets
+  - **Impact**: More professional and visually appealing project presentation
+
+### Testing
+
+- **Network Test Stability** (#d598888b, #01f0cd64)
+  - Temporarily skipped flaky network tests to improve CI reliability
+  - **Files**: Test suite
+  - **Impact**: More stable test runs
+
+### Summary
+
+Release 5.5.0 is a feature release adding fund statement support for BDCs and investment companies, plus enhanced AI integration capabilities through progressive disclosure in Company.to_context(). Key highlights:
+
+- Fund financial statement support for BDCs and investment companies
+- Progressive disclosure with detail parameter in Company.to_context()
+- Type checker issue fixes for improved code quality
+- MCP dependency flexibility for better compatibility
+- Enhanced documentation clarity for year parameters and offline workflows
+- Professional README redesign with custom SVG graphics
+
+This release maintains full backward compatibility with v5.4.x while adding valuable new capabilities for fund analysis and AI integration.
+
 ## [5.4.0] - 2025-12-18
 
 ### Added
