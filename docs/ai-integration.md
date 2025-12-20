@@ -130,31 +130,52 @@ print(context)
 
 > **Note**: The older `company.text()` method is deprecated. Use `company.to_context()` for consistent naming across all EdgarTools classes.
 
-### Detail Levels
-
-Three progressive disclosure levels for different use cases:
-
-```python
-# Minimal - Just the essentials (~100-200 tokens)
-minimal = company.to_context(detail='minimal')
-
-# Standard - Balanced overview (~300-500 tokens)
-standard = company.to_context(detail='standard')
-
-# Detailed - Comprehensive information (~800-1200 tokens)
-detailed = company.to_context(detail='detailed')
-```
-
-### Token Limiting
+### Token Control
 
 Control output size for LLM context windows:
 
 ```python
+from edgar import Company
+
+company = Company("AAPL")
+
+# Default output (~2000 tokens max)
+context = company.to_context()
+
 # Limit to specific token count
 context = company.to_context(max_tokens=500)
 
-# Automatically truncates while preserving structure
+# Smaller context for constrained windows
+minimal_context = company.to_context(max_tokens=200)
 ```
+
+### Detail Levels (Filing Objects)
+
+Some objects support progressive disclosure via the `detail` parameter:
+
+```python
+# Filing objects support detail levels
+filing = company.get_filings(form="10-K").latest()
+
+# Minimal - Just the essentials (~100-200 tokens)
+minimal = filing.to_context(detail='minimal')
+
+# Standard - Balanced overview (~300-500 tokens)
+standard = filing.to_context(detail='standard')
+
+# Full - Comprehensive information (~800-1200 tokens)
+full = filing.to_context(detail='full')
+```
+
+**Objects supporting `detail` parameter:**
+- `Filing.to_context(detail='standard')`
+- `Filings.to_context(detail='standard')`
+- `EntityFilings.to_context(detail='standard')`
+
+**Objects using `max_tokens` only:**
+- `Company.to_context(max_tokens=2000)`
+- `XBRL.to_context(max_tokens=2000)`
+- `Statement.text(max_tokens=...)`
 
 ### Output Format: Markdown-KV
 
@@ -181,20 +202,20 @@ net_income_fy2023: $96,995,000,000
 ### Available Text Methods
 
 ```python
-# Company context
-company_text = company.to_context(detail='standard')
+# Company context (uses max_tokens)
+company_text = company.to_context(max_tokens=500)
 
-# Filing context
+# Filing context (supports detail parameter)
 filing = company.get_filings(form="10-K").latest()
-filing_text = filing.text(detail='standard')
+filing_text = filing.to_context(detail='standard')
 
-# XBRL context
+# XBRL context (uses max_tokens)
 xbrl = filing.xbrl()
-xbrl_text = xbrl.to_context(detail='standard')
+xbrl_text = xbrl.to_context(max_tokens=1000)
 
 # Statement context
 income = xbrl.statements.income_statement()
-statement_text = income.text(detail='standard')
+statement_text = income.text()
 ```
 
 ## AI Skills System
@@ -512,14 +533,16 @@ income = get_revenue_trend("AAPL", periods=3)
 ### 2. Use Progressive Disclosure
 
 ```python
-# Start minimal, add detail as needed
-overview = company.to_context(detail='minimal')  # Quick overview
+# For Company objects, use max_tokens to control size
+overview = company.to_context(max_tokens=200)   # Quick overview (~200 tokens)
+standard = company.to_context(max_tokens=500)   # Balanced view (~500 tokens)
+detailed = company.to_context(max_tokens=2000)  # Comprehensive (default)
 
-# Need more context?
-standard = company.to_context(detail='standard')  # Balanced view
-
-# Need everything?
-detailed = company.to_context(detail='detailed')  # Comprehensive
+# For Filing objects, use detail parameter
+filing = company.get_filings(form="10-K").latest()
+minimal = filing.to_context(detail='minimal')   # Just the essentials
+standard = filing.to_context(detail='standard') # Balanced view
+full = filing.to_context(detail='full')         # Everything
 ```
 
 ### 3. Respect Token Limits
@@ -572,12 +595,14 @@ Approximate token sizes for common operations:
 
 | Operation | Tokens (approx) |
 |-----------|----------------|
-| `Company.text(detail='minimal')` | 100-200 |
-| `Company.text(detail='standard')` | 300-500 |
-| `Company.text(detail='detailed')` | 800-1200 |
-| `Filing.text(detail='standard')` | 200-400 |
+| `Company.to_context(max_tokens=200)` | ~200 |
+| `Company.to_context(max_tokens=500)` | ~500 |
+| `Company.to_context()` (default) | ~2000 |
+| `Filing.to_context(detail='minimal')` | 100-200 |
+| `Filing.to_context(detail='standard')` | 200-400 |
+| `Filing.to_context(detail='full')` | 400-800 |
 | `Statement.to_dataframe()` (3 periods) | 500-1000 |
-| `XBRL.text(detail='standard')` | 400-600 |
+| `XBRL.to_context(max_tokens=500)` | ~500 |
 
 ### Optimization Strategies
 
@@ -617,14 +642,18 @@ income = xbrl.statements.income_statement()  # ~1,250 tokens
 print(xbrl)  # Full XBRL object, ~2,500 tokens
 ```
 
-**5. Control detail levels:**
+**5. Control output size:**
 
 ```python
-# For overview tasks
-overview = company.to_context(detail='minimal')
+# For overview tasks (Company uses max_tokens)
+overview = company.to_context(max_tokens=200)
 
 # For detailed analysis
-analysis = company.to_context(detail='detailed')
+analysis = company.to_context(max_tokens=2000)
+
+# For Filing objects, use detail parameter
+filing_overview = filing.to_context(detail='minimal')
+filing_full = filing.to_context(detail='full')
 ```
 
 ### Token Counting
@@ -659,7 +688,7 @@ context_parts = []
 
 # 1. Company overview
 context_parts.append("# Company Overview")
-context_parts.append(company.to_context(detail='minimal', max_tokens=200))
+context_parts.append(company.to_context(max_tokens=200))
 
 # 2. Latest filing
 filing = company.get_filings(form="10-K").latest()
@@ -747,13 +776,16 @@ pip install "edgartools[ai]"
 
 ### Issue: Token counts seem high
 
-**Solution**: Use lower detail levels or max_tokens:
+**Solution**: Use max_tokens to limit output size:
 ```python
-# Instead of:
-text = company.to_context(detail='detailed')
+# Instead of default (up to 2000 tokens):
+text = company.to_context()
 
-# Try:
-text = company.to_context(detail='standard', max_tokens=500)
+# Limit to specific size:
+text = company.to_context(max_tokens=500)
+
+# For Filing objects, use detail parameter:
+filing_text = filing.to_context(detail='standard')  # Instead of 'full'
 ```
 
 ## Additional Resources
