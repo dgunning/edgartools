@@ -50,8 +50,8 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 ai = [
-    "mcp==1.12.3; python_version>='3.10'",  # Model Context Protocol (Python 3.10+ only)
-    "tiktoken>=0.10.0",                     # Token counting for OpenAI models
+    "mcp>=1.12.3",          # Model Context Protocol
+    "tiktoken>=0.10.0",     # Token counting for OpenAI models
 ]
 
 ai-dev = [
