@@ -5,6 +5,7 @@ import pandas as pd
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
+from edgar.xbrl.statements import StitchedStatement
 from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
 
@@ -387,13 +388,13 @@ class MultiFinancials:
     def extract(cls, filings) -> "MultiFinancials":
         return cls(XBRLS.from_filings(filings))
 
-    def balance_sheet(self) -> Optional[Statement]:
+    def balance_sheet(self) -> Optional[StitchedStatement]:
         return self.xbs.statements.balance_sheet()
 
-    def income_statement(self) -> Optional[Statement]:
+    def income_statement(self) -> Optional[StitchedStatement]:
         return self.xbs.statements.income_statement()
 
-    def cashflow_statement(self) -> Optional[Statement]:
+    def cashflow_statement(self) -> Optional[StitchedStatement]:
         return self.xbs.statements.cashflow_statement()
 
     def __rich__(self):

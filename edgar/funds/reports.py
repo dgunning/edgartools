@@ -462,7 +462,7 @@ class FundReport:
     def matches_ticker(self, ticker: str) -> bool:
         """Check if this report's series matches the given ticker."""
         series_ticker = self.get_ticker_for_series()
-        return series_ticker and series_ticker.upper() == ticker.upper()
+        return bool(series_ticker and series_ticker.upper() == ticker.upper())
 
     @property
     def reporting_period(self):
@@ -600,9 +600,10 @@ class FundReport:
             return deriv.future_derivative.notional_amount
         elif deriv.forward_derivative:
             # For forwards, use the larger absolute amount as notional
-            sold = abs(deriv.forward_derivative.amount_sold) if deriv.forward_derivative.amount_sold else 0
-            purchased = abs(deriv.forward_derivative.amount_purchased) if deriv.forward_derivative.amount_purchased else 0
-            return max(sold, purchased) if max(sold, purchased) > 0 else None
+            sold = abs(deriv.forward_derivative.amount_sold) if deriv.forward_derivative.amount_sold else Decimal(0)
+            purchased = abs(deriv.forward_derivative.amount_purchased) if deriv.forward_derivative.amount_purchased else Decimal(0)
+            max_val = max(sold, purchased)
+            return max_val if max_val > 0 else None
         elif deriv.option_derivative:
             # Options themselves don't have notional amounts at the derivative level
             return None
@@ -628,7 +629,7 @@ class FundReport:
     def _get_counterparty(self, investment: InvestmentOrSecurity) -> Optional[str]:
         """Extract counterparty name from any derivative type"""
         if not investment.derivative_info:
-            return pd.NA
+            return None
 
         deriv = investment.derivative_info
         if deriv.forward_derivative:
@@ -639,7 +640,7 @@ class FundReport:
             return deriv.future_derivative.counterparty_name
         elif deriv.option_derivative:
             return deriv.option_derivative.counterparty_name
-        return pd.NA
+        return None
 
     def _get_unrealized_pnl(self, investment: InvestmentOrSecurity) -> Optional[Decimal]:
         """Extract unrealized P&L from derivative, preferring derivative-specific fields"""

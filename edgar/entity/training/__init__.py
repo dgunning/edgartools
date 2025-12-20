@@ -25,6 +25,7 @@ Usage:
 """
 
 from pathlib import Path
+from typing import Optional
 
 # Default output directory (relative to project root, untracked)
 DEFAULT_OUTPUT_DIR = Path("training/output")
@@ -118,7 +119,7 @@ STATEMENT_TYPES = [
 ]
 
 
-def get_output_dir(output_path: str = None) -> Path:
+def get_output_dir(output_path: Optional[str] = None) -> Path:
     """
     Get the output directory path, creating it if necessary.
 
@@ -137,7 +138,7 @@ def get_output_dir(output_path: str = None) -> Path:
     return output_dir
 
 
-def get_industry_output_dir(output_path: str = None) -> Path:
+def get_industry_output_dir(output_path: Optional[str] = None) -> Path:
     """
     Get the industry-specific output directory.
 

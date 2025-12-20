@@ -484,7 +484,8 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
         ticker_for_url = ticker.upper().replace('-', '')
         downloaded = download_file(
             f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{ticker_for_url}.png", as_text=False)
-        return downloaded
+        # download_file with as_text=False returns bytes
+        return downloaded if isinstance(downloaded, bytes) else None
     except HTTPStatusError as e:
         # If the status code is 404, the icon is not available
         if e.response.status_code == 404:

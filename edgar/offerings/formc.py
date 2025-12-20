@@ -500,7 +500,7 @@ class IssuerCompany:
             offerings.append(Offering(file_num, cik=str(company.cik)))
         return offerings
 
-    def latest_offering(self)->'Offering':
+    def latest_offering(self)->Optional['Offering']:
         """
         Get the most recent Form C offering (excludes amendments and reports).
 
