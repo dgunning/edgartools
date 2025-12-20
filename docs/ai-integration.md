@@ -149,31 +149,35 @@ context = company.to_context(max_tokens=500)
 minimal_context = company.to_context(max_tokens=200)
 ```
 
-### Detail Levels (Filing Objects)
+### Detail Levels
 
-Some objects support progressive disclosure via the `detail` parameter:
+Most objects support progressive disclosure via the `detail` parameter:
 
 ```python
-# Filing objects support detail levels
-filing = company.get_filings(form="10-K").latest()
+from edgar import Company
 
-# Minimal - Just the essentials (~100-200 tokens)
-minimal = filing.to_context(detail='minimal')
+company = Company("AAPL")
 
-# Standard - Balanced overview (~300-500 tokens)
-standard = filing.to_context(detail='standard')
+# Minimal - Just the essentials (~100-150 tokens)
+minimal = company.to_context(detail='minimal')
 
-# Full - Comprehensive information (~800-1200 tokens)
-full = filing.to_context(detail='full')
+# Standard - Adds industry, actions (~250-350 tokens) [default]
+standard = company.to_context(detail='standard')
+
+# Full - Adds addresses, contact info (~500+ tokens)
+full = company.to_context(detail='full')
+
+# Optional: Override with max_tokens limit
+limited = company.to_context(detail='full', max_tokens=200)
 ```
 
 **Objects supporting `detail` parameter:**
+- `Company.to_context(detail='standard')`
 - `Filing.to_context(detail='standard')`
 - `Filings.to_context(detail='standard')`
 - `EntityFilings.to_context(detail='standard')`
 
 **Objects using `max_tokens` only:**
-- `Company.to_context(max_tokens=2000)`
 - `XBRL.to_context(max_tokens=2000)`
 - `Statement.text(max_tokens=...)`
 
@@ -202,8 +206,8 @@ net_income_fy2023: $96,995,000,000
 ### Available Text Methods
 
 ```python
-# Company context (uses max_tokens)
-company_text = company.to_context(max_tokens=500)
+# Company context (supports detail parameter)
+company_text = company.to_context(detail='standard')
 
 # Filing context (supports detail parameter)
 filing = company.get_filings(form="10-K").latest()
@@ -533,16 +537,19 @@ income = get_revenue_trend("AAPL", periods=3)
 ### 2. Use Progressive Disclosure
 
 ```python
-# For Company objects, use max_tokens to control size
-overview = company.to_context(max_tokens=200)   # Quick overview (~200 tokens)
-standard = company.to_context(max_tokens=500)   # Balanced view (~500 tokens)
-detailed = company.to_context(max_tokens=2000)  # Comprehensive (default)
+# Use detail parameter to control output level
+overview = company.to_context(detail='minimal')   # Quick overview (~100-150 tokens)
+standard = company.to_context(detail='standard')  # Balanced view (~250-350 tokens)
+detailed = company.to_context(detail='full')      # Comprehensive (~500+ tokens)
 
-# For Filing objects, use detail parameter
+# Same pattern works for filings
 filing = company.get_filings(form="10-K").latest()
 minimal = filing.to_context(detail='minimal')   # Just the essentials
 standard = filing.to_context(detail='standard') # Balanced view
 full = filing.to_context(detail='full')         # Everything
+
+# Optional: combine with max_tokens for hard limit
+limited = company.to_context(detail='full', max_tokens=200)
 ```
 
 ### 3. Respect Token Limits
@@ -595,9 +602,9 @@ Approximate token sizes for common operations:
 
 | Operation | Tokens (approx) |
 |-----------|----------------|
-| `Company.to_context(max_tokens=200)` | ~200 |
-| `Company.to_context(max_tokens=500)` | ~500 |
-| `Company.to_context()` (default) | ~2000 |
+| `Company.to_context(detail='minimal')` | 100-150 |
+| `Company.to_context(detail='standard')` | 250-350 |
+| `Company.to_context(detail='full')` | 500+ |
 | `Filing.to_context(detail='minimal')` | 100-200 |
 | `Filing.to_context(detail='standard')` | 200-400 |
 | `Filing.to_context(detail='full')` | 400-800 |
@@ -645,15 +652,16 @@ print(xbrl)  # Full XBRL object, ~2,500 tokens
 **5. Control output size:**
 
 ```python
-# For overview tasks (Company uses max_tokens)
-overview = company.to_context(max_tokens=200)
+# Use detail parameter for progressive disclosure
+overview = company.to_context(detail='minimal')   # Quick overview
+analysis = company.to_context(detail='full')      # Complete details
 
-# For detailed analysis
-analysis = company.to_context(max_tokens=2000)
-
-# For Filing objects, use detail parameter
+# Same pattern for filings
 filing_overview = filing.to_context(detail='minimal')
 filing_full = filing.to_context(detail='full')
+
+# Optional: hard limit with max_tokens
+limited = company.to_context(detail='full', max_tokens=200)
 ```
 
 ### Token Counting
@@ -688,7 +696,7 @@ context_parts = []
 
 # 1. Company overview
 context_parts.append("# Company Overview")
-context_parts.append(company.to_context(max_tokens=200))
+context_parts.append(company.to_context(detail='minimal'))
 
 # 2. Latest filing
 filing = company.get_filings(form="10-K").latest()
@@ -776,16 +784,17 @@ pip install "edgartools[ai]"
 
 ### Issue: Token counts seem high
 
-**Solution**: Use max_tokens to limit output size:
+**Solution**: Use lower detail levels:
 ```python
-# Instead of default (up to 2000 tokens):
-text = company.to_context()
+# Instead of full detail:
+text = company.to_context(detail='full')
 
-# Limit to specific size:
-text = company.to_context(max_tokens=500)
+# Use minimal or standard:
+text = company.to_context(detail='minimal')   # ~100-150 tokens
+text = company.to_context(detail='standard')  # ~250-350 tokens
 
-# For Filing objects, use detail parameter:
-filing_text = filing.to_context(detail='standard')  # Instead of 'full'
+# Or combine with max_tokens for hard limit:
+text = company.to_context(detail='full', max_tokens=200)
 ```
 
 ## Additional Resources

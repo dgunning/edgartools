@@ -31,6 +31,42 @@ def test_company_repr():
 
 
 @pytest.mark.network
+def test_company_to_context_detail_levels():
+    """Test Company.to_context() with different detail levels (Issue #546)."""
+    company = get_test_company("AAPL")
+
+    # Test minimal - should have basic info only
+    minimal = company.to_context(detail='minimal')
+    assert 'COMPANY: Apple Inc.' in minimal
+    assert 'CIK: 0000320193' in minimal
+    assert 'Ticker: AAPL' in minimal
+    assert 'AVAILABLE ACTIONS' not in minimal  # Not in minimal
+    assert 'BUSINESS ADDRESS' not in minimal   # Not in minimal
+
+    # Test standard - should have actions but not addresses
+    standard = company.to_context(detail='standard')
+    assert 'COMPANY: Apple Inc.' in standard
+    assert 'AVAILABLE ACTIONS' in standard
+    assert '.get_filings()' in standard
+    assert 'BUSINESS ADDRESS' not in standard  # Not in standard
+
+    # Test full - should have everything including addresses
+    full = company.to_context(detail='full')
+    assert 'COMPANY: Apple Inc.' in full
+    assert 'AVAILABLE ACTIONS' in full
+    assert 'BUSINESS ADDRESS' in full
+    assert 'CUPERTINO' in full
+
+    # Test that minimal < standard < full in length
+    assert len(minimal) < len(standard) < len(full)
+
+    # Test max_tokens override
+    limited = company.to_context(detail='full', max_tokens=50)
+    assert '[Truncated for token limit]' in limited
+    assert len(limited) < len(full)
+
+
+@pytest.mark.network
 def test_ticker_display_for_company_with_multiple_tickers():
     company = get_test_company(310522)
     assert "FNMA" in company.tickers
