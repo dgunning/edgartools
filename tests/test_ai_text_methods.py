@@ -2,7 +2,8 @@
 Tests for AI-optimized .to_context() methods on core EdgarTools objects.
 
 These methods provide research-backed format optimization:
-- Markdown-KV for metadata objects (60.7% accuracy, 25% fewer tokens)
+- Plain text key-value for metadata objects (Company uses UPPERCASE labels)
+- Markdown-KV for XBRL objects (60.7% accuracy, 25% fewer tokens)
 - TSV for tabular collections (maximum token efficiency)
 
 Note: .text() methods are deprecated in favor of .to_context() for consistency.
@@ -15,12 +16,12 @@ import pytest
 
 @pytest.mark.network
 def test_company_to_context_method(aapl_company):
-    """Test Company.to_context() returns Markdown-KV format."""
+    """Test Company.to_context() returns plain text key-value format."""
     text = aapl_company.to_context(max_tokens=2000)
 
-    # Check format is Markdown-KV (key-value with ** markers)
-    assert "**Company:**" in text
-    assert "**CIK:**" in text
+    # Check format is plain text key-value (UPPERCASE labels)
+    assert "COMPANY:" in text
+    assert "CIK:" in text
 
     # Check company-specific data
     assert "Apple" in text or "AAPL" in text
@@ -36,13 +37,13 @@ def test_company_to_context_contains_key_fields(aapl_company):
     """Test Company.to_context() includes essential company fields."""
     text = aapl_company.to_context(max_tokens=2000)
 
-    # Essential fields that should be present
-    assert "**Company:**" in text
-    assert "**CIK:**" in text
+    # Essential fields that should be present (plain text format)
+    assert "COMPANY:" in text
+    assert "CIK:" in text
 
     # Optional fields (may or may not be present depending on data)
     # Just verify format if present
-    if "**Ticker:**" in text:
+    if "Ticker:" in text:
         assert "AAPL" in text
 
 
@@ -126,8 +127,8 @@ def test_company_text_deprecated(aapl_company):
         assert "deprecated" in str(w[0].message).lower()
         assert "to_context" in str(w[0].message)
 
-        # But should still return valid output
-        assert "**Company:**" in text
+        # But should still return valid output (plain text format)
+        assert "COMPANY:" in text
         assert "Apple" in text or "AAPL" in text
 
 
@@ -185,12 +186,12 @@ def test_text_method_token_limiting():
 
 @pytest.mark.fast
 def test_markdown_kv_format():
-    """Test Markdown-KV format structure."""
-    # Example Markdown-KV output
-    text = """**Company:** Apple Inc.
+    """Test Markdown-KV format structure (used by XBRL.to_context())."""
+    # Example Markdown-KV output (as used by XBRL)
+    text = """**Entity:** Apple Inc.
 **CIK:** 0000320193
-**Ticker:** AAPL
-**Industry:** Electronic Computers"""
+**Form:** 10-K
+**Facts:** 1234"""
 
     lines = text.strip().split('\n')
 
@@ -201,6 +202,28 @@ def test_markdown_kv_format():
         parts = line.split(":**", 1)
         assert len(parts) == 2
         key = parts[0].strip("*")
+        value = parts[1].strip()
+        assert len(key) > 0
+        assert len(value) > 0
+
+
+@pytest.mark.fast
+def test_plain_text_kv_format():
+    """Test plain text key-value format structure (used by Company.to_context())."""
+    # Example plain text output (as used by Company)
+    text = """COMPANY: Apple Inc.
+CIK: 0000320193
+Ticker: AAPL
+Industry: Electronic Computers"""
+
+    lines = text.strip().split('\n')
+
+    # Each line should be a key-value pair with colon separator
+    for line in lines:
+        assert ":" in line
+        parts = line.split(":", 1)
+        assert len(parts) == 2
+        key = parts[0].strip()
         value = parts[1].strip()
         assert len(key) > 0
         assert len(value) > 0
