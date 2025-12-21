@@ -194,8 +194,8 @@ class MultiPeriodStatement:
             padding=(0, 1),
         )
 
-        # Add concept column
-        stmt_table.add_column("", style="")
+        # Add concept column with fixed width and wrapping
+        stmt_table.add_column("", style="", width=42, no_wrap=False)
 
         # Add period columns
         for period in self.periods:
