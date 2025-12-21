@@ -23,6 +23,8 @@ from edgar.display.styles import (
     company_title,
     label_value,
     identifier,
+    get_statement_styles,
+    source_text,
 )
 from edgar.formatting import accession_number_text, cik_text
 
@@ -220,14 +222,14 @@ def demo_filings_table():
 # =============================================================================
 
 def demo_statement():
-    """Demonstrate financial statement design."""
+    """Demonstrate financial statement design (legacy style)."""
+    styles = get_statement_styles()
 
     table = Table(
         box=box.SIMPLE,
         show_header=True,
         header_style="bold",
         padding=(0, 1),
-        row_styles=["", ""],
     )
 
     table.add_column("", width=40)  # Concept name
@@ -235,17 +237,17 @@ def demo_statement():
     table.add_column("2023", justify="right", width=15)
     table.add_column("2022", justify="right", width=15)
 
-    # Data rows with proper styling
+    # Data rows using new statement styles
     rows = [
-        (Text("Revenue", style=get_style("abstract_item")), "391,035", "383,285", "394,328"),
-        (Text("  Products", style=""), "298,085", "298,085", "316,199"),
-        (Text("  Services", style=""), "96,169", "85,200", "78,129"),
-        (Text("Cost of Sales", style=""), "214,137", "214,137", "223,546"),
-        (Text("Gross Profit", style=get_style("total_row")), "176,898", "169,148", "170,782"),
-        (Text("Operating Expenses", style=get_style("abstract_item")), "", "", ""),
-        (Text("  R&D", style=""), "29,915", "29,915", "26,251"),
-        (Text("  SG&A", style=""), "26,097", "24,932", "25,094"),
-        (Text("Operating Income", style=get_style("total_row")), "120,886", "114,301", "119,437"),
+        (Text("Revenue", style=styles["row"]["abstract"]), "391,035", "383,285", "394,328"),
+        (Text("  Products", style=styles["row"]["item"]), "298,085", "298,085", "316,199"),
+        (Text("  Services", style=styles["row"]["item"]), "96,169", "85,200", "78,129"),
+        (Text("Cost of Sales", style=styles["row"]["item"]), "214,137", "214,137", "223,546"),
+        (Text("Gross Profit", style=styles["row"]["total"]), "176,898", "169,148", "170,782"),
+        (Text("Operating Expenses", style=styles["row"]["abstract"]), "", "", ""),
+        (Text("  R&D", style=styles["row"]["item"]), "29,915", "29,915", "26,251"),
+        (Text("  SG&A", style=styles["row"]["item"]), "26,097", "24,932", "25,094"),
+        (Text("Operating Income", style=styles["row"]["total"]), "120,886", "114,301", "119,437"),
     ]
 
     for row in rows:
@@ -253,14 +255,14 @@ def demo_statement():
 
     # Header with company and statement info
     header = Text.assemble(
-        ("Apple Inc.", get_style("company_name")),
+        ("Apple Inc.", styles["header"]["company_name"]),
         " ",
         ("AAPL", get_style("ticker")),
         "\n",
-        ("Consolidated Statements of Operations", get_style("section_header")),
+        ("Consolidated Statements of Operations", styles["header"]["statement_title"]),
     )
 
-    footer = Text("Amounts in millions USD", style=get_style("metadata"))
+    footer = Text("Amounts in millions USD", style=styles["metadata"]["units"])
 
     panel = Panel(
         table,
@@ -268,13 +270,134 @@ def demo_statement():
         title_align="left",
         subtitle=footer,
         subtitle_align="right",
-        border_style=get_style("border"),
+        border_style=styles["structure"]["border"],
         box=card_border(),
         padding=(0, 1),
         expand=False,
     )
 
     return panel
+
+
+def demo_statement_with_source():
+    """Demonstrate financial statement with source attribution (target design)."""
+    from rich.console import Group
+
+    styles = get_statement_styles()
+
+    table = Table(
+        box=box.SIMPLE,
+        show_header=True,
+        header_style="bold",
+        padding=(0, 1),
+    )
+
+    table.add_column("", width=40)
+    table.add_column("FY 2024", justify="right", width=12)
+    table.add_column("FY 2023", justify="right", width=12)
+    table.add_column("FY 2022", justify="right", width=12)
+
+    # Data rows with value styling
+    data = [
+        ("REVENUE", "abstract", None, None, None),
+        ("Net Sales", "total", 391035, 383285, 394328),
+        ("  Products", "item", 298085, 298085, 316199),
+        ("  Services", "item", 96169, 85200, 78129),
+        ("COSTS AND EXPENSES", "abstract", None, None, None),
+        ("Cost of Sales", "item", 214137, 214137, 223546),
+        ("Gross Profit", "total", 176898, 169148, 170782),
+        ("Operating Expenses", "abstract", None, None, None),
+        ("  Research and Development", "item", 29915, 29915, 26251),
+        ("  Selling, General and Administrative", "item", 26097, 24932, 25094),
+        ("Total Operating Expenses", "subtotal", 56012, 54847, 51345),
+        ("Operating Income", "total", 120886, 114301, 119437),
+    ]
+
+    def format_value(val, row_type):
+        if val is None:
+            return Text("")
+        val_str = f"{val:,}"
+        if row_type == "total":
+            return Text(val_str, style=styles["value"]["total"])
+        elif row_type == "subtotal":
+            return Text(val_str, style=styles["value"]["total"])
+        else:
+            return Text(val_str, style=styles["value"]["default"])
+
+    for label, row_type, v1, v2, v3 in data:
+        if row_type == "abstract":
+            label_text = Text(label, style=styles["row"]["abstract"])
+        elif row_type == "total":
+            label_text = Text(label, style=styles["row"]["total"])
+        elif row_type == "subtotal":
+            label_text = Text(label, style=styles["row"]["subtotal"])
+        else:
+            label_text = Text(label, style=styles["row"]["item"])
+
+        table.add_row(label_text, format_value(v1, row_type), format_value(v2, row_type), format_value(v3, row_type))
+
+    # Build title hierarchy (like XBRL)
+    title_lines = [
+        Text("Income Statement", style=styles["header"]["statement_title"]),
+        Text("Fiscal Year", style=styles["metadata"]["hint"]),
+        Text("Amounts in millions USD", style=styles["metadata"]["units"]),
+    ]
+    title = Text("\n").join(title_lines)
+
+    # Footer with source and company
+    footer = Text.assemble(
+        ("Apple Inc. ", styles["header"]["company_name"]),
+        ("(AAPL)", get_style("ticker")),
+        ("  ", ""),
+        (SYMBOLS["bullet"], styles["structure"]["separator"]),
+        ("  ", ""),
+        ("Source: EntityFacts", styles["metadata"]["source"]),
+    )
+
+    panel = Panel(
+        table,
+        title=title,
+        title_align="left",
+        subtitle=footer,
+        subtitle_align="left",
+        border_style=styles["structure"]["border"],
+        box=box.SIMPLE,
+        padding=(0, 1),
+        expand=False,
+    )
+
+    return panel
+
+
+def demo_statement_styles():
+    """Show the get_statement_styles() structure."""
+
+    styles = get_statement_styles()
+
+    table = Table(
+        title="get_statement_styles() Reference",
+        box=box.ROUNDED,
+        show_header=True,
+        header_style="bold",
+    )
+
+    table.add_column("Category", width=12)
+    table.add_column("Key", width=18)
+    table.add_column("Style", width=20)
+    table.add_column("Preview", width=25)
+
+    for category, items in styles.items():
+        if category == "comparison":
+            # Handle comparison separately (has symbol + style)
+            for key, val in items.items():
+                preview = Text(f"{val['symbol']} {key}", style=val['style'])
+                table.add_row(category, key, val['style'], preview)
+        else:
+            for key, style in items.items():
+                preview = Text(f"Sample {key}", style=style) if style else Text("(default)")
+                table.add_row(category, key, style or "(none)", preview)
+
+    return table
 
 
 # =============================================================================
@@ -553,9 +676,19 @@ def main():
     console.print(demo_filings_table())
     console.print("\n")
 
-    # Section 4: Financial Statement
-    console.print("[bold]4. Financial Statement[/bold]\n")
+    # Section 4: Financial Statement (current)
+    console.print("[bold]4. Financial Statement (using get_statement_styles)[/bold]\n")
     console.print(demo_statement())
+    console.print("\n")
+
+    # Section 4b: Financial Statement with source (target design)
+    console.print("[bold]4b. Financial Statement with Source Attribution (Target Design)[/bold]\n")
+    console.print(demo_statement_with_source())
+    console.print("\n")
+
+    # Section 4c: Statement styles reference
+    console.print("[bold]4c. Statement Styles Reference (get_statement_styles)[/bold]\n")
+    console.print(demo_statement_styles())
     console.print("\n")
 
     # Section 5: Reference

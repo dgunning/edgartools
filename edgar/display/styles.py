@@ -22,46 +22,99 @@ from rich.text import Text
 # =============================================================================
 
 PALETTE = {
-    # Primary elements - high visibility
+    # =========================================================================
+    # PRIMARY ELEMENTS - high visibility
+    # =========================================================================
     "company_name": "bold green",
     "ticker": "bold gold1",
     "form_type": "bold",
 
-    # Identifiers - distinctive but not overpowering
+    # =========================================================================
+    # IDENTIFIERS - distinctive but not overpowering
+    # =========================================================================
     "cik": "dodger_blue1",
     "accession": "dodger_blue1",
 
-    # Structure
+    # =========================================================================
+    # STRUCTURE
+    # =========================================================================
     "section_header": "bold",
     "subsection": "bold dim",
 
-    # Labels and values
+    # =========================================================================
+    # LABELS AND VALUES
+    # =========================================================================
     "label": "grey70",
     "value": "",  # default terminal color
     "value_highlight": "bold",
 
-    # Metadata - subtle
+    # =========================================================================
+    # METADATA - subtle
+    # =========================================================================
     "metadata": "dim",
     "hint": "dim italic",
     "date": "dim",
+    "source": "dim italic",  # For "Source: EntityFacts" etc.
+    "units": "dim",  # For "Amounts in millions USD"
 
-    # Borders and separators
+    # =========================================================================
+    # BORDERS AND SEPARATORS
+    # =========================================================================
     "border": "grey50",
     "separator": "grey50",
 
-    # Status indicators
+    # =========================================================================
+    # STATUS INDICATORS
+    # =========================================================================
     "positive": "green",
     "negative": "red",
     "neutral": "dim",
     "warning": "yellow",
     "info": "cyan",
 
-    # Financial specific
+    # =========================================================================
+    # FINANCIAL STATEMENTS - Row Types
+    # =========================================================================
+    # Abstract items - section headers like "ASSETS", "Revenue"
+    "stmt_abstract": "bold cyan",
+    "stmt_abstract_top": "bold cyan",  # Top-level (ASSETS, LIABILITIES)
+    "stmt_abstract_section": "bold",   # Section level (Current Assets)
+
+    # Total rows - summary lines
+    "stmt_total": "bold",
+    "stmt_subtotal": "bold dim",
+
+    # Regular line items
+    "stmt_item": "",  # Default style
+    "stmt_item_dim": "dim",  # Dimension items (italic/dim)
+    "stmt_item_low_confidence": "dim italic",
+
+    # =========================================================================
+    # FINANCIAL STATEMENTS - Values
+    # =========================================================================
+    "stmt_value": "",  # Default value
+    "stmt_value_positive": "green",
+    "stmt_value_negative": "red",
+    "stmt_value_total": "bold",
+    "stmt_value_empty": "dim",
+
+    # =========================================================================
+    # FINANCIAL STATEMENTS - Comparison Indicators
+    # =========================================================================
+    "stmt_increase": "green",
+    "stmt_decrease": "red",
+    "stmt_unchanged": "dim",
+
+    # =========================================================================
+    # LEGACY ALIASES (for backward compatibility during migration)
+    # =========================================================================
     "total_row": "bold",
     "subtotal_row": "bold dim",
     "abstract_item": "bold cyan",
 
-    # Links and references
+    # =========================================================================
+    # LINKS AND REFERENCES
+    # =========================================================================
     "link": "blue underline",
     "reference": "cyan",
 }
@@ -98,6 +151,14 @@ SYMBOLS = {
     # Enclosures
     "lbracket": "\u3010",         # [
     "rbracket": "\u3011",         # ]
+
+    # Financial comparisons
+    "increase": "\u25B2",         # ▲
+    "decrease": "\u25BC",         # ▼
+    "unchanged": "\u2022",        # •
+
+    # Confidence markers
+    "low_confidence": "\u25E6",   # ◦ (hollow bullet)
 }
 
 
@@ -140,3 +201,77 @@ def identifier(value: str, id_type: str = "cik") -> Text:
     """Create a styled identifier (CIK, accession number, etc.)."""
     style_name = id_type if id_type in PALETTE else "cik"
     return Text(value, style=get_style(style_name))
+
+
+# =============================================================================
+# FINANCIAL STATEMENT STYLES
+# =============================================================================
+
+def get_statement_styles() -> dict:
+    """
+    Get a structured style dictionary for financial statements.
+
+    This provides a migration path from the old style systems
+    (terminal_styles.py and get_xbrl_styles()) to the unified palette.
+
+    Returns:
+        Dictionary with organized style groups for statement rendering.
+    """
+    return {
+        # Header styles
+        "header": {
+            "company_name": PALETTE["company_name"],
+            "statement_title": PALETTE["section_header"],
+            "top_level": PALETTE["stmt_abstract_top"],
+            "section": PALETTE["stmt_abstract_section"],
+            "subsection": PALETTE["subsection"],
+        },
+        # Row styles
+        "row": {
+            "abstract": PALETTE["stmt_abstract"],
+            "total": PALETTE["stmt_total"],
+            "subtotal": PALETTE["stmt_subtotal"],
+            "item": PALETTE["stmt_item"],
+            "item_dim": PALETTE["stmt_item_dim"],
+            "low_confidence": PALETTE["stmt_item_low_confidence"],
+        },
+        # Value styles
+        "value": {
+            "default": PALETTE["stmt_value"],
+            "positive": PALETTE["stmt_value_positive"],
+            "negative": PALETTE["stmt_value_negative"],
+            "total": PALETTE["stmt_value_total"],
+            "empty": PALETTE["stmt_value_empty"],
+        },
+        # Structure styles
+        "structure": {
+            "border": PALETTE["border"],
+            "separator": PALETTE["separator"],
+        },
+        # Metadata styles
+        "metadata": {
+            "source": PALETTE["source"],
+            "units": PALETTE["units"],
+            "date": PALETTE["date"],
+            "hint": PALETTE["hint"],
+        },
+        # Comparison indicators
+        "comparison": {
+            "increase": {"symbol": SYMBOLS["increase"], "style": PALETTE["stmt_increase"]},
+            "decrease": {"symbol": SYMBOLS["decrease"], "style": PALETTE["stmt_decrease"]},
+            "unchanged": {"symbol": SYMBOLS["unchanged"], "style": PALETTE["stmt_unchanged"]},
+        },
+    }
+
+
+def source_text(source: str) -> Text:
+    """
+    Create a styled source attribution text.
+
+    Args:
+        source: Source name (e.g., "EntityFacts", "SEC XBRL")
+
+    Returns:
+        Rich Text object like "Source: EntityFacts" in source style.
+    """
+    return Text(f"Source: {source}", style=get_style("source"))
