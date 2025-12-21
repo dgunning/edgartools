@@ -36,6 +36,17 @@ from edgar.entity.models import FinancialFact
 from edgar.display import get_statement_styles, SYMBOLS, get_style
 from edgar.richtools import repr_rich
 
+
+def _is_statement_abstract(label: str, depth: int) -> bool:
+    """Check if an item is a top-level statement abstract header (e.g., 'Income Statement [Abstract]')."""
+    return "[Abstract]" in label and depth == 0
+
+
+def _clean_label(label: str) -> str:
+    """Remove XBRL jargon like '[Abstract]' from labels."""
+    return label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
+
+
 # Define which statements accept linked concepts from which source statements
 # Key = target statement, Value = set of source statements that can flow into it
 # Flow direction: Income/Balance -> CashFlow/Equity/Comprehensive (not reverse)
@@ -193,17 +204,12 @@ class MultiPeriodStatement:
         def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
             """Add an item row to the table."""
             # Skip top-level statement abstract headers (e.g., "Income Statement [Abstract]")
-            # but still process their children
-            is_statement_abstract = "[Abstract]" in item.label and depth == 0
+            skip_render = _is_statement_abstract(item.label, depth)
 
-            if not is_statement_abstract:
+            if not skip_render:
                 indent = "  " * depth
-
-                # Prepare row values
                 row = []
-
-                # Clean up label - remove XBRL jargon like "[Abstract]"
-                label = item.label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
+                label = _clean_label(item.label)
 
                 # Concept label with semantic styles
                 if item.is_abstract:
@@ -260,7 +266,7 @@ class MultiPeriodStatement:
                 stmt_table.add_row(*row)
 
             # Add children (process even if we skipped rendering this item)
-            child_depth = depth if is_statement_abstract else depth + 1
+            child_depth = depth if skip_render else depth + 1
             for child in item.children:
                 if child_depth < 3:
                     add_item_to_table(child, child_depth)
@@ -300,17 +306,12 @@ class MultiPeriodStatement:
 
         def collect_items(item: 'MultiPeriodItem', depth: int = 0):
             """Recursively collect items into flat structure."""
-            # Skip top-level statement abstract headers (e.g., "Income Statement [Abstract]")
-            is_statement_abstract = "[Abstract]" in item.label and depth == 0
+            skip_item = _is_statement_abstract(item.label, depth)
 
-            if not is_statement_abstract:
-                # Clean up label - remove XBRL jargon
-                clean_label = item.label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
-
-                # Create row data
+            if not skip_item:
                 row = {
                     'concept': item.concept,
-                    'label': clean_label,
+                    'label': _clean_label(item.label),
                     'depth': depth,
                     'is_abstract': item.is_abstract,
                     'is_total': item.is_total,
@@ -325,7 +326,7 @@ class MultiPeriodStatement:
                 data.append(row)
 
             # Process children (adjust depth if we skipped the abstract)
-            child_depth = depth if is_statement_abstract else depth + 1
+            child_depth = depth if skip_item else depth + 1
             for child in item.children:
                 collect_items(child, child_depth)
 
@@ -927,16 +928,12 @@ class MultiPeriodStatement:
         def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
             """Add an item row to the table."""
             # Skip top-level statement abstract headers (e.g., "Income Statement [Abstract]")
-            is_statement_abstract = "[Abstract]" in item.label and depth == 0
+            skip_render = _is_statement_abstract(item.label, depth)
 
-            if not is_statement_abstract:
+            if not skip_render:
                 indent = "  " * depth
-
-                # Prepare row values
                 row = []
-
-                # Clean up label - remove XBRL jargon
-                label = item.label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
+                label = _clean_label(item.label)
 
                 # Concept label
                 if item.is_abstract:
@@ -992,7 +989,7 @@ class MultiPeriodStatement:
                 stmt_table.add_row(*row)
 
             # Add children (process even if we skipped rendering this item)
-            child_depth = depth if is_statement_abstract else depth + 1
+            child_depth = depth if skip_render else depth + 1
             for child in item.children:
                 if child_depth < 3:
                     add_item_to_table(child, child_depth)

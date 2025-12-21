@@ -1272,3 +1272,120 @@ class TestPeriodSelection:
         columns = result_pivot.data.columns
         assert not any (c.startswith("Q") for c in columns)
         print(income_statement)
+
+
+class TestStatementDisplayBehavior:
+    """Test the statement display formatting and styling (edgartools-bkhk)."""
+
+    def test_helper_is_statement_abstract(self):
+        """Test the _is_statement_abstract helper function."""
+        from edgar.entity.enhanced_statement import _is_statement_abstract
+
+        # Should return True for top-level abstract headers
+        assert _is_statement_abstract("Income Statement [Abstract]", 0) is True
+        assert _is_statement_abstract("Statement of Financial Position [Abstract]", 0) is True
+
+        # Should return False if depth > 0
+        assert _is_statement_abstract("Income Statement [Abstract]", 1) is False
+
+        # Should return False if no [Abstract] suffix
+        assert _is_statement_abstract("Total Revenue", 0) is False
+        assert _is_statement_abstract("ASSETS", 0) is False
+
+    def test_helper_clean_label(self):
+        """Test the _clean_label helper function."""
+        from edgar.entity.enhanced_statement import _clean_label
+
+        # Should remove [Abstract] suffix
+        assert _clean_label("Income Statement [Abstract]") == "Income Statement"
+        assert _clean_label("Operating expenses: [Abstract]") == "Operating expenses:"
+
+        # Should handle no suffix
+        assert _clean_label("Total Revenue") == "Total Revenue"
+        assert _clean_label("ASSETS") == "ASSETS"
+
+        # Should strip whitespace
+        assert _clean_label("  Revenue  ") == "Revenue"
+
+    def test_dataframe_no_abstract_labels(self):
+        """Test that to_dataframe() excludes [Abstract] from labels."""
+        from edgar.entity.enhanced_statement import MultiPeriodStatement, MultiPeriodItem
+
+        # Create child item first
+        child_item = MultiPeriodItem(
+            concept="us-gaap:Revenue",
+            label="Total Revenue",
+            values={"FY 2024": 100000},
+            depth=1,
+            parent_concept="us-gaap:IncomeStatementAbstract",
+            is_abstract=False,
+            is_total=True,
+            section="IncomeStatement",
+            confidence=1.0,
+            children=[]
+        )
+
+        # Create a mock statement with abstract header
+        items = [
+            MultiPeriodItem(
+                concept="us-gaap:IncomeStatementAbstract",
+                label="Income Statement [Abstract]",
+                values={},
+                depth=0,
+                parent_concept=None,
+                is_abstract=True,
+                is_total=False,
+                section="IncomeStatement",
+                confidence=1.0,
+                children=[child_item]
+            )
+        ]
+
+        statement = MultiPeriodStatement(
+            statement_type="IncomeStatement",
+            periods=["FY 2024"],
+            items=items,
+            company_name="Test Corp",
+            cik="0001234567"
+        )
+
+        df = statement.to_dataframe()
+
+        # Should not contain [Abstract] in any labels
+        assert not df['label'].str.contains(r'\[Abstract\]').any()
+
+        # Should have the revenue row
+        assert 'Total Revenue' in df['label'].values
+
+    def test_positive_values_no_green_style(self):
+        """Test that positive values don't use green styling."""
+        from edgar.display import get_statement_styles
+
+        styles = get_statement_styles()
+
+        # Positive values should have empty style (no color)
+        assert styles["value"]["positive"] == ""
+
+        # Negative values should have red style
+        assert styles["value"]["negative"] == "red"
+
+    def test_statement_styles_structure(self):
+        """Test that get_statement_styles returns correct structure."""
+        from edgar.display import get_statement_styles
+
+        styles = get_statement_styles()
+
+        # Check required keys exist
+        assert "header" in styles
+        assert "row" in styles
+        assert "value" in styles
+        assert "structure" in styles
+        assert "metadata" in styles
+
+        # Check row styles
+        assert "abstract" in styles["row"]
+        assert "total" in styles["row"]
+        assert "item" in styles["row"]
+
+        # Check metadata includes source
+        assert "source" in styles["metadata"]
