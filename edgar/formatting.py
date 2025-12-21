@@ -166,9 +166,9 @@ def accession_number_text(accession: str) -> Text:
 
     Returns:
         Rich Text object with colored parts:
-        - Leading zeros in grey54
-        - Year in bright_blue
-        - Trailing zeros in grey54
+        - Leading zeros in dim
+        - Year in dodger_blue1
+        - Trailing zeros in dim
     """
     if not accession:
         return Text()
@@ -193,7 +193,7 @@ def accession_number_text(accession: str) -> Text:
         ("0" * cik_zeros, "dim"),
         (cik_value, "bold white"),
         ("-", None),
-        (year_part, "bright_blue"),
+        (year_part, "dodger_blue1"),
         ("-", None),
         ("0" * seq_zeros, "dim"),
         (seq_value, "bold white")
