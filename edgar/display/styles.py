@@ -93,8 +93,8 @@ PALETTE = {
     # FINANCIAL STATEMENTS - Values
     # =========================================================================
     "stmt_value": "",  # Default value
-    "stmt_value_positive": "green",
-    "stmt_value_negative": "red",
+    "stmt_value_positive": "",  # No special color - most values are positive
+    "stmt_value_negative": "red",  # Highlight negatives (losses, deficits)
     "stmt_value_total": "bold",
     "stmt_value_empty": "dim",
 

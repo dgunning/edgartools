@@ -90,6 +90,10 @@ A cohesive design language for all rich terminal output in EdgarTools.
 | `total_row` | `bold` | Total/summary rows |
 | `subtotal_row` | `bold dim` | Subtotal rows |
 | `abstract_item` | `bold cyan` | Section headers (ASSETS, REVENUE) |
+| `stmt_value_positive` | (default) | Positive values - no special color |
+| `stmt_value_negative` | `red` | Negative values (losses, deficits) |
+
+**Note**: Unlike status indicators, financial statement values do NOT use green for positive numbers. Most financial values are positive, so green would overwhelm the display and collide with company name styling. Only negatives are highlighted (red) to draw attention to losses or deficits.
 
 ---
 

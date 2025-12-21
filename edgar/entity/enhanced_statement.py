@@ -33,25 +33,7 @@ from edgar.entity.mappings_loader import (
 )
 from edgar.entity.models import FinancialFact
 
-try:
-    from edgar.entity.terminal_styles import get_current_scheme
-except ImportError:
-    # Fallback if terminal_styles not available - use professional scheme
-    def get_current_scheme():
-        return {
-            "abstract_item": "bold blue",
-            "total_item": "bold bright_white",
-            "regular_item": "",
-            "low_confidence_item": "italic",
-            "positive_value": "green",
-            "negative_value": "red",
-            "total_value_prefix": "bold",
-            "separator": "blue",
-            "company_name": "bold bright_white",
-            "statement_type": "bold blue",
-            "panel_border": "white",
-            "empty_value": "bright_black",
-        }
+from edgar.display import get_statement_styles, SYMBOLS, get_style
 from edgar.richtools import repr_rich
 
 # Define which statements accept linked concepts from which source statements
@@ -163,8 +145,8 @@ class MultiPeriodStatement:
 
     def __rich__(self):
         """Create a rich representation with multiple periods."""
-        # Get color scheme at the start
-        colors = get_current_scheme()
+        # Get styles from the unified design language
+        styles = get_statement_styles()
 
         # Statement type mapping
         statement_names = {
@@ -173,111 +155,119 @@ class MultiPeriodStatement:
             'CashFlow': 'Cash Flow Statement'
         }
 
-        # Title
-        title_parts = []
-        if self.company_name:
-            title_parts.append((self.company_name, colors["company_name"]))
-        else:
-            title_parts.append(("Financial Statement", colors["total_item"]))
-
-        title = Text.assemble(*title_parts)
-
-        # Subtitle
+        # Build title hierarchy (like XBRL statements)
         statement_display = statement_names.get(self.statement_type, self.statement_type)
         period_range = f"{self.periods[-1]} to {self.periods[0]}" if len(self.periods) > 1 else self.periods[0] if self.periods else ""
-        subtitle = f"{statement_display} • {period_range}"
+
+        title_lines = [
+            Text(statement_display, style=styles["header"]["statement_title"]),
+            Text(period_range, style=styles["metadata"]["hint"]),
+            Text("Amounts in USD", style=styles["metadata"]["units"]),
+        ]
+        title = Text("\n").join(title_lines)
+
+        # Build footer with company info and source attribution
+        footer_parts = []
+        if self.company_name:
+            footer_parts.append((self.company_name, styles["header"]["company_name"]))
+            footer_parts.append(("  ", ""))
+            footer_parts.append((SYMBOLS["bullet"], styles["structure"]["separator"]))
+            footer_parts.append(("  ", ""))
+        footer_parts.append(("Source: EntityFacts", styles["metadata"]["source"]))
+        footer = Text.assemble(*footer_parts)
 
         # Main table with multiple period columns
         stmt_table = Table(
             box=box.SIMPLE,
             show_header=True,
             padding=(0, 1),
-            expand=True
         )
 
         # Add concept column
-        stmt_table.add_column("", style="", ratio=2)
+        stmt_table.add_column("", style="")
 
         # Add period columns
         for period in self.periods:
-            stmt_table.add_column(period, justify="right", style="bold", ratio=1)
+            stmt_table.add_column(period, justify="right", style="bold")
 
         def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
             """Add an item row to the table."""
-            indent = "  " * depth
+            # Skip top-level statement abstract headers (e.g., "Income Statement [Abstract]")
+            # but still process their children
+            is_statement_abstract = "[Abstract]" in item.label and depth == 0
 
-            # Prepare row values
-            row = []
+            if not is_statement_abstract:
+                indent = "  " * depth
 
-            # Concept label
-            if item.is_abstract:
-                row.append(Text(f"{indent}{item.label}", style=colors["abstract_item"]))
-            elif item.is_total:
-                row.append(Text(f"{indent}{item.label}", style=colors["total_item"]))
-            else:
-                # Check if this is a key financial item that should always be prominent
-                important_labels = [
-                    'Total Revenue', 'Revenue', 'Net Sales', 'Total Net Sales',
-                    'Operating Income', 'Operating Income (Loss)', 'Operating Profit',
-                    'Net Income', 'Net Income (Loss)', 'Net Earnings',
-                    'Gross Profit', 'Gross Margin',
-                    'Cost of Revenue', 'Cost of Goods Sold',
-                    'Operating Expenses', 'Total Operating Expenses',
-                    'Earnings Per Share', 'EPS'
-                ]
+                # Prepare row values
+                row = []
 
-                is_important = any(label in item.label for label in important_labels)
+                # Clean up label - remove XBRL jargon like "[Abstract]"
+                label = item.label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
 
-                # Don't mark important items as low confidence even if score is low
-                if is_important:
-                    style = colors["total_item"]  # Use bold styling for important items
-                    confidence_marker = ""
+                # Concept label with semantic styles
+                if item.is_abstract:
+                    row.append(Text(f"{indent}{label}", style=styles["row"]["abstract"]))
+                elif item.is_total:
+                    row.append(Text(f"{indent}{label}", style=styles["row"]["total"]))
                 else:
-                    style = colors["low_confidence_item"] if item.confidence < 0.8 else colors["regular_item"]
-                    confidence_marker = " ◦" if item.confidence < 0.8 else ""
+                    # Check if this is a key financial item that should always be prominent
+                    important_keywords = [
+                        'Total Revenue', 'Revenue', 'Net Sales', 'Total Net Sales',
+                        'Operating Income', 'Operating Income (Loss)', 'Operating Profit',
+                        'Net Income', 'Net Income (Loss)', 'Net Earnings',
+                        'Gross Profit', 'Gross Margin',
+                        'Cost of Revenue', 'Cost of Goods Sold',
+                        'Operating Expenses', 'Total Operating Expenses',
+                        'Earnings Per Share', 'EPS'
+                    ]
 
-                row.append(Text(f"{indent}{item.label}{confidence_marker}", style=style))
+                    is_important = any(kw in label for kw in important_keywords)
 
-            # Period values
-            for period in self.periods:
-                value_str = item.get_display_value(period, concise_format=self.concise_format)
-                if value_str and value_str != "-":
-                    # Color code values
-                    value = item.values.get(period)
-                    if value and isinstance(value, (int, float)):
-                        value_style = colors["negative_value"] if value < 0 else colors["positive_value"]
+                    # Don't mark important items as low confidence even if score is low
+                    if is_important:
+                        style = styles["row"]["total"]  # Use bold styling for important items
+                        confidence_marker = ""
                     else:
-                        value_style = ""
+                        style = styles["row"]["low_confidence"] if item.confidence < 0.8 else styles["row"]["item"]
+                        confidence_marker = f" {SYMBOLS['low_confidence']}" if item.confidence < 0.8 else ""
 
-                    if item.is_total:
-                        # Combine total style with value color if present
-                        total_style = colors["total_value_prefix"]
-                        if value_style:
-                            total_style = f"{total_style} {value_style}"
-                        row.append(Text(value_str, style=total_style))
+                    row.append(Text(f"{indent}{label}{confidence_marker}", style=style))
+
+                # Period values with semantic value styles
+                # Always use concise format for display (e.g., $416B vs $416,161,000,000)
+                for period in self.periods:
+                    value_str = item.get_display_value(period, concise_format=True)
+                    if value_str and value_str != "-":
+                        # Color code values
+                        value = item.values.get(period)
+                        if value and isinstance(value, (int, float)):
+                            value_style = styles["value"]["negative"] if value < 0 else styles["value"]["positive"]
+                        else:
+                            value_style = styles["value"]["default"]
+
+                        if item.is_total:
+                            # Combine total style with value color if present
+                            total_style = styles["value"]["total"]
+                            if value_style:
+                                total_style = f"{total_style} {value_style}"
+                            row.append(Text(value_str, style=total_style))
+                        else:
+                            row.append(Text(value_str, style=value_style))
                     else:
-                        row.append(Text(value_str, style=value_style))
-                else:
-                    row.append("")
+                        row.append(Text("", style=styles["value"]["empty"]))
 
-            stmt_table.add_row(*row)
+                stmt_table.add_row(*row)
 
-            # Add separator line after totals
-            if item.is_total and depth == 0:
-                separator_row = [Text("─" * 40, style=colors["separator"])]
-                for _ in self.periods:
-                    separator_row.append(Text("─" * 15, style=colors["separator"]))
-                stmt_table.add_row(*separator_row)
-
-            # Add children
+            # Add children (process even if we skipped rendering this item)
+            child_depth = depth if is_statement_abstract else depth + 1
             for child in item.children:
-                if depth < 3:
-                    add_item_to_table(child, depth + 1)
+                if child_depth < 3:
+                    add_item_to_table(child, child_depth)
 
         # Add all items
         for item in self.items:
             add_item_to_table(item)
-
 
         # Combine content
         content_parts = [
@@ -290,9 +280,13 @@ class MultiPeriodStatement:
         return Panel(
             content,
             title=title,
-            subtitle=subtitle,
-            border_style=colors["panel_border"],
-            expand=True
+            title_align="left",
+            subtitle=footer,
+            subtitle_align="left",
+            border_style=styles["structure"]["border"],
+            box=box.SIMPLE,
+            padding=(0, 1),
+            expand=False,
         )
 
     def to_dataframe(self) -> pd.DataFrame:
@@ -306,26 +300,34 @@ class MultiPeriodStatement:
 
         def collect_items(item: 'MultiPeriodItem', depth: int = 0):
             """Recursively collect items into flat structure."""
-            # Create row data
-            row = {
-                'concept': item.concept,
-                'label': item.label,
-                'depth': depth,
-                'is_abstract': item.is_abstract,
-                'is_total': item.is_total,
-                'section': item.section,
-                'confidence': item.confidence
-            }
+            # Skip top-level statement abstract headers (e.g., "Income Statement [Abstract]")
+            is_statement_abstract = "[Abstract]" in item.label and depth == 0
 
-            # Add period values
-            for period in self.periods:
-                row[period] = item.values.get(period)
+            if not is_statement_abstract:
+                # Clean up label - remove XBRL jargon
+                clean_label = item.label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
 
-            data.append(row)
+                # Create row data
+                row = {
+                    'concept': item.concept,
+                    'label': clean_label,
+                    'depth': depth,
+                    'is_abstract': item.is_abstract,
+                    'is_total': item.is_total,
+                    'section': item.section,
+                    'confidence': item.confidence
+                }
 
-            # Process children
+                # Add period values
+                for period in self.periods:
+                    row[period] = item.values.get(period)
+
+                data.append(row)
+
+            # Process children (adjust depth if we skipped the abstract)
+            child_depth = depth if is_statement_abstract else depth + 1
             for child in item.children:
-                collect_items(child, depth + 1)
+                collect_items(child, child_depth)
 
         # Collect all items
         for item in self.items:
@@ -901,8 +903,8 @@ class MultiPeriodStatement:
         Returns:
             Rich Table object
         """
-        # Get color scheme
-        colors = get_current_scheme()
+        # Get styles from unified design language
+        styles = get_statement_styles()
 
         # Choose box style based on context
         box_style = box.MINIMAL if for_llm else box.SIMPLE
@@ -924,75 +926,76 @@ class MultiPeriodStatement:
 
         def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
             """Add an item row to the table."""
-            indent = "  " * depth
+            # Skip top-level statement abstract headers (e.g., "Income Statement [Abstract]")
+            is_statement_abstract = "[Abstract]" in item.label and depth == 0
 
-            # Prepare row values
-            row = []
+            if not is_statement_abstract:
+                indent = "  " * depth
 
-            # Concept label
-            if item.is_abstract:
-                row.append(Text(f"{indent}{item.label}", style=colors["abstract_item"]))
-            elif item.is_total:
-                row.append(Text(f"{indent}{item.label}", style=colors["total_item"]))
-            else:
-                # Check if this is a key financial item that should always be prominent
-                important_labels = [
-                    'Total Revenue', 'Revenue', 'Net Sales', 'Total Net Sales',
-                    'Operating Income', 'Operating Income (Loss)', 'Operating Profit',
-                    'Net Income', 'Net Income (Loss)', 'Net Earnings',
-                    'Gross Profit', 'Gross Margin',
-                    'Cost of Revenue', 'Cost of Goods Sold',
-                    'Operating Expenses', 'Total Operating Expenses',
-                    'Earnings Per Share', 'EPS'
-                ]
+                # Prepare row values
+                row = []
 
-                is_important = any(label in item.label for label in important_labels)
+                # Clean up label - remove XBRL jargon
+                label = item.label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
 
-                # Don't mark important items as low confidence even if score is low
-                if is_important:
-                    style = colors["total_item"]  # Use bold styling for important items
-                    confidence_marker = ""
+                # Concept label
+                if item.is_abstract:
+                    row.append(Text(f"{indent}{label}", style=styles["row"]["abstract"]))
+                elif item.is_total:
+                    row.append(Text(f"{indent}{label}", style=styles["row"]["total"]))
                 else:
-                    style = colors["low_confidence_item"] if item.confidence < 0.8 else colors["regular_item"]
-                    confidence_marker = " ◦" if item.confidence < 0.8 else ""
+                    # Check if this is a key financial item that should always be prominent
+                    important_keywords = [
+                        'Total Revenue', 'Revenue', 'Net Sales', 'Total Net Sales',
+                        'Operating Income', 'Operating Income (Loss)', 'Operating Profit',
+                        'Net Income', 'Net Income (Loss)', 'Net Earnings',
+                        'Gross Profit', 'Gross Margin',
+                        'Cost of Revenue', 'Cost of Goods Sold',
+                        'Operating Expenses', 'Total Operating Expenses',
+                        'Earnings Per Share', 'EPS'
+                    ]
 
-                row.append(Text(f"{indent}{item.label}{confidence_marker}", style=style))
+                    is_important = any(kw in label for kw in important_keywords)
 
-            # Period values
-            for period in self.periods:
-                value_str = item.get_display_value(period, concise_format=self.concise_format)
-                if value_str and value_str != "-":
-                    # Color code values
-                    value = item.values.get(period)
-                    if value and isinstance(value, (int, float)):
-                        value_style = colors["negative_value"] if value < 0 else colors["positive_value"]
+                    # Don't mark important items as low confidence even if score is low
+                    if is_important:
+                        style = styles["row"]["total"]  # Use bold styling for important items
+                        confidence_marker = ""
                     else:
-                        value_style = ""
+                        style = styles["row"]["low_confidence"] if item.confidence < 0.8 else styles["row"]["item"]
+                        confidence_marker = f" {SYMBOLS['low_confidence']}" if item.confidence < 0.8 else ""
 
-                    if item.is_total:
-                        # Combine total style with value color if present
-                        total_style = colors["total_value_prefix"]
-                        if value_style:
-                            total_style = f"{total_style} {value_style}"
-                        row.append(Text(value_str, style=total_style))
+                    row.append(Text(f"{indent}{label}{confidence_marker}", style=style))
+
+                # Period values
+                for period in self.periods:
+                    value_str = item.get_display_value(period, concise_format=self.concise_format)
+                    if value_str and value_str != "-":
+                        # Color code values
+                        value = item.values.get(period)
+                        if value and isinstance(value, (int, float)):
+                            value_style = styles["value"]["negative"] if value < 0 else styles["value"]["positive"]
+                        else:
+                            value_style = ""
+
+                        if item.is_total:
+                            # Combine total style with value color if present
+                            total_style = styles["value"]["total"]
+                            if value_style:
+                                total_style = f"{total_style} {value_style}"
+                            row.append(Text(value_str, style=total_style))
+                        else:
+                            row.append(Text(value_str, style=value_style))
                     else:
-                        row.append(Text(value_str, style=value_style))
-                else:
-                    row.append("")
+                        row.append("")
 
-            stmt_table.add_row(*row)
+                stmt_table.add_row(*row)
 
-            # Add separator line after totals (skip for LLM to save characters)
-            if item.is_total and depth == 0 and not for_llm:
-                separator_row = [Text("─" * 40, style=colors["separator"])]
-                for _ in self.periods:
-                    separator_row.append(Text("─" * 15, style=colors["separator"]))
-                stmt_table.add_row(*separator_row)
-
-            # Add children
+            # Add children (process even if we skipped rendering this item)
+            child_depth = depth if is_statement_abstract else depth + 1
             for child in item.children:
-                if depth < 3:
-                    add_item_to_table(child, depth + 1)
+                if child_depth < 3:
+                    add_item_to_table(child, child_depth)
 
         # Add all items
         for item in self.items:
