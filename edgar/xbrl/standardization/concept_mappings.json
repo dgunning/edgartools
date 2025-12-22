@@ -125,9 +125,6 @@
   "Accumulated Other Comprehensive Income/Loss": [
     "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax"
   ],
-  "Earnings Per Share": [
-    "us-gaap_EarningsPerShareAbstract"
-  ],
   "Earnings Per Share (Basic)": [
     "us-gaap_EarningsPerShareBasic"
   ],
@@ -135,7 +132,7 @@
     "us-gaap_EarningsPerShareDiluted"
   ],
   "Shares Outstanding": [
-    "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract"
+    "us-gaap_CommonStockSharesOutstanding"
   ],
   "Shares Outstanding (Basic)": [
     "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic"
@@ -221,7 +218,8 @@
     "us-gaap_LongTermDebtAndCapitalLeaseObligations",
     "us-gaap_LongTermDebt",
     "us-gaap_LongTermBorrowings",
-    "us-gaap_LongTermDebtNoncurrent"
+    "us-gaap_LongTermDebtNoncurrent",
+    "us-gaap_ConvertibleDebtNoncurrent"
   ],
   "Notes Payable, Current": [
     "us-gaap_NotesPayableCurrent"
