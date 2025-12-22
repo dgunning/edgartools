@@ -270,17 +270,16 @@ class Statement:
         # Determine which periods to display
         statement_type = self.canonical_type if self.canonical_type else self.role_or_type
 
-        if period_view:
-            # Use specified period view
-            from edgar.xbrl.periods import get_period_views
-            period_views = get_period_views(self.xbrl, statement_type)
-            periods_to_display = period_views.get(period_view, [])
-            if not periods_to_display:
-                # Fallback to default
-                periods_to_display = determine_periods_to_display(self.xbrl, statement_type)
-        else:
-            # Use default period selection
-            periods_to_display = determine_periods_to_display(self.xbrl, statement_type)
+        # Determine which periods to display
+        # determine_periods_to_display handles:
+        # - period_filter: return only the specific period requested
+        # - period_view: use predefined view names
+        # - fallback: smart period selection when neither is specified
+        periods_to_display = determine_periods_to_display(
+            self.xbrl, statement_type,
+            period_filter=period_filter,
+            period_view=period_view
+        )
 
         if not periods_to_display:
             return pd.DataFrame()
