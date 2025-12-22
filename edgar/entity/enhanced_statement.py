@@ -1620,10 +1620,57 @@ class EnhancedStatementBuilder:
                 if period_label not in quarterly_by_period:
                     quarterly_by_period[period_label] = (pk, info_with_calculated_fy)
                 else:
-                    # If duplicate valid periods exist, prefer most recent filing_date
+                    # DEDUPLICATION LOGIC: Prefer PRIMARY data over COMPARATIVE disclosures
+                    #
+                    # Background: SEC filings include comparative data from prior periods.
+                    # When Apple files their FY2025 10-K, it includes:
+                    #   - FY2025 data (primary, tagged fiscal_year=2025)
+                    #   - FY2024 comparatives (tagged fiscal_year=2025, period_end=2024-xx-xx)
+                    #
+                    # The SEC Facts API captures both, creating collisions where two entries
+                    # have the same period_end but different fiscal_years. Both calculate to
+                    # the same period label (e.g., "Q3 2024").
+                    #
+                    # Key insight: Comparative disclosures typically contain only a subset of
+                    # concepts (e.g., StockholdersEquity in equity reconciliation tables),
+                    # while primary data contains the complete set (~21 concepts vs 1).
+                    #
+                    # Primary data: fact's fiscal_year matches the calculated label year
+                    #   - From the original filing (e.g., Q3 2024 10-Q filed Aug 2024)
+                    #   - Contains complete set of balance sheet concepts
+                    #
+                    # Comparative data: fact's fiscal_year is ahead of calculated label year
+                    #   - From a later filing's comparative disclosures (e.g., FY2025 10-K)
+                    #   - Contains only concepts that appear in comparative tables
+                    #
+                    # Issue #1kzb: The previous logic preferred the most recent filing_date,
+                    # which caused comparative data (sparse) to overwrite primary data (complete).
+                    #
+                    # Note on restatements: True restatements would also come from later filings,
+                    # but they typically have similar fact counts (full period restated) and are
+                    # filed as amendments (10-K/A, 10-Q/A). The sparse comparative data we see
+                    # (1 fact vs 21) is clearly not a restatement - it's just concepts that
+                    # happen to appear in multi-year comparative tables.
+                    #
                     existing_pk, existing_info = quarterly_by_period[period_label]
-                    if info['filing_date'] > existing_info['filing_date']:
+
+                    # Check if fiscal_year matches calculated year (primary data indicator)
+                    fact_fiscal_year = pk[0]
+                    existing_fiscal_year = existing_pk[0]
+
+                    current_is_primary = (fact_fiscal_year == calculated_fiscal_year)
+                    existing_is_primary = (existing_fiscal_year == existing_info['calculated_fiscal_year'])
+
+                    # Prefer primary data over comparative
+                    if current_is_primary and not existing_is_primary:
                         quarterly_by_period[period_label] = (pk, info_with_calculated_fy)
+                    elif not current_is_primary and existing_is_primary:
+                        pass  # Keep existing (it's primary)
+                    else:
+                        # Both are primary or both are comparative - prefer most recent filing
+                        # This handles cases like corrections within the same fiscal year
+                        if info['filing_date'] > existing_info['filing_date']:
+                            quarterly_by_period[period_label] = (pk, info_with_calculated_fy)
 
             # Sort by period end date (newest first) and select requested number
             sorted_periods = sorted(
