@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.6.0] - 2025-12-22
+
+### Fixed
+
+- **Critical: Statement.to_dataframe() Period Filtering** (#548, 56bf2f47)
+  - Fixed critical bugs in period filtering logic in Statement.to_dataframe()
+  - Resolved issues with duplicate periods and incorrect data selection
+  - Improved period matching for quarterly and annual statements
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Ensures accurate financial data extraction when converting statements to dataframes
+  - **Example**: `statement.to_dataframe()` now correctly filters and returns the requested periods
+
+- **Fiscal Year Labeling for Early FYE Companies** (4ab57196)
+  - Fixed fiscal year labeling for companies with fiscal year ends in Jan-Mar
+  - Properly handles cases where fiscal year differs from calendar year
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate fiscal year display for all companies regardless of FYE date
+
+- **Primary Data Preference in Quarterly Periods** (258b5a56)
+  - Fixed preference logic to use primary data over comparative disclosures
+  - Ensures most relevant data is shown for quarterly periods
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: More accurate quarterly financial data representation
+
+- **Label Column Width with Text Wrapping** (70feee83)
+  - Set fixed width for label column with proper text wrapping
+  - Improved readability of financial statement displays
+  - **Files**: `edgar/display/` modules
+  - **Impact**: Better formatted output for long labels in financial statements
+
+### Added
+
+- **Display Design Language System** (b1125282, 17a02a4e, 3a21d28c)
+  - Introduced new `edgar/display/` package for consistent rich output formatting
+  - Added comprehensive color palette for financial statement styles
+  - Redesigned EntityFacts statement display using new design language
+  - Created abstract filtering and display behavior framework
+  - **Files**: `edgar/display/` (new package)
+  - **Impact**: Consistent, professional display formatting across all financial statements
+  - **Example**: All statement displays now use unified styling and color schemes
+
+### Documentation
+
+- **Insider Transactions Example** (bdf3fd16)
+  - Added example script demonstrating insider transaction analysis
+  - **Files**: `docs/examples/insider_transactions.py`
+  - **Impact**: Helps users understand how to work with insider trading data
+
+### Summary
+
+Release 5.6.0 is a critical bug fix release addressing period filtering issues in Statement.to_dataframe() (#548), along with a major enhancement introducing the Display Design Language System for consistent, professional output formatting. Key highlights:
+
+- Critical fix for Statement.to_dataframe() period filtering bugs
+- New display design language package for unified formatting
+- Fixed fiscal year labeling for early FYE companies
+- Improved primary data preference in quarterly periods
+- Enhanced statement display with better text wrapping
+
+This release is recommended for all users, especially those using Statement.to_dataframe() for data analysis.
+
 ## [5.5.0] - 2025-12-20
 
 ### Added
