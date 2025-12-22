@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- OMB Header -->
+<div class="SmallText Right">
+    OMB APPROVAL<br>
+    OMB Number: 3235-0287<br>
+    Estimated average burden<br>
+    hours per response: 0.5
+</div>
+
+<div class="FormTitle">{{ form_name_display }}</div>
+<div class="SubHeader">Check this box if no longer subject to Section 16. Form 4 or Form 5 obligations may continue. See Instruction 1(b). <span class="Checkbox"></span></div>
+
+<div class="Header">UNITED STATES SECURITIES AND EXCHANGE COMMISSION<br>Washington, D.C. 20549</div>
+<div class="Header">{{ form_title_display }}</div>
+<div class="SmallText Centered" style="margin-bottom:10px;">Filed pursuant to Section 16(a) of the Securities Exchange Act of 1934<br>or Section 30(h) of the Investment Company Act of 1940</div>
+
+<table class="NoBorder" style="margin-bottom:10px;">
+    <tr>
+        <td style="width:60%; vertical-align:top;">
+            <div><span class="Bold">1. Name and Address of Reporting Person*</span></div>
+            <div style="margin-left:10px; margin-top:2px;">
+                {{ reporting_owner_name_str }}<br>
+                {{ reporting_owner_address_str|safe }}
+            </div>
+            
+            <div style="margin-top:5px;"><span class="Bold">1a. IRS/SSN Identification Number of Reporting Person</span></div>
+            <div style="margin-left:10px; margin-top:2px;">&nbsp;</div>
+        </td>
+        <td style="width:40%; vertical-align:top;">
+            <div><span class="Bold">2. Issuer Name and Ticker or Trading Symbol</span></div>
+            <div style="margin-left:10px; margin-top:2px;">{{ issuer_name }} [{{ ticker }}]</div>
+            
+            <div style="margin-top:5px;"><span class="Bold">3. Date of Earliest Transaction (Month/Day/Year)</span></div>
+            <div style="margin-left:10px; margin-top:2px;">{{ reporting_period }}</div>
+
+            <div style="margin-top:5px;"><span class="Bold">4. If Amendment, Date of Original Filed (Month/Day/Year)</span></div>
+             <div style="margin-left:10px; margin-top:2px;">&nbsp;</div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="padding-top:5px;">
+            <span class="Bold">5. Relationship of Reporting Person(s) to Issuer</span><br>
+            <span class="SmallText">(Check all applicable)</span>
+            <div style="margin-left:10px; margin-top:2px;">
+                <span class="Checkbox">{% if is_director %}X{% else %}&nbsp;{% endif %}</span> Director 
+                &nbsp;&nbsp; <span class="Checkbox">{% if is_officer %}X{% else %}&nbsp;{% endif %}</span> Officer (give title below) 
+                &nbsp;&nbsp; <span class="Checkbox">{% if is_ten_pct_owner %}X{% else %}&nbsp;{% endif %}</span> 10% Owner <br>
+                <span class="Checkbox">{% if is_other %}X{% else %}&nbsp;{% endif %}</span> Other (specify below)
+                <div style="margin-left:25px; margin-top:2px; font-size:7pt;">{{ officer_title }}</div>
+                <div style="margin-left:25px; margin-top:2px; font-size:7pt;">{{ relationship_str }}</div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="padding-top:5px;">
+            <span class="Bold">6. Individual or Joint/Group Filing (Check Applicable Line)</span>
+            <div style="margin-left:10px; margin-top:2px;">
+                <span class="Checkbox">{% if is_individual_filing %}X{% else %}&nbsp;{% endif %}</span> Form filed by One Reporting Person<br>
+                <span class="Checkbox">{% if is_joint_filing %}X{% else %}&nbsp;{% endif %}</span> Form filed by More than One Reporting Person
+            </div>
+        </td>
+    </tr>
+</table>
+
+<!-- Table I - Non-Derivative Securities -->
+<h4 class="SectionHeader" style="text-align:center;">
+    Table I - Non-Derivative Securities {% if form_type == '3' %}Beneficially Owned{% else %}Acquired, Disposed of, or Beneficially Owned{% endif %}
+</h4>
+
+<table class="ReportTable">
+    <thead>
+        {% if form_type == '3' %}
+        <!-- Form 3 Table I Header -->
+        <tr>
+            <th>1. Title of Security (Instr. 3)</th>
+            <th>2. Amount of Securities Beneficially Owned (Instr. 4)</th>
+            <th>3. Ownership Form: Direct (D) or Indirect (I) (Instr. 4)</th>
+            <th>4. Nature of Indirect Beneficial Ownership (Instr. 4)</th>
+        </tr>
+        {% else %}
+        <!-- Forms 4 & 5 Table I Header -->
+        <tr>
+            <th rowspan="2">1. Title of Security (Instr. 3)</th>
+            <th rowspan="2">2. Transaction Date (Month/Day/Year)</th>
+            <th rowspan="2">2A. Deemed Execution Date, if any (Month/Day/Year)</th>
+            <th colspan="2">3. Transaction Code (Instr. 8)</th>
+            <th colspan="3">4. Securities Acquired (A) or Disposed Of (D) (Instr. 3, 4 and 5)</th>
+            <th rowspan="2">5. Amount of Securities Beneficially<br/>Owned Following Reported Transaction(s)<br/>(Instr. 3 and 4)</th>
+            <th rowspan="2">6. Ownership Form: Direct (D) or Indirect (I) <br/>(Instr. 4)</th>
+            <th rowspan="2">7. Nature of Indirect Beneficial Ownership <br/>(Instr. 4)</th>
+        </tr>
+        <tr>
+            <th>Code</th>
+            <th>V</th>
+            <th>Amount</th>
+            <th>(A) or (D)</th>
+            <th>Price</th>
+        </tr>
+        {% endif %}
+    </thead>
+    <tbody>
+        {% if non_deriv_rows %}
+            {% for row in non_deriv_rows %}
+                <tr>
+                    {% for cell in row %}
+                    {{ cell|safe }}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="{% if form_type == '3' %}4{% else %}11{% endif %}" class="Centered">No non-derivative securities reported</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Table II - Derivative Securities -->
+<h4 class="SectionHeader" style="text-align:center; margin-top:20px;">
+    {% if form_type == '3' %}
+    Table II - Derivative Securities Beneficially Owned
+    {% else %}
+    Table II - Derivative Securities Acquired, Disposed of, or Beneficially Owned
+    {% endif %}
+    <br>
+    <span style="font-weight:normal; font-size:8pt;">(e.g., puts, calls, warrants, options, convertible securities)</span>
+</h4>
+
+<table class="ReportTable">
+    <thead>
+        {% if form_type == '3' %}
+        <!-- Form 3 Table II Header -->
+        <tr>
+            <th>1. Title of Derivative Security (Instr. 5)</th>
+            <th>2. Date Exercisable and Expiration Date (Month/Day/Year)</th>
+            <th>3. Title and Amount of Securities Underlying Derivative Security (Instr. 4)</th>
+            <th>4. Conversion or Exercise Price of Derivative Security</th>
+            <th>5. Ownership Form: Direct (D) or Indirect (I) (Instr. 5)</th>
+            <th>6. Nature of Indirect Beneficial Ownership (Instr. 5)</th>
+        </tr>
+        {% else %}
+        <!-- Forms 4 & 5 Table II Header -->
+        <tr>
+            <th rowspan="2">1. Title of Derivative Security (Instr. 5)</th>
+            <th rowspan="2">2. Conversion or Exercise Price of Derivative Security</th>
+            <th rowspan="2">3. Transaction Date (Month/Day/Year)</th>
+            <th rowspan="2">3A. Deemed Execution Date, if any (Month/Day/Year)</th>
+            <th colspan="2">4. Transaction Code (Instr. 8)</th>
+            <th colspan="2">5. Number of Derivative Securities Acquired (A) or Disposed of (D) (Instr. 3, 4 and 5)</th>
+            <th rowspan="2">6. Date Exercisable and Expiration Date (Month/Day/Year)</th>
+            <th rowspan="2">7. Title and Amount of Securities Underlying Derivative Security (Instr. 3 and 4)</th>
+            <th rowspan="2">8. Price of Derivative Security</th>
+            <th rowspan="2">9. Number of derivative Securities Beneficially Owned Following Reported Transaction(s) (Instr. 4)</th>
+            <th rowspan="2">10. Ownership Form of Derivative Security: Direct (D) or Indirect (I) (Instr. 4)</th>
+            <th rowspan="2">11. Nature of Indirect Beneficial Ownership (Instr. 5)</th>
+        </tr>
+        <tr>
+            <th>Code</th>
+            <th>V</th>
+            <th>Amount or Number of Shares</th>
+            <th>(A) or (D)</th>
+        </tr>
+        {% endif %}
+    </thead>
+    <tbody>
+        {% if deriv_rows %}
+            {% for row in deriv_rows %}
+                <tr>
+                    {% for cell in row %}
+                    {{ cell|safe }}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="{% if form_type == '3' %}6{% else %}16{% endif %}" class="Centered">No derivative securities reported</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Remarks Section -->
+{% if remarks %}
+<div class="Remarks">
+    <span class="Bold">Remarks:</span><br>
+    <div class="RemarkText">{{ remarks }}</div>
+</div>
+{% endif %}
+
+<!-- Footnotes Section -->
+{% if footnotes %}
+<div class="Footnotes">
+    <h4 class="SectionHeader">Explanation of Responses:</h4>
+    <div class="FootnoteList">
+        {% for footnote in footnotes %}
+        <li><span class="Bold">{{ footnote.id }}:</span> {{ footnote.text }}</li>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Signature Section -->
+<div class="SignatureBlock">
+    <table style="width:auto; border:none;">
+        <tr>
+            {% if sig_name %}
+            <td style="padding-right:30px;">
+                <div class="SmallText">** Signature of Reporting Person</div>
+                <div>/s/ {{ sig_name }}</div>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+            
+            {% if sig_date %}
+            <td>
+                <div class="SmallText">Date</div>
+                <div>{{ sig_date }}</div>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+        </tr>
+    </table>
+</div>
+
+<!-- Disclaimer and OMB Notice -->
+<div style="margin-top:10px; font-size:7pt; font-style:italic;">
+    Note: File three copies of this Form, one of which must be manually signed. If space is insufficient, see Instruction 6 for procedure.<br>
+    Persons who respond to the collection of information contained in this form are not required to respond unless the form displays a currently valid OMB Number.
+</div>
+{% endblock %}

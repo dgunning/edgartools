@@ -1,0 +1,209 @@
+{
+  "metadata": {
+    "industry": "energy",
+    "industry_name": "Energy & Oil/Gas",
+    "sic_ranges": [
+      [
+        1300,
+        1399
+      ],
+      [
+        4900,
+        4949
+      ]
+    ],
+    "companies_analyzed": 109,
+    "min_occurrence_rate": 0.3,
+    "generated": "2025-12-17T14:34:05.909390"
+  },
+  "BalanceSheet": {
+    "statement_type": "BalanceSheet",
+    "nodes": {
+      "OtherLiabilitiesCurrent": {
+        "concept": "OtherLiabilitiesCurrent",
+        "label": "Other Current Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.295081967213115,
+        "occurrence_rate": 0.3853,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AccruedLiabilitiesCurrent": {
+        "concept": "AccruedLiabilitiesCurrent",
+        "label": "Accrued Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.981132075471698,
+        "occurrence_rate": 0.3945,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "OtherAssetsCurrent": {
+        "concept": "OtherAssetsCurrent",
+        "label": "Other Current Assets",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.7551020408163267,
+        "occurrence_rate": 0.3853,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LongTermDebtNoncurrent": {
+        "concept": "LongTermDebtNoncurrent",
+        "label": "Long Term Debt",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.2528735632183907,
+        "occurrence_rate": 0.3945,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AssetRetirementObligationsNoncurrent": {
+        "concept": "AssetRetirementObligationsNoncurrent",
+        "label": "Asset retirement obligations",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.343283582089552,
+        "occurrence_rate": 0.5229,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LiabilitiesNoncurrentAbstract": {
+        "concept": "LiabilitiesNoncurrentAbstract",
+        "label": "Long-term liabilities:",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 2.8333333333333335,
+        "occurrence_rate": 0.3303,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "IncomeStatement": {
+    "statement_type": "IncomeStatement",
+    "nodes": {
+      "GeneralAndAdministrativeExpense": {
+        "concept": "GeneralAndAdministrativeExpense",
+        "label": "General and Administrative Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.6527777777777777,
+        "occurrence_rate": 0.6972,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OperatingExpenses": {
+        "concept": "OperatingExpenses",
+        "label": "Operating Expenses",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.0163934426229506,
+        "occurrence_rate": 0.3761,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "NonoperatingIncomeExpenseAbstract": {
+        "concept": "NonoperatingIncomeExpenseAbstract",
+        "label": "Other income (expense)",
+        "parent": "StatementLineItems",
+        "depth": 2.2708333333333335,
+        "occurrence_rate": 0.4404,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "NonoperatingIncomeExpense": {
+        "concept": "NonoperatingIncomeExpense",
+        "label": "Nonoperating Income/Expense",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.253012048192771,
+        "occurrence_rate": 0.5413,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "srt_ProductOrServiceAxis": {
+        "concept": "srt_ProductOrServiceAxis",
+        "label": "Product and Service [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "occurrence_rate": 0.5321,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "srt_ProductsAndServicesDomain": {
+        "concept": "srt_ProductsAndServicesDomain",
+        "label": "Product and Service [Domain]",
+        "parent": "srt_ProductOrServiceAxis",
+        "depth": 3.0,
+        "occurrence_rate": 0.5321,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "CostsAndExpenses": {
+        "concept": "CostsAndExpenses",
+        "label": "Costs and Expenses",
+        "parent": "CostsAndExpensesAbstract",
+        "depth": 3.9310344827586206,
+        "occurrence_rate": 0.4587,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      }
+    }
+  },
+  "CashFlowStatement": {
+    "statement_type": "CashFlowStatement",
+    "nodes": {
+      "IncreaseDecreaseInAccountsPayableAndAccruedLiabilities": {
+        "concept": "IncreaseDecreaseInAccountsPayableAndAccruedLiabilities",
+        "label": "Accounts payable and accrued liabilities",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.9791666666666665,
+        "occurrence_rate": 0.4312,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PaymentsOfDebtIssuanceCosts": {
+        "concept": "PaymentsOfDebtIssuanceCosts",
+        "label": "Debt issuance costs",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.767857142857143,
+        "occurrence_rate": 0.3945,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets": {
+        "concept": "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+        "label": "Prepaid expenses and other current assets",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.0256410256410255,
+        "occurrence_rate": 0.3394,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "StatementOfEquity": {
+    "statement_type": "StatementOfEquity",
+    "nodes": {
+      "SharesOutstanding": {
+        "concept": "SharesOutstanding",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 3.8229166666666665,
+        "occurrence_rate": 0.3394,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+Ticker,Company,Cik
+AAPL,Apple Inc.,320193
+MSFT,Microsoft Corporation,789019
+AMZN,"Amazon.com, Inc.",1018724
+NVDA,NVIDIA Corporation,1045810
+TSLA,"Tesla, Inc.",1318605
+GOOGL,Alphabet Inc. Class A,1652044
+META,"Meta Platforms, Inc.",1326801
+AMD,"Advanced Micro Devices, Inc.",2488
+NFLX,"Netflix, Inc.",1065280
+BRK.B,Berkshire Hathaway Inc.,1067983
+V,Visa Inc.,1403161
+JNJ,Johnson & Johnson,200406
+PG,Procter & Gamble Co.,80424
+JPM,JPMorgan Chase & Co.,19617
+UNH,UnitedHealth Group Incorporated,731766
+DIS,The Walt Disney Company,1744489
+HD,"Home Depot, Inc.",354950
+XOM,Exxon Mobil Corporation,34088
+KO,Coca-Cola Company,21344
+PEP,"PepsiCo, Inc.",77476
+PFE,Pfizer Inc.,78003
+MA,Mastercard Incorporated,1141391
+ADBE,Adobe Inc.,796343
+CRM,"Salesforce, Inc.",1108524
+INTC,Intel Corporation,50863
+CSCO,"Cisco Systems, Inc.",858877
+NKE,"Nike, Inc.",320187
+T,AT&T Inc.,732717
+CMCSA,Comcast Corporation,1166691
+VZ,Verizon Communications Inc.,732712
+CVX,Chevron Corporation,93410
+ABBV,AbbVie Inc.,1551152
+MRK,"Merck & Co., Inc.",310158
+BMY,Bristol-Myers Squibb Company,14272
+WMT,Walmart Inc.,104169
+MCD,McDonald's Corporation,63908
+SBUX,Starbucks Corporation,829224
+GS,"Goldman Sachs Group, Inc.",886982
+MS,Morgan Stanley,895421
+AXP,American Express Company,4962
+C,Citigroup Inc.,831001
+BA,Boeing Company,12927
+DAL,"Delta Air Lines, Inc.",27904
+LUV,Southwest Airlines Co.,92380
+MAR,"Marriott International, Inc.",1048286
+HLT,Hilton Worldwide Holdings Inc.,1585689
+BKNG,Booking Holdings Inc.,1075531
+PYPL,"PayPal Holdings, Inc.",1633917
+SQ,"Square, Inc.",1512673
+ZM,"Zoom Video Communications, Inc.",1585521
+SNOW,Snowflake Inc.,1640147
+UBER,"Uber Technologies, Inc.",1543151
+LYFT,"Lyft, Inc.",1759509
+ROKU,"Roku, Inc.",1428439
+SPOT,Spotify Technology S.A.,1639920
+SHOP,Shopify Inc.,1594805
+EBAY,eBay Inc.,1065088
+TWTR,"Twitter, Inc.",1418091
+SNAP,Snap Inc.,1564408
+PINS,"Pinterest, Inc.",1506293
+PLTR,Palantir Technologies Inc.,1321655
+ZI,ZoomInfo Technologies Inc.,1794515
+DOCU,"DocuSign, Inc.",1261333
+TWLO,Twilio Inc.,1447669
+CRWD,"CrowdStrike Holdings, Inc.",1535527
+NET,"Cloudflare, Inc.",1477333
+DDOG,"Datadog, Inc.",1561550
+MDB,"MongoDB, Inc.",1441816
+ZS,"Zscaler, Inc.",1713683
+OKTA,"Okta, Inc.",1660134
+DBX,"Dropbox, Inc.",1467623
+SMAR,Smartsheet Inc.,1366561
+ASAN,"Asana, Inc.",1477720
+RNG,"RingCentral, Inc.",1384905
+PTON,"Peloton Interactive, Inc.",1639825
+TTD,"The Trade Desk, Inc.",1671933
+HUBS,"HubSpot, Inc.",1404655
+COUP,Coupa Software Incorporated,1385867
+AYX,"Alteryx, Inc.",1689923
+SPLK,Splunk Inc.,1353283
+NEWR,"New Relic, Inc.",1448056
+DT,"Dynatrace, Inc.",1773383
+NOW,"ServiceNow, Inc.",1373715
+WDAY,"Workday, Inc.",1327811
+ADSK,"Autodesk, Inc.",769397

@@ -1,0 +1,294 @@
+[build-system]
+requires = ["hatchling>=1.26.3"]
+build-backend = "hatchling.build"
+
+[project]
+name = "edgartools"
+description = 'Navigate Edgar filings with ease'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = ["sec", "edgar", "filings", "company", "python", "finance", "financial", "reports"]
+authors = [
+  { name = "Dwight Gunning", email = "dgunning@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+  "httpx>=0.25.0",
+  "pandas>=2.0.0",
+  "tabulate>=0.9.0",
+  "pyarrow>=17.0.0",
+  "beautifulsoup4>=4.10.0",
+  "lxml>=4.4",
+  "rich>=13.8.0",
+  "humanize>=4.0.0",
+  "stamina>=24.2.0",
+  "orjson>=3.6.0",
+  "textdistance>=4.5.0",
+  "rank_bm25>=0.2.1",
+  "rapidfuzz>=3.5.0",
+  "unidecode>=1.2.0",
+  "pydantic>=2.0.0",
+  "tqdm>=4.62.0",
+  "nest-asyncio>=1.5.1",
+  "jinja2>=3.1.0",
+  "hishel==0.1.3",
+  "httpxthrottlecache>=0.1.6",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+ai = [
+    "mcp>=1.12.3",          # Model Context Protocol
+    "tiktoken>=0.10.0",     # Token counting for OpenAI models
+]
+
+ai-dev = [
+    "pytest-mock>=3.12.0",       # For mocking AI responses
+    "responses>=0.24.0",         # HTTP response mocking
+]
+
+data = [
+    "duckdb>=1.0.0",            # SQL interface for company datasets
+]
+
+test-harness = [
+    "click>=8.0.0",              # CLI interface for test harness
+]
+
+# Cloud storage support via fsspec
+cloud = [
+    "fsspec>=2023.1.0",          # Core filesystem abstraction
+]
+
+s3 = [
+    "fsspec>=2023.1.0",
+    "s3fs>=2023.1.0",            # AWS S3, Cloudflare R2, MinIO
+]
+
+gcs = [
+    "fsspec>=2023.1.0",
+    "gcsfs>=2023.1.0",           # Google Cloud Storage
+]
+
+azure = [
+    "fsspec>=2023.1.0",
+    "adlfs>=2023.1.0",           # Azure Blob Storage
+]
+
+all-cloud = [
+    "fsspec>=2023.1.0",
+    "s3fs>=2023.1.0",
+    "gcsfs>=2023.1.0",
+    "adlfs>=2023.1.0",
+]
+
+[project.urls]
+Documentation = "https://dgunning.github.io/edgartools/"
+Issues = "https://github.com/dgunning/edgartools/issues"
+Source = "https://github.com/dgunning/edgartools"
+
+[project.scripts]
+edgartools-mcp = "edgar.ai.mcp_server:main"
+edgar-test = "tests.harness.cli:cli"
+
+[tool.hatch.version]
+path = "edgar/__about__.py"
+
+[tool.hatch.build]
+include = [
+  "edgar/**/*.py",
+  "edgar/**/templates/*.html",
+  "edgar/**/docs/*.md",
+  "edgar/ai/skills/core/*.md",
+  "edgar/reference/data/*",
+  "edgar/entity/data/*",
+  "edgar/xbrl/standardization/*",
+  "LICENSE.txt"
+]
+artifacts = [
+  "LICENSE.txt"  # And this line
+]
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "pytest-env",
+  "pytest-xdist",
+  "pytest-asyncio",
+  "pytest-retry",
+  "pytest-vcr",
+  "vcrpy",
+  "filelock",
+  "pyinstrument",
+  "pyright",
+  "ruff",
+  "tqdm",
+  "xlsxwriter",
+  "openpyxl",
+  "jupyter",
+  "freezegun==1.5.1",
+  "mkdocs",
+  "mkdocstrings[python]",
+  "mkdocs-material"
+]
+
+features = [
+    "ai",
+    "ai-dev"
+]
+
+[tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
+no-cov = "cov --no-cov {args}"
+lint = "ruff check edgar"
+smoke-filings = "python tests/batch/batch_filings.py {args}"
+# Test categorization commands (sequential execution)
+test-fast = "pytest -m 'fast' {args}"
+test-slow = "pytest -m 'slow' {args}"
+test-network = "pytest -m 'network' {args}"
+test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+
+# Parallel test commands (selective parallelization for SEC rate limit safety)
+# - Fast tests: Full parallelization (no network calls)
+# - Network/slow: Sequential (respects SEC rate limits)
+# - Core: Limited parallelization (mixed tests)
+test-fast-parallel = "pytest -n auto -m 'fast' {args}"
+test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+test-parallel-safe = "pytest -n auto -m 'fast' {args}"
+
+# Parallel CI test strategy (skip regression tests for faster feedback)
+#
+# SELECTIVE PARALLELIZATION STRATEGY:
+# 1. Marker-based: -m 'not regression' excludes tests marked as regression
+# 2. Path-based: --ignore=tests/issues/regression excludes entire folder
+# 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
+# 4. Selective parallel: Only parallelize tests safe from SEC rate limits
+# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 70% threshold
+#
+# Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
+
+test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
+test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
+test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
+test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
+
+# Regression tests (run separately/on-demand for comprehensive bug prevention)
+test-regression = "pytest --cov --cov-report=xml -m regression {args}"
+
+# Other test categories  
+test-batch = "pytest tests/batch/ -m 'batch' {args}"
+test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}"
+test-full = "pytest --ignore=tests/manual --ignore=tests/perf {args}"
+
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "pytest-env",
+  "pytest-asyncio"
+]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["39", "310", "311", "312"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "edgar/__about__.py",
+  "tests/perf/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+# Coverage threshold moved to CI combined coverage check
+# Individual test groups don't meet 70% alone, only combined
+
+
+[tool.ruff]
+line-length = 150
+exclude = [
+  ".git",
+  "__pycache__",
+  "build",
+  "dist",
+  "docs/source/conf.py",
+  "tests",
+]
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "S", "B", "G", "N", "I001", "T", "PD", "C90"]
+ignore = [
+  "W291",
+  "E501",
+  "S608",
+  "PD901",
+  "C901",
+  "S101"
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+    "pytest-retry>=1.7.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+env = [
+    "EDGAR_IDENTITY=Dev Gunning developer-gunning@gmail.com",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+retries = 2
+retry_delay = 4
+cumulative_timing = false
+retry_outcome = "rerun"
+
+# Pytest markers for test categorization
+markers = [
+    "fast: Fast tests that run quickly (< 0.1s each)",
+    "slow: Slow tests that take significant time (> 1s each)",
+    "network: Tests that require internet connectivity",
+    "regression: Regression tests for specific GitHub issues",
+    "batch: Batch processing tests",
+    "performance: Performance and benchmarking tests",
+    "reproduction: Tests that reproduce specific issues",
+    "integration: Integration tests",
+    "data_quality: Data quality validation tests",
+    "vcr: Tests using VCR cassettes for recorded HTTP responses",
+]
+
+[tool.pyright]
+# Suppress false positives for C extension modules
+reportAttributeAccessIssue = "none"
+# PyArrow is a C extension - type stubs are incomplete
+ignoreExternal = true
+
+[tool.ty]
+# Suppress unresolved-attribute errors for pyarrow.compute (C extension with incomplete stubs)
+# These are false positives - the methods exist at runtime
+[[tool.ty.overrides]]
+include = ["edgar/_filings.py"]
+rules = { unresolved-attribute = "ignore" }

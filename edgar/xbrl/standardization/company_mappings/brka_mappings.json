@@ -1,0 +1,21 @@
+{
+  "concept_mappings": {
+    "Sales and Service Revenue": [
+      "brka_SalesAndServiceRevenue"
+    ]
+  },
+  "hierarchy_rules": {
+    "Revenue": {
+      "components": [
+        "Sales and Service Revenue",
+        "Operating Lease Revenue"
+      ],
+      "description": "Total revenue comprises sales/service revenue and operating lease income for holding company"
+    }
+  },
+  "business_context": {
+    "entity_type": "holding_company",
+    "industry": "diversified_conglomerate", 
+    "description": "Berkshire Hathaway operates diverse businesses including insurance, utilities, railroads, and manufacturing"
+  }
+}

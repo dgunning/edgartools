@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "entity_identifier": "tsla",
+    "company_name": "Tesla, Inc.",
+    "cik": "1318605",
+    "priority": "high",
+    "created_date": "2024-06-25",
+    "last_updated": "2024-06-25",
+    "description": "Tesla-specific concept mappings to handle automotive, energy, and service revenue streams"
+  },
+  "concept_mappings": {
+    "Automotive Revenue": [
+      "tsla_AutomotiveRevenue",
+      "tsla_AutomotiveSales", 
+      "tsla_VehicleRevenue"
+    ],
+    "Automotive Leasing Revenue": [
+      "tsla_AutomotiveLeasing",
+      "tsla_AutomotiveLeasingRevenue",
+      "tsla_VehicleLeasingRevenue"
+    ],
+    "Energy Revenue": [
+      "tsla_EnergyGenerationAndStorageRevenue",
+      "tsla_EnergyRevenue",
+      "tsla_SolarRevenue",
+      "tsla_EnergyStorageRevenue"
+    ],
+    "Service Revenue": [
+      "tsla_ServicesAndOtherRevenue",
+      "tsla_ServiceRevenue",
+      "tsla_SuperchargerRevenue"
+    ]
+  },
+  "hierarchy_rules": {
+    "Revenue": {
+      "children": [
+        "Automotive Revenue",
+        "Energy Revenue",
+        "Service Revenue"
+      ]
+    },
+    "Automotive Revenue": {
+      "children": [
+        "Automotive Leasing Revenue"
+      ]
+    }
+  },
+  "business_context": {
+    "primary_revenue_streams": ["automotive", "energy", "services"],
+    "revenue_model": "product_and_service",
+    "key_metrics": ["vehicle_deliveries", "energy_deployments"],
+    "industry": "automotive_technology"
+  }
+}

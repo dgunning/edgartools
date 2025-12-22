@@ -1,0 +1,35 @@
+<!doctype html public "-//w3c//dtd xhtml">
+<html>
+<head>
+    <title>{{ html_title }}</title>
+    <style>
+        body {font-family: Arial, sans-serif; margin: 20px; font-size: 9pt; color: #000;}
+        table {border-collapse: collapse; width: 100%;}
+        th, td {border: 1px solid #777; padding: 3px; text-align: left; vertical-align: top; font-size:8pt;}
+        th {background-color: #f0f0f0; font-weight: bold; text-align:center;}
+        .TableCell {font-size:8pt;}
+        .Centered {text-align: center;}
+        .Right {text-align: right;}
+        .Bold {font-weight: bold;}
+        .SmallText {font-size: 7pt;}
+        .FormTitle {font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 5px;}
+        .Header {font-size: 10pt; font-weight: bold; text-align: center; margin-bottom: 5px;}
+        .SubHeader {font-size: 9pt; text-align: center; margin-bottom: 15px;}
+        .SectionHeader {font-size: 10pt; font-weight: bold; margin-top: 10px; margin-bottom: 5px;}
+        .IssuerInfo, .ReportingOwnerInfo {border: 1px solid #000; padding: 5px; margin-bottom:10px; width: 48%; display:inline-block; vertical-align:top;}
+        .InfoBoxTable td {border:none; font-size:8pt; padding:1px;}
+        .Footnotes {margin-top: 20px; font-size: 8pt;}
+        .FootnoteList {list-style-type: none; padding-left: 0;}
+        .FootnoteList li {margin-bottom: 3px;}
+        .SignatureBlock {margin-top:30px; font-size:9pt;}
+        .SignatureBlock .SignatureDate {float:right;}
+        .Remarks {margin-top:15px; font-size:9pt;}
+        .RemarkText {margin-left:10px; font-size:8pt;}
+        .Checkbox {display: inline-block; width: 12px; height: 12px; border: 1px solid #000; text-align: center; line-height: 12px;}
+        .NoBorder, .NoBorder td, .NoBorder th {border: none;}
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,37 @@
+﻿Exhibit No.,Description,Form Types Involved,Regex
+1,Underwriting Agreement,"S-1, S-3, F-1, F-3, S-8, S-11, etc.",^EX-1\b
+2,"Plan of Acquisition, Reorganization, Arrangement, Liquidation or Succession","Commonly used across various forms including S-4, S-1, S-11, 10-K, etc.",^EX-2\b
+3,Articles of Incorporation and Bylaws,"S-1, S-3, F-1, F-3, S-8, S-11, etc.",^EX-3(\.\d+)?\b
+4,"Instruments Defining the Rights of Security Holders, including Indentures",Required across various form types,^EX-4\b
+5,Opinion regarding Legality,Typically required across all form types,^EX-5\b
+6,Reserved,N/A,^EX-6\b
+7,Correspondence from Independent Accountants,Limited use (specific forms only),^EX-7\b
+8,Opinion re Tax Matters,"S-11, F-1, F-3, S-3, S-8",^EX-8\b
+9,Voting Trust Agreements,Mostly required in S-4 and other specific forms,^EX-9\b
+10,Material Contracts,Required widely across forms for significant contracts,^EX-10(\.\d+)?\b
+11,Statement re Computation of Per Share Earnings,Commonly required where applicable,^EX-11\b
+12,Statements re Computation of Ratios,Required in forms where ratios are relevant,^EX-12\b
+13,Annual Report to Security Holders,Typically part of 10-K or annual disclosures,^EX-13\b
+14,Code of Ethics,Required disclosure for most forms,^EX-14\b
+15,Letter re Unaudited Interim Financial Information,Used in specific situations across various forms,^EX-15\b
+16,Letter re Change in Certifying Accountant,Used primarily in 10-K and 10-Q,^EX-16\b
+17,Correspondence on Departure of Director,"Occasionally required, depending on the circumstances",^EX-17\b
+18,Letter re Change in Accounting Principles,Used when significant changes in accounting principles occur,^EX-18\b
+19,Report Furnished to Security Holders,Often part of 10-Q or similar reports,^EX-19\b
+20,Other Documents or Statements to Security Holders,"As applicable, varies by form and content required",^EX-20\b
+21,Subsidiaries of the Registrant,Required across various forms depending on the structure of the registrant,^EX-21\b
+22,Published Report Regarding Matters Submitted to Vote of Security Holders,As applicable to the voting matters,^EX-22\b
+23,Consents of Experts and Counsel,Required across various forms when expert consents are necessary,^EX-23(\.\d+)?\b
+24,Power of Attorney,"As required, often associated with filings involving multiple signatories",^EX-24\b
+25,Statement of Eligibility of Trustee,Required in filings involving indentures under the Trust Indenture Act,^EX-25\b
+26,Invitation for Competitive Bids,Required in specific cases involving competitive bids,^EX-26\b
+27-30,Reserved,N/A,`^EX-(27
+31,Rule 13a-14(a)/15d-14(a) Certifications,Common certification required across various forms,^EX-31(\.\d+)?\b
+32,Section 1350 Certifications,Required under specific legal stipulations,^EX-32\b
+33-34,Assessment and Attestation Reports regarding Compliance,Specific to asset-backed securities,`^EX-(33
+35-36,Servicer Compliance Statement and Depositor Certification,Specific to asset-backed securities,`^EX-(35
+95,Mine Safety Disclosure Exhibit,Specific to registrants involved in mining operations,^EX-95\b
+99,Additional Exhibits,As required by specific circumstances or regulatory demands,^EX-99(\.\d+)?\b
+100-101,XBRL-Related Documents and Interactive Data File,Required for electronic data submission,`^EX-(100
+102-103,Asset Data File and Asset Related Documents,Specific to asset-backed securities filings,`^EX-(102
+104-106,Reserved/Static Pool PDF,N/A or specific to asset-backed securities,`^EX-(104

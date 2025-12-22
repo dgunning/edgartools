@@ -1,0 +1,64 @@
+{
+  "entity_info": {
+    "name": "Microsoft Corporation",
+    "cik": "0000789019",
+    "ticker": "MSFT",
+    "description": "Microsoft-specific concept mappings for unique business terminology"
+  },
+  
+  "concept_mappings": {
+    "_comment_msft_revenue": "Microsoft uses specific revenue categorization that differs from standard tech companies",
+    
+    "Product Revenue": [
+      "msft_ProductRevenue",
+      "msft_WindowsCommercialRevenue",
+      "msft_WindowsConsumerRevenue",
+      "msft_OfficeCommercialRevenue"
+    ],
+    
+    "Service Revenue": [
+      "msft_ServiceRevenue", 
+      "msft_CloudServicesRevenue",
+      "msft_ConsultingServicesRevenue"
+    ],
+    
+    "Subscription Revenue": [
+      "msft_Office365CommercialRevenue",
+      "msft_Office365ConsumerRevenue",
+      "msft_DynamicsRevenue"
+    ],
+    
+    "Platform Revenue": [
+      "msft_AzureRevenue",
+      "msft_XboxContentAndServicesRevenue"
+    ],
+    
+    "_comment_msft_expenses": "Microsoft has unique expense categorizations for sales and marketing vs G&A",
+    
+    "Sales and Marketing Expense": [
+      "msft_SalesAndMarketingExpense",
+      "msft_AdvertisingAndPromotionExpense"
+    ],
+    
+    "Technical Support Expense": [
+      "msft_TechnicalSupportExpense",
+      "msft_CustomerSupportExpense"
+    ]
+  },
+  
+  "hierarchy_rules": {
+    "_comment": "Rules for handling Microsoft-specific hierarchical relationships",
+    
+    "revenue_hierarchy": {
+      "parent": "Revenue",
+      "children": ["Product Revenue", "Service Revenue", "Subscription Revenue", "Platform Revenue"],
+      "calculation_rule": "sum"
+    },
+    
+    "expense_hierarchy": {
+      "parent": "Operating Expenses", 
+      "children": ["Sales and Marketing Expense", "Technical Support Expense"],
+      "calculation_rule": "sum"
+    }
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "industry": "mining",
+    "industry_name": "Mining & Materials",
+    "sic_ranges": [
+      [
+        1000,
+        1499
+      ]
+    ],
+    "companies_analyzed": 59,
+    "min_occurrence_rate": 0.3,
+    "generated": "2025-12-18T15:10:59.051947"
+  },
+  "BalanceSheet": {
+    "statement_type": "BalanceSheet",
+    "nodes": {
+      "OtherLiabilitiesCurrent": {
+        "concept": "OtherLiabilitiesCurrent",
+        "label": "Other Current Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.638888888888889,
+        "occurrence_rate": 0.4237,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AssetRetirementObligationsNoncurrent": {
+        "concept": "AssetRetirementObligationsNoncurrent",
+        "label": "Asset retirement obligations",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.3636363636363638,
+        "occurrence_rate": 0.339,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AccountsPayableAndAccruedLiabilitiesCurrent": {
+        "concept": "AccountsPayableAndAccruedLiabilitiesCurrent",
+        "label": "Accounts payable and accrued liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.485714285714286,
+        "occurrence_rate": 0.4237,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      }
+    }
+  },
+  "IncomeStatement": {
+    "statement_type": "IncomeStatement",
+    "nodes": {
+      "srt_ProductOrServiceAxis": {
+        "concept": "srt_ProductOrServiceAxis",
+        "label": "Product and Service [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "occurrence_rate": 0.3051,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "srt_ProductsAndServicesDomain": {
+        "concept": "srt_ProductsAndServicesDomain",
+        "label": "Product and Service [Domain]",
+        "parent": "srt_ProductOrServiceAxis",
+        "depth": 3.0,
+        "occurrence_rate": 0.3051,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "NonoperatingIncomeExpenseAbstract": {
+        "concept": "NonoperatingIncomeExpenseAbstract",
+        "label": "Other income (expense)",
+        "parent": "IncomeStatementAbstract",
+        "depth": 1.8636363636363635,
+        "occurrence_rate": 0.3729,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "GeneralAndAdministrativeExpense": {
+        "concept": "GeneralAndAdministrativeExpense",
+        "label": "General and Administrative Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.3736263736263736,
+        "occurrence_rate": 0.7119,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OperatingExpenses": {
+        "concept": "OperatingExpenses",
+        "label": "Operating Expenses",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 2.923076923076923,
+        "occurrence_rate": 0.4407,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "NonoperatingIncomeExpense": {
+        "concept": "NonoperatingIncomeExpense",
+        "label": "Nonoperating Income/Expense",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.1951219512195124,
+        "occurrence_rate": 0.4915,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      }
+    }
+  },
+  "CashFlowStatement": {
+    "statement_type": "CashFlowStatement",
+    "nodes": {
+      "IncreaseDecreaseInAccountsPayableAndAccruedLiabilities": {
+        "concept": "IncreaseDecreaseInAccountsPayableAndAccruedLiabilities",
+        "label": "Accounts payable and accrued liabilities",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.8125,
+        "occurrence_rate": 0.5254,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ProceedsFromIssuanceOfCommonStock": {
+        "concept": "ProceedsFromIssuanceOfCommonStock",
+        "label": "Proceeds from Issuance of Common Stock",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.8823529411764706,
+        "occurrence_rate": 0.3051,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+        "label": "Net increase (decrease) in cash and cash equivalents",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.0476190476190477,
+        "occurrence_rate": 0.339,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      }
+    }
+  },
+  "StatementOfEquity": {
+    "statement_type": "StatementOfEquity",
+    "nodes": {
+      "StockIssuedDuringPeriodSharesNewIssues": {
+        "concept": "StockIssuedDuringPeriodSharesNewIssues",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 4.077922077922078,
+        "occurrence_rate": 0.339,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "SharesOutstanding": {
+        "concept": "SharesOutstanding",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 3.76,
+        "occurrence_rate": 0.3559,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  }
+}

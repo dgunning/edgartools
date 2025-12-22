@@ -1,0 +1,485 @@
+{
+  "metadata": {
+    "industry": "insurance",
+    "industry_name": "Insurance",
+    "sic_ranges": [
+      [
+        6300,
+        6399
+      ]
+    ],
+    "companies_analyzed": 98,
+    "min_occurrence_rate": 0.3,
+    "generated": "2025-12-17T14:35:45.485139"
+  },
+  "BalanceSheet": {
+    "statement_type": "BalanceSheet",
+    "nodes": {
+      "EquitySecuritiesFvNi": {
+        "concept": "EquitySecuritiesFvNi",
+        "label": "Parent Company",
+        "parent": "InvestmentsAbstract",
+        "depth": 4.37641723356009,
+        "occurrence_rate": 0.449,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherInvestments": {
+        "concept": "OtherInvestments",
+        "label": "Other investments",
+        "parent": "InvestmentsAbstract",
+        "depth": 4.550522648083624,
+        "occurrence_rate": 0.4592,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "Investments": {
+        "concept": "Investments",
+        "label": "Total investments",
+        "parent": "InvestmentsAbstract",
+        "depth": 4.062068965517241,
+        "occurrence_rate": 0.7347,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "DeferredPolicyAcquisitionCosts": {
+        "concept": "DeferredPolicyAcquisitionCosts",
+        "label": "Deferred policy acquisition costs",
+        "parent": "AssetsAbstract",
+        "depth": 3.336448598130841,
+        "occurrence_rate": 0.5918,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherAssets": {
+        "concept": "OtherAssets",
+        "label": "Other Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.6968325791855206,
+        "occurrence_rate": 0.7755,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LiabilityForClaimsAndClaimsAdjustmentExpense": {
+        "concept": "LiabilityForClaimsAndClaimsAdjustmentExpense",
+        "label": "Unpaid losses and loss adjustment expenses",
+        "parent": "LiabilitiesAbstract",
+        "depth": 3.7224489795918365,
+        "occurrence_rate": 0.7143,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "UnearnedPremiums": {
+        "concept": "UnearnedPremiums",
+        "label": "Unearned premiums",
+        "parent": "LiabilitiesAbstract",
+        "depth": 3.7295081967213113,
+        "occurrence_rate": 0.6735,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherLiabilities": {
+        "concept": "OtherLiabilities",
+        "label": "Other Liabilities",
+        "parent": "LiabilitiesAbstract",
+        "depth": 4.181818181818182,
+        "occurrence_rate": 0.5816,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "InvestmentsAbstract": {
+        "concept": "InvestmentsAbstract",
+        "label": "Investments:",
+        "parent": "AssetsAbstract",
+        "depth": 2.68,
+        "occurrence_rate": 0.5102,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "AccruedInvestmentIncomeReceivable": {
+        "concept": "AccruedInvestmentIncomeReceivable",
+        "label": "Accrued investment income",
+        "parent": "AssetsAbstract",
+        "depth": 3.1769911504424777,
+        "occurrence_rate": 0.551,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "DeferredIncomeTaxAssetsNet": {
+        "concept": "DeferredIncomeTaxAssetsNet",
+        "label": "Deferred Tax Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.073529411764706,
+        "occurrence_rate": 0.4592,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LiabilitiesAbstract": {
+        "concept": "LiabilitiesAbstract",
+        "label": "Liabilities",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 2.264705882352941,
+        "occurrence_rate": 0.6939,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "ReinsurancePayable": {
+        "concept": "ReinsurancePayable",
+        "label": "Reinsurance balances payable",
+        "parent": "LiabilitiesAbstract",
+        "depth": 3.6041666666666665,
+        "occurrence_rate": 0.3265,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "AvailableForSaleSecuritiesDebtSecurities": {
+        "concept": "AvailableForSaleSecuritiesDebtSecurities",
+        "label": "Parent Company",
+        "parent": "InvestmentsAbstract",
+        "depth": 4.570655116404981,
+        "occurrence_rate": 0.4592,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "OtherShortTermInvestments": {
+        "concept": "OtherShortTermInvestments",
+        "label": "Parent Company",
+        "parent": "InvestmentsAbstract",
+        "depth": 4.283687943262412,
+        "occurrence_rate": 0.3367,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PremiumsReceivableAtCarryingValue": {
+        "concept": "PremiumsReceivableAtCarryingValue",
+        "label": "Premiums receivable",
+        "parent": "AssetsAbstract",
+        "depth": 3.283333333333333,
+        "occurrence_rate": 0.4388,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PrepaidReinsurancePremiums": {
+        "concept": "PrepaidReinsurancePremiums",
+        "label": "Prepaid reinsurance premiums",
+        "parent": "AssetsAbstract",
+        "depth": 3.1666666666666665,
+        "occurrence_rate": 0.3265,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "LongTermDebt": {
+        "concept": "LongTermDebt",
+        "label": "Long Term Debt",
+        "parent": "LiabilitiesAbstract",
+        "depth": 4.348837209302325,
+        "occurrence_rate": 0.3163,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "TreasuryStockValue": {
+        "concept": "TreasuryStockValue",
+        "label": "Treasury Stock Common Value",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 4.016949152542373,
+        "occurrence_rate": 0.3367,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "IncomeStatement": {
+    "statement_type": "IncomeStatement",
+    "nodes": {
+      "PremiumsEarnedNet": {
+        "concept": "PremiumsEarnedNet",
+        "label": "Net premiums earned",
+        "parent": "RevenuesAbstract",
+        "depth": 3.274447949526814,
+        "occurrence_rate": 0.7755,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "NetInvestmentIncome": {
+        "concept": "NetInvestmentIncome",
+        "label": "Net investment income",
+        "parent": "RevenuesAbstract",
+        "depth": 3.3595238095238096,
+        "occurrence_rate": 0.7143,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "GainLossOnInvestments": {
+        "concept": "GainLossOnInvestments",
+        "label": "Parent Company",
+        "parent": "RevenuesAbstract",
+        "depth": 3.3333333333333335,
+        "occurrence_rate": 0.3367,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "BenefitsLossesAndExpensesAbstract": {
+        "concept": "BenefitsLossesAndExpensesAbstract",
+        "label": "Expenses",
+        "parent": "IncomeStatementAbstract",
+        "depth": 1.5172413793103448,
+        "occurrence_rate": 0.5918,
+        "is_abstract": true,
+        "is_total": false,
+        "children": []
+      },
+      "PolicyholderBenefitsAndClaimsIncurredNet": {
+        "concept": "PolicyholderBenefitsAndClaimsIncurredNet",
+        "label": "Losses and loss adjustment expenses",
+        "parent": "BenefitsLossesAndExpensesAbstract",
+        "depth": 3.239067055393586,
+        "occurrence_rate": 0.6939,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "DeferredPolicyAcquisitionCostAmortizationExpense": {
+        "concept": "DeferredPolicyAcquisitionCostAmortizationExpense",
+        "label": "Amortization of deferred policy acquisition costs",
+        "parent": "BenefitsLossesAndExpensesAbstract",
+        "depth": 3.254166666666667,
+        "occurrence_rate": 0.3571,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "InterestExpense": {
+        "concept": "InterestExpense",
+        "label": "Interest Expense",
+        "parent": "BenefitsLossesAndExpensesAbstract",
+        "depth": 3.409937888198758,
+        "occurrence_rate": 0.3878,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "BenefitsLossesAndExpenses": {
+        "concept": "BenefitsLossesAndExpenses",
+        "label": "Total expenses",
+        "parent": "BenefitsLossesAndExpensesAbstract",
+        "depth": 3.1961722488038276,
+        "occurrence_rate": 0.6837,
+        "is_abstract": false,
+        "is_total": true,
+        "children": []
+      },
+      "OtherIncome": {
+        "concept": "OtherIncome",
+        "label": "Parent Company",
+        "parent": "RevenuesAbstract",
+        "depth": 3.066666666666667,
+        "occurrence_rate": 0.5714,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "OtherCostAndExpenseOperating": {
+        "concept": "OtherCostAndExpenseOperating",
+        "label": "Other operating expenses",
+        "parent": "BenefitsLossesAndExpensesAbstract",
+        "depth": 3.101010101010101,
+        "occurrence_rate": 0.3265,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "CashFlowStatement": {
+    "statement_type": "CashFlowStatement",
+    "nodes": {
+      "AccretionAmortizationOfDiscountsAndPremiumsInvestments": {
+        "concept": "AccretionAmortizationOfDiscountsAndPremiumsInvestments",
+        "label": "Parent Company",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.617021276595745,
+        "occurrence_rate": 0.3776,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInDeferredPolicyAcquisitionCosts": {
+        "concept": "IncreaseDecreaseInDeferredPolicyAcquisitionCosts",
+        "label": "Deferred policy acquisition costs",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.0,
+        "occurrence_rate": 0.5408,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInOtherOperatingAssets": {
+        "concept": "IncreaseDecreaseInOtherOperatingAssets",
+        "label": "Other assets",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.9019607843137254,
+        "occurrence_rate": 0.3878,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PaymentsToAcquireAvailableForSaleSecuritiesDebt": {
+        "concept": "PaymentsToAcquireAvailableForSaleSecuritiesDebt",
+        "label": "Parent Company",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 3.154639175257732,
+        "occurrence_rate": 0.6837,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ProceedsFromSaleOfAvailableForSaleSecuritiesDebt": {
+        "concept": "ProceedsFromSaleOfAvailableForSaleSecuritiesDebt",
+        "label": "Proceeds from Sale of Debt Securities, ",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 3.0140845070422535,
+        "occurrence_rate": 0.4694,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities": {
+        "concept": "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+        "label": "Proceeds from Maturities, Prepayments and Calls of Securities",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.8823529411764706,
+        "occurrence_rate": 0.4898,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "ProceedsFromSaleOfEquitySecuritiesFvNi": {
+        "concept": "ProceedsFromSaleOfEquitySecuritiesFvNi",
+        "label": "Equity securities",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 3.0588235294117645,
+        "occurrence_rate": 0.4082,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PaymentsForProceedsFromShortTermInvestments": {
+        "concept": "PaymentsForProceedsFromShortTermInvestments",
+        "label": "Parent Company",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.9019607843137254,
+        "occurrence_rate": 0.3163,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInReinsuranceRecoverable": {
+        "concept": "IncreaseDecreaseInReinsuranceRecoverable",
+        "label": "Reinsurance recoverable",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.923076923076923,
+        "occurrence_rate": 0.4898,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInOtherOperatingCapitalNet": {
+        "concept": "IncreaseDecreaseInOtherOperatingCapitalNet",
+        "label": "Parent Company",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.4655172413793105,
+        "occurrence_rate": 0.3878,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PaymentsToAcquireEquitySecuritiesFvNi": {
+        "concept": "PaymentsToAcquireEquitySecuritiesFvNi",
+        "label": "Equity securities",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 3.0697674418604652,
+        "occurrence_rate": 0.3367,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "PaymentsToAcquireOtherInvestments": {
+        "concept": "PaymentsToAcquireOtherInvestments",
+        "label": "Purchases of other investments",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 3.282051282051282,
+        "occurrence_rate": 0.3061,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInLiabilityForClaimsAndClaimsAdjustmentExpenseReserve": {
+        "concept": "IncreaseDecreaseInLiabilityForClaimsAndClaimsAdjustmentExpenseReserve",
+        "label": "Loss and loss adjustment expense reserves",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.9782608695652173,
+        "occurrence_rate": 0.449,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInUnearnedPremiums": {
+        "concept": "IncreaseDecreaseInUnearnedPremiums",
+        "label": "Unearned premiums",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.8846153846153846,
+        "occurrence_rate": 0.5102,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      },
+      "IncreaseDecreaseInPremiumsReceivable": {
+        "concept": "IncreaseDecreaseInPremiumsReceivable",
+        "label": "Premiums receivable",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.891304347826087,
+        "occurrence_rate": 0.449,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  },
+  "StatementOfEquity": {
+    "statement_type": "StatementOfEquity",
+    "nodes": {
+      "TreasuryStockValueAcquiredCostMethod": {
+        "concept": "TreasuryStockValueAcquiredCostMethod",
+        "label": "Treasury Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.335078534031414,
+        "occurrence_rate": 0.5306,
+        "is_abstract": false,
+        "is_total": false,
+        "children": []
+      }
+    }
+  }
+}

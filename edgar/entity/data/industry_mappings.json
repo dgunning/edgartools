@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Maps SIC codes to industry categories for virtual tree extensions",
+    "generated": "2025-12-17"
+  },
+  "industries": {
+    "banking": {
+      "name": "Banking & Financial Services",
+      "sic_ranges": [[6020, 6029]],
+      "extension_file": "banking.json",
+      "description": "Commercial banks, savings institutions"
+    },
+    "tech": {
+      "name": "Technology & Software",
+      "sic_ranges": [[7370, 7379], [3570, 3579]],
+      "extension_file": "tech.json",
+      "description": "Software, computer services, hardware"
+    },
+    "healthcare": {
+      "name": "Healthcare & Pharmaceuticals",
+      "sic_ranges": [[2833, 2836], [8000, 8099]],
+      "extension_file": "healthcare.json",
+      "description": "Pharmaceuticals, biotechnology, health services"
+    },
+    "energy": {
+      "name": "Energy & Oil/Gas",
+      "sic_ranges": [[1300, 1399]],
+      "extension_file": "energy.json",
+      "description": "Oil & gas extraction"
+    },
+    "insurance": {
+      "name": "Insurance",
+      "sic_ranges": [[6300, 6399]],
+      "extension_file": "insurance.json",
+      "description": "Insurance carriers and agents"
+    },
+    "retail": {
+      "name": "Retail Trade",
+      "sic_ranges": [[5200, 5999]],
+      "extension_file": "retail.json",
+      "description": "Retail stores, e-commerce"
+    },
+    "realestate": {
+      "name": "Real Estate & REITs",
+      "sic_ranges": [[6500, 6553], [6798, 6798]],
+      "extension_file": "realestate.json",
+      "description": "Real estate operators, REITs, property management"
+    },
+    "utilities": {
+      "name": "Utilities",
+      "sic_ranges": [[4910, 4941]],
+      "extension_file": "utilities.json",
+      "description": "Electric, gas, and combination utilities"
+    },
+    "consumergoods": {
+      "name": "Consumer Goods",
+      "sic_ranges": [[2000, 2399]],
+      "extension_file": "consumergoods.json",
+      "description": "Food, beverages, tobacco, textiles, apparel"
+    },
+    "telecom": {
+      "name": "Telecommunications",
+      "sic_ranges": [[4810, 4899]],
+      "extension_file": "telecom.json",
+      "description": "Telephone, cable, wireless communications"
+    },
+    "transportation": {
+      "name": "Transportation",
+      "sic_ranges": [[4000, 4799]],
+      "extension_file": "transportation.json",
+      "description": "Rail, trucking, air, water transportation"
+    },
+    "aerospace": {
+      "name": "Aerospace & Defense",
+      "sic_ranges": [[3720, 3729], [3760, 3769]],
+      "extension_file": "aerospace.json",
+      "description": "Aircraft, guided missiles, space vehicles"
+    },
+    "hospitality": {
+      "name": "Hospitality",
+      "sic_ranges": [[7010, 7041]],
+      "extension_file": "hospitality.json",
+      "description": "Hotels, motels, lodging"
+    },
+    "mining": {
+      "name": "Mining & Materials",
+      "sic_ranges": [[1000, 1299], [1400, 1499]],
+      "extension_file": "mining.json",
+      "description": "Metal, coal, mineral mining"
+    },
+    "automotive": {
+      "name": "Automotive",
+      "sic_ranges": [[3710, 3716]],
+      "extension_file": "automotive.json",
+      "description": "Motor vehicles and parts"
+    }
+  }
+}
