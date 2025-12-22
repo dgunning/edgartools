@@ -1,6 +1,0 @@
-Company: JPMORGAN CHASE & CO
-CIK: 19617
-Form: 10-K
-Filing Date: 2013-02-28
-Accession No: 0000019617-13-000221
-URL: https://www.sec.gov/Archives/edgar/data/19617/0000019617-13-000221-index.html

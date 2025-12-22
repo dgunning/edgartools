@@ -1,6 +1,0 @@
-Company: COCA COLA CO
-CIK: 21344
-Form: 10-K
-Filing Date: 2023-02-21
-Accession No: 0000021344-23-000011
-URL: https://www.sec.gov/Archives/edgar/data/21344/0000021344-23-000011-index.html

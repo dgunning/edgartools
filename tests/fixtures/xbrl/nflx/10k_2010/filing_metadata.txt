@@ -1,6 +1,0 @@
-Company: NETFLIX INC
-CIK: 1065280
-Form: 10-K
-Filing Date: 2010-02-22
-Accession No: 0001193125-10-036181
-URL: https://www.sec.gov/Archives/edgar/data/1065280/0001193125-10-036181-index.html

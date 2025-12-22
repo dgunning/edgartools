@@ -1,6 +1,0 @@
-Company: MICROSOFT CORP
-CIK: 789019
-Form: 10-K
-Filing Date: 2015-07-31
-Accession No: 0001193125-15-272806
-URL: https://www.sec.gov/Archives/edgar/data/789019/0001193125-15-272806-index.html

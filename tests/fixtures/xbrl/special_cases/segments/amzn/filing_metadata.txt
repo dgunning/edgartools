@@ -1,6 +1,0 @@
-Company: AMAZON COM INC
-CIK: 1018724
-Form: 10-K
-Filing Date: 2023-02-03
-Accession No: 0001018724-23-000004
-URL: https://www.sec.gov/Archives/edgar/data/1018724/0001018724-23-000004-index.html

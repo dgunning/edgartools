@@ -1,6 +1,0 @@
-Company: Apple Inc.
-CIK: 320193
-Form: 10-Q
-Filing Date: 2023-08-04
-Accession No: 0000320193-23-000077
-URL: https://www.sec.gov/Archives/edgar/data/320193/0000320193-23-000077-index.html

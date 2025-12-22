@@ -1,6 +1,0 @@
-Company: BOEING CO
-CIK: 12927
-Form: 10-K
-Filing Date: 2023-01-27
-Accession No: 0000012927-23-000007
-URL: https://www.sec.gov/Archives/edgar/data/12927/0000012927-23-000007-index.html
