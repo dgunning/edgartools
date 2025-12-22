@@ -1247,58 +1247,68 @@ def detect_fiscal_year_end(facts: List[FinancialFact]) -> int:
 
 def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int) -> int:
     """
-    Calculate the fiscal year for period labels based on period_end date.
+    Calculate the year for period labels based on period_end date and fiscal year end.
 
-    This function addresses Issue #460 where quarterly labels showed incorrect fiscal years
-    because the SEC Facts API provides forward-looking fiscal_year values (the year the
-    quarter contributes to), not the year for labeling purposes.
+    This function addresses Issue #460 where quarterly labels showed incorrect years
+    because the SEC Facts API provides forward-looking fiscal_year values.
 
-    For quarterly periods, the fiscal year label should reflect when the period occurred,
-    not which fiscal year it contributes to. This mirrors the logic from
-    validate_fiscal_year_period_end() but calculates the appropriate fiscal year for labels.
+    Issue #02gu: The original implementation incorrectly added 1 year when
+    period_end.month > fiscal_year_end_month, which broke for companies with
+    early fiscal year ends (Jan-Mar) like NVIDIA where almost all months are
+    "after" the FYE month.
+
+    The nuanced fix:
+    - For companies with early FYE (Jan-Mar): Use calendar year labeling
+      This fixes NVIDIA (Jan FYE) where Q3 Oct 2025 should be "Q3 2025" not "Q3 2026"
+    - For companies with later FYE (Apr-Dec): Use fiscal year convention
+      This preserves Apple (Sept FYE) where Q1 Dec 2023 should be "Q1 2024"
 
     Args:
         period_end: The period end date
         fiscal_year_end_month: Company's fiscal year end month (1-12)
 
     Returns:
-        The fiscal year to use for labeling this period
+        The year to use for labeling this period
 
     Examples:
-        >>> # Apple (fiscal year ends in September)
-        >>> # Q3 ending June 28, 2024
-        >>> calculate_fiscal_year_for_label(date(2024, 6, 28), 9)
-        2024  # Q3 2024, not Q3 2025
+        >>> # NVIDIA (fiscal year ends in January - early FYE, use calendar year)
+        >>> # Q3 ending October 26, 2025
+        >>> calculate_fiscal_year_for_label(date(2025, 10, 26), 1)
+        2025  # Q3 2025 - calendar year for early FYE companies
 
-        >>> # Q4 ending September 28, 2024
-        >>> calculate_fiscal_year_for_label(date(2024, 9, 28), 9)
-        2024  # Q4 2024 (fiscal year end)
-
+        >>> # Apple (fiscal year ends in September - later FYE, use fiscal year)
         >>> # Q1 ending December 30, 2023
         >>> calculate_fiscal_year_for_label(date(2023, 12, 30), 9)
-        2024  # Q1 2024 (first quarter of FY 2024)
+        2024  # Q1 2024 - fiscal year convention preserved
+
+        >>> # Apple Q3 ending June 28, 2024
+        >>> calculate_fiscal_year_for_label(date(2024, 6, 28), 9)
+        2024  # Q3 2024 - before FYE, same calendar year
 
         >>> # Early January period (52/53-week calendar edge case)
         >>> calculate_fiscal_year_for_label(date(2023, 1, 1), 12)
         2022  # FY 2022 (52/53-week calendar convention)
     """
     # Early January (Jan 1-7): Use prior year (52/53-week calendar convention)
+    # This handles companies with 52/53-week calendars where fiscal year end
+    # dates can fall in the first week of January
     if period_end.month == 1 and period_end.day <= 7:
         return period_end.year - 1
 
-    # If period_end is in a month AFTER fiscal year end, it's the NEXT fiscal year
-    # Example: Apple FY ends Sept (month 9)
-    #   - Period ending Oct 2023 (month 10) → FY 2024 (first quarter of new fiscal year)
-    #   - Period ending Sept 2023 (month 9) → FY 2023 (end of fiscal year)
-    #   - Period ending June 2024 (month 6) → FY 2024 (third quarter)
-
-    if period_end.month > fiscal_year_end_month:
-        # Period is after fiscal year end, so it's in the next fiscal year
-        # Example: Sept FY end, period ends in Oct/Nov/Dec → next year
-        return period_end.year + 1
-    else:
-        # Period is at or before fiscal year end, use calendar year
+    # For companies with early fiscal year ends (Jan-Mar), use calendar year
+    # This avoids the confusing "Q3 2026 for Oct 2025" issue with companies like NVIDIA
+    # where almost all months (Feb-Dec) would otherwise get +1 year added
+    if fiscal_year_end_month <= 3:
         return period_end.year
+
+    # For companies with later fiscal year ends (Apr-Dec), use fiscal year convention
+    # Quarters after FYE month are in the next fiscal year
+    # Example: Apple (Sept FYE) Q1 ends in Dec, so Dec 2023 → Q1 2024
+    if period_end.month > fiscal_year_end_month:
+        return period_end.year + 1
+
+    # Period is at or before FYE month - use calendar year
+    return period_end.year
 
 
 class EnhancedStatementBuilder:
