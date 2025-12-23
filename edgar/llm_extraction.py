@@ -618,6 +618,202 @@ FORM_20F_ITEMS = {
     },
 }
 
+# 8-K Current Report Item Definitions
+# SEC Form 8-K has 9 sections with items numbered X.XX
+FORM_8K_ITEMS = {
+    # Section 1 - Registrant's Business and Operations
+    "Item 1.01": {
+        "title": "Entry into a Material Definitive Agreement",
+        "boundaries": ["Item 1.02", "Item 1.03", "Item 2.01", "Item 9.01"],
+        "section": "Section 1",
+    },
+    "Item 1.02": {
+        "title": "Termination of a Material Definitive Agreement",
+        "boundaries": ["Item 1.03", "Item 1.04", "Item 2.01", "Item 9.01"],
+        "section": "Section 1",
+    },
+    "Item 1.03": {
+        "title": "Bankruptcy or Receivership",
+        "boundaries": ["Item 1.04", "Item 1.05", "Item 2.01", "Item 9.01"],
+        "section": "Section 1",
+    },
+    "Item 1.04": {
+        "title": "Mine Safety - Reporting of Shutdowns and Patterns of Violations",
+        "boundaries": ["Item 1.05", "Item 2.01", "Item 9.01"],
+        "section": "Section 1",
+    },
+    "Item 1.05": {
+        "title": "Material Cybersecurity Incidents",
+        "boundaries": ["Item 2.01", "Item 2.02", "Item 9.01"],
+        "section": "Section 1",
+    },
+    # Section 2 - Financial Information
+    "Item 2.01": {
+        "title": "Completion of Acquisition or Disposition of Assets",
+        "boundaries": ["Item 2.02", "Item 2.03", "Item 3.01", "Item 9.01"],
+        "section": "Section 2",
+    },
+    "Item 2.02": {
+        "title": "Results of Operations and Financial Condition",
+        "boundaries": ["Item 2.03", "Item 2.04", "Item 3.01", "Item 9.01"],
+        "section": "Section 2",
+    },
+    "Item 2.03": {
+        "title": "Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement",
+        "boundaries": ["Item 2.04", "Item 2.05", "Item 3.01", "Item 9.01"],
+        "section": "Section 2",
+    },
+    "Item 2.04": {
+        "title": "Triggering Events That Accelerate or Increase a Direct Financial Obligation",
+        "boundaries": ["Item 2.05", "Item 2.06", "Item 3.01", "Item 9.01"],
+        "section": "Section 2",
+    },
+    "Item 2.05": {
+        "title": "Costs Associated with Exit or Disposal Activities",
+        "boundaries": ["Item 2.06", "Item 3.01", "Item 9.01"],
+        "section": "Section 2",
+    },
+    "Item 2.06": {
+        "title": "Material Impairments",
+        "boundaries": ["Item 3.01", "Item 3.02", "Item 9.01"],
+        "section": "Section 2",
+    },
+    # Section 3 - Securities and Trading Markets
+    "Item 3.01": {
+        "title": "Notice of Delisting or Failure to Satisfy a Continued Listing Rule or Standard",
+        "boundaries": ["Item 3.02", "Item 3.03", "Item 4.01", "Item 9.01"],
+        "section": "Section 3",
+    },
+    "Item 3.02": {
+        "title": "Unregistered Sales of Equity Securities",
+        "boundaries": ["Item 3.03", "Item 4.01", "Item 9.01"],
+        "section": "Section 3",
+    },
+    "Item 3.03": {
+        "title": "Material Modification to Rights of Security Holders",
+        "boundaries": ["Item 4.01", "Item 4.02", "Item 9.01"],
+        "section": "Section 3",
+    },
+    # Section 4 - Matters Related to Accountants and Financial Statements
+    "Item 4.01": {
+        "title": "Changes in Registrant's Certifying Accountant",
+        "boundaries": ["Item 4.02", "Item 5.01", "Item 9.01"],
+        "section": "Section 4",
+    },
+    "Item 4.02": {
+        "title": "Non-Reliance on Previously Issued Financial Statements",
+        "boundaries": ["Item 5.01", "Item 5.02", "Item 9.01"],
+        "section": "Section 4",
+    },
+    # Section 5 - Corporate Governance and Management
+    "Item 5.01": {
+        "title": "Changes in Control of Registrant",
+        "boundaries": ["Item 5.02", "Item 5.03", "Item 9.01"],
+        "section": "Section 5",
+    },
+    "Item 5.02": {
+        "title": "Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers",
+        "boundaries": ["Item 5.03", "Item 5.04", "Item 9.01"],
+        "section": "Section 5",
+    },
+    "Item 5.03": {
+        "title": "Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
+        "boundaries": ["Item 5.04", "Item 5.05", "Item 9.01"],
+        "section": "Section 5",
+    },
+    "Item 5.04": {
+        "title": "Temporary Suspension of Trading Under Registrant's Employee Benefit Plans",
+        "boundaries": ["Item 5.05", "Item 5.06", "Item 9.01"],
+        "section": "Section 5",
+    },
+    "Item 5.05": {
+        "title": "Amendment to Registrant's Code of Ethics",
+        "boundaries": ["Item 5.06", "Item 5.07", "Item 9.01"],
+        "section": "Section 5",
+    },
+    "Item 5.06": {
+        "title": "Change in Shell Company Status",
+        "boundaries": ["Item 5.07", "Item 5.08", "Item 9.01"],
+        "section": "Section 5",
+    },
+    "Item 5.07": {
+        "title": "Submission of Matters to a Vote of Security Holders",
+        "boundaries": ["Item 5.08", "Item 6.01", "Item 9.01"],
+        "section": "Section 5",
+    },
+    "Item 5.08": {
+        "title": "Shareholder Nominations Pursuant to Exchange Act Rule 14a-11",
+        "boundaries": ["Item 6.01", "Item 7.01", "Item 9.01"],
+        "section": "Section 5",
+    },
+    # Section 6 - Asset-Backed Securities
+    "Item 6.01": {
+        "title": "ABS Informational and Computational Material",
+        "boundaries": ["Item 6.02", "Item 6.03", "Item 7.01", "Item 9.01"],
+        "section": "Section 6",
+    },
+    "Item 6.02": {
+        "title": "Change of Servicer or Trustee",
+        "boundaries": ["Item 6.03", "Item 6.04", "Item 7.01", "Item 9.01"],
+        "section": "Section 6",
+    },
+    "Item 6.03": {
+        "title": "Change in Credit Enhancement or Other External Support",
+        "boundaries": ["Item 6.04", "Item 6.05", "Item 7.01", "Item 9.01"],
+        "section": "Section 6",
+    },
+    "Item 6.04": {
+        "title": "Failure to Make a Required Distribution",
+        "boundaries": ["Item 6.05", "Item 6.06", "Item 7.01", "Item 9.01"],
+        "section": "Section 6",
+    },
+    "Item 6.05": {
+        "title": "Securities Act Updating Disclosure",
+        "boundaries": ["Item 6.06", "Item 7.01", "Item 9.01"],
+        "section": "Section 6",
+    },
+    "Item 6.06": {
+        "title": "Static Pool",
+        "boundaries": ["Item 7.01", "Item 8.01", "Item 9.01"],
+        "section": "Section 6",
+    },
+    # Section 7 - Regulation FD
+    "Item 7.01": {
+        "title": "Regulation FD Disclosure",
+        "boundaries": ["Item 8.01", "Item 9.01"],
+        "section": "Section 7",
+    },
+    # Section 8 - Other Events
+    "Item 8.01": {
+        "title": "Other Events",
+        "boundaries": ["Item 9.01", "Signature"],
+        "section": "Section 8",
+    },
+    # Section 9 - Financial Statements and Exhibits
+    "Item 9.01": {
+        "title": "Financial Statements and Exhibits",
+        "boundaries": ["Signature"],
+        "section": "Section 9",
+    },
+}
+
+# 6-K Report of Foreign Private Issuer
+# Form 6-K is less structured - mainly contains exhibits and press releases
+FORM_6K_SECTIONS = {
+    "Cover": {
+        "title": "Cover Page",
+        "boundaries": ["Signature", "Exhibits", "Exhibit"],
+    },
+    "Exhibits": {
+        "title": "Exhibits",
+        "boundaries": ["Signature"],
+    },
+    "Signature": {
+        "title": "Signature",
+        "boundaries": [],
+    },
+}
+
 # Master form registry
 FORM_ITEM_REGISTRY = {
     "10-K": FORM_10K_ITEMS,
@@ -626,6 +822,10 @@ FORM_ITEM_REGISTRY = {
     "10-Q/A": FORM_10Q_ITEMS,
     "20-F": FORM_20F_ITEMS,
     "20-F/A": FORM_20F_ITEMS,
+    "8-K": FORM_8K_ITEMS,
+    "8-K/A": FORM_8K_ITEMS,
+    "6-K": FORM_6K_SECTIONS,
+    "6-K/A": FORM_6K_SECTIONS,
 }
 
 
@@ -713,12 +913,20 @@ def _normalize_item_name(item_name: str, form_type: Optional[str] = None) -> str
     - "Item1" -> "Item 1"
     - "ITEM 1A" -> "Item 1A"
     - "Item 3.D" -> "Item 3D" (for 20-F)
+    - "item 1.01" -> "Item 1.01" (for 8-K)
+    - "Item5.02" -> "Item 5.02" (for 8-K)
     """
     if not item_name:
         return item_name
 
     # Basic normalization
     normalized = item_name.strip()
+
+    # Check for 8-K decimal format first (Item X.XX)
+    decimal_match = re.match(r"(?i)item\s*(\d+)\.(\d+)", normalized)
+    if decimal_match:
+        major, minor = decimal_match.groups()
+        return f"Item {major}.{minor.zfill(2)}"
 
     # Handle "Item 3.D" -> "Item 3D" for 20-F sub-items (do this first)
     normalized = re.sub(r"(?i)(item\s*\d+)\.([A-Za-z])", r"\1\2", normalized)
@@ -756,6 +964,8 @@ __all__ = [
     "FORM_10K_ITEMS",
     "FORM_10Q_ITEMS",
     "FORM_20F_ITEMS",
+    "FORM_8K_ITEMS",
+    "FORM_6K_SECTIONS",
     "FORM_ITEM_REGISTRY",
 ]
 
@@ -1244,6 +1454,7 @@ _STATEMENT_KEYWORDS = {
         "cash flow statement",
         "statement of cash flows",
         "cash flows",
+        "cash flow",
     ],
     "StatementOfEquity": [
         "statement of equity",
@@ -1267,7 +1478,16 @@ def _normalize_statement_name(statement_name: str) -> Optional[str]:
     if not statement_name:
         return None
 
-    normalized = re.sub(r"[^a-z0-9]+", " ", statement_name.lower()).strip()
+    # First check for exact canonical match (case-insensitive)
+    statement_lower = statement_name.lower().replace(" ", "").replace("_", "")
+    for canonical in _STATEMENT_KEYWORDS:
+        if canonical.lower() == statement_lower:
+            return canonical
+
+    # Split camelCase before normalizing (BalanceSheet -> Balance Sheet)
+    spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", statement_name)
+    normalized = re.sub(r"[^a-z0-9]+", " ", spaced.lower()).strip()
+
     if normalized in {"statements", "all statements", "all"}:
         return "AllStatements"
 
@@ -1996,28 +2216,42 @@ def _build_item_pattern(item_name: str, form_type: Optional[str] = None) -> str:
     """Build a regex pattern for matching an item name.
 
     Handles variations like:
-    - "Item 1" -> matches "Item 1", "ITEM 1", "Item  1"
+    - "Item 1" -> matches "Item 1", "ITEM 1", "Item  1", "ITEM&#160;1"
     - "Item 1A" -> matches "Item 1A", "Item 1.A", "Item1A"
     - "Item 3D" -> matches "Item 3D", "Item 3.D" (for 20-F)
+    - "Item 1.01" -> matches "Item 1.01", "ITEM 1.01" (for 8-K)
     - "Part II Item 1" -> matches variations for 10-Q
     """
-    # Parse the item name
+    # Pattern to match whitespace including HTML entities (&#160;, &nbsp;)
+    SP = r"(?:\s|&#160;|&nbsp;)*"
+
+    # Check for 8-K decimal format first (Item X.XX)
+    decimal_match = re.match(r"(?i)(Item)\s*(\d+)\.(\d+)", item_name)
+    if decimal_match:
+        prefix, major, minor = decimal_match.groups()
+        # Match: Item 1.01, ITEM 1.01, Item&#160;1.01, etc.
+        return rf"{prefix}{SP}{major}\.{SP}{minor}"
+
+    # Parse the item name for standard format (Item X, Item XA)
     match = re.match(r"(?i)((?:Part\s+(?:I+|[12])\s+)?Item)\s*(\d+)([A-Za-z]?)", item_name)
     if not match:
         # Fallback to simple replacement
-        return item_name.replace(" ", r"\s+")
+        return item_name.replace(" ", SP)
 
     prefix, num, suffix = match.groups()
+
+    # Replace spaces in prefix with flexible whitespace pattern
+    prefix_pattern = prefix.replace(" ", SP)
 
     # Build flexible pattern
     if suffix:
         # Handle sub-items like "Item 1A" or "Item 3D"
-        # Match: Item 1A, Item 1.A, Item1A, ITEM 1A, etc.
-        pattern = rf"{prefix.replace(' ', r'\s*')}\s*{num}\.?\s*{suffix}"
+        # Match: Item 1A, Item 1.A, Item1A, ITEM 1A, ITEM&#160;1A, etc.
+        pattern = rf"{prefix_pattern}{SP}{num}\.?{SP}{suffix}"
     else:
         # Handle main items like "Item 1"
-        # Match: Item 1, ITEM 1, Item  1, etc.
-        pattern = rf"{prefix.replace(' ', r'\s*')}\s*{num}"
+        # Match: Item 1, ITEM 1, Item  1, ITEM&#160;1, etc.
+        pattern = rf"{prefix_pattern}{SP}{num}"
 
     # For 10-Q, also match "Part II" prefixed versions for Part II items
     if form_type and form_type.upper().startswith("10-Q"):
@@ -2026,7 +2260,7 @@ def _build_item_pattern(item_name: str, form_type: Optional[str] = None) -> str:
             pass
         else:
             # Add optional Part prefix for matching
-            pattern = rf"(?:Part\s+(?:II|2)\s+)?{pattern}"
+            pattern = rf"(?:Part{SP}(?:II|2){SP})?{pattern}"
 
     return pattern
 

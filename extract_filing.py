@@ -100,20 +100,21 @@ def list_form_items(form_type: str):
     items = get_form_items(form_type)
     if not items:
         print(f"No item definitions found for form type: {form_type}")
-        print("Supported forms: 10-K, 10-Q, 20-F")
+        print("Supported forms: 10-K, 10-Q, 20-F, 8-K, 6-K")
         return
 
     print(f"\nAvailable items for {form_type}:")
     print("=" * 60)
 
-    current_part = None
+    current_group = None
     for item in items:
         info = get_item_info(form_type, item)
         if info:
-            part = info.get("part", "")
-            if part != current_part:
-                current_part = part
-                print(f"\n{part}")
+            # Handle both "part" (10-K, 10-Q, 20-F) and "section" (8-K)
+            group = info.get("part", "") or info.get("section", "")
+            if group != current_group:
+                current_group = group
+                print(f"\n{group}")
                 print("-" * 40)
 
             title = info.get("title", "")[:50]
