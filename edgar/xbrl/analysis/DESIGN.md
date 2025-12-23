@@ -10,20 +10,19 @@ A dataclass that encapsulates the results of a ratio calculation:
 ```python
 @dataclass
 class RatioAnalysis:
-    name: str               # Name of the ratio
-    description: str        # Description of what the ratio measures
-    calculation_df: pd.DataFrame  # DataFrame used in calculation
-    result: float          # Final ratio value
-    components: Dict[str, float]  # Individual components used
-    period: str            # Period the ratio is calculated for
+    name: str                      # Name of the ratio
+    description: str               # Description of what the ratio measures
+    calculation_df: pd.DataFrame   # DataFrame used in calculation
+    results: pd.Series             # Final ratio values by period
+    components: Dict[str, pd.Series]  # Individual components used
+    equivalents_used: Dict[str, str]  # Equivalent calculations used
 ```
 
-### FinancialRatioAnalyzer
+### FinancialRatios
 The main class responsible for ratio calculations:
 ```python
-class FinancialRatioAnalyzer:
-    def __init__(self, balance_sheet_df, income_stmt_df, 
-                 cash_flow_df, periods)
+class FinancialRatios:
+    def __init__(self, xbrl)
 ```
 
 ## Data Flow Pipeline
@@ -132,57 +131,49 @@ class RatioAnalysis:
 ## Usage Example
 
 ```python
-analyzer = FinancialRatioAnalyzer(
-    balance_sheet_df=balance_sheet_df,
-    income_stmt_df=income_stmt_df,
-    cash_flow_df=cash_flow_df,
-    periods=['2023-12-31', '2022-12-31', '2021-12-31']
-)
+ratios = FinancialRatios(xbrl)
 
 # Calculate ratios
-current_ratios = analyzer.calculate_current_ratio()
-roa_ratios = analyzer.calculate_return_on_assets()
+current_ratio = ratios.calculate_current_ratio()
+roa_ratio = ratios.calculate_return_on_assets()
 
 # Access results
-for ratio in current_ratios:
-    print(f"{ratio.name} ({ratio.period}): {ratio.result:.2f}")
-    # DataFrame available for Excel export
-    ratio.calculation_df.to_excel(f"{ratio.name}_{ratio.period}.xlsx")
+print(current_ratio.results)
+print(roa_ratio.results)
 ```
 
 ## Implemented Ratios
 
-1. **Current Ratio**
-   - Formula: Current Assets / Current Liabilities
-   - Measures: Company's ability to pay short-term obligations
+1. **Liquidity Ratios**
+   - Current Ratio
+   - Quick Ratio (inventory treated as 0 when absent)
+   - Cash Ratio
+   - Working Capital
 
-2. **Quick Ratio**
-   - Formula: (Current Assets - Inventory) / Current Liabilities
-   - Measures: Company's ability to pay short-term obligations with liquid assets
-   - Note: Handles missing inventory data by treating it as 0
+2. **Profitability Ratios**
+   - Gross Margin
+   - Operating Margin
+   - Net Margin
+   - Return on Assets
+   - Return on Equity
 
-3. **Return on Assets (ROA)**
-   - Formula: Net Income / Average Total Assets
-   - Measures: Asset utilization efficiency
+3. **Efficiency Ratios**
+   - Asset Turnover
+   - Inventory Turnover (skipped when inventory is absent)
+   - Receivables Turnover
+   - Days Sales Outstanding
 
-4. **Operating Margin**
-   - Formula: Operating Income / Revenue
-   - Measures: Operating efficiency and pricing strategy
-
-5. **Cash Ratio**
-   - Formula: Cash / Current Liabilities
-   - Measures: Company's ability to cover liabilities with cash only
-
-6. **Working Capital**
-   - Formula: Current Assets - Current Liabilities
-   - Measures: Short-term financial health
+4. **Leverage Ratios**
+   - Debt to Equity
+   - Debt to Assets
+   - Interest Coverage (skipped when interest expense is absent)
+   - Equity Multiplier
 
 ## Future Extensions
 
 1. **Additional Ratios**
-   - Debt-to-Equity
-   - Asset Turnover
-   - Inventory Turnover
+   - Industry-specific ratios
+   - Cash flow coverage ratios
 
 2. **Enhanced Features**
    - Industry average comparisons

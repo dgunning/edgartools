@@ -349,10 +349,12 @@ class FinancialRatios:
                         mask = df['concept'] == company_concept
                         if mask.any():
                             matching_row = df[mask].iloc[0]
-                            # Only copy values for available periods
-                            calc_df.loc[concept] = matching_row[calc_df.columns]
-                            found = True
-                            break
+                            # Only copy values for available periods, clean blanks to NaN
+                            cleaned_row = _clean_series_data(matching_row[calc_df.columns])
+                            calc_df.loc[concept] = cleaned_row
+                            if not cleaned_row.isna().all():
+                                found = True
+                                break
                     if found:
                         break
 
@@ -362,10 +364,12 @@ class FinancialRatios:
                     mask = df['concept'] == concept
                     if mask.any():
                         matching_row = df[mask].iloc[0]
-                        # Only copy values for available periods
-                        calc_df.loc[concept] = matching_row[calc_df.columns]
-                        found = True
-                        break
+                        # Only copy values for available periods, clean blanks to NaN
+                        cleaned_row = _clean_series_data(matching_row[calc_df.columns])
+                        calc_df.loc[concept] = cleaned_row
+                        if not cleaned_row.isna().all():
+                            found = True
+                            break
 
             # If still not found, try matching by label
             if not found:
@@ -375,10 +379,12 @@ class FinancialRatios:
                         mask = df['label'].str.contains(concept, case=False, na=False)
                         if mask.any():
                             matching_row = df[mask].iloc[0]
-                            # Only copy values for available periods
-                            calc_df.loc[concept] = matching_row[calc_df.columns]
-                            found = True
-                            break
+                            # Only copy values for available periods, clean blanks to NaN
+                            cleaned_row = _clean_series_data(matching_row[calc_df.columns])
+                            calc_df.loc[concept] = cleaned_row
+                            if not cleaned_row.isna().all():
+                                found = True
+                                break
 
             # If still not found or all NaN, try concept equivalents
             if not found or calc_df.loc[concept].isna().all():
@@ -659,21 +665,52 @@ class FinancialRatios:
                 'optional_concepts': {},
                 'statements': [(self.income_stmt_df, "IncomeStatement")]
             },
-            'leverage': {
-                'concepts': [
-                    StandardConcept.LONG_TERM_DEBT,
-                    StandardConcept.TOTAL_EQUITY,
-                    StandardConcept.TOTAL_ASSETS,
-                    StandardConcept.OPERATING_INCOME,
-                    StandardConcept.INTEREST_EXPENSE
-                ],
-                'optional_concepts': {},
-                'statements': [
-                    (self.balance_sheet_df, "BalanceSheet"),
-                    (self.income_stmt_df, "IncomeStatement")
-                ]
-            }
-        }
+              'leverage': {
+                  'concepts': [
+                      StandardConcept.LONG_TERM_DEBT,
+                      StandardConcept.TOTAL_EQUITY,
+                      StandardConcept.TOTAL_ASSETS,
+                      StandardConcept.OPERATING_INCOME
+                  ],
+                  'optional_concepts': {
+                      StandardConcept.INTEREST_EXPENSE: 0.0
+                  },
+                  'statements': [
+                      (self.balance_sheet_df, "BalanceSheet"),
+                      (self.income_stmt_df, "IncomeStatement")
+                  ]
+              },
+              'profitability': {
+                  'concepts': [
+                      StandardConcept.REVENUE,
+                      StandardConcept.GROSS_PROFIT,
+                      StandardConcept.OPERATING_INCOME,
+                      StandardConcept.NET_INCOME,
+                      StandardConcept.TOTAL_ASSETS,
+                      StandardConcept.TOTAL_EQUITY
+                  ],
+                  'optional_concepts': {},
+                  'statements': [
+                      (self.income_stmt_df, "IncomeStatement"),
+                      (self.balance_sheet_df, "BalanceSheet")
+                  ]
+              },
+              'efficiency': {
+                  'concepts': [
+                      StandardConcept.REVENUE,
+                      StandardConcept.TOTAL_ASSETS,
+                      StandardConcept.COST_OF_REVENUE,
+                      StandardConcept.ACCOUNTS_RECEIVABLE
+                  ],
+                  'optional_concepts': {
+                      StandardConcept.INVENTORY: 0.0
+                  },
+                  'statements': [
+                      (self.income_stmt_df, "IncomeStatement"),
+                      (self.balance_sheet_df, "BalanceSheet")
+                  ]
+              }
+          }
 
         if ratio_type not in ratio_configs:
             raise ValueError(f"Unknown ratio type: {ratio_type}. Valid types are: {list(ratio_configs.keys())}")
@@ -742,7 +779,8 @@ class FinancialRatios:
 
         ROA = Net Income / Average Total Assets
         """
-        calc_df, equivalents = self.get_ratio_data('return_on_assets')
+        ratio_data = self.get_ratio_data('return_on_assets')
+        calc_df = ratio_data.calculation_df
 
         try:
             net_income, income_equiv = self._get_concept_value(
@@ -779,7 +817,8 @@ class FinancialRatios:
 
         Operating Margin = Operating Income / Revenue
         """
-        calc_df, equivalents = self.get_ratio_data('operating_margin')
+        ratio_data = self.get_ratio_data('operating_margin')
+        calc_df = ratio_data.calculation_df
 
         try:
             operating_income, income_equiv = self._get_concept_value(
@@ -815,7 +854,8 @@ class FinancialRatios:
         Note: If Gross Profit is not directly available, it will be calculated as
         Revenue - Cost of Revenue.
         """
-        calc_df, equivalents = self.get_ratio_data('gross_margin')
+        ratio_data = self.get_ratio_data('gross_margin')
+        calc_df = ratio_data.calculation_df
 
         try:
             gross_profit, profit_equiv = self._get_concept_value(
@@ -900,7 +940,8 @@ class FinancialRatios:
         Cash Ratio = Cash / Current Liabilities
         Measures ability to pay short-term obligations using only cash.
         """
-        calc_df, equivalents = self.get_ratio_data('current')
+        ratio_data = self.get_ratio_data('current')
+        calc_df = ratio_data.calculation_df
 
         try:
             cash, cash_equiv = self._get_concept_value(
@@ -934,7 +975,8 @@ class FinancialRatios:
         Working Capital = Current Assets - Current Liabilities
         Measures short-term financial health.
         """
-        calc_df, equivalents = self.get_ratio_data('current')
+        ratio_data = self.get_ratio_data('current')
+        calc_df = ratio_data.calculation_df
 
         try:
             current_assets, assets_equiv = self._get_concept_value(
@@ -975,7 +1017,8 @@ class FinancialRatios:
             - return_on_assets
             - return_on_equity
         """
-        calc_df, equivalents = self.get_ratio_data('profitability')
+        ratio_data = self.get_ratio_data('profitability')
+        calc_df = ratio_data.calculation_df
 
         try:
             revenue, revenue_equiv = self._get_concept_value(StandardConcept.REVENUE, calc_df)
@@ -1080,14 +1123,19 @@ class FinancialRatios:
             - receivables_turnover
             - days_sales_outstanding
         """
-        calc_df, equivalents = self.get_ratio_data('efficiency')
+        ratio_data = self.get_ratio_data('efficiency')
+        calc_df = ratio_data.calculation_df
 
         try:
             revenue, revenue_equiv = self._get_concept_value(StandardConcept.REVENUE, calc_df)
             total_assets, assets_equiv = self._get_concept_value(StandardConcept.TOTAL_ASSETS, calc_df)
-            inventory, inventory_equiv = self._get_concept_value(StandardConcept.INVENTORY, calc_df)
             cogs, cogs_equiv = self._get_concept_value(StandardConcept.COST_OF_REVENUE, calc_df)
             receivables, receivables_equiv = self._get_concept_value(StandardConcept.ACCOUNTS_RECEIVABLE, calc_df)
+
+            inventory = None
+            inventory_equiv = None
+            if ratio_data.has_concept(StandardConcept.INVENTORY):
+                inventory, inventory_equiv = self._get_concept_value(StandardConcept.INVENTORY, calc_df)
 
             results = {}
 
@@ -1132,7 +1180,7 @@ class FinancialRatios:
                     name="Receivables Turnover",
                     description="Measures how quickly company collects receivables",
                     calculation_df=calc_df,
-                    results=turnover,
+                    results=turnover.to_frame().T,
                     components={
                         'revenue': revenue,
                         'receivables': receivables
@@ -1174,14 +1222,20 @@ class FinancialRatios:
             - interest_coverage
             - equity_multiplier
         """
-        calc_df, equivalents = self.get_ratio_data('leverage')
+        ratio_data = self.get_ratio_data('leverage')
+        calc_df = ratio_data.calculation_df
 
         try:
             total_debt, debt_equiv = self._get_concept_value(StandardConcept.LONG_TERM_DEBT, calc_df)
             total_equity, equity_equiv = self._get_concept_value(StandardConcept.TOTAL_EQUITY, calc_df)
             total_assets, assets_equiv = self._get_concept_value(StandardConcept.TOTAL_ASSETS, calc_df)
             operating_income, income_equiv = self._get_concept_value(StandardConcept.OPERATING_INCOME, calc_df)
-            interest_expense, interest_equiv = self._get_concept_value(StandardConcept.INTEREST_EXPENSE, calc_df)
+
+            interest_expense = None
+            interest_equiv = None
+            if ratio_data.has_concept(StandardConcept.INTEREST_EXPENSE):
+                interest_expense, interest_equiv = self._get_concept_value(
+                    StandardConcept.INTEREST_EXPENSE, calc_df)
 
             results = {}
 
