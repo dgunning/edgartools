@@ -506,6 +506,25 @@ class EntityData:
         else:
             return False
 
+    @cached_property
+    def is_bdc(self) -> bool:
+        """
+        Check if this entity is a Business Development Company.
+
+        BDCs are identified by having an 814-* file number in their filings.
+        The 814- prefix indicates registration under the Investment Company
+        Act of 1940 as a BDC.
+
+        Returns:
+            True if any filing has an 814-* file number, False otherwise.
+        """
+        file_numbers = self.filings.data['fileNumber']
+        for fn in file_numbers:
+            fn_str = fn.as_py()
+            if fn_str and fn_str.startswith('814-'):
+                return True
+        return False
+
     def __str__(self):
         return f"EntityData({self.name} [{self.cik}])"
 

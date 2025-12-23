@@ -44,6 +44,7 @@ from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_
 from edgar.financials import Financials, MultiFinancials
 from edgar.funds import FundClass, FundCompany, FundSeries, find_fund
 from edgar.funds.reports import NPORT_FORMS, FundReport
+from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
 
 # HTTP configuration functions for runtime SSL/proxy configuration
 from edgar.httpclient import configure_http, get_http_config
