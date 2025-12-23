@@ -4,11 +4,15 @@ SEC Filing Extraction Tool
 
 Extract sections from SEC filings and save as markdown.
 
+Supported forms: 10-K, 10-Q, 20-F, 8-K, 6-K
+
 Usage:
     python extract_filing.py AAPL 10-K --items "Item 1,Item 7,Item 8"
     python extract_filing.py MSFT 10-Q --items "Item 2" --notes
     python extract_filing.py TSLA 10-K --statements "IncomeStatement,BalanceSheet"
     python extract_filing.py GOOG 10-K --all
+    python extract_filing.py AAPL 8-K --items "Item 5.02"
+    python extract_filing.py AAPL 8-K --exhibits "EX-99" --filing-index 1
 """
 
 import argparse
@@ -23,6 +27,7 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  # 10-K / 10-Q extraction
   python extract_filing.py AAPL 10-K --items "Item 1,Item 7"
   python extract_filing.py MSFT 10-Q --items "Item 2" --notes
   python extract_filing.py TSLA 10-K --statements "IncomeStatement,BalanceSheet"
@@ -30,12 +35,29 @@ Examples:
   python extract_filing.py NVDA 10-K --all
   python extract_filing.py AAPL 10-K --list-items  # Show available items
 
+  # 8-K extraction
+  python extract_filing.py AAPL 8-K --items "Item 5.02"  # Officer changes
+  python extract_filing.py AAPL 8-K --items "Item 2.02"  # Earnings results
+  python extract_filing.py AAPL 8-K --exhibits "EX-99" --filing-index 1  # Press release
+  python extract_filing.py AAPL 8-K --exhibits "all" --filing-index 1    # All exhibits
+  python extract_filing.py AAPL 8-K --list-items  # Show all 8-K items
+
+  # 20-F extraction (foreign issuers)
+  python extract_filing.py NIO 20-F --items "Item 3D"  # Risk factors
+  python extract_filing.py BABA 20-F --items "Item 5"  # Operating review
+
 Available statement types:
   IncomeStatement, BalanceSheet, CashFlowStatement,
   StatementOfEquity, ComprehensiveIncome, CoverPage, AllStatements
 
 Available categories:
   Statements, Notes, Cover, Financial
+
+Common 8-K items:
+  Item 1.01 - Material Agreements    Item 2.02 - Earnings Results
+  Item 1.05 - Cybersecurity          Item 5.02 - Officer Changes
+  Item 7.01 - Regulation FD          Item 8.01 - Other Events
+  Item 9.01 - Exhibits
         """
     )
 
