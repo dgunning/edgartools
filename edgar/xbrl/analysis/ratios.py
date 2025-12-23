@@ -315,20 +315,47 @@ class FinancialRatios:
             - DataFrame with concepts as index and periods as columns
             - Dictionary mapping concepts to their equivalent descriptions if used
         """
-        # Get the set of periods available in each statement
+        def _normalize_period_label(label: object) -> Optional[str]:
+            if label is None:
+                return None
+            text = str(label)
+            if " (" in text:
+                text = text.split(" (", 1)[0]
+            return text
+
+        # Get the set of periods available in each statement (normalized)
         if optional_concepts is None:
             optional_concepts = []
-        available_periods = set()
+        available_periods: set[str] = set()
+        statement_names = [statement_type for _, statement_type in statement_dfs]
+        statement_period_maps: List[Dict[str, object]] = []
         for df, _ in statement_dfs:
-            # Get columns that are periods (exclude 'concept', 'label', etc)
-            period_cols = [col for col in df.columns if col in self.periods]
+            period_map: Dict[str, object] = {}
+            for col in df.columns:
+                if col in {"concept", "label", "level", "abstract", "dimension"}:
+                    continue
+                normalized = _normalize_period_label(col)
+                if normalized in self.periods and normalized not in period_map:
+                    period_map[normalized] = col
+
+            statement_period_maps.append(period_map)
+
+            period_cols = list(period_map.keys())
             if not available_periods:
                 available_periods = set(period_cols)
             else:
                 available_periods &= set(period_cols)
 
         if not available_periods:
-            raise ValueError("No common periods found across required statements")
+            periods_by_statement = {
+                name: sorted(list(period_map.keys()))
+                for name, period_map in zip(statement_names, statement_period_maps)
+            }
+            raise ValueError(
+                "No common periods found across required statements. "
+                f"Statements={statement_names}. "
+                f"Periods={periods_by_statement}"
+            )
 
         all_concepts = required_concepts + optional_concepts
         # Create empty DataFrame with only the common periods
@@ -343,14 +370,17 @@ class FinancialRatios:
             # First try to find matching company concepts from the mapping store
             if concept in self._mapping_store.mappings:
                 company_concepts = self._mapping_store.mappings[concept]
-                for df, _statement_type in statement_dfs:
+                for (df, _statement_type), period_map in zip(statement_dfs, statement_period_maps):
                     # Check each possible company concept
                     for company_concept in company_concepts:
                         mask = df['concept'] == company_concept
                         if mask.any():
                             matching_row = df[mask].iloc[0]
                             # Only copy values for available periods, clean blanks to NaN
-                            cleaned_row = _clean_series_data(matching_row[calc_df.columns])
+                            normalized_row = pd.Series(
+                                {period: matching_row[col] for period, col in period_map.items()}
+                            )
+                            cleaned_row = _clean_series_data(normalized_row.reindex(calc_df.columns))
                             calc_df.loc[concept] = cleaned_row
                             if not cleaned_row.isna().all():
                                 found = True
@@ -360,12 +390,15 @@ class FinancialRatios:
 
             # If not found via mappings, try direct concept match
             if not found:
-                for df, _statement_type in statement_dfs:
+                for (df, _statement_type), period_map in zip(statement_dfs, statement_period_maps):
                     mask = df['concept'] == concept
                     if mask.any():
                         matching_row = df[mask].iloc[0]
                         # Only copy values for available periods, clean blanks to NaN
-                        cleaned_row = _clean_series_data(matching_row[calc_df.columns])
+                        normalized_row = pd.Series(
+                            {period: matching_row[col] for period, col in period_map.items()}
+                        )
+                        cleaned_row = _clean_series_data(normalized_row.reindex(calc_df.columns))
                         calc_df.loc[concept] = cleaned_row
                         if not cleaned_row.isna().all():
                             found = True
@@ -373,14 +406,17 @@ class FinancialRatios:
 
             # If still not found, try matching by label
             if not found:
-                for df, _statement_type in statement_dfs:
+                for (df, _statement_type), period_map in zip(statement_dfs, statement_period_maps):
                     # Get label column if it exists
                     if 'label' in df.columns:
                         mask = df['label'].str.contains(concept, case=False, na=False)
                         if mask.any():
                             matching_row = df[mask].iloc[0]
                             # Only copy values for available periods, clean blanks to NaN
-                            cleaned_row = _clean_series_data(matching_row[calc_df.columns])
+                            normalized_row = pd.Series(
+                                {period: matching_row[col] for period, col in period_map.items()}
+                            )
+                            cleaned_row = _clean_series_data(normalized_row.reindex(calc_df.columns))
                             calc_df.loc[concept] = cleaned_row
                             if not cleaned_row.isna().all():
                                 found = True
@@ -409,7 +445,12 @@ class FinancialRatios:
                             continue
 
             if not found and concept not in optional_concepts:
-                raise KeyError(f"Could not find or calculate required concept: {concept}")
+                raise KeyError(
+                    "Could not find or calculate required concept. "
+                    f"Concept={concept}. "
+                    f"Statements={statement_names}. "
+                    f"Periods={sorted(available_periods)}"
+                )
 
         # Filter out None values from equivalents and ensure all values are strings
         filtered_equivalents = {k: str(v) for k, v in equivalents_used.items() if v is not None}
