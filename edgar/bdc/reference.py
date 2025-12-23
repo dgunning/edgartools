@@ -207,8 +207,9 @@ class BDCEntity:
         Check if this BDC has detailed investment data in its XBRL filings.
 
         Some BDCs provide detailed per-investment XBRL data in their Schedule
-        of Investments, while others only provide aggregate totals. This method
-        checks whether detailed data is available before attempting extraction.
+        of Investments, while others only provide aggregate totals or only
+        tag dividend income. This method checks whether useful per-investment
+        data (fair value, cost) is available for extraction.
 
         Args:
             form: The form type to check ('10-K' or '10-Q'). Defaults to '10-K'.
@@ -229,12 +230,23 @@ class BDCEntity:
             return False
 
         df = soi.to_dataframe()
-        # Check for InvestmentIdentifierAxis which indicates individual investments
-        has_individual = df['dimension_label'].str.contains(
-            'InvestmentIdentifierAxis', na=False
-        ).any()
 
-        return bool(has_individual)
+        # Check for InvestmentIdentifierAxis which indicates individual investments
+        has_identifier_axis = df['dimension_label'].str.contains(
+            'InvestmentIdentifierAxis', na=False
+        )
+
+        # Also check for useful data concepts (fair value or cost)
+        # Some BDCs only tag dividend income, which isn't useful for portfolio analysis
+        useful_concepts = ['InvestmentOwnedAtFairValue', 'InvestmentOwnedAtCost']
+        has_useful_concept = df['concept'].str.contains(
+            '|'.join(useful_concepts), na=False, regex=True
+        )
+
+        # Must have both identifier axis AND useful concepts on the same rows
+        has_detailed = (has_identifier_axis & has_useful_concept).any()
+
+        return bool(has_detailed)
 
 
 class BDCEntities:

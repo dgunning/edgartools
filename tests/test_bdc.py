@@ -738,6 +738,21 @@ class TestHasDetailedInvestments:
         # HTGC doesn't provide detailed per-investment XBRL data
         assert htgc.has_detailed_investments() is False
 
+    @pytest.mark.network
+    def test_blue_owl_has_no_detailed_investments(self):
+        """Test that Blue Owl has no detailed investment data.
+
+        Blue Owl tags InvestmentIdentifierAxis in XBRL but only for dividend
+        income data, not fair value or cost. This tests that we correctly
+        identify this as not having useful detailed investment data.
+        """
+        bdcs = get_bdc_list()
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
+
+        # Blue Owl only tags dividend income, not fair value/cost
+        assert blue_owl.has_detailed_investments() is False
+
 
 class TestIsActive:
     """Tests for is_active property and active filtering."""
