@@ -4,14 +4,19 @@ Tests for BDC (Business Development Company) functionality.
 import pytest
 
 from edgar import Company
+from decimal import Decimal
+
 from edgar.bdc import (
     BDCEntities,
     BDCEntity,
+    PortfolioInvestment,
+    PortfolioInvestments,
     fetch_bdc_report,
     get_active_bdc_ciks,
     get_bdc_list,
     is_bdc_cik,
 )
+from edgar.bdc.investments import _parse_investment_identifier
 
 
 class TestBDCReference:
@@ -285,3 +290,241 @@ class TestBDCIntegration:
         assert soi is not None
         assert hasattr(soi, 'to_dataframe')
         assert hasattr(soi, 'render')
+
+
+class TestPortfolioInvestment:
+    """Tests for PortfolioInvestment dataclass."""
+
+    def test_portfolio_investment_creation(self):
+        """Test creating PortfolioInvestment."""
+        inv = PortfolioInvestment(
+            identifier='Test Company, First lien senior secured loan',
+            company_name='Test Company',
+            investment_type='First lien senior secured loan',
+            fair_value=Decimal('1000000'),
+            cost=Decimal('950000'),
+            interest_rate=0.095,
+        )
+
+        assert inv.company_name == 'Test Company'
+        assert inv.investment_type == 'First lien senior secured loan'
+        assert inv.fair_value == Decimal('1000000')
+        assert inv.cost == Decimal('950000')
+        assert inv.interest_rate == 0.095
+
+    def test_portfolio_investment_unrealized_gain(self):
+        """Test unrealized gain/loss calculation."""
+        inv = PortfolioInvestment(
+            identifier='Test Company, Equity',
+            company_name='Test Company',
+            investment_type='Equity',
+            fair_value=Decimal('1200000'),
+            cost=Decimal('1000000'),
+        )
+
+        assert inv.unrealized_gain_loss == Decimal('200000')
+
+    def test_portfolio_investment_is_debt(self):
+        """Test is_debt property."""
+        loan = PortfolioInvestment(
+            identifier='Test, First lien senior secured loan',
+            company_name='Test',
+            investment_type='First lien senior secured loan',
+        )
+        assert loan.is_debt is True
+        assert loan.is_equity is False
+
+    def test_portfolio_investment_is_equity(self):
+        """Test is_equity property."""
+        equity = PortfolioInvestment(
+            identifier='Test, Common stock',
+            company_name='Test',
+            investment_type='Common stock',
+        )
+        assert equity.is_equity is True
+        assert equity.is_debt is False
+
+    def test_portfolio_investment_rich(self):
+        """Test PortfolioInvestment __rich__ returns Panel."""
+        from rich.panel import Panel
+
+        inv = PortfolioInvestment(
+            identifier='Test Company, First lien senior secured loan',
+            company_name='Test Company',
+            investment_type='First lien senior secured loan',
+            fair_value=Decimal('1000000'),
+            cost=Decimal('950000'),
+        )
+
+        rich_output = inv.__rich__()
+        assert isinstance(rich_output, Panel)
+
+
+class TestPortfolioInvestments:
+    """Tests for PortfolioInvestments collection."""
+
+    def test_portfolio_investments_totals(self):
+        """Test total calculations."""
+        investments = PortfolioInvestments([
+            PortfolioInvestment(
+                identifier='Company A, Loan',
+                company_name='Company A',
+                investment_type='Loan',
+                fair_value=Decimal('1000000'),
+                cost=Decimal('900000'),
+            ),
+            PortfolioInvestment(
+                identifier='Company B, Equity',
+                company_name='Company B',
+                investment_type='Equity',
+                fair_value=Decimal('500000'),
+                cost=Decimal('400000'),
+            ),
+        ])
+
+        assert investments.total_fair_value == Decimal('1500000')
+        assert investments.total_cost == Decimal('1300000')
+        assert investments.total_unrealized_gain_loss == Decimal('200000')
+
+    def test_portfolio_investments_filter(self):
+        """Test filtering investments."""
+        investments = PortfolioInvestments([
+            PortfolioInvestment(
+                identifier='Company A, First lien loan',
+                company_name='Company A',
+                investment_type='First lien loan',
+            ),
+            PortfolioInvestment(
+                identifier='Company B, Second lien loan',
+                company_name='Company B',
+                investment_type='Second lien loan',
+            ),
+            PortfolioInvestment(
+                identifier='Company C, Equity',
+                company_name='Company C',
+                investment_type='Equity',
+            ),
+        ])
+
+        # Filter by investment type
+        loans = investments.filter(investment_type='lien')
+        assert len(loans) == 2
+
+        # Filter by company name
+        company_a = investments.filter(company_name='Company A')
+        assert len(company_a) == 1
+
+    def test_portfolio_investments_to_dataframe(self):
+        """Test converting to DataFrame."""
+        investments = PortfolioInvestments([
+            PortfolioInvestment(
+                identifier='Test, Loan',
+                company_name='Test',
+                investment_type='Loan',
+                fair_value=Decimal('1000000'),
+            ),
+        ])
+
+        df = investments.to_dataframe()
+        assert 'company_name' in df.columns
+        assert 'investment_type' in df.columns
+        assert 'fair_value' in df.columns
+        assert len(df) == 1
+
+    def test_portfolio_investments_rich(self):
+        """Test PortfolioInvestments __rich__ returns Panel."""
+        from rich.panel import Panel
+
+        investments = PortfolioInvestments([
+            PortfolioInvestment(
+                identifier='Test, Loan',
+                company_name='Test',
+                investment_type='Loan',
+                fair_value=Decimal('1000000'),
+                cost=Decimal('900000'),
+            ),
+        ])
+
+        rich_output = investments.__rich__()
+        assert isinstance(rich_output, Panel)
+
+
+class TestInvestmentIdentifierParsing:
+    """Tests for investment identifier parsing."""
+
+    def test_parse_first_lien_loan(self):
+        """Test parsing first lien loan identifier."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Acme Corp, First lien senior secured loan'
+        )
+        assert company == 'Acme Corp'
+        assert 'First lien' in inv_type
+
+    def test_parse_equity(self):
+        """Test parsing equity identifier."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Test Holdings LLC, Common stock'
+        )
+        assert company == 'Test Holdings LLC'
+        assert inv_type == 'Common stock'
+
+    def test_parse_numbered_loan(self):
+        """Test parsing numbered loan identifier."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Big Company Inc., First lien senior secured loan 2'
+        )
+        assert company == 'Big Company Inc.'
+        assert 'First lien' in inv_type
+
+    def test_parse_complex_company_name(self):
+        """Test parsing with complex company names containing commas."""
+        # Company name with ampersand
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Smith & Jones LLC, Equity'
+        )
+        assert company == 'Smith & Jones LLC'
+        assert inv_type == 'Equity'
+
+
+class TestPortfolioInvestmentsIntegration:
+    """Integration tests for portfolio investments."""
+
+    @pytest.mark.network
+    def test_bdc_entity_portfolio_investments(self):
+        """Test BDCEntity.portfolio_investments() method."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        investments = arcc.portfolio_investments()
+        # ARCC should have portfolio investments
+        assert investments is not None
+        assert len(investments) > 100  # ARCC has hundreds of investments
+
+    @pytest.mark.network
+    def test_portfolio_investments_has_fair_values(self):
+        """Test that portfolio investments have fair values."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        investments = arcc.portfolio_investments()
+        assert investments is not None
+
+        # Total fair value should be significant (billions for ARCC)
+        assert investments.total_fair_value > Decimal('1000000000')
+
+    @pytest.mark.network
+    def test_portfolio_investments_filter_by_type(self):
+        """Test filtering portfolio investments by type."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        investments = arcc.portfolio_investments()
+        assert investments is not None
+
+        # Filter to first lien loans
+        first_lien = investments.filter(investment_type='First lien')
+        assert len(first_lien) > 0
+        assert len(first_lien) < len(investments)

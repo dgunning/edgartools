@@ -10,6 +10,7 @@ Key Features:
 - Access the authoritative SEC BDC Report listing all BDCs
 - Check if a company is a BDC via CIK lookup
 - Get lists of active BDCs
+- Parse individual portfolio investments from Schedule of Investments
 
 Example usage:
     >>> from edgar.bdc import get_bdc_list, is_bdc_cik
@@ -18,7 +19,17 @@ Example usage:
     176
     >>> is_bdc_cik(1287750)  # ARCC (Ares Capital)
     True
+
+    # Get portfolio investments
+    >>> arcc = next(b for b in bdcs if b.cik == 1287750)
+    >>> investments = arcc.portfolio_investments()
+    >>> len(investments)
+    450
 """
+from edgar.bdc.investments import (
+    PortfolioInvestment,
+    PortfolioInvestments,
+)
 from edgar.bdc.reference import (
     BDCEntities,
     BDCEntity,
@@ -32,6 +43,8 @@ from edgar.bdc.reference import (
 __all__ = [
     'BDCEntities',
     'BDCEntity',
+    'PortfolioInvestment',
+    'PortfolioInvestments',
     'fetch_bdc_report',
     'get_active_bdc_ciks',
     'get_bdc_list',

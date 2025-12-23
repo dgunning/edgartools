@@ -1,0 +1,456 @@
+"""
+BDC Portfolio Investment data models.
+
+This module provides structured access to individual investment holdings
+from a BDC's Schedule of Investments (SOI).
+"""
+import re
+from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
+from typing import Optional
+
+import pandas as pd
+from rich import box
+from rich.panel import Panel
+from rich.table import Table
+
+from edgar.richtools import repr_rich
+
+__all__ = [
+    'PortfolioInvestment',
+    'PortfolioInvestments',
+]
+
+# XBRL concepts for investment data
+CONCEPT_FAIR_VALUE = 'us-gaap_InvestmentOwnedAtFairValue'
+CONCEPT_COST = 'us-gaap_InvestmentOwnedAtCost'
+CONCEPT_PRINCIPAL = 'us-gaap_InvestmentOwnedBalancePrincipalAmount'
+CONCEPT_SHARES = 'us-gaap_InvestmentOwnedBalanceShares'
+CONCEPT_INTEREST_RATE = 'us-gaap_InvestmentInterestRate'
+CONCEPT_SPREAD = 'us-gaap_InvestmentBasisSpreadVariableRate'
+CONCEPT_PCT_NET_ASSETS = 'us-gaap_InvestmentOwnedPercentOfNetAssets'
+
+# Known investment types for parsing (order matters - more specific first)
+INVESTMENT_TYPES = [
+    # Loans - most specific first
+    'First lien senior secured revolving loan',
+    'First lien senior secured delayed draw term loan',
+    'First lien senior secured term loan',
+    'First lien senior secured loan',
+    'Second lien senior secured loan',
+    'Senior secured revolving loan',
+    'Senior secured term loan',
+    'Senior secured loan',
+    'Senior subordinated loan',
+    'Junior secured loan',
+    'Subordinated certificate',
+    'Subordinated debt',
+    'Subordinated loan',
+    'Subordinated note',
+    'Unsecured debt',
+    'Unsecured loan',
+    'Mezzanine debt',
+    'Mezzanine loan',
+    'Term loan',
+    'Revolver',
+    'Revolving loan',
+    # Preferred
+    'Series A-1 preferred units',
+    'Series A preferred units',
+    'Series A preferred shares',
+    'Series B preferred units',
+    'Series B preferred shares',
+    'Series C preferred shares',
+    'Preferred shares',
+    'Preferred stock',
+    'Preferred units',
+    'Preferred equity',
+    # Common equity
+    'Class A common units',
+    'Class B common units',
+    'Common units',
+    'Common stock',
+    'Common shares',
+    'Common equity',
+    # Other equity
+    'LLC units',
+    'LLC interest',
+    'LP units',
+    'LP interest',
+    'Membership units',
+    'Membership interest',
+    'Member interest',
+    'Partnership interest',
+    'Equity interest',
+    'Equity',
+    'Warrants',
+    'Options',
+    # Series units
+    'Series A units',
+    'Series B units',
+    'Series C units',
+    # Class interests
+    'Class A common interest',
+    'Class B common interest',
+    'Class A preferred units',
+    'Class B preferred units',
+    # Certificates
+    'Subordinated certificates',
+    'Senior certificates',
+    'Certificates',
+]
+
+
+def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
+    """
+    Parse the dimension label to extract company name and investment type.
+
+    Args:
+        dimension_label: The full dimension label, e.g.,
+            "us-gaap:InvestmentIdentifierAxis: Company Name, First lien senior secured loan"
+
+    Returns:
+        Tuple of (identifier, company_name, investment_type)
+    """
+    # Strip the axis prefix
+    identifier = dimension_label
+    if ':' in dimension_label:
+        parts = dimension_label.split(': ', 1)
+        if len(parts) > 1:
+            identifier = parts[1].strip()
+
+    # Try to match known investment types (case-insensitive)
+    company_name = identifier
+    investment_type = "Unknown"
+
+    for inv_type in INVESTMENT_TYPES:
+        # Look for the investment type at the end, preceded by comma
+        pattern = rf',\s*{re.escape(inv_type)}(\s*\d*)?$'
+        match = re.search(pattern, identifier, re.IGNORECASE)
+        if match:
+            company_name = identifier[:match.start()].strip()
+            investment_type = identifier[match.start() + 1:].strip()
+            break
+
+    return identifier, company_name, investment_type
+
+
+@dataclass(frozen=True)
+class PortfolioInvestment:
+    """
+    A single investment holding from a BDC's Schedule of Investments.
+
+    Represents an individual investment in a portfolio company, including
+    debt instruments (loans) and equity positions.
+    """
+    identifier: str  # Full investment identifier
+    company_name: str  # Parsed company name
+    investment_type: str  # Type of investment (loan, equity, etc.)
+    fair_value: Optional[Decimal] = None
+    cost: Optional[Decimal] = None
+    principal_amount: Optional[Decimal] = None
+    shares: Optional[int] = None
+    interest_rate: Optional[float] = None
+    spread: Optional[float] = None
+    percent_of_net_assets: Optional[float] = None
+
+    @property
+    def unrealized_gain_loss(self) -> Optional[Decimal]:
+        """Calculate unrealized gain/loss (fair value - cost)."""
+        if self.fair_value is not None and self.cost is not None:
+            return self.fair_value - self.cost
+        return None
+
+    @property
+    def is_debt(self) -> bool:
+        """Check if this is a debt investment."""
+        debt_types = ['loan', 'debt', 'mezzanine']
+        return any(t in self.investment_type.lower() for t in debt_types)
+
+    @property
+    def is_equity(self) -> bool:
+        """Check if this is an equity investment."""
+        equity_types = ['equity', 'stock', 'shares', 'warrants', 'units', 'membership']
+        return any(t in self.investment_type.lower() for t in equity_types)
+
+    def __rich__(self):
+        table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
+        table.add_column("Field", style="dim")
+        table.add_column("Value")
+
+        table.add_row("Type", self.investment_type)
+
+        if self.fair_value is not None:
+            table.add_row("Fair Value", f"${self.fair_value:,.0f}")
+        if self.cost is not None:
+            table.add_row("Cost", f"${self.cost:,.0f}")
+        if self.unrealized_gain_loss is not None:
+            gain_loss = self.unrealized_gain_loss
+            style = "green" if gain_loss >= 0 else "red"
+            table.add_row("Unrealized G/L", f"[{style}]${gain_loss:,.0f}[/{style}]")
+        if self.principal_amount is not None:
+            table.add_row("Principal", f"${self.principal_amount:,.0f}")
+        if self.shares is not None:
+            table.add_row("Shares", f"{self.shares:,}")
+        if self.interest_rate is not None:
+            table.add_row("Interest Rate", f"{self.interest_rate:.2%}")
+        if self.spread is not None:
+            table.add_row("Spread", f"{self.spread:.2%}")
+        if self.percent_of_net_assets is not None:
+            table.add_row("% of Net Assets", f"{self.percent_of_net_assets:.2%}")
+
+        return Panel(
+            table,
+            title=self.company_name,
+            subtitle=self.investment_type,
+            border_style="blue",
+            width=80
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+class PortfolioInvestments:
+    """
+    A collection of portfolio investments from a BDC's Schedule of Investments.
+
+    Provides filtering, aggregation, and display capabilities for BDC holdings.
+    """
+
+    def __init__(self, investments: list[PortfolioInvestment]):
+        self._investments = investments
+
+    def __len__(self) -> int:
+        return len(self._investments)
+
+    def __getitem__(self, item) -> PortfolioInvestment:
+        return self._investments[item]
+
+    def __iter__(self):
+        return iter(self._investments)
+
+    @property
+    def total_fair_value(self) -> Decimal:
+        """Total fair value of all investments."""
+        return sum(
+            (inv.fair_value for inv in self._investments if inv.fair_value is not None),
+            Decimal(0)
+        )
+
+    @property
+    def total_cost(self) -> Decimal:
+        """Total cost basis of all investments."""
+        return sum(
+            (inv.cost for inv in self._investments if inv.cost is not None),
+            Decimal(0)
+        )
+
+    @property
+    def total_unrealized_gain_loss(self) -> Decimal:
+        """Total unrealized gain/loss across all investments."""
+        return self.total_fair_value - self.total_cost
+
+    def filter(
+        self,
+        investment_type: Optional[str] = None,
+        company_name: Optional[str] = None,
+        min_fair_value: Optional[Decimal] = None,
+    ) -> 'PortfolioInvestments':
+        """
+        Filter investments by criteria.
+
+        Args:
+            investment_type: Filter by investment type (partial match, case-insensitive)
+            company_name: Filter by company name (partial match, case-insensitive)
+            min_fair_value: Minimum fair value threshold
+
+        Returns:
+            New PortfolioInvestments with matching investments
+        """
+        investments = self._investments
+
+        if investment_type:
+            investments = [
+                inv for inv in investments
+                if investment_type.lower() in inv.investment_type.lower()
+            ]
+
+        if company_name:
+            investments = [
+                inv for inv in investments
+                if company_name.lower() in inv.company_name.lower()
+            ]
+
+        if min_fair_value is not None:
+            investments = [
+                inv for inv in investments
+                if inv.fair_value is not None and inv.fair_value >= min_fair_value
+            ]
+
+        return PortfolioInvestments(investments)
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Convert to pandas DataFrame."""
+        return pd.DataFrame([
+            {
+                'company_name': inv.company_name,
+                'investment_type': inv.investment_type,
+                'fair_value': float(inv.fair_value) if inv.fair_value else None,
+                'cost': float(inv.cost) if inv.cost else None,
+                'principal_amount': float(inv.principal_amount) if inv.principal_amount else None,
+                'shares': inv.shares,
+                'interest_rate': inv.interest_rate,
+                'spread': inv.spread,
+                'percent_of_net_assets': inv.percent_of_net_assets,
+            }
+            for inv in self._investments
+        ])
+
+    def __rich__(self):
+        table = Table(
+            title="Portfolio Investments",
+            box=box.SIMPLE,
+            show_header=True,
+            header_style="bold",
+            row_styles=["", "dim"],
+        )
+        table.add_column("#", justify="right", style="dim")
+        table.add_column("Company", style="bold", max_width=40)
+        table.add_column("Type", max_width=30)
+        table.add_column("Fair Value", justify="right")
+        table.add_column("Cost", justify="right")
+        table.add_column("Rate", justify="right")
+
+        # Show first 30 investments
+        for idx, inv in enumerate(self._investments[:30]):
+            fair_value = f"${inv.fair_value:,.0f}" if inv.fair_value else ""
+            cost = f"${inv.cost:,.0f}" if inv.cost else ""
+            rate = f"{inv.interest_rate:.2%}" if inv.interest_rate else ""
+
+            table.add_row(
+                str(idx),
+                inv.company_name[:40],
+                inv.investment_type[:30],
+                fair_value,
+                cost,
+                rate,
+            )
+
+        if len(self._investments) > 30:
+            table.add_row("...", "...", "...", "...", "...", "...")
+
+        # Summary
+        summary = Table(box=box.SIMPLE, show_header=False)
+        summary.add_column("Metric", style="dim")
+        summary.add_column("Value", style="bold")
+        summary.add_row("Total Investments", str(len(self._investments)))
+        summary.add_row("Total Fair Value", f"${self.total_fair_value:,.0f}")
+        summary.add_row("Total Cost", f"${self.total_cost:,.0f}")
+
+        gain_loss = self.total_unrealized_gain_loss
+        style = "green" if gain_loss >= 0 else "red"
+        summary.add_row("Unrealized G/L", f"[{style}]${gain_loss:,.0f}[/{style}]")
+
+        from rich.console import Group
+        return Panel(
+            Group(table, summary),
+            title="BDC Portfolio Investments",
+            border_style="blue",
+            expand=False,
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    @classmethod
+    def from_statement(cls, statement, period: Optional[str] = None) -> 'PortfolioInvestments':
+        """
+        Create PortfolioInvestments from an XBRL Schedule of Investments Statement.
+
+        Args:
+            statement: The Statement from xbrl.statements.schedule_of_investments()
+            period: Optional period column (e.g., '2024-12-31'). If None, uses latest.
+
+        Returns:
+            PortfolioInvestments collection
+        """
+        df = statement.to_dataframe()
+
+        # Find the period column to use
+        if period is None:
+            # Find date columns (exclude metadata columns)
+            date_cols = [
+                col for col in df.columns
+                if re.match(r'\d{4}-\d{2}-\d{2}', str(col))
+            ]
+            if not date_cols:
+                return cls([])
+            # Use the latest (first) date column
+            period = date_cols[0]
+
+        # Filter to rows with values and dimension labels
+        mask = (
+            df[period].notna() &
+            df['dimension_label'].notna() &
+            df['dimension_label'].str.contains('InvestmentIdentifierAxis', na=False)
+        )
+        data = df[mask].copy()
+
+        if data.empty:
+            return cls([])
+
+        # Group by dimension_label and pivot concepts
+        investments = {}
+        for _, row in data.iterrows():
+            dim_label = row['dimension_label']
+            concept = row['concept']
+            value = row[period]
+
+            if dim_label not in investments:
+                identifier, company_name, inv_type = _parse_investment_identifier(dim_label)
+                investments[dim_label] = {
+                    'identifier': identifier,
+                    'company_name': company_name,
+                    'investment_type': inv_type,
+                }
+
+            # Map concept to field
+            inv = investments[dim_label]
+
+            # Skip empty or invalid values
+            if pd.isna(value) or value == '':
+                continue
+
+            try:
+                if concept == CONCEPT_FAIR_VALUE:
+                    inv['fair_value'] = Decimal(str(value))
+                elif concept == CONCEPT_COST:
+                    inv['cost'] = Decimal(str(value))
+                elif concept == CONCEPT_PRINCIPAL:
+                    inv['principal_amount'] = Decimal(str(value))
+                elif concept == CONCEPT_SHARES:
+                    inv['shares'] = int(float(value))
+                elif concept == CONCEPT_INTEREST_RATE:
+                    inv['interest_rate'] = float(value)
+                elif concept == CONCEPT_SPREAD:
+                    inv['spread'] = float(value)
+                elif concept == CONCEPT_PCT_NET_ASSETS:
+                    inv['percent_of_net_assets'] = float(value)
+            except (ValueError, TypeError, InvalidOperation):
+                # Skip values that can't be converted
+                pass
+
+        # Create PortfolioInvestment objects
+        portfolio = [
+            PortfolioInvestment(**inv_data)
+            for inv_data in investments.values()
+        ]
+
+        # Sort by fair value (largest first)
+        portfolio.sort(
+            key=lambda x: x.fair_value if x.fair_value is not None else Decimal(0),
+            reverse=True
+        )
+
+        return cls(portfolio)

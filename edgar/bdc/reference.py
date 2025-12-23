@@ -143,6 +143,37 @@ class BDCEntity:
 
         return xbrl.statements.schedule_of_investments()
 
+    def portfolio_investments(self, form: str = "10-K"):
+        """
+        Get individual portfolio investments from the latest filing.
+
+        Parses the Schedule of Investments XBRL data to extract individual
+        investment holdings with fair value, cost, interest rate, etc.
+
+        Args:
+            form: The form type to use ('10-K' or '10-Q'). Defaults to '10-K'.
+
+        Returns:
+            PortfolioInvestments collection, or None if not available.
+
+        Example:
+            >>> arcc = get_bdc_list()[0]
+            >>> investments = arcc.portfolio_investments()
+            >>> len(investments)
+            450
+            >>> investments.total_fair_value
+            Decimal('25000000000')
+            >>> investments.filter(investment_type='First lien')
+            PortfolioInvestments with first lien loans
+        """
+        from edgar.bdc.investments import PortfolioInvestments
+
+        soi = self.schedule_of_investments(form=form)
+        if soi is None:
+            return None
+
+        return PortfolioInvestments.from_statement(soi)
+
 
 class BDCEntities:
     """
