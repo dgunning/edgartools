@@ -195,6 +195,11 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     """
     Parse the dimension label to extract company name and investment type.
 
+    Handles multiple formats:
+    1. ARCC format: "Company Name, First lien senior secured loan"
+    2. HTGC format: "Debt Investments Software and Armis, Inc., Senior Secured, Maturity Date..."
+    3. Category rollups: "Debt Investments Software (52.80%)" - treated as Unknown type
+
     Args:
         dimension_label: The full dimension label, e.g.,
             "us-gaap:InvestmentIdentifierAxis: Company Name, First lien senior secured loan"
@@ -209,10 +214,15 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
         if len(parts) > 1:
             identifier = parts[1].strip()
 
-    # Try to match known investment types (case-insensitive)
+    # Check for category rollup pattern (e.g., "Debt Investments Software (52.80%)")
+    # These should be excluded as they're not individual investments
+    if re.search(r'\(\d+\.\d+%\)\s*$', identifier):
+        return identifier, identifier, "Unknown"
+
     company_name = identifier
     investment_type = "Unknown"
 
+    # Try standard format first (investment type at end)
     for inv_type in INVESTMENT_TYPES:
         # Look for the investment type at the end, preceded by comma
         # Support optional numeric suffixes like "1", "2", "1.1", "2.1"
@@ -221,7 +231,24 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
         if match:
             company_name = identifier[:match.start()].strip()
             investment_type = identifier[match.start() + 1:].strip()
-            break
+            return identifier, company_name, investment_type
+
+    # Try HTGC format: "Debt Investments [Industry] and [Company], Senior Secured, ..."
+    # Look for ", Senior Secured" anywhere in the string
+    htgc_match = re.search(r',\s*(Senior Secured)\s*,', identifier, re.IGNORECASE)
+    if htgc_match:
+        investment_type = "Senior Secured"
+        # Extract company name - look for " and " before "Senior Secured"
+        and_match = re.search(r'\s+and\s+(.+?)(?:,\s*Senior Secured)', identifier, re.IGNORECASE)
+        if and_match:
+            company_name = and_match.group(1).strip()
+        return identifier, company_name, investment_type
+
+    # Check for patterns like "Total [Company]" which are rollups
+    if identifier.startswith('Total ') or identifier.startswith('Investments ') or \
+       identifier.startswith('Investment Fund ') or identifier.startswith('Debt Investments (') or \
+       identifier.startswith('Equity Investments ('):
+        return identifier, identifier, "Unknown"
 
     return identifier, company_name, investment_type
 
@@ -641,6 +668,131 @@ class PortfolioInvestments:
 
         # Filter out Unknown types unless include_untyped is True
         # Unknown types are typically company-level rollups that inflate totals
+        if not include_untyped:
+            portfolio = [inv for inv in portfolio if inv.investment_type != "Unknown"]
+
+        # Sort by fair value (largest first)
+        portfolio.sort(
+            key=lambda x: x.fair_value if x.fair_value is not None else Decimal(0),
+            reverse=True
+        )
+
+        return cls(portfolio, period=period)
+
+    @classmethod
+    def from_xbrl(
+        cls,
+        xbrl,
+        period: Optional[str] = None,
+        include_untyped: bool = False
+    ) -> 'PortfolioInvestments':
+        """
+        Create PortfolioInvestments directly from XBRL facts.
+
+        This method extracts investment data directly from XBRL facts using the
+        dimension columns (dim_*), which works for BDCs that have dimensional
+        investment data in facts but not in the Statement presentation hierarchy.
+
+        Args:
+            xbrl: The XBRL object from filing.xbrl()
+            period: Optional period (e.g., '2024-12-31'). If None, uses latest instant.
+            include_untyped: If False (default), excludes investments with "Unknown" type.
+
+        Returns:
+            PortfolioInvestments collection
+        """
+        all_facts = xbrl.facts.get_facts()
+
+        # Determine the period to use
+        if period is None:
+            # Find the latest instant period with fair value data
+            fv_facts = [
+                f for f in all_facts
+                if f.get('concept') == 'us-gaap:InvestmentOwnedAtFairValue'
+                and f.get('period_type') == 'instant'
+            ]
+            if not fv_facts:
+                return cls([], period=None)
+
+            # Get unique periods and use the latest
+            periods = set(f.get('period_instant') for f in fv_facts if f.get('period_instant'))
+            if not periods:
+                return cls([], period=None)
+            period = max(periods)
+
+        # The dimension key for investment identifier
+        dim_key = 'dim_us-gaap_InvestmentIdentifierAxis'
+
+        # Filter facts to the target period with investment dimension
+        period_key = f'instant_{period}'
+
+        # Collect all relevant concepts for the period
+        relevant_concepts = {
+            'us-gaap:InvestmentOwnedAtFairValue': 'fair_value',
+            'us-gaap:InvestmentOwnedAtCost': 'cost',
+            'us-gaap:InvestmentOwnedBalancePrincipalAmount': 'principal_amount',
+            'us-gaap:InvestmentOwnedBalanceShares': 'shares',
+            'us-gaap:InvestmentInterestRate': 'interest_rate',
+            'us-gaap:InvestmentInterestRatePaidInKind': 'pik_rate',
+            'us-gaap:InvestmentBasisSpreadVariableRate': 'spread',
+            'us-gaap:InvestmentOwnedPercentOfNetAssets': 'percent_of_net_assets',
+        }
+
+        # Group facts by investment identifier
+        investments = {}
+        for fact in all_facts:
+            # Check if this is a relevant concept
+            concept = fact.get('concept')
+            if concept not in relevant_concepts:
+                continue
+
+            # Check for investment dimension
+            inv_identifier = fact.get(dim_key)
+            if not inv_identifier:
+                continue
+
+            # Check period matches
+            fact_period = fact.get('period_instant')
+            if fact_period != period:
+                continue
+
+            # Initialize investment if needed
+            if inv_identifier not in investments:
+                # Parse the identifier to get company name and type
+                # Format: "us-gaap:InvestmentIdentifierAxis: Company Name, Investment Type"
+                # But here we just have the member value, not the axis prefix
+                full_label = f"us-gaap:InvestmentIdentifierAxis: {inv_identifier}"
+                identifier, company_name, inv_type = _parse_investment_identifier(full_label)
+                investments[inv_identifier] = {
+                    'identifier': identifier,
+                    'company_name': company_name,
+                    'investment_type': inv_type,
+                }
+
+            # Map the value to the appropriate field
+            field_name = relevant_concepts[concept]
+            value = fact.get('numeric_value') or fact.get('value')
+
+            if value is None or pd.isna(value):
+                continue
+
+            try:
+                if field_name in ('fair_value', 'cost', 'principal_amount'):
+                    investments[inv_identifier][field_name] = Decimal(str(value))
+                elif field_name == 'shares':
+                    investments[inv_identifier][field_name] = int(float(value))
+                elif field_name in ('interest_rate', 'pik_rate', 'spread', 'percent_of_net_assets'):
+                    investments[inv_identifier][field_name] = float(value)
+            except (ValueError, TypeError, InvalidOperation):
+                pass
+
+        # Create PortfolioInvestment objects
+        portfolio = [
+            PortfolioInvestment(**inv_data)
+            for inv_data in investments.values()
+        ]
+
+        # Filter out Unknown types unless include_untyped is True
         if not include_untyped:
             portfolio = [inv for inv in portfolio if inv.investment_type != "Unknown"]
 

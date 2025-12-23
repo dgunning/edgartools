@@ -729,29 +729,40 @@ class TestHasDetailedInvestments:
         assert arcc.has_detailed_investments() is True
 
     @pytest.mark.network
-    def test_htgc_has_no_detailed_investments(self):
-        """Test that HTGC (Hercules) has no detailed investment data."""
+    def test_htgc_has_detailed_investments(self):
+        """Test that HTGC (Hercules) has detailed investment data.
+
+        HTGC uses a different format: "Debt Investments [Industry] and [Company], Senior Secured, ..."
+        The from_xbrl method extracts these by looking at dimensional facts.
+        """
         bdcs = get_bdc_list()
         htgc = next((b for b in bdcs if 'hercules' in b.name.lower()), None)
         assert htgc is not None
 
-        # HTGC doesn't provide detailed per-investment XBRL data
-        assert htgc.has_detailed_investments() is False
+        assert htgc.has_detailed_investments() is True
+
+        # Verify we can extract investments
+        investments = htgc.portfolio_investments()
+        assert investments is not None
+        assert len(investments) > 50  # HTGC has ~116 investments
 
     @pytest.mark.network
-    def test_blue_owl_has_no_detailed_investments(self):
-        """Test that Blue Owl has no detailed investment data.
+    def test_blue_owl_has_detailed_investments(self):
+        """Test that Blue Owl has detailed investment data.
 
-        Blue Owl tags InvestmentIdentifierAxis in XBRL but only for dividend
-        income data, not fair value or cost. This tests that we correctly
-        identify this as not having useful detailed investment data.
+        Blue Owl's investment data is in dimensional facts (dim_us-gaap_InvestmentIdentifierAxis)
+        rather than in the Statement presentation hierarchy. The from_xbrl method extracts these.
         """
         bdcs = get_bdc_list()
         blue_owl = bdcs.get_by_cik(1812554)
         assert blue_owl is not None
 
-        # Blue Owl only tags dividend income, not fair value/cost
-        assert blue_owl.has_detailed_investments() is False
+        assert blue_owl.has_detailed_investments() is True
+
+        # Verify we can extract investments
+        investments = blue_owl.portfolio_investments()
+        assert investments is not None
+        assert len(investments) > 100  # Blue Owl has ~468 investments
 
 
 class TestIsActive:

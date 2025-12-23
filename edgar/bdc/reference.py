@@ -175,6 +175,14 @@ class BDCEntity:
         Parses the Schedule of Investments XBRL data to extract individual
         investment holdings with fair value, cost, interest rate, etc.
 
+        This method tries two extraction approaches:
+        1. Statement-based: Uses the XBRL presentation hierarchy
+        2. Facts-based: Extracts directly from XBRL facts with dimensions
+
+        Some BDCs (like Blue Owl) have dimensional investment data in facts
+        but not in the Statement presentation hierarchy, so both approaches
+        are attempted.
+
         Args:
             form: The form type to use ('10-K' or '10-Q'). Defaults to '10-K'.
             include_untyped: If False (default), excludes investments with "Unknown"
@@ -196,7 +204,23 @@ class BDCEntity:
         """
         from edgar.bdc.investments import PortfolioInvestments
 
-        soi = self.schedule_of_investments(form=form)
+        # Get XBRL for the filing
+        company = self.get_company()
+        filings = company.get_filings(form=form, amendments=False)
+        if len(filings) == 0:
+            return None
+
+        xbrl = filings[0].xbrl()
+        if xbrl is None:
+            return None
+
+        # Try facts-based extraction first (works for more BDCs)
+        investments = PortfolioInvestments.from_xbrl(xbrl, include_untyped=include_untyped)
+        if len(investments) > 0:
+            return investments
+
+        # Fall back to statement-based extraction
+        soi = xbrl.statements.schedule_of_investments()
         if soi is None:
             return None
 
@@ -210,6 +234,8 @@ class BDCEntity:
         of Investments, while others only provide aggregate totals or only
         tag dividend income. This method checks whether useful per-investment
         data (fair value, cost) is available for extraction.
+
+        Checks both statement-based and facts-based sources.
 
         Args:
             form: The form type to check ('10-K' or '10-Q'). Defaults to '10-K'.
@@ -225,28 +251,30 @@ class BDCEntity:
             >>> htgc.has_detailed_investments()
             False
         """
-        soi = self.schedule_of_investments(form=form)
-        if soi is None:
+        # Get XBRL for the filing
+        company = self.get_company()
+        filings = company.get_filings(form=form, amendments=False)
+        if len(filings) == 0:
             return False
 
-        df = soi.to_dataframe()
+        xbrl = filings[0].xbrl()
+        if xbrl is None:
+            return False
 
-        # Check for InvestmentIdentifierAxis which indicates individual investments
-        has_identifier_axis = df['dimension_label'].str.contains(
-            'InvestmentIdentifierAxis', na=False
-        )
+        # Check facts-based data (more reliable)
+        all_facts = xbrl.facts.get_facts()
+        dim_key = 'dim_us-gaap_InvestmentIdentifierAxis'
+        useful_concepts = {'us-gaap:InvestmentOwnedAtFairValue', 'us-gaap:InvestmentOwnedAtCost'}
 
-        # Also check for useful data concepts (fair value or cost)
-        # Some BDCs only tag dividend income, which isn't useful for portfolio analysis
-        useful_concepts = ['InvestmentOwnedAtFairValue', 'InvestmentOwnedAtCost']
-        has_useful_concept = df['concept'].str.contains(
-            '|'.join(useful_concepts), na=False, regex=True
-        )
+        for fact in all_facts:
+            concept = fact.get('concept', '')
+            has_dim = fact.get(dim_key) is not None
+            is_useful = concept in useful_concepts
 
-        # Must have both identifier axis AND useful concepts on the same rows
-        has_detailed = (has_identifier_axis & has_useful_concept).any()
+            if has_dim and is_useful:
+                return True
 
-        return bool(has_detailed)
+        return False
 
 
 class BDCEntities:
