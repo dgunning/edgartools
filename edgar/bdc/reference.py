@@ -85,6 +85,64 @@ class BDCEntity:
         from edgar.richtools import repr_rich
         return repr_rich(self.__rich__())
 
+    def get_company(self):
+        """
+        Get the Company object for this BDC.
+
+        Returns:
+            Company object for this BDC's CIK.
+        """
+        from edgar import Company
+        return Company(self.cik)
+
+    def get_filings(self, form: Optional[str] = None):
+        """
+        Get filings for this BDC.
+
+        Args:
+            form: Optional form type to filter (e.g., '10-K', '10-Q')
+
+        Returns:
+            Filings for this BDC.
+        """
+        company = self.get_company()
+        if form:
+            return company.get_filings(form=form)
+        return company.get_filings()
+
+    def schedule_of_investments(self, form: str = "10-K"):
+        """
+        Get the Schedule of Investments from the latest filing.
+
+        Fetches the latest 10-K (or specified form) for this BDC and
+        extracts the Schedule of Investments statement from the XBRL data.
+
+        Args:
+            form: The form type to use ('10-K' or '10-Q'). Defaults to '10-K'.
+
+        Returns:
+            Statement object containing the Schedule of Investments,
+            or None if not available.
+
+        Example:
+            >>> arcc = get_bdc_list()[0]
+            >>> soi = arcc.schedule_of_investments()
+            >>> soi.to_dataframe()
+        """
+        company = self.get_company()
+        # Exclude amendments to get full XBRL data
+        filings = company.get_filings(form=form, amendments=False)
+        if len(filings) == 0:
+            return None
+
+        latest_filing = filings[0]
+        xbrl = latest_filing.xbrl()
+
+        if xbrl is None:
+            return None
+
+        return xbrl.statements.schedule_of_investments()
+
 
 class BDCEntities:
     """

@@ -251,3 +251,37 @@ class TestBDCIntegration:
                 # SOI may or may not be present depending on the filing
                 # This test just ensures the method works without error
                 assert soi is None or hasattr(soi, 'render')
+
+    @pytest.mark.network
+    def test_bdc_entity_get_company(self):
+        """Test BDCEntity.get_company() method."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        company = arcc.get_company()
+        assert company.cik == 1287750
+        assert 'ARES' in company.name.upper()
+
+    @pytest.mark.network
+    def test_bdc_entity_get_filings(self):
+        """Test BDCEntity.get_filings() method."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        filings = arcc.get_filings(form='10-K')
+        assert len(filings) > 0
+
+    @pytest.mark.network
+    def test_bdc_entity_schedule_of_investments(self):
+        """Test BDCEntity.schedule_of_investments() method."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        soi = arcc.schedule_of_investments()
+        # ARCC should have a Schedule of Investments
+        assert soi is not None
+        assert hasattr(soi, 'to_dataframe')
+        assert hasattr(soi, 'render')
