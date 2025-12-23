@@ -695,3 +695,114 @@ class TestHasDetailedInvestments:
 
         # HTGC doesn't provide detailed per-investment XBRL data
         assert htgc.has_detailed_investments() is False
+
+
+class TestIsActive:
+    """Tests for is_active property and active filtering."""
+
+    def test_is_active_with_recent_filing(self):
+        """Test that BDC with recent filing is active."""
+        from datetime import date
+        from dateutil.relativedelta import relativedelta
+
+        # Filed 6 months ago - should be active
+        recent_date = date.today() - relativedelta(months=6)
+        bdc = BDCEntity(
+            file_number='814-00001',
+            cik=1234567,
+            name='TEST ACTIVE BDC',
+            last_filing_date=recent_date,
+            last_filing_type='10-K',
+        )
+        assert bdc.is_active is True
+
+    def test_is_active_with_old_filing(self):
+        """Test that BDC with old filing is inactive."""
+        from datetime import date
+        from dateutil.relativedelta import relativedelta
+
+        # Filed 2 years ago - should be inactive
+        old_date = date.today() - relativedelta(months=24)
+        bdc = BDCEntity(
+            file_number='814-00002',
+            cik=7654321,
+            name='TEST INACTIVE BDC',
+            last_filing_date=old_date,
+            last_filing_type='10-K',
+        )
+        assert bdc.is_active is False
+
+    def test_is_active_with_no_filing_date(self):
+        """Test that BDC with no filing date is inactive."""
+        bdc = BDCEntity(
+            file_number='814-00003',
+            cik=1111111,
+            name='TEST NO DATE BDC',
+        )
+        assert bdc.is_active is False
+
+    def test_is_active_returns_bool(self):
+        """Test that is_active returns Python bool, not numpy bool."""
+        from datetime import date
+
+        bdc = BDCEntity(
+            file_number='814-00004',
+            cik=2222222,
+            name='TEST BOOL BDC',
+            last_filing_date=date.today(),
+            last_filing_type='10-Q',
+        )
+        assert type(bdc.is_active) is bool
+
+    @pytest.mark.network
+    def test_filter_active_bdcs(self):
+        """Test filtering to active BDCs."""
+        bdcs = get_bdc_list()
+        active = bdcs.filter(active=True)
+        inactive = bdcs.filter(active=False)
+
+        # Should have both active and inactive
+        assert len(active) > 0
+        assert len(inactive) > 0
+        assert len(active) + len(inactive) == len(bdcs)
+
+        # All in active should have is_active True
+        assert all(bdc.is_active for bdc in active)
+        # All in inactive should have is_active False
+        assert all(not bdc.is_active for bdc in inactive)
+
+    @pytest.mark.network
+    def test_dataframe_includes_is_active(self):
+        """Test that to_dataframe includes is_active column."""
+        bdcs = get_bdc_list()
+        df = bdcs.to_dataframe()
+
+        assert 'is_active' in df.columns
+        # Should have both True and False values
+        assert df['is_active'].sum() > 0  # Some active
+        assert (~df['is_active']).sum() > 0  # Some inactive
+
+    def test_rich_display_shows_status(self):
+        """Test that __rich__ shows status indicator."""
+        from datetime import date
+
+        active_bdc = BDCEntity(
+            file_number='814-00005',
+            cik=3333333,
+            name='TEST ACTIVE DISPLAY',
+            last_filing_date=date.today(),
+            last_filing_type='10-K',
+        )
+        inactive_bdc = BDCEntity(
+            file_number='814-00006',
+            cik=4444444,
+            name='TEST INACTIVE DISPLAY',
+            last_filing_date=date(2020, 1, 1),
+            last_filing_type='10-K',
+        )
+
+        active_repr = repr(active_bdc)
+        inactive_repr = repr(inactive_bdc)
+
+        assert 'Active' in active_repr
+        assert 'Inactive' in inactive_repr

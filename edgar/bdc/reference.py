@@ -9,6 +9,7 @@ Data source: https://www.sec.gov/about/opendatasetsshtmlbdc
 import io
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from functools import lru_cache
 from typing import Optional
 from rich import box
@@ -54,6 +55,23 @@ class BDCEntity:
     last_filing_date: Optional[date] = None
     last_filing_type: Optional[str] = None
 
+    @property
+    def is_active(self) -> bool:
+        """
+        Check if the BDC is actively filing with the SEC.
+
+        A BDC is considered active if it has filed within the last 18 months.
+        BDCs that haven't filed recently may have been acquired, liquidated,
+        or converted to a different structure.
+
+        Returns:
+            True if the BDC has filed within the last 18 months.
+        """
+        if not self.last_filing_date:
+            return False
+        cutoff = date.today() - relativedelta(months=18)
+        return self.last_filing_date >= cutoff
+
     def __rich__(self):
 
         # Create info table
@@ -69,15 +87,22 @@ class BDCEntity:
             location = ", ".join(filter(None, [self.city, self.state]))
             table.add_row("Location", location)
 
-        # Last filing info
+        # Last filing info with status indicator
         if self.last_filing_date:
-            table.add_row("Last Filing", f"{self.last_filing_type or ''} ({self.last_filing_date})")
+            filing_text = f"{self.last_filing_type or ''} ({self.last_filing_date})"
+            if not self.is_active:
+                filing_text = f"[red]{filing_text}[/red]"
+            table.add_row("Last Filing", filing_text)
+
+        # Status indicator
+        status = "[green]Active[/green]" if self.is_active else "[red]Inactive[/red]"
+        table.add_row("Status", status)
 
         return Panel(
             table,
             title=Text.assemble("🏢 ", (self.name, "bold")),
             subtitle="Business Development Company",
-            border_style="blue",
+            border_style="blue" if self.is_active else "red",
             width=100
         )
 
@@ -231,13 +256,15 @@ class BDCEntities:
     def __iter__(self):
         return iter(self._entities)
 
-    def filter(self, state: Optional[str] = None, active: bool = False) -> 'BDCEntities':
+    def filter(self, state: Optional[str] = None, active: Optional[bool] = None) -> 'BDCEntities':
         """
         Filter BDC entities.
 
         Args:
             state: Filter by state (e.g., 'NY', 'CA')
-            active: If True, only include BDCs that filed in 2023 or later
+            active: If True, only include active BDCs (filed within last 18 months).
+                   If False, only include inactive BDCs.
+                   If None (default), include all.
 
         Returns:
             Filtered BDCEntities
@@ -247,9 +274,10 @@ class BDCEntities:
         if state:
             entities = [e for e in entities if e.state and e.state.upper() == state.upper()]
 
-        if active:
-            cutoff = date(2023, 1, 1)
-            entities = [e for e in entities if e.last_filing_date and e.last_filing_date >= cutoff]
+        if active is True:
+            entities = [e for e in entities if e.is_active]
+        elif active is False:
+            entities = [e for e in entities if not e.is_active]
 
         return BDCEntities(entities)
 
@@ -264,6 +292,7 @@ class BDCEntities:
                 'state': e.state,
                 'last_filing_date': e.last_filing_date,
                 'last_filing_type': e.last_filing_type,
+                'is_active': e.is_active,
             }
             for e in self._entities
         ])
@@ -284,26 +313,37 @@ class BDCEntities:
         table.add_column("File Number")
         table.add_column("State")
         table.add_column("Last Filing")
+        table.add_column("Status", justify="center")
 
-        # Show first 20 rows, then ellipsis if more
-        display_entities = self._entities
-        for index, entity in enumerate(display_entities):
+        # Count active/inactive for subtitle
+        active_count = sum(1 for e in self._entities if e.is_active)
+        inactive_count = len(self._entities) - active_count
+
+        for index, entity in enumerate(self._entities):
             last_filing = ""
             if entity.last_filing_date:
                 last_filing = f"{entity.last_filing_type or ''} ({entity.last_filing_date})"
+                if not entity.is_active:
+                    last_filing = f"[dim]{last_filing}[/dim]"
+
+            status = "[green]Active[/green]" if entity.is_active else "[red]Inactive[/red]"
+
+            # Dim the name for inactive BDCs
+            name = entity.name if entity.is_active else f"[dim]{entity.name}[/dim]"
 
             table.add_row(
                 str(index),
-                entity.name,
+                name,
                 cik_text(entity.cik),
                 entity.file_number,
                 entity.state or "",
                 last_filing,
+                status,
             )
 
         return Panel(
             table,
-            subtitle=f"[bold]{len(self._entities)}[/bold] BDCs",
+            subtitle=f"[green]{active_count}[/green] active, [red]{inactive_count}[/red] inactive — [bold]{len(self._entities)}[/bold] total",
             border_style="blue",
             expand=False,
         )
