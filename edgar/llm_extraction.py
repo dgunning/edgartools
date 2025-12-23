@@ -12,12 +12,751 @@ try:
 except Exception:  # pragma: no cover - optional import for typing
     Report = None
 
+# =============================================================================
+# Form Item Definitions
+# =============================================================================
+
+# 10-K Annual Report Item Definitions
+# SEC Form 10-K has 16 items organized in 4 parts
+FORM_10K_ITEMS = {
+    "Item 1": {
+        "title": "Business",
+        "boundaries": ["Item 1A", "Item 1B", "Item 2"],
+        "part": "Part I",
+    },
+    "Item 1A": {
+        "title": "Risk Factors",
+        "boundaries": ["Item 1B", "Item 2"],
+        "part": "Part I",
+    },
+    "Item 1B": {
+        "title": "Unresolved Staff Comments",
+        "boundaries": ["Item 1C", "Item 2"],
+        "part": "Part I",
+    },
+    "Item 1C": {
+        "title": "Cybersecurity",
+        "boundaries": ["Item 2"],
+        "part": "Part I",
+    },
+    "Item 2": {
+        "title": "Properties",
+        "boundaries": ["Item 3"],
+        "part": "Part I",
+    },
+    "Item 3": {
+        "title": "Legal Proceedings",
+        "boundaries": ["Item 4"],
+        "part": "Part I",
+    },
+    "Item 4": {
+        "title": "Mine Safety Disclosures",
+        "boundaries": ["Part II", "Item 5"],
+        "part": "Part I",
+    },
+    "Item 5": {
+        "title": "Market for Registrant's Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities",
+        "boundaries": ["Item 6", "Item 7"],
+        "part": "Part II",
+    },
+    "Item 6": {
+        "title": "[Reserved]",
+        "boundaries": ["Item 7"],
+        "part": "Part II",
+    },
+    "Item 7": {
+        "title": "Management's Discussion and Analysis of Financial Condition and Results of Operations",
+        "boundaries": ["Item 7A", "Item 8"],
+        "part": "Part II",
+    },
+    "Item 7A": {
+        "title": "Quantitative and Qualitative Disclosures About Market Risk",
+        "boundaries": ["Item 8"],
+        "part": "Part II",
+    },
+    "Item 8": {
+        "title": "Financial Statements and Supplementary Data",
+        "boundaries": ["Item 9", "Item 9A"],
+        "part": "Part II",
+    },
+    "Item 9": {
+        "title": "Changes in and Disagreements With Accountants on Accounting and Financial Disclosure",
+        "boundaries": ["Item 9A"],
+        "part": "Part II",
+    },
+    "Item 9A": {
+        "title": "Controls and Procedures",
+        "boundaries": ["Item 9B"],
+        "part": "Part II",
+    },
+    "Item 9B": {
+        "title": "Other Information",
+        "boundaries": ["Item 9C", "Part III", "Item 10"],
+        "part": "Part II",
+    },
+    "Item 9C": {
+        "title": "Disclosure Regarding Foreign Jurisdictions that Prevent Inspections",
+        "boundaries": ["Part III", "Item 10"],
+        "part": "Part II",
+    },
+    "Item 10": {
+        "title": "Directors, Executive Officers and Corporate Governance",
+        "boundaries": ["Item 11"],
+        "part": "Part III",
+    },
+    "Item 11": {
+        "title": "Executive Compensation",
+        "boundaries": ["Item 12"],
+        "part": "Part III",
+    },
+    "Item 12": {
+        "title": "Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters",
+        "boundaries": ["Item 13"],
+        "part": "Part III",
+    },
+    "Item 13": {
+        "title": "Certain Relationships and Related Transactions, and Director Independence",
+        "boundaries": ["Item 14"],
+        "part": "Part III",
+    },
+    "Item 14": {
+        "title": "Principal Accountant Fees and Services",
+        "boundaries": ["Part IV", "Item 15"],
+        "part": "Part III",
+    },
+    "Item 15": {
+        "title": "Exhibits and Financial Statement Schedules",
+        "boundaries": ["Item 16", "Signature"],
+        "part": "Part IV",
+    },
+    "Item 16": {
+        "title": "Form 10-K Summary",
+        "boundaries": ["Signature"],
+        "part": "Part IV",
+    },
+}
+
+# 10-Q Quarterly Report Item Definitions
+# SEC Form 10-Q has items organized in 2 parts
+FORM_10Q_ITEMS = {
+    # Part I - Financial Information
+    "Item 1": {
+        "title": "Financial Statements",
+        "boundaries": ["Item 2"],
+        "part": "Part I",
+    },
+    "Item 2": {
+        "title": "Management's Discussion and Analysis of Financial Condition and Results of Operations",
+        "boundaries": ["Item 3"],
+        "part": "Part I",
+    },
+    "Item 3": {
+        "title": "Quantitative and Qualitative Disclosures About Market Risk",
+        "boundaries": ["Item 4"],
+        "part": "Part I",
+    },
+    "Item 4": {
+        "title": "Controls and Procedures",
+        "boundaries": ["Part II", "Item 1"],
+        "part": "Part I",
+    },
+    # Part II - Other Information
+    "Part II Item 1": {
+        "title": "Legal Proceedings",
+        "boundaries": ["Item 1A", "Part II Item 1A", "Item 2", "Part II Item 2"],
+        "part": "Part II",
+        "aliases": ["Item 1"],
+    },
+    "Part II Item 1A": {
+        "title": "Risk Factors",
+        "boundaries": ["Item 2", "Part II Item 2"],
+        "part": "Part II",
+        "aliases": ["Item 1A"],
+    },
+    "Part II Item 2": {
+        "title": "Unregistered Sales of Equity Securities and Use of Proceeds",
+        "boundaries": ["Item 3", "Part II Item 3"],
+        "part": "Part II",
+        "aliases": ["Item 2"],
+    },
+    "Part II Item 3": {
+        "title": "Defaults Upon Senior Securities",
+        "boundaries": ["Item 4", "Part II Item 4"],
+        "part": "Part II",
+        "aliases": ["Item 3"],
+    },
+    "Part II Item 4": {
+        "title": "Mine Safety Disclosures",
+        "boundaries": ["Item 5", "Part II Item 5"],
+        "part": "Part II",
+        "aliases": ["Item 4"],
+    },
+    "Part II Item 5": {
+        "title": "Other Information",
+        "boundaries": ["Item 6", "Part II Item 6"],
+        "part": "Part II",
+        "aliases": ["Item 5"],
+    },
+    "Part II Item 6": {
+        "title": "Exhibits",
+        "boundaries": ["Signature"],
+        "part": "Part II",
+        "aliases": ["Item 6"],
+    },
+}
+
+# 20-F Annual Report for Foreign Private Issuers
+# Has sub-items (e.g., Item 3A, 3B, 3C, 3D)
+FORM_20F_ITEMS = {
+    # Part I
+    "Item 1": {
+        "title": "Identity of Directors, Senior Management and Advisers",
+        "boundaries": ["Item 2"],
+        "part": "Part I",
+    },
+    "Item 2": {
+        "title": "Offer Statistics and Expected Timetable",
+        "boundaries": ["Item 3"],
+        "part": "Part I",
+    },
+    "Item 3": {
+        "title": "Key Information",
+        "boundaries": ["Item 4"],
+        "part": "Part I",
+        "sub_items": ["Item 3A", "Item 3B", "Item 3C", "Item 3D"],
+    },
+    "Item 3A": {
+        "title": "[Reserved]",
+        "boundaries": ["Item 3B"],
+        "part": "Part I",
+        "parent": "Item 3",
+    },
+    "Item 3B": {
+        "title": "Capitalization and Indebtedness",
+        "boundaries": ["Item 3C"],
+        "part": "Part I",
+        "parent": "Item 3",
+    },
+    "Item 3C": {
+        "title": "Reasons for the Offer and Use of Proceeds",
+        "boundaries": ["Item 3D"],
+        "part": "Part I",
+        "parent": "Item 3",
+    },
+    "Item 3D": {
+        "title": "Risk Factors",
+        "boundaries": ["Item 4"],
+        "part": "Part I",
+        "parent": "Item 3",
+    },
+    "Item 4": {
+        "title": "Information on the Company",
+        "boundaries": ["Item 4A", "Item 5"],
+        "part": "Part I",
+        "sub_items": ["Item 4A", "Item 4B", "Item 4C", "Item 4D"],
+    },
+    "Item 4A": {
+        "title": "Unresolved Staff Comments",
+        "boundaries": ["Item 4B", "Item 5"],
+        "part": "Part I",
+        "parent": "Item 4",
+    },
+    "Item 4B": {
+        "title": "Business Overview",
+        "boundaries": ["Item 4C"],
+        "part": "Part I",
+        "parent": "Item 4",
+    },
+    "Item 4C": {
+        "title": "Organizational Structure",
+        "boundaries": ["Item 4D"],
+        "part": "Part I",
+        "parent": "Item 4",
+    },
+    "Item 4D": {
+        "title": "Property, Plants and Equipment",
+        "boundaries": ["Item 5"],
+        "part": "Part I",
+        "parent": "Item 4",
+    },
+    "Item 5": {
+        "title": "Operating and Financial Review and Prospects",
+        "boundaries": ["Item 6"],
+        "part": "Part I",
+        "sub_items": ["Item 5A", "Item 5B", "Item 5C", "Item 5D", "Item 5E", "Item 5F"],
+    },
+    "Item 5A": {
+        "title": "Operating Results",
+        "boundaries": ["Item 5B"],
+        "part": "Part I",
+        "parent": "Item 5",
+    },
+    "Item 5B": {
+        "title": "Liquidity and Capital Resources",
+        "boundaries": ["Item 5C"],
+        "part": "Part I",
+        "parent": "Item 5",
+    },
+    "Item 5C": {
+        "title": "Research and Development, Patents and Licenses",
+        "boundaries": ["Item 5D"],
+        "part": "Part I",
+        "parent": "Item 5",
+    },
+    "Item 5D": {
+        "title": "Trend Information",
+        "boundaries": ["Item 5E"],
+        "part": "Part I",
+        "parent": "Item 5",
+    },
+    "Item 5E": {
+        "title": "Critical Accounting Estimates",
+        "boundaries": ["Item 5F", "Item 6"],
+        "part": "Part I",
+        "parent": "Item 5",
+    },
+    "Item 5F": {
+        "title": "Off-Balance Sheet Arrangements",
+        "boundaries": ["Item 6"],
+        "part": "Part I",
+        "parent": "Item 5",
+    },
+    "Item 6": {
+        "title": "Directors, Senior Management and Employees",
+        "boundaries": ["Item 7"],
+        "part": "Part I",
+        "sub_items": ["Item 6A", "Item 6B", "Item 6C", "Item 6D", "Item 6E"],
+    },
+    "Item 6A": {
+        "title": "Directors and Senior Management",
+        "boundaries": ["Item 6B"],
+        "part": "Part I",
+        "parent": "Item 6",
+    },
+    "Item 6B": {
+        "title": "Compensation",
+        "boundaries": ["Item 6C"],
+        "part": "Part I",
+        "parent": "Item 6",
+    },
+    "Item 6C": {
+        "title": "Board Practices",
+        "boundaries": ["Item 6D"],
+        "part": "Part I",
+        "parent": "Item 6",
+    },
+    "Item 6D": {
+        "title": "Employees",
+        "boundaries": ["Item 6E"],
+        "part": "Part I",
+        "parent": "Item 6",
+    },
+    "Item 6E": {
+        "title": "Share Ownership",
+        "boundaries": ["Item 7"],
+        "part": "Part I",
+        "parent": "Item 6",
+    },
+    "Item 7": {
+        "title": "Major Shareholders and Related Party Transactions",
+        "boundaries": ["Item 8"],
+        "part": "Part I",
+        "sub_items": ["Item 7A", "Item 7B", "Item 7C"],
+    },
+    "Item 7A": {
+        "title": "Major Shareholders",
+        "boundaries": ["Item 7B"],
+        "part": "Part I",
+        "parent": "Item 7",
+    },
+    "Item 7B": {
+        "title": "Related Party Transactions",
+        "boundaries": ["Item 7C"],
+        "part": "Part I",
+        "parent": "Item 7",
+    },
+    "Item 7C": {
+        "title": "Interests of Experts and Counsel",
+        "boundaries": ["Item 8"],
+        "part": "Part I",
+        "parent": "Item 7",
+    },
+    "Item 8": {
+        "title": "Financial Information",
+        "boundaries": ["Item 9"],
+        "part": "Part I",
+        "sub_items": ["Item 8A", "Item 8B"],
+    },
+    "Item 8A": {
+        "title": "Consolidated Statements and Other Financial Information",
+        "boundaries": ["Item 8B"],
+        "part": "Part I",
+        "parent": "Item 8",
+    },
+    "Item 8B": {
+        "title": "Significant Changes",
+        "boundaries": ["Item 9"],
+        "part": "Part I",
+        "parent": "Item 8",
+    },
+    "Item 9": {
+        "title": "The Offer and Listing",
+        "boundaries": ["Item 10"],
+        "part": "Part I",
+        "sub_items": ["Item 9A", "Item 9B", "Item 9C"],
+    },
+    "Item 9A": {
+        "title": "Offer and Listing Details",
+        "boundaries": ["Item 9B"],
+        "part": "Part I",
+        "parent": "Item 9",
+    },
+    "Item 9B": {
+        "title": "Plan of Distribution",
+        "boundaries": ["Item 9C"],
+        "part": "Part I",
+        "parent": "Item 9",
+    },
+    "Item 9C": {
+        "title": "Markets",
+        "boundaries": ["Item 10"],
+        "part": "Part I",
+        "parent": "Item 9",
+    },
+    "Item 10": {
+        "title": "Additional Information",
+        "boundaries": ["Item 11"],
+        "part": "Part I",
+        "sub_items": ["Item 10A", "Item 10B", "Item 10C", "Item 10D", "Item 10E", "Item 10F", "Item 10G", "Item 10H"],
+    },
+    "Item 10A": {
+        "title": "Share Capital",
+        "boundaries": ["Item 10B"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 10B": {
+        "title": "Memorandum and Articles of Association",
+        "boundaries": ["Item 10C"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 10C": {
+        "title": "Material Contracts",
+        "boundaries": ["Item 10D"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 10D": {
+        "title": "Exchange Controls",
+        "boundaries": ["Item 10E"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 10E": {
+        "title": "Taxation",
+        "boundaries": ["Item 10F"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 10F": {
+        "title": "Dividends and Paying Agents",
+        "boundaries": ["Item 10G"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 10G": {
+        "title": "Statement by Experts",
+        "boundaries": ["Item 10H"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 10H": {
+        "title": "Documents on Display",
+        "boundaries": ["Item 11"],
+        "part": "Part I",
+        "parent": "Item 10",
+    },
+    "Item 11": {
+        "title": "Quantitative and Qualitative Disclosures About Market Risk",
+        "boundaries": ["Item 12"],
+        "part": "Part I",
+    },
+    "Item 12": {
+        "title": "Description of Securities Other than Equity Securities",
+        "boundaries": ["Part II", "Item 13"],
+        "part": "Part I",
+        "sub_items": ["Item 12A", "Item 12B", "Item 12C", "Item 12D"],
+    },
+    "Item 12A": {
+        "title": "Debt Securities",
+        "boundaries": ["Item 12B"],
+        "part": "Part I",
+        "parent": "Item 12",
+    },
+    "Item 12B": {
+        "title": "Warrants and Rights",
+        "boundaries": ["Item 12C"],
+        "part": "Part I",
+        "parent": "Item 12",
+    },
+    "Item 12C": {
+        "title": "Other Securities",
+        "boundaries": ["Item 12D"],
+        "part": "Part I",
+        "parent": "Item 12",
+    },
+    "Item 12D": {
+        "title": "American Depositary Shares",
+        "boundaries": ["Part II", "Item 13"],
+        "part": "Part I",
+        "parent": "Item 12",
+    },
+    # Part II
+    "Item 13": {
+        "title": "Defaults, Dividend Arrearages and Delinquencies",
+        "boundaries": ["Item 14"],
+        "part": "Part II",
+    },
+    "Item 14": {
+        "title": "Material Modifications to the Rights of Security Holders and Use of Proceeds",
+        "boundaries": ["Item 15"],
+        "part": "Part II",
+    },
+    "Item 15": {
+        "title": "Controls and Procedures",
+        "boundaries": ["Item 16"],
+        "part": "Part II",
+    },
+    "Item 16": {
+        "title": "Reserved",
+        "boundaries": ["Item 16A"],
+        "part": "Part II",
+        "sub_items": ["Item 16A", "Item 16B", "Item 16C", "Item 16D", "Item 16E", "Item 16F", "Item 16G", "Item 16H", "Item 16I", "Item 16J", "Item 16K"],
+    },
+    "Item 16A": {
+        "title": "Audit Committee Financial Expert",
+        "boundaries": ["Item 16B"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16B": {
+        "title": "Code of Ethics",
+        "boundaries": ["Item 16C"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16C": {
+        "title": "Principal Accountant Fees and Services",
+        "boundaries": ["Item 16D"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16D": {
+        "title": "Exemptions from the Listing Standards for Audit Committees",
+        "boundaries": ["Item 16E"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16E": {
+        "title": "Purchases of Equity Securities by the Issuer and Affiliated Purchasers",
+        "boundaries": ["Item 16F"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16F": {
+        "title": "Change in Registrant's Certifying Accountant",
+        "boundaries": ["Item 16G"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16G": {
+        "title": "Corporate Governance",
+        "boundaries": ["Item 16H"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16H": {
+        "title": "Mine Safety Disclosure",
+        "boundaries": ["Item 16I"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16I": {
+        "title": "Disclosure Regarding Foreign Jurisdictions that Prevent Inspections",
+        "boundaries": ["Item 16J"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16J": {
+        "title": "Insider Trading Policies",
+        "boundaries": ["Item 16K"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    "Item 16K": {
+        "title": "Cybersecurity",
+        "boundaries": ["Part III", "Item 17"],
+        "part": "Part II",
+        "parent": "Item 16",
+    },
+    # Part III
+    "Item 17": {
+        "title": "Financial Statements",
+        "boundaries": ["Item 18"],
+        "part": "Part III",
+    },
+    "Item 18": {
+        "title": "Financial Statements",
+        "boundaries": ["Item 19"],
+        "part": "Part III",
+    },
+    "Item 19": {
+        "title": "Exhibits",
+        "boundaries": ["Signature"],
+        "part": "Part III",
+    },
+}
+
+# Master form registry
+FORM_ITEM_REGISTRY = {
+    "10-K": FORM_10K_ITEMS,
+    "10-K/A": FORM_10K_ITEMS,
+    "10-Q": FORM_10Q_ITEMS,
+    "10-Q/A": FORM_10Q_ITEMS,
+    "20-F": FORM_20F_ITEMS,
+    "20-F/A": FORM_20F_ITEMS,
+}
+
+
+def _get_form_items(form_type: Optional[str]) -> Optional[dict]:
+    """Get item definitions for a specific form type."""
+    if not form_type:
+        return None
+    # Normalize form type (handle variations)
+    normalized = form_type.upper().strip()
+    return FORM_ITEM_REGISTRY.get(normalized)
+
+
+def _get_item_boundaries(form_type: Optional[str], item_name: str) -> List[str]:
+    """Get boundary items for a specific item in a form.
+
+    Returns the list of items that mark the end of the specified item's content.
+    Falls back to generic boundaries if form-specific ones aren't available.
+    """
+    form_items = _get_form_items(form_type)
+
+    if form_items and item_name in form_items:
+        return form_items[item_name].get("boundaries", []) + ["Signature"]
+
+    # Fallback to legacy boundaries
+    return _ITEM_BOUNDARIES.get(item_name, ["Item", "Signature"])
+
+
+def _get_item_title(form_type: Optional[str], item_name: str) -> str:
+    """Get the official title for an item."""
+    form_items = _get_form_items(form_type)
+
+    if form_items and item_name in form_items:
+        return form_items[item_name].get("title", item_name)
+
+    return item_name
+
+
+def get_form_items(form_type: str) -> List[str]:
+    """Get all available item names for a form type.
+
+    Args:
+        form_type: The SEC form type (e.g., "10-K", "10-Q", "20-F")
+
+    Returns:
+        List of item names available for this form type
+
+    Example:
+        >>> get_form_items("10-K")
+        ['Item 1', 'Item 1A', 'Item 1B', 'Item 1C', 'Item 2', ...]
+    """
+    form_items = _get_form_items(form_type)
+    if not form_items:
+        return []
+    return list(form_items.keys())
+
+
+def get_item_info(form_type: str, item_name: str) -> Optional[dict]:
+    """Get detailed information about a specific item.
+
+    Args:
+        form_type: The SEC form type (e.g., "10-K", "10-Q", "20-F")
+        item_name: The item name (e.g., "Item 7A")
+
+    Returns:
+        Dictionary with item info (title, boundaries, part, sub_items, parent)
+        or None if not found
+
+    Example:
+        >>> get_item_info("10-K", "Item 7")
+        {'title': "Management's Discussion...", 'boundaries': ['Item 7A', 'Item 8'], 'part': 'Part II'}
+    """
+    form_items = _get_form_items(form_type)
+    if not form_items:
+        return None
+
+    normalized = _normalize_item_name(item_name, form_type)
+    return form_items.get(normalized)
+
+
+def _normalize_item_name(item_name: str, form_type: Optional[str] = None) -> str:
+    """Normalize item name to match form definitions.
+
+    Handles variations like:
+    - "item 1" -> "Item 1"
+    - "Item1" -> "Item 1"
+    - "ITEM 1A" -> "Item 1A"
+    - "Item 3.D" -> "Item 3D" (for 20-F)
+    """
+    if not item_name:
+        return item_name
+
+    # Basic normalization
+    normalized = item_name.strip()
+
+    # Handle "Item 3.D" -> "Item 3D" for 20-F sub-items (do this first)
+    normalized = re.sub(r"(?i)(item\s*\d+)\.([A-Za-z])", r"\1\2", normalized)
+
+    # Handle various formats: "item 1", "Item1", "ITEM 1A", "Item 1.A"
+    match = re.match(r"(?i)(item)\s*(\d+)\s*\.?\s*([A-Za-z]?)", normalized)
+    if match:
+        prefix, num, suffix = match.groups()
+        normalized = f"Item {num}{suffix.upper()}"
+
+    # Handle 10-Q Part II items
+    if form_type and form_type.upper().startswith("10-Q"):
+        # Check if this might be a Part II item
+        part2_match = re.match(r"(?i)(?:part\s*(?:ii|2)\s+)?(item\s+\d+[A-Za-z]?)", normalized)
+        if part2_match:
+            item_part = part2_match.group(1)
+            # Normalize the item part
+            item_match = re.match(r"(?i)item\s*(\d+)([A-Za-z]?)", item_part)
+            if item_match:
+                num, suffix = item_match.groups()
+                normalized = f"Item {num}{suffix.upper()}"
+
+    return normalized
+
+
 __all__ = [
     "ExtractedSection",
     "extract_markdown",
     "extract_sections",
     "extract_filing_markdown",
     "extract_filing_sections",
+    # Form item utilities
+    "get_form_items",
+    "get_item_info",
+    "FORM_10K_ITEMS",
+    "FORM_10Q_ITEMS",
+    "FORM_20F_ITEMS",
+    "FORM_ITEM_REGISTRY",
 ]
 
 
@@ -153,32 +892,45 @@ def _normalize_list(value: Optional[Union[str, Sequence[str]]]) -> List[str]:
 
 
 def _extract_item_sections(filing, item_name: str) -> List[ExtractedSection]:
-    html_content, section_title = _extract_item_html(filing, item_name)
+    # Get form type for form-aware extraction
+    form_type = getattr(filing, "form", None)
+
+    # Normalize the item name
+    normalized_item = _normalize_item_name(item_name, form_type)
+
+    # Get the official title for this item
+    official_title = _get_item_title(form_type, normalized_item)
+
+    html_content, section_title = _extract_item_html(filing, normalized_item, form_type)
     if html_content:
-        markdown = process_content(html_content, section_title=section_title or item_name)
+        display_title = section_title or official_title or normalized_item
+        markdown = process_content(html_content, section_title=display_title)
         return [
             ExtractedSection(
-                title=section_title or item_name,
+                title=display_title,
                 markdown=markdown,
-                source=f"item:{item_name}",
+                source=f"item:{normalized_item}",
             )
         ]
 
-    text_content = _extract_item_text(filing, item_name)
+    text_content = _extract_item_text(filing, normalized_item)
     if text_content:
-        markdown = process_content(text_content, section_title=section_title or item_name)
+        display_title = official_title or normalized_item
+        markdown = process_content(text_content, section_title=display_title)
         return [
             ExtractedSection(
-                title=section_title or item_name,
+                title=display_title,
                 markdown=markdown,
-                source=f"item:{item_name}",
+                source=f"item:{normalized_item}",
             )
         ]
 
     return []
 
 
-def _extract_item_html(filing, item_name: str) -> Tuple[Optional[str], Optional[str]]:
+def _extract_item_html(
+    filing, item_name: str, form_type: Optional[str] = None
+) -> Tuple[Optional[str], Optional[str]]:
     try:
         report = filing.obj()
     except Exception:
@@ -201,8 +953,9 @@ def _extract_item_html(filing, item_name: str) -> Tuple[Optional[str], Optional[
     if not html:
         return None, None
 
-    stop_targets = _ITEM_BOUNDARIES.get(item_name, ["Item", "Signature"])
-    html_content = extract_item_with_boundaries(html, item_name, stop_targets)
+    # Use form-aware boundaries
+    stop_targets = _get_item_boundaries(form_type, item_name)
+    html_content = extract_item_with_boundaries(html, item_name, stop_targets, form_type)
     if html_content:
         return html_content, item_name
 
@@ -1239,15 +1992,78 @@ def process_content(content, section_title=None):
 # -----------------------------
 # Regex Boundary Extractor
 # -----------------------------
-def extract_item_with_boundaries(full_html, item_start, item_end_list):
+def _build_item_pattern(item_name: str, form_type: Optional[str] = None) -> str:
+    """Build a regex pattern for matching an item name.
+
+    Handles variations like:
+    - "Item 1" -> matches "Item 1", "ITEM 1", "Item  1"
+    - "Item 1A" -> matches "Item 1A", "Item 1.A", "Item1A"
+    - "Item 3D" -> matches "Item 3D", "Item 3.D" (for 20-F)
+    - "Part II Item 1" -> matches variations for 10-Q
+    """
+    # Parse the item name
+    match = re.match(r"(?i)((?:Part\s+(?:I+|[12])\s+)?Item)\s*(\d+)([A-Za-z]?)", item_name)
+    if not match:
+        # Fallback to simple replacement
+        return item_name.replace(" ", r"\s+")
+
+    prefix, num, suffix = match.groups()
+
+    # Build flexible pattern
+    if suffix:
+        # Handle sub-items like "Item 1A" or "Item 3D"
+        # Match: Item 1A, Item 1.A, Item1A, ITEM 1A, etc.
+        pattern = rf"{prefix.replace(' ', r'\s*')}\s*{num}\.?\s*{suffix}"
+    else:
+        # Handle main items like "Item 1"
+        # Match: Item 1, ITEM 1, Item  1, etc.
+        pattern = rf"{prefix.replace(' ', r'\s*')}\s*{num}"
+
+    # For 10-Q, also match "Part II" prefixed versions for Part II items
+    if form_type and form_type.upper().startswith("10-Q"):
+        if "Part II" in item_name or "Part 2" in item_name:
+            # Already has Part prefix
+            pass
+        else:
+            # Add optional Part prefix for matching
+            pattern = rf"(?:Part\s+(?:II|2)\s+)?{pattern}"
+
+    return pattern
+
+
+def extract_item_with_boundaries(
+    full_html: str,
+    item_start: str,
+    item_end_list: List[str],
+    form_type: Optional[str] = None,
+) -> Optional[str]:
+    """Extract content between item boundaries using regex.
+
+    Args:
+        full_html: The complete HTML content to search
+        item_start: The item name to find (e.g., "Item 7A")
+        item_end_list: List of items that mark the end boundary
+        form_type: Optional form type for form-specific pattern matching
+
+    Returns:
+        The extracted HTML content, or None if not found
+    """
+    # Build the start pattern
+    # Note: (?:\s|<|:|&) handles whitespace, tags, colons, and HTML entities like &#160;
+    start_pattern = _build_item_pattern(item_start, form_type)
     start_pat = re.compile(
-        rf"(?:>|\n)\s*{item_start.replace(' ', r'\s+')}\.?",
+        rf"(?:>|\n)\s*{start_pattern}\.?(?:\s|<|:|&)",
         re.IGNORECASE,
     )
 
-    end_pat_str = "|".join([i.replace(" ", r"\s+") for i in item_end_list])
+    # Build the end pattern from all boundary items
+    end_patterns = []
+    for item in item_end_list:
+        end_patterns.append(_build_item_pattern(item, form_type))
+
+    end_pat_str = "|".join(end_patterns)
     end_pat = re.compile(
-        rf"(?:>|\n)\s*(?:{end_pat_str})",
+        rf"(?:>|\n)\s*(?:{end_pat_str})(?:\s|<|:|\.|\&)",
         re.IGNORECASE,
     )
 
@@ -1279,6 +2095,8 @@ def extract_item_with_boundaries(full_html, item_start, item_end_list):
     return max(candidates, key=len)
 
 
+# Legacy item boundaries - kept for backwards compatibility
+# New code should use FORM_ITEM_REGISTRY instead
 _ITEM_BOUNDARIES = {
     "Item 1": ["Item 1A", "Item 1B", "Item 2"],
     "Item 1A": ["Item 1B", "Item 2"],
