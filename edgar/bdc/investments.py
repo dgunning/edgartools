@@ -27,11 +27,17 @@ CONCEPT_COST = 'us-gaap_InvestmentOwnedAtCost'
 CONCEPT_PRINCIPAL = 'us-gaap_InvestmentOwnedBalancePrincipalAmount'
 CONCEPT_SHARES = 'us-gaap_InvestmentOwnedBalanceShares'
 CONCEPT_INTEREST_RATE = 'us-gaap_InvestmentInterestRate'
+CONCEPT_PIK_RATE = 'us-gaap_InvestmentInterestRatePaidInKind'
 CONCEPT_SPREAD = 'us-gaap_InvestmentBasisSpreadVariableRate'
 CONCEPT_PCT_NET_ASSETS = 'us-gaap_InvestmentOwnedPercentOfNetAssets'
 
 # Known investment types for parsing (order matters - more specific first)
 INVESTMENT_TYPES = [
+    # Secured Debt (used by some BDCs like Main Street)
+    'First lien secured debt',
+    'Second lien secured debt',
+    'Senior secured debt',
+    'Secured debt',
     # Loans - most specific first
     'First lien senior secured revolving loan',
     'First lien senior secured delayed draw term loan',
@@ -56,22 +62,53 @@ INVESTMENT_TYPES = [
     'Revolving loan',
     # Preferred
     'Series A-1 preferred units',
+    'Series A-1 preferred stock',
     'Series A preferred units',
     'Series A preferred shares',
+    'Series A preferred stock',
     'Series B preferred units',
     'Series B preferred shares',
+    'Series B preferred stock',
+    'Series C-1 preferred shares',
+    'Series C-2 preferred shares',
     'Series C preferred shares',
+    'Series C preferred units',
+    'Series D preferred units',
+    'Series D units',
+    'Series E units',
+    'Senior preferred units',
+    'Senior preferred stock',
+    'Junior preferred stock',
     'Preferred shares',
     'Preferred stock',
     'Preferred units',
     'Preferred equity',
     # Common equity
+    'Class A-1 common units',
+    'Class A-2 common units',
     'Class A common units',
+    'Class A common stock',
     'Class B common units',
+    'Class B common stock',
+    'Class C common units',
     'Common units',
     'Common stock',
     'Common shares',
     'Common equity',
+    'Ordinary shares',
+    # Class units (without common/preferred qualifier)
+    'Class A-1 units',
+    'Class A-2 units',
+    'Class A units',
+    'Class B units',
+    'Class C units',
+    # Member units (used by some BDCs like Main Street)
+    'Class A Preferred Member Units',
+    'Class B Preferred Member Units',
+    'Preferred Member Units',
+    'Class A Member Units',
+    'Class B Member Units',
+    'Member Units',
     # Other equity
     'LLC units',
     'LLC interest',
@@ -80,12 +117,21 @@ INVESTMENT_TYPES = [
     'Membership units',
     'Membership interest',
     'Member interest',
+    'Class A membership units',
+    'Class B membership units',
     'Partnership interest',
     'Equity interest',
     'Equity',
+    # Warrants
+    'Warrants to purchase shares of common stock',
+    'Warrant to purchase shares of common stock',
+    'Warrant to purchase common stock',
+    'Warrant to purchase units',
     'Warrants',
     'Options',
     # Series units
+    'Series A common units',
+    'Series B common units',
     'Series A units',
     'Series B units',
     'Series C units',
@@ -98,6 +144,48 @@ INVESTMENT_TYPES = [
     'Subordinated certificates',
     'Senior certificates',
     'Certificates',
+    # Notes
+    'First lien senior secured note',
+    'Second lien senior secured note',
+    'Senior subordinated note',
+    'Senior secured note',
+    'Subordinated note',
+    'Unsecured note',
+    # Partnership/LP interests
+    'Limited partnership interests',
+    'Limited partnership interest',
+    'Limited partner interests',
+    'Limited partner interest',
+    'Limited partnership units',
+    'General partnership interest',
+    'Partnership units',
+    'Class A LP interests',
+    'Class A LP interest',
+    'LP interests',
+    # Notes (plural forms)
+    'First lien senior secured notes',
+    'Second lien senior secured notes',
+    'Senior secured notes',
+    'Senior subordinated notes',
+    'Subordinated notes',
+    'Unsecured notes',
+    # Additional preferred
+    'Series A-2 preferred shares',
+    'Series A-3 preferred shares',
+    'Series C-3 preferred shares',
+    'Middle preferred shares',
+    'Warrant to purchase shares of Series C preferred stock',
+    'Warrant to purchase shares of Series A preferred stock',
+    'Warrant to purchase shares of Series B preferred stock',
+    # Additional common
+    'Class A-1 common stock',
+    'Series C common units',
+    'Common member units',
+    # Other
+    'Loan instrument units',
+    'Co-invest units',
+    'Series E-1 preferred stock',
+    'Warrant to purchase units of Class A common units',
 ]
 
 
@@ -125,7 +213,8 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
 
     for inv_type in INVESTMENT_TYPES:
         # Look for the investment type at the end, preceded by comma
-        pattern = rf',\s*{re.escape(inv_type)}(\s*\d*)?$'
+        # Support optional numeric suffixes like "1", "2", "1.1", "2.1"
+        pattern = rf',\s*{re.escape(inv_type)}(\s*[\d.]*)?$'
         match = re.search(pattern, identifier, re.IGNORECASE)
         if match:
             company_name = identifier[:match.start()].strip()
@@ -151,6 +240,7 @@ class PortfolioInvestment:
     principal_amount: Optional[Decimal] = None
     shares: Optional[int] = None
     interest_rate: Optional[float] = None
+    pik_rate: Optional[float] = None  # Paid-in-kind interest rate
     spread: Optional[float] = None
     percent_of_net_assets: Optional[float] = None
 
@@ -194,6 +284,8 @@ class PortfolioInvestment:
             table.add_row("Shares", f"{self.shares:,}")
         if self.interest_rate is not None:
             table.add_row("Interest Rate", f"{self.interest_rate:.2%}")
+        if self.pik_rate is not None:
+            table.add_row("PIK Rate", f"{self.pik_rate:.2%}")
         if self.spread is not None:
             table.add_row("Spread", f"{self.spread:.2%}")
         if self.percent_of_net_assets is not None:
@@ -301,6 +393,7 @@ class PortfolioInvestments:
                 'principal_amount': float(inv.principal_amount) if inv.principal_amount else None,
                 'shares': inv.shares,
                 'interest_rate': inv.interest_rate,
+                'pik_rate': inv.pik_rate,
                 'spread': inv.spread,
                 'percent_of_net_assets': inv.percent_of_net_assets,
             }
@@ -316,7 +409,7 @@ class PortfolioInvestments:
             row_styles=["", "dim"],
         )
         table.add_column("#", justify="right", style="dim")
-        table.add_column("Company", style="bold", max_width=40)
+        table.add_column("Company", style="bold", max_width=80, overflow="fold")
         table.add_column("Type", max_width=30)
         table.add_column("Fair Value", justify="right")
         table.add_column("Cost", justify="right")
@@ -330,7 +423,7 @@ class PortfolioInvestments:
 
             table.add_row(
                 str(idx),
-                inv.company_name[:40],
+                inv.company_name,
                 inv.investment_type[:30],
                 fair_value,
                 cost,
@@ -364,13 +457,20 @@ class PortfolioInvestments:
         return repr_rich(self.__rich__())
 
     @classmethod
-    def from_statement(cls, statement, period: Optional[str] = None) -> 'PortfolioInvestments':
+    def from_statement(
+        cls,
+        statement,
+        period: Optional[str] = None,
+        include_untyped: bool = False
+    ) -> 'PortfolioInvestments':
         """
         Create PortfolioInvestments from an XBRL Schedule of Investments Statement.
 
         Args:
             statement: The Statement from xbrl.statements.schedule_of_investments()
             period: Optional period column (e.g., '2024-12-31'). If None, uses latest.
+            include_untyped: If False (default), excludes investments with "Unknown" type.
+                These are typically company-level rollup entries that would inflate totals.
 
         Returns:
             PortfolioInvestments collection
@@ -433,6 +533,8 @@ class PortfolioInvestments:
                     inv['shares'] = int(float(value))
                 elif concept == CONCEPT_INTEREST_RATE:
                     inv['interest_rate'] = float(value)
+                elif concept == CONCEPT_PIK_RATE:
+                    inv['pik_rate'] = float(value)
                 elif concept == CONCEPT_SPREAD:
                     inv['spread'] = float(value)
                 elif concept == CONCEPT_PCT_NET_ASSETS:
@@ -446,6 +548,11 @@ class PortfolioInvestments:
             PortfolioInvestment(**inv_data)
             for inv_data in investments.values()
         ]
+
+        # Filter out Unknown types unless include_untyped is True
+        # Unknown types are typically company-level rollups that inflate totals
+        if not include_untyped:
+            portfolio = [inv for inv in portfolio if inv.investment_type != "Unknown"]
 
         # Sort by fair value (largest first)
         portfolio.sort(

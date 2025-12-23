@@ -143,7 +143,7 @@ class BDCEntity:
 
         return xbrl.statements.schedule_of_investments()
 
-    def portfolio_investments(self, form: str = "10-K"):
+    def portfolio_investments(self, form: str = "10-K", include_untyped: bool = False):
         """
         Get individual portfolio investments from the latest filing.
 
@@ -152,6 +152,9 @@ class BDCEntity:
 
         Args:
             form: The form type to use ('10-K' or '10-Q'). Defaults to '10-K'.
+            include_untyped: If False (default), excludes investments with "Unknown"
+                type. These are typically company-level rollup entries that would
+                inflate totals. Set to True to include all entries.
 
         Returns:
             PortfolioInvestments collection, or None if not available.
@@ -160,9 +163,9 @@ class BDCEntity:
             >>> arcc = get_bdc_list()[0]
             >>> investments = arcc.portfolio_investments()
             >>> len(investments)
-            450
+            1070
             >>> investments.total_fair_value
-            Decimal('25000000000')
+            Decimal('27000000000')
             >>> investments.filter(investment_type='First lien')
             PortfolioInvestments with first lien loans
         """
@@ -172,7 +175,7 @@ class BDCEntity:
         if soi is None:
             return None
 
-        return PortfolioInvestments.from_statement(soi)
+        return PortfolioInvestments.from_statement(soi, include_untyped=include_untyped)
 
 
 class BDCEntities:
