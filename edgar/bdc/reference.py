@@ -281,6 +281,52 @@ class BDCEntities:
 
         return BDCEntities(entities)
 
+    def get_by_cik(self, cik: int) -> Optional[BDCEntity]:
+        """
+        Get a BDC by its CIK number.
+
+        Args:
+            cik: The SEC CIK number.
+
+        Returns:
+            BDCEntity if found, None otherwise.
+
+        Example:
+            >>> bdcs = get_bdc_list()
+            >>> arcc = bdcs.get_by_cik(1287750)
+            >>> arcc.name
+            'ARES CAPITAL CORP'
+        """
+        for entity in self._entities:
+            if entity.cik == cik:
+                return entity
+        return None
+
+    def get_by_ticker(self, ticker: str) -> Optional[BDCEntity]:
+        """
+        Get a BDC by its ticker symbol.
+
+        Uses the SEC ticker-to-CIK mapping to find the BDC.
+
+        Args:
+            ticker: The stock ticker symbol (e.g., 'ARCC', 'MAIN').
+
+        Returns:
+            BDCEntity if found, None otherwise.
+
+        Example:
+            >>> bdcs = get_bdc_list()
+            >>> arcc = bdcs.get_by_ticker('ARCC')
+            >>> arcc.name
+            'ARES CAPITAL CORP'
+        """
+        from edgar.reference.tickers import find_cik
+
+        cik = find_cik(ticker.upper())
+        if cik is None:
+            return None
+        return self.get_by_cik(cik)
+
     def to_dataframe(self) -> pd.DataFrame:
         """Convert to pandas DataFrame."""
         return pd.DataFrame([

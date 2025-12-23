@@ -210,6 +210,48 @@ class TestBDCEntities:
         rich_output = bdcs.__rich__()
         assert isinstance(rich_output, Panel)
 
+    @pytest.mark.network
+    def test_bdc_entities_get_by_cik(self):
+        """Test getting BDC by CIK."""
+        bdcs = get_bdc_list()
+
+        # Known BDC - Ares Capital
+        arcc = bdcs.get_by_cik(1287750)
+        assert arcc is not None
+        assert arcc.name == 'ARES CAPITAL CORP'
+        assert arcc.cik == 1287750
+
+        # Non-existent CIK
+        none_result = bdcs.get_by_cik(999999999)
+        assert none_result is None
+
+    @pytest.mark.network
+    def test_bdc_entities_get_by_ticker(self):
+        """Test getting BDC by ticker symbol."""
+        bdcs = get_bdc_list()
+
+        # Known BDC tickers
+        arcc = bdcs.get_by_ticker('ARCC')
+        assert arcc is not None
+        assert arcc.name == 'ARES CAPITAL CORP'
+
+        main = bdcs.get_by_ticker('MAIN')
+        assert main is not None
+        assert 'Main Street' in main.name
+
+        htgc = bdcs.get_by_ticker('HTGC')
+        assert htgc is not None
+        assert 'Hercules' in htgc.name
+
+        # Lowercase should work too
+        arcc_lower = bdcs.get_by_ticker('arcc')
+        assert arcc_lower is not None
+        assert arcc_lower.cik == arcc.cik
+
+        # Non-BDC ticker
+        aapl = bdcs.get_by_ticker('AAPL')
+        assert aapl is None
+
 
 class TestCompanyIsBDC:
     """Tests for Company.is_bdc property."""
