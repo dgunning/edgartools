@@ -65,6 +65,10 @@ Available categories:
         action="store_true",
         help="Extract all available items for the form type"
     )
+    parser.add_argument(
+        "--exhibits", "-e",
+        help="Extract exhibits (e.g., 'EX-99.1', 'EX-10', or 'all' for all exhibits)"
+    )
 
     # Output options
     parser.add_argument(
@@ -151,6 +155,7 @@ def extract_and_save(
     items: Optional[List[str]] = None,
     statements: Optional[List[str]] = None,
     category: Optional[str] = None,
+    exhibits: Optional[List[str]] = None,
     notes: bool = False,
     max_reports: Optional[int] = None,
     output_file: Optional[str] = None,
@@ -166,13 +171,15 @@ def extract_and_save(
         kwargs["statement"] = statements
     if category:
         kwargs["category"] = category
+    if exhibits:
+        kwargs["exhibit"] = exhibits
     if notes:
         kwargs["notes"] = True
     if max_reports:
         kwargs["max_reports"] = max_reports
 
     # If no extraction specified, default to statements
-    if not any([items, statements, category]):
+    if not any([items, statements, category, exhibits]):
         kwargs["statement"] = ["AllStatements"]
         if notes:
             kwargs["notes"] = True
@@ -182,7 +189,22 @@ def extract_and_save(
     sections = extract_filing_sections(filing, **kwargs)
 
     if not sections:
-        print("No sections extracted!")
+        if exhibits:
+            # Check what exhibits are available
+            try:
+                avail_exhibits = filing.exhibits
+                if avail_exhibits:
+                    print("No matching exhibits found. Available exhibits:")
+                    for ex in avail_exhibits:
+                        doc = getattr(ex, 'document', 'N/A')
+                        desc = getattr(ex, 'description', 'N/A')
+                        print(f"  - {doc}: {desc}")
+                else:
+                    print("This filing has no exhibits.")
+            except Exception:
+                print("No exhibits found in this filing.")
+        else:
+            print("No sections extracted!")
         return None
 
     # Generate output filename
@@ -254,6 +276,10 @@ def main():
     if args.statements:
         statements = [stmt.strip() for stmt in args.statements.split(",")]
 
+    exhibits = None
+    if args.exhibits:
+        exhibits = [ex.strip() for ex in args.exhibits.split(",")]
+
     # Handle --all flag
     if args.all:
         from edgar.llm_extraction import get_form_items
@@ -268,6 +294,7 @@ def main():
         items=items,
         statements=statements,
         category=args.category,
+        exhibits=exhibits,
         notes=args.notes,
         max_reports=args.max_reports,
         output_file=args.output,

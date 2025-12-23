@@ -983,6 +983,7 @@ def extract_filing_markdown(
     item: Optional[Union[str, Sequence[str]]] = None,
     category: Optional[Union[str, Sequence[str]]] = None,
     statement: Optional[Union[str, Sequence[str]]] = None,
+    exhibit: Optional[Union[str, Sequence[str]]] = None,
     notes: bool = False,
     max_reports: Optional[int] = None,
     include_header: bool = True,
@@ -992,6 +993,7 @@ def extract_filing_markdown(
         item=item,
         category=category,
         statement=statement,
+        exhibit=exhibit,
         notes=notes,
         max_reports=max_reports,
     )
@@ -1017,6 +1019,7 @@ def extract_filing_sections(
     item: Optional[Union[str, Sequence[str]]] = None,
     category: Optional[Union[str, Sequence[str]]] = None,
     statement: Optional[Union[str, Sequence[str]]] = None,
+    exhibit: Optional[Union[str, Sequence[str]]] = None,
     notes: bool = False,
     max_reports: Optional[int] = None,
 ) -> List[ExtractedSection]:
@@ -1029,8 +1032,9 @@ def extract_filing_sections(
     items = _normalize_list(item)
     categories = _normalize_list(category)
     statements = _normalize_list(statement)
+    exhibits = _normalize_list(exhibit)
 
-    if not items and not categories and not statements:
+    if not items and not categories and not statements and not exhibits:
         statements = ["AllStatements"]
         if notes:
             categories = ["Notes"]
@@ -1050,6 +1054,9 @@ def extract_filing_sections(
             _extract_statement_sections(filing, statement_name, max_reports)
         )
 
+    for exhibit_filter in exhibits:
+        sections.extend(_extract_exhibit_sections(filing, exhibit_filter))
+
     return sections
 
 
@@ -1059,6 +1066,7 @@ def extract_markdown(
     item: Optional[Union[str, Sequence[str]]] = None,
     category: Optional[Union[str, Sequence[str]]] = None,
     statement: Optional[Union[str, Sequence[str]]] = None,
+    exhibit: Optional[Union[str, Sequence[str]]] = None,
     notes: bool = False,
     max_reports: Optional[int] = None,
     include_header: bool = True,
@@ -1068,6 +1076,7 @@ def extract_markdown(
         item=item,
         category=category,
         statement=statement,
+        exhibit=exhibit,
         notes=notes,
         max_reports=max_reports,
         include_header=include_header,
@@ -1080,6 +1089,7 @@ def extract_sections(
     item: Optional[Union[str, Sequence[str]]] = None,
     category: Optional[Union[str, Sequence[str]]] = None,
     statement: Optional[Union[str, Sequence[str]]] = None,
+    exhibit: Optional[Union[str, Sequence[str]]] = None,
     notes: bool = False,
     max_reports: Optional[int] = None,
 ) -> List[ExtractedSection]:
@@ -1088,6 +1098,7 @@ def extract_sections(
         item=item,
         category=category,
         statement=statement,
+        exhibit=exhibit,
         notes=notes,
         max_reports=max_reports,
     )
@@ -1332,6 +1343,83 @@ def _extract_report_sections(report) -> List[ExtractedSection]:
             source=f"report:{title}",
         )
     ]
+
+
+def _extract_exhibit_sections(
+    filing, exhibit_filter: Optional[str] = None
+) -> List[ExtractedSection]:
+    """Extract exhibit content from a filing.
+
+    Args:
+        filing: The filing object
+        exhibit_filter: Optional filter for exhibit names (e.g., "EX-99", "EX-10")
+                       If None or "all", extracts all exhibits
+
+    Returns:
+        List of ExtractedSection objects containing exhibit content
+    """
+    sections: List[ExtractedSection] = []
+
+    try:
+        exhibits = filing.exhibits
+        if not exhibits:
+            return sections
+    except Exception:
+        return sections
+
+    for exhibit in exhibits:
+        try:
+            doc_name = getattr(exhibit, "document", "")
+            description = getattr(exhibit, "description", "")
+
+            # Skip the main filing document (usually the 8-K itself)
+            if description and description.upper() in ("8-K", "8-K/A", "6-K", "6-K/A"):
+                continue
+
+            # Apply filter if specified
+            if exhibit_filter and exhibit_filter.lower() not in ("all", ""):
+                filter_lower = exhibit_filter.lower().replace("-", "").replace("_", "")
+                doc_lower = doc_name.lower().replace("-", "").replace("_", "")
+                desc_lower = description.lower().replace("-", "").replace("_", "")
+
+                if filter_lower not in doc_lower and filter_lower not in desc_lower:
+                    continue
+
+            # Get exhibit content as markdown
+            markdown = None
+            if hasattr(exhibit, "markdown"):
+                md = exhibit.markdown
+                markdown = md() if callable(md) else md
+
+            if not markdown and hasattr(exhibit, "text"):
+                text = exhibit.text
+                markdown = text() if callable(text) else text
+
+            if not markdown:
+                continue
+
+            # Build title from description or document name
+            title = description if description else doc_name
+            if not title.upper().startswith("EX"):
+                # Extract exhibit number from filename if not in description
+                import re
+                ex_match = re.search(r"ex[\-_]?(\d+[\-_.]?\d*)", doc_name, re.IGNORECASE)
+                if ex_match:
+                    title = f"EX-{ex_match.group(1).replace('_', '.').replace('-', '.')} {title}"
+
+            sections.append(
+                ExtractedSection(
+                    title=title,
+                    markdown=markdown,
+                    source=f"exhibit:{doc_name}",
+                )
+            )
+
+        except Exception:
+            # Skip exhibits that fail to process
+            continue
+
+    return sections
 
 
 def _get_statement_from_financials(financials: Financials, canonical: str):
