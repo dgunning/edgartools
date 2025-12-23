@@ -8,23 +8,34 @@ file numbers starting with "814-".
 
 Key Features:
 - Access the authoritative SEC BDC Report listing all BDCs
+- Search for BDCs by name or ticker with fuzzy matching
 - Check if a company is a BDC via CIK lookup
 - Get lists of active BDCs
 - Parse individual portfolio investments from Schedule of Investments
 
 Example usage:
-    >>> from edgar.bdc import get_bdc_list, is_bdc_cik
+    >>> from edgar.bdc import get_bdc_list, find_bdc, is_bdc_cik
     >>> bdcs = get_bdc_list()
     >>> len(bdcs)
     176
     >>> is_bdc_cik(1287750)  # ARCC (Ares Capital)
     True
 
+    # Search for BDCs by name
+    >>> results = find_bdc("Ares")
+    >>> results[0].name
+    'ARES CAPITAL CORP'
+
+    # Search by ticker
+    >>> results = find_bdc("MAIN")
+    >>> results[0].name
+    'MAIN STREET CAPITAL CORP'
+
     # Get portfolio investments
-    >>> arcc = next(b for b in bdcs if b.cik == 1287750)
+    >>> arcc = bdcs.get_by_ticker("ARCC")
     >>> investments = arcc.portfolio_investments()
     >>> len(investments)
-    450
+    1256
 """
 from edgar.bdc.investments import (
     DataQuality,
@@ -40,14 +51,22 @@ from edgar.bdc.reference import (
     get_latest_bdc_report_year,
     is_bdc_cik,
 )
+from edgar.bdc.search import (
+    BDCSearchIndex,
+    BDCSearchResults,
+    find_bdc,
+)
 
 __all__ = [
     'BDCEntities',
     'BDCEntity',
+    'BDCSearchIndex',
+    'BDCSearchResults',
     'DataQuality',
     'PortfolioInvestment',
     'PortfolioInvestments',
     'fetch_bdc_report',
+    'find_bdc',
     'get_active_bdc_ciks',
     'get_bdc_list',
     'get_latest_bdc_report_year',

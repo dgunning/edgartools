@@ -367,6 +367,32 @@ class BDCEntities:
             return None
         return self.get_by_cik(cik)
 
+    def search(self, query: str, top_n: int = 10):
+        """
+        Search for BDCs by name or ticker.
+
+        Supports fuzzy matching on BDC names and exact/prefix matching on tickers.
+
+        Args:
+            query: Search query (name or ticker)
+            top_n: Maximum number of results
+
+        Returns:
+            BDCSearchResults with matching BDCs
+
+        Example:
+            >>> bdcs = get_bdc_list()
+            >>> results = bdcs.search("Ares")
+            >>> results[0].name
+            'ARES CAPITAL CORP'
+
+            >>> results = bdcs.search("MAIN")
+            >>> results[0].name
+            'MAIN STREET CAPITAL CORP'
+        """
+        from edgar.bdc.search import find_bdc
+        return find_bdc(query, top_n=top_n)
+
     def to_dataframe(self) -> pd.DataFrame:
         """Convert to pandas DataFrame."""
         return pd.DataFrame([

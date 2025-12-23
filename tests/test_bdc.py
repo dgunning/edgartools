@@ -874,3 +874,90 @@ class TestIsActive:
 
         assert 'Active' in active_repr
         assert 'Inactive' in inactive_repr
+
+
+class TestBDCSearch:
+    """Tests for BDC search functionality."""
+
+    @pytest.mark.network
+    def test_find_bdc_by_name(self):
+        """Test searching for BDC by name."""
+        from edgar.bdc import find_bdc
+
+        results = find_bdc("Ares")
+        assert len(results) > 0
+        # Should find Ares Capital
+        assert any("ARES" in r.name for r in results)
+
+    @pytest.mark.network
+    def test_find_bdc_by_ticker(self):
+        """Test searching for BDC by ticker."""
+        from edgar.bdc import find_bdc
+
+        results = find_bdc("ARCC")
+        assert len(results) > 0
+        # First result should be Ares Capital
+        assert results[0].cik == 1287750
+
+    @pytest.mark.network
+    def test_find_bdc_fuzzy_match(self):
+        """Test fuzzy matching on BDC names."""
+        from edgar.bdc import find_bdc
+
+        # Search with partial name
+        results = find_bdc("Main Street")
+        assert len(results) > 0
+        # Should find Main Street Capital
+        assert any("MAIN STREET" in r.name.upper() for r in results)
+
+    @pytest.mark.network
+    def test_search_results_indexing(self):
+        """Test indexing into search results returns BDCEntity."""
+        from edgar.bdc import find_bdc, BDCEntity
+
+        results = find_bdc("ARCC")
+        assert len(results) > 0
+        entity = results[0]
+        assert isinstance(entity, BDCEntity)
+        assert entity.cik == 1287750
+
+    @pytest.mark.network
+    def test_search_results_iteration(self):
+        """Test iterating over search results."""
+        from edgar.bdc import find_bdc, BDCEntity
+
+        results = find_bdc("Capital", top_n=5)
+        entities = list(results)
+        assert len(entities) <= 5
+        assert all(isinstance(e, BDCEntity) for e in entities)
+
+    @pytest.mark.network
+    def test_search_results_properties(self):
+        """Test search results properties."""
+        from edgar.bdc import find_bdc
+
+        results = find_bdc("Hercules")
+        assert not results.empty
+        assert len(results.ciks) == len(results)
+        assert len(results.tickers) == len(results)
+
+    @pytest.mark.network
+    def test_bdcentities_search_method(self):
+        """Test search method on BDCEntities."""
+        bdcs = get_bdc_list()
+        results = bdcs.search("Blue Owl")
+        assert len(results) > 0
+        assert any("BLUE OWL" in r.name.upper() for r in results)
+
+    @pytest.mark.network
+    def test_search_results_display(self):
+        """Test that search results can be displayed."""
+        from edgar.bdc import find_bdc
+
+        results = find_bdc("MAIN")
+        # Should be able to get rich representation
+        rich_repr = results.__rich__()
+        assert rich_repr is not None
+        # Should be able to get string repr
+        str_repr = repr(results)
+        assert "MAIN" in str_repr
