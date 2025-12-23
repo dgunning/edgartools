@@ -528,3 +528,170 @@ class TestPortfolioInvestmentsIntegration:
         first_lien = investments.filter(investment_type='First lien')
         assert len(first_lien) > 0
         assert len(first_lien) < len(investments)
+
+
+class TestDataQuality:
+    """Tests for DataQuality dataclass."""
+
+    def test_data_quality_creation(self):
+        """Test creating DataQuality."""
+        from edgar.bdc import DataQuality
+
+        dq = DataQuality(
+            total_investments=100,
+            fair_value_coverage=0.95,
+            cost_coverage=0.94,
+            principal_coverage=0.75,
+            interest_rate_coverage=0.67,
+            pik_rate_coverage=0.15,
+            spread_coverage=0.67,
+            debt_count=73,
+            equity_count=22,
+        )
+        assert dq.total_investments == 100
+        assert dq.fair_value_coverage == 0.95
+        assert dq.debt_count == 73
+
+    def test_data_quality_rich(self):
+        """Test DataQuality __rich__ returns Panel."""
+        from rich.panel import Panel
+        from edgar.bdc import DataQuality
+
+        dq = DataQuality(
+            total_investments=100,
+            fair_value_coverage=0.95,
+            cost_coverage=0.94,
+            principal_coverage=0.75,
+            interest_rate_coverage=0.67,
+            pik_rate_coverage=0.15,
+            spread_coverage=0.67,
+            debt_count=73,
+            equity_count=22,
+        )
+        rich_output = dq.__rich__()
+        assert isinstance(rich_output, Panel)
+
+
+class TestPortfolioInvestmentsPeriodAndQuality:
+    """Tests for period and data_quality properties."""
+
+    def test_portfolio_investments_period(self):
+        """Test period property."""
+        investments = PortfolioInvestments([
+            PortfolioInvestment(
+                identifier='Test, Loan',
+                company_name='Test',
+                investment_type='Loan',
+            ),
+        ], period='2024-12-31')
+
+        assert investments.period == '2024-12-31'
+
+    def test_portfolio_investments_data_quality(self):
+        """Test data_quality property."""
+        from edgar.bdc import DataQuality
+
+        investments = PortfolioInvestments([
+            PortfolioInvestment(
+                identifier='Company A, Loan',
+                company_name='Company A',
+                investment_type='Loan',
+                fair_value=Decimal('1000000'),
+                cost=Decimal('900000'),
+                interest_rate=0.10,
+            ),
+            PortfolioInvestment(
+                identifier='Company B, Equity',
+                company_name='Company B',
+                investment_type='Equity',
+                fair_value=Decimal('500000'),
+            ),
+        ])
+
+        dq = investments.data_quality
+        assert isinstance(dq, DataQuality)
+        assert dq.total_investments == 2
+        assert dq.fair_value_coverage == 1.0  # Both have fair value
+        assert dq.cost_coverage == 0.5  # Only one has cost
+        assert dq.interest_rate_coverage == 0.5  # Only one has rate
+
+    def test_empty_portfolio_data_quality(self):
+        """Test data_quality for empty portfolio."""
+        investments = PortfolioInvestments([])
+        dq = investments.data_quality
+        assert dq.total_investments == 0
+        assert dq.fair_value_coverage == 0.0
+
+    def test_filter_preserves_period(self):
+        """Test that filter preserves period."""
+        investments = PortfolioInvestments([
+            PortfolioInvestment(
+                identifier='Company A, Loan',
+                company_name='Company A',
+                investment_type='Loan',
+            ),
+            PortfolioInvestment(
+                identifier='Company B, Equity',
+                company_name='Company B',
+                investment_type='Equity',
+            ),
+        ], period='2024-12-31')
+
+        filtered = investments.filter(investment_type='Loan')
+        assert filtered.period == '2024-12-31'
+
+    @pytest.mark.network
+    def test_portfolio_investments_period_from_xbrl(self):
+        """Test that period is extracted from XBRL data."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        investments = arcc.portfolio_investments()
+        assert investments is not None
+        assert investments.period is not None
+        # Period should be a date string like '2024-12-31'
+        assert len(investments.period) == 10
+        assert '-' in investments.period
+
+    @pytest.mark.network
+    def test_portfolio_investments_data_quality_from_xbrl(self):
+        """Test data_quality from real XBRL data."""
+        from edgar.bdc import DataQuality
+
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        investments = arcc.portfolio_investments()
+        assert investments is not None
+
+        dq = investments.data_quality
+        assert isinstance(dq, DataQuality)
+        assert dq.total_investments > 100
+        assert dq.fair_value_coverage > 0.9  # Most have fair value
+        assert dq.debt_count > 0
+        assert dq.equity_count > 0
+
+
+class TestHasDetailedInvestments:
+    """Tests for has_detailed_investments method."""
+
+    @pytest.mark.network
+    def test_arcc_has_detailed_investments(self):
+        """Test that ARCC has detailed investment data."""
+        bdcs = get_bdc_list()
+        arcc = next((b for b in bdcs if b.cik == 1287750), None)
+        assert arcc is not None
+
+        assert arcc.has_detailed_investments() is True
+
+    @pytest.mark.network
+    def test_htgc_has_no_detailed_investments(self):
+        """Test that HTGC (Hercules) has no detailed investment data."""
+        bdcs = get_bdc_list()
+        htgc = next((b for b in bdcs if 'hercules' in b.name.lower()), None)
+        assert htgc is not None
+
+        # HTGC doesn't provide detailed per-investment XBRL data
+        assert htgc.has_detailed_investments() is False

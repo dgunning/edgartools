@@ -7,6 +7,7 @@ from a BDC's Schedule of Investments (SOI).
 import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from datetime import date
 from typing import Optional
 
 import pandas as pd
@@ -17,6 +18,7 @@ from rich.table import Table
 from edgar.richtools import repr_rich
 
 __all__ = [
+    'DataQuality',
     'PortfolioInvestment',
     'PortfolioInvestments',
 ]
@@ -225,6 +227,51 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
 
 
 @dataclass(frozen=True)
+class DataQuality:
+    """
+    Data quality metrics for a PortfolioInvestments collection.
+
+    Provides coverage percentages for each field to help users understand
+    data completeness and reliability.
+    """
+    total_investments: int
+    fair_value_coverage: float  # Percentage with fair value
+    cost_coverage: float  # Percentage with cost
+    principal_coverage: float  # Percentage with principal (debt only)
+    interest_rate_coverage: float  # Percentage with interest rate (debt only)
+    pik_rate_coverage: float  # Percentage with PIK rate
+    spread_coverage: float  # Percentage with spread
+    debt_count: int  # Number of debt investments
+    equity_count: int  # Number of equity investments
+
+    def __rich__(self):
+        table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
+        table.add_column("Metric", style="dim")
+        table.add_column("Value", justify="right")
+
+        table.add_row("Total Investments", str(self.total_investments))
+        table.add_row("Debt", str(self.debt_count))
+        table.add_row("Equity", str(self.equity_count))
+        table.add_row("", "")
+        table.add_row("Fair Value Coverage", f"{self.fair_value_coverage:.0%}")
+        table.add_row("Cost Coverage", f"{self.cost_coverage:.0%}")
+        table.add_row("Principal Coverage", f"{self.principal_coverage:.0%}")
+        table.add_row("Interest Rate Coverage", f"{self.interest_rate_coverage:.0%}")
+        table.add_row("PIK Rate Coverage", f"{self.pik_rate_coverage:.0%}")
+        table.add_row("Spread Coverage", f"{self.spread_coverage:.0%}")
+
+        return Panel(
+            table,
+            title="Data Quality",
+            border_style="green" if self.fair_value_coverage > 0.9 else "yellow",
+            width=40
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+
+@dataclass(frozen=True)
 class PortfolioInvestment:
     """
     A single investment holding from a BDC's Schedule of Investments.
@@ -308,10 +355,19 @@ class PortfolioInvestments:
     A collection of portfolio investments from a BDC's Schedule of Investments.
 
     Provides filtering, aggregation, and display capabilities for BDC holdings.
+
+    Attributes:
+        period: The date of the data (e.g., '2024-12-31')
+        data_quality: Coverage metrics for data completeness
     """
 
-    def __init__(self, investments: list[PortfolioInvestment]):
+    def __init__(
+        self,
+        investments: list[PortfolioInvestment],
+        period: Optional[str] = None
+    ):
         self._investments = investments
+        self._period = period
 
     def __len__(self) -> int:
         return len(self._investments)
@@ -321,6 +377,40 @@ class PortfolioInvestments:
 
     def __iter__(self):
         return iter(self._investments)
+
+    @property
+    def period(self) -> Optional[str]:
+        """The period date for this data (e.g., '2024-12-31')."""
+        return self._period
+
+    @property
+    def data_quality(self) -> DataQuality:
+        """Data quality metrics showing coverage for each field."""
+        total = len(self._investments)
+        if total == 0:
+            return DataQuality(
+                total_investments=0,
+                fair_value_coverage=0.0,
+                cost_coverage=0.0,
+                principal_coverage=0.0,
+                interest_rate_coverage=0.0,
+                pik_rate_coverage=0.0,
+                spread_coverage=0.0,
+                debt_count=0,
+                equity_count=0,
+            )
+
+        return DataQuality(
+            total_investments=total,
+            fair_value_coverage=sum(1 for i in self._investments if i.fair_value) / total,
+            cost_coverage=sum(1 for i in self._investments if i.cost) / total,
+            principal_coverage=sum(1 for i in self._investments if i.principal_amount) / total,
+            interest_rate_coverage=sum(1 for i in self._investments if i.interest_rate) / total,
+            pik_rate_coverage=sum(1 for i in self._investments if i.pik_rate) / total,
+            spread_coverage=sum(1 for i in self._investments if i.spread) / total,
+            debt_count=sum(1 for i in self._investments if i.is_debt),
+            equity_count=sum(1 for i in self._investments if i.is_equity),
+        )
 
     @property
     def total_fair_value(self) -> Decimal:
@@ -380,7 +470,7 @@ class PortfolioInvestments:
                 if inv.fair_value is not None and inv.fair_value >= min_fair_value
             ]
 
-        return PortfolioInvestments(investments)
+        return PortfolioInvestments(investments, period=self._period)
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert to pandas DataFrame."""
@@ -485,7 +575,7 @@ class PortfolioInvestments:
                 if re.match(r'\d{4}-\d{2}-\d{2}', str(col))
             ]
             if not date_cols:
-                return cls([])
+                return cls([], period=None)
             # Use the latest (first) date column
             period = date_cols[0]
 
@@ -498,7 +588,7 @@ class PortfolioInvestments:
         data = df[mask].copy()
 
         if data.empty:
-            return cls([])
+            return cls([], period=period)
 
         # Group by dimension_label and pivot concepts
         investments = {}
@@ -560,4 +650,4 @@ class PortfolioInvestments:
             reverse=True
         )
 
-        return cls(portfolio)
+        return cls(portfolio, period=period)

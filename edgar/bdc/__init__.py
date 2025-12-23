@@ -27,6 +27,7 @@ Example usage:
     450
 """
 from edgar.bdc.investments import (
+    DataQuality,
     PortfolioInvestment,
     PortfolioInvestments,
 )
@@ -43,6 +44,7 @@ from edgar.bdc.reference import (
 __all__ = [
     'BDCEntities',
     'BDCEntity',
+    'DataQuality',
     'PortfolioInvestment',
     'PortfolioInvestments',
     'fetch_bdc_report',

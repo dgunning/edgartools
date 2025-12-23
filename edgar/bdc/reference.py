@@ -177,6 +177,40 @@ class BDCEntity:
 
         return PortfolioInvestments.from_statement(soi, include_untyped=include_untyped)
 
+    def has_detailed_investments(self, form: str = "10-K") -> bool:
+        """
+        Check if this BDC has detailed investment data in its XBRL filings.
+
+        Some BDCs provide detailed per-investment XBRL data in their Schedule
+        of Investments, while others only provide aggregate totals. This method
+        checks whether detailed data is available before attempting extraction.
+
+        Args:
+            form: The form type to check ('10-K' or '10-Q'). Defaults to '10-K'.
+
+        Returns:
+            True if detailed investment data is available, False otherwise.
+
+        Example:
+            >>> arcc = get_bdc_list()[0]
+            >>> arcc.has_detailed_investments()
+            True
+            >>> htgc = get_bdc_list()['Hercules']  # Example of BDC without detailed data
+            >>> htgc.has_detailed_investments()
+            False
+        """
+        soi = self.schedule_of_investments(form=form)
+        if soi is None:
+            return False
+
+        df = soi.to_dataframe()
+        # Check for InvestmentIdentifierAxis which indicates individual investments
+        has_individual = df['dimension_label'].str.contains(
+            'InvestmentIdentifierAxis', na=False
+        ).any()
+
+        return bool(has_individual)
+
 
 class BDCEntities:
     """
