@@ -1,3 +1,76 @@
+from functools import lru_cache
+from typing import Optional
+
+from edgar.reference.data.common import read_csv_from_package
+
+
+@lru_cache(maxsize=1)
+def _load_place_codes() -> dict:
+    """Load place codes from CSV file."""
+    df = read_csv_from_package('place_codes.csv')
+    # Create mapping from code to (place_name, type)
+    return {row['Code']: (row['Place'].title(), row['Type']) for _, row in df.iterrows()}
+
+
+def get_place_name(code: str) -> Optional[str]:
+    """
+    Get the full place name for a state/country code.
+
+    Args:
+        code: The SEC place code (e.g., 'DE', 'CA', 'X0')
+
+    Returns:
+        The full place name in title case (e.g., 'Delaware', 'California', 'United Kingdom')
+        or None if not found
+    """
+    place_codes = _load_place_codes()
+    result = place_codes.get(code)
+    return result[0] if result else None
+
+
+def get_place_type(code: str) -> Optional[str]:
+    """
+    Get the type (US, FOREIGN, UNKNOWN) for a place code.
+
+    Args:
+        code: The SEC place code (e.g., 'DE', 'CA', 'K3')
+
+    Returns:
+        'US', 'FOREIGN', or 'UNKNOWN', or None if code not found
+    """
+    place_codes = _load_place_codes()
+    result = place_codes.get(code)
+    return result[1] if result else None
+
+
+def is_us_company(state_code: str) -> bool:
+    """
+    Determine if a company is a US company based on its state of incorporation.
+
+    Args:
+        state_code: The SEC state/country code (e.g., 'DE', 'CA', 'K3')
+
+    Returns:
+        True if the company is incorporated in a US state or territory, False otherwise
+    """
+    place_type = get_place_type(state_code)
+    return place_type == 'US'
+
+
+def is_foreign_company(state_code: str) -> bool:
+    """
+    Determine if a company is a foreign company based on its state of incorporation.
+
+    Args:
+        state_code: The SEC state/country code (e.g., 'DE', 'CA', 'K3')
+
+    Returns:
+        True if the company is incorporated in a foreign country, False otherwise
+    """
+    place_type = get_place_type(state_code)
+    return place_type == 'FOREIGN'
+
+
 ACRONYMS = {
     "CCC": "CIK Confirmation Code",
     "CIK": "Central Index Key",
