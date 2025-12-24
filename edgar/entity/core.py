@@ -824,14 +824,29 @@ class Company(Entity):
         - Semantic colors from edgar.display.styles
         - Compact layout with whitespace section separation
         """
-        ticker = self.get_ticker()
-
-        # Build header line: Company Name + Ticker
-        if ticker:
+        # Build header line: Company Name + Ticker(s)
+        # Show up to 2 tickers, then "+ N more" for additional
+        tickers = self.tickers if hasattr(self, 'tickers') else []
+        if tickers:
+            if len(tickers) == 1:
+                ticker_text = Text(tickers[0], style=get_style("ticker"))
+            elif len(tickers) == 2:
+                ticker_text = Text.assemble(
+                    (tickers[0], get_style("ticker")),
+                    (" / ", get_style("metadata")),
+                    (tickers[1], get_style("ticker"))
+                )
+            else:
+                ticker_text = Text.assemble(
+                    (tickers[0], get_style("ticker")),
+                    (" / ", get_style("metadata")),
+                    (tickers[1], get_style("ticker")),
+                    (f" +{len(tickers) - 2}", get_style("metadata"))
+                )
             header = Text.assemble(
                 (self.data.name, get_style("company_name")),
                 "  ",
-                (ticker, get_style("ticker"))
+                ticker_text
             )
         else:
             header = Text(self.data.name, style=get_style("company_name"))
@@ -865,7 +880,7 @@ class Company(Entity):
         # Section 1: Core details (compact key-value pairs)
         details_table = Table(box=None, show_header=False, padding=(0, 2), expand=False)
         details_table.add_column("Label", style=get_style("label"), width=14)
-        details_table.add_column("Value", style=get_style("value"))
+        details_table.add_column("Value", style=get_style("value_highlight"))
 
         # Industry
         if hasattr(self.data, 'sic') and self.data.sic:
