@@ -262,6 +262,161 @@ class ScheduleOfInvestmentsData:
         """Return first n rows as DataFrame."""
         return self._data.head(n)
 
+    def _get_company_column(self) -> Optional[str]:
+        """Find the column containing portfolio company names."""
+        for col in ['company', 'Investment, Issuer Name Axis']:
+            if col in self._data.columns:
+                return col
+        return None
+
+    def _get_fair_value_column(self) -> Optional[str]:
+        """Find the column containing fair value."""
+        for col in ['fair_value', 'Investment Owned, Fair Value']:
+            if col in self._data.columns:
+                return col
+        return None
+
+    def search(self, query: str, top_n: int = 20) -> pd.DataFrame:
+        """
+        Search for portfolio companies across all BDCs.
+
+        Find which BDCs hold investments matching the search query.
+        This enables cross-BDC analysis like "Which BDCs hold Ivy Hill?"
+
+        Args:
+            query: Search string to match against company names (case-insensitive)
+            top_n: Maximum number of results to return (default: 20)
+
+        Returns:
+            DataFrame with columns: company, bdc_name, bdc_cik, fair_value, form
+
+        Example:
+            >>> dataset = fetch_bdc_dataset(2024, 3)
+            >>> soi = dataset.schedule_of_investments
+            >>>
+            >>> # Find all BDCs holding "Ivy Hill"
+            >>> soi.search("Ivy Hill")
+                                    company           bdc_name   bdc_cik    fair_value
+            0  Ivy Hill Asset Management, L.P.  ARES CAPITAL CORP  1287750  1915300000.0
+            >>>
+            >>> # Search for software companies
+            >>> soi.search("software")
+        """
+        if self._data.empty:
+            return pd.DataFrame()
+
+        company_col = self._get_company_column()
+        if company_col is None:
+            return pd.DataFrame()
+
+        # Filter by query
+        mask = self._data[company_col].str.contains(query, case=False, na=False)
+        matches = self._data[mask].copy()
+
+        if matches.empty:
+            return pd.DataFrame()
+
+        # Build result DataFrame
+        fair_value_col = self._get_fair_value_column()
+
+        result_data = []
+        for _, row in matches.iterrows():
+            company_name = row[company_col]
+            # Clean up [Member] suffix
+            if isinstance(company_name, str) and '[Member]' in company_name:
+                company_name = company_name.replace(' [Member]', '').strip()
+
+            entry = {
+                'company': company_name,
+                'bdc_name': row.get('name', ''),
+                'bdc_cik': row.get('cik', 0),
+                'form': row.get('form', ''),
+            }
+            if fair_value_col:
+                entry['fair_value'] = row.get(fair_value_col, 0)
+
+            result_data.append(entry)
+
+        result = pd.DataFrame(result_data)
+
+        # Sort by fair value if available, otherwise by company name
+        if 'fair_value' in result.columns:
+            result = result.sort_values('fair_value', ascending=False)
+        else:
+            result = result.sort_values('company')
+
+        return result.head(top_n).reset_index(drop=True)
+
+    def top_companies(self, n: int = 25) -> pd.DataFrame:
+        """
+        Get the most commonly held portfolio companies across all BDCs.
+
+        Aggregates holdings across all BDCs to find companies that appear
+        in multiple BDC portfolios, indicating broad private credit exposure.
+
+        Args:
+            n: Number of top companies to return (default: 25)
+
+        Returns:
+            DataFrame with columns: company, num_bdcs, total_fair_value, bdc_names
+
+        Example:
+            >>> dataset = fetch_bdc_dataset(2024, 3)
+            >>> soi = dataset.schedule_of_investments
+            >>>
+            >>> # Most commonly held private companies
+            >>> soi.top_companies(10)
+                                 company  num_bdcs  total_fair_value                    bdc_names
+            0       Ivy Hill Asset Mgmt         1      1915300000.0           ARES CAPITAL CORP
+            1          ABC Software LLC         3       850000000.0  ARES CAPITAL, MAIN STREET...
+        """
+        if self._data.empty:
+            return pd.DataFrame()
+
+        company_col = self._get_company_column()
+        if company_col is None:
+            return pd.DataFrame()
+
+        fair_value_col = self._get_fair_value_column()
+
+        # Group by company
+        grouped_data = []
+        for company, group in self._data.groupby(company_col):
+            if pd.isna(company):
+                continue
+
+            # Clean company name
+            company_name = company
+            if isinstance(company_name, str) and '[Member]' in company_name:
+                company_name = company_name.replace(' [Member]', '').strip()
+
+            # Get unique BDCs holding this company
+            bdc_names = group['name'].dropna().unique().tolist() if 'name' in group.columns else []
+
+            entry = {
+                'company': company_name,
+                'num_bdcs': len(bdc_names),
+                'bdc_names': ', '.join(sorted(bdc_names)[:3]) + ('...' if len(bdc_names) > 3 else ''),
+            }
+
+            if fair_value_col and fair_value_col in group.columns:
+                entry['total_fair_value'] = group[fair_value_col].sum()
+
+            grouped_data.append(entry)
+
+        if not grouped_data:
+            return pd.DataFrame()
+
+        result = pd.DataFrame(grouped_data)
+
+        # Sort by number of BDCs holding, then by total fair value
+        sort_cols = ['num_bdcs']
+        if 'total_fair_value' in result.columns:
+            sort_cols.append('total_fair_value')
+        result = result.sort_values(sort_cols, ascending=False)
+
+        return result.head(n).reset_index(drop=True)
+
     def __rich__(self):
         """Rich display for the SOI data."""
         table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))

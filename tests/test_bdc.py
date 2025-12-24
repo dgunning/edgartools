@@ -1090,3 +1090,39 @@ class TestBDCDatasets:
         assert dataset.num_submissions == 1
         assert dataset.num_facts == 0
         assert dataset.num_soi_entries == 0
+
+    @pytest.mark.network
+    def test_soi_search(self):
+        """Test searching for portfolio companies across BDCs."""
+        from edgar.bdc import fetch_bdc_dataset
+
+        dataset = fetch_bdc_dataset(2024, 3)
+        soi = dataset.schedule_of_investments
+
+        # Search for a known company
+        results = soi.search("software", top_n=10)
+        assert isinstance(results, pd.DataFrame)
+        assert len(results) <= 10
+
+        if not results.empty:
+            assert 'company' in results.columns
+            assert 'bdc_name' in results.columns
+            assert 'bdc_cik' in results.columns
+
+    @pytest.mark.network
+    def test_soi_top_companies(self):
+        """Test getting top portfolio companies across BDCs."""
+        from edgar.bdc import fetch_bdc_dataset
+
+        dataset = fetch_bdc_dataset(2024, 3)
+        soi = dataset.schedule_of_investments
+
+        top = soi.top_companies(n=10)
+        assert isinstance(top, pd.DataFrame)
+        assert len(top) <= 10
+
+        if not top.empty:
+            assert 'company' in top.columns
+            assert 'num_bdcs' in top.columns
+            # Companies should be held by at least 1 BDC
+            assert top['num_bdcs'].min() >= 1
