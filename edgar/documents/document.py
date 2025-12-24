@@ -3,12 +3,14 @@ Document model for parsed HTML.
 """
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
 
 if TYPE_CHECKING:
     import pandas as pd
 
+from lxml.etree import LxmlError, XMLSyntaxError
 from rich.console import Group
 from rich.table import Table as RichTable
 from rich.text import Text
@@ -17,6 +19,8 @@ from edgar.documents.nodes import Node, SectionNode
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.types import SearchResult, XBRLFact
 from edgar.richtools import repr_rich
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -154,14 +158,14 @@ class Section:
                 try:
                     table_node = table_processor.process(table_elem)
                     tables.append(table_node)
-                except Exception:
-                    # Skip tables that fail to process
+                except (LxmlError, XMLSyntaxError, ValueError, TypeError, AttributeError) as e:
+                    logger.debug(f"Failed to process table in section '{self.name}': {e}")
                     continue
 
             return tables
 
-        except Exception:
-            # If anything fails, return empty list
+        except (LxmlError, XMLSyntaxError, ValueError, TypeError) as e:
+            logger.debug(f"TOC table extraction failed for section '{self.name}': {e}")
             return []
 
     def _extract_section_html(self, extractor, html_source: str) -> str:
@@ -216,12 +220,14 @@ class Section:
             for elem in collected_elements:
                 try:
                     html_parts.append(lxml_html.tostring(elem, encoding='unicode'))
-                except Exception:
+                except (LxmlError, TypeError, AttributeError) as e:
+                    logger.debug(f"Failed to serialize element in section '{self.name}': {e}")
                     continue
 
             return ''.join(html_parts)
 
-        except Exception:
+        except (LxmlError, XMLSyntaxError, ValueError) as e:
+            logger.debug(f"HTML extraction failed for section '{self.name}': {e}")
             return ""
 
     def search(self, query: str) -> List[SearchResult]:

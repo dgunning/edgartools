@@ -17,6 +17,7 @@ import pytest
 from edgar import Company
 
 
+@pytest.mark.network
 def test_toc_section_tables_extraction():
     """
     Test that TOC-based sections can extract tables.
@@ -60,6 +61,7 @@ def test_toc_section_tables_extraction():
     assert all(isinstance(t, TableNode) for t in tables), "All results should be TableNode objects"
 
 
+@pytest.mark.network
 def test_toc_section_empty_node_children():
     """
     Verify that TOC sections have empty node.children (the root cause of the bug).
@@ -79,6 +81,7 @@ def test_toc_section_empty_node_children():
     assert len(tables) > 0, "section.tables() should work despite empty node.children"
 
 
+@pytest.mark.network
 def test_document_level_tables_still_work():
     """
     Verify that document-level table extraction still works.
@@ -95,6 +98,7 @@ def test_document_level_tables_still_work():
     assert len(all_tables) >= 50, f"Expected 50+ tables in document, got {len(all_tables)}"
 
 
+@pytest.mark.network
 def test_table_types_in_toc_section():
     """
     Test that different table types are correctly identified in TOC sections.
@@ -115,6 +119,7 @@ def test_table_types_in_toc_section():
     assert table_types["FINANCIAL"] > 0, "Should have at least one financial table"
 
 
+@pytest.mark.network
 def test_table_to_dataframe_from_toc_section():
     """
     Test that tables extracted from TOC sections can be converted to DataFrames.
