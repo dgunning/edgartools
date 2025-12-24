@@ -393,6 +393,21 @@ class BDCEntities:
         from edgar.bdc.search import find_bdc
         return find_bdc(query, top_n=top_n)
 
+    @property
+    def ciks(self) -> list[int]:
+        """
+        Get list of CIKs for all BDCs in this collection.
+
+        Returns:
+            Sorted list of CIK numbers.
+
+        Example:
+            >>> bdcs = get_bdc_list()
+            >>> bdcs.ciks[:5]
+            [18349, 25254, 35315, 36377, 63602]
+        """
+        return sorted(e.cik for e in self._entities)
+
     def to_dataframe(self) -> pd.DataFrame:
         """Convert to pandas DataFrame."""
         return pd.DataFrame([

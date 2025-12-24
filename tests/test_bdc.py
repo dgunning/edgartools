@@ -2,6 +2,7 @@
 Tests for BDC (Business Development Company) functionality.
 """
 import pytest
+import pandas as pd
 
 from edgar import Company
 from decimal import Decimal
@@ -961,3 +962,131 @@ class TestBDCSearch:
         # Should be able to get string repr
         str_repr = repr(results)
         assert "MAIN" in str_repr
+
+
+class TestBDCDatasets:
+    """Tests for SEC DERA BDC Data Sets."""
+
+    @pytest.mark.network
+    def test_fetch_bdc_dataset(self):
+        """Test fetching a BDC dataset from SEC DERA."""
+        from edgar.bdc import fetch_bdc_dataset
+
+        # Fetch Q4 2024 dataset (should exist)
+        dataset = fetch_bdc_dataset(2024, 4)
+
+        # Should have all components
+        assert dataset is not None
+        assert dataset.year == 2024
+        assert dataset.quarter == 4
+        assert dataset.period == "2024Q4"
+
+        # Should have DataFrames for each file
+        assert hasattr(dataset, 'submissions')
+        assert hasattr(dataset, 'numbers')
+        assert hasattr(dataset, 'presentation')
+        assert hasattr(dataset, 'soi')
+
+        # Submissions should have expected structure
+        if not dataset.submissions.empty:
+            assert 'adsh' in dataset.submissions.columns
+            assert 'cik' in dataset.submissions.columns
+
+    @pytest.mark.network
+    def test_fetch_bdc_dataset_invalid_quarter(self):
+        """Test that invalid quarter raises ValueError."""
+        from edgar.bdc import fetch_bdc_dataset
+
+        with pytest.raises(ValueError, match="Quarter must be 1, 2, 3, or 4"):
+            fetch_bdc_dataset(2024, 5)
+
+    @pytest.mark.network
+    def test_bdc_dataset_properties(self):
+        """Test BDCDataset computed properties."""
+        from edgar.bdc import fetch_bdc_dataset
+
+        dataset = fetch_bdc_dataset(2024, 4)
+
+        # Test properties
+        assert dataset.num_submissions >= 0
+        assert dataset.num_facts >= 0
+        assert dataset.num_soi_entries >= 0
+        assert dataset.num_companies >= 0
+
+    @pytest.mark.network
+    def test_bdc_dataset_get_methods(self):
+        """Test BDCDataset getter methods."""
+        from edgar.bdc import fetch_bdc_dataset
+
+        dataset = fetch_bdc_dataset(2024, 4)
+
+        # Test getting facts for a submission
+        if not dataset.submissions.empty:
+            adsh = dataset.submissions.iloc[0]['adsh']
+            facts = dataset.get_facts_for_submission(adsh)
+            assert isinstance(facts, pd.DataFrame)
+
+            soi = dataset.get_soi_for_submission(adsh)
+            assert isinstance(soi, pd.DataFrame)
+
+    @pytest.mark.network
+    def test_bdc_dataset_summary_by_company(self):
+        """Test BDCDataset summary by company."""
+        from edgar.bdc import fetch_bdc_dataset
+
+        dataset = fetch_bdc_dataset(2024, 4)
+
+        summary = dataset.summary_by_company()
+        assert isinstance(summary, pd.DataFrame)
+
+        if not summary.empty:
+            assert 'cik' in summary.columns
+            assert 'name' in summary.columns
+
+    @pytest.mark.network
+    def test_bdc_dataset_rich_display(self):
+        """Test BDCDataset rich display."""
+        from rich.panel import Panel
+        from edgar.bdc import fetch_bdc_dataset
+
+        dataset = fetch_bdc_dataset(2024, 4)
+
+        rich_output = dataset.__rich__()
+        assert isinstance(rich_output, Panel)
+
+        str_repr = str(dataset)
+        assert "2024Q4" in str_repr
+
+    @pytest.mark.network
+    def test_list_bdc_datasets(self):
+        """Test listing available BDC datasets."""
+        from edgar.bdc import list_bdc_datasets
+
+        df = list_bdc_datasets(max_years_back=2)
+        assert isinstance(df, pd.DataFrame)
+
+        if not df.empty:
+            assert 'year' in df.columns
+            assert 'quarter' in df.columns
+            assert 'period' in df.columns
+            assert 'url' in df.columns
+
+    def test_bdc_dataset_dataclass(self):
+        """Test BDCDataset can be created directly for unit testing."""
+        from edgar.bdc import BDCDataset
+        import pandas as pd
+
+        # Create empty dataset for testing
+        dataset = BDCDataset(
+            year=2024,
+            quarter=3,
+            submissions=pd.DataFrame({'adsh': ['test-123'], 'cik': [1234]}),
+            numbers=pd.DataFrame(),
+            presentation=pd.DataFrame(),
+            soi=pd.DataFrame(),
+        )
+
+        assert dataset.period == "2024Q3"
+        assert dataset.num_submissions == 1
+        assert dataset.num_facts == 0
+        assert dataset.num_soi_entries == 0

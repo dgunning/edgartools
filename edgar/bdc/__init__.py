@@ -12,6 +12,7 @@ Key Features:
 - Check if a company is a BDC via CIK lookup
 - Get lists of active BDCs
 - Parse individual portfolio investments from Schedule of Investments
+- Access SEC DERA bulk data sets for cross-BDC analysis
 
 Example usage:
     >>> from edgar.bdc import get_bdc_list, find_bdc, is_bdc_cik
@@ -36,7 +37,20 @@ Example usage:
     >>> investments = arcc.portfolio_investments()
     >>> len(investments)
     1256
+
+    # Bulk analysis with DERA data sets
+    >>> from edgar.bdc import fetch_bdc_dataset
+    >>> dataset = fetch_bdc_dataset(2024, 3)
+    >>> dataset.soi.groupby('industry')['fair_value'].sum()
 """
+from edgar.bdc.datasets import (
+    BDCDataset,
+    ScheduleOfInvestmentsData,
+    fetch_bdc_dataset,
+    fetch_bdc_dataset_monthly,
+    get_available_quarters,
+    list_bdc_datasets,
+)
 from edgar.bdc.investments import (
     DataQuality,
     PortfolioInvestment,
@@ -58,17 +72,27 @@ from edgar.bdc.search import (
 )
 
 __all__ = [
+    # Data sets (DERA bulk extracts)
+    'BDCDataset',
+    'ScheduleOfInvestmentsData',
+    'fetch_bdc_dataset',
+    'fetch_bdc_dataset_monthly',
+    'get_available_quarters',
+    'list_bdc_datasets',
+    # Reference data
     'BDCEntities',
     'BDCEntity',
-    'BDCSearchIndex',
-    'BDCSearchResults',
-    'DataQuality',
-    'PortfolioInvestment',
-    'PortfolioInvestments',
     'fetch_bdc_report',
-    'find_bdc',
     'get_active_bdc_ciks',
     'get_bdc_list',
     'get_latest_bdc_report_year',
     'is_bdc_cik',
+    # Investments
+    'DataQuality',
+    'PortfolioInvestment',
+    'PortfolioInvestments',
+    # Search
+    'BDCSearchIndex',
+    'BDCSearchResults',
+    'find_bdc',
 ]
