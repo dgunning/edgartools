@@ -855,12 +855,23 @@ class Company(Entity):
             details_table.add_row("Fiscal Year", fy_end)
 
         # State of Incorporation
-        if hasattr(self.data, 'state_of_incorporation_description') and self.data.state_of_incorporation_description:
-            from edgar.reference._codes import get_place_name
-            code = self.data.state_of_incorporation_description
-            # Look up full name from place_codes.csv, fallback to code if not found
-            state = get_place_name(code) or code
-            details_table.add_row("Incorporated", state)
+        if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
+            from edgar.reference._codes import get_place_name, is_foreign_company
+            code = self.data.state_of_incorporation
+            # Always look up full name from place_codes.csv, fallback to description or code
+            state_name = get_place_name(code)
+            if not state_name:
+                state_name = getattr(self.data, 'state_of_incorporation_description', None) or code
+            # Add Foreign indicator for non-US companies
+            if is_foreign_company(code):
+                incorporation_text = Text.assemble(
+                    (state_name, get_style("value")),
+                    ("  ", ""),
+                    ("Foreign", get_style("foreign"))
+                )
+                details_table.add_row("Incorporated", incorporation_text)
+            else:
+                details_table.add_row("Incorporated", state_name)
 
         # Entity Type (for non-companies or when relevant)
         if hasattr(self.data, 'entity_type') and self.data.entity_type and self.data.is_individual:

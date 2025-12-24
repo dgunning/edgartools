@@ -71,6 +71,7 @@ PALETTE = {
     "neutral": "dim",
     "warning": "yellow",
     "info": "cyan",
+    "foreign": "magenta",  # Foreign company indicator
 
     # =========================================================================
     # FINANCIAL STATEMENTS - Row Types
