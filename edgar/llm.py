@@ -329,6 +329,12 @@ def _extract_xbrl_statements(filing, statements, optimize_for_llm, show_dimensio
                     log.debug(f"Empty dataframe for {stmt_name}")
                     continue
 
+                # Filter out dimension rows if requested
+                if not show_dimension and 'dimension' in df.columns:
+                    # Remove rows that have dimension values (keep only consolidated/main rows)
+                    # The dimension column contains booleans: False=no dimension, True=has dimension
+                    df = df[df['dimension'] == False]
+
                 # Determine which columns to keep
                 drop_cols = {"concept"}  # Always drop concept
                 if not show_dimension:
