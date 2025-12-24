@@ -494,6 +494,29 @@ class Company(Entity):
         return None
 
     @property
+    def is_foreign(self) -> bool:
+        """
+        Check if this company is incorporated outside the United States.
+
+        Uses the SEC state of incorporation code to determine if the company
+        is registered in a foreign jurisdiction.
+
+        Returns:
+            True if incorporated in a foreign country, False if US or unknown
+
+        Example:
+            >>> company = Company('BABA')
+            >>> company.is_foreign
+            True
+            >>> Company('AAPL').is_foreign
+            False
+        """
+        if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
+            from edgar.reference._codes import is_foreign_company
+            return is_foreign_company(self.data.state_of_incorporation)
+        return False
+
+    @property
     def latest_tenk(self) -> Optional[TenK]:
         """Get the latest 10-K filing for this company."""
         latest_10k = self.get_filings(form='10-K', trigger_full_load=False).latest()
