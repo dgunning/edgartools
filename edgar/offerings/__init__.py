@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
-    from edgar.entity.entity_filings import EntityFilings
+    from edgar.entity.filings import EntityFilings
 
 from edgar.offerings.campaign import Campaign, Offering  # Campaign for backwards compatibility
 from edgar.offerings.formc import FormC, FundingPortal, IssuerCompany, Signer

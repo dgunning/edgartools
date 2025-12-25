@@ -5,7 +5,7 @@ Streaming parser for large HTML documents.
 import io
 from typing import TYPE_CHECKING, Any, Dict
 
-from lxml import etree
+from lxml import etree  # type: ignore[import-untyped]
 from lxml.html import HtmlElement
 
 from edgar.documents.config import ParserConfig
