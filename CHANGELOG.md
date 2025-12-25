@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.6.1] - 2025-12-25
+
+### Fixed
+
+- **Type Checker Issues in Source Code** (20ac62d9)
+  - Added type ignore comments for lxml.etree imports (missing type stubs)
+  - Fixed EntityFilings import path in offerings/__init__.py
+  - Added type ignore for np.issubdtype pandas dtype argument
+  - **Files**: `edgar/documents/utils/streaming.py`, `edgar/npx/parsing.py`, `edgar/offerings/__init__.py`, `edgar/ownership/core.py`
+  - **Impact**: Zero type errors in main edgar source code with `uvx ty check`
+
+- **Financial Ratio Calculation Type Mismatches** (#549, 03a4e486)
+  - Fixed type mismatches in FinancialRatios class calculations
+  - Added missing configuration for ratio computations
+  - **Files**: `edgar/financials/ratios.py`
+  - **Impact**: Reliable financial ratio calculations across all company types
+
+- **TypeError in get_financial_metrics() for MSFT** (#553, f0886207)
+  - Fixed get_financial_metrics() returning empty strings instead of numeric values
+  - Improved handling of missing or malformed financial data
+  - **Files**: `edgar/financials/metrics.py`
+  - **Impact**: Consistent numeric returns from financial metrics API
+
+- **Section Tables Returning Empty for TOC-Based Sections** (#554, 28b02a4b)
+  - Fixed section.tables() returning empty lists for table-of-contents based sections
+  - Improved table extraction from document sections
+  - **Files**: `edgar/documents/` modules
+  - **Impact**: Reliable table extraction from all document section types
+
+### Documentation
+
+- **Comprehensive Ownership Module Documentation**
+  - Added detailed documentation for edgar.ownership module
+  - **Files**: `docs/` ownership documentation
+  - **Impact**: Better developer experience for insider transaction analysis
+
+### Summary
+
+Release 5.6.1 is a bug fix release focusing on type safety and reliability improvements. Key highlights:
+
+- Zero type errors in main source code
+- Fixed financial ratio and metrics calculation issues
+- Improved table extraction from document sections
+- Enhanced ownership module documentation
+
+This release is recommended for all users.
+
 ## [5.6.0] - 2025-12-22
 
 ### Fixed
