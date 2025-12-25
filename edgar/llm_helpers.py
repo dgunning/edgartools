@@ -1087,6 +1087,7 @@ def process_content(content, section_title=None, track_filtered=False):
                     table_text = element.get_text()[:100]
                     filtered_metadata["details"].append({
                         "type": "xbrl_metadata_table",
+                        "reason": "Contains XBRL namespace/type metadata (non-financial content)",
                         "preview": clean_text(table_text)
                     })
                 continue
@@ -1129,6 +1130,7 @@ def process_content(content, section_title=None, track_filtered=False):
                         filtered_metadata["duplicate_tables"] += 1
                         filtered_metadata["details"].append({
                             "type": "duplicate_table",
+                            "reason": "Duplicate of earlier table (identical structure and data)",
                             "title": table_title or "Untitled"
                         })
                     processed_tables.add(element)

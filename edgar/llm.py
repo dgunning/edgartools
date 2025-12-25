@@ -108,7 +108,8 @@ def extract_markdown(
     include_header: bool = True,
     optimize_for_llm: bool = True,
     show_dimension: bool = True,
-    show_filtered_data: bool = False
+    show_filtered_data: bool = False,
+    max_filtered_items: Optional[int] = 10
 ) -> str:
     """
     Extract filing content as LLM-optimized markdown.
@@ -127,6 +128,7 @@ def extract_markdown(
         optimize_for_llm: Apply LLM optimizations (cell merging, dedup, etc.)
         show_dimension: Include dimension, abstract, and level columns in statements (default: True)
         show_filtered_data: Append metadata about filtered/omitted data at end (default: False)
+        max_filtered_items: Maximum filtered items to show in metadata (None = all, default: 10)
 
     Returns:
         Combined markdown string
@@ -187,12 +189,24 @@ def extract_markdown(
         if filtered_data.get("details"):
             parts.append("")
             parts.append("### Details:")
-            for i, detail in enumerate(filtered_data["details"][:10], 1):  # Show first 10
+            # Show limited or all items based on max_filtered_items
+            details_to_show = filtered_data["details"]
+            if max_filtered_items is not None:
+                details_to_show = details_to_show[:max_filtered_items]
+
+            for i, detail in enumerate(details_to_show, 1):
                 parts.append(f"{i}. Type: {detail['type']}")
+                if "reason" in detail:
+                    parts.append(f"   Reason: {detail['reason']}")
                 if "preview" in detail:
                     parts.append(f"   Preview: {detail['preview']}")
                 elif "title" in detail:
                     parts.append(f"   Title: {detail['title']}")
+
+            # Show count if items were truncated
+            total_details = len(filtered_data["details"])
+            if max_filtered_items is not None and total_details > max_filtered_items:
+                parts.append(f"   ... and {total_details - max_filtered_items} more items (use max_filtered_items=None to see all)")
 
     return "\n".join(parts)
 
