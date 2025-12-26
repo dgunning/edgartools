@@ -28,7 +28,7 @@ Example:
 """
 
 from dataclasses import dataclass
-from typing import List, Optional, Sequence, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 from edgar.core import log
 
@@ -66,36 +66,34 @@ _STATEMENT_TITLES = {
     "CoverPage": "Cover Page",
 }
 
-_STATEMENT_KEYWORDS = {
-    "IncomeStatement": [
-        "income statement", "statement of income", "statement of operations",
-        "statement of earnings", "operations", "earnings", "profit and loss", "p&l",
-    ],
-    "BalanceSheet": [
-        "balance sheet", "statement of financial position", "financial position",
-    ],
-    "CashFlowStatement": [
-        "cash flow statement", "statement of cash flows", "cash flows",
-    ],
-    "StatementOfEquity": [
-        "statement of equity", "statement of stockholders equity",
-        "statement of shareholders equity", "stockholders equity", "shareholders equity",
-    ],
-    "ComprehensiveIncome": [
-        "comprehensive income", "statement of comprehensive income",
-    ],
-    "CoverPage": [
-        "cover page", "cover",
-    ],
-}
-
-# Item boundary patterns for regex fallback
+# Item boundary patterns for LLM section extraction
+# NOTE: Authoritative source for 10-K/10-Q structure is:
+#   - edgar.company_reports.ten_k.TenK.structure (all 23 10-K items)
+#   - edgar.company_reports.ten_q.TenQ.structure (all 11 10-Q items)
+# This dict provides boundaries for section extraction in extract_markdown()
 _ITEM_BOUNDARIES = {
-    "Item 1": ["Item 1A", "Item 1B", "Item 2"],
-    "Item 1A": ["Item 1B", "Item 2"],
+    "Item 1": ["Item 1A", "Item 1B", "Item 1C", "Item 2"],
+    "Item 1A": ["Item 1B", "Item 1C", "Item 2"],
+    "Item 1B": ["Item 1C", "Item 2"],
+    "Item 1C": ["Item 2"],
+    "Item 2": ["Item 3"],
+    "Item 3": ["Item 4"],
+    "Item 4": ["Item 5", "Part II"],
+    "Item 5": ["Item 7"],  # Item 6 removed 2021
     "Item 7": ["Item 7A", "Item 8"],
     "Item 7A": ["Item 8"],
-    "Item 8": ["Item 9", "Item 9A"],
+    "Item 8": ["Item 9", "Item 9A", "Item 9B"],
+    "Item 9": ["Item 9A", "Item 9B", "Item 9C"],
+    "Item 9A": ["Item 9B", "Item 9C"],
+    "Item 9B": ["Item 9C", "Item 10", "Part III"],
+    "Item 9C": ["Item 10", "Part III"],
+    "Item 10": ["Item 11"],
+    "Item 11": ["Item 12"],
+    "Item 12": ["Item 13"],
+    "Item 13": ["Item 14"],
+    "Item 14": ["Item 15", "Part IV"],
+    "Item 15": ["Item 16", "Signatures"],
+    "Item 16": ["Signatures"],
 }
 
 
@@ -240,8 +238,8 @@ def extract_sections(
         track_filtered: Track filtered data and return metadata
 
     Returns:
-        If track_filtered=False: List of ExtractedSection objects
         If track_filtered=True: Tuple of (List[ExtractedSection], dict) with filtered metadata
+        If track_filtered=False: List[ExtractedSection] objects
 
     Example:
         >>> sections = extract_sections(filing, notes=True)
@@ -291,7 +289,7 @@ def extract_sections(
 
     if track_filtered:
         return (sections, all_filtered_data)
-    return (sections, {})
+    return sections
 
 
 def _normalize_list(value: Optional[Union[str, Sequence[str]]]) -> List[str]:
@@ -303,7 +301,7 @@ def _normalize_list(value: Optional[Union[str, Sequence[str]]]) -> List[str]:
     return [v for v in value if v]
 
 
-def _build_header(filing, sections: List['ExtractedSection']) -> str:
+def _build_header(filing: 'Filing', sections: List['ExtractedSection']) -> str:
     """
     Build filing metadata header in YAML frontmatter format.
 
@@ -376,7 +374,12 @@ def _build_header(filing, sections: List['ExtractedSection']) -> str:
     return "\n".join(yaml_lines)
 
 
-def _extract_xbrl_statements(filing, statements, optimize_for_llm, show_dimension=True):
+def _extract_xbrl_statements(
+    filing: 'Filing',
+    statements: Union[str, Sequence[str]],
+    optimize_for_llm: bool,
+    show_dimension: bool = True
+) -> List[ExtractedSection]:
     """Extract XBRL financial statements."""
     sections = []
 
@@ -391,14 +394,17 @@ def _extract_xbrl_statements(filing, statements, optimize_for_llm, show_dimensio
                 financials = report.financials
 
         if not financials:
-            log.debug("No financials available for XBRL extraction")
+            log.warning("Cannot extract XBRL statements: No financials available in filing. "
+                       "This may be a non-XBRL filing or missing financial data.")
             return sections
 
         for stmt_name in _normalize_list(statements):
             # Get statement from financials
             stmt = _get_statement(financials, stmt_name)
             if not stmt:
-                log.debug(f"Statement not found: {stmt_name}")
+                log.warning(f"Statement '{stmt_name}' not found in financials. "
+                           f"Available types: IncomeStatement, BalanceSheet, CashFlowStatement, "
+                           f"StatementOfEquity, ComprehensiveIncome, CoverPage")
                 continue
 
             # Render using EdgarTools
@@ -455,7 +461,7 @@ def _extract_xbrl_statements(filing, statements, optimize_for_llm, show_dimensio
     return sections
 
 
-def _get_statement(financials, stmt_name: str):
+def _get_statement(financials: 'Financials', stmt_name: str) -> Optional['Statement']:
     """Get statement from financials object."""
     mapping = {
         "IncomeStatement": lambda: financials.income_statement(),
@@ -477,7 +483,11 @@ def _get_statement(financials, stmt_name: str):
     return None
 
 
-def _extract_items(filing, items, optimize_for_llm):
+def _extract_items(
+    filing: 'Filing',
+    items: Union[str, Sequence[str]],
+    optimize_for_llm: bool
+) -> List[ExtractedSection]:
     """Extract item sections using Document sections or fallback."""
     sections = []
 
@@ -563,30 +573,41 @@ def _extract_items(filing, items, optimize_for_llm):
         # Fallback: Use regex boundary extraction
         try:
             html = filing.html()
-            if html:
-                from tools.llm_extraction import extract_item_with_boundaries
-                content = extract_item_with_boundaries(
-                    html,
-                    item_name,
-                    _ITEM_BOUNDARIES.get(item_name, ["Item", "Signature"])
-                )
-                if content:
-                    from edgar.llm_helpers import process_content
-                    markdown = process_content(content, section_title=item_name)
-                    if markdown:
-                        sections.append(ExtractedSection(
-                            title=item_name,
-                            markdown=markdown,
-                            source=f'item:{item_name}:fallback',
-                            is_xbrl=False
-                        ))
+            if not html:
+                log.warning(f"Cannot extract {item_name}: No HTML content available in filing")
+                continue
+
+            from edgar.llm_extraction import extract_item_with_boundaries
+            content = extract_item_with_boundaries(
+                html,
+                item_name,
+                _ITEM_BOUNDARIES.get(item_name, ["Item", "Signature"])
+            )
+            if content:
+                from edgar.llm_helpers import process_content
+                markdown = process_content(content, section_title=item_name)
+                if markdown:
+                    sections.append(ExtractedSection(
+                        title=item_name,
+                        markdown=markdown,
+                        source=f'item:{item_name}:fallback',
+                        is_xbrl=False
+                    ))
+                else:
+                    log.warning(f"Extraction of {item_name} returned empty content after processing")
+            else:
+                log.warning(f"Could not locate {item_name} boundaries in filing HTML")
         except Exception as e:
-            log.debug(f"Fallback extraction failed for {item_name}: {e}")
+            log.warning(f"Failed to extract {item_name}: {e}")
 
     return sections
 
 
-def _extract_notes(filing, optimize_for_llm, track_filtered=False):
+def _extract_notes(
+    filing: 'Filing',
+    optimize_for_llm: bool,
+    track_filtered: bool = False
+) -> Union[List[ExtractedSection], Tuple[List[ExtractedSection], Dict]]:
     """
     Extract financial statement notes.
 
@@ -594,8 +615,8 @@ def _extract_notes(filing, optimize_for_llm, track_filtered=False):
     Strategy 2: Use Document sections as fallback
 
     Returns:
-        If track_filtered=False: sections list
-        If track_filtered=True: (sections, filtered_metadata) tuple
+        If track_filtered=False: List of ExtractedSection objects
+        If track_filtered=True: Tuple of (sections list, filtered_metadata dict)
     """
     sections = []
     all_filtered_data = {
@@ -660,7 +681,7 @@ def _extract_notes(filing, optimize_for_llm, track_filtered=False):
                     log.debug(f"Extracted {len(sections)} notes via FilingSummary")
                     if track_filtered:
                         return (sections, all_filtered_data)
-                    return (sections, {})
+                    return sections
 
     except Exception as e:
         log.debug(f"XBRL notes extraction failed: {e}")
@@ -701,4 +722,4 @@ def _extract_notes(filing, optimize_for_llm, track_filtered=False):
 
     if track_filtered:
         return (sections, all_filtered_data)
-    return (sections, {})
+    return sections
