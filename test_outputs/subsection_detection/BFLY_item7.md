@@ -1,7 +1,109 @@
-START_DOCUMENT: 10-K 0001628280-25-009036 2025-02-28
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0001628280-25-009036
+filing_date: 2025-02-28
+company: Butterfly Network, Inc.
+ticker: BFLY
+section: Item 7
+format: markdown
+---
 
-## SECTION: 7
+## SECTION: Item 7
+The following discussion and analysis of the financial condition and results of operations should be read in conjunction with the financial statements and related notes included elsewhere in this Annual Report on Form 10-K. This discussion contains forward-looking statements reflecting our current expectations, estimates and assumptions concerning events and financial trends that may affect our future operating results or financial position. Actual results and the timing of events may differ materially from those contained in these forward-looking statements due to a number of factors, including those discussed in the sections entitled “Risk Factors” and “Cautionary Statement Regarding Forward-Looking Statements” appearing elsewhere in this Annual Report on Form 10-K.
+
+
+### Overview
+
+
+We are an innovative digital health business transforming care through a unique combination of portable, semiconductor-based ultrasound technology, intuitive software, services, and educational offerings that can make medical imaging more accessible than ever before. Butterfly’s solution enables the practical application of ultrasound information into the clinical workflow through affordable hardware that fits in a healthcare professional’s pocket and is paired with cloud-connected software that is easily accessed through a mobile application.
+
+Butterfly developed ultrasound devices that can perform whole-body imaging in a single handheld probe because it is powered by our proprietary semiconductor technology instead of piezoelectric crystals. Our Ultrasound-on-Chip™ makes ultrasound more accessible outside of large healthcare institutions, while our software is intended to make the product easy to use, fully integrated with the clinical workflow, and accessible on a user’s smartphone, tablet, and almost any hospital computer system connected to the Internet. We aim to enable the delivery of imaging information anywhere at point-of-care to drive earlier detection throughout the body and remote management of health conditions. We market and sell the Butterfly system, which includes probes, related accessories, and software subscriptions, to healthcare systems, physicians, and healthcare providers through a direct sales force, distributors, and our eCommerce channel.
+
+Since 2022, we have taken significant actions to reduce our cost of operations and extend our cash runway and have reduced our annual cash requirements by approximately $180 million, to less than $50 million annually. As we look forward, we expect to continue to invest in our business in order to grow revenue. On January 31, 2025, we raised additional capital through the issuance and sale in a public offering of 27.6 million shares of our Class A common stock, generating proceeds of $86.9 million, before underwriting costs and expenses.
+
+
+### Key Performance Measures
+
+
+We review the key performance measures discussed below to evaluate the business and measure performance, identify trends, formulate plans, and make strategic decisions. Our key performance measures may fluctuate over time as the adoption of our devices increases, which may shift the revenue mix more toward software and other services. The quarterly measures may be impacted by the timing of device sales.
+
+Units fulfilled
+
+We define units fulfilled as the number of devices whereby control is transferred to a customer. We do not adjust this measure for returns as our volume of returns has historically been low. We view units fulfilled as a key indicator of the growth of our business. We believe that this measure is useful to investors because it presents our core growth and performance of our business period over period.
+
+Units fulfilled increased by 3,131, or 19.0%, for the year ended December 31, 2024 compared to the year ended December 31, 2023. The increase was led by higher volume across all U.S. sales channels as we began selling our next-generation iQ3 probe alongside our existing iQ+ probe. We also saw increased probe sales in our international distributor channel after onboarding several new distribution territories in the current year.
+
+Software and other services mix
+
+We define software and other services mix as a percentage of our total revenue recognized in a reporting period that is based on software subscriptions and other related services, consisting primarily of our software as a service (“SaaS”) offering. We view software and other services mix as a key indicator of the profitability of our business, and thus we believe that this measure is useful to investors.
+
+Software and other services mix decreased by 5.3 percentage points, to 33.9% for the year ended December 31, 2024 compared to the year ended December 31, 2023. Although our software and other services revenue increased in the current year, our software and other services mix decreased due to the even larger increase in product revenue realized in the current year.
+
+Description of Certain Components of Financial Data
+
+Revenue
+
+Revenue consists of revenue from the sale of products, such as medical devices and accessories, and the sale of software and related services, classified as software and other services revenue on our consolidated statements of operations and comprehensive loss. Our software and related service offerings include SaaS subscriptions, product support and maintenance (“Support”), and software development kits ("SDKs") which may be perpetual or term-based. SaaS subscriptions include licenses for teams and individuals as well as enterprise-level subscriptions. For sales of products and perpetual SDKs, revenue is recognized at a point in time upon transfer of control to the customer. SaaS subscriptions, Support, and term-based SDKs are generally related to stand-ready obligations and are recognized ratably over time.
+
+Over time, as adoption of our devices increases through further market penetration and as practitioners in the Butterfly network continue to use our devices, we expect our annual revenue mix to shift more toward software and other services. The quarterly revenue mix may be impacted by the timing of device sales. In 2024, due to the continued success of our next-generation iQ3 probe, our software and other services mix as a percentage of total revenue decreased.
+
+To date, we have invested in building out our commercial footprint, with the ultimate goal of growing adoption at large-scale healthcare systems and driving awareness of the usability of ultrasound. As we expand our healthcare system software offerings and develop relationships with larger healthcare systems, we continue to expect a higher proportion of our sales in healthcare systems compared to eCommerce.
+
+Cost of revenue
+
+Cost of product revenue consists of product costs including manufacturing costs, personnel costs and benefits, inbound freight, packaging, warranty replacement costs, payment processing fees, and inventory obsolescence and write-offs. We expect our cost of product revenue to fluctuate over time due to the level of units fulfilled in any given period and fluctuate as a percentage of product revenue over time as our focus on operational efficiencies in our supply chain may be offset by increased prices of certain inventory components.
+
+Cost of software and other services revenue consists of personnel costs, cloud hosting costs and payment processing fees. Because the costs and associated expenses to deliver our SaaS offerings are less than the costs and associated expenses of manufacturing and selling our devices, we anticipate an improvement in profitability and margin expansion over time as our revenue mix shifts increasingly towards software and other services. We plan to continue to invest additional resources to expand and further develop our SaaS and other service offerings which will be reflected in cost of revenue as amortization expense.
+
+Research and development
+
+Research and development expenses primarily consist of personnel costs and benefits, professional services, facilities-related expenses and depreciation, fabrication services, and software costs. Most of our research and development expenses are related to developing new products and services that have not reached the point of commercialization and improving our products and services that have been commercialized. Fabrication services include certain third-party engineering costs, product testing, and test boards. Research and development expenses are expensed as incurred. We expect to continue to make substantial investments in our product and software development, clinical, and regulatory capabilities.
+
+Sales and marketing
+
+Sales and marketing expenses primarily consist of personnel costs and benefits, advertising, conferences and events, facilities-related expenses, and software costs. We expect to increase our investments in our commercial capabilities.
+
+General and administrative
+
+General and administrative expenses primarily consist of personnel costs and benefits, insurance, patent fees, software costs, facilities-related expenses, and outside services. Outside services consist of professional services, legal fees and other professional fees.
+
+Operating expenses classified as other are expenses which we do not consider representative of our ongoing operations. These other expenses primarily consist of employee severance and benefits costs related to our reductions in force and business transformation initiative, litigation costs, and legal settlements.
+
+Results of Operations
+
+We operate as a single reportable segment to reflect the way our chief operating decision maker reviews and assesses the performance of the business. The accounting policies are described in Note 2 “Summary of Significant Accounting Policies” in our consolidated financial statements included in this Annual Report on Form 10-K.
+
+
+#### Table: Year ended December 31,
+| label | 2024 | 2023 | 2022 |
+| --- | ---: | ---: | ---: |
+| (in thousands) | Dollars | Dollars | Dollars |
+| Revenue: |  |  |  |
+| Product | $54,200 | $40,036 | $50,263 |
+| Software and other services | 27,856 | 25,864 | 23,127 |
+| **Total revenue** | **82,056** | **65,900** | **73,390** |
+| Cost of revenue: |  |  |  |
+| Product | 24,380 | 40,655 | 26,804 |
+| Software and other services | 8,845 | 8,389 | 7,126 |
+| **Total cost of revenue** | **33,225** | **49,044** | **33,930** |
+| Gross profit | 48,831 | 16,856 | 39,460 |
+| Operating expenses: |  |  |  |
+| Research and development | 37,800 | 55,616 | 88,044 |
+| Sales and marketing | 41,567 | 39,073 | 59,494 |
+| General and administrative | 39,810 | 49,613 | 77,596 |
+| Other | 4,065 | 18,164 | 7,346 |
+| **Total operating expenses** | **123,242** | **162,466** | **232,480** |
+| Loss from operations | (74,411) | (145,610) | (193,020) |
+| Interest income | 5,020 | 7,450 | 3,384 |
+| Interest expense | (1,261) | — | (2) |
+| Change in fair value of warrant liabilities | (1,859) | 4,544 | 20,859 |
+| Other income (expense), net | (13) | (2) | 98 |
+| Loss before provision for income taxes | (72,524) | (133,618) | (168,681) |
+| Provision (benefit) for income taxes | (32) | 82 | 42 |
+| Net loss and comprehensive loss | $(72,492) | $(133,700) | $(168,723) |
+
+
+
 Comparison of the Years Ended December 31, 2024 and 2023
 
 Revenue
@@ -170,7 +272,9 @@ personnel costs resulting from our reductions in force over the past year and $4
 
 Other increased by $10.8 million for the year ended December 31, 2023 compared to the year ended December 31, 2022. This increase was primarily driven by $6.7 million of higher employee severance and benefits costs resulting from our reductions in force in 2023 and $4.1 million of higher legal costs due to litigation and other legal matters. These costs are not representative of our ongoing operations.
 
-Liquidity and Capital Resources
+
+### Liquidity and Capital Resources
+
 
 Since our inception, our primary sources of liquidity are cash flows from operations and proceeds from stock issuances and the Business Combination. Our primary uses of liquidity are operating expenses, working capital requirements, and capital expenditures.
 
@@ -225,7 +329,9 @@ Net cash used in investing activities decreased by $164.2 million, or 175.1%, fo
 
 Net cash provided by financing activities decreased by $2.7 million, or 92.1%, for the year ended December 31, 2023 compared to the year ended December 31, 2022. The decrease was primarily due to the non-recurrence of net proceeds from exercise of stock options and warrants of $2.7 million, partially offset by $0.1 million from other financing activities.
 
-Critical Accounting Policies and Estimates
+
+### Critical Accounting Policies and Estimates
+
 
 Our consolidated financial statements have been prepared in conformity with accounting principles generally accepted in the United States of America (“U.S. GAAP”). The process of preparing financial statements in conformity with U.S. GAAP requires us to make estimates and assumptions that affect the reported amounts of certain assets and liabilities and disclosure of contingent assets and liabilities at the date of the financial statements as well as the reported amounts of revenue and expense during the period. We base our assumptions, judgments, and estimates on historical experience and various other factors that we believe to be reasonable under the circumstances. Actual results could differ materially from these estimates under different assumptions or conditions. We evaluate our assumptions, judgments, and estimates on a regular basis. Historically, our assumptions, judgments, and estimates relative to our critical accounting policies have not differed materially from actual results.
 

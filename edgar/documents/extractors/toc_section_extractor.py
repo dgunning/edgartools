@@ -198,7 +198,7 @@ class SECSectionExtractor:
 
         boundary = self.section_boundaries[normalized_name]
 
-        # Extract content between boundaries using HTML parsing
+        # Extract HTML content between boundaries
         html_content = getattr(self.document.metadata, 'original_html', None)
         if not html_content:
             return None
@@ -209,8 +209,19 @@ class SECSectionExtractor:
         except Exception:
             return None
 
-    def _extract_section_html(self, html_content: str, boundary: SectionBoundary, include_subsections: bool) -> str:
-        """Extract section HTML content between anchors."""
+    def _extract_section_html(self, html_content: str, boundary: SectionBoundary,
+                              include_subsections: bool) -> str:
+        """
+        Extract section HTML from document between anchors.
+
+        Args:
+            html_content: Full HTML content
+            boundary: Section boundary info
+            include_subsections: Whether to include subsections
+
+        Returns:
+            Extracted section HTML
+        """
         # Handle XML declaration issues
         if html_content.startswith('<?xml'):
             html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
@@ -222,12 +233,12 @@ class SECSectionExtractor:
         if not start_elements:
             return ""
 
-        # Collect HTML elements between boundaries
+        # Collect elements between boundaries
         collected_elements = []
         in_range = False
 
         for event, el in etree.iterwalk(tree, events=('start', 'end')):
-            # Skip non-element nodes
+            # Skip non-element nodes (comments, etc.)
             if not hasattr(el, 'get'):
                 continue
 
@@ -241,32 +252,27 @@ class SECSectionExtractor:
 
                 # Check if we've reached the end boundary
                 if boundary.end_element_id and el_id == boundary.end_element_id:
-                    in_range = False
                     break
 
                 # Check for sibling section boundaries (when not including subsections)
                 if in_range and not include_subsections and self._is_sibling_section(el_id, boundary.name):
-                    in_range = False
                     break
 
-                # Collect elements
+                # Collect element if in range
                 if in_range:
                     collected_elements.append(el)
 
-        # Convert collected elements to HTML string
-        if not collected_elements:
-            return ""
-
-        # Build HTML from collected elements
+        # Serialize collected elements back to HTML
         html_parts = []
-        for el in collected_elements:
+        for element in collected_elements:
             try:
-                html_parts.append(etree.tostring(el, encoding='unicode', method='html'))
-            except:
-                # If element can't be serialized, skip it
-                pass
+                element_html = lxml_html.tostring(element, encoding='unicode')
+                html_parts.append(element_html)
+            except Exception:
+                # If serialization fails, skip this element
+                continue
 
-        return ''.join(html_parts)
+        return '\n'.join(html_parts)
 
     def _normalize_section_name(self, section_name: str) -> str:
         """Normalize section name for lookup."""

@@ -1,7 +1,14 @@
-START_DOCUMENT: 10-K 0001564408-25-000019 2025-02-05
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0001564408-25-000019
+filing_date: 2025-02-05
+company: Snap Inc
+ticker: SNAP
+section: Item 1
+format: markdown
+---
 
-## SECTION: part_i_item_1
+## SECTION: Item 1
 
 ### Item 1. Business.
 
@@ -92,7 +99,9 @@ Advertising Technology: We constantly develop and expand our advertising product
 
 Large-scale Infrastructure: We spend considerable resources and investment on the underlying architecture that powers our products, such as optimizing the delivery of billions of videos to hundreds of millions of people around the world every day. We currently partner with third party providers to support the infrastructure for our growing needs. These partnerships have allowed us to scale quickly without upfront physical infrastructure costs, allowing us to focus our efforts on product innovation.
 
-Employees and Culture
+
+### Employees and Culture
+
 
 We seek to be a force for good through our products, our work to strengthen our communities, our efforts to make a positive impact on the planet, and our inclusive workplace.
 
@@ -166,11 +175,15 @@ Furthermore, foreign data protection, privacy, consumer protection, content regu
 
 For additional information about government regulation applicable to our business, see “Risk Factors” in Part I, Item 1A and “Legal Proceedings” in Part I, Item 3 in this Annual Report on Form 10-K.
 
-Information about Geographic Revenue and Segments
+
+### Information about Geographic Revenue and Segments
+
 
 Information about geographic revenue and segments is set forth in Notes 2 and 19, respectively, of the notes to our consolidated financial statements included in “Financial Statements and Supplementary Data” in Part II, Item 8 in this Annual Report on Form 10-K.
 
-Available Information
+
+### Available Information
+
 
 Our website address is www.snap.com. Our Annual Report on Form 10-K, Quarterly Reports on Form 10-Q, Current Reports on Form 8-K, and amendments to these reports filed pursuant to Sections 13(a) and 15(d) of the Exchange Act are filed with the SEC. Such reports and other information filed or furnished by us with the SEC are available free of charge on our website at investor.snap.com when such reports are available on the SEC’s website. We use our website, including investor.snap.com, as a means of disclosing material non-public information and for complying with our disclosure obligations under Regulation FD.
 

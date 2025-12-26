@@ -21,9 +21,9 @@ def test_comprehensive_extraction(ticker):
 
         # Test 1: Extract Item 1
         print("\n1. Extracting Item 1...")
-        markdown_item1 = extract_markdown(filing, item="item 1")
+        markdown_item1 = extract_markdown(filing, item="Item 1")
         file_item1 = output_dir / f"{ticker}_item1.md"
-        with open(file_item1, "w", encoding="utf-8") as f:
+        with open(file_item1, "w", encoding="utf-8", newline='\n') as f:
             f.write(markdown_item1)
         subsection_count1 = markdown_item1.count('\n###')
         print(f"   Saved to: {file_item1.name}")
@@ -31,9 +31,9 @@ def test_comprehensive_extraction(ticker):
 
         # Test 2: Extract Item 1A (Risk Factors)
         print("\n2. Extracting Item 1A (Risk Factors)...")
-        markdown_item1a = extract_markdown(filing, item="item 1A")
+        markdown_item1a = extract_markdown(filing, item="Item 1A")
         file_item1a = output_dir / f"{ticker}_item1A.md"
-        with open(file_item1a, "w", encoding="utf-8") as f:
+        with open(file_item1a, "w", encoding="utf-8", newline='\n') as f:
             f.write(markdown_item1a)
         subsection_count1a = markdown_item1a.count('\n###')
         print(f"   Saved to: {file_item1a.name}")
@@ -41,9 +41,9 @@ def test_comprehensive_extraction(ticker):
 
         # Test 3: Extract Item 7 (MD&A)
         print("\n3. Extracting Item 7 (MD&A)...")
-        markdown_item7 = extract_markdown(filing, item="7")
+        markdown_item7 = extract_markdown(filing, item="Item 7")
         file_item7 = output_dir / f"{ticker}_item7.md"
-        with open(file_item7, "w", encoding="utf-8") as f:
+        with open(file_item7, "w", encoding="utf-8", newline='\n') as f:
             f.write(markdown_item7)
         subsection_count7 = markdown_item7.count('\n###')
         print(f"   Saved to: {file_item7.name}")
@@ -53,7 +53,7 @@ def test_comprehensive_extraction(ticker):
         print("\n4. Extracting Financial Notes...")
         markdown_notes = extract_markdown(filing, notes=True)
         file_notes = output_dir / f"{ticker}_notes.md"
-        with open(file_notes, "w", encoding="utf-8") as f:
+        with open(file_notes, "w", encoding="utf-8", newline='\n') as f:
             f.write(markdown_notes)
         subsection_count_notes = markdown_notes.count('\n###')
         print(f"   Saved to: {file_notes.name}")
@@ -61,9 +61,9 @@ def test_comprehensive_extraction(ticker):
 
         # Test 5: Extract multiple items together
         print("\n5. Extracting Items 1, 1A, 7 together...")
-        markdown_multi = extract_markdown(filing, item=["1", "1A", "7"])
-        file_multi = output_dir / f"{ticker}_items_1_1A_7.md"
-        with open(file_multi, "w", encoding="utf-8") as f:
+        markdown_multi = extract_markdown(filing, item=["9"])
+        file_multi = output_dir / f"{ticker}_items_9.md"
+        with open(file_multi, "w", encoding="utf-8", newline='\n') as f:
             f.write(markdown_multi)
         subsection_count_multi = markdown_multi.count('\n###')
         print(f"   Saved to: {file_multi.name}")

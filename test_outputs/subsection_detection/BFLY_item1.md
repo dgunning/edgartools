@@ -1,7 +1,14 @@
-START_DOCUMENT: 10-K 0001628280-25-009036 2025-02-28
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0001628280-25-009036
+filing_date: 2025-02-28
+company: Butterfly Network, Inc.
+ticker: BFLY
+section: Item 1
+format: markdown
+---
 
-## SECTION: part_i_item_1
+## SECTION: Item 1
 
 ### Item 1. BUSINESS
 

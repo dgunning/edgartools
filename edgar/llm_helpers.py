@@ -205,13 +205,21 @@ def is_subsection_heading(element) -> tuple[bool, str]:
         return False, ""
 
     # Exclude form headers and common SEC filing text
-    noise_keywords = [
+    text_lower = text.lower()
+
+    # Exact match filters (these are complete section names to exclude)
+    exact_noise = [
         'united states', 'securities and exchange commission', 'washington',
-        'commission file number', 'form 10-k', 'form 10-q', 'or', 'and',
+        'commission file number', 'form 10-k', 'form 10-q',
         'signatures', 'part i', 'part ii', 'part iii', 'part iv',
-        'exhibit', 'index to', 'table of contents'
+        'table of contents'
     ]
-    if any(keyword in text.lower() for keyword in noise_keywords):
+    if any(keyword == text_lower for keyword in exact_noise):
+        return False, ""
+
+    # Prefix match filters (exclude if text starts with these)
+    prefix_noise = ['exhibit', 'index to']
+    if any(text_lower.startswith(keyword) for keyword in prefix_noise):
         return False, ""
 
     # Exclude very short text (likely abbreviations or form codes)
@@ -237,9 +245,10 @@ def is_subsection_heading(element) -> tuple[bool, str]:
     parent = element.parent
     if parent:
         # Get all children, filtering out whitespace-only text nodes
+        # Note: NavigableString has name=None, Tag elements have name set
         children = [
             child for child in parent.children
-            if hasattr(child, 'name') or (isinstance(child, str) and child.strip())
+            if (hasattr(child, 'name') and child.name is not None) or (isinstance(child, str) and child.strip())
         ]
 
         # If more than one non-whitespace child, it's not standalone

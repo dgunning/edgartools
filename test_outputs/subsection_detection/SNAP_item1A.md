@@ -1,12 +1,23 @@
-START_DOCUMENT: 10-K 0001564408-25-000019 2025-02-05
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0001564408-25-000019
+filing_date: 2025-02-05
+company: Snap Inc
+ticker: SNAP
+section: Item 1A
+format: markdown
+---
 
-## SECTION: part_i_item_1a
-Item 1A. Risk Factors.
+## SECTION: Item 1A
+
+### Item 1A. Risk Factors.
+
 
 You should carefully consider the risks and uncertainties described below, together with all the other information in this Annual Report on Form 10-K, including “Management’s Discussion and Analysis of Financial Condition and Results of Operations” and the consolidated financial statements and the related notes. If any of the following risks actually occurs (or if any of those discussed elsewhere in this Annual Report on Form 10-K occurs), our business, reputation, financial condition, results of operations, revenue, and future prospects could be seriously harmed. The risks and uncertainties described below are not the only ones we face. Additional risks and uncertainties that we are unaware of, or that we currently believe are not material, may also become important factors that adversely affect our business. Unless otherwise indicated, references to our business being seriously harmed in these risk factors will include harm to our business, reputation, financial condition, results of operations, revenue, and future prospects. In that event, the market price of our Class A common stock could decline, and you could lose part or all of your investment.
 
-Risks Related to Our Business and Industry
+
+### Risks Related to Our Business and Industry
+
 
 Our ecosystem of users, advertisers, and partners depends on the engagement of our user base. Our user base growth rate has declined in the past and it may do so again in the future. If we fail to retain current users or add new users, or if our users engage less with Snapchat, our business would be seriously harmed.
 
@@ -606,11 +617,15 @@ Some of our products are in regulated industries. Clearances to market regulated
 
 The FDA and other state and foreign regulatory agencies regulate Spectacles. We may develop future products that are regulated as medical devices by the FDA or regulated by other governmental agencies. Government authorities, primarily the FDA and corresponding regulatory agencies, regulate the medical device industry. Unless there is an exemption, we must obtain regulatory approval from the FDA and corresponding agencies, or other applicable governmental authorities, before we can market or sell a new regulated product or make a significant modification to an existing product. Obtaining regulatory clearances to market a medical device or other regulated products can be costly and time-consuming, and we may not be able to obtain these clearances or approvals on a timely basis, or at all, for future products. Any delay in, or failure to receive or maintain, clearance or approval for any products under development could prevent us from launching new products. We could seriously harm our business and the ability to sell our products if we experience any product problems requiring reporting to governmental authorities, if we fail to comply with applicable federal, state, or foreign agency regulations, or if we are subject to enforcement actions such as fines, civil penalties, injunctions, product recalls, or failure to obtain regulatory clearances or approvals.
 
-We have faced inventory risk with respect to our physical products.
+
+### We have faced inventory risk with respect to our physical products.
+
 
 We have been and may in the future be exposed to inventory risks related to our physical products as a result of rapid changes in product cycles and pricing, defective merchandise, changes in consumer demand and consumer spending patterns, changes in consumer tastes with respect to our products, and other factors. We try to accurately predict these trends and avoid overstocking or understocking inventory. Demand for products, however, can change significantly between the time inventory or components are ordered and the date of sale. The acquisition of certain types of inventory or components may require significant lead-time and prepayment and they may not be returnable. Failure to manage our inventory, supplier commitments, or customer expectations could seriously harm our business.
 
-Risks Related to Credit and Financing
+
+### Risks Related to Credit and Financing
+
 
 We have offered and may continue to offer credit to our partners to stay competitive, and as a result we may be exposed to credit risk of some of our partners, which may seriously harm our business.
 
@@ -788,7 +803,9 @@ If securities or industry analysts either do not publish research about us, or p
 
 The trading market for our Class A common stock is influenced in part by the research and reports that securities or industry analysts may publish about us, our business, our market, or our competitors. If one or more of the analysts initiate research with an unfavorable rating or downgrade our Class A common stock, provide a more favorable recommendation about our competitors, or publish inaccurate or unfavorable research about our business, our Class A common stock price would likely decline. If any analyst who may cover us were to cease coverage of us or fail to regularly publish reports on us, we could lose visibility in the financial markets, which in turn could cause the trading price or trading volume to decline. Since we provide only limited financial guidance, this may increase the probability that our financial results are perceived as not in line with analysts’ expectations, and could cause volatility to our Class A common stock price.
 
-We do not intend to pay cash dividends for the foreseeable future.
+
+### We do not intend to pay cash dividends for the foreseeable future.
+
 
 We have never declared or paid cash dividends on our capital stock. We currently intend to retain any future earnings to finance the operation and expansion of our business, and we do not expect to declare or pay any cash dividends in the foreseeable future. As a result, you may only receive a return on your investment in our Class A common stock if the market price of our Class A common stock increases. In addition, our Credit Facility includes restrictions on our ability to pay cash dividends.
 

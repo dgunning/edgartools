@@ -1,8 +1,17 @@
-START_DOCUMENT: 10-K 0001628280-25-009036 2025-02-28
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0001628280-25-009036
+filing_date: 2025-02-28
+company: Butterfly Network, Inc.
+ticker: BFLY
+section: Item 1A
+format: markdown
+---
 
-## SECTION: part_i_item_1a
-Item 1A. RISK FACTORS
+## SECTION: Item 1A
+
+### Item 1A. RISK FACTORS
+
 
 This Annual Report on Form 10-K contains forward-looking statements that involve risks and uncertainties. These statements include projections about our finances, plans and objectives for the future, future operating and economic performance, and other statements regarding future performance. These statements are not guarantees of future performance or events. Our actual results could differ materially from those discussed in this report. Factors that could cause or contribute to these differences include, but are not limited to, those discussed in the following section, as well as those discussed in Part II, Item 7 entitled “Management’s Discussion and Analysis of Financial Condition and Results of Operations” and elsewhere throughout this report.
 

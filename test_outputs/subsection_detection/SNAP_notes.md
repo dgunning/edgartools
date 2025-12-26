@@ -1,5 +1,35 @@
-START_DOCUMENT: 10-K 0001564408-25-000019 2025-02-05
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0001564408-25-000019
+filing_date: 2025-02-05
+company: Snap Inc
+ticker: SNAP
+sections:
+  - Description of Business and Summary of Significant Accounting Policies
+  - Revenue
+  - Net Loss per Share
+  - Stockholders' Equity
+  - Business Acquisitions
+  - Goodwill and Intangible Assets
+  - Debt
+  - Commitments and Contingencies
+  - Leases
+  - Strategic Investments
+  - Fair Value Measurements
+  - Income Taxes
+  - Accumulated Other Comprehensive Income (Loss)
+  - Property and Equipment, Net
+  - Balance Sheet Components
+  - Employee Benefit Plans
+  - Related Party Transactions
+  - Restructuring
+  - Segments and Geographic Information
+  - Pay vs Performance Disclosure
+  - Insider Trading Arrangements
+  - Insider Trading Policies and Procedures
+  - Cybersecurity Risk Management and Strategy Disclosure
+format: markdown
+---
 
 ## SECTION: Description of Business and Summary of Significant Accounting Policies
 <!-- Source: XBRL -->
@@ -63,7 +93,9 @@ Advertising costs are expensed as incurred and recorded within sales and marketi
 
 We have three classes of authorized common stock – Class A common stock, Class B common stock, and Class C common stock. Class A common stockholders have no voting rights, Class B common stockholders are entitled to one vote per share, and Class C common stockholders are entitled to ten votes per share. Shares of our Class B common stock are convertible into an equivalent number of shares of our Class A common stock and generally convert into shares of our Class A common stock upon transfer. Shares of our Class C common stock are convertible into an equivalent number of shares of our Class B common stock and generally convert into shares of our Class B common stock upon transfer.
 
-Future Stock Split to be Effected in the Form of a Stock Dividend
+
+### Future Stock Split to be Effected in the Form of a Stock Dividend
+
 
 In July 2022, our board of directors determined that it was advisable and in our best interest to approve a stock split to be effected in the form of a special dividend of one share of Class A common stock on each outstanding share of our common stock at a future date (the “Future Stock Split”). In connection with the Future Stock Split, we entered into certain agreements (the “Co-Founder Agreements”) with Evan Spiegel and Robert Murphy, our co-founders, and certain of their respective affiliates requiring them, among other things, to convert shares of Class B common stock and Class C common stock into Class A common stock under certain circumstances. In May 2024, the conditions for the declaration of such dividends were modified and the Co-Founder Agreements were amended to reflect such modifications. As modified, the Future Stock Split will not be declared and paid until the first business day following the date on which (i) the average of the volume weighted average price (the “VWAP”) per share of Class A common stock equals or exceeds $40 per share for 90 consecutive trading days (the “90-Day VWAP”) and (ii) the ratio of the 90-Day VWAP to $8.70 equals or exceeds the ratio of the average closing price of the S&P 500 Total Return index for the same 90 trading days for which the 90-Day VWAP was calculated to 8,862.85. If this does not occur by July 21, 2032, the Future Stock Split will not be declared and paid, and the Co-Founder Agreements will terminate.
 
@@ -91,11 +123,15 @@ In evaluating our ability to recover deferred tax assets, we consider all availa
 
 We recognize a tax benefit from an uncertain tax position only if it is more likely than not that the tax position will be sustained on examination by the taxing authorities, based on the technical merits of the position. The tax benefits recognized in our consolidated financial statements from such positions are measured based on the largest benefit that has a greater than 50% likelihood of being realized. We recognize interest and penalties associated with tax matters as part of the income tax provision and include accrued interest and penalties with the related income tax liability on our consolidated balance sheets.
 
-Currency Translation and Remeasurement
+
+### Currency Translation and Remeasurement
+
 
 The functional currency of the majority of our foreign subsidiaries is the U.S. dollar. Monetary assets and liabilities denominated in a foreign currency are remeasured into U.S. dollars at the exchange rate on the balance sheet date. Revenue and expenses are remeasured at the average exchange rates during the period. Equity transactions and other non-monetary assets are remeasured using historical exchange rates. Foreign currency transaction gains and losses are recorded in other income (expense), net on our consolidated statement of operations. For those foreign subsidiaries where the local currency is the functional currency, adjustments to translate those statements into U.S. dollars are recorded in accumulated other comprehensive income (loss) in stockholders’ equity.
 
-Cash and Cash Equivalents
+
+### Cash and Cash Equivalents
+
 
 Cash and cash equivalents consist of highly liquid investments with maturities of 90 days or less from the date of purchase.
 
@@ -131,11 +167,15 @@ When we exercise significant influence over, but do not control the investee, su
 
 Certain financial instruments are required to be recorded at fair value. Other financial instruments, including cash and cash equivalents and restricted cash, are recorded at cost, which approximates fair value. Additionally, accounts receivable, accounts payable, and accrued expenses approximate fair value because of the short-term nature of these financial instruments.
 
-Accounts Receivable and Allowance for Doubtful Accounts
+
+### Accounts Receivable and Allowance for Doubtful Accounts
+
 
 Accounts receivable are recorded at the invoiced amount less any allowance for doubtful accounts to reserve for potentially uncollectible receivables. To determine the amount of the allowance, we make judgments about the creditworthiness of customers based on ongoing credit evaluation and historical experience. As of December 31, 2024 and 2023, the allowance for doubtful accounts was immaterial.
 
-Property and Equipment
+
+### Property and Equipment
+
 
 Property and equipment are stated at cost, less accumulated depreciation. We compute depreciation using the straight-line method over the estimated useful lives of the assets, which is generally three years for computer hardware, software, and equipment, five years for furniture, and over the shorter of lease term or useful life of the assets for leasehold improvements. Buildings are generally depreciated over a useful life ranging from 20 to 45 years. Maintenance and repairs are expensed as incurred.
 
@@ -329,7 +369,9 @@ The number of shares reserved for issuance under the 2017 Plan will increase aut
 
 In January 2017, our board of directors adopted the 2017 Employee Stock Purchase Plan (the “2017 ESPP”). Our stockholders approved the 2017 ESPP in February 2017. The 2017 ESPP became effective in connection with the IPO. A total of 16,484,690 shares of Class A common stock were initially reserved for issuance under the 2017 ESPP. No shares of our Class A common stock have been issued or offered under the 2017 ESPP. The number of shares of our Class A common stock reserved for issuance will automatically increase on January 1st of each calendar year, beginning on January 1, 2018 through January 1, 2027, by the lesser of (i) 1.0% of the total number of shares of our common stock outstanding on the last day of the calendar month before the date of the automatic increase, and (ii) 15,000,000 shares; provided that before the date of any such increase, our board of directors may determine that such increase will be less than the amount set forth in clauses (i) and (ii). As of December 31, 2024, there were 16,484,690 shares of our Class A common stock reserved for future issuance under the 2017 ESPP.
 
-Restricted Stock Units and Restricted Stock Awards
+
+### Restricted Stock Units and Restricted Stock Awards
+
 
 The following table summarizes the RSU and RSA activity for the year ended December 31, 2024:
 
@@ -818,7 +860,9 @@ We hold investments in publicly traded companies with an aggregate carrying valu
 
 We carry the Convertible Notes at face value less the unamortized debt issuance costs on our consolidated balance sheets and present the fair value for disclosure purposes only. As of December 31, 2024, the fair value of the 2025 Notes, the 2026 Notes, the 2027 Notes, the 2028 Notes, and the 2030 Notes was $35.5 million, $242.7 million, $998.5 million, $1,226.6 million, and $635.6 million, respectively. As of December 31, 2023, the fair value of the 2025 Notes, the 2026 Notes, the 2027 Notes, and the 2028 Notes was $300.9 million, $893.2 million, $921.5 million, and $1,181.7 million, respectively. The estimated fair value of the Convertible Notes, which are classified as Level 2 financial instruments, was determined based on the estimated or actual bid prices of the Convertible Notes in an over-the-counter market on the last business day of the period.
 
-Schedule of Cash, Cash Equivalents, and Restricted Cash
+
+### Schedule of Cash, Cash Equivalents, and Restricted Cash
+
 
 The following table provides a reconciliation of cash, cash equivalents and restricted cash reported in our consolidated balance sheet to the total of the amounts in the consolidated statements of cash flows.
 
@@ -1095,7 +1139,9 @@ In the third quarter of 2023, we initiated the wind down of our AR Enterprise bu
 
 During the year ended December 31, 2023, we recognized pre-tax restructuring charges of $40.8 million, primarily recorded in sales and marketing and general and administrative expenses in our consolidated statement of operations, and an income tax benefit of $5.7 million. The pre-tax restructuring charges primarily include cash severance, stock-based compensation expense, and charges related to the revision of the useful lives and disposal of certain acquired intangible assets.
 
-Strategic Reprioritization
+
+### Strategic Reprioritization
+
 
 In the third quarter of 2022, we initiated a strategic reprioritization plan, which included a reduction of our global employee headcount by approximately 20%. We substantially completed the reprioritization plan in the fourth quarter of 2022.
 

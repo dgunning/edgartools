@@ -1,14 +1,25 @@
-START_DOCUMENT: 10-K 0000320193-25-000079 2025-10-31
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0000320193-25-000079
+filing_date: 2025-10-31
+company: Apple Inc.
+ticker: AAPL
+section: Item 1A
+format: markdown
+---
 
-## SECTION: part_i_item_1a
-Item 1A. Risk Factors
+## SECTION: Item 1A
+
+### Item 1A. Risk Factors
+
 
 The following summarizes factors that could have a material adverse effect on the Company’s business, reputation, results of operations, financial condition and stock price. The Company may not be able to accurately predict, control or mitigate these risks. Statements in this section are based on the Company’s beliefs and opinions regarding matters that could materially adversely affect the Company in the future and are not representations as to whether such matters have or have not occurred previously. The risks and uncertainties described below are not exhaustive and should not be considered a complete statement of all potential risks or uncertainties that the Company faces or may face in the future.
 
 This section should be read in conjunction with Part II, Item 7, “Management’s Discussion and Analysis of Financial Condition and Results of Operations” and the consolidated financial statements and accompanying notes in Part II, Item 8, “Financial Statements and Supplementary Data” of this Form 10-K.
 
-Macroeconomic and Industry Risks
+
+### Macroeconomic and Industry Risks
+
 
 The Company’s operations and performance depend significantly on global and regional economic conditions and adverse economic conditions can materially adversely affect the Company’s business, results of operations, financial condition and stock price.
 
@@ -116,7 +127,9 @@ The Company believes that its distinctive and inclusive culture is a significant
 
 Apple Inc. | 2025 Form 10-K | 10
 
-The Company depends on the performance of carriers and other resellers.
+
+### The Company depends on the performance of carriers and other resellers.
+
 
 The Company distributes its products and certain of its services through cellular network carriers and other resellers, many of which distribute products and services from competitors. Resellers offer financing, installment payment plans or subsidies for users’ purchases of devices, and such plans may be discontinued or modified any time.
 
@@ -146,7 +159,9 @@ Investment in new business strategies, commercial relationships and acquisitions
 
 The Company has invested, and in the future may invest, in new business strategies, commercial relationships and acquisitions. Such endeavors may involve significant risks and uncertainties, including distraction of management from current operations, greater-than-expected liabilities and expenses, economic, political, legal and regulatory challenges associated with operating in new businesses, regions or countries, inadequate return on capital, potential impairment of tangible and intangible assets, and significant write-offs. Some transactions, including investments and acquisitions, are exposed to additional risks, including failing to obtain required regulatory approvals on a timely basis or at all, a counterparty’s failure to perform or deliver as anticipated, or the imposition of onerous conditions that could delay or prevent the Company from completing a transaction or otherwise limit the Company’s ability to fully realize the anticipated benefits of a transaction. New business strategies and ventures are inherently risky and may not be successful. The Company’s business strategies and investments may not be successful, which could materially adversely affect the Company’s business, reputation, results of operations, financial condition and stock price.
 
-Legal and Regulatory Compliance Risks
+
+### Legal and Regulatory Compliance Risks
+
 
 The Company’s business, results of operations and financial condition could be adversely impacted by unfavorable results of legal proceedings or government investigations.
 

@@ -1,5 +1,28 @@
-START_DOCUMENT: 10-K 0000320193-25-000079 2025-10-31
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0000320193-25-000079
+filing_date: 2025-10-31
+company: Apple Inc.
+ticker: AAPL
+sections:
+  - Summary of Significant Accounting Policies
+  - Revenue
+  - Earnings Per Share
+  - Financial Instruments
+  - Property, Plant and Equipment
+  - Consolidated Financial Statement Details
+  - Income Taxes
+  - Leases
+  - Debt
+  - Shareholders' Equity
+  - Share-Based Compensation
+  - Commitments, Contingencies and Supply Concentrations
+  - Segment Information and Geographic Data
+  - Insider Trading Arrangements
+  - Insider Trading Policies and Procedures
+  - Cybersecurity Risk Management and Strategy Disclosure
+format: markdown
+---
 
 ## SECTION: Summary of Significant Accounting Policies
 <!-- Source: XBRL -->
@@ -84,7 +107,9 @@ The entire disclosure for earnings per share.
 <!-- Source: XBRL -->
 Sep. 27, 2025
 
-Cash, Cash Equivalents and Marketable Securities
+
+### Cash, Cash Equivalents and Marketable Securities
+
 
 The following tables show the Company’s cash, cash equivalents and marketable securities by significant investment category as of September 27, 2025 and September 28, 2024 (in millions):
 
@@ -144,7 +169,9 @@ As of September 27, 2025, 80% of the Company’s non-current marketable debt sec
 
 The Company’s investments in marketable debt securities have been classified and accounted for as available-for-sale. The Company classifies marketable debt securities as either current or non-current based on each instrument’s underlying maturity.
 
-Derivative Instruments and Hedging
+
+### Derivative Instruments and Hedging
+
 
 The Company may use derivative instruments to partially offset its business exposure to foreign exchange and interest rate risk. However, the Company may choose not to hedge certain exposures for a variety of reasons including accounting considerations or the prohibitive economic cost of hedging particular exposures. There can be no assurance the hedges will offset more than a portion of the financial impact resulting from movements in foreign exchange or interest rates.
 
@@ -158,7 +185,9 @@ Gains and losses arising from changes in the fair values of derivative instrumen
 
 The Company classifies cash flows related to derivative instruments in the same section of the Consolidated Statements of Cash Flows as the items being hedged, which are generally classified as operating activities.
 
-Foreign Exchange Rate Risk
+
+#### Foreign Exchange Rate Risk
+
 
 To protect gross margins from fluctuations in foreign exchange rates, the Company may use forwards, options or other instruments, and may designate these instruments as cash flow hedges. The Company generally hedges portions of its forecasted foreign currency exposure associated with revenue and inventory purchases, typically for up to 12 months.
 
@@ -198,7 +227,9 @@ As of September 27, 2025 and September 28, 2024, the carrying amount of the Comp
 
 As of September 27, 2025, the Company had one customer that represented 10% or more of total trade receivables, which accounted for 12%. The Company’s third-party cellular network carriers accounted for 34% and 38% of total trade receivables as of September 27, 2025 and September 28, 2024, respectively. The Company requires third-party credit support or collateral from certain customers to limit credit risk.
 
-Vendor Non-Trade Receivables
+
+#### Vendor Non-Trade Receivables
+
 
 The Company has non-trade receivables from certain of its manufacturing vendors resulting from the sale of components to these vendors who manufacture subassemblies or assemble final products for the Company. The Company purchases these components directly from suppliers. The Company does not reflect the sale of these components in products net sales. Rather, the Company recognizes any gain on these sales as a reduction of products cost of sales when the related final products are sold by the Company. As of September 27, 2025, the Company had two vendors that individually represented 10% or more of total vendor non-trade receivables, which accounted for 46% and 23%. As of September 28, 2024, the Company had two vendors that individually represented 10% or more of total vendor non-trade receivables, which accounted for 44% and 23%.
 
@@ -276,7 +307,9 @@ On August 30, 2016, the Commission announced its decision that Ireland granted s
 
 The Company and Ireland appealed the State Aid Decision to the General Court of the Court of Justice of the European Union (“General Court”). On July 15, 2020, the General Court annulled the State Aid Decision. On September 25, 2020, the Commission appealed the General Court’s decision to the European Court of Justice (“ECJ”). On September 10, 2024, the ECJ announced that it had set aside the 2020 judgment of the General Court and confirmed the Commission’s 2016 State Aid Decision. As a result, during the fourth quarter of 2024 the Company recorded a one-time income tax charge of $10.2 billion, net, which represented $15.8 billion payable to Ireland via release of amounts held in escrow, partially offset by a U.S. foreign tax credit of $4.8 billion and a decrease in unrecognized tax benefits of $823 million.
 
-Provision for Income Taxes and Effective Tax Rate
+
+### Provision for Income Taxes and Effective Tax Rate
+
 
 The provision for income taxes for 2025, 2024 and 2023, consisted of the following (in millions):
 
@@ -319,7 +352,9 @@ A reconciliation of the provision for income taxes to the amount computed by app
 
 
 
-Deferred Tax Assets and Liabilities
+
+### Deferred Tax Assets and Liabilities
+
 
 As of September 27, 2025 and September 28, 2024, the significant components of the Company’s deferred tax assets and liabilities were as follows (in millions):
 
@@ -605,7 +640,9 @@ The Company has entered into certain off–balance sheet commitments that requir
 
 The Company is subject to various legal proceedings and claims that have arisen in the ordinary course of business and that have not been fully resolved. The outcome of litigation is inherently uncertain. In the opinion of management, there was not at least a reasonable possibility the Company may have incurred a material loss, or a material loss greater than a recorded accrual, concerning loss contingencies for asserted legal and other claims.
 
-Concentrations in the Available Sources of Supply of Materials and Product
+
+### Concentrations in the Available Sources of Supply of Materials and Product
+
 
 Although most components essential to the Company’s business are generally available from multiple sources, certain components are currently obtained from single or limited sources. The Company also competes for various components with other participants in the markets for smartphones, personal computers, tablets, wearables and accessories. Therefore, many components used by the Company, including those that are available from multiple sources, are at times subject to industry-wide shortage and significant commodity pricing fluctuations. Restrictions on international trade can increase the cost or limit the availability of the Company’s products and the components and rare earths and other raw materials that go into them.
 

@@ -155,11 +155,10 @@ def extract_markdown(
     parts = []
 
     if include_header:
-        header = _build_header(filing)
+        header = _build_header(filing, sections)
         if header:
             parts.append(header)
-        parts.append("FORMAT: Text is plain paragraphs. Tables are Markdown.")
-        parts.append("")
+            parts.append("")
 
     for section in sections:
         parts.append(f"## SECTION: {section.title}")
@@ -208,7 +207,14 @@ def extract_markdown(
             if max_filtered_items is not None and total_details > max_filtered_items:
                 parts.append(f"   ... and {total_details - max_filtered_items} more items (use max_filtered_items=None to see all)")
 
-    return "\n".join(parts)
+    # Join parts and normalize line endings to Unix LF
+    result = "\n".join(parts)
+
+    # Normalize line endings: Windows CRLF → Unix LF
+    result = result.replace('\r\n', '\n')  # CRLF to LF
+    result = result.replace('\r', '\n')    # Old Mac CR to LF
+
+    return result
 
 
 def extract_sections(
@@ -297,16 +303,77 @@ def _normalize_list(value: Optional[Union[str, Sequence[str]]]) -> List[str]:
     return [v for v in value if v]
 
 
-def _build_header(filing) -> str:
-    """Build filing metadata header."""
+def _build_header(filing, sections: List['ExtractedSection']) -> str:
+    """
+    Build filing metadata header in YAML frontmatter format.
+
+    Args:
+        filing: Filing object
+        sections: List of extracted sections (for section titles)
+
+    Returns:
+        YAML frontmatter block with filing metadata
+    """
+    # Extract basic filing info
     form = getattr(filing, 'form', None)
     accession_no = getattr(filing, 'accession_no', None)
     filing_date = getattr(filing, 'filing_date', None)
 
-    if form and accession_no and filing_date:
-        return f"START_DOCUMENT: {form} {accession_no} {filing_date}"
+    # Try to get company name and ticker
+    company_name = None
+    ticker = None
 
-    return "START_DOCUMENT: SEC Filing"
+    # Get company name (filing.company is a string)
+    if hasattr(filing, 'company'):
+        company_name = filing.company if isinstance(filing.company, str) else None
+
+    # Try to get ticker from CIK
+    if hasattr(filing, 'cik'):
+        try:
+            from edgar.reference.tickers import find_ticker
+            cik = filing.cik
+            ticker = find_ticker(cik)
+        except Exception:
+            # If reference lookup fails, try other methods
+            pass
+
+    # Fallback: try direct ticker attribute
+    if not ticker and hasattr(filing, 'ticker'):
+        ticker = filing.ticker
+
+    # Get section titles
+    section_titles = [s.title for s in sections] if sections else []
+
+    # Build YAML frontmatter
+    yaml_lines = ["---"]
+
+    if form:
+        yaml_lines.append(f"filing_type: {form}")
+
+    if accession_no:
+        yaml_lines.append(f"accession_number: {accession_no}")
+
+    if filing_date:
+        yaml_lines.append(f"filing_date: {filing_date}")
+
+    if company_name:
+        yaml_lines.append(f"company: {company_name}")
+
+    if ticker:
+        yaml_lines.append(f"ticker: {ticker}")
+
+    if section_titles:
+        if len(section_titles) == 1:
+            yaml_lines.append(f"section: {section_titles[0]}")
+        else:
+            yaml_lines.append("sections:")
+            for title in section_titles:
+                yaml_lines.append(f"  - {title}")
+
+    yaml_lines.append("format: markdown")
+    yaml_lines.append("---")
+
+    return "\n".join(yaml_lines)
 
 
 def _extract_xbrl_statements(filing, statements, optimize_for_llm, show_dimension=True):
@@ -447,39 +514,43 @@ def _extract_items(filing, items, optimize_for_llm):
                         markdown = "\n\n".join(table_renders)
 
                     sections.append(ExtractedSection(
-                        title=section.title or item_name,
+                        title=item_name,
                         markdown=markdown,
                         source=f'item:{item_name}',
                         is_xbrl=False
                     ))
                     continue
                 else:
-                    # No tables, use TOC section extractor with HTML processing
-                    if (hasattr(section, '_section_extractor') and section._section_extractor and
-                        optimize_for_llm):
-                        # Use section extractor to get section-specific HTML, then process it
-                        from edgar.llm_helpers import process_content
-                        section_html = section._section_extractor.get_section_html(section.name, include_subsections=True)
-                        if section_html:
-                            markdown = process_content(section_html, section_title=section.title or item_name)
-                        else:
-                            # Fallback if extraction fails
-                            text = section.text()
-                            from edgar.llm_helpers import postprocess_text
-                            markdown = postprocess_text(text) if optimize_for_llm else text
-                    else:
-                        # Fallback to text extraction
+                    # No tables - try HTML processing for subsection detection
+                    markdown = None
+
+                    if optimize_for_llm and hasattr(section, '_section_extractor') and section._section_extractor:
+                        # Try to get section HTML for subsection detection
+                        try:
+                            section_html = section._section_extractor.get_section_html(
+                                section.name,
+                                include_subsections=True
+                            )
+                            if section_html:
+                                from edgar.llm_helpers import process_content
+                                markdown = process_content(section_html, section_title=item_name)
+                        except Exception as e:
+                            log.debug(f"HTML processing failed for {item_name}: {e}")
+
+                    # Fallback to plain text if HTML processing didn't work
+                    if not markdown:
                         text = section.text()
 
                         # Apply LLM optimizations (filter page numbers, TOC, etc.)
                         if optimize_for_llm and text:
                             from edgar.llm_helpers import postprocess_text
                             text = postprocess_text(text)
+
                         markdown = text
 
                     if markdown:
                         sections.append(ExtractedSection(
-                            title=section.title or item_name,
+                            title=item_name,
                             markdown=markdown,
                             source=f'item:{item_name}',
                             is_xbrl=False

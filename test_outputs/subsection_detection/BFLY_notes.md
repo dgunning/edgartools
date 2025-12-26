@@ -1,5 +1,34 @@
-START_DOCUMENT: 10-K 0001628280-25-009036 2025-02-28
-FORMAT: Text is plain paragraphs. Tables are Markdown.
+---
+filing_type: 10-K
+accession_number: 0001628280-25-009036
+filing_date: 2025-02-28
+company: Butterfly Network, Inc.
+ticker: BFLY
+sections:
+  - Organization and Description of Business
+  - Summary of Significant Accounting Policies
+  - Revenue Recognition
+  - Fair Value of Financial Instruments
+  - Inventories
+  - Restricted Cash
+  - Other Non-Current Assets
+  - Property, Equipment, and Intangible Assets
+  - Accrued Expenses and Other Current Liabilities
+  - Stockholders' Equity
+  - Stock-Based Compensation
+  - Net Loss Per Share
+  - Income Taxes
+  - 401(k) Retirement Plan
+  - Warrants
+  - Leases
+  - Commitments and Contingencies
+  - Subsequent Events
+  - Pay vs Performance Disclosure
+  - Insider Trading Arrangements
+  - Insider Trading Policies and Procedures
+  - Cybersecurity Risk Management and Strategy Disclosure
+format: markdown
+---
 
 ## SECTION: Organization and Description of Business
 <!-- Source: XBRL -->
