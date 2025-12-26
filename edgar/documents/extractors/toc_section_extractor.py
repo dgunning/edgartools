@@ -179,6 +179,95 @@ class SECSectionExtractor:
             # Fallback to simple text extraction
             return self._extract_section_fallback(section_name, clean)
 
+    def get_section_html(self, section_name: str, include_subsections: bool = True) -> Optional[str]:
+        """
+        Extract HTML content for a specific section.
+
+        Args:
+            section_name: Name of section (e.g., "Item 1", "Item 1A", "Part I")
+            include_subsections: Whether to include subsections
+
+        Returns:
+            Section HTML content or None if section not found
+        """
+        # Normalize section name
+        normalized_name = self._normalize_section_name(section_name)
+
+        if normalized_name not in self.section_boundaries:
+            return None
+
+        boundary = self.section_boundaries[normalized_name]
+
+        # Extract content between boundaries using HTML parsing
+        html_content = getattr(self.document.metadata, 'original_html', None)
+        if not html_content:
+            return None
+
+        try:
+            section_html = self._extract_section_html(html_content, boundary, include_subsections)
+            return section_html
+        except Exception:
+            return None
+
+    def _extract_section_html(self, html_content: str, boundary: SectionBoundary, include_subsections: bool) -> str:
+        """Extract section HTML content between anchors."""
+        # Handle XML declaration issues
+        if html_content.startswith('<?xml'):
+            html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+
+        tree = lxml_html.fromstring(html_content)
+
+        # Verify start anchor exists
+        start_elements = tree.xpath(f'//*[@id="{boundary.anchor_id}"]')
+        if not start_elements:
+            return ""
+
+        # Collect HTML elements between boundaries
+        collected_elements = []
+        in_range = False
+
+        for event, el in etree.iterwalk(tree, events=('start', 'end')):
+            # Skip non-element nodes
+            if not hasattr(el, 'get'):
+                continue
+
+            el_id = el.get('id', '')
+
+            if event == 'start':
+                # Check if we've reached the start anchor
+                if el_id == boundary.anchor_id:
+                    in_range = True
+                    continue
+
+                # Check if we've reached the end boundary
+                if boundary.end_element_id and el_id == boundary.end_element_id:
+                    in_range = False
+                    break
+
+                # Check for sibling section boundaries (when not including subsections)
+                if in_range and not include_subsections and self._is_sibling_section(el_id, boundary.name):
+                    in_range = False
+                    break
+
+                # Collect elements
+                if in_range:
+                    collected_elements.append(el)
+
+        # Convert collected elements to HTML string
+        if not collected_elements:
+            return ""
+
+        # Build HTML from collected elements
+        html_parts = []
+        for el in collected_elements:
+            try:
+                html_parts.append(etree.tostring(el, encoding='unicode', method='html'))
+            except:
+                # If element can't be serialized, skip it
+                pass
+
+        return ''.join(html_parts)
+
     def _normalize_section_name(self, section_name: str) -> str:
         """Normalize section name for lookup."""
         # Handle common variations

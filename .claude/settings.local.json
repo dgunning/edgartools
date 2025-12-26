@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(python test_table_comparison.py:*)",
+      "Bash(python debug_section_tables.py:*)",
+      "Bash(python:*)",
+      "Bash(git checkout:*)",
+      "Bash(git ls-tree:*)"
+    ]
+  }
+}

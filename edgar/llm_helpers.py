@@ -169,6 +169,108 @@ def postprocess_text(text: str) -> str:
 
 
 # -----------------------------
+# Subsection Detection
+# -----------------------------
+
+def is_subsection_heading(element) -> tuple[bool, str]:
+    """
+    Detect if an element is a subsection heading.
+
+    Subsection headings are typically:
+    - <span> tags with font-weight:700 (bold) or font-style:italic
+    - Standalone in parent div (no siblings except whitespace)
+    - Short text (< 80 chars) starting with capital letter
+    - Parent div has top margin
+
+    Returns:
+        tuple[bool, str]: (is_subsection, heading_level)
+        heading_level is "###" for bold or "####" for italic
+    """
+    # Must be a span or div tag
+    if element.name not in ('span', 'div'):
+        return False, ""
+
+    # Get text
+    text = element.get_text().strip()
+
+    # Must be short (< 80 chars) and start with capital
+    if not text or len(text) > 80:
+        return False, ""
+
+    if not text[0].isupper():
+        return False, ""
+
+    # Check for noise patterns
+    if text.lower() in ('table of contents', 'page'):
+        return False, ""
+
+    # Exclude form headers and common SEC filing text
+    noise_keywords = [
+        'united states', 'securities and exchange commission', 'washington',
+        'commission file number', 'form 10-k', 'form 10-q', 'or', 'and',
+        'signatures', 'part i', 'part ii', 'part iii', 'part iv',
+        'exhibit', 'index to', 'table of contents'
+    ]
+    if any(keyword in text.lower() for keyword in noise_keywords):
+        return False, ""
+
+    # Exclude very short text (likely abbreviations or form codes)
+    if len(text) < 4:
+        return False, ""
+
+    # For div elements, check if it contains a single span child
+    if element.name == 'div':
+        # Check if this div contains a single span as subsection
+        spans = element.find_all('span', recursive=False)
+        if len(spans) == 1:
+            span = spans[0]
+            span_text = span.get_text().strip()
+            # Check if span text matches the div text (meaning it's the only content)
+            if span_text == text:
+                element = span  # Use the span for style checking
+            else:
+                return False, ""
+        else:
+            return False, ""
+
+    # Must have siblings check (for span elements)
+    parent = element.parent
+    if parent:
+        # Get all children, filtering out whitespace-only text nodes
+        children = [
+            child for child in parent.children
+            if hasattr(child, 'name') or (isinstance(child, str) and child.strip())
+        ]
+
+        # If more than one non-whitespace child, it's not standalone
+        if len(children) > 1:
+            return False, ""
+
+        # Check parent style for top margin (indicates section break)
+        parent_style = parent.get('style', '')
+        if 'margin-top' not in parent_style:
+            return False, ""
+
+        # Exclude centered text (usually form headers)
+        if 'text-align:center' in parent_style:
+            return False, ""
+
+    # Check style attributes for bold or italic
+    style = element.get('style', '')
+
+    # Determine heading level based on style
+    is_bold = 'font-weight:700' in style or 'font-weight:bold' in style
+    is_italic = 'font-style:italic' in style
+
+    if is_bold:
+        return True, "###"  # Level 1 subsection
+    elif is_italic:
+        return True, "####"  # Level 2 subsection
+
+    return False, ""
+
+
+# -----------------------------
 # Table Preprocessing
 # --------------------------------------
 
@@ -1158,6 +1260,14 @@ def process_content(content, section_title=None, track_filtered=False):
             txt = clean_text(element.get_text())
             if txt and not is_noise_text(txt):
                 output_parts.append(f"\n### {txt}\n")
+            continue
+
+        # Check for subsection headings (bold/italic spans in standalone divs)
+        is_subsection, heading_level = is_subsection_heading(element)
+        if is_subsection:
+            txt = clean_text(element.get_text())
+            if txt and not is_noise_text(txt):
+                output_parts.append(f"\n{heading_level} {txt}\n")
             continue
 
         # Process lists

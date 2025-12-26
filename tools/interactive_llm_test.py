@@ -11,15 +11,13 @@ print("SETUP: Getting SNAP 10-K filing")
 print("=" * 70)
 
 snap = Company("SNAP")
-
-# Depending on the library behavior, you may need one of these:
 filings = snap.get_filings(form="10-K")
 
-# Option A (if latest() returns a single filing):
-filing = filings.latest()
-
-# Option B (if latest(1) returns a list-like):
-# filing = filings.latest(1)[0]
+# Depending on library behavior, choose one:
+try:
+    filing = filings.latest()          # common: returns a single filing
+except TypeError:
+    filing = filings.latest(1)[0]      # if latest(n) returns a list-like
 
 print(f"Filing: {filing.form} for {filing.company}")
 print(f"Date: {filing.filing_date}\n")
@@ -28,16 +26,17 @@ print("=" * 70)
 print("EXAMPLE 1: Basic Usage (all defaults)")
 print("=" * 70)
 
-# Extract Item 1 (change to "7" if you actually want Item 7)
-markdown = extract_markdown(filing, statement=["IncomeStatement", "BalanceSheet"], show_dimension=False)
+# Extract Item 1 (switch to "7" if needed)
+markdown = extract_markdown(filing, item="8")
 
 print(f"\nResult: {len(markdown)} characters")
 print("First 200 characters:")
 print(markdown[:200])
 print("...")
 
-# --- Save output ---
-output_dir = Path.cwd() / "test_outputs"   # works in scripts + notebooks
+# Save output relative to THIS script file
+script_dir = Path(__file__).resolve().parent
+output_dir = script_dir / "test_outputs"
 output_dir.mkdir(exist_ok=True)
 
 filename = "SNAP_10K_Item1.md"

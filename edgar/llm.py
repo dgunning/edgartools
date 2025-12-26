@@ -454,18 +454,33 @@ def _extract_items(filing, items, optimize_for_llm):
                     ))
                     continue
                 else:
-                    # No tables, get text
-                    text = section.text()
+                    # No tables, use TOC section extractor with HTML processing
+                    if (hasattr(section, '_section_extractor') and section._section_extractor and
+                        optimize_for_llm):
+                        # Use section extractor to get section-specific HTML, then process it
+                        from edgar.llm_helpers import process_content
+                        section_html = section._section_extractor.get_section_html(section.name, include_subsections=True)
+                        if section_html:
+                            markdown = process_content(section_html, section_title=section.title or item_name)
+                        else:
+                            # Fallback if extraction fails
+                            text = section.text()
+                            from edgar.llm_helpers import postprocess_text
+                            markdown = postprocess_text(text) if optimize_for_llm else text
+                    else:
+                        # Fallback to text extraction
+                        text = section.text()
 
-                    # Apply LLM optimizations (filter page numbers, TOC, etc.)
-                    if optimize_for_llm and text:
-                        from edgar.llm_helpers import postprocess_text
-                        text = postprocess_text(text)
+                        # Apply LLM optimizations (filter page numbers, TOC, etc.)
+                        if optimize_for_llm and text:
+                            from edgar.llm_helpers import postprocess_text
+                            text = postprocess_text(text)
+                        markdown = text
 
-                    if text:
+                    if markdown:
                         sections.append(ExtractedSection(
                             title=section.title or item_name,
-                            markdown=text,
+                            markdown=markdown,
                             source=f'item:{item_name}',
                             is_xbrl=False
                         ))
