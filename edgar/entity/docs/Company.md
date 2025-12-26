@@ -56,6 +56,11 @@ facts = company.facts
 # Get financial statements from latest filings
 financials = company.get_financials()           # From latest 10-K
 quarterly = company.get_quarterly_financials()  # From latest 10-Q
+
+# Direct access to financial statements (recommended)
+income = company.income_statement()      # Income statement
+balance = company.balance_sheet()        # Balance sheet
+cash = company.cash_flow()               # Cash flow statement
 ```
 
 ### Company Information
@@ -149,6 +154,17 @@ if company.not_found:
 | `industry` | str | Industry description from SIC |
 | `is_company` | bool | True if entity is a company (vs. individual) |
 | `is_individual` | bool | True if entity is an individual |
+| `filer_category` | FilerCategory | Parsed filer category with status and qualifications |
+
+### Filer Status Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `is_large_accelerated_filer` | bool | True if public float >= $700M |
+| `is_accelerated_filer` | bool | True if public float >= $75M and < $700M |
+| `is_non_accelerated_filer` | bool | True if public float < $75M |
+| `is_smaller_reporting_company` | bool | True if qualifies as Smaller Reporting Company (SRC) |
+| `is_emerging_growth_company` | bool | True if qualifies as Emerging Growth Company (EGC) |
 
 ### Financial Data Properties
 
@@ -159,6 +175,7 @@ if company.not_found:
 | `latest_tenq` | TenQ | Latest 10-Q filing object |
 | `public_float` | float | Public float value (if available) |
 | `shares_outstanding` | int | Outstanding shares (if available) |
+| `docs` | Docs | Access comprehensive Company API documentation |
 
 ### Status Properties
 
@@ -322,6 +339,183 @@ def get_exchanges() -> List[str]
 exchanges = company.get_exchanges()
 for exchange in exchanges:
     print(f"Listed on: {exchange}")
+```
+
+### to_context()
+
+Get AI-optimized plain text representation of the company:
+
+```python
+def to_context(
+    detail: str = 'standard',
+    max_tokens: Optional[int] = None
+) -> str
+```
+
+**Parameters:**
+- `detail`: Level of detail to include:
+  - `'minimal'`: Basic company info (~100-150 tokens)
+  - `'standard'`: Adds industry, category, available actions (~250-350 tokens)
+  - `'full'`: Adds addresses, phone, filing stats (~500+ tokens)
+- `max_tokens`: Optional token limit using 4 chars/token heuristic
+
+**Returns**: Markdown-formatted key-value representation optimized for LLMs
+
+**Examples:**
+
+```python
+# Get minimal context for LLM
+context = company.to_context('minimal')
+print(context)
+# COMPANY: Apple Inc.
+# CIK: 0000320193
+# Ticker: AAPL
+
+# Get standard context with available actions
+context = company.to_context('standard')
+
+# Get full context with addresses
+context = company.to_context('full')
+
+# Limit token count
+context = company.to_context('standard', max_tokens=200)
+```
+
+**Note**: Uses Markdown-KV format optimized for LLM consumption (60.7% accuracy, 25% fewer tokens than JSON).
+
+### text() (Deprecated)
+
+**Deprecated**: Use `to_context()` instead.
+
+```python
+def text(max_tokens: int = 2000) -> str
+```
+
+This method is deprecated and will be removed in a future version. Use `to_context()` for consistent naming with other AI-native methods.
+
+## Direct Financial Statement Methods
+
+These methods provide direct access to financial statements without needing to access `facts` first.
+
+### income_statement()
+
+Get income statement data:
+
+```python
+def income_statement(
+    periods: int = 4,
+    annual: bool = True,
+    as_dataframe: bool = False,
+    concise_format: bool = False
+) -> Optional[MultiPeriodStatement]
+```
+
+**Parameters:**
+- `periods`: Number of periods to retrieve (default: 4)
+- `annual`: If True, prefer annual periods; if False, get quarterly
+- `as_dataframe`: If True, return DataFrame; if False, return MultiPeriodStatement
+- `concise_format`: If True, display values as $1.0B; if False, display as $1,000,000,000
+
+**Examples:**
+
+```python
+# Get 4 years of annual income statements
+income = company.income_statement()
+
+# Get quarterly data
+income = company.income_statement(annual=False)
+
+# Get as DataFrame
+df = company.income_statement(as_dataframe=True)
+
+# Concise format for display
+income = company.income_statement(concise_format=True)
+```
+
+### balance_sheet()
+
+Get balance sheet data:
+
+```python
+def balance_sheet(
+    periods: int = 4,
+    annual: bool = True,
+    as_dataframe: bool = False,
+    concise_format: bool = False
+) -> Optional[MultiPeriodStatement]
+```
+
+**Parameters**: Same as `income_statement()`
+
+**Examples:**
+
+```python
+# Get annual balance sheets
+balance = company.balance_sheet()
+
+# Get quarterly balance sheets
+balance = company.balance_sheet(annual=False, periods=8)
+```
+
+### cash_flow()
+
+Get cash flow statement data:
+
+```python
+def cash_flow(
+    periods: int = 4,
+    annual: bool = True,
+    as_dataframe: bool = False,
+    concise_format: bool = False
+) -> Optional[MultiPeriodStatement]
+```
+
+**Parameters**: Same as `income_statement()`
+
+**Examples:**
+
+```python
+# Get annual cash flow statements
+cash = company.cash_flow()
+
+# Get as DataFrame for analysis
+df = company.cash_flow(as_dataframe=True)
+```
+
+### get_structured_statement()
+
+Get a hierarchically structured financial statement using learned canonical structures:
+
+```python
+def get_structured_statement(
+    statement_type: str,
+    fiscal_year: Optional[int] = None,
+    fiscal_period: Optional[str] = None,
+    use_canonical: bool = True,
+    include_missing: bool = False
+) -> Optional[StructuredStatement]
+```
+
+**Parameters:**
+- `statement_type`: Type of statement ('BalanceSheet', 'IncomeStatement', 'CashFlow')
+- `fiscal_year`: Fiscal year to retrieve (defaults to latest)
+- `fiscal_period`: Fiscal period ('FY', 'Q1', 'Q2', 'Q3', 'Q4')
+- `use_canonical`: Use canonical structure for organization (recommended)
+- `include_missing`: Include placeholders for missing canonical concepts
+
+**Returns**: `StructuredStatement` with hierarchical organization or None if no data
+
+**Examples:**
+
+```python
+# Get Q4 2024 income statement
+stmt = company.get_structured_statement('IncomeStatement', 2024, 'Q4')
+
+# Display hierarchically
+print(stmt.get_hierarchical_display())
+
+# Get full year balance sheet
+balance = company.get_structured_statement('BalanceSheet', 2024, 'FY')
 ```
 
 ## Accessing Filings
@@ -533,6 +727,33 @@ if hasattr(data, 'entity_type'):
     print(f"Entity Type: {data.entity_type}")
 if hasattr(data, 'category'):
     print(f"Category: {data.category}")
+```
+
+### Filer Status and Category
+
+```python
+# Get structured filer category
+category = company.filer_category
+print(f"Status: {category.status}")  # e.g., FilerStatus.LARGE_ACCELERATED
+
+# Check specific filer statuses
+if company.is_large_accelerated_filer:
+    print("Large accelerated filer (public float >= $700M)")
+elif company.is_accelerated_filer:
+    print("Accelerated filer (public float >= $75M)")
+else:
+    print("Non-accelerated filer")
+
+# Check qualifications
+if company.is_smaller_reporting_company:
+    print("Qualifies as Smaller Reporting Company (SRC)")
+if company.is_emerging_growth_company:
+    print("Qualifies as Emerging Growth Company (EGC)")
+
+# Filer status affects filing deadlines and disclosure requirements
+# Large accelerated filers: 10-K due 60 days after fiscal year end
+# Accelerated filers: 10-K due 75 days after fiscal year end
+# Non-accelerated filers: 10-K due 90 days after fiscal year end
 ```
 
 ### Former Names
