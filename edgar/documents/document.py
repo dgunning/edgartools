@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -117,7 +117,7 @@ class Section:
             return self._get_tables_from_toc_section()
 
         # For heading/pattern-based sections, use node tree search
-        return self.node.find(lambda n: isinstance(n, TableNode))
+        return cast(List[TableNode], self.node.find(lambda n: isinstance(n, TableNode)))
 
     def _get_tables_from_toc_section(self) -> List[TableNode]:
         """
@@ -662,20 +662,20 @@ class Document:
 
         return text
 
-    def search(self, query: str, top_k: int = 10) -> List[SearchResult]:
+    def search(self, query: str, top_k: int = 10):
         """
         Search document for query.
-        
+
         Args:
             query: Search query
             top_k: Maximum results to return
-            
+
         Returns:
             List of search results
         """
         from edgar.documents.search import DocumentSearch
         searcher = DocumentSearch(self)
-        return searcher.search(query, top_k=top_k)
+        return searcher.search(query, limit=top_k)
 
     def get_section(self, section_name: str, part: Optional[str] = None) -> Optional[Section]:
         """

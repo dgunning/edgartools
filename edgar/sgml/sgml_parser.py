@@ -264,7 +264,7 @@ class SubmissionFormatParser:
                 context = context[tag][index]
             else:
                 context = context[tag]
-        return context
+        return context  # type: ignore[return-value]
 
     def _is_unclosed_tag(self, line: str) -> bool:
         """Check if line is an unclosed tag with value."""
