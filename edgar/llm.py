@@ -281,11 +281,19 @@ def extract_sections(
 
     # 3. Extract notes (if requested)
     if notes:
-        notes_sections, notes_filtered = _extract_notes(
+        notes_result = _extract_notes(
             filing,
             optimize_for_llm,
             track_filtered
         )
+
+        # Unpack based on return type
+        if track_filtered:
+            notes_sections, notes_filtered = notes_result
+        else:
+            notes_sections = notes_result
+            notes_filtered = None
+
         sections.extend(notes_sections)
 
         # Merge filtered data
