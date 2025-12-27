@@ -140,7 +140,7 @@ def extract_markdown(
         ...     notes=True
         ... )
     """
-    sections, filtered_data = extract_sections(
+    result = extract_sections(
         filing,
         item=item,
         statement=statement,
@@ -149,6 +149,13 @@ def extract_markdown(
         show_dimension=show_dimension,
         track_filtered=show_filtered_data
     )
+
+    # Unpack based on return type
+    if show_filtered_data:
+        sections, filtered_data = result
+    else:
+        sections = result
+        filtered_data = None
 
     parts = []
 
