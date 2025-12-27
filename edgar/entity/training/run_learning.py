@@ -1176,7 +1176,7 @@ def get_companies(exchange: str, count: int, random_state: int = 42) -> List[str
 
 def main():
     parser = argparse.ArgumentParser(description='Financial Statement Concept Learning')
-    parser.add_argument('--companies', type=int, default=100,
+    parser.add_argument('--companies', type=int, default=500,
                        help='Number of companies to process (default: 100)')
     parser.add_argument('--exchange', type=str, default='NYSE',
                        help='Exchange to sample from (default: NYSE)')
