@@ -18,6 +18,7 @@ Python library for SEC Edgar filings analysis.
 | Statements | `edgar/xbrl/statements.py` | `Statement` |
 | Documents | `edgar/documents/` | `Document`, `HTMLParser` |
 | Reports (10-K/Q/8-K) | `edgar/company_reports.py` | `TenK`, `TenQ`, `EightK` |
+| LLM extraction | `edgar/llm.py` | `extract_markdown()`, `extract_sections()` |
 | Reference data | `edgar/reference/` | Tickers, forms |
 
 ## Entry Points
@@ -30,6 +31,7 @@ from edgar import Filing, Filings, Company, find, obj
 - `find(form="10-K", ticker="AAPL")` - Search filings
 - `filing.xbrl()` - Parse XBRL financials
 - `filing.obj()` - Get typed report object (TenK, TenQ, etc.)
+- `extract_markdown(filing, ...)` - Get LLM-optimized markdown with YAML frontmatter
 
 ## Data Flow
 
@@ -38,6 +40,8 @@ Filing → filing.obj() → TenK/TenQ/EightK
 Filing → filing.xbrl() → XBRL → statements
 Company → company.get_facts() → EntityFacts → Statement
 Filing → filing.document() → Document → extractors
+Filing → extract_markdown() → markdown string with YAML frontmatter
+Filing → extract_sections() → ExtractedSection objects → LLM processing
 ```
 
 ## Large Files (>30KB)
@@ -45,6 +49,7 @@ Filing → filing.document() → Document → extractors
 When modifying these, read in chunks:
 - `_filings.py` (72KB), `xbrl/rendering.py` (72KB), `xbrl/xbrl.py` (66KB)
 - `entity/entity_facts.py` (63KB), `xbrl/facts.py` (55KB), `xbrl/statements.py` (46KB)
+- `llm_helpers.py` (42KB)
 
 ## Issue Tracking (Beads)
 
