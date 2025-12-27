@@ -312,32 +312,10 @@ def _build_header(filing: 'Filing', sections: List['ExtractedSection']) -> str:
     Returns:
         YAML frontmatter block with filing metadata
     """
-    # Extract basic filing info
-    form = getattr(filing, 'form', None)
-    accession_no = getattr(filing, 'accession_no', None)
-    filing_date = getattr(filing, 'filing_date', None)
+    from edgar.filing_metadata import extract_filing_metadata
 
-    # Try to get company name and ticker
-    company_name = None
-    ticker = None
-
-    # Get company name (filing.company is a string)
-    if hasattr(filing, 'company'):
-        company_name = filing.company if isinstance(filing.company, str) else None
-
-    # Try to get ticker from CIK
-    if hasattr(filing, 'cik'):
-        try:
-            from edgar.reference.tickers import find_ticker
-            cik = filing.cik
-            ticker = find_ticker(cik)
-        except Exception:
-            # If reference lookup fails, try other methods
-            pass
-
-    # Fallback: try direct ticker attribute
-    if not ticker and hasattr(filing, 'ticker'):
-        ticker = filing.ticker
+    # Extract metadata via shared helper
+    metadata = extract_filing_metadata(filing, include_ticker=True)
 
     # Get section titles
     section_titles = [s.title for s in sections] if sections else []
@@ -345,20 +323,20 @@ def _build_header(filing: 'Filing', sections: List['ExtractedSection']) -> str:
     # Build YAML frontmatter
     yaml_lines = ["---"]
 
-    if form:
-        yaml_lines.append(f"filing_type: {form}")
+    if metadata['form']:
+        yaml_lines.append(f"filing_type: {metadata['form']}")
 
-    if accession_no:
-        yaml_lines.append(f"accession_number: {accession_no}")
+    if metadata['accession_no']:
+        yaml_lines.append(f"accession_number: {metadata['accession_no']}")
 
-    if filing_date:
-        yaml_lines.append(f"filing_date: {filing_date}")
+    if metadata['filing_date']:
+        yaml_lines.append(f"filing_date: {metadata['filing_date']}")
 
-    if company_name:
-        yaml_lines.append(f"company: {company_name}")
+    if metadata['company']:
+        yaml_lines.append(f"company: {metadata['company']}")
 
-    if ticker:
-        yaml_lines.append(f"ticker: {ticker}")
+    if metadata.get('ticker'):
+        yaml_lines.append(f"ticker: {metadata.get('ticker')}")
 
     if section_titles:
         if len(section_titles) == 1:

@@ -2009,6 +2009,7 @@ class Filing:
               - Use .attachments for exhibits (5 documents)
         """
         from edgar import get_obj_info
+        from edgar.filing_metadata import extract_filing_metadata
 
         lines = []
 
@@ -2016,20 +2017,18 @@ class Filing:
         lines.append(f"FILING: Form {self.form}")
         lines.append("")
 
+        # Extract metadata via shared helper
+        metadata = extract_filing_metadata(self, include_ticker=False, include_period=True)
+
         # Always include basic info
-        lines.append(f"Company: {self.company}")
-        lines.append(f"CIK: {self.cik}")
-        lines.append(f"Filed: {self.filing_date}")
-        lines.append(f"Accession: {self.accession_no}")
+        lines.append(f"Company: {metadata['company']}")
+        lines.append(f"CIK: {metadata['cik']}")
+        lines.append(f"Filed: {metadata['filing_date']}")
+        lines.append(f"Accession: {metadata['accession_no']}")
 
         # Add period of report if available and not minimal
-        if detail in ['standard', 'full']:
-            try:
-                period = self.period_of_report
-                if period:
-                    lines.append(f"Period: {period}")
-            except Exception:
-                pass  # Period not available for all filing types
+        if detail in ['standard', 'full'] and metadata.get('period'):
+            lines.append(f"Period: {metadata['period']}")
 
         # Add multi-entity info if present
         if self.is_multi_entity and detail != 'minimal':
