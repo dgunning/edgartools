@@ -14,6 +14,19 @@ dist/
 # AI-generated documentation (local only)
 AGENTS.md
 edgar/GEMINI.md
+# LLM extraction docs (exclude from tracking, keep only core user docs)
+docs/llm-extraction/CHUNKING_EXAMPLE.md
+docs/llm-extraction/CHUNKING_MARKDOWN_PROPOSAL.md
+docs/llm-extraction/EDGARTOOLS_TABLE_EXTRACTION_GUIDE.md
+docs/llm-extraction/EXTRACTION_INFRASTRUCTURE_REPORT.md
+docs/llm-extraction/FIXES_SUMMARY.md
+docs/llm-extraction/IMPLEMENTATION_COMPLETE.md
+docs/llm-extraction/IMPLEMENTATION_SUMMARY.md
+docs/llm-extraction/METADATA_QUICK_REF.md
+docs/llm-extraction/METADATA_USAGE_ANALYSIS.md
+docs/llm-extraction/PLTR_TABLE_COMPARISON_REPORT.md
+docs/llm-extraction/subsection_pattern_analysis.md
+docs/llm-extraction/TABLE_EXTRACTION_COMPARISON_REPORT.md
 # Beads issue tracking (local state)
 .beads/
 data/.DS_Store
