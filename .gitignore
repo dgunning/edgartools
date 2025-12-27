@@ -27,3 +27,5 @@ ratelimiter.sqlite*
 # Training output (generated, not tracked)
 training/output/
 *.csv
+.gitignore
+nul
