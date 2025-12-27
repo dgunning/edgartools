@@ -451,10 +451,15 @@ class Statement:
         if statement_type in ('IncomeStatement', 'CashFlowStatement'):
             if 'preferred_sign' in result.columns:
                 for col in period_cols:
-                    if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
+                    if col not in result.columns:
+                        continue
+                    # Convert to numeric - handles object dtype columns with None values (Issue #556)
+                    # This is needed because columns with None values become object dtype
+                    numeric_col = pd.to_numeric(result[col], errors='coerce')
+                    if pd.api.types.is_numeric_dtype(numeric_col):
                         # Apply preferred_sign where it's not None and not 0
                         mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
-                        result.loc[mask, col] = result.loc[mask, col] * result.loc[mask, 'preferred_sign']
+                        result.loc[mask, col] = numeric_col[mask] * result.loc[mask, 'preferred_sign']
 
         # Balance Sheet: no transformation
 
