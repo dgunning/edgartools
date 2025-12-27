@@ -16,8 +16,6 @@ The `to_context()` method provides token-efficient, AI-optimized text representa
 ### Examples Found
 
 #### Example 1: Filing.to_context() - AI Discovery for Single Filing
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\_filings.py:930-1033`
-
 ```python
 def to_context(self, detail: str = 'standard') -> str:
     """
@@ -47,7 +45,6 @@ def to_context(self, detail: str = 'standard') -> str:
 - `.html()` - Get raw HTML
 
 #### Example 2: Filings.to_context() - Collection Navigation
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\_filings.py:930-1033`
 
 ```python
 def to_context(self, detail: str = 'standard') -> str:
@@ -85,7 +82,6 @@ def to_context(self, detail: str = 'standard') -> str:
 - `.filter(form='C')` - Filtering operations
 
 #### Example 3: Company.to_context() - Corporate Entity Context
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\entity\core.py:638-769`
 
 ```python
 def to_context(self, detail: str = 'standard', max_tokens: Optional[int] = None) -> str:
@@ -126,7 +122,6 @@ def to_context(self, detail: str = 'standard', max_tokens: Optional[int] = None)
 - `.docs` - Documentation
 
 #### Example 4: FormC.to_context() - Crowdfunding Form Context
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\offerings\formc.py:693-804`
 
 ```python
 def to_context(self, detail: str = 'standard', filing_date: Optional[date] = None) -> str:
@@ -168,7 +163,6 @@ def to_context(self, detail: str = 'standard', filing_date: Optional[date] = Non
 - Offering status
 
 #### Example 5: XBRL.to_context() - Financial Data Context
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\xbrl\xbrl.py:1721`
 
 ```python
 def to_context(self, max_tokens: int = 2000) -> str:
@@ -218,7 +212,6 @@ def to_context(self, max_tokens: int = 2000) -> str:
 - No progressive disclosure
 
 **Variation C: EntityFilings (Company-Specific Collections)**
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\entity\filings.py:368`
 - Extends Filings.to_context() with company header
 - Adds company name and CIK to context
 - Maintains same navigation hints
@@ -276,7 +269,6 @@ The `edgar.llm` module provides high-level functions for extracting filing conte
 ### Examples Found
 
 #### Example 1: Basic extract_markdown() Usage
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\tools\example_llm_usage.py:11-30`
 
 ```python
 from edgar import Filing
@@ -320,7 +312,6 @@ format: markdown
 ```
 
 #### Example 2: Extracting Multiple Items
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\EXTRACTION_GUIDE.md:34-35`
 
 ```python
 # Extract multiple items at once
@@ -334,7 +325,6 @@ markdown = extract_markdown(filing, item=["1", "1A", "7", "8"])
 - Item 8: Financial statements
 
 #### Example 3: Structured Sections Output
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\tools\example_llm_usage.py:32-47`
 
 ```python
 from edgar.llm import extract_sections
@@ -365,7 +355,6 @@ class ExtractedSection:
 ```
 
 #### Example 4: Dimension Control in XBRL Statements
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\demo_show_dimension.py:23-50`
 
 ```python
 # Show dimension, abstract, and level columns (default: True)
@@ -388,7 +377,6 @@ markdown_without_dims = extract_markdown(
 - `show_dimension=False` - Cleaner output for general LLM consumption
 
 #### Example 5: Filtered Data Tracking
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\llm.py:169-207`
 
 ```python
 # Track what was filtered out during optimization
@@ -422,7 +410,6 @@ Total items filtered: 45
 ```
 
 #### Example 6: Item Extraction with Boundaries
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\llm.py:74-97`
 
 ```python
 # Item boundary patterns for section extraction
@@ -443,7 +430,6 @@ _ITEM_BOUNDARIES = {
 ### Pattern Variations
 
 **Variation A: Statement Extraction (XBRL)**
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\llm.py:377-461`
 
 ```python
 def _extract_xbrl_statements(
@@ -470,7 +456,6 @@ def _extract_xbrl_statements(
 - "ComprehensiveIncome" → Comprehensive Income
 
 **Variation B: Item Extraction (HTML)**
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\llm.py:486-603`
 
 ```python
 def _extract_items(
@@ -489,7 +474,6 @@ def _extract_items(
 ```
 
 **Variation C: Notes Extraction (Hybrid)**
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\llm.py:606-725`
 
 ```python
 def _extract_notes(
@@ -560,7 +544,6 @@ EdgarTools provides multiple layers of AI integration used in actual workflows: 
 ### Examples Found
 
 #### Example 1: Offering Lifecycle Discovery Workflow
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\docs\examples\offering_lifecycle.py:42-67`
 
 ```python
 # Streamlined API Features Used:
@@ -594,7 +577,6 @@ for stage_name, form_type in [("Initial", "C"), ("Amendments", "C/A"), ...]:
 **Use Case**: AI agent tracking crowdfunding campaign lifecycle
 
 #### Example 2: Building LLM Context (Multi-Layer)
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\examples\scripts\ai\ai_context.py:81-125`
 
 ```python
 def example_4_building_llm_context():
@@ -635,7 +617,6 @@ def example_4_building_llm_context():
 **Use Case**: Building optimized context within token budget
 
 #### Example 3: Documentation Search Pattern
-**File**: `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\docs\ai-integration.md:717-732`
 
 ```python
 from edgar import Company
@@ -776,7 +757,6 @@ Research basis: improvingagents.com/blog/best-input-data-format-for-llms
 ## Documentation and Testing Patterns
 
 ### Test Coverage for to_context()
-**File**: `tests/test_ai_native_context.py` (356 lines)
 
 **Test Classes**:
 1. `TestGetObjInfo` - Helper function validation
@@ -831,7 +811,6 @@ def test_full_workflow_discoverable(self):
 ## Migration Patterns (Deprecation Handling)
 
 ### .text() → .to_context() Migration
-**File**: `edgar/entity/core.py:771-792`
 
 ```python
 def text(self, max_tokens: int = 2000) -> str:
