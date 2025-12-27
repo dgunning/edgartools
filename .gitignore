@@ -27,6 +27,26 @@ docs/llm-extraction/METADATA_USAGE_ANALYSIS.md
 docs/llm-extraction/PLTR_TABLE_COMPARISON_REPORT.md
 docs/llm-extraction/subsection_pattern_analysis.md
 docs/llm-extraction/TABLE_EXTRACTION_COMPARISON_REPORT.md
+# Internal research and analysis docs
+docs-internal/
+AI_USAGE_PATTERNS_DOCUMENTATION.md
+# Internal tools (keep only one example: tools/example_llm_usage.py)
+tools/CELL_SHIFTING_ANALYSIS.md
+tools/QUICK_START.md
+tools/demo_improved_title_extraction.py
+tools/interactive_demo.py
+tools/interactive_llm_test.py
+tools/llm_extraction.py
+tools/show_metadata_usage.py
+tools/simple_examples.py
+tools/test_cell_shifting.py
+tools/test_global_fixes.py
+tools/test_llm_integration.py
+tools/test_placeholder_columns.py
+tools/test_snap_fixes.py
+tools/usage_examples.py
+# Research scripts
+scripts/research_income_statement_sector_samples.py
 # Beads issue tracking (local state)
 .beads/
 data/.DS_Store
