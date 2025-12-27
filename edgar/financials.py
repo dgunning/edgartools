@@ -105,13 +105,16 @@ class Financials:
                         period_col = period_columns[period_offset]
                         value = matches.iloc[0][period_col]
 
-                        # Convert to numeric if possible
-                        if pd.notna(value) and value != '':
-                            try:
-                                return float(value) if '.' in str(value) else int(value)
-                            except (ValueError, TypeError):
-                                return value
-                        return value
+                        # Skip empty/NA values - try next pattern
+                        if pd.isna(value) or value == '':
+                            continue
+
+                        # Convert to numeric
+                        try:
+                            return float(value) if '.' in str(value) else int(value)
+                        except (ValueError, TypeError):
+                            # Non-numeric value, try next pattern
+                            continue
 
             return None
 
@@ -239,10 +242,11 @@ class Financials:
             Operating cash flow value if found, None otherwise
         """
         patterns = [
-            r'Net Cash.*Operations',
+            r'^Net Cash from Operating',          # Most specific - matches "Net Cash from Operating Activities"
+            r'^Net Cash Provided by Operating',   # Alternative phrasing
+            r'Net Cash.*Operating Activities$',   # Anchored to end
             r'Operating.*Cash.*Flow',
-            r'Cash.*Operations',
-            r'Net Cash.*Operating'
+            r'Net Cash.*Operations$',             # Avoid matching "adjustments to reconcile..."
         ]
         return self._get_standardized_concept_value('cashflow', patterns, period_offset)
 

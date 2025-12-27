@@ -4,14 +4,14 @@ from typing import Any, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from lxml import etree
+from lxml import etree  # type: ignore[import-untyped]
 
 __all__ = ['is_numeric', 'compute_average_price', 'compute_total_value', 
            'format_currency', 'format_amount', 'safe_numeric', 'format_numeric']
 
 
 def is_numeric(series: pd.Series) -> bool:
-    if np.issubdtype(series.dtype, np.number):
+    if np.issubdtype(series.dtype, np.number):  # type: ignore[arg-type]
         return True
     try:
         series.astype(float)

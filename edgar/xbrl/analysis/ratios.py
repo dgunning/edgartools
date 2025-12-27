@@ -664,13 +664,44 @@ class FinancialRatios:
                     StandardConcept.LONG_TERM_DEBT,
                     StandardConcept.TOTAL_EQUITY,
                     StandardConcept.TOTAL_ASSETS,
-                    StandardConcept.OPERATING_INCOME,
-                    StandardConcept.INTEREST_EXPENSE
+                    StandardConcept.OPERATING_INCOME
                 ],
-                'optional_concepts': {},
+                'optional_concepts': {
+                    StandardConcept.INTEREST_EXPENSE: None  # Optional - some companies don't report it
+                },
                 'statements': [
                     (self.balance_sheet_df, "BalanceSheet"),
                     (self.income_stmt_df, "IncomeStatement")
+                ]
+            },
+            'profitability': {
+                'concepts': [
+                    StandardConcept.REVENUE,
+                    StandardConcept.GROSS_PROFIT,
+                    StandardConcept.OPERATING_INCOME,
+                    StandardConcept.NET_INCOME,
+                    StandardConcept.TOTAL_ASSETS,
+                    StandardConcept.TOTAL_EQUITY
+                ],
+                'optional_concepts': {},
+                'statements': [
+                    (self.income_stmt_df, "IncomeStatement"),
+                    (self.balance_sheet_df, "BalanceSheet")
+                ]
+            },
+            'efficiency': {
+                'concepts': [
+                    StandardConcept.REVENUE,
+                    StandardConcept.TOTAL_ASSETS,
+                    StandardConcept.COST_OF_REVENUE
+                ],
+                'optional_concepts': {
+                    StandardConcept.INVENTORY: 0.0,  # Optional - service companies may not have inventory
+                    StandardConcept.ACCOUNTS_RECEIVABLE: None  # Optional
+                },
+                'statements': [
+                    (self.income_stmt_df, "IncomeStatement"),
+                    (self.balance_sheet_df, "BalanceSheet")
                 ]
             }
         }
@@ -742,7 +773,8 @@ class FinancialRatios:
 
         ROA = Net Income / Average Total Assets
         """
-        calc_df, equivalents = self.get_ratio_data('return_on_assets')
+        ratio_data = self.get_ratio_data('return_on_assets')
+        calc_df = ratio_data.calculation_df
 
         try:
             net_income, income_equiv = self._get_concept_value(
@@ -779,7 +811,8 @@ class FinancialRatios:
 
         Operating Margin = Operating Income / Revenue
         """
-        calc_df, equivalents = self.get_ratio_data('operating_margin')
+        ratio_data = self.get_ratio_data('operating_margin')
+        calc_df = ratio_data.calculation_df
 
         try:
             operating_income, income_equiv = self._get_concept_value(
@@ -815,7 +848,8 @@ class FinancialRatios:
         Note: If Gross Profit is not directly available, it will be calculated as
         Revenue - Cost of Revenue.
         """
-        calc_df, equivalents = self.get_ratio_data('gross_margin')
+        ratio_data = self.get_ratio_data('gross_margin')
+        calc_df = ratio_data.calculation_df
 
         try:
             gross_profit, profit_equiv = self._get_concept_value(
@@ -900,7 +934,8 @@ class FinancialRatios:
         Cash Ratio = Cash / Current Liabilities
         Measures ability to pay short-term obligations using only cash.
         """
-        calc_df, equivalents = self.get_ratio_data('current')
+        ratio_data = self.get_ratio_data('current')
+        calc_df = ratio_data.calculation_df
 
         try:
             cash, cash_equiv = self._get_concept_value(
@@ -934,7 +969,8 @@ class FinancialRatios:
         Working Capital = Current Assets - Current Liabilities
         Measures short-term financial health.
         """
-        calc_df, equivalents = self.get_ratio_data('current')
+        ratio_data = self.get_ratio_data('current')
+        calc_df = ratio_data.calculation_df
 
         try:
             current_assets, assets_equiv = self._get_concept_value(
@@ -975,7 +1011,8 @@ class FinancialRatios:
             - return_on_assets
             - return_on_equity
         """
-        calc_df, equivalents = self.get_ratio_data('profitability')
+        ratio_data = self.get_ratio_data('profitability')
+        calc_df = ratio_data.calculation_df
 
         try:
             revenue, revenue_equiv = self._get_concept_value(StandardConcept.REVENUE, calc_df)
@@ -1080,14 +1117,25 @@ class FinancialRatios:
             - receivables_turnover
             - days_sales_outstanding
         """
-        calc_df, equivalents = self.get_ratio_data('efficiency')
+        ratio_data = self.get_ratio_data('efficiency')
+        calc_df = ratio_data.calculation_df
 
         try:
             revenue, revenue_equiv = self._get_concept_value(StandardConcept.REVENUE, calc_df)
             total_assets, assets_equiv = self._get_concept_value(StandardConcept.TOTAL_ASSETS, calc_df)
-            inventory, inventory_equiv = self._get_concept_value(StandardConcept.INVENTORY, calc_df)
             cogs, cogs_equiv = self._get_concept_value(StandardConcept.COST_OF_REVENUE, calc_df)
-            receivables, receivables_equiv = self._get_concept_value(StandardConcept.ACCOUNTS_RECEIVABLE, calc_df)
+
+            # INVENTORY is optional - service companies may not have inventory
+            try:
+                inventory, inventory_equiv = self._get_concept_value(StandardConcept.INVENTORY, calc_df)
+            except KeyError:
+                inventory, inventory_equiv = None, None
+
+            # ACCOUNTS_RECEIVABLE is optional
+            try:
+                receivables, receivables_equiv = self._get_concept_value(StandardConcept.ACCOUNTS_RECEIVABLE, calc_df)
+            except KeyError:
+                receivables, receivables_equiv = None, None
 
             results = {}
 
@@ -1132,7 +1180,7 @@ class FinancialRatios:
                     name="Receivables Turnover",
                     description="Measures how quickly company collects receivables",
                     calculation_df=calc_df,
-                    results=turnover,
+                    results=turnover.to_frame().T,
                     components={
                         'revenue': revenue,
                         'receivables': receivables
@@ -1174,14 +1222,20 @@ class FinancialRatios:
             - interest_coverage
             - equity_multiplier
         """
-        calc_df, equivalents = self.get_ratio_data('leverage')
+        ratio_data = self.get_ratio_data('leverage')
+        calc_df = ratio_data.calculation_df
 
         try:
             total_debt, debt_equiv = self._get_concept_value(StandardConcept.LONG_TERM_DEBT, calc_df)
             total_equity, equity_equiv = self._get_concept_value(StandardConcept.TOTAL_EQUITY, calc_df)
             total_assets, assets_equiv = self._get_concept_value(StandardConcept.TOTAL_ASSETS, calc_df)
             operating_income, income_equiv = self._get_concept_value(StandardConcept.OPERATING_INCOME, calc_df)
-            interest_expense, interest_equiv = self._get_concept_value(StandardConcept.INTEREST_EXPENSE, calc_df)
+
+            # INTEREST_EXPENSE is optional - some companies don't report it
+            try:
+                interest_expense, interest_equiv = self._get_concept_value(StandardConcept.INTEREST_EXPENSE, calc_df)
+            except KeyError:
+                interest_expense, interest_equiv = None, None
 
             results = {}
 

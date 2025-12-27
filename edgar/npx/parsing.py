@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
 
-from lxml import etree as ET
+from lxml import etree as ET  # type: ignore[import-untyped]
 
 from .models import (
     ClassInfo,
