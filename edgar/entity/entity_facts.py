@@ -1014,6 +1014,409 @@ class EntityFacts:
         synonyms = get_synonym_groups()
         return synonyms.list_groups(category=category)
 
+    # ═══════════════════════════════════════════════════════════════════════════
+    # TTM (Trailing Twelve Months) Calculation Methods
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """
+        Calculate TTM (Trailing Twelve Months) value for a financial concept.
+
+        TTM aggregates 4 consecutive quarters into a rolling 12-month metric,
+        providing a smoothed view of financial performance that eliminates
+        seasonal variations.
+
+        Args:
+            concept: XBRL concept name (e.g., 'Revenue', 'NetIncomeLoss')
+                    Can include or omit 'us-gaap:' prefix
+            as_of: Optional date or period string to calculate TTM as of
+                   - date object: TTM ending on or before this date
+                   - Period string: "2024-Q2", "2024-FY"
+                   - None: Most recent available TTM
+
+        Returns:
+            TTMMetric object with value, periods, and metadata
+
+        Raises:
+            ValueError: If insufficient quarterly data (<4 quarters available)
+            KeyError: If concept not found in facts
+
+        Example:
+            >>> facts = company.get_facts()
+            >>> # Most recent TTM revenue
+            >>> ttm = facts.get_ttm('Revenue')
+            >>> print(f"TTM Revenue: ${ttm.value / 1e9:.1f}B")
+            TTM Revenue: $391.0B
+            >>>
+            >>> # TTM as of specific quarter
+            >>> ttm_q2 = facts.get_ttm('Revenue', as_of='2024-Q2')
+            >>> print(f"Periods: {ttm_q2.periods}")
+            [(2023, 'Q3'), (2023, 'Q4'), (2024, 'Q1'), (2024, 'Q2')]
+        """
+        from edgar.entity.ttm import TTMCalculator
+
+        # Normalize concept name (add us-gaap prefix if needed)
+        if ':' not in concept:
+            concept = f'us-gaap:{concept}'
+
+        # Get all facts for this concept
+        concept_facts = self.query().by_concept(concept).execute()
+
+        if not concept_facts:
+            raise KeyError(f"Concept '{concept}' not found in company facts")
+
+        # Parse as_of parameter to date
+        as_of_date = self._parse_as_of_parameter(as_of)
+
+        # Calculate TTM using TTMCalculator
+        calculator = TTMCalculator(concept_facts)
+        return calculator.calculate_ttm(as_of=as_of_date)
+
+    def _parse_as_of_parameter(self, as_of: Optional[Union[date, str]]) -> Optional[date]:
+        """
+        Parse as_of parameter to a date object.
+
+        Args:
+            as_of: Date, period string ("YYYY-QN", "YYYY-FY"), or None
+
+        Returns:
+            Parsed date object, or None
+
+        Raises:
+            ValueError: If period string format is invalid
+
+        Example:
+            >>> facts._parse_as_of_parameter('2024-Q2')
+            date(2024, 6, 30)
+            >>> facts._parse_as_of_parameter('2024-FY')
+            date(2024, 12, 31)
+        """
+        if as_of is None:
+            return None
+
+        # Already a date object
+        if isinstance(as_of, date):
+            return as_of
+
+        # Parse period string: "YYYY-QN" or "YYYY-FY"
+        if isinstance(as_of, str):
+            parts = as_of.split('-')
+            if len(parts) != 2:
+                raise ValueError(
+                    f"Invalid period format: '{as_of}'. "
+                    f"Expected format: 'YYYY-QN' or 'YYYY-FY'"
+                )
+
+            year_str, period_str = parts
+            try:
+                year = int(year_str)
+            except ValueError:
+                raise ValueError(f"Invalid year in period: '{year_str}'")
+
+            # Map fiscal period to approximate end date
+            period_end_months = {
+                'Q1': 3,   # March
+                'Q2': 6,   # June
+                'Q3': 9,   # September
+                'Q4': 12,  # December
+                'FY': 12   # December (fiscal year end)
+            }
+
+            if period_str not in period_end_months:
+                raise ValueError(
+                    f"Invalid period: '{period_str}'. "
+                    f"Expected: Q1, Q2, Q3, Q4, or FY"
+                )
+
+            month = period_end_months[period_str]
+
+            # Get last day of month
+            if month == 3:
+                day = 31
+            elif month == 6:
+                day = 30
+            elif month == 9:
+                day = 30
+            else:  # month == 12
+                day = 31
+
+            return date(year, month, day)
+
+        raise ValueError(f"Unsupported as_of type: {type(as_of)}")
+
+    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """
+        Calculate TTM revenue.
+
+        Convenience method that handles various revenue concept names.
+
+        Args:
+            as_of: Optional date or period string (see get_ttm for details)
+
+        Returns:
+            TTMMetric object with TTM revenue value
+
+        Example:
+            >>> ttm = facts.get_ttm_revenue()
+            >>> print(f"TTM Revenue: ${ttm.value / 1e9:.1f}B")
+        """
+        # Try common revenue concept names in priority order
+        revenue_concepts = [
+            'RevenueFromContractWithCustomerExcludingAssessedTax',
+            'SalesRevenueNet',
+            'Revenues',
+            'Revenue',
+            'TotalRevenues',
+            'NetSales'
+        ]
+
+        last_error = None
+        for concept in revenue_concepts:
+            try:
+                return self.get_ttm(concept, as_of=as_of)
+            except (KeyError, ValueError) as e:
+                last_error = e
+                continue
+
+        # If we get here, none of the concept names worked
+        if last_error:
+            raise last_error
+        raise KeyError("Revenue concept not found in company facts")
+
+    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """
+        Calculate TTM net income.
+
+        Convenience method that handles various net income concept names.
+
+        Args:
+            as_of: Optional date or period string (see get_ttm for details)
+
+        Returns:
+            TTMMetric object with TTM net income value
+
+        Example:
+            >>> ttm = facts.get_ttm_net_income()
+            >>> print(f"TTM Net Income: ${ttm.value / 1e9:.1f}B")
+        """
+        net_income_concepts = [
+            'NetIncomeLoss',
+            'ProfitLoss',
+            'NetIncome',
+            'NetEarnings',
+            'NetIncomeLossAttributableToParent'
+        ]
+
+        last_error = None
+        for concept in net_income_concepts:
+            try:
+                return self.get_ttm(concept, as_of=as_of)
+            except (KeyError, ValueError) as e:
+                last_error = e
+                continue
+
+        if last_error:
+            raise last_error
+        raise KeyError("Net income concept not found in company facts")
+
+    def get_ttm_operating_cash_flow(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """
+        Calculate TTM operating cash flow.
+
+        Convenience method that handles various operating cash flow concept names.
+
+        Args:
+            as_of: Optional date or period string (see get_ttm for details)
+
+        Returns:
+            TTMMetric object with TTM operating cash flow value
+
+        Example:
+            >>> ttm = facts.get_ttm_operating_cash_flow()
+            >>> print(f"TTM Operating Cash Flow: ${ttm.value / 1e9:.1f}B")
+        """
+        ocf_concepts = [
+            'NetCashProvidedByUsedInOperatingActivities',
+            'CashProvidedByUsedInOperatingActivities',
+            'OperatingCashFlow',
+            'CashFromOperatingActivities'
+        ]
+
+        last_error = None
+        for concept in ocf_concepts:
+            try:
+                return self.get_ttm(concept, as_of=as_of)
+            except (KeyError, ValueError) as e:
+                last_error = e
+                continue
+
+        if last_error:
+            raise last_error
+        raise KeyError("Operating cash flow concept not found in company facts")
+
+    def get_ttm_trend(
+        self,
+        concept: str,
+        periods: int = 8
+    ) -> pd.DataFrame:
+        """
+        Calculate TTM trend showing rolling TTM values over multiple periods.
+
+        Creates a time series of TTM values, with each row representing a
+        different "as of" quarter. Useful for analyzing TTM trends and growth
+        patterns over time.
+
+        Args:
+            concept: XBRL concept name (e.g., 'Revenue', 'NetIncomeLoss')
+                    Can include or omit 'us-gaap:' prefix
+            periods: Number of TTM values to calculate (default: 8)
+
+        Returns:
+            DataFrame with columns:
+            - as_of_quarter: e.g., 'Q2 2024'
+            - ttm_value: TTM value for that quarter
+            - fiscal_year: e.g., 2024
+            - fiscal_period: e.g., 'Q2'
+            - yoy_growth: % change vs 4 quarters ago (None if insufficient data)
+            - periods_included: List of quarters in this TTM window
+
+        Raises:
+            ValueError: If insufficient quarterly data for requested periods
+            KeyError: If concept not found in facts
+
+        Example:
+            >>> facts = company.get_facts()
+            >>> # Get 8 quarters of TTM revenue trend
+            >>> trend = facts.get_ttm_trend('Revenue', periods=8)
+            >>> print(trend[['as_of_quarter', 'ttm_value', 'yoy_growth']])
+            as_of_quarter    ttm_value  yoy_growth
+            Q2 2024          391.0B     0.042
+            Q1 2024          390.0B     0.031
+            ...
+            >>>
+            >>> # Plot TTM trend
+            >>> trend.plot(x='as_of_quarter', y='ttm_value')
+        """
+        from edgar.entity.ttm import TTMCalculator
+
+        # Normalize concept name (add us-gaap prefix if needed)
+        if ':' not in concept:
+            concept = f'us-gaap:{concept}'
+
+        # Get all facts for this concept
+        concept_facts = self.query().by_concept(concept).execute()
+
+        if not concept_facts:
+            raise KeyError(f"Concept '{concept}' not found in company facts")
+
+        # Calculate TTM trend using TTMCalculator
+        calculator = TTMCalculator(concept_facts)
+        return calculator.calculate_ttm_trend(periods=periods)
+
+    def get_ttm_revenue_trend(self, periods: int = 8) -> pd.DataFrame:
+        """
+        Calculate TTM revenue trend.
+
+        Convenience method that handles various revenue concept names.
+
+        Args:
+            periods: Number of TTM values to calculate (default: 8)
+
+        Returns:
+            DataFrame with TTM revenue trend
+
+        Example:
+            >>> trend = facts.get_ttm_revenue_trend(periods=12)
+            >>> print(trend.head())
+        """
+        revenue_concepts = [
+            'RevenueFromContractWithCustomerExcludingAssessedTax',
+            'SalesRevenueNet',
+            'Revenues',
+            'Revenue',
+            'TotalRevenues',
+            'NetSales'
+        ]
+
+        last_error = None
+        for concept in revenue_concepts:
+            try:
+                return self.get_ttm_trend(concept, periods=periods)
+            except (KeyError, ValueError) as e:
+                last_error = e
+                continue
+
+        if last_error:
+            raise last_error
+        raise KeyError("Revenue concept not found in company facts")
+
+    def get_ttm_income_statement(
+        self,
+        as_of: Optional[Union[date, str]] = None
+    ) -> 'TTMStatement':
+        """
+        Build TTM income statement with all line items.
+
+        Creates a complete income statement using TTM values for each line item.
+        Useful for comparing to annual 10-K statements or analyzing current
+        performance.
+
+        Args:
+            as_of: Optional date or period string to calculate TTM as of
+                   (see get_ttm for details)
+
+        Returns:
+            TTMStatement object with income statement line items
+
+        Example:
+            >>> facts = company.get_facts()
+            >>> stmt = facts.get_ttm_income_statement()
+            >>> print(stmt)  # Rich formatted table output
+            >>>
+            >>> # Get statement as of specific period
+            >>> stmt_q2 = facts.get_ttm_income_statement(as_of='2024-Q2')
+            >>> df = stmt_q2.to_dataframe()
+        """
+        from edgar.entity.ttm import TTMStatementBuilder
+
+        # Parse as_of parameter
+        as_of_date = self._parse_as_of_parameter(as_of)
+
+        # Build TTM income statement
+        builder = TTMStatementBuilder(self)
+        return builder.build_income_statement(as_of=as_of_date)
+
+    def get_ttm_cashflow_statement(
+        self,
+        as_of: Optional[Union[date, str]] = None
+    ) -> 'TTMStatement':
+        """
+        Build TTM cash flow statement with all line items.
+
+        Creates a complete cash flow statement using TTM values for each
+        line item.
+
+        Args:
+            as_of: Optional date or period string to calculate TTM as of
+                   (see get_ttm for details)
+
+        Returns:
+            TTMStatement object with cash flow statement line items
+
+        Example:
+            >>> facts = company.get_facts()
+            >>> stmt = facts.get_ttm_cashflow_statement()
+            >>> print(stmt)  # Rich formatted table output
+        """
+        from edgar.entity.ttm import TTMStatementBuilder
+
+        # Parse as_of parameter
+        as_of_date = self._parse_as_of_parameter(as_of)
+
+        # Build TTM cash flow statement
+        builder = TTMStatementBuilder(self)
+        return builder.build_cashflow_statement(as_of=as_of_date)
+
     # Convenient properties for common DEI facts
     @property
     def shares_outstanding(self) -> Optional[float]:
