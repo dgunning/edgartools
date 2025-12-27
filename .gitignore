@@ -11,6 +11,9 @@
 dist/
 .vscode/
 .claude/settings.local.json
+# AI-generated documentation (local only)
+AGENTS.md
+edgar/GEMINI.md
 # Beads issue tracking (local state)
 .beads/
 data/.DS_Store
