@@ -4,19 +4,34 @@
     "us-gaap_Revenue",
     "us-gaap_Revenues",
     "us-gaap_SalesRevenueNet",
-    "us-gaap_OperatingRevenue"
+    "us-gaap_OperatingRevenue",
+    "ifrs-full_Revenue"
   ],
   "Contract Revenue": [
     "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
-    "us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax"
+    "us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax",
+    "ifrs-full_RevenueFromContractsWithCustomers"
   ],
   "Product Revenue": [
     "us-gaap_SalesRevenueGoodsNet",
     "us-gaap_ProductSales"
   ],
-  "Operating Lease Revenue": [
+  "Service Revenue": [
+    "us-gaap_SalesRevenueServicesNet"
+  ],
+  "Subscription Revenue": [
+    "us-gaap_SubscriptionRevenue"
+  ],
+  "Leasing Revenue": [
     "us-gaap_OperatingLeaseLeaseIncome"
   ],
+  "_comment_industry_revenue": "Industry-specific revenue categories rely on company mappings unless a standard taxonomy tag exists.",
+  "Automotive Revenue": [],
+  "Automotive Leasing Revenue": [],
+  "Energy Revenue": [],
+  "Software Revenue": [],
+  "Hardware Revenue": [],
+  "Platform Revenue": [],
   "_comment_cost_of_revenue_hierarchy": "COST OF REVENUE HIERARCHY FIX: Separated different cost types to prevent duplicate labels. Different business models (manufacturing, service, mixed) use different cost concepts that should have distinct labels for clarity.",
   "Cost of Revenue": [
     "us-gaap_CostOfRevenueAbstract"
@@ -28,7 +43,8 @@
     "us-gaap_CostOfGoodsSold"
   ],
   "Cost of Goods and Services Sold": [
-    "us-gaap_CostOfGoodsAndServicesSold"
+    "us-gaap_CostOfGoodsAndServicesSold",
+    "us-gaap_CostOfServices"
   ],
   "Cost of Sales": [
     "us-gaap_CostOfSales"
@@ -70,21 +86,26 @@
     "us-gaap_MarketingExpense",
     "us-gaap_AdvertisingExpense"
   ],
+  "_comment_sales_expense": "Sales Expense is reserved for company-specific tags to avoid duplicating Selling Expense mappings.",
+  "Sales Expense": [],
   "Operating Income": [
     "us-gaap_OperatingIncomeLoss",
     "us-gaap_OperatingIncome",
-    "us-gaap_IncomeLossFromContinuingOperationsBeforeInterestAndTaxes"
+    "us-gaap_IncomeLossFromContinuingOperationsBeforeInterestAndTaxes",
+    "ifrs-full_OperatingIncome",
+    "ifrs-full_ProfitLossFromOperatingActivities"
   ],
   "Nonoperating Income/Expense": [
     "orcl_NonoperatingIncomeExpenseIncludingEliminationOfNetIncomeLossAttributableToNoncontrollingInterests",
-    "us-gaap_NonoperatingIncomeExpense"
+    "us-gaap_NonoperatingIncomeExpense",
+    "us-gaap_OtherNonoperatingIncomeExpense"
   ],
   "Interest Expense": [
     "us-gaap_InterestAndDebtExpense",
     "us-gaap_InterestExpense",
     "us-gaap_InterestIncomeExpenseNet"
   ],
-    "Interest Expense (operating)": [
+  "Interest Expense (operating)": [
     "us-gaap_InterestExpenseOperating"
   ],
   "Interest Expense (non-operating)": [
@@ -100,20 +121,21 @@
     "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems"
   ],
   "Income Tax Expense": [
-    "us-gaap_IncomeTaxesPaidNet",
     "us-gaap_IncomeTaxExpenseBenefit"
   ],
   "_comment_net_income_hierarchy": "NET INCOME HIERARCHY FIX: Separated total net income from component income types to prevent duplicate labels. Continuing operations income and profit/loss are components that should have distinct labels from total net income.",
   "Net Income": [
     "us-gaap_NetIncome",
-    "us-gaap_NetIncomeLoss"
+    "us-gaap_NetIncomeLoss",
+    "ifrs-full_ProfitLossAttributableToOwnersOfParent"
   ],
   "Net Income from Continuing Operations": [
     "us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
     "us-gaap_IncomeLossFromContinuingOperations"
   ],
   "Profit or Loss": [
-    "us-gaap_ProfitLoss"
+    "us-gaap_ProfitLoss",
+    "ifrs-full_ProfitLoss"
   ],
   "Net Income Attributable to Noncontrolling Interest": [
     "us-gaap_NetIncomeLossAttributableToNonredeemableNoncontrollingInterest",
@@ -122,7 +144,7 @@
   "Basic Net Income Available to Common Shareholders": [
     "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic"
   ],
-    "Diluted Net Income Available to Common Shareholders": [
+  "Diluted Net Income Available to Common Shareholders": [
     "us-gaap_NetIncomeLossAvailableToCommonStockholdersDiluted"
   ],
   "Accumulated Other Comprehensive Income/Loss": [
@@ -132,10 +154,12 @@
     "us-gaap_EarningsPerShareAbstract"
   ],
   "Earnings Per Share (Basic)": [
-    "us-gaap_EarningsPerShareBasic"
+    "us-gaap_EarningsPerShareBasic",
+    "ifrs-full_BasicEarningsLossPerShare"
   ],
   "Earnings Per Share (Diluted)": [
-    "us-gaap_EarningsPerShareDiluted"
+    "us-gaap_EarningsPerShareDiluted",
+    "ifrs-full_DilutedEarningsLossPerShare"
   ],
   "Shares Outstanding": [
     "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract"
@@ -177,7 +201,7 @@
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
   ],
-    "Total Non Current Assets": [
+  "Total Non Current Assets": [
     "us-gaap_AssetsNoncurrent"
   ],
   "Property, Plant and Equipment": [
@@ -195,7 +219,8 @@
   ],
   "Total Assets": [
     "us-gaap_Assets",
-    "us-gaap_AssetsTotal"
+    "us-gaap_AssetsTotal",
+    "ifrs-full_Assets"
   ],
   "Long-Term Investments": [
     "us-gaap_LongTermInvestments"
@@ -217,7 +242,7 @@
   "Total Current Liabilities": [
     "us-gaap_LiabilitiesCurrent"
   ],
-    "Total Non Current Liabilities": [
+  "Total Non Current Liabilities": [
     "us-gaap_LiabilitiesNoncurrent"
   ],
   "Long Term Debt": [
@@ -235,11 +260,15 @@
   "Deferred Revenue": [
     "us-gaap_DeferredRevenueNoncurrent",
     "us-gaap_DeferredRevenueCurrent",
-    "us-gaap_DeferredRevenue"
+    "us-gaap_DeferredRevenue",
+    "us-gaap_ContractWithCustomerLiability",
+    "us-gaap_ContractWithCustomerLiabilityCurrent",
+    "us-gaap_ContractWithCustomerLiabilityNoncurrent"
   ],
   "Total Liabilities": [
     "us-gaap_LiabilitiesTotal",
-    "us-gaap_Liabilities"
+    "us-gaap_Liabilities",
+    "ifrs-full_Liabilities"
   ],
   "Common Stock Shares Outstanding": [
     "us-gaap_CommonStockSharesOutstanding"
@@ -271,14 +300,16 @@
     "us-gaap_EquityAttributableToParent",
     "us-gaap_StockholdersEquity",
     "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
-    "us-gaap_StockholdersEquityAttributableToParent"
+    "us-gaap_StockholdersEquityAttributableToParent",
+    "ifrs-full_Equity"
   ],
   "Total Liabilities and Stockholders' Equity": [
     "us-gaap_LiabilitiesAndStockholdersEquity"
   ],
   "Net Cash from Operating Activities": [
     "us-gaap_NetCashProvidedByUsedInOperatingActivities",
-    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperations"
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperations",
+    "ifrs-full_CashFlowsFromUsedInOperatingActivities"
   ],
   "Net Cash from Investing Activities": [
     "us-gaap_NetCashProvidedByUsedInInvestingActivities",
@@ -291,7 +322,11 @@
   "Net Change in Cash": [
     "us-gaap_IncreaseDecreaseInCashAndCashEquivalents",
     "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
-    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+    "ifrs-full_IncreaseDecreaseInCashAndCashEquivalents"
+  ],
+  "Income Taxes Paid (Net)": [
+    "us-gaap_IncomeTaxesPaidNet"
   ],
   "Payments for Property, Plant and Equipment": [
     "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"
@@ -317,7 +352,7 @@
   "Proceeds from Sale and Maturity of Other Investments": [
     "us-gaap_ProceedsFromSaleAndMaturityOfOtherInvestments"
   ],
-  "Proceeds from Sale of Debt Securities, ": [
+  "Proceeds from Sale of Debt Securities": [
     "us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt"
   ],
   "Proceeds from (Repayments of) Commercial Paper": [
@@ -337,9 +372,8 @@
   ],
   "Other Liabilities": [
     "us-gaap_OtherLiabilities"
-
   ],
-    "Other Current Liabilities": [
+  "Other Current Liabilities": [
     "us-gaap_OtherLiabilitiesCurrent"
   ],
   "Other Non Current Liabilities": [
@@ -348,6 +382,7 @@
   "Depreciation and Amortization": [
     "us-gaap_AmortizationOfIntangibleAssets",
     "us-gaap_Depreciation",
-    "us-gaap_DepreciationAndAmortization"
+    "us-gaap_DepreciationAndAmortization",
+    "us-gaap_DepreciationDepletionAndAmortization"
   ]
 }

@@ -62,9 +62,9 @@ _ACCEPTS_LINKED_FROM = {
 # Income statement concept lists for deduplication and promotion
 # Revenue concepts (in priority order - first found wins)
 _REVENUE_CONCEPTS = [
-    'RevenueFromContractWithCustomerExcludingAssessedTax',
+    'Revenues',
     'SalesRevenueNet',
-    'Revenues'
+    'RevenueFromContractWithCustomerExcludingAssessedTax'
 ]
 
 # Cost concepts for deduplication (in priority order - first found wins)

@@ -10,6 +10,43 @@
 **/__pycache__/
 dist/
 .vscode/
+.claude/settings.local.json
+# AI-generated documentation (local only)
+AGENTS.md
+edgar/GEMINI.md
+# LLM extraction docs (exclude from tracking, keep only core user docs)
+docs/llm-extraction/CHUNKING_EXAMPLE.md
+docs/llm-extraction/CHUNKING_MARKDOWN_PROPOSAL.md
+docs/llm-extraction/EDGARTOOLS_TABLE_EXTRACTION_GUIDE.md
+docs/llm-extraction/EXTRACTION_INFRASTRUCTURE_REPORT.md
+docs/llm-extraction/FIXES_SUMMARY.md
+docs/llm-extraction/IMPLEMENTATION_COMPLETE.md
+docs/llm-extraction/IMPLEMENTATION_SUMMARY.md
+docs/llm-extraction/METADATA_QUICK_REF.md
+docs/llm-extraction/METADATA_USAGE_ANALYSIS.md
+docs/llm-extraction/PLTR_TABLE_COMPARISON_REPORT.md
+docs/llm-extraction/subsection_pattern_analysis.md
+docs/llm-extraction/TABLE_EXTRACTION_COMPARISON_REPORT.md
+# Internal research and analysis docs
+docs-internal/
+AI_USAGE_PATTERNS_DOCUMENTATION.md
+# Internal tools (keep only one example: tools/example_llm_usage.py)
+tools/CELL_SHIFTING_ANALYSIS.md
+tools/QUICK_START.md
+tools/demo_improved_title_extraction.py
+tools/interactive_demo.py
+tools/interactive_llm_test.py
+tools/llm_extraction.py
+tools/show_metadata_usage.py
+tools/simple_examples.py
+tools/test_cell_shifting.py
+tools/test_global_fixes.py
+tools/test_llm_integration.py
+tools/test_placeholder_columns.py
+tools/test_snap_fixes.py
+tools/usage_examples.py
+# Research scripts
+scripts/research_income_statement_sector_samples.py
 # Beads issue tracking (local state)
 .beads/
 data/.DS_Store
@@ -25,3 +62,6 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
+*.csv
+.gitignore
+nul

@@ -285,7 +285,8 @@ class MappingStore:
         for std_concept, company_concepts in self.mappings.items():
             merged[std_concept] = []
             for concept in company_concepts:
-                merged[std_concept].append((concept, "core", 1))
+                normalized = self._normalize_concept_name(concept)
+                merged[std_concept].append((normalized, "core", 1))
 
         # Add company mappings (priority 2 - higher)
         for entity_id, company_data in self.company_mappings.items():
@@ -293,10 +294,21 @@ class MappingStore:
             priority_level = 2
 
             for std_concept, company_concepts in concept_mappings.items():
+                if not isinstance(std_concept, str) or std_concept.startswith("_"):
+                    continue
                 if std_concept not in merged:
                     merged[std_concept] = []
-                for concept in company_concepts:
-                    merged[std_concept].append((concept, entity_id, priority_level))
+
+                if isinstance(company_concepts, str):
+                    concepts = [company_concepts]
+                elif isinstance(company_concepts, (list, set, tuple)):
+                    concepts = company_concepts
+                else:
+                    continue
+
+                for concept in concepts:
+                    normalized = self._normalize_concept_name(concept)
+                    merged[std_concept].append((normalized, entity_id, priority_level))
 
         return merged
 
@@ -307,14 +319,54 @@ class MappingStore:
         # Add company hierarchy rules
         for _entity_id, company_data in self.company_mappings.items():
             hierarchy_rules = company_data.get("hierarchy_rules", {})
-            all_rules.update(hierarchy_rules)
+            for rule_name, rule in hierarchy_rules.items():
+                if isinstance(rule_name, str) and rule_name.startswith("_"):
+                    continue
+                all_rules[rule_name] = rule
 
         return all_rules
 
+    def _normalize_concept_name(self, concept: str) -> str:
+        """Normalize concept names to a consistent underscore namespace format."""
+        if not concept:
+            return concept
+
+        normalized = concept.strip()
+        normalized = normalized.replace(":", "_")
+        normalized = normalized.replace("us_gaap_", "us-gaap_")
+        normalized = normalized.replace("ifrs_full_", "ifrs-full_")
+        return normalized
+
+    def _normalize_mapping_entries(self, mappings: Dict[str, Any]) -> Dict[str, Set[str]]:
+        """Normalize mapping entries and filter out comment keys."""
+        normalized: Dict[str, Set[str]] = {}
+        for standard_concept, company_concepts in mappings.items():
+            if not isinstance(standard_concept, str) or standard_concept.startswith("_"):
+                continue
+
+            if isinstance(company_concepts, str):
+                concepts = [company_concepts]
+            elif isinstance(company_concepts, (list, set, tuple)):
+                concepts = company_concepts
+            else:
+                continue
+
+            normalized_concepts = {
+                self._normalize_concept_name(concept)
+                for concept in concepts
+                if isinstance(concept, str)
+            }
+            normalized[standard_concept] = normalized_concepts
+
+        return normalized
+
     def _detect_entity_from_concept(self, concept: str) -> Optional[str]:
         """Detect entity identifier from concept name prefix."""
-        if '_' in concept:
-            prefix = concept.split('_')[0].lower()
+        normalized = self._normalize_concept_name(concept)
+        if not normalized:
+            return None
+        if '_' in normalized:
+            prefix = normalized.split('_', 1)[0].lower()
             # Check if this prefix corresponds to a known company
             if prefix in self.company_mappings:
                 return prefix
@@ -364,11 +416,11 @@ class MappingStore:
                 flattened = {}
                 for _statement_type, concepts in data.items():
                     for standard_concept, company_concepts in concepts.items():
-                        flattened[standard_concept] = set(company_concepts)
-                return flattened
+                        flattened[standard_concept] = company_concepts
+                return self._normalize_mapping_entries(flattened)
             else:
                 # Flat structure
-                return {k: set(v) for k, v in data.items()}
+                return self._normalize_mapping_entries(data)
 
         # If all methods fail, return empty mappings
         # The initialize_default_mappings function will create a file if needed
@@ -402,7 +454,8 @@ class MappingStore:
         if standard_concept not in self.mappings:
             self.mappings[standard_concept] = set()
 
-        self.mappings[standard_concept].add(company_concept)
+        normalized = self._normalize_concept_name(company_concept)
+        self.mappings[standard_concept].add(normalized)
         self._save_mappings()
 
     def get_standard_concept(self, company_concept: str, context: Optional[Dict] = None) -> Optional[str]:
@@ -416,17 +469,19 @@ class MappingStore:
         Returns:
             The standard concept or None if not found
         """
+        normalized_concept = self._normalize_concept_name(company_concept)
+
         # Use merged mappings with priority-based resolution
         if self.merged_mappings:
             # Detect company from concept prefix (e.g., 'tsla:Revenue' -> 'tsla')
-            detected_entity = self._detect_entity_from_concept(company_concept)
+            detected_entity = self._detect_entity_from_concept(normalized_concept)
 
             # Search through merged mappings with priority
             candidates = []
 
             for std_concept, mapping_list in self.merged_mappings.items():
                 for concept, source, priority in mapping_list:
-                    if concept == company_concept:
+                    if concept == normalized_concept:
                         # Boost priority if it matches detected entity
                         effective_priority = priority
                         if detected_entity and source == detected_entity:
@@ -444,7 +499,7 @@ class MappingStore:
 
         # Fallback to core mappings
         for standard_concept, company_concepts in self.mappings.items():
-            if company_concept in company_concepts:
+            if normalized_concept in company_concepts:
                 return standard_concept
         return None
 
