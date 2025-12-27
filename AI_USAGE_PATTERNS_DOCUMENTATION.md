@@ -893,25 +893,25 @@ def test_company_text_deprecated(aapl_company):
 ### File Paths Referenced in This Document
 
 **Implementation Files**:
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\_filings.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\entity\core.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\entity\filings.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\offerings\formc.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\offerings\campaign.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\xbrl\xbrl.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\edgar\llm.py`
+- `edgar/_filings.py`
+- `edgar/entity/core.py`
+- `edgar/entity/filings.py`
+- `edgar/offerings/formc.py`
+- `edgar/offerings/campaign.py`
+- `edgar/xbrl/xbrl.py`
+- `edgar/llm.py`
 
 **Test Files**:
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\tests\test_ai_native_context.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\tests\test_ai_text_methods.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\tests\test_company.py`
+- `tests/test_ai_native_context.py`
+- `tests/test_ai_text_methods.py`
+- `tests/test_company.py`
 
 **Example Files**:
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\docs\examples\offering_lifecycle.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\examples\scripts\ai\ai_context.py`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\tools\example_llm_usage.py`
+- `docs/examples/offering_lifecycle.py`
+- `examples/scripts/ai/ai_context.py`
+- `tools/example_llm_usage.py`
 
 **Documentation Files**:
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\docs\ai-integration.md`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\EXTRACTION_GUIDE.md`
-- `C:\Users\SaifA\OneDrive\ai project\Citra\web features\sec-filings\edgartools_git\docs-internal\planning\AI_NATIVE_WORKFLOW_IMPLEMENTATION_PLAN.md`
+- `docs/ai-integration.md`
+- `EXTRACTION_GUIDE.md`
+- `docs-internal/planning/AI_NATIVE_WORKFLOW_IMPLEMENTATION_PLAN.md`
