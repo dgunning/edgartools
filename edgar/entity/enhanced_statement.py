@@ -221,7 +221,8 @@ class MultiPeriodStatement:
             footer_parts.append(("  ", ""))
             footer_parts.append((SYMBOLS["bullet"], styles["structure"]["separator"]))
             footer_parts.append(("  ", ""))
-        footer_parts.append(("Source: EntityFacts", styles["metadata"]["source"]))
+        footer_parts.append(("Source: ", styles["metadata"]["source"]))
+        footer_parts.append(("EntityFacts", styles["metadata"]["source_entity_facts"]))
         footer = Text.assemble(*footer_parts)
 
         # Main table with multiple period columns

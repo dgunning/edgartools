@@ -54,7 +54,9 @@ PALETTE = {
     "metadata": "dim",
     "hint": "dim italic",
     "date": "dim",
-    "source": "dim italic",  # For "Source: EntityFacts" etc.
+    "source": "dim italic",  # For "Source:" prefix
+    "source_entity_facts": "cyan",  # EntityFacts API source
+    "source_xbrl": "gold1",  # XBRL filing source
     "units": "dim",  # For "Amounts in millions USD"
     "period_range": "bold",  # For "Q3 2022 to Q3 2025" - high visibility
 
@@ -252,6 +254,8 @@ def get_statement_styles() -> dict:
         # Metadata styles
         "metadata": {
             "source": PALETTE["source"],
+            "source_entity_facts": PALETTE["source_entity_facts"],
+            "source_xbrl": PALETTE["source_xbrl"],
             "units": PALETTE["units"],
             "date": PALETTE["date"],
             "hint": PALETTE["hint"],
