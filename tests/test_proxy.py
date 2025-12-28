@@ -81,7 +81,7 @@ class TestProxyStatementMetadata:
 
     def test_cik(self, proxy):
         """Test CIK property."""
-        assert proxy.cik == 320193
+        assert proxy.cik == '320193'
 
     def test_accession_number(self, proxy):
         """Test accession_number property."""

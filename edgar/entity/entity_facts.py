@@ -8,10 +8,11 @@ analytics and AI-ready interfaces.
 from collections import defaultdict
 from datetime import date
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
 if TYPE_CHECKING:
     from edgar.entity.query import FactQuery
+    from edgar.entity.unit_handling import UnitResult
     from edgar.enums import PeriodType
 
 from typing import Union
@@ -1290,7 +1291,7 @@ class EntityFacts:
         return enhanced_stmt
 
     # Investment analytics
-    def calculate_ratios(self) -> Dict[str, float]:
+    def calculate_ratios(self) -> Dict[str, Any]:
         """
         Calculate common financial ratios.
 
@@ -1571,7 +1572,7 @@ class EntityFacts:
                                       concept_variants: List[str],
                                       period: Optional[str] = None,
                                       unit: Optional[str] = None,
-                                      fallback_calculation: Optional[callable] = None,
+                                      fallback_calculation: Optional[Callable] = None,
                                       return_detailed: bool = False,
                                       strict_unit_match: bool = False) -> Optional[float]:
         """
@@ -1609,7 +1610,7 @@ class EntityFacts:
 
                     if unit_result.success:
                         if return_detailed:
-                            return unit_result
+                            return unit_result  # type: ignore[return-value]
                         return unit_result.value
 
         # Try fallback calculation if provided
@@ -1618,7 +1619,7 @@ class EntityFacts:
                 fallback_value = fallback_calculation(period, target_unit)
                 if fallback_value is not None:
                     if return_detailed:
-                        return UnitResult(
+                        return UnitResult(  # type: ignore[return-value]
                             value=fallback_value,
                             normalized_unit=UnitNormalizer.normalize_unit(target_unit),
                             original_unit=target_unit,
@@ -1629,7 +1630,7 @@ class EntityFacts:
             except Exception as e:
                 # Fallback calculation failed, continue
                 if return_detailed:
-                    return UnitResult(
+                    return UnitResult(  # type: ignore[return-value]
                         value=None,
                         normalized_unit=None,
                         original_unit=target_unit or "",
@@ -1639,7 +1640,7 @@ class EntityFacts:
 
         # No value found
         if return_detailed:
-            return UnitResult(
+            return UnitResult(  # type: ignore[return-value]
                 value=None,
                 normalized_unit=None,
                 original_unit=target_unit or "",

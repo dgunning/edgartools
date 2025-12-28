@@ -276,7 +276,7 @@ class Address:
         # Simplified representation that avoids unnecessary string operations
         return f'Address(street1="{self.street1}", street2="{self.street2}", city="{self.city}", zipcode="{self.zipcode}")'
 
-    def to_json(self) -> Dict[str, str]:
+    def to_json(self) -> Dict[str, Optional[str]]:
         """Convert the address to a JSON-serializable dict."""
         # Direct dictionary creation is faster than multiple assignments
         return {
@@ -395,7 +395,7 @@ class EntityData:
                     is_inline_xbrl: Optional[bool] = None,
                     sort_by: Optional[Union[str, List[Tuple[str, str]]]] = None,
                     trigger_full_load: bool = True
-                    ) -> EntityFilings:
+                    ) -> Optional[EntityFilings]:
         """
         Get entity filings with lazy loading behavior.
 

@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.6.2] - 2025-12-27
+
+### Fixed
+
+- **XBRL Presentation Mode Not Applied to Columns with None Values** (#556, 5f404f3d)
+  - Fixed presentation mode not being applied to columns containing None values
+  - Ensures consistent formatting across all XBRL statement columns
+  - **Files**: `edgar/xbrl/` modules
+  - **Impact**: Proper presentation mode rendering for statements with missing data
+
+- **Type Checker Invalid Return Type Errors** (8eef4721)
+  - Fixed 17 invalid-return-type errors detected by ty type checker
+  - Improved type safety across multiple modules
+  - **Files**: Various edgar modules
+  - **Impact**: Enhanced type safety and IDE support
+
+- **Document Size Limit for Large NPORT-P Filings** (edgartools-ypvp)
+  - Increased max_document_size from 100MB to 110MB to handle edge cases
+  - Resolves DocumentTooLargeError for large NPORT-P filings (e.g., Voya FUNDS TRUST)
+  - **Files**: `edgar/documents/config.py`
+  - **Impact**: Successfully processes NPORT-P filings that were previously failing by 48 bytes
+
+### Documentation
+
+- **Proxy Statement Text Extraction Guide** (c0415007)
+  - Added comprehensive guide for extracting text from proxy statements
+  - Includes TSLA example test script
+  - **Files**: `edgar/proxy/docs/`
+
+- **Proxy Package Documentation** (0b0c54fb)
+  - Added detailed documentation to edgar.proxy package
+  - **Impact**: Better developer experience for proxy statement analysis
+
+- **Company API Documentation Updates** (b230a647)
+  - Updated Company.md with recent API additions
+  - Reflects latest company data access methods
+
+### Summary
+
+Release 5.6.2 is a maintenance release focusing on edge case fixes and documentation improvements. Key highlights:
+
+- Fixed XBRL presentation mode for columns with None values
+- Increased document size limit to handle large NPORT-P filings
+- Enhanced type safety with 17 type error fixes
+- Improved proxy statement documentation
+
+This release is recommended for users working with large filings or proxy statements.
+
 ## [5.6.1] - 2025-12-25
 
 ### Fixed
