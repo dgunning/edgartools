@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.6.3] - 2025-12-28
+
+### Fixed
+
+- **Duplicate Period Labels for December FYE Companies** (df153797, edgartools-t3tr)
+  - Fixed duplicate "FY 2024" labels when both current and comparative periods had fiscal_year=2024
+  - For December fiscal year end companies, now uses period_end.year for labels instead of SEC's fiscal_year tag
+  - Non-December FYE companies continue to trust SEC's fiscal_year since their FY doesn't align with calendar year
+  - **Files**: `edgar/entity/` modules
+  - **Impact**: Accurate period labeling for December FYE companies in EntityFacts statements
+
+### Added
+
+- **Industry-Specific Concept Learning** (d4571f63)
+  - Added new securities industry (SIC 6200-6289) for broker-dealers and asset managers
+  - Updated all 16 industry extensions with per-industry occurrence thresholds
+  - Thresholds now based on industry homogeneity (18-30% range)
+  - Added investment_companies extension (SIC 6720-6799)
+  - Learns 902+ industry-specific concepts across all industries
+  - **Files**: `edgar/entity/industry_mappings.json`, industry extension files
+  - **Impact**: More accurate industry-specific financial concept recognition
+
+- **Dynamic Label Width for Entity Facts Statements** (f0df927c)
+  - Calculates label column width based on terminal size and number of periods
+  - Wider labels (up to 55 chars) for fewer periods, narrower (min 30) for more
+  - Added min_width=10 on value columns to prevent truncation
+  - Falls back to tier-based defaults when terminal width unavailable
+  - **Files**: `edgar/entity/` display modules
+  - **Impact**: Optimal use of terminal space for statement display
+
+### Improved
+
+- **Statement Display Styling** (fc10074e, c4bfb3d1)
+  - Made period range bold for better visibility (was previously dim italic)
+  - Color-coded source attribution: EntityFacts (cyan) vs XBRL (gold)
+  - **Files**: `edgar/entity/styles.py`, `edgar/entity/enhanced_statement.py`
+  - **Impact**: Improved readability and visual distinction between data sources
+
+### Summary
+
+Release 5.6.3 is a feature and fix release focused on EntityFacts statement display improvements. Key highlights:
+
+- Fixed duplicate period labels for December FYE companies
+- Added industry-specific concept learning with 902+ concepts
+- Dynamic label width based on terminal size
+- Enhanced statement styling with color-coded sources
+
+This release is recommended for users working with EntityFacts API data and industry-specific financial analysis.
+
 ## [5.6.2] - 2025-12-27
 
 ### Fixed
