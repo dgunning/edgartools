@@ -35,6 +35,12 @@
       "extension_file": "insurance.json",
       "description": "Insurance carriers and agents"
     },
+    "investment_companies": {
+      "name": "Investment Companies & Asset Management",
+      "sic_ranges": [[6720, 6799]],
+      "extension_file": "investment_companies.json",
+      "description": "Asset managers, holding companies, investment trusts, private equity"
+    },
     "retail": {
       "name": "Retail Trade",
       "sic_ranges": [[5200, 5999]],
@@ -94,6 +100,12 @@
       "sic_ranges": [[3710, 3716]],
       "extension_file": "automotive.json",
       "description": "Motor vehicles and parts"
+    },
+    "securities": {
+      "name": "Securities & Asset Management",
+      "sic_ranges": [[6200, 6289]],
+      "extension_file": "securities.json",
+      "description": "Security brokers, dealers, investment advisors, asset managers"
     }
   }
 }
