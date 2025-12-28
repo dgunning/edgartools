@@ -47,6 +47,43 @@ def _clean_label(label: str) -> str:
     return label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
 
 
+def _calculate_label_width(num_periods: int, console_width: int | None = None) -> int:
+    """
+    Calculate label column width based on number of periods and available console width.
+
+    Dynamically allocates space: wider labels when fewer periods or wider console,
+    narrower labels when more periods or narrower console.
+
+    Args:
+        num_periods: Number of period columns in the statement
+        console_width: Available console width in characters. If None, uses sensible defaults.
+
+    Returns:
+        Width for the label column
+    """
+    # Constraints
+    min_label_width = 30
+    max_label_width = 55
+    value_column_width = 12  # Space needed per value column (value + padding)
+    table_overhead = 10  # Borders, panel padding, etc.
+
+    if console_width is None:
+        # Fallback to tier-based defaults when console width unknown
+        if num_periods < 4:
+            return 50
+        elif num_periods < 6:
+            return 46
+        else:
+            return 42
+
+    # Calculate available space for label column
+    space_for_values = num_periods * value_column_width
+    available_for_label = console_width - space_for_values - table_overhead
+
+    # Clamp to min/max bounds
+    return max(min_label_width, min(max_label_width, available_for_label))
+
+
 # Define which statements accept linked concepts from which source statements
 # Key = target statement, Value = set of source statements that can flow into it
 # Flow direction: Income/Balance -> CashFlow/Equity/Comprehensive (not reverse)
@@ -172,7 +209,7 @@ class MultiPeriodStatement:
 
         title_lines = [
             Text(statement_display, style=styles["header"]["statement_title"]),
-            Text(period_range, style=styles["metadata"]["hint"]),
+            Text(period_range, style=styles["metadata"]["period_range"]),
             Text("Amounts in USD", style=styles["metadata"]["units"]),
         ]
         title = Text("\n").join(title_lines)
@@ -184,7 +221,8 @@ class MultiPeriodStatement:
             footer_parts.append(("  ", ""))
             footer_parts.append((SYMBOLS["bullet"], styles["structure"]["separator"]))
             footer_parts.append(("  ", ""))
-        footer_parts.append(("Source: EntityFacts", styles["metadata"]["source"]))
+        footer_parts.append(("Source: ", styles["metadata"]["source"]))
+        footer_parts.append(("EntityFacts", styles["metadata"]["source_entity_facts"]))
         footer = Text.assemble(*footer_parts)
 
         # Main table with multiple period columns
@@ -194,12 +232,15 @@ class MultiPeriodStatement:
             padding=(0, 1),
         )
 
-        # Add concept column with fixed width and wrapping
-        stmt_table.add_column("", style="", width=42, no_wrap=False)
+        # Add concept column with dynamic width based on terminal size and number of periods
+        import shutil
+        terminal_width = shutil.get_terminal_size().columns
+        label_width = _calculate_label_width(len(self.periods), terminal_width)
+        stmt_table.add_column("", style="", width=label_width, no_wrap=False)
 
-        # Add period columns
+        # Add period columns with minimum width for values like "$138.6B"
         for period in self.periods:
-            stmt_table.add_column(period, justify="right", style="bold")
+            stmt_table.add_column(period, justify="right", style="bold", min_width=10)
 
         def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
             """Add an item row to the table."""
@@ -1681,19 +1722,32 @@ class EnhancedStatementBuilder:
             selected_period_info = sorted_periods[:periods]
 
         # Extract period labels and build a mapping for the selected periods
-        # For annual periods, use the fiscal year from facts (most reliable)
+        # For annual periods: use period_end.year for Dec FYE, fiscal_year for others
         # For quarterly periods, calculate fiscal year from period_end (Issue #460)
         selected_periods = []
         for pk, info in selected_period_info:
             if annual and info.get('is_annual') and pk[2]:  # pk[2] is period_end
-                # Use fiscal_year from facts if available (handles 52/53-week calendars correctly)
-                # Falls back to period_end.year with early January adjustment for edge cases
-                if 'fiscal_year' in info and info['fiscal_year']:
+                period_end = pk[2]
+
+                # FIX for Issue edgartools-t3tr: For December fiscal year end companies,
+                # use period_end.year for the label instead of SEC's fiscal_year.
+                # This fixes duplicate labels for comparative data where SEC tags all
+                # periods with the filing's fiscal_year (e.g., BLK's 2023 data tagged as FY 2024).
+                #
+                # For non-December FYE companies (e.g., DLTR with Feb FYE), trust SEC's
+                # fiscal_year since their FY doesn't align with calendar year.
+                if fiscal_year_end_month == 12:
+                    # December FYE: fiscal year = calendar year, use period_end.year
+                    # Handle early January edge case (52/53-week calendars)
+                    if period_end.month == 1 and period_end.day <= 7:
+                        label = f"FY {period_end.year - 1}"
+                    else:
+                        label = f"FY {period_end.year}"
+                elif 'fiscal_year' in info and info['fiscal_year']:
+                    # Non-December FYE: trust SEC's fiscal_year tag
                     label = f"FY {info['fiscal_year']}"
                 else:
-                    period_end = pk[2]
-                    # For periods ending Jan 1-7, use prior year (52/53-week calendar convention)
-                    # This handles cases like fiscal year ending Jan 1, 2023 being FY 2022
+                    # Fallback: use period_end.year with early January adjustment
                     if period_end.month == 1 and period_end.day <= 7:
                         label = f"FY {period_end.year - 1}"
                     else:
