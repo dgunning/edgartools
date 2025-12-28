@@ -200,13 +200,21 @@ class TestTTMCalculatorWarnings:
         """Test warning when <8 quarters available."""
         facts = []
 
-        # Create only 5 quarters
+        # Create only 5 unique quarters (Q1-Q4 2024 + Q1 2025)
         for i in range(5):
-            quarter = i + 1
+            if i < 4:
+                quarter = i + 1
+                fiscal_year = 2024
+                period_end = date(2024, quarter * 3, 30)
+            else:
+                quarter = 1
+                fiscal_year = 2025
+                period_end = date(2025, 3, 30)
+
             facts.append(create_quarterly_fact(
-                fiscal_year=2024,
-                fiscal_period=f'Q{quarter if quarter <= 4 else 1}',
-                period_end=date(2024, quarter * 3 if quarter <= 4 else 3, 30)
+                fiscal_year=fiscal_year,
+                fiscal_period=f'Q{quarter}',
+                period_end=period_end
             ))
 
         calc = TTMCalculator(facts)
@@ -308,16 +316,16 @@ class TestTTMCalculatorPeriodFiltering:
     def test_filter_accepts_variation_in_quarter_length(self):
         """Test that 89-92 day quarters are accepted."""
         facts = [
-            create_quarterly_fact(duration_days=89),  # Shorter quarter
-            create_quarterly_fact(duration_days=90),  # Standard
-            create_quarterly_fact(duration_days=91),  # Standard
-            create_quarterly_fact(duration_days=92),  # Longer quarter
+            create_quarterly_fact(period_end=date(2024, 3, 30), duration_days=89),  # Q1 - Shorter quarter
+            create_quarterly_fact(period_end=date(2024, 6, 30), duration_days=90),  # Q2 - Standard
+            create_quarterly_fact(period_end=date(2024, 9, 30), duration_days=91),  # Q3 - Standard
+            create_quarterly_fact(period_end=date(2024, 12, 31), duration_days=92),  # Q4 - Longer quarter
         ]
 
         calc = TTMCalculator(facts)
         quarterly = calc._filter_quarterly_facts()
 
-        # All should be accepted (80-100 day range)
+        # All should be accepted (70-120 day range in QUARTER bucket)
         assert len(quarterly) == 4
 
 
