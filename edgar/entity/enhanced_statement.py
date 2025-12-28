@@ -209,7 +209,7 @@ class MultiPeriodStatement:
 
         title_lines = [
             Text(statement_display, style=styles["header"]["statement_title"]),
-            Text(period_range, style=styles["metadata"]["hint"]),
+            Text(period_range, style=styles["metadata"]["period_range"]),
             Text("Amounts in USD", style=styles["metadata"]["units"]),
         ]
         title = Text("\n").join(title_lines)

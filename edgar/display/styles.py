@@ -56,6 +56,7 @@ PALETTE = {
     "date": "dim",
     "source": "dim italic",  # For "Source: EntityFacts" etc.
     "units": "dim",  # For "Amounts in millions USD"
+    "period_range": "bold",  # For "Q3 2022 to Q3 2025" - high visibility
 
     # =========================================================================
     # BORDERS AND SEPARATORS
@@ -254,6 +255,7 @@ def get_statement_styles() -> dict:
             "units": PALETTE["units"],
             "date": PALETTE["date"],
             "hint": PALETTE["hint"],
+            "period_range": PALETTE["period_range"],
         },
         # Comparison indicators
         "comparison": {
