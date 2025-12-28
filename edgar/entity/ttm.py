@@ -229,6 +229,7 @@ class TTMCalculator:
                 'ttm_value': ttm_value,
                 'fiscal_year': as_of_fact.fiscal_year,
                 'fiscal_period': as_of_fact.fiscal_period,
+                'as_of_date': as_of_fact.period_end,  # Add period_end for statement builder
                 'yoy_growth': yoy_growth,
                 'periods_included': [
                     (q.fiscal_year, q.fiscal_period) for q in ttm_window
@@ -404,32 +405,32 @@ class TTMCalculator:
             q1 = self._find_prior_quarter(quarters, before=ytd6.period_end)
             if q1:
                 q2_value = ytd6.numeric_value - q1.numeric_value
-                if q2_value >= 0:  # Skip negative values (data quality issue)
-                    q2_fact = self._create_derived_quarter(
-                        ytd6, q2_value, "derived_q2_ytd6_minus_q1"
-                    )
-                    discrete_quarters.append(q2_fact)
-                    log.debug(f"Derived Q2 from YTD_6M: ${q2_value/1e9:.2f}B "
-                             f"(YTD_6M ${ytd6.numeric_value/1e9:.2f}B - Q1 ${q1.numeric_value/1e9:.2f}B)")
-                else:
-                    log.warning(f"Negative Q2 value detected: ${q2_value/1e9:.2f}B. "
-                               f"Skipping derivation (data quality issue)")
+                if q2_value < 0:
+                    log.debug(f"Negative Q2 value detected: ${q2_value/1e9:.2f}B for {ytd6.concept}. "
+                               f"Passing value (data quality/adjustment issue)")
+                
+                q2_fact = self._create_derived_quarter(
+                    ytd6, q2_value, "derived_q2_ytd6_minus_q1", target_period="Q2"
+                )
+                discrete_quarters.append(q2_fact)
+                log.debug(f"Derived Q2 from YTD_6M: ${q2_value/1e9:.2f}B "
+                         f"(YTD_6M ${ytd6.numeric_value/1e9:.2f}B - Q1 ${q1.numeric_value/1e9:.2f}B)")
 
         # 4. Derive Q3 from YTD_9M - YTD_6M
         for ytd9 in ytd_9m:
             ytd6 = self._find_prior_ytd6(ytd_6m, before=ytd9.period_end)
             if ytd6:
                 q3_value = ytd9.numeric_value - ytd6.numeric_value
-                if q3_value >= 0:
-                    q3_fact = self._create_derived_quarter(
-                        ytd9, q3_value, "derived_q3_ytd9_minus_ytd6"
-                    )
-                    discrete_quarters.append(q3_fact)
-                    log.debug(f"Derived Q3 from YTD_9M: ${q3_value/1e9:.2f}B "
-                             f"(YTD_9M ${ytd9.numeric_value/1e9:.2f}B - YTD_6M ${ytd6.numeric_value/1e9:.2f}B)")
-                else:
-                    log.warning(f"Negative Q3 value detected: ${q3_value/1e9:.2f}B. "
-                               f"Skipping derivation (data quality issue)")
+                if q3_value < 0:
+                    log.debug(f"Negative Q3 value detected: ${q3_value/1e9:.2f}B for {ytd9.concept}. "
+                               f"Passing value (data quality/adjustment issue)")
+                
+                q3_fact = self._create_derived_quarter(
+                    ytd9, q3_value, "derived_q3_ytd9_minus_ytd6", target_period="Q3"
+                )
+                discrete_quarters.append(q3_fact)
+                log.debug(f"Derived Q3 from YTD_9M: ${q3_value/1e9:.2f}B "
+                         f"(YTD_9M ${ytd9.numeric_value/1e9:.2f}B - YTD_6M ${ytd6.numeric_value/1e9:.2f}B)")
 
         # 5. Derive Q4 from FY - YTD_9M
         for fy in annual:
@@ -441,16 +442,16 @@ class TTMCalculator:
             )
             if ytd9:
                 q4_value = fy.numeric_value - ytd9.numeric_value
-                if q4_value >= 0:
-                    q4_fact = self._create_derived_quarter(
-                        fy, q4_value, "derived_q4_fy_minus_ytd9"
-                    )
-                    discrete_quarters.append(q4_fact)
-                    log.debug(f"Derived Q4 from FY: ${q4_value/1e9:.2f}B "
-                             f"(FY ${fy.numeric_value/1e9:.2f}B - YTD_9M ${ytd9.numeric_value/1e9:.2f}B)")
-                else:
-                    log.warning(f"Negative Q4 value detected: ${q4_value/1e9:.2f}B. "
-                               f"Skipping derivation (data quality issue)")
+                if q4_value < 0:
+                    log.debug(f"Negative Q4 value detected: ${q4_value/1e9:.2f}B for {fy.concept}. "
+                               f"Passing value (data quality/adjustment issue)")
+                
+                q4_fact = self._create_derived_quarter(
+                    fy, q4_value, "derived_q4_fy_minus_ytd9", target_period="Q4"
+                )
+                discrete_quarters.append(q4_fact)
+                log.debug(f"Derived Q4 from FY: ${q4_value/1e9:.2f}B "
+                         f"(FY ${fy.numeric_value/1e9:.2f}B - YTD_9M ${ytd9.numeric_value/1e9:.2f}B)")
 
         # 6. Deduplicate by period_end (keep latest filing)
         dedup_quarters = self._deduplicate_by_period_end(discrete_quarters)
@@ -548,7 +549,8 @@ class TTMCalculator:
         self,
         source_fact: FinancialFact,
         derived_value: float,
-        derivation_method: str
+        derivation_method: str,
+        target_period: Optional[str] = None
     ) -> FinancialFact:
         """
         Create a synthetic quarter fact from derivation.
@@ -557,6 +559,7 @@ class TTMCalculator:
             source_fact: Source YTD or annual fact
             derived_value: Calculated discrete quarter value
             derivation_method: Description of how value was derived
+            target_period: Fiscal period label (e.g., 'Q2', 'Q4'). Defaults to source's.
 
         Returns:
             New FinancialFact with derived value and metadata
@@ -565,7 +568,8 @@ class TTMCalculator:
             >>> q2_fact = calculator._create_derived_quarter(
             ...     ytd6_fact,
             ...     120e9,
-            ...     "derived_q2_ytd6_minus_q1"
+            ...     "derived_q2_ytd6_minus_q1",
+            ...     target_period="Q2"
             ... )
         """
         return FinancialFact(
@@ -576,7 +580,7 @@ class TTMCalculator:
             numeric_value=derived_value,
             unit=source_fact.unit,
             fiscal_year=source_fact.fiscal_year,
-            fiscal_period=source_fact.fiscal_period,
+            fiscal_period=target_period or source_fact.fiscal_period,
             period_type='duration',
             period_start=source_fact.period_start,
             period_end=source_fact.period_end,

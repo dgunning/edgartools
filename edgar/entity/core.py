@@ -558,13 +558,14 @@ class Company(Entity):
             return facts.shares_outstanding
         return None
 
-    def income_statement(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
+    def income_statement(self, periods: int = 4, period: str = 'annual', annual: Optional[bool] = None, as_dataframe: bool = False, concise_format: bool = False):
         """
         Get income statement data for this company.
 
         Args:
             periods: Number of periods to retrieve
-            annual: If True, prefer annual periods; if False, get quarterly
+            period: Period type ('annual', 'quarterly', 'ttm')
+            annual: (Deprecated) If True, prefer annual periods; if False, get quarterly
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
@@ -574,19 +575,20 @@ class Company(Entity):
         facts = self.facts
         if facts:
             try:
-                return facts.income_statement(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
+                return facts.income_statement(periods=periods, period=period, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
             except Exception as e:
                 from edgar.core import log
                 log.debug(f"Error getting income statement for {self.name}: {e}")
         return None
 
-    def balance_sheet(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
+    def balance_sheet(self, periods: int = 4, period: str = 'annual', annual: Optional[bool] = None, as_dataframe: bool = False, concise_format: bool = False):
         """
         Get balance sheet data for this company.
 
         Args:
             periods: Number of periods to retrieve
-            annual: If True, prefer annual periods; if False, get quarterly
+            period: Period type ('annual', 'quarterly', 'ttm')
+            annual: (Deprecated) If True, prefer annual periods; if False, get quarterly
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
@@ -596,19 +598,20 @@ class Company(Entity):
         facts = self.facts
         if facts:
             try:
-                return facts.balance_sheet(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
+                return facts.balance_sheet(periods=periods, period=period, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
             except Exception as e:
                 from edgar.core import log
                 log.debug(f"Error getting balance sheet for {self.name}: {e}")
         return None
 
-    def cash_flow(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
+    def cash_flow(self, periods: int = 4, period: str = 'annual', annual: Optional[bool] = None, as_dataframe: bool = False, concise_format: bool = False):
         """
         Get cash flow statement data for this company.
 
         Args:
             periods: Number of periods to retrieve
-            annual: If True, prefer annual periods; if False, get quarterly
+            period: Period type ('annual', 'quarterly', 'ttm')
+            annual: (Deprecated) If True, prefer annual periods; if False, get quarterly
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
@@ -618,7 +621,7 @@ class Company(Entity):
         facts = self.facts
         if facts:
             try:
-                return facts.cash_flow(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
+                return facts.cash_flow(periods=periods, period=period, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
             except Exception as e:
                 from edgar.core import log
                 log.debug(f"Error getting cash flow for {self.name}: {e}")

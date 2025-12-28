@@ -1482,7 +1482,7 @@ class EntityFacts:
 
     # Financial statement helpers
     def income_statement(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                         annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+                         period: str = 'annual', annual: Optional[bool] = None, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """
         Get income statement facts for recent periods.
 
@@ -1490,7 +1490,8 @@ class EntityFacts:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
-            annual: If True, prefer annual (FY) periods over interim periods
+            period: Period type ('annual', 'quarterly', 'ttm')
+            annual: (Deprecated) If True, prefer annual periods; if False, get quarterly
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
@@ -1498,19 +1499,19 @@ class EntityFacts:
 
         Example:
             # Get hierarchical multi-period statement (default)
-            stmt = facts.income_statement(periods=4, annual=True)
+            stmt = facts.income_statement(periods=4, period='annual')
             print(stmt)  # Rich display with hierarchy
 
-            # Get with concise format
-            stmt = facts.income_statement(periods=4, concise_format=True)
+            # Get TTM statement
+            stmt = facts.income_statement(periods=4, period='ttm')
 
             # Get DataFrame for analysis
             df = facts.income_statement(periods=4, as_dataframe=True)
-
-            # Convert statement to DataFrame later
-            stmt = facts.income_statement(periods=4)
-            df = stmt.to_dataframe()
         """
+        # Handle backward compatibility for 'annual'
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
         # Always build the enhanced multi-period statement
         from edgar.entity.enhanced_statement import EnhancedStatementBuilder
         builder = EnhancedStatementBuilder(sic_code=self._sic_code)
@@ -1518,7 +1519,7 @@ class EntityFacts:
             facts=self._facts,
             statement_type='IncomeStatement',
             periods=periods,
-            annual=annual
+            period_type=period
         )
         enhanced_stmt.company_name = self.name
         enhanced_stmt.cik = str(self.cik)
@@ -1531,7 +1532,7 @@ class EntityFacts:
         return enhanced_stmt
 
     def balance_sheet(self, periods: int = 4, as_of: Optional[date] = None, as_dataframe: bool = False,
-                      annual: bool = True, concise_format: bool = False) -> Union[pd.DataFrame, MultiPeriodStatement]:
+                      period: str = 'annual', annual: Optional[bool] = None, concise_format: bool = False) -> Union[pd.DataFrame, MultiPeriodStatement]:
         """
         Get balance sheet facts for recent periods or as of a specific date.
 
@@ -1539,7 +1540,8 @@ class EntityFacts:
             periods: Number of periods to retrieve (ignored if as_of is specified)
             as_of: Optional date for point-in-time view; if specified, gets single snapshot
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
-            annual: If True, prefer annual (FY) periods over interim periods
+            period: Period type ('annual', 'quarterly', 'ttm')
+            annual: (Deprecated) If True, prefer annual periods; if False, get quarterly
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
@@ -1547,16 +1549,20 @@ class EntityFacts:
 
         Example:
             # Get hierarchical multi-period statement (default)
-            stmt = facts.balance_sheet(periods=4, annual=True)
+            stmt = facts.balance_sheet(periods=4, period='annual')
             print(stmt)  # Rich display with hierarchy
 
-            # Get DataFrame for analysis
-            df = facts.balance_sheet(periods=4, as_dataframe=True)
+            # Get TTM statement
+            stmt = facts.balance_sheet(periods=4, period='ttm')
 
             # Convert statement to DataFrame later
             stmt = facts.balance_sheet(periods=4)
             df = stmt.to_dataframe()
         """
+        # Handle backward compatibility for 'annual'
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
         if not as_of:
             # Always build the enhanced multi-period statement for regular periods
             from edgar.entity.enhanced_statement import EnhancedStatementBuilder
@@ -1565,7 +1571,7 @@ class EntityFacts:
                 facts=self._facts,
                 statement_type='BalanceSheet',
                 periods=periods,
-                annual=annual
+                period_type=period
             )
             enhanced_stmt.company_name = self.name
             enhanced_stmt.cik = str(self.cik)
@@ -1648,7 +1654,7 @@ class EntityFacts:
             return result
 
     def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+                  period: str = 'annual', annual: Optional[bool] = None, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """
         Get cash flow statement facts.
 
@@ -1656,7 +1662,8 @@ class EntityFacts:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
-            annual: If True, prefer annual (FY) periods over interim periods
+            period: Period type ('annual', 'quarterly', 'ttm')
+            annual: (Deprecated) If True, prefer annual periods; if False, get quarterly
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
@@ -1664,16 +1671,20 @@ class EntityFacts:
 
         Example:
             # Get hierarchical multi-period statement (default)
-            stmt = facts.cash_flow(periods=4, annual=True)
+            stmt = facts.cash_flow(periods=4, period='annual')
             print(stmt)  # Rich display with hierarchy
 
-            # Get DataFrame for analysis
-            df = facts.cash_flow(periods=4, as_dataframe=True)
+            # Get TTM statement
+            ttm_stmt = facts.cash_flow(periods=4, period='ttm')
 
             # Convert statement to DataFrame later
             stmt = facts.cash_flow(periods=4)
             df = stmt.to_dataframe()
         """
+        # Handle backward compatibility for 'annual'
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
         # Always build the enhanced multi-period statement
         from edgar.entity.enhanced_statement import EnhancedStatementBuilder
         builder = EnhancedStatementBuilder(sic_code=self._sic_code)
@@ -1681,7 +1692,7 @@ class EntityFacts:
             facts=self._facts,
             statement_type='CashFlow',
             periods=periods,
-            annual=annual
+            period_type=period
         )
         enhanced_stmt.company_name = self.name
         enhanced_stmt.cik = str(self.cik)
