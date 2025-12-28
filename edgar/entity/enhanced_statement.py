@@ -1681,19 +1681,32 @@ class EnhancedStatementBuilder:
             selected_period_info = sorted_periods[:periods]
 
         # Extract period labels and build a mapping for the selected periods
-        # For annual periods, use the fiscal year from facts (most reliable)
+        # For annual periods: use period_end.year for Dec FYE, fiscal_year for others
         # For quarterly periods, calculate fiscal year from period_end (Issue #460)
         selected_periods = []
         for pk, info in selected_period_info:
             if annual and info.get('is_annual') and pk[2]:  # pk[2] is period_end
-                # Use fiscal_year from facts if available (handles 52/53-week calendars correctly)
-                # Falls back to period_end.year with early January adjustment for edge cases
-                if 'fiscal_year' in info and info['fiscal_year']:
+                period_end = pk[2]
+
+                # FIX for Issue edgartools-t3tr: For December fiscal year end companies,
+                # use period_end.year for the label instead of SEC's fiscal_year.
+                # This fixes duplicate labels for comparative data where SEC tags all
+                # periods with the filing's fiscal_year (e.g., BLK's 2023 data tagged as FY 2024).
+                #
+                # For non-December FYE companies (e.g., DLTR with Feb FYE), trust SEC's
+                # fiscal_year since their FY doesn't align with calendar year.
+                if fiscal_year_end_month == 12:
+                    # December FYE: fiscal year = calendar year, use period_end.year
+                    # Handle early January edge case (52/53-week calendars)
+                    if period_end.month == 1 and period_end.day <= 7:
+                        label = f"FY {period_end.year - 1}"
+                    else:
+                        label = f"FY {period_end.year}"
+                elif 'fiscal_year' in info and info['fiscal_year']:
+                    # Non-December FYE: trust SEC's fiscal_year tag
                     label = f"FY {info['fiscal_year']}"
                 else:
-                    period_end = pk[2]
-                    # For periods ending Jan 1-7, use prior year (52/53-week calendar convention)
-                    # This handles cases like fiscal year ending Jan 1, 2023 being FY 2022
+                    # Fallback: use period_end.year with early January adjustment
                     if period_end.month == 1 and period_end.day <= 7:
                         label = f"FY {period_end.year - 1}"
                     else:
