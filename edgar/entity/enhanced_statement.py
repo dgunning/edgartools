@@ -1488,6 +1488,10 @@ class EnhancedStatementBuilder:
         if annual is not None:
             period_type = 'annual' if annual else 'quarterly'
 
+        # Validate period_type
+        if period_type not in ['annual', 'quarterly', 'ttm']:
+            raise ValueError(f"Invalid period_type '{period_type}'. Allowed values are: 'annual', 'quarterly', 'ttm'")
+
         # Filter facts by statement type (including multi-statement concepts from feeder statements)
         stmt_facts = [f for f in facts if _fact_belongs_to_statement(f, statement_type)]
 
