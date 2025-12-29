@@ -120,6 +120,26 @@ PALETTE = {
     # =========================================================================
     "link": "blue underline",
     "reference": "cyan",
+
+    # =========================================================================
+    # BADGES - Background fills for visual emphasis
+    # =========================================================================
+    # Form type badges
+    "badge_10k": "bold white on dodger_blue1",
+    "badge_10q": "bold white on green",
+    "badge_8k": "bold white on dark_orange",
+    "badge_proxy": "bold white on magenta",
+    "badge_default": "bold white on grey50",
+
+    # Source badges - distinguish data origin
+    "badge_source_xbrl": "bold white on gold3",
+    "badge_source_entity_facts": "bold white on cyan",
+
+    # Status badges
+    "badge_error": "bold white on red",
+    "badge_warning": "bold black on yellow",
+    "badge_success": "bold white on green",
+    "badge_info": "bold white on blue",
 }
 
 
