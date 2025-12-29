@@ -23,32 +23,88 @@ class Financials:
             log.warning(f"Filing {filing} does not contain XBRL data: {e}")
             return None
 
-    def balance_sheet(self):
-        if self.xb is None:
-            return None
-        return self.xb.statements.balance_sheet()
+    def balance_sheet(self, include_dimensions: bool = True):
+        """
+        Get the balance sheet.
 
-    def income_statement(self):
-        if self.xb is None:
-            return None
-        return self.xb.statements.income_statement()
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
-    def cashflow_statement(self):
+        Returns:
+            A Statement object for the balance sheet, or None if not available
+        """
         if self.xb is None:
             return None
-        return self.xb.statements.cashflow_statement()
+        return self.xb.statements.balance_sheet(include_dimensions=include_dimensions)
 
-    def statement_of_equity(self):
-        if self.xb is None:
-            return None
-        return self.xb.statements.statement_of_equity()
+    def income_statement(self, include_dimensions: bool = True):
+        """
+        Get the income statement.
 
-    def comprehensive_income(self):
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the income statement, or None if not available
+        """
         if self.xb is None:
             return None
-        return self.xb.statements.comprehensive_income()
+        return self.xb.statements.income_statement(include_dimensions=include_dimensions)
+
+    def cashflow_statement(self, include_dimensions: bool = True):
+        """
+        Get the cash flow statement.
+
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the cash flow statement, or None if not available
+        """
+        if self.xb is None:
+            return None
+        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions)
+
+    def statement_of_equity(self, include_dimensions: bool = True):
+        """
+        Get the statement of equity.
+
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the statement of equity, or None if not available
+        """
+        if self.xb is None:
+            return None
+        return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions)
+
+    def comprehensive_income(self, include_dimensions: bool = True):
+        """
+        Get the comprehensive income statement.
+
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the comprehensive income statement, or None if not available
+        """
+        if self.xb is None:
+            return None
+        return self.xb.statements.comprehensive_income(include_dimensions=include_dimensions)
 
     def cover(self):
+        """
+        Get the cover page.
+
+        Returns:
+            A Statement object for the cover page, or None if not available
+        """
         if self.xb is None:
             return None
         return self.xb.statements.cover_page()
