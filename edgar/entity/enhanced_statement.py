@@ -1645,8 +1645,24 @@ class EnhancedStatementBuilder:
                     for fact in quarterly_facts:
                         if fact.fiscal_period == 'Q4' and hasattr(fact, 'calculation_context'):
                             # This is a derived Q4 fact
-                            period_key = (fact.fiscal_year, fact.fiscal_period, fact.period_end)
-                            period_label = f"{fact.fiscal_period} {fact.fiscal_year}"
+                            
+                            # FIX for Missing Q4 Data in Table:
+                            # Derived facts inherit fiscal_year from the source FY fact.
+                            # If source FY is comparative data (e.g., in 2025 filing but for 2024),
+                            # the derived Q4 will have the "wrong" fiscal_year (2025 instead of 2024).
+                            # This causes a key mismatch between the generated period label (Q4 2024)
+                            # and the fact's period key (2025...), resulting in empty cells.
+                            #
+                            # We must calculate the correct fiscal year from period_end to ensure
+                            # proper grouping and period key matching.
+                            correct_fiscal_year = calculate_fiscal_year_for_label(
+                                fact.period_end,
+                                fiscal_year_end_month
+                            )
+                            
+                            # Use corrected fiscal year for key and metadata
+                            period_key = (correct_fiscal_year, fact.fiscal_period, fact.period_end)
+                            period_label = f"{fact.fiscal_period} {correct_fiscal_year}"
                             
                             if period_key not in period_info:
                                 period_info[period_key] = {
@@ -1654,7 +1670,7 @@ class EnhancedStatementBuilder:
                                     'end_date': fact.period_end or date.max,
                                     'is_annual': False,
                                     'filing_date': fact.filing_date or date.min,
-                                    'fiscal_year': fact.fiscal_year,
+                                    'fiscal_year': correct_fiscal_year,
                                     'fiscal_period': fact.fiscal_period
                                 }
                                 derived_q4_count += 1
@@ -1797,12 +1813,15 @@ class EnhancedStatementBuilder:
                         as_of_date = row['as_of_date']
                         fp = row['fiscal_period']
                         
-                        # Handle fiscal_year - use as_of_date.year as fallback for NaN
-                        fy_val = row['fiscal_year']
-                        if pd.isna(fy_val) or fy_val == 0:
-                            fy = as_of_date.year if as_of_date else 0
+                        # Recalculate correct fiscal year from as_of_date
+                        # This fixes potential mismatches where source facts have wrong fiscal year
+                        # (e.g. comparative data showing fy=2025 for 2024 period)
+                        if as_of_date:
+                            fy = calculate_fiscal_year_for_label(as_of_date, fiscal_year_end_month)
                         else:
-                            fy = int(fy_val)
+                            # Fallback if no date (unlikely for TTM)
+                            fy_val = row['fiscal_year']
+                            fy = int(fy_val) if not pd.isna(fy_val) else 0
                         
                         period_key = (fy, fp, as_of_date)
                         
