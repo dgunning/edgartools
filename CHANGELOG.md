@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.6.4] - 2025-12-29
+
+### Fixed
+
+- **XBRL Assets Values Incorrectly Rounded Breaking Balance Sheet Equation** (Issue #564, 25617183)
+  - Critical bug fix: XBRL was selecting less precise facts when duplicates existed
+  - PFE 2017 Assets showed $172,000M instead of correct $171,797M ($203M error)
+  - Added _get_fact_precision() helper to calculate decimal precision from fact decimals attribute
+  - Added _select_most_precise_fact() to choose fact with highest precision when duplicates exist
+  - Now correctly selects most precise fact, preserving balance sheet equation integrity
+  - **Files**: `edgar/xbrl/facts.py`
+  - **Impact**: Accurate XBRL financial statement values, especially for duplicate facts with different precision
+
+### Summary
+
+Release 5.6.4 is a critical bug fix release addressing XBRL fact precision. This fix ensures that when duplicate facts exist with different precision levels, the most precise value is selected, maintaining the integrity of financial statements and the fundamental accounting equation (Assets = Liabilities + Equity).
+
+This release is highly recommended for users working with XBRL financial data.
+
 ## [5.6.3] - 2025-12-28
 
 ### Fixed
