@@ -1,0 +1,160 @@
+{
+	"income_statement": {
+		"core": {
+			"us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax": "Revenue",
+			"us-gaap:SalesRevenueNet": "Revenue",
+			"us-gaap:CostOfRevenue": "COGS",
+			"us-gaap:GrossProfit": "Gross Profit",
+			"us-gaap:OperatingIncomeLoss": "Operating Income",
+			"us-gaap:NetIncomeLoss": "Net Income",
+			"us-gaap:EarningsPerShareBasic": "EPS Basic",
+			"us-gaap:EarningsPerShareDiluted": "EPS Diluted",
+			"us-gaap:IncomeTaxExpenseBenefit": "Income Tax",
+			"us-gaap:ResearchAndDevelopmentExpense": "R&D",
+			"us-gaap:SellingGeneralAndAdministrativeExpense": "SG&A"
+		},
+		"sector_extensions": {
+			"REIT": {
+				"us-gaap:RealEstateRevenue": "Real Estate Revenue",
+				"us-gaap:NetRealizedGainLossOnInvestments": "Realized Gains/Losses",
+				"us-gaap:RealEstateOperatingExpenses": "Property Operating Expenses"
+			},
+			"FINANCIAL_SERVICES": {
+				"us-gaap:InterestIncome": "Interest Income",
+				"us-gaap:InterestExpense": "Interest Expense",
+				"us-gaap:NetInterestIncome": "Net Interest Income",
+				"us-gaap:ProvisionForCreditLosses": "Provision for Credit Losses"
+			},
+			"BANKING": {
+				"us-gaap:NetInterestIncome": "Net Interest Income",
+				"us-gaap:NoninterestIncome": "Non-Interest Income",
+				"us-gaap:NoninterestExpense": "Non-Interest Expense"
+			},
+			"INSURANCE": {
+				"us-gaap:PremiumsEarnedNet": "Net Premiums Earned",
+				"us-gaap:PolicyholderBenefitsAndClaimsIncurredNet": "Claims Incurred",
+				"us-gaap:InsuranceUnderwritingExpenses": "Underwriting Expenses"
+			},
+			"ENERGY": {
+				"us-gaap:OilAndGasRevenue": "Oil & Gas Revenue",
+				"us-gaap:DepreciationDepletionAndAmortization": "DD&A",
+				"us-gaap:ExplorationExpense": "Exploration Expense"
+			}
+		},
+		"alternatives": {
+			"TotalRevenue": "Revenue",
+			"NetSales": "Revenue",
+			"CostOfGoodsSold": "COGS",
+			"OperatingIncome": "Operating Income",
+			"NetIncome": "Net Income"
+		}
+	},
+	"balance_sheet": {
+		"core": {
+			"us-gaap:CashAndCashEquivalents": "Cash & Equivalents",
+			"us-gaap:AccountsReceivableNetCurrent": "Accounts Receivable",
+			"us-gaap:InventoryNet": "Inventory",
+			"us-gaap:PropertyPlantAndEquipmentNet": "PP&E Net",
+			"us-gaap:Goodwill": "Goodwill",
+			"us-gaap:IntangibleAssetsNet": "Intangible Assets Net",
+			"us-gaap:AccountsPayableCurrent": "Accounts Payable",
+			"us-gaap:AccruedLiabilitiesCurrent": "Accrued Liabilities",
+			"us-gaap:ShortTermBorrowings": "Short-Term Debt",
+			"us-gaap:LongTermDebtNoncurrent": "Long-Term Debt",
+			"us-gaap:CommonStockValue": "Common Stock",
+			"us-gaap:AdditionalPaidInCapital": "Additional Paid-In Capital",
+			"us-gaap:RetainedEarningsAccumulatedDeficit": "Retained Earnings",
+			"us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax": "Accumulated Other Comprehensive Income"
+		},
+		"sector_extensions": {
+			"REIT": {
+				"us-gaap:RealEstateInvestmentsNet": "Real Estate Investments Net",
+				"us-gaap:AccumulatedDepreciationAndAmortization": "Accumulated Depreciation",
+				"us-gaap:NoncontrollingInterestInRealEstate": "Noncontrolling Interest"
+			},
+			"FINANCIAL_SERVICES": {
+				"us-gaap:TradingSecurities": "Trading Securities",
+				"us-gaap:LoansAndLeasesNet": "Loans & Leases Net",
+				"us-gaap:AllowanceForCreditLosses": "Allowance for Credit Losses",
+				"us-gaap:Deposits": "Customer Deposits"
+			},
+			"BANKING": {
+				"us-gaap:CashDueFromBanks": "Cash Due From Banks",
+				"us-gaap:FederalFundsSoldAndSecuritiesBought": "Federal Funds Sold",
+				"us-gaap:SubordinatedDebt": "Subordinated Debt"
+			},
+			"INSURANCE": {
+				"us-gaap:PolicyholderAssets": "Policyholder Assets",
+				"us-gaap:DeferredPolicyAcquisitionCosts": "DPAC",
+				"us-gaap:ReservesForClaims": "Claims Reserves"
+			},
+			"ENERGY": {
+				"us-gaap:OilAndGasPropertiesNet": "Oil & Gas Properties Net",
+				"us-gaap:MineralRights": "Mineral Rights"
+			}
+		},
+		"alternatives": {
+			"CashAndCashEquivalents": "Cash & Equivalents",
+			"AccountsReceivableNet": "Accounts Receivable",
+			"PropertyPlantAndEquipmentNet": "PP&E Net",
+			"LongTermDebt": "Long-Term Debt",
+			"RetainedEarnings": "Retained Earnings"
+		}
+	},
+	"cash_flow": {
+		"core": {
+			"us-gaap:NetIncomeLoss": "Net Income",
+			"us-gaap:DepreciationDepletionAndAmortization": "Depreciation & Amortization",
+			"us-gaap:StockBasedCompensation": "Stock-Based Compensation",
+			"us-gaap:DeferredIncomeTaxExpenseBenefit": "Deferred Tax",
+			"us-gaap:AccountsReceivableIncreaseDecrease": "Change in Accounts Receivable",
+			"us-gaap:InventoryIncreaseDecrease": "Change in Inventory",
+			"us-gaap:AccountsPayableIncreaseDecrease": "Change in Accounts Payable",
+			"us-gaap:NetCashProvidedByUsedInOperatingActivities": "Operating Cash Flow",
+			"us-gaap:PaymentsToAcquirePropertyPlantAndEquipment": "CapEx",
+			"us-gaap:ProceedsFromSaleOfPropertyPlantAndEquipment": "Proceeds from Asset Sales",
+			"us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired": "Acquisitions",
+			"us-gaap:ProceedsFromSaleOfBusiness": "Proceeds from Divestitures",
+			"us-gaap:NetCashProvidedByUsedInInvestingActivities": "Investing Cash Flow",
+			"us-gaap:ProceedsFromIssuanceOfCommonStock": "Proceeds from Common Stock",
+			"us-gaap:ProceedsFromIssuanceOfDebt": "Proceeds from Debt",
+			"us-gaap:RepaymentOfDebt": "Repayment of Debt",
+			"us-gaap:PaymentsOfDividends": "Dividends Paid",
+			"us-gaap:PaymentsForRepurchaseOfCommonStock": "Share Buybacks",
+			"us-gaap:NetCashProvidedByUsedInFinancingActivities": "Financing Cash Flow",
+			"us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease": "Net Change in Cash"
+		},
+		"sector_extensions": {
+			"REIT": {
+				"us-gaap:PaymentsToAcquireRealEstateInvestments": "Property Acquisitions",
+				"us-gaap:ProceedsFromSaleOfRealEstateInvestments": "Property Disposals",
+				"us-gaap:ProceedsFromIssuanceOfMortgageLoans": "Mortgage Proceeds"
+			},
+			"FINANCIAL_SERVICES": {
+				"us-gaap:ProceedsFromFederalFundsSoldAndSecuritiesBought": "Federal Funds/Securities",
+				"us-gaap:ProceedsFromDepositInflows": "Deposit Inflows",
+				"us-gaap:PaymentsForDepositOutflows": "Deposit Outflows"
+			},
+			"BANKING": {
+				"us-gaap:ProceedsFromFederalFundsPurchased": "Federal Funds Purchased",
+				"us-gaap:ProceedsFromCustomerDeposits": "Customer Deposits"
+			},
+			"INSURANCE": {
+				"us-gaap:ProceedsFromPolicyholderClaims": "Policyholder Claims",
+				"us-gaap:ProceedsFromInvestmentIncome": "Investment Income"
+			},
+			"ENERGY": {
+				"us-gaap:PaymentsForOilAndGasExploration": "Exploration Payments",
+				"us-gaap:ProceedsFromSaleOfOilAndGasProperties": "Property Sales"
+			}
+		},
+		"alternatives": {
+			"DepreciationAndAmortization": "Depreciation & Amortization",
+			"CapitalExpenditures": "CapEx",
+			"ShareBasedCompensation": "Stock-Based Compensation",
+			"ChangeInAccountsReceivable": "Change in Accounts Receivable",
+			"ProceedsFromDebtIssuance": "Proceeds from Debt",
+			"RepurchaseOfCommonStock": "Share Buybacks"
+		}
+	}
+}

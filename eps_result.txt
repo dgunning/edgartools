@@ -1,0 +1,28 @@
+﻿============================================================
+Q4 EPS CALCULATION TEST (NVDA)
+============================================================
+
+1. Finding Net Income facts...
+   Found 300 Net Income facts
+   FY2024: $29.76B
+   FY2025: $29.76B
+   FY2025: $72.88B
+
+2. Finding Weighted Average Shares facts...
+   Found 216 Shares facts
+   FY2024: 2.47B shares
+   FY2025: 24.69B shares
+   FY2025: 24.55B shares
+
+3. Calculating Q4 EPS...
+
+   Derived 17 Q4 EPS values:
+   * FY2023 Q4 EPS = $0.5916
+   * FY2024 Q4 EPS = $1.2178
+   * FY2025 Q4 EPS = $0.0577
+   * FY2025 Q4 EPS = $0.5017
+   * FY2025 Q4 EPS = $0.9021
+
+============================================================
+TEST COMPLETE
+============================================================

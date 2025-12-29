@@ -10,8 +10,8 @@ Dict[str, Optional[float]] on MultiPeriodItem objects, not pandas DataFrames.
 # ruff: noqa: PD011
 
 from collections import defaultdict
-from dataclasses import dataclass, field
-from datetime import date
+from dataclasses import dataclass, field, replace
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
@@ -1336,11 +1336,7 @@ def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int
     if period_end.month == 1 and period_end.day <= 7:
         return period_end.year - 1
 
-    # For companies with early fiscal year ends (Jan-Mar), use calendar year
-    # This avoids the confusing "Q3 2026 for Oct 2025" issue with companies like NVIDIA
-    # where almost all months (Feb-Dec) would otherwise get +1 year added
-    if fiscal_year_end_month <= 3:
-        return period_end.year
+
 
     # For companies with later fiscal year ends (Apr-Dec), use fiscal year convention
     # Quarters after FYE month are in the next fiscal year
@@ -1464,6 +1460,76 @@ class EnhancedStatementBuilder:
         normalized = self._normalize_concept(concept)
         return normalized in essential or concept in essential
 
+    def _detect_splits(self, facts: List[FinancialFact]) -> List[Dict[str, Any]]:
+        """Detect stock splits from facts."""
+        split_facts = [f for f in facts if 'StockSplitConversionRatio' in f.concept]
+        splits = []
+        seen_splits = set()
+        
+        for f in split_facts:
+            # Normalize: Ratio > 1 implies forward split (e.g. 10). Adjust by dividing older values.
+            if f.numeric_value is not None and f.numeric_value > 0 and f.period_end:
+                # Deduplicate based on Year and Ratio to avoid applying the same split multiple times
+                # (e.g. reported in Q2 and Q3 of the same year)
+                split_key = (f.period_end.year, f.numeric_value)
+                if split_key in seen_splits:
+                    continue
+                seen_splits.add(split_key)
+                
+                splits.append({
+                    'date': f.period_end,
+                    'ratio': f.numeric_value
+                })
+        splits.sort(key=lambda s: s['date'])
+        return splits
+
+    def _apply_split_adjustments(self, facts: List[FinancialFact], splits: List[Dict[str, Any]]) -> List[FinancialFact]:
+        """Apply retrospective split adjustments to per-share and share-count facts."""
+        adjusted_facts = []
+        for f in facts:
+            if not f.unit or f.numeric_value is None:
+                adjusted_facts.append(f)
+                continue
+            
+            unit_lower = str(f.unit).lower()
+            concept_lower = f.concept.lower()
+            
+            # Identify adjustables
+            is_per_share = '/share' in unit_lower or 'earningspershare' in concept_lower
+            is_shares = 'shares' in unit_lower and not is_per_share
+            
+            if not (is_per_share or is_shares):
+                adjusted_facts.append(f)
+                continue
+                
+            # Calculate cumulative ratio
+            # Apply all splits that occurred AFTER this fact's period_end
+            cum_ratio = 1.0
+            for s in splits:
+                if s['date'] > f.period_end:
+                    # Check if finding is NOT restated (filing date < split)
+                    if not f.filing_date or f.filing_date <= s['date']:
+                        cum_ratio *= s['ratio']
+            
+            if cum_ratio == 1.0:
+                adjusted_facts.append(f)
+                continue
+            
+            # Apply adjustment
+            if is_per_share:
+                new_val = f.numeric_value / cum_ratio
+            else: # is_shares
+                new_val = f.numeric_value * cum_ratio
+                
+            # Clone and replace
+            new_f = replace(f, 
+                            value=new_val, 
+                            numeric_value=new_val, 
+                            calculation_context=f"split_adj_ratio_{cum_ratio:.2f}")
+            adjusted_facts.append(new_f)
+            
+        return adjusted_facts
+
     def build_multi_period_statement(self,
                                     facts: List[FinancialFact],
                                     statement_type: str,
@@ -1491,6 +1557,12 @@ class EnhancedStatementBuilder:
         # Validate period_type
         if period_type not in ['annual', 'quarterly', 'ttm']:
             raise ValueError(f"Invalid period_type '{period_type}'. Allowed values are: 'annual', 'quarterly', 'ttm'")
+
+        # 0. Global Stock Split Adjustment
+        # Adjust input facts for valid stock splits to ensure consistent EPS/Share data.
+        splits = self._detect_splits(facts)
+        if splits:
+            facts = self._apply_split_adjustments(facts, splits)
 
         # Filter facts by statement type (including multi-statement concepts from feeder statements)
         stmt_facts = [f for f in facts if _fact_belongs_to_statement(f, statement_type)]
@@ -1687,6 +1759,97 @@ class EnhancedStatementBuilder:
             if derived_q4_count > 0:
                 log.debug(f"Derived {derived_q4_count} Q4 periods from FY-YTD_9M calculation")
             
+            # Step 1.5: Derive Q4 EPS correctly (EPS = Net Income / Shares)
+            # Since EPS is a per-share metric, it cannot be derived by subtraction.
+            # Instead, we calculate Q4 EPS = Q4 Net Income / Q4 Weighted Avg Shares
+            if statement_type == 'IncomeStatement':
+                try:
+                    # Find Net Income facts
+                    ni_concepts = ['us-gaap:NetIncomeLoss', 'us-gaap:ProfitLoss', 'us-gaap:NetIncome']
+                    ni_facts = [f for f in stmt_facts if f.concept in ni_concepts]
+                    
+                    # Find Weighted Average Shares facts (separate Basic and Diluted)
+                    basic_shares = [f for f in facts if f.concept == 'us-gaap:WeightedAverageNumberOfSharesOutstandingBasic']
+                    # Note: Different companies use different concept names for diluted shares
+                    diluted_shares = [f for f in facts if f.concept in [
+                        'us-gaap:WeightedAverageNumberOfSharesOutstandingDiluted',
+                        'us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding'
+                    ]]
+                    
+                    # Find existing Q4 period_keys to align EPS with
+                    existing_q4_keys = [
+                        pk for pk in period_info.keys() 
+                        if pk[1] == 'Q4'  # pk is (fiscal_year, fiscal_period, period_end)
+                    ]
+                    
+                    # Build a lookup by fiscal_year for matching
+                    q4_keys_by_year = {}
+                    for pk in existing_q4_keys:
+                        fy = pk[0]
+                        if fy not in q4_keys_by_year:
+                            q4_keys_by_year[fy] = pk
+                    
+                    def add_eps_to_periods(derived_eps_list):
+                        """Helper to add derived EPS facts to period collections."""
+                        added = 0
+                        for eps_fact in derived_eps_list:
+                            fy = eps_fact.fiscal_year
+                            
+                            # Try to find matching existing Q4 period_key
+                            if fy in q4_keys_by_year:
+                                period_key = q4_keys_by_year[fy]
+                                period_facts[period_key].append(eps_fact)
+                                added += 1
+                            else:
+                                # Fallback: create new period_key if no existing Q4 found
+                                correct_fiscal_year = calculate_fiscal_year_for_label(
+                                    eps_fact.period_end,
+                                    fiscal_year_end_month
+                                )
+                                period_key = (correct_fiscal_year, eps_fact.fiscal_period, eps_fact.period_end)
+                                period_label = f"{eps_fact.fiscal_period} {correct_fiscal_year}"
+                                
+                                if period_key not in period_info:
+                                    period_info[period_key] = {
+                                        'label': period_label,
+                                        'end_date': eps_fact.period_end or date.max,
+                                        'is_annual': False,
+                                        'filing_date': eps_fact.filing_date or date.min,
+                                        'fiscal_year': correct_fiscal_year,
+                                        'fiscal_period': eps_fact.fiscal_period
+                                    }
+                                
+                                period_facts[period_key].append(eps_fact)
+                                added += 1
+                        return added
+                    
+                    eps_added = 0
+                    
+                    # Derive Basic EPS
+                    if ni_facts and basic_shares:
+                        eps_calculator = TTMCalculator(ni_facts)
+                        derived_basic_eps = eps_calculator.derive_eps_for_quarter(
+                            net_income_facts=ni_facts,
+                            shares_facts=basic_shares,
+                            eps_concept='us-gaap:EarningsPerShareBasic'
+                        )
+                        eps_added += add_eps_to_periods(derived_basic_eps)
+                    
+                    # Derive Diluted EPS
+                    if ni_facts and diluted_shares:
+                        eps_calculator = TTMCalculator(ni_facts)
+                        derived_diluted_eps = eps_calculator.derive_eps_for_quarter(
+                            net_income_facts=ni_facts,
+                            shares_facts=diluted_shares,
+                            eps_concept='us-gaap:EarningsPerShareDiluted'
+                        )
+                        eps_added += add_eps_to_periods(derived_diluted_eps)
+                    
+                    if eps_added > 0:
+                        log.debug(f"Added {eps_added} Q4 EPS values (Basic + Diluted) to existing Q4 periods")
+                except Exception as e:
+                    log.debug(f"Could not derive Q4 EPS: {e}")
+            
             # Rebuild period_list after adding derived Q4
             period_list = [(pk, info) for pk, info in period_info.items()]
             
@@ -1877,7 +2040,97 @@ class EnhancedStatementBuilder:
                     # Skip concepts that don't have enough data for TTM
                     continue
             
-            # Sort by end_date (newest first) and deduplicate by label
+            # --- TTM EPS Derivation (Sum of Quarterly EPS) ---
+            # Standard TTM calculation skips EPS because it's non-additive.
+            # We manually calculate TTM EPS by summing the last 4 quarters of EPS (Reported + Derived Q4).
+            if statement_type == 'IncomeStatement':
+                try:
+                    # 1. Gather inputs
+                    ni_concepts = ['us-gaap:NetIncomeLoss', 'us-gaap:ProfitLoss', 'us-gaap:NetIncome']
+                    ni_facts = [f for f in stmt_facts if f.concept in ni_concepts]
+                    
+                    basic_shares = [f for f in facts if f.concept == 'us-gaap:WeightedAverageNumberOfSharesOutstandingBasic']
+                    diluted_shares = [f for f in facts if f.concept in [
+                        'us-gaap:WeightedAverageNumberOfSharesOutstandingDiluted',
+                        'us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding'
+                    ]]
+
+
+                    
+                    eps_concepts_map = {
+                        'us-gaap:EarningsPerShareBasic': basic_shares,
+                        'us-gaap:EarningsPerShareDiluted': diluted_shares
+                    }
+                    
+                    # 2. Process each EPS concept
+                    for eps_concept, shares_facts in eps_concepts_map.items():
+                        if not shares_facts:
+                            continue
+                            
+                        # A. Derive Q4 EPS facts
+                        eps_calculator = TTMCalculator(ni_facts)
+                        derived_q4_eps = eps_calculator.derive_eps_for_quarter(
+                            net_income_facts=ni_facts,
+                            shares_facts=shares_facts,
+                            eps_concept=eps_concept
+                        )
+                        
+                        # B. Get Reported Quarterly EPS facts
+                        # CRITICAL: Filter for ~90 day duration to exclude YTD facts (e.g. Q2 YTD, Q3 YTD)
+                        # which are often labeled with the same fiscal period but cover 6 or 9 months.
+                        reported_eps = []
+                        for f in facts:
+                             if f.concept == eps_concept and f.fiscal_period in ['Q1', 'Q2', 'Q3', 'Q4']:
+                                 if f.period_start and f.period_end:
+                                     duration_days = (f.period_end - f.period_start).days
+                                     if 75 <= duration_days <= 105:  # Approx 3 months (allow for 52/53 week variances)
+                                         reported_eps.append(f)
+                        
+                        # C. Combine and Deduplicate (prefer Derived Q4 over comparative reported if needed, or reported if available?)
+                        # Actually standard logic prefers reported. But Q4 is usually missing.
+                        # Using _deduplicate_by_period_end from calculator to handle multiple filings/versions.
+                        combined_eps = reported_eps + derived_q4_eps
+                        all_quarterly_eps = eps_calculator._deduplicate_by_period_end(combined_eps)
+                        
+                        # D. Calculate TTM for each period in ttm_periods
+                        for period_key, info in ttm_periods.items():
+                            as_of_date = info['end_date']
+                            
+                            # Find 4 quarters ending on/before as_of_date
+                            relevant_quarters = [q for q in all_quarterly_eps if q.period_end <= as_of_date]
+                            
+                            # Sort by period_end descending
+                            relevant_quarters.sort(key=lambda q: q.period_end, reverse=True)
+                            ttm_window = relevant_quarters[:4]
+                            
+                            # Check if we have 4 quarters and no large gaps
+                            if len(ttm_window) == 4:
+                                # Simple Summation
+                                ttm_value = sum(q.numeric_value for q in ttm_window)
+                                
+                                # Create TTM Fact
+                                ttm_fact = FinancialFact(
+                                    concept=eps_concept,
+                                    taxonomy='us-gaap',
+                                    label='Earnings Per Share' + (' Diluted' if 'Diluted' in eps_concept else ' Basic'),
+                                    value=ttm_value,
+                                    numeric_value=ttm_value,
+                                    unit='USD/share',
+                                    fiscal_year=info['fiscal_year'],
+                                    fiscal_period=info['fiscal_period'],
+                                    period_type='duration',
+                                    period_start=None,
+                                    period_end=as_of_date,
+                                    filing_date=as_of_date,
+                                    form_type='TTM',
+                                    accession='TTM-EPS-SUM',
+                                    calculation_context='ttm_eps_sum_adjusted'
+                                )
+                                period_facts[period_key].append(ttm_fact)
+                                
+                except Exception as e:
+                     log.debug(f"Could not calculate TTM EPS: {e}")
+            # -------------------------------------------------
             sorted_periods = sorted(
                 ttm_periods.items(),
                 key=lambda x: x[1]['end_date'],

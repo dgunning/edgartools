@@ -1,0 +1,266 @@
+ticker,accession,period_end,concept,original_label,mapped_label,standard_label
+AIG,0000005272-25-000012,2024-12-31,us-gaap_InvestmentTypeCategorizationMember,,Investments [Domain],
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PremiumsEarnedNet,Premiums,netPremiumsEarned,netPremiumsEarned
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetInvestmentIncome,,Total net investment income,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net realized gains (losses),
+AIG,0000005272-25-000012,2024-12-31,us-gaap_OtherIncome,,Other income,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Losses and loss adjustment expenses incurred,benefitsAndClaims,benefitsAndClaims
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostsAndPresentValueOfFutureProfitsAmortization1,,Amortization of deferred policy acquisition costs,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+AIG,0000005272-25-000012,2024-12-31,us-gaap_InterestExpense,interestExpense,interestExpense,interestExpense
+AIG,0000005272-25-000012,2024-12-31,us-gaap_GainsLossesOnExtinguishmentOfDebt,,(Gain) loss on extinguishment of debt,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DisposalGroupNotDiscontinuedOperationGainLossOnDisposal,,Net (gain) loss on divestitures and other,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,"Total benefits, losses and expenses",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income from continuing operations before income tax expense,
+AIG,0000005272-25-000012,2024-12-31,aig_IncomeTaxExpenseBenefitCurrent,,Current,
+AIG,0000005272-25-000012,2024-12-31,aig_IncomeTaxExpenseBenefitDeferred,,Deferred,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest,,Income from continuing operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTax,,"Income (loss) from discontinued operations, net of income taxes",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Less: Net income attributable to noncontrolling interests,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PreferredStockDividendsAndOtherAdjustments,,Less: Dividends on preferred stock and preferred stock redemption premiums,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic,netIncome,netIncome,netIncome
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsPerBasicShare,,Income (loss) from continuing operations (in dollars per share),
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerBasicShare,,Income (loss) from discontinued operations (in dollars per share),
+AIG,0000005272-25-000012,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsPerDilutedShare,,Income (loss) from continuing operations (in dollars per share),
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerDilutedShare,,Income (loss) from discontinued operations (in dollars per share),
+AIG,0000005272-25-000012,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+AIG,0000005272-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+AIG,0000005272-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PropertyLiabilityAndCasualtyInsuranceSegmentMember,,Property and casualty insurance premiums,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PremiumsEarnedNet,Insurance premiums and contract charges,netPremiumsEarned,netPremiumsEarned
+ALL,0000899051-25-000015,2024-12-31,us-gaap_OtherIncome,,Other revenue,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+ALL,0000899051-25-000015,2024-12-31,all_RealizedInvestmentGainsLossesContinuingOperations,,Net gains (losses) on investments and derivatives,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Property and casualty insurance claims and claims expense,benefitsAndClaims,benefitsAndClaims
+ALL,0000899051-25-000015,2024-12-31,all_AccidentAndHealthInsuranceContractBenefitsNetOfReinsuranceRecoveries,,"Accident, health and other policy benefits (including remeasurement (gains) losses of $1, $0, and $(4))",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Amortization of deferred policy acquisition costs,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_OtherCostAndExpenseOperating,,Operating costs and expenses,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_DefinedBenefitPlanActuarialGainLossImmediateRecognitionAsComponentInNetPeriodicBenefitCostCredit,,Pension and other postretirement remeasurement (gains) losses,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_RestructuringCharges,,Restructuring and related charges,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AmortizationOfIntangibleAssets,,Amortization of purchased intangibles,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_InterestExpenseOperating,,Interest expense,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total costs and expenses,
+ALL,0000899051-25-000015,2024-12-31,all_IncomeLossFromOperationsBeforeIncomeTaxExpenseBenefit,,Income (loss) from operations before income tax expense,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Less: Net loss attributable to noncontrolling interest,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PreferredStockDividendsIncomeStatementImpact,,Less: Preferred stock dividends,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic,netIncome,netIncome,netIncome
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetIncomeLossAvailableToCommonStockholdersDiluted,,"Net income (loss) applicable to common shareholders, diluted",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+ALL,0000899051-25-000015,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+ALL,0000899051-25-000015,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+ALL,0000899051-25-000015,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PremiumsEarnedNet,Premiums,netPremiumsEarned,netPremiumsEarned
+TRV,0000086312-25-000012,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+TRV,0000086312-25-000012,2024-12-31,trv_InsuranceFeeIncome,,Fee income,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net realized investment losses,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_OtherIncome,,Other revenues,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Claims and claim adjustment expenses,benefitsAndClaims,benefitsAndClaims
+TRV,0000086312-25-000012,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Amortization of deferred acquisition costs,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+TRV,0000086312-25-000012,2024-12-31,us-gaap_InterestExpense,interestExpense,interestExpense,interestExpense
+TRV,0000086312-25-000012,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total claims and expenses,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income before income taxes,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+TRV,0000086312-25-000012,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+TRV,0000086312-25-000012,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+TRV,0000086312-25-000012,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+TRV,0000086312-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+TRV,0000086312-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PremiumsEarnedNetPropertyAndCasualty,,Net premiums earned,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_InterestAndDividendIncomeOperating,,Investment income,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_DebtAndEquitySecuritiesRealizedGainLoss,,Net realized gains (losses) on security sales,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_DebtAndEquitySecuritiesUnrealizedGainLoss,,Net holding period gains (losses) on securities,
+PGR,0000080661-25-000007,2024-12-31,pgr_TotalOtherThanTemporaryImpairmentLoss,,Subtotal impairment losses,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_DebtAndEquitySecuritiesGainLoss,,Total net realized gains (losses) on securities,
+PGR,0000080661-25-000007,2024-12-31,pgr_FeesAndOtherRevenues,,Fees and other revenues,
+PGR,0000080661-25-000007,2024-12-31,pgr_NonInsuranceServiceRevenues,,Service revenues,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Losses and loss adjustment expenses,benefitsAndClaims,benefitsAndClaims
+PGR,0000080661-25-000007,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Policy acquisition costs,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_OtherUnderwritingExpense,,Other underwriting expenses,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_InvestmentIncomeInvestmentExpense,,Investment expenses,
+PGR,0000080661-25-000007,2024-12-31,pgr_NonInsuranceServiceExpenses,,Service expenses,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_InterestExpenseDebt,,Interest expense,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_GoodwillImpairmentLoss,,Goodwill impairment,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total expenses,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income before income taxes,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+PGR,0000080661-25-000007,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+PGR,0000080661-25-000007,2024-12-31,us-gaap_OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax,,Change in total net unrealized gains (losses) on fixed-maturity securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTax,,Comprehensive income (loss),
+PGR,0000080661-25-000007,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PreferredStockDividendsIncomeStatementImpact,,Less: Preferred share dividends and other,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic,netIncome,netIncome,netIncome
+PGR,0000080661-25-000007,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+PGR,0000080661-25-000007,2024-12-31,us-gaap_WeightedAverageNumberDilutedSharesOutstandingAdjustment,,Net effect of dilutive stock-based compensation,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+PGR,0000080661-25-000007,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+PGR,0000080661-25-000007,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+MET,0001099219-25-000044,2024-12-31,us-gaap_PremiumsEarnedNet,Premiums,netPremiumsEarned,netPremiumsEarned
+MET,0001099219-25-000044,2024-12-31,us-gaap_InsuranceCommissionsAndFees,,Universal life and investment-type product policy fees,
+MET,0001099219-25-000044,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+MET,0001099219-25-000044,2024-12-31,us-gaap_OtherIncome,,Other revenues,
+MET,0001099219-25-000044,2024-12-31,us-gaap_GainLossOnInvestments,,Net investment gains (losses),
+MET,0001099219-25-000044,2024-12-31,us-gaap_GainLossOnDerivativeInstrumentsNetPretax,,Net derivative gains (losses),
+MET,0001099219-25-000044,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+MET,0001099219-25-000044,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Policyholder benefits and claims,benefitsAndClaims,benefitsAndClaims
+MET,0001099219-25-000044,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefitRemeasurementGainLoss,,Policyholder liability remeasurement (gains) losses,
+MET,0001099219-25-000044,2024-12-31,us-gaap_MarketRiskBenefitChangeInFairValueGainLoss,,Market risk benefit remeasurement (gains) losses,
+MET,0001099219-25-000044,2024-12-31,us-gaap_InterestCreditedToPolicyholdersAccountBalances,,Interest credited to policyholder account balances,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PolicyholderDividends,,Policyholder dividends,
+MET,0001099219-25-000044,2024-12-31,us-gaap_OperatingExpenses,operatingExpenses,operatingExpenses,operatingExpenses
+MET,0001099219-25-000044,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total expenses,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income (loss) before provision for income tax,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+MET,0001099219-25-000044,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Less: Net income (loss) attributable to noncontrolling interests,
+MET,0001099219-25-000044,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+MET,0001099219-25-000044,2024-12-31,us-gaap_DividendsPreferredStock,,Less: Preferred stock dividends,
+MET,0001099219-25-000044,2024-12-31,us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic,netIncome,netIncome,netIncome
+MET,0001099219-25-000044,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+MET,0001099219-25-000044,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PremiumsEarnedNet,"Premiums (includes $73, $323 and $(377) of gains (losses) from changes in estimates on deferred profit liability amortization for the year ended December 31, 2024, 2023 and 2022, respectively)",netPremiumsEarned,netPremiumsEarned
+PRU,0001137774-25-000044,2024-12-31,us-gaap_InsuranceCommissionsAndFees,,Policy charges and fee income,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_InsuranceAgencyManagementFee,,Asset management and service fees,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_OtherIncome,,Other income (loss),
+PRU,0001137774-25-000044,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,"Realized investment gains (losses), net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_MarketRiskBenefitChangeInFairValueGainLoss,,"Change in value of market risk benefits, net of related hedging gains (losses)",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Policyholders’ benefits,benefitsAndClaims,benefitsAndClaims
+PRU,0001137774-25-000044,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefitExpectedFuturePolicyBenefitIncreaseDecreaseForOtherChange,,Change in estimates of liability for future policy benefits,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_InterestCreditedToPolicyholdersAccountBalances,,Interest credited to policyholders’ account balances,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PolicyholderDividends,,Dividends to policyholders,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Amortization of deferred policy acquisition costs,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_GoodwillAndIntangibleAssetImpairment,,Goodwill impairment,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_GeneralAndAdministrativeExpense,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses
+PRU,0001137774-25-000044,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total benefits and expenses,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments,,INCOME (LOSS) BEFORE INCOME TAXES AND EQUITY IN EARNINGS OF JOINT VENTURES AND OTHER OPERATING ENTITIES,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncomeLossFromContinuingOperations,,INCOME (LOSS) BEFORE EQUITY IN EARNINGS OF JOINT VENTURES AND OTHER OPERATING ENTITIES,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestments,,"Equity in earnings of joint ventures and other operating entities, net of taxes",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+PRU,0001137774-25-000044,2024-12-31,pru_NetIncomeLossAttributableToNoncontrollingInterestAndRedeemableNoncontrollingIneterst,,Less: Income (loss) attributable to noncontrolling interests and redeemable noncontrolling interests,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+PRU,0001137774-25-000044,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+PRU,0001137774-25-000044,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PremiumsEarnedNet,"Net earned premiums, principally supplemental health insurance",netPremiumsEarned,netPremiumsEarned
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_GainLossOnInvestments,,Net investment gains (losses),
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OtherIncome,,Other income (loss),
+AFL,0000004977-25-000047,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+AFL,0000004977-25-000047,2024-12-31,afl_PolicyholderBenefitsAndClaimsIncurredExcludingReserveRemeasurementGainLoss,,"Benefits and claims, excluding reserve remeasurement",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefitRemeasurementGainLoss,,Reserve remeasurement (gains) losses,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,"Total benefits and claims, net",benefitsAndClaims,benefitsAndClaims
+AFL,0000004977-25-000047,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Amortization of deferred policy acquisition costs,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_InsuranceCommissions,,Insurance commissions,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+AFL,0000004977-25-000047,2024-12-31,us-gaap_InterestExpenseOperating,,Interest expense,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OperatingExpenses,operatingExpenses,operatingExpenses,operatingExpenses
+AFL,0000004977-25-000047,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total benefits and expenses,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Earnings before income taxes,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CurrentIncomeTaxExpenseBenefit,,Current,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,deferredIncomeTax
+AFL,0000004977-25-000047,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+AFL,0000004977-25-000047,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+AFL,0000004977-25-000047,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+AFL,0000004977-25-000047,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+AFL,0000004977-25-000047,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CommonStockDividendsPerShareCashPaid,,Cash dividends per share,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PremiumsWrittenNet,,Net premiums written,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInUnearnedPremiumsNet,,Increase in unearned premiums,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PremiumsEarnedNet,Net premiums earned,netPremiumsEarned,netPremiumsEarned
+CB,0000896159-25-000004,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+CB,0000896159-25-000004,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net realized gains (losses),
+CB,0000896159-25-000004,2024-12-31,us-gaap_MarketRiskBenefitChangeInFairValueGainLoss,,Market risk benefits gains (losses),
+CB,0000896159-25-000004,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+CB,0000896159-25-000004,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Losses and loss expenses,benefitsAndClaims,benefitsAndClaims
+CB,0000896159-25-000004,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefitsPeriodExpense,,"Policy benefits (includes remeasurement gains (losses) of $(2), $19, and $3)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Policy acquisition costs,
+CB,0000896159-25-000004,2024-12-31,us-gaap_GeneralAndAdministrativeExpense,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses
+CB,0000896159-25-000004,2024-12-31,us-gaap_InterestExpense,interestExpense,interestExpense,interestExpense
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherOperatingIncomeExpenseNet,,Other (income) expense,
+CB,0000896159-25-000004,2024-12-31,us-gaap_AmortizationOfIntangibleAssets,,Amortization of purchased intangibles,
+CB,0000896159-25-000004,2024-12-31,us-gaap_BusinessCombinationIntegrationRelatedCosts,,Integration expenses,
+CB,0000896159-25-000004,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total expenses,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income before income tax,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+CB,0000896159-25-000004,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Net income (loss) attributable to noncontrolling interests,
+CB,0000896159-25-000004,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentBeforeTax,,Unrealized appreciation (depreciation),
+CB,0000896159-25-000004,2024-12-31,us-gaap_OciLiabilityForFuturePolicyBenefitGainLossAfterReclassificationAdjustmentBeforeTax,,Current discount rate on future policy benefits,
+CB,0000896159-25-000004,2024-12-31,us-gaap_OciMarketRiskBenefitInstrumentSpecificCreditRiskGainLossAfterAdjustmentsBeforeTax,,Instrument-specific credit risk on market risk benefits,
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentBeforeTax,,Cumulative foreign currency translation adjustment,
+CB,0000896159-25-000004,2024-12-31,cb_OtherComprehensiveIncomeLossDefinedBenefitPlanAndOtherAfterReclassificationAdjustmentBeforeTax,,"Other, including postretirement benefit liability adjustment",
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherComprehensiveIncomeLossBeforeTax,,"Other comprehensive income (loss), before income tax",
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherComprehensiveIncomeLossTax,,Income tax (expense) benefit related to OCI items,
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherComprehensiveIncomeLossNetOfTax,,Other comprehensive income (loss),
+CB,0000896159-25-000004,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest,,Comprehensive income (loss),
+CB,0000896159-25-000004,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest,,Comprehensive income (loss) attributable to noncontrolling interests,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTax,,Comprehensive income (loss) attributable to Chubb,
+CB,0000896159-25-000004,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+CB,0000896159-25-000004,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PremiumsEarnedNet,Earned premiums,netPremiumsEarned,netPremiumsEarned
+HIG,0000874766-25-000023,2024-12-31,us-gaap_InsuranceCommissionsAndFees,,Fee income,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net realized losses,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_OtherIncome,,Other revenues,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,"Benefits, losses and loss adjustment expenses",benefitsAndClaims,benefitsAndClaims
+HIG,0000874766-25-000023,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,"Amortization of deferred policy acquisition costs (""DAC"")",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+HIG,0000874766-25-000023,2024-12-31,us-gaap_InterestExpense,interestExpense,interestExpense,interestExpense
+HIG,0000874766-25-000023,2024-12-31,us-gaap_AmortizationOfIntangibleAssets,,Amortization of other intangible assets,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_RestructuringCharges,,Restructuring and other costs,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,"Benefits, losses and expenses",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,"Income (Loss) from Continuing Operations before Income Taxes, Noncontrolling Interest",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PreferredStockDividendsIncomeStatementImpact,,Less: Preferred stock dividends,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic,netIncome,netIncome,netIncome
+HIG,0000874766-25-000023,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+HIG,0000874766-25-000023,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+LNC,0000059558-25-000023,2024-12-31,us-gaap_SeriesCPreferredStockMember,,Series C Preferred Stock,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_SeriesDPreferredStockMember,,Series D Preferred Stock,
+LNC,0000059558-25-000023,2024-12-31,lnc_PremiumsEarnedExcludingInsuranceCommissionsAndFeesNet,,Insurance premiums,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_InsuranceCommissionsAndFees,,Fee income,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetInvestmentIncome,,Net investment income,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_DebtAndEquitySecuritiesRealizedGainLoss,,Realized gain (loss),
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherIncome,,Other revenues,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PolicyholderBenefitsAndClaimsIncurredNet,Benefits,benefitsAndClaims,benefitsAndClaims
+LNC,0000059558-25-000023,2024-12-31,us-gaap_InterestCreditedToPolicyholdersAccountBalances,,Interest credited,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_MarketRiskBenefitChangeInFairValueGainLoss,,Market risk benefit (gain) loss,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefitRemeasurementGainLoss,,Policyholder liability remeasurement (gain) loss,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherCostAndExpenseOperating,,Commissions and other expenses,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_InterestExpenseDebt,,Interest and debt expense,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_GoodwillAndIntangibleAssetImpairment,,Impairment of intangibles,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_BenefitsLossesAndExpenses,,Total expenses,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income (loss) before taxes,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+LNC,0000059558-25-000023,2024-12-31,lnc_OtherComprehensiveIncomeLossUnrealizedInvestmentGainsLosses,,Unrealized investment gain (loss),
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OciMarketRiskBenefitInstrumentSpecificCreditRiskGainLossAfterAdjustmentsTax,,Market risk benefit non-performance risk gain (loss),
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OciLiabilityForFuturePolicyBenefitGainLossAfterReclassificationAdjustmentTaxParent,,Policyholder liability discount rate remeasurement gain (loss),
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax,,Foreign currency translation adjustment,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax,,Funded status of employee benefit plans,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherComprehensiveIncomeLossNetOfTax,,"Total other comprehensive income (loss), net of tax",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTax,,Comprehensive income (loss),
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PreferredStockDividendsAndOtherAdjustments,,Preferred stock dividends declared,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic,netIncome,netIncome,netIncome
+LNC,0000059558-25-000023,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+LNC,0000059558-25-000023,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+LNC,0000059558-25-000023,2024-12-31,us-gaap_CommonStockDividendsPerShareDeclared,,Cash Dividends Declared Per Common Share (in dollars per share),

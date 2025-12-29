@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-12-29T11:24:41.543186",
+  "companies_processed": 100,
+  "successful_companies": 74,
+  "total_observations": 26700,
+  "canonical_concepts": {},
+  "errors": 0,
+  "multi_statement_concepts": 266,
+  "linkage_concepts": 62,
+  "output_files": {
+    "learned_mappings.json": 2,
+    "virtual_trees.json": 2,
+    "statement_mappings_v1.json": 234,
+    "canonical_structures.json": 1184363,
+    "learning_summary.json": 188,
+    "structural_learning_report.md": 3791,
+    "concept_linkages.json": 392638,
+    "learning_statistics.json": 39262
+  }
+}

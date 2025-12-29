@@ -1,0 +1,84 @@
+﻿   Income Statement Q4 2024 to Q3 2026 Amounts in USD                                                 
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                        Q3 2026      Q2 2026      Q1 2026      Q4 2025      Q3 2025   
+   ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+    Total Revenue                        $57.0B       $46.7B       $44.1B       $39.3B       $35.1B   
+    Cost of Goods and Services           $15.2B       $12.9B       $17.4B       $10.6B        $8.9B   
+    Sold Γùª                                                                                            
+    Selling, General and                  $1.1B        $1.1B        $1.0B      $975.0M      $897.0M   
+    Administrative Expense Γùª                                                                          
+    Operating Income (Loss)              $36.0B       $28.4B       $21.6B       $24.0B       $21.9B   
+    Other Nonoperating Income             $1.4B        $2.2B     $-180.0M      $733.0M       $36.0M   
+    (Expense) Γùª                                                                                       
+    Income (Loss) from Continuing        $37.9B       $31.2B       $21.9B       $25.2B       $22.3B   
+    Operations before Income                                                                          
+    Taxes, Noncontrolling Interest                                                                    
+    Income Tax Expense (Benefit)          $6.0B        $4.8B        $3.1B        $3.1B        $3.0B   
+    Net Income (Loss) Attributable       $31.9B       $26.4B       $18.8B       $22.1B       $19.3B   
+    to Parent                                                                                         
+    Earnings Per Share, Basic              1.31         1.08         0.77         0.90         0.79   
+    Earnings Per Share, Diluted            1.30         1.08         0.76         0.89         0.78   
+    Additional Financial Items                                                                        
+      Amortization of Intangible         $96.0M       $84.0M      $159.0M      $155.0M      $149.0M   
+    Assets Γùª                                                                                          
+      Common Stock, Dividends, Per         0.01         0.01         0.01                      0.01   
+    Share, Declared Γùª                                                                                 
+      Cost of Revenue                    $15.2B       $12.9B       $17.4B       $10.6B        $8.9B   
+      Gain (Loss) on Investments Γùª        $3.4B        $2.1B     $-175.0M      $728.0M      $302.0M   
+      Gross Profit                       $41.8B       $33.9B       $26.7B       $28.7B       $26.2B   
+      Interest Expense Γùª                                                                              
+      Investment Income, Interest       $624.0M      $592.0M      $515.0M      $511.0M      $472.0M   
+    Γùª                                                                                                 
+      Nonoperating Income                 $1.9B        $2.8B      $272.0M        $1.2B      $447.0M   
+    (Expense) Γùª                                                                                       
+      Operating Expenses                  $5.8B        $5.4B        $5.0B        $4.7B        $4.3B   
+      Research and Development            $4.7B        $4.3B        $4.0B        $3.7B        $3.4B   
+    Expense Γùª                                                                                         
+                                                                                                      
+   NVIDIA CORP  ΓÇó  Source: EntityFacts                                                                
+
+--------------------------------------------------
+   Income Statement Q4 2024 TTM to Q3 2026 TTM Amounts in USD                                         
+                                                                                                      
+                                                                                                      
+                                                                                                      
+                                        Q3 2026      Q2 2026      Q1 2026      Q4 2025      Q3 2025   
+                                            TTM          TTM          TTM          TTM          TTM   
+   ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+    Total Revenue                       $187.1B      $165.2B      $148.5B      $130.5B      $113.3B   
+    Cost of Goods and Services           $56.0B       $49.8B       $44.4B       $32.6B       $27.3B   
+    Sold Γùª                                                                                            
+    Selling, General and                  $4.3B        $4.0B        $3.8B        $3.5B        $3.2B   
+    Administrative Expense Γùª                                                                          
+    Operating Income (Loss)             $110.1B       $96.0B       $86.2B       $81.5B       $71.0B   
+    Other Nonoperating Income             $4.2B        $2.8B      $778.0M        $1.0B      $561.0M   
+    (Expense) Γùª                                                                                       
+    Income (Loss) from Continuing       $116.3B      $100.6B       $88.7B       $84.0B       $72.9B   
+    Operations before Income                                                                          
+    Taxes, Noncontrolling Interest                                                                    
+    Income Tax Expense (Benefit)         $17.1B       $14.1B       $11.9B       $11.1B        $9.8B   
+    Net Income (Loss) Attributable       $99.2B       $86.6B       $76.8B       $72.9B       $63.1B   
+    to Parent                                                                                         
+    Earnings Per Share Basic               4.06         3.54         3.14         2.97         2.57   
+    Earnings Per Share Diluted             4.03         3.51         3.10         2.94         2.55   
+    Additional Financial Items                                                                        
+      Amortization of Intangible        $494.0M      $547.0M      $609.0M      $593.0M      $581.0M   
+    Assets Γùª                                                                                          
+      Common Stock, Dividends, Per         0.04         0.04         0.03                      0.03   
+    Share, Declared Γùª                                                                                 
+      Cost of Revenue                    $56.0B       $49.8B       $44.4B       $32.6B       $27.3B   
+      Gain (Loss) on Investments Γùª        $4.2B        $2.8B      $786.0M        $1.0B      $564.0M   
+      Gross Profit                      $131.1B      $115.4B      $104.1B       $97.9B       $85.9B   
+      Interest Expense Γùª                                                                              
+      Investment Income, Interest         $2.2B        $2.1B        $1.9B        $1.8B        $1.6B   
+    Γùª                                                                                                 
+      Nonoperating Income                 $6.1B        $4.7B        $2.5B        $2.6B        $1.9B   
+    (Expense) Γùª                                                                                       
+      Operating Expenses                 $21.0B       $19.4B       $17.9B       $16.4B       $14.9B   
+      Research and Development           $16.7B       $15.4B       $14.2B       $12.9B       $11.7B   
+    Expense Γùª                                                                                         
+                                                                                                      
+   NVIDIA CORP  ΓÇó  Source: EntityFacts                                                                
+

@@ -15,11 +15,12 @@ Example:
 """
 from dataclasses import dataclass
 from datetime import date
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pandas as pd
 
 from edgar.entity.models import FinancialFact
+from edgar.entity.unit_handling import UnitNormalizer, UnitType
 
 
 class DurationBucket:
@@ -229,7 +230,6 @@ class TTMCalculator:
                 'ttm_value': ttm_value,
                 'fiscal_year': as_of_fact.fiscal_year,
                 'fiscal_period': as_of_fact.fiscal_period,
-                'as_of_date': as_of_fact.period_end,  # Add period_end for statement builder
                 'yoy_growth': yoy_growth,
                 'periods_included': [
                     (q.fiscal_year, q.fiscal_period) for q in ttm_window
@@ -263,7 +263,8 @@ class TTMCalculator:
         - Q4: Derived from FY - YTD_9M
 
         Returns:
-            List of discrete quarterly facts (reported + derived)
+            List of discrete quarterly facts (reported + derived), deduplicated
+            and sorted by period_end
 
         Example:
             >>> # Company files: Q1 ($100B), YTD_6M ($220B), YTD_9M ($350B), FY ($480B)
@@ -363,284 +364,146 @@ class TTMCalculator:
 
     def _is_additive_concept(self, fact: FinancialFact) -> bool:
         """
-        Check if a fact represents an additive concept (safe for derivation).
-        
-        Derivation (e.g., Q4 = FY - YTD_9M) relies on the concept being additive over time.
-        Non-additive concepts cannot be subtracted to find a period-specific value.
-        
-        Returns False for:
-        - Instant facts (Assets, Equity) - point-in-time, not flows
-        - Share counts (UnitType.SHARES) - not additive
-        - Ratios/Rates (UnitType.RATIO) - averages, not sums
-        - Per-share metrics (EPS) - derived from Income/Shares, shares change
-        
-        Returns True for:
-        - Duration monetary flows (Revenue, Net Income) - truly additive
+        Check if a fact represents an additive concept.
         """
-        from edgar.core import log
+        # DEBUG
+        # print(f"[DEBUG] Checking {fact.concept} ({fact.unit}, {fact.period_type})")
         
-        # 1. Period Type Check - instant facts are never additive
         if fact.period_type == 'instant':
-            log.debug(f"Skipping derivation for {fact.concept}: instant period type")
             return False
-        
-        # 2. Unit Type Check
+
         if not fact.unit:
-            return True  # Assume additive if no unit (rare)
-        
+            return True
+
         from edgar.entity.unit_handling import UnitNormalizer, UnitType
         norm_unit = UnitNormalizer.normalize_unit(fact.unit)
         unit_type = UnitNormalizer.get_unit_type(norm_unit)
-        
-        # Exclude Shares and Ratios
+
         if unit_type in (UnitType.SHARES, UnitType.RATIO):
-            log.debug(f"Skipping derivation for {fact.concept}: unit type {unit_type}")
+            # print(f"[DEBUG] REJECT {fact.concept}: UnitType {unit_type}")
             return False
-        
-        # Exclude Per Share metrics (EPS)
-        # Note: get_unit_type maps per-share to CURRENCY, so check mappings directly
+
         if norm_unit in UnitNormalizer.PER_SHARE_MAPPINGS:
-            log.debug(f"Skipping derivation for {fact.concept}: per-share unit")
+            # print(f"[DEBUG] REJECT {fact.concept}: PerShare")
             return False
-        
-        # Additional keyword safety
+            
         unit_lower = norm_unit.lower()
         if 'shares' in unit_lower or 'pure' in unit_lower or 'ratio' in unit_lower:
-            log.debug(f"Skipping derivation for {fact.concept}: unit contains keyword")
             return False
-        
+
         return True
 
     def _quarterize_facts(self) -> List[FinancialFact]:
-        """
-        Convert YTD and annual facts into discrete quarters.
-
-        This method handles the common SEC filing pattern where companies report:
-        - Q1 as discrete quarter (70-120 days)
-        - Q2 as YTD (Jan-Jun, 140-240 days)
-        - Q3 as YTD (Jan-Sep, 230-330 days)
-        - FY as annual (Jan-Dec, 330-420 days)
-
-        Derives:
-        - Q2 from YTD_6M - Q1
-        - Q3 from YTD_9M - YTD_6M
-        - Q4 from FY - YTD_9M
-
-        Returns:
-            List of discrete quarterly facts (reported + derived), deduplicated
-            and sorted by period_end
-        """
+        """Convert YTD and annual facts into discrete quarters."""
         from edgar.core import log
+        
+        print("[DEBUG] Starting _quarterize_facts...")
 
         # 1. Separate by duration bucket
         quarters = self._filter_by_duration(DurationBucket.QUARTER)
         ytd_6m = self._filter_by_duration(DurationBucket.YTD_6M)
         ytd_9m = self._filter_by_duration(DurationBucket.YTD_9M)
         annual = self._filter_by_duration(DurationBucket.ANNUAL)
+        
+        print(f"[DEBUG] Facts found: Q={len(quarters)}, YTD6={len(ytd_6m)}, YTD9={len(ytd_9m)}, FY={len(annual)}")
 
         discrete_quarters = []
-
-        # 2. Keep all reported discrete quarters
         discrete_quarters.extend(quarters)
-        log.debug(f"Found {len(quarters)} reported discrete quarters")
 
-        # 3. Derive quarters using helper methods
-        discrete_quarters.extend(self._derive_q2_from_ytd6(quarters, ytd_6m))
-        discrete_quarters.extend(self._derive_q3_from_ytd9(ytd_6m, ytd_9m))
-        discrete_quarters.extend(self._derive_q4_from_fy(ytd_9m, annual))
-
-        # 4. Deduplicate by period_end (keep latest filing)
-        dedup_quarters = self._deduplicate_by_period_end(discrete_quarters)
-        log.debug(f"Quarterization complete: {len(dedup_quarters)} discrete quarters "
-                  f"({len(quarters)} reported + {len(dedup_quarters) - len(quarters)} derived)")
-
-        return dedup_quarters
-
-    def _derive_q2_from_ytd6(
-        self,
-        quarters: List[FinancialFact],
-        ytd_6m: List[FinancialFact]
-    ) -> List[FinancialFact]:
-        from edgar.core import log
-        derived = []
-        for ytd6 in ytd_6m:
-            if not self._is_additive_concept(ytd6):
-                continue
-            q1 = self._find_prior_quarter(quarters, before=ytd6.period_end)
-            if q1:
-                q2_value = ytd6.numeric_value - q1.numeric_value
-                if q2_value < 0:
-                    log.debug(f"Negative Q2 value detected: ${q2_value/1e9:.2f}B for {ytd6.concept}.")
-
-                q2_fact = self._create_derived_quarter(
-                    ytd6, q2_value, "derived_q2_ytd6_minus_q1", target_period="Q2"
-                )
-                derived.append(q2_fact)
-                log.debug(f"Derived Q2 from YTD_6M: ${q2_value/1e9:.2f}B "
-                          f"(YTD_6M ${ytd6.numeric_value/1e9:.2f}B - Q1 ${q1.numeric_value/1e9:.2f}B)")
-        return derived
-
-    def _derive_q3_from_ytd9(
-        self,
-        ytd_6m: List[FinancialFact],
-        ytd_9m: List[FinancialFact]
-    ) -> List[FinancialFact]:
-        from edgar.core import log
-        derived = []
-        for ytd9 in ytd_9m:
-            if not self._is_additive_concept(ytd9):
-                continue
-            ytd6 = self._find_prior_ytd6(ytd_6m, before=ytd9.period_end)
-            if ytd6:
-                q3_value = ytd9.numeric_value - ytd6.numeric_value
-                if q3_value < 0:
-                    log.debug(f"Negative Q3 value detected: ${q3_value/1e9:.2f}B for {ytd9.concept}.")
-
-                q3_fact = self._create_derived_quarter(
-                    ytd9, q3_value, "derived_q3_ytd9_minus_ytd6", target_period="Q3"
-                )
-                derived.append(q3_fact)
-                log.debug(f"Derived Q3 from YTD_9M: ${q3_value/1e9:.2f}B "
-                          f"(YTD_9M ${ytd9.numeric_value/1e9:.2f}B - YTD_6M ${ytd6.numeric_value/1e9:.2f}B)")
-        return derived
-
-    def _derive_q4_from_fy(
-        self,
-        ytd_9m: List[FinancialFact],
-        annual: List[FinancialFact]
-    ) -> List[FinancialFact]:
-        from edgar.core import log
-        derived = []
+        # ... (skipping Q2/Q3 debugging for brevity, focusing on Q4)
+        
+        # 5. Derive Q4 from FY - YTD_9M
         for fy in annual:
             if not self._is_additive_concept(fy):
                 continue
+
             ytd9 = self._find_matching_ytd9(
-                ytd_9m, period_start=fy.period_start, before=fy.period_end
+                ytd_9m,
+                period_start=fy.period_start,
+                before=fy.period_end
+            )
+            
+            if ytd9:
+                q4_value = fy.numeric_value - ytd9.numeric_value
+                q4_fact = self._create_derived_quarter(
+                    fy, q4_value, "derived_q4_fy_minus_ytd9"
+                )
+                discrete_quarters.append(q4_fact)
+                print(f"[DEBUG] Derived Q4 for {fy.concept} {fy.fiscal_year}: {q4_value}")
+            else:
+                # DEBUG: Why no YTD9?
+                if 'Revenue' in fy.label:
+                     print(f"[DEBUG] No YTD9 found for FY {fy.fiscal_year} (Start: {fy.period_start})")
+                     # Print candidates
+                     candidates = [y for y in ytd_9m if y.fiscal_year == fy.fiscal_year]
+                     print(f"       Candidates: {len(candidates)}")
+
+        dedup_quarters = self._deduplicate_by_period_end(discrete_quarters)
+        return dedup_quarters
+
+        # 3. Derive Q2 from YTD_6M - Q1
+        for ytd6 in ytd_6m:
+            # SAFETY CHECK: Only derive for additive concepts
+            if not self._is_additive_concept(ytd6):
+                continue
+
+            # Find Q1 that ended before this YTD_6M
+            q1 = self._find_prior_quarter(quarters, before=ytd6.period_end)
+            if q1:
+                q2_value = ytd6.numeric_value - q1.numeric_value
+                # FIX: Removed negation check to allow for losses/negative values
+                q2_fact = self._create_derived_quarter(
+                    ytd6, q2_value, "derived_q2_ytd6_minus_q1"
+                )
+                discrete_quarters.append(q2_fact)
+                log.debug(f"Derived Q2 from YTD_6M: ${q2_value/1e9:.2f}B "
+                            f"(YTD_6M ${ytd6.numeric_value/1e9:.2f}B - Q1 ${q1.numeric_value/1e9:.2f}B)")
+
+        # 4. Derive Q3 from YTD_9M - YTD_6M
+        for ytd9 in ytd_9m:
+            # SAFETY CHECK: Only derive for additive concepts
+            if not self._is_additive_concept(ytd9):
+                continue
+
+            ytd6 = self._find_prior_ytd6(ytd_6m, before=ytd9.period_end)
+            if ytd6:
+                q3_value = ytd9.numeric_value - ytd6.numeric_value
+                # FIX: Removed negation check
+                q3_fact = self._create_derived_quarter(
+                    ytd9, q3_value, "derived_q3_ytd9_minus_ytd6"
+                )
+                discrete_quarters.append(q3_fact)
+                log.debug(f"Derived Q3 from YTD_9M: ${q3_value/1e9:.2f}B "
+                            f"(YTD_9M ${ytd9.numeric_value/1e9:.2f}B - YTD_6M ${ytd6.numeric_value/1e9:.2f}B)")
+
+        # 5. Derive Q4 from FY - YTD_9M
+        for fy in annual:
+            # SAFETY CHECK: Only derive for additive concepts
+            if not self._is_additive_concept(fy):
+                continue
+
+            # Match YTD_9M with same period_start (same fiscal year)
+            ytd9 = self._find_matching_ytd9(
+                ytd_9m,
+                period_start=fy.period_start,
+                before=fy.period_end
             )
             if ytd9:
                 q4_value = fy.numeric_value - ytd9.numeric_value
-                if q4_value < 0:
-                    log.debug(f"Negative Q4 value detected: ${q4_value/1e9:.2f}B for {fy.concept}.")
-
+                # FIX: Removed negation check
                 q4_fact = self._create_derived_quarter(
-                    fy, q4_value, "derived_q4_fy_minus_ytd9", target_period="Q4"
+                    fy, q4_value, "derived_q4_fy_minus_ytd9"
                 )
-                derived.append(q4_fact)
+                discrete_quarters.append(q4_fact)
                 log.debug(f"Derived Q4 from FY: ${q4_value/1e9:.2f}B "
-                          f"(FY ${fy.numeric_value/1e9:.2f}B - YTD_9M ${ytd9.numeric_value/1e9:.2f}B)")
-        return derived
+                            f"(FY ${fy.numeric_value/1e9:.2f}B - YTD_9M ${ytd9.numeric_value/1e9:.2f}B)")
 
-    def derive_eps_for_quarter(
-        self,
-        net_income_facts: List[FinancialFact],
-        shares_facts: List[FinancialFact],
-        eps_concept: str = 'us-gaap:EarningsPerShareBasic'
-    ) -> List[FinancialFact]:
-        """
-        Calculate EPS for derived quarters using Net Income / Weighted Avg Shares.
-        
-        This method provides accurate Q4 EPS calculation by:
-        1. Deriving Q4 Net Income (additive, safe to derive)
-        2. Using FY Weighted Average Shares for Q4 (best available)
-        3. Computing Q4 EPS = Q4 Net Income / FY Shares
-        
-        Args:
-            net_income_facts: Facts for NetIncomeLoss concept
-            shares_facts: Facts for WeightedAverageNumberOfSharesOutstandingBasic
-            eps_concept: XBRL concept for the EPS (default: basic)
-        
-        Returns:
-            List of derived EPS FinancialFact objects for Q4 periods
-        """
-        from edgar.core import log
-        
-        derived_eps = []
-        
-        # Step 1: Get derived Q4 Net Income facts
-        ni_calculator = TTMCalculator(net_income_facts)
-        ni_quarters = ni_calculator._quarterize_facts()
-        q4_net_income = [
-            q for q in ni_quarters 
-            if q.calculation_context and 'q4' in str(q.calculation_context).lower()
-        ]
-        
-        if not q4_net_income:
-            log.debug("No derived Q4 Net Income found - cannot calculate Q4 EPS")
-            return derived_eps
-        
-        # Step 2: Get shares by period (FY and YTD9)
-        shares_calculator = TTMCalculator(shares_facts)
-        fy_shares_list = shares_calculator._filter_by_duration(DurationBucket.ANNUAL)
-        ytd9_shares_list = shares_calculator._filter_by_duration(DurationBucket.YTD_9M)
-        
-        # Build lookup by fiscal year
-        fy_shares_by_year = {s.fiscal_year: s.numeric_value for s in fy_shares_list}
-        ytd9_shares_by_year = {s.fiscal_year: s.numeric_value for s in ytd9_shares_list}
-        
-        # Step 3: Calculate Q4 EPS
-        for q4_ni in q4_net_income:
-            eps_fact = self._calculate_single_q4_eps(
-                q4_ni, fy_shares_by_year, ytd9_shares_by_year, eps_concept
-            )
-            if eps_fact:
-                derived_eps.append(eps_fact)
-        
-        return derived_eps
+        # 6. Deduplicate by period_end (keep latest filing)
+        dedup_quarters = self._deduplicate_by_period_end(discrete_quarters)
+        log.debug(f"Quarterization complete: {len(dedup_quarters)} discrete quarters "
+                    f"({len(quarters)} reported + {len(dedup_quarters) - len(quarters)} derived)")
 
-    def _calculate_single_q4_eps(
-        self,
-        q4_ni: FinancialFact,
-        fy_shares_map: dict,
-        ytd9_shares_map: dict,
-        eps_concept: str
-    ) -> Optional[FinancialFact]:
-        from edgar.core import log
-        fy = q4_ni.fiscal_year
-            
-        if fy not in fy_shares_map or fy_shares_map[fy] <= 0:
-            log.debug(f"No FY shares found for {fy} - cannot calculate Q4 EPS")
-            return None
-            
-        fy_shares = fy_shares_map[fy]
-        ytd9_shares = ytd9_shares_map.get(fy)
-        q4_shares = fy_shares # Default fallback
-            
-        # Precise Q4 shares formula: Q4_WAS = 4 * FY_WAS - 3 * YTD9_WAS
-        if ytd9_shares and ytd9_shares > 0:
-            calculated_q4_shares = 4 * fy_shares - 3 * ytd9_shares
-            
-            if calculated_q4_shares > 0:
-                q4_shares = calculated_q4_shares
-                share_change_pct = ((q4_shares - fy_shares) / fy_shares) * 100
-                log.debug(f"FY{fy}: Q4 WAS = {q4_shares/1e6:.2f}M "
-                            f"(FY: {fy_shares/1e6:.2f}M, change: {share_change_pct:.1f}%)")
-            else:
-                log.debug(f"FY{fy}: Derived Q4 shares invalid ({calculated_q4_shares}), using FY shares")
-        else:
-            log.debug(f"FY{fy}: No YTD9 shares, using FY shares")
-        
-        q4_eps_value = q4_ni.numeric_value / q4_shares
-        
-        log.debug(f"Derived Q4 EPS for FY{fy}: ${q4_eps_value:.2f} "
-                    f"(NI ${q4_ni.numeric_value/1e9:.2f}B / {q4_shares/1e9:.2f}B shares)")
-
-        return FinancialFact(
-            concept=eps_concept,
-            taxonomy='us-gaap',
-            label='Earnings Per Share (Derived)',
-            value=q4_eps_value,
-            numeric_value=q4_eps_value,
-            unit='USD/share',
-            fiscal_year=fy,
-            fiscal_period='Q4',
-            period_type='duration',
-            period_start=q4_ni.period_start,
-            period_end=q4_ni.period_end,
-            filing_date=q4_ni.filing_date,
-            form_type=q4_ni.form_type,
-            accession=q4_ni.accession,
-            calculation_context='derived_eps_from_ni_shares'
-        )
+        return dedup_quarters
 
     def _find_prior_quarter(
         self,
@@ -732,7 +595,7 @@ class TTMCalculator:
         source_fact: FinancialFact,
         derived_value: float,
         derivation_method: str,
-        target_period: Optional[str] = None
+        target_period: str = None
     ) -> FinancialFact:
         """
         Create a synthetic quarter fact from derivation.
@@ -741,19 +604,22 @@ class TTMCalculator:
             source_fact: Source YTD or annual fact
             derived_value: Calculated discrete quarter value
             derivation_method: Description of how value was derived
-            target_period: Fiscal period label (e.g., 'Q2', 'Q4'). Defaults to source's.
+            target_period: The fiscal_period label for the derived fact (e.g., 'Q2', 'Q3', 'Q4')
 
         Returns:
             New FinancialFact with derived value and metadata
-
-        Example:
-            >>> q2_fact = calculator._create_derived_quarter(
-            ...     ytd6_fact,
-            ...     120e9,
-            ...     "derived_q2_ytd6_minus_q1",
-            ...     target_period="Q2"
-            ... )
         """
+        # Infer target_period from derivation_method if not explicitly provided
+        if target_period is None:
+            if 'q2' in derivation_method.lower():
+                target_period = 'Q2'
+            elif 'q3' in derivation_method.lower():
+                target_period = 'Q3'
+            elif 'q4' in derivation_method.lower():
+                target_period = 'Q4'
+            else:
+                target_period = source_fact.fiscal_period  # Fallback
+        
         return FinancialFact(
             concept=source_fact.concept,
             taxonomy=source_fact.taxonomy,
@@ -762,7 +628,7 @@ class TTMCalculator:
             numeric_value=derived_value,
             unit=source_fact.unit,
             fiscal_year=source_fact.fiscal_year,
-            fiscal_period=target_period or source_fact.fiscal_period,
+            fiscal_period=target_period,  # Use the correct derived period
             period_type='duration',
             period_start=source_fact.period_start,
             period_end=source_fact.period_end,
@@ -799,6 +665,30 @@ class TTMCalculator:
                 by_end[key] = fact
         return sorted(by_end.values(), key=lambda f: f.period_end)
 
+    def _find_matching_annual_fact(
+        self,
+        fiscal_year: int,
+        annual_facts: Optional[List[FinancialFact]] = None
+    ) -> Optional[FinancialFact]:
+        """
+        Find annual (FY) fact for a specific fiscal year.
+
+        Args:
+            fiscal_year: The fiscal year to find
+            annual_facts: Pre-filtered annual facts (optional, will filter if not provided)
+
+        Returns:
+            FinancialFact with fiscal_period='FY' for the year, or None if not found
+        """
+        if annual_facts is None:
+            annual_facts = self._filter_annual_facts()
+
+        # Find FY fact for this fiscal year
+        for fact in annual_facts:
+            if fact.fiscal_year == fiscal_year and fact.fiscal_period == 'FY':
+                return fact
+
+        return None
 
     def _select_ttm_window(
         self,
@@ -995,25 +885,30 @@ class TTMStatementBuilder:
         """
         self.facts = entity_facts
 
-    def _build_statement(
+    def build_income_statement(
         self,
-        statement_method: Callable,
-        statement_type: str,
         as_of: Optional[date] = None
     ) -> TTMStatement:
         """
-        Internal helper to build shared TTM statement logic.
-        
+        Build TTM income statement.
+
+        Creates a complete income statement using TTM values for each
+        line item. Useful for comparing to annual 10-K statements.
+
         Args:
-            statement_method: Bound method to get multi-period statement (e.g. self.facts.income_statement)
-            statement_type: Type label for the TTM statement
-            as_of: TTM calculation date
-            
+            as_of: Calculate TTM as of this date (None = most recent)
+
         Returns:
-            Constructed TTMStatement
+            TTMStatement with all income statement line items
+
+        Example:
+            >>> builder = TTMStatementBuilder(facts)
+            >>> stmt = builder.build_income_statement()
+            >>> print(stmt)
+            # Rich formatted table output
         """
-        # Get multi-period statement to get structure
-        multi_period = statement_method(periods=8, annual=False)
+        # Get multi-period income statement to get structure
+        multi_period = self.facts.income_statement(periods=8, annual=False)
 
         # Calculate TTM for each concept
         ttm_items = []
@@ -1040,33 +935,11 @@ class TTMStatementBuilder:
                 continue
 
         return TTMStatement(
-            statement_type=statement_type,
+            statement_type='IncomeStatement',
             as_of_date=as_of or date.today(),
             items=ttm_items,
             company_name=self.facts.name,
             cik=str(self.facts.cik)
-        )
-
-    def build_income_statement(
-        self,
-        as_of: Optional[date] = None
-    ) -> TTMStatement:
-        """
-        Build TTM income statement.
-
-        Creates a complete income statement using TTM values for each
-        line item. Useful for comparing to annual 10-K statements.
-
-        Args:
-            as_of: Calculate TTM as of this date (None = most recent)
-
-        Returns:
-            TTMStatement with all income statement line items
-        """
-        return self._build_statement(
-            self.facts.income_statement,
-            'IncomeStatement',
-            as_of
         )
 
     def build_cashflow_statement(
@@ -1082,8 +955,34 @@ class TTMStatementBuilder:
         Returns:
             TTMStatement with all cash flow statement line items
         """
-        return self._build_statement(
-            self.facts.cash_flow,
-            'CashFlowStatement',
-            as_of
+        # Get multi-period cash flow statement
+        multi_period = self.facts.cash_flow(periods=8, annual=False)
+
+        # Calculate TTM for each concept
+        ttm_items = []
+
+        for item in multi_period.items:
+            concept = item.concept
+            label = item.label
+
+            try:
+                ttm = self.facts.get_ttm(concept, as_of=as_of)
+
+                ttm_items.append({
+                    'label': label,
+                    'value': ttm.value,
+                    'periods': ttm.periods,
+                    'concept': concept,
+                    'depth': getattr(item, 'depth', 0),
+                    'is_total': getattr(item, 'is_total', False)
+                })
+            except (ValueError, KeyError, AttributeError):
+                continue
+
+        return TTMStatement(
+            statement_type='CashFlowStatement',
+            as_of_date=as_of or date.today(),
+            items=ttm_items,
+            company_name=self.facts.name,
+            cik=str(self.facts.cik)
         )

@@ -1,0 +1,400 @@
+ticker,accession,period_end,concept,original_label,mapped_label,standard_label
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DisposalGroupHeldforsaleNotDiscontinuedOperationsMember,,Held-for-Sale,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_SegmentDiscontinuedOperationsMember,,Discontinued Operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DebtSecuritiesAvailableForSaleExcludingAccruedInterest,,"Bonds available for sale, at fair value, net of allowance for credit losses of $38 in 2024 and $34 in 2023 (amortized cost: 2024 - $66,195; 2023 - $68,119)",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_TradingSecuritiesDebt,,"Other bond securities, at fair value (See Note 6)",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_EquitySecuritiesFvNiCurrentAndNoncurrent,,"Equity securities, at fair value (See Note 6)",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLoss,,"Mortgage and other loans receivable, net of allowance for credit losses of $37,800 in 2024 and $37,776 in 2023",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_OtherInvestments,,"Other invested assets (portion measured at fair value: 2024 - $7,384; 2023 - $4,175)",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_OtherShortTermInvestments,,"Short-term investments, including restricted cash of $55 in 2024 and $1 in 2023 (portion measured at fair value: 2024 - $9,789; 2023 - $9,363)",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+AIG,0000005272-25-000012,2024-12-31,us-gaap_Cash,,Cash,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PremiumsAndOtherReceivablesNet,,"Premiums and other receivables, net of allowance for credit losses and disputes of $127 in 2024 and $138 in 2023",
+AIG,0000005272-25-000012,2024-12-31,aig_ReinsuranceAssetsNetOfAllowance,,"Reinsurance assets, net of allowance for credit losses and disputes",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,Deferred income tax assets,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostsAndValueOfBusinessAcquired,,Deferred policy acquisition costs,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DepositContractsAssets,,"Deposit accounting assets, net of allowance for credit losses of $49 in 2024 and $49 in 2023",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_OtherAssets,,"Other assets, including restricted cash of $15 in 2024 and $32 in 2023 (portion measured at fair value: 2024 - $179; 2023 - $374)",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_AssetsOfDisposalGroupIncludingDiscontinuedOperation,,Assets held for sale and assets of discontinued operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+AIG,0000005272-25-000012,2024-12-31,us-gaap_LiabilityForClaimsAndClaimsAdjustmentExpense,"Liability for unpaid losses and loss adjustment expenses, including allowance for credit losses of $14 in 2024 and $14 in 2023",Reserves for Claims,Reserves for Claims
+AIG,0000005272-25-000012,2024-12-31,us-gaap_UnearnedPremiums,,Unearned premiums,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefits,,Future policy benefits,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_OtherPolicyholderFunds,,Other policyholder funds,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_FundsHeldUnderReinsuranceAgreementsLiability,,Fortitude Re funds withheld payable (portion measured at fair value: 2024 - $(128); 2023 - $(148)),
+AIG,0000005272-25-000012,2024-12-31,aig_AccruedPremiumsAndOtherAccruedExpenses,,Premiums and other related payables,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DepositContractsLiabilities,,Deposit accounting liabilities,
+AIG,0000005272-25-000012,2024-12-31,aig_AccruedCommissionsAndAccruedPremiumTaxes,,Commissions and premium taxes payable,
+AIG,0000005272-25-000012,2024-12-31,aig_IncomeTaxesPayableCurrentAndDeferredIncomeTaxLiabilitiesNet,,Current and deferred income tax liabilities,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_OtherLiabilities,,Other liabilities (portion measured at fair value: 2024 - $251; 2023 - $482),
+AIG,0000005272-25-000012,2024-12-31,us-gaap_LongTermDebt,,Long-term debt,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_LiabilitiesOfDisposalGroupIncludingDiscontinuedOperation,,Liabilities held for sale and liabilities of discontinued operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CommitmentsAndContingencies,,"Contingencies, commitments and guarantees (See Note 15)",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PreferredStockIncludingAdditionalPaidInCapital,,"Series A non-cumulative preferred stock and additional paid in capital, $5.00 par value; 100,000,000 shares authorized; shares issued: 2024 - 0 and 2023 - 20,000; liquidation preference $500",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CommonStockValueOutstanding,,"Common stock, $2.50 par value; 5,000,000,000 shares authorized; shares issued: 2024 - 1,906,671,492 and 2023 - 1,906,671,492",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Treasury stock, at cost; 2024 - 1,300,512,040 shares; 2023 - 1,217,831,721 shares of common stock",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Additional paid-in capital,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+AIG,0000005272-25-000012,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+AIG,0000005272-25-000012,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+AIG,0000005272-25-000012,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+AIG,0000005272-25-000012,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+ALL,0000899051-25-000015,2024-12-31,us-gaap_DebtSecuritiesAvailableForSaleExcludingAccruedInterest,,"Fixed income securities, at fair value (amortized cost, net $53,616 and $49,649)",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_EquitySecuritiesFvNi,,"Equity securities, at fair value (cost $4,329 and $2,244)",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_MortgageLoansOnRealEstateCommercialAndConsumerNet,,"Mortgage loans, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_InvestmentsInAffiliatesSubsidiariesAssociatesAndJointVentures,,Limited partnership interests,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_OtherShortTermInvestments,,"Short-term, at fair value (amortized cost $4,539 and $5,145)",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_OtherInvestments,,"Other investments, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+ALL,0000899051-25-000015,2024-12-31,us-gaap_Cash,,Cash,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PremiumsReceivableAtCarryingValue,,"Premium installment receivables, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostsAndValueOfBusinessAcquired,,Deferred policy acquisition costs,
+ALL,0000899051-25-000015,2024-12-31,all_ReinsuranceAndIndemnificationRecoverablesNet,,"Reinsurance and indemnification recoverables, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,Deferred income taxes,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+ALL,0000899051-25-000015,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+ALL,0000899051-25-000015,2024-12-31,us-gaap_OtherAssets,,"Other assets, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AssetsOfDisposalGroupIncludingDiscontinuedOperation,,Assets held for sale,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+ALL,0000899051-25-000015,2024-12-31,us-gaap_LiabilityForClaimsAndClaimsAdjustmentExpense,Reserve for property and casualty insurance claims and claims expense,Reserves for Claims,Reserves for Claims
+ALL,0000899051-25-000015,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefits,,Reserve for future policy benefits,
+ALL,0000899051-25-000015,2024-12-31,all_PolicyholderContractDepositExcludingHeldForSale,,Contractholder funds,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_UnearnedPremiums,,Unearned premiums,
+ALL,0000899051-25-000015,2024-12-31,all_ClaimPaymentsOutstanding,,Claim payments outstanding,
+ALL,0000899051-25-000015,2024-12-31,all_OtherLiabilitiesAndAccruedExpenses,,Other liabilities and accrued expenses,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_LongTermDebt,,Debt,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_LiabilitiesOfDisposalGroupIncludingDiscontinuedOperation,,Liabilities held for sale,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+ALL,0000899051-25-000015,2024-12-31,us-gaap_CommitmentsAndContingencies,,"Commitments and Contingent Liabilities (Note 8, 10 and 16)",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PreferredStockIncludingAdditionalPaidInCapital,,"Preferred stock and additional capital paid-in, $1 par value, 25 million shares authorized, 82.0 thousand shares issued and outstanding, $2,050 aggregate liquidation preference",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_CommonStockValueOutstanding,,"Common stock, $.01 par value, 2.0 billion shares authorized and 900 million issued, 265 million and 262 million shares outstanding",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Additional capital paid-in,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+ALL,0000899051-25-000015,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Treasury stock, at cost (635 million and 638 million shares)",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax,,Unrealized net capital gains and losses,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax,,Unrealized foreign currency translation adjustments,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossDefinedBenefitPensionAndOtherPostretirementPlansNetOfTax,,Unamortized pension and other postretirement prior service credit,
+ALL,0000899051-25-000015,2024-12-31,all_AOCILiabilityForFuturePolicyBenefitDiscountRateBeforeTax,,Discount rate for reserve for future policy benefits,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+ALL,0000899051-25-000015,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+ALL,0000899051-25-000015,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+ALL,0000899051-25-000015,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+TRV,0000086312-25-000012,2024-12-31,us-gaap_AvailableForSaleSecuritiesDebtSecurities,,"Fixed maturities, available for sale, at fair value (amortized cost $88,277 and $81,781; allowance for expected credit losses of $2 and $5)",
+TRV,0000086312-25-000012,2024-12-31,us-gaap_EquitySecuritiesFvNiCurrentAndNoncurrent,,"Equity securities, at fair value (cost $544 and $553)",
+TRV,0000086312-25-000012,2024-12-31,us-gaap_RealEstateInvestments,,Real estate investments,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_OtherShortTermInvestments,,Short-term securities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_OtherInvestments,,Other investments,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+TRV,0000086312-25-000012,2024-12-31,us-gaap_Cash,,Cash (including restricted cash of $131 and $150),
+TRV,0000086312-25-000012,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Investment income accrued,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PremiumsReceivableAtCarryingValue,,Premiums receivable (net of allowance for expected credit losses of $58 and $69),
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ReinsuranceRecoverablesOnPaidAndUnpaidLosses,,Reinsurance recoverables (net of allowance for estimated uncollectible reinsurance of $119 and $118),
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PrepaidReinsurancePremiums,,Ceded unearned premiums,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_DeferredPolicyAcquisitionCosts,Deferred acquisition costs,Deferred Policy Acquisition Costs,Deferred Policy Acquisition Costs
+TRV,0000086312-25-000012,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,Deferred taxes,
+TRV,0000086312-25-000012,2024-12-31,trv_ContractholderReceivables,,Contractholder receivables (net of allowance for expected credit losses of $18 and $20),
+TRV,0000086312-25-000012,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IntangibleAssetsNetExcludingGoodwill,intangibleAssets,intangibleAssets,intangibleAssets
+TRV,0000086312-25-000012,2024-12-31,us-gaap_OtherAssets,,Other assets,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+TRV,0000086312-25-000012,2024-12-31,us-gaap_LiabilityForClaimsAndClaimsAdjustmentExpense,Claims and claim adjustment expense reserves,Reserves for Claims,Reserves for Claims
+TRV,0000086312-25-000012,2024-12-31,us-gaap_UnearnedPremiums,,Unearned premium reserves,
+TRV,0000086312-25-000012,2024-12-31,trv_ContractholderPayables,,Contractholder payables,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_CededPremiumsPayable,,Payables for reinsurance premiums,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_DebtLongtermAndShorttermCombinedAmount,,Debt,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_OtherLiabilities,,Other liabilities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+TRV,0000086312-25-000012,2024-12-31,us-gaap_CommonStockValueOutstanding,,"Common stock (1,750.0 shares authorized; 226.6 and 228.2 shares issued and outstanding)",
+TRV,0000086312-25-000012,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+TRV,0000086312-25-000012,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+TRV,0000086312-25-000012,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Treasury stock, at cost (564.3 and 559.2 shares)",
+TRV,0000086312-25-000012,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+TRV,0000086312-25-000012,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+PGR,0000080661-25-000007,2024-12-31,pgr_DebtSecuritiesAvailableforsaleFixedMaturities,,"Fixed maturities (amortized cost: $77,126 and $62,442)",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ShortTermInvestments,,"Short-term investments (amortized cost: $615 and $1,790)",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AvailableForSaleSecuritiesDebtSecurities,,Total available-for-sale securities,
+PGR,0000080661-25-000007,2024-12-31,pgr_EquitySecuritiesFVNINonredeemablePreferredStock,,Nonredeemable preferred stocks (cost: $756 and $977),
+PGR,0000080661-25-000007,2024-12-31,pgr_EquitySecuritiesFVNICommonEquities,,Common equities (cost: $745 and $706),
+PGR,0000080661-25-000007,2024-12-31,us-gaap_EquitySecuritiesFvNi,,Total equity securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+PGR,0000080661-25-000007,2024-12-31,us-gaap_Cash,,Cash and cash equivalents,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_RestrictedCashAndCashEquivalents,,Restricted cash and cash equivalents,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PremiumsReceivableAtCarryingValue,,"Premiums receivable, net of allowance for credit losses of $460 and $369",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ReinsuranceRecoverablesOnPaidAndUnpaidLosses,,Reinsurance recoverables,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PrepaidReinsurancePremiums,,Prepaid reinsurance premiums,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_DeferredPolicyAcquisitionCosts,Deferred acquisition costs,Deferred Policy Acquisition Costs,Deferred Policy Acquisition Costs
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+PGR,0000080661-25-000007,2024-12-31,pgr_DeferredTaxAssetsFederalTax,,Net federal deferred income taxes,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_OtherAssets,,Other assets,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+PGR,0000080661-25-000007,2024-12-31,us-gaap_UnearnedPremiums,,Unearned premiums,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_LiabilityForClaimsAndClaimsAdjustmentExpense,Loss and loss adjustment expense reserves,Reserves for Claims,Reserves for Claims
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AccountsPayableAndAccruedLiabilitiesCurrentAndNoncurrent,,"Accounts payable, accrued expenses, and other liabilities",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_DebtLongtermAndShorttermCombinedAmount,,Debt,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PreferredStockValueOutstanding,,"Serial Preferred Shares, Series B, no par value (cumulative, liquidation preference of $1,000 per share) (authorized, issued, and outstanding 0 and 0.5)",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_CommonStockValueOutstanding,,"Common shares, $1.00 par value (authorized 900; issued 798, including treasury shares of 212 and 213)",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Paid-in capital,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax,,Net unrealized gains (losses) on fixed-maturity securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AociLossCashFlowHedgeCumulativeGainLossAfterTax,,Net unrealized losses on forecasted transactions,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax,,Foreign currency translation adjustment,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+PGR,0000080661-25-000007,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+PGR,0000080661-25-000007,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+MET,0001099219-25-000044,2024-12-31,us-gaap_AvailableForSaleSecuritiesDebtSecurities,,"Fixed maturity securities available-for-sale, at estimated fair value (net of allowance for credit loss of $160 and $184, respectively); and amortized cost: $307,421 and $300,555, respectively",
+MET,0001099219-25-000044,2024-12-31,us-gaap_EquitySecuritiesFvNiCurrentAndNoncurrent,,"Equity securities, at estimated fair value",
+MET,0001099219-25-000044,2024-12-31,met_ContractholderDirectedEquitySecuritiesAndFairValueOptionSecuritiesAtEstimatedFairValue,,"Contractholder-directed equity securities and fair value option securities, at estimated fair value",
+MET,0001099219-25-000044,2024-12-31,us-gaap_MortgageLoansOnRealEstateCommercialAndConsumerNet,,"Mortgage loans (net of allowance for credit loss of $800 and $721, respectively)",
+MET,0001099219-25-000044,2024-12-31,us-gaap_LoansInsurancePolicy,,Policy loans,
+MET,0001099219-25-000044,2024-12-31,us-gaap_RealEstateInvestments,,"Real estate and real estate joint ventures (includes $378 and $317, respectively, under the fair value option; $65 and $0, respectively, of real estate held-for-sale; $183 and $0, respectively, relating to variable interest entities)",
+MET,0001099219-25-000044,2024-12-31,met_OtherLimitedPartnershipInterests,,Other limited partnership interests,
+MET,0001099219-25-000044,2024-12-31,us-gaap_ShortTermInvestments,,"Short-term investments, principally at estimated fair value",
+MET,0001099219-25-000044,2024-12-31,us-gaap_OtherInvestments,,"Other invested assets (net of allowance for credit loss of $0 and $23, respectively; includes $1,851 and $1,993, respectively, of leveraged and direct financing leases; $424 and $333, respectively, relating to variable interest entities)",
+MET,0001099219-25-000044,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+MET,0001099219-25-000044,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+MET,0001099219-25-000044,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PremiumsAndOtherReceivablesNet,,"Premiums, reinsurance and other receivables (includes $47 and $0, respectively, relating to variable interest entities)",
+MET,0001099219-25-000044,2024-12-31,us-gaap_MarketRiskBenefitAssetAmount,,"Market risk benefits, at estimated fair value",
+MET,0001099219-25-000044,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostsAndValueOfBusinessAcquired,,Deferred policy acquisition costs and value of business acquired,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncomeTaxReceivable,,Current income tax recoverable,
+MET,0001099219-25-000044,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,Deferred income tax asset,
+MET,0001099219-25-000044,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+MET,0001099219-25-000044,2024-12-31,us-gaap_OtherAssets,,Other assets,
+MET,0001099219-25-000044,2024-12-31,us-gaap_SeparateAccountAssets,,Separate account assets,
+MET,0001099219-25-000044,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+MET,0001099219-25-000044,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefits,,Future policy benefits,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PolicyholderContractDeposits,,Policyholder account balances,
+MET,0001099219-25-000044,2024-12-31,us-gaap_MarketRiskBenefitLiabilityAmount,,"Market risk benefits, at estimated fair value",
+MET,0001099219-25-000044,2024-12-31,met_OtherPolicyRelatedBalances,,Other policy-related balances,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PolicyholderDividendsPayable,,Policyholder dividends payable,
+MET,0001099219-25-000044,2024-12-31,met_PayablesForCollateralUnderSecuritiesLoanedAndOtherTransactions,,Payables for collateral under securities loaned and other transactions,
+MET,0001099219-25-000044,2024-12-31,us-gaap_ShortTermBorrowings,shortTermDebt,shortTermDebt,shortTermDebt
+MET,0001099219-25-000044,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities,,Long-term debt,
+MET,0001099219-25-000044,2024-12-31,us-gaap_SecuredDebt,,Collateral financing arrangement,
+MET,0001099219-25-000044,2024-12-31,us-gaap_JuniorSubordinatedNotes,,Junior subordinated debt securities,
+MET,0001099219-25-000044,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred income tax liability,
+MET,0001099219-25-000044,2024-12-31,us-gaap_OtherLiabilities,,Other liabilities,
+MET,0001099219-25-000044,2024-12-31,us-gaap_SeparateAccountsLiability,,Separate account liabilities,
+MET,0001099219-25-000044,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+MET,0001099219-25-000044,2024-12-31,us-gaap_CommitmentsAndContingencies,,"Contingencies, Commitments and Guarantees (Note 24)",
+MET,0001099219-25-000044,2024-12-31,us-gaap_PreferredStockValue,,"Preferred stock, par value $0.01 per share; $3,905 aggregate liquidation preference",
+MET,0001099219-25-000044,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+MET,0001099219-25-000044,2024-12-31,us-gaap_AdditionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital
+MET,0001099219-25-000044,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+MET,0001099219-25-000044,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+MET,0001099219-25-000044,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+MET,0001099219-25-000044,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+MET,0001099219-25-000044,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+MET,0001099219-25-000044,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+MET,0001099219-25-000044,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+PRU,0001137774-25-000044,2024-12-31,us-gaap_AvailableForSaleSecuritiesDebtSecurities,,"Fixed maturities, available-for-sale, at fair value (allowance for credit losses: 2024-$331; 2023-$160) (amortized cost: 2024-$341,004; 2023-$334,598)",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_TradingSecuritiesDebt,,"Fixed maturities, trading, at fair value (amortized cost: 2024-$13,631; 2023-$10,624)",
+PRU,0001137774-25-000044,2024-12-31,pru_Assetssupportingexperienceratedcontractholderliabilitiesatfairvalue,,"Assets supporting experience-rated contractholder liabilities, at fair value",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_EquitySecuritiesFvNi,,"Equity securities, at fair value (cost: 2024-$7,043; 2023-$5,786)",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_NotesReceivableNet,,Total net loans,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PolicyLoansReceivable,,Policy loans,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_OtherInvestments,,"Other invested assets (net of $2 and $1 allowance for credit losses; includes $7,573 and $6,074 of assets measured at fair value at December 31, 2024 and 2023, respectively)",
+PRU,0001137774-25-000044,2024-12-31,pru_ShortTermInvestmentsExcludingDebtSecuritiesTrading,,Short-term investments (net of allowance for credit losses: 2024-$0; 2023-$0),
+PRU,0001137774-25-000044,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+PRU,0001137774-25-000044,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+PRU,0001137774-25-000044,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_DeferredPolicyAcquisitionCosts,Deferred policy acquisition cost,Deferred Policy Acquisition Costs,Deferred Policy Acquisition Costs
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ValueOfBusinessAcquiredVOBA,,Value of business acquired,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_MarketRiskBenefitAssetAmount,,Market risk benefit assets,
+PRU,0001137774-25-000044,2024-12-31,pru_ReinsuranceRecoverableAndDepositReceivablesIncludingReinsurancePremiumPaid,,"Reinsurance recoverables and deposit receivables (net of $12 and $12 allowance for credit losses; includes $849 and $149 of embedded derivatives at fair value at December 31, 2024 and 2023, respectively)",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,Income Tax Assets,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_OtherAssets,,"Other assets (net of $2 and $3 allowance for credit losses; includes $0 and $11 of assets at fair value at December 31, 2024 and 2023, respectively)",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_SeparateAccountAssets,,Separate account assets,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+PRU,0001137774-25-000044,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefits,,Future policy benefits,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PolicyholderContractDeposits,,Policyholders' account balances,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_MarketRiskBenefitLiabilityAmount,,Market risk benefit liabilities,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PolicyholderDividendsPayable,,Policyholder's dividends,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_SecuritiesSoldUnderAgreementsToRepurchase,,Securities sold under agreements to repurchase,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ObligationToReturnSecuritiesReceivedAsCollateral,,Cash collateral for loaned securities,
+PRU,0001137774-25-000044,2024-12-31,pru_ReinsurancePayableAndFundsWithheldPayable,,"Reinsurance and funds withheld payables (includes $(118) and $490 of embedded derivatives at fair value at December 31, 2024 and 2023, respectively)",
+PRU,0001137774-25-000044,2024-12-31,pru_DebtCurrentExcludingSecuritiesSold,,Short-term debt,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_LongTermDebtNoncurrent,longTermDebt,longTermDebt,longTermDebt
+PRU,0001137774-25-000044,2024-12-31,us-gaap_OtherLiabilities,,"Other liabilities (includes $14 and $15 allowance for credit losses and $4,751 and $4,175 of derivatives at fair value at December 31, 2024 and 2023, respectively)",
+PRU,0001137774-25-000044,2024-12-31,pru_NotesIssuedByConsolidatedVariableInterestEntities,,"Notes issued by consolidated variable interest entities (includes $60 and $778 measured at fair value under the fair value option at December 31, 2024 and 2023, respectively)",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_SeparateAccountsLiability,,Separate account liabilities,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+PRU,0001137774-25-000044,2024-12-31,us-gaap_CommitmentsAndContingencies,,COMMITMENTS AND CONTINGENT LIABILITIES,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_RedeemableNoncontrollingInterestEquityCarryingAmount,,Redeemable noncontrolling interests,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_TemporaryEquityCarryingAmountIncludingPortionAttributableToNoncontrollingInterests,,Total mezzanine equity,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PreferredStockValue,,"Preferred Stock ($0.01 par value; 10,000,000 shares authorized; none issued)",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+PRU,0001137774-25-000044,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Additional paid-in capital,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+PRU,0001137774-25-000044,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+PRU,0001137774-25-000044,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+PRU,0001137774-25-000044,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+PRU,0001137774-25-000044,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+PRU,0001137774-25-000044,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+AFL,0000004977-25-000047,2024-12-31,srt_ConsolidatedEntityExcludingVariableInterestEntitiesVIEMember,,Consolidated Entity Excluding Variable Interest Entities (VIE),
+AFL,0000004977-25-000047,2024-12-31,us-gaap_VariableInterestEntityPrimaryBeneficiaryMember,,"Variable Interest Entity, Consolidated",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AvailableForSaleSecuritiesDebtSecurities,,"Fixed maturity securities, available-for-sale",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_DebtSecuritiesHeldToMaturityAmortizedCostAfterAllowanceForCreditLoss,,"Fixed maturity securities, held-to-maturity",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_EquitySecuritiesFvNiCurrentAndNoncurrent,,Equity securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NotesReceivableNet,,Commercial mortgage and other loans,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OtherInvestments,,Other investments,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+AFL,0000004977-25-000047,2024-12-31,us-gaap_InvestmentsAndCash,,Total investments and cash,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PremiumsAndOtherReceivablesNet,,Receivables,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_DeferredPolicyAcquisitionCosts,Deferred policy acquisition costs,Deferred Policy Acquisition Costs,Deferred Policy Acquisition Costs
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OtherAssets,,Other,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+AFL,0000004977-25-000047,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefits,,Future policy benefits,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_LiabilityForUnpaidClaimsAndClaimsAdjustmentExpenseNet,,Unpaid policy claims,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_UnearnedPremiums,,Unearned premiums,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OtherPolicyholderFunds,,Other policyholders’ funds,
+AFL,0000004977-25-000047,2024-12-31,afl_TotalPolicyLiabilities,,Total policy liabilities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_TaxesPayableCurrentAndNoncurrent,,Income taxes,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ObligationToReturnSecuritiesReceivedAsCollateral,,Payables for return of cash collateral on loaned securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_DebtAndCapitalLeaseObligations,,Notes payable and lease obligations,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OtherLiabilities,,Other,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CommitmentsAndContingencies,,Commitments and contingent liabilities (Note 15),
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Additional paid-in capital,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax,,Unrealized foreign currency translation gains (losses),
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax,,Unrealized gains (losses) on fixed maturity securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AociLossCashFlowHedgeCumulativeGainLossAfterTax,,Unrealized gains (losses) on derivatives,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AociLiabilityForFuturePolicyBenefitAfterTax,,Effect of changes in discount rate assumptions,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossDefinedBenefitPensionAndOtherPostretirementPlansNetOfTax,,Pension liability adjustment,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+AFL,0000004977-25-000047,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+AFL,0000004977-25-000047,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherShortTermInvestments,,"Short-term investments, at fair value (amortized cost – $5,143 and $4,551) (includes variable interest entities (VIE) balances of $57 and $217)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_AvailableForSaleSecuritiesDebtSecurities,,"Fixed maturities available-for-sale, at fair value, net of valuation allowance – $70 and $156 (amortized cost – $115,083 and $111,128)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLoss,,"Private debt held-for-investment, at amortized cost, net of valuation allowance – $4 and $4",
+CB,0000896159-25-000004,2024-12-31,us-gaap_EquitySecuritiesFvNi,,"Equity securities, at fair value (includes VIE balances of $1,289 and $1,078)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_AlternativeInvestment,,Private equities (includes VIE balances of $22 and $21),
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherLongTermInvestments,,"Other investments (includes VIE balances of $4,538 and $3,773)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+CB,0000896159-25-000004,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+CB,0000896159-25-000004,2024-12-31,cb_Securitieslendingcollateral,,Securities lending collateral,
+CB,0000896159-25-000004,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PremiumsReceivableAtCarryingValue,,"Insurance and reinsurance balances receivable, net of valuation allowance – $59 and $53",
+CB,0000896159-25-000004,2024-12-31,us-gaap_ReinsuranceRecoverablesOnPaidAndUnpaidLosses,,"Reinsurance recoverable on losses and loss expenses, net of valuation allowance – $310 and $367",
+CB,0000896159-25-000004,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefitReinsuranceRecoverableAfterAllowance,,Reinsurance recoverable on policy benefits,
+CB,0000896159-25-000004,2024-12-31,us-gaap_DeferredPolicyAcquisitionCosts,Deferred policy acquisition costs,Deferred Policy Acquisition Costs,Deferred Policy Acquisition Costs
+CB,0000896159-25-000004,2024-12-31,us-gaap_ValueOfBusinessAcquiredVOBA,,Value of business acquired,
+CB,0000896159-25-000004,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+CB,0000896159-25-000004,2024-12-31,us-gaap_IntangibleAssetsNetExcludingGoodwill,intangibleAssets,intangibleAssets,intangibleAssets
+CB,0000896159-25-000004,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,Deferred tax assets,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PrepaidReinsurancePremiums,,Prepaid reinsurance premiums,
+CB,0000896159-25-000004,2024-12-31,us-gaap_SeparateAccountAssets,,Separate account assets,
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherAssets,,Other assets (includes VIE balances of $26 and $33),
+CB,0000896159-25-000004,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+CB,0000896159-25-000004,2024-12-31,us-gaap_LiabilityForClaimsAndClaimsAdjustmentExpense,Unpaid losses and loss expenses,Reserves for Claims,Reserves for Claims
+CB,0000896159-25-000004,2024-12-31,us-gaap_UnearnedPremiums,,Unearned premiums,
+CB,0000896159-25-000004,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefits,,Future policy benefits,
+CB,0000896159-25-000004,2024-12-31,us-gaap_MarketRiskBenefitLiabilityAmount,,Market risk benefits,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PolicyholderFunds,,Policyholders' account balances,
+CB,0000896159-25-000004,2024-12-31,us-gaap_SeparateAccountsLiability,,Separate account liabilities,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ReinsurancePayable,,Insurance and reinsurance balances payable,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ObligationToReturnSecuritiesReceivedAsCollateral,,Securities lending payable,
+CB,0000896159-25-000004,2024-12-31,us-gaap_AccountsPayableAndAccruedLiabilitiesCurrentAndNoncurrent,,"Accounts payable, accrued expenses, and other liabilities (includes VIE balances of $183 and $18)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred tax liabilities,
+CB,0000896159-25-000004,2024-12-31,us-gaap_SecuredDebtRepurchaseAgreements,,"Repurchase agreements (includes VIE balances of $815 and $1,009)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_ShortTermBorrowings,shortTermDebt,shortTermDebt,shortTermDebt
+CB,0000896159-25-000004,2024-12-31,us-gaap_LongTermDebt,,Long-term debt,
+CB,0000896159-25-000004,2024-12-31,us-gaap_OtherBorrowings,,Hybrid debt,
+CB,0000896159-25-000004,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+CB,0000896159-25-000004,2024-12-31,us-gaap_CommitmentsAndContingencies,,Commitments and contingencies (refer to Note 14),
+CB,0000896159-25-000004,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+CB,0000896159-25-000004,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+CB,0000896159-25-000004,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Additional paid-in capital,
+CB,0000896159-25-000004,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+CB,0000896159-25-000004,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+CB,0000896159-25-000004,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+CB,0000896159-25-000004,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+CB,0000896159-25-000004,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total shareholders’ equity,
+CB,0000896159-25-000004,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+HIG,0000874766-25-000023,2024-12-31,us-gaap_AvailableForSaleSecuritiesDebtSecurities,,"Fixed maturities, AFS, at fair value (amortized cost of $44,538 and $41,726, and ACL of $16 and $21)",
+HIG,0000874766-25-000023,2024-12-31,hig_FairValueOptionFixedMaturitySecurities,,"Fixed maturities, at fair value using the fair value option (""FVO Securities"")",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_EquitySecuritiesFvNi,,"Equity securities, at fair value",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NotesReceivableNet,,"Financing Receivable, after Allowance for Credit Loss",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_AlternativeInvestment,,Limited partnerships and other alternative investments,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_OtherInvestments,,Other investments,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_OtherShortTermInvestments,,Short-term investments,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+HIG,0000874766-25-000023,2024-12-31,us-gaap_Cash,,Cash,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_RestrictedCash,,Restricted Cash,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued Investment Income Receivable,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PremiumsReceivableAtCarryingValue,,Premiums receivable and agents' balances (net of ACL of $117 and $109),
+HIG,0000874766-25-000023,2024-12-31,us-gaap_ReinsuranceRecoverables,,Reinsurance recoverables (net of allowance for uncollectible reinsurance of $75 and $103),
+HIG,0000874766-25-000023,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostsAndValueOfBusinessAcquired,,Deferred policy acquisition costs,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,"Deferred income taxes, net",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+HIG,0000874766-25-000023,2024-12-31,us-gaap_OtherIntangibleAssetsNet,,"Other intangible assets, net",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_OtherAssets,,Other assets,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+HIG,0000874766-25-000023,2024-12-31,us-gaap_LiabilityForClaimsAndClaimsAdjustmentExpense,Unpaid losses and loss adjustment expenses,Reserves for Claims,Reserves for Claims
+HIG,0000874766-25-000023,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefits,,"Liability for Future Policy Benefit, before Reinsurance",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PolicyholderFunds,,Policyholder Account Balance,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_UnearnedPremiums,,Unearned premiums,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_LongTermDebt,,Long-term debt,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_OtherLiabilities,,Other liabilities,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PreferredStockValueOutstanding,,"Preferred stock, $0.01 par value — 50,000,000 shares authorized, 13,800 shares issued at December 31, 2024 and December 31, 2023, aggregate liquidation preference of $345",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+HIG,0000874766-25-000023,2024-12-31,us-gaap_AdditionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital
+HIG,0000874766-25-000023,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+HIG,0000874766-25-000023,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+HIG,0000874766-25-000023,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+HIG,0000874766-25-000023,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+HIG,0000874766-25-000023,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+LNC,0000059558-25-000023,2024-12-31,us-gaap_SeriesCPreferredStockMember,,Series C Preferred Stock,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_SeriesDPreferredStockMember,,Series D Preferred Stock,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_DebtSecuritiesAvailableForSaleExcludingAccruedInterest,,"Fixed maturity available-for-sale securities, at fair value",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_TradingSecuritiesDebt,,Trading securities,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_EquitySecuritiesFvNi,,Equity securities,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLoss,,"Mortgage loans on real estate, net of allowance for credit losses",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_LoansInsurancePolicy,,Policy loans,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_DerivativeAssets,,Derivative investments,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherInvestments,,Other investments,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_Investments,Total investments,Total Investments,Total Investments
+LNC,0000059558-25-000023,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+LNC,0000059558-25-000023,2024-12-31,lnc_DeferredPolicyAcquisitionCostsValueOfBusinessAcquiredAndDeferredSalesInducements,,"Deferred acquisition costs, value of business acquired and deferred sales inducements",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ReinsuranceRecoverables,,"Reinsurance recoverables, net of allowance for credit losses",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_DepositAssets,,"Deposit assets, net of allowance for credit losses",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_MarketRiskBenefitAssetAmount,,Market risk benefit assets,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_AccruedInvestmentIncomeReceivable,,Accrued investment income,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherAssets,,Other assets,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_SeparateAccountAssets,,Separate account assets,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PolicyholderFunds,,Policyholder account balances,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_LiabilityForFuturePolicyBenefitsAndUnpaidClaimsAndClaimsAdjustmentExpense,,Future contract benefits,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_FundsHeldUnderReinsuranceAgreementsLiability,,Funds withheld reinsurance liabilities,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_MarketRiskBenefitLiabilityAmount,,Market risk benefit liabilities,
+LNC,0000059558-25-000023,2024-12-31,lnc_DeferredFrontEndLoads,,Deferred front-end loads,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_DepositsReceivedForSecuritiesLoanedAtCarryingValue,,Payables for collateral on investments,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_DebtCurrent,,Short-term debt,
+LNC,0000059558-25-000023,2024-12-31,lnc_LongTermDebtAndFairValueHedges,,Long-term debt,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherLiabilities,,Other liabilities,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_SeparateAccountsLiability,,Separate account liabilities,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+LNC,0000059558-25-000023,2024-12-31,us-gaap_CommitmentsAndContingencies,,Contingencies and Commitments (See Note 17),
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PreferredStockValueOutstanding,,Preferred stock,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_CommonStockValueOutstanding,,Common stock,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+LNC,0000059558-25-000023,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+LNC,0000059558-25-000023,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+LNC,0000059558-25-000023,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity

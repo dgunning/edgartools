@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "generated": "2025-12-29T11:24:41.333879",
+    "companies_analyzed": 74,
+    "min_occurrence_rate": 5.0,
+    "source": "edgar.entity.training.run_learning"
+  },
+  "mappings": {}
+}

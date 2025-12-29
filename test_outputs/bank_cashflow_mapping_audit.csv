@@ -1,0 +1,725 @@
+ticker,accession,period_end,concept,original_label,mapped_label,standard_label
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Europe/Middle East/Africa,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Asia-Pacific,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Latin America/Caribbean,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Total international,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,North America,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer & Community Banking,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Commercial & Investment Bank,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Asset & Wealth Management,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,Corporate,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment",netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,netIncome
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Retained earnings
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Europe/Middle East/Africa
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Asia-Pacific
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Latin America/Caribbean
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Total international
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,North America
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Operating Segments - Consumer & Community Banking
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Operating Segments - Commercial & Investment Bank
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Operating Segments - Asset & Wealth Management
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,Corporate
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,"Segment Reporting, Reconciling Item, Excluding Corporate Nonsegment"
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetIncomeLoss,JPMorgan Chase & Co.,netIncome,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,deferredIncomeTax
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,JPMorgan Chase & Co.,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,JPMorgan Chase & Co.,netCashProvidedByOperatingActivities,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsToAcquireBusinessesNetOfCashAcquired,acquisitionsNet,acquisitionsNet,acquisitionsNet
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,JPMorgan Chase & Co.,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,JPMorgan Chase & Co.,netCashProvidedByInvestingActivities,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,JPMorgan Chase & Co.,commonStockRepurchased,commonStockRepurchased
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,JPMorgan Chase & Co.,commonStockRepurchased,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,commonDividendsPaid
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsOfDividends,JPMorgan Chase & Co.,commonDividendsPaid,commonDividendsPaid
+JPM,0000019617-25-000270,2024-12-31,us-gaap_PaymentsOfDividends,JPMorgan Chase & Co.,commonDividendsPaid,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,JPMorgan Chase & Co.
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,JPMorgan Chase & Co.,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+JPM,0000019617-25-000270,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,JPMorgan Chase & Co.,netCashProvidedByFinancingActivities,JPMorgan Chase & Co.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Retained Earnings,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Bank of America Corporation,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Consumer Banking,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Wealth & Investment Management,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Banking,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Operating Segments - Global Markets,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,All Other,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,U.S.,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,"Europe, Middle East and Africa",netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Latin America and the Caribbean,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,netIncome
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Retained Earnings
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Operating Segments - Consumer Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Operating Segments - Global Wealth & Investment Management
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Operating Segments - Global Banking
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Operating Segments - Global Markets
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,All Other
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Asia
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,"Europe, Middle East and Africa"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Latin America and the Caribbean
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetIncomeLoss,Non-U.S.,netIncome,Non-U.S.
+BAC,0000070858-25-000139,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+BAC,0000070858-25-000139,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,deferredIncomeTax
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ShareBasedCompensation,stockBasedCompensation,stockBasedCompensation,stockBasedCompensation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Bank of America Corporation,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Bank of America Corporation,netCashProvidedByOperatingActivities,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Bank of America Corporation,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Bank of America Corporation,netCashProvidedByInvestingActivities,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,Bank of America Corporation - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,Subsidiaries - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Long-Term Debt Notes,netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Long-Term Debt Notes,netDebtIssuance,Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Long-Term Debt Notes,netDebtIssuance,Bank of America Corporation - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Long-Term Debt Notes,netDebtIssuance,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Long-Term Debt Notes,netDebtIssuance,Subsidiaries - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Long-Term Debt Notes,netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation - Long-Term Debt Notes,netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation - Long-Term Debt Notes,netDebtIssuance,Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation - Long-Term Debt Notes,netDebtIssuance,Bank of America Corporation - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation - Long-Term Debt Notes,netDebtIssuance,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation - Long-Term Debt Notes,netDebtIssuance,Subsidiaries - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation - Long-Term Debt Notes,netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes",netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes",netDebtIssuance,Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes",netDebtIssuance,Bank of America Corporation - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes",netDebtIssuance,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes",netDebtIssuance,Subsidiaries - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes",netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Subsidiaries - Long-Term Debt Notes,netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Subsidiaries - Long-Term Debt Notes,netDebtIssuance,Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Subsidiaries - Long-Term Debt Notes,netDebtIssuance,Bank of America Corporation - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Subsidiaries - Long-Term Debt Notes,netDebtIssuance,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Subsidiaries - Long-Term Debt Notes,netDebtIssuance,Subsidiaries - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Subsidiaries - Long-Term Debt Notes,netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation,netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation,netDebtIssuance,Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation,netDebtIssuance,Bank of America Corporation - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation,netDebtIssuance,"Bank of America, N.A. - Subsidiaries - Long-Term Debt Notes"
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation,netDebtIssuance,Subsidiaries - Long-Term Debt Notes
+BAC,0000070858-25-000139,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Bank of America Corporation,netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Bank of America Corporation,netDebtIssuance,netDebtIssuance
+BAC,0000070858-25-000139,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Bank of America Corporation,netDebtIssuance,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+BAC,0000070858-25-000139,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Bank of America Corporation,commonStockRepurchased,commonStockRepurchased
+BAC,0000070858-25-000139,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Bank of America Corporation,commonStockRepurchased,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Bank of America Corporation
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Bank of America Corporation,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+BAC,0000070858-25-000139,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Bank of America Corporation,netCashProvidedByFinancingActivities,Bank of America Corporation
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+WFC,0000072971-25-000066,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Parent Company,netDebtIssuance,netDebtIssuance
+WFC,0000072971-25-000066,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Parent Company,netDebtIssuance,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+WFC,0000072971-25-000066,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,commonStockRepurchased
+WFC,0000072971-25-000066,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Parent Company
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+WFC,0000072971-25-000066,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,Parent Company
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,CGMHI - Reportable legal entities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,Citigroup Inc.,netIncome,netIncome
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,Citigroup Inc.,netIncome,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,Citigroup Inc.,netIncome,CGMHI - Reportable legal entities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,CGMHI - Reportable legal entities,netIncome,netIncome
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,CGMHI - Reportable legal entities,netIncome,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_NetIncomeLoss,CGMHI - Reportable legal entities,netIncome,CGMHI - Reportable legal entities
+C,0000831001-25-000067,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,deferredIncomeTax
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Citigroup Inc.,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Citigroup Inc.,netCashProvidedByOperatingActivities,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,capitalExpenditure,capitalExpenditure,capitalExpenditure
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Citigroup Inc.,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Citigroup Inc.,netCashProvidedByInvestingActivities,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,commonDividendsPaid
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsOfDividends,Citigroup Inc.,commonDividendsPaid,commonDividendsPaid
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsOfDividends,Citigroup Inc.,commonDividendsPaid,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Citigroup Inc.,commonStockRepurchased,commonStockRepurchased
+C,0000831001-25-000067,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Citigroup Inc.,commonStockRepurchased,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Citigroup Inc.
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Citigroup Inc.,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+C,0000831001-25-000067,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Citigroup Inc.,netCashProvidedByFinancingActivities,Citigroup Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Retained earnings,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Platform Solutions,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Global Banking & Markets,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asset & Wealth Management,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Americas,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,EMEA,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Asia,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,netIncome
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,Retained earnings
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,Platform Solutions
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,Global Banking & Markets
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,Asset & Wealth Management
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,Americas
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,EMEA
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,Asia
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetIncomeLoss,Group Inc.,netIncome,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,deferredIncomeTax
+GS,0000886982-25-000005,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,Group Inc.,deferredIncomeTax,deferredIncomeTax
+GS,0000886982-25-000005,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,Group Inc.,deferredIncomeTax,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_ShareBasedCompensation,stockBasedCompensation,stockBasedCompensation,stockBasedCompensation
+GS,0000886982-25-000005,2024-12-31,us-gaap_ShareBasedCompensation,stockBasedCompensation,stockBasedCompensation,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_ShareBasedCompensation,Group Inc.,stockBasedCompensation,stockBasedCompensation
+GS,0000886982-25-000005,2024-12-31,us-gaap_ShareBasedCompensation,Group Inc.,stockBasedCompensation,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Group Inc.,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Group Inc.,netCashProvidedByOperatingActivities,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,capitalExpenditure,capitalExpenditure,capitalExpenditure
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,capitalExpenditure,capitalExpenditure,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,Group Inc.,capitalExpenditure,capitalExpenditure
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,Group Inc.,capitalExpenditure,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Group Inc.,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Group Inc.,netCashProvidedByInvestingActivities,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Group Inc.,commonStockRepurchased,commonStockRepurchased
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Group Inc.,commonStockRepurchased,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,commonDividendsPaid
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsOfDividends,Group Inc.,commonDividendsPaid,commonDividendsPaid
+GS,0000886982-25-000005,2024-12-31,us-gaap_PaymentsOfDividends,Group Inc.,commonDividendsPaid,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Group Inc.
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Group Inc.,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+GS,0000886982-25-000005,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Group Inc.,netCashProvidedByFinancingActivities,Group Inc.
+MS,0000895421-25-000304,2024-12-31,us-gaap_ShareBasedCompensation,stockBasedCompensation,stockBasedCompensation,stockBasedCompensation
+MS,0000895421-25-000304,2024-12-31,us-gaap_IncreaseDecreaseInAccountsPayable,accountsPayables,accountsPayables,accountsPayables
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Parent Company
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,Parent Company
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Parent Company
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,Parent Company
+MS,0000895421-25-000304,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,commonDividendsPaid
+MS,0000895421-25-000304,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,Parent Company
+MS,0000895421-25-000304,2024-12-31,us-gaap_PaymentsOfDividends,Parent Company,commonDividendsPaid,commonDividendsPaid
+MS,0000895421-25-000304,2024-12-31,us-gaap_PaymentsOfDividends,Parent Company,commonDividendsPaid,Parent Company
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Parent Company
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+MS,0000895421-25-000304,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,"Wealth, Corporate, Commercial and Institutional Banking"
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Consumer and Business Banking
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Payment Services
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Treasury and Corporate Support
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,"Wealth, Corporate, Commercial and Institutional Banking",netIncome,netIncome
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,"Wealth, Corporate, Commercial and Institutional Banking",netIncome,"Wealth, Corporate, Commercial and Institutional Banking"
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,"Wealth, Corporate, Commercial and Institutional Banking",netIncome,Consumer and Business Banking
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,"Wealth, Corporate, Commercial and Institutional Banking",netIncome,Payment Services
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,"Wealth, Corporate, Commercial and Institutional Banking",netIncome,Treasury and Corporate Support
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,"Wealth, Corporate, Commercial and Institutional Banking",netIncome,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Consumer and Business Banking,netIncome,netIncome
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Consumer and Business Banking,netIncome,"Wealth, Corporate, Commercial and Institutional Banking"
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Consumer and Business Banking,netIncome,Consumer and Business Banking
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Consumer and Business Banking,netIncome,Payment Services
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Consumer and Business Banking,netIncome,Treasury and Corporate Support
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Consumer and Business Banking,netIncome,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Payment Services,netIncome,netIncome
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Payment Services,netIncome,"Wealth, Corporate, Commercial and Institutional Banking"
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Payment Services,netIncome,Consumer and Business Banking
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Payment Services,netIncome,Payment Services
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Payment Services,netIncome,Treasury and Corporate Support
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Payment Services,netIncome,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Treasury and Corporate Support,netIncome,netIncome
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Treasury and Corporate Support,netIncome,"Wealth, Corporate, Commercial and Institutional Banking"
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Treasury and Corporate Support,netIncome,Consumer and Business Banking
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Treasury and Corporate Support,netIncome,Payment Services
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Treasury and Corporate Support,netIncome,Treasury and Corporate Support
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Treasury and Corporate Support,netIncome,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,netIncome
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,"Wealth, Corporate, Commercial and Institutional Banking"
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,Consumer and Business Banking
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,Payment Services
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,Treasury and Corporate Support
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Parent Company,netDebtIssuance,netDebtIssuance
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Parent Company,netDebtIssuance,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+USB,0000036104-25-000016,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Parent Company,netDebtIssuance,netDebtIssuance
+USB,0000036104-25-000016,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Parent Company,netDebtIssuance,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,commonStockIssuance,commonStockIssuance,commonStockIssuance
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,commonStockIssuance,commonStockIssuance,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,Parent Company,commonStockIssuance,commonStockIssuance
+USB,0000036104-25-000016,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,Parent Company,commonStockIssuance,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+USB,0000036104-25-000016,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,commonStockRepurchased
+USB,0000036104-25-000016,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Parent Company
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+USB,0000036104-25-000016,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,deferredIncomeTax
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+PNC,0000713676-25-000027,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,commonStockRepurchased
+PNC,0000713676-25-000027,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Parent Company
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+PNC,0000713676-25-000027,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,Parent Company
+TFC,0000092230-25-000020,2025-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+TFC,0000092230-25-000020,2025-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+TFC,0000092230-25-000020,2025-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+TFC,0000092230-25-000020,2025-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+TFC,0000092230-25-000020,2025-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+TFC,0000092230-25-000020,2025-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,netIncome
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetIncomeLoss,Parent Company,netIncome,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_DeferredIncomeTaxExpenseBenefit,deferredIncomeTax,deferredIncomeTax,deferredIncomeTax
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,Parent Company,netCashProvidedByOperatingActivities,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,capitalExpenditure,capitalExpenditure,capitalExpenditure
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,Parent Company,netCashProvidedByInvestingActivities,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Parent Company,netDebtIssuance,netDebtIssuance
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,Parent Company,netDebtIssuance,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+BK,0001390777-25-000046,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Parent Company,netDebtIssuance,netDebtIssuance
+BK,0001390777-25-000046,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,Parent Company,netDebtIssuance,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,commonStockIssuance,commonStockIssuance,commonStockIssuance
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,commonStockIssuance,commonStockIssuance,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,Parent Company,commonStockIssuance,commonStockIssuance
+BK,0001390777-25-000046,2024-12-31,us-gaap_ProceedsFromIssuanceOfCommonStock,Parent Company,commonStockIssuance,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+BK,0001390777-25-000046,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,commonStockRepurchased
+BK,0001390777-25-000046,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,Parent Company,commonStockRepurchased,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+BK,0001390777-25-000046,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,Parent Company,netCashProvidedByFinancingActivities,Parent Company
+BK,0001390777-25-000046,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod

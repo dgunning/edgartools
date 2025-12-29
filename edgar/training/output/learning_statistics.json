@@ -1,0 +1,1372 @@
+{
+  "metadata": {
+    "generated": "2025-12-29T11:24:41.675039",
+    "min_occurrence_rate": 5.0
+  },
+  "data_summary": {
+    "companies_processed": 100,
+    "companies_successful": 74,
+    "companies_failed": 26,
+    "success_rate": 0.74,
+    "total_observations": 26700,
+    "avg_processing_time_ms": 3668.5873972226495,
+    "total_processing_time_s": 267.8068799972534
+  },
+  "failure_analysis": {
+    "by_reason": {
+      "no_10k_filings": {
+        "count": 23,
+        "tickers": [
+          "NOA",
+          "WIA",
+          "MUA",
+          "FFA",
+          "VALE",
+          "BORR",
+          "DIA",
+          "WIT",
+          "NRO",
+          "GUT",
+          "ITUB",
+          "ERC",
+          "XRP",
+          "BIRK",
+          "VOYG",
+          "EFT",
+          "INDO",
+          "RLX",
+          "DPG",
+          "EGO"
+        ]
+      },
+      "no_xbrl_data": {
+        "count": 3,
+        "tickers": [
+          "JBK",
+          "VG",
+          "BNKD"
+        ]
+      }
+    },
+    "total_failures": 26
+  },
+  "concept_counts": {
+    "total_unique_concepts": 2697,
+    "standard_concepts": 1519,
+    "custom_concepts": 1178,
+    "custom_rate": 0.4367816091954023,
+    "canonical_concepts": 0,
+    "canonical_rate": 0.0,
+    "filtered_out": 2697,
+    "filtered_rate": 1.0
+  },
+  "per_company_stats": {
+    "concepts": {
+      "min": 46,
+      "max": 242,
+      "mean": 155.23287671232876,
+      "median": 153,
+      "stdev": 35.68088522971726
+    },
+    "custom_concepts": {
+      "min": 2,
+      "max": 69,
+      "mean": 18.246575342465754,
+      "median": 13
+    },
+    "coverage": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0
+    }
+  },
+  "by_statement": {
+    "BalanceSheet": {
+      "total_concepts": 654,
+      "canonical_concepts": 0,
+      "canonical_rate": 0.0
+    },
+    "IncomeStatement": {
+      "total_concepts": 582,
+      "canonical_concepts": 0,
+      "canonical_rate": 0.0
+    },
+    "CashFlowStatement": {
+      "total_concepts": 1156,
+      "canonical_concepts": 0,
+      "canonical_rate": 0.0
+    },
+    "StatementOfEquity": {
+      "total_concepts": 443,
+      "canonical_concepts": 0,
+      "canonical_rate": 0.0
+    },
+    "ComprehensiveIncome": {
+      "total_concepts": 212,
+      "canonical_concepts": 0,
+      "canonical_rate": 0.0
+    }
+  },
+  "custom_concepts_by_company": {
+    "nref": {
+      "count": 62,
+      "examples": [
+        "nref_AccountsAndFinancingReceivableAfterAllowanceForCreditLossValuationAdjustmentDueToDeconsolidationOfRealEstate",
+        "nref_PublicOfferingMember",
+        "nref_AdjustmentToAccountsPayableAndAccruedLiabilitiesOnConsolidationOfRealEstate",
+        "nref_IncreaseInMortgagesPayableInConnectionWithVIEConsolidationFinancingActivities",
+        "nref_StockholdersEquityAttributableToNoncontrollingInterestValuationAdjustmentDueToDeconsolidationOfRealEstate"
+      ]
+    },
+    "rc": {
+      "count": 43,
+      "examples": [
+        "rc_PaymentsOnPaycheckProtectionProgramLiquidityFacility",
+        "rc_LoanParticipationsSold",
+        "rc_DividendsOperatingPartnershipUnitsCash",
+        "rc_AccruedPaidInKindInterest",
+        "rc_IncreaseDecreaseInRepairAndDenialReserve"
+      ]
+    },
+    "so": {
+      "count": 40,
+      "examples": [
+        "so_DeferredChargesAndOtherAssets",
+        "so_ProceedsAbstract",
+        "so_NaturalGasMember",
+        "so_IncreaseDecreaseInNaturalGasCostUnderRecoveryCurrentPortion",
+        "so_PrepaidLongTermServiceAgreement"
+      ]
+    },
+    "h": {
+      "count": 40,
+      "examples": [
+        "h_ProceedsfromShorttermandLongtermDebt",
+        "h_StockIssuedDuringPeriodSharesSharebasedPaymentActivity",
+        "h_NoncashIssuanceOfFinancingReceivables",
+        "h_IncreaseDecreaseInDeferredRevenueRelatedToLoyaltyProgram",
+        "h_DirectAndSellingGeneralAndAdministrativeExpenses"
+      ]
+    },
+    "rpt": {
+      "count": 39,
+      "examples": [
+        "rpt_NoncashUnrealizedGainLossonInvestments",
+        "rpt_RelatedPartyLoanServicingFeeExpense",
+        "rpt_OtherNonCashLoanCharges",
+        "rpt_ShareBasedManagementPaymentArrangementExpenseShares",
+        "rpt_TreasuryStockSharesReceivedThroughDistributionsFromInvestmentInManager"
+      ]
+    },
+    "by": {
+      "count": 39,
+      "examples": [
+        "by_LegalAuditAndOtherProfessionalFees",
+        "by_ATMAndInterchangeFees",
+        "by_LoanAndLeaseRelatedExpenses",
+        "by_WealthManagementAndTrustIncome",
+        "by_TaxCutsAndJobsActOf2017ReclassificationFromAociToRetainedEarnings"
+      ]
+    },
+    "ahr": {
+      "count": 34,
+      "examples": [
+        "ahr_Noncashreclassificationofnoncontrollinginterest",
+        "ahr_ProceedsFromRedeemableNoncontrollingInterest",
+        "ahr_IncreaseDecreaseinSecurityDepositsPrepaidRentOperatingLeaseandOtherOperatingLiabilities",
+        "ahr_CashPaidForAbstract",
+        "ahr_BorrowingUnderFinancingObligation"
+      ]
+    },
+    "psa": {
+      "count": 32,
+      "examples": [
+        "psa_CapitalExpendituresForPropertyEnhancementsRemainingUnpaidAtPeriodEnd",
+        "psa_RetainedEarningsIncludingNoncontrollingInterestMember",
+        "psa_TemporaryEquityNoncontrollingInterestDecreaseFromDistributionsToNoncontrollingInterestHolders",
+        "psa_SelfStorageOperationsMember",
+        "psa_DividendsCommonStockAndRestrictedShareUnits"
+      ]
+    },
+    "sre": {
+      "count": 31,
+      "examples": [
+        "sre_ComprehensiveIncomeLossTaxAttributableToParent",
+        "sre_ReserveForAlisoCanyonCosts",
+        "sre_GreenhouseGasObligationsNoncurrent",
+        "sre_PreferredDividendsPaidBySubsidiariesTaxAttributableToParent",
+        "sre_NetExerciseOfStockOptions"
+      ]
+    },
+    "srt": {
+      "count": 31,
+      "examples": [
+        "srt_StatementGeographicalAxis",
+        "srt_NameOfMajorCustomerDomain",
+        "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember",
+        "srt_StatementScenarioAxis",
+        "srt_RevisionOfPriorPeriodAccountingStandardsUpdateAdjustmentMember"
+      ]
+    },
+    "pcg": {
+      "count": 31,
+      "examples": [
+        "pcg_RepaymentsOfRecoveryBonds",
+        "pcg_SelfInsuranceAssetCurrent",
+        "pcg_StockIssuedDuringPeriodPreferredSharesNewIssuesValue",
+        "pcg_RegulatoryAssetsLiabilitiesAndBalancingAccountsNet",
+        "pcg_LitigationAssetNoncurrent"
+      ]
+    },
+    "mfa": {
+      "count": 30,
+      "examples": [
+        "mfa_TransferFromCommercialLoansToRealEstateOwned",
+        "mfa_AdjustmentsToAdditionalPaidInCapitalChangeInAccruedDividendsAttributableToStockBasedAwards",
+        "mfa_DeconsolidationOfSecuritizedAgencyEligibleInvestorLoansAndRelatedDebt",
+        "mfa_ReversalProvisionForCreditLossesOnResidentialWholeLoans",
+        "mfa_ProvisionForCreditAndValuationLossesOnResidentialWholeLoansAndOtherFinancialInstrumentsAtCarryingValue"
+      ]
+    },
+    "bk": {
+      "count": 30,
+      "examples": [
+        "bk_InterestBearingDepositsInFederalReserveAndOtherCentralBanks",
+        "bk_IncreaseDecreaseInPayableToCustomersAndBrokerDealers",
+        "bk_IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
+        "bk_PreferredStockAmortizationOfDeferredFees",
+        "bk_NoncontrollingInterestInConsolidatedEntityMember"
+      ]
+    },
+    "wfc": {
+      "count": 30,
+      "examples": [
+        "wfc_InterestAndIncomeTaxesPaidNetAndOtherSignificantNoncashTransactionsTable",
+        "wfc_FinancingReceivableAndNetInvestmentInLeaseExcludingAccruedInterestBeforeAllowanceForCreditLoss",
+        "wfc_InterestAndIncomeTaxesPaidNetAndOtherSignificantNoncashTransactionsLineItems",
+        "wfc_FixedInterestRateDebtSecuritiesMember",
+        "wfc_CommonStockAbstract"
+      ]
+    },
+    "insw": {
+      "count": 26,
+      "examples": [
+        "insw_SecurityDepositsForSaleOfVessels",
+        "insw_InvestingAndFinancingActivitiesItemsIncludedInNetIncomeLossAbstract",
+        "insw_TimeAndBareboatCharterLeasesMember",
+        "insw_PaymentsForDrydocking",
+        "insw_ProceedsFromCostsSaleOfPropertyPlantAndEquipment"
+      ]
+    }
+  },
+  "outliers": {
+    "high_concept_count": [
+      {
+        "cik": "0001032208",
+        "ticker": "SREA",
+        "total_concepts": 242,
+        "deviation": 2.431753661072461
+      },
+      {
+        "cik": "0001032208",
+        "ticker": "SRE",
+        "total_concepts": 242,
+        "deviation": 2.431753661072461
+      },
+      {
+        "cik": "0001702750",
+        "ticker": "BY",
+        "total_concepts": 232,
+        "deviation": 2.151491556149364
+      }
+    ],
+    "low_concept_count": [
+      {
+        "cik": "0001222333",
+        "ticker": "GLD",
+        "total_concepts": 46,
+        "deviation": 3.06138359542024
+      }
+    ],
+    "high_custom_rate": [
+      {
+        "cik": "0001786248",
+        "ticker": "NREF",
+        "custom_rate": 0.323943661971831,
+        "custom_concepts": 69
+      }
+    ],
+    "low_coverage": [
+      {
+        "cik": "0001037976",
+        "ticker": "JLL",
+        "coverage_rate": 0.0,
+        "total_concepts": 170
+      },
+      {
+        "cik": "0001393311",
+        "ticker": "PSA-PG",
+        "coverage_rate": 0.0,
+        "total_concepts": 166
+      },
+      {
+        "cik": "0001035983",
+        "ticker": "FIX",
+        "coverage_rate": 0.0,
+        "total_concepts": 133
+      },
+      {
+        "cik": "0001376986",
+        "ticker": "TVC",
+        "coverage_rate": 0.0,
+        "total_concepts": 149
+      },
+      {
+        "cik": "0000896156",
+        "ticker": "ETD",
+        "coverage_rate": 0.0,
+        "total_concepts": 118
+      },
+      {
+        "cik": "0001055160",
+        "ticker": "MFAO",
+        "coverage_rate": 0.0,
+        "total_concepts": 144
+      },
+      {
+        "cik": "0001520006",
+        "ticker": "MTDR",
+        "coverage_rate": 0.0,
+        "total_concepts": 177
+      },
+      {
+        "cik": "0001318220",
+        "ticker": "WCN",
+        "coverage_rate": 0.0,
+        "total_concepts": 169
+      },
+      {
+        "cik": "0001527590",
+        "ticker": "RCB",
+        "coverage_rate": 0.0,
+        "total_concepts": 225
+      },
+      {
+        "cik": "0001032208",
+        "ticker": "SREA",
+        "coverage_rate": 0.0,
+        "total_concepts": 242
+      }
+    ]
+  },
+  "company_details": [
+    {
+      "cik": "0001037976",
+      "ticker": "JLL",
+      "name": "JONES LANG LASALLE INC",
+      "total_concepts": 170,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 22,
+      "custom_rate": 0.12941176470588237,
+      "processing_time_ms": 3950.8166313171387
+    },
+    {
+      "cik": "0001393311",
+      "ticker": "PSA-PG",
+      "name": "Public Storage",
+      "total_concepts": 166,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 34,
+      "custom_rate": 0.20481927710843373,
+      "processing_time_ms": 2899.184226989746
+    },
+    {
+      "cik": "0001035983",
+      "ticker": "FIX",
+      "name": "COMFORT SYSTEMS USA INC",
+      "total_concepts": 133,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 2,
+      "custom_rate": 0.015037593984962405,
+      "processing_time_ms": 2072.8514194488525
+    },
+    {
+      "cik": "0001376986",
+      "ticker": "TVC",
+      "name": "Tennessee Valley Authority",
+      "total_concepts": 149,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 36,
+      "custom_rate": 0.24161073825503357,
+      "processing_time_ms": 2949.7640132904053
+    },
+    {
+      "cik": "0000896156",
+      "ticker": "ETD",
+      "name": "ETHAN ALLEN INTERIORS INC",
+      "total_concepts": 118,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 4,
+      "custom_rate": 0.03389830508474576,
+      "processing_time_ms": 2143.336057662964
+    },
+    {
+      "cik": "0001055160",
+      "ticker": "MFAO",
+      "name": "MFA FINANCIAL, INC.",
+      "total_concepts": 144,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 30,
+      "custom_rate": 0.20833333333333334,
+      "processing_time_ms": 3272.991895675659
+    },
+    {
+      "cik": "0001520006",
+      "ticker": "MTDR",
+      "name": "Matador Resources Co",
+      "total_concepts": 177,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 25,
+      "custom_rate": 0.14124293785310735,
+      "processing_time_ms": 2134.587287902832
+    },
+    {
+      "cik": "0001318220",
+      "ticker": "WCN",
+      "name": "Waste Connections, Inc.",
+      "total_concepts": 169,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 11,
+      "custom_rate": 0.0650887573964497,
+      "processing_time_ms": 2662.5466346740723
+    },
+    {
+      "cik": "0001527590",
+      "ticker": "RCB",
+      "name": "Ready Capital Corp",
+      "total_concepts": 225,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 46,
+      "custom_rate": 0.20444444444444446,
+      "processing_time_ms": 4288.217306137085
+    },
+    {
+      "cik": "0001032208",
+      "ticker": "SREA",
+      "name": "SEMPRA",
+      "total_concepts": 242,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 33,
+      "custom_rate": 0.13636363636363635,
+      "processing_time_ms": 6753.976821899414
+    },
+    {
+      "cik": "0001587732",
+      "ticker": "OGS",
+      "name": "ONE Gas, Inc.",
+      "total_concepts": 139,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 11,
+      "custom_rate": 0.07913669064748201,
+      "processing_time_ms": 2251.2223720550537
+    },
+    {
+      "cik": "0001528849",
+      "ticker": "RH",
+      "name": "RH",
+      "total_concepts": 173,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 28,
+      "custom_rate": 0.16184971098265896,
+      "processing_time_ms": 2314.9166107177734
+    },
+    {
+      "cik": "0001121788",
+      "ticker": "GRMN",
+      "name": "GARMIN LTD",
+      "total_concepts": 138,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 13,
+      "custom_rate": 0.09420289855072464,
+      "processing_time_ms": 2303.468942642212
+    },
+    {
+      "cik": "0001982518",
+      "ticker": "SDHC",
+      "name": "Smith Douglas Homes Corp.",
+      "total_concepts": 136,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 24,
+      "custom_rate": 0.17647058823529413,
+      "processing_time_ms": 1452.5530338287354
+    },
+    {
+      "cik": "0000821483",
+      "ticker": "PARR",
+      "name": "PAR PACIFIC HOLDINGS, INC.",
+      "total_concepts": 149,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 17,
+      "custom_rate": 0.11409395973154363,
+      "processing_time_ms": 2976.8004417419434
+    },
+    {
+      "cik": "0000310764",
+      "ticker": "SYK",
+      "name": "STRYKER CORP",
+      "total_concepts": 130,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 2,
+      "custom_rate": 0.015384615384615385,
+      "processing_time_ms": 2198.5459327697754
+    },
+    {
+      "cik": "0000811156",
+      "ticker": "CMS-PC",
+      "name": "CMS ENERGY CORP",
+      "total_concepts": 196,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 19,
+      "custom_rate": 0.09693877551020408,
+      "processing_time_ms": 4924.339771270752
+    },
+    {
+      "cik": "0001364954",
+      "ticker": "CHGG",
+      "name": "CHEGG, INC",
+      "total_concepts": 149,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 11,
+      "custom_rate": 0.0738255033557047,
+      "processing_time_ms": 1924.769639968872
+    },
+    {
+      "cik": "0000921582",
+      "ticker": "IMAX",
+      "name": "IMAX CORP",
+      "total_concepts": 162,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 25,
+      "custom_rate": 0.15432098765432098,
+      "processing_time_ms": 3189.134120941162
+    },
+    {
+      "cik": "0001897762",
+      "ticker": "INGM",
+      "name": "Ingram Micro Holding Corp",
+      "total_concepts": 139,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 7,
+      "custom_rate": 0.050359712230215826,
+      "processing_time_ms": 1926.884412765503
+    },
+    {
+      "cik": "0000726728",
+      "ticker": "O",
+      "name": "REALTY INCOME CORP",
+      "total_concepts": 156,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 12,
+      "custom_rate": 0.07692307692307693,
+      "processing_time_ms": 3127.9585361480713
+    },
+    {
+      "cik": "0000783325",
+      "ticker": "WEC",
+      "name": "WEC ENERGY GROUP, INC.",
+      "total_concepts": 154,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 13,
+      "custom_rate": 0.08441558441558442,
+      "processing_time_ms": 4615.865707397461
+    },
+    {
+      "cik": "0000318833",
+      "ticker": "TISI",
+      "name": "TEAM INC",
+      "total_concepts": 132,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 5,
+      "custom_rate": 0.03787878787878788,
+      "processing_time_ms": 2289.0448570251465
+    },
+    {
+      "cik": "0001679049",
+      "ticker": "INSW",
+      "name": "International Seaways, Inc.",
+      "total_concepts": 154,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 28,
+      "custom_rate": 0.18181818181818182,
+      "processing_time_ms": 3127.8767585754395
+    },
+    {
+      "cik": "0001702750",
+      "ticker": "BY",
+      "name": "BYLINE BANCORP, INC.",
+      "total_concepts": 232,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 44,
+      "custom_rate": 0.1896551724137931,
+      "processing_time_ms": 5106.177568435669
+    },
+    {
+      "cik": "0001580808",
+      "ticker": "ATEN",
+      "name": "A10 Networks, Inc.",
+      "total_concepts": 127,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 5,
+      "custom_rate": 0.03937007874015748,
+      "processing_time_ms": 1853.1639575958252
+    },
+    {
+      "cik": "0001430723",
+      "ticker": "SFBS",
+      "name": "ServisFirst Bancshares, Inc.",
+      "total_concepts": 179,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 17,
+      "custom_rate": 0.09497206703910614,
+      "processing_time_ms": 2923.048973083496
+    },
+    {
+      "cik": "0001413329",
+      "ticker": "PM",
+      "name": "Philip Morris International Inc.",
+      "total_concepts": 161,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 13,
+      "custom_rate": 0.08074534161490683,
+      "processing_time_ms": 3676.5055656433105
+    },
+    {
+      "cik": "0001609804",
+      "ticker": "OEC",
+      "name": "Orion S.A.",
+      "total_concepts": 124,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 6,
+      "custom_rate": 0.04838709677419355,
+      "processing_time_ms": 2200.1140117645264
+    },
+    {
+      "cik": "0001032208",
+      "ticker": "SRE",
+      "name": "SEMPRA",
+      "total_concepts": 242,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 33,
+      "custom_rate": 0.13636363636363635,
+      "processing_time_ms": 6644.67191696167
+    },
+    {
+      "cik": "0001393311",
+      "ticker": "PSA-PJ",
+      "name": "Public Storage",
+      "total_concepts": 166,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 34,
+      "custom_rate": 0.20481927710843373,
+      "processing_time_ms": 2176.205635070801
+    },
+    {
+      "cik": "0001632970",
+      "ticker": "AHR",
+      "name": "American Healthcare REIT, Inc.",
+      "total_concepts": 193,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 36,
+      "custom_rate": 0.18652849740932642,
+      "processing_time_ms": 2831.935167312622
+    },
+    {
+      "cik": "0000092122",
+      "ticker": "SO",
+      "name": "SOUTHERN CO",
+      "total_concepts": 223,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 43,
+      "custom_rate": 0.19282511210762332,
+      "processing_time_ms": 9430.68528175354
+    },
+    {
+      "cik": "0001004980",
+      "ticker": "PCG-PG",
+      "name": "PG&E Corp",
+      "total_concepts": 199,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 33,
+      "custom_rate": 0.1658291457286432,
+      "processing_time_ms": 4203.582286834717
+    },
+    {
+      "cik": "0001580345",
+      "ticker": "TPVG",
+      "name": "TriplePoint Venture Growth BDC Corp.",
+      "total_concepts": 106,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 8,
+      "custom_rate": 0.07547169811320754,
+      "processing_time_ms": 3701.658248901367
+    },
+    {
+      "cik": "0001326205",
+      "ticker": "IGC",
+      "name": "IGC Pharma, Inc.",
+      "total_concepts": 107,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 2,
+      "custom_rate": 0.018691588785046728,
+      "processing_time_ms": 1310.098648071289
+    },
+    {
+      "cik": "0001614806",
+      "ticker": "RPT-PC",
+      "name": "Rithm Property Trust Inc.",
+      "total_concepts": 175,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 39,
+      "custom_rate": 0.22285714285714286,
+      "processing_time_ms": 2101.484537124634
+    },
+    {
+      "cik": "0001222333",
+      "ticker": "GLD",
+      "name": "SPDR GOLD TRUST",
+      "total_concepts": 46,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 4,
+      "custom_rate": 0.08695652173913043,
+      "processing_time_ms": 896.1920738220215
+    },
+    {
+      "cik": "0001180262",
+      "ticker": "HLF",
+      "name": "HERBALIFE LTD.",
+      "total_concepts": 121,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 10,
+      "custom_rate": 0.08264462809917356,
+      "processing_time_ms": 2886.8563175201416
+    },
+    {
+      "cik": "0001041061",
+      "ticker": "YUM",
+      "name": "YUM BRANDS INC",
+      "total_concepts": 132,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 9,
+      "custom_rate": 0.06818181818181818,
+      "processing_time_ms": 2749.8703002929688
+    },
+    {
+      "cik": "0000007536",
+      "ticker": "ARW",
+      "name": "ARROW ELECTRONICS, INC.",
+      "total_concepts": 125,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 2,
+      "custom_rate": 0.016,
+      "processing_time_ms": 2188.3385181427
+    },
+    {
+      "cik": "0000845877",
+      "ticker": "AGM-PF",
+      "name": "FEDERAL AGRICULTURAL MORTGAGE CORP",
+      "total_concepts": 173,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 16,
+      "custom_rate": 0.09248554913294797,
+      "processing_time_ms": 3761.3232135772705
+    },
+    {
+      "cik": "0000019617",
+      "ticker": "JPM-PC",
+      "name": "JPMORGAN CHASE & CO",
+      "total_concepts": 163,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 24,
+      "custom_rate": 0.147239263803681,
+      "processing_time_ms": 34452.68988609314
+    },
+    {
+      "cik": "0000749251",
+      "ticker": "IT",
+      "name": "GARTNER INC",
+      "total_concepts": 124,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 10,
+      "custom_rate": 0.08064516129032258,
+      "processing_time_ms": 3376.8491744995117
+    },
+    {
+      "cik": "0001145986",
+      "ticker": "ASPN",
+      "name": "ASPEN AEROGELS INC",
+      "total_concepts": 149,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 25,
+      "custom_rate": 0.16778523489932887,
+      "processing_time_ms": 3454.2195796966553
+    },
+    {
+      "cik": "0000091576",
+      "ticker": "KEY-PJ",
+      "name": "KEYCORP /NEW/",
+      "total_concepts": 201,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 21,
+      "custom_rate": 0.1044776119402985,
+      "processing_time_ms": 5091.038942337036
+    },
+    {
+      "cik": "0000815097",
+      "ticker": "CCL",
+      "name": "CARNIVAL CORP",
+      "total_concepts": 137,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 21,
+      "custom_rate": 0.15328467153284672,
+      "processing_time_ms": 2270.731210708618
+    },
+    {
+      "cik": "0001034670",
+      "ticker": "ALV",
+      "name": "AUTOLIV INC",
+      "total_concepts": 134,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 3,
+      "custom_rate": 0.022388059701492536,
+      "processing_time_ms": 2729.555606842041
+    },
+    {
+      "cik": "0001898795",
+      "ticker": "LVWR",
+      "name": "LiveWire Group, Inc.",
+      "total_concepts": 123,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 12,
+      "custom_rate": 0.0975609756097561,
+      "processing_time_ms": 1761.770248413086
+    },
+    {
+      "cik": "0001057877",
+      "ticker": "IDA",
+      "name": "IDACORP INC",
+      "total_concepts": 166,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 6,
+      "custom_rate": 0.03614457831325301,
+      "processing_time_ms": 3382.5645446777344
+    },
+    {
+      "cik": "0001156039",
+      "ticker": "ELV",
+      "name": "Elevance Health, Inc.",
+      "total_concepts": 151,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 9,
+      "custom_rate": 0.059602649006622516,
+      "processing_time_ms": 3249.222755432129
+    },
+    {
+      "cik": "0000072971",
+      "ticker": "WFC-PY",
+      "name": "WELLS FARGO & COMPANY/MN",
+      "total_concepts": 203,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 36,
+      "custom_rate": 0.17733990147783252,
+      "processing_time_ms": 10257.073640823364
+    },
+    {
+      "cik": "0001282648",
+      "ticker": "BATL",
+      "name": "BATTALION OIL CORP",
+      "total_concepts": 141,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 22,
+      "custom_rate": 0.15602836879432624,
+      "processing_time_ms": 2395.2670097351074
+    },
+    {
+      "cik": "0001160791",
+      "ticker": "GORO",
+      "name": "GOLD RESOURCE CORP",
+      "total_concepts": 113,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 10,
+      "custom_rate": 0.08849557522123894,
+      "processing_time_ms": 3155.927896499634
+    },
+    {
+      "cik": "0001552033",
+      "ticker": "TRU",
+      "name": "TransUnion",
+      "total_concepts": 162,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 3,
+      "custom_rate": 0.018518518518518517,
+      "processing_time_ms": 2718.369960784912
+    },
+    {
+      "cik": "0001390777",
+      "ticker": "BK-PK",
+      "name": "Bank of New York Mellon Corp",
+      "total_concepts": 198,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 31,
+      "custom_rate": 0.15656565656565657,
+      "processing_time_ms": 5878.097295761108
+    },
+    {
+      "cik": "0001929561",
+      "ticker": "RXO",
+      "name": "RXO, Inc.",
+      "total_concepts": 124,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 11,
+      "custom_rate": 0.08870967741935484,
+      "processing_time_ms": 1394.310712814331
+    },
+    {
+      "cik": "0002039058",
+      "ticker": "JACS-RI",
+      "name": "Jackson Acquisition Co II",
+      "total_concepts": 86,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 12,
+      "custom_rate": 0.13953488372093023,
+      "processing_time_ms": 767.2231197357178
+    },
+    {
+      "cik": "0000033185",
+      "ticker": "EFX",
+      "name": "EQUIFAX INC",
+      "total_concepts": 135,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 5,
+      "custom_rate": 0.037037037037037035,
+      "processing_time_ms": 2377.842903137207
+    },
+    {
+      "cik": "0000007084",
+      "ticker": "ADM",
+      "name": "Archer-Daniels-Midland Co",
+      "total_concepts": 154,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 12,
+      "custom_rate": 0.07792207792207792,
+      "processing_time_ms": 3465.6758308410645
+    },
+    {
+      "cik": "0000731766",
+      "ticker": "UNH",
+      "name": "UNITEDHEALTH GROUP INC",
+      "total_concepts": 136,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 10,
+      "custom_rate": 0.07352941176470588,
+      "processing_time_ms": 3032.8681468963623
+    },
+    {
+      "cik": "0000720672",
+      "ticker": "SFB",
+      "name": "STIFEL FINANCIAL CORP",
+      "total_concepts": 186,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 24,
+      "custom_rate": 0.12903225806451613,
+      "processing_time_ms": 3980.5192947387695
+    },
+    {
+      "cik": "0000899051",
+      "ticker": "ALL-PJ",
+      "name": "ALLSTATE CORP",
+      "total_concepts": 167,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 21,
+      "custom_rate": 0.12574850299401197,
+      "processing_time_ms": 5087.292671203613
+    },
+    {
+      "cik": "0001538379",
+      "ticker": "IBTA",
+      "name": "Ibotta, Inc.",
+      "total_concepts": 158,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 12,
+      "custom_rate": 0.0759493670886076,
+      "processing_time_ms": 2067.730665206909
+    },
+    {
+      "cik": "0001786248",
+      "ticker": "NREF",
+      "name": "NexPoint Real Estate Finance, Inc.",
+      "total_concepts": 213,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 69,
+      "custom_rate": 0.323943661971831,
+      "processing_time_ms": 2521.730899810791
+    },
+    {
+      "cik": "0001796209",
+      "ticker": "APG",
+      "name": "APi Group Corp",
+      "total_concepts": 153,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 14,
+      "custom_rate": 0.0915032679738562,
+      "processing_time_ms": 2308.6979389190674
+    },
+    {
+      "cik": "0001579241",
+      "ticker": "ALLE",
+      "name": "Allegion plc",
+      "total_concepts": 127,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 4,
+      "custom_rate": 0.031496062992125984,
+      "processing_time_ms": 3014.370918273926
+    },
+    {
+      "cik": "0000096943",
+      "ticker": "TFX",
+      "name": "TELEFLEX INC",
+      "total_concepts": 161,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 8,
+      "custom_rate": 0.049689440993788817,
+      "processing_time_ms": 2719.5181846618652
+    },
+    {
+      "cik": "0000046195",
+      "ticker": "BOH",
+      "name": "BANK OF HAWAII CORP",
+      "total_concepts": 177,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 16,
+      "custom_rate": 0.0903954802259887,
+      "processing_time_ms": 5390.569448471069
+    },
+    {
+      "cik": "0001468174",
+      "ticker": "H",
+      "name": "Hyatt Hotels Corp",
+      "total_concepts": 189,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 42,
+      "custom_rate": 0.2222222222222222,
+      "processing_time_ms": 5411.534070968628
+    },
+    {
+      "cik": "0001967680",
+      "ticker": "VLTO",
+      "name": "Veralto Corp",
+      "total_concepts": 117,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 8,
+      "custom_rate": 0.06837606837606838,
+      "processing_time_ms": 3570.6136226654053
+    },
+    {
+      "cik": "0000104894",
+      "ticker": "ELME",
+      "name": "Elme Communities",
+      "total_concepts": 120,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 7,
+      "custom_rate": 0.058333333333333334,
+      "processing_time_ms": 2195.1193809509277
+    },
+    {
+      "cik": "0001822928",
+      "ticker": "HLLY",
+      "name": "Holley Inc.",
+      "total_concepts": 133,
+      "canonical_covered": 0,
+      "coverage_rate": 0.0,
+      "custom_concepts": 12,
+      "custom_rate": 0.09022556390977443,
+      "processing_time_ms": 1934.3187808990479
+    }
+  ],
+  "lookups": {
+    "cik_to_ticker": {
+      "0001037976": "JLL",
+      "0001393311": "PSA-PJ",
+      "0001284143": "JBK",
+      "0001035983": "FIX",
+      "0001376986": "TVC",
+      "0000896156": "ETD",
+      "0001055160": "MFAO",
+      "0002007855": "VG",
+      "0000927971": "BNKD",
+      "0001520006": "MTDR",
+      "0001318220": "WCN",
+      "0001879016": "IE",
+      "0001527590": "RCB",
+      "0001368519": "NOA",
+      "0001254370": "WIA",
+      "0001032208": "SRE",
+      "0001587732": "OGS",
+      "0001528849": "RH",
+      "0000901243": "MUA",
+      "0001121788": "GRMN",
+      "0001982518": "SDHC",
+      "0001291334": "FFA",
+      "0000821483": "PARR",
+      "0000310764": "SYK",
+      "0000811156": "CMS-PC",
+      "0001364954": "CHGG",
+      "0000921582": "IMAX",
+      "0001897762": "INGM",
+      "0000726728": "O",
+      "0000783325": "WEC",
+      "0000318833": "TISI",
+      "0000917851": "VALE",
+      "0001679049": "INSW",
+      "0001702750": "BY",
+      "0001580808": "ATEN",
+      "0001430723": "SFBS",
+      "0001413329": "PM",
+      "0001609804": "OEC",
+      "0001715497": "BORR",
+      "0001632970": "AHR",
+      "0001041130": "DIA",
+      "0000092122": "SO",
+      "0001004980": "PCG-PG",
+      "0001580345": "TPVG",
+      "0001326205": "IGC",
+      "0001614806": "RPT-PC",
+      "0001222333": "GLD",
+      "0001180262": "HLF",
+      "0001041061": "YUM",
+      "0000007536": "ARW",
+      "0000845877": "AGM-PF",
+      "0000019617": "JPM-PC",
+      "0000749251": "IT",
+      "0001123799": "WIT",
+      "0001261166": "NRO",
+      "0001145986": "ASPN",
+      "0001080720": "GUT",
+      "0000091576": "KEY-PJ",
+      "0000815097": "CCL",
+      "0001034670": "ALV",
+      "0001898795": "LVWR",
+      "0001057877": "IDA",
+      "0001132597": "ITUB",
+      "0001227073": "ERC",
+      "0002039525": "XRP",
+      "0001156039": "ELV",
+      "0000072971": "WFC-PY",
+      "0001282648": "BATL",
+      "0001160791": "GORO",
+      "0001552033": "TRU",
+      "0001390777": "BK-PK",
+      "0001977102": "BIRK",
+      "0001929561": "RXO",
+      "0001788060": "VOYG",
+      "0001288992": "EFT",
+      "0002039058": "JACS-RI",
+      "0001757840": "INDO",
+      "0001828365": "RLX",
+      "0000033185": "EFX",
+      "0001515671": "DPG",
+      "0000007084": "ADM",
+      "0000731766": "UNH",
+      "0000720672": "SFB",
+      "0000899051": "ALL-PJ",
+      "0001538379": "IBTA",
+      "0001786248": "NREF",
+      "0001796209": "APG",
+      "0001579241": "ALLE",
+      "0000096943": "TFX",
+      "0000046195": "BOH",
+      "0000918608": "EGO",
+      "0001468174": "H",
+      "0001967680": "VLTO",
+      "0000701818": "KGC",
+      "0000104894": "ELME",
+      "0001822928": "HLLY",
+      "0000835948": "MVF",
+      "0001604174": "ECC"
+    },
+    "ticker_to_cik": {
+      "JLL": "0001037976",
+      "PSA-PG": "0001393311",
+      "JBK": "0001284143",
+      "FIX": "0001035983",
+      "TVC": "0001376986",
+      "ETD": "0000896156",
+      "MFAO": "0001055160",
+      "VG": "0002007855",
+      "BNKD": "0000927971",
+      "MTDR": "0001520006",
+      "WCN": "0001318220",
+      "IE": "0001879016",
+      "RCB": "0001527590",
+      "NOA": "0001368519",
+      "WIA": "0001254370",
+      "SREA": "0001032208",
+      "OGS": "0001587732",
+      "RH": "0001528849",
+      "MUA": "0000901243",
+      "GRMN": "0001121788",
+      "SDHC": "0001982518",
+      "FFA": "0001291334",
+      "PARR": "0000821483",
+      "SYK": "0000310764",
+      "CMS-PC": "0000811156",
+      "CHGG": "0001364954",
+      "IMAX": "0000921582",
+      "INGM": "0001897762",
+      "O": "0000726728",
+      "WEC": "0000783325",
+      "TISI": "0000318833",
+      "VALE": "0000917851",
+      "INSW": "0001679049",
+      "BY": "0001702750",
+      "ATEN": "0001580808",
+      "SFBS": "0001430723",
+      "PM": "0001413329",
+      "OEC": "0001609804",
+      "SRE": "0001032208",
+      "BORR": "0001715497",
+      "PSA-PJ": "0001393311",
+      "AHR": "0001632970",
+      "DIA": "0001041130",
+      "SO": "0000092122",
+      "PCG-PG": "0001004980",
+      "TPVG": "0001580345",
+      "IGC": "0001326205",
+      "RPT-PC": "0001614806",
+      "GLD": "0001222333",
+      "HLF": "0001180262",
+      "YUM": "0001041061",
+      "ARW": "0000007536",
+      "AGM-PF": "0000845877",
+      "JPM-PC": "0000019617",
+      "IT": "0000749251",
+      "WIT": "0001123799",
+      "NRO": "0001261166",
+      "ASPN": "0001145986",
+      "GUT": "0001080720",
+      "KEY-PJ": "0000091576",
+      "CCL": "0000815097",
+      "ALV": "0001034670",
+      "LVWR": "0001898795",
+      "IDA": "0001057877",
+      "ITUB": "0001132597",
+      "ERC": "0001227073",
+      "XRP": "0002039525",
+      "ELV": "0001156039",
+      "WFC-PY": "0000072971",
+      "BATL": "0001282648",
+      "GORO": "0001160791",
+      "TRU": "0001552033",
+      "BK-PK": "0001390777",
+      "BIRK": "0001977102",
+      "RXO": "0001929561",
+      "VOYG": "0001788060",
+      "EFT": "0001288992",
+      "JACS-RI": "0002039058",
+      "INDO": "0001757840",
+      "RLX": "0001828365",
+      "EFX": "0000033185",
+      "DPG": "0001515671",
+      "ADM": "0000007084",
+      "UNH": "0000731766",
+      "SFB": "0000720672",
+      "ALL-PJ": "0000899051",
+      "IBTA": "0001538379",
+      "NREF": "0001786248",
+      "APG": "0001796209",
+      "ALLE": "0001579241",
+      "TFX": "0000096943",
+      "BOH": "0000046195",
+      "EGO": "0000918608",
+      "H": "0001468174",
+      "VLTO": "0001967680",
+      "KGC": "0000701818",
+      "ELME": "0000104894",
+      "HLLY": "0001822928",
+      "MVF": "0000835948",
+      "ECC": "0001604174"
+    }
+  }
+}

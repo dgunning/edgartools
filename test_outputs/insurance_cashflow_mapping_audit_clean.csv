@@ -1,0 +1,513 @@
+ticker,accession,period_end,concept,original_label,mapped_label,standard_label
+AIG,0000005272-25-000012,2024-12-31,us-gaap_VariableInterestEntityPrimaryBeneficiaryMember,,Consolidated VIE,
+AIG,0000005272-25-000012,2024-12-31,srt_ConsolidatedEntityExcludingVariableInterestEntitiesVIEMember,,"Consolidated Entity, Excluding Consolidated VIE",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTax,,(Income) loss from discontinued operations,
+AIG,0000005272-25-000012,2024-12-31,aig_GainLossOnSaleOfDebtSecuritiesAvailableForSaleAndOtherAssetsNet,,Net losses on sales of securities available for sale and other assets,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DisposalGroupNotDiscontinuedOperationGainLossOnDisposal,,Net (gain) loss on divestitures and other,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_GainsLossesOnExtinguishmentOfDebt,,(Gain) loss on extinguishment of debt,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_UnrealizedGainLossOnInvestments,,Unrealized (gains) losses in earnings - net,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestmentsNetOfDividendsOrDistributions,,"Equity in income from equity method investments, net of dividends or distributions",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_DepreciationAmortizationAndAccretionNet,,Depreciation and other amortization,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_AssetImpairmentCharges,,Impairments of assets,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInLiabilityForClaimsAndClaimsAdjustmentExpenseReserve,,Insurance reserves,
+AIG,0000005272-25-000012,2024-12-31,aig_IncreaseDecreaseInPremiumsAndInsuranceBalancesReceivableAndPayableNet,,Premiums and other receivables and payables - net,
+AIG,0000005272-25-000012,2024-12-31,aig_IncreaseDecreaseInReinsuranceAssetsNet,,"Reinsurance assets, net",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,Capitalization of deferred policy acquisition costs,
+AIG,0000005272-25-000012,2024-12-31,aig_IncreaseDecreaseInCurrentAndDeferredIncomeTaxes,,Current and deferred income taxes - net,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingCapitalNet,,"Other, net",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities,,Total adjustments,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperations,,Net cash provided by operating activities - continuing operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations,,Net cash used in operating activities - discontinued operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt,,Available for sale securities,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromSaleOfTradingSecuritiesHeldforinvestment,,Other securities,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromSaleAndMaturityOfOtherInvestments,,Other invested assets,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromDivestitureOfBusinessesNetOfCashDivested,,"Divestitures, net",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities,,Maturities of fixed maturity securities available for sale,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromSaleAndCollectionOfMortgageNotesReceivable,,Principal payments received on and sales of mortgage and other loans receivable,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,Available for sale securities,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsToAcquireTradingSecuritiesHeldforinvestment,,Other securities,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsToAcquireOtherInvestments,,Other invested assets,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsToAcquireMortgageNotesReceivable,,Mortgage and other loans receivable,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsForProceedsFromShortTermInvestments,,Net change in short-term investments,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,"Other, net",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperations,,Net cash provided by (used in) investing activities - continuing operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CashProvidedByUsedInInvestingActivitiesDiscontinuedOperations,,Net cash used in investing activities - discontinued operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+AIG,0000005272-25-000012,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsForRepurchaseOfPreferredStockAndPreferenceStock,,Redemption of preferred stock,
+AIG,0000005272-25-000012,2024-12-31,aig_PaymentsOfDividendsPreferredStockAndPreferredStockRedemptionPremium,,Dividends on preferred stock and preferred stock redemption premiums,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends on common stock,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_ProceedsFromPaymentsForOtherFinancingActivities,,"Other, net",
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperations,,Net cash used in financing activities - continuing operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations,,Net cash provided by financing activities - discontinued operations,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+AIG,0000005272-25-000012,2024-12-31,us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,,Effect of exchange rate changes on cash and restricted cash,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations,,Cash and restricted cash at end of year,
+AIG,0000005272-25-000012,2024-12-31,aig_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectHeldForSaleAssetsIncludingDiscontinuedOperations,,Cash and restricted cash of held for sale assets,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations,,Cash and restricted cash at end of year,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_Cash,,Cash,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_RestrictedCashAndCashEquivalentsAtCarryingValue,,Restricted cash included in Short-term investments,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_RestrictedCashAndCashEquivalentsNoncurrent,,Restricted cash included in Other assets,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+AIG,0000005272-25-000012,2024-12-31,us-gaap_InterestPaidNet,,Interest,
+AIG,0000005272-25-000012,2024-12-31,us-gaap_IncomeTaxesPaidNet,,Taxes,
+AIG,0000005272-25-000012,2024-12-31,aig_FixedMaturitySecuritiesAvailableForSaleReceivedInConnectionWithPensionRiskTransferTransactions,,Fixed maturity securities available for sale received in connection with pension risk transfer transactions attributed to discontinued operations,
+AIG,0000005272-25-000012,2024-12-31,aig_NoncashOrPartNoncashAcquisitionInvestmentsAcquiredDuringReinsuranceTransaction,,Fixed maturity securities and other invested assets received in connection with reinsurance transactions,
+AIG,0000005272-25-000012,2024-12-31,aig_NoncashOrPartNoncashSecuritiesTransferredInConnectionWithReinsuranceTransaction,,Fixed maturity securities and other invested assets transferred in connection with reinsurance transactions,
+AIG,0000005272-25-000012,2024-12-31,aig_NoncashConsiderationReceivedFromSaleOfBusiness,,Non-cash consideration received from sale of Validus Re,
+AIG,0000005272-25-000012,2024-12-31,aig_InterestCreditedToPolicyholderAccountsIncludedInFinancingActivities,,Interest credited to policyholder contract deposits included in financing activities,
+AIG,0000005272-25-000012,2024-12-31,aig_FeeIncomeDebitedToPolicyholderContractDepositsIncludedInFinancingActivities,,Fee income debited to policyholder contract deposits included in financing activities,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+ALL,0000899051-25-000015,2024-12-31,us-gaap_DepreciationAmortizationAndAccretionNet,,"Depreciation, amortization and other non-cash items",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net (gains) losses on investments and derivatives,
+ALL,0000899051-25-000015,2024-12-31,all_DefinedBenefitPlanRemeasurementGainLoss,,Pension and other postretirement remeasurement (gains) losses,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncreaseDecreaseInFuturePolicyBenefitReservesAndOtherInsuranceLiabilities,,Policy benefits and other insurance reserves,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncreaseDecreaseInUnearnedPremiums,,Unearned premiums,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,Deferred policy acquisition costs,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncreaseDecreaseInPremiumsReceivable,,"Premium installment receivables, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncreaseDecreaseInReinsuranceRecoverable,,"Reinsurance recoverables, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncreaseDecreaseInIncomeTaxesPayableNetOfIncomeTaxesReceivable,,Income taxes,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingCapitalNet,,Other operating assets and liabilities,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt,,Fixed income securities,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromSaleOfEquitySecuritiesFvNi,,Equity securities,
+ALL,0000899051-25-000015,2024-12-31,all_ProceedsFromDivestitureOfInterestInLimitedPartnershipInterest,,Limited partnership interests,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromSaleOfOtherInvestments,,Other investments,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities,,Fixed income securities,
+ALL,0000899051-25-000015,2024-12-31,all_ProceedsFromCollectionOfMortgageLoans,,Mortgage loans,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfOtherInvestments,,Other investments,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,Fixed income securities,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsToAcquireEquitySecuritiesFvNi,,Equity securities,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsToAcquireInterestInSubsidiariesAndAffiliates,,Limited partnership interests,
+ALL,0000899051-25-000015,2024-12-31,all_PaymentsToPurchaseMortgageLoans,,Mortgage loans,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsToAcquireOtherInvestments,,Other investments,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsForProceedsFromShortTermInvestments,,"Change in short-term and other investments, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,capitalExpenditure,capitalExpenditure,capitalExpenditure
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromSaleOfPropertyPlantAndEquipment,,Proceeds from sale of property and equipment,
+ALL,0000899051-25-000015,2024-12-31,all_PaymentsToAcquireOperations,,"Acquisition of operations, net of cash acquired",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+ALL,0000899051-25-000015,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromIssuanceOfPreferredStockAndPreferenceStock,,Proceeds from issuance of preferred stock,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromRepurchaseOfRedeemablePreferredStock,,Redemption of preferred stock,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_AdditionsToContractHoldersFunds,,Contractholder fund deposits,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_WithdrawalFromContractHoldersFunds,,Contractholder fund withdrawals,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends paid on common stock,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock,,Dividends paid on preferred stock,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromIssuanceOfSharesUnderIncentiveAndShareBasedCompensationPlansIncludingStockOptions,,"Shares reissued under equity incentive plans, net",
+ALL,0000899051-25-000015,2024-12-31,us-gaap_ProceedsFromPaymentsForOtherFinancingActivities,,Other,
+ALL,0000899051-25-000015,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+ALL,0000899051-25-000015,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+ALL,0000899051-25-000015,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+ALL,0000899051-25-000015,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+TRV,0000086312-25-000012,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+TRV,0000086312-25-000012,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net realized investment losses,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+TRV,0000086312-25-000012,2024-12-31,us-gaap_DeferredFederalIncomeTaxExpenseBenefit,,Deferred federal income tax benefit,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Amortization of deferred acquisition costs,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestments,,Equity in income from other investments,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInPremiumsReceivable,,Premiums receivable,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInReinsuranceRecoverable,,Reinsurance recoverables,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,Deferred acquisition costs,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInLiabilityForClaimsAndClaimsAdjustmentExpenseReserve,,Claims and claim adjustment expense reserves,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncreaseDecreaseInUnearnedPremiums,,Unearned premium reserves,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_OtherOperatingActivitiesCashFlowStatement,,Other operating activities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities,,Proceeds from maturities of fixed maturities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt,,Fixed maturities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ProceedsFromSaleOfEquitySecuritiesFvNi,,Equity securities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ProceedsFromSaleOfRealEstateHeldforinvestment,,Real estate investments,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ProceedsFromSaleAndMaturityOfOtherInvestments,,Other investments,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,Fixed maturities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsToAcquireEquitySecuritiesFvNi,,Equity securities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsToAcquireRealEstateHeldForInvestment,,Real estate investments,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsToAcquireOtherInvestments,,Other investments,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsForProceedsFromAvailableforsaleSecuritiesShortterm,,Net sales (purchases) of short-term securities,
+TRV,0000086312-25-000012,2024-12-31,trv_SecuritiesTransactionsInCourseOfSettlement,,Securities transactions in the course of settlement,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsToAcquireBusinessesNetOfCashAcquired,acquisitionsNet,acquisitionsNet,acquisitionsNet
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,Other investing activities,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsRelatedToTaxWithholdingForShareBasedCompensation,,Treasury stock acquired — net employee share-based compensation,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends paid to shareholders,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ProceedsFromDebtNetOfIssuanceCosts,,Issuance of debt,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_ProceedsFromStockOptionsExercised,,Issuance of common stock — employee share options,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+TRV,0000086312-25-000012,2024-12-31,us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations,,Effect of exchange rate changes on cash and restricted cash,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+TRV,0000086312-25-000012,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+TRV,0000086312-25-000012,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+TRV,0000086312-25-000012,2024-12-31,us-gaap_IncomeTaxesPaidNet,,Income taxes paid,
+TRV,0000086312-25-000012,2024-12-31,us-gaap_InterestPaidNet,,Interest paid,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+PGR,0000080661-25-000007,2024-12-31,us-gaap_Depreciation,,Depreciation,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_AccretionAmortizationOfDiscountsAndPremiumsInvestments,,Net amortization (accretion) of fixed-income securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_RestrictedStockExpense,,Amortization of equity-based compensation,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net realized (gains) losses on securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_GainLossOnSaleOfPropertyPlantEquipment,,Net (gains) losses on disposition of property and equipment,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_GoodwillImpairmentLoss,,Goodwill impairment,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInPremiumsReceivable,,Premiums receivable,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInReinsuranceRecoverable,,Reinsurance recoverables,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInPrepaidReinsurancePremiums,,Prepaid reinsurance premiums,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,Deferred acquisition costs,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInIncomeTaxes,,Income taxes,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInUnearnedPremiums,,Unearned premiums,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInLiabilityForClaimsAndClaimsAdjustmentExpenseReserve,,Loss and loss adjustment expense reserves,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInAccountsPayableAndAccruedLiabilities,,"Accounts payable, accrued expenses, and other liabilities",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingCapitalNet,,"Other, net",
+PGR,0000080661-25-000007,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,Fixed maturities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PaymentsToAcquireEquitySecuritiesFvNi,,Equity securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt,,Fixed maturities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ProceedsFromSaleOfEquitySecuritiesFvNi,,Equity securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities,,Fixed maturities,
+PGR,0000080661-25-000007,2024-12-31,pgr_ProceedsFromMaturitiesPrepaymentsAndCallsOfEquitySecuritiesFVNI,,Equity securities,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PaymentsForProceedsFromShortTermInvestments,,Net (purchases) sales of short-term investments,
+PGR,0000080661-25-000007,2024-12-31,pgr_ProceedsFromPayablesToBrokerDealersInvestingActivities,,Net change in unsettled security transactions,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,capitalExpenditure,capitalExpenditure,capitalExpenditure
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ProceedsFromSaleOfPropertyPlantAndEquipment,,Sales of property and equipment,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PaymentsForRepurchaseOfPreferredStockAndPreferenceStock,,Redemption of preferred shares1,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends paid to common shareholders,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock,,Dividends paid to preferred shareholders,
+PGR,0000080661-25-000007,2024-12-31,pgr_PaymentsforRepurchaseofCommonStockforRestrictedStockTaxLiabilities,,Acquisition of treasury shares for restricted stock tax liabilities,
+PGR,0000080661-25-000007,2024-12-31,pgr_PaymentsforRepurchaseofCommonStockintheOpenMarket,,Acquisition of treasury shares acquired in open market,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_ProceedsFromIssuanceOfDebt,,Net proceeds from debt issuance,
+PGR,0000080661-25-000007,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+PGR,0000080661-25-000007,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+PGR,0000080661-25-000007,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+PGR,0000080661-25-000007,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+MET,0001099219-25-000044,2024-12-31,us-gaap_OtherDepreciationAndAmortization,,Depreciation and amortization expenses,
+MET,0001099219-25-000044,2024-12-31,us-gaap_AccretionAmortizationOfDiscountsAndPremiumsInvestments,,"Amortization of premiums and accretion of discounts associated with investments, net",
+MET,0001099219-25-000044,2024-12-31,met_GainsLossesOnInvestmentsAndFromSalesOfBusinessesNet,,"(Gains) losses on investments and from sales of businesses, net",
+MET,0001099219-25-000044,2024-12-31,met_GainsLossesOnDerivativesNet,,"(Gains) losses on derivatives, net",
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestmentsNetOfDividendsOrDistributions,,"(Income) loss from equity method investments, net of dividends or distributions",
+MET,0001099219-25-000044,2024-12-31,us-gaap_InterestCreditedToPolicyOwnerAccount,,Interest credited to policyholder account balances,
+MET,0001099219-25-000044,2024-12-31,met_InsuranceCommissionsandFees1,,Universal life and investment-type product policy fees,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInTradingSecurities,,Change in contractholder-directed equity securities and fair value option securities,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInAccruedInvestmentIncomeReceivable,,Change in accrued investment income,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInAccountsAndOtherReceivables,,"Change in premiums, reinsurance and other receivables",
+MET,0001099219-25-000044,2024-12-31,us-gaap_MarketRiskBenefitIncreaseDecreaseFromEquityMarketChange,,Change in market risk benefits,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,"Change in deferred policy acquisition costs and value of business acquired, net",
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable,,Change in income tax,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingAssets,,Change in other assets,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInInsuranceLiabilities,,Change in insurance-related liabilities and policy-related balances,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingLiabilities,,Change in other liabilities,
+MET,0001099219-25-000044,2024-12-31,us-gaap_OtherOperatingActivitiesCashFlowStatement,,"Other, net",
+MET,0001099219-25-000044,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromSaleAndMaturityOfAvailableForSaleSecurities,,"Sales, maturities and repayments of fixed maturity securities available-for-sale",
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromSaleOfEquitySecuritiesFvNi,,"Sales, maturities and repayments of equity securities",
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromSaleAndCollectionOfMortgageNotesReceivable,,"Sales, maturities and repayments of mortgage loans",
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromRealEstateAndRealEstateJointVentures,,"Sales, maturities and repayments of real estate and real estate joint ventures",
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromLimitedPartnershipInvestments,,"Sales, maturities and repayments of other limited partnership interests",
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromSaleMaturityAndCollectionOfShorttermInvestments,,"Sales, maturities and repayments of short-term investments",
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,Purchases of fixed maturity securities available-for-sale,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsToAcquireEquitySecuritiesFvNi,,Purchases of equity securities,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsToAcquireMortgageNotesReceivable,,Purchases of mortgage loans,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsToAcquireRealEstateAndRealEstateJointVentures,,Purchases of real estate and real estate joint ventures,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsToAcquireLimitedPartnershipInterests,,Purchases of other limited partnership interests,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsToAcquireShortTermInvestments,,Purchases of short-term investments,
+MET,0001099219-25-000044,2024-12-31,met_Cashreceivedinconnectionwithfreestandingderivatives,,Cash received in connection with freestanding derivatives,
+MET,0001099219-25-000044,2024-12-31,met_CashPaidInConnectionWithFreestandingDerivatives,,Cash paid in connection with freestanding derivatives,
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromDivestitureOfBusinessesNetOfCashDivested,,Sales of businesses,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsToAcquireInterestInJointVenture,,Purchases of investments in operating joint ventures,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsForProceedsFromPolicyLoans,,Net change in policy loans,
+MET,0001099219-25-000044,2024-12-31,met_NetChangeInOtherInvestedAssets,,Net change in other invested assets,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,"Other, net",
+MET,0001099219-25-000044,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromAnnuitiesAndInvestmentCertificates,,Policyholder account balances - deposits,
+MET,0001099219-25-000044,2024-12-31,us-gaap_RepaymentsOfAnnuitiesAndInvestmentCertificates,,Policyholder account balances - withdrawals,
+MET,0001099219-25-000044,2024-12-31,met_NetChangeInPayablesForCollateralUnderSecuritiesLoanedAndOtherTransactions,,Net change in payables for collateral under securities loaned and other transactions,
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+MET,0001099219-25-000044,2024-12-31,us-gaap_RepaymentsOfOtherLongTermDebt,,Long-term debt repaid,
+MET,0001099219-25-000044,2024-12-31,us-gaap_RepaymentsOfSecuredDebt,,Collateral financing arrangement repaid,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsForProceedsFromDerivativeInstrumentFinancingActivities,,"Derivatives with certain financing elements and other derivative-related transactions, net",
+MET,0001099219-25-000044,2024-12-31,met_ProceedsFromMortgageLoanSecuredFinancing,,Proceeds from mortgage loan secured financing,
+MET,0001099219-25-000044,2024-12-31,met_RepaymentsOfMortgageLoanSecuredFinancing,,Repayments of mortgage loan secured financing,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock,,Dividends on preferred stock,
+MET,0001099219-25-000044,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends on common stock,
+MET,0001099219-25-000044,2024-12-31,us-gaap_ProceedsFromPaymentsForOtherFinancingActivities,,"Other, net",
+MET,0001099219-25-000044,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+MET,0001099219-25-000044,2024-12-31,us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsDisposalGroupIncludingDiscontinuedOperations,,Effect of change in foreign currency exchange rates on cash and cash equivalents balances,
+MET,0001099219-25-000044,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+MET,0001099219-25-000044,2024-12-31,met_CashAndCashEquivalentsIncludingSubsidiaryHeldForSale,,"Cash and cash equivalents, including subsidiaries held-for-sale, end of year",
+MET,0001099219-25-000044,2024-12-31,met_CashAndCashEquivalentsIncludingSubsidiaryHeldForSale,,"Cash and cash equivalents, including subsidiaries held-for-sale, end of year",
+MET,0001099219-25-000044,2024-12-31,us-gaap_DisposalGroupIncludingDiscontinuedOperationCashAndCashEquivalents,,"Cash and cash equivalents, subsidiaries held-for-sale, end of year",
+MET,0001099219-25-000044,2024-12-31,us-gaap_DisposalGroupIncludingDiscontinuedOperationCashAndCashEquivalents,,"Cash and cash equivalents, subsidiaries held-for-sale, end of year",
+MET,0001099219-25-000044,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+MET,0001099219-25-000044,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+MET,0001099219-25-000044,2024-12-31,us-gaap_InterestPaidNet,,Net cash paid for Interest,
+MET,0001099219-25-000044,2024-12-31,us-gaap_IncomeTaxesPaidNet,,Net cash paid (received) for Income tax,
+MET,0001099219-25-000044,2024-12-31,met_NoncashFixedMaturitySecuritiesAvailableForSaleDisposedOfInConnectionWithAReinsuranceTransaction,,Fixed maturity securities available-for-sale disposed of in connection with a reinsurance transaction,
+MET,0001099219-25-000044,2024-12-31,us-gaap_NoncashOrPartNoncashAcquisitionInvestmentsAcquired1,,Fixed maturity securities available-for-sale received in connection with pension risk transfer transactions,
+MET,0001099219-25-000044,2024-12-31,met_NoncashMortgageLoansDisposedOfInConnectionWithAReinsuranceTransaction,,Mortgage loans disposed of in connection with a reinsurance transaction,
+MET,0001099219-25-000044,2024-12-31,met_NoncashRealEstateAcquiredInSatisfactionOfDebt,,Real estate and real estate joint ventures acquired in satisfaction of debt,
+MET,0001099219-25-000044,2024-12-31,met_NoncashOtherInvestedAssetsReceivedInConnectionWithTheSaleOfOtherLimitedPartnershipInterests,,Other invested assets received in connection with the sale of other limited partnership interests,
+MET,0001099219-25-000044,2024-12-31,met_NoncashIncreaseOfRealEstateAndRealEstateJointVenturesConsolidated,,Increase of real estate and real estate joint ventures,
+MET,0001099219-25-000044,2024-12-31,met_NoncashIncreaseOfShortTermDebtConsolidated,,Increase of short-term debt,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_DiscontinuedOperationsHeldforsaleMember,,Held-for-sale,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+PRU,0001137774-25-000044,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,"Realized investment gains(losses), net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_MarketRiskBenefitChangeInFairValueGainLoss,,"Change in value of market risk benefits, net of related hedging (gains) losses",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_InsuranceServicesRevenue,,Policy charges and fee income,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_InterestCreditedToPolicyOwnerAccount,,Interest credited to policyholders' account balances,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_GoodwillAndIntangibleAssetImpairment,,Goodwill impairment,
+PRU,0001137774-25-000044,2024-12-31,pru_DepreciationDepletionAndAmortizationNetOfAdjustmentForAccountingAdoption,,Depreciation and amortization,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+PRU,0001137774-25-000044,2024-12-31,pru_GainsLossesOnAssetsSupportingExperienceRatedContractholderLiabilitiesNet,,"(Gains) losses on assets supporting experience-rated contractholder liabilities, net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,Deferred policy acquisition costs,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInInsuranceLiabilities,,Future policy benefits and other insurance liabilities,
+PRU,0001137774-25-000044,2024-12-31,pru_IncreaseDecreaseInReinsuranceRelatedBalances,,Reinsurance related-balances,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInIncomeTaxes,,Income Taxes,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInDerivativeAssetsAndLiabilities,,"Derivatives, net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingCapitalNet,,"Other, net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities,,"Fixed maturities, available-for-sale",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfHeldToMaturitySecurities,,"Fixed maturities, held-to-maturity",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromMaturitiesRepaymentsAndCallsOfTradingSecuritiesHeldforinvestment,,"Fixed maturities, trading",
+PRU,0001137774-25-000044,2024-12-31,pru_ProceedsFromAssetsSupportingExperienceRatedContractholderLiabilities,,Assets supporting experience-rated contractholder liabilities,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromSaleAndMaturityOfMarketableSecurities,salesMaturitiesOfInvestments,salesMaturitiesOfInvestments,salesMaturitiesOfInvestments
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromSaleAndCollectionOfMortgageNotesReceivable,,Commercial mortgage and other loans,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromCollectionOfPolicyLoans,,Policy loans,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromSaleAndMaturityOfOtherInvestments,,Other invested assets,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromSaleMaturityAndCollectionOfShorttermInvestments,,Short-term investments,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,"Fixed maturities, available-for-sale",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsToAcquireTradingSecuritiesHeldforinvestment,,"Fixed maturities, trading",
+PRU,0001137774-25-000044,2024-12-31,pru_PaymentstoAcquireAssetsSupportingExperienceratedContractholderLiabilities,,Assets supporting experience-rated contractholder liabilities,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsToAcquireMarketableSecurities,purchasesOfInvestments,purchasesOfInvestments,purchasesOfInvestments
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsToAcquireMortgageNotesReceivable,,Commercial mortgage and other loans,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsToFundPolicyLoans,,Policy loans,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsToAcquireOtherInvestments,,Other invested assets,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsToAcquireShortTermInvestments,,Short-term investments,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromDivestitureOfBusinessesNetOfCashDivested,,"Dispositions, net of cash disposed",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsForProceedsFromDerivativeInstrumentInvestingActivities,,"Derivatives, net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,"Other, net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+PRU,0001137774-25-000044,2024-12-31,us-gaap_AdditionsToContractHoldersFunds,,Policyholders’ account deposits,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_WithdrawalFromContractHoldersFunds,,Policyholders’ account withdrawals,
+PRU,0001137774-25-000044,2024-12-31,pru_ProceedsFromPaymentsForSecuritiesSoldUnderAgreementsToRepurchaseAndCashCollateralForLoanedSecurities,,Net change in securities sold under agreements to repurchase and cash collateral for loaned securities,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Cash dividends paid on Common Stock,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromRepaymentsOfShortTermDebtMaturingInThreeMonthsOrLess,,Net change in financing arrangements (maturities 90 days or less),
+PRU,0001137774-25-000044,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromStockOptionsExercised,,Common Stock reissued for exercise of stock options,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromOtherDebt,,Proceeds from the issuance of debt (maturities longer than 90 days),
+PRU,0001137774-25-000044,2024-12-31,us-gaap_RepaymentsOfOtherDebt,,Repayments of debt (maturities longer than 90 days),
+PRU,0001137774-25-000044,2024-12-31,pru_ProceedsfromnotesissuedbyconsolidatedVIEs,,Proceeds from notes issued by consolidated VIEs,
+PRU,0001137774-25-000044,2024-12-31,pru_RepaymentsofnotesissuesbyconsolidatedVIEs,,Repayments of notes issued by consolidated VIEs,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_ProceedsFromPaymentsForOtherFinancingActivities,,"Other, net",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+PRU,0001137774-25-000044,2024-12-31,us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,,Effect of foreign exchange rate changes on cash balances,
+PRU,0001137774-25-000044,2024-12-31,pru_NETINCREASEDECREASEINCASHCASHEQUIVALENTSRESTRICTEDCASHANDRESTRICTEDCASHEQUIVALENTSINCLUDINGBALANCESCLASSIFIEDASHELDFORSALE,,"NET INCREASE (DECREASE) IN CASH, CASH EQUIVALENTS, RESTRICTED CASH AND RESTRICTED CASH EQUIVALENTS INCLUDING BALANCES CLASSIFIED AS HELD-FOR-SALE",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_NetCashProvidedByUsedInDiscontinuedOperations,,NET CHANGE IN CASH BALANCES CLASSIFIED AS HELD-FOR-SALE,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+PRU,0001137774-25-000044,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+PRU,0001137774-25-000044,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+PRU,0001137774-25-000044,2024-12-31,us-gaap_IncomeTaxesPaidNet,,"Income taxes paid, net of refunds",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_InterestPaid,,Interest paid,
+PRU,0001137774-25-000044,2024-12-31,pru_ChangeInAssetsClassifiedAsHeldForSale,,Assets classified as held-for-sale,
+PRU,0001137774-25-000044,2024-12-31,pru_ChangeInLiabilitiesClassifiedAsHeldForSale,,Liabilities classified as held-for-sale,
+PRU,0001137774-25-000044,2024-12-31,pru_NetAssetsClassifiedAsHeldForSale,,Net assets classified as held-for-sale,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_StockIssued1,,Treasury Stock shares issued for stock-based compensation programs,
+PRU,0001137774-25-000044,2024-12-31,pru_NovationOfContractsUnderReinsuranceAgreement4,,Novation of annuity contracts,
+PRU,0001137774-25-000044,2024-12-31,pru_NovationOfIRAContractsUnderReinsuranceAgreement,,Assets transferred upon surrender of IRA contracts,
+PRU,0001137774-25-000044,2024-12-31,pru_AssetsReceivedAndRelatedLiabilitiesRecordedPensionRiskTransferassetsreceived,,"Assets received, excluding Cash and cash equivalents",
+PRU,0001137774-25-000044,2024-12-31,us-gaap_LiabilitiesAssumed1,,Liabilities assumed,
+PRU,0001137774-25-000044,2024-12-31,pru_OtherSignificantNoncashTransactionValueOfConsiderationCash,,Net cash received / (paid),
+PRU,0001137774-25-000044,2024-12-31,us-gaap_AssetAcquisitionConsiderationTransferredOtherAssets,,"Net assets transferred, excluding Cash and cash equivalent",
+PRU,0001137774-25-000044,2024-12-31,pru_PolicyLoansCeded,,Policy loans ceded,
+PRU,0001137774-25-000044,2024-12-31,pru_PayableEstablishedUnderCoinsuranceWithFundsWithheld,,Reinsurance payables,
+PRU,0001137774-25-000044,2024-12-31,pru_ReinsuranceRecoverablesEstablisehdForPHAB,,Reinsurance recoverables,
+PRU,0001137774-25-000044,2024-12-31,pru_DepositAssetsEstablishedForPHAB,,Deposit assets established for Policyholders' account balances ceded,
+PRU,0001137774-25-000044,2024-12-31,pru_UnwindOfDACCeded,,Unwind of Deferred policy acquisition costs ceded,
+PRU,0001137774-25-000044,2024-12-31,pru_DeferredReinsuranceLoss,,Deferred reinsurance loss,
+PRU,0001137774-25-000044,2024-12-31,pru_ReinsuranceRecoverableUnderMODCO,,"Reinsurance recoverables under modified coinsurance, net",
+PRU,0001137774-25-000044,2024-12-31,pru_DefferedReinsuranceGain,,Deferred reinsurance gain,
+PRU,0001137774-25-000044,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+PRU,0001137774-25-000044,2024-12-31,us-gaap_RestrictedCashAndCashEquivalents,,Restricted cash and restricted cash equivalents (included in “Other assets”),
+PRU,0001137774-25-000044,2024-12-31,pru_TotalCashCashEquivalentsRestrictedCashandRestrictedCashEquivalents,,"Total cash, cash equivalents, restricted cash and restricted cash equivalents",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+AFL,0000004977-25-000047,2024-12-31,us-gaap_IncreaseDecreaseInReceivables,,Change in receivables and advance premiums,
+AFL,0000004977-25-000047,2024-12-31,afl_CapitalizationOfDeferredPolicyAcquisitionCosts,,Capitalization of deferred policy acquisition costs,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostAmortizationExpense,,Amortization of deferred policy acquisition costs,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_IncreaseDecreaseInInsuranceLiabilities,,Increase in policy liabilities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable,,Change in income tax liabilities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_GainLossOnInvestments,,Net investment (gains) losses,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OtherNoncashIncomeExpense,,"Other, net",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ProceedsFromSaleAndMaturityOfAvailableForSaleSecurities,,Available-for-sale fixed maturity securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ProceedsFromSaleOfEquitySecuritiesFvNi,,Equity securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfHeldToMaturitySecurities,,Held-to-maturity fixed maturity securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ProceedsFromSaleAndCollectionOfLoansReceivable,,Commercial mortgage and other loans,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,Available for sale fixed maturity securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsToAcquireEquitySecuritiesFvNi,,Equity securities,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsToAcquireLoansReceivable,,Commercial mortgage and other loans,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsToAcquireOtherInvestments,,"Other investments, net",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsForProceedsFromHedgeInvestingActivities,,"Settlement of derivatives, net",
+AFL,0000004977-25-000047,2024-12-31,afl_IncreaseDecreaseInCollateralHeldForSecuritiesLendingAndDerivatives,,"Cash received (pledged or returned) as collateral, net",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,"Other, net",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet,,Proceeds from borrowings,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_RepaymentsOfLongTermDebtAndCapitalSecurities,,Principal payments under debt obligations,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_PaymentsOfDividends,commonDividendsPaid,commonDividendsPaid,commonDividendsPaid
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NetChangeAnnuitiesAndInvestmentCertificates,,"Change in investment-type contracts, net",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ProceedsFromSaleOfTreasuryStock,,Treasury stock reissued,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_ProceedsFromPaymentsForOtherFinancingActivities,,"Other, net",
+AFL,0000004977-25-000047,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+AFL,0000004977-25-000047,2024-12-31,us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations,,Effect of exchange rate changes on cash and cash equivalents,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+AFL,0000004977-25-000047,2024-12-31,us-gaap_IncomeTaxesPaidNet,,Income taxes paid,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_InterestPaidNet,,Interest paid,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_OtherNoncashExpense,,Noncash interest,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_TransferToOtherRealEstate,,Noncash real estate acquired in satisfaction of debt,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_CapitalLeaseObligationsIncurred,,Lease obligations,
+AFL,0000004977-25-000047,2024-12-31,us-gaap_StockIssued1,,Treasury stock issued,
+CB,0000896159-25-000004,2024-12-31,us-gaap_RealizedInvestmentGainsLosses,,Net Realized Gains Losses,
+CB,0000896159-25-000004,2024-12-31,us-gaap_AccretionAmortizationOfDiscountsAndPremiumsInvestments,,"Accretion (Amortization) of Discounts and Premiums, Investments",
+CB,0000896159-25-000004,2024-12-31,us-gaap_PresentValueOfFutureInsuranceProfitsAmortizationExpense1,,Amortization of purchased intangibles,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInDeferredIncomeTaxes,,Deferred income taxes,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestments,,Equity in net income of subsidiaries and affiliates,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInLiabilityForClaimsAndClaimsAdjustmentExpenseReserve,,Unpaid losses and loss expenses,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInUnearnedPremiums,,Unearned premiums,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInFuturePolicyBenefitReserves,,Future policy benefits,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInReinsurancePayables,,Insurance and reinsurance balances payable,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInAccountsPayableAndAccruedLiabilities,,"Accounts payable, accrued expenses, and other liabilities",
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable,,Income taxes,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInPremiumsReceivable,,Insurance and reinsurance balances receivable,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInReinsuranceRecoverable,,Reinsurance recoverable,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,Deferred policy acquisition costs,
+CB,0000896159-25-000004,2024-12-31,cb_SalesPurchaseOfInvestmentsByConsolidatedInvestmentProducts,,Net sales of investments by consolidated investment products,
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingCapitalNet,,Other,
+CB,0000896159-25-000004,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,Purchases of fixed maturities available-for-sale,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsToAcquireHeldToMaturitySecurities,,Purchases of fixed maturities held-to-maturity,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsToAcquireEquitySecuritiesFvNi,,Purchases of equity securities,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt,,Sales of fixed maturities available-for-sale,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromSaleOfEquitySecuritiesFvNi,,Sales of equity securities,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities,,Maturities and redemptions of fixed maturities available-for-sale,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfHeldToMaturitySecurities,,Maturities and redemptions of fixed maturities held-to-maturity,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsForProceedsFromShortTermInvestments,,Net change in short-term investments,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsForProceedsFromDerivativeInstrumentInvestingActivities,,Net derivative instruments settlements,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsToAcquireLimitedPartnershipInterests,,Private equity contributions,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromLimitedPartnershipInvestments,,Private equity distributions,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsToAcquireBusinessesNetOfCashAcquired,acquisitionsNet,acquisitionsNet,acquisitionsNet
+CB,0000896159-25-000004,2024-12-31,cb_CashAndCashEquivalentsIncreaseDecreaseDueToConsolidationAndDeconsolidationOfInvestmentProducts,,Cash And Cash Equivalents Increase (Decrease) Due To Consolidation And Deconsolidation Of Investment Products,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,Other,
+CB,0000896159-25-000004,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends paid on Common Shares,
+CB,0000896159-25-000004,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromShortTermDebt,,Proceeds from issuance of repurchase agreements,
+CB,0000896159-25-000004,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+CB,0000896159-25-000004,2024-12-31,us-gaap_RepaymentsOfShortTermDebt,,Repayment of repurchase agreements,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromIssuanceOfSharesUnderIncentiveAndShareBasedCompensationPlansIncludingStockOptions,,Proceeds from share-based compensation plans,
+CB,0000896159-25-000004,2024-12-31,us-gaap_AdditionsToContractHoldersFunds,,Policyholder contract deposits,
+CB,0000896159-25-000004,2024-12-31,us-gaap_WithdrawalFromContractHoldersFunds,,Policyholder contract withdrawals,
+CB,0000896159-25-000004,2024-12-31,cb_ThirdPartyCapitalInvestedIntoConsolidatedInvestmentProducts,,Third-party capital invested into consolidated investment products,
+CB,0000896159-25-000004,2024-12-31,cb_ThirdPartyCapitalDistributedByConsolidatedInvestmentProducts,,Third-party capital distributed by consolidated investment products,
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProceedsFromPaymentsForOtherFinancingActivities,,Tax withholding payments for share-based compensation plans,
+CB,0000896159-25-000004,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+CB,0000896159-25-000004,2024-12-31,us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,,Effect of foreign currency rate changes on cash and restricted cash,
+CB,0000896159-25-000004,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+CB,0000896159-25-000004,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+CB,0000896159-25-000004,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+CB,0000896159-25-000004,2024-12-31,us-gaap_IncomeTaxesPaidNet,,Taxes paid,
+CB,0000896159-25-000004,2024-12-31,us-gaap_InterestPaidNet,,Interest paid,
+CB,0000896159-25-000004,2024-12-31,us-gaap_MarketRiskBenefitChangeInFairValueGainLoss,,"Market Risk Benefit, Change in Fair Value, Gain (Loss)",
+CB,0000896159-25-000004,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+HIG,0000874766-25-000023,2024-12-31,us-gaap_GainLossOnInvestments,,Net realized losses,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_DeferredPolicyAcquisitionCostsAndPresentValueOfFutureProfitsAmortization1,,Amortization of deferred policy acquisition costs,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInDeferredPolicyAcquisitionCosts,,Additions to deferred policy acquisition costs,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_DepreciationAmortizationAndAccretionNet,,Depreciation and amortization,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_GainsLossesOnExtinguishmentOfDebt,,Loss on extinguishment of debt,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_OtherOperatingActivitiesCashFlowStatement,,"Other operating activities, net",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInReinsuranceRecoverable,,Increase in reinsurance recoverables,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInDeferredIncomeTaxes,,Net change in accrued and deferred income taxes,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInInsuranceLiabilities,,Increase in insurance liabilities,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInPremiumsReceivable,,Increase (Decrease) in Premiums Receivable,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInOtherOperatingCapitalNet,,Net change in other assets and other liabilities,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+HIG,0000874766-25-000023,2024-12-31,us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt,,"Fixed maturities, AFS",
+HIG,0000874766-25-000023,2024-12-31,hig_ProceedsFromSaleAndMaturityOfFairValueOptionFixedMaturitySecurties,,"Proceeds From Sale and Maturity of Fair Value Option, Fixed Maturity Securties",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_ProceedsFromSaleAndMaturityOfMarketableSecurities,salesMaturitiesOfInvestments,salesMaturitiesOfInvestments,salesMaturitiesOfInvestments
+HIG,0000874766-25-000023,2024-12-31,us-gaap_ProceedsFromSaleAndCollectionOfMortgageNotesReceivable,,Mortgage loans,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_ProceedsFromLimitedPartnershipInvestments,,Limited partnerships and other alternative investments,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt,,"Fixed maturities, AFS",
+HIG,0000874766-25-000023,2024-12-31,hig_PaymentsForThePurchaseOfFairValueOptionFixedMaturitySecurties,,Payments for the purchase of Fair Value Option Fixed Maturity Securties,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsToAcquireMarketableSecurities,purchasesOfInvestments,purchasesOfInvestments,purchasesOfInvestments
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsToAcquireMortgageNotesReceivable,,Mortgage loans,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsToAcquireLimitedPartnershipInterests,,Limited partnerships and other alternative investments,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsForProceedsFromDerivativeInstrumentInvestingActivities,,Net proceeds from (payments for) derivatives,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsToAcquirePropertyPlantAndEquipment,capitalExpenditure,capitalExpenditure,capitalExpenditure
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsForProceedsFromShortTermInvestments,,Net payments for short-term investments,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,"Other investing activities, net",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+HIG,0000874766-25-000023,2024-12-31,us-gaap_AdditionsToContractHoldersFunds,,Deposits and other additions to investment and universal life-type contracts,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_WithdrawalFromContractHoldersFunds,,Withdrawals and other deductions from investment and universal life-type contracts,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_RepaymentsOfShortTermDebt,,Repayment of debt,
+HIG,0000874766-25-000023,2024-12-31,hig_ProceedsPaymentsIssuanceReturnOfSharesUnderIncentiveAndShareBasedCompensationPlans,,"Net issuance (return of) shares under incentive and stock compensation plans, including related excise tax benefit",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock,,Payments for Repurchase of Preferred Stock and Preference Stock,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends paid on common stock,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+HIG,0000874766-25-000023,2024-12-31,us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations,,"Effect of Exchange Rate on Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Including Disposal Group and Discontinued Operations",
+HIG,0000874766-25-000023,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+HIG,0000874766-25-000023,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+HIG,0000874766-25-000023,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+HIG,0000874766-25-000023,2024-12-31,us-gaap_IncomeTaxesPaidNet,,Income tax paid,
+HIG,0000874766-25-000023,2024-12-31,us-gaap_InterestPaidNet,,Interest paid,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+LNC,0000059558-25-000023,2024-12-31,us-gaap_DebtAndEquitySecuritiesRealizedGainLoss,,Realized (gain) loss,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_MarketRiskBenefitChangeInFairValueGainLoss,,Market risk benefit (gain) loss,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ProceedsFromPaymentsForTradingSecurities,,"Sales and maturities (purchases) of trading securities, net",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_GoodwillAndIntangibleAssetImpairment,,Impairment of intangibles,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInPrepaidReinsurancePremiums,,Net operating cash payments related to closing Fortitude Re reinsurance transaction,
+LNC,0000059558-25-000023,2024-12-31,lnc_DeferredAcquisitionCostsValueOfBusinessAcquiredDeferredSalesInducementsAndDeferredFrontEndLoadsDeferralsAndInterestNetOfAmortization,,"Deferred acquisition costs, value of business acquired, deferred ales inducements and deferred front-end loads",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInAccruedInvestmentIncomeReceivable,,Accrued investment income,
+LNC,0000059558-25-000023,2024-12-31,lnc_ChangeInInsuranceLiabilitiesAndReinsuranceRelatedBalance,,Insurance liabilities and reinsurance-related balances,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInAccruedLiabilities,otherWorkingCapital,otherWorkingCapital,otherWorkingCapital
+LNC,0000059558-25-000023,2024-12-31,us-gaap_IncreaseDecreaseInIncomeTaxes,,Federal income tax accruals,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_OtherNoncashIncomeExpense,,Other,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetCashProvidedByUsedInOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities,netCashProvidedByOperatingActivities
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PaymentsToAcquireInvestments,,Purchases of available-for-sale securities and equity securities,
+LNC,0000059558-25-000023,2024-12-31,lnc_ProceedsFromSaleOfDebtSecuritiesAvailableForSaleAndEquitySecurities,,Sales of available-for-sale securities and equity securities,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities,,Maturities of available-for-sale securities,
+LNC,0000059558-25-000023,2024-12-31,lnc_PaymentsToAcquireAlternativeInvestments,,Purchases of alternative investments,
+LNC,0000059558-25-000023,2024-12-31,lnc_ProceedsFromSaleAndRepaymentOfAlternativeInvestments,,Sales and repayments of alternative investments,
+LNC,0000059558-25-000023,2024-12-31,lnc_IssuanceOfMortgageLoansOnRealEstate,,Issuance of mortgage loans on real estate,
+LNC,0000059558-25-000023,2024-12-31,lnc_RepaymentAndMaturitiesOfMortgageLoansOnRealEstate,,Repayment and maturities of mortgage loans on real estate,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PaymentsForProceedsFromPolicyLoans,,"Repayment (issuance) of policy loans, net",
+LNC,0000059558-25-000023,2024-12-31,lnc_NetChangeInCollateralOnInvestmentsDerivativesAndRelatedSettlements,,"Net change in collateral on investments, certain derivatives and related settlements",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ProceedsFromDivestitureOfBusinessesNetOfCashDivested,,"Cash received from disposition, net of cash transferred",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PaymentsForProceedsFromOtherInvestingActivities,,Other,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetCashProvidedByUsedInInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities,netCashProvidedByInvestingActivities
+LNC,0000059558-25-000023,2024-12-31,us-gaap_RepaymentsOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ProceedsFromIssuanceOfLongTermDebt,netDebtIssuance,netDebtIssuance,netDebtIssuance
+LNC,0000059558-25-000023,2024-12-31,lnc_PaymentsOfSaleLeasebackTransactions,,Payment related to sale-leaseback transactions,
+LNC,0000059558-25-000023,2024-12-31,lnc_ProceedsFromFinancingLeasesAndOtherFinancingActivities,,Proceeds from certain financing arrangements,
+LNC,0000059558-25-000023,2024-12-31,lnc_PaymentsForFinancingLeasesAndOtherFinancingActivities,,Payment related to certain financing arrangements,
+LNC,0000059558-25-000023,2024-12-31,lnc_ProceedsFromReinsuranceAgreementsFinancingActivities,,Net financing cash proceeds related to closing Fortitude Re reinsurance transaction,
+LNC,0000059558-25-000023,2024-12-31,lnc_DepositsOfFixedAccountValuesIncludingFixedPortionOfVariable,,Deposits of fixed account balances,
+LNC,0000059558-25-000023,2024-12-31,lnc_WithdrawalsOfFixedAccountValuesIncludingFixedPortionOfVariable,,Withdrawals of fixed account balances,
+LNC,0000059558-25-000023,2024-12-31,lnc_TransfersToAndFromSeparateAccountsNet,,"Transfers from (to) separate accounts, net",
+LNC,0000059558-25-000023,2024-12-31,lnc_CommonStockIssuedForBenefitPlans,,Common stock issued for benefit plans,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ProceedsFromIssuanceOfPreferredStockAndPreferenceStock,,"Issuance of preferred stock, net of issuance costs",
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PaymentsForRepurchaseOfCommonStock,commonStockRepurchased,commonStockRepurchased,commonStockRepurchased
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock,,Dividends paid to preferred stockholders,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_PaymentsOfDividendsCommonStock,,Dividends paid to common stockholders,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_ProceedsFromPaymentsForOtherFinancingActivities,,Other,
+LNC,0000059558-25-000023,2024-12-31,us-gaap_NetCashProvidedByUsedInFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities,netCashProvidedByFinancingActivities
+LNC,0000059558-25-000023,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect,netChangeInCash,netChangeInCash,netChangeInCash
+LNC,0000059558-25-000023,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod
+LNC,0000059558-25-000023,2024-12-31,us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents,cashAtEndOfPeriod,cashAtEndOfPeriod,cashAtEndOfPeriod

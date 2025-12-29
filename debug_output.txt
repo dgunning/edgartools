@@ -1,0 +1,102 @@
+﻿Fetching MSFT facts...
+Filtering for Revenue...
+Found 353 Revenue-like facts
+
+Analyzing 26 recent facts:
+  2024 FY (duration): 198270000000 Start=2021-07-01 End=2022-06-30
+  2024 Q1 (duration): 50122000000 Start=2022-07-01 End=2022-09-30
+  2024 Q2 (duration): 102869000000 Start=2022-07-01 End=2022-12-31
+  2024 Q2 (duration): 52747000000 Start=2022-10-01 End=2022-12-31
+  2024 Q3 (duration): 155726000000 Start=2022-07-01 End=2023-03-31
+  2024 Q3 (duration): 52857000000 Start=2023-01-01 End=2023-03-31
+  2024 FY (duration): 211915000000 Start=2022-07-01 End=2023-06-30
+  2025 FY (duration): 211915000000 Start=2022-07-01 End=2023-06-30
+  2024 Q1 (duration): 56517000000 Start=2023-07-01 End=2023-09-30
+  2025 Q1 (duration): 56517000000 Start=2023-07-01 End=2023-09-30
+  2024 Q2 (duration): 118537000000 Start=2023-07-01 End=2023-12-31
+  2025 Q2 (duration): 118537000000 Start=2023-07-01 End=2023-12-31
+  2024 Q2 (duration): 62020000000 Start=2023-10-01 End=2023-12-31
+  2025 Q2 (duration): 62020000000 Start=2023-10-01 End=2023-12-31
+  2024 Q3 (duration): 180395000000 Start=2023-07-01 End=2024-03-31
+  2025 Q3 (duration): 180395000000 Start=2023-07-01 End=2024-03-31
+  2024 Q3 (duration): 61858000000 Start=2024-01-01 End=2024-03-31
+  2025 Q3 (duration): 61858000000 Start=2024-01-01 End=2024-03-31
+  2024 FY (duration): 245122000000 Start=2023-07-01 End=2024-06-30
+  2025 FY (duration): 245122000000 Start=2023-07-01 End=2024-06-30
+  2025 Q1 (duration): 65585000000 Start=2024-07-01 End=2024-09-30
+  2025 Q2 (duration): 135217000000 Start=2024-07-01 End=2024-12-31
+  2025 Q2 (duration): 69632000000 Start=2024-10-01 End=2024-12-31
+  2025 Q3 (duration): 205283000000 Start=2024-07-01 End=2025-03-31
+  2025 Q3 (duration): 70066000000 Start=2025-01-01 End=2025-03-31
+  2025 FY (duration): 281724000000 Start=2024-07-01 End=2025-06-30
+
+Running TTMCalculator...
+[DEBUG] Starting _quarterize_facts...
+[DEBUG] Facts found: Q=218, YTD6=36, YTD9=36, FY=63
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2018: 43640000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2018: 53150000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2019: 53150000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2018: 30085000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2019: 30085000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2020: 30085000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2019: 33717000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2020: 33717000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2021: 33717000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2020: 38033000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2021: 38033000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2022: 38033000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2021: 46152000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2022: 46152000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2023: 46152000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2022: 51865000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2023: 51865000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2024: 51865000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 0: 51865000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2023: 56189000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2024: 56189000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 0: 56189000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2025: 56189000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2024: 64727000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 0: 64727000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2025: 64727000000.0
+[DEBUG] Derived Q4 for us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax 2025: 76441000000.0
+[DEBUG] No YTD9 found for FY 2010 (Start: 2007-07-01)
+       Candidates: 2
+[DEBUG] Derived Q4 for us-gaap:Revenues 2010: 13099000000.0
+[DEBUG] Derived Q4 for us-gaap:Revenues 2010: 16039000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueGoodsNet 2016: 9497000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueGoodsNet 2016: 4556000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueGoodsNet 2017: 4556000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueGoodsNet 2016: 13988000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueGoodsNet 2017: 13988000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueGoodsNet 2017: 13769000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2011: 13099000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2011: 16039000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2012: 16039000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2011: 17367000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2012: 17367000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2013: 17367000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2013: 17367000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2012: 18059000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2013: 18059000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2013: 18059000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2014: 18059000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2013: 19896000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2013: 19896000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2014: 19896000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2015: 19896000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 0: 19896000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2014: 23382000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2015: 23382000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 0: 23382000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2016: 23382000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2015: 22180000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 0: 22180000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2016: 22180000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2017: 22180000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2016: 37806000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2017: 37806000000.0
+[DEBUG] Derived Q4 for us-gaap:SalesRevenueNet 2017: 46529000000.0
+
+Scanning Derived Quarters for 2024/2025:
+  Γ¥î NO Q4 2024/2025 FOUND

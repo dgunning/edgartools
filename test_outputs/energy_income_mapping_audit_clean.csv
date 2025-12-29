@@ -1,0 +1,251 @@
+ticker,accession,period_end,concept,original_label,mapped_label,standard_label
+XOM,0000034088-25-000010,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+XOM,0000034088-25-000010,2024-12-31,xom_CrudeOilAndProductPurchases,,Crude oil and product purchases,
+XOM,0000034088-25-000010,2024-12-31,xom_ProductionAndManufacturingExpenses,,Production and manufacturing expenses,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+XOM,0000034088-25-000010,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+XOM,0000034088-25-000010,2024-12-31,us-gaap_ExplorationExpense,"Exploration expenses, including dry holes",explorationCosts,explorationCosts
+XOM,0000034088-25-000010,2024-12-31,us-gaap_NetPeriodicDefinedBenefitsExpenseReversalOfExpenseExcludingServiceCostComponent,,Non-service pension and postretirement benefit expense,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_InterestExpense,interestExpense,interestExpense,interestExpense
+XOM,0000034088-25-000010,2024-12-31,us-gaap_TaxesOther,,Other taxes and duties,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_CostsAndExpenses,,Total costs and other deductions,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income (loss) before income taxes,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+XOM,0000034088-25-000010,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+XOM,0000034088-25-000010,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Net income (loss) attributable to noncontrolling interests,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+XOM,0000034088-25-000010,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+XOM,0000034088-25-000010,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+CVX,0000093410-25-000009,2024-12-31,us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax,revenue,revenue,revenue
+CVX,0000093410-25-000009,2024-12-31,cvx_EquityMethodInvestmentIncome,,Income (loss) from equity affiliates,
+CVX,0000093410-25-000009,2024-12-31,cvx_NonoperatingIncome,,Other income (loss),
+CVX,0000093410-25-000009,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+CVX,0000093410-25-000009,2024-12-31,us-gaap_CostOfGoodsAndServicesSold,costOfRevenue,costOfRevenue,costOfRevenue
+CVX,0000093410-25-000009,2024-12-31,us-gaap_OperatingCostsAndExpenses,operatingExpenses,operatingExpenses,operatingExpenses
+CVX,0000093410-25-000009,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+CVX,0000093410-25-000009,2024-12-31,us-gaap_ExplorationExpense,Exploration expenses,explorationCosts,explorationCosts
+CVX,0000093410-25-000009,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+CVX,0000093410-25-000009,2024-12-31,us-gaap_TaxesOther,,Taxes other than on income,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_InterestExpenseDebt,,Interest and debt expense,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_NetPeriodicDefinedBenefitsExpenseReversalOfExpenseExcludingServiceCostComponent,,Other components of net periodic benefit costs,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_CostsAndExpenses,,Total Costs and Other Deductions,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments,,Income (Loss) Before Income Tax Expense,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+CVX,0000093410-25-000009,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+CVX,0000093410-25-000009,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Less: Net income (loss) attributable to noncontrolling interests,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+CVX,0000093410-25-000009,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+CVX,0000093410-25-000009,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+COP,0001163165-25-000012,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+COP,0001163165-25-000012,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestments,,Equity in earnings of affiliates,
+COP,0001163165-25-000012,2024-12-31,us-gaap_GainLossOnSaleOfPropertyPlantEquipment,,Gain (loss) on dispositions,
+COP,0001163165-25-000012,2024-12-31,us-gaap_OtherOperatingIncomeExpenseNet,,Other income,
+COP,0001163165-25-000012,2024-12-31,cop_RevenuesAndOtherIncome,,Total Revenues and Other Income,
+COP,0001163165-25-000012,2024-12-31,us-gaap_CostOfGoodsAndServicesSold,costOfRevenue,costOfRevenue,costOfRevenue
+COP,0001163165-25-000012,2024-12-31,us-gaap_OperatingCostsAndExpenses,operatingExpenses,operatingExpenses,operatingExpenses
+COP,0001163165-25-000012,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+COP,0001163165-25-000012,2024-12-31,us-gaap_ExplorationExpense,Exploration expenses,explorationCosts,explorationCosts
+COP,0001163165-25-000012,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+COP,0001163165-25-000012,2024-12-31,us-gaap_AssetImpairmentCharges,,Impairments,
+COP,0001163165-25-000012,2024-12-31,us-gaap_TaxesExcludingIncomeAndExciseTaxes,,Taxes other than income taxes,
+COP,0001163165-25-000012,2024-12-31,us-gaap_AccretionExpenseIncludingAssetRetirementObligations,,Accretion on discounted liabilities,
+COP,0001163165-25-000012,2024-12-31,us-gaap_InterestAndDebtExpense,,Interest and debt expense,
+COP,0001163165-25-000012,2024-12-31,us-gaap_ForeignCurrencyTransactionGainLossBeforeTax,,Foreign currency transaction (gain) loss,
+COP,0001163165-25-000012,2024-12-31,us-gaap_OtherNonoperatingIncomeExpense,totalOtherIncomeExpensesNet,totalOtherIncomeExpensesNet,totalOtherIncomeExpensesNet
+COP,0001163165-25-000012,2024-12-31,cop_OperatingExpensesIncludingNonoperatingIncomeExpenseAndInterestAndDebtExpense,,Total Costs and Expenses,
+COP,0001163165-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income (loss) before income taxes,
+COP,0001163165-25-000012,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+COP,0001163165-25-000012,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+COP,0001163165-25-000012,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+COP,0001163165-25-000012,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+COP,0001163165-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+COP,0001163165-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+SLB,0000950170-25-007638,2024-12-31,us-gaap_ServiceMember,,Services,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_ProductMember,,Product,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax,revenue,revenue,revenue
+SLB,0000950170-25-007638,2024-12-31,slb_InterestIncomeAndOther,,"Interest & other income, net",
+SLB,0000950170-25-007638,2024-12-31,us-gaap_CostOfGoodsAndServicesSold,costOfRevenue,costOfRevenue,costOfRevenue
+SLB,0000950170-25-007638,2024-12-31,us-gaap_ResearchAndDevelopmentExpense,researchAndDevelopmentExpenses,researchAndDevelopmentExpenses,researchAndDevelopmentExpenses
+SLB,0000950170-25-007638,2024-12-31,us-gaap_GeneralAndAdministrativeExpense,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses
+SLB,0000950170-25-007638,2024-12-31,us-gaap_RestructuringCharges,,Restructuring & other,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_BusinessCombinationIntegrationRelatedCosts,,Merger & integration,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_InterestExpense,interestExpense,interestExpense,interestExpense
+SLB,0000950170-25-007638,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income before taxes,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+SLB,0000950170-25-007638,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+SLB,0000950170-25-007638,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Net income attributable to noncontrolling interests,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+SLB,0000950170-25-007638,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+SLB,0000950170-25-007638,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+SLB,0000950170-25-007638,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+SLB,0000950170-25-007638,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OilAndCondensateMember,,Crude Oil and Condensate,
+EOG,0000821189-25-000011,2024-12-31,srt_NaturalGasLiquidsReservesMember,,Natural Gas Liquids,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_NaturalGasProductionMember,,Natural Gas,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_NaturalGasGatheringTransportationMarketingAndProcessingMember,,"Gathering, Processing and Marketing",
+EOG,0000821189-25-000011,2024-12-31,us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax,,Revenue from contract with customer,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_RevenueNotFromContractWithCustomer,,Revenue not from contract with customer,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_GainLossOnDispositionOfAssets1,,"Gains (Losses) on Asset Dispositions, Net",
+EOG,0000821189-25-000011,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OperatingLeaseExpense,,Lease and Well,
+EOG,0000821189-25-000011,2024-12-31,eog_GatheringProcessingAndTransportationCosts,,"Gathering, Processing and Transportation Costs",
+EOG,0000821189-25-000011,2024-12-31,us-gaap_ExplorationExpense,Exploration Costs,explorationCosts,explorationCosts
+EOG,0000821189-25-000011,2024-12-31,us-gaap_ResultsOfOperationsDryHoleCosts,,Dry Hole Costs,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_ImpairmentOfOilAndGasProperties,,Impairments,
+EOG,0000821189-25-000011,2024-12-31,eog_MarketingCosts,,Marketing Costs,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+EOG,0000821189-25-000011,2024-12-31,us-gaap_GeneralAndAdministrativeExpense,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses
+EOG,0000821189-25-000011,2024-12-31,eog_TaxesOtherThanIncome,,Taxes Other Than Income,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_CostsAndExpenses,,Total,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OperatingIncomeLoss,operatingIncome,operatingIncome,operatingIncome
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherNonoperatingIncomeExpense,totalOtherIncomeExpensesNet,totalOtherIncomeExpensesNet,totalOtherIncomeExpensesNet
+EOG,0000821189-25-000011,2024-12-31,eog_IncomeBeforeInterestExpenseAndIncomeTaxes,,Income Before Interest Expense and Income Taxes,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_InterestCostsIncurred,,Incurred,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_InterestCostsCapitalizedAdjustment,,Capitalized,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_InterestExpenseNonoperating,,"Interest Expense, Net",
+EOG,0000821189-25-000011,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income Before Income Taxes,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+EOG,0000821189-25-000011,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+EOG,0000821189-25-000011,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+EOG,0000821189-25-000011,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+EOG,0000821189-25-000011,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+EOG,0000821189-25-000011,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+EOG,0000821189-25-000011,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax,,Foreign Currency Translation Adjustments,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax,,Deferred Postretirement Plan,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherComprehensiveIncomeLossNetOfTax,,Other comprehensive income (loss),
+EOG,0000821189-25-000011,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest,,Comprehensive Income,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+OXY,0000797468-25-000029,2024-12-31,oxy_InterestDividendsAndOtherIncome,,"Interest, dividends and other income",
+OXY,0000797468-25-000029,2024-12-31,oxy_GainLossOnDispositionOfAssetsAndOtherNet,,"Gains (losses) on sales of assets and other, net",
+OXY,0000797468-25-000029,2024-12-31,oxy_RevenuesOperatingAndNonoperating,,Total,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_ResultsOfOperationsExpenseFromOilAndGasProducingActivities,,Oil and gas lease operating expense,
+OXY,0000797468-25-000029,2024-12-31,oxy_TransportationAndGatheringExpense,,Transportation and gathering expense,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_CostOfGoodsAndServicesSold,costOfRevenue,costOfRevenue,costOfRevenue
+OXY,0000797468-25-000029,2024-12-31,oxy_PurchasedCommodities,,Purchased commodities,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+OXY,0000797468-25-000029,2024-12-31,us-gaap_OtherCostAndExpenseOperating,,Other operating and non-operating expense,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_TaxesExcludingIncomeAndExciseTaxes,,Taxes other than on income,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+OXY,0000797468-25-000029,2024-12-31,oxy_PretaxAssetImpairmentAndRelatedItems,,Asset impairments and other charges,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_BusinessCombinationAcquisitionRelatedCosts,,Acquisition-related costs,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_ExplorationExpense,Exploration expense,explorationCosts,explorationCosts
+OXY,0000797468-25-000029,2024-12-31,us-gaap_InterestAndDebtExpense,,"Interest and debt expense, net",
+OXY,0000797468-25-000029,2024-12-31,oxy_CostsAndOtherDeductions,,Total,
+OXY,0000797468-25-000029,2024-12-31,oxy_IncomeLossFromContinuingOperationsBeforeNonoperatingIncomeExpenseEquityMethodInvestmentsIncomeTaxesNoncontrollingInterest,,Income before income taxes and other items,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_GainLossOnDerivativeInstrumentsNetPretax,,"Gains on interest rate swaps, net",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestments,,Income from equity investments and other,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_NonoperatingIncomeExpense,nonOperatingIncomeExcludingInterest,nonOperatingIncomeExcludingInterest,nonOperatingIncomeExcludingInterest
+OXY,0000797468-25-000029,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income from continuing operations before income taxes,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+OXY,0000797468-25-000029,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest,,Income from continuing operations,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTax,,"Income from discontinued operations, net of tax",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+OXY,0000797468-25-000029,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Less: Net income attributable to noncontrolling interest,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_PreferredStockDividendsAndOtherAdjustments,,Less: Preferred stock dividends and redemption premiums,
+OXY,0000797468-25-000029,2024-12-31,oxy_NetIncomeLossAttributableToCommonStockholders,,NET INCOME ATTRIBUTABLE TO COMMON STOCKHOLDERS,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsPerBasicShare,,Income from continuing operations—basic (in dollars per share),
+OXY,0000797468-25-000029,2024-12-31,us-gaap_DiscontinuedOperationIncomeLossFromDiscontinuedOperationNetOfTaxPerBasicShare,,Discontinued operations—basic (in dollars per share),
+OXY,0000797468-25-000029,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+OXY,0000797468-25-000029,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsPerDilutedShare,,Income from continuing operations—diluted (in dollars per share),
+OXY,0000797468-25-000029,2024-12-31,us-gaap_DiscontinuedOperationIncomeLossFromDiscontinuedOperationNetOfTaxPerDilutedShare,,Discontinued operations—diluted (in dollars per share),
+OXY,0000797468-25-000029,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+DVN,0000950170-25-022844,2024-12-31,us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax,revenue,revenue,revenue
+DVN,0000950170-25-022844,2024-12-31,us-gaap_GainLossOnOilAndGasHedgingActivity,,"Oil, gas and NGL derivatives",
+DVN,0000950170-25-022844,2024-12-31,us-gaap_Revenues,revenue,revenue,revenue
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ResultsOfOperationsProductionOrLiftingCosts,,Production expenses,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ExplorationExpense,Exploration expenses,explorationCosts,explorationCosts
+DVN,0000950170-25-022844,2024-12-31,us-gaap_CostOfGoodsAndServicesSold,costOfRevenue,costOfRevenue,costOfRevenue
+DVN,0000950170-25-022844,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+DVN,0000950170-25-022844,2024-12-31,us-gaap_GainLossOnDispositionOfAssets1,,Asset dispositions,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_GeneralAndAdministrativeExpense,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses
+DVN,0000950170-25-022844,2024-12-31,us-gaap_InterestIncomeExpenseNonoperatingNet,,"Financing costs, net",
+DVN,0000950170-25-022844,2024-12-31,dvn_OperatingAndNonoperatingOtherIncomeExpense,,"Other, net",
+DVN,0000950170-25-022844,2024-12-31,dvn_TotalExpenses,,Total expenses,
+DVN,0000950170-25-022844,2024-12-31,dvn_IncomeLossFromContinuingOperationsBeforeNoncontrollingInterest,,Earnings before income taxes,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+DVN,0000950170-25-022844,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Net earnings attributable to noncontrolling interests,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+DVN,0000950170-25-022844,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+DVN,0000950170-25-022844,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax,,Pension and postretirement plans,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OtherComprehensiveIncomeLossNetOfTax,,"Other comprehensive earnings (loss), net of tax",
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest,,Comprehensive earnings:,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest,,Comprehensive earnings attributable to noncontrolling interests,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ComprehensiveIncomeNetOfTax,,Comprehensive earnings attributable to Devon,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax,revenue,revenue,revenue
+PSX,0001534701-25-000074,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestments,,Equity in earnings of affiliates,
+PSX,0001534701-25-000074,2024-12-31,psx_GainLossOnDisposition,,Net gain on dispositions,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_NonoperatingIncomeExpense,nonOperatingIncomeExcludingInterest,nonOperatingIncomeExcludingInterest,nonOperatingIncomeExcludingInterest
+PSX,0001534701-25-000074,2024-12-31,psx_RevenuesAndOtherIncome,,Total Revenues and Other Income,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_CostOfGoodsAndServicesSold,costOfRevenue,costOfRevenue,costOfRevenue
+PSX,0001534701-25-000074,2024-12-31,us-gaap_OtherCostAndExpenseOperating,,Operating expenses,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+PSX,0001534701-25-000074,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+PSX,0001534701-25-000074,2024-12-31,us-gaap_AssetImpairmentCharges,,Impairments,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_TaxesExcludingIncomeAndExciseTaxes,,Taxes other than income taxes,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_AccretionExpenseIncludingAssetRetirementObligations,,Accretion on discounted liabilities,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_InterestAndDebtExpense,,Interest and debt expense,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_ForeignCurrencyTransactionGainLossBeforeTax,,Foreign currency transaction (gains) losses,
+PSX,0001534701-25-000074,2024-12-31,psx_CostAndExpenses,,Total Costs and Expenses,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_IncomeLossIncludingPortionAttributableToNoncontrollingInterest,,Income before income taxes,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+PSX,0001534701-25-000074,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+PSX,0001534701-25-000074,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Less: net income attributable to noncontrolling interests,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+PSX,0001534701-25-000074,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+PSX,0001534701-25-000074,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+PSX,0001534701-25-000074,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+PSX,0001534701-25-000074,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+MPC,0001510295-25-000012,2024-12-31,us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax,revenue,revenue,revenue
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromEquityMethodInvestments,,Income from equity method investments,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_GainLossOnDispositionOfAssets1,,Net gain on disposal of assets,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OtherOperatingIncome,,Other income,
+MPC,0001510295-25-000012,2024-12-31,mpc_RevenuesAndOtherIncome,,Revenues and other income,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_CostOfGoodsAndServicesSold,costOfRevenue,costOfRevenue,costOfRevenue
+MPC,0001510295-25-000012,2024-12-31,us-gaap_DepreciationDepletionAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+MPC,0001510295-25-000012,2024-12-31,us-gaap_SellingGeneralAndAdministrativeExpense,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses,sellingGeneralAndAdministrativeExpenses
+MPC,0001510295-25-000012,2024-12-31,us-gaap_TaxesExcludingIncomeAndExciseTaxes,,Other taxes,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_CostsAndExpenses,,Total costs and expenses,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OperatingIncomeLoss,operatingIncome,operatingIncome,operatingIncome
+MPC,0001510295-25-000012,2024-12-31,us-gaap_InterestAndDebtExpense,,Net interest and other financial costs,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income from continuing operations before income taxes,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest,,"Income from continuing operations, net of tax",
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxAttributableToReportingEntity,,"Income from discontinued operations, net of tax",
+MPC,0001510295-25-000012,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+MPC,0001510295-25-000012,2024-12-31,us-gaap_NetIncomeLossAttributableToRedeemableNoncontrollingInterest,,Redeemable noncontrolling interest,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_NetIncomeLossAttributableToNonredeemableNoncontrollingInterest,,Noncontrolling interests,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsPerBasicShare,,Continuing operations,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerBasicShare,,Discontinued operations,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+MPC,0001510295-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsPerDilutedShare,,Continuing operations,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxPerDilutedShare,,Discontinued operations,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+MPC,0001510295-25-000012,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+VLO,0001035002-25-000005,2024-12-31,us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax,,Revenues,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_CostDirectMaterial,,Cost of materials and other,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_CostOfGoodsAndServicesSoldOverhead,,Operating expenses (excluding depreciation and amortization expense reflected below),
+VLO,0001035002-25-000005,2024-12-31,us-gaap_CostOfGoodsAndServicesSoldDepreciationAndAmortization,,Depreciation and amortization expense,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_CostOfRevenue,costOfRevenue,costOfRevenue,costOfRevenue
+VLO,0001035002-25-000005,2024-12-31,us-gaap_ImpairmentOfLongLivedAssetsHeldForUse,,Asset impairment loss,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_OtherCostAndExpenseOperating,,Other operating expenses,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_GeneralAndAdministrativeExpense,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses,generalAndAdministrativeExpenses
+VLO,0001035002-25-000005,2024-12-31,us-gaap_DepreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization,depreciationAndAmortization
+VLO,0001035002-25-000005,2024-12-31,us-gaap_OperatingIncomeLoss,operatingIncome,operatingIncome,operatingIncome
+VLO,0001035002-25-000005,2024-12-31,us-gaap_OtherNonoperatingIncomeExpense,totalOtherIncomeExpensesNet,totalOtherIncomeExpensesNet,totalOtherIncomeExpensesNet
+VLO,0001035002-25-000005,2024-12-31,us-gaap_InterestExpense,interestExpense,interestExpense,interestExpense
+VLO,0001035002-25-000005,2024-12-31,us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest,,Income before income tax expense,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_IncomeTaxExpenseBenefit,incomeTaxExpense,incomeTaxExpense,incomeTaxExpense
+VLO,0001035002-25-000005,2024-12-31,us-gaap_ProfitLoss,netIncome,netIncome,netIncome
+VLO,0001035002-25-000005,2024-12-31,us-gaap_NetIncomeLossAttributableToNoncontrollingInterest,,Less: Net income attributable to noncontrolling interests,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_NetIncomeLoss,netIncome,netIncome,netIncome
+VLO,0001035002-25-000005,2024-12-31,us-gaap_EarningsPerShareBasic,eps,eps,eps
+VLO,0001035002-25-000005,2024-12-31,us-gaap_WeightedAverageNumberOfSharesOutstandingBasic,weightedAverageShsOut,weightedAverageShsOut,weightedAverageShsOut
+VLO,0001035002-25-000005,2024-12-31,us-gaap_EarningsPerShareDiluted,epsDiluted,epsDiluted,epsDiluted
+VLO,0001035002-25-000005,2024-12-31,us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding,weightedAverageShsOutDil,weightedAverageShsOutDil,weightedAverageShsOutDil
+VLO,0001035002-25-000005,2024-12-31,us-gaap_ExciseAndSalesTaxes,,Includes excise taxes on sales by certain of our foreign operations,

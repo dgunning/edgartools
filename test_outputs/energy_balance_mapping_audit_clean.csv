@@ -1,0 +1,336 @@
+ticker,accession,period_end,concept,original_label,mapped_label,standard_label
+XOM,0000034088-25-000010,2024-12-31,us-gaap_RelatedPartyMember,,Related Party,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_NonrelatedPartyMember,,Nonrelated Party,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+XOM,0000034088-25-000010,2024-12-31,us-gaap_RestrictedCashAndCashEquivalentsAtCarryingValue,,Cash and cash equivalents – restricted,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_ReceivablesNetCurrent,netReceivables,netReceivables,netReceivables
+XOM,0000034088-25-000010,2024-12-31,us-gaap_EnergyRelatedInventory,,"Crude oil, products and merchandise",
+XOM,0000034088-25-000010,2024-12-31,us-gaap_InventoryPartsAndComponentsNetOfReserves,,Materials and supplies,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_OtherAssetsCurrent,,Other current assets,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+XOM,0000034088-25-000010,2024-12-31,us-gaap_LongTermInvestmentsAndReceivablesNet,,"Investments, advances and long-term receivables",
+XOM,0000034088-25-000010,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+XOM,0000034088-25-000010,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+XOM,0000034088-25-000010,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+XOM,0000034088-25-000010,2024-12-31,us-gaap_DebtCurrent,,Notes and loans payable,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_AccountsPayableAndAccruedLiabilitiesCurrent,,Accounts payable and accrued liabilities,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_AccruedIncomeTaxesCurrent,,Income taxes payable,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+XOM,0000034088-25-000010,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligations,,Long-term debt,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent,,Postretirement benefits reserves,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred income tax liabilities,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_OtherLiabilitiesNoncurrent,otherNonCurrentLiabilities,otherNonCurrentLiabilities,otherNonCurrentLiabilities
+XOM,0000034088-25-000010,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+XOM,0000034088-25-000010,2024-12-31,us-gaap_CommitmentsAndContingencies,,Commitments and contingencies,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+XOM,0000034088-25-000010,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+XOM,0000034088-25-000010,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+XOM,0000034088-25-000010,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Common stock held in treasury (3,666 million shares in 2024 and 4,048 million shares in 2023)",
+XOM,0000034088-25-000010,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+XOM,0000034088-25-000010,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+XOM,0000034088-25-000010,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total Equity,
+XOM,0000034088-25-000010,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+CVX,0000093410-25-000009,2024-12-31,cvx_CashAndCashEquivalentsExcludingTimeDeposits,,Cash and cash equivalents,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_TimeDepositsAtCarryingValue,,Time deposits,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_MarketableSecuritiesCurrent,shortTermInvestments,shortTermInvestments,shortTermInvestments
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AccountsNotesAndLoansReceivableNetCurrent,,Accounts and notes receivable (less allowance: 2024 - $259; 2023 - $301),
+CVX,0000093410-25-000009,2024-12-31,us-gaap_InventoryFinishedGoodsAndWorkInProcess,,Crude oil and products,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_EnergyRelatedInventoryChemicals,,Chemicals,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_OtherInventorySupplies,,"Materials, supplies and other",
+CVX,0000093410-25-000009,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+CVX,0000093410-25-000009,2024-12-31,us-gaap_PrepaidExpenseCurrent,,Prepaid expenses and other current assets,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AccountsReceivableExcludingAccruedInterestAfterAllowanceForCreditLossNoncurrent,,"Long-term receivables, net (less allowances: 2024 - $352; 2023 - $340)",
+CVX,0000093410-25-000009,2024-12-31,us-gaap_InvestmentsInAffiliatesSubsidiariesAssociatesAndJointVentures,,Investments and advances,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization,,"Properties, plant and equipment, at cost",
+CVX,0000093410-25-000009,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization,,"Less: Accumulated depreciation, depletion and amortization",
+CVX,0000093410-25-000009,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization,,"Properties, plant and equipment, net",
+CVX,0000093410-25-000009,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+CVX,0000093410-25-000009,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+CVX,0000093410-25-000009,2024-12-31,us-gaap_DisposalGroupIncludingDiscontinuedOperationPropertyPlantAndEquipment,,Assets held for sale,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+CVX,0000093410-25-000009,2024-12-31,us-gaap_ShortTermBorrowings,shortTermDebt,shortTermDebt,shortTermDebt
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AccruedLiabilitiesCurrent,accruedExpenses,accruedExpenses,accruedExpenses
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AccruedIncomeTaxesCurrent,,Federal and other taxes on income,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AccrualForTaxesOtherThanIncomeTaxesCurrent,,Other taxes payable,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+CVX,0000093410-25-000009,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities,,Long-term debt,
+CVX,0000093410-25-000009,2024-12-31,cvx_ContractWithCustomerLiabilityAndOtherNoncurrentLiability,,Deferred credits and other noncurrent obligations,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Noncurrent deferred income taxes,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent,,Noncurrent employee benefit plans,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+CVX,0000093410-25-000009,2024-12-31,us-gaap_PreferredStockValue,,"Preferred stock (authorized 100,000,000 shares; $1.00 par value; none issued)",
+CVX,0000093410-25-000009,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Capital in excess of par value,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+CVX,0000093410-25-000009,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+CVX,0000093410-25-000009,2024-12-31,us-gaap_CommonStockHeldInTrust,,Deferred compensation and benefit plan trust,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Treasury stock, at cost (2024 - 673,664,306 shares; 2023 - 577,028,776 shares)",
+CVX,0000093410-25-000009,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+CVX,0000093410-25-000009,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+CVX,0000093410-25-000009,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total Equity,
+CVX,0000093410-25-000009,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+COP,0001163165-25-000012,2024-12-31,us-gaap_NonrelatedPartyMember,,Nonrelated Party,
+COP,0001163165-25-000012,2024-12-31,us-gaap_RelatedPartyMember,,Related Party,
+COP,0001163165-25-000012,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+COP,0001163165-25-000012,2024-12-31,us-gaap_ShortTermInvestments,,Short-term investments,
+COP,0001163165-25-000012,2024-12-31,us-gaap_AccountsAndNotesReceivableNet,,Accounts and notes receivable—related parties,
+COP,0001163165-25-000012,2024-12-31,us-gaap_AccountsAndNotesReceivableNet,,Accounts and notes receivable—related parties,
+COP,0001163165-25-000012,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+COP,0001163165-25-000012,2024-12-31,us-gaap_PrepaidExpenseAndOtherAssetsCurrent,prepaids,prepaids,prepaids
+COP,0001163165-25-000012,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+COP,0001163165-25-000012,2024-12-31,us-gaap_LongTermInvestmentsAndReceivablesNet,,Investments and long-term receivables,
+COP,0001163165-25-000012,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization,,"Net properties, plants and equipment (net of accumulated DD&A of $81,072 and $74,361, respectively)",
+COP,0001163165-25-000012,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+COP,0001163165-25-000012,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+COP,0001163165-25-000012,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+COP,0001163165-25-000012,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+COP,0001163165-25-000012,2024-12-31,us-gaap_DebtCurrent,,Short-term debt,
+COP,0001163165-25-000012,2024-12-31,us-gaap_TaxesPayableCurrent,,Accrued income and other taxes,
+COP,0001163165-25-000012,2024-12-31,us-gaap_EmployeeRelatedLiabilitiesCurrent,,Employee benefit obligations,
+COP,0001163165-25-000012,2024-12-31,us-gaap_OtherLiabilitiesCurrent,,Other accruals,
+COP,0001163165-25-000012,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+COP,0001163165-25-000012,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligations,,Long-term debt,
+COP,0001163165-25-000012,2024-12-31,cop_AssetRetirementObligationsAndAccruedEnvironmentalCostNonCurrent,,Asset retirement obligations and accrued environmental costs,
+COP,0001163165-25-000012,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred income taxes,
+COP,0001163165-25-000012,2024-12-31,us-gaap_PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent,,Employee benefit obligations,
+COP,0001163165-25-000012,2024-12-31,us-gaap_DeferredCreditsAndOtherLiabilities,,Other liabilities and deferred credits,
+COP,0001163165-25-000012,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+COP,0001163165-25-000012,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+COP,0001163165-25-000012,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Capital in excess of par,
+COP,0001163165-25-000012,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+COP,0001163165-25-000012,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+COP,0001163165-25-000012,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+COP,0001163165-25-000012,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+COP,0001163165-25-000012,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+SLB,0000950170-25-007638,2024-12-31,us-gaap_Cash,,Cash,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_ShortTermInvestments,,Short-term investments,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_ReceivablesNetCurrent,netReceivables,netReceivables,netReceivables
+SLB,0000950170-25-007638,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+SLB,0000950170-25-007638,2024-12-31,us-gaap_OtherAssetsCurrent,,Other current assets,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+SLB,0000950170-25-007638,2024-12-31,us-gaap_InvestmentsInAffiliatesSubsidiariesAssociatesAndJointVentures,,Investments in Affiliated Companies,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+SLB,0000950170-25-007638,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+SLB,0000950170-25-007638,2024-12-31,us-gaap_FiniteLivedIntangibleAssetsNet,,Intangible Assets,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+SLB,0000950170-25-007638,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+SLB,0000950170-25-007638,2024-12-31,us-gaap_AccountsPayableAndAccruedLiabilitiesCurrent,,Accounts payable and accrued liabilities,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_AccruedIncomeTaxesCurrent,,Estimated liability for taxes on income,
+SLB,0000950170-25-007638,2024-12-31,slb_ShortTermBorrowingsAndLongTermDebtCurrent,,Short-term borrowings and current portion of long-term debt,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_DividendsPayableCurrent,,Dividends payable,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+SLB,0000950170-25-007638,2024-12-31,us-gaap_LongTermDebtNoncurrent,longTermDebt,longTermDebt,longTermDebt
+SLB,0000950170-25-007638,2024-12-31,us-gaap_PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent,,Postretirement Benefits,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred Taxes,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_OtherLiabilitiesNoncurrent,otherNonCurrentLiabilities,otherNonCurrentLiabilities,otherNonCurrentLiabilities
+SLB,0000950170-25-007638,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+SLB,0000950170-25-007638,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+SLB,0000950170-25-007638,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+SLB,0000950170-25-007638,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+SLB,0000950170-25-007638,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+SLB,0000950170-25-007638,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+SLB,0000950170-25-007638,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+SLB,0000950170-25-007638,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+SLB,0000950170-25-007638,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+EOG,0000821189-25-000011,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+EOG,0000821189-25-000011,2024-12-31,us-gaap_AccountsReceivableNetCurrent,netReceivables,netReceivables,netReceivables
+EOG,0000821189-25-000011,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+EOG,0000821189-25-000011,2024-12-31,us-gaap_DerivativeAssetsCurrent,,Assets from Price Risk Management Activities,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherAssetsCurrent,,Other,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OilAndGasPropertySuccessfulEffortMethodGross,,Oil and Gas Properties (Successful Efforts Method),
+EOG,0000821189-25-000011,2024-12-31,us-gaap_PropertyPlantAndEquipmentOther,,"Other Property, Plant and Equipment",
+EOG,0000821189-25-000011,2024-12-31,us-gaap_PropertyPlantAndEquipmentGross,,"Total Property, Plant and Equipment",
+EOG,0000821189-25-000011,2024-12-31,us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment,accumulatedDepreciationAmortizationPPE,accumulatedDepreciationAmortizationPPE,accumulatedDepreciationAmortizationPPE
+EOG,0000821189-25-000011,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+EOG,0000821189-25-000011,2024-12-31,us-gaap_DeferredIncomeTaxAssetsNet,,Deferred Income Taxes,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+EOG,0000821189-25-000011,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+EOG,0000821189-25-000011,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+EOG,0000821189-25-000011,2024-12-31,us-gaap_TaxesPayableCurrent,,Accrued Taxes Payable,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_DividendsPayableCurrentAndNoncurrent,,Dividends Payable,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_DerivativeLiabilitiesCurrent,,Liabilities from Price Risk Management Activities,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_LongTermDebtCurrent,shortTermDebt,shortTermDebt,shortTermDebt
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OperatingLeaseLiabilityCurrent,,Current Portion of Operating Lease Liabilities,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherLiabilitiesCurrent,,Other,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+EOG,0000821189-25-000011,2024-12-31,us-gaap_LongTermDebtNoncurrent,longTermDebt,longTermDebt,longTermDebt
+EOG,0000821189-25-000011,2024-12-31,us-gaap_OtherLiabilitiesNoncurrent,otherNonCurrentLiabilities,otherNonCurrentLiabilities,otherNonCurrentLiabilities
+EOG,0000821189-25-000011,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred Income Taxes,
+EOG,0000821189-25-000011,2024-12-31,us-gaap_CommitmentsAndContingencies,,Commitments and Contingencies (Note 8),
+EOG,0000821189-25-000011,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+EOG,0000821189-25-000011,2024-12-31,us-gaap_AdditionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital
+EOG,0000821189-25-000011,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+EOG,0000821189-25-000011,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+EOG,0000821189-25-000011,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Common Stock Held in Treasury, 31,731,107 Shares and 7,888,105 Shares at December 31, 2024 and 2023, respectively",
+EOG,0000821189-25-000011,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+EOG,0000821189-25-000011,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+OXY,0000797468-25-000029,2024-12-31,us-gaap_OperatingSegmentsMember,,Operating segments,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_CorporateNonSegmentMember,,Corporate,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+OXY,0000797468-25-000029,2024-12-31,us-gaap_AccountsReceivableNetCurrent,netReceivables,netReceivables,netReceivables
+OXY,0000797468-25-000029,2024-12-31,us-gaap_OilAndGasJointInterestBillingReceivables,,Joint interest receivables,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+OXY,0000797468-25-000029,2024-12-31,us-gaap_OtherAssetsCurrent,,Other current assets,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+OXY,0000797468-25-000029,2024-12-31,us-gaap_EquityMethodInvestments,,INVESTMENTS IN UNCONSOLIDATED ENTITIES,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization,,"Gross property, plant and equipment",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization,,"Accumulated depreciation, depletion and amortization",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization,,"Total property, plant and equipment, net",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_OperatingLeaseRightOfUseAsset,,OPERATING LEASE ASSETS,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+OXY,0000797468-25-000029,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+OXY,0000797468-25-000029,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligationsCurrent,,Current maturities of long-term debt,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_OperatingLeaseLiabilityCurrent,,Current operating lease liabilities,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+OXY,0000797468-25-000029,2024-12-31,us-gaap_AccruedLiabilitiesCurrent,accruedExpenses,accruedExpenses,accruedExpenses
+OXY,0000797468-25-000029,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+OXY,0000797468-25-000029,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligations,,"LONG-TERM DEBT, NET",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,"Deferred income taxes, net",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_AssetRetirementObligationsNoncurrent,,Asset retirement obligations,
+OXY,0000797468-25-000029,2024-12-31,oxy_DeferredCreditsAndOtherLiabilitiesNoncurrentOther,,Other deferred credits and liabilities,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_DeferredCreditsAndOtherLiabilitiesNoncurrent,,Total deferred credits and other liabilities,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_PreferredStockValue,,"Preferred stock, at $1.00 per share par value, issued shares: 2024 — 84,897 and 2023 — 84,897",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+OXY,0000797468-25-000029,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Treasury stock: 2024 — 228,311,184 shares and 2023 — 228,053,397 shares",
+OXY,0000797468-25-000029,2024-12-31,us-gaap_AdditionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital
+OXY,0000797468-25-000029,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+OXY,0000797468-25-000029,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+OXY,0000797468-25-000029,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+OXY,0000797468-25-000029,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+OXY,0000797468-25-000029,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+OXY,0000797468-25-000029,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+DVN,0000950170-25-022844,2024-12-31,us-gaap_RestrictedCashAndCashEquivalents,,"Cash, cash equivalents and restricted cash",
+DVN,0000950170-25-022844,2024-12-31,us-gaap_AccountsReceivableNetCurrent,netReceivables,netReceivables,netReceivables
+DVN,0000950170-25-022844,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OtherAssetsCurrent,,Other current assets,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OilAndGasPropertySuccessfulEffortMethodNet,,"Oil and gas property and equipment, based on successful efforts accounting, net",
+DVN,0000950170-25-022844,2024-12-31,us-gaap_PropertyPlantAndEquipmentOtherNet,,"Other property and equipment, net ($178 million and $136 million related to CDM in 2024 and 2023, respectively)",
+DVN,0000950170-25-022844,2024-12-31,us-gaap_PropertyPlantAndEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet,propertyPlantEquipmentNet
+DVN,0000950170-25-022844,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+DVN,0000950170-25-022844,2024-12-31,dvn_RightOfUseAssetsNoncurrent,,Right-of-use assets,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_Investments,,Investments,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+DVN,0000950170-25-022844,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+DVN,0000950170-25-022844,2024-12-31,us-gaap_AccountsPayableTradeCurrent,,Accounts payable,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OilAndGasSalesPayableCurrent,,Revenues and royalties payable,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_ShortTermBorrowings,shortTermDebt,shortTermDebt,shortTermDebt
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OtherLiabilitiesCurrent,,Other current liabilities,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+DVN,0000950170-25-022844,2024-12-31,us-gaap_LongTermDebtNoncurrent,longTermDebt,longTermDebt,longTermDebt
+DVN,0000950170-25-022844,2024-12-31,dvn_LeaseLiabilitiesNoncurrent,,Lease liabilities,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_AssetRetirementObligationsNoncurrent,,Asset retirement obligations,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_OtherLiabilitiesNoncurrent,otherNonCurrentLiabilities,otherNonCurrentLiabilities,otherNonCurrentLiabilities
+DVN,0000950170-25-022844,2024-12-31,us-gaap_DeferredIncomeTaxesAndOtherTaxLiabilitiesNoncurrent,,Deferred income taxes,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+DVN,0000950170-25-022844,2024-12-31,us-gaap_AdditionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital,additionalPaidInCapital
+DVN,0000950170-25-022844,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+DVN,0000950170-25-022844,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+DVN,0000950170-25-022844,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+DVN,0000950170-25-022844,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+DVN,0000950170-25-022844,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+DVN,0000950170-25-022844,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+DVN,0000950170-25-022844,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+PSX,0001534701-25-000074,2024-12-31,us-gaap_NonrelatedPartyMember,,Nonrelated Party,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_RelatedPartyMember,,Related Party,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+PSX,0001534701-25-000074,2024-12-31,us-gaap_AccountsNotesAndLoansReceivableNetCurrent,,Accounts and notes receivable (net of allowances of $70 million in 2024 and $71 million in 2023),
+PSX,0001534701-25-000074,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+PSX,0001534701-25-000074,2024-12-31,us-gaap_PrepaidExpenseAndOtherAssetsCurrent,prepaids,prepaids,prepaids
+PSX,0001534701-25-000074,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+PSX,0001534701-25-000074,2024-12-31,us-gaap_LongTermInvestmentsAndReceivablesNet,,Investments and long-term receivables,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization,,"Net properties, plants and equipment",
+PSX,0001534701-25-000074,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+PSX,0001534701-25-000074,2024-12-31,us-gaap_IntangibleAssetsNetExcludingGoodwill,intangibleAssets,intangibleAssets,intangibleAssets
+PSX,0001534701-25-000074,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+PSX,0001534701-25-000074,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+PSX,0001534701-25-000074,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+PSX,0001534701-25-000074,2024-12-31,us-gaap_DebtCurrent,,Short-term debt,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_TaxesPayableCurrent,,Accrued income and other taxes,
+PSX,0001534701-25-000074,2024-12-31,psx_EmployeeBenefitObligationsCurrent,,Employee benefit obligations,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_OtherLiabilitiesCurrent,,Other accruals,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+PSX,0001534701-25-000074,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligations,,Long-term debt,
+PSX,0001534701-25-000074,2024-12-31,psx_AssetRetirementObligationsAndAccruedEnvironmentalCost,,Asset retirement obligations and accrued environmental costs,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred income taxes,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent,,Employee benefit obligations,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_DeferredCreditsAndOtherLiabilitiesNoncurrent,,Other liabilities and deferred credits,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+PSX,0001534701-25-000074,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+PSX,0001534701-25-000074,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Capital in excess of par,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Treasury stock (at cost: 2024—248,594,923 shares; 2023—224,377,439 shares)",
+PSX,0001534701-25-000074,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+PSX,0001534701-25-000074,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+PSX,0001534701-25-000074,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+PSX,0001534701-25-000074,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+PSX,0001534701-25-000074,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total Equity,
+PSX,0001534701-25-000074,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+MPC,0001510295-25-000012,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+MPC,0001510295-25-000012,2024-12-31,us-gaap_ShortTermInvestments,,Short-term investments,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_AccountsReceivableNetCurrent,netReceivables,netReceivables,netReceivables
+MPC,0001510295-25-000012,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OtherAssetsCurrent,,Other current assets,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+MPC,0001510295-25-000012,2024-12-31,us-gaap_EquityMethodInvestments,,Equity method investments,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization,,"Property, plant and equipment, net",
+MPC,0001510295-25-000012,2024-12-31,us-gaap_Goodwill,goodwill,goodwill,goodwill
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OperatingLeaseRightOfUseAsset,,Right of use assets,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+MPC,0001510295-25-000012,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+MPC,0001510295-25-000012,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+MPC,0001510295-25-000012,2024-12-31,us-gaap_EmployeeRelatedLiabilitiesCurrent,,Payroll and benefits payable,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_TaxesPayableCurrent,,Accrued taxes,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligationsCurrent,,Debt due within one year,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OperatingLeaseLiabilityCurrent,,Operating lease liabilities,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OtherLiabilitiesCurrent,,Other current liabilities,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+MPC,0001510295-25-000012,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligations,,Long-term debt,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred income taxes,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent,,Defined benefit postretirement plan obligations,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_OperatingLeaseLiabilityNoncurrent,,Long-term operating lease liabilities,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_DeferredCreditsAndOtherLiabilitiesNoncurrent,,Deferred credits and other liabilities,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_Liabilities,totalLiabilities,totalLiabilities,totalLiabilities
+MPC,0001510295-25-000012,2024-12-31,us-gaap_CommitmentsAndContingencies,,Commitments and contingencies (see Note 27),
+MPC,0001510295-25-000012,2024-12-31,us-gaap_RedeemableNoncontrollingInterestEquityCarryingAmount,,Redeemable noncontrolling interest,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_PreferredStockValue,,"Preferred stock, no shares issued and outstanding (par value $0.01 per share, 30 million shares authorized)",
+MPC,0001510295-25-000012,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+MPC,0001510295-25-000012,2024-12-31,us-gaap_TreasuryStockValue,treasuryStock,treasuryStock,treasuryStock
+MPC,0001510295-25-000012,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Additional paid-in capital,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+MPC,0001510295-25-000012,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+MPC,0001510295-25-000012,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+MPC,0001510295-25-000012,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+MPC,0001510295-25-000012,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+MPC,0001510295-25-000012,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
+VLO,0001035002-25-000005,2024-12-31,us-gaap_CashAndCashEquivalentsAtCarryingValue,cashAndCashEquivalents,cashAndCashEquivalents,cashAndCashEquivalents
+VLO,0001035002-25-000005,2024-12-31,us-gaap_ReceivablesNetCurrent,netReceivables,netReceivables,netReceivables
+VLO,0001035002-25-000005,2024-12-31,us-gaap_InventoryNet,inventory,inventory,inventory
+VLO,0001035002-25-000005,2024-12-31,us-gaap_PrepaidExpenseAndOtherAssetsCurrent,prepaids,prepaids,prepaids
+VLO,0001035002-25-000005,2024-12-31,us-gaap_AssetsCurrent,totalCurrentAssets,totalCurrentAssets,totalCurrentAssets
+VLO,0001035002-25-000005,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization,,"Property, plant, and equipment, at cost",
+VLO,0001035002-25-000005,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization,,Accumulated depreciation,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization,,"Property, plant, and equipment, net",
+VLO,0001035002-25-000005,2024-12-31,us-gaap_OtherAssetsNoncurrent,otherNonCurrentAssets,otherNonCurrentAssets,otherNonCurrentAssets
+VLO,0001035002-25-000005,2024-12-31,us-gaap_Assets,totalAssets,totalAssets,totalAssets
+VLO,0001035002-25-000005,2024-12-31,us-gaap_DebtCurrent,,Current portion of debt and finance lease obligations,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_AccountsPayableCurrent,accountPayables,accountPayables,accountPayables
+VLO,0001035002-25-000005,2024-12-31,us-gaap_AccruedLiabilitiesCurrent,accruedExpenses,accruedExpenses,accruedExpenses
+VLO,0001035002-25-000005,2024-12-31,us-gaap_SalesAndExciseTaxPayableCurrent,,Taxes other than income taxes payable,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_AccruedIncomeTaxesCurrent,,Income taxes payable,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_LiabilitiesCurrent,totalCurrentLiabilities,totalCurrentLiabilities,totalCurrentLiabilities
+VLO,0001035002-25-000005,2024-12-31,us-gaap_LongTermDebtAndCapitalLeaseObligations,,"Debt and finance lease obligations, less current portion",
+VLO,0001035002-25-000005,2024-12-31,us-gaap_DeferredIncomeTaxLiabilitiesNet,,Deferred income tax liabilities,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_OtherLiabilitiesNoncurrent,otherNonCurrentLiabilities,otherNonCurrentLiabilities,otherNonCurrentLiabilities
+VLO,0001035002-25-000005,2024-12-31,us-gaap_CommitmentsAndContingencies,,Commitments and contingencies,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_CommonStockValue,commonStock,commonStock,commonStock
+VLO,0001035002-25-000005,2024-12-31,us-gaap_AdditionalPaidInCapitalCommonStock,,Additional paid-in capital,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_TreasuryStockCommonValue,,"Treasury stock, at cost; 358,637,890 and 340,199,677 common shares",
+VLO,0001035002-25-000005,2024-12-31,us-gaap_RetainedEarningsAccumulatedDeficit,retainedEarnings,retainedEarnings,retainedEarnings
+VLO,0001035002-25-000005,2024-12-31,us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss,accumulatedOtherComprehensiveIncomeLoss
+VLO,0001035002-25-000005,2024-12-31,us-gaap_StockholdersEquity,totalStockholdersEquity,totalStockholdersEquity,totalStockholdersEquity
+VLO,0001035002-25-000005,2024-12-31,us-gaap_MinorityInterest,minorityInterest,minorityInterest,minorityInterest
+VLO,0001035002-25-000005,2024-12-31,us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,,Total equity,
+VLO,0001035002-25-000005,2024-12-31,us-gaap_LiabilitiesAndStockholdersEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity,totalLiabilitiesAndTotalEquity
