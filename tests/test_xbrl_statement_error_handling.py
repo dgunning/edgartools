@@ -132,7 +132,8 @@ def test_statement_of_equity_successful_resolution():
         
         # Should call Statement constructor with correct parameters
         mock_statement_class.assert_called_once_with(
-            mock_xbrl, 'test_role', canonical_type="StatementOfEquity"
+            mock_xbrl, 'test_role', canonical_type="StatementOfEquity",
+            include_dimensions=True
         )
 
 
