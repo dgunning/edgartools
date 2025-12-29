@@ -1843,6 +1843,32 @@ class EnhancedStatementBuilder:
                                 'fiscal_year': fy,
                                 'fiscal_period': fp
                             }
+                        
+                        # Store TTM fact in period_facts
+                        # We need to turn the trend row back into a FinancialFact
+                        # to match the structure expected by build_multi_period_statement
+                        source_fact = facts_list[0] if facts_list else None
+                        
+                        if source_fact:
+                            ttm_fact = FinancialFact(
+                                concept=concept,  # Use loop variable
+                                taxonomy=source_fact.taxonomy,
+                                label=source_fact.label,
+                                value=row['ttm_value'],  # Use correct column name
+                                numeric_value=row['ttm_value'],  # Use correct column name
+                                unit=source_fact.unit,
+                                fiscal_year=fy,
+                                fiscal_period=fp,
+                                period_type='duration',
+                                period_start=None, # TTM is rolling, no single start
+                                period_end=as_of_date,
+                                filing_date=as_of_date or date.min,
+                                form_type='TTM',
+                                accession='TTM-CALC',
+                                calculation_context='ttm_trend'
+                            )
+                            period_facts[period_key].append(ttm_fact)
+                                
                 except (ValueError, Exception):
                     # Skip concepts that don't have enough data for TTM
                     continue
