@@ -1468,7 +1468,8 @@ class EnhancedStatementBuilder:
                                     facts: List[FinancialFact],
                                     statement_type: str,
                                     periods: int = 4,
-                                    annual: bool = True) -> MultiPeriodStatement:
+                                    period_type: str = 'annual',
+                                    annual: Optional[bool] = None) -> MultiPeriodStatement:
         """
         Build a multi-period statement with hierarchical structure.
 
@@ -1476,11 +1477,17 @@ class EnhancedStatementBuilder:
             facts: List of all facts
             statement_type: Type of statement
             periods: Number of periods to include
-            annual: Prefer annual periods over quarterly
+            period_type: Type of period ('annual', 'quarterly', 'ttm')
+            annual: Legacy parameter (True=annual, False=quarterly). 
+                   If provided, overrides period_type for backward compatibility.
 
         Returns:
             MultiPeriodStatement with hierarchical structure and multiple periods
         """
+        # Handle legacy 'annual' parameter
+        if annual is not None:
+            period_type = 'annual' if annual else 'quarterly'
+
         # Filter facts by statement type (including multi-statement concepts from feeder statements)
         stmt_facts = [f for f in facts if _fact_belongs_to_statement(f, statement_type)]
 
@@ -1519,8 +1526,8 @@ class EnhancedStatementBuilder:
         # This needs to be calculated before the annual/quarterly split so it's available for both paths
         fiscal_year_end_month = detect_fiscal_year_end(stmt_facts)
 
-        if annual:
-            # When annual=True, filter for TRUE annual periods using duration
+        if period_type == 'annual':
+            # When period_type is 'annual', filter for TRUE annual periods using duration
             # Some facts are marked as FY but are actually quarterly (90 days vs 363+ days)
             true_annual_periods = []
 
@@ -1611,9 +1618,8 @@ class EnhancedStatementBuilder:
             # Sort by period year (descending) and select
             sorted_periods = sorted(annual_by_period_year.items(), key=lambda x: x[0], reverse=True)
             selected_period_info = [period_info for year, period_info in sorted_periods[:periods]]
-        else:
+        elif period_type == 'quarterly':
             # Quarterly mode: Filter out comparative data by validating period_end
-            # fiscal_year_end_month was already calculated at line 1223 and is in scope here
 
             valid_quarterly_periods = []
 
@@ -1721,12 +1727,83 @@ class EnhancedStatementBuilder:
             )
             selected_period_info = sorted_periods[:periods]
 
+        else:  # period_type == 'ttm'
+            # TTM mode: Generate synthetic facts using TTMCalculator
+            from edgar.entity.ttm import TTMCalculator
+            
+            # Group facts by concept for TTM calculation
+            concept_facts = defaultdict(list)
+            for fact in stmt_facts:
+                concept_facts[fact.concept].append(fact)
+            
+            # Calculate TTM trend for each concept
+            ttm_periods = {}  # key -> info
+            for concept, facts_list in concept_facts.items():
+                try:
+                    calculator = TTMCalculator(facts_list)
+                    trend = calculator.calculate_ttm_trend(periods=periods)
+                    
+                    for _, row in trend.iterrows():
+                        as_of_date = row['as_of_date']
+                        fp = row['fiscal_period']
+                        
+                        # Handle fiscal_year - use as_of_date.year as fallback for NaN
+                        fy_val = row['fiscal_year']
+                        if pd.isna(fy_val) or fy_val == 0:
+                            fy = as_of_date.year if as_of_date else 0
+                        else:
+                            fy = int(fy_val)
+                        
+                        period_key = (fy, fp, as_of_date)
+                        
+                        # For TTM, derive quarter from period_end if fiscal_period is FY
+                        # This ensures we show Q4 TTM instead of FY TTM
+                        if fp == 'FY' and as_of_date:
+                            quarter = (as_of_date.month - 1) // 3 + 1
+                            if quarter > 4:
+                                quarter = 4
+                            label = f"Q{quarter} {fy} TTM"
+                        else:
+                            label = f"{fp} {fy} TTM"
+                        
+                        if period_key not in ttm_periods:
+                            ttm_periods[period_key] = {
+                                'label': label,
+                                'end_date': as_of_date or date.max,
+                                'is_annual': False,
+                                'fiscal_year': fy,
+                                'fiscal_period': fp
+                            }
+                except (ValueError, Exception):
+                    # Skip concepts that don't have enough data for TTM
+                    continue
+            
+            # Sort by end_date (newest first) and deduplicate by label
+            sorted_periods = sorted(
+                ttm_periods.items(),
+                key=lambda x: x[1]['end_date'],
+                reverse=True
+            )
+            
+            # Filter out FY periods and deduplicate by label
+            seen_labels = set()
+            selected_period_info = []
+            for pk, info in sorted_periods:
+                # Skip FY periods in TTM - we only want quarterly TTM windows
+                if info['fiscal_period'] == 'FY':
+                    continue
+                if info['label'] not in seen_labels:
+                    selected_period_info.append((pk, info))
+                    seen_labels.add(info['label'])
+                    if len(selected_period_info) >= periods:
+                        break
+
         # Extract period labels and build a mapping for the selected periods
         # For annual periods: use period_end.year for Dec FYE, fiscal_year for others
         # For quarterly periods, calculate fiscal year from period_end (Issue #460)
         selected_periods = []
         for pk, info in selected_period_info:
-            if annual and info.get('is_annual') and pk[2]:  # pk[2] is period_end
+            if period_type == 'annual' and info.get('is_annual') and pk[2]:  # pk[2] is period_end
                 period_end = pk[2]
 
                 # FIX for Issue edgartools-t3tr: For December fiscal year end companies,
@@ -1752,7 +1829,7 @@ class EnhancedStatementBuilder:
                         label = f"FY {period_end.year - 1}"
                     else:
                         label = f"FY {period_end.year}"
-            elif not annual and pk[2]:
+            elif period_type == 'quarterly' and pk[2]:
                 # FIX for Issue #460: For quarterly periods, use the calculated fiscal year
                 # that was stored during grouping (avoids recalculation)
                 fiscal_period = pk[1]
