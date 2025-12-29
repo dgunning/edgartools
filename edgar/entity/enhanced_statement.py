@@ -1620,7 +1620,57 @@ class EnhancedStatementBuilder:
             selected_period_info = [period_info for year, period_info in sorted_periods[:periods]]
         elif period_type == 'quarterly':
             # Quarterly mode: Filter out comparative data by validating period_end
-
+            # 
+            # IMPORTANT: SEC EDGAR doesn't provide Q4 as separate facts.
+            # Companies report Q4 as part of their annual 10-K filing (FY).
+            # We need to derive Q4 from FY - YTD_9M (or FY - Q1 - Q2 - Q3).
+            
+            # Step 1: Derive Q4 facts using TTMCalculator's quarterization logic
+            from edgar.entity.ttm import TTMCalculator
+            
+            # Group facts by concept for Q4 derivation
+            concept_facts = defaultdict(list)
+            for fact in stmt_facts:
+                concept_facts[fact.concept].append(fact)
+            
+            # Derive Q4 for each concept and add to period_info/period_facts
+            derived_q4_count = 0
+            for concept, facts_list in concept_facts.items():
+                try:
+                    calculator = TTMCalculator(facts_list)
+                    # Get quarterized facts (includes derived Q4)
+                    quarterly_facts = calculator._quarterize_facts()
+                    
+                    # Add derived Q4 facts to our period collections
+                    for fact in quarterly_facts:
+                        if fact.fiscal_period == 'Q4' and hasattr(fact, 'calculation_context'):
+                            # This is a derived Q4 fact
+                            period_key = (fact.fiscal_year, fact.fiscal_period, fact.period_end)
+                            period_label = f"{fact.fiscal_period} {fact.fiscal_year}"
+                            
+                            if period_key not in period_info:
+                                period_info[period_key] = {
+                                    'label': period_label,
+                                    'end_date': fact.period_end or date.max,
+                                    'is_annual': False,
+                                    'filing_date': fact.filing_date or date.min,
+                                    'fiscal_year': fact.fiscal_year,
+                                    'fiscal_period': fact.fiscal_period
+                                }
+                                derived_q4_count += 1
+                            
+                            period_facts[period_key].append(fact)
+                except (ValueError, Exception):
+                    # Skip concepts that don't have enough data for Q4 derivation
+                    continue
+            
+            if derived_q4_count > 0:
+                log.debug(f"Derived {derived_q4_count} Q4 periods from FY-YTD_9M calculation")
+            
+            # Rebuild period_list after adding derived Q4
+            period_list = [(pk, info) for pk, info in period_info.items()]
+            
+            # Step 2: Filter periods for valid quarterly data
             valid_quarterly_periods = []
 
             for pk, info in period_list:
