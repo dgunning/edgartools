@@ -1479,9 +1479,15 @@ class EnhancedStatementBuilder:
                     if lag > 280:
                         continue
                 
-                # Only accept Instant facts (period_start is None) to avoid comparative echoes
-                if f.period_start is not None and f.period_start != f.period_end:
-                    continue
+                
+                # Accept Instant facts OR short-duration facts (≤31 days)
+                # Instant: period_start is None (true event date)
+                # Short duration: Split event reported for the month (e.g., NVDA May 2024 = 30 days)
+                # Reject long durations: Comparative quarters/years (90+ days)
+                if f.period_start is not None:
+                    duration_days = (f.period_end - f.period_start).days
+                    if duration_days > 31:  # Reject quarterly/annual comparative periods
+                        continue
 
                 if split_key in seen_splits:
                     continue

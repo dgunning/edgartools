@@ -1562,6 +1562,14 @@ class EntityFacts:
         # Handle backward compatibility for 'annual'
         if annual is not None:
             period = 'annual' if annual else 'quarterly'
+        
+        # Block TTM for balance sheet - balance sheets are point-in-time, not flows
+        if period == 'ttm':
+            raise ValueError(
+                "TTM (Trailing Twelve Months) is not applicable to Balance Sheet statements. "
+                "Balance sheets are point-in-time snapshots, not cumulative flows. "
+                "Use period='quarterly' or period='annual' instead."
+            )
 
         if not as_of:
             # Always build the enhanced multi-period statement for regular periods
