@@ -1472,6 +1472,17 @@ class EnhancedStatementBuilder:
                 # Deduplicate based on Year and Ratio to avoid applying the same split multiple times
                 # (e.g. reported in Q2 and Q3 of the same year)
                 split_key = (f.period_end.year, f.numeric_value)
+                
+                # Filter out "historical echo" facts (e.g. 2023 10-K reporting a 2020 split)
+                if f.filing_date:
+                    lag = (f.filing_date - f.period_end).days
+                    if lag > 280:
+                        continue
+                
+                # Only accept Instant facts (period_start is None) to avoid comparative echoes
+                if f.period_start is not None and f.period_start != f.period_end:
+                    continue
+
                 if split_key in seen_splits:
                     continue
                 seen_splits.add(split_key)
