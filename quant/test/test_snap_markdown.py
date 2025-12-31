@@ -6,7 +6,7 @@ from quant.markdown import extract_markdown
 def main() -> None:
     set_identity("Quant LLM test user@example.com")
 
-    company = Company("SNAP")
+    company = Company("MSFT")
     filings = company.get_filings(form="10-K")
     filing = filings.latest()
     if filing is None:
