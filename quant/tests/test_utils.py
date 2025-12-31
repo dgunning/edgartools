@@ -4,7 +4,8 @@ import pytest
 
 from edgar.entity.models import FinancialFact
 
-from quant.utils import TTMCalculator, detect_splits, apply_split_adjustments
+from quant.entity_facts_wrapper import QuantEntityFacts
+from quant.utils import TTMCalculator, TTMStatementBuilder, detect_splits, apply_split_adjustments
 
 
 def make_fact(
@@ -247,3 +248,105 @@ def test_derive_q4_eps_from_net_income_and_shares():
     q4_eps = derived_eps[0]
     assert q4_eps.fiscal_period == "Q4"
     assert pytest.approx(q4_eps.numeric_value, rel=1e-6) == (100 / 1300)
+
+
+def test_ttm_eps_falls_back_to_fy_shares_for_q4():
+    ni_facts = [
+        make_fact(
+            concept="us-gaap:NetIncomeLoss",
+            value=100,
+            unit="USD",
+            period_start=date(2023, 1, 1),
+            period_end=date(2023, 3, 31),
+            fiscal_year=2023,
+            fiscal_period="Q1",
+        ),
+        make_fact(
+            concept="us-gaap:NetIncomeLoss",
+            value=110,
+            unit="USD",
+            period_start=date(2023, 4, 1),
+            period_end=date(2023, 6, 30),
+            fiscal_year=2023,
+            fiscal_period="Q2",
+        ),
+        make_fact(
+            concept="us-gaap:NetIncomeLoss",
+            value=120,
+            unit="USD",
+            period_start=date(2023, 7, 1),
+            period_end=date(2023, 9, 30),
+            fiscal_year=2023,
+            fiscal_period="Q3",
+        ),
+        make_fact(
+            concept="us-gaap:NetIncomeLoss",
+            value=130,
+            unit="USD",
+            period_start=date(2023, 10, 1),
+            period_end=date(2023, 12, 31),
+            fiscal_year=2023,
+            fiscal_period="Q4",
+        ),
+    ]
+    shares_facts = [
+        make_fact(
+            concept="us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+            value=1000,
+            unit="shares",
+            period_start=date(2023, 1, 1),
+            period_end=date(2023, 3, 31),
+            fiscal_year=2023,
+            fiscal_period="Q1",
+        ),
+        make_fact(
+            concept="us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+            value=1000,
+            unit="shares",
+            period_start=date(2023, 4, 1),
+            period_end=date(2023, 6, 30),
+            fiscal_year=2023,
+            fiscal_period="Q2",
+        ),
+        make_fact(
+            concept="us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+            value=1000,
+            unit="shares",
+            period_start=date(2023, 7, 1),
+            period_end=date(2023, 9, 30),
+            fiscal_year=2023,
+            fiscal_period="Q3",
+        ),
+        # FY shares only for Q4 fallback
+        make_fact(
+            concept="us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+            value=1200,
+            unit="shares",
+            period_start=date(2023, 1, 1),
+            period_end=date(2023, 12, 31),
+            fiscal_year=2023,
+            fiscal_period="FY",
+        ),
+    ]
+    eps_fact = make_fact(
+        concept="us-gaap:EarningsPerShareBasic",
+        value=0.1,
+        unit="USD/share",
+        period_start=date(2023, 1, 1),
+        period_end=date(2023, 3, 31),
+        fiscal_year=2023,
+        fiscal_period="Q1",
+    )
+
+    facts = ni_facts + shares_facts + [eps_fact]
+    qef = QuantEntityFacts(cik=1, name="TestCo", facts=facts, sic_code=None)
+    builder = TTMStatementBuilder(qef)
+    stmt = builder.build_income_statement()
+    df = stmt.to_dataframe()
+
+    eps_rows = df[df["label"].str.contains("Earnings Per Share", na=False, case=False)]
+    assert not eps_rows.empty
+    period_cols = [c for c in df.columns if c not in {"label", "depth", "is_total"}]
+    assert period_cols
+    eps_value = eps_rows.iloc[0][period_cols[0]]
+    assert eps_value is not None

@@ -1196,20 +1196,30 @@ class TTMStatementBuilder:
 
             share_annual = shares_calc._filter_by_duration(DurationBucket.ANNUAL)
             shares_by_end_annual = {}
+            shares_by_year_annual = {}
             for fact in share_annual:
                 key = fact.period_end
                 if key not in shares_by_end_annual or (
                     fact.filing_date and shares_by_end_annual[key].filing_date and fact.filing_date > shares_by_end_annual[key].filing_date
                 ):
                     shares_by_end_annual[key] = fact
+                if fact.fiscal_year:
+                    existing = shares_by_year_annual.get(fact.fiscal_year)
+                    if not existing or (
+                        fact.filing_date and existing.filing_date and fact.filing_date > existing.filing_date
+                    ):
+                        shares_by_year_annual[fact.fiscal_year] = fact
 
             rows = []
             for i in range(3, len(ni_quarters)):
                 window = ni_quarters[i - 3:i + 1]
                 window_ends = [q.period_end for q in window]
                 window_shares = []
-                for end in window_ends:
+                for quarter in window:
+                    end = quarter.period_end
                     share_fact = shares_by_end.get(end) or shares_by_end_annual.get(end)
+                    if not share_fact and quarter.fiscal_period == "Q4":
+                        share_fact = shares_by_year_annual.get(quarter.fiscal_year)
                     if not share_fact or share_fact.numeric_value is None:
                         window_shares = []
                         break
