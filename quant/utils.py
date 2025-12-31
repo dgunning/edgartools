@@ -447,7 +447,7 @@ class TTMCalculator:
         # 3. Derive quarters using helper methods
         discrete_quarters.extend(self._derive_q2_from_ytd6(quarters, ytd_6m))
         discrete_quarters.extend(self._derive_q3_from_ytd9(ytd_6m, ytd_9m))
-        discrete_quarters.extend(self._derive_q4_from_fy(ytd_9m, annual))
+        discrete_quarters.extend(self._derive_q4_from_fy(quarters, ytd_9m, annual))
 
         # 4. Deduplicate by period_end (keep latest filing)
         dedup_quarters = self._deduplicate_by_period_end(discrete_quarters)
@@ -512,11 +512,18 @@ class TTMCalculator:
 
     def _derive_q4_from_fy(
         self,
+        quarters: List[FinancialFact],
         ytd_9m: List[FinancialFact],
         annual: List[FinancialFact]
     ) -> List[FinancialFact]:
         from edgar.core import log
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        from dataclasses import replace
         derived = []
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
         for fy in annual:
             if not self._is_additive_concept(fy):
                 continue
@@ -534,9 +541,71 @@ class TTMCalculator:
                     fy, q4_value, "derived_q4_fy_minus_ytd9", target_period="Q4",
                     period_start=q4_start
                 )
+                if q4_fact.period_end:
+                    calculated_fy = calculate_fiscal_year_for_label(
+                        q4_fact.period_end, fiscal_year_end_month
+                    )
+                    q4_fact = replace(q4_fact, fiscal_year=calculated_fy)
                 derived.append(q4_fact)
                 log.debug(f"Derived Q4 from FY: ${q4_value/1e9:.2f}B "
                           f"(FY ${fy.numeric_value/1e9:.2f}B - YTD_9M ${ytd9.numeric_value/1e9:.2f}B)")
+                continue
+
+            # Fallback: derive Q4 from FY - (Q1 + Q2 + Q3) when YTD_9M is absent
+            q1_q3_candidates = []
+            for q in quarters:
+                if q.fiscal_period not in ("Q1", "Q2", "Q3"):
+                    continue
+                if q.numeric_value is None or q.period_start is None or q.period_end is None:
+                    continue
+                if fy.period_start and fy.period_end:
+                    if not (fy.period_start <= q.period_start <= fy.period_end):
+                        continue
+                    if not (fy.period_start <= q.period_end <= fy.period_end):
+                        continue
+                q1_q3_candidates.append(q)
+
+            if not q1_q3_candidates:
+                log.debug(f"No Q1-Q3 quarters found for FY {fy.fiscal_year} - cannot derive Q4")
+                continue
+
+            # Prefer the latest filing per quarter
+            quarter_by_period = {}
+            for q in q1_q3_candidates:
+                existing = quarter_by_period.get(q.fiscal_period)
+                if not existing or (q.filing_date and existing.filing_date and q.filing_date > existing.filing_date):
+                    quarter_by_period[q.fiscal_period] = q
+
+            ordered_quarters = [quarter_by_period.get(p) for p in ("Q1", "Q2", "Q3")]
+            if any(q is None for q in ordered_quarters):
+                log.debug(f"Incomplete Q1-Q3 set for FY {fy.fiscal_year} - cannot derive Q4")
+                continue
+
+            q1, q2, q3 = ordered_quarters
+            if any(q.numeric_value is None for q in (q1, q2, q3)):
+                log.debug(f"Missing numeric values for Q1-Q3 FY {fy.fiscal_year} - cannot derive Q4")
+                continue
+
+            q4_value = fy.numeric_value - (q1.numeric_value + q2.numeric_value + q3.numeric_value)
+            if q4_value < 0:
+                log.debug(f"Negative Q4 value detected: ${q4_value/1e9:.2f}B for {fy.concept}.")
+
+            from datetime import timedelta
+            q4_start = q3.period_end + timedelta(days=1)
+            q4_fact = self._create_derived_quarter(
+                fy, q4_value, "derived_q4_fy_minus_q1q2q3", target_period="Q4",
+                period_start=q4_start
+            )
+            if q4_fact.period_end:
+                calculated_fy = calculate_fiscal_year_for_label(
+                    q4_fact.period_end, fiscal_year_end_month
+                )
+                q4_fact = replace(q4_fact, fiscal_year=calculated_fy)
+            derived.append(q4_fact)
+            log.debug(
+                f"Derived Q4 from FY: ${q4_value/1e9:.2f}B "
+                f"(FY ${fy.numeric_value/1e9:.2f}B - Q1-3 ${((q1.numeric_value + q2.numeric_value + q3.numeric_value)/1e9):.2f}B)"
+            )
         return derived
 
     def derive_eps_for_quarter(
@@ -565,13 +634,10 @@ class TTMCalculator:
         
         derived_eps = []
         
-        # Step 1: Get derived Q4 Net Income facts
+        # Step 1: Get Q4 Net Income facts (derived or reported)
         ni_calculator = TTMCalculator(net_income_facts)
         ni_quarters = ni_calculator._quarterize_facts()
-        q4_net_income = [
-            q for q in ni_quarters 
-            if q.calculation_context and 'q4' in str(q.calculation_context).lower()
-        ]
+        q4_net_income = [q for q in ni_quarters if q.fiscal_period == 'Q4']
         
         if not q4_net_income:
             log.debug("No derived Q4 Net Income found - cannot calculate Q4 EPS")
@@ -604,6 +670,7 @@ class TTMCalculator:
         eps_concept: str
     ) -> Optional[FinancialFact]:
         from edgar.core import log
+        from edgar.entity.mappings_loader import get_primary_statement
         fy = q4_ni.fiscal_year
             
         if fy not in fy_shares_map or fy_shares_map[fy] <= 0:
@@ -633,6 +700,9 @@ class TTMCalculator:
         log.debug(f"Derived Q4 EPS for FY{fy}: ${q4_eps_value:.2f} "
                     f"(NI ${q4_ni.numeric_value/1e9:.2f}B / {q4_shares/1e9:.2f}B shares)")
 
+        clean_concept = eps_concept.split(':')[-1] if ':' in eps_concept else eps_concept
+        statement_type = get_primary_statement(clean_concept)
+
         return FinancialFact(
             concept=eps_concept,
             taxonomy='us-gaap',
@@ -648,6 +718,7 @@ class TTMCalculator:
             filing_date=q4_ni.filing_date,
             form_type=q4_ni.form_type,
             accession=q4_ni.accession,
+            statement_type=statement_type,
             calculation_context='derived_eps_from_ni_shares'
         )
 

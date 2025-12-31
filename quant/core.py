@@ -96,25 +96,46 @@ class QuantCompany(Company):
             "WeightedAverageNumberOfSharesOutstandingDiluted",
         ])
 
+        def _has_eps_for_period(concept_name: str, period_end: date, fiscal_period: str) -> bool:
+            candidates = [concept_name]
+            if ":" in concept_name:
+                candidates.append(concept_name.split(":", 1)[1])
+            else:
+                candidates.append(f"us-gaap:{concept_name}")
+
+            for name in candidates:
+                for fact in concept_facts.get(name, []):
+                    if (
+                        fact.period_end == period_end
+                        and fact.fiscal_period == fiscal_period
+                        and fact.period_type == "duration"
+                    ):
+                        return True
+            return False
+
         if net_income_facts and shares_basic_facts:
             calc = TTMCalculator(net_income_facts)
-            derived_facts.extend(
-                calc.derive_eps_for_quarter(
-                    net_income_facts,
-                    shares_basic_facts,
-                    eps_concept="us-gaap:EarningsPerShareBasic",
-                )
-            )
+            for eps_fact in calc.derive_eps_for_quarter(
+                net_income_facts,
+                shares_basic_facts,
+                eps_concept="us-gaap:EarningsPerShareBasic",
+            ):
+                if not _has_eps_for_period(
+                    eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period
+                ):
+                    derived_facts.append(eps_fact)
 
         if net_income_facts and shares_diluted_facts:
             calc = TTMCalculator(net_income_facts)
-            derived_facts.extend(
-                calc.derive_eps_for_quarter(
-                    net_income_facts,
-                    shares_diluted_facts,
-                    eps_concept="us-gaap:EarningsPerShareDiluted",
-                )
-            )
+            for eps_fact in calc.derive_eps_for_quarter(
+                net_income_facts,
+                shares_diluted_facts,
+                eps_concept="us-gaap:EarningsPerShareDiluted",
+            ):
+                if not _has_eps_for_period(
+                    eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period
+                ):
+                    derived_facts.append(eps_fact)
 
         return facts + derived_facts
 
