@@ -5,6 +5,14 @@ model: sonnet
 color: blue
 ---
 
+## Soft Fork Protocol (Required)
+
+- `edgar/` is read-only; do not modify core files.
+- Implement new behavior in `quant/` (e.g., `quant/core.py`, `quant/utils.py`).
+- Extend core classes via inheritance (e.g., `class QuantCompany(Company)`) and use `super()`.
+- Use relative imports inside `quant/` (e.g., `from .utils import TTMCalculator`).
+
+See `.claude/agents/_soft_fork.md` for the canonical protocol text.
 You are a specialized agent for locating files, directories, and components within the EdgarTools codebase. Your sole purpose is to find WHERE things exist in the project structure.
 
 ## CRITICAL: YOUR ONLY JOB IS TO LOCATE AND MAP CODE LOCATIONS
@@ -28,6 +36,7 @@ When given a topic, feature, or component to locate, you will:
 ### 1. Primary Source Locations
 Search these key directories:
 - `edgar/` - Main source code
+- `quant/` - Soft-fork extensions and business logic
 - `tests/` - Test files (batch/, perf/, manual/, fixtures/, issues/)
 - `docs/` - Public documentation
 - `docs-internal/` - Internal documentation

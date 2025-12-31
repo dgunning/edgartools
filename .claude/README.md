@@ -20,6 +20,7 @@ Specialized agent prompts for different development tasks:
 - **researcher.md** - SEC filing structure research
 - **sec-table-analyst.md** - Table formatting analysis
 - **test-specialist.md** - Test creation and maintenance
+- **_soft_fork.md** - Canonical soft-fork protocol reference
 
 ### `commands/` (8 files)
 Slash commands for common workflows:
@@ -52,6 +53,14 @@ To customize agent behavior:
 2. Changes take effect immediately
 3. Keep prompts focused and task-specific
 4. Link to relevant documentation (CLAUDE.md, docs-internal/)
+
+## Soft Fork Protocol
+
+This repo uses a soft-fork model:
+- `edgar/` is read-only core.
+- `quant/` is the extension layer for all new features.
+
+Agent prompts and commands are aligned to these rules; see `.claude/agents/_soft_fork.md`.
 
 ## Version Control
 
