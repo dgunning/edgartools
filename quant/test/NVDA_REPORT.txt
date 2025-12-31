@@ -1,0 +1,235 @@
+﻿====================================================================================================
+COMPREHENSIVE NVDA QUANT MODULE TEST REPORT
+====================================================================================================
+
+Initializing QuantCompany for NVIDIA (NVDA)...
+[OK] Company: NVIDIA CORP
+[OK] CIK: 1045810
+[OK] SIC: 3674
+
+====================================================================================================
+TEST 1: STOCK SPLIT DETECTION
+====================================================================================================
+
+[OK] Detected 2 stock split(s):
+  - Date: 2021-06-03, Ratio: 4.0:1
+  - Date: 2024-05-31, Ratio: 10.0:1
+
+====================================================================================================
+TEST 2: ANNUAL INCOME STATEMENT (Split-Adjusted)
+====================================================================================================
+
+                                                                                                                                                                             label  depth  is_abstract  is_total     section  confidence       FY 2025       FY 2024       FY 2023       FY 2022       FY 2021
+concept                                                                                                                                                                                                                                                                                                       
+RevenueFromContractWithCustomerExcludingAssessedTax                                                                                                                  Total Revenue      0        False      True        None    0.950000  1.304970e+11  6.092200e+10  2.697400e+10  2.691400e+10  1.667500e+10
+CostOfGoodsAndServicesSold                                                                                                                                         Cost of Revenue      0        False     False        None    0.353474  3.263900e+10  1.662100e+10  1.161800e+10  9.439000e+09  6.279000e+09
+SellingGeneralAndAdministrativeExpense                                                                                                 Selling, General and Administrative Expense      0        False     False        None    0.371601  3.491000e+09  2.654000e+09  2.440000e+09  2.166000e+09  1.940000e+09
+OperatingIncomeLoss                                                                                                                                        Operating Income (Loss)      0        False      True        None    0.570997  8.145300e+10  3.297200e+10  4.224000e+09  1.004100e+10  4.532000e+09
+OtherNonoperatingIncomeExpense                                                                                                                 Other Nonoperating Income (Expense)      0        False     False        None    0.425982  1.034000e+09  2.370000e+08 -4.800000e+07  1.070000e+08  4.000000e+06
+IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest  Income (Loss) from Continuing Operations before Income Taxes, Noncontrolling Interest      0        False      True        None    0.682779  8.402600e+10  3.381800e+10  4.181000e+09  9.941000e+09           NaN
+IncomeTaxExpenseBenefit                                                                                                                               Income Tax Expense (Benefit)      0        False      True        None    0.800604  1.114600e+10  4.058000e+09 -1.870000e+08  1.890000e+08  7.700000e+07
+NetIncomeLoss                                                                                                                             Net Income (Loss) Attributable to Parent      0        False      True        None    0.776435  7.288000e+10  2.976000e+10  4.368000e+09  9.752000e+09  4.332000e+09
+EarningsPerShareBasic                                                                                                                                    Earnings Per Share, Basic      0        False     False        None    0.845921  2.970000e+00  1.205000e+00  1.760000e-01  3.910000e-01  1.755000e-01
+EarningsPerShareDiluted                                                                                                                                Earnings Per Share, Diluted      0        False     False        None    0.836858  2.940000e+00  1.193000e+00  1.740000e-01  3.850000e-01  1.725000e-01
+AdditionalItems                                                                                                                                         Additional Financial Items      0         True     False  Additional    1.000000           NaN           NaN           NaN           NaN           NaN
+AmortizationOfIntangibleAssets                                                                                                                   Amortization of Intangible Assets      1        False     False  Additional    0.500000  5.930000e+08  6.140000e+08  6.990000e+08  5.630000e+08  6.120000e+08
+CommonStockDividendsPerShareDeclared                                                                                                  Common Stock, Dividends, Per Share, Declared      1        False     False  Additional    0.500000  3.400000e-02  1.600000e-01  1.600000e-01           NaN           NaN
+CostOfRevenue                                                                                                                                                      Cost of Revenue      1        False     False  Additional    0.500000  3.263900e+10  1.662100e+10  1.161800e+10  9.439000e+09  6.279000e+09
+CurrentIncomeTaxExpenseBenefit                                                                                                                Current Income Tax Expense (Benefit)      1        False     False  Additional    0.500000  1.562300e+10  6.547000e+09  1.977000e+09  5.950000e+08  3.590000e+08
+DepreciationAndAmortization                                                                                                Depreciation, Depletion and Amortization, Nonproduction      1        False     False  Additional    0.500000           NaN           NaN           NaN           NaN  1.098000e+09
+GainLossOnInvestments                                                                                                                                   Gain (Loss) on Investments      1        False     False  Additional    0.500000  1.030000e+09  2.380000e+08 -4.500000e+07  1.000000e+08           NaN
+GoodwillImpairmentLoss                                                                                                                                   Goodwill, Impairment Loss      1        False     False  Additional    0.500000  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+GrossProfit                                                                                                                                                           Gross Profit      1        False      True  Additional    0.500000  9.785800e+10  4.430100e+10  1.535600e+10  1.747500e+10  1.039600e+10
+IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic                                                 Income (Loss) from Continuing Operations before Income Taxes, Domestic      1        False     False  Additional    0.500000  7.745600e+10  2.949500e+10  3.477000e+09  8.446000e+09  1.437000e+09
+InterestExpense                                                                                                                                                   Interest Expense      1        False     False  Additional    0.500000           NaN  2.570000e+08  2.620000e+08  2.360000e+08  1.840000e+08
+InvestmentIncomeInterest                                                                                                                               Investment Income, Interest      1        False     False  Additional    0.500000  1.786000e+09  8.660000e+08  2.670000e+08  2.900000e+07  5.700000e+07
+NonoperatingIncomeExpense                                                                                                                            Nonoperating Income (Expense)      1        False     False  Additional    0.500000  2.573000e+09  8.460000e+08 -4.300000e+07 -1.000000e+08 -1.230000e+08
+OperatingExpenses                                                                                                                                               Operating Expenses      1        False     False  Additional    0.500000  1.640500e+10  1.132900e+10  1.113200e+10  7.434000e+09  5.864000e+09
+ResearchAndDevelopmentExpense                                                                                                                     Research and Development Expense      1        False     False  Additional    0.500000  1.291400e+10  8.675000e+09  7.339000e+09  5.268000e+09  3.924000e+09
+
+
+[OK] Earnings Per Share (Basic) - Split Adjusted:
+                                           label  depth  is_abstract  is_total section  confidence  FY 2025  FY 2024  FY 2023  FY 2022  FY 2021
+concept                                                                                                                                        
+EarningsPerShareBasic  Earnings Per Share, Basic      0        False     False    None    0.845921     2.97    1.205    0.176    0.391   0.1755
+
+====================================================================================================
+TEST 3: QUARTERLY INCOME STATEMENT (with Q4 Derivation)
+====================================================================================================
+
+                                                                                                                                                                             label  depth  is_abstract  is_total     section  confidence       Q3 2025       Q2 2025       Q1 2025       Q3 2024       Q2 2024       Q1 2024       Q3 2023       Q2 2023
+concept                                                                                                                                                                                                                                                                                                                                                 
+Revenues                                                                                                                                                             Total Revenue      0        False      True        None    0.950000  5.700600e+10  4.674300e+10  4.406200e+10  3.508200e+10  3.004000e+10  2.604400e+10  1.812000e+10  1.350700e+10
+CostOfGoodsAndServicesSold                                                                                                                         Cost of Goods and Services Sold      0        False     False        None    0.353474  1.515700e+10  1.289000e+10  1.739400e+10  8.926000e+09  7.466000e+09  5.638000e+09  4.720000e+09  4.045000e+09
+SellingGeneralAndAdministrativeExpense                                                                                                 Selling, General and Administrative Expense      0        False     False        None    0.371601  1.134000e+09  1.122000e+09  1.041000e+09  8.970000e+08  8.420000e+08  7.770000e+08  6.890000e+08  6.220000e+08
+OperatingIncomeLoss                                                                                                                                        Operating Income (Loss)      0        False      True        None    0.570997  3.601000e+10  2.844000e+10  2.163800e+10  2.186900e+10  1.864200e+10  1.690900e+10  1.041700e+10  6.800000e+09
+OtherNonoperatingIncomeExpense                                                                                                                 Other Nonoperating Income (Expense)      0        False     False        None    0.425982  1.363000e+09  2.236000e+09 -1.800000e+08  3.600000e+07  1.890000e+08  7.500000e+07 -6.600000e+07  5.900000e+07
+IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest  Income (Loss) from Continuing Operations before Income Taxes, Noncontrolling Interest      0        False      True        None    0.682779  3.793600e+10  3.120600e+10  2.191000e+10  2.231600e+10  1.921400e+10  1.727900e+10  1.052200e+10  6.981000e+09
+IncomeTaxExpenseBenefit                                                                                                                               Income Tax Expense (Benefit)      0        False      True        None    0.800604  6.026000e+09  4.784000e+09  3.135000e+09  3.007000e+09  2.615000e+09  2.398000e+09  1.279000e+09  7.930000e+08
+NetIncomeLoss                                                                                                                             Net Income (Loss) Attributable to Parent      0        False      True        None    0.776435  3.191000e+10  2.642200e+10  1.877500e+10  1.930900e+10  1.659900e+10  1.488100e+10  9.243000e+09  6.188000e+09
+EarningsPerShareBasic                                                                                                                                    Earnings Per Share, Basic      0        False     False        None    0.845921  1.310000e+00  1.080000e+00  7.700000e-01  7.900000e-01  6.800000e-01  6.000000e-01  3.700000e-01  2.500000e-01
+EarningsPerShareDiluted                                                                                                                                Earnings Per Share, Diluted      0        False     False        None    0.836858  1.300000e+00  1.080000e+00  7.600000e-01  7.800000e-01  6.700000e-01  6.000000e-01  3.700000e-01  2.500000e-01
+AdditionalItems                                                                                                                                         Additional Financial Items      0         True     False  Additional    1.000000           NaN           NaN           NaN           NaN           NaN           NaN           NaN           NaN
+AmortizationOfIntangibleAssets                                                                                                                   Amortization of Intangible Assets      1        False     False  Additional    0.500000  9.600000e+07  8.400000e+07  1.590000e+08  1.490000e+08  1.460000e+08  1.430000e+08  1.440000e+08  1.460000e+08
+CommonStockDividendsPerShareDeclared                                                                                                  Common Stock, Dividends, Per Share, Declared      1        False     False  Additional    0.500000  1.000000e-02  1.000000e-02  1.000000e-02  1.000000e-02  1.000000e-02  4.000000e-03  4.000000e-03  4.000000e-03
+CostOfRevenue                                                                                                                                                      Cost of Revenue      1        False     False  Additional    0.500000  1.515700e+10  1.289000e+10  1.739400e+10  8.926000e+09  7.466000e+09  5.638000e+09  4.720000e+09  4.045000e+09
+GainLossOnInvestments                                                                                                                                   Gain (Loss) on Investments      1        False     False  Additional    0.500000  3.426000e+09  2.073000e+09 -1.750000e+08  3.020000e+08  2.640000e+08  6.900000e+07 -2.400000e+07  4.500000e+07
+GrossProfit                                                                                                                                                           Gross Profit      1        False      True  Additional    0.500000  4.184900e+10  3.385300e+10  2.666800e+10  2.615600e+10  2.257400e+10  2.040600e+10  1.340000e+10  9.462000e+09
+InvestmentIncomeInterest                                                                                                                               Investment Income, Interest      1        False     False  Additional    0.500000  6.240000e+08  5.920000e+08  5.150000e+08  4.720000e+08  4.440000e+08  3.590000e+08  2.340000e+08  1.870000e+08
+NonoperatingIncomeExpense                                                                                                                            Nonoperating Income (Expense)      1        False     False  Additional    0.500000  1.926000e+09  2.766000e+09  2.720000e+08  4.470000e+08  5.720000e+08  3.700000e+08  1.050000e+08  1.810000e+08
+OperatingExpenses                                                                                                                                               Operating Expenses      1        False     False  Additional    0.500000  5.839000e+09  5.413000e+09  5.030000e+09  4.287000e+09  3.932000e+09  3.497000e+09  2.983000e+09  2.662000e+09
+ResearchAndDevelopmentExpense                                                                                                                     Research and Development Expense      1        False     False  Additional    0.500000  4.705000e+09  4.291000e+09  3.989000e+09  3.390000e+09  3.090000e+09  2.720000e+09  2.294000e+09  2.040000e+09
+
+====================================================================================================
+TEST 4: TTM (Trailing Twelve Months) INCOME STATEMENT
+====================================================================================================
+
+DEBUG: TTM Building for NVIDIA CORP
+DEBUG: TTM Statement built with 0 items
+DEBUG: Structure statement (annual=False) has 2 items
+IncomeStatement (TTM) - NVIDIA
+             CORP             
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé Item Γöé TTM Value Γöé Periods Γöé
+Γö£ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöñ
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+
+====================================================================================================
+TEST 5: TTM METRICS - REVENUE & NET INCOME
+====================================================================================================
+
+[OK] TTM Revenue:
+  Value: $10,918,000,000
+  As of: 2020-01-26
+  Periods: [(2020, 'FY'), (2020, 'FY'), (2020, 'FY'), (2020, 'FY')]
+  Has gaps: False
+  Has calculated Q4: False
+
+[OK] TTM Net Income:
+  Value: $99,198,000,000
+  As of: 2025-10-26
+  Periods: [(2025, 'Q4'), (2026, 'Q1'), (2026, 'Q2'), (2026, 'Q3')]
+  Has gaps: False
+  Has calculated Q4: True
+
+====================================================================================================
+TEST 6: BALANCE SHEET (Annual)
+====================================================================================================
+
+                                                                                                         label  depth  is_abstract  is_total     section  confidence       FY 2025       FY 2024       FY 2023       FY 2022
+concept                                                                                                                                                                                                                     
+AssetsAbstract                                                                                          ASSETS      0         True     False        None    0.836858           NaN           NaN           NaN           NaN
+Assets                                                                                                  Assets      1        False      True        None    0.900302  1.116010e+11  6.572800e+10  4.118200e+10  4.418700e+10
+PropertyPlantAndEquipmentNet                                                Property, Plant and Equipment, Net      1        False      True        None    0.540785  6.283000e+09  3.914000e+09  3.807000e+09  2.778000e+09
+Goodwill                                                                                              Goodwill      1        False     False        None    0.564955  5.188000e+09  4.430000e+09  4.372000e+09  4.349000e+09
+IntangibleAssetsNetExcludingGoodwill                               Intangible Assets, Net (Excluding Goodwill)      1        False     False        None    0.404834  8.070000e+08  1.112000e+09  1.676000e+09  2.339000e+09
+AssetsCurrentAbstract                                                                          Current assets:      1         True     False        None    0.516616           NaN           NaN           NaN           NaN
+CashAndCashEquivalentsAtCarryingValue                             Cash and Cash Equivalents, at Carrying Value      2        False     False        None    0.728097  8.589000e+09  7.280000e+09  3.389000e+09  1.990000e+09
+AccountsReceivableNetCurrent                     Accounts Receivable, after Allowance for Credit Loss, Current      2        False     False        None    0.432024  2.306500e+10  9.999000e+09  3.827000e+09  4.650000e+09
+InventoryNet                                                                                    Inventory, Net      2        False      True        None    0.389728  1.008000e+10  5.282000e+09  5.159000e+09  2.605000e+09
+AssetsCurrent                                                                                  Assets, Current      2        False      True        None    0.592145  8.012600e+10  4.434500e+10  2.307300e+10  2.882900e+10
+PrepaidExpenseAndOtherAssetsCurrent                                  Prepaid Expense and Other Assets, Current      2        False     False        None    0.323263  3.771000e+09  3.080000e+09  7.910000e+08  3.660000e+08
+OperatingLeaseRightOfUseAsset                                              Operating Lease, Right-of-Use Asset      1        False     False        None    0.459215  1.793000e+09  1.346000e+09  1.038000e+09  8.290000e+08
+OtherAssetsNoncurrent                                                                 Other Assets, Noncurrent      1        False     False        None    0.543807  6.425000e+09  4.500000e+09  3.820000e+09  3.841000e+09
+LiabilitiesAndStockholdersEquityAbstract                                                LIABILITIES AND EQUITY      0         True     False        None    0.716012           NaN           NaN           NaN           NaN
+Liabilities                                                                                        Liabilities      1        False      True        None    0.728097  3.227400e+10  2.275000e+10  1.908100e+10  1.757500e+10
+CommitmentsAndContingencies                                                      Commitments and Contingencies      1        False     False        None    0.682779  0.000000e+00           NaN           NaN           NaN
+StockholdersEquityAbstract                                                               StockholdersΓÇÖ equity:      1         True     False        None    0.592145           NaN           NaN           NaN           NaN
+CommonStockValue                                                                   Common Stock, Value, Issued      2        False     False        None    0.770393  2.400000e+07  2.000000e+06  2.000000e+06  3.000000e+06
+AdditionalPaidInCapital                                                             Additional Paid in Capital      2        False     False        None    0.447130  1.123700e+10  1.313200e+10  1.197100e+10  1.038500e+10
+RetainedEarningsAccumulatedDeficit                                     Retained Earnings (Accumulated Deficit)      2        False     False        None    0.836858  6.803800e+10  2.981700e+10  1.017100e+10  1.623500e+10
+AccumulatedOtherComprehensiveIncomeLossNetOfTax      Accumulated Other Comprehensive Income (Loss), Net of Tax      2        False     False        None    0.755287  2.800000e+07  2.700000e+07 -4.300000e+07 -1.100000e+07
+StockholdersEquity                                                 Stockholders' Equity Attributable to Parent      2        False      True        None    0.815710  7.932700e+10  4.297800e+10  2.210100e+10  2.661200e+10
+LiabilitiesAndStockholdersEquity                                                        Liabilities and Equity      1        False      True        None    0.888218  1.116010e+11  6.572800e+10  4.118200e+10  4.418700e+10
+LiabilitiesCurrentAbstract                                                                Current liabilities:      1         True     False        None    0.510574           NaN           NaN           NaN           NaN
+LiabilitiesCurrent                                                                        Liabilities, Current      2        False      True        None    0.592145  1.804700e+10  1.063100e+10  6.563000e+09  4.335000e+09
+OperatingLeaseLiabilityCurrent                                             Operating Lease, Liability, Current      2        False     False        None    0.314199  2.880000e+08  2.280000e+08  1.760000e+08  1.440000e+08
+AccountsPayableCurrent                                                               Accounts Payable, Current      2        False     False        None    0.465257  6.310000e+09  2.699000e+09  1.193000e+09  1.783000e+09
+OperatingLeaseLiabilityNoncurrent                                       Operating Lease, Liability, Noncurrent      1        False     False        None    0.392749  1.519000e+09  1.119000e+09  9.020000e+08  7.410000e+08
+DeferredIncomeTaxLiabilitiesNet                                           Deferred Income Tax Liabilities, Net      1        False     False        None    0.389728  8.860000e+08  4.620000e+08  2.470000e+08  2.450000e+08
+OtherLiabilitiesNoncurrent                                                       Other Liabilities, Noncurrent      1        False     False        None    0.486405  4.245000e+09  2.541000e+09  1.913000e+09  1.553000e+09
+AdditionalItems                                                                     Additional Financial Items      0         True     False  Additional    1.000000           NaN           NaN           NaN           NaN
+AccountsPayable                                                                      Accounts Payable, Current      1        False     False  Additional    0.500000  6.310000e+09  2.699000e+09  1.193000e+09  1.783000e+09
+AccountsReceivable                               Accounts Receivable, after Allowance for Credit Loss, Current      1        False     False  Additional    0.500000  2.306500e+10  9.999000e+09  3.827000e+09  4.650000e+09
+AccruedLiabilitiesCurrent                                                         Accrued Liabilities, Current      1        False     False  Additional    0.500000  1.173700e+10  6.682000e+09  4.120000e+09  2.552000e+09
+Inventory                                                                                       Inventory, Net      1        False      True  Additional    0.500000  1.008000e+10  5.282000e+09  5.159000e+09  2.605000e+09
+LongTermDebt                                                                                    Long-term Debt      1        False     False  Additional    0.500000  8.463000e+09  9.709000e+09  1.095300e+10  1.094600e+10
+LongTermDebtCurrent                                                         Long-term Debt, Current Maturities      1        False     False  Additional    0.500000  0.000000e+00  1.250000e+09  1.250000e+09  0.000000e+00
+LongTermDebtNoncurrent                                            Long-term Debt, Excluding Current Maturities      1        False     False  Additional    0.500000  8.463000e+09  8.459000e+09  9.703000e+09  1.094600e+10
+
+====================================================================================================
+TEST 7: CASH FLOW STATEMENT (Annual)
+====================================================================================================
+
+                                                                                                                                                                                                                                              label  depth  is_abstract  is_total     section  confidence       FY 2025       FY 2024       FY 2023       FY 2022
+concept                                                                                                                                                                                                                                                                                                                                                          
+NetCashProvidedByUsedInOperatingActivitiesAbstract                                                                                                                                                            Cash flows from operating activities:      0         True     False        None    0.791541           NaN           NaN           NaN           NaN
+AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract                                                                              Adjustments to reconcile net income to net cash provided by operating activities:      1         True     False        None    0.779456           NaN           NaN           NaN           NaN
+DepreciationDepletionAndAmortization                                                                                                                                                                       Depreciation, Depletion and Amortization      2        False     False        None    0.383686  1.864000e+09  1.508000e+09  1.544000e+09  1.174000e+09
+ShareBasedCompensation                                                                                                                                                                             Share-based Payment Arrangement, Noncash Expense      2        False     False        None    0.667674  4.737000e+09  3.549000e+09  2.709000e+09  2.004000e+09
+IncreaseDecreaseInOperatingCapitalAbstract                                                                                                                                                             Changes in operating assets and liabilities:      2         True     False        None    0.712991           NaN           NaN           NaN           NaN
+IncreaseDecreaseInAccountsReceivable                                                                                                                                                                     Increase (Decrease) in Accounts Receivable      3        False     False        None    0.410876  1.306300e+10  6.172000e+09 -8.220000e+08  2.215000e+09
+IncreaseDecreaseInInventories                                                                                                                                                                                    Increase (Decrease) in Inventories      3        False     False        None    0.374622  4.781000e+09  9.800000e+07  2.554000e+09  7.740000e+08
+IncreaseDecreaseInAccountsPayable                                                                                                                                                                           Increase (Decrease) in Accounts Payable      3        False     False        None    0.311178  3.357000e+09  1.531000e+09 -5.510000e+08  5.680000e+08
+DeferredIncomeTaxExpenseBenefit                                                                                                                                                                               Deferred Income Tax Expense (Benefit)      2        False     False        None    0.377644 -4.477000e+09 -2.489000e+09 -2.164000e+09 -4.060000e+08
+NetCashProvidedByUsedInOperatingActivities                                                                                                                                                      Net Cash Provided by (Used in) Operating Activities      1        False      True        None    0.885196  6.408900e+10  2.809000e+10  5.641000e+09  9.108000e+09
+NetCashProvidedByUsedInInvestingActivitiesAbstract                                                                                                                                                            Cash flows from investing activities:      0         True     False        None    0.752266           NaN           NaN           NaN           NaN
+PaymentsToAcquireBusinessesNetOfCashAcquired                                                                                                                                                   Payments to Acquire Businesses, Net of Cash Acquired      1        False     False        None    0.377644  1.007000e+09  8.300000e+07  4.900000e+07  2.630000e+08
+NetCashProvidedByUsedInInvestingActivities                                                                                                                                                      Net Cash Provided by (Used in) Investing Activities      1        False      True        None    0.851964 -2.042100e+10 -1.056600e+10  7.375000e+09 -9.830000e+09
+PaymentsForProceedsFromOtherInvestingActivities                                                                                                                                             Payments for (Proceeds from) Other Investing Activities      1        False     False        None    0.377644 -2.200000e+07  9.850000e+08  7.700000e+07  2.400000e+07
+NetCashProvidedByUsedInFinancingActivitiesAbstract                                                                                                                                                            Cash flows from financing activities:      0         True     False        None    0.785498           NaN           NaN           NaN           NaN
+PaymentsRelatedToTaxWithholdingForShareBasedCompensation                                                                                                                                  Payment, Tax Withholding, Share-based Payment Arrangement      1        False     False        None    0.323263  6.930000e+09  2.783000e+09  1.475000e+09  1.904000e+09
+PaymentsForRepurchaseOfCommonStock                                                                                                                                                                          Payments for Repurchase of Common Stock      1        False     False        None    0.586103  3.370600e+10  9.533000e+09  1.003900e+10           NaN
+NetCashProvidedByUsedInFinancingActivities                                                                                                                                                      Net Cash Provided by (Used in) Financing Activities      1        False      True        None    0.894260 -4.235900e+10 -1.363300e+10 -1.161700e+10  1.865000e+09
+PaymentsOfDividendsCommonStock                                                                                                                                                                                                       Dividends paid      1        False     False        None    0.374622  8.340000e+08  3.950000e+08  3.980000e+08  3.990000e+08
+ProceedsFromPaymentsForOtherFinancingActivities                                                                                                                                             Proceeds from (Payments for) Other Financing Activities      1        False     False        None    0.350453  0.000000e+00 -1.000000e+06 -2.000000e+06 -7.000000e+06
+CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect  Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents, Period Increase (Decrease), Including Exchange Rate Effect      0        False      True        None    0.797583  1.309000e+09  3.891000e+09  1.399000e+09  1.143000e+09
+CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents                                                                                                               Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents      0        False     False        None    0.788520  8.589000e+09  7.280000e+09  3.389000e+09  1.990000e+09
+SupplementalCashFlowInformationAbstract                                                                                                                                                           Supplemental disclosure of cash flow information:      0         True     False        None    0.561934           NaN           NaN           NaN           NaN
+InterestPaidNet                                                                                                                                                                 Interest Paid, Excluding Capitalized Interest, Operating Activities      1        False     False        None    0.583082  2.460000e+08  2.520000e+08  2.540000e+08  2.460000e+08
+IncomeTaxesPaidNet                                                                                                                                                                                                           Income Taxes Paid, Net      1        False     False        None    0.374622  1.511800e+10  6.549000e+09  1.404000e+09  3.960000e+08
+AdditionalItems                                                                                                                                                                                                          Additional Financial Items      0         True     False  Additional    1.000000           NaN           NaN           NaN           NaN
+AllocatedShareBasedCompensationExpense                                                                                                                                                                     Share-based Payment Arrangement, Expense      1        False     False  Additional    0.500000  4.737000e+09  3.549000e+09  2.710000e+09  2.004000e+09
+AmortizationOfIntangibleAssets                                                                                                                                                                                    Amortization of Intangible Assets      1        False     False  Additional    0.500000  5.930000e+08  6.140000e+08  6.990000e+08  5.630000e+08
+Depreciation                                                                                                                                                                                                                           Depreciation      1        False     False  Additional    0.500000  1.300000e+09  8.940000e+08  8.440000e+08  6.110000e+08
+DepreciationAndAmortization                                                                                                                                                                                Depreciation, Depletion and Amortization      1        False     False  Additional    0.500000  1.864000e+09  1.508000e+09  1.544000e+09  1.174000e+09
+DividendsPaid                                                                                                                                                                                                                 Payments of Dividends      1        False     False  Additional    0.500000  8.340000e+08  3.950000e+08  3.980000e+08  3.990000e+08
+GainLossOnInvestments                                                                                                                                                                                                    Gain (Loss) on Investments      1        False     False  Additional    0.500000  1.030000e+09  2.380000e+08 -4.500000e+07  1.000000e+08
+Goodwill                                                                                                                                                                                                                                   Goodwill      1        False     False  Additional    0.500000  5.188000e+09  4.430000e+09  4.372000e+09  4.349000e+09
+GoodwillImpairmentLoss                                                                                                                                                                                                    Goodwill, Impairment Loss      1        False     False  Additional    0.500000  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+IncomeTaxExpenseBenefit                                                                                                                                                                                                Income Tax Expense (Benefit)      1        False     False  Additional    0.500000  1.114600e+10  4.058000e+09 -1.870000e+08  1.890000e+08
+InterestExpenseNonoperating                                                                                                                                                                                             InterestExpenseNonoperating      1        False     False  Additional    0.500000  2.470000e+08           NaN           NaN           NaN
+InventoryWriteDown                                                                                                                                                                                                             Inventory Write-down      1        False     False  Additional    0.500000  1.600000e+09  7.740000e+08  1.040000e+09           NaN
+InvestmentIncomeInterest                                                                                                                                                                                                Investment Income, Interest      1        False     False  Additional    0.500000  1.786000e+09  8.660000e+08  2.670000e+08  2.900000e+07
+NetIncomeLoss                                                                                                                                                                                              Net Income (Loss) Attributable to Parent      1        False      True  Additional    0.500000  7.288000e+10  2.976000e+10  4.368000e+09  9.752000e+09
+NonoperatingIncomeExpense                                                                                                                                                                                             Nonoperating Income (Expense)      1        False     False  Additional    0.500000  2.573000e+09  8.460000e+08 -4.300000e+07 -1.000000e+08
+OperatingExpenses                                                                                                                                                                                                                Operating Expenses      1        False     False  Additional    0.500000  1.640500e+10  1.132900e+10  1.113200e+10  7.434000e+09
+OtherNonoperatingIncomeExpense                                                                                                                                                                                  Other Nonoperating Income (Expense)      1        False     False  Additional    0.500000  1.034000e+09  2.370000e+08 -4.800000e+07  1.070000e+08
+PaymentsOfDividends                                                                                                                                                                                                           Payments of Dividends      1        False     False  Additional    0.500000  8.340000e+08  3.950000e+08  3.980000e+08  3.990000e+08
+ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities                                                                                        Proceeds from Maturities, Prepayments and Calls of Debt Securities, Available-for-sale      1        False     False  Additional    0.500000  1.119500e+10  9.732000e+09  1.942500e+10  1.519700e+10
+
+====================================================================================================
+TEST 8: CUSTOM TTM CALCULATION
+====================================================================================================
+
+[OK] TTM Revenue (as of Q3 2024 - Oct 27, 2024):
+  Value: $10,918,000,000
+  Periods: [(2020, 'FY'), (2020, 'FY'), (2020, 'FY'), (2020, 'FY')]
+
+====================================================================================================
+TEST SUMMARY
+====================================================================================================
+
+[OK] Stock Split Detection: PASSED
+[OK] Annual Income Statement: PASSED
+[OK] Quarterly Income Statement: PASSED
+[ ? ] TTM Income Statement: Check output above
+[ ? ] TTM Metrics: Check output above
+[ ? ] Balance Sheet: Check output above
+[ ? ] Cash Flow Statement: Check output above
+[ ? ] Custom TTM Calculation: Check output above
+
+====================================================================================================
+REPORT COMPLETE
+====================================================================================================

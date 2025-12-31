@@ -25,3 +25,5 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
+.quant/
+quant/
