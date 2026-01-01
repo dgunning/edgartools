@@ -517,6 +517,30 @@ class Company(Entity):
         return False
 
     @property
+    def filer_type(self) -> Optional[str]:
+        """
+        Get the filer type based on state of incorporation.
+
+        Returns:
+            'Domestic' - Incorporated in US
+            'Canadian' - Incorporated in Canada
+            'Foreign' - Incorporated elsewhere
+            None - Unknown or state of incorporation not available
+
+        Example:
+            >>> Company('AAPL').filer_type
+            'Domestic'
+            >>> Company('BABA').filer_type
+            'Foreign'
+            >>> Company('CNQ').filer_type  # Canadian Natural Resources
+            'Canadian'
+        """
+        if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
+            from edgar.reference._codes import get_filer_type
+            return get_filer_type(self.data.state_of_incorporation)
+        return None
+
+    @property
     def latest_tenk(self) -> Optional[TenK]:
         """Get the latest 10-K filing for this company."""
         latest_10k = self.get_filings(form='10-K', trigger_full_load=False).latest()
