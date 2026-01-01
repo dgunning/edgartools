@@ -30,7 +30,7 @@ from edgar.entity.data import Address, CompanyData, EntityData
 from edgar.entity.entity_facts import EntityFacts, NoCompanyFactsFound, get_company_facts
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
-from edgar.formatting import datefmt, reverse_name
+from edgar.formatting import cik_text, datefmt, reverse_name
 from edgar.reference.tickers import find_cik
 from edgar.richtools import Docs, repr_rich
 
@@ -876,7 +876,7 @@ class Company(Entity):
             header = Text(self.data.name, style=get_style("company_name"))
 
         # Build subtitle line: CIK • Exchange • Category
-        subtitle_parts = [Text(f"CIK {self.cik}", style=get_style("cik"))]
+        subtitle_parts = [cik_text(self.cik)]
 
         # Add exchange if available
         if hasattr(self.data, 'exchanges') and self.data.exchanges:
@@ -895,6 +895,12 @@ class Company(Entity):
             elif 'Non-accelerated' in category:
                 category = 'Non-accelerated Filer'
             subtitle_parts.append(Text(category, style=get_style("metadata")))
+
+        # Add filer type indicator for non-domestic companies
+        if self.filer_type == 'Foreign':
+            subtitle_parts.append(Text(self.filer_type, style=get_style("foreign")))
+        elif self.filer_type == 'Canadian':
+            subtitle_parts.append(Text(self.filer_type, style=get_style("canadian")))
 
         subtitle = Text(f" {SYMBOLS['bullet']} ").join(subtitle_parts)
 
@@ -918,22 +924,13 @@ class Company(Entity):
 
         # State of Incorporation
         if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
-            from edgar.reference._codes import get_place_name, is_foreign_company
+            from edgar.reference._codes import get_place_name
             code = self.data.state_of_incorporation
             # Always look up full name from place_codes.csv, fallback to description or code
             state_name = get_place_name(code)
             if not state_name:
                 state_name = getattr(self.data, 'state_of_incorporation_description', None) or code
-            # Add Foreign indicator for non-US companies
-            if is_foreign_company(code):
-                incorporation_text = Text.assemble(
-                    (state_name, get_style("value")),
-                    ("  ", ""),
-                    ("Foreign", get_style("foreign"))
-                )
-                details_table.add_row("Incorporated", incorporation_text)
-            else:
-                details_table.add_row("Incorporated", state_name)
+            details_table.add_row("Incorporated", state_name)
 
         # Entity Type (for non-companies or when relevant)
         if hasattr(self.data, 'entity_type') and self.data.entity_type and self.data.is_individual:
@@ -976,26 +973,33 @@ class Company(Entity):
 
         content_lines.append(details_table)
 
-        # Section 2: Former Names (if any, compact format)
+        # Section 2: Former Names (only if most recent change was within last 2 years)
         if hasattr(self.data, 'former_names') and self.data.former_names:
-            content_lines.append(Text(""))  # Spacing
-            content_lines.append(Text("Former Names", style=get_style("section_header")))
+            from datetime import date, timedelta
+            most_recent = self.data.former_names[0]
+            two_years_ago = date.today() - timedelta(days=730)
+            # Check if the most recent name change was within last 2 years
+            most_recent_date_str = most_recent.get('to')
+            most_recent_date = date.fromisoformat(most_recent_date_str) if most_recent_date_str else None
+            if most_recent_date and most_recent_date >= two_years_ago:
+                content_lines.append(Text(""))  # Spacing
+                content_lines.append(Text("Former Names", style=get_style("section_header")))
 
-            for former_name in self.data.former_names[:3]:  # Limit to 3
-                from_date = datefmt(former_name['from'], '%b %Y')
-                to_date = datefmt(former_name['to'], '%b %Y')
-                content_lines.append(Text.assemble(
-                    ("  ", ""),
-                    (former_name['name'], "italic"),
-                    (" (", get_style("metadata")),
-                    (f"{from_date} {SYMBOLS['arrow_right']} {to_date}", get_style("metadata")),
-                    (")", get_style("metadata"))
-                ))
+                for former_name in self.data.former_names[:3]:  # Limit to 3
+                    from_date = datefmt(former_name['from'], '%b %Y')
+                    to_date = datefmt(former_name['to'], '%b %Y')
+                    content_lines.append(Text.assemble(
+                        ("  ", ""),
+                        (former_name['name'], "italic"),
+                        (" (", get_style("metadata")),
+                        (f"{from_date} {SYMBOLS['arrow_right']} {to_date}", get_style("metadata")),
+                        (")", get_style("metadata"))
+                    ))
 
-            # Show count if more than 3
-            if len(self.data.former_names) > 3:
-                remaining = len(self.data.former_names) - 3
-                content_lines.append(Text(f"  {SYMBOLS['ellipsis']} and {remaining} more", style=get_style("metadata")))
+                # Show count if more than 3
+                if len(self.data.former_names) > 3:
+                    remaining = len(self.data.former_names) - 3
+                    content_lines.append(Text(f"  {SYMBOLS['ellipsis']} and {remaining} more", style=get_style("metadata")))
 
         content = Group(
             header,
@@ -1011,7 +1015,7 @@ class Company(Entity):
             border_style=get_style("border"),
             box=box.ROUNDED,
             padding=(0, 1),
-            width=80,
+            width=85,
             subtitle=Text.assemble(
                 ("SEC Entity Data", get_style("metadata")),
                 f" {SYMBOLS['bullet']} ",
