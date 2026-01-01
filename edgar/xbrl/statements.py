@@ -1168,14 +1168,16 @@ class Statements:
             return self._handle_statement_error(e, "CashFlowStatement")
 
     def statement_of_equity(self, parenthetical: bool = False,
-                            include_dimensions: bool = False) -> Optional[Statement]:
+                            include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get a statement of equity.
 
         Args:
             parenthetical: Whether to get the parenthetical statement of equity
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: False)
+                              when rendering or converting to DataFrame (default: True for
+                              Statement of Equity since it's an inherently dimensional statement
+                              that tracks changes across equity components)
 
         Returns:
            The statement of equity, or None if unable to resolve the statement
@@ -1194,7 +1196,7 @@ class Statements:
             return self._handle_statement_error(e, "StatementOfEquity")
 
     def comprehensive_income(self, parenthetical: bool = False,
-                             include_dimensions: bool = False) -> Optional[Statement]:
+                             include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get a statement of comprehensive income.
 
@@ -1205,7 +1207,9 @@ class Statements:
         Args:
             parenthetical: Whether to get the parenthetical comprehensive income statement
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: False)
+                              when rendering or converting to DataFrame (default: True for
+                              Comprehensive Income since it's an inherently dimensional statement
+                              that tracks components of other comprehensive income)
 
         Returns:
             The comprehensive income statement, or None if unable to resolve the statement
@@ -1511,7 +1515,7 @@ class StitchedStatements:
 
     def statement_of_equity(self, max_periods: int = 8, standard: bool = True,
                             use_optimal_periods: bool = True, show_date_range: bool = False,
-                            include_dimensions: bool = False) -> Optional[StitchedStatement]:
+                            include_dimensions: bool = True) -> Optional[StitchedStatement]:
         """
         Get a stitched statement of changes in equity across multiple time periods.
 
@@ -1520,7 +1524,9 @@ class StitchedStatements:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
-            include_dimensions: Whether to include dimensional segment data (default: False)
+            include_dimensions: Whether to include dimensional segment data (default: True for
+                              Statement of Equity since it's an inherently dimensional statement
+                              that tracks changes across equity components)
 
         Returns:
             StitchedStatement for the statement of equity
@@ -1533,7 +1539,7 @@ class StitchedStatements:
 
     def comprehensive_income(self, max_periods: int = 8, standard: bool = True,
                              use_optimal_periods: bool = True, show_date_range: bool = False,
-                             include_dimensions: bool = False) -> Optional[StitchedStatement]:
+                             include_dimensions: bool = True) -> Optional[StitchedStatement]:
         """
         Get a stitched statement of comprehensive income across multiple time periods.
 
@@ -1542,7 +1548,9 @@ class StitchedStatements:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
-            include_dimensions: Whether to include dimensional segment data (default: False)
+            include_dimensions: Whether to include dimensional segment data (default: True for
+                              Comprehensive Income since it's an inherently dimensional statement
+                              that tracks components of other comprehensive income)
 
         Returns:
             StitchedStatement for the comprehensive income statement

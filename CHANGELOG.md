@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.7.1] - 2026-01-01
+
+### Fixed
+
+- **Statement of Equity and Comprehensive Income NaN Values** (Issue #571, edgartools-rywt)
+  - Critical bug fix: v5.7.0 regression caused Statement of Equity and Comprehensive Income to show mostly NaN values
+  - Root cause: The v5.7.0 change to `include_dimensions=False` default filtered out dimensional data that these statements require
+  - Statement of Equity and Comprehensive Income are inherently dimensional statements (tracking changes across equity components)
+  - Changed default for `statement_of_equity()` and `comprehensive_income()` to `include_dimensions=True`
+  - Also fixed in `StitchedStatements` class for multi-period analysis
+  - AAPL values improved from 4/13 concepts with values (31%) to 12/27 (44%)
+  - Users can still explicitly set `include_dimensions=False` for previous behavior
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate financial data in Statement of Equity and Comprehensive Income
+
+### Summary
+
+Release 5.7.1 is a critical point release fixing a data accuracy regression in v5.7.0. Statement of Equity and Comprehensive Income statements now correctly display dimensional data by default, ensuring accurate financial values.
+
+This release is highly recommended for all users working with equity statements.
+
+## [5.7.0] - 2026-01-01
+
+### Changed
+
+- **Include Dimensions Default to False for Cleaner Statement Output** (57665eb1)
+  - Changed `include_dimensions` parameter default from `True` to `False` for most financial statements
+  - Provides cleaner output by hiding dimensional segment data by default
+  - Users can explicitly set `include_dimensions=True` when dimensional breakdown is needed
+  - **Note**: This change was partially reverted in v5.7.1 for Statement of Equity and Comprehensive Income
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Cleaner default output for Balance Sheet, Income Statement, Cash Flow Statement
+
+### Added
+
+- **Business Category Property for Company** (33b63b8c)
+  - Added `business_category` property to Company class
+  - **Files**: `edgar/entity/core.py`
+
+### Summary
+
+Release 5.7.0 changes the default behavior for dimensional data display in financial statements, providing cleaner output by default.
+
 ## [5.6.4] - 2025-12-29
 
 ### Fixed
