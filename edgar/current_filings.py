@@ -14,7 +14,7 @@ from rich.text import Text
 
 from edgar._filings import Filings
 from edgar.core import IntString
-from edgar.formatting import accepted_time_text, accession_number_text
+from edgar.display.formatting import accepted_time_text, accession_number_text
 from edgar.httprequests import get_with_retry
 from edgar.reference.tickers import find_ticker
 from edgar.xmltools import child_text

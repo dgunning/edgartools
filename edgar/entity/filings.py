@@ -17,7 +17,7 @@ from rich.text import Text
 
 from edgar._filings import Filing, Filings, PagingState
 from edgar.core import IntString, listify, log
-from edgar.formatting import accession_number_text, display_size
+from edgar.display.formatting import accession_number_text, display_size
 from edgar.reference.forms import describe_form
 from edgar.richtools import Docs, df_to_rich_table, repr_rich
 

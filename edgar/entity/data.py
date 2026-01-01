@@ -15,7 +15,7 @@ from edgar.core import listify, log
 from edgar.dates import InvalidDateException
 from edgar.entity.filings import EntityFilings
 from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
-from edgar.formatting import reverse_name
+from edgar.display.formatting import reverse_name
 from edgar.storage import is_using_local_storage
 
 # Module-level import cache for lazy imports

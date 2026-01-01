@@ -16,7 +16,7 @@ from rich.table import Table as RichTable
 from rich.text import Text
 
 from edgar.documents import HTMLParser, ParserConfig
-from edgar.formatting import cik_text
+from edgar.display.formatting import cik_text
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
 from edgar.xbrl.core import determine_dominant_scale, format_date, format_value, parse_date

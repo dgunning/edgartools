@@ -26,7 +26,7 @@ from edgar.display.styles import (
     get_statement_styles,
     source_text,
 )
-from edgar.formatting import accession_number_text, cik_text
+from edgar.display.formatting import accession_number_text, cik_text
 
 console = Console()
 

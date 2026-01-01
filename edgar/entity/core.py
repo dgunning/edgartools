@@ -30,7 +30,7 @@ from edgar.entity.data import Address, CompanyData, EntityData
 from edgar.entity.entity_facts import EntityFacts, NoCompanyFactsFound, get_company_facts
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
-from edgar.formatting import cik_text, datefmt, reverse_name
+from edgar.display.formatting import cik_text, datefmt, reverse_name
 from edgar.reference.tickers import find_cik
 from edgar.richtools import Docs, repr_rich
 

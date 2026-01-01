@@ -25,7 +25,7 @@ from edgar._party import Address
 from edgar.core import IntString, get_bool
 from edgar.datatools import convert_to_numeric
 from edgar.entity import Entity
-from edgar.formatting import reverse_name, yes_no
+from edgar.display.formatting import reverse_name, yes_no
 from edgar.ownership.core import format_amount, format_currency, format_numeric, safe_numeric
 from edgar.ownership.html_render import ownership_to_html
 from edgar.richtools import df_to_rich_table, repr_rich
