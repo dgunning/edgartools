@@ -275,7 +275,7 @@ class CurrentPeriodView:
             return self.period_key
 
     def balance_sheet(self, raw_concepts: bool = False, as_statement: bool = True,
-                       include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                       include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period balance sheet data.
 
@@ -284,8 +284,8 @@ class CurrentPeriodView:
                          (e.g., "us-gaap:Assets" instead of "Assets")
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
                          Useful when companies report ONLY dimensional data.
 
         Returns:
@@ -308,7 +308,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def income_statement(self, raw_concepts: bool = False, as_statement: bool = True,
-                          include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                          include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period income statement data.
 
@@ -317,8 +317,8 @@ class CurrentPeriodView:
                          (e.g., "us-gaap:Revenues" instead of "Revenue")
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
                          Useful when companies report ONLY dimensional data (e.g., AOS Revenue).
 
         Returns:
@@ -341,7 +341,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def cashflow_statement(self, raw_concepts: bool = False, as_statement: bool = True,
-                            include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                            include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period cash flow statement data.
 
@@ -350,8 +350,8 @@ class CurrentPeriodView:
                          (e.g., "us-gaap:NetCashProvidedByUsedInOperatingActivities")
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with rich formatting by default,
@@ -370,7 +370,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def statement_of_equity(self, raw_concepts: bool = False, as_statement: bool = True,
-                             include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                             include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period statement of equity data.
 
@@ -378,8 +378,8 @@ class CurrentPeriodView:
             raw_concepts: If True, preserve original XBRL concept names
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with rich formatting by default,
@@ -391,7 +391,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def comprehensive_income(self, raw_concepts: bool = False, as_statement: bool = True,
-                              include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                              include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period comprehensive income statement data.
 
@@ -399,8 +399,8 @@ class CurrentPeriodView:
             raw_concepts: If True, preserve original XBRL concept names
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with rich formatting by default,
@@ -412,15 +412,15 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def _get_statement_dataframe(self, statement_type: str, raw_concepts: bool = False,
-                                   include_dimensions: bool = True) -> pd.DataFrame:
+                                   include_dimensions: bool = False) -> pd.DataFrame:
         """
         Internal method to get statement data as DataFrame for current period.
 
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
             raw_concepts: Whether to preserve raw XBRL concept names
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             pandas DataFrame with statement data filtered to current period.
@@ -517,14 +517,14 @@ class CurrentPeriodView:
                 reason=f"Failed to retrieve {statement_type}: {str(e)}"
             ) from e
 
-    def _get_statement_object(self, statement_type: str, include_dimensions: bool = True) -> 'Statement':
+    def _get_statement_object(self, statement_type: str, include_dimensions: bool = False) -> 'Statement':
         """
         Internal method to get statement as a Statement object for current period.
 
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with current period filtering applied
@@ -839,7 +839,7 @@ class CurrentPeriodStatement:
 
     def __init__(self, xbrl, role_or_type: str, canonical_type: Optional[str] = None,
                  period_filter: Optional[str] = None, period_label: Optional[str] = None,
-                 include_dimensions: bool = True):
+                 include_dimensions: bool = False):
         """
         Initialize with period filtering.
 
@@ -849,8 +849,8 @@ class CurrentPeriodStatement:
             canonical_type: Optional canonical statement type
             period_filter: Period key to filter to
             period_label: Human-readable period label
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
         """
         self.xbrl = xbrl
         self.role_or_type = role_or_type

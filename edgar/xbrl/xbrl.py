@@ -538,15 +538,15 @@ class XBRL:
         return self._current_period_view
 
     def query(self,
-              include_dimensions: bool = True,
+              include_dimensions: bool = False,
               include_contexts: bool = False,
               include_element_info: bool = False) -> 'FactQuery':
         """
         Start a new query for XBRL facts.
         """
         fact_query = self.facts.query()
-        if not include_dimensions:
-            fact_query = fact_query.exclude_dimensions()
+        # Explicitly set the include_dimensions flag based on the parameter
+        fact_query._include_dimensions = include_dimensions
         if not include_contexts:
             fact_query = fact_query.exclude_contexts()
         if not include_element_info:
@@ -654,13 +654,13 @@ class XBRL:
         self._all_statements_cached = statements
         return statements
 
-    def get_statement_by_type(self, statement_type: str, include_dimensions: bool = True) -> Optional[Dict[str, Any]]:
+    def get_statement_by_type(self, statement_type: str, include_dimensions: bool = False) -> Optional[Dict[str, Any]]:
         """
         Get the first statement matching the given type.
 
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', 'Notes', etc.)
-            include_dimensions: Whether to include dimensional segment data (default: True)
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             Statement data if found, None otherwise
@@ -1461,7 +1461,7 @@ class XBRL:
                          standard: bool = True,
                          show_date_range: bool = False,
                          parenthetical: bool = False,
-                         include_dimensions: bool = True) -> Optional[RenderedStatement]:
+                         include_dimensions: bool = False) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         Args:
@@ -1472,7 +1472,7 @@ class XBRL:
             standard: Whether to use standardized concept labels (default: True)
             show_date_range: Whether to show full date ranges for duration periods (default: False)
             parenthetical: Whether to look for a parenthetical statement (default: False)
-            include_dimensions: Whether to include dimensional segment data (default: True)
+            include_dimensions: Whether to include dimensional segment data (default: False)
         Returns:
             RichTable: A formatted table representation of the statement
         """

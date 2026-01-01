@@ -23,13 +23,13 @@ class Financials:
             log.warning(f"Filing {filing} does not contain XBRL data: {e}")
             return None
 
-    def balance_sheet(self, include_dimensions: bool = True):
+    def balance_sheet(self, include_dimensions: bool = False):
         """
         Get the balance sheet.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             A Statement object for the balance sheet, or None if not available
@@ -38,13 +38,13 @@ class Financials:
             return None
         return self.xb.statements.balance_sheet(include_dimensions=include_dimensions)
 
-    def income_statement(self, include_dimensions: bool = True):
+    def income_statement(self, include_dimensions: bool = False):
         """
         Get the income statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             A Statement object for the income statement, or None if not available
@@ -53,13 +53,13 @@ class Financials:
             return None
         return self.xb.statements.income_statement(include_dimensions=include_dimensions)
 
-    def cashflow_statement(self, include_dimensions: bool = True):
+    def cashflow_statement(self, include_dimensions: bool = False):
         """
         Get the cash flow statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             A Statement object for the cash flow statement, or None if not available
@@ -68,13 +68,13 @@ class Financials:
             return None
         return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions)
 
-    def statement_of_equity(self, include_dimensions: bool = True):
+    def statement_of_equity(self, include_dimensions: bool = False):
         """
         Get the statement of equity.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             A Statement object for the statement of equity, or None if not available
@@ -83,13 +83,13 @@ class Financials:
             return None
         return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions)
 
-    def comprehensive_income(self, include_dimensions: bool = True):
+    def comprehensive_income(self, include_dimensions: bool = False):
         """
         Get the comprehensive income statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             A Statement object for the comprehensive income statement, or None if not available

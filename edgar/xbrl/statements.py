@@ -95,7 +95,7 @@ class Statement:
     }
 
     def __init__(self, xbrl, role_or_type: str, canonical_type: Optional[str] = None,
-               skip_concept_check: bool = False, include_dimensions: bool = True):
+               skip_concept_check: bool = False, include_dimensions: bool = False):
         """
         Initialize with an XBRL object and statement identifier.
 
@@ -106,7 +106,7 @@ class Statement:
                          If provided, this type will be used for specialized processing logic
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Raises:
             StatementValidationError: If statement validation fails
@@ -262,7 +262,7 @@ class Statement:
         period_filter: Optional[str] = None,
         period_view: Optional[str] = None,
         standard: bool = True,
-        include_dimensions: bool = True,
+        include_dimensions: bool = False,
         include_unit: bool = False,
         include_point_in_time: bool = False
     ) -> pd.DataFrame:
@@ -1082,14 +1082,14 @@ class Statements:
         return self["CoverPage"]
 
     def balance_sheet(self, parenthetical: bool = False,
-                      include_dimensions: bool = True) -> Optional[Statement]:
+                      include_dimensions: bool = False) -> Optional[Statement]:
         """
         Get a balance sheet.
 
         Args:
             parenthetical: Whether to get the parenthetical balance sheet
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             A balance sheet statement, or None if unable to resolve the statement
@@ -1113,7 +1113,7 @@ class Statements:
             return self._handle_statement_error(e, "BalanceSheet")
 
     def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False,
-                         include_dimensions: bool = True) -> Optional[Statement]:
+                         include_dimensions: bool = False) -> Optional[Statement]:
         """
         Get an income statement.
 
@@ -1121,7 +1121,7 @@ class Statements:
             parenthetical: Whether to get the parenthetical income statement
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             An income statement, or None if unable to resolve the statement
@@ -1142,14 +1142,14 @@ class Statements:
             return self._handle_statement_error(e, "IncomeStatement")
 
     def cashflow_statement(self, parenthetical: bool = False,
-                           include_dimensions: bool = True) -> Optional[Statement]:
+                           include_dimensions: bool = False) -> Optional[Statement]:
         """
         Get a cash flow statement.
 
         Args:
             parenthetical: Whether to get the parenthetical cash flow statement
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
              The cash flow statement, or None if unable to resolve the statement
@@ -1168,14 +1168,14 @@ class Statements:
             return self._handle_statement_error(e, "CashFlowStatement")
 
     def statement_of_equity(self, parenthetical: bool = False,
-                            include_dimensions: bool = True) -> Optional[Statement]:
+                            include_dimensions: bool = False) -> Optional[Statement]:
         """
         Get a statement of equity.
 
         Args:
             parenthetical: Whether to get the parenthetical statement of equity
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
            The statement of equity, or None if unable to resolve the statement
@@ -1194,7 +1194,7 @@ class Statements:
             return self._handle_statement_error(e, "StatementOfEquity")
 
     def comprehensive_income(self, parenthetical: bool = False,
-                             include_dimensions: bool = True) -> Optional[Statement]:
+                             include_dimensions: bool = False) -> Optional[Statement]:
         """
         Get a statement of comprehensive income.
 
@@ -1205,7 +1205,7 @@ class Statements:
         Args:
             parenthetical: Whether to get the parenthetical comprehensive income statement
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
 
         Returns:
             The comprehensive income statement, or None if unable to resolve the statement
@@ -1302,7 +1302,7 @@ class Statements:
                      statement_type: str,
                      period_view: Optional[str] = None,
                      standard: bool = True,
-                     include_dimensions: bool = True) -> Optional[pd.DataFrame]:
+                     include_dimensions: bool = False) -> Optional[pd.DataFrame]:
         """
         Convert a statement to a pandas DataFrame.
 
@@ -1310,7 +1310,7 @@ class Statements:
             statement_type: Type of statement to convert
             period_view: Optional period view name
             standard: Whether to use standardized concept labels (default: True)
-            include_dimensions: Whether to include dimensional segment data (default: True)
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             pandas DataFrame containing the statement data

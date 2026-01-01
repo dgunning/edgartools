@@ -274,14 +274,15 @@ def test_query_by_dimension(aapl_xbrl):
     assert len(df) == 3
 
 def test_query_by_dimension_none(aapl_xbrl):
-    # Test querying by dimension
+    # Test querying by dimension - with include_dimensions=True to get dimensional columns
     facts = (aapl_xbrl
-             .query()
+             .query(include_dimensions=True)
              .by_text("Revenue")
              )
     assert any('dim' in col for col in facts.to_dataframe().columns)
+    # Now filter to exclude dimensions using by_dimension(None)
     facts = (aapl_xbrl
-             .query()
+             .query(include_dimensions=True)
              .by_text("Revenue")
              .by_dimension(None)
              )

@@ -46,7 +46,7 @@ class FactQuery:
         self._filters = []
         self._transformations = []
         self._aggregations = []
-        self._include_dimensions = True
+        self._include_dimensions = False
         self._include_contexts = True
         self._include_element_info = True
         self._sort_by = None
@@ -1381,7 +1381,7 @@ class FactsView:
         return df[columns]
 
     def facts_history(self, concept: str, date_col: str = 'period_end',
-                      include_dimensions: bool = True) -> pd.DataFrame:
+                      include_dimensions: bool = False) -> pd.DataFrame:
         """
         Get the history of a concept across time, optionally including dimensions.
 
