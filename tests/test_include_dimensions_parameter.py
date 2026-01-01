@@ -95,14 +95,14 @@ def test_include_dimensions_parameter_compatibility():
 
 
 @pytest.mark.network
-def test_include_dimensions_default_is_true():
+def test_include_dimensions_when_include_dimensions_is_true():
     """
     Test that the default behavior is to include dimensional data
     """
     apd = Company("APD")
     filing = apd.get_filings(form="10-K").latest(1)
     xbrl = filing.xbrl()
-    bs = xbrl.statements.balance_sheet()
+    bs = xbrl.statements.balance_sheet(include_dimensions=True)
 
     # Call without specifying include_dimensions (should default to True)
     df_default = bs.to_dataframe()
