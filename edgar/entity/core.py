@@ -540,6 +540,109 @@ class Company(Entity):
             return get_filer_type(self.data.state_of_incorporation)
         return None
 
+    def _get_form_types(self, limit: int = 100) -> set:
+        """
+        Get unique form types from recent filings efficiently.
+
+        Args:
+            limit: Maximum number of recent filings to check
+
+        Returns:
+            Set of form type strings (e.g., {'10-K', '10-Q', '8-K'})
+        """
+        filings = self.get_filings(trigger_full_load=False)
+        if filings is None or filings.empty:
+            return set()
+
+        form_column = filings.data['form']
+        actual_limit = min(limit, len(form_column))
+        return set(form_column.slice(0, actual_limit).to_pylist())
+
+    @cached_property
+    def business_category(self) -> str:
+        """
+        Get the primary business category for this company.
+
+        Classification uses multiple signals:
+        - SIC code (definitive for REITs, Banks, Insurance, SPACs)
+        - SEC form types filed (investment company forms, 13F, N-2)
+        - Entity type from SEC data
+        - Company name patterns (for disambiguation)
+
+        Returns:
+            One of: 'Operating Company', 'ETF', 'Mutual Fund', 'Closed-End Fund',
+                   'BDC', 'REIT', 'Investment Manager', 'Bank', 'Insurance Company',
+                   'SPAC', 'Holding Company', 'Unknown'
+
+        Example:
+            >>> Company('AAPL').business_category
+            'Operating Company'
+
+            >>> Company('O').business_category
+            'REIT'
+
+            >>> Company('JPM').business_category
+            'Bank'
+        """
+        from edgar.entity.categorization import classify_business_category
+
+        form_types = self._get_form_types()
+        entity_type = getattr(self.data, 'entity_type', None)
+
+        return classify_business_category(
+            sic=self.sic,
+            entity_type=entity_type,
+            name=self.name or '',
+            form_types=form_types
+        )
+
+    def is_fund(self) -> bool:
+        """
+        Check if company is an investment fund (ETF, Mutual Fund, or Closed-End Fund).
+
+        Returns:
+            True if the company is classified as any type of fund
+
+        Example:
+            >>> Company('AAPL').is_fund()
+            False
+        """
+        return self.business_category in ['ETF', 'Mutual Fund', 'Closed-End Fund']
+
+    def is_financial_institution(self) -> bool:
+        """
+        Check if company is a financial institution.
+
+        Includes Banks, Insurance Companies, Investment Managers, and BDCs.
+
+        Returns:
+            True if classified as a financial institution
+
+        Example:
+            >>> Company('JPM').is_financial_institution()
+            True
+            >>> Company('AAPL').is_financial_institution()
+            False
+        """
+        return self.business_category in [
+            'Bank', 'Insurance Company', 'Investment Manager', 'BDC'
+        ]
+
+    def is_operating_company(self) -> bool:
+        """
+        Check if company is a standard operating company.
+
+        Returns:
+            True if classified as an Operating Company
+
+        Example:
+            >>> Company('AAPL').is_operating_company()
+            True
+            >>> Company('JPM').is_operating_company()
+            False
+        """
+        return self.business_category == 'Operating Company'
+
     @property
     def latest_tenk(self) -> Optional[TenK]:
         """Get the latest 10-K filing for this company."""
