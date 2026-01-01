@@ -175,7 +175,7 @@ class ProxyStatement:
     @property
     def cik(self) -> str:
         """Central Index Key."""
-        return self._filing.cik
+        return str(self._filing.cik)
 
     @property
     def accession_number(self) -> str:

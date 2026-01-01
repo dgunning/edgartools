@@ -23,32 +23,88 @@ class Financials:
             log.warning(f"Filing {filing} does not contain XBRL data: {e}")
             return None
 
-    def balance_sheet(self):
-        if self.xb is None:
-            return None
-        return self.xb.statements.balance_sheet()
+    def balance_sheet(self, include_dimensions: bool = True):
+        """
+        Get the balance sheet.
 
-    def income_statement(self):
-        if self.xb is None:
-            return None
-        return self.xb.statements.income_statement()
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
-    def cashflow_statement(self):
+        Returns:
+            A Statement object for the balance sheet, or None if not available
+        """
         if self.xb is None:
             return None
-        return self.xb.statements.cashflow_statement()
+        return self.xb.statements.balance_sheet(include_dimensions=include_dimensions)
 
-    def statement_of_equity(self):
-        if self.xb is None:
-            return None
-        return self.xb.statements.statement_of_equity()
+    def income_statement(self, include_dimensions: bool = True):
+        """
+        Get the income statement.
 
-    def comprehensive_income(self):
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the income statement, or None if not available
+        """
         if self.xb is None:
             return None
-        return self.xb.statements.comprehensive_income()
+        return self.xb.statements.income_statement(include_dimensions=include_dimensions)
+
+    def cashflow_statement(self, include_dimensions: bool = True):
+        """
+        Get the cash flow statement.
+
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the cash flow statement, or None if not available
+        """
+        if self.xb is None:
+            return None
+        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions)
+
+    def statement_of_equity(self, include_dimensions: bool = True):
+        """
+        Get the statement of equity.
+
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the statement of equity, or None if not available
+        """
+        if self.xb is None:
+            return None
+        return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions)
+
+    def comprehensive_income(self, include_dimensions: bool = True):
+        """
+        Get the comprehensive income statement.
+
+        Args:
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
+
+        Returns:
+            A Statement object for the comprehensive income statement, or None if not available
+        """
+        if self.xb is None:
+            return None
+        return self.xb.statements.comprehensive_income(include_dimensions=include_dimensions)
 
     def cover(self):
+        """
+        Get the cover page.
+
+        Returns:
+            A Statement object for the cover page, or None if not available
+        """
         if self.xb is None:
             return None
         return self.xb.statements.cover_page()
@@ -105,13 +161,16 @@ class Financials:
                         period_col = period_columns[period_offset]
                         value = matches.iloc[0][period_col]
 
-                        # Convert to numeric if possible
-                        if pd.notna(value) and value != '':
-                            try:
-                                return float(value) if '.' in str(value) else int(value)
-                            except (ValueError, TypeError):
-                                return value
-                        return value
+                        # Skip empty/NA values - try next pattern
+                        if pd.isna(value) or value == '':
+                            continue
+
+                        # Convert to numeric
+                        try:
+                            return float(value) if '.' in str(value) else int(value)
+                        except (ValueError, TypeError):
+                            # Non-numeric value, try next pattern
+                            continue
 
             return None
 
@@ -239,10 +298,11 @@ class Financials:
             Operating cash flow value if found, None otherwise
         """
         patterns = [
-            r'Net Cash.*Operations',
+            r'^Net Cash from Operating',          # Most specific - matches "Net Cash from Operating Activities"
+            r'^Net Cash Provided by Operating',   # Alternative phrasing
+            r'Net Cash.*Operating Activities$',   # Anchored to end
             r'Operating.*Cash.*Flow',
-            r'Cash.*Operations',
-            r'Net Cash.*Operating'
+            r'Net Cash.*Operations$',             # Avoid matching "adjustments to reconcile..."
         ]
         return self._get_standardized_concept_value('cashflow', patterns, period_offset)
 

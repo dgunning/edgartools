@@ -7,6 +7,169 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.6.4] - 2025-12-29
+
+### Fixed
+
+- **XBRL Assets Values Incorrectly Rounded Breaking Balance Sheet Equation** (Issue #564, 25617183)
+  - Critical bug fix: XBRL was selecting less precise facts when duplicates existed
+  - PFE 2017 Assets showed $172,000M instead of correct $171,797M ($203M error)
+  - Added _get_fact_precision() helper to calculate decimal precision from fact decimals attribute
+  - Added _select_most_precise_fact() to choose fact with highest precision when duplicates exist
+  - Now correctly selects most precise fact, preserving balance sheet equation integrity
+  - **Files**: `edgar/xbrl/facts.py`
+  - **Impact**: Accurate XBRL financial statement values, especially for duplicate facts with different precision
+
+### Summary
+
+Release 5.6.4 is a critical bug fix release addressing XBRL fact precision. This fix ensures that when duplicate facts exist with different precision levels, the most precise value is selected, maintaining the integrity of financial statements and the fundamental accounting equation (Assets = Liabilities + Equity).
+
+This release is highly recommended for users working with XBRL financial data.
+
+## [5.6.3] - 2025-12-28
+
+### Fixed
+
+- **Duplicate Period Labels for December FYE Companies** (df153797, edgartools-t3tr)
+  - Fixed duplicate "FY 2024" labels when both current and comparative periods had fiscal_year=2024
+  - For December fiscal year end companies, now uses period_end.year for labels instead of SEC's fiscal_year tag
+  - Non-December FYE companies continue to trust SEC's fiscal_year since their FY doesn't align with calendar year
+  - **Files**: `edgar/entity/` modules
+  - **Impact**: Accurate period labeling for December FYE companies in EntityFacts statements
+
+### Added
+
+- **Industry-Specific Concept Learning** (d4571f63)
+  - Added new securities industry (SIC 6200-6289) for broker-dealers and asset managers
+  - Updated all 16 industry extensions with per-industry occurrence thresholds
+  - Thresholds now based on industry homogeneity (18-30% range)
+  - Added investment_companies extension (SIC 6720-6799)
+  - Learns 902+ industry-specific concepts across all industries
+  - **Files**: `edgar/entity/industry_mappings.json`, industry extension files
+  - **Impact**: More accurate industry-specific financial concept recognition
+
+- **Dynamic Label Width for Entity Facts Statements** (f0df927c)
+  - Calculates label column width based on terminal size and number of periods
+  - Wider labels (up to 55 chars) for fewer periods, narrower (min 30) for more
+  - Added min_width=10 on value columns to prevent truncation
+  - Falls back to tier-based defaults when terminal width unavailable
+  - **Files**: `edgar/entity/` display modules
+  - **Impact**: Optimal use of terminal space for statement display
+
+### Improved
+
+- **Statement Display Styling** (fc10074e, c4bfb3d1)
+  - Made period range bold for better visibility (was previously dim italic)
+  - Color-coded source attribution: EntityFacts (cyan) vs XBRL (gold)
+  - **Files**: `edgar/entity/styles.py`, `edgar/entity/enhanced_statement.py`
+  - **Impact**: Improved readability and visual distinction between data sources
+
+### Summary
+
+Release 5.6.3 is a feature and fix release focused on EntityFacts statement display improvements. Key highlights:
+
+- Fixed duplicate period labels for December FYE companies
+- Added industry-specific concept learning with 902+ concepts
+- Dynamic label width based on terminal size
+- Enhanced statement styling with color-coded sources
+
+This release is recommended for users working with EntityFacts API data and industry-specific financial analysis.
+
+## [5.6.2] - 2025-12-27
+
+### Fixed
+
+- **XBRL Presentation Mode Not Applied to Columns with None Values** (#556, 5f404f3d)
+  - Fixed presentation mode not being applied to columns containing None values
+  - Ensures consistent formatting across all XBRL statement columns
+  - **Files**: `edgar/xbrl/` modules
+  - **Impact**: Proper presentation mode rendering for statements with missing data
+
+- **Type Checker Invalid Return Type Errors** (8eef4721)
+  - Fixed 17 invalid-return-type errors detected by ty type checker
+  - Improved type safety across multiple modules
+  - **Files**: Various edgar modules
+  - **Impact**: Enhanced type safety and IDE support
+
+- **Document Size Limit for Large NPORT-P Filings** (edgartools-ypvp)
+  - Increased max_document_size from 100MB to 110MB to handle edge cases
+  - Resolves DocumentTooLargeError for large NPORT-P filings (e.g., Voya FUNDS TRUST)
+  - **Files**: `edgar/documents/config.py`
+  - **Impact**: Successfully processes NPORT-P filings that were previously failing by 48 bytes
+
+### Documentation
+
+- **Proxy Statement Text Extraction Guide** (c0415007)
+  - Added comprehensive guide for extracting text from proxy statements
+  - Includes TSLA example test script
+  - **Files**: `edgar/proxy/docs/`
+
+- **Proxy Package Documentation** (0b0c54fb)
+  - Added detailed documentation to edgar.proxy package
+  - **Impact**: Better developer experience for proxy statement analysis
+
+- **Company API Documentation Updates** (b230a647)
+  - Updated Company.md with recent API additions
+  - Reflects latest company data access methods
+
+### Summary
+
+Release 5.6.2 is a maintenance release focusing on edge case fixes and documentation improvements. Key highlights:
+
+- Fixed XBRL presentation mode for columns with None values
+- Increased document size limit to handle large NPORT-P filings
+- Enhanced type safety with 17 type error fixes
+- Improved proxy statement documentation
+
+This release is recommended for users working with large filings or proxy statements.
+
+## [5.6.1] - 2025-12-25
+
+### Fixed
+
+- **Type Checker Issues in Source Code** (20ac62d9)
+  - Added type ignore comments for lxml.etree imports (missing type stubs)
+  - Fixed EntityFilings import path in offerings/__init__.py
+  - Added type ignore for np.issubdtype pandas dtype argument
+  - **Files**: `edgar/documents/utils/streaming.py`, `edgar/npx/parsing.py`, `edgar/offerings/__init__.py`, `edgar/ownership/core.py`
+  - **Impact**: Zero type errors in main edgar source code with `uvx ty check`
+
+- **Financial Ratio Calculation Type Mismatches** (#549, 03a4e486)
+  - Fixed type mismatches in FinancialRatios class calculations
+  - Added missing configuration for ratio computations
+  - **Files**: `edgar/financials/ratios.py`
+  - **Impact**: Reliable financial ratio calculations across all company types
+
+- **TypeError in get_financial_metrics() for MSFT** (#553, f0886207)
+  - Fixed get_financial_metrics() returning empty strings instead of numeric values
+  - Improved handling of missing or malformed financial data
+  - **Files**: `edgar/financials/metrics.py`
+  - **Impact**: Consistent numeric returns from financial metrics API
+
+- **Section Tables Returning Empty for TOC-Based Sections** (#554, 28b02a4b)
+  - Fixed section.tables() returning empty lists for table-of-contents based sections
+  - Improved table extraction from document sections
+  - **Files**: `edgar/documents/` modules
+  - **Impact**: Reliable table extraction from all document section types
+
+### Documentation
+
+- **Comprehensive Ownership Module Documentation**
+  - Added detailed documentation for edgar.ownership module
+  - **Files**: `docs/` ownership documentation
+  - **Impact**: Better developer experience for insider transaction analysis
+
+### Summary
+
+Release 5.6.1 is a bug fix release focusing on type safety and reliability improvements. Key highlights:
+
+- Zero type errors in main source code
+- Fixed financial ratio and metrics calculation issues
+- Improved table extraction from document sections
+- Enhanced ownership module documentation
+
+This release is recommended for all users.
+
 ## [5.6.0] - 2025-12-22
 
 ### Fixed

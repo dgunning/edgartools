@@ -94,8 +94,8 @@ class Statement:
         ]
     }
 
-    def __init__(self, xbrl, role_or_type: str, canonical_type: Optional[str] = None, 
-               skip_concept_check: bool = False):
+    def __init__(self, xbrl, role_or_type: str, canonical_type: Optional[str] = None,
+               skip_concept_check: bool = False, include_dimensions: bool = True):
         """
         Initialize with an XBRL object and statement identifier.
 
@@ -105,6 +105,8 @@ class Statement:
             canonical_type: Optional canonical statement type (e.g., "BalanceSheet", "IncomeStatement")
                          If provided, this type will be used for specialized processing logic
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
         Raises:
             StatementValidationError: If statement validation fails
@@ -112,6 +114,7 @@ class Statement:
         self.xbrl = xbrl
         self.role_or_type = role_or_type
         self.canonical_type = canonical_type
+        self._include_dimensions = include_dimensions
 
     def is_segmented(self) -> bool:
         """
@@ -126,7 +129,7 @@ class Statement:
                period_view: Optional[str] = None,
                standard: bool = True,
                show_date_range: bool = False,
-               include_dimensions: bool = True) -> Any:
+               include_dimensions: Optional[bool] = None) -> Any:
         """
         Render the statement as a formatted table.
 
@@ -135,11 +138,16 @@ class Statement:
             period_view: Optional name of a predefined period view
             standard: Whether to use standardized concept labels
             show_date_range: Whether to show full date ranges for duration periods
-            include_dimensions: Whether to include dimensional segment data
+            include_dimensions: Whether to include dimensional segment data.
+                              If None, uses the instance default set at creation time.
 
         Returns:
             Rich Table containing the rendered statement
         """
+        # Use instance default if not explicitly specified
+        if include_dimensions is None:
+            include_dimensions = self._include_dimensions
+
         # Use the canonical type for rendering if available, otherwise use the role
         rendering_type = self.canonical_type if self.canonical_type else self.role_or_type
 
@@ -196,18 +204,19 @@ class Statement:
     def to_dataframe(self,
                      period_filter: Optional[str] = None,
                      period_view: Optional[str] = None,
-                     standard:bool=True,
-                     include_dimensions:bool=True,
-                     include_unit:bool=False,
-                     include_point_in_time:bool=False,
-                     presentation:bool=False) -> Any:
+                     standard: bool = True,
+                     include_dimensions: Optional[bool] = None,
+                     include_unit: bool = False,
+                     include_point_in_time: bool = False,
+                     presentation: bool = False) -> Any:
         """Convert statement to pandas DataFrame.
 
         Args:
             period_filter: Optional period key to filter facts
             period_view: Optional name of a predefined period view
             standard: Whether to use standardized concept labels
-            include_dimensions: Whether to include dimensional segment data
+            include_dimensions: Whether to include dimensional segment data.
+                              If None, uses the instance default set at creation time.
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
             presentation: If True, apply HTML-matching presentation logic (Issue #463)
@@ -218,6 +227,10 @@ class Statement:
         Returns:
             DataFrame with raw values + metadata (balance, weight, preferred_sign) by default
         """
+        # Use instance default if not explicitly specified
+        if include_dimensions is None:
+            include_dimensions = self._include_dimensions
+
         try:
             # Build DataFrame from raw data (Issue #463)
             df = self._build_dataframe_from_raw_data(
@@ -451,10 +464,15 @@ class Statement:
         if statement_type in ('IncomeStatement', 'CashFlowStatement'):
             if 'preferred_sign' in result.columns:
                 for col in period_cols:
-                    if col in result.columns and pd.api.types.is_numeric_dtype(result[col]):
+                    if col not in result.columns:
+                        continue
+                    # Convert to numeric - handles object dtype columns with None values (Issue #556)
+                    # This is needed because columns with None values become object dtype
+                    numeric_col = pd.to_numeric(result[col], errors='coerce')
+                    if pd.api.types.is_numeric_dtype(numeric_col):
                         # Apply preferred_sign where it's not None and not 0
                         mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
-                        result.loc[mask, col] = result.loc[mask, col] * result.loc[mask, 'preferred_sign']
+                        result.loc[mask, col] = numeric_col[mask] * result.loc[mask, 'preferred_sign']
 
         # Balance Sheet: no transformation
 
@@ -1063,12 +1081,15 @@ class Statements:
 
         return self["CoverPage"]
 
-    def balance_sheet(self, parenthetical: bool = False) -> Optional[Statement]:
+    def balance_sheet(self, parenthetical: bool = False,
+                      include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get a balance sheet.
 
         Args:
             parenthetical: Whether to get the parenthetical balance sheet
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
         Returns:
             A balance sheet statement, or None if unable to resolve the statement
@@ -1076,51 +1097,59 @@ class Statements:
         try:
             role = self.find_statement_by_primary_concept("BalanceSheet", is_parenthetical=parenthetical)
             if role:
-                return Statement(self.xbrl, role, canonical_type="BalanceSheet")
+                return Statement(self.xbrl, role, canonical_type="BalanceSheet",
+                               include_dimensions=include_dimensions)
 
             # Try using the xbrl.render_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("BalanceSheet", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="BalanceSheet")
+                    return Statement(self.xbrl, found_role, canonical_type="BalanceSheet",
+                                   include_dimensions=include_dimensions)
 
-            return self["BalanceSheet"]
+            return Statement(self.xbrl, "BalanceSheet", canonical_type="BalanceSheet",
+                           include_dimensions=include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "BalanceSheet")
 
-    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False) -> Optional[Statement]:
+    def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False,
+                         include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get an income statement.
 
         Args:
             parenthetical: Whether to get the parenthetical income statement
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
         Returns:
             An income statement, or None if unable to resolve the statement
-
-        Note:
-            To control dimensional display, use the include_dimensions parameter when calling
-            render() or to_dataframe() on the returned Statement object.
         """
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("IncomeStatement", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="IncomeStatement", 
-                                   skip_concept_check=skip_concept_check)
+                    return Statement(self.xbrl, found_role, canonical_type="IncomeStatement",
+                                   skip_concept_check=skip_concept_check,
+                                   include_dimensions=include_dimensions)
 
-            return self["IncomeStatement"]
+            return Statement(self.xbrl, "IncomeStatement", canonical_type="IncomeStatement",
+                           skip_concept_check=skip_concept_check,
+                           include_dimensions=include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "IncomeStatement")
 
-    def cashflow_statement(self, parenthetical: bool = False) -> Optional[Statement]:
+    def cashflow_statement(self, parenthetical: bool = False,
+                           include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get a cash flow statement.
 
         Args:
             parenthetical: Whether to get the parenthetical cash flow statement
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
         Returns:
              The cash flow statement, or None if unable to resolve the statement
@@ -1130,18 +1159,23 @@ class Statements:
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("CashFlowStatement", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="CashFlowStatement")
+                    return Statement(self.xbrl, found_role, canonical_type="CashFlowStatement",
+                                   include_dimensions=include_dimensions)
 
-            return self["CashFlowStatement"]
+            return Statement(self.xbrl, "CashFlowStatement", canonical_type="CashFlowStatement",
+                           include_dimensions=include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "CashFlowStatement")
 
-    def statement_of_equity(self, parenthetical: bool = False) -> Optional[Statement]:
+    def statement_of_equity(self, parenthetical: bool = False,
+                            include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get a statement of equity.
 
         Args:
             parenthetical: Whether to get the parenthetical statement of equity
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
         Returns:
            The statement of equity, or None if unable to resolve the statement
@@ -1151,13 +1185,16 @@ class Statements:
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("StatementOfEquity", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="StatementOfEquity")
+                    return Statement(self.xbrl, found_role, canonical_type="StatementOfEquity",
+                                   include_dimensions=include_dimensions)
 
-            return self["StatementOfEquity"]
+            return Statement(self.xbrl, "StatementOfEquity", canonical_type="StatementOfEquity",
+                           include_dimensions=include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "StatementOfEquity")
 
-    def comprehensive_income(self, parenthetical: bool = False) -> Optional[Statement]:
+    def comprehensive_income(self, parenthetical: bool = False,
+                             include_dimensions: bool = True) -> Optional[Statement]:
         """
         Get a statement of comprehensive income.
 
@@ -1167,6 +1204,8 @@ class Statements:
 
         Args:
             parenthetical: Whether to get the parenthetical comprehensive income statement
+            include_dimensions: Default setting for whether to include dimensional segment data
+                              when rendering or converting to DataFrame (default: True)
 
         Returns:
             The comprehensive income statement, or None if unable to resolve the statement
@@ -1176,9 +1215,11 @@ class Statements:
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("ComprehensiveIncome", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="ComprehensiveIncome")
+                    return Statement(self.xbrl, found_role, canonical_type="ComprehensiveIncome",
+                                   include_dimensions=include_dimensions)
 
-            return self["ComprehensiveIncome"]
+            return Statement(self.xbrl, "ComprehensiveIncome", canonical_type="ComprehensiveIncome",
+                           include_dimensions=include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "ComprehensiveIncome")
 
@@ -1403,7 +1444,8 @@ class StitchedStatements:
         self.xbrls = xbrls
 
     def balance_sheet(self, max_periods: int = 8, standard: bool = True,
-                      use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
+                      use_optimal_periods: bool = True, show_date_range: bool = False,
+                      include_dimensions: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched balance sheet across multiple time periods.
 
@@ -1412,17 +1454,20 @@ class StitchedStatements:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             StitchedStatement for the balance sheet
         """
-        statement = StitchedStatement(self.xbrls, 'BalanceSheet', max_periods, standard, use_optimal_periods)
+        statement = StitchedStatement(self.xbrls, 'BalanceSheet', max_periods, standard,
+                                     use_optimal_periods, include_dimensions)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
 
     def income_statement(self, max_periods: int = 8, standard: bool = True,
-                         use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
+                         use_optimal_periods: bool = True, show_date_range: bool = False,
+                         include_dimensions: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched income statement across multiple time periods.
 
@@ -1431,17 +1476,20 @@ class StitchedStatements:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             StitchedStatement for the income statement
         """
-        statement = StitchedStatement(self.xbrls, 'IncomeStatement', max_periods, standard, use_optimal_periods)
+        statement = StitchedStatement(self.xbrls, 'IncomeStatement', max_periods, standard,
+                                     use_optimal_periods, include_dimensions)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
 
     def cashflow_statement(self, max_periods: int = 8, standard: bool = True,
-                           use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
+                           use_optimal_periods: bool = True, show_date_range: bool = False,
+                           include_dimensions: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched cash flow statement across multiple time periods.
 
@@ -1450,17 +1498,20 @@ class StitchedStatements:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             StitchedStatement for the cash flow statement
         """
-        statement = StitchedStatement(self.xbrls, 'CashFlowStatement', max_periods, standard, use_optimal_periods)
+        statement = StitchedStatement(self.xbrls, 'CashFlowStatement', max_periods, standard,
+                                     use_optimal_periods, include_dimensions)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
 
     def statement_of_equity(self, max_periods: int = 8, standard: bool = True,
-                            use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
+                            use_optimal_periods: bool = True, show_date_range: bool = False,
+                            include_dimensions: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched statement of changes in equity across multiple time periods.
 
@@ -1469,17 +1520,20 @@ class StitchedStatements:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             StitchedStatement for the statement of equity
         """
-        statement = StitchedStatement(self.xbrls, 'StatementOfEquity', max_periods, standard, use_optimal_periods)
+        statement = StitchedStatement(self.xbrls, 'StatementOfEquity', max_periods, standard,
+                                     use_optimal_periods, include_dimensions)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
 
     def comprehensive_income(self, max_periods: int = 8, standard: bool = True,
-                             use_optimal_periods: bool = True, show_date_range: bool = False) -> Optional[StitchedStatement]:
+                             use_optimal_periods: bool = True, show_date_range: bool = False,
+                             include_dimensions: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched statement of comprehensive income across multiple time periods.
 
@@ -1488,11 +1542,13 @@ class StitchedStatements:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             show_date_range: Whether to show full date ranges for duration periods
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             StitchedStatement for the comprehensive income statement
         """
-        statement = StitchedStatement(self.xbrls, 'ComprehensiveIncome', max_periods, standard, use_optimal_periods)
+        statement = StitchedStatement(self.xbrls, 'ComprehensiveIncome', max_periods, standard,
+                                     use_optimal_periods, include_dimensions)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement

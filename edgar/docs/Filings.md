@@ -149,6 +149,8 @@ sample = filings.sample(20)                # Random 20 filings
 
 ## Pagination
 
+The default view of `filings.__rich__()` is to show 50 rows at a time. Pagination is possible using `next()` and `previous()` 
+
 ### Navigation
 ```python
 # Navigate through pages

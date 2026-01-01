@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import lru_cache
-from typing import List, Union
+from typing import List, Optional, Union
 
 import pyarrow.compute as pc
 
@@ -403,7 +403,7 @@ class ThirteenF:
         return self.signer
 
     @property
-    def filing_signer_title(self) -> str:
+    def filing_signer_title(self) -> Optional[str]:
         """
         The business title of the individual who signed the 13F filing.
 

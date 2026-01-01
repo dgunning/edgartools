@@ -886,6 +886,9 @@ class XBRL:
         for period_key, period_facts in facts_by_period.items():
             if should_display_dimensions:
                 # For statements that should display dimensions, group facts by dimension
+                # Issue #564: Collect non-dimensioned facts separately to select most precise
+                non_dimensioned_facts_for_period = []
+
                 for context_id, wrapped_fact in period_facts:
                     fact = wrapped_fact['fact']
                     dimension_info = wrapped_fact['dimension_info']
@@ -898,49 +901,58 @@ class XBRL:
                         # Store dimensioned fact with the full dimension metadata
                         dimensioned_facts[dim_key_str].append((period_key, fact, dimension_info))
                     else:
-                        # This is a non-dimensioned fact for this concept, use in the main item
-                        if not values.get(period_key):
-                            values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+                        # Collect non-dimensioned facts to select most precise later
+                        non_dimensioned_facts_for_period.append((context_id, wrapped_fact))
 
-                            # Store the decimals info for proper scaling
-                            if fact.decimals is not None:
-                                try:
-                                    if fact.decimals == 'INF':
-                                        decimals[period_key] = 0  # Infinite precision, no scaling
-                                    else:
-                                        decimals[period_key] = int(fact.decimals)
-                                except (ValueError, TypeError):
-                                    decimals[period_key] = 0  # Default
+                # Issue #564: Select the most precise non-dimensioned fact for this period
+                # (Multiple contexts may map to same period; select highest precision)
+                if non_dimensioned_facts_for_period and not values.get(period_key):
+                    if len(non_dimensioned_facts_for_period) == 1:
+                        context_id, wrapped_fact = non_dimensioned_facts_for_period[0]
+                        fact = wrapped_fact['fact']
+                    else:
+                        # Multiple non-dimensioned contexts for same period - select by precision
+                        best = max(non_dimensioned_facts_for_period,
+                                   key=lambda x: self._get_fact_precision(x[1]['fact']))
+                        context_id, wrapped_fact = best
+                        fact = wrapped_fact['fact']
 
-                            # Store unit_ref for this period
-                            units[period_key] = fact.unit_ref
+                    # Store the selected fact's value
+                    values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                            # Store period_type from context
-                            if context_id in self.contexts:
-                                context = self.contexts[context_id]
-                                if hasattr(context, 'period') and context.period:
-                                    pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
-                                    period_types[period_key] = pt
+                    # Store the decimals info for proper scaling
+                    if fact.decimals is not None:
+                        try:
+                            if fact.decimals == 'INF':
+                                decimals[period_key] = 0  # Infinite precision, no scaling
+                            else:
+                                decimals[period_key] = int(fact.decimals)
+                        except (ValueError, TypeError):
+                            decimals[period_key] = 0  # Default
+
+                    # Store unit_ref for this period
+                    units[period_key] = fact.unit_ref
+
+                    # Store period_type from context
+                    if context_id in self.contexts:
+                        context = self.contexts[context_id]
+                        if hasattr(context, 'period') and context.period:
+                            pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                            period_types[period_key] = pt
 
             else:
                 # For standard financial statements, prefer non-dimensioned facts
-                # If only one fact, use it
+                # Issue #564: Select by (1) fewest dimensions, (2) highest precision
                 if len(period_facts) == 1:
                     context_id, wrapped_fact = period_facts[0]
                     fact = wrapped_fact['fact']
                 else:
-                    # Multiple facts for same period - prioritize based on dimensions
-                    # Sort facts by preference: no dimensions first, then by dimension count (fewer dimensions preferred)
-                    sorted_facts = []
-                    for ctx_id, wrapped_fact in period_facts:
-                        dimension_count = len(wrapped_fact['dimension_info'])
-                        sorted_facts.append((dimension_count, ctx_id, wrapped_fact))
-
-                    # Sort by dimension count (no dimensions or fewer dimensions first)
-                    sorted_facts.sort()
-
-                    # Use the first fact (with fewest dimensions)
-                    _, context_id, wrapped_fact = sorted_facts[0]
+                    # Multiple contexts for same period - select best by dimensions and precision
+                    # min() with tuple key: (dimension_count ASC, -precision DESC)
+                    best = min(period_facts,
+                               key=lambda x: (len(x[1]['dimension_info']),
+                                              -self._get_fact_precision(x[1]['fact'])))
+                    context_id, wrapped_fact = best
                     fact = wrapped_fact['fact']
 
                 # Store the value
@@ -1131,6 +1143,62 @@ class XBRL:
         for child_id in node.children:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path, should_display_dimensions)
 
+    @staticmethod
+    def _get_fact_precision(fact) -> int:
+        """
+        Get a numeric precision value for a fact based on its decimals attribute.
+
+        Higher return value = more precise:
+        - INF (infinite precision) returns 1_000_000
+        - Numeric decimals return their value (e.g., -6 for millions, 2 for hundredths)
+        - None or invalid returns 0 (default/unknown precision)
+
+        Args:
+            fact: An XBRL Fact object with a decimals attribute
+
+        Returns:
+            Integer precision value for comparison (higher = more precise)
+        """
+        if fact.decimals == 'INF':
+            return 1_000_000  # Infinite precision = highest
+        elif fact.decimals is not None:
+            try:
+                return int(fact.decimals)
+            except (ValueError, TypeError):
+                return 0
+        return 0  # Default/unknown precision
+
+    @staticmethod
+    def _select_most_precise_fact(facts: list):
+        """
+        Select the most precise fact from a list of facts.
+
+        When multiple facts exist for the same concept/context with different
+        precision (decimals attribute), this selects the one with highest precision.
+        This is critical for maintaining data accuracy (Issue #564).
+
+        Args:
+            facts: List of Fact objects to choose from
+
+        Returns:
+            The fact with highest precision, or None if list is empty
+        """
+        if not facts:
+            return None
+        if len(facts) == 1:
+            return facts[0]
+
+        best_fact = None
+        best_precision = None
+
+        for fact in facts:
+            precision = XBRL._get_fact_precision(fact)
+            if best_precision is None or precision > best_precision:
+                best_precision = precision
+                best_fact = fact
+
+        return best_fact
+
     def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None,
                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
@@ -1149,8 +1217,9 @@ class XBRL:
 
         # Check each context
         for context_id in self.contexts:
-            # Use parser's get_fact method which handles normalization internally
-            fact = self.parser.get_fact(element_name, context_id)
+            # Issue #564: Get ALL facts for this element/context and select the most precise
+            facts_list = self.parser.get_facts_by_key(element_name, context_id)
+            fact = self._select_most_precise_fact(facts_list)
 
             if fact:
                 # If period filter is specified, check if context matches period
