@@ -1078,18 +1078,20 @@ def _format_value_for_display_as_string(
         # Get statement context
         statement_type = item.get('statement_type')
 
-        # For Income Statement and Cash Flow Statement: Use preferred_sign
+        # Apply preferred_sign from presentation linkbase for display
         # preferred_sign comes from preferredLabel in presentation linkbase
-        # -1 = negate for display (e.g., expenses, dividends, outflows)
+        # -1 = negate for display (e.g., expenses, dividends, outflows, contra accounts)
         # 1 = show as-is
         # None = no transformation specified
-        if statement_type in ('IncomeStatement', 'CashFlowStatement'):
+        #
+        # Originally only applied to Income Statement and Cash Flow Statement (Issue #463)
+        # Extended to Balance Sheet for contra accounts like Treasury Stock (Issue #568)
+        # - APD, JPM, XOM use preferred_sign=-1 for Treasury Stock
+        # - JPM uses preferred_sign=-1 for Allowance for Loan Losses
+        if statement_type in ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet'):
             preferred_sign = item.get('preferred_signs', {}).get(period_key)
             if preferred_sign is not None and preferred_sign != 0:
                 value = value * preferred_sign
-
-        # Balance Sheet: No transformation (use as-is)
-        # else: pass
 
     # Format numeric values efficiently
     if value_type in (int, float):
