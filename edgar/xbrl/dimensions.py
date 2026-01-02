@@ -6,23 +6,32 @@ dimensions, enabling smart filtering for include_dimensions=False scenarios.
 
 **Classification Dimensions** (face values):
     Dimensions that distinguish types on the face of the statement.
-    Examples: PropertyPlantAndEquipmentByTypeAxis, EquityComponentsAxis
+    Examples: PropertyPlantAndEquipmentByTypeAxis, RelatedPartyTransactionsByRelatedPartyAxis
     These should SHOW when include_dimensions=False.
 
 **Breakdown Dimensions** (detail):
     Dimensions that add drill-down detail beyond the face presentation.
-    Examples: StatementGeographicalAxis, StatementBusinessSegmentsAxis
+    Examples: StatementGeographicalAxis, FairValueByFairValueHierarchyLevelAxis
     These should HIDE when include_dimensions=False.
+
+Uses a hybrid approach:
+1. Explicit BREAKDOWN_AXES set for known breakdown dimensions
+2. Pattern-based detection (BREAKDOWN_PATTERNS) for scalability
+3. Explicit FACE_AXES set for dimensions that should always show
 
 Issue #569: URI balance sheet was missing PPE values because ALL dimensional items
 were being filtered, including face-level classification dimensions.
 """
 
+import re
 from typing import Dict, List, Any, Set, Optional
 
-# Standard XBRL axes that indicate BREAKDOWN detail (not face values)
-# These dimensions typically add geographic, segment, or disclosure-level breakdowns
-# beyond what appears on the face of the financial statement.
+# =============================================================================
+# EXPLICIT AXIS LISTS
+# =============================================================================
+
+# Axes that are ALWAYS breakdown (notes disclosure, not face)
+# These are checked first, before pattern matching
 BREAKDOWN_AXES: Set[str] = {
     # Geographic breakdowns
     'StatementGeographicalAxis',
@@ -39,6 +48,7 @@ BREAKDOWN_AXES: Set[str] = {
 
     # Acquisition-specific detail
     'BusinessAcquisitionAxis',
+    'AssetAcquisitionAxis',
 
     # Legal entity breakdowns
     'LegalEntityAxis',
@@ -48,76 +58,131 @@ BREAKDOWN_AXES: Set[str] = {
     'ReportingUnitAxis',
 
     # Intangible asset type breakdowns (notes disclosure, not face)
-    # SEC filings show "Other intangible assets, net" on face, breakdowns in notes
     'FiniteLivedIntangibleAssetsByMajorClassAxis',
     'IndefiniteLivedIntangibleAssetsByMajorClassAxis',
 
     # Equity method investment breakdowns (notes disclosure, not face)
-    # Shows assets/liabilities breakdown by investee - APD uses this
     'EquityMethodInvestmentNonconsolidatedInvesteeAxis',
     'srt:ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis',
 
     # Equity component axis - context-dependent (see STATEMENT_STRUCTURAL_AXES)
-    # On Balance Sheet: breakdown (equity shown as direct line items)
-    # On Statement of Equity: structural (it's the column axis)
     'StatementEquityComponentsAxis',
 }
 
+# Axes that should ALWAYS show on face (classification dimensions)
+# These override pattern matching
+FACE_AXES: Set[str] = {
+    # Related party transactions - shows on face for debt, receivables, etc.
+    'RelatedPartyTransactionsByRelatedPartyAxis',
+
+    # PPE by type - shows on face for rental companies, etc.
+    'PropertyPlantAndEquipmentByTypeAxis',
+
+    # Debt instrument type - sometimes on face
+    'LongtermDebtTypeAxis',
+    'ShortTermDebtTypeAxis',
+
+    # Class of stock - shows on face
+    'StatementClassOfStockAxis',
+}
+
+# =============================================================================
+# PATTERN-BASED DETECTION
+# =============================================================================
+
+# Regex patterns that indicate BREAKDOWN dimensions (notes disclosure)
+# If an axis matches any of these patterns and is not in FACE_AXES, it's a breakdown
+BREAKDOWN_PATTERNS: List[str] = [
+    # Fair value disclosures
+    r'FairValue.*Axis',
+    r'.*HierarchyLevelAxis',
+    r'.*MeasurementBasisAxis',
+    r'.*MeasurementFrequencyAxis',
+
+    # Financial instrument details
+    r'FinancialInstrumentAxis',
+    r'.*PortfolioSegmentAxis',
+
+    # Collateral and pledging
+    r'PledgedStatusAxis',
+    r'RecourseStatusAxis',
+
+    # Accounting changes
+    r'CumulativeEffect.*Axis',
+    r'AdjustmentsForNewAccountingPronouncementsAxis',
+
+    # Counterparty and concentration
+    r'CounterpartyNameAxis',
+    r'ConcentrationRisk.*Axis',
+
+    # Restructuring
+    r'RestructuringPlanAxis',
+
+    # Industry/security classification
+    r'EquitySecuritiesBy.*Axis',
+    r'.*ByLiabilityClassAxis',
+]
+
+# Compile patterns for efficiency
+_COMPILED_BREAKDOWN_PATTERNS = [re.compile(p, re.IGNORECASE) for p in BREAKDOWN_PATTERNS]
+
+# =============================================================================
+# STATEMENT-SPECIFIC OVERRIDES
+# =============================================================================
+
 # Axes that are STRUCTURAL (not breakdown) for specific statement types
-# These axes define the column structure of the statement, not drill-down detail
 STATEMENT_STRUCTURAL_AXES: Dict[str, Set[str]] = {
     # Statement of Equity uses EquityComponentsAxis as columns
-    # The SEC shows: Common Stock | APIC | Retained Earnings | Treasury | AOCI
     'StatementOfEquity': {'StatementEquityComponentsAxis'},
     'StatementOfStockholdersEquity': {'StatementEquityComponentsAxis'},
     'StatementOfChangesInEquity': {'StatementEquityComponentsAxis'},
 }
 
+# =============================================================================
+# CLASSIFICATION FUNCTIONS
+# =============================================================================
+
+def _matches_breakdown_pattern(axis_name: str) -> bool:
+    """Check if an axis name matches any breakdown pattern."""
+    for pattern in _COMPILED_BREAKDOWN_PATTERNS:
+        if pattern.search(axis_name):
+            return True
+    return False
+
+
+def _normalize_axis_name(dimension: str) -> tuple:
+    """
+    Extract prefix and axis name from dimension string.
+
+    Returns:
+        Tuple of (prefix, axis_name) where prefix may be empty string
+    """
+    if ':' in dimension:
+        prefix, axis_name = dimension.split(':', 1)
+        return prefix, axis_name
+    return '', dimension
+
+
 def is_breakdown_dimension(item: Dict[str, Any], statement_type: Optional[str] = None) -> bool:
     """
     Determine if a dimensional item is a breakdown (detail) vs classification (face).
 
-    Breakdown dimensions add drill-down detail beyond the face presentation.
-    Classification dimensions distinguish types on the face of the statement.
+    Uses a three-tier approach:
+    1. Check FACE_AXES - if axis is here, it's NOT a breakdown (show on face)
+    2. Check BREAKDOWN_AXES - if axis is here, it IS a breakdown (hide)
+    3. Check BREAKDOWN_PATTERNS - if axis matches a pattern, it's a breakdown
 
     Some axes are context-dependent:
-    - StatementEquityComponentsAxis is a BREAKDOWN on Balance Sheet (duplicates line items)
-    - StatementEquityComponentsAxis is STRUCTURAL on Statement of Equity (defines columns)
-
-    Note: Members not in the presentation linkbase are filtered at a higher level
-    (in XBRL._generate_line_items) using presentation-based member validation.
-    This function only checks for known breakdown axes.
+    - StatementEquityComponentsAxis is a BREAKDOWN on Balance Sheet
+    - StatementEquityComponentsAxis is STRUCTURAL on Statement of Equity
 
     Args:
-        item: Raw statement item dictionary, expected to have 'dimension_metadata' key
-              containing a list of dimension info dicts with 'dimension' and 'member_label'.
-        statement_type: Optional statement type (e.g., 'StatementOfEquity', 'BalanceSheet')
-                       for context-aware filtering.
+        item: Raw statement item dictionary with 'dimension_metadata' key
+        statement_type: Optional statement type for context-aware filtering
 
     Returns:
         True if this is a breakdown dimension (should hide with include_dimensions=False)
         False if this is a classification dimension (should show on face)
-
-    Examples:
-        >>> # Face-level PPE by type (should show)
-        >>> item = {'dimension_metadata': [{'dimension': 'us-gaap:PropertyPlantAndEquipmentByTypeAxis', 'member_label': 'Property and equipment'}]}
-        >>> is_breakdown_dimension(item)
-        False
-
-        >>> # Geographic breakdown (should hide)
-        >>> item = {'dimension_metadata': [{'dimension': 'srt:StatementGeographicalAxis', 'member_label': 'UNITED STATES'}]}
-        >>> is_breakdown_dimension(item)
-        True
-
-        >>> # Equity components on Statement of Equity (structural, should show)
-        >>> item = {'dimension_metadata': [{'dimension': 'us-gaap:StatementEquityComponentsAxis', 'member_label': 'Common Stock'}]}
-        >>> is_breakdown_dimension(item, statement_type='StatementOfEquity')
-        False
-
-        >>> # Equity components on Balance Sheet (breakdown, should hide)
-        >>> item = {'dimension_metadata': [{'dimension': 'us-gaap:StatementEquityComponentsAxis', 'member_label': 'Common Stock'}]}
-        >>> is_breakdown_dimension(item, statement_type='BalanceSheet')
-        True
     """
     dim_metadata = item.get('dimension_metadata', [])
     if not dim_metadata:
@@ -128,30 +193,25 @@ def is_breakdown_dimension(item: Dict[str, Any], statement_type: Optional[str] =
 
     for dim_info in dim_metadata:
         dimension = dim_info.get('dimension', '')
-        # Extract axis name, handling various formats:
-        # - 'us-gaap:StatementGeographicalAxis' -> 'StatementGeographicalAxis'
-        # - 'srt:StatementGeographicalAxis' -> 'srt:StatementGeographicalAxis' (keep prefix for srt)
-        # - 'StatementGeographicalAxis' -> 'StatementGeographicalAxis'
+        prefix, axis_name = _normalize_axis_name(dimension)
 
-        if ':' in dimension:
-            prefix, axis_name = dimension.split(':', 1)
+        # Check if this is a structural axis for this statement type
+        if axis_name in structural_axes:
+            continue  # Not a breakdown for this statement
 
-            # Check if this is a structural axis for this statement type
-            if axis_name in structural_axes:
-                continue  # Not a breakdown for this statement
+        # 1. Check FACE_AXES first (should show on face)
+        if axis_name in FACE_AXES:
+            continue  # This is a face dimension, check next
 
-            # Check both with and without prefix
-            if axis_name in BREAKDOWN_AXES:
-                return True
-            if f'{prefix}:{axis_name}' in BREAKDOWN_AXES:
-                return True
-        else:
-            # Check if this is a structural axis for this statement type
-            if dimension in structural_axes:
-                continue
+        # 2. Check explicit BREAKDOWN_AXES
+        if axis_name in BREAKDOWN_AXES:
+            return True
+        if f'{prefix}:{axis_name}' in BREAKDOWN_AXES:
+            return True
 
-            if dimension in BREAKDOWN_AXES:
-                return True
+        # 3. Check pattern-based detection
+        if _matches_breakdown_pattern(axis_name):
+            return True
 
     return False
 
