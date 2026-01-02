@@ -52,7 +52,7 @@ class TestIssue548PeriodFiltering:
         numeric_cols = [c for c in df.columns if c not in [
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
-            "unit", "point_in_time"
+            "unit", "point_in_time", "is_breakdown"
         ]]
         assert len(numeric_cols) > 0, "Should have period columns"
 
@@ -71,7 +71,7 @@ class TestIssue548PeriodFiltering:
         numeric_cols = [c for c in df.columns if c not in [
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
-            "unit", "point_in_time"
+            "unit", "point_in_time", "is_breakdown"
         ]]
         assert len(numeric_cols) > 0, "Should fall back to default periods"
 
@@ -94,7 +94,7 @@ class TestIssue548PeriodFiltering:
         numeric_cols = [c for c in df.columns if c not in [
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
-            "unit", "point_in_time"
+            "unit", "point_in_time", "is_breakdown"
         ]]
         assert len(numeric_cols) == 1, f"Should have exactly one period column, got: {numeric_cols}"
 
@@ -120,7 +120,7 @@ class TestIssue548PeriodFiltering:
         numeric_cols = [c for c in df.columns if c not in [
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
-            "unit", "point_in_time"
+            "unit", "point_in_time", "is_breakdown"
         ]]
         assert len(numeric_cols) >= 1, "Should have period columns"
 
@@ -143,7 +143,7 @@ class TestIssue548PeriodFiltering:
             numeric_cols = [c for c in df.columns if c not in [
                 "concept", "label", "level", "abstract", "dimension", "dimension_label",
                 "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
-                "unit", "point_in_time"
+                "unit", "point_in_time", "is_breakdown"
             ]]
             if numeric_cols:
                 period_col = numeric_cols[0]

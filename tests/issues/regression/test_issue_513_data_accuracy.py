@@ -125,9 +125,13 @@ class TestIssue513NFLXRevenueDeduplication:
     """Test that revenue deduplication preserves dimensional segment data"""
 
     def test_revenue_segments_preserved_in_income_statement(self, nflx_2025_q3_10q_filing):
-        """Revenue segment breakdown should be preserved, not deduplicated"""
+        """Revenue segment breakdown should be preserved, not deduplicated
+
+        Note: As of v5.7.0, include_dimensions defaults to False for cleaner output.
+        This test explicitly enables dimensions to verify segment data is preserved.
+        """
         statement = nflx_2025_q3_10q_filing.xbrl().statements.income_statement()
-        df = statement.to_dataframe()
+        df = statement.to_dataframe(include_dimensions=True)
 
         # Check that revenue segment labels are present
         labels = df['label'].tolist()
