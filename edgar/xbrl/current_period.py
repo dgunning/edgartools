@@ -459,8 +459,9 @@ class CurrentPeriodView:
 
                 # Skip breakdown dimensions when include_dimensions=False
                 # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+                # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
                 if not include_dimensions and is_dimension:
-                    if is_breakdown_dimension(item):
+                    if is_breakdown_dimension(item, statement_type=statement_type):
                         continue
 
                 # Get the value for appropriate period
@@ -481,7 +482,7 @@ class CurrentPeriodView:
                     }
 
                     # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
-                    row['is_breakdown'] = is_breakdown_dimension(item) if is_dimension else False
+                    row['is_breakdown'] = is_breakdown_dimension(item, statement_type=statement_type) if is_dimension else False
                     # Add dimension label (always include column for schema consistency)
                     row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
 
@@ -938,8 +939,9 @@ class CurrentPeriodStatement:
 
             # Skip breakdown dimensions when include_dimensions=False
             # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+            # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
             if not dims and is_dimension:
-                if is_breakdown_dimension(item):
+                if is_breakdown_dimension(item, statement_type=self.canonical_type):
                     continue
 
             values = item.get('values', {})
@@ -972,7 +974,7 @@ class CurrentPeriodStatement:
                 }
 
                 # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
-                row['is_breakdown'] = is_breakdown_dimension(item) if is_dimension else False
+                row['is_breakdown'] = is_breakdown_dimension(item, statement_type=self.canonical_type) if is_dimension else False
                 # Add dimension label (always include column for schema consistency)
                 row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
 

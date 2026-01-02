@@ -18,7 +18,7 @@ Issue #569: URI balance sheet was missing PPE values because ALL dimensional ite
 were being filtered, including face-level classification dimensions.
 """
 
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any, Set, Optional
 
 # Standard XBRL axes that indicate BREAKDOWN detail (not face values)
 # These dimensions typically add geographic, segment, or disclosure-level breakdowns
@@ -52,17 +52,32 @@ BREAKDOWN_AXES: Set[str] = {
     'FiniteLivedIntangibleAssetsByMajorClassAxis',
     'IndefiniteLivedIntangibleAssetsByMajorClassAxis',
 
-    # Equity component breakdowns (duplicates non-dimensional face values)
-    # SEC filings show equity components as direct line items, not dimensional children
+    # Equity component axis - context-dependent (see STATEMENT_STRUCTURAL_AXES)
+    # On Balance Sheet: breakdown (equity shown as direct line items)
+    # On Statement of Equity: structural (it's the column axis)
     'StatementEquityComponentsAxis',
 }
 
-def is_breakdown_dimension(item: Dict[str, Any]) -> bool:
+# Axes that are STRUCTURAL (not breakdown) for specific statement types
+# These axes define the column structure of the statement, not drill-down detail
+STATEMENT_STRUCTURAL_AXES: Dict[str, Set[str]] = {
+    # Statement of Equity uses EquityComponentsAxis as columns
+    # The SEC shows: Common Stock | APIC | Retained Earnings | Treasury | AOCI
+    'StatementOfEquity': {'StatementEquityComponentsAxis'},
+    'StatementOfStockholdersEquity': {'StatementEquityComponentsAxis'},
+    'StatementOfChangesInEquity': {'StatementEquityComponentsAxis'},
+}
+
+def is_breakdown_dimension(item: Dict[str, Any], statement_type: Optional[str] = None) -> bool:
     """
     Determine if a dimensional item is a breakdown (detail) vs classification (face).
 
     Breakdown dimensions add drill-down detail beyond the face presentation.
     Classification dimensions distinguish types on the face of the statement.
+
+    Some axes are context-dependent:
+    - StatementEquityComponentsAxis is a BREAKDOWN on Balance Sheet (duplicates line items)
+    - StatementEquityComponentsAxis is STRUCTURAL on Statement of Equity (defines columns)
 
     Note: Members not in the presentation linkbase are filtered at a higher level
     (in XBRL._generate_line_items) using presentation-based member validation.
@@ -71,6 +86,8 @@ def is_breakdown_dimension(item: Dict[str, Any]) -> bool:
     Args:
         item: Raw statement item dictionary, expected to have 'dimension_metadata' key
               containing a list of dimension info dicts with 'dimension' and 'member_label'.
+        statement_type: Optional statement type (e.g., 'StatementOfEquity', 'BalanceSheet')
+                       for context-aware filtering.
 
     Returns:
         True if this is a breakdown dimension (should hide with include_dimensions=False)
@@ -87,17 +104,22 @@ def is_breakdown_dimension(item: Dict[str, Any]) -> bool:
         >>> is_breakdown_dimension(item)
         True
 
-        >>> # Multi-dimensional: PPE type + Geography = breakdown
-        >>> item = {'dimension_metadata': [
-        ...     {'dimension': 'us-gaap:PropertyPlantAndEquipmentByTypeAxis', 'member_label': 'Property'},
-        ...     {'dimension': 'srt:StatementGeographicalAxis', 'member_label': 'UNITED STATES'}
-        ... ]}
-        >>> is_breakdown_dimension(item)
+        >>> # Equity components on Statement of Equity (structural, should show)
+        >>> item = {'dimension_metadata': [{'dimension': 'us-gaap:StatementEquityComponentsAxis', 'member_label': 'Common Stock'}]}
+        >>> is_breakdown_dimension(item, statement_type='StatementOfEquity')
+        False
+
+        >>> # Equity components on Balance Sheet (breakdown, should hide)
+        >>> item = {'dimension_metadata': [{'dimension': 'us-gaap:StatementEquityComponentsAxis', 'member_label': 'Common Stock'}]}
+        >>> is_breakdown_dimension(item, statement_type='BalanceSheet')
         True
     """
     dim_metadata = item.get('dimension_metadata', [])
     if not dim_metadata:
         return False
+
+    # Get structural axes for this statement type (if any)
+    structural_axes = STATEMENT_STRUCTURAL_AXES.get(statement_type, set()) if statement_type else set()
 
     for dim_info in dim_metadata:
         dimension = dim_info.get('dimension', '')
@@ -108,24 +130,34 @@ def is_breakdown_dimension(item: Dict[str, Any]) -> bool:
 
         if ':' in dimension:
             prefix, axis_name = dimension.split(':', 1)
+
+            # Check if this is a structural axis for this statement type
+            if axis_name in structural_axes:
+                continue  # Not a breakdown for this statement
+
             # Check both with and without prefix
             if axis_name in BREAKDOWN_AXES:
                 return True
             if f'{prefix}:{axis_name}' in BREAKDOWN_AXES:
                 return True
         else:
+            # Check if this is a structural axis for this statement type
+            if dimension in structural_axes:
+                continue
+
             if dimension in BREAKDOWN_AXES:
                 return True
 
     return False
 
 
-def get_dimension_classification(item: Dict[str, Any]) -> str:
+def get_dimension_classification(item: Dict[str, Any], statement_type: Optional[str] = None) -> str:
     """
     Get a human-readable classification of a dimensional item.
 
     Args:
         item: Raw statement item dictionary with 'dimension_metadata' key
+        statement_type: Optional statement type for context-aware classification
 
     Returns:
         One of: 'face', 'breakdown', 'none'
@@ -133,7 +165,7 @@ def get_dimension_classification(item: Dict[str, Any]) -> str:
     if not item.get('is_dimension', False):
         return 'none'
 
-    if is_breakdown_dimension(item):
+    if is_breakdown_dimension(item, statement_type=statement_type):
         return 'breakdown'
 
     return 'face'

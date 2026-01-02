@@ -1262,11 +1262,12 @@ def render_statement(
 
     # Issue #569: Filter breakdown dimensions (geographic, segment) when include_dimensions=False
     # Keep classification dimensions (PPE type, equity components) that appear on the face
+    # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
     if not include_dimensions:
         from edgar.xbrl.dimensions import is_breakdown_dimension
         statement_data = [
             item for item in statement_data
-            if not item.get('is_dimension') or not is_breakdown_dimension(item)
+            if not item.get('is_dimension') or not is_breakdown_dimension(item, statement_type=statement_type)
         ]
 
     # Filter out periods with only empty strings (Fix for Issue #408)
