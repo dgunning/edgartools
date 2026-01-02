@@ -1,0 +1,13 @@
+{
+  "ticker": "BULL",
+  "form": "10-K",
+  "income_statement": {},
+  "balance_sheet": {},
+  "cash_flow": {},
+  "meta": {
+    "fetched_at": "2026-01-02 07:26:25",
+    "is_available": false,
+    "bs_available": false,
+    "cf_available": false
+  }
+}

@@ -1,0 +1,551 @@
+symbol,cik,exchange,industry,sector
+MBOT,883975,NASDAQ,Medical - Instruments & Supplies,Healthcare
+SUNC,2089661,NYSE,Oil & Gas Midstream,Energy
+SQQQ,1174610,NASDAQ,Asset Management,Financial Services
+AAPG,2023311,NASDAQ,Biotechnology,Healthcare
+TQQQ,1174610,NASDAQ,Asset Management,Financial Services
+EXLS,1297989,NASDAQ,Information Technology Services,Technology
+NCTY,1296774,NASDAQ,Electronic Gaming & Multimedia,Technology
+LPAA,2015502,NASDAQ,Shell Companies,Financial Services
+ABLLL,1814287,NASDAQ,Insurance - Life,Financial Services
+APEI,1201792,NASDAQ,Education & Training Services,Consumer Defensive
+AGI,1178819,NYSE,Gold,Basic Materials
+OTGAU,2077010,NASDAQ,Shell Companies,Financial Services
+ABL,1814287,NASDAQ,Insurance - Life,Financial Services
+OFIX,884624,NASDAQ,Medical - Devices,Healthcare
+NUTX,1479681,NASDAQ,Medical - Healthcare Information Services,Healthcare
+SHEN,354963,NASDAQ,Telecommunications Services,Communication Services
+ESPR,1434868,NASDAQ,Drug Manufacturers - Specialty & Generic,Healthcare
+CWCO,928340,NASDAQ,Regulated Water,Utilities
+SVC,945394,NASDAQ,REIT - Hotel & Motel,Real Estate
+CLMB,945983,NASDAQ,Technology Distributors,Technology
+TCPC,1370755,NASDAQ,Asset Management,Financial Services
+CLNE,1368265,NASDAQ,Oil & Gas Refining & Marketing,Energy
+IPEXR,2028355,NASDAQ,Financial - Conglomerates,Financial Services
+NAMM,2026514,NASDAQ,Gold,Basic Materials
+BWAY,1505065,NASDAQ,Medical - Devices,Healthcare
+LGIH,1580670,NASDAQ,Residential Construction,Consumer Cyclical
+GTY,1052752,NYSE,REIT - Retail,Real Estate
+DYN,1818794,NASDAQ,Biotechnology,Healthcare
+BLMN,1546417,NASDAQ,Restaurants,Consumer Cyclical
+SFIX,1576942,NASDAQ,Apparel - Retail,Consumer Cyclical
+CBNK,1419536,NASDAQ,Banks - Regional,Financial Services
+GLRE,1385613,NASDAQ,Insurance - Reinsurance,Financial Services
+FSV,1637810,NASDAQ,Real Estate - Services,Real Estate
+AFRI,1903870,NASDAQ,Agricultural Farm Products,Consumer Defensive
+PLNT,1637207,NYSE,Leisure,Consumer Cyclical
+ALRS,903419,NASDAQ,Banks - Regional,Financial Services
+ALNY,1178670,NASDAQ,Biotechnology,Healthcare
+DRTS,1871321,NASDAQ,Biotechnology,Healthcare
+PANW,1327567,NASDAQ,Software - Infrastructure,Technology
+PUBM,1422930,NASDAQ,Software - Application,Technology
+ASTL,1860805,NASDAQ,Steel,Basic Materials
+JLL,1037976,NYSE,Real Estate - Services,Real Estate
+AGH,2009312,NASDAQ,Leisure,Consumer Cyclical
+ATYR,1339970,NASDAQ,Biotechnology,Healthcare
+SNDL,1766600,NASDAQ,Drug Manufacturers - Specialty & Generic,Healthcare
+RIBB,2035016,NASDAQ,Shell Companies,Financial Services
+TEAD,1856432,NASDAQ,Software - Application,Technology
+LAZR,1758057,NASDAQ,Auto - Parts,Consumer Cyclical
+TWFG,2007596,NASDAQ,Insurance - Brokers,Financial Services
+RRBI,1071236,NASDAQ,Banks - Regional,Financial Services
+FORA,1829280,NASDAQ,Medical - Healthcare Information Services,Healthcare
+OAKU,1945422,NASDAQ,Shell Companies,Financial Services
+ESLA,1844417,NASDAQ,Biotechnology,Healthcare
+ALTI,1838615,NASDAQ,Asset Management - Global,Financial Services
+GOCO,1808220,NASDAQ,Insurance - Brokers,Financial Services
+ESS,920522,NYSE,REIT - Residential,Real Estate
+ALF,2010930,NASDAQ,Shell Companies,Financial Services
+TACO,2033122,NASDAQ,Shell Companies,Financial Services
+NVNO,1661053,NASDAQ,Medical - Devices,Healthcare
+IMRX,1790340,NASDAQ,Biotechnology,Healthcare
+PLMK,2030482,NASDAQ,Financial - Conglomerates,Financial Services
+HOUR,1874875,NASDAQ,Specialty Retail,Consumer Cyclical
+SPRB,1683553,NASDAQ,Biotechnology,Healthcare
+RFIL,740664,NASDAQ,Electrical Equipment & Parts,Industrials
+DTIL,1357874,NASDAQ,Biotechnology,Healthcare
+SKBL,2031009,NASDAQ,Engineering & Construction,Industrials
+CBSH,22356,NASDAQ,Banks - Regional,Financial Services
+DXR,27367,NASDAQ,Medical - Instruments & Supplies,Healthcare
+CMRC,1626450,NASDAQ,Software - Application,Technology
+BRLS,1852973,NASDAQ,Packaged Foods,Consumer Defensive
+NTSK,2063196,NASDAQ,Software - Services,Technology
+NCMI,1377630,NASDAQ,Advertising Agencies,Communication Services
+AFJK,1979005,NASDAQ,Shell Companies,Financial Services
+KRT,1758021,NASDAQ,Packaging & Containers,Consumer Cyclical
+ZCAR,1854275,NASDAQ,Rental & Leasing Services,Industrials
+OBT,1754226,NASDAQ,Banks - Regional,Financial Services
+MCHX,1224133,NASDAQ,Advertising Agencies,Communication Services
+SAIHW,1847075,NASDAQ,Information Technology Services,Technology
+AFCG,1822523,NASDAQ,REIT - Specialty,Real Estate
+ATPC,1713210,NASDAQ,Packaged Foods,Consumer Defensive
+MPC,1510295,NYSE,Oil & Gas Refining & Marketing,Energy
+ET,1276187,NYSE,Oil & Gas Midstream,Energy
+ABAT,1576873,NASDAQ,Industrial Materials,Basic Materials
+TRDA,1689375,NASDAQ,Biotechnology,Healthcare
+BAYA,1969475,NASDAQ,Shell Companies,Financial Services
+FERA,2025401,NASDAQ,Shell Companies,Financial Services
+TME,1744676,NYSE,Internet Content & Information,Communication Services
+MGX,1785279,NASDAQ,Biotechnology,Healthcare
+PRE,1876431,NASDAQ,Medical - Diagnostics & Research,Healthcare
+JLHL,2007846,NASDAQ,Engineering & Construction,Industrials
+TRON,1956744,NASDAQ,Leisure,Consumer Cyclical
+BSAA,2051587,NASDAQ,Shell Companies,Financial Services
+ARGX,1697862,NASDAQ,Biotechnology,Healthcare
+ASIC,2040491,NYSE,Insurance - Property & Casualty,Financial Services
+CLPT,1285550,NASDAQ,Medical - Devices,Healthcare
+SPRY,1671858,NASDAQ,Biotechnology,Healthcare
+KAVL,1762239,NASDAQ,Tobacco,Consumer Defensive
+VLO,1035002,NYSE,Oil & Gas Refining & Marketing,Energy
+SMLR,1554859,NASDAQ,Medical - Devices,Healthcare
+SWBI,1092796,NASDAQ,Aerospace & Defense,Industrials
+CRWD,1535527,NASDAQ,Software - Infrastructure,Technology
+KDK,1853138,NASDAQ,Software - Application,Technology
+USCB,1901637,NASDAQ,Banks - Regional,Financial Services
+WFCF,1360565,NASDAQ,Software - Application,Technology
+MTEK,1872964,NASDAQ,"Hardware, Equipment & Parts",Technology
+HCHL,2046656,NASDAQ,Restaurants,Consumer Cyclical
+TIMB,1826168,NYSE,Telecommunications Services,Communication Services
+SATA,1920406,NASDAQ,Asset Management,Financial Services
+CAH,721371,NYSE,Medical - Distribution,Healthcare
+ZURA,1855644,NASDAQ,Biotechnology,Healthcare
+MAMK,2008007,NASDAQ,Apparel - Footwear & Accessories,Consumer Cyclical
+LSAK,1041514,NASDAQ,Software - Infrastructure,Technology
+CPNG,1834584,NYSE,Specialty Retail,Consumer Cyclical
+L,60086,NYSE,Insurance - Property & Casualty,Financial Services
+DEVS,1854480,NASDAQ,Industrial - Pollution & Treatment Controls,Industrials
+FIGXW,2059033,NASDAQ,Shell Companies,Financial Services
+LAB,1162194,NASDAQ,Medical - Devices,Healthcare
+LPBB,2023676,NASDAQ,Shell Companies,Financial Services
+SRTA,1779128,NASDAQ,"Airlines, Airports & Air Services",Industrials
+NNDM,1643303,NASDAQ,Computer Hardware,Technology
+QRVO,1604778,NASDAQ,Semiconductors,Technology
+ALCO,3545,NASDAQ,Agricultural Farm Products,Consumer Defensive
+FSHP,1850059,NASDAQ,Shell Companies,Financial Services
+ADIL,1513525,NASDAQ,Biotechnology,Healthcare
+TSN,100493,NYSE,Agricultural Farm Products,Consumer Defensive
+VRSN,1014473,NASDAQ,Software - Infrastructure,Technology
+ANEB,1815974,NASDAQ,Biotechnology,Healthcare
+WPM,1323404,NYSE,Gold,Basic Materials
+PSA,1393311,NYSE,REIT - Industrial,Real Estate
+PERI,1338940,NASDAQ,Internet Content & Information,Communication Services
+AQNB,1174169,NYSE,Regulated Electric,Utilities
+NBIS,1513845,NASDAQ,Internet Content & Information,Communication Services
+BYNO,1801417,NASDAQ,Shell Companies,Financial Services
+VG,2007855,NYSE,Oil & Gas Midstream,Energy
+GDRX,1809519,NASDAQ,Medical - Healthcare Information Services,Healthcare
+EM,1834253,NASDAQ,Personal Products & Services,Consumer Cyclical
+ADC,917251,NYSE,REIT - Retail,Real Estate
+TRUE,1327318,NASDAQ,Internet Content & Information,Communication Services
+GSIT,1126741,NASDAQ,Semiconductors,Technology
+OSK,775158,NYSE,Agricultural - Machinery,Industrials
+NPCE,1528287,NASDAQ,Medical - Devices,Healthcare
+ADUR,1863934,NASDAQ,Chemicals - Specialty,Basic Materials
+LW,1679273,NYSE,Packaged Foods,Consumer Defensive
+LGHL,1806524,NASDAQ,Financial - Capital Markets,Financial Services
+RZLV,1920294,NASDAQ,Software - Infrastructure,Technology
+HIMS,1773751,NYSE,Medical - Equipment & Services,Healthcare
+LWAY,814586,NASDAQ,Packaged Foods,Consumer Defensive
+AVT,8858,NASDAQ,Technology Distributors,Technology
+AWI,7431,NYSE,Construction,Industrials
+FTLF,1374328,NASDAQ,Packaged Foods,Consumer Defensive
+LENZ,1815776,NASDAQ,Biotechnology,Healthcare
+BRY,1705873,NASDAQ,Oil & Gas Exploration & Production,Energy
+PKBK,1315399,NASDAQ,Banks - Regional,Financial Services
+WGS,1818331,NASDAQ,Medical - Healthcare Information Services,Healthcare
+AVTR,1722482,NYSE,Medical - Instruments & Supplies,Healthcare
+GIWWU,2080019,NASDAQ,Asset Management,Financial Services
+GWRS,1434728,NASDAQ,Regulated Water,Utilities
+LH,920148,NYSE,Medical - Equipment & Services,Healthcare
+QS,1811414,NYSE,Auto - Parts,Consumer Cyclical
+INV,2001557,NASDAQ,Asset Management,Financial Services
+WB,1595761,NASDAQ,Internet Content & Information,Communication Services
+AUTL,1730463,NASDAQ,Biotechnology,Healthcare
+IONR,1896084,NASDAQ,Industrial Materials,Basic Materials
+VLRS,1520504,NYSE,"Airlines, Airports & Air Services",Industrials
+SXTC,1723980,NASDAQ,Drug Manufacturers - Specialty & Generic,Healthcare
+SUN,1552275,NYSE,Oil & Gas Refining & Marketing,Energy
+USARW,1787434,NASDAQ,Industrial Materials,Basic Materials
+TONX,1566610,NASDAQ,Asset Management,Financial Services
+TLNCU,2073340,NASDAQ,Asset Management,Financial Services
+XCH,1979887,NASDAQ,Industrial - Machinery,Industrials
+FRMI,2071778,NASDAQ,Regulated Electric,Utilities
+GWW,277135,NYSE,Industrial - Distribution,Industrials
+ADXN,1574232,NASDAQ,Biotechnology,Healthcare
+MNPR,1645469,NASDAQ,Biotechnology,Healthcare
+NVAWW,1852551,NASDAQ,Gold,Basic Materials
+PLUT,1933021,NASDAQ,Financial - Capital Markets,Financial Services
+BHP,811809,NYSE,Industrial Materials,Basic Materials
+FINV,1691445,NYSE,Financial - Credit Services,Financial Services
+NAGE,851773,NASDAQ,Biotechnology,Healthcare
+OXY,797468,NYSE,Oil & Gas Exploration & Production,Energy
+DSGN,1807120,NASDAQ,Biotechnology,Healthcare
+PGAC,2030829,NASDAQ,Shell Companies,Financial Services
+AGL,1831097,NYSE,Medical - Care Facilities,Healthcare
+CCI,1051470,NYSE,REIT - Specialty,Real Estate
+KFRC,930420,NASDAQ,Staffing & Employment Services,Industrials
+ZS,1713683,NASDAQ,Software - Infrastructure,Technology
+DNA,1830214,NYSE,Biotechnology,Healthcare
+HVMC,2070602,NASDAQ,Banks,Financial Services
+LOVE,1701758,NASDAQ,"Furnishings, Fixtures & Appliances",Consumer Cyclical
+LSTR,853816,NASDAQ,Integrated Freight & Logistics,Industrials
+LTBR,1084554,NASDAQ,Electrical Equipment & Parts,Industrials
+INTR,1864163,NASDAQ,Banks - Regional,Financial Services
+CTRE,1590717,NYSE,REIT - Healthcare Facilities,Real Estate
+TBB,732717,NYSE,Telecommunications Services,Communication Services
+AIRJ,1855474,NASDAQ,Electrical Equipment & Parts,Industrials
+WELL,766704,NYSE,REIT - Healthcare Facilities,Real Estate
+FLNC,1868941,NASDAQ,Renewable Utilities,Utilities
+COFS,803164,NASDAQ,Banks - Regional,Financial Services
+ZK,1954042,NYSE,Auto - Manufacturers,Consumer Cyclical
+SOMN,92122,NYSE,Regulated Electric,Utilities
+MDT,1613103,NYSE,Medical - Devices,Healthcare
+CAN,1780652,NASDAQ,Computer Hardware,Technology
+SYK,310764,NYSE,Medical - Devices,Healthcare
+BEPH,1533232,NYSE,Real Estate - Development,Real Estate
+BRKR,1109354,NASDAQ,Medical - Devices,Healthcare
+SPOT,1639920,NYSE,Internet Content & Information,Communication Services
+BZAIW,1821788,NASDAQ,Software - Application,Technology
+VLY,714310,NASDAQ,Banks - Regional,Financial Services
+BBD,1160330,NYSE,Banks - Regional,Financial Services
+FDBC,1098151,NASDAQ,Banks - Regional,Financial Services
+MNTK,1826600,NASDAQ,Diversified Utilities,Utilities
+DJT,1849635,NASDAQ,Internet Content & Information,Communication Services
+MKTX,1278021,NASDAQ,Financial - Capital Markets,Financial Services
+ENTA,1177648,NASDAQ,Biotechnology,Healthcare
+NAMI,1967631,NASDAQ,Internet Content & Information,Communication Services
+GTLB,1653482,NASDAQ,Software - Application,Technology
+GLBE,1835963,NASDAQ,Specialty Retail,Consumer Cyclical
+TEM,1717115,NASDAQ,Medical - Healthcare Information Services,Healthcare
+SOUN,1840856,NASDAQ,Software - Application,Technology
+PEW-WT,2051380,NYSE,Industrial - Infrastructure Operations,Industrials
+WING,1636222,NASDAQ,Restaurants,Consumer Cyclical
+UNP,100885,NYSE,Railroads,Industrials
+ZBRA,877212,NASDAQ,Communication Equipment,Technology
+AUGO,1468642,NASDAQ,Other Precious Metals,Basic Materials
+SHMD,1987240,NASDAQ,Industrial - Machinery,Industrials
+MIDD,769520,NASDAQ,Industrial - Machinery,Industrials
+ENLT,1922641,NASDAQ,Renewable Utilities,Utilities
+MCW,1853513,NASDAQ,Personal Products & Services,Consumer Cyclical
+BJ,1531152,NYSE,Discount Stores,Consumer Defensive
+GCT,1857816,NASDAQ,Software - Infrastructure,Technology
+LIN,1707925,NASDAQ,Chemicals - Specialty,Basic Materials
+SBRA,1492298,NASDAQ,REIT - Healthcare Facilities,Real Estate
+CCEC,1392326,NASDAQ,Marine Shipping,Industrials
+KHC,1637459,NASDAQ,Packaged Foods,Consumer Defensive
+BULL,1866364,NASDAQ,Software - Application,Technology
+RDDT,1713445,NYSE,Internet Content & Information,Communication Services
+HRB,12659,NYSE,Personal Products & Services,Consumer Cyclical
+ALAB,1736297,NASDAQ,Semiconductors,Technology
+LAUR,912766,NASDAQ,Education & Training Services,Consumer Defensive
+SEV,1786471,NASDAQ,Auto - Manufacturers,Consumer Cyclical
+SOBO,2019061,NYSE,Oil & Gas Midstream,Energy
+RITM,1556593,NYSE,REIT - Mortgage,Real Estate
+SWX,1692115,NYSE,Regulated Gas,Utilities
+AGYS,78749,NASDAQ,Software - Application,Technology
+RUN,1469367,NASDAQ,Solar,Energy
+CTHR,1015155,NASDAQ,Luxury Goods,Consumer Cyclical
+EVRG,1711269,NASDAQ,Regulated Electric,Utilities
+LNT,352541,NASDAQ,Regulated Electric,Utilities
+LLYVK,1560385,NASDAQ,Entertainment,Communication Services
+LITE,1633978,NASDAQ,Communication Equipment,Technology
+RIVN,1874178,NASDAQ,Auto - Manufacturers,Consumer Cyclical
+ACVA,1637873,NASDAQ,Auto - Dealerships,Consumer Cyclical
+VFF,1584549,NASDAQ,Agricultural Farm Products,Consumer Defensive
+MRCY,1049521,NASDAQ,Aerospace & Defense,Industrials
+OSIS,1039065,NASDAQ,"Hardware, Equipment & Parts",Technology
+TTGT,1293282,NASDAQ,Internet Content & Information,Communication Services
+LNZA,1843724,NASDAQ,Waste Management,Industrials
+BOOT,1610250,NYSE,Apparel - Retail,Consumer Cyclical
+ATXG,1650101,NASDAQ,Integrated Freight & Logistics,Industrials
+CLIK,2020027,NASDAQ,Staffing & Employment Services,Industrials
+MTLS,1091223,NASDAQ,Software - Application,Technology
+PLXS,785786,NASDAQ,"Hardware, Equipment & Parts",Technology
+JEM,2018222,NASDAQ,Apparel - Retail,Consumer Cyclical
+FCN,887936,NYSE,Consulting Services,Industrials
+RELX,929869,NYSE,Publishing,Communication Services
+GFS,1709048,NASDAQ,Semiconductors,Technology
+TFPM,1829726,NYSE,Other Precious Metals,Basic Materials
+VIST,1762506,NYSE,Oil & Gas Exploration & Production,Energy
+MEOH,886977,NASDAQ,Chemicals,Basic Materials
+EMR,32604,NYSE,Industrial - Machinery,Industrials
+INFY,1067491,NYSE,Information Technology Services,Technology
+PPTA,1526243,NASDAQ,Other Precious Metals,Basic Materials
+RUM,1830081,NASDAQ,Software - Application,Technology
+RAL,2041385,NYSE,Aerospace & Defense,Industrials
+BIPC,1788348,NYSE,Regulated Gas,Utilities
+PENN,921738,NASDAQ,"Gambling, Resorts & Casinos",Consumer Cyclical
+GTX,1735707,NASDAQ,Auto - Parts,Consumer Cyclical
+SAIL,1627857,NASDAQ,Software - Infrastructure,Technology
+EU,1500881,NASDAQ,Uranium,Energy
+BNZI,1826011,NASDAQ,Software - Application,Technology
+PLBL,2035697,NASDAQ,Department Stores,Consumer Cyclical
+MU,723125,NASDAQ,Semiconductors,Technology
+BL,1666134,NASDAQ,Software - Application,Technology
+FARM,34563,NASDAQ,Packaged Foods,Consumer Defensive
+IBEX,1720420,NASDAQ,Information Technology Services,Technology
+NPWR,1845437,NYSE,Industrial - Machinery,Industrials
+STNE,1745431,NASDAQ,Software - Infrastructure,Technology
+GPJA,41091,NYSE,Regulated Electric,Utilities
+AIOT,1774170,NASDAQ,Communication Equipment,Technology
+GDEV,1848739,NASDAQ,Electronic Gaming & Multimedia,Technology
+BMBL,1830043,NASDAQ,Software - Application,Technology
+LMB,1606163,NASDAQ,Engineering & Construction,Industrials
+EGO,918608,NYSE,Gold,Basic Materials
+MQ,1522540,NASDAQ,Software - Infrastructure,Technology
+MSI,68505,NYSE,Communication Equipment,Technology
+TTD,1671933,NASDAQ,Software - Application,Technology
+UPWK,1627475,NASDAQ,Staffing & Employment Services,Industrials
+VSEC,102752,NASDAQ,Aerospace & Defense,Industrials
+LOAR,2000178,NYSE,Aerospace & Defense,Industrials
+SONO,1314727,NASDAQ,Consumer Electronics,Technology
+EYE,1710155,NASDAQ,Specialty Retail,Consumer Cyclical
+WEN,30697,NASDAQ,Restaurants,Consumer Cyclical
+GTEC,1735041,NASDAQ,Industrial - Machinery,Industrials
+HUBG,940942,NASDAQ,Integrated Freight & Logistics,Industrials
+PLUG,1093691,NASDAQ,Electrical Equipment & Parts,Industrials
+MELI,1099590,NASDAQ,Specialty Retail,Consumer Cyclical
+HBNB,1866001,NASDAQ,Real Estate - Services,Real Estate
+CMCSA,1166691,NASDAQ,Telecommunications Services,Communication Services
+SA,1231346,NYSE,Gold,Basic Materials
+BRSL,1619762,NYSE,"Gambling, Resorts & Casinos",Consumer Cyclical
+TLN,1622536,NASDAQ,Independent Power Producers,Utilities
+SMR,1822966,NYSE,Renewable Utilities,Utilities
+CDTG,1793895,NASDAQ,Waste Management,Industrials
+UHG,1830188,NASDAQ,Residential Construction,Consumer Cyclical
+WKHS,1425287,NASDAQ,Auto - Manufacturers,Consumer Cyclical
+SBGI,1971213,NASDAQ,Entertainment,Communication Services
+ASST,1920406,NASDAQ,Asset Management,Communication Services
+RRR,1653653,NASDAQ,"Gambling, Resorts & Casinos",Consumer Cyclical
+UXIN,1729173,NASDAQ,Auto - Dealerships,Consumer Cyclical
+GVH,1978527,NASDAQ,Integrated Freight & Logistics,Industrials
+FWONK,1560385,NASDAQ,Entertainment,Communication Services
+NDSN,72331,NASDAQ,Industrial - Machinery,Industrials
+GO,1771515,NASDAQ,Grocery Stores,Consumer Defensive
+RKDA,1469443,NASDAQ,Agricultural Inputs,Basic Materials
+PTEN,889900,NASDAQ,Oil & Gas Drilling,Energy
+PRIM,1361538,NASDAQ,Engineering & Construction,Industrials
+GLIBA,2057463,NASDAQ,Telecommunications Services,Communication Services
+QSG,1932770,NASDAQ,Education & Training Services,Consumer Defensive
+EVTV,1563568,NASDAQ,Auto - Manufacturers,Consumer Cyclical
+TRS,842633,NASDAQ,Packaging & Containers,Consumer Cyclical
+GIBO,2034520,NASDAQ,Internet Content & Information,Communication Services
+HOFV,1708176,NASDAQ,Entertainment,Communication Services
+KXIN,1713539,NASDAQ,Auto - Dealerships,Consumer Cyclical
+HNRG,788965,NASDAQ,Coal,Energy
+LOT,1962746,NASDAQ,Auto - Manufacturers,Consumer Cyclical
+AMWD,794619,NASDAQ,"Furnishings, Fixtures & Appliances",Consumer Cyclical
+YTRA,1516899,NASDAQ,Travel Services,Consumer Cyclical
+ONON,1858985,NYSE,Apparel - Retail,Consumer Cyclical
+TC,1743340,NASDAQ,Internet Content & Information,Communication Services
+JBSS,880117,NASDAQ,Packaged Foods,Consumer Defensive
+GLDD,1372020,NASDAQ,Engineering & Construction,Industrials
+EH,1759783,NASDAQ,Aerospace & Defense,Industrials
+GEOS,1001115,NASDAQ,Oil & Gas Equipment & Services,Energy
+NPT,2014337,NASDAQ,Specialty Retail,Consumer Cyclical
+TMC,1798562,NASDAQ,Industrial Materials,Basic Materials
+NWS,1564708,NASDAQ,Entertainment,Communication Services
+TORO,1941131,NASDAQ,Marine Shipping,Industrials
+HSAI,1861737,NASDAQ,Auto - Parts,Consumer Cyclical
+WOOF,1826470,NASDAQ,Specialty Retail,Consumer Cyclical
+CURB,2027317,NYSE,REIT - Retail,Real Estate
+EAF,931148,NYSE,Electrical Equipment & Parts,Industrials
+GRP-UN,1564538,NYSE,REIT - Industrial,Real Estate
+ESLT,1027664,NASDAQ,Aerospace & Defense,Industrials
+HPK,1792849,NASDAQ,Oil & Gas Exploration & Production,Energy
+CWST,911177,NASDAQ,Waste Management,Industrials
+LNKS,1972074,NASDAQ,Manufacturing - Metal Fabrication,Industrials
+MCFT,1638290,NASDAQ,Auto - Recreational Vehicles,Consumer Cyclical
+OUT,1579877,NYSE,REIT - Specialty,Real Estate
+SGLY,1422892,NASDAQ,Integrated Freight & Logistics,Industrials
+HWKN,46250,NASDAQ,Chemicals - Specialty,Basic Materials
+CZR,1590895,NASDAQ,"Gambling, Resorts & Casinos",Consumer Cyclical
+ARHS,1875444,NASDAQ,Home Improvement,Consumer Cyclical
+SNCY,1743907,NASDAQ,"Airlines, Airports & Air Services",Industrials
+NHPAP,1561032,NASDAQ,REIT - Industrial,Real Estate
+WHLRD,1527541,NASDAQ,REIT - Retail,Real Estate
+WIMI,1770088,NASDAQ,Advertising Agencies,Communication Services
+CAPS,887151,NASDAQ,Construction Materials,Basic Materials
+BZ,1842827,NASDAQ,Staffing & Employment Services,Industrials
+HYMC,1718405,NASDAQ,Gold,Basic Materials
+AREC,1590715,NASDAQ,Coal,Energy
+SEDG,1419612,NASDAQ,Solar,Energy
+NN,1865631,NASDAQ,Internet Content & Information,Communication Services
+RAY,1948443,NASDAQ,Household & Personal Products,Consumer Defensive
+TDW,98222,NYSE,Oil & Gas Equipment & Services,Energy
+UROY,1711570,NASDAQ,Uranium,Energy
+USFD,1665918,NYSE,Food Distribution,Consumer Defensive
+KGS,1767042,NYSE,Oil & Gas Equipment & Services,Energy
+TBBB,1978954,NYSE,Discount Stores,Consumer Defensive
+MAMA,1520358,NASDAQ,Packaged Foods,Consumer Defensive
+IMPP,1876581,NASDAQ,Oil & Gas Exploration & Production,Energy
+OTLY,1843586,NASDAQ,Beverages - Non-Alcoholic,Consumer Defensive
+FCPT,1650132,NYSE,REIT - Retail,Real Estate
+AGNC,1423689,NASDAQ,REIT - Mortgage,Real Estate
+KALU,811596,NASDAQ,Aluminum,Basic Materials
+AMCX,1514991,NASDAQ,Entertainment,Communication Services
+OII,73756,NYSE,Oil & Gas Equipment & Services,Energy
+UE,1611547,NYSE,REIT - Diversified,Real Estate
+CELH,1341766,NASDAQ,Beverages - Non-Alcoholic,Consumer Defensive
+NUAI,2028336,NASDAQ,Oil & Gas Energy,Energy
+ATLX,1540684,NASDAQ,Other Precious Metals,Basic Materials
+NEXT,1612720,NASDAQ,Oil & Gas Exploration & Production,Energy
+ATNI,879585,NASDAQ,Telecommunications Services,Communication Services
+CNEY,1780785,NASDAQ,Chemicals - Specialty,Basic Materials
+STHO,1953366,NASDAQ,Real Estate - Services,Real Estate
+BKV,1838406,NYSE,Oil & Gas Exploration & Production,Energy
+OMSE,2012219,NASDAQ,Oil & Gas Equipment & Services,Energy
+PTNM,2046573,NASDAQ,Household & Personal Products,Consumer Defensive
+TNK,1419945,NYSE,Oil & Gas Midstream,Energy
+TYGO,1855447,NASDAQ,Solar,Energy
+AVX,1826397,NASDAQ,Agricultural Farm Products,Consumer Defensive
+TIGO,912958,NASDAQ,Telecommunications Services,Communication Services
+IVT,1307748,NYSE,REIT - Retail,Real Estate
+ZG,1617640,NASDAQ,Internet Content & Information,Communication Services
+IPX,1898601,NASDAQ,Industrial Materials,Basic Materials
+CURI,1776909,NASDAQ,Broadcasting,Communication Services
+IMAX,921582,NYSE,Entertainment,Communication Services
+DHC,1075415,NASDAQ,REIT - Healthcare Facilities,Real Estate
+GOOD,1234006,NASDAQ,REIT - Diversified,Real Estate
+LOPE,1434588,NASDAQ,Education & Training Services,Consumer Defensive
+FNGR,1602409,NASDAQ,Telecommunications Services,Communication Services
+FMST,1935418,NASDAQ,Chemicals,Basic Materials
+SFD,91388,NASDAQ,Agricultural Farm Products,Consumer Defensive
+SLVM,1856485,NYSE,"Paper, Lumber & Forest Products",Basic Materials
+TU,868675,NYSE,Telecommunications Services,Communication Services
+NIPG,1966233,NASDAQ,Entertainment,Communication Services
+PCYO,276720,NASDAQ,Regulated Water,Utilities
+COST,909832,NASDAQ,Discount Stores,Consumer Defensive
+ADV,1776661,NASDAQ,Advertising Agencies,Communication Services
+DASH,1792789,NASDAQ,Internet Content & Information,Communication Services
+FMC,37785,NYSE,Agricultural Inputs,Basic Materials
+XPRO,1575828,NYSE,Oil & Gas Equipment & Services,Energy
+ABLV,1957489,NASDAQ,Advertising Agencies,Communication Services
+Z,1617640,NASDAQ,Internet Content & Information,Communication Services
+SDRL,1737706,NYSE,Oil & Gas Drilling,Energy
+SELF,1031235,NASDAQ,REIT - Industrial,Real Estate
+BIDU,1329099,NASDAQ,Internet Content & Information,Communication Services
+TALO,1724965,NYSE,Oil & Gas Exploration & Production,Energy
+CMCT,908311,NASDAQ,REIT - Office,Real Estate
+MAA,912595,NYSE,REIT - Residential,Real Estate
+BPYPO,1545772,NASDAQ,Real Estate - Services,Real Estate
+ZEUS,917470,NASDAQ,Steel,Basic Materials
+SGI,1206264,NYSE,Household & Personal Products,Consumer Defensive
+WSHP,37848,NASDAQ,Internet Content & Information,Communication Services
+SREA,1032208,NYSE,Regulated Electric,Utilities
+UMH,752642,NYSE,REIT - Residential,Real Estate
+ADAM,1273685,NASDAQ,REIT - Mortgage,Real Estate
+DMLP,1172358,NASDAQ,Oil & Gas Exploration & Production,Energy
+OLLI,1639300,NASDAQ,Discount Stores,Consumer Defensive
+EFC,1411342,NYSE,REIT - Mortgage,Real Estate
+PRDO,1046568,NASDAQ,Education & Training Services,Consumer Defensive
+MAYS,54187,NASDAQ,Real Estate - Services,Real Estate
+XHR,1616000,NYSE,REIT - Hotel & Motel,Real Estate
+XEL,72903,NASDAQ,Regulated Electric,Utilities
+OPEN,1801169,NASDAQ,Real Estate - Services,Real Estate
+METC,1687187,NASDAQ,Coal,Energy
+FRPT,1611647,NASDAQ,Packaged Foods,Consumer Defensive
+NHPBP,1561032,NASDAQ,REIT - Healthcare Facilities,Real Estate
+BRID,14177,NASDAQ,Packaged Foods,Consumer Defensive
+SCHL,866729,NASDAQ,Publishing,Communication Services
+OTTR,1466593,NASDAQ,Diversified Utilities,Utilities
+EQIX,1101239,NASDAQ,REIT - Specialty,Real Estate
+REAX,1862461,NASDAQ,Real Estate - Services,Real Estate
+AVO,1802974,NASDAQ,Food Distribution,Consumer Defensive
+NEXN,1849396,NASDAQ,Advertising Agencies,Communication Services
+WDFC,105132,NASDAQ,Chemicals - Specialty,Basic Materials
+EPC,1096752,NYSE,Household & Personal Products,Consumer Defensive
+VTS,1944558,NYSE,Oil & Gas Exploration & Production,Energy
+CALM,16160,NASDAQ,Agricultural Farm Products,Consumer Defensive
+WAVE,1846715,NASDAQ,Renewable Utilities,Utilities
+AENT,1823584,NASDAQ,Entertainment,Communication Services
+RS,861884,NYSE,Steel,Basic Materials
+FYBR,20520,NASDAQ,Telecommunications Services,Communication Services
+TXO,1559432,NYSE,Oil & Gas Exploration & Production,Energy
+TRTX,1630472,NYSE,REIT - Mortgage,Real Estate
+CGAU,1854640,NYSE,Gold,Basic Materials
+GCI,1579684,NYSE,Publishing,Communication Services
+SRE,1032208,NYSE,Diversified Utilities,Utilities
+O,726728,NYSE,REIT - Retail,Real Estate
+NNN,751364,NYSE,REIT - Retail,Real Estate
+DBRG,1679688,NYSE,REIT - Diversified,Real Estate
+HPP,1482512,NYSE,REIT - Office,Real Estate
+OKE,1039684,NYSE,Oil & Gas Midstream,Energy
+CTVA,1755672,NYSE,Agricultural Inputs,Basic Materials
+EQT,33213,NYSE,Oil & Gas Exploration & Production,Energy
+KOS,1509991,NYSE,Oil & Gas Exploration & Production,Energy
+SYY,96021,NYSE,Food Distribution,Consumer Defensive
+NXDR,1846069,NYSE,Internet Content & Information,Communication Services
+WLKP,1604665,NYSE,Chemicals,Basic Materials
+PK,1617406,NYSE,REIT - Hotel & Motel,Real Estate
+CTRI,1981599,NYSE,Regulated Gas,Utilities
+KDP,1418135,NASDAQ,Beverages - Non-Alcoholic,Consumer Defensive
+UHT,798783,NYSE,REIT - Healthcare Facilities,Real Estate
+MGY,1698990,NYSE,Oil & Gas Exploration & Production,Energy
+IHRT,1400891,NASDAQ,Broadcasting,Communication Services
+WTRG,78128,NYSE,Regulated Water,Utilities
+OVV,1792580,NYSE,Oil & Gas Exploration & Production,Energy
+FTK,928054,NYSE,Oil & Gas Equipment & Services,Energy
+FPI,1591670,NYSE,REIT - Specialty,Real Estate
+ARI,1467760,NYSE,REIT - Mortgage,Real Estate
+GPRK,1464591,NYSE,Oil & Gas Exploration & Production,Energy
+NOA,1368519,NYSE,Oil & Gas Equipment & Services,Energy
+TCI,733590,NYSE,Real Estate - Services,Real Estate
+ASIX,1673985,NYSE,Chemicals,Basic Materials
+RYAM,1597672,NYSE,Chemicals,Basic Materials
+APA,1841666,NASDAQ,Oil & Gas Exploration & Production,Energy
+PPC,802481,NASDAQ,Packaged Foods,Consumer Defensive
+RNWWW,1848763,NASDAQ,Renewable Utilities,Utilities
+CPB,16732,NASDAQ,Packaged Foods,Consumer Defensive
+NVA,1852551,NASDAQ,Other Precious Metals,Basic Materials
+KRP,1657788,NYSE,Oil & Gas Exploration & Production,Energy
+EGY,894627,NYSE,Oil & Gas Exploration & Production,Energy
+IPAR,822663,NASDAQ,Household & Personal Products,Consumer Defensive
+GLNG,1207179,NASDAQ,Oil & Gas Midstream,Energy
+PSMT,1041803,NASDAQ,Discount Stores,Consumer Defensive
+MZTI,57515,NASDAQ,Packaged Foods,Consumer Defensive
+SPRU,1772720,NYSE,Solar,Energy
+USLM,82020,NASDAQ,Construction Materials,Basic Materials
+ENFY,857949,NYSE,Agricultural Inputs,Basic Materials
+ELVR,2055296,NASDAQ,Other Precious Metals,Basic Materials
+FIZZ,69891,NASDAQ,Beverages - Non-Alcoholic,Consumer Defensive
+MSEX,66004,NASDAQ,Regulated Water,Utilities
+SGML,1848309,NASDAQ,Industrial Materials,Basic Materials
+COCO,1482981,NASDAQ,Beverages - Non-Alcoholic,Consumer Defensive
+ASPI,1921865,NASDAQ,Chemicals,Basic Materials
+HELE,916789,NASDAQ,Household & Personal Products,Consumer Defensive
+SENEA,88948,NASDAQ,Packaged Foods,Consumer Defensive
+WEST,1806347,NASDAQ,Packaged Foods,Consumer Defensive
+CHA,2013649,NASDAQ,Beverages - Non-Alcoholic,Consumer Defensive
+PAAS,771992,NASDAQ,Silver,Basic Materials
+CREG,721693,NASDAQ,Renewable Utilities,Utilities
+BNRG,1901215,NASDAQ,Renewable Utilities,Utilities
+CDZI,727273,NASDAQ,Regulated Water,Utilities
+GEVO,1392380,NASDAQ,Chemicals - Specialty,Basic Materials
+LWLG,1325964,NASDAQ,Chemicals - Specialty,Basic Materials
+LVRO,1945711,NASDAQ,Agricultural Inputs,Basic Materials
+LYB,1489393,NYSE,Chemicals - Specialty,Basic Materials
+ALTO,778164,NASDAQ,Chemicals - Specialty,Basic Materials
+KGC,701818,NYSE,Gold,Basic Materials
+VIASP,1606268,NASDAQ,Regulated Electric,Utilities
+EAI,7323,NYSE,Regulated Electric,Utilities
+AEE,1002910,NYSE,Regulated Electric,Utilities
+NFE,1749723,NASDAQ,Regulated Gas,Utilities
+EBR,1439124,NYSE,Regulated Electric,Utilities
+UGI,884614,NYSE,Regulated Gas,Utilities
+CIG-C,1157557,NYSE,Diversified Utilities,Utilities
+ELPC,1041792,NYSE,Diversified Utilities,Utilities
+CMSD,811156,NYSE,Regulated Electric,Utilities
+CWEN,1567683,NYSE,Renewable Utilities,Utilities
+IDA,1057877,NYSE,Regulated Electric,Utilities
+ORA,1296445,NYSE,Renewable Utilities,Utilities
+CIG,1157557,NYSE,Diversified Utilities,Utilities
+BEPC,1791863,NYSE,Renewable Utilities,Utilities
+POR,784977,NYSE,Regulated Electric,Utilities
+AQN,1174169,NYSE,Renewable Utilities,Utilities
+ALE,66756,NYSE,Diversified Utilities,Utilities
+DTW,936340,NYSE,Regulated Electric,Utilities
+DTB,936340,NYSE,Regulated Electric,Utilities
+DTG,936340,NYSE,Regulated Electric,Utilities
+KEN,1611005,NYSE,Independent Power Producers,Utilities
+AVA,104918,NYSE,Diversified Utilities,Utilities
