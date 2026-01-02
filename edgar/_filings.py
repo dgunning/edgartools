@@ -705,7 +705,7 @@ class Filings:
         # Filter by form
         if forms:
             filing_index = filter_by_form(filing_index, form=forms, amendments=amendments if amendments is not None else False)
-        elif amendments is not None:
+        elif amendments is not None and filing_index.num_rows > 0:
             # Get the unique values of the form as a pylist
             forms = list(set([form.replace("/A", "") for form in pc.unique(filing_index['form']).to_pylist()]))
             filing_index = filter_by_form(filing_index, form=forms, amendments=amendments)
@@ -718,7 +718,7 @@ class Filings:
                 # Warn if user is requesting today's filings but data is from yesterday
                 if _is_requesting_current_filings(filing_date):
                     latest_date = self.date_range[1]
-                    if _get_data_staleness_days(latest_date) >= 1:
+                    if latest_date is not None and _get_data_staleness_days(latest_date) >= 1:
                         _warn_use_current_filings(
                             f"Filtering for current-day filings, but data only includes filings through {latest_date.date() if isinstance(latest_date, datetime) else latest_date}"
                         )
