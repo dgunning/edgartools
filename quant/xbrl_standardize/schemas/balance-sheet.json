@@ -1,5 +1,5 @@
 {
-	"mappingVersion": "2026-01-02.1",
+	"mappingVersion": "2026-01-02.2",
 	"statement": "BalanceSheet",
 	"periodType": "instant",
 	"unit": "USD",
@@ -7,7 +7,10 @@
 		"Comprehensive Balance Sheet mapping for US GAAP + IFRS filers.",
 		"Priority structure: 150+ industry-specific, 120 IFRS, 110 US GAAP, 80-100 computed.",
 		"Banking balance sheets differ significantly: loans instead of AR, deposits instead of AP.",
-		"Insurance companies have unique asset structures (investments, reserves)."
+		"Insurance companies have unique asset structures (investments, reserves).",
+		"Never mix Net and Gross concepts (PPE, Inventory) - Gross values exclude depreciation/reserves and will overstate assets.",
+		"When a rule has both selectAny and computeAny, selectAny is evaluated first; if it returns null, computeAny is tried.",
+		"CommonStock field contains ONLY par value, never amounts that include APIC to prevent double-counting in equity calculations."
 	],
 	"fields": {
 		"cash": {
@@ -136,8 +139,28 @@
 					"name": "US GAAP: Inventory net",
 					"priority": 110,
 					"selectAny": [
-						"us-gaap:InventoryNet",
-						"us-gaap:InventoryGross"
+						"us-gaap:InventoryNet"
+					]
+				}
+			]
+		},
+		"prepaidExpenses": {
+			"standardLabel": "prepaidExpenses",
+			"rules": [
+				{
+					"name": "IFRS: Prepaid expenses",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:PrepaidExpenses",
+						"ifrs-full:PrepaidExpensesAndOtherAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Prepaid expense",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PrepaidExpenseCurrent",
+						"us-gaap:PrepaidExpenseCurrentAndNoncurrent"
 					]
 				}
 			]
@@ -211,8 +234,28 @@
 					"name": "US GAAP: Property, plant and equipment net",
 					"priority": 110,
 					"selectAny": [
-						"us-gaap:PropertyPlantAndEquipmentNet",
-						"us-gaap:PropertyPlantAndEquipmentGross"
+						"us-gaap:PropertyPlantAndEquipmentNet"
+					]
+				},
+				{
+					"name": "Compute: PPE Gross - Accumulated Depreciation",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:PropertyPlantAndEquipmentGross"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment"
+									]
+								}
+							]
+						}
 					]
 				}
 			]
@@ -256,12 +299,51 @@
 				}
 			]
 		},
+		"operatingLeaseRightOfUseAsset": {
+			"standardLabel": "operatingLeaseRightOfUseAsset",
+			"rules": [
+				{
+					"name": "IFRS: Right-of-use assets (operating leases)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:RightofuseAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Operating lease right-of-use asset",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:OperatingLeaseRightOfUseAsset"
+					]
+				}
+			]
+		},
+		"deferredTaxAssets": {
+			"standardLabel": "deferredTaxAssets",
+			"rules": [
+				{
+					"name": "IFRS: Deferred tax assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:DeferredTaxAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Deferred tax assets net",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:DeferredTaxAssetsNet",
+						"us-gaap:DeferredIncomeTaxAssetsNet"
+					]
+				}
+			]
+		},
 		"longTermInvestments": {
 			"standardLabel": "longTermInvestments",
 			"rules": [
 				{
-					"name": "Banks: Long-term securities (AFS + HTM)",
-					"priority": 150,
+					"name": "Banks: Long-term securities (direct)",
+					"priority": 155,
 					"industryHints": [
 						"Bank",
 						"Banks",
@@ -271,6 +353,16 @@
 					"selectAny": [
 						"us-gaap:MarketableSecurities",
 						"us-gaap:AvailableForSaleSecuritiesDebtSecurities"
+					]
+				},
+				{
+					"name": "Banks: Compute long-term securities (AFS + HTM)",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks"
 					],
 					"computeAny": [
 						{
@@ -421,8 +513,8 @@
 			"standardLabel": "shortTermDebt",
 			"rules": [
 				{
-					"name": "Banks: Federal funds purchased + short-term borrowings",
-					"priority": 150,
+					"name": "Banks: Short-term borrowings (direct)",
+					"priority": 155,
 					"industryHints": [
 						"Bank",
 						"Banks",
@@ -433,6 +525,16 @@
 						"us-gaap:FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase",
 						"us-gaap:OtherShortTermBorrowings",
 						"us-gaap:CommercialPaper"
+					]
+				},
+				{
+					"name": "Banks: Compute short-term borrowings (Fed funds + other)",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks"
 					],
 					"computeAny": [
 						{
@@ -495,8 +597,8 @@
 			"standardLabel": "deposits",
 			"rules": [
 				{
-					"name": "Banks: Total deposits",
-					"priority": 150,
+					"name": "Banks: Total deposits (direct)",
+					"priority": 155,
 					"industryHints": [
 						"Bank",
 						"Banks",
@@ -507,6 +609,18 @@
 					],
 					"selectAny": [
 						"us-gaap:Deposits"
+					]
+				},
+				{
+					"name": "Banks: Compute deposits from components",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"Thrifts",
+						"Savings"
 					],
 					"computeAny": [
 						{
@@ -536,6 +650,48 @@
 								}
 							]
 						}
+					]
+				}
+			]
+		},
+		"deferredRevenue": {
+			"standardLabel": "deferredRevenue",
+			"rules": [
+				{
+					"name": "IFRS: Deferred revenue / contract liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:ContractLiabilities",
+						"ifrs-full:DeferredIncome"
+					]
+				},
+				{
+					"name": "US GAAP: Deferred revenue current",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:DeferredRevenueCurrent",
+						"us-gaap:ContractWithCustomerLiabilityCurrent"
+					]
+				}
+			]
+		},
+		"accruedExpenses": {
+			"standardLabel": "accruedExpenses",
+			"rules": [
+				{
+					"name": "IFRS: Accrued expenses and other payables",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:AccrualsAndDeferredIncome",
+						"ifrs-full:AccruedExpenses"
+					]
+				},
+				{
+					"name": "US GAAP: Accrued liabilities current",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:AccruedLiabilitiesCurrent",
+						"us-gaap:AccountsPayableAndAccruedLiabilitiesCurrent"
 					]
 				}
 			]
@@ -632,6 +788,25 @@
 						"us-gaap:LongTermDebt",
 						"us-gaap:LongTermDebtAndCapitalLeaseObligations",
 						"us-gaap:LongTermDebtNoncurrent"
+					]
+				}
+			]
+		},
+		"operatingLeaseLiability": {
+			"standardLabel": "operatingLeaseLiability",
+			"rules": [
+				{
+					"name": "IFRS: Lease liabilities (non-current)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:NoncurrentLeaseLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Operating lease liability non-current",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:OperatingLeaseLiabilityNoncurrent"
 					]
 				}
 			]
@@ -741,6 +916,26 @@
 				}
 			]
 		},
+		"preferredStock": {
+			"standardLabel": "preferredStock",
+			"rules": [
+				{
+					"name": "IFRS: Preferred shares / preference shares",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:PreferenceShares"
+					]
+				},
+				{
+					"name": "US GAAP: Preferred stock value",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PreferredStockValue",
+						"us-gaap:PreferredStockValueOutstanding"
+					]
+				}
+			]
+		},
 		"commonStock": {
 			"standardLabel": "commonStock",
 			"rules": [
@@ -752,11 +947,11 @@
 					]
 				},
 				{
-					"name": "US GAAP: Common stock value",
+					"name": "US GAAP: Common stock value (par value only)",
 					"priority": 110,
 					"selectAny": [
 						"us-gaap:CommonStockValue",
-						"us-gaap:CommonStockIncludingAdditionalPaidInCapital"
+						"us-gaap:CommonStockValueOutstanding"
 					]
 				}
 			]
@@ -801,9 +996,36 @@
 				}
 			]
 		},
+		"nonControllingInterest": {
+			"standardLabel": "nonControllingInterest",
+			"rules": [
+				{
+					"name": "IFRS: Non-controlling interests",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:NoncontrollingInterests"
+					]
+				},
+				{
+					"name": "US GAAP: Minority interest (stockholders' equity)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:MinorityInterest",
+						"us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+					]
+				}
+			]
+		},
 		"treasuryStock": {
 			"standardLabel": "treasuryStock",
 			"rules": [
+				{
+					"name": "IFRS: Treasury shares",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:TreasuryShares"
+					]
+				},
 				{
 					"name": "US GAAP: Treasury stock value (monetary)",
 					"priority": 110,
