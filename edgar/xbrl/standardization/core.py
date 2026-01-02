@@ -681,6 +681,47 @@ class ConceptMapper:
             json.dump(serializable_mappings, f, indent=2)
 
 
+def _should_preserve_label(original_label: str, standardized_label: str) -> bool:
+    """
+    Check if the original label should be preserved over the standardized version.
+
+    Preserves original labels that contain important qualifiers that would be lost
+    in standardization, such as "Other", "net", specific accounting distinctions.
+
+    Args:
+        original_label: The company's original label
+        standardized_label: The proposed standardized label
+
+    Returns:
+        True if the original label should be kept (standardization would lose context)
+    """
+    if not original_label or not standardized_label:
+        return False
+
+    original_lower = original_label.lower()
+    standardized_lower = standardized_label.lower()
+
+    # Qualifiers that indicate important context that shouldn't be lost
+    # These indicate the label is more specific than the standardized version
+    important_qualifiers = [
+        'other ',      # "Other intangible assets" vs "Intangible Assets"
+        ', net',       # "Intangible assets, net" vs "Intangible Assets"
+        ' net',        # "Property and equipment net" vs "Property and Equipment"
+        'long-term',   # "Other long-term assets" vs "Other Assets"
+        'short-term',  # Distinguishes from long-term
+        'current',     # "Current assets" specificity
+        'non-current', # "Non-current assets" specificity
+        'noncurrent',  # Alternate spelling
+    ]
+
+    for qualifier in important_qualifiers:
+        # If original has the qualifier but standardized doesn't, preserve original
+        if qualifier in original_lower and qualifier not in standardized_lower:
+            return True
+
+    return False
+
+
 def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper) -> List[Dict[str, Any]]:
     """
     Standardize labels in a statement using the concept mapper.
@@ -743,13 +784,20 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
         # Try to map the concept
         standard_label = mapper.map_concept(concept, label, context)
 
-        # If we found a mapping, create a modified copy
+        # If we found a mapping, check if we should preserve the original label
         if standard_label:
-            # Create a shallow copy only when needed
-            standardized_item = item.copy()
-            standardized_item["label"] = standard_label
-            standardized_item["original_label"] = label
-            result.append(standardized_item)
+            # Check if the original label contains important qualifiers
+            # that would be lost in standardization (e.g., "Other intangible assets, net"
+            # should not become generic "Intangible Assets")
+            if _should_preserve_label(label, standard_label):
+                # Preserve original label - it has more specific context
+                result.append(item)
+            else:
+                # Create a shallow copy only when needed
+                standardized_item = item.copy()
+                standardized_item["label"] = standard_label
+                standardized_item["original_label"] = label
+                result.append(standardized_item)
         else:
             # No mapping found, use original item
             result.append(item)

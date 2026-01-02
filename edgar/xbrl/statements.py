@@ -12,6 +12,7 @@ from rich import box
 from rich.table import Table
 
 from edgar.richtools import repr_rich
+from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
 
 
@@ -301,9 +302,13 @@ class Statement:
         df_rows = []
 
         for item in raw_data:
-            # Skip if filtering by dimensions
+            # Skip breakdown dimensions when include_dimensions=False
+            # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+            # Only filter out breakdown dimensions (geographic, segment, acquisition)
+            # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
             if not include_dimensions and item.get('is_dimension'):
-                continue
+                if is_breakdown_dimension(item, statement_type=self.canonical_type):
+                    continue
 
             # Build base row
             row = {
@@ -355,6 +360,8 @@ class Statement:
             row['level'] = item.get('level', 0)
             row['abstract'] = item.get('is_abstract', False)
             row['dimension'] = item.get('is_dimension', False)
+            # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
+            row['is_breakdown'] = is_breakdown_dimension(item, statement_type=self.canonical_type) if item.get('is_dimension') else False
             # Issue #522: Add dimension_label for consistency with CurrentPeriodView
             row['dimension_label'] = item.get('full_dimension_label', '') if item.get('is_dimension', False) else None
 

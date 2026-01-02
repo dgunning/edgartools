@@ -21,6 +21,7 @@ import pandas as pd
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
+from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
 
 if TYPE_CHECKING:
@@ -456,9 +457,12 @@ class CurrentPeriodView:
             for item in statement_data:
                 is_dimension = item.get('is_dimension', False)
 
-                # Skip dimensional items if include_dimensions=False
+                # Skip breakdown dimensions when include_dimensions=False
+                # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+                # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
                 if not include_dimensions and is_dimension:
-                    continue
+                    if is_breakdown_dimension(item, statement_type=statement_type):
+                        continue
 
                 # Get the value for appropriate period
                 values = item.get('values', {})
@@ -477,6 +481,8 @@ class CurrentPeriodView:
                         'dimension': is_dimension,  # Renamed for consistency
                     }
 
+                    # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
+                    row['is_breakdown'] = is_breakdown_dimension(item, statement_type=statement_type) if is_dimension else False
                     # Add dimension label (always include column for schema consistency)
                     row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
 
@@ -931,9 +937,12 @@ class CurrentPeriodStatement:
         for item in raw_data:
             is_dimension = item.get('is_dimension', False)
 
-            # Skip dimensional items if include_dimensions=False
+            # Skip breakdown dimensions when include_dimensions=False
+            # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+            # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
             if not dims and is_dimension:
-                continue
+                if is_breakdown_dimension(item, statement_type=self.canonical_type):
+                    continue
 
             values = item.get('values', {})
             current_value = values.get(self.period_filter)
@@ -964,6 +973,8 @@ class CurrentPeriodStatement:
                     'dimension': is_dimension,  # Renamed for consistency
                 }
 
+                # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
+                row['is_breakdown'] = is_breakdown_dimension(item, statement_type=self.canonical_type) if is_dimension else False
                 # Add dimension label (always include column for schema consistency)
                 row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
 

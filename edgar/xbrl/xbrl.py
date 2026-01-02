@@ -14,7 +14,7 @@ and handling dimensional qualifiers.
 import datetime
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
@@ -737,6 +737,47 @@ class XBRL:
         from edgar.xbrl.stitching import render_stitched_statement as _render_stitched_statement
         return _render_stitched_statement(stitched_data, statement_title, statement_type, self.entity_info)
 
+    def _get_valid_dimensional_members(self, tree) -> Dict[str, Set[str]]:
+        """
+        Extract valid dimensional members from a presentation tree.
+
+        The presentation linkbase defines which dimensional members should appear
+        on a statement. This function builds a mapping from axis to valid members
+        by examining the Domain nodes in the tree.
+
+        Pattern in presentation tree:
+        - Axis nodes (e.g., PropertyPlantAndEquipmentByTypeAxis) have Domain children
+        - Domain nodes (e.g., PropertyPlantAndEquipmentTypeDomain) have Member children
+        - The valid members are the children of the Domain nodes
+
+        Args:
+            tree: PresentationTree for the statement
+
+        Returns:
+            Dict mapping axis names (normalized) to sets of valid member names (normalized)
+        """
+        valid_members = {}
+
+        for node_id, node in tree.all_nodes.items():
+            # Find Domain nodes - they contain valid members as children
+            if 'Domain' in node_id and node.children:
+                # Find the parent Axis node
+                # Domain nodes are children of Axis nodes
+                parent_node = tree.all_nodes.get(node.parent)
+                if parent_node and 'Axis' in node.parent:
+                    # Normalize axis name (remove prefix, use underscore)
+                    axis_name = node.parent.replace(':', '_')
+
+                    # Collect all member children (normalized)
+                    members = set()
+                    for child in node.children:
+                        # Normalize member name
+                        members.add(child.replace(':', '_'))
+
+                    valid_members[axis_name] = members
+
+        return valid_members
+
     def get_statement(self, role_or_type: str,
                       period_filter: Optional[str] = None,
                       should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
@@ -747,7 +788,7 @@ class XBRL:
             role_or_type: Can be one of:
                 - Extended link role URI (e.g. "http://apple.com/role/ConsolidatedStatementOfIncome")
                 - Statement type name (e.g. "BalanceSheet")
-                - Statement short name (e.g. "ConsolidatedStatementOfIncome") 
+                - Statement short name (e.g. "ConsolidatedStatementOfIncome")
             period_filter: Optional period key to filter facts
             should_display_dimensions: Whether to display dimensions for this statement.
                 If None, the method will determine based on statement type and role.
@@ -772,9 +813,14 @@ class XBRL:
         if should_display_dimensions is None:
             should_display_dimensions = True
 
+        # Get valid dimensional members from presentation tree
+        # This ensures we only show members that are actually defined in the linkbase
+        valid_dimensional_members = self._get_valid_dimensional_members(tree) if should_display_dimensions else {}
+
         # Generate line items recursively
         line_items = []
-        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None, should_display_dimensions)
+        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
+                                  should_display_dimensions, valid_dimensional_members)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
@@ -785,7 +831,8 @@ class XBRL:
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
-                             path: Optional[List[str]] = None, should_display_dimensions: bool = False) -> None:
+                             path: Optional[List[str]] = None, should_display_dimensions: bool = False,
+                             valid_dimensional_members: Optional[Dict[str, Set[str]]] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -796,6 +843,8 @@ class XBRL:
             period_filter: Optional period key to filter facts
             path: Current path in hierarchy
             should_display_dimensions: Whether to display dimensions for this statement
+            valid_dimensional_members: Dict mapping axis names to sets of valid member names
+                from the presentation linkbase. Only facts with members in this set will be shown.
         """
         if element_id not in nodes:
             return
@@ -895,6 +944,28 @@ class XBRL:
                     dimension_key = wrapped_fact['dimension_key']
 
                     if dimension_info:
+                        # Check if this dimensional fact has valid members per the presentation linkbase
+                        # This filters out facts from other disclosures that happen to use the same concept
+                        # but with different dimensional members (e.g., revenue members on balance sheet)
+                        is_valid_dimension = True
+                        if valid_dimensional_members:
+                            for dim_data in dimension_info:
+                                # Get the axis and member from the dimension info
+                                axis = dim_data.get('dimension', '').replace(':', '_')
+                                member = dim_data.get('member', '').replace(':', '_')
+
+                                # If this axis is defined in the presentation tree,
+                                # check if the member is valid
+                                if axis in valid_dimensional_members:
+                                    if member not in valid_dimensional_members[axis]:
+                                        # Member not in presentation tree - skip this fact
+                                        is_valid_dimension = False
+                                        break
+
+                        if not is_valid_dimension:
+                            # Skip this dimensional fact - member not in presentation linkbase
+                            continue
+
                         # Use the dimension_key we already generated
                         dim_key_str = dimension_key
 
@@ -1008,7 +1079,8 @@ class XBRL:
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
                 'children': node.children,
                 'has_values': len(values) > 0,  # True if we have total values
-                'has_dimension_children': True  # Mark as having dimension children
+                'has_dimension_children': True,  # Mark as having dimension children
+                'is_company_preferred_label': node.is_company_preferred_label  # Skip standardization if company-preferred
             }
         else:
             # Non-dimensional case: Create normal line item with values
@@ -1030,7 +1102,8 @@ class XBRL:
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
                 'children': node.children,
-                'has_values': len(values) > 0  # Flag to indicate if we found values
+                'has_values': len(values) > 0,  # Flag to indicate if we found values
+                'is_company_preferred_label': node.is_company_preferred_label  # Skip standardization if company-preferred
             }
 
         # Add to result
@@ -1141,7 +1214,8 @@ class XBRL:
 
         # Process children
         for child_id in node.children:
-            self._generate_line_items(child_id, nodes, result, period_filter, current_path, should_display_dimensions)
+            self._generate_line_items(child_id, nodes, result, period_filter, current_path,
+                                      should_display_dimensions, valid_dimensional_members)
 
     @staticmethod
     def _get_fact_precision(fact) -> int:
@@ -1289,9 +1363,11 @@ class XBRL:
                         if dim_value in self.element_catalog:
                             mem_element = self.element_catalog[dim_value]
                             # Try different label roles in order of preference
-                            for role in ['http://www.xbrl.org/2003/role/terseLabel',
-                                         'http://www.xbrl.org/2003/role/label',
-                                         'http://www.xbrl.org/2003/role/verboseLabel']:
+                            # Prefer verboseLabel which provides full accounting terms
+                            # (e.g., "Rental equipment, net" vs "Sales of rental equipment")
+                            for role in ['http://www.xbrl.org/2003/role/verboseLabel',
+                                         'http://www.xbrl.org/2003/role/terseLabel',
+                                         'http://www.xbrl.org/2003/role/label']:
                                 if role in mem_element.labels:
                                     mem_label = mem_element.labels[role]
                                     break
@@ -1484,13 +1560,12 @@ class XBRL:
         if matching_statements:
             role_definition = matching_statements[0]['definition']
 
-        # Determine if this statement should display dimensions
-        # Issue #504: Honor the user's explicit include_dimensions parameter
-        # Previously, even when include_dimensions=True, dimensional data was filtered out for balance sheets
-        # because _is_dimension_display_statement() returned False for core statements without segment keywords
-        should_display_dimensions = include_dimensions
+        # Issue #569: Always get full dimensional data from get_statement
+        # Then filter breakdown dimensions (geographic, segment) in render_statement
+        # This ensures face-level classification dimensions (PPE type, equity) are shown
+        should_display_dimensions = True
 
-        # Get the statement data with dimension display flag
+        # Get the statement data with all dimensional data
         statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)
         if not statement_data:
             return None
@@ -1516,6 +1591,7 @@ class XBRL:
         )
 
         # Render the statement
+        # Issue #569: Pass include_dimensions to filter breakdown dimensions in render
         return render_statement(
             statement_data,
             periods_to_display,
@@ -1525,7 +1601,8 @@ class XBRL:
             standard,
             show_date_range,
             show_comparisons=True,
-            xbrl_instance=self
+            xbrl_instance=self,
+            include_dimensions=include_dimensions
         )
 
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:

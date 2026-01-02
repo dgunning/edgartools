@@ -86,23 +86,36 @@ class TestIssue571EquityNaNValues:
 
     @pytest.mark.network
     def test_backwards_compatibility_explicit_false(self, aapl_10k_xbrl):
-        """Test that users can still explicitly set include_dimensions=False."""
+        """Test that users can still explicitly set include_dimensions=False.
+
+        Note: For Statement of Equity, include_dimensions=False still preserves
+        equity component dimensions because StatementEquityComponentsAxis is
+        STRUCTURAL (defines the statement's column structure) not a BREAKDOWN
+        dimension. This is correct behavior per Issue #569.
+
+        The behavior difference from include_dimensions=True would only appear
+        if the statement had additional breakdown dimensions (geographic, segment).
+        """
         stmt = aapl_10k_xbrl.statements.statement_of_equity(include_dimensions=False)
 
         # Should respect explicit False setting
         assert stmt._include_dimensions is False
 
-        # DataFrame should filter out dimensional items
+        # DataFrame should still have dimensional items (equity components are structural)
         df = stmt.to_dataframe()
         non_abstract = df[df['abstract'] == False]
 
-        # With include_dimensions=False, should have fewer rows than with True
+        # With include_dimensions=False on Statement of Equity, equity component
+        # dimensions are preserved (they're structural, not breakdown)
+        # This is correct per Issue #569: StatementEquityComponentsAxis is
+        # marked as structural for StatementOfEquity
         stmt_with_dims = aapl_10k_xbrl.statements.statement_of_equity(include_dimensions=True)
         df_with_dims = stmt_with_dims.to_dataframe()
         non_abstract_with_dims = df_with_dims[df_with_dims['abstract'] == False]
 
-        assert len(non_abstract) < len(non_abstract_with_dims), \
-            "include_dimensions=False should result in fewer rows"
+        # Both should have the same rows because equity components are structural
+        assert len(non_abstract) == len(non_abstract_with_dims), \
+            "Statement of Equity equity components are structural, not breakdown"
 
     @pytest.mark.network
     def test_statement_of_equity_rendering_has_values(self, aapl_10k_xbrl):

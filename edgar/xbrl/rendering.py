@@ -1078,18 +1078,20 @@ def _format_value_for_display_as_string(
         # Get statement context
         statement_type = item.get('statement_type')
 
-        # For Income Statement and Cash Flow Statement: Use preferred_sign
+        # Apply preferred_sign from presentation linkbase for display
         # preferred_sign comes from preferredLabel in presentation linkbase
-        # -1 = negate for display (e.g., expenses, dividends, outflows)
+        # -1 = negate for display (e.g., expenses, dividends, outflows, contra accounts)
         # 1 = show as-is
         # None = no transformation specified
-        if statement_type in ('IncomeStatement', 'CashFlowStatement'):
+        #
+        # Originally only applied to Income Statement and Cash Flow Statement (Issue #463)
+        # Extended to Balance Sheet for contra accounts like Treasury Stock (Issue #568)
+        # - APD, JPM, XOM use preferred_sign=-1 for Treasury Stock
+        # - JPM uses preferred_sign=-1 for Allowance for Loan Losses
+        if statement_type in ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet'):
             preferred_sign = item.get('preferred_signs', {}).get(period_key)
             if preferred_sign is not None and preferred_sign != 0:
                 value = value * preferred_sign
-
-        # Balance Sheet: No transformation (use as-is)
-        # else: pass
 
     # Format numeric values efficiently
     if value_type in (int, float):
@@ -1234,7 +1236,8 @@ def render_statement(
     standard: bool = True,
     show_date_range: bool = False,
     show_comparisons: bool = True,
-    xbrl_instance: Optional[Any] = None
+    xbrl_instance: Optional[Any] = None,
+    include_dimensions: bool = False
 ) -> RenderedStatement:
     """
     Render a financial statement as a structured intermediate representation.
@@ -1248,6 +1251,9 @@ def render_statement(
         standard: Whether to use standardized concept labels (default: True)
         show_date_range: Whether to show full date ranges for duration periods (default: False)
         show_comparisons: Whether to show period-to-period comparisons (default: True)
+        include_dimensions: Whether to include dimensional segment data (default: False).
+            When False, only breakdown dimensions (geographic, segment) are filtered out.
+            Classification dimensions (PPE type, equity components) are always shown.
 
     Returns:
         RenderedStatement: A structured representation of the statement that can be rendered
@@ -1255,6 +1261,16 @@ def render_statement(
     """
     if entity_info is None:
         entity_info = {}
+
+    # Issue #569: Filter breakdown dimensions (geographic, segment) when include_dimensions=False
+    # Keep classification dimensions (PPE type, equity components) that appear on the face
+    # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+    if not include_dimensions:
+        from edgar.xbrl.dimensions import is_breakdown_dimension
+        statement_data = [
+            item for item in statement_data
+            if not item.get('is_dimension') or not is_breakdown_dimension(item, statement_type=statement_type)
+        ]
 
     # Filter out periods with only empty strings (Fix for Issue #408)
     # Apply to all major financial statement types that could have empty periods
