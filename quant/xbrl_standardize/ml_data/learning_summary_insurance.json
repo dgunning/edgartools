@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-01-01T21:13:19.074659",
+  "companies_processed": 138,
+  "successful_companies": 118,
+  "total_observations": 49016,
+  "canonical_concepts": {
+    "BalanceSheet": 34,
+    "IncomeStatement": 19,
+    "CashFlowStatement": 30,
+    "StatementOfEquity": 14,
+    "ComprehensiveIncome": 5
+  },
+  "errors": 0,
+  "multi_statement_concepts": 404,
+  "linkage_concepts": 102,
+  "output_files": {
+    "learned_mappings_insurance.json": 39587,
+    "virtual_trees_insurance.json": 44883,
+    "statement_mappings_v1_insurance.json": 42193,
+    "canonical_structures_insurance.json": 1306091,
+    "learning_summary_insurance.json": 336,
+    "structural_learning_report_insurance.md": 1907,
+    "concept_linkages_insurance.json": 615537,
+    "learning_statistics_insurance.json": 56010
+  }
+}

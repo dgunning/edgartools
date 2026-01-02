@@ -1,0 +1,647 @@
+{
+	"mappingVersion": "2026-01-02.1",
+	"statement": "CashFlowStatement",
+	"periodType": "duration",
+	"unit": "USD",
+	"notes": [
+		"Comprehensive Cash Flow Statement mapping for US GAAP + IFRS filers.",
+		"Priority structure: 150+ industry-specific, 120 IFRS, 110 US GAAP, 80-100 computed.",
+		"ML-optimized: Concepts ordered by is_total flag + occurrence rate from 300+ companies.",
+		"Cash flow structure: Operating Activities, Investing Activities, Financing Activities."
+	],
+	"fields": {
+		"netIncome": {
+			"standardLabel": "netIncome",
+			"rules": [
+				{
+					"name": "IFRS: Profit or loss (ML: 45.4%)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:ProfitLoss"
+					]
+				},
+				{
+					"name": "US GAAP: Net income (ML: 40.5%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:NetIncomeLoss",
+						"us-gaap:ProfitLoss"
+					]
+				}
+			]
+		},
+		"depreciationAndAmortization": {
+			"standardLabel": "depreciationAndAmortization",
+			"rules": [
+				{
+					"name": "IFRS: Depreciation and amortisation",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:DepreciationAndAmortisationExpense",
+						"ifrs-full:DepreciationAmortisationAndImpairmentLossReversalOfImpairmentLossRecognisedInProfitOrLoss"
+					]
+				},
+				{
+					"name": "US GAAP: Depreciation and amortization (ML: 35.4%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:DepreciationDepletionAndAmortization",
+						"us-gaap:DepreciationAndAmortization",
+						"us-gaap:Depreciation",
+						"us-gaap:AmortizationOfIntangibleAssets"
+					]
+				}
+			]
+		},
+		"shareBasedCompensation": {
+			"standardLabel": "shareBasedCompensation",
+			"rules": [
+				{
+					"name": "IFRS: Share-based payment expense",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:SharebasedPaymentExpense"
+					]
+				},
+				{
+					"name": "US GAAP: Share-based compensation (ML: 69.2%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:ShareBasedCompensation",
+						"us-gaap:AllocatedShareBasedCompensationExpense"
+					]
+				}
+			]
+		},
+		"deferredIncomeTax": {
+			"standardLabel": "deferredIncomeTax",
+			"rules": [
+				{
+					"name": "IFRS: Deferred tax expense/benefit",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:DeferredTaxExpenseIncome"
+					]
+				},
+				{
+					"name": "US GAAP: Deferred income tax (ML: 32.9%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:DeferredIncomeTaxExpenseBenefit",
+						"us-gaap:IncreaseDecreaseInDeferredIncomeTaxes"
+					]
+				}
+			]
+		},
+		"changeInAccountsReceivable": {
+			"standardLabel": "changeInAccountsReceivable",
+			"rules": [
+				{
+					"name": "IFRS: Change in trade and other receivables",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncreaseDecreaseInTradeAndOtherReceivables"
+					]
+				},
+				{
+					"name": "US GAAP: Change in accounts receivable (ML: 44.5%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncreaseDecreaseInAccountsReceivable",
+						"us-gaap:IncreaseDecreaseInReceivables"
+					]
+				}
+			]
+		},
+		"changeInInventory": {
+			"standardLabel": "changeInInventory",
+			"rules": [
+				{
+					"name": "IFRS: Change in inventories",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncreaseDecreaseInInventories"
+					]
+				},
+				{
+					"name": "US GAAP: Change in inventories (ML: 36.6%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncreaseDecreaseInInventories"
+					]
+				}
+			]
+		},
+		"changeInAccountsPayable": {
+			"standardLabel": "changeInAccountsPayable",
+			"rules": [
+				{
+					"name": "IFRS: Change in trade and other payables",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncreaseDecreaseInTradeAndOtherPayables"
+					]
+				},
+				{
+					"name": "US GAAP: Change in accounts payable (ML: 32.6%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncreaseDecreaseInAccountsPayable"
+					]
+				}
+			]
+		},
+		"changeInOtherOperatingAssets": {
+			"standardLabel": "changeInOtherOperatingAssets",
+			"rules": [
+				{
+					"name": "IFRS: Change in other operating assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncreaseDecreaseInOtherOperatingReceivables"
+					]
+				},
+				{
+					"name": "US GAAP: Change in other operating assets (ML: 26.5%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncreaseDecreaseInOtherOperatingAssets",
+						"us-gaap:IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets"
+					]
+				}
+			]
+		},
+		"changeInOtherOperatingLiabilities": {
+			"standardLabel": "changeInOtherOperatingLiabilities",
+			"rules": [
+				{
+					"name": "IFRS: Change in other operating liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncreaseDecreaseInOtherOperatingPayables"
+					]
+				},
+				{
+					"name": "US GAAP: Change in other operating liabilities",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncreaseDecreaseInOtherOperatingLiabilities",
+						"us-gaap:IncreaseDecreaseInAccruedLiabilities"
+					]
+				}
+			]
+		},
+		"operatingCashFlow": {
+			"standardLabel": "operatingCashFlow",
+			"rules": [
+				{
+					"name": "IFRS: Cash from operating activities (ML-optimized)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CashFlowsFromUsedInOperatingActivities"
+					]
+				},
+				{
+					"name": "US GAAP: Operating cash flow (ML: 85.7%, TOTAL)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:NetCashProvidedByUsedInOperatingActivities"
+					]
+				},
+				{
+					"name": "Compute: Net income + adjustments + working capital changes",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "netIncome"},
+								{"field": "depreciationAndAmortization"},
+								{"field": "shareBasedCompensation"},
+								{"field": "deferredIncomeTax"},
+								{"field": "changeInAccountsReceivable"},
+								{"field": "changeInInventory"},
+								{"field": "changeInAccountsPayable"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"capitalExpenditures": {
+			"standardLabel": "capitalExpenditures",
+			"rules": [
+				{
+					"name": "IFRS: Purchase of property, plant and equipment",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:PurchaseOfPropertyPlantAndEquipment"
+					]
+				},
+				{
+					"name": "US GAAP: Payments for property, plant and equipment (ML: 54.0%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+						"us-gaap:PaymentsToAcquireProductiveAssets"
+					]
+				}
+			]
+		},
+		"acquisitions": {
+			"standardLabel": "acquisitions",
+			"rules": [
+				{
+					"name": "IFRS: Purchase of subsidiaries",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:PurchaseOfSubsidiaries"
+					]
+				},
+				{
+					"name": "US GAAP: Payments to acquire businesses (ML: 30.8%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired",
+						"us-gaap:PaymentsToAcquireBusinessesGross"
+					]
+				}
+			]
+		},
+		"proceedsFromInvestments": {
+			"standardLabel": "proceedsFromInvestments",
+			"rules": [
+				{
+					"name": "IFRS: Proceeds from sale of investments",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:ProceedsFromSaleOfFinancialAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Proceeds from investments",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:ProceedsFromSaleAndMaturityOfAvailableForSaleSecurities",
+						"us-gaap:ProceedsFromSaleOfAvailableForSaleSecuritiesDebt"
+					]
+				}
+			]
+		},
+		"paymentsForInvestments": {
+			"standardLabel": "paymentsForInvestments",
+			"rules": [
+				{
+					"name": "IFRS: Payments for investments",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:PurchaseOfFinancialAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Payments for investments",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PaymentsToAcquireAvailableForSaleSecuritiesDebt",
+						"us-gaap:PaymentsToAcquireInvestments"
+					]
+				}
+			]
+		},
+		"investingCashFlow": {
+			"standardLabel": "investingCashFlow",
+			"rules": [
+				{
+					"name": "IFRS: Cash from investing activities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CashFlowsFromUsedInInvestingActivities"
+					]
+				},
+				{
+					"name": "US GAAP: Investing cash flow (ML: 83.2%, TOTAL)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:NetCashProvidedByUsedInInvestingActivities"
+					]
+				},
+				{
+					"name": "Compute: CapEx + acquisitions + investment activity",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{"field": "proceedsFromInvestments"},
+								{
+									"op": "add",
+									"terms": [
+										{"field": "capitalExpenditures"},
+										{"field": "acquisitions"},
+										{"field": "paymentsForInvestments"}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"proceedsFromDebt": {
+			"standardLabel": "proceedsFromDebt",
+			"rules": [
+				{
+					"name": "IFRS: Proceeds from borrowings",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:ProceedsFromBorrowings"
+					]
+				},
+				{
+					"name": "US GAAP: Proceeds from debt issuance",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:ProceedsFromIssuanceOfLongTermDebt",
+						"us-gaap:ProceedsFromDebtNetOfIssuanceCosts"
+					]
+				}
+			]
+		},
+		"repaymentsOfDebt": {
+			"standardLabel": "repaymentsOfDebt",
+			"rules": [
+				{
+					"name": "IFRS: Repayments of borrowings",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:RepaymentsOfBorrowings"
+					]
+				},
+				{
+					"name": "US GAAP: Repayments of debt",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:RepaymentsOfLongTermDebt",
+						"us-gaap:RepaymentsOfDebt"
+					]
+				}
+			]
+		},
+		"proceedsFromStockIssuance": {
+			"standardLabel": "proceedsFromStockIssuance",
+			"rules": [
+				{
+					"name": "IFRS: Proceeds from issuing shares",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:ProceedsFromIssuingShares"
+					]
+				},
+				{
+					"name": "US GAAP: Proceeds from stock issuance (ML: 30.5%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:ProceedsFromIssuanceOfCommonStock",
+						"us-gaap:ProceedsFromIssuanceOrSaleOfEquity"
+					]
+				}
+			]
+		},
+		"stockRepurchases": {
+			"standardLabel": "stockRepurchases",
+			"rules": [
+				{
+					"name": "IFRS: Payments to repurchase shares",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:PaymentsForRepurchaseOfShares"
+					]
+				},
+				{
+					"name": "US GAAP: Stock repurchases (ML: 47.9%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PaymentsForRepurchaseOfCommonStock",
+						"us-gaap:PaymentsForRepurchaseOfEquity"
+					]
+				}
+			]
+		},
+		"dividendsPaid": {
+			"standardLabel": "dividendsPaid",
+			"rules": [
+				{
+					"name": "IFRS: Dividends paid",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:DividendsPaid"
+					]
+				},
+				{
+					"name": "US GAAP: Dividends paid",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PaymentsOfDividends",
+						"us-gaap:PaymentsOfDividendsCommonStock"
+					]
+				}
+			]
+		},
+		"financingCashFlow": {
+			"standardLabel": "financingCashFlow",
+			"rules": [
+				{
+					"name": "IFRS: Cash from financing activities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CashFlowsFromUsedInFinancingActivities"
+					]
+				},
+				{
+					"name": "US GAAP: Financing cash flow (ML: 85.7%, TOTAL)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:NetCashProvidedByUsedInFinancingActivities"
+					]
+				},
+				{
+					"name": "Compute: Debt + equity + dividends",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{
+									"op": "add",
+									"terms": [
+										{"field": "proceedsFromDebt"},
+										{"field": "proceedsFromStockIssuance"}
+									]
+								},
+								{
+									"op": "add",
+									"terms": [
+										{"field": "repaymentsOfDebt"},
+										{"field": "stockRepurchases"},
+										{"field": "dividendsPaid"}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"effectOfExchangeRate": {
+			"standardLabel": "effectOfExchangeRate",
+			"rules": [
+				{
+					"name": "IFRS: Effect of exchange rate changes",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:EffectOfExchangeRateChangesOnCashAndCashEquivalents"
+					]
+				},
+				{
+					"name": "US GAAP: Effect of exchange rate (ML: 29.3%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+						"us-gaap:EffectOfExchangeRateOnCashAndCashEquivalents"
+					]
+				}
+			]
+		},
+		"netChangeInCash": {
+			"standardLabel": "netChangeInCash",
+			"rules": [
+				{
+					"name": "IFRS: Increase/decrease in cash (ML-optimized)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncreaseDecreaseInCashAndCashEquivalents"
+					]
+				},
+				{
+					"name": "US GAAP: Net change in cash (ML: 69.8%, TOTAL)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+						"us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+						"us-gaap:CashAndCashEquivalentsPeriodIncreaseDecrease"
+					]
+				},
+				{
+					"name": "Compute: Operating + Investing + Financing + FX",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "operatingCashFlow"},
+								{"field": "investingCashFlow"},
+								{"field": "financingCashFlow"},
+								{"field": "effectOfExchangeRate"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"cashBeginningOfPeriod": {
+			"standardLabel": "cashBeginningOfPeriod",
+			"rules": [
+				{
+					"name": "IFRS: Cash at beginning of period",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CashAndCashEquivalentsBeginningOfPeriod"
+					]
+				},
+				{
+					"name": "US GAAP: Cash at beginning of period",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+						"us-gaap:CashAndCashEquivalentsAtCarryingValue"
+					]
+				}
+			]
+		},
+		"cashEndOfPeriod": {
+			"standardLabel": "cashEndOfPeriod",
+			"rules": [
+				{
+					"name": "IFRS: Cash at end of period",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CashAndCashEquivalentsEndOfPeriod"
+					]
+				},
+				{
+					"name": "US GAAP: Cash at end of period (ML: 71.0%)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+						"us-gaap:CashAndCashEquivalentsAtCarryingValue"
+					]
+				},
+				{
+					"name": "Compute: Beginning cash + Net change",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "cashBeginningOfPeriod"},
+								{"field": "netChangeInCash"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"interestPaid": {
+			"standardLabel": "interestPaid",
+			"rules": [
+				{
+					"name": "IFRS: Interest paid",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:InterestPaidClassifiedAsFinancingActivities",
+						"ifrs-full:InterestPaid"
+					]
+				},
+				{
+					"name": "US GAAP: Interest paid (ML: 52.7%, supplemental)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:InterestPaidNet",
+						"us-gaap:InterestPaid"
+					]
+				}
+			]
+		},
+		"incomeTaxesPaid": {
+			"standardLabel": "incomeTaxesPaid",
+			"rules": [
+				{
+					"name": "IFRS: Income taxes paid",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncomeTaxesPaidClassifiedAsOperatingActivities",
+						"ifrs-full:IncomeTaxesPaid"
+					]
+				},
+				{
+					"name": "US GAAP: Income taxes paid (ML: 38.4%, supplemental)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncomeTaxesPaidNet",
+						"us-gaap:IncomeTaxesPaid"
+					]
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,83 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "sector": "insurance",
+    "generated_from": "merged_virtual_trees",
+    "min_occurrence_threshold": 0.05,
+    "description": "Sector-specific XBRL concept mappings for insurance"
+  },
+  "fields": {
+    "revenue": {
+      "primary": "us-gaap:Revenues",
+      "confidence": "high",
+      "occurrence_rate_sector": 0.5234601074824308,
+      "occurrence_rate_global": 0.24085365853658536,
+      "label": "Revenue",
+      "sector_specific": false
+    },
+    "operatingIncome": {
+      "primary": "us-gaap:OperatingIncomeLoss",
+      "confidence": "medium",
+      "occurrence_rate_sector": 0.2573170731707317,
+      "occurrence_rate_global": 0.6432926829268293,
+      "label": "Operating Income",
+      "sector_specific": false
+    },
+    "interestExpense": {
+      "primary": "us-gaap:InterestExpense",
+      "confidence": "medium",
+      "occurrence_rate_sector": 0.24586606035551883,
+      "occurrence_rate_global": 0.11890243902439024,
+      "label": "Interest Expense",
+      "sector_specific": false
+    },
+    "incomeBeforeTaxes": {
+      "primary": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "confidence": "high",
+      "occurrence_rate_sector": 0.6653162463828028,
+      "occurrence_rate_global": 0.6463414634146342,
+      "label": "Income Before Tax from Continuing Operations",
+      "sector_specific": false
+    },
+    "incomeTaxExpense": {
+      "primary": "us-gaap:IncomeTaxExpenseBenefit",
+      "confidence": "high",
+      "occurrence_rate_sector": 0.7629185613890037,
+      "occurrence_rate_global": 0.7378048780487805,
+      "label": "Income Tax Expense",
+      "sector_specific": false
+    },
+    "netIncome": {
+      "primary": "us-gaap:NetIncomeLoss",
+      "confidence": "high",
+      "occurrence_rate_sector": 0.7574204216618438,
+      "occurrence_rate_global": 0.7621951219512195,
+      "label": "Net Income",
+      "sector_specific": false
+    },
+    "earningsPerShareBasic": {
+      "primary": "us-gaap:EarningsPerShareBasic",
+      "confidence": "high",
+      "occurrence_rate_sector": 0.8009301364200083,
+      "occurrence_rate_global": 0.8201219512195121,
+      "label": "Earnings Per Share (Basic)",
+      "sector_specific": false
+    },
+    "earningsPerShareDiluted": {
+      "primary": "us-gaap:EarningsPerShareDiluted",
+      "confidence": "high",
+      "occurrence_rate_sector": 0.7921868540719306,
+      "occurrence_rate_global": 0.8109756097560976,
+      "label": "Earnings Per Share (Diluted)",
+      "sector_specific": false
+    },
+    "weightedAverageSharesOutstandingBasic": {
+      "primary": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+      "confidence": "high",
+      "occurrence_rate_sector": 0.6132286068623398,
+      "occurrence_rate_global": 0.7195121951219512,
+      "label": "Shares Outstanding (Basic)",
+      "sector_specific": false
+    }
+  }
+}

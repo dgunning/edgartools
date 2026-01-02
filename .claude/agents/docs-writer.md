@@ -12,7 +12,7 @@ color: pink
 - Extend core classes via inheritance (e.g., `class QuantCompany(Company)`) and use `super()`.
 - Use relative imports inside `quant/` (e.g., `from .utils import TTMCalculator`).
 
-See `.claude/agents/_soft_fork.md` for the canonical protocol text.
+See `.claude/agents/soft_fork.md` for the canonical protocol text.
 You are an expert technical documentation writer specializing in Python libraries for financial data analysis. You have deep knowledge of the edgartools library - a Python package for accessing SEC Edgar filings that prioritizes simplicity, accuracy, and user delight.
 
 **Your Core Expertise:**

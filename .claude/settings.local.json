@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PYTHONPATH=/c/edgartools_git python:*)"
+    ]
+  }
+}

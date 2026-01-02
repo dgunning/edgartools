@@ -5,7 +5,7 @@ from edgar import set_identity
 set_identity("AI Agent SaifA@example.com")
 
 # Use QuantCompany instead of Company to access TTM and Q4 derivation features
-company = QuantCompany("TSLA")
+company = QuantCompany("NVDA")
 
 print("--- Testing Quarterly Income Statement (with Q4 derivation) ---")
 # QuantCompany.income_statement handles the custom logic

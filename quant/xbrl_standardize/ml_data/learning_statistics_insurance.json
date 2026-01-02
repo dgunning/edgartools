@@ -1,0 +1,1861 @@
+{
+  "metadata": {
+    "generated": "2026-01-01T21:13:19.425696",
+    "min_occurrence_rate": 0.3
+  },
+  "data_summary": {
+    "companies_processed": 138,
+    "companies_successful": 118,
+    "companies_failed": 20,
+    "success_rate": 0.855072463768116,
+    "total_observations": 49016,
+    "avg_processing_time_ms": 6700.0571597706185,
+    "total_processing_time_s": 737.0062875747681
+  },
+  "failure_analysis": {
+    "by_reason": {
+      "no_10k_filings": {
+        "count": 19,
+        "tickers": [
+          "ASIC",
+          "SLDE",
+          "YB",
+          "AII",
+          "BNT",
+          "WDH",
+          "ARX",
+          "FIHL",
+          "AMBC",
+          "IGIC",
+          "PUK",
+          "TIRX",
+          "AIFU",
+          "ZBAO",
+          "KG",
+          "MFC",
+          "HUIZ",
+          "AEG",
+          "SLF"
+        ]
+      },
+      "no_xbrl_data": {
+        "count": 1,
+        "tickers": [
+          "AHL"
+        ]
+      }
+    },
+    "total_failures": 20
+  },
+  "concept_counts": {
+    "total_unique_concepts": 2789,
+    "standard_concepts": 1342,
+    "custom_concepts": 1447,
+    "custom_rate": 0.5188239512370025,
+    "canonical_concepts": 102,
+    "canonical_rate": 0.03657224811760488,
+    "filtered_out": 2687,
+    "filtered_rate": 0.9634277518823952
+  },
+  "per_company_stats": {
+    "concepts": {
+      "min": 95,
+      "max": 230,
+      "mean": 154.01818181818183,
+      "median": 150.5,
+      "stdev": 24.901266250616054
+    },
+    "custom_concepts": {
+      "min": 0,
+      "max": 56,
+      "mean": 17.036363636363635,
+      "median": 16.0
+    },
+    "coverage": {
+      "min": 0.32085561497326204,
+      "max": 0.7009345794392523,
+      "mean": 0.4745545326143396,
+      "median": 0.47951505016722407
+    }
+  },
+  "by_statement": {
+    "BalanceSheet": {
+      "total_concepts": 650,
+      "canonical_concepts": 38,
+      "canonical_rate": 0.05846153846153846
+    },
+    "IncomeStatement": {
+      "total_concepts": 575,
+      "canonical_concepts": 27,
+      "canonical_rate": 0.04695652173913043
+    },
+    "CashFlowStatement": {
+      "total_concepts": 1246,
+      "canonical_concepts": 37,
+      "canonical_rate": 0.02969502407704655
+    },
+    "StatementOfEquity": {
+      "total_concepts": 441,
+      "canonical_concepts": 27,
+      "canonical_rate": 0.061224489795918366
+    },
+    "ComprehensiveIncome": {
+      "total_concepts": 417,
+      "canonical_concepts": 33,
+      "canonical_rate": 0.07913669064748201
+    }
+  },
+  "custom_concepts_by_company": {
+    "hci": {
+      "count": 47,
+      "examples": [
+        "hci_IncreaseDecreaseInCededReinsurancePremiumsPayable",
+        "hci_ReinsuranceRecoveredInAdvanceOnUnpaidLosses",
+        "hci_PayableOnPurchasesOfEquitySecurities",
+        "hci_DistributionsFromLimitedPartnershipForReturnOnInvestment",
+        "hci_RepurchaseAndRetirementOfCommonStockUnderShareRepurchasePlanShares"
+      ]
+    },
+    "ago": {
+      "count": 43,
+      "examples": [
+        "ago_OtherComprehensiveIncomeLossAvailableForSaleSecuritiesWithCreditImpairmentNetOfTax",
+        "ago_PaymentsForProceedsFromShortTermInvestmentsWithMaturitiesOfLessThanThreeMonths",
+        "ago_FairValueGainLossOnConsolidatedInvestmentVehicles",
+        "ago_FairValueGainLossOnCommittedCapitalSecurities",
+        "ago_CashFlowsFromOperatingActivitiesConsolidatedInvestmentVehiclesAbstract"
+      ]
+    },
+    "pru": {
+      "count": 39,
+      "examples": [
+        "pru_PolicyLoansCeded",
+        "pru_DefferedReinsuranceGain",
+        "pru_WiltonReMember",
+        "pru_DepreciationDepletionAndAmortizationNetOfAdjustmentForAccountingAdoption",
+        "pru_RepaymentsofnotesissuesbyconsolidatedVIEs"
+      ]
+    },
+    "eqh": {
+      "count": 38,
+      "examples": [
+        "eqh_NotesIssuedByConsolidatedVariableInterestEntityFairValueOption",
+        "eqh_OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax1",
+        "eqh_IncreaseDecreaseInCollateralizedPledgedLiabilities",
+        "eqh_RepaymentsOfIssuanceOfDebtConsolidatedVariableInterestEntity",
+        "eqh_NetInvestmentNetRealizedAndUnrealizedGainLossOnTradingSecurities"
+      ]
+    },
+    "hgty": {
+      "count": 36,
+      "examples": [
+        "hgty_LiabilitiesTemporaryEquityAndStockholdersEquityAbstract",
+        "hgty_StockIssuedDuringPeriodSharesExchangeOfUnits",
+        "hgty_GainLossOnDisposalsOfEquipmentSoftwareAndOtherAssets",
+        "hgty_TemporaryEquityNoncontrollingInterestRemovalOfRedeemableFeature",
+        "hgty_StockIssuedDuringPeriodSharesEmployeeStockPurchasePlanNetOfTaxWithholdings"
+      ]
+    },
+    "twfg": {
+      "count": 34,
+      "examples": [
+        "twfg_IncreaseDecreaseInContractWithCustomerLiabilityCommissionsPayable",
+        "twfg_TemporaryEquityEffectOfReorganizationTransactionsValue",
+        "twfg_DistributionsMadeToLimitedLiabilityCompanyLLCMemberOtherDistribution",
+        "twfg_DeferredAcquisitionPayableNonCurrent",
+        "twfg_FeeIncomeMember"
+      ]
+    },
+    "srt": {
+      "count": 33,
+      "examples": [
+        "srt_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis",
+        "srt_CondensedFinancialInformationOfParentCompanyOnlyDisclosureAbstract",
+        "srt_PayablesToCustomers",
+        "srt_ConsolidatedEntityExcludingVariableInterestEntitiesVIEMember",
+        "srt_AffiliatedEntityMember"
+      ]
+    },
+    "wtm": {
+      "count": 33,
+      "examples": [
+        "wtm_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentFromSaleOfDiscontinuedOperationsNetOfTax",
+        "wtm_ProceedsFromSaleOfParticipationContracts",
+        "wtm_IncomeLossFromDiscontinuedOperationsNetOfTaxIncludingPortionAttributableToNoncontrollingInterestExcludingGainLossOnDisposal",
+        "wtm_ComprehensiveIncomeLossNetOfTaxAttributableToParentIncludingDiscontinuedOperations",
+        "wtm_ProceedsFromMemberSurplusContributions"
+      ]
+    },
+    "aig": {
+      "count": 32,
+      "examples": [
+        "aig_ModifiedCoinsuranceAndFundsWithheldEmbeddedDerivativesMember",
+        "aig_CashFlowNoncashFinancingActivities",
+        "aig_IncreaseDecreaseInCurrentAndDeferredIncomeTaxes",
+        "aig_PaymentsForProceedsFromInvestingActivitiesAbstract",
+        "aig_GainLossOnSaleOfDebtSecuritiesAvailableForSaleAndOtherAssetsNet"
+      ]
+    },
+    "pfg": {
+      "count": 30,
+      "examples": [
+        "pfg_AdjustmentsForReinsuranceToAccumulatedOtherComprehensiveIncomeLoss",
+        "pfg_ForwardContractAmountReportedInAdditionalPaidInCapital",
+        "pfg_AdjustmentsToRedemptionAmountOfRedeemableNoncontrollingInterest",
+        "pfg_DeferredPolicyAcquisitionCostAndCapitalizedContractCostAmortizationExpense",
+        "pfg_ProceedsFromMaturitiesRepaymentsAndCallsOfDebtSecuritiesAvailableForSaleAndEquitySecuritiesFvNi"
+      ]
+    },
+    "mbi": {
+      "count": 29,
+      "examples": [
+        "mbi_IncreaseDecreaseInOtherNetRealizedGainsLosses",
+        "mbi_IncomeLossFromDiscontinuedOperationsNetOfIncomeTax",
+        "mbi_AvailableForSaleSecuritiesShortTermInvestment",
+        "mbi_InsuranceLossRecoverable",
+        "mbi_InterestOnVariableInterestEntitiesNet"
+      ]
+    },
+    "ajg": {
+      "count": 28,
+      "examples": [
+        "ajg_GainsLossesOnExtinguishmentOfDebtRelatedToOperatingActivities",
+        "ajg_SupplementalRevenueMember",
+        "ajg_CostReimbursements",
+        "ajg_AdjustmentsToAdditionalPaidInCapitalOtherCompensationExpense",
+        "ajg_ProceedsFromRepaymentsOfCorporateRelatedLongTermDebt"
+      ]
+    },
+    "abl": {
+      "count": 27,
+      "examples": [
+        "abl_ProceedsReceivedFromSPACTrust",
+        "abl_IncreaseDecreaseInAccruedTransactionCosts",
+        "abl_IncreaseDecreaseInManagementAndPerformanceFeeReceivable",
+        "abl_NoncontrollingInterestIncreaseFromTransferOfNoncontrollingInterest",
+        "abl_LifeSettlementContractsDistributionsToAffiliates"
+      ]
+    },
+    "jxn": {
+      "count": 26,
+      "examples": [
+        "jxn_GainLossOnInvestmentsAndDerivativeInstrumentsNet",
+        "jxn_PaymentsToAcquireDebtSecurities",
+        "jxn_NetInvestmentIncomeFundsWithheldAssets",
+        "jxn_MortalityExpenseAndSurrenderCharges",
+        "jxn_SecuritiesSoldUnderAgreementsToRepurchaseAndSecuritiesLoaned"
+      ]
+    },
+    "cno": {
+      "count": 25,
+      "examples": [
+        "cno_DeferredIncomeTaxAssetsNetIncludingNetofCurrentIncomeTaxPayable",
+        "cno_StockBasedCompensation",
+        "cno_IncomeTaxExpenseBenefitBeforeValuationAllowanceAdjustment",
+        "cno_PaymentsOnFinancingArrangements",
+        "cno_NetInvestmentIncomeOnGeneralAccountInvestedAssets"
+      ]
+    }
+  },
+  "outliers": {
+    "high_concept_count": [
+      {
+        "cik": "0001400810",
+        "ticker": "HCI",
+        "total_concepts": 230,
+        "deviation": 3.0513234715499014
+      },
+      {
+        "cik": "0000005272",
+        "ticker": "AIG",
+        "total_concepts": 216,
+        "deviation": 2.4891030664067033
+      },
+      {
+        "cik": "0001137774",
+        "ticker": "PRU",
+        "total_concepts": 210,
+        "deviation": 2.2481514642024756
+      },
+      {
+        "cik": "0001137774",
+        "ticker": "PRH",
+        "total_concepts": 210,
+        "deviation": 2.2481514642024756
+      },
+      {
+        "cik": "0001137774",
+        "ticker": "PRS",
+        "total_concepts": 210,
+        "deviation": 2.2481514642024756
+      },
+      {
+        "cik": "0001333986",
+        "ticker": "EQH",
+        "total_concepts": 208,
+        "deviation": 2.167834263467733
+      },
+      {
+        "cik": "0001814287",
+        "ticker": "ABLLL",
+        "total_concepts": 205,
+        "deviation": 2.047358462365619
+      },
+      {
+        "cik": "0001814287",
+        "ticker": "ABL",
+        "total_concepts": 205,
+        "deviation": 2.047358462365619
+      }
+    ],
+    "low_concept_count": [
+      {
+        "cik": "0000874866",
+        "ticker": "CRVL",
+        "total_concepts": 95,
+        "deviation": 2.370087578045222
+      }
+    ],
+    "high_custom_rate": [],
+    "low_coverage": [
+      {
+        "cik": "0001814287",
+        "ticker": "ABLLL",
+        "coverage_rate": 0.32195121951219513,
+        "total_concepts": 205
+      },
+      {
+        "cik": "0001814287",
+        "ticker": "ABL",
+        "coverage_rate": 0.32195121951219513,
+        "total_concepts": 205
+      },
+      {
+        "cik": "0002007596",
+        "ticker": "TWFG",
+        "coverage_rate": 0.32085561497326204,
+        "total_concepts": 187
+      },
+      {
+        "cik": "0001808220",
+        "ticker": "GOCO",
+        "coverage_rate": 0.36423841059602646,
+        "total_concepts": 151
+      },
+      {
+        "cik": "0001685040",
+        "ticker": "BHF",
+        "coverage_rate": 0.49673202614379086,
+        "total_concepts": 153
+      },
+      {
+        "cik": "0001371285",
+        "ticker": "TRUP",
+        "coverage_rate": 0.45901639344262296,
+        "total_concepts": 122
+      },
+      {
+        "cik": "0001934850",
+        "ticker": "FGN",
+        "coverage_rate": 0.43790849673202614,
+        "total_concepts": 153
+      },
+      {
+        "cik": "0001333986",
+        "ticker": "EQH",
+        "coverage_rate": 0.3798076923076923,
+        "total_concepts": 208
+      },
+      {
+        "cik": "0001137774",
+        "ticker": "PRU",
+        "coverage_rate": 0.36666666666666664,
+        "total_concepts": 210
+      },
+      {
+        "cik": "0000230557",
+        "ticker": "SIGI",
+        "coverage_rate": 0.4764705882352941,
+        "total_concepts": 170
+      }
+    ]
+  },
+  "company_details": [
+    {
+      "cik": "0001823529",
+      "ticker": "ACT",
+      "name": "Enact Holdings, Inc.",
+      "total_concepts": 107,
+      "canonical_covered": 75,
+      "coverage_rate": 0.7009345794392523,
+      "custom_concepts": 2,
+      "custom_rate": 0.018691588785046728,
+      "processing_time_ms": 4461.483955383301
+    },
+    {
+      "cik": "0001018979",
+      "ticker": "AMSF",
+      "name": "AMERISAFE INC",
+      "total_concepts": 129,
+      "canonical_covered": 80,
+      "coverage_rate": 0.6201550387596899,
+      "custom_concepts": 8,
+      "custom_rate": 0.06201550387596899,
+      "processing_time_ms": 5323.795557022095
+    },
+    {
+      "cik": "0000876437",
+      "ticker": "MTG",
+      "name": "MGIC INVESTMENT CORP",
+      "total_concepts": 126,
+      "canonical_covered": 77,
+      "coverage_rate": 0.6111111111111112,
+      "custom_concepts": 6,
+      "custom_rate": 0.047619047619047616,
+      "processing_time_ms": 1683.8231086730957
+    },
+    {
+      "cik": "0000064996",
+      "ticker": "MCY",
+      "name": "MERCURY GENERAL CORP",
+      "total_concepts": 112,
+      "canonical_covered": 68,
+      "coverage_rate": 0.6071428571428571,
+      "custom_concepts": 5,
+      "custom_rate": 0.044642857142857144,
+      "processing_time_ms": 2131.7062377929688
+    },
+    {
+      "cik": "0000020286",
+      "ticker": "CINF",
+      "name": "CINCINNATI FINANCIAL CORP",
+      "total_concepts": 137,
+      "canonical_covered": 81,
+      "coverage_rate": 0.5912408759124088,
+      "custom_concepts": 13,
+      "custom_rate": 0.0948905109489051,
+      "processing_time_ms": 7815.020799636841
+    },
+    {
+      "cik": "0000086312",
+      "ticker": "TRV",
+      "name": "TRAVELERS COMPANIES, INC.",
+      "total_concepts": 132,
+      "canonical_covered": 78,
+      "coverage_rate": 0.5909090909090909,
+      "custom_concepts": 5,
+      "custom_rate": 0.03787878787878788,
+      "processing_time_ms": 7304.343223571777
+    },
+    {
+      "cik": "0001547903",
+      "ticker": "NMIH",
+      "name": "NMI Holdings, Inc.",
+      "total_concepts": 121,
+      "canonical_covered": 71,
+      "coverage_rate": 0.5867768595041323,
+      "custom_concepts": 6,
+      "custom_rate": 0.049586776859504134,
+      "processing_time_ms": 1718.5068130493164
+    },
+    {
+      "cik": "0001691421",
+      "ticker": "LMND",
+      "name": "Lemonade, Inc.",
+      "total_concepts": 120,
+      "canonical_covered": 70,
+      "coverage_rate": 0.5833333333333334,
+      "custom_concepts": 7,
+      "custom_rate": 0.058333333333333334,
+      "processing_time_ms": 4343.3356285095215
+    },
+    {
+      "cik": "0001267238",
+      "ticker": "AIZ",
+      "name": "ASSURANT, INC.",
+      "total_concepts": 142,
+      "canonical_covered": 82,
+      "coverage_rate": 0.5774647887323944,
+      "custom_concepts": 12,
+      "custom_rate": 0.08450704225352113,
+      "processing_time_ms": 8636.370182037354
+    },
+    {
+      "cik": "0001267238",
+      "ticker": "AIZN",
+      "name": "ASSURANT, INC.",
+      "total_concepts": 142,
+      "canonical_covered": 82,
+      "coverage_rate": 0.5774647887323944,
+      "custom_concepts": 12,
+      "custom_rate": 0.08450704225352113,
+      "processing_time_ms": 6713.339805603027
+    },
+    {
+      "cik": "0000101199",
+      "ticker": "UFCS",
+      "name": "UNITED FIRE GROUP INC",
+      "total_concepts": 130,
+      "canonical_covered": 75,
+      "coverage_rate": 0.5769230769230769,
+      "custom_concepts": 5,
+      "custom_rate": 0.038461538461538464,
+      "processing_time_ms": 2750.138759613037
+    },
+    {
+      "cik": "0000021175",
+      "ticker": "CNA",
+      "name": "CNA FINANCIAL CORP",
+      "total_concepts": 138,
+      "canonical_covered": 79,
+      "coverage_rate": 0.572463768115942,
+      "custom_concepts": 14,
+      "custom_rate": 0.10144927536231885,
+      "processing_time_ms": 7823.203802108765
+    },
+    {
+      "cik": "0000011544",
+      "ticker": "WRB",
+      "name": "BERKLEY W R CORP",
+      "total_concepts": 145,
+      "canonical_covered": 83,
+      "coverage_rate": 0.5724137931034483,
+      "custom_concepts": 12,
+      "custom_rate": 0.08275862068965517,
+      "processing_time_ms": 5405.344247817993
+    },
+    {
+      "cik": "0001448893",
+      "ticker": "ESNT",
+      "name": "Essent Group Ltd.",
+      "total_concepts": 126,
+      "canonical_covered": 71,
+      "coverage_rate": 0.5634920634920635,
+      "custom_concepts": 4,
+      "custom_rate": 0.031746031746031744,
+      "processing_time_ms": 1999.744176864624
+    },
+    {
+      "cik": "0001828105",
+      "ticker": "HIPO",
+      "name": "Hippo Holdings Inc.",
+      "total_concepts": 132,
+      "canonical_covered": 74,
+      "coverage_rate": 0.5606060606060606,
+      "custom_concepts": 11,
+      "custom_rate": 0.08333333333333333,
+      "processing_time_ms": 5275.858163833618
+    },
+    {
+      "cik": "0001385613",
+      "ticker": "GLRE",
+      "name": "GREENLIGHT CAPITAL RE, LTD.",
+      "total_concepts": 125,
+      "canonical_covered": 70,
+      "coverage_rate": 0.56,
+      "custom_concepts": 12,
+      "custom_rate": 0.096,
+      "processing_time_ms": 3678.3485412597656
+    },
+    {
+      "cik": "0000060086",
+      "ticker": "L",
+      "name": "LOEWS CORP",
+      "total_concepts": 147,
+      "canonical_covered": 82,
+      "coverage_rate": 0.5578231292517006,
+      "custom_concepts": 16,
+      "custom_rate": 0.10884353741496598,
+      "processing_time_ms": 7051.661014556885
+    },
+    {
+      "cik": "0001584831",
+      "ticker": "OXBR",
+      "name": "OXBRIDGE RE HOLDINGS Ltd",
+      "total_concepts": 108,
+      "canonical_covered": 60,
+      "coverage_rate": 0.5555555555555556,
+      "custom_concepts": 0,
+      "custom_rate": 0.0,
+      "processing_time_ms": 3621.746301651001
+    },
+    {
+      "cik": "0000005513",
+      "ticker": "UNM",
+      "name": "Unum Group",
+      "total_concepts": 130,
+      "canonical_covered": 72,
+      "coverage_rate": 0.5538461538461539,
+      "custom_concepts": 6,
+      "custom_rate": 0.046153846153846156,
+      "processing_time_ms": 9562.051057815552
+    },
+    {
+      "cik": "0000005513",
+      "ticker": "UNMA",
+      "name": "Unum Group",
+      "total_concepts": 130,
+      "canonical_covered": 72,
+      "coverage_rate": 0.5538461538461539,
+      "custom_concepts": 6,
+      "custom_rate": 0.046153846153846156,
+      "processing_time_ms": 8630.038499832153
+    },
+    {
+      "cik": "0001172052",
+      "ticker": "SAFT",
+      "name": "SAFETY INSURANCE GROUP INC",
+      "total_concepts": 141,
+      "canonical_covered": 78,
+      "coverage_rate": 0.5531914893617021,
+      "custom_concepts": 11,
+      "custom_rate": 0.07801418439716312,
+      "processing_time_ms": 6576.892852783203
+    },
+    {
+      "cik": "0000947484",
+      "ticker": "ACGL",
+      "name": "ARCH CAPITAL GROUP LTD.",
+      "total_concepts": 151,
+      "canonical_covered": 83,
+      "coverage_rate": 0.5496688741721855,
+      "custom_concepts": 14,
+      "custom_rate": 0.09271523178807947,
+      "processing_time_ms": 7449.202060699463
+    },
+    {
+      "cik": "0002002473",
+      "ticker": "BOW",
+      "name": "Bowhead Specialty Holdings Inc.",
+      "total_concepts": 135,
+      "canonical_covered": 73,
+      "coverage_rate": 0.5407407407407407,
+      "custom_concepts": 6,
+      "custom_rate": 0.044444444444444446,
+      "processing_time_ms": 3417.0243740081787
+    },
+    {
+      "cik": "0001127703",
+      "ticker": "PRA",
+      "name": "PROASSURANCE CORP",
+      "total_concepts": 150,
+      "canonical_covered": 81,
+      "coverage_rate": 0.54,
+      "custom_concepts": 17,
+      "custom_rate": 0.11333333333333333,
+      "processing_time_ms": 9408.93840789795
+    },
+    {
+      "cik": "0000874866",
+      "ticker": "CRVL",
+      "name": "CORVEL CORP",
+      "total_concepts": 95,
+      "canonical_covered": 51,
+      "coverage_rate": 0.5368421052631579,
+      "custom_concepts": 5,
+      "custom_rate": 0.05263157894736842,
+      "processing_time_ms": 2166.261911392212
+    },
+    {
+      "cik": "0000913144",
+      "ticker": "RNR",
+      "name": "RENAISSANCERE HOLDINGS LTD",
+      "total_concepts": 138,
+      "canonical_covered": 74,
+      "coverage_rate": 0.5362318840579711,
+      "custom_concepts": 5,
+      "custom_rate": 0.036231884057971016,
+      "processing_time_ms": 7067.632675170898
+    },
+    {
+      "cik": "0000891166",
+      "ticker": "UVE",
+      "name": "UNIVERSAL INSURANCE HOLDINGS, INC.",
+      "total_concepts": 156,
+      "canonical_covered": 83,
+      "coverage_rate": 0.532051282051282,
+      "custom_concepts": 6,
+      "custom_rate": 0.038461538461538464,
+      "processing_time_ms": 4563.460111618042
+    },
+    {
+      "cik": "0001788882",
+      "ticker": "ROOT",
+      "name": "Root, Inc.",
+      "total_concepts": 126,
+      "canonical_covered": 67,
+      "coverage_rate": 0.5317460317460317,
+      "custom_concepts": 8,
+      "custom_rate": 0.06349206349206349,
+      "processing_time_ms": 4207.237958908081
+    },
+    {
+      "cik": "0001095073",
+      "ticker": "EG",
+      "name": "EVEREST GROUP, LTD.",
+      "total_concepts": 140,
+      "canonical_covered": 74,
+      "coverage_rate": 0.5285714285714286,
+      "custom_concepts": 10,
+      "custom_rate": 0.07142857142857142,
+      "processing_time_ms": 6577.065706253052
+    },
+    {
+      "cik": "0000720858",
+      "ticker": "ITIC",
+      "name": "INVESTORS TITLE CO",
+      "total_concepts": 131,
+      "canonical_covered": 69,
+      "coverage_rate": 0.5267175572519084,
+      "custom_concepts": 12,
+      "custom_rate": 0.0916030534351145,
+      "processing_time_ms": 1071.207046508789
+    },
+    {
+      "cik": "0001761312",
+      "ticker": "PLMR",
+      "name": "Palomar Holdings, Inc.",
+      "total_concepts": 137,
+      "canonical_covered": 72,
+      "coverage_rate": 0.5255474452554745,
+      "custom_concepts": 7,
+      "custom_rate": 0.051094890510948905,
+      "processing_time_ms": 5167.833566665649
+    },
+    {
+      "cik": "0000890926",
+      "ticker": "RDN",
+      "name": "RADIAN GROUP INC",
+      "total_concepts": 157,
+      "canonical_covered": 82,
+      "coverage_rate": 0.5222929936305732,
+      "custom_concepts": 15,
+      "custom_rate": 0.09554140127388536,
+      "processing_time_ms": 8082.348585128784
+    },
+    {
+      "cik": "0001669162",
+      "ticker": "KNSL",
+      "name": "Kinsale Capital Group, Inc.",
+      "total_concepts": 138,
+      "canonical_covered": 72,
+      "coverage_rate": 0.5217391304347826,
+      "custom_concepts": 3,
+      "custom_rate": 0.021739130434782608,
+      "processing_time_ms": 4409.419059753418
+    },
+    {
+      "cik": "0000800457",
+      "ticker": "DGICA",
+      "name": "DONEGAL GROUP INC",
+      "total_concepts": 143,
+      "canonical_covered": 74,
+      "coverage_rate": 0.5174825174825175,
+      "custom_concepts": 9,
+      "custom_rate": 0.06293706293706294,
+      "processing_time_ms": 6337.862968444824
+    },
+    {
+      "cik": "0000874766",
+      "ticker": "HIG",
+      "name": "HARTFORD INSURANCE GROUP, INC.",
+      "total_concepts": 156,
+      "canonical_covered": 80,
+      "coverage_rate": 0.5128205128205128,
+      "custom_concepts": 4,
+      "custom_rate": 0.02564102564102564,
+      "processing_time_ms": 10719.916582107544
+    },
+    {
+      "cik": "0000850141",
+      "ticker": "HMN",
+      "name": "HORACE MANN EDUCATORS CORP /DE/",
+      "total_concepts": 135,
+      "canonical_covered": 69,
+      "coverage_rate": 0.5111111111111111,
+      "custom_concepts": 18,
+      "custom_rate": 0.13333333333333333,
+      "processing_time_ms": 8039.819240570068
+    },
+    {
+      "cik": "0001519449",
+      "ticker": "SKWD",
+      "name": "Skyward Specialty Insurance Group, Inc.",
+      "total_concepts": 148,
+      "canonical_covered": 75,
+      "coverage_rate": 0.5067567567567568,
+      "custom_concepts": 12,
+      "custom_rate": 0.08108108108108109,
+      "processing_time_ms": 4969.15602684021
+    },
+    {
+      "cik": "0000898174",
+      "ticker": "RZC",
+      "name": "REINSURANCE GROUP OF AMERICA INC",
+      "total_concepts": 156,
+      "canonical_covered": 79,
+      "coverage_rate": 0.5064102564102564,
+      "custom_concepts": 6,
+      "custom_rate": 0.038461538461538464,
+      "processing_time_ms": 10792.9368019104
+    },
+    {
+      "cik": "0000898174",
+      "ticker": "RZB",
+      "name": "REINSURANCE GROUP OF AMERICA INC",
+      "total_concepts": 156,
+      "canonical_covered": 79,
+      "coverage_rate": 0.5064102564102564,
+      "custom_concepts": 6,
+      "custom_rate": 0.038461538461538464,
+      "processing_time_ms": 10869.050025939941
+    },
+    {
+      "cik": "0000898174",
+      "ticker": "RGA",
+      "name": "REINSURANCE GROUP OF AMERICA INC",
+      "total_concepts": 156,
+      "canonical_covered": 79,
+      "coverage_rate": 0.5064102564102564,
+      "custom_concepts": 6,
+      "custom_rate": 0.038461538461538464,
+      "processing_time_ms": 11543.528318405151
+    },
+    {
+      "cik": "0001576018",
+      "ticker": "SPNT",
+      "name": "SiriusPoint Ltd",
+      "total_concepts": 163,
+      "canonical_covered": 82,
+      "coverage_rate": 0.5030674846625767,
+      "custom_concepts": 18,
+      "custom_rate": 0.11042944785276074,
+      "processing_time_ms": 10557.608127593994
+    },
+    {
+      "cik": "0000899051",
+      "ticker": "ALL",
+      "name": "ALLSTATE CORP",
+      "total_concepts": 167,
+      "canonical_covered": 84,
+      "coverage_rate": 0.5029940119760479,
+      "custom_concepts": 21,
+      "custom_rate": 0.12574850299401197,
+      "processing_time_ms": 9577.009201049805
+    },
+    {
+      "cik": "0000008177",
+      "ticker": "AAME",
+      "name": "ATLANTIC AMERICAN CORP",
+      "total_concepts": 130,
+      "canonical_covered": 65,
+      "coverage_rate": 0.5,
+      "custom_concepts": 11,
+      "custom_rate": 0.08461538461538462,
+      "processing_time_ms": 4614.4819259643555
+    },
+    {
+      "cik": "0001685040",
+      "ticker": "BHF",
+      "name": "Brighthouse Financial, Inc.",
+      "total_concepts": 153,
+      "canonical_covered": 76,
+      "coverage_rate": 0.49673202614379086,
+      "custom_concepts": 7,
+      "custom_rate": 0.0457516339869281,
+      "processing_time_ms": 6266.0973072052
+    },
+    {
+      "cik": "0001593275",
+      "ticker": "HG",
+      "name": "Hamilton Insurance Group, Ltd.",
+      "total_concepts": 129,
+      "canonical_covered": 64,
+      "coverage_rate": 0.49612403100775193,
+      "custom_concepts": 5,
+      "custom_rate": 0.03875968992248062,
+      "processing_time_ms": 8604.930639266968
+    },
+    {
+      "cik": "0001214816",
+      "ticker": "AXS",
+      "name": "AXIS CAPITAL HOLDINGS LTD",
+      "total_concepts": 163,
+      "canonical_covered": 80,
+      "coverage_rate": 0.49079754601226994,
+      "custom_concepts": 10,
+      "custom_rate": 0.06134969325153374,
+      "processing_time_ms": 4905.1148891448975
+    },
+    {
+      "cik": "0001042046",
+      "ticker": "AFGE",
+      "name": "AMERICAN FINANCIAL GROUP INC",
+      "total_concepts": 149,
+      "canonical_covered": 73,
+      "coverage_rate": 0.4899328859060403,
+      "custom_concepts": 20,
+      "custom_rate": 0.1342281879194631,
+      "processing_time_ms": 6240.8766746521
+    },
+    {
+      "cik": "0001042046",
+      "ticker": "AFGB",
+      "name": "AMERICAN FINANCIAL GROUP INC",
+      "total_concepts": 149,
+      "canonical_covered": 73,
+      "coverage_rate": 0.4899328859060403,
+      "custom_concepts": 20,
+      "custom_rate": 0.1342281879194631,
+      "processing_time_ms": 6512.3395919799805
+    },
+    {
+      "cik": "0001042046",
+      "ticker": "AFGD",
+      "name": "AMERICAN FINANCIAL GROUP INC",
+      "total_concepts": 149,
+      "canonical_covered": 73,
+      "coverage_rate": 0.4899328859060403,
+      "custom_concepts": 20,
+      "custom_rate": 0.1342281879194631,
+      "processing_time_ms": 5624.407529830933
+    },
+    {
+      "cik": "0001042046",
+      "ticker": "AFG",
+      "name": "AMERICAN FINANCIAL GROUP INC",
+      "total_concepts": 149,
+      "canonical_covered": 73,
+      "coverage_rate": 0.4899328859060403,
+      "custom_concepts": 20,
+      "custom_rate": 0.1342281879194631,
+      "processing_time_ms": 5969.244956970215
+    },
+    {
+      "cik": "0001042046",
+      "ticker": "AFGC",
+      "name": "AMERICAN FINANCIAL GROUP INC",
+      "total_concepts": 149,
+      "canonical_covered": 73,
+      "coverage_rate": 0.4899328859060403,
+      "custom_concepts": 20,
+      "custom_rate": 0.1342281879194631,
+      "processing_time_ms": 6242.318391799927
+    },
+    {
+      "cik": "0000024090",
+      "ticker": "CIA",
+      "name": "CITIZENS, INC.",
+      "total_concepts": 140,
+      "canonical_covered": 68,
+      "coverage_rate": 0.4857142857142857,
+      "custom_concepts": 9,
+      "custom_rate": 0.06428571428571428,
+      "processing_time_ms": 7612.553119659424
+    },
+    {
+      "cik": "0000033992",
+      "ticker": "KINS",
+      "name": "KINGSTONE COMPANIES, INC.",
+      "total_concepts": 147,
+      "canonical_covered": 71,
+      "coverage_rate": 0.48299319727891155,
+      "custom_concepts": 19,
+      "custom_rate": 0.1292517006802721,
+      "processing_time_ms": 5821.503400802612
+    },
+    {
+      "cik": "0000084246",
+      "ticker": "RLI",
+      "name": "RLI CORP",
+      "total_concepts": 139,
+      "canonical_covered": 67,
+      "coverage_rate": 0.48201438848920863,
+      "custom_concepts": 17,
+      "custom_rate": 0.1223021582733813,
+      "processing_time_ms": 3717.797040939331
+    },
+    {
+      "cik": "0001276520",
+      "ticker": "GNW",
+      "name": "GENWORTH FINANCIAL INC",
+      "total_concepts": 156,
+      "canonical_covered": 75,
+      "coverage_rate": 0.4807692307692308,
+      "custom_concepts": 15,
+      "custom_rate": 0.09615384615384616,
+      "processing_time_ms": 12167.68217086792
+    },
+    {
+      "cik": "0000944695",
+      "ticker": "THG",
+      "name": "HANOVER INSURANCE GROUP, INC.",
+      "total_concepts": 161,
+      "canonical_covered": 77,
+      "coverage_rate": 0.4782608695652174,
+      "custom_concepts": 23,
+      "custom_rate": 0.14285714285714285,
+      "processing_time_ms": 9241.960763931274
+    },
+    {
+      "cik": "0000230557",
+      "ticker": "SIGI",
+      "name": "SELECTIVE INSURANCE GROUP INC",
+      "total_concepts": 170,
+      "canonical_covered": 81,
+      "coverage_rate": 0.4764705882352941,
+      "custom_concepts": 9,
+      "custom_rate": 0.052941176470588235,
+      "processing_time_ms": 4081.003189086914
+    },
+    {
+      "cik": "0000320335",
+      "ticker": "GL",
+      "name": "GLOBE LIFE INC.",
+      "total_concepts": 147,
+      "canonical_covered": 70,
+      "coverage_rate": 0.47619047619047616,
+      "custom_concepts": 14,
+      "custom_rate": 0.09523809523809523,
+      "processing_time_ms": 8458.919763565063
+    },
+    {
+      "cik": "0001472787",
+      "ticker": "FAF",
+      "name": "First American Financial Corp",
+      "total_concepts": 158,
+      "canonical_covered": 75,
+      "coverage_rate": 0.47468354430379744,
+      "custom_concepts": 24,
+      "custom_rate": 0.1518987341772152,
+      "processing_time_ms": 3339.9391174316406
+    },
+    {
+      "cik": "0000896159",
+      "ticker": "CB",
+      "name": "Chubb Ltd",
+      "total_concepts": 177,
+      "canonical_covered": 84,
+      "coverage_rate": 0.4745762711864407,
+      "custom_concepts": 18,
+      "custom_rate": 0.1016949152542373,
+      "processing_time_ms": 10439.172506332397
+    },
+    {
+      "cik": "0001224608",
+      "ticker": "CNO",
+      "name": "CNO Financial Group, Inc.",
+      "total_concepts": 136,
+      "canonical_covered": 64,
+      "coverage_rate": 0.47058823529411764,
+      "custom_concepts": 25,
+      "custom_rate": 0.18382352941176472,
+      "processing_time_ms": 4049.8569011688232
+    },
+    {
+      "cik": "0001681206",
+      "ticker": "NODK",
+      "name": "NI Holdings, Inc.",
+      "total_concepts": 150,
+      "canonical_covered": 70,
+      "coverage_rate": 0.4666666666666667,
+      "custom_concepts": 17,
+      "custom_rate": 0.11333333333333333,
+      "processing_time_ms": 5779.777050018311
+    },
+    {
+      "cik": "0001494904",
+      "ticker": "GBLI",
+      "name": "Global Indemnity Group, LLC",
+      "total_concepts": 168,
+      "canonical_covered": 78,
+      "coverage_rate": 0.4642857142857143,
+      "custom_concepts": 23,
+      "custom_rate": 0.13690476190476192,
+      "processing_time_ms": 9703.557968139648
+    },
+    {
+      "cik": "0001096343",
+      "ticker": "MKL",
+      "name": "MARKEL GROUP INC.",
+      "total_concepts": 151,
+      "canonical_covered": 70,
+      "coverage_rate": 0.46357615894039733,
+      "custom_concepts": 18,
+      "custom_rate": 0.11920529801324503,
+      "processing_time_ms": 5267.069101333618
+    },
+    {
+      "cik": "0001371285",
+      "ticker": "TRUP",
+      "name": "TRUPANION, INC.",
+      "total_concepts": 122,
+      "canonical_covered": 56,
+      "coverage_rate": 0.45901639344262296,
+      "custom_concepts": 7,
+      "custom_rate": 0.05737704918032787,
+      "processing_time_ms": 3483.8554859161377
+    },
+    {
+      "cik": "0001379041",
+      "ticker": "EIG",
+      "name": "Employers Holdings, Inc.",
+      "total_concepts": 168,
+      "canonical_covered": 77,
+      "coverage_rate": 0.4583333333333333,
+      "custom_concepts": 21,
+      "custom_rate": 0.125,
+      "processing_time_ms": 5722.70131111145
+    },
+    {
+      "cik": "0001822993",
+      "ticker": "JXN-PA",
+      "name": "Jackson Financial Inc.",
+      "total_concepts": 177,
+      "canonical_covered": 80,
+      "coverage_rate": 0.4519774011299435,
+      "custom_concepts": 26,
+      "custom_rate": 0.14689265536723164,
+      "processing_time_ms": 8682.394742965698
+    },
+    {
+      "cik": "0001822993",
+      "ticker": "JXN",
+      "name": "Jackson Financial Inc.",
+      "total_concepts": 177,
+      "canonical_covered": 80,
+      "coverage_rate": 0.4519774011299435,
+      "custom_concepts": 26,
+      "custom_rate": 0.14689265536723164,
+      "processing_time_ms": 7640.491247177124
+    },
+    {
+      "cik": "0001401521",
+      "ticker": "ACIC",
+      "name": "AMERICAN COASTAL INSURANCE Corp",
+      "total_concepts": 183,
+      "canonical_covered": 82,
+      "coverage_rate": 0.44808743169398907,
+      "custom_concepts": 18,
+      "custom_rate": 0.09836065573770492,
+      "processing_time_ms": 11811.045169830322
+    },
+    {
+      "cik": "0001393726",
+      "ticker": "TIPT",
+      "name": "TIPTREE INC.",
+      "total_concepts": 175,
+      "canonical_covered": 78,
+      "coverage_rate": 0.44571428571428573,
+      "custom_concepts": 17,
+      "custom_rate": 0.09714285714285714,
+      "processing_time_ms": 6810.506820678711
+    },
+    {
+      "cik": "0000860748",
+      "ticker": "KMPB",
+      "name": "KEMPER Corp",
+      "total_concepts": 173,
+      "canonical_covered": 77,
+      "coverage_rate": 0.44508670520231214,
+      "custom_concepts": 18,
+      "custom_rate": 0.10404624277456648,
+      "processing_time_ms": 9724.09701347351
+    },
+    {
+      "cik": "0000860748",
+      "ticker": "KMPR",
+      "name": "KEMPER Corp",
+      "total_concepts": 173,
+      "canonical_covered": 77,
+      "coverage_rate": 0.44508670520231214,
+      "custom_concepts": 18,
+      "custom_rate": 0.10404624277456648,
+      "processing_time_ms": 7569.371700286865
+    },
+    {
+      "cik": "0001067983",
+      "ticker": "BRK-A",
+      "name": "BERKSHIRE HATHAWAY INC",
+      "total_concepts": 156,
+      "canonical_covered": 69,
+      "coverage_rate": 0.4423076923076923,
+      "custom_concepts": 31,
+      "custom_rate": 0.1987179487179487,
+      "processing_time_ms": 9070.651769638062
+    },
+    {
+      "cik": "0001067983",
+      "ticker": "BRK-B",
+      "name": "BERKSHIRE HATHAWAY INC",
+      "total_concepts": 156,
+      "canonical_covered": 69,
+      "coverage_rate": 0.4423076923076923,
+      "custom_concepts": 31,
+      "custom_rate": 0.1987179487179487,
+      "processing_time_ms": 10456.283330917358
+    },
+    {
+      "cik": "0000094344",
+      "ticker": "STC",
+      "name": "STEWART INFORMATION SERVICES CORP",
+      "total_concepts": 161,
+      "canonical_covered": 71,
+      "coverage_rate": 0.4409937888198758,
+      "custom_concepts": 19,
+      "custom_rate": 0.11801242236024845,
+      "processing_time_ms": 5231.741905212402
+    },
+    {
+      "cik": "0000004977",
+      "ticker": "AFL",
+      "name": "AFLAC INC",
+      "total_concepts": 162,
+      "canonical_covered": 71,
+      "coverage_rate": 0.4382716049382716,
+      "custom_concepts": 16,
+      "custom_rate": 0.09876543209876543,
+      "processing_time_ms": 10683.507442474365
+    },
+    {
+      "cik": "0001934850",
+      "ticker": "FGN",
+      "name": "F&G Annuities & Life, Inc.",
+      "total_concepts": 153,
+      "canonical_covered": 67,
+      "coverage_rate": 0.43790849673202614,
+      "custom_concepts": 11,
+      "custom_rate": 0.0718954248366013,
+      "processing_time_ms": 2896.3122367858887
+    },
+    {
+      "cik": "0001934850",
+      "ticker": "FG",
+      "name": "F&G Annuities & Life, Inc.",
+      "total_concepts": 153,
+      "canonical_covered": 67,
+      "coverage_rate": 0.43790849673202614,
+      "custom_concepts": 11,
+      "custom_rate": 0.0718954248366013,
+      "processing_time_ms": 2720.113515853882
+    },
+    {
+      "cik": "0001126328",
+      "ticker": "PFG",
+      "name": "PRINCIPAL FINANCIAL GROUP INC",
+      "total_concepts": 167,
+      "canonical_covered": 72,
+      "coverage_rate": 0.4311377245508982,
+      "custom_concepts": 30,
+      "custom_rate": 0.17964071856287425,
+      "processing_time_ms": 15002.127647399902
+    },
+    {
+      "cik": "0000080661",
+      "ticker": "PGR",
+      "name": "PROGRESSIVE CORP/OH/",
+      "total_concepts": 170,
+      "canonical_covered": 73,
+      "coverage_rate": 0.4294117647058823,
+      "custom_concepts": 16,
+      "custom_rate": 0.09411764705882353,
+      "processing_time_ms": 6160.4743003845215
+    },
+    {
+      "cik": "0001099219",
+      "ticker": "MET",
+      "name": "METLIFE INC",
+      "total_concepts": 189,
+      "canonical_covered": 80,
+      "coverage_rate": 0.42328042328042326,
+      "custom_concepts": 23,
+      "custom_rate": 0.12169312169312169,
+      "processing_time_ms": 14907.707929611206
+    },
+    {
+      "cik": "0000059558",
+      "ticker": "LNC",
+      "name": "LINCOLN NATIONAL CORP",
+      "total_concepts": 140,
+      "canonical_covered": 59,
+      "coverage_rate": 0.42142857142857143,
+      "custom_concepts": 21,
+      "custom_rate": 0.15,
+      "processing_time_ms": 4381.442546844482
+    },
+    {
+      "cik": "0001333493",
+      "ticker": "EHTH",
+      "name": "eHealth, Inc.",
+      "total_concepts": 133,
+      "canonical_covered": 56,
+      "coverage_rate": 0.42105263157894735,
+      "custom_concepts": 8,
+      "custom_rate": 0.06015037593984962,
+      "processing_time_ms": 5237.49041557312
+    },
+    {
+      "cik": "0001273813",
+      "ticker": "AGO",
+      "name": "ASSURED GUARANTY LTD",
+      "total_concepts": 180,
+      "canonical_covered": 75,
+      "coverage_rate": 0.4166666666666667,
+      "custom_concepts": 43,
+      "custom_rate": 0.2388888888888889,
+      "processing_time_ms": 3039.0141010284424
+    },
+    {
+      "cik": "0000062709",
+      "ticker": "MMC",
+      "name": "MARSH & MCLENNAN COMPANIES, INC.",
+      "total_concepts": 150,
+      "canonical_covered": 62,
+      "coverage_rate": 0.41333333333333333,
+      "custom_concepts": 17,
+      "custom_rate": 0.11333333333333333,
+      "processing_time_ms": 6754.87208366394
+    },
+    {
+      "cik": "0001726978",
+      "ticker": "GSHD",
+      "name": "Goosehead Insurance, Inc.",
+      "total_concepts": 136,
+      "canonical_covered": 56,
+      "coverage_rate": 0.4117647058823529,
+      "custom_concepts": 20,
+      "custom_rate": 0.14705882352941177,
+      "processing_time_ms": 3883.1024169921875
+    },
+    {
+      "cik": "0000315293",
+      "ticker": "AON",
+      "name": "Aon plc",
+      "total_concepts": 141,
+      "canonical_covered": 58,
+      "coverage_rate": 0.41134751773049644,
+      "custom_concepts": 7,
+      "custom_rate": 0.04964539007092199,
+      "processing_time_ms": 5889.999628067017
+    },
+    {
+      "cik": "0000814585",
+      "ticker": "MBI",
+      "name": "MBIA INC",
+      "total_concepts": 167,
+      "canonical_covered": 68,
+      "coverage_rate": 0.40718562874251496,
+      "custom_concepts": 32,
+      "custom_rate": 0.19161676646706588,
+      "processing_time_ms": 9094.966888427734
+    },
+    {
+      "cik": "0001331875",
+      "ticker": "FNF",
+      "name": "Fidelity National Financial, Inc.",
+      "total_concepts": 185,
+      "canonical_covered": 75,
+      "coverage_rate": 0.40540540540540543,
+      "custom_concepts": 21,
+      "custom_rate": 0.11351351351351352,
+      "processing_time_ms": 9648.379802703857
+    },
+    {
+      "cik": "0000079282",
+      "ticker": "BRO",
+      "name": "BROWN & BROWN, INC.",
+      "total_concepts": 152,
+      "canonical_covered": 61,
+      "coverage_rate": 0.40131578947368424,
+      "custom_concepts": 27,
+      "custom_rate": 0.17763157894736842,
+      "processing_time_ms": 5548.761606216431
+    },
+    {
+      "cik": "0001475922",
+      "ticker": "PRI",
+      "name": "Primerica, Inc.",
+      "total_concepts": 197,
+      "canonical_covered": 78,
+      "coverage_rate": 0.39593908629441626,
+      "custom_concepts": 23,
+      "custom_rate": 0.116751269035533,
+      "processing_time_ms": 8975.784540176392
+    },
+    {
+      "cik": "0000025475",
+      "ticker": "CRD-A",
+      "name": "CRAWFORD & CO",
+      "total_concepts": 152,
+      "canonical_covered": 60,
+      "coverage_rate": 0.39473684210526316,
+      "custom_concepts": 10,
+      "custom_rate": 0.06578947368421052,
+      "processing_time_ms": 5778.736591339111
+    },
+    {
+      "cik": "0000005272",
+      "ticker": "AIG",
+      "name": "AMERICAN INTERNATIONAL GROUP, INC.",
+      "total_concepts": 216,
+      "canonical_covered": 84,
+      "coverage_rate": 0.3888888888888889,
+      "custom_concepts": 35,
+      "custom_rate": 0.16203703703703703,
+      "processing_time_ms": 15735.723495483398
+    },
+    {
+      "cik": "0001333986",
+      "ticker": "EQH",
+      "name": "Equitable Holdings, Inc.",
+      "total_concepts": 208,
+      "canonical_covered": 79,
+      "coverage_rate": 0.3798076923076923,
+      "custom_concepts": 40,
+      "custom_rate": 0.19230769230769232,
+      "processing_time_ms": 3934.5734119415283
+    },
+    {
+      "cik": "0000776867",
+      "ticker": "WTM",
+      "name": "WHITE MOUNTAINS INSURANCE GROUP LTD",
+      "total_concepts": 181,
+      "canonical_covered": 68,
+      "coverage_rate": 0.3756906077348066,
+      "custom_concepts": 37,
+      "custom_rate": 0.20441988950276244,
+      "processing_time_ms": 4053.299903869629
+    },
+    {
+      "cik": "0001849253",
+      "ticker": "RYAN",
+      "name": "RYAN SPECIALTY HOLDINGS, INC.",
+      "total_concepts": 163,
+      "canonical_covered": 61,
+      "coverage_rate": 0.37423312883435583,
+      "custom_concepts": 20,
+      "custom_rate": 0.12269938650306748,
+      "processing_time_ms": 2119.1136837005615
+    },
+    {
+      "cik": "0001140536",
+      "ticker": "WTW",
+      "name": "WILLIS TOWERS WATSON PLC",
+      "total_concepts": 149,
+      "canonical_covered": 55,
+      "coverage_rate": 0.3691275167785235,
+      "custom_concepts": 14,
+      "custom_rate": 0.09395973154362416,
+      "processing_time_ms": 10314.159870147705
+    },
+    {
+      "cik": "0001137774",
+      "ticker": "PRU",
+      "name": "PRUDENTIAL FINANCIAL INC",
+      "total_concepts": 210,
+      "canonical_covered": 77,
+      "coverage_rate": 0.36666666666666664,
+      "custom_concepts": 39,
+      "custom_rate": 0.18571428571428572,
+      "processing_time_ms": 6102.1997928619385
+    },
+    {
+      "cik": "0001137774",
+      "ticker": "PRH",
+      "name": "PRUDENTIAL FINANCIAL INC",
+      "total_concepts": 210,
+      "canonical_covered": 77,
+      "coverage_rate": 0.36666666666666664,
+      "custom_concepts": 39,
+      "custom_rate": 0.18571428571428572,
+      "processing_time_ms": 17975.722074508667
+    },
+    {
+      "cik": "0001137774",
+      "ticker": "PRS",
+      "name": "PRUDENTIAL FINANCIAL INC",
+      "total_concepts": 210,
+      "canonical_covered": 77,
+      "coverage_rate": 0.36666666666666664,
+      "custom_concepts": 39,
+      "custom_rate": 0.18571428571428572,
+      "processing_time_ms": 17586.297273635864
+    },
+    {
+      "cik": "0001808220",
+      "ticker": "GOCO",
+      "name": "GoHealth, Inc.",
+      "total_concepts": 151,
+      "canonical_covered": 55,
+      "coverage_rate": 0.36423841059602646,
+      "custom_concepts": 11,
+      "custom_rate": 0.0728476821192053,
+      "processing_time_ms": 3990.610122680664
+    },
+    {
+      "cik": "0000922621",
+      "ticker": "ERIE",
+      "name": "ERIE INDEMNITY CO",
+      "total_concepts": 140,
+      "canonical_covered": 50,
+      "coverage_rate": 0.35714285714285715,
+      "custom_concepts": 22,
+      "custom_rate": 0.15714285714285714,
+      "processing_time_ms": 6226.845979690552
+    },
+    {
+      "cik": "0001400810",
+      "ticker": "HCI",
+      "name": "HCI Group, Inc.",
+      "total_concepts": 230,
+      "canonical_covered": 82,
+      "coverage_rate": 0.3565217391304348,
+      "custom_concepts": 56,
+      "custom_rate": 0.24347826086956523,
+      "processing_time_ms": 10111.299991607666
+    },
+    {
+      "cik": "0000354190",
+      "ticker": "AJG",
+      "name": "Arthur J. Gallagher & Co.",
+      "total_concepts": 146,
+      "canonical_covered": 50,
+      "coverage_rate": 0.3424657534246575,
+      "custom_concepts": 33,
+      "custom_rate": 0.22602739726027396,
+      "processing_time_ms": 7908.22958946228
+    },
+    {
+      "cik": "0001794783",
+      "ticker": "SLQT",
+      "name": "SelectQuote, Inc.",
+      "total_concepts": 152,
+      "canonical_covered": 51,
+      "coverage_rate": 0.3355263157894737,
+      "custom_concepts": 8,
+      "custom_rate": 0.05263157894736842,
+      "processing_time_ms": 4105.822801589966
+    },
+    {
+      "cik": "0001781755",
+      "ticker": "BWIN",
+      "name": "Baldwin Insurance Group, Inc.",
+      "total_concepts": 160,
+      "canonical_covered": 53,
+      "coverage_rate": 0.33125,
+      "custom_concepts": 21,
+      "custom_rate": 0.13125,
+      "processing_time_ms": 3478.2707691192627
+    },
+    {
+      "cik": "0001840776",
+      "ticker": "HGTY",
+      "name": "Hagerty, Inc.",
+      "total_concepts": 197,
+      "canonical_covered": 65,
+      "coverage_rate": 0.3299492385786802,
+      "custom_concepts": 41,
+      "custom_rate": 0.20812182741116753,
+      "processing_time_ms": 3094.4814682006836
+    },
+    {
+      "cik": "0001814287",
+      "ticker": "ABLLL",
+      "name": "Abacus Global Management, Inc.",
+      "total_concepts": 205,
+      "canonical_covered": 66,
+      "coverage_rate": 0.32195121951219513,
+      "custom_concepts": 33,
+      "custom_rate": 0.16097560975609757,
+      "processing_time_ms": 3589.1058444976807
+    },
+    {
+      "cik": "0001814287",
+      "ticker": "ABL",
+      "name": "Abacus Global Management, Inc.",
+      "total_concepts": 205,
+      "canonical_covered": 66,
+      "coverage_rate": 0.32195121951219513,
+      "custom_concepts": 33,
+      "custom_rate": 0.16097560975609757,
+      "processing_time_ms": 1435.0578784942627
+    },
+    {
+      "cik": "0002007596",
+      "ticker": "TWFG",
+      "name": "TWFG, Inc.",
+      "total_concepts": 187,
+      "canonical_covered": 60,
+      "coverage_rate": 0.32085561497326204,
+      "custom_concepts": 40,
+      "custom_rate": 0.21390374331550802,
+      "processing_time_ms": 4277.663946151733
+    }
+  ],
+  "lookups": {
+    "cik_to_ticker": {
+      "0001814287": "ABL",
+      "0001385613": "GLRE",
+      "0002007596": "TWFG",
+      "0001808220": "GOCO",
+      "0002040491": "ASIC",
+      "0000060086": "L",
+      "0001685040": "BHF",
+      "0001620459": "JRVR",
+      "0001691421": "LMND",
+      "0001886428": "SLDE",
+      "0001371285": "TRUP",
+      "0001519449": "SKWD",
+      "0000947484": "ACGL",
+      "0001172052": "SAFT",
+      "0001018979": "AMSF",
+      "0001502292": "PRHIZ",
+      "0001823529": "ACT",
+      "0001788882": "ROOT",
+      "0001995520": "YB",
+      "0000101199": "UFCS",
+      "0001412100": "MHLA",
+      "0001934850": "FG",
+      "0001333986": "EQH",
+      "0001547903": "NMIH",
+      "0001137774": "PRS",
+      "0000720858": "ITIC",
+      "0002007587": "AII",
+      "0001837429": "BNT",
+      "0000230557": "SIGI",
+      "0000874866": "CRVL",
+      "0001591890": "FGNX",
+      "0001823986": "WDH",
+      "0000059558": "LNC",
+      "0001214816": "AXS",
+      "0001849253": "RYAN",
+      "0001472787": "FAF",
+      "0000876437": "MTG",
+      "0001448893": "ESNT",
+      "0000084246": "RLI",
+      "0000776867": "WTM",
+      "0000064996": "MCY",
+      "0001840776": "HGTY",
+      "0001273813": "AGO",
+      "0001224608": "CNO",
+      "0001276520": "GNW",
+      "0001267395": "AHL",
+      "0000860748": "KMPR",
+      "0001997350": "ARX",
+      "0001593275": "HG",
+      "0001576018": "SPNT",
+      "0001400810": "HCI",
+      "0000094344": "STC",
+      "0001636639": "FIHL",
+      "0000850141": "HMN",
+      "0001822993": "JXN",
+      "0000898174": "RGA",
+      "0001042046": "AFGC",
+      "0001127703": "PRA",
+      "0001379041": "EIG",
+      "0000891166": "UVE",
+      "0002002473": "BOW",
+      "0001598665": "HRTG",
+      "0001828105": "HIPO",
+      "0000025475": "CRD-A",
+      "-999999999": "AMBC",
+      "0000814585": "MBI",
+      "0000024090": "CIA",
+      "0001794783": "SLQT",
+      "0001140536": "WTW",
+      "0000080661": "PGR",
+      "0001761312": "PLMR",
+      "0001726978": "GSHD",
+      "0001781755": "BWIN",
+      "0001126328": "PFG",
+      "0001794338": "IGIC",
+      "0001393726": "TIPT",
+      "0001401521": "ACIC",
+      "0000033992": "KINS",
+      "0000922621": "ERIE",
+      "0001116578": "PUK",
+      "0000800457": "DGICA",
+      "0001494904": "GBLI",
+      "0001333493": "EHTH",
+      "0001681206": "NODK",
+      "0001782941": "TIRX",
+      "0000008177": "AAME",
+      "0001812727": "RELI",
+      "0001413855": "AIFU",
+      "0001966750": "ZBAO",
+      "0002055116": "KG",
+      "0000086312": "TRV",
+      "0000354190": "AJG",
+      "0000004977": "AFL",
+      "0000899051": "ALL",
+      "0001086888": "MFC",
+      "0001099219": "MET",
+      "0000005272": "AIG",
+      "0000944695": "THG",
+      "0000020286": "CINF",
+      "0000890926": "RDN",
+      "0001584831": "OXBR",
+      "0001778982": "HUIZ",
+      "0001067983": "BRK-B",
+      "0000769218": "AEG",
+      "0000896159": "CB",
+      "0000062709": "MMC",
+      "0000315293": "AON",
+      "0000874766": "HIG",
+      "0001097362": "SLF",
+      "0000011544": "WRB",
+      "0000079282": "BRO",
+      "0001096343": "MKL",
+      "0001669162": "KNSL",
+      "0001331875": "FNF",
+      "0001095073": "EG",
+      "0000005513": "UNMA",
+      "0000021175": "CNA",
+      "0000913144": "RNR",
+      "0001267238": "AIZN",
+      "0000074260": "ORI",
+      "0000320335": "GL",
+      "0001475922": "PRI"
+    },
+    "ticker_to_cik": {
+      "ABLLL": "0001814287",
+      "ABL": "0001814287",
+      "GLRE": "0001385613",
+      "TWFG": "0002007596",
+      "GOCO": "0001808220",
+      "ASIC": "0002040491",
+      "L": "0000060086",
+      "BHF": "0001685040",
+      "JRVR": "0001620459",
+      "LMND": "0001691421",
+      "SLDE": "0001886428",
+      "TRUP": "0001371285",
+      "SKWD": "0001519449",
+      "ACGL": "0000947484",
+      "SAFT": "0001172052",
+      "AMSF": "0001018979",
+      "PRHIZ": "0001502292",
+      "ACT": "0001823529",
+      "ROOT": "0001788882",
+      "YB": "0001995520",
+      "UFCS": "0000101199",
+      "MHNC": "0001412100",
+      "FGN": "0001934850",
+      "EQH": "0001333986",
+      "NMIH": "0001547903",
+      "PRU": "0001137774",
+      "ITIC": "0000720858",
+      "AII": "0002007587",
+      "BNT": "0001837429",
+      "SIGI": "0000230557",
+      "CRVL": "0000874866",
+      "FGNX": "0001591890",
+      "WDH": "0001823986",
+      "LNC": "0000059558",
+      "AXS": "0001214816",
+      "RYAN": "0001849253",
+      "FAF": "0001472787",
+      "MTG": "0000876437",
+      "ESNT": "0001448893",
+      "RLI": "0000084246",
+      "WTM": "0000776867",
+      "MCY": "0000064996",
+      "HGTY": "0001840776",
+      "FG": "0001934850",
+      "AGO": "0001273813",
+      "CNO": "0001224608",
+      "GNW": "0001276520",
+      "AHL": "0001267395",
+      "KMPB": "0000860748",
+      "ARX": "0001997350",
+      "HG": "0001593275",
+      "KMPR": "0000860748",
+      "SPNT": "0001576018",
+      "HCI": "0001400810",
+      "STC": "0000094344",
+      "FIHL": "0001636639",
+      "HMN": "0000850141",
+      "JXN-PA": "0001822993",
+      "RZC": "0000898174",
+      "AFGE": "0001042046",
+      "PRA": "0001127703",
+      "MHLA": "0001412100",
+      "EIG": "0001379041",
+      "UVE": "0000891166",
+      "BOW": "0002002473",
+      "HRTG": "0001598665",
+      "HIPO": "0001828105",
+      "CRD-A": "0000025475",
+      "AMBC": "-999999999",
+      "MBI": "0000814585",
+      "CIA": "0000024090",
+      "SLQT": "0001794783",
+      "WTW": "0001140536",
+      "PGR": "0000080661",
+      "PLMR": "0001761312",
+      "GSHD": "0001726978",
+      "BWIN": "0001781755",
+      "PFG": "0001126328",
+      "IGIC": "0001794338",
+      "TIPT": "0001393726",
+      "ACIC": "0001401521",
+      "KINS": "0000033992",
+      "ERIE": "0000922621",
+      "PUK": "0001116578",
+      "DGICA": "0000800457",
+      "GBLI": "0001494904",
+      "EHTH": "0001333493",
+      "NODK": "0001681206",
+      "TIRX": "0001782941",
+      "AAME": "0000008177",
+      "RELI": "0001812727",
+      "AIFU": "0001413855",
+      "ZBAO": "0001966750",
+      "KG": "0002055116",
+      "TRV": "0000086312",
+      "AJG": "0000354190",
+      "AFL": "0000004977",
+      "ALL": "0000899051",
+      "MFC": "0001086888",
+      "MET": "0001099219",
+      "AIG": "0000005272",
+      "AFGB": "0001042046",
+      "AFGD": "0001042046",
+      "THG": "0000944695",
+      "CINF": "0000020286",
+      "JXN": "0001822993",
+      "AFG": "0001042046",
+      "RDN": "0000890926",
+      "OXBR": "0001584831",
+      "HUIZ": "0001778982",
+      "BRK-A": "0001067983",
+      "BRK-B": "0001067983",
+      "AEG": "0000769218",
+      "CB": "0000896159",
+      "MMC": "0000062709",
+      "AON": "0000315293",
+      "HIG": "0000874766",
+      "SLF": "0001097362",
+      "WRB": "0000011544",
+      "BRO": "0000079282",
+      "MKL": "0001096343",
+      "KNSL": "0001669162",
+      "FNF": "0001331875",
+      "EG": "0001095073",
+      "RZB": "0000898174",
+      "UNM": "0000005513",
+      "CNA": "0000021175",
+      "RGA": "0000898174",
+      "RNR": "0000913144",
+      "UNMA": "0000005513",
+      "AIZ": "0001267238",
+      "ORI": "0000074260",
+      "GL": "0000320335",
+      "AFGC": "0001042046",
+      "AIZN": "0001267238",
+      "PRH": "0001137774",
+      "PRS": "0001137774",
+      "PRI": "0001475922"
+    }
+  }
+}

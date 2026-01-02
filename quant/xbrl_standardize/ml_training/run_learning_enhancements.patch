@@ -1,0 +1,422 @@
+diff --git a/edgar/entity/training/run_learning.py b/edgar/entity/training/run_learning.py
+index b26f353e..3b89b55e 100644
+--- a/edgar/entity/training/run_learning.py
++++ b/edgar/entity/training/run_learning.py
+@@ -876,10 +876,22 @@ class ConceptLearner:
+             }
+         }
+ 
+-    def generate_outputs(self, output_dir: Path) -> Dict[str, Any]:
+-        """Generate all output files."""
++    def generate_outputs(self, output_dir: Path, tag: str = '') -> Dict[str, Any]:
++        """
++        Generate all output files.
++
++        Args:
++            output_dir: Directory to write outputs to
++            tag: Optional tag to append to filenames (e.g., 'global', 'banking')
++
++        Returns:
++            Summary statistics dictionary
++        """
+         output_dir.mkdir(parents=True, exist_ok=True)
+ 
++        # Generate filename suffix from tag
++        suffix = f"_{tag}" if tag else ""
++
+         # Generate learned mappings
+         # First, group stats by concept to handle multi-statement concepts properly
+         concept_to_stats: Dict[str, List[ConceptStats]] = defaultdict(list)
+@@ -924,52 +936,53 @@ class ConceptLearner:
+                    f"{validation_stats['missing_parents']} missing, "
+                    f"{validation_stats['null_parents']} null")
+ 
+-        # Save learned_mappings.json
+-        with open(output_dir / 'learned_mappings.json', 'w') as f:
++        # Save learned_mappings.json (with tag)
++        with open(output_dir / f'learned_mappings{suffix}.json', 'w') as f:
+             json.dump(learned_mappings, f, indent=2)
+ 
+-        # Generate virtual trees
++        # Generate virtual trees (with tag)
+         virtual_trees = self._generate_virtual_trees(learned_mappings)
+-        with open(output_dir / 'virtual_trees.json', 'w') as f:
++        with open(output_dir / f'virtual_trees{suffix}.json', 'w') as f:
+             json.dump(virtual_trees, f, indent=2)
+ 
+-        # Generate statement_mappings_v1.json (with metadata)
++        # Generate statement_mappings_v1.json (with metadata and tag)
+         statement_mappings = {
+             'metadata': {
+                 'version': '1.0.0',
+                 'generated': datetime.now().isoformat(),
+                 'companies_analyzed': self.successful_companies,
+                 'min_occurrence_rate': self.min_occurrence_rate,
+-                'source': 'edgar.entity.training.run_learning'
++                'source': 'edgar.entity.training.run_learning',
++                'tag': tag if tag else None
+             },
+             'mappings': learned_mappings
+         }
+-        with open(output_dir / 'statement_mappings_v1.json', 'w') as f:
++        with open(output_dir / f'statement_mappings_v1{suffix}.json', 'w') as f:
+             json.dump(statement_mappings, f, indent=2)
+ 
+-        # Generate canonical structures (raw data by statement type)
++        # Generate canonical structures (raw data by statement type, with tag)
+         canonical = self._generate_canonical_structures()
+-        with open(output_dir / 'canonical_structures.json', 'w') as f:
++        with open(output_dir / f'canonical_structures{suffix}.json', 'w') as f:
+             json.dump(canonical, f, indent=2)
+ 
+-        # Generate learning summary
++        # Generate learning summary (with tag)
+         summary = self._generate_summary(learned_mappings)
+-        with open(output_dir / 'learning_summary.json', 'w') as f:
++        with open(output_dir / f'learning_summary{suffix}.json', 'w') as f:
+             json.dump(summary, f, indent=2)
+ 
+-        # Generate markdown report
++        # Generate markdown report (with tag)
+         report = self._generate_report(learned_mappings, canonical)
+-        with open(output_dir / 'structural_learning_report.md', 'w') as f:
++        with open(output_dir / f'structural_learning_report{suffix}.md', 'w') as f:
+             f.write(report)
+ 
+-        # Generate concept linkages (multi-statement tracking)
++        # Generate concept linkages (multi-statement tracking, with tag)
+         linkages = self._generate_concept_linkages()
+-        with open(output_dir / 'concept_linkages.json', 'w') as f:
++        with open(output_dir / f'concept_linkages{suffix}.json', 'w') as f:
+             json.dump(linkages, f, indent=2)
+ 
+-        # Generate comprehensive statistics
++        # Generate comprehensive statistics (with tag)
+         statistics = self._generate_statistics(learned_mappings)
+-        with open(output_dir / 'learning_statistics.json', 'w') as f:
++        with open(output_dir / f'learning_statistics{suffix}.json', 'w') as f:
+             json.dump(statistics, f, indent=2)
+ 
+         # Add linkage stats to summary
+@@ -977,27 +990,38 @@ class ConceptLearner:
+         summary['linkage_concepts'] = linkages['metadata']['linkage_concepts']
+ 
+         # Update summary with file sizes
+-        summary['output_files'] = self._get_output_file_sizes(output_dir)
++        summary['output_files'] = self._get_output_file_sizes(output_dir, suffix)
+ 
+-        # Rewrite summary with updated info
+-        with open(output_dir / 'learning_summary.json', 'w') as f:
++        # Rewrite summary with updated info (with tag)
++        with open(output_dir / f'learning_summary{suffix}.json', 'w') as f:
+             json.dump(summary, f, indent=2)
+ 
+-        logger.info(f"Generated outputs in {output_dir}")
+-        logger.info(f"  - learned_mappings.json: {len(learned_mappings)} concepts")
+-        logger.info(f"  - virtual_trees.json: {len(virtual_trees)} statement types")
+-        logger.info(f"  - statement_mappings_v1.json")
+-        logger.info(f"  - canonical_structures.json")
+-        logger.info(f"  - learning_summary.json")
+-        logger.info(f"  - structural_learning_report.md")
+-        logger.info(f"  - concept_linkages.json: {linkages['metadata']['multi_statement_concepts']} multi-statement concepts")
+-        logger.info(f"  - learning_statistics.json: comprehensive stats with outliers")
++        tag_msg = f" (tag: {tag})" if tag else ""
++        logger.info(f"Generated outputs in {output_dir}{tag_msg}")
++        logger.info(f"  - learned_mappings{suffix}.json: {len(learned_mappings)} concepts")
++        logger.info(f"  - virtual_trees{suffix}.json: {len(virtual_trees)} statement types")
++        logger.info(f"  - statement_mappings_v1{suffix}.json")
++        logger.info(f"  - canonical_structures{suffix}.json")
++        logger.info(f"  - learning_summary{suffix}.json")
++        logger.info(f"  - structural_learning_report{suffix}.md")
++        logger.info(f"  - concept_linkages{suffix}.json: {linkages['metadata']['multi_statement_concepts']} multi-statement concepts")
++        logger.info(f"  - learning_statistics{suffix}.json: comprehensive stats with outliers")
+ 
+         return summary
+ 
+-    def _get_output_file_sizes(self, output_dir: Path) -> Dict[str, int]:
+-        """Get sizes of output files in bytes."""
+-        files = [
++    def _get_output_file_sizes(self, output_dir: Path, suffix: str = '') -> Dict[str, int]:
++        """
++        Get sizes of output files in bytes.
++
++        Args:
++            output_dir: Directory containing output files
++            suffix: Optional suffix for tagged files
++
++        Returns:
++            Dict mapping filename to size in bytes
++        """
++        # Build filenames with suffix
++        base_names = [
+             'learned_mappings.json',
+             'virtual_trees.json',
+             'statement_mappings_v1.json',
+@@ -1007,11 +1031,20 @@ class ConceptLearner:
+             'concept_linkages.json',
+             'learning_statistics.json'
+         ]
++
+         sizes = {}
+-        for f in files:
+-            path = output_dir / f
++        for base_name in base_names:
++            # Insert suffix before extension
++            name_parts = base_name.rsplit('.', 1)
++            if len(name_parts) == 2:
++                tagged_name = f"{name_parts[0]}{suffix}.{name_parts[1]}"
++            else:
++                tagged_name = f"{base_name}{suffix}"
++
++            path = output_dir / tagged_name
+             if path.exists():
+-                sizes[f] = path.stat().st_size
++                sizes[tagged_name] = path.stat().st_size
++
+         return sizes
+ 
+     def _generate_virtual_trees(self, learned_mappings: Dict) -> Dict:
+@@ -1174,12 +1207,172 @@ def get_companies(exchange: str, count: int, random_state: int = 42) -> List[str
+         return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM', 'JNJ', 'V']
+ 
+ 
++def get_companies_multi_exchange(exchanges: List[str], count: int, random_state: int = 42) -> List[str]:
++    """
++    Get list of company tickers from multiple exchanges.
++
++    Args:
++        exchanges: List of exchange names (e.g., ['NYSE', 'Nasdaq'])
++        count: Total number of companies to sample
++        random_state: Random seed for reproducibility
++
++    Returns:
++        List of ticker symbols
++    """
++    try:
++        from edgar.reference.company_subsets import CompanySubset
++        import random
++
++        all_tickers = []
++
++        # Collect tickers from all exchanges
++        for exchange in exchanges:
++            try:
++                companies = CompanySubset().from_exchange(exchange).get()
++                if 'ticker' in companies.columns:
++                    tickers = companies['ticker'].dropna().tolist()
++                    all_tickers.extend(tickers)
++                    logger.info(f"  Found {len(tickers)} companies on {exchange}")
++            except Exception as e:
++                logger.warning(f"  Error loading {exchange}: {e}")
++
++        # Remove duplicates while preserving order
++        unique_tickers = list(dict.fromkeys(all_tickers))
++        logger.info(f"  Total unique companies across exchanges: {len(unique_tickers)}")
++
++        # Sample if needed
++        if count and len(unique_tickers) > count:
++            random.seed(random_state)
++            sampled = random.sample(unique_tickers, count)
++            logger.info(f"  Sampled {count} companies from {len(unique_tickers)} total")
++            return sampled
++
++        return unique_tickers
++
++    except ImportError:
++        logger.warning("CompanySubset not available, using fallback list")
++        return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM', 'JNJ', 'V']
++
++
++def get_companies_by_sector(sector_key: str, count: int, random_state: int = 42) -> List[str]:
++    """
++    Get list of company tickers for a specific sector using CIK_CODES.csv.
++
++    OPTIMIZED: Uses pre-built CSV index instead of scanning 949K submission files.
++    This reduces sector company discovery from ~3 hours to <1 second.
++
++    Args:
++        sector_key: Sector identifier (e.g., 'financials_banking')
++        count: Number of companies to sample
++        random_state: Random seed for reproducibility
++
++    Returns:
++        List of ticker symbols
++    """
++    try:
++        # Import sector configuration from quant package
++        from quant.xbrl_standardize import SECTORS, get_sector_info
++        import pandas as pd
++        import random
++        from pathlib import Path
++
++        sector_info = get_sector_info(sector_key)
++        if not sector_info:
++            raise ValueError(f"Unknown sector: {sector_key}")
++
++        logger.info(f"  Sector: {sector_info['name']}")
++        logger.info(f"  SIC ranges: {sector_info['sic_ranges']}")
++
++        # Load CIK_CODES.csv (FAST: 5,625 rows vs 949K files)
++        # Path: edgar/entity/training/run_learning.py -> repo_root/quant/xbrl_standardize/CIK_CODES.csv
++        csv_path = Path(__file__).parent.parent.parent.parent / "quant" / "xbrl_standardize" / "CIK_CODES.csv"
++        if not csv_path.exists():
++            logger.warning(f"CIK_CODES.csv not found at {csv_path}, falling back to slow method")
++            # Fallback to old method
++            from edgar.reference.company_subsets import get_companies_by_industry
++            all_tickers = []
++            for sic_start, sic_end in sector_info['sic_ranges']:
++                try:
++                    df = get_companies_by_industry(sic_range=(sic_start, sic_end))
++                    if df is not None and not df.empty and 'ticker' in df.columns:
++                        tickers = df['ticker'].dropna().tolist()
++                        all_tickers.extend(tickers)
++                except Exception as e:
++                    logger.warning(f"    Error getting companies for SIC {sic_start}-{sic_end}: {e}")
++            unique_tickers = list(dict.fromkeys(all_tickers))
++        else:
++            # OPTIMIZED PATH: Use CSV
++            df = pd.read_csv(csv_path)
++            logger.info(f"  Loaded {len(df)} companies from CIK_CODES.csv")
++
++            # Map sector_key to industry name patterns
++            SECTOR_TO_INDUSTRY_PATTERNS = {
++                'financials_banking': ['Banks', 'Banking'],
++                'financials_insurance': ['Insurance'],
++                'energy_utilities': ['Regulated Electric', 'Regulated Water', 'Regulated Gas', 'Utilities'],
++                'technology': ['Software', 'Semiconductors', 'Computer', 'Technology'],
++                'healthcare': ['Medical', 'Pharmaceutical', 'Biotechnology', 'Healthcare'],
++            }
++
++            patterns = SECTOR_TO_INDUSTRY_PATTERNS.get(sector_key, [])
++            if not patterns:
++                logger.warning(f"No industry patterns defined for sector '{sector_key}', using all companies")
++                filtered_df = df
++            else:
++                # Filter by industry patterns (case-insensitive partial match)
++                mask = df['industry'].str.contains('|'.join(patterns), case=False, na=False)
++                filtered_df = df[mask]
++                logger.info(f"  Filtered to {len(filtered_df)} companies matching patterns: {patterns}")
++
++            # Extract tickers
++            unique_tickers = filtered_df['symbol'].dropna().unique().tolist()
++
++        logger.info(f"  Total unique companies in sector: {len(unique_tickers)}")
++
++        # Sample if needed
++        if count and len(unique_tickers) > count:
++            random.seed(random_state)
++            sampled = random.sample(unique_tickers, count)
++            logger.info(f"  Sampled {count} companies from {len(unique_tickers)} total")
++            return sampled
++
++        return unique_tickers
++
++    except ImportError as e:
++        logger.error(f"Failed to import required modules: {e}")
++        logger.warning("Using fallback list for testing")
++        return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META']
++
++
+ def main():
+-    parser = argparse.ArgumentParser(description='Financial Statement Concept Learning')
++    parser = argparse.ArgumentParser(
++        description='Financial Statement Concept Learning',
++        formatter_class=argparse.RawDescriptionHelpFormatter,
++        epilog='''
++Examples:
++  # Basic usage (single exchange)
++  python -m edgar.entity.training.run_learning --companies 100
++
++  # Multi-exchange learning
++  python -m edgar.entity.training.run_learning --exchanges NYSE,Nasdaq --companies 500 --tag global
++
++  # Sector-specific learning
++  python -m edgar.entity.training.run_learning --sector financials_banking --companies 150 --tag banking
++
++  # Custom threshold and output
++  python -m edgar.entity.training.run_learning --min-occurrence 0.15 --output ./custom_output
++        '''
++    )
+     parser.add_argument('--companies', type=int, default=100,
+                        help='Number of companies to process (default: 100)')
+     parser.add_argument('--exchange', type=str, default='NYSE',
+-                       help='Exchange to sample from (default: NYSE)')
++                       help='Single exchange to sample from (default: NYSE)')
++    parser.add_argument('--exchanges', type=str, default=None,
++                       help='Comma-separated exchanges (e.g., "NYSE,Nasdaq") - overrides --exchange')
++    parser.add_argument('--sector', type=str, default=None,
++                       help='Sector key for sector-specific learning (e.g., "financials_banking")')
++    parser.add_argument('--tag', type=str, default='',
++                       help='Tag to append to output filenames (e.g., "global", "banking")')
+     parser.add_argument('--output', type=str, default=None,
+                        help='Output directory (default: training/output)')
+     parser.add_argument('--min-occurrence', type=float, default=0.3,
+@@ -1189,10 +1382,26 @@ def main():
+ 
+     args = parser.parse_args()
+ 
+-    # Get companies
+-    logger.info(f"Selecting {args.companies} companies from {args.exchange}...")
+-    tickers = get_companies(args.exchange, args.companies, args.random_state)
+-    logger.info(f"Selected {len(tickers)} companies")
++    # Determine company selection method (priority: sector > exchanges > exchange)
++    if args.sector:
++        logger.info(f"Running sector-specific learning for: {args.sector}")
++        logger.info(f"Selecting {args.companies} companies from sector...")
++        tickers = get_companies_by_sector(args.sector, args.companies, args.random_state)
++        if not tickers:
++            logger.error(f"No companies found for sector '{args.sector}'")
++            return 1
++
++    elif args.exchanges:
++        exchanges_list = [e.strip() for e in args.exchanges.split(',')]
++        logger.info(f"Running multi-exchange learning: {exchanges_list}")
++        logger.info(f"Selecting {args.companies} companies from {len(exchanges_list)} exchanges...")
++        tickers = get_companies_multi_exchange(exchanges_list, args.companies, args.random_state)
++
++    else:
++        logger.info(f"Selecting {args.companies} companies from {args.exchange}...")
++        tickers = get_companies(args.exchange, args.companies, args.random_state)
++
++    logger.info(f"Selected {len(tickers)} companies for learning")
+ 
+     # Initialize learner
+     learner = ConceptLearner(min_occurrence_rate=args.min_occurrence)
+@@ -1201,21 +1410,34 @@ def main():
+     for ticker in tickers:
+         learner.process_company(ticker)
+ 
+-    # Generate outputs
++    # Generate outputs (with tag)
+     output_dir = get_output_dir(args.output)
+-    summary = learner.generate_outputs(output_dir)
++    summary = learner.generate_outputs(output_dir, tag=args.tag)
+ 
+     # Print summary
+     print("\n" + "="*50)
+     print("LEARNING COMPLETE")
+     print("="*50)
++    if args.tag:
++        print(f"Tag: {args.tag}")
++    if args.sector:
++        print(f"Sector: {args.sector}")
++    elif args.exchanges:
++        print(f"Exchanges: {args.exchanges}")
++    else:
++        print(f"Exchange: {args.exchange}")
+     print(f"Companies processed: {summary['successful_companies']}/{summary['companies_processed']}")
+     print(f"Total observations: {summary['total_observations']}")
+     print(f"Canonical concepts by statement:")
+     for stmt, count in summary['canonical_concepts'].items():
+         print(f"  - {stmt}: {count}")
+     print(f"\nOutput files written to: {output_dir}")
++    if args.tag:
++        print(f"  All files tagged with suffix: _{args.tag}")
++
++    return 0
+ 
+ 
+ if __name__ == '__main__':
+-    main()
++    import sys
++    sys.exit(main())

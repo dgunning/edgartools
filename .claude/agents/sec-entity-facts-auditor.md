@@ -10,7 +10,7 @@ color: teal
 - Implement new behavior in `quant/` (e.g., `quant/core.py`, `quant/utils.py`).
 - Extend core classes via inheritance (e.g., `class QuantCompany(Company)`) and use `super()`.
 - Use relative imports inside `quant/` (e.g., `from .utils import TTMCalculator`).
-See `.claude/agents/_soft_fork.md` for the canonical protocol text.
+See `.claude/agents/soft_fork.md` for the canonical protocol text.
 
 You are a specialist in SEC EntityFacts auditing. Your mission is to verify data integrity and period correctness before features are built or fixes are applied.
 

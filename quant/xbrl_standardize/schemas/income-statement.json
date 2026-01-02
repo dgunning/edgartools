@@ -1,0 +1,964 @@
+{
+	"mappingVersion": "2026-01-02.1",
+	"statement": "IncomeStatement",
+	"periodType": "duration",
+	"unit": "USD",
+	"notes": [
+		"Comprehensive SEC-focused IncomeStatement mapping for US GAAP + IFRS filers.",
+		"Engine: evaluate rules by descending priority. For each rule: try selectAny (first non-null), else computeAny (first fully-resolved expression).",
+		"For bank-style statements, EBIT is defined as pretaxIncome (interest income/expense are operating lines).",
+		"Avoid using us-gaap:CostsAndExpenses as operating expense (often includes COGS); if you need it, add a separate 'totalExpenses' field in your app.",
+		"This file lists only standard taxonomy concepts (us-gaap:, ifrs-full:). Company extension concepts are not included; handle them with company-specific overlays if needed."
+	],
+	"fields": {
+		"revenue": {
+			"standardLabel": "revenue",
+			"rules": [
+				{
+					"name": "Banks / lenders (net interest + noninterest)",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"Consumer Finance",
+						"Credit Services",
+						"Thrifts",
+						"Savings"
+					],
+					"selectAny": [
+						"us-gaap:RevenuesNetOfInterestExpense",
+						"us-gaap:TotalRevenueNetOfInterestExpense",
+						"us-gaap:Revenues",
+						"us-gaap:RevenuesAndOtherIncome"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:InterestIncomeExpenseNet",
+										"us-gaap:NetInterestIncome"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:NoninterestIncome"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Insurance (premiums + investment income style)",
+					"priority": 150,
+					"industryHints": [
+						"Insurance",
+						"Insurer",
+						"Reinsurance"
+					],
+					"selectAny": [
+						"us-gaap:TotalRevenuesAndOtherIncome",
+						"us-gaap:TotalRevenues",
+						"us-gaap:Revenues",
+						"ifrs-full:InsuranceRevenue"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:PremiumsEarned",
+										"us-gaap:InsuranceServicesRevenue",
+										"ifrs-full:InsuranceRevenue"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:InvestmentIncomeNet",
+										"us-gaap:NetInvestmentIncome",
+										"ifrs-full:FinanceIncome"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Utilities / regulated: operating revenues",
+					"priority": 150,
+					"industryHints": [
+						"Utilities",
+						"Electric Utilities",
+						"Gas Utilities",
+						"Water Utilities",
+						"Independent Power Producers"
+					],
+					"selectAny": [
+						"us-gaap:OperatingRevenues",
+						"us-gaap:RegulatedAndUnregulatedOperatingRevenue",
+						"us-gaap:Revenues"
+					]
+				},
+				{
+					"name": "Energy / O&G: sales and other operating revenues",
+					"priority": 150,
+					"industryHints": [
+						"Oil",
+						"Gas",
+						"Energy",
+						"E&P",
+						"Refining",
+						"Midstream"
+					],
+					"selectAny": [
+						"us-gaap:SalesAndOtherOperatingRevenues",
+						"us-gaap:SalesAndOtherOperatingRevenue",
+						"us-gaap:Revenues",
+						"us-gaap:SalesRevenueNet"
+					]
+				},
+				{
+					"name": "REIT / real estate (rental + other)",
+					"priority": 150,
+					"industryHints": [
+						"REIT",
+						"Real Estate",
+						"Property",
+						"Realty"
+					],
+					"selectAny": [
+						"us-gaap:RealEstateRevenueNet",
+						"us-gaap:RentalIncome",
+						"us-gaap:Revenues"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:RentalIncome"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:OtherRevenues",
+										"us-gaap:Revenues"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "IFRS: Revenue (global baseline)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:Revenue",
+						"ifrs-full:RevenueFromContractsWithCustomers",
+						"ifrs-full:RevenueFromContractsWithCustomersExcludingAssessedTax",
+						"ifrs-full:RevenueFromContractsWithCustomersIncludingAssessedTax"
+					]
+				},
+				{
+					"name": "General corporates (US GAAP / ASC 606 / classic)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+						"us-gaap:RevenueFromContractWithCustomerIncludingAssessedTax",
+						"us-gaap:SalesRevenueNet",
+						"us-gaap:NetSales",
+						"us-gaap:Revenues",
+						"us-gaap:RevenuesAndOtherIncome",
+						"us-gaap:OperatingRevenues",
+						"us-gaap:RegulatedAndUnregulatedOperatingRevenue",
+						"us-gaap:SalesAndOtherOperatingRevenues",
+						"us-gaap:SalesAndOtherOperatingRevenue",
+						"us-gaap:SalesRevenueGoodsNet",
+						"us-gaap:SalesRevenueServicesNet",
+						"us-gaap:RevenuesFromExternalCustomers"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:SalesRevenueGoodsNet",
+										"us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:SalesRevenueServicesNet"
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"costOfGoodsSold": {
+			"standardLabel": "costOfGoodsSold",
+			"rules": [
+				{
+					"name": "IFRS: Cost of sales",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CostOfSales"
+					]
+				},
+				{
+					"name": "US GAAP: COGS / Cost of revenue",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:CostOfRevenue",
+						"us-gaap:CostOfGoodsAndServicesSold",
+						"us-gaap:CostOfGoodsSold",
+						"us-gaap:CostOfSales",
+						"us-gaap:CostOfServices",
+						"us-gaap:CostOfProductsSold",
+						"us-gaap:CostOfGoodsSoldExcludingDepreciationDepletionAndAmortization",
+						"us-gaap:CostOfGoodsSoldIncludingDepreciationDepletionAndAmortization"
+					]
+				}
+			]
+		},
+		"grossIncome": {
+			"standardLabel": "grossIncome",
+			"rules": [
+				{
+					"name": "IFRS/US GAAP: Gross profit direct",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:GrossProfit",
+						"ifrs-full:GrossProfit",
+						"us-gaap:GrossMargin"
+					]
+				},
+				{
+					"name": "Compute gross profit = revenue - COGS",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{
+									"field": "revenue"
+								},
+								{
+									"field": "costOfGoodsSold"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"researchDevelopment": {
+			"standardLabel": "researchDevelopment",
+			"rules": [
+				{
+					"name": "R&D direct (US GAAP + IFRS)",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:ResearchAndDevelopmentExpense",
+						"us-gaap:ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost",
+						"us-gaap:ResearchAndDevelopmentExpenseSoftwareExcludingAcquiredInProcessCost",
+						"ifrs-full:ResearchAndDevelopmentExpense"
+					]
+				}
+			]
+		},
+		"sgaExpense": {
+			"standardLabel": "sgaExpense",
+			"rules": [
+				{
+					"name": "US GAAP: Single-line SG&A",
+					"priority": 140,
+					"selectAny": [
+						"us-gaap:SellingGeneralAndAdministrativeExpense"
+					]
+				},
+				{
+					"name": "IFRS: Admin + distribution (proxy for SG&A)",
+					"priority": 130,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"ifrs-full:AdministrativeExpense"
+									]
+								},
+								{
+									"conceptAny": [
+										"ifrs-full:DistributionCosts"
+									]
+								}
+							]
+						}
+					],
+					"selectAny": [
+						"ifrs-full:AdministrativeExpense",
+						"ifrs-full:DistributionCosts"
+					]
+				},
+				{
+					"name": "US GAAP: Compute SG&A = G&A + Selling/Marketing",
+					"priority": 120,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:GeneralAndAdministrativeExpense"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:SellingAndMarketingExpense",
+										"us-gaap:MarketingAndAdvertisingExpense",
+										"us-gaap:AdvertisingExpense"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "US GAAP: Partial SG&A (if only one component tagged)",
+					"priority": 60,
+					"selectAny": [
+						"us-gaap:GeneralAndAdministrativeExpense",
+						"us-gaap:SellingAndMarketingExpense",
+						"us-gaap:MarketingAndAdvertisingExpense",
+						"us-gaap:AdvertisingExpense",
+						"us-gaap:DistributionCosts"
+					]
+				}
+			]
+		},
+		"totalOperatingExpense": {
+			"standardLabel": "totalOperatingExpense",
+			"rules": [
+				{
+					"name": "Banks: Noninterest expense (operating expenses)",
+					"priority": 140,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"BrokerDealers",
+						"Capital Markets",
+						"Consumer Finance",
+						"Credit Services"
+					],
+					"selectAny": [
+						"us-gaap:NoninterestExpense"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:LaborAndRelatedExpense"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:OccupancyNet"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:CommunicationsAndInformationTechnology"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:ProfessionalFees"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:MarketingAndAdvertisingExpense"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:OtherCostAndExpenseOperating"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Insurance: Total expenses / insurance service expenses (proxy)",
+					"priority": 130,
+					"industryHints": [
+						"Insurance",
+						"Insurer",
+						"Reinsurance"
+					],
+					"selectAny": [
+						"us-gaap:CostsAndExpenses",
+						"us-gaap:BenefitsLossesAndLossAdjustmentExpenses",
+						"us-gaap:PolicyholderBenefitsAndClaimsIncurredNet",
+						"us-gaap:InsuranceServicesExpenses",
+						"ifrs-full:InsuranceServiceExpenses"
+					]
+				},
+				{
+					"name": "US GAAP: Operating expenses",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:OperatingExpenses",
+						"us-gaap:OperatingCostsAndExpenses"
+					]
+				},
+				{
+					"name": "IFRS: Operating expenses proxy",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:OtherOperatingExpenses",
+						"ifrs-full:AdministrativeExpense"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"ifrs-full:AdministrativeExpense"
+									]
+								},
+								{
+									"conceptAny": [
+										"ifrs-full:DistributionCosts"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Compute from components (R&D + SG&A)",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"field": "researchDevelopment"
+								},
+								{
+									"field": "sgaExpense"
+								}
+							]
+						},
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:ResearchAndDevelopmentExpense",
+										"ifrs-full:ResearchAndDevelopmentExpense"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:SellingGeneralAndAdministrativeExpense",
+										"ifrs-full:AdministrativeExpense"
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"interestExpense": {
+			"standardLabel": "interestExpense",
+			"rules": [
+				{
+					"name": "IFRS: Finance costs (interest expense proxy)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:FinanceCosts",
+						"ifrs-full:InterestExpense"
+					]
+				},
+				{
+					"name": "US GAAP: Interest expense (including operating for banks)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:InterestExpenseOperating",
+						"us-gaap:InterestExpense",
+						"us-gaap:InterestExpenseDebt",
+						"us-gaap:InterestExpenseBorrowings",
+						"us-gaap:InterestCost",
+						"us-gaap:InterestExpenseOnDebt"
+					]
+				}
+			]
+		},
+		"pretaxIncome": {
+			"standardLabel": "pretaxIncome",
+			"rules": [
+				{
+					"name": "IFRS: Profit before tax",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:ProfitLossBeforeTax",
+						"ifrs-full:ProfitLossBeforeTaxFromContinuingOperations"
+					]
+				},
+				{
+					"name": "US GAAP: Income before income taxes",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+						"us-gaap:IncomeLossBeforeIncomeTaxes",
+						"us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxes"
+					]
+				}
+			]
+		},
+		"provisionforIncomeTaxes": {
+			"standardLabel": "provisionforIncomeTaxes",
+			"rules": [
+				{
+					"name": "IFRS: Income tax expense",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IncomeTaxExpenseContinuingOperations",
+						"ifrs-full:IncomeTaxExpense"
+					]
+				},
+				{
+					"name": "US GAAP: Income tax expense/benefit",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:IncomeTaxExpenseBenefit",
+						"us-gaap:IncomeTaxExpenseBenefitContinuingOperations"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:CurrentIncomeTaxExpenseBenefit"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:DeferredIncomeTaxExpenseBenefit"
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"netIncomeAfterTaxes": {
+			"standardLabel": "netIncomeAfterTaxes",
+			"rules": [
+				{
+					"name": "IFRS: Profit (loss)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:ProfitLoss",
+						"ifrs-full:ProfitLossFromContinuingOperations"
+					]
+				},
+				{
+					"name": "US GAAP: Net income (loss)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:NetIncomeLoss",
+						"us-gaap:ProfitLoss"
+					]
+				},
+				{
+					"name": "Fallback: pretax - taxes (approx)",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{
+									"field": "pretaxIncome"
+								},
+								{
+									"field": "provisionforIncomeTaxes"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"netIncome": {
+			"standardLabel": "netIncome",
+			"rules": [
+				{
+					"name": "Prefer attributable-to-parent/controlling interest",
+					"priority": 130,
+					"selectAny": [
+						"us-gaap:NetIncomeLossAttributableToParent",
+						"us-gaap:NetIncomeLossAttributableToControllingInterest",
+						"ifrs-full:ProfitLossAttributableToOwnersOfParent"
+					]
+				},
+				{
+					"name": "Otherwise use netIncomeAfterTaxes",
+					"priority": 110,
+					"computeAny": [
+						{
+							"op": "id",
+							"terms": [
+								{
+									"field": "netIncomeAfterTaxes"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"ebit": {
+			"standardLabel": "ebit",
+			"rules": [
+				{
+					"name": "Banks/financial intermediaries: EBIT = pretax income",
+					"priority": 200,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"BrokerDealers",
+						"Capital Markets",
+						"Consumer Finance",
+						"Credit Services",
+						"Insurance"
+					],
+					"computeAny": [
+						{
+							"op": "id",
+							"terms": [
+								{
+									"field": "pretaxIncome"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Operating income/profit (direct EBIT proxy)",
+					"priority": 150,
+					"selectAny": [
+						"us-gaap:OperatingIncomeLoss",
+						"us-gaap:IncomeLossFromContinuingOperationsBeforeInterestAndIncomeTaxes",
+						"ifrs-full:OperatingProfitLoss",
+						"ifrs-full:ProfitLossFromOperatingActivities"
+					]
+				},
+				{
+					"name": "Compute EBIT = pretax + interest expense - interest income (corporates)",
+					"priority": 120,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"field": "pretaxIncome"
+								},
+								{
+									"field": "interestExpense"
+								},
+								{
+									"op": "mul",
+									"terms": [
+										-1,
+										{
+											"conceptAny": [
+												"us-gaap:InterestIncome",
+												"us-gaap:InterestIncomeOperating",
+												"us-gaap:InvestmentIncomeInterest",
+												"us-gaap:InterestAndDividendIncomeOperating",
+												"us-gaap:InvestmentIncomeInterestAndDividend",
+												"ifrs-full:FinanceIncome"
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Fallback: use pretax income",
+					"priority": 50,
+					"computeAny": [
+						{
+							"op": "id",
+							"terms": [
+								{
+									"field": "pretaxIncome"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"operatingIncome": {
+			"standardLabel": "operatingIncome",
+			"rules": [
+				{
+					"name": "IFRS: Operating profit/loss",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:OperatingProfitLoss",
+						"ifrs-full:ProfitLossFromOperatingActivities"
+					]
+				},
+				{
+					"name": "US GAAP: Operating income (loss)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:OperatingIncomeLoss",
+						"us-gaap:IncomeLossFromContinuingOperationsBeforeInterestAndIncomeTaxes"
+					]
+				},
+				{
+					"name": "Compute: grossIncome - totalOperatingExpense",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{
+									"field": "grossIncome"
+								},
+								{
+									"field": "totalOperatingExpense"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"depreciationAndAmortization": {
+			"standardLabel": "depreciationAndAmortization",
+			"rules": [
+				{
+					"name": "IFRS: Depreciation and amortization",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:DepreciationAndAmortisationExpense",
+						"ifrs-full:DepreciationAmortisationAndImpairmentLossReversalOfImpairmentLossRecognisedInProfitOrLoss"
+					]
+				},
+				{
+					"name": "US GAAP: Depreciation, depletion and amortization",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:DepreciationDepletionAndAmortization",
+						"us-gaap:DepreciationAndAmortization",
+						"us-gaap:Depreciation",
+						"us-gaap:AmortizationOfIntangibleAssets"
+					]
+				},
+				{
+					"name": "Compute: Depreciation + Amortization",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:Depreciation",
+										"us-gaap:DepreciationNonproduction"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:AmortizationOfIntangibleAssets"
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"otherIncomeExpense": {
+			"standardLabel": "otherIncomeExpense",
+			"rules": [
+				{
+					"name": "Banks: Noninterest income (fees, trading, other)",
+					"priority": 130,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"BrokerDealers",
+						"Capital Markets",
+						"Consumer Finance",
+						"Credit Services"
+					],
+					"selectAny": [
+						"us-gaap:NoninterestIncome",
+						"us-gaap:NoninterestIncomeOther",
+						"us-gaap:FeesAndCommissions",
+						"us-gaap:TradingGainsLosses"
+					]
+				},
+				{
+					"name": "US GAAP: Other nonoperating income/expense",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:OtherNonoperatingIncomeExpense",
+						"us-gaap:NonoperatingIncomeExpense",
+						"us-gaap:OtherIncomeAndExpenses"
+					]
+				},
+				{
+					"name": "IFRS: Other income/expense",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:OtherIncome",
+						"ifrs-full:OtherExpenses"
+					]
+				},
+				{
+					"name": "Compute: Other income - Other expense",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:OtherIncome",
+										"us-gaap:OtherNonoperatingIncome",
+										"ifrs-full:OtherIncome"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:OtherExpenses",
+										"us-gaap:OtherNonoperatingExpense",
+										"ifrs-full:OtherExpenses"
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"earningsPerShareBasic": {
+			"standardLabel": "earningsPerShareBasic",
+			"rules": [
+				{
+					"name": "IFRS: Basic earnings per share",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:BasicEarningsLossPerShare",
+						"ifrs-full:BasicEarningsPerShare"
+					]
+				},
+				{
+					"name": "US GAAP: Earnings per share, basic",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:EarningsPerShareBasic",
+						"us-gaap:EarningsPerShareBasicAndDiluted"
+					]
+				}
+			]
+		},
+		"earningsPerShareDiluted": {
+			"standardLabel": "earningsPerShareDiluted",
+			"rules": [
+				{
+					"name": "IFRS: Diluted earnings per share",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:DilutedEarningsLossPerShare",
+						"ifrs-full:DilutedEarningsPerShare"
+					]
+				},
+				{
+					"name": "US GAAP: Earnings per share, diluted",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:EarningsPerShareDiluted",
+						"us-gaap:EarningsPerShareBasicAndDiluted"
+					]
+				}
+			]
+		},
+		"weightedAverageSharesOutstandingBasic": {
+			"standardLabel": "weightedAverageSharesOutstandingBasic",
+			"rules": [
+				{
+					"name": "US GAAP: Weighted average shares, basic",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+						"us-gaap:WeightedAverageNumberOfSharesIssuedBasic",
+						"us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+					]
+				},
+				{
+					"name": "IFRS: Weighted average shares",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:WeightedAverageNumberOfOrdinarySharesOutstanding"
+					]
+				}
+			]
+		},
+		"weightedAverageSharesOutstandingDiluted": {
+			"standardLabel": "weightedAverageSharesOutstandingDiluted",
+			"rules": [
+				{
+					"name": "US GAAP: Weighted average shares, diluted",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+						"us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+					]
+				},
+				{
+					"name": "IFRS: Weighted average shares (diluted)",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:WeightedAverageNumberOfOrdinarySharesOutstanding"
+					]
+				}
+			]
+		}
+	}
+}

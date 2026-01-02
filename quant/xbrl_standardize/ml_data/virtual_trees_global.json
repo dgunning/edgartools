@@ -1,0 +1,2667 @@
+{
+  "BalanceSheet": {
+    "statement_type": "BalanceSheet",
+    "nodes": {
+      "StatementOfFinancialPositionAbstract": {
+        "concept": "StatementOfFinancialPositionAbstract",
+        "label": "Statement of Financial Position [Abstract]",
+        "parent": null,
+        "depth": 0.0,
+        "children": [
+          "AssetsAbstract",
+          "LiabilitiesAndStockholdersEquityAbstract"
+        ],
+        "occurrence_rate": 0.8780487804878049,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "RelatedPartyTransactionsByRelatedPartyAxis": {
+        "concept": "RelatedPartyTransactionsByRelatedPartyAxis",
+        "label": "Related and Nonrelated Parties [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "children": [
+          "RelatedPartyDomain"
+        ],
+        "occurrence_rate": 0.11890243902439024,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "RelatedPartyDomain": {
+        "concept": "RelatedPartyDomain",
+        "label": "Related and Nonrelated Parties [Domain]",
+        "parent": "RelatedPartyTransactionsByRelatedPartyAxis",
+        "depth": 3.0,
+        "children": [
+          "RelatedPartyMember"
+        ],
+        "occurrence_rate": 0.11890243902439024,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "RelatedPartyMember": {
+        "concept": "RelatedPartyMember",
+        "label": "Related Party",
+        "parent": "RelatedPartyDomain",
+        "depth": 3.6315789473684212,
+        "children": [],
+        "occurrence_rate": 0.10670731707317073,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AssetsAbstract": {
+        "concept": "AssetsAbstract",
+        "label": "Assets",
+        "parent": "StatementOfFinancialPositionAbstract",
+        "depth": 1.891304347826087,
+        "children": [
+          "OperatingLeaseRightOfUseAsset",
+          "Assets",
+          "AssetsCurrentAbstract",
+          "Goodwill",
+          "IntangibleAssetsNetExcludingGoodwill",
+          "DeferredIncomeTaxAssetsNet",
+          "OtherAssetsNoncurrent",
+          "PropertyPlantAndEquipmentNet",
+          "OtherAssets"
+        ],
+        "occurrence_rate": 0.8048780487804879,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "CashAndCashEquivalentsAtCarryingValue": {
+        "concept": "CashAndCashEquivalentsAtCarryingValue",
+        "label": "Cash and Cash Equivalents",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.9755434782608696,
+        "children": [],
+        "occurrence_rate": 0.676829268292683,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OperatingLeaseRightOfUseAsset": {
+        "concept": "OperatingLeaseRightOfUseAsset",
+        "label": "Operating lease right-of-use assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.389423076923077,
+        "children": [],
+        "occurrence_rate": 0.47560975609756095,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "Assets": {
+        "concept": "Assets",
+        "label": "Total Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.913871260199456,
+        "children": [],
+        "occurrence_rate": 0.8780487804878049,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "LiabilitiesAndStockholdersEquityAbstract": {
+        "concept": "LiabilitiesAndStockholdersEquityAbstract",
+        "label": "LIABILITIES AND STOCKHOLDERS\u2019 EQUITY",
+        "parent": "StatementOfFinancialPositionAbstract",
+        "depth": 1.8883928571428572,
+        "children": [
+          "Liabilities",
+          "CommitmentsAndContingencies",
+          "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+          "StockholdersEquityAbstract",
+          "LiabilitiesAndStockholdersEquity",
+          "LiabilitiesCurrentAbstract",
+          "LiabilitiesNoncurrentAbstract",
+          "DeferredIncomeTaxLiabilitiesNet",
+          "OtherLiabilitiesNoncurrent",
+          "LongTermDebtNoncurrent",
+          "OperatingLeaseLiabilityNoncurrent",
+          "LiabilitiesAbstract",
+          "TemporaryEquityCarryingAmountAttributableToParent"
+        ],
+        "occurrence_rate": 0.6615853658536586,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "Liabilities": {
+        "concept": "Liabilities",
+        "label": "Total Liabilities",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 4.023850085178876,
+        "children": [],
+        "occurrence_rate": 0.7926829268292683,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "CommitmentsAndContingencies": {
+        "concept": "CommitmentsAndContingencies",
+        "label": "Commitments and contingencies",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.141868512110727,
+        "children": [],
+        "occurrence_rate": 0.676829268292683,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract": {
+        "concept": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+        "label": "Equity",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 2.696969696969697,
+        "children": [
+          "MinorityInterest"
+        ],
+        "occurrence_rate": 0.19207317073170732,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "StockholdersEquityAbstract": {
+        "concept": "StockholdersEquityAbstract",
+        "label": "Stockholders\u2019 equity:",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 2.6995515695067263,
+        "children": [
+          "CommonStockValue",
+          "AdditionalPaidInCapitalCommonStock",
+          "RetainedEarningsAccumulatedDeficit",
+          "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+          "StockholdersEquity",
+          "PreferredStockValue",
+          "TreasuryStockCommonValue",
+          "TreasuryStockValue",
+          "AdditionalPaidInCapital"
+        ],
+        "occurrence_rate": 0.6432926829268293,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "CommonStockValue": {
+        "concept": "CommonStockValue",
+        "label": "Common Stock",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 4.3180722891566266,
+        "children": [],
+        "occurrence_rate": 0.801829268292683,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AdditionalPaidInCapitalCommonStock": {
+        "concept": "AdditionalPaidInCapitalCommonStock",
+        "label": "Additional paid-in capital",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 3.975206611570248,
+        "children": [],
+        "occurrence_rate": 0.2896341463414634,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "RetainedEarningsAccumulatedDeficit": {
+        "concept": "RetainedEarningsAccumulatedDeficit",
+        "label": "Retained Earnings",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 3.9115281501340484,
+        "children": [],
+        "occurrence_rate": 0.8567073170731707,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax": {
+        "concept": "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+        "label": "Accumulated Other Comprehensive Income/Loss",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 4.012578616352202,
+        "children": [],
+        "occurrence_rate": 0.6371951219512195,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockholdersEquity": {
+        "concept": "StockholdersEquity",
+        "label": "Total Stockholders' Equity",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 4.326845637583893,
+        "children": [],
+        "occurrence_rate": 0.8292682926829268,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "MinorityInterest": {
+        "concept": "MinorityInterest",
+        "label": "Minority Interest",
+        "parent": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+        "depth": 4.246153846153846,
+        "children": [],
+        "occurrence_rate": 0.25914634146341464,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "LiabilitiesAndStockholdersEquity": {
+        "concept": "LiabilitiesAndStockholdersEquity",
+        "label": "Total Liabilities and Stockholders' Equity",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.1357142857142857,
+        "children": [],
+        "occurrence_rate": 0.8628048780487805,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "AssetsCurrentAbstract": {
+        "concept": "AssetsCurrentAbstract",
+        "label": "Current assets:",
+        "parent": "AssetsAbstract",
+        "depth": 2.756218905472637,
+        "children": [
+          "CashAndCashEquivalentsAtCarryingValue",
+          "AccountsReceivableNetCurrent",
+          "InventoryNet",
+          "OtherAssetsCurrent",
+          "AssetsCurrent",
+          "PrepaidExpenseAndOtherAssetsCurrent",
+          "PrepaidExpenseCurrent"
+        ],
+        "occurrence_rate": 0.5975609756097561,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "AccountsReceivableNetCurrent": {
+        "concept": "AccountsReceivableNetCurrent",
+        "label": "Accounts Receivable",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 4.1436170212765955,
+        "children": [],
+        "occurrence_rate": 0.4146341463414634,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "InventoryNet": {
+        "concept": "InventoryNet",
+        "label": "Inventory",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.8157894736842106,
+        "children": [],
+        "occurrence_rate": 0.36585365853658536,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "OtherAssetsCurrent": {
+        "concept": "OtherAssetsCurrent",
+        "label": "Other Current Assets",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 4.012658227848101,
+        "children": [],
+        "occurrence_rate": 0.18597560975609756,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AssetsCurrent": {
+        "concept": "AssetsCurrent",
+        "label": "Total Current Assets",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.9558823529411766,
+        "children": [],
+        "occurrence_rate": 0.6402439024390244,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "Goodwill": {
+        "concept": "Goodwill",
+        "label": "Goodwill",
+        "parent": "AssetsAbstract",
+        "depth": 3.6635220125786163,
+        "children": [],
+        "occurrence_rate": 0.4725609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IntangibleAssetsNetExcludingGoodwill": {
+        "concept": "IntangibleAssetsNetExcludingGoodwill",
+        "label": "Intangible Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.227488151658768,
+        "children": [],
+        "occurrence_rate": 0.3628048780487805,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "DeferredIncomeTaxAssetsNet": {
+        "concept": "DeferredIncomeTaxAssetsNet",
+        "label": "Deferred Tax Assets",
+        "parent": "AssetsAbstract",
+        "depth": 2.9245283018867925,
+        "children": [],
+        "occurrence_rate": 0.28353658536585363,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OtherAssetsNoncurrent": {
+        "concept": "OtherAssetsNoncurrent",
+        "label": "Other Non Current Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.2604166666666665,
+        "children": [],
+        "occurrence_rate": 0.49085365853658536,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "LiabilitiesCurrentAbstract": {
+        "concept": "LiabilitiesCurrentAbstract",
+        "label": "Current liabilities:",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 2.8275862068965516,
+        "children": [
+          "AccountsPayableCurrent",
+          "ContractWithCustomerLiabilityCurrent",
+          "EmployeeRelatedLiabilitiesCurrent",
+          "OtherLiabilitiesCurrent",
+          "AccruedIncomeTaxesCurrent",
+          "LiabilitiesCurrent",
+          "AccruedLiabilitiesCurrent",
+          "OperatingLeaseLiabilityCurrent",
+          "LongTermDebtCurrent"
+        ],
+        "occurrence_rate": 0.6036585365853658,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "AccountsPayableCurrent": {
+        "concept": "AccountsPayableCurrent",
+        "label": "Accounts Payable",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.370212765957447,
+        "children": [],
+        "occurrence_rate": 0.4878048780487805,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ContractWithCustomerLiabilityCurrent": {
+        "concept": "ContractWithCustomerLiabilityCurrent",
+        "label": "Deferred revenue",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.090909090909091,
+        "children": [],
+        "occurrence_rate": 0.15853658536585366,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "EmployeeRelatedLiabilitiesCurrent": {
+        "concept": "EmployeeRelatedLiabilitiesCurrent",
+        "label": "Accrued Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.5098039215686274,
+        "children": [],
+        "occurrence_rate": 0.14939024390243902,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OtherLiabilitiesCurrent": {
+        "concept": "OtherLiabilitiesCurrent",
+        "label": "Other Current Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.573248407643312,
+        "children": [],
+        "occurrence_rate": 0.2774390243902439,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AccruedIncomeTaxesCurrent": {
+        "concept": "AccruedIncomeTaxesCurrent",
+        "label": "Income taxes payable",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.7857142857142856,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "LiabilitiesCurrent": {
+        "concept": "LiabilitiesCurrent",
+        "label": "Total Current Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.007220216606498,
+        "children": [],
+        "occurrence_rate": 0.6371951219512195,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "LiabilitiesNoncurrentAbstract": {
+        "concept": "LiabilitiesNoncurrentAbstract",
+        "label": "Long-term liabilities:",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.026315789473684,
+        "children": [],
+        "occurrence_rate": 0.11585365853658537,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "DeferredIncomeTaxLiabilitiesNet": {
+        "concept": "DeferredIncomeTaxLiabilitiesNet",
+        "label": "Deferred income taxes",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.061946902654867,
+        "children": [],
+        "occurrence_rate": 0.32926829268292684,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OtherLiabilitiesNoncurrent": {
+        "concept": "OtherLiabilitiesNoncurrent",
+        "label": "Other Non Current Liabilities",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.302469135802469,
+        "children": [],
+        "occurrence_rate": 0.4054878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PreferredStockValue": {
+        "concept": "PreferredStockValue",
+        "label": "Preferred Stock",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 4.10188679245283,
+        "children": [],
+        "occurrence_rate": 0.5426829268292683,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PrepaidExpenseAndOtherAssetsCurrent": {
+        "concept": "PrepaidExpenseAndOtherAssetsCurrent",
+        "label": "Prepaid Expenses",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.8962962962962964,
+        "children": [],
+        "occurrence_rate": 0.36585365853658536,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PropertyPlantAndEquipmentNet": {
+        "concept": "PropertyPlantAndEquipmentNet",
+        "label": "Property, Plant and Equipment",
+        "parent": "AssetsAbstract",
+        "depth": 3.208695652173913,
+        "children": [],
+        "occurrence_rate": 0.5670731707317073,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "AccruedLiabilitiesCurrent": {
+        "concept": "AccruedLiabilitiesCurrent",
+        "label": "Accrued Liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.137404580152672,
+        "children": [],
+        "occurrence_rate": 0.3231707317073171,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "OtherAssets": {
+        "concept": "OtherAssets",
+        "label": "Other Assets",
+        "parent": "AssetsAbstract",
+        "depth": 4.12015503875969,
+        "children": [],
+        "occurrence_rate": 0.1951219512195122,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "TreasuryStockCommonValue": {
+        "concept": "TreasuryStockCommonValue",
+        "label": "Treasury Stock Common Value",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 4.0144927536231885,
+        "children": [],
+        "occurrence_rate": 0.16463414634146342,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OtherLiabilities": {
+        "concept": "OtherLiabilities",
+        "label": "Other Liabilities",
+        "parent": "LiabilitiesAbstract",
+        "depth": 3.953125,
+        "children": [],
+        "occurrence_rate": 0.11890243902439024,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "LongTermDebtNoncurrent": {
+        "concept": "LongTermDebtNoncurrent",
+        "label": "Long Term Debt",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.4625850340136055,
+        "children": [],
+        "occurrence_rate": 0.25914634146341464,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OperatingLeaseLiabilityNoncurrent": {
+        "concept": "OperatingLeaseLiabilityNoncurrent",
+        "label": "Operating lease liabilities",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 3.433333333333333,
+        "children": [],
+        "occurrence_rate": 0.39939024390243905,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OperatingLeaseLiabilityCurrent": {
+        "concept": "OperatingLeaseLiabilityCurrent",
+        "label": "Operating lease liabilities",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 4.073770491803279,
+        "children": [],
+        "occurrence_rate": 0.32926829268292684,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "LongTermDebtCurrent": {
+        "concept": "LongTermDebtCurrent",
+        "label": "Short Term Debt",
+        "parent": "LiabilitiesCurrentAbstract",
+        "depth": 3.91044776119403,
+        "children": [],
+        "occurrence_rate": 0.14939024390243902,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "TreasuryStockValue": {
+        "concept": "TreasuryStockValue",
+        "label": "Treasury Stock Common Value",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 3.8333333333333335,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AdditionalPaidInCapital": {
+        "concept": "AdditionalPaidInCapital",
+        "label": "Additional paid-in capital",
+        "parent": "StockholdersEquityAbstract",
+        "depth": 3.771144278606965,
+        "children": [],
+        "occurrence_rate": 0.5091463414634146,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "LiabilitiesAbstract": {
+        "concept": "LiabilitiesAbstract",
+        "label": "Liabilities",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 2.348314606741573,
+        "children": [
+          "OtherLiabilities"
+        ],
+        "occurrence_rate": 0.24695121951219512,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "StatementClassOfStockAxis": {
+        "concept": "StatementClassOfStockAxis",
+        "label": "Class of Stock [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "children": [
+          "ClassOfStockDomain"
+        ],
+        "occurrence_rate": 0.22865853658536586,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "ClassOfStockDomain": {
+        "concept": "ClassOfStockDomain",
+        "label": "Class of Stock [Domain]",
+        "parent": "StatementClassOfStockAxis",
+        "depth": 3.0,
+        "children": [
+          "CommonClassAMember",
+          "CommonClassBMember"
+        ],
+        "occurrence_rate": 0.22865853658536586,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "CommonClassAMember": {
+        "concept": "CommonClassAMember",
+        "label": "Class A Common Stock",
+        "parent": "ClassOfStockDomain",
+        "depth": 3.7209302325581395,
+        "children": [],
+        "occurrence_rate": 0.125,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CommonClassBMember": {
+        "concept": "CommonClassBMember",
+        "label": "Class B Common Stock",
+        "parent": "ClassOfStockDomain",
+        "depth": 3.736842105263158,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PrepaidExpenseCurrent": {
+        "concept": "PrepaidExpenseCurrent",
+        "label": "Prepaid Expenses",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.9318181818181817,
+        "children": [],
+        "occurrence_rate": 0.11280487804878049,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "TemporaryEquityCarryingAmountAttributableToParent": {
+        "concept": "TemporaryEquityCarryingAmountAttributableToParent",
+        "label": "Class A ordinary shares subject to possible redemption",
+        "parent": "LiabilitiesAndStockholdersEquityAbstract",
+        "depth": 4.153061224489796,
+        "children": [],
+        "occurrence_rate": 0.11280487804878049,
+        "is_abstract": false,
+        "is_total": false
+      }
+    },
+    "roots": [
+      "StatementOfFinancialPositionAbstract",
+      "RelatedPartyTransactionsByRelatedPartyAxis",
+      "StatementClassOfStockAxis"
+    ],
+    "sections": {}
+  },
+  "IncomeStatement": {
+    "statement_type": "IncomeStatement",
+    "nodes": {
+      "IncomeStatementAbstract": {
+        "concept": "IncomeStatementAbstract",
+        "label": "Income Statement [Abstract]",
+        "parent": null,
+        "depth": 0.0,
+        "children": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "CostOfGoodsAndServicesSold",
+          "InterestIncomeExpenseNet",
+          "IncomeLossFromEquityMethodInvestments",
+          "IncomeTaxExpenseBenefit",
+          "NetIncomeLossAttributableToNoncontrollingInterest",
+          "NetIncomeLoss",
+          "EarningsPerShareAbstract",
+          "WeightedAverageNumberOfSharesOutstandingAbstract",
+          "SellingGeneralAndAdministrativeExpense",
+          "OperatingIncomeLoss",
+          "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "OperatingExpensesAbstract",
+          "NetIncomeLossAvailableToCommonStockholdersBasic",
+          "NoninterestExpenseAbstract",
+          "GrossProfit",
+          "CostOfRevenue",
+          "InterestExpense"
+        ],
+        "occurrence_rate": 0.8567073170731707,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "srt_ProductOrServiceAxis": {
+        "concept": "srt_ProductOrServiceAxis",
+        "label": "Product and Service [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "children": [
+          "srt_ProductsAndServicesDomain"
+        ],
+        "occurrence_rate": 0.22560975609756098,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "srt_ProductsAndServicesDomain": {
+        "concept": "srt_ProductsAndServicesDomain",
+        "label": "Product and Service [Domain]",
+        "parent": "srt_ProductOrServiceAxis",
+        "depth": 3.0,
+        "children": [],
+        "occurrence_rate": 0.22560975609756098,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "RevenuesAbstract": {
+        "concept": "RevenuesAbstract",
+        "label": "Revenues",
+        "parent": "StatementLineItems",
+        "depth": 2.340909090909091,
+        "children": [
+          "Revenues"
+        ],
+        "occurrence_rate": 0.25914634146341464,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "RevenueFromContractWithCustomerExcludingAssessedTax": {
+        "concept": "RevenueFromContractWithCustomerExcludingAssessedTax",
+        "label": "Contract Revenue",
+        "parent": "IncomeStatementAbstract",
+        "depth": 3.637598597721297,
+        "children": [],
+        "occurrence_rate": 0.39939024390243905,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "Revenues": {
+        "concept": "Revenues",
+        "label": "Revenue",
+        "parent": "RevenuesAbstract",
+        "depth": 3.7755555555555556,
+        "children": [],
+        "occurrence_rate": 0.24085365853658536,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CostsAndExpensesAbstract": {
+        "concept": "CostsAndExpensesAbstract",
+        "label": "Costs and expenses:",
+        "parent": "StatementLineItems",
+        "depth": 2.1739130434782608,
+        "children": [
+          "CostsAndExpenses"
+        ],
+        "occurrence_rate": 0.13719512195121952,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "CostOfGoodsAndServicesSold": {
+        "concept": "CostOfGoodsAndServicesSold",
+        "label": "Cost of Goods and Services Sold",
+        "parent": "IncomeStatementAbstract",
+        "depth": 3.312883435582822,
+        "children": [],
+        "occurrence_rate": 0.27439024390243905,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "GeneralAndAdministrativeExpense": {
+        "concept": "GeneralAndAdministrativeExpense",
+        "label": "General and Administrative Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.300699300699301,
+        "children": [],
+        "occurrence_rate": 0.40853658536585363,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "DepreciationAndAmortization": {
+        "concept": "DepreciationAndAmortization",
+        "label": "Depreciation and Amortization",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.696078431372549,
+        "children": [],
+        "occurrence_rate": 0.11585365853658537,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "InterestIncomeExpenseNet": {
+        "concept": "InterestIncomeExpenseNet",
+        "label": "Interest Expense",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.5714285714285716,
+        "children": [],
+        "occurrence_rate": 0.1402439024390244,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "CostsAndExpenses": {
+        "concept": "CostsAndExpenses",
+        "label": "Costs and Expenses",
+        "parent": "CostsAndExpensesAbstract",
+        "depth": 3.745222929936306,
+        "children": [],
+        "occurrence_rate": 0.20426829268292682,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "IncomeLossFromEquityMethodInvestments": {
+        "concept": "IncomeLossFromEquityMethodInvestments",
+        "label": "Reportable Segment",
+        "parent": "IncomeStatementAbstract",
+        "depth": 3.25,
+        "children": [],
+        "occurrence_rate": 0.1402439024390244,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxExpenseBenefit": {
+        "concept": "IncomeTaxExpenseBenefit",
+        "label": "Income Tax Expense",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.5009174311926605,
+        "children": [],
+        "occurrence_rate": 0.7378048780487805,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "NetIncomeLossAttributableToNoncontrollingInterest": {
+        "concept": "NetIncomeLossAttributableToNoncontrollingInterest",
+        "label": "Net Income Attributable to Noncontrolling Interest",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.541095890410959,
+        "children": [],
+        "occurrence_rate": 0.2347560975609756,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "NetIncomeLoss": {
+        "concept": "NetIncomeLoss",
+        "label": "Net Income",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.7324380165289255,
+        "children": [],
+        "occurrence_rate": 0.7621951219512195,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "EarningsPerShareAbstract": {
+        "concept": "EarningsPerShareAbstract",
+        "label": "Earnings Per Share",
+        "parent": "IncomeStatementAbstract",
+        "depth": 1.9,
+        "children": [
+          "EarningsPerShareBasic",
+          "EarningsPerShareDiluted"
+        ],
+        "occurrence_rate": 0.3780487804878049,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "EarningsPerShareBasic": {
+        "concept": "EarningsPerShareBasic",
+        "label": "Earnings Per Share (Basic)",
+        "parent": "EarningsPerShareAbstract",
+        "depth": 2.8449197860962565,
+        "children": [],
+        "occurrence_rate": 0.8201219512195121,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "EarningsPerShareDiluted": {
+        "concept": "EarningsPerShareDiluted",
+        "label": "Earnings Per Share (Diluted)",
+        "parent": "EarningsPerShareAbstract",
+        "depth": 2.836898395721925,
+        "children": [],
+        "occurrence_rate": 0.8109756097560976,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "WeightedAverageNumberOfSharesOutstandingAbstract": {
+        "concept": "WeightedAverageNumberOfSharesOutstandingAbstract",
+        "label": "Shares Outstanding",
+        "parent": "IncomeStatementAbstract",
+        "depth": 1.75,
+        "children": [
+          "WeightedAverageNumberOfSharesOutstandingBasic",
+          "WeightedAverageNumberOfDilutedSharesOutstanding"
+        ],
+        "occurrence_rate": 0.20426829268292682,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "WeightedAverageNumberOfSharesOutstandingBasic": {
+        "concept": "WeightedAverageNumberOfSharesOutstandingBasic",
+        "label": "Shares Outstanding (Basic)",
+        "parent": "WeightedAverageNumberOfSharesOutstandingAbstract",
+        "depth": 2.7962962962962963,
+        "children": [],
+        "occurrence_rate": 0.7195121951219512,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "WeightedAverageNumberOfDilutedSharesOutstanding": {
+        "concept": "WeightedAverageNumberOfDilutedSharesOutstanding",
+        "label": "Shares Outstanding (Diluted)",
+        "parent": "WeightedAverageNumberOfSharesOutstandingAbstract",
+        "depth": 2.7564102564102564,
+        "children": [],
+        "occurrence_rate": 0.7042682926829268,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "SellingGeneralAndAdministrativeExpense": {
+        "concept": "SellingGeneralAndAdministrativeExpense",
+        "label": "Selling, General and Administrative Expense",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.805263157894737,
+        "children": [],
+        "occurrence_rate": 0.25609756097560976,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OperatingIncomeLoss": {
+        "concept": "OperatingIncomeLoss",
+        "label": "Operating Income",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6774847870182557,
+        "children": [],
+        "occurrence_rate": 0.6432926829268293,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "OtherNonoperatingIncomeExpense": {
+        "concept": "OtherNonoperatingIncomeExpense",
+        "label": "Other income (expense), net",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.053435114503817,
+        "children": [],
+        "occurrence_rate": 0.40853658536585363,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest": {
+        "concept": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "label": "Income Before Tax from Continuing Operations",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.549586776859504,
+        "children": [],
+        "occurrence_rate": 0.6463414634146342,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "OperatingExpensesAbstract": {
+        "concept": "OperatingExpensesAbstract",
+        "label": "Operating expenses:",
+        "parent": "IncomeStatementAbstract",
+        "depth": 1.859375,
+        "children": [
+          "GeneralAndAdministrativeExpense",
+          "DepreciationAndAmortization",
+          "ResearchAndDevelopmentExpense",
+          "OperatingExpenses",
+          "SellingAndMarketingExpense"
+        ],
+        "occurrence_rate": 0.3780487804878049,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "ResearchAndDevelopmentExpense": {
+        "concept": "ResearchAndDevelopmentExpense",
+        "label": "Research and Development Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 2.9226519337016574,
+        "children": [],
+        "occurrence_rate": 0.2774390243902439,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OperatingExpenses": {
+        "concept": "OperatingExpenses",
+        "label": "Operating Expenses",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.569948186528497,
+        "children": [],
+        "occurrence_rate": 0.3018292682926829,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "NonoperatingIncomeExpense": {
+        "concept": "NonoperatingIncomeExpense",
+        "label": "Nonoperating Income/Expense",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.289617486338798,
+        "children": [],
+        "occurrence_rate": 0.34146341463414637,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "NetIncomeLossAvailableToCommonStockholdersBasic": {
+        "concept": "NetIncomeLossAvailableToCommonStockholdersBasic",
+        "label": "Basic Net Income Available to Common Shareholders",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.4583333333333335,
+        "children": [],
+        "occurrence_rate": 0.22865853658536586,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "NoninterestExpenseAbstract": {
+        "concept": "NoninterestExpenseAbstract",
+        "label": "Noninterest Expense",
+        "parent": "IncomeStatementAbstract",
+        "depth": 1.6486486486486487,
+        "children": [
+          "LaborAndRelatedExpense",
+          "NoninterestExpense"
+        ],
+        "occurrence_rate": 0.10060975609756098,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "LaborAndRelatedExpense": {
+        "concept": "LaborAndRelatedExpense",
+        "label": "Salaries and employee benefits",
+        "parent": "NoninterestExpenseAbstract",
+        "depth": 3.452830188679245,
+        "children": [],
+        "occurrence_rate": 0.14939024390243902,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "NoninterestExpense": {
+        "concept": "NoninterestExpense",
+        "label": "Operating Expenses",
+        "parent": "NoninterestExpenseAbstract",
+        "depth": 3.3529411764705883,
+        "children": [],
+        "occurrence_rate": 0.10060975609756098,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "InterestExpenseOperating": {
+        "concept": "InterestExpenseOperating",
+        "label": "Interest Expense (operating)",
+        "parent": "InterestExpenseAbstract",
+        "depth": 3.2884615384615383,
+        "children": [],
+        "occurrence_rate": 0.125,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "GrossProfit": {
+        "concept": "GrossProfit",
+        "label": "Gross Profit",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.302325581395349,
+        "children": [],
+        "occurrence_rate": 0.27134146341463417,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "CostOfRevenue": {
+        "concept": "CostOfRevenue",
+        "label": "Total Cost of Revenue",
+        "parent": "IncomeStatementAbstract",
+        "depth": 3.4802631578947367,
+        "children": [],
+        "occurrence_rate": 0.14939024390243902,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "SellingAndMarketingExpense": {
+        "concept": "SellingAndMarketingExpense",
+        "label": "Selling Expense",
+        "parent": "OperatingExpensesAbstract",
+        "depth": 3.015625,
+        "children": [],
+        "occurrence_rate": 0.13719512195121952,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "InterestExpenseNonoperating": {
+        "concept": "InterestExpenseNonoperating",
+        "label": "Interest Expense (non-operating)",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.2484848484848485,
+        "children": [],
+        "occurrence_rate": 0.2652439024390244,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "NonoperatingIncomeExpenseAbstract": {
+        "concept": "NonoperatingIncomeExpenseAbstract",
+        "label": "Other income (expense):",
+        "parent": "StatementLineItems",
+        "depth": 1.9753086419753085,
+        "children": [
+          "OtherNonoperatingIncomeExpense",
+          "NonoperatingIncomeExpense",
+          "InterestExpenseNonoperating",
+          "InvestmentIncomeInterest"
+        ],
+        "occurrence_rate": 0.24390243902439024,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "InvestmentIncomeInterest": {
+        "concept": "InvestmentIncomeInterest",
+        "label": "Interest income",
+        "parent": "NonoperatingIncomeExpenseAbstract",
+        "depth": 3.5689655172413794,
+        "children": [],
+        "occurrence_rate": 0.17682926829268292,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "InterestExpense": {
+        "concept": "InterestExpense",
+        "label": "Interest Expense",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.793103448275862,
+        "children": [],
+        "occurrence_rate": 0.11890243902439024,
+        "is_abstract": false,
+        "is_total": false
+      }
+    },
+    "roots": [
+      "IncomeStatementAbstract",
+      "srt_ProductOrServiceAxis",
+      "RevenuesAbstract",
+      "CostsAndExpensesAbstract",
+      "InterestExpenseOperating",
+      "NonoperatingIncomeExpenseAbstract"
+    ],
+    "sections": {}
+  },
+  "CashFlowStatement": {
+    "statement_type": "CashFlowStatement",
+    "nodes": {
+      "GainsLossesOnExtinguishmentOfDebt": {
+        "concept": "GainsLossesOnExtinguishmentOfDebt",
+        "label": "Loss on extinguishment of debt",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 4.23841059602649,
+        "children": [],
+        "occurrence_rate": 0.17378048780487804,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProfitLoss": {
+        "concept": "ProfitLoss",
+        "label": "Profit or Loss",
+        "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.251318101933216,
+        "children": [],
+        "occurrence_rate": 0.45426829268292684,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "StatementOfCashFlowsAbstract": {
+        "concept": "StatementOfCashFlowsAbstract",
+        "label": "Statement of Cash Flows [Abstract]",
+        "parent": "StatementLineItems",
+        "depth": 0.013333333333333334,
+        "children": [
+          "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+          "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+          "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+          "SupplementalCashFlowInformationAbstract",
+          "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract",
+          "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+          "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+          "NoncashInvestingAndFinancingItemsAbstract"
+        ],
+        "occurrence_rate": 0.8719512195121951,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "NetCashProvidedByUsedInOperatingActivitiesAbstract": {
+        "concept": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+        "label": "Cash flows from operating activities:",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.394927536231884,
+        "children": [
+          "ProfitLoss",
+          "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+          "NetCashProvidedByUsedInOperatingActivities"
+        ],
+        "occurrence_rate": 0.7987804878048781,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract": {
+        "concept": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "label": "Adjustments to reconcile net income to net cash provided by operating activities:",
+        "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 2.2573529411764706,
+        "children": [
+          "GainsLossesOnExtinguishmentOfDebt",
+          "DepreciationDepletionAndAmortization",
+          "ShareBasedCompensation",
+          "ProvisionForDoubtfulAccounts",
+          "IncreaseDecreaseInOperatingCapitalAbstract",
+          "Depreciation",
+          "AmortizationOfIntangibleAssets",
+          "AmortizationOfFinancingCostsAndDiscounts",
+          "OtherNoncashIncomeExpense",
+          "DeferredIncomeTaxesAndTaxCredits",
+          "DeferredIncomeTaxExpenseBenefit",
+          "AssetImpairmentCharges",
+          "GainLossOnSaleOfPropertyPlantEquipment",
+          "AccretionAmortizationOfDiscountsAndPremiumsInvestments",
+          "AmortizationOfFinancingCosts"
+        ],
+        "occurrence_rate": 0.7865853658536586,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "DepreciationDepletionAndAmortization": {
+        "concept": "DepreciationDepletionAndAmortization",
+        "label": "Depreciation and amortization",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.9609375,
+        "children": [],
+        "occurrence_rate": 0.35365853658536583,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ShareBasedCompensation": {
+        "concept": "ShareBasedCompensation",
+        "label": "Stock-based compensation",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.7507082152974505,
+        "children": [],
+        "occurrence_rate": 0.6920731707317073,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProvisionForDoubtfulAccounts": {
+        "concept": "ProvisionForDoubtfulAccounts",
+        "label": "Bad debt expense",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.4262295081967213,
+        "children": [],
+        "occurrence_rate": 0.17073170731707318,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInOperatingCapitalAbstract": {
+        "concept": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "label": "Changes in operating assets and liabilities:",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 2.8354430379746836,
+        "children": [
+          "IncreaseDecreaseInAccountsReceivable",
+          "IncreaseDecreaseInOtherOperatingAssets",
+          "IncreaseDecreaseInInventories",
+          "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+          "IncreaseDecreaseInAccountsPayable",
+          "IncreaseDecreaseInContractWithCustomerLiability",
+          "IncreaseDecreaseInOtherOperatingCapitalNet",
+          "IncreaseDecreaseInAccruedLiabilities",
+          "IncreaseDecreaseInAccruedIncomeTaxesPayable",
+          "IncreaseDecreaseInOtherOperatingLiabilities",
+          "IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities",
+          "IncreaseDecreaseInOperatingLeaseLiability",
+          "IncreaseDecreaseInAccountsPayableAndAccruedLiabilities"
+        ],
+        "occurrence_rate": 0.698170731707317,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "IncreaseDecreaseInAccountsReceivable": {
+        "concept": "IncreaseDecreaseInAccountsReceivable",
+        "label": "Accounts receivable",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.9594594594594597,
+        "children": [],
+        "occurrence_rate": 0.4451219512195122,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInOtherOperatingAssets": {
+        "concept": "IncreaseDecreaseInOtherOperatingAssets",
+        "label": "Other assets",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.8684210526315788,
+        "children": [],
+        "occurrence_rate": 0.2652439024390244,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "NetCashProvidedByUsedInOperatingActivities": {
+        "concept": "NetCashProvidedByUsedInOperatingActivities",
+        "label": "Net Cash from Operating Activities",
+        "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 2.8690176322418135,
+        "children": [],
+        "occurrence_rate": 0.8567073170731707,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "NetCashProvidedByUsedInInvestingActivitiesAbstract": {
+        "concept": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "label": "Cash flows from investing activities:",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.3598484848484849,
+        "children": [
+          "NetCashProvidedByUsedInInvestingActivities",
+          "PaymentsToAcquireBusinessesNetOfCashAcquired",
+          "PaymentsToAcquirePropertyPlantAndEquipment",
+          "ProceedsFromSaleOfPropertyPlantAndEquipment",
+          "PaymentsForProceedsFromOtherInvestingActivities",
+          "PaymentsToAcquireInvestments",
+          "ProceedsFromSaleOfAvailableForSaleSecuritiesDebt",
+          "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+          "PaymentsToAcquireAvailableForSaleSecuritiesDebt"
+        ],
+        "occurrence_rate": 0.7682926829268293,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "NetCashProvidedByUsedInInvestingActivities": {
+        "concept": "NetCashProvidedByUsedInInvestingActivities",
+        "label": "Net Cash from Investing Activities",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.5302593659942363,
+        "children": [],
+        "occurrence_rate": 0.8323170731707317,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "NetCashProvidedByUsedInFinancingActivitiesAbstract": {
+        "concept": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "label": "Cash flows from financing activities:",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.3713235294117647,
+        "children": [
+          "RepaymentsOfLongTermDebt",
+          "PaymentsOfFinancingCosts",
+          "FinanceLeasePrincipalPayments",
+          "PaymentsOfStockIssuanceCosts",
+          "ProceedsFromIssuanceOfCommonStock",
+          "PaymentsOfDividendsCommonStock",
+          "NetCashProvidedByUsedInFinancingActivities",
+          "ProceedsFromStockOptionsExercised",
+          "PaymentsForRepurchaseOfCommonStock",
+          "ProceedsFromPaymentsForOtherFinancingActivities",
+          "ProceedsFromIssuanceOfLongTermDebt",
+          "PaymentsOfDividends",
+          "PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+          "PaymentsOfDebtIssuanceCosts",
+          "ProceedsFromLinesOfCredit",
+          "RepaymentsOfLinesOfCredit"
+        ],
+        "occurrence_rate": 0.7896341463414634,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "RepaymentsOfLongTermDebt": {
+        "concept": "RepaymentsOfLongTermDebt",
+        "label": "Repayments of long-term debt",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 3.064516129032258,
+        "children": [],
+        "occurrence_rate": 0.23170731707317074,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsOfFinancingCosts": {
+        "concept": "PaymentsOfFinancingCosts",
+        "label": "Payment of deferred financing costs",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.5952380952380953,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "FinanceLeasePrincipalPayments": {
+        "concept": "FinanceLeasePrincipalPayments",
+        "label": "Payments on finance leases",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.4210526315789473,
+        "children": [],
+        "occurrence_rate": 0.11585365853658537,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsOfStockIssuanceCosts": {
+        "concept": "PaymentsOfStockIssuanceCosts",
+        "label": "Payment of offering costs",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.830188679245283,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIssuanceOfCommonStock": {
+        "concept": "ProceedsFromIssuanceOfCommonStock",
+        "label": "Proceeds from Issuance of Common Stock",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 3.2690582959641254,
+        "children": [],
+        "occurrence_rate": 0.3048780487804878,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsOfDividendsCommonStock": {
+        "concept": "PaymentsOfDividendsCommonStock",
+        "label": "Dividends paid",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.661417322834646,
+        "children": [],
+        "occurrence_rate": 0.24695121951219512,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "NetCashProvidedByUsedInFinancingActivities": {
+        "concept": "NetCashProvidedByUsedInFinancingActivities",
+        "label": "Net Cash from Financing Activities",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.7186700767263425,
+        "children": [],
+        "occurrence_rate": 0.8567073170731707,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "label": "Net Change in Cash",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8821656050955413,
+        "children": [],
+        "occurrence_rate": 0.698170731707317,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+        "label": "Parent Company",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 2.0183098591549298,
+        "children": [],
+        "occurrence_rate": 0.7103658536585366,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "SupplementalCashFlowInformationAbstract": {
+        "concept": "SupplementalCashFlowInformationAbstract",
+        "label": "Supplemental disclosure of cash flow information:",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.4639175257731958,
+        "children": [
+          "InterestPaidNet",
+          "IncomeTaxesPaidNet",
+          "IncomeTaxesPaid"
+        ],
+        "occurrence_rate": 0.5640243902439024,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "InterestPaidNet": {
+        "concept": "InterestPaidNet",
+        "label": "Cash paid for interest",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.6907216494845363,
+        "children": [],
+        "occurrence_rate": 0.5274390243902439,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract": {
+        "concept": "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract",
+        "label": "Non-cash investing and financing activities:",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.449438202247191,
+        "children": [
+          "RightOfUseAssetObtainedInExchangeForOperatingLeaseLiability",
+          "CapitalExpendituresIncurredButNotYetPaid",
+          "StockIssued1"
+        ],
+        "occurrence_rate": 0.25914634146341464,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "IncreaseDecreaseInInventories": {
+        "concept": "IncreaseDecreaseInInventories",
+        "label": "Inventories",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.9767441860465116,
+        "children": [],
+        "occurrence_rate": 0.36585365853658536,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets": {
+        "concept": "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+        "label": "Prepaid expenses and other current assets",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.035087719298246,
+        "children": [],
+        "occurrence_rate": 0.3353658536585366,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInAccountsPayable": {
+        "concept": "IncreaseDecreaseInAccountsPayable",
+        "label": "Accounts payable",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.036697247706422,
+        "children": [],
+        "occurrence_rate": 0.32621951219512196,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInContractWithCustomerLiability": {
+        "concept": "IncreaseDecreaseInContractWithCustomerLiability",
+        "label": "Deferred revenue",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.15,
+        "children": [],
+        "occurrence_rate": 0.17378048780487804,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInOtherOperatingCapitalNet": {
+        "concept": "IncreaseDecreaseInOtherOperatingCapitalNet",
+        "label": "Other, net",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.767857142857143,
+        "children": [],
+        "occurrence_rate": 0.11585365853658537,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsToAcquireBusinessesNetOfCashAcquired": {
+        "concept": "PaymentsToAcquireBusinessesNetOfCashAcquired",
+        "label": "Payments to Acquire Businesses",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.6258992805755397,
+        "children": [],
+        "occurrence_rate": 0.3079268292682927,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsToAcquirePropertyPlantAndEquipment": {
+        "concept": "PaymentsToAcquirePropertyPlantAndEquipment",
+        "label": "Payments for Property, Plant and Equipment",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.657004830917874,
+        "children": [],
+        "occurrence_rate": 0.5396341463414634,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromSaleOfPropertyPlantAndEquipment": {
+        "concept": "ProceedsFromSaleOfPropertyPlantAndEquipment",
+        "label": "Proceeds from sale of property and equipment",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.441860465116279,
+        "children": [],
+        "occurrence_rate": 0.21951219512195122,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsForProceedsFromOtherInvestingActivities": {
+        "concept": "PaymentsForProceedsFromOtherInvestingActivities",
+        "label": "Other",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.504950495049505,
+        "children": [],
+        "occurrence_rate": 0.23170731707317074,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromStockOptionsExercised": {
+        "concept": "ProceedsFromStockOptionsExercised",
+        "label": "Proceeds from exercise of stock options",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.566666666666667,
+        "children": [],
+        "occurrence_rate": 0.22560975609756098,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsForRepurchaseOfCommonStock": {
+        "concept": "PaymentsForRepurchaseOfCommonStock",
+        "label": "Repurchase of common stock",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.9047619047619047,
+        "children": [],
+        "occurrence_rate": 0.47865853658536583,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromPaymentsForOtherFinancingActivities": {
+        "concept": "ProceedsFromPaymentsForOtherFinancingActivities",
+        "label": "Other",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.4895833333333335,
+        "children": [],
+        "occurrence_rate": 0.23170731707317074,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+        "concept": "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+        "label": "Effect of exchange rate changes on cash and cash equivalents",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.3762376237623761,
+        "children": [],
+        "occurrence_rate": 0.2926829268292683,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "Depreciation": {
+        "concept": "Depreciation",
+        "label": "Depreciation and Amortization",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.5945945945945947,
+        "children": [],
+        "occurrence_rate": 0.16158536585365854,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AmortizationOfIntangibleAssets": {
+        "concept": "AmortizationOfIntangibleAssets",
+        "label": "Depreciation and Amortization",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 4.23,
+        "children": [],
+        "occurrence_rate": 0.11890243902439024,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AmortizationOfFinancingCostsAndDiscounts": {
+        "concept": "AmortizationOfFinancingCostsAndDiscounts",
+        "label": "Amortization of deferred financing costs and debt discount",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.6666666666666665,
+        "children": [],
+        "occurrence_rate": 0.11890243902439024,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OtherNoncashIncomeExpense": {
+        "concept": "OtherNoncashIncomeExpense",
+        "label": "Other",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.681318681318681,
+        "children": [],
+        "occurrence_rate": 0.23780487804878048,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInAccruedLiabilities": {
+        "concept": "IncreaseDecreaseInAccruedLiabilities",
+        "label": "Accrued expenses",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.8260869565217392,
+        "children": [],
+        "occurrence_rate": 0.1951219512195122,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInAccruedIncomeTaxesPayable": {
+        "concept": "IncreaseDecreaseInAccruedIncomeTaxesPayable",
+        "label": "Income taxes payable",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.7954545454545454,
+        "children": [],
+        "occurrence_rate": 0.11280487804878049,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInOtherOperatingLiabilities": {
+        "concept": "IncreaseDecreaseInOtherOperatingLiabilities",
+        "label": "Other liabilities",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.71875,
+        "children": [],
+        "occurrence_rate": 0.16158536585365854,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsToAcquireInvestments": {
+        "concept": "PaymentsToAcquireInvestments",
+        "label": "Purchases of investments",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.5531914893617023,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIssuanceOfLongTermDebt": {
+        "concept": "ProceedsFromIssuanceOfLongTermDebt",
+        "label": "Proceeds from Issuance of Long-Term Debt",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.992248062015504,
+        "children": [],
+        "occurrence_rate": 0.21646341463414634,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+        "label": "Cash and cash equivalents at end of period",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 2.192857142857143,
+        "children": [],
+        "occurrence_rate": 0.17682926829268292,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxesPaidNet": {
+        "concept": "IncomeTaxesPaidNet",
+        "label": "Income Tax Expense",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.526315789473684,
+        "children": [],
+        "occurrence_rate": 0.38414634146341464,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities": {
+        "concept": "IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities",
+        "label": "Accrued expenses and other liabilities",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.146341463414634,
+        "children": [],
+        "occurrence_rate": 0.10670731707317073,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations": {
+        "concept": "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+        "label": "Effect of exchange rate changes on cash and cash equivalents",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.542857142857143,
+        "children": [],
+        "occurrence_rate": 0.10670731707317073,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromSaleOfAvailableForSaleSecuritiesDebt": {
+        "concept": "ProceedsFromSaleOfAvailableForSaleSecuritiesDebt",
+        "label": "Proceeds from Sale of Debt Securities, ",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.511111111111111,
+        "children": [],
+        "occurrence_rate": 0.11890243902439024,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities": {
+        "concept": "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+        "label": "Proceeds from Maturities, Prepayments and Calls of Securities",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.4285714285714284,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsToAcquireAvailableForSaleSecuritiesDebt": {
+        "concept": "PaymentsToAcquireAvailableForSaleSecuritiesDebt",
+        "label": "Purchases of securities available for sale",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.54,
+        "children": [],
+        "occurrence_rate": 0.13414634146341464,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsOfDividends": {
+        "concept": "PaymentsOfDividends",
+        "label": "Payments of Dividends",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.5416666666666665,
+        "children": [],
+        "occurrence_rate": 0.15853658536585366,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsRelatedToTaxWithholdingForShareBasedCompensation": {
+        "concept": "PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+        "label": "Tax Withholding for Share-Based Compensation",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.575221238938053,
+        "children": [],
+        "occurrence_rate": 0.29573170731707316,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+        "label": "Net Change in Cash",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.4605263157894737,
+        "children": [],
+        "occurrence_rate": 0.1676829268292683,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "IncomeTaxesPaid": {
+        "concept": "IncomeTaxesPaid",
+        "label": "Income taxes",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.510204081632653,
+        "children": [],
+        "occurrence_rate": 0.14329268292682926,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "RightOfUseAssetObtainedInExchangeForOperatingLeaseLiability": {
+        "concept": "RightOfUseAssetObtainedInExchangeForOperatingLeaseLiability",
+        "label": "Right-of-use assets obtained in exchange for new operating lease liabilities",
+        "parent": "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract",
+        "depth": 2.6140350877192984,
+        "children": [],
+        "occurrence_rate": 0.1676829268292683,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "DeferredIncomeTaxesAndTaxCredits": {
+        "concept": "DeferredIncomeTaxesAndTaxCredits",
+        "label": "Deferred income taxes",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.709090909090909,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentsOfDebtIssuanceCosts": {
+        "concept": "PaymentsOfDebtIssuanceCosts",
+        "label": "Payment of debt issuance costs",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.8219178082191783,
+        "children": [],
+        "occurrence_rate": 0.18292682926829268,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "DeferredIncomeTaxExpenseBenefit": {
+        "concept": "DeferredIncomeTaxExpenseBenefit",
+        "label": "Deferred income taxes",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.486111111111111,
+        "children": [],
+        "occurrence_rate": 0.32926829268292684,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInOperatingLeaseLiability": {
+        "concept": "IncreaseDecreaseInOperatingLeaseLiability",
+        "label": "Operating lease liabilities",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 4.074074074074074,
+        "children": [],
+        "occurrence_rate": 0.1524390243902439,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AssetImpairmentCharges": {
+        "concept": "AssetImpairmentCharges",
+        "label": "Impairment charges",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.7586206896551726,
+        "children": [],
+        "occurrence_rate": 0.10365853658536585,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "GainLossOnSaleOfPropertyPlantEquipment": {
+        "concept": "GainLossOnSaleOfPropertyPlantEquipment",
+        "label": "Loss on disposal of property and equipment",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.6333333333333333,
+        "children": [],
+        "occurrence_rate": 0.16158536585365854,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "NoncashInvestingAndFinancingItemsAbstract": {
+        "concept": "NoncashInvestingAndFinancingItemsAbstract",
+        "label": "Non-cash investing and financing activities:",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.5,
+        "children": [],
+        "occurrence_rate": 0.17682926829268292,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "CapitalExpendituresIncurredButNotYetPaid": {
+        "concept": "CapitalExpendituresIncurredButNotYetPaid",
+        "label": "Accrued capital expenditures",
+        "parent": "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract",
+        "depth": 2.734375,
+        "children": [],
+        "occurrence_rate": 0.18292682926829268,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInAccountsPayableAndAccruedLiabilities": {
+        "concept": "IncreaseDecreaseInAccountsPayableAndAccruedLiabilities",
+        "label": "Accounts payable and accrued expenses",
+        "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+        "depth": 3.897196261682243,
+        "children": [],
+        "occurrence_rate": 0.25914634146341464,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AccretionAmortizationOfDiscountsAndPremiumsInvestments": {
+        "concept": "AccretionAmortizationOfDiscountsAndPremiumsInvestments",
+        "label": "Net (accretion) amortization of discount/premium on debt securities",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 4.552941176470588,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssued1": {
+        "concept": "StockIssued1",
+        "label": "Issuance of common stock in connection with business acquisition",
+        "parent": "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract",
+        "depth": 3.311111111111111,
+        "children": [],
+        "occurrence_rate": 0.10670731707317073,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AmortizationOfFinancingCosts": {
+        "concept": "AmortizationOfFinancingCosts",
+        "label": "Amortization of debt issuance costs",
+        "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.9444444444444446,
+        "children": [],
+        "occurrence_rate": 0.13109756097560976,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromLinesOfCredit": {
+        "concept": "ProceedsFromLinesOfCredit",
+        "label": "Proceeds from line of credit",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.8360655737704916,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "RepaymentsOfLinesOfCredit": {
+        "concept": "RepaymentsOfLinesOfCredit",
+        "label": "Repayments of revolving credit facility",
+        "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+        "depth": 2.933333333333333,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      }
+    },
+    "roots": [
+      "StatementOfCashFlowsAbstract"
+    ],
+    "sections": {}
+  },
+  "StatementOfEquity": {
+    "statement_type": "StatementOfEquity",
+    "nodes": {
+      "StatementTable": {
+        "concept": "StatementTable",
+        "label": "Statement [Table]",
+        "parent": "StatementOfStockholdersEquityAbstract",
+        "depth": 1.0,
+        "children": [
+          "StatementLineItems",
+          "StatementEquityComponentsAxis",
+          "srt_CumulativeEffectPeriodOfAdoptionAxis"
+        ],
+        "occurrence_rate": 0.8567073170731707,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "StatementLineItems": {
+        "concept": "StatementLineItems",
+        "label": "Statement [Line Items]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "children": [
+          "IncreaseDecreaseInStockholdersEquityRollForward",
+          "StockIssuedDuringPeriodValueNewIssues",
+          "StockIssuedDuringPeriodSharesNewIssues",
+          "SharesOutstanding",
+          "AdjustmentsToAdditionalPaidInCapitalWarrantIssued",
+          "StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities",
+          "StockIssuedDuringPeriodSharesRestrictedStockAwardGross"
+        ],
+        "occurrence_rate": 0.8628048780487805,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": {
+        "concept": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+        "label": "Total Stockholders' Equity",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.651041666666667,
+        "children": [],
+        "occurrence_rate": 0.3048780487804878,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "StatementOfStockholdersEquityAbstract": {
+        "concept": "StatementOfStockholdersEquityAbstract",
+        "label": "Statement of Stockholders' Equity [Abstract]",
+        "parent": null,
+        "depth": 0.0,
+        "children": [
+          "StatementTable"
+        ],
+        "occurrence_rate": 0.8689024390243902,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "StatementEquityComponentsAxis": {
+        "concept": "StatementEquityComponentsAxis",
+        "label": "Equity Components [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "children": [
+          "EquityComponentDomain"
+        ],
+        "occurrence_rate": 0.8536585365853658,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "EquityComponentDomain": {
+        "concept": "EquityComponentDomain",
+        "label": "Equity Component [Domain]",
+        "parent": "StatementEquityComponentsAxis",
+        "depth": 3.0,
+        "children": [
+          "ParentMember",
+          "CommonStockMember",
+          "AdditionalPaidInCapitalMember",
+          "RetainedEarningsMember",
+          "AccumulatedOtherComprehensiveIncomeMember",
+          "NoncontrollingInterestMember",
+          "TreasuryStockCommonMember",
+          "PreferredStockMember"
+        ],
+        "occurrence_rate": 0.8536585365853658,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "ParentMember": {
+        "concept": "ParentMember",
+        "label": "Parent",
+        "parent": "EquityComponentDomain",
+        "depth": 3.926829268292683,
+        "children": [],
+        "occurrence_rate": 0.11585365853658537,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CommonStockMember": {
+        "concept": "CommonStockMember",
+        "label": "Common Stock",
+        "parent": "EquityComponentDomain",
+        "depth": 3.825174825174825,
+        "children": [],
+        "occurrence_rate": 0.8170731707317073,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AdditionalPaidInCapitalMember": {
+        "concept": "AdditionalPaidInCapitalMember",
+        "label": "Additional Paid-in Capital",
+        "parent": "EquityComponentDomain",
+        "depth": 3.8104089219330857,
+        "children": [],
+        "occurrence_rate": 0.7896341463414634,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "RetainedEarningsMember": {
+        "concept": "RetainedEarningsMember",
+        "label": "Retained Earnings",
+        "parent": "EquityComponentDomain",
+        "depth": 3.810996563573883,
+        "children": [],
+        "occurrence_rate": 0.8475609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AccumulatedOtherComprehensiveIncomeMember": {
+        "concept": "AccumulatedOtherComprehensiveIncomeMember",
+        "label": "Accumulated Other Comprehensive Income (Loss)",
+        "parent": "EquityComponentDomain",
+        "depth": 3.9626168224299065,
+        "children": [],
+        "occurrence_rate": 0.6310975609756098,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "NoncontrollingInterestMember": {
+        "concept": "NoncontrollingInterestMember",
+        "label": "Noncontrolling Interests",
+        "parent": "EquityComponentDomain",
+        "depth": 3.888888888888889,
+        "children": [],
+        "occurrence_rate": 0.2652439024390244,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncreaseDecreaseInStockholdersEquityRollForward": {
+        "concept": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+        "parent": "StatementLineItems",
+        "depth": 2.9886363636363638,
+        "children": [
+          "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+          "CommonStockSharesOutstanding",
+          "StockIssuedDuringPeriodValueShareBasedCompensation",
+          "StockIssuedDuringPeriodSharesShareBasedCompensation",
+          "StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+          "StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+          "DividendsCommonStockCash",
+          "MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders",
+          "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+          "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+          "StockRepurchasedAndRetiredDuringPeriodValue",
+          "StockIssuedDuringPeriodValueStockOptionsExercised",
+          "StockIssuedDuringPeriodSharesStockOptionsExercised",
+          "StockIssuedDuringPeriodValueConversionOfConvertibleSecurities",
+          "TreasuryStockSharesAcquired",
+          "TreasuryStockValueAcquiredCostMethod",
+          "StockIssuedDuringPeriodSharesAcquisitions",
+          "StockIssuedDuringPeriodValueAcquisitions",
+          "StockRepurchasedDuringPeriodValue",
+          "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures",
+          "StockRepurchasedAndRetiredDuringPeriodShares",
+          "StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+          "StockRepurchasedDuringPeriodShares",
+          "DividendsCommonStock"
+        ],
+        "occurrence_rate": 0.5121951219512195,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "CommonStockSharesOutstanding": {
+        "concept": "CommonStockSharesOutstanding",
+        "label": "Common Stock Shares Outstanding",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.441108545034642,
+        "children": [],
+        "occurrence_rate": 0.2682926829268293,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodValueShareBasedCompensation": {
+        "concept": "StockIssuedDuringPeriodValueShareBasedCompensation",
+        "label": "Additional Paid-in Capital",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.408304498269896,
+        "children": [],
+        "occurrence_rate": 0.23780487804878048,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesShareBasedCompensation": {
+        "concept": "StockIssuedDuringPeriodSharesShareBasedCompensation",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.344370860927152,
+        "children": [],
+        "occurrence_rate": 0.19817073170731708,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodValueEmployeeStockPurchasePlan": {
+        "concept": "StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+        "label": "Additional Paid-in Capital",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.3760683760683765,
+        "children": [],
+        "occurrence_rate": 0.13719512195121952,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans": {
+        "concept": "StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.41747572815534,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodValueNewIssues": {
+        "concept": "StockIssuedDuringPeriodValueNewIssues",
+        "label": "Additional Paid-in Capital",
+        "parent": "StatementLineItems",
+        "depth": 4.192192192192192,
+        "children": [],
+        "occurrence_rate": 0.38414634146341464,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesNewIssues": {
+        "concept": "StockIssuedDuringPeriodSharesNewIssues",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 4.177083333333333,
+        "children": [],
+        "occurrence_rate": 0.3231707317073171,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "DividendsCommonStockCash": {
+        "concept": "DividendsCommonStockCash",
+        "label": "Retained Earnings",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.454054054054054,
+        "children": [],
+        "occurrence_rate": 0.20426829268292682,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders": {
+        "concept": "MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders",
+        "label": "Noncontrolling Interests",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.488549618320611,
+        "children": [],
+        "occurrence_rate": 0.14939024390243902,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+        "concept": "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+        "label": "Additional Paid-in Capital",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.272930648769575,
+        "children": [],
+        "occurrence_rate": 0.524390243902439,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation": {
+        "concept": "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+        "label": "Additional Paid-in Capital",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.343511450381679,
+        "children": [],
+        "occurrence_rate": 0.13109756097560976,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockRepurchasedAndRetiredDuringPeriodValue": {
+        "concept": "StockRepurchasedAndRetiredDuringPeriodValue",
+        "label": "Retained Earnings",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.45859872611465,
+        "children": [],
+        "occurrence_rate": 0.13109756097560976,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "SharesOutstanding": {
+        "concept": "SharesOutstanding",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 3.9611197511664074,
+        "children": [],
+        "occurrence_rate": 0.32926829268292684,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "AdjustmentsToAdditionalPaidInCapitalWarrantIssued": {
+        "concept": "AdjustmentsToAdditionalPaidInCapitalWarrantIssued",
+        "label": "Additional Paid-in Capital",
+        "parent": "StatementLineItems",
+        "depth": 4.08029197080292,
+        "children": [],
+        "occurrence_rate": 0.10060975609756098,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodValueStockOptionsExercised": {
+        "concept": "StockIssuedDuringPeriodValueStockOptionsExercised",
+        "label": "Additional Paid-in Capital",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.212454212454213,
+        "children": [],
+        "occurrence_rate": 0.2652439024390244,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesStockOptionsExercised": {
+        "concept": "StockIssuedDuringPeriodSharesStockOptionsExercised",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.324200913242009,
+        "children": [],
+        "occurrence_rate": 0.24390243902439024,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodValueConversionOfConvertibleSecurities": {
+        "concept": "StockIssuedDuringPeriodValueConversionOfConvertibleSecurities",
+        "label": "Additional Paid-in Capital",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.3544303797468356,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities": {
+        "concept": "StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 4.245283018867925,
+        "children": [],
+        "occurrence_rate": 0.11280487804878049,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "TreasuryStockCommonMember": {
+        "concept": "TreasuryStockCommonMember",
+        "label": "Treasury Stock",
+        "parent": "EquityComponentDomain",
+        "depth": 3.9456521739130435,
+        "children": [],
+        "occurrence_rate": 0.27439024390243905,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "TreasuryStockSharesAcquired": {
+        "concept": "TreasuryStockSharesAcquired",
+        "label": "Treasury Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.196428571428571,
+        "children": [],
+        "occurrence_rate": 0.12804878048780488,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "TreasuryStockValueAcquiredCostMethod": {
+        "concept": "TreasuryStockValueAcquiredCostMethod",
+        "label": "Treasury Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.299516908212561,
+        "children": [],
+        "occurrence_rate": 0.19817073170731708,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesAcquisitions": {
+        "concept": "StockIssuedDuringPeriodSharesAcquisitions",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.235955056179775,
+        "children": [],
+        "occurrence_rate": 0.11280487804878049,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodValueAcquisitions": {
+        "concept": "StockIssuedDuringPeriodValueAcquisitions",
+        "label": "Additional Paid-in Capital",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.350282485875706,
+        "children": [],
+        "occurrence_rate": 0.14634146341463414,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockRepurchasedDuringPeriodValue": {
+        "concept": "StockRepurchasedDuringPeriodValue",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.4343891402714934,
+        "children": [],
+        "occurrence_rate": 0.15853658536585366,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "srt_CumulativeEffectPeriodOfAdoptionAxis": {
+        "concept": "srt_CumulativeEffectPeriodOfAdoptionAxis",
+        "label": "Cumulative Effect, Period of Adoption [Axis]",
+        "parent": "StatementTable",
+        "depth": 2.0,
+        "children": [
+          "srt_CumulativeEffectPeriodOfAdoptionDomain"
+        ],
+        "occurrence_rate": 0.11280487804878049,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "srt_CumulativeEffectPeriodOfAdoptionDomain": {
+        "concept": "srt_CumulativeEffectPeriodOfAdoptionDomain",
+        "label": "Cumulative Effect, Period of Adoption [Domain]",
+        "parent": "srt_CumulativeEffectPeriodOfAdoptionAxis",
+        "depth": 3.0,
+        "children": [
+          "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember"
+        ],
+        "occurrence_rate": 0.11280487804878049,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember": {
+        "concept": "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember",
+        "label": "Cumulative Effect, Period of Adoption, Adjustment",
+        "parent": "srt_CumulativeEffectPeriodOfAdoptionDomain",
+        "depth": 3.825,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesRestrictedStockAwardGross": {
+        "concept": "StockIssuedDuringPeriodSharesRestrictedStockAwardGross",
+        "label": "Common Stock",
+        "parent": "StatementLineItems",
+        "depth": 3.951219512195122,
+        "children": [],
+        "occurrence_rate": 0.10365853658536585,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures": {
+        "concept": "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.368421052631579,
+        "children": [],
+        "occurrence_rate": 0.10060975609756098,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockRepurchasedAndRetiredDuringPeriodShares": {
+        "concept": "StockRepurchasedAndRetiredDuringPeriodShares",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.4787234042553195,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures": {
+        "concept": "StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.333333333333333,
+        "children": [],
+        "occurrence_rate": 0.10975609756097561,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "StockRepurchasedDuringPeriodShares": {
+        "concept": "StockRepurchasedDuringPeriodShares",
+        "label": "Common Stock",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.479591836734694,
+        "children": [],
+        "occurrence_rate": 0.125,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "DividendsCommonStock": {
+        "concept": "DividendsCommonStock",
+        "label": "Retained Earnings",
+        "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+        "depth": 4.5,
+        "children": [],
+        "occurrence_rate": 0.10670731707317073,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PreferredStockMember": {
+        "concept": "PreferredStockMember",
+        "label": "Preferred Stock",
+        "parent": "EquityComponentDomain",
+        "depth": 4.013333333333334,
+        "children": [],
+        "occurrence_rate": 0.18597560975609756,
+        "is_abstract": false,
+        "is_total": false
+      }
+    },
+    "roots": [
+      "StatementOfStockholdersEquityAbstract"
+    ],
+    "sections": {}
+  },
+  "ComprehensiveIncome": {
+    "statement_type": "ComprehensiveIncome",
+    "nodes": {
+      "StatementOfIncomeAndComprehensiveIncomeAbstract": {
+        "concept": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "label": "Statement of Comprehensive Income [Abstract]",
+        "parent": "IncomeStatementAbstract",
+        "depth": 0.006097560975609756,
+        "children": [
+          "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+          "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest",
+          "ComprehensiveIncomeNetOfTax",
+          "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+          "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParentAbstract"
+        ],
+        "occurrence_rate": 0.4817073170731707,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax": {
+        "concept": "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+        "label": "Unrealized (loss) gain on derivative instruments",
+        "parent": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "depth": 2.4166666666666665,
+        "children": [],
+        "occurrence_rate": 0.125,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest": {
+        "concept": "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+        "label": "Comprehensive income",
+        "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "depth": 1.8333333333333333,
+        "children": [],
+        "occurrence_rate": 0.24390243902439024,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest": {
+        "concept": "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest",
+        "label": "Comprehensive income attributable to noncontrolling interests",
+        "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "depth": 1.7391304347826086,
+        "children": [],
+        "occurrence_rate": 0.17682926829268292,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ComprehensiveIncomeNetOfTax": {
+        "concept": "ComprehensiveIncomeNetOfTax",
+        "label": "Comprehensive income (loss)",
+        "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "depth": 1.715415019762846,
+        "children": [],
+        "occurrence_rate": 0.5426829268292683,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "OtherComprehensiveIncomeLossNetOfTax": {
+        "concept": "OtherComprehensiveIncomeLossNetOfTax",
+        "label": "Accumulated Other Comprehensive Loss",
+        "parent": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "depth": 2.7262773722627736,
+        "children": [],
+        "occurrence_rate": 0.24085365853658536,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract": {
+        "concept": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "label": "Other comprehensive income (loss):",
+        "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "depth": 1.318840579710145,
+        "children": [
+          "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+          "OtherComprehensiveIncomeLossNetOfTax",
+          "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+          "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax",
+          "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax"
+        ],
+        "occurrence_rate": 0.21036585365853658,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax": {
+        "concept": "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+        "label": "Foreign currency translation adjustments",
+        "parent": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "depth": 2.4301075268817205,
+        "children": [],
+        "occurrence_rate": 0.18597560975609756,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent": {
+        "concept": "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+        "label": "Other comprehensive income (loss)",
+        "parent": "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParentAbstract",
+        "depth": 2.588888888888889,
+        "children": [],
+        "occurrence_rate": 0.1676829268292683,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParentAbstract": {
+        "concept": "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParentAbstract",
+        "label": "Other comprehensive income (loss), net of tax:",
+        "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "depth": 1.0465116279069768,
+        "children": [
+          "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent"
+        ],
+        "occurrence_rate": 0.12195121951219512,
+        "is_abstract": true,
+        "is_total": false
+      },
+      "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax": {
+        "concept": "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax",
+        "label": "Accumulated Other Comprehensive Income (Loss)",
+        "parent": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "depth": 2.961038961038961,
+        "children": [],
+        "occurrence_rate": 0.13414634146341464,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax": {
+        "concept": "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax",
+        "label": "Pension and other postretirement benefits",
+        "parent": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "depth": 2.25,
+        "children": [],
+        "occurrence_rate": 0.10670731707317073,
+        "is_abstract": false,
+        "is_total": false
+      }
+    },
+    "roots": [
+      "StatementOfIncomeAndComprehensiveIncomeAbstract"
+    ],
+    "sections": {}
+  }
+}

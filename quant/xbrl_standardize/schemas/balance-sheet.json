@@ -1,0 +1,911 @@
+{
+	"mappingVersion": "2026-01-02.1",
+	"statement": "BalanceSheet",
+	"periodType": "instant",
+	"unit": "USD",
+	"notes": [
+		"Comprehensive Balance Sheet mapping for US GAAP + IFRS filers.",
+		"Priority structure: 150+ industry-specific, 120 IFRS, 110 US GAAP, 80-100 computed.",
+		"Banking balance sheets differ significantly: loans instead of AR, deposits instead of AP.",
+		"Insurance companies have unique asset structures (investments, reserves)."
+	],
+	"fields": {
+		"cash": {
+			"standardLabel": "cash",
+			"rules": [
+				{
+					"name": "Banks: Cash and cash equivalents (ML-optimized order)",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"BrokerDealers",
+						"Capital Markets"
+					],
+					"selectAny": [
+						"us-gaap:CashCashEquivalentsAndFederalFundsSold",
+						"us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+						"us-gaap:CashAndCashEquivalentsAtCarryingValue",
+						"us-gaap:CashAndDueFromBanks"
+					]
+				},
+				{
+					"name": "IFRS: Cash and cash equivalents",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CashAndCashEquivalents"
+					]
+				},
+				{
+					"name": "US GAAP: Cash and cash equivalents",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:CashAndCashEquivalentsAtCarryingValue",
+						"us-gaap:Cash",
+						"us-gaap:CashEquivalentsAtCarryingValue"
+					]
+				}
+			]
+		},
+		"shortTermInvestments": {
+			"standardLabel": "shortTermInvestments",
+			"rules": [
+				{
+					"name": "Banks: Trading securities + available-for-sale",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks"
+					],
+					"selectAny": [
+						"us-gaap:TradingSecurities",
+						"us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent"
+					]
+				},
+				{
+					"name": "IFRS: Current financial assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CurrentFinancialAssetsAtFairValueThroughProfitOrLoss",
+						"ifrs-full:CurrentFinancialAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Marketable securities current",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:MarketableSecuritiesCurrent",
+						"us-gaap:ShortTermInvestments",
+						"us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent"
+					]
+				}
+			]
+		},
+		"accountsReceivable": {
+			"standardLabel": "accountsReceivable",
+			"rules": [
+				{
+					"name": "Banks: Loans and financing receivables",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks"
+					],
+					"selectAny": [
+						"us-gaap:FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLoss",
+						"us-gaap:LoansAndLeasesReceivableNetReportedAmount",
+						"us-gaap:NotesAndLoansReceivableNetCurrent"
+					]
+				},
+				{
+					"name": "IFRS: Trade and other receivables",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:TradeAndOtherCurrentReceivables",
+						"ifrs-full:CurrentTradeReceivables"
+					]
+				},
+				{
+					"name": "US GAAP: Accounts receivable net",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:AccountsReceivableNetCurrent",
+						"us-gaap:ReceivablesNetCurrent",
+						"us-gaap:AccountsNotesAndLoansReceivableNetCurrent"
+					]
+				}
+			]
+		},
+		"inventory": {
+			"standardLabel": "inventory",
+			"rules": [
+				{
+					"name": "IFRS: Inventories",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:Inventories"
+					]
+				},
+				{
+					"name": "US GAAP: Inventory net",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:InventoryNet",
+						"us-gaap:InventoryGross"
+					]
+				}
+			]
+		},
+		"otherCurrentAssets": {
+			"standardLabel": "otherCurrentAssets",
+			"rules": [
+				{
+					"name": "IFRS: Other current assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:OtherCurrentAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Other current assets",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:OtherAssetsCurrent",
+						"us-gaap:PrepaidExpenseAndOtherAssetsCurrent"
+					]
+				}
+			]
+		},
+		"totalCurrentAssets": {
+			"standardLabel": "totalCurrentAssets",
+			"rules": [
+				{
+					"name": "IFRS: Current assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CurrentAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Current assets",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:AssetsCurrent"
+					]
+				},
+				{
+					"name": "Compute: Sum of current assets",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "cash"},
+								{"field": "shortTermInvestments"},
+								{"field": "accountsReceivable"},
+								{"field": "inventory"},
+								{"field": "otherCurrentAssets"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"propertyPlantEquipment": {
+			"standardLabel": "propertyPlantEquipment",
+			"rules": [
+				{
+					"name": "IFRS: Property, plant and equipment",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:PropertyPlantAndEquipment"
+					]
+				},
+				{
+					"name": "US GAAP: Property, plant and equipment net",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:PropertyPlantAndEquipmentNet",
+						"us-gaap:PropertyPlantAndEquipmentGross"
+					]
+				}
+			]
+		},
+		"goodwill": {
+			"standardLabel": "goodwill",
+			"rules": [
+				{
+					"name": "IFRS: Goodwill",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:Goodwill"
+					]
+				},
+				{
+					"name": "US GAAP: Goodwill",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:Goodwill"
+					]
+				}
+			]
+		},
+		"intangibleAssets": {
+			"standardLabel": "intangibleAssets",
+			"rules": [
+				{
+					"name": "IFRS: Intangible assets other than goodwill",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IntangibleAssetsOtherThanGoodwill"
+					]
+				},
+				{
+					"name": "US GAAP: Intangible assets net (total first, ML-optimized)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:FiniteLivedIntangibleAssetsNet",
+						"us-gaap:IntangibleAssetsNetExcludingGoodwill"
+					]
+				}
+			]
+		},
+		"longTermInvestments": {
+			"standardLabel": "longTermInvestments",
+			"rules": [
+				{
+					"name": "Banks: Long-term securities (AFS + HTM)",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks"
+					],
+					"selectAny": [
+						"us-gaap:MarketableSecurities",
+						"us-gaap:AvailableForSaleSecuritiesDebtSecurities"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:AvailableForSaleSecuritiesDebtSecurities"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLoss"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "IFRS: Non-current financial assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:NoncurrentFinancialAssets",
+						"ifrs-full:NoncurrentInvestments"
+					]
+				},
+				{
+					"name": "US GAAP: Long-term investments",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:MarketableSecuritiesNoncurrent",
+						"us-gaap:LongTermInvestments",
+						"us-gaap:InvestmentsAndAdvancesNoncurrent"
+					]
+				}
+			]
+		},
+		"otherNonCurrentAssets": {
+			"standardLabel": "otherNonCurrentAssets",
+			"rules": [
+				{
+					"name": "IFRS: Other non-current assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:OtherNoncurrentAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Other non-current assets",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:OtherAssetsNoncurrent",
+						"us-gaap:DeferredCostsNoncurrent"
+					]
+				}
+			]
+		},
+		"totalNonCurrentAssets": {
+			"standardLabel": "totalNonCurrentAssets",
+			"rules": [
+				{
+					"name": "IFRS: Non-current assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:NoncurrentAssets"
+					]
+				},
+				{
+					"name": "US GAAP: Non-current assets",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:AssetsNoncurrent"
+					]
+				},
+				{
+					"name": "Compute: Sum of non-current assets",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "propertyPlantEquipment"},
+								{"field": "goodwill"},
+								{"field": "intangibleAssets"},
+								{"field": "longTermInvestments"},
+								{"field": "otherNonCurrentAssets"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"totalAssets": {
+			"standardLabel": "totalAssets",
+			"rules": [
+				{
+					"name": "IFRS: Total assets",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:Assets"
+					]
+				},
+				{
+					"name": "US GAAP: Total assets",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:Assets"
+					]
+				},
+				{
+					"name": "Compute: Current + Non-current assets",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "totalCurrentAssets"},
+								{"field": "totalNonCurrentAssets"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"accountsPayable": {
+			"standardLabel": "accountsPayable",
+			"rules": [
+				{
+					"name": "IFRS: Trade and other payables",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:TradeAndOtherCurrentPayables",
+						"ifrs-full:CurrentTradePayables"
+					]
+				},
+				{
+					"name": "US GAAP: Accounts payable",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:AccountsPayableCurrent",
+						"us-gaap:AccountsPayableAndAccruedLiabilitiesCurrent"
+					]
+				}
+			]
+		},
+		"shortTermDebt": {
+			"standardLabel": "shortTermDebt",
+			"rules": [
+				{
+					"name": "Banks: Federal funds purchased + short-term borrowings",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks"
+					],
+					"selectAny": [
+						"us-gaap:FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase",
+						"us-gaap:OtherShortTermBorrowings",
+						"us-gaap:CommercialPaper"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:OtherShortTermBorrowings"
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "IFRS: Current borrowings",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CurrentBorrowings",
+						"ifrs-full:CurrentFinancialLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Short-term debt",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:ShortTermBorrowings",
+						"us-gaap:DebtCurrent",
+						"us-gaap:CommercialPaper"
+					]
+				}
+			]
+		},
+		"currentPortionLongTermDebt": {
+			"standardLabel": "currentPortionLongTermDebt",
+			"rules": [
+				{
+					"name": "IFRS: Current portion of long-term borrowings",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CurrentPortionOfLongTermBorrowings"
+					]
+				},
+				{
+					"name": "US GAAP: Long-term debt current",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:LongTermDebtCurrent",
+						"us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent"
+					]
+				}
+			]
+		},
+		"deposits": {
+			"standardLabel": "deposits",
+			"rules": [
+				{
+					"name": "Banks: Total deposits",
+					"priority": 150,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"Thrifts",
+						"Savings"
+					],
+					"selectAny": [
+						"us-gaap:Deposits"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"conceptAny": [
+										"us-gaap:NoninterestBearingDepositLiabilitiesDomestic",
+										"us-gaap:NoninterestBearingDepositLiabilities"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:InterestBearingDepositLiabilitiesDomestic",
+										"us-gaap:InterestBearingDepositLiabilities"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:NoninterestBearingDepositLiabilitiesForeign"
+									]
+								},
+								{
+									"conceptAny": [
+										"us-gaap:InterestBearingDepositLiabilitiesForeign"
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"otherCurrentLiabilities": {
+			"standardLabel": "otherCurrentLiabilities",
+			"rules": [
+				{
+					"name": "IFRS: Other current liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:OtherCurrentLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Other current liabilities",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:OtherLiabilitiesCurrent",
+						"us-gaap:AccruedLiabilitiesCurrent"
+					]
+				}
+			]
+		},
+		"totalCurrentLiabilities": {
+			"standardLabel": "totalCurrentLiabilities",
+			"rules": [
+				{
+					"name": "IFRS: Current liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:CurrentLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Current liabilities",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:LiabilitiesCurrent"
+					]
+				},
+				{
+					"name": "Banks: Compute with deposits (WARNING: approximation)",
+					"priority": 90,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks"
+					],
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "deposits"},
+								{"field": "shortTermDebt"},
+								{"field": "otherCurrentLiabilities"}
+							]
+						}
+					]
+				},
+				{
+					"name": "Compute: Sum of current liabilities (non-banks)",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "accountsPayable"},
+								{"field": "shortTermDebt"},
+								{"field": "currentPortionLongTermDebt"},
+								{"field": "otherCurrentLiabilities"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"longTermDebt": {
+			"standardLabel": "longTermDebt",
+			"rules": [
+				{
+					"name": "IFRS: Non-current borrowings",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:NoncurrentBorrowings",
+						"ifrs-full:NoncurrentFinancialLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Long-term debt (totals first, ML-optimized)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:LongTermDebt",
+						"us-gaap:LongTermDebtAndCapitalLeaseObligations",
+						"us-gaap:LongTermDebtNoncurrent"
+					]
+				}
+			]
+		},
+		"deferredTaxLiabilities": {
+			"standardLabel": "deferredTaxLiabilities",
+			"rules": [
+				{
+					"name": "IFRS: Deferred tax liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:DeferredTaxLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Deferred tax liabilities non-current",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:DeferredTaxLiabilitiesNoncurrent",
+						"us-gaap:DeferredIncomeTaxLiabilitiesNet"
+					]
+				}
+			]
+		},
+		"otherNonCurrentLiabilities": {
+			"standardLabel": "otherNonCurrentLiabilities",
+			"rules": [
+				{
+					"name": "IFRS: Other non-current liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:OtherNoncurrentLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Other non-current liabilities",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:OtherLiabilitiesNoncurrent",
+						"us-gaap:DeferredCreditsAndOtherLiabilitiesNoncurrent"
+					]
+				}
+			]
+		},
+		"totalNonCurrentLiabilities": {
+			"standardLabel": "totalNonCurrentLiabilities",
+			"rules": [
+				{
+					"name": "IFRS: Non-current liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:NoncurrentLiabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Non-current liabilities",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:LiabilitiesNoncurrent"
+					]
+				},
+				{
+					"name": "Compute: Sum of non-current liabilities",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "longTermDebt"},
+								{"field": "deferredTaxLiabilities"},
+								{"field": "otherNonCurrentLiabilities"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"totalLiabilities": {
+			"standardLabel": "totalLiabilities",
+			"rules": [
+				{
+					"name": "IFRS: Total liabilities",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:Liabilities"
+					]
+				},
+				{
+					"name": "US GAAP: Total liabilities",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:Liabilities"
+					]
+				},
+				{
+					"name": "Compute: Current + Non-current liabilities",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "totalCurrentLiabilities"},
+								{"field": "totalNonCurrentLiabilities"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"commonStock": {
+			"standardLabel": "commonStock",
+			"rules": [
+				{
+					"name": "IFRS: Issued capital",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:IssuedCapital"
+					]
+				},
+				{
+					"name": "US GAAP: Common stock value",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:CommonStockValue",
+						"us-gaap:CommonStockIncludingAdditionalPaidInCapital"
+					]
+				}
+			]
+		},
+		"additionalPaidInCapital": {
+			"standardLabel": "additionalPaidInCapital",
+			"rules": [
+				{
+					"name": "IFRS: Share premium",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:SharePremium"
+					]
+				},
+				{
+					"name": "US GAAP: Additional paid-in capital",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:AdditionalPaidInCapital",
+						"us-gaap:AdditionalPaidInCapitalCommonStock"
+					]
+				}
+			]
+		},
+		"retainedEarnings": {
+			"standardLabel": "retainedEarnings",
+			"rules": [
+				{
+					"name": "IFRS: Retained earnings",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:RetainedEarnings"
+					]
+				},
+				{
+					"name": "US GAAP: Retained earnings (accumulated deficit)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:RetainedEarningsAccumulatedDeficit",
+						"us-gaap:RetainedEarningsUnappropriated"
+					]
+				}
+			]
+		},
+		"treasuryStock": {
+			"standardLabel": "treasuryStock",
+			"rules": [
+				{
+					"name": "US GAAP: Treasury stock value (monetary)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:TreasuryStockValue",
+						"us-gaap:TreasuryStockCommonValue"
+					]
+				}
+			]
+		},
+		"accumulatedOtherComprehensiveIncome": {
+			"standardLabel": "accumulatedOtherComprehensiveIncome",
+			"rules": [
+				{
+					"name": "IFRS: Other components of equity (OCI)",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:OtherComponentsOfEquity",
+						"ifrs-full:ReserveOfExchangeDifferencesOnTranslation"
+					]
+				},
+				{
+					"name": "US GAAP: Accumulated OCI (balance sheet stock)",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+					]
+				}
+			]
+		},
+		"totalEquity": {
+			"standardLabel": "totalEquity",
+			"rules": [
+				{
+					"name": "IFRS: Total equity",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:Equity"
+					]
+				},
+				{
+					"name": "US GAAP: Stockholders' equity",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:StockholdersEquity",
+						"us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+					]
+				},
+				{
+					"name": "Compute: Common stock + APIC + Retained - Treasury + AOCI",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "sub",
+							"terms": [
+								{
+									"op": "add",
+									"terms": [
+										{"field": "commonStock"},
+										{"field": "additionalPaidInCapital"},
+										{"field": "retainedEarnings"},
+										{"field": "accumulatedOtherComprehensiveIncome"}
+									]
+								},
+								{"field": "treasuryStock"}
+							]
+						}
+					]
+				}
+			]
+		},
+		"totalLiabilitiesAndEquity": {
+			"standardLabel": "totalLiabilitiesAndEquity",
+			"rules": [
+				{
+					"name": "IFRS: Total liabilities and equity",
+					"priority": 120,
+					"selectAny": [
+						"ifrs-full:LiabilitiesAndEquity"
+					]
+				},
+				{
+					"name": "US GAAP: Total liabilities and stockholders' equity",
+					"priority": 110,
+					"selectAny": [
+						"us-gaap:LiabilitiesAndStockholdersEquity"
+					]
+				},
+				{
+					"name": "Compute: Total liabilities + Total equity",
+					"priority": 80,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{"field": "totalLiabilities"},
+								{"field": "totalEquity"}
+							]
+						}
+					]
+				}
+			]
+		}
+	}
+}
