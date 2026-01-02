@@ -1,5 +1,5 @@
 {
-	"mappingVersion": "2026-01-02.1",
+	"mappingVersion": "2026-01-02.2",
 	"statement": "IncomeStatement",
 	"periodType": "duration",
 	"unit": "USD",
@@ -7,6 +7,8 @@
 		"Comprehensive SEC-focused IncomeStatement mapping for US GAAP + IFRS filers.",
 		"Engine: evaluate rules by descending priority. For each rule: try selectAny (first non-null), else computeAny (first fully-resolved expression).",
 		"For bank-style statements, EBIT is defined as pretaxIncome (interest income/expense are operating lines).",
+		"Basic and diluted shares are fundamentally different metrics - no cross-fallbacks allowed to prevent incorrect EPS calculations.",
+		"When a rule has both selectAny and computeAny, selectAny is evaluated first; if it returns null, computeAny is tried.",
 		"Avoid using us-gaap:CostsAndExpenses as operating expense (often includes COGS); if you need it, add a separate 'totalExpenses' field in your app.",
 		"This file lists only standard taxonomy concepts (us-gaap:, ifrs-full:). Company extension concepts are not included; handle them with company-specific overlays if needed."
 	],
@@ -123,7 +125,7 @@
 					]
 				},
 				{
-					"name": "REIT / real estate (rental + other)",
+					"name": "REIT / real estate (use comprehensive revenue concept)",
 					"priority": 150,
 					"industryHints": [
 						"REIT",
@@ -133,26 +135,8 @@
 					],
 					"selectAny": [
 						"us-gaap:RealEstateRevenueNet",
-						"us-gaap:RentalIncome",
-						"us-gaap:Revenues"
-					],
-					"computeAny": [
-						{
-							"op": "add",
-							"terms": [
-								{
-									"conceptAny": [
-										"us-gaap:RentalIncome"
-									]
-								},
-								{
-									"conceptAny": [
-										"us-gaap:OtherRevenues",
-										"us-gaap:Revenues"
-									]
-								}
-							]
-						}
+						"us-gaap:Revenues",
+						"us-gaap:RentalIncome"
 					]
 				},
 				{
@@ -287,7 +271,14 @@
 					]
 				},
 				{
-					"name": "IFRS: Admin + distribution (proxy for SG&A)",
+					"name": "IFRS: SG&A direct concepts",
+					"priority": 135,
+					"selectAny": [
+						"ifrs-full:SellingGeneralAndAdministrativeExpense"
+					]
+				},
+				{
+					"name": "IFRS: Compute Admin + distribution (proxy for SG&A)",
 					"priority": 130,
 					"computeAny": [
 						{
@@ -305,10 +296,6 @@
 								}
 							]
 						}
-					],
-					"selectAny": [
-						"ifrs-full:AdministrativeExpense",
-						"ifrs-full:DistributionCosts"
 					]
 				},
 				{
@@ -351,8 +338,8 @@
 			"standardLabel": "totalOperatingExpense",
 			"rules": [
 				{
-					"name": "Banks: Noninterest expense (operating expenses)",
-					"priority": 140,
+					"name": "Banks: Noninterest expense (direct)",
+					"priority": 145,
 					"industryHints": [
 						"Bank",
 						"Banks",
@@ -365,6 +352,20 @@
 					],
 					"selectAny": [
 						"us-gaap:NoninterestExpense"
+					]
+				},
+				{
+					"name": "Banks: Compute noninterest expense from components",
+					"priority": 140,
+					"industryHints": [
+						"Bank",
+						"Banks",
+						"Diversified Banks",
+						"Regional Banks",
+						"BrokerDealers",
+						"Capital Markets",
+						"Consumer Finance",
+						"Credit Services"
 					],
 					"computeAny": [
 						{
@@ -429,12 +430,15 @@
 					]
 				},
 				{
-					"name": "IFRS: Operating expenses proxy",
-					"priority": 110,
+					"name": "IFRS: Operating expenses direct",
+					"priority": 115,
 					"selectAny": [
-						"ifrs-full:OtherOperatingExpenses",
-						"ifrs-full:AdministrativeExpense"
-					],
+						"ifrs-full:OtherOperatingExpenses"
+					]
+				},
+				{
+					"name": "IFRS: Compute operating expenses from components",
+					"priority": 110,
 					"computeAny": [
 						{
 							"op": "add",
@@ -548,12 +552,16 @@
 					]
 				},
 				{
-					"name": "US GAAP: Income tax expense/benefit",
-					"priority": 110,
+					"name": "US GAAP: Income tax expense/benefit (direct)",
+					"priority": 115,
 					"selectAny": [
 						"us-gaap:IncomeTaxExpenseBenefit",
 						"us-gaap:IncomeTaxExpenseBenefitContinuingOperations"
-					],
+					]
+				},
+				{
+					"name": "US GAAP: Compute tax from current + deferred",
+					"priority": 110,
 					"computeAny": [
 						{
 							"op": "add",
@@ -706,20 +714,6 @@
 											]
 										}
 									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"name": "Fallback: use pretax income",
-					"priority": 50,
-					"computeAny": [
-						{
-							"op": "id",
-							"terms": [
-								{
-									"field": "pretaxIncome"
 								}
 							]
 						}
@@ -877,6 +871,160 @@
 				}
 			]
 		},
+		"stockBasedCompensation": {
+			"standardLabel": "stockBasedCompensation",
+			"rules": [
+				{
+					"name": "US GAAP: Stock-based compensation expense",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:ShareBasedCompensation",
+						"us-gaap:AllocatedShareBasedCompensationExpense",
+						"us-gaap:EmployeeServiceShareBasedCompensationNonvested",
+						"us-gaap:ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross"
+					]
+				},
+				{
+					"name": "IFRS: Share-based payment expense",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:SharebasedPaymentExpense"
+					]
+				}
+			]
+		},
+		"interestIncome": {
+			"standardLabel": "interestIncome",
+			"rules": [
+				{
+					"name": "US GAAP: Interest income",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:InterestIncome",
+						"us-gaap:InterestIncomeOperating",
+						"us-gaap:InvestmentIncomeInterest",
+						"us-gaap:InterestAndDividendIncomeOperating",
+						"us-gaap:InvestmentIncomeInterestAndDividend"
+					]
+				},
+				{
+					"name": "IFRS: Finance income / investment income",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:FinanceIncome",
+						"ifrs-full:InterestIncome"
+					]
+				}
+			]
+		},
+		"incomeFromEquityMethodInvestments": {
+			"standardLabel": "incomeFromEquityMethodInvestments",
+			"rules": [
+				{
+					"name": "US GAAP: Income from equity method investments",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:IncomeLossFromEquityMethodInvestments",
+						"us-gaap:IncomeLossFromEquityMethodInvestmentsNetOfDividendsOrDistributions"
+					]
+				},
+				{
+					"name": "IFRS: Share of profit/loss of associates and JVs",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod",
+						"ifrs-full:ShareOfProfitLossOfAssociates"
+					]
+				}
+			]
+		},
+		"nonControllingInterest": {
+			"standardLabel": "nonControllingInterest",
+			"rules": [
+				{
+					"name": "US GAAP: Net income attributable to noncontrolling interest",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:NetIncomeLossAttributableToNoncontrollingInterest",
+						"us-gaap:ProfitLossAttributableToNoncontrollingInterest"
+					]
+				},
+				{
+					"name": "IFRS: Profit/loss attributable to NCI",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:ProfitLossAttributableToNoncontrollingInterests"
+					]
+				}
+			]
+		},
+		"discontinuedOperations": {
+			"standardLabel": "discontinuedOperations",
+			"rules": [
+				{
+					"name": "US GAAP: Income/loss from discontinued operations",
+					"priority": 120,
+					"selectAny": [
+						"us-gaap:IncomeLossFromDiscontinuedOperationsNetOfTax",
+						"us-gaap:DiscontinuedOperationIncomeLossFromDiscontinuedOperationDuringPhaseOutPeriodNetOfTax",
+						"us-gaap:DisposalGroupIncludingDiscontinuedOperationIncomeLossFromDiscontinuedOperationNetOfTax"
+					]
+				},
+				{
+					"name": "IFRS: Profit/loss from discontinued operations",
+					"priority": 110,
+					"selectAny": [
+						"ifrs-full:ProfitLossFromDiscontinuedOperations"
+					]
+				}
+			]
+		},
+		"ebitda": {
+			"standardLabel": "ebitda",
+			"rules": [
+				{
+					"name": "US GAAP: EBITDA (if reported directly)",
+					"priority": 130,
+					"selectAny": [
+						"us-gaap:EarningsBeforeInterestTaxesDepreciationAndAmortization"
+					]
+				},
+				{
+					"name": "Compute: EBIT + D&A",
+					"priority": 100,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"field": "ebit"
+								},
+								{
+									"field": "depreciationAndAmortization"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Compute: Operating income + D&A",
+					"priority": 90,
+					"computeAny": [
+						{
+							"op": "add",
+							"terms": [
+								{
+									"field": "operatingIncome"
+								},
+								{
+									"field": "depreciationAndAmortization"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		"earningsPerShareBasic": {
 			"standardLabel": "earningsPerShareBasic",
 			"rules": [
@@ -927,12 +1075,11 @@
 					"priority": 120,
 					"selectAny": [
 						"us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
-						"us-gaap:WeightedAverageNumberOfSharesIssuedBasic",
-						"us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+						"us-gaap:WeightedAverageNumberOfSharesIssuedBasic"
 					]
 				},
 				{
-					"name": "IFRS: Weighted average shares",
+					"name": "IFRS: Weighted average shares, basic",
 					"priority": 110,
 					"selectAny": [
 						"ifrs-full:WeightedAverageNumberOfOrdinarySharesOutstanding"
@@ -947,14 +1094,14 @@
 					"name": "US GAAP: Weighted average shares, diluted",
 					"priority": 120,
 					"selectAny": [
-						"us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
-						"us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+						"us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
 					]
 				},
 				{
-					"name": "IFRS: Weighted average shares (diluted)",
+					"name": "IFRS: Weighted average shares, diluted",
 					"priority": 110,
 					"selectAny": [
+						"ifrs-full:WeightedAverageNumberOfDilutedOrdinarySharesOutstanding",
 						"ifrs-full:WeightedAverageNumberOfOrdinarySharesOutstanding"
 					]
 				}
