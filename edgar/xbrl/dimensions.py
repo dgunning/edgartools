@@ -52,6 +52,11 @@ BREAKDOWN_AXES: Set[str] = {
     'FiniteLivedIntangibleAssetsByMajorClassAxis',
     'IndefiniteLivedIntangibleAssetsByMajorClassAxis',
 
+    # Equity method investment breakdowns (notes disclosure, not face)
+    # Shows assets/liabilities breakdown by investee - APD uses this
+    'EquityMethodInvestmentNonconsolidatedInvesteeAxis',
+    'srt:ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis',
+
     # Equity component axis - context-dependent (see STATEMENT_STRUCTURAL_AXES)
     # On Balance Sheet: breakdown (equity shown as direct line items)
     # On Statement of Equity: structural (it's the column axis)
