@@ -56,10 +56,10 @@ class TestIssue564XBRLPrecisionSelection:
         stmt = pfizer_10k_2017.statements.balance_sheet()
         raw_data = stmt.get_raw_data()
 
-        # Find Total Assets
+        # Find Total Assets (case-insensitive)
         total_assets_item = None
         for item in raw_data:
-            if item.get('label') == 'Total Assets':
+            if item.get('label', '').lower() == 'total assets':
                 total_assets_item = item
                 break
 
@@ -83,10 +83,10 @@ class TestIssue564XBRLPrecisionSelection:
         stmt = pfizer_10k_2018.statements.balance_sheet()
         raw_data = stmt.get_raw_data()
 
-        # Find Total Assets
+        # Find Total Assets (case-insensitive)
         total_assets_item = None
         for item in raw_data:
-            if item.get('label') == 'Total Assets':
+            if item.get('label', '').lower() == 'total assets':
                 total_assets_item = item
                 break
 
@@ -105,10 +105,10 @@ class TestIssue564XBRLPrecisionSelection:
         stmt = zoetis_10k_2018.statements.balance_sheet()
         raw_data = stmt.get_raw_data()
 
-        # Find Total Assets
+        # Find Total Assets (case-insensitive)
         total_assets_item = None
         for item in raw_data:
-            if item.get('label') == 'Total Assets':
+            if item.get('label', '').lower() == 'total assets':
                 total_assets_item = item
                 break
 
@@ -127,15 +127,15 @@ class TestIssue564XBRLPrecisionSelection:
         stmt = pfizer_10k_2017.statements.balance_sheet()
         raw_data = stmt.get_raw_data()
 
-        # Find Total Assets and Total Liabilities and Stockholders' Equity
+        # Find Total Assets and Total Liabilities and Stockholders' Equity (case-insensitive)
         total_assets = None
         total_liab_equity = None
 
         for item in raw_data:
-            label = item.get('label', '')
-            if label == 'Total Assets':
+            label = item.get('label', '').lower()
+            if label == 'total assets':
                 total_assets = item.get('values', {}).get('instant_2017-12-31')
-            elif 'Total Liabilities and' in label and 'Equity' in label:
+            elif 'total liabilities and' in label and 'equity' in label:
                 total_liab_equity = item.get('values', {}).get('instant_2017-12-31')
 
         assert total_assets is not None, "Total Assets not found"
