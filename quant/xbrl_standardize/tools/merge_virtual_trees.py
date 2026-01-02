@@ -10,11 +10,10 @@ Usage:
     python merge_virtual_trees.py --input-dir training/output --output map/virtual_trees_merged.json
 """
 
-import json
 import argparse
+import json
 from pathlib import Path
-from typing import Dict, List, Any
-from collections import defaultdict
+from typing import Any, Dict
 
 
 def load_virtual_trees(file_path: Path) -> Dict[str, Any]:

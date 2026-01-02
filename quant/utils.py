@@ -1,5 +1,4 @@
-"""
-TTM (Trailing Twelve Months) calculation module.
+"""TTM (Trailing Twelve Months) calculation module.
 
 Provides core logic for aggregating 4 consecutive quarters into trailing
 twelve month metrics. TTM calculations smooth seasonal variations and
@@ -12,6 +11,7 @@ Example:
     >>> ttm = facts.get_ttm_revenue()
     >>> print(f"TTM Revenue: ${ttm.value / 1e9:.1f}B")
     TTM Revenue: $391.0B
+
 """
 from dataclasses import dataclass
 from datetime import date
@@ -24,6 +24,7 @@ from edgar.entity.models import FinancialFact
 
 class DurationBucket:
     """Duration classification buckets for period facts."""
+
     QUARTER = "QUARTER"     # 70-120 days
     YTD_6M = "YTD_6M"       # 140-240 days
     YTD_9M = "YTD_9M"       # 230-330 days
@@ -33,8 +34,7 @@ class DurationBucket:
 
 @dataclass
 class TTMMetric:
-    """
-    Result of a TTM calculation.
+    """Result of a TTM calculation.
 
     Attributes:
         concept: XBRL concept identifier (e.g., 'us-gaap:Revenue')
@@ -47,7 +47,9 @@ class TTMMetric:
         has_gaps: True if quarters are not consecutive
         has_calculated_q4: True if Q4 was calculated from FY - (Q1+Q2+Q3)
         warning: Optional warning message about data quality
+
     """
+
     concept: str
     label: str
     value: float
@@ -70,8 +72,7 @@ class TTMMetric:
 
 
 class TTMCalculator:
-    """
-    Calculates TTM metrics from quarterly financial facts.
+    """Calculates TTM metrics from quarterly financial facts.
 
     TTM (Trailing Twelve Months) aggregates 4 consecutive quarters into a
     rolling 12-month metric. This provides a smoothed view of financial
@@ -82,20 +83,20 @@ class TTMCalculator:
         >>> ttm = calculator.calculate_ttm()
         >>> print(f"TTM: ${ttm.value:,.0f}")
         TTM: $391,035,000,000
+
     """
 
     def __init__(self, facts: List[FinancialFact]):
-        """
-        Initialize with list of facts for a single concept.
+        """Initialize with list of facts for a single concept.
 
         Args:
             facts: List of FinancialFact objects for one concept
+
         """
         self.facts = facts
 
     def calculate_ttm(self, as_of: Optional[date] = None) -> TTMMetric:
-        """
-        Calculate TTM value as of a specific date.
+        """Calculate TTM value as of a specific date.
 
         Selects the 4 most recent consecutive quarters ending on or before
         the as_of date and sums their values. Quarters are obtained via
@@ -115,8 +116,8 @@ class TTMCalculator:
             >>> ttm = calculator.calculate_ttm(as_of=date(2024, 3, 30))
             >>> print(ttm.periods)
             [(2023, 'Q3'), (2023, 'Q4'), (2024, 'Q1'), (2024, 'Q2')]
+
         """
-        from edgar.core import log
 
         # 1. Get quarterized facts (includes derived Q2, Q3, Q4 from YTD/annual)
         quarterly = self._filter_quarterly_facts()
@@ -162,8 +163,7 @@ class TTMCalculator:
         )
 
     def calculate_ttm_trend(self, periods: int = 8) -> pd.DataFrame:
-        """
-        Calculate rolling TTM values for multiple periods.
+        """Calculate rolling TTM values for multiple periods.
 
         Creates a time series of TTM values, with each row representing
         a different "as of" quarter. Useful for analyzing TTM trends
@@ -191,6 +191,7 @@ class TTMCalculator:
             Q2 2024          391.0B     0.042
             Q1 2024          390.0B     0.031
             ...
+
         """
         # 1. Filter to quarterly facts
         quarterly = self._filter_quarterly_facts()
@@ -249,8 +250,7 @@ class TTMCalculator:
         return df
 
     def _filter_quarterly_facts(self) -> List[FinancialFact]:
-        """
-        Get discrete quarterly facts.
+        """Get discrete quarterly facts.
 
         Returns both reported quarters (80-120 day periods) and quarters derived
         from YTD/annual facts. This handles the common filing pattern where Q2
@@ -269,15 +269,16 @@ class TTMCalculator:
             >>> # Company files: Q1 ($100B), YTD_6M ($220B), YTD_9M ($350B), FY ($480B)
             >>> quarters = calculator._filter_quarterly_facts()
             >>> # Returns: Q1 ($100B), Q2 ($120B), Q3 ($130B), Q4 ($130B)
+
         """
         return self._quarterize_facts()
 
     def _filter_annual_facts(self) -> List[FinancialFact]:
-        """
-        Filter to annual duration facts (~365 days).
+        """Filter to annual duration facts (~365 days).
 
         Returns:
             List of facts with duration between 350-380 days
+
         """
         annual = []
 
@@ -301,8 +302,7 @@ class TTMCalculator:
         return annual
 
     def _classify_duration(self, fact: FinancialFact) -> str:
-        """
-        Classify fact by duration bucket.
+        """Classify fact by duration bucket.
 
         Uses period_start and period_end to determine if fact represents
         a discrete quarter, YTD (year-to-date), or annual period.
@@ -318,6 +318,7 @@ class TTMCalculator:
             >>> bucket = calculator._classify_duration(fact)
             >>> print(bucket)
             'YTD_6M'  # 180 days
+
         """
         if not fact.period_start or not fact.period_end:
             return DurationBucket.OTHER
@@ -335,8 +336,7 @@ class TTMCalculator:
         bucket: str,
         require_duration: bool = True
     ) -> List[FinancialFact]:
-        """
-        Filter facts to specific duration bucket.
+        """Filter facts to specific duration bucket.
 
         Args:
             bucket: DurationBucket constant (QUARTER, YTD_6M, YTD_9M, or ANNUAL)
@@ -348,6 +348,7 @@ class TTMCalculator:
         Example:
             >>> quarters = calculator._filter_by_duration(DurationBucket.QUARTER)
             >>> ytd_6m = calculator._filter_by_duration(DurationBucket.YTD_6M)
+
         """
         filtered = []
         for fact in self.facts:
@@ -362,8 +363,7 @@ class TTMCalculator:
         return filtered
 
     def _is_additive_concept(self, fact: FinancialFact) -> bool:
-        """
-        Check if a fact represents an additive concept (safe for derivation).
+        """Check if a fact represents an additive concept (safe for derivation).
         
         Derivation (e.g., Q4 = FY - YTD_9M) relies on the concept being additive over time.
         Non-additive concepts cannot be subtracted to find a period-specific value.
@@ -378,42 +378,41 @@ class TTMCalculator:
         - Duration monetary flows (Revenue, Net Income) - truly additive
         """
         from edgar.core import log
-        
+
         # 1. Period Type Check - instant facts are never additive
         if fact.period_type == 'instant':
             log.debug(f"Skipping derivation for {fact.concept}: instant period type")
             return False
-        
+
         # 2. Unit Type Check
         if not fact.unit:
             return True  # Assume additive if no unit (rare)
-        
+
         from edgar.entity.unit_handling import UnitNormalizer, UnitType
         norm_unit = UnitNormalizer.normalize_unit(fact.unit)
         unit_type = UnitNormalizer.get_unit_type(norm_unit)
-        
+
         # Exclude Shares and Ratios
         if unit_type in (UnitType.SHARES, UnitType.RATIO):
             log.debug(f"Skipping derivation for {fact.concept}: unit type {unit_type}")
             return False
-        
+
         # Exclude Per Share metrics (EPS)
         # Note: get_unit_type maps per-share to CURRENCY, so check mappings directly
         if norm_unit in UnitNormalizer.PER_SHARE_MAPPINGS:
             log.debug(f"Skipping derivation for {fact.concept}: per-share unit")
             return False
-        
+
         # Additional keyword safety
         unit_lower = norm_unit.lower()
         if 'shares' in unit_lower or 'pure' in unit_lower or 'ratio' in unit_lower:
             log.debug(f"Skipping derivation for {fact.concept}: unit contains keyword")
             return False
-        
+
         return True
 
     def _quarterize_facts(self) -> List[FinancialFact]:
-        """
-        Convert YTD and annual facts into discrete quarters.
+        """Convert YTD and annual facts into discrete quarters.
 
         This method handles the common SEC filing pattern where companies report:
         - Q1 as discrete quarter (70-120 days)
@@ -429,6 +428,7 @@ class TTMCalculator:
         Returns:
             List of discrete quarterly facts (reported + derived), deduplicated
             and sorted by period_end
+
         """
         from edgar.core import log
 
@@ -516,12 +516,13 @@ class TTMCalculator:
         ytd_9m: List[FinancialFact],
         annual: List[FinancialFact]
     ) -> List[FinancialFact]:
+        from dataclasses import replace
+
         from edgar.core import log
         from edgar.entity.enhanced_statement import (
             calculate_fiscal_year_for_label,
             detect_fiscal_year_end,
         )
-        from dataclasses import replace
         derived = []
         fiscal_year_end_month = detect_fiscal_year_end(self.facts)
         for fy in annual:
@@ -614,8 +615,7 @@ class TTMCalculator:
         shares_facts: List[FinancialFact],
         eps_concept: str = 'us-gaap:EarningsPerShareBasic'
     ) -> List[FinancialFact]:
-        """
-        Calculate EPS for derived quarters using Net Income / Weighted Avg Shares.
+        """Calculate EPS for derived quarters using Net Income / Weighted Avg Shares.
         
         This method provides accurate Q4 EPS calculation by:
         1. Deriving Q4 Net Income (additive, safe to derive)
@@ -629,29 +629,30 @@ class TTMCalculator:
         
         Returns:
             List of derived EPS FinancialFact objects for Q4 periods
+
         """
         from edgar.core import log
-        
+
         derived_eps = []
-        
+
         # Step 1: Get Q4 Net Income facts (derived or reported)
         ni_calculator = TTMCalculator(net_income_facts)
         ni_quarters = ni_calculator._quarterize_facts()
         q4_net_income = [q for q in ni_quarters if q.fiscal_period == 'Q4']
-        
+
         if not q4_net_income:
             log.debug("No derived Q4 Net Income found - cannot calculate Q4 EPS")
             return derived_eps
-        
+
         # Step 2: Get shares by period (FY and YTD9)
         shares_calculator = TTMCalculator(shares_facts)
         fy_shares_list = shares_calculator._filter_by_duration(DurationBucket.ANNUAL)
         ytd9_shares_list = shares_calculator._filter_by_duration(DurationBucket.YTD_9M)
-        
+
         # Build lookup by fiscal year
         fy_shares_by_year = {s.fiscal_year: s.numeric_value for s in fy_shares_list}
         ytd9_shares_by_year = {s.fiscal_year: s.numeric_value for s in ytd9_shares_list}
-        
+
         # Step 3: Calculate Q4 EPS
         for q4_ni in q4_net_income:
             eps_fact = self._calculate_single_q4_eps(
@@ -659,7 +660,7 @@ class TTMCalculator:
             )
             if eps_fact:
                 derived_eps.append(eps_fact)
-        
+
         return derived_eps
 
     def _calculate_single_q4_eps(
@@ -672,19 +673,19 @@ class TTMCalculator:
         from edgar.core import log
         from edgar.entity.mappings_loader import get_primary_statement
         fy = q4_ni.fiscal_year
-            
+
         if fy not in fy_shares_map or fy_shares_map[fy] <= 0:
             log.debug(f"No FY shares found for {fy} - cannot calculate Q4 EPS")
             return None
-            
+
         fy_shares = fy_shares_map[fy]
         ytd9_shares = ytd9_shares_map.get(fy)
         q4_shares = fy_shares # Default fallback
-            
+
         # Precise Q4 shares formula: Q4_WAS = 4 * FY_WAS - 3 * YTD9_WAS
         if ytd9_shares and ytd9_shares > 0:
             calculated_q4_shares = 4 * fy_shares - 3 * ytd9_shares
-            
+
             if calculated_q4_shares > 0:
                 q4_shares = calculated_q4_shares
                 share_change_pct = ((q4_shares - fy_shares) / fy_shares) * 100
@@ -694,9 +695,9 @@ class TTMCalculator:
                 log.debug(f"FY{fy}: Derived Q4 shares invalid ({calculated_q4_shares}), using FY shares")
         else:
             log.debug(f"FY{fy}: No YTD9 shares, using FY shares")
-        
+
         q4_eps_value = q4_ni.numeric_value / q4_shares
-        
+
         log.debug(f"Derived Q4 EPS for FY{fy}: ${q4_eps_value:.2f} "
                     f"(NI ${q4_ni.numeric_value/1e9:.2f}B / {q4_shares/1e9:.2f}B shares)")
 
@@ -727,8 +728,7 @@ class TTMCalculator:
         quarters: List[FinancialFact],
         before: date
     ) -> Optional[FinancialFact]:
-        """
-        Find the most recent quarter ending before a date.
+        """Find the most recent quarter ending before a date.
 
         Args:
             quarters: List of quarterly facts
@@ -740,6 +740,7 @@ class TTMCalculator:
         Example:
             >>> q1 = calculator._find_prior_quarter(quarters, before=date(2023, 6, 30))
             >>> # Returns Q1 ending 2023-03-31
+
         """
         candidates = [q for q in quarters if q.period_end < before]
         return max(candidates, key=lambda q: q.period_end) if candidates else None
@@ -749,8 +750,7 @@ class TTMCalculator:
         ytd_6m: List[FinancialFact],
         before: date
     ) -> Optional[FinancialFact]:
-        """
-        Find the most recent YTD_6M ending before a date.
+        """Find the most recent YTD_6M ending before a date.
 
         Args:
             ytd_6m: List of YTD_6M facts
@@ -762,6 +762,7 @@ class TTMCalculator:
         Example:
             >>> ytd6 = calculator._find_prior_ytd6(ytd_6m, before=date(2023, 9, 30))
             >>> # Returns YTD_6M ending 2023-06-30
+
         """
         candidates = [y for y in ytd_6m if y.period_end < before]
         return max(candidates, key=lambda y: y.period_end) if candidates else None
@@ -772,8 +773,7 @@ class TTMCalculator:
         period_start: date,
         before: date
     ) -> Optional[FinancialFact]:
-        """
-        Find YTD_9M with matching period_start (same fiscal year).
+        """Find YTD_9M with matching period_start (same fiscal year).
 
         Attempts to match period_start exactly to ensure Q4 derivation uses
         YTD_9M from the same fiscal year as the annual fact. Falls back to
@@ -794,6 +794,7 @@ class TTMCalculator:
             ...     before=date(2023, 12, 31)
             ... )
             >>> # Returns YTD_9M with period_start=2023-01-01
+
         """
         # First try exact period_start match (same fiscal year)
         candidates = [
@@ -815,14 +816,14 @@ class TTMCalculator:
         target_period: Optional[str] = None,
         period_start: Optional[date] = None
     ) -> FinancialFact:
-        """
-        Create a synthetic quarter fact from derivation.
+        """Create a synthetic quarter fact from derivation.
 
         Args:
             source_fact: Source YTD or annual fact
             derived_value: Calculated discrete quarter value
             derivation_method: Description of how value was derived
             target_period: Fiscal period label (e.g., 'Q2', 'Q4'). Defaults to source's.
+            period_start: Optional start date for the derived period
 
         Returns:
             New FinancialFact with derived value and metadata
@@ -834,6 +835,7 @@ class TTMCalculator:
             ...     "derived_q2_ytd6_minus_q1",
             ...     target_period="Q2"
             ... )
+
         """
         # Ensure statement_type is set (if None, builder rejects in _fact_belongs_to_statement fallback due to linkage rules)
         stmt_type = source_fact.statement_type
@@ -865,8 +867,7 @@ class TTMCalculator:
         self,
         facts: List[FinancialFact]
     ) -> List[FinancialFact]:
-        """
-        Keep latest fact per period_end (handles re-filings).
+        """Keep latest fact per period_end (handles re-filings).
 
         When multiple facts exist for the same period_end (due to amended
         filings or derivation), keeps the most recently filed version.
@@ -880,6 +881,7 @@ class TTMCalculator:
         Example:
             >>> dedup = calculator._deduplicate_by_period_end(all_quarters)
             >>> # Returns one fact per unique period_end date
+
         """
         by_end = {}
         for fact in facts:
@@ -894,8 +896,7 @@ class TTMCalculator:
         quarterly: List[FinancialFact],
         as_of: Optional[date]
     ) -> List[FinancialFact]:
-        """
-        Select 4 consecutive quarters ending on/before as_of date.
+        """Select 4 consecutive quarters ending on/before as_of date.
 
         Args:
             quarterly: List of quarterly facts
@@ -903,6 +904,7 @@ class TTMCalculator:
 
         Returns:
             List of 4 quarters in chronological order (oldest to newest)
+
         """
         # Sort by period_end descending (newest first)
         sorted_facts = sorted(quarterly, key=lambda f: f.period_end, reverse=True)
@@ -918,14 +920,14 @@ class TTMCalculator:
         return list(reversed(ttm_window))
 
     def _check_for_gaps(self, quarters: List[FinancialFact]) -> bool:
-        """
-        Check if quarters are consecutive (~90 days apart).
+        """Check if quarters are consecutive (~90 days apart).
 
         Args:
             quarters: List of quarters in chronological order
 
         Returns:
             True if gaps detected, False if quarters are consecutive
+
         """
         if len(quarters) < 2:
             return False
@@ -947,8 +949,7 @@ class TTMCalculator:
         ttm_quarters: List[FinancialFact],
         has_calculated_q4: bool = False
     ) -> Optional[str]:
-        """
-        Generate warning message if data quality issues exist.
+        """Generate warning message if data quality issues exist.
 
         Args:
             all_quarterly: All available quarterly facts
@@ -957,6 +958,7 @@ class TTMCalculator:
 
         Returns:
             Warning message string, or None if no issues
+
         """
         warnings = []
 
@@ -986,8 +988,7 @@ class TTMCalculator:
 
 @dataclass
 class TTMStatement:
-    """
-    TTM financial statement with multiple line items.
+    """TTM financial statement with multiple line items.
 
     Represents a full financial statement (Income Statement or Cash Flow
     Statement) calculated using TTM values for each line item.
@@ -998,7 +999,9 @@ class TTMStatement:
         items: List of line items with TTM values
         company_name: Company name
         cik: CIK number as string
+
     """
+
     statement_type: str
     as_of_date: date
     items: List[dict]  # [{label, values, concept, depth, is_total}, ...]
@@ -1007,11 +1010,11 @@ class TTMStatement:
     periods: Optional[List[Tuple[int, str]]] = None
 
     def to_dataframe(self) -> pd.DataFrame:
-        """
-        Convert statement to pandas DataFrame.
+        """Convert statement to pandas DataFrame.
 
         Returns:
             DataFrame with columns: label, periods..., depth, is_total
+
         """
         rows = []
         period_labels = [f"{fp} {fy}" for fy, fp in self.periods] if self.periods else ["TTM"]
@@ -1032,6 +1035,7 @@ class TTMStatement:
     def __rich__(self):
         """Rich console representation styled like core statements."""
         import shutil
+
         from rich import box
         from rich.console import Group
         from rich.padding import Padding
@@ -1155,19 +1159,18 @@ class TTMStatement:
 
 
 class TTMStatementBuilder:
-    """
-    Builds TTM statements from EntityFacts.
+    """Builds TTM statements from EntityFacts.
 
     Creates full financial statements (Income Statement, Cash Flow Statement)
     with TTM values calculated for each line item.
     """
 
     def __init__(self, entity_facts):
-        """
-        Initialize with EntityFacts instance.
+        """Initialize with EntityFacts instance.
 
         Args:
             entity_facts: EntityFacts object containing company financial data
+
         """
         self.facts = entity_facts
 
@@ -1177,8 +1180,7 @@ class TTMStatementBuilder:
         statement_type: str,
         as_of: Optional[date] = None
     ) -> TTMStatement:
-        """
-        Internal helper to build shared TTM statement logic.
+        """Internal helper to build shared TTM statement logic.
         
         Args:
             statement_method: Bound method to get multi-period statement (e.g. self.facts.income_statement)
@@ -1187,6 +1189,7 @@ class TTMStatementBuilder:
             
         Returns:
             Constructed TTMStatement
+
         """
         # Get multi-period statement to get structure
         multi_period = statement_method(periods=8, annual=False)
@@ -1431,8 +1434,7 @@ class TTMStatementBuilder:
         self,
         as_of: Optional[date] = None
     ) -> TTMStatement:
-        """
-        Build TTM income statement.
+        """Build TTM income statement.
 
         Creates a complete income statement using TTM values for each
         line item. Useful for comparing to annual 10-K statements.
@@ -1442,6 +1444,7 @@ class TTMStatementBuilder:
 
         Returns:
             TTMStatement with all income statement line items
+
         """
         return self._build_statement(
             self.facts.income_statement,
@@ -1453,14 +1456,14 @@ class TTMStatementBuilder:
         self,
         as_of: Optional[date] = None
     ) -> TTMStatement:
-        """
-        Build TTM cash flow statement.
+        """Build TTM cash flow statement.
 
         Args:
             as_of: Calculate TTM as of this date (None = most recent)
 
         Returns:
             TTMStatement with all cash flow statement line items
+
         """
         return self._build_statement(
             self.facts.cash_flow,
@@ -1472,12 +1475,12 @@ class TTMStatementBuilder:
 # Stock Split Adjustment Utilities
 # -----------------------------------------------------------------------------
 
-from typing import Any, Dict
 from dataclasses import replace
+from typing import Any, Dict
+
 
 def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
-    """
-    Detect stock splits from facts.
+    """Detect stock splits from facts.
     
     Identifies 'StockSplitConversionRatio' facts and filters for valid
     split events (rejecting filing lags and long-duration aggregations).
@@ -1485,7 +1488,7 @@ def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
     split_facts = [f for f in facts if 'StockSplitConversionRatio' in f.concept]
     splits = []
     seen_splits = set()
-    
+
     for f in split_facts:
         # Normalize: Ratio > 1 implies forward split (e.g. 10). Adjust by dividing older values.
         if f.numeric_value is not None and f.numeric_value > 0 and f.period_end:
@@ -1519,8 +1522,7 @@ def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
     return splits
 
 def apply_split_adjustments(facts: List[FinancialFact], splits: List[Dict[str, Any]]) -> List[FinancialFact]:
-    """
-    Apply retrospective split adjustments to per-share and share-count facts.
+    """Apply retrospective split adjustments to per-share and share-count facts.
     
     Adjusts:
     - Per-share metrics (EPS, Dividend/Share): Divided by cumulative ratio

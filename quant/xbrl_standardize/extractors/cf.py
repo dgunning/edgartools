@@ -5,12 +5,15 @@ Extracts balance sheet using cash-flow.json mapping.
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, Union
+
 import pandas as pd
+
 from edgar import Company, set_identity
 
 Number = Union[int, float]
@@ -202,15 +205,15 @@ def fallback_xbrl_query_facts(company: Company, needed_concepts: Set[str], force
     filing = company.get_filings(form=form).latest()
     xb = filing.xbrl()
     q = xb.query()
-    
+
     # Filter for duration facts
     if hasattr(q, "by_period_type"): q = q.by_period_type("duration")
     df = q.to_dataframe()
     if df.empty: raise RuntimeError("Fallback XBRL query returned no data.")
-    
+
     pe = pd.to_datetime(forced_period) if forced_period else pd.to_datetime(df["period_end"]).max()
     df = df[pd.to_datetime(df["period_end"]) == pe]
-    
+
     facts: Facts = {}
     for c in needed_concepts:
         rows = df[df["concept"].isin(concept_variants(c))]
@@ -237,7 +240,7 @@ def main():
 
     set_identity(args.identity)
     with open(args.mapping, "r") as f: mapping = json.load(f)
-    
+
     needed_concepts = set()
     for fspec in mapping.get("fields", {}).values():
         for rule in fspec.get("rules", []):

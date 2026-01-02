@@ -4,11 +4,12 @@ ML-Powered Mapping Auditor
 Identifies component-before-total issues and other semantic problems using ML learnings.
 """
 
-import json
 import argparse
-from pathlib import Path
-from typing import Dict, List, Tuple, Any, Optional
+import json
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 
 @dataclass
 class ConceptInfo:

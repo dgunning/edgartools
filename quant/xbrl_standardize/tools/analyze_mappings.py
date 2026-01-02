@@ -9,11 +9,11 @@ Usage:
     python analyze_mappings.py --core map/map_core.json --overlays map/map_overlays/*.json
 """
 
-import json
 import argparse
+import json
+from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
-from collections import defaultdict, Counter
+from typing import Any, Dict, List
 
 
 def load_mapping(file_path: Path) -> Dict[str, Any]:
@@ -180,11 +180,11 @@ def generate_report(
     report = []
     report.append("# Mapping Quality Analysis Report")
     report.append(f"\n**Generated**: {Path().resolve()}")
-    report.append(f"\n---\n")
+    report.append("\n---\n")
 
     # Coverage Section
     report.append("## 1. Coverage Analysis")
-    report.append(f"\n### Core Mapping")
+    report.append("\n### Core Mapping")
     report.append(f"- **Total Fields**: {core_analysis['coverage']['total_fields']}")
     report.append(f"- **Required Fields**: {core_analysis['coverage']['required_fields']}")
     report.append(f"- **Mapped Fields**: {core_analysis['coverage']['mapped_fields']}")
@@ -192,31 +192,31 @@ def generate_report(
     report.append(f"- **Fields with Fallbacks**: {core_analysis['coverage']['fields_with_fallbacks']} ({core_analysis['coverage']['fallback_rate']:.1%})")
 
     if core_analysis['coverage']['missing_required']:
-        report.append(f"\n**Missing Required Fields**:")
+        report.append("\n**Missing Required Fields**:")
         for field in core_analysis['coverage']['missing_required']:
             report.append(f"- `{field}`")
 
     # Confidence Section
-    report.append(f"\n## 2. Confidence Analysis")
-    report.append(f"\n### Distribution")
+    report.append("\n## 2. Confidence Analysis")
+    report.append("\n### Distribution")
     conf = core_analysis['confidence']
     report.append(f"- **High Confidence** (≥30%): {conf['high_confidence_count']}")
     report.append(f"- **Medium Confidence** (15-30%): {conf['medium_confidence_count']}")
     report.append(f"- **Low Confidence** (<15%): {conf['low_confidence_count']}")
-    report.append(f"\n### Occurrence Rates")
+    report.append("\n### Occurrence Rates")
     report.append(f"- **Mean**: {conf['mean_occurrence_rate']:.1%}")
     report.append(f"- **Min**: {conf['min_occurrence_rate'][1]:.1%} (`{conf['min_occurrence_rate'][0]}`)")
     report.append(f"- **Max**: {conf['max_occurrence_rate'][1]:.1%} (`{conf['max_occurrence_rate'][0]}`)")
 
     if conf['low_confidence_mappings']:
-        report.append(f"\n### Low Confidence Mappings")
+        report.append("\n### Low Confidence Mappings")
         report.append("| Field | Occurrence Rate |")
         report.append("|-------|----------------|")
         for field, rate in conf['low_confidence_mappings']:
             report.append(f"| `{field}` | {rate:.1%} |")
 
     # Conflicts Section
-    report.append(f"\n## 3. Conflict Analysis")
+    report.append("\n## 3. Conflict Analysis")
     conflicts = core_analysis['conflicts']
 
     if conflicts['conflicts']:
@@ -224,7 +224,7 @@ def generate_report(
         for concept, fields in conflicts['conflicts'].items():
             report.append(f"- `{concept}` ← {', '.join(f'`{f}`' for f in fields)}")
     else:
-        report.append(f"\n✅ **No conflicts found**")
+        report.append("\n✅ **No conflicts found**")
 
     if conflicts['missing_parents']:
         report.append(f"\n**Missing Parent Concepts** ({conflicts['missing_parent_count']}):")
@@ -235,7 +235,7 @@ def generate_report(
 
     # Sector Comparison Section
     if sector_analyses:
-        report.append(f"\n## 4. Sector Overlay Analysis")
+        report.append("\n## 4. Sector Overlay Analysis")
 
         for sector_analysis in sector_analyses:
             sector = sector_analysis['sector']
@@ -245,7 +245,7 @@ def generate_report(
             report.append(f"- **Sector-Specific**: {sector_analysis['sector_specific_count']}")
 
             if sector_analysis['overridden_fields']:
-                report.append(f"\n**Overridden Mappings**:")
+                report.append("\n**Overridden Mappings**:")
                 report.append("| Field | Core Concept | Sector Concept | Sector Occ | Global Occ |")
                 report.append("|-------|--------------|----------------|------------|------------|")
                 for override in sector_analysis['overridden_fields']:
@@ -258,7 +258,7 @@ def generate_report(
                     )
 
     # Recommendations Section
-    report.append(f"\n## 5. Recommendations")
+    report.append("\n## 5. Recommendations")
 
     recommendations = []
 
@@ -399,19 +399,19 @@ Examples:
     print("\n" + "="*70)
     print("✅ ANALYSIS COMPLETE")
     print("="*70)
-    print(f"\nKey Metrics:")
+    print("\nKey Metrics:")
     print(f"  Coverage: {coverage['coverage_rate']:.1%}")
     print(f"  High Confidence: {confidence['high_confidence_count']}/{len(core_mapping['fields'])}")
     print(f"  Conflicts: {conflicts['conflict_count']}")
 
     if coverage['coverage_rate'] >= 0.90 and conflicts['conflict_count'] == 0:
-        print(f"\n✅ Quality: EXCELLENT - Ready for production")
+        print("\n✅ Quality: EXCELLENT - Ready for production")
         return 0
     elif coverage['coverage_rate'] >= 0.75 and conflicts['conflict_count'] <= 2:
-        print(f"\n⚠️  Quality: GOOD - Minor issues to address")
+        print("\n⚠️  Quality: GOOD - Minor issues to address")
         return 0
     else:
-        print(f"\n❌ Quality: NEEDS IMPROVEMENT - Review report for details")
+        print("\n❌ Quality: NEEDS IMPROVEMENT - Review report for details")
         return 1
 
 

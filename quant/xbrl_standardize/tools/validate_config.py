@@ -9,19 +9,12 @@ Usage:
     python quant/xbrl_standardize/validate_config.py
 """
 
-from typing import Dict, List, Any
-import json
+from typing import Any, Dict
 
 
 def validate_sectors() -> Dict[str, Any]:
     """Validate sector configuration."""
-    from quant.xbrl_standardize import (
-        SECTORS,
-        SECTOR_PRIORITY,
-        get_all_sector_keys,
-        get_sector_by_sic,
-        validate_sector_key
-    )
+    from quant.xbrl_standardize import SECTOR_PRIORITY, SECTORS, get_all_sector_keys, get_sector_by_sic
 
     issues = []
     warnings = []
@@ -87,10 +80,8 @@ def validate_field_specs() -> Dict[str, Any]:
     """Validate field specifications."""
     from quant.xbrl_standardize.field_specs import (
         INCOME_STATEMENT_FIELDS,
-        FIELD_EVALUATION_ORDER,
-        FIELD_SPEC_METADATA,
+        get_field_candidates,
         validate_field_spec,
-        get_field_candidates
     )
 
     # Use built-in validation
@@ -135,8 +126,8 @@ def validate_field_specs() -> Dict[str, Any]:
 
 def validate_directories() -> Dict[str, Any]:
     """Validate directory structure."""
-    from quant.xbrl_standardize import get_map_dir, get_overlays_dir, get_output_dir
-    from pathlib import Path
+
+    from quant.xbrl_standardize import get_map_dir, get_overlays_dir
 
     issues = []
     created = []

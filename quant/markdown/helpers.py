@@ -14,7 +14,7 @@ Key features:
 
 import re
 from collections import deque
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 from bs4 import BeautifulSoup
 

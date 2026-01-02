@@ -9,11 +9,10 @@ Usage:
     python build_map_schema.py --trees map/virtual_trees_merged.json --output-dir map/
 """
 
-import json
 import argparse
+import json
 from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional
-from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def load_merged_trees(file_path: Path) -> Dict[str, Any]:
@@ -25,11 +24,7 @@ def load_merged_trees(file_path: Path) -> Dict[str, Any]:
 def load_field_specs():
     """Load field specifications from field_specs.py."""
     try:
-        from quant.xbrl_standardize.field_specs import (
-            INCOME_STATEMENT_FIELDS,
-            FIELD_EVALUATION_ORDER,
-            get_field_candidates
-        )
+        from quant.xbrl_standardize.field_specs import FIELD_EVALUATION_ORDER, INCOME_STATEMENT_FIELDS, get_field_candidates
         return INCOME_STATEMENT_FIELDS, FIELD_EVALUATION_ORDER, get_field_candidates
     except ImportError as e:
         print(f"❌ Failed to import field_specs: {e}")
@@ -417,7 +412,7 @@ Examples:
     print("\n" + "="*70)
     print("✅ MAP SCHEMA BUILD COMPLETE")
     print("="*70)
-    print(f"\nGenerated files:")
+    print("\nGenerated files:")
     print(f"  - Core: {core_output}")
     print(f"  - Overlays: {overlays_dir}/*.json")
 
