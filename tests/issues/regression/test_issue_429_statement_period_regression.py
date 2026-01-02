@@ -86,12 +86,15 @@ class TestIssue429StatementPeriodRegression(unittest.TestCase):
     
     @pytest.mark.regression
     def test_income_statement_returns_data(self):
-        """Test that income statement returns meaningful data (this was the main bug)"""
+        """Test that income statement returns meaningful data (this was the main bug)
+
+        Note: As of v5.7.0, include_dimensions defaults to False, so fewer rows.
+        """
         # Get Statement object (new default) and convert to DataFrame for testing
         stmt = self.current_period.income_statement()
         df = stmt.get_dataframe()
-        self.assertGreater(len(df), 30, 
-                          f"Income statement should have more than 30 rows, got {len(df)}")
+        self.assertGreater(len(df), 15,
+                          f"Income statement should have more than 15 rows, got {len(df)}")
         
         # Check for typical income statement items
         labels = df['label'].str.lower()
