@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.7.2] - 2026-01-02
+
+### Fixed
+
+- **Dimension Filtering for Balance Sheet Line Items** (Issues #568, #569)
+  - Fixed missing balance sheet items when `include_dimensions=False`
+  - Contra accounts (Treasury Stock, etc.) now correctly apply `preferred_sign`
+  - Equity Method Investment breakdowns are properly filtered
+  - Presentation-linkbase validation ensures face values are shown while hiding unnecessary breakdowns
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/statements.py`
+
+- **Statement of Equity Dimension Handling** (Issue #571 follow-up)
+  - Statement-type aware dimension filtering for Statement of Equity
+  - Structural equity dimensions (common stock, retained earnings components) preserved
+  - **Files**: `edgar/xbrl/statements.py`
+
+### Changed
+
+- **Enhanced Dimension Classification**
+  - Improved pattern-based detection for classifying dimensions as structural vs. breakdown
+  - Better handling of segment and geographic dimensions on face of statements
+  - **Files**: `edgar/xbrl/xbrl.py`
+
+### Summary
+
+Release 5.7.2 completes the dimension filtering improvements started in v5.7.0/v5.7.1. Balance sheets now correctly show all face-value line items while filtering out breakdown dimensions. This release is recommended for all users.
+
 ## [5.7.1] - 2026-01-01
 
 ### Fixed
