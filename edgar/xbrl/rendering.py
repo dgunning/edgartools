@@ -1234,7 +1234,8 @@ def render_statement(
     standard: bool = True,
     show_date_range: bool = False,
     show_comparisons: bool = True,
-    xbrl_instance: Optional[Any] = None
+    xbrl_instance: Optional[Any] = None,
+    include_dimensions: bool = False
 ) -> RenderedStatement:
     """
     Render a financial statement as a structured intermediate representation.
@@ -1248,6 +1249,9 @@ def render_statement(
         standard: Whether to use standardized concept labels (default: True)
         show_date_range: Whether to show full date ranges for duration periods (default: False)
         show_comparisons: Whether to show period-to-period comparisons (default: True)
+        include_dimensions: Whether to include dimensional segment data (default: False).
+            When False, only breakdown dimensions (geographic, segment) are filtered out.
+            Classification dimensions (PPE type, equity components) are always shown.
 
     Returns:
         RenderedStatement: A structured representation of the statement that can be rendered
@@ -1255,6 +1259,15 @@ def render_statement(
     """
     if entity_info is None:
         entity_info = {}
+
+    # Issue #569: Filter breakdown dimensions (geographic, segment) when include_dimensions=False
+    # Keep classification dimensions (PPE type, equity components) that appear on the face
+    if not include_dimensions:
+        from edgar.xbrl.dimensions import is_breakdown_dimension
+        statement_data = [
+            item for item in statement_data
+            if not item.get('is_dimension') or not is_breakdown_dimension(item)
+        ]
 
     # Filter out periods with only empty strings (Fix for Issue #408)
     # Apply to all major financial statement types that could have empty periods
