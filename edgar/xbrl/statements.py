@@ -306,8 +306,10 @@ class Statement:
             # Issue #569: Keep classification dimensions (PPE type, equity components) on face
             # Only filter out breakdown dimensions (geographic, segment, acquisition)
             # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
             if not include_dimensions and item.get('is_dimension'):
-                if is_breakdown_dimension(item, statement_type=self.canonical_type):
+                if is_breakdown_dimension(item, statement_type=self.canonical_type,
+                                          xbrl=self.xbrl, role_uri=self.role_or_type):
                     continue
 
             # Build base row
@@ -361,7 +363,11 @@ class Statement:
             row['abstract'] = item.get('is_abstract', False)
             row['dimension'] = item.get('is_dimension', False)
             # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
-            row['is_breakdown'] = is_breakdown_dimension(item, statement_type=self.canonical_type) if item.get('is_dimension') else False
+            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+            row['is_breakdown'] = is_breakdown_dimension(
+                item, statement_type=self.canonical_type,
+                xbrl=self.xbrl, role_uri=self.role_or_type
+            ) if item.get('is_dimension') else False
             # Issue #522: Add dimension_label for consistency with CurrentPeriodView
             row['dimension_label'] = item.get('full_dimension_label', '') if item.get('is_dimension', False) else None
 

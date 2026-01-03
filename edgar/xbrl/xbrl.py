@@ -1657,6 +1657,7 @@ class XBRL:
 
         # Render the statement
         # Issue #569: Pass include_dimensions to filter breakdown dimensions in render
+        # Issue #577/cf9o: Pass role_uri for definition linkbase-based filtering
         return render_statement(
             statement_data,
             periods_to_display,
@@ -1667,7 +1668,8 @@ class XBRL:
             show_date_range,
             show_comparisons=True,
             xbrl_instance=self,
-            include_dimensions=include_dimensions
+            include_dimensions=include_dimensions,
+            role_uri=found_role
         )
 
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
@@ -1920,6 +1922,125 @@ class XBRL:
         # Cache the result (including None values to avoid repeated lookups)
         self._currency_cache[cache_key] = currency_measure
         return currency_measure
+
+    # =========================================================================
+    # DEFINITION LINKBASE - DIMENSION VALIDATION
+    # =========================================================================
+
+    def get_valid_dimensions_for_role(self, role_uri: str) -> set:
+        """
+        Get axes (dimensions) that are valid for a statement role per definition linkbase.
+
+        The definition linkbase declares which dimensions are valid for each statement
+        via hypercube (table) definitions. This is the authoritative source for determining
+        whether a dimensional fact is a "face value" or a "breakdown".
+
+        Args:
+            role_uri: The statement role URI (e.g., "http://company.com/role/IncomeStatement")
+
+        Returns:
+            Set of axis element IDs that are valid for this role.
+            Returns empty set if no hypercube definitions exist for this role.
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> axes = xbrl.get_valid_dimensions_for_role(
+            ...     "http://www.boeing.com/role/ConsolidatedStatementsofOperations"
+            ... )
+            >>> print(axes)
+            {'srt_ProductOrServiceAxis'}
+        """
+        if not hasattr(self, '_valid_dimensions_cache'):
+            self._valid_dimensions_cache = {}
+
+        if role_uri in self._valid_dimensions_cache:
+            return self._valid_dimensions_cache[role_uri]
+
+        valid_axes = set()
+
+        # Get tables defined for this role
+        if role_uri in self.tables:
+            for table in self.tables[role_uri]:
+                valid_axes.update(table.axes)
+
+        self._valid_dimensions_cache[role_uri] = valid_axes
+        return valid_axes
+
+    def _normalize_axis_id(self, axis_id: str) -> str:
+        """
+        Normalize axis ID to consistent format for comparison.
+
+        Handles both formats:
+        - Underscore format: srt_ProductOrServiceAxis (from definition linkbase)
+        - Colon format: srt:ProductOrServiceAxis (from dimension metadata)
+
+        Returns the base axis name for comparison.
+        """
+        # Extract just the axis name (after prefix)
+        if ':' in axis_id:
+            return axis_id.split(':', 1)[1]
+        if '_' in axis_id:
+            # Handle cases like 'srt_ProductOrServiceAxis' -> 'ProductOrServiceAxis'
+            # But also handle 'us-gaap_StatementTable' correctly
+            parts = axis_id.split('_', 1)
+            if len(parts) == 2:
+                return parts[1]
+        return axis_id
+
+    def is_dimension_valid_for_role(self, dimension: str, role_uri: str) -> bool:
+        """
+        Check if a dimension (axis) is declared valid for a statement role.
+
+        This checks the definition linkbase hypercube declarations to determine
+        if a dimension should be treated as a "face value" dimension for this
+        statement (as opposed to a breakdown/detail dimension).
+
+        Args:
+            dimension: The dimension/axis name (e.g., "srt:ProductOrServiceAxis")
+            role_uri: The statement role URI
+
+        Returns:
+            True if the dimension is declared valid for this role's hypercubes.
+            False if not declared (meaning it's likely a breakdown dimension).
+
+        Example:
+            >>> xbrl.is_dimension_valid_for_role(
+            ...     "srt:ProductOrServiceAxis",
+            ...     "http://www.boeing.com/role/ConsolidatedStatementsofOperations"
+            ... )
+            True
+        """
+        valid_axes = self.get_valid_dimensions_for_role(role_uri)
+
+        if not valid_axes:
+            # No definition linkbase data for this role
+            return False
+
+        # Normalize the input dimension for comparison
+        dim_normalized = self._normalize_axis_id(dimension)
+
+        # Check if any valid axis matches
+        for axis in valid_axes:
+            axis_normalized = self._normalize_axis_id(axis)
+            if dim_normalized == axis_normalized:
+                return True
+
+        return False
+
+    def has_definition_linkbase_for_role(self, role_uri: str) -> bool:
+        """
+        Check if definition linkbase data exists for a statement role.
+
+        This is useful for determining whether to use definition linkbase-based
+        dimension filtering or fall back to heuristic-based filtering.
+
+        Args:
+            role_uri: The statement role URI
+
+        Returns:
+            True if hypercube/table definitions exist for this role.
+        """
+        return role_uri in self.tables and len(self.tables[role_uri]) > 0
 
     def __rich__(self):
         """Rich representation for pretty printing in console."""
