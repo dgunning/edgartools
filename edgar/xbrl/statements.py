@@ -368,8 +368,26 @@ class Statement:
                 item, statement_type=self.canonical_type,
                 xbrl=self.xbrl, role_uri=self.role_or_type
             ) if item.get('is_dimension') else False
-            # Issue #522: Add dimension_label for consistency with CurrentPeriodView
-            row['dimension_label'] = item.get('full_dimension_label', '') if item.get('is_dimension', False) else None
+
+            # Issue #574: Add structured dimension fields (axis, member, label)
+            # dimension_metadata is a list of dicts with 'dimension', 'member', 'member_label' keys
+            if item.get('is_dimension', False):
+                dim_metadata = item.get('dimension_metadata', [])
+                if dim_metadata:
+                    # Use first dimension (primary axis) for the columns
+                    primary_dim = dim_metadata[0]
+                    row['dimension_axis'] = primary_dim.get('dimension', '')
+                    row['dimension_member'] = primary_dim.get('member', '')
+                    row['dimension_label'] = primary_dim.get('member_label', '')
+                else:
+                    # Fallback to legacy format if metadata not available
+                    row['dimension_axis'] = None
+                    row['dimension_member'] = None
+                    row['dimension_label'] = item.get('full_dimension_label', '')
+            else:
+                row['dimension_axis'] = None
+                row['dimension_member'] = None
+                row['dimension_label'] = None
 
             df_rows.append(row)
 

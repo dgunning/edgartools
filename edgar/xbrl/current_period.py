@@ -492,8 +492,23 @@ class CurrentPeriodView:
                     row['is_breakdown'] = is_breakdown_dimension(
                         item, statement_type=statement_type, xbrl=self.xbrl, role_uri=role_uri
                     ) if is_dimension else False
-                    # Add dimension label (always include column for schema consistency)
-                    row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
+
+                    # Issue #574: Add structured dimension fields (axis, member, label)
+                    if is_dimension:
+                        dim_metadata = item.get('dimension_metadata', [])
+                        if dim_metadata:
+                            primary_dim = dim_metadata[0]
+                            row['dimension_axis'] = primary_dim.get('dimension', '')
+                            row['dimension_member'] = primary_dim.get('member', '')
+                            row['dimension_label'] = primary_dim.get('member_label', '')
+                        else:
+                            row['dimension_axis'] = None
+                            row['dimension_member'] = None
+                            row['dimension_label'] = item.get('full_dimension_label', '')
+                    else:
+                        row['dimension_axis'] = None
+                        row['dimension_member'] = None
+                        row['dimension_label'] = None
 
                     # Add metadata columns from lookup (Issue #522)
                     original_concept = item.get('concept', concept_name)
@@ -512,9 +527,10 @@ class CurrentPeriodView:
                     rows.append(row)
 
             if not rows:
-                # Create empty DataFrame with expected structure (Issue #522)
+                # Create empty DataFrame with expected structure (Issue #522, #574)
                 columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
-                           'dimension_label', 'balance', 'weight', 'preferred_sign',
+                           'is_breakdown', 'dimension_axis', 'dimension_member', 'dimension_label',
+                           'balance', 'weight', 'preferred_sign',
                            'parent_concept', 'parent_abstract_concept']
                 return pd.DataFrame(columns=columns)
 
@@ -990,8 +1006,23 @@ class CurrentPeriodStatement:
                     item, statement_type=self.canonical_type,
                     xbrl=self.xbrl, role_uri=self.role_or_type
                 ) if is_dimension else False
-                # Add dimension label (always include column for schema consistency)
-                row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
+
+                # Issue #574: Add structured dimension fields (axis, member, label)
+                if is_dimension:
+                    dim_metadata = item.get('dimension_metadata', [])
+                    if dim_metadata:
+                        primary_dim = dim_metadata[0]
+                        row['dimension_axis'] = primary_dim.get('dimension', '')
+                        row['dimension_member'] = primary_dim.get('member', '')
+                        row['dimension_label'] = primary_dim.get('member_label', '')
+                    else:
+                        row['dimension_axis'] = None
+                        row['dimension_member'] = None
+                        row['dimension_label'] = item.get('full_dimension_label', '')
+                else:
+                    row['dimension_axis'] = None
+                    row['dimension_member'] = None
+                    row['dimension_label'] = None
 
                 # Add metadata columns from lookup (Issue #522)
                 original_concept = item.get('concept', concept_name)
@@ -1010,9 +1041,10 @@ class CurrentPeriodStatement:
                 rows.append(row)
 
         if not rows:
-            # Create empty DataFrame with expected structure (Issue #522)
+            # Create empty DataFrame with expected structure (Issue #522, #574)
             columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
-                       'dimension_label', 'balance', 'weight', 'preferred_sign',
+                       'is_breakdown', 'dimension_axis', 'dimension_member', 'dimension_label',
+                       'balance', 'weight', 'preferred_sign',
                        'parent_concept', 'parent_abstract_concept']
             return pd.DataFrame(columns=columns)
 
