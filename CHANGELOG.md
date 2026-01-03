@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.7.4] - 2026-01-03
+
+### Added
+
+- **Structured Dimension Fields in Statement DataFrames** (Issue #574)
+  - Added `dimension_axis`, `dimension_member`, and `dimension_label` columns to statement DataFrames
+  - Provides clear separation of dimension metadata from financial concept data
+  - `dimension_axis`: Contains the axis name (e.g., `srt:ProductOrServiceAxis`)
+  - `dimension_member`: Contains the member QName (e.g., `us-gaap_ProductMember`)
+  - `dimension_label`: Contains the human-readable member label (e.g., `Product`)
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Cleaner data structure for dimensional analysis
+
+- **Definition Linkbase-Based Dimension Filtering** (Issue #577)
+  - Uses XBRL definition linkbase to determine which dimensions are valid for each statement
+  - Dimensions declared in hypercubes are treated as face values (not filtered out)
+  - Undeclared dimensions are treated as breakdowns (filtered when `include_dimensions=False`)
+  - Critical for filers like Boeing who report face values only through dimensional XBRL
+  - New XBRL methods: `has_definition_linkbase_for_role()`, `get_valid_dimensions_for_role()`, `is_dimension_valid_for_role()`
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/dimensions.py`
+  - **Impact**: More accurate dimension filtering based on XBRL specification
+
+- **Filter XBRL Structural Elements from DataFrames** (edgartools-03zg)
+  - Filters out XBRL structural artifacts (hypercube, dimension, member declarations)
+  - Cleaner DataFrames containing only financial data
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Cleaner output without technical XBRL elements
+
+### Fixed
+
+- **Statement of Equity Period Selection** (Issue #572, edgartools-rywt)
+  - Fixed period selection returning only 1 period instead of 3 fiscal years
+  - Equity and Comprehensive Income statements now correctly display 3 fiscal years
+  - Relaxed fact threshold (3 vs 10) for equity statements which have fewer facts per period
+  - **Files**: `edgar/xbrl/period_selector.py`
+  - **Impact**: Complete period data for equity statements
+
+- **8-K Item Parsing Validation**
+  - Added validation to filter invalid 8-K item numbers (e.g., "401", "404" from Section references)
+  - Valid formats: X.XX (e.g., "5.02") or legacy single digit (1-9)
+  - **Files**: `edgar/entity/filings.py`
+  - **Impact**: Accurate 8-K item extraction
+
+### Summary
+
+Release 5.7.4 introduces structured dimension fields and definition linkbase-based dimension filtering for more accurate XBRL data handling. Statement of Equity now correctly displays 3 fiscal years. This release is recommended for all users working with dimensional XBRL data.
+
 ## [5.7.3] - 2026-01-03
 
 ### Fixed
