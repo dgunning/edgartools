@@ -23,6 +23,7 @@ from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
+from edgar.xbrl.statements import is_xbrl_structural_element
 
 if TYPE_CHECKING:
     from edgar.xbrl.statements import Statement
@@ -459,6 +460,10 @@ class CurrentPeriodView:
             # Convert to DataFrame
             rows = []
             for item in statement_data:
+                # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+                if is_xbrl_structural_element(item):
+                    continue
+
                 is_dimension = item.get('is_dimension', False)
 
                 # Skip breakdown dimensions when include_dimensions=False
@@ -960,6 +965,10 @@ class CurrentPeriodStatement:
         # Convert to DataFrame format matching Statement.to_dataframe() schema
         rows = []
         for item in raw_data:
+            # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+            if is_xbrl_structural_element(item):
+                continue
+
             is_dimension = item.get('is_dimension', False)
 
             # Skip breakdown dimensions when include_dimensions=False

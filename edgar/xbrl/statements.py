@@ -15,6 +15,39 @@ from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
 
+# XBRL structural element patterns (Issue #03zg)
+# These are XBRL metadata, not financial data, and should be filtered from user-facing output
+STRUCTURAL_LABEL_PATTERNS = ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']
+STRUCTURAL_CONCEPT_SUFFIXES = ('Axis', 'Domain', 'Member', 'LineItems', 'Table')
+
+
+def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
+    """
+    Check if an item is an XBRL structural element that should be hidden from user output.
+
+    XBRL structural elements include:
+    - Axes: Dimensional axes like ProductOrServiceAxis
+    - Domains: Domain members like ProductsAndServicesDomain
+    - Tables: Hypercube tables like StatementTable
+    - Line Items: Container elements like StatementLineItems
+
+    These are internal XBRL constructs, not actual financial data.
+
+    Issue #03zg: Filter these from to_dataframe() output for cleaner presentation.
+    """
+    label = item.get('label', '')
+    concept = item.get('concept', '')
+
+    # Check label for bracket patterns (e.g., "[Axis]", "[Table]")
+    if any(pattern in label for pattern in STRUCTURAL_LABEL_PATTERNS):
+        return True
+
+    # Check concept name suffix (e.g., "ProductOrServiceAxis", "StatementTable")
+    if concept.endswith(STRUCTURAL_CONCEPT_SUFFIXES):
+        return True
+
+    return False
+
 
 @dataclass
 class StatementInfo:
@@ -302,6 +335,11 @@ class Statement:
         df_rows = []
 
         for item in raw_data:
+            # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+            # These are internal XBRL constructs, not financial data
+            if is_xbrl_structural_element(item):
+                continue
+
             # Skip breakdown dimensions when include_dimensions=False
             # Issue #569: Keep classification dimensions (PPE type, equity components) on face
             # Only filter out breakdown dimensions (geographic, segment, acquisition)
