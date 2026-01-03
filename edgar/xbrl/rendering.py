@@ -1237,7 +1237,8 @@ def render_statement(
     show_date_range: bool = False,
     show_comparisons: bool = True,
     xbrl_instance: Optional[Any] = None,
-    include_dimensions: bool = False
+    include_dimensions: bool = False,
+    role_uri: Optional[str] = None
 ) -> RenderedStatement:
     """
     Render a financial statement as a structured intermediate representation.
@@ -1254,6 +1255,7 @@ def render_statement(
         include_dimensions: Whether to include dimensional segment data (default: False).
             When False, only breakdown dimensions (geographic, segment) are filtered out.
             Classification dimensions (PPE type, equity components) are always shown.
+        role_uri: Role URI for definition linkbase-based dimension filtering (optional)
 
     Returns:
         RenderedStatement: A structured representation of the statement that can be rendered
@@ -1265,11 +1267,14 @@ def render_statement(
     # Issue #569: Filter breakdown dimensions (geographic, segment) when include_dimensions=False
     # Keep classification dimensions (PPE type, equity components) that appear on the face
     # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+    # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
     if not include_dimensions:
         from edgar.xbrl.dimensions import is_breakdown_dimension
         statement_data = [
             item for item in statement_data
-            if not item.get('is_dimension') or not is_breakdown_dimension(item, statement_type=statement_type)
+            if not item.get('is_dimension') or not is_breakdown_dimension(
+                item, statement_type=statement_type, xbrl=xbrl_instance, role_uri=role_uri
+            )
         ]
 
     # Filter out periods with only empty strings (Fix for Issue #408)

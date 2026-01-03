@@ -19,6 +19,9 @@ from httpx import AsyncClient, ConnectError, HTTPError, ReadTimeout, RequestErro
 from stamina import retry
 from tqdm import tqdm
 
+# Suppress stamina retry logging (e.g., "stamina.retry_scheduled" messages)
+logging.getLogger("stamina").setLevel(logging.ERROR)
+
 from edgar.core import get_edgar_data_directory, text_extensions
 from edgar.httpclient import async_http_client, http_client
 

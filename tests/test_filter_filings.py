@@ -51,3 +51,32 @@ def test_filter_by_filing_date(filings):
     filtered = filings.filter(date="2024-12-05")
     filing_dates = filtered.data['filing_date'].unique().to_pylist()
     assert filing_dates == [date(2024, 12, 5)]
+
+
+@pytest.mark.fast
+def test_filter_empty_table_does_not_raise(filings):
+    """Test that filtering an empty table doesn't raise ArrowTypeError.
+
+    This tests the fix for the bug where filtering filings for a date with no
+    published filings (e.g., holidays or future dates) would raise:
+    pyarrow.lib.ArrowTypeError: Array type doesn't match type of values set: string vs null
+    """
+    # Filter to get an empty result (date that has no filings)
+    empty_filings = filings.filter(filing_date="1900-01-01")
+    assert len(empty_filings) == 0
+
+    # Now apply additional filters to the empty result - this should not raise
+    result = empty_filings.filter(form="10-K")
+    assert len(result) == 0
+
+    result = empty_filings.filter(cik=12345)
+    assert len(result) == 0
+
+    result = empty_filings.filter(ticker="AAPL")
+    assert len(result) == 0
+
+    result = empty_filings.filter(exchange="NYSE")
+    assert len(result) == 0
+
+    result = empty_filings.filter(accession_number="0000000000-00-000000")
+    assert len(result) == 0

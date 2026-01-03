@@ -23,6 +23,7 @@ from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
+from edgar.xbrl.statements import is_xbrl_structural_element
 
 if TYPE_CHECKING:
     from edgar.xbrl.statements import Statement
@@ -436,6 +437,10 @@ class CurrentPeriodView:
             # Select appropriate period based on statement type
             period_filter = self._get_appropriate_period_for_statement(statement_type)
 
+            # Get role_uri for definition linkbase-based dimension filtering
+            # Issue #577/cf9o: Use authoritative hypercube data when available
+            _, role_uri, _ = self.xbrl.find_statement(statement_type)
+
             # Get raw statement data filtered to current period
             statement_data = self.xbrl.get_statement(statement_type, period_filter=period_filter)
 
@@ -455,13 +460,19 @@ class CurrentPeriodView:
             # Convert to DataFrame
             rows = []
             for item in statement_data:
+                # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+                if is_xbrl_structural_element(item):
+                    continue
+
                 is_dimension = item.get('is_dimension', False)
 
                 # Skip breakdown dimensions when include_dimensions=False
                 # Issue #569: Keep classification dimensions (PPE type, equity components) on face
                 # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+                # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
                 if not include_dimensions and is_dimension:
-                    if is_breakdown_dimension(item, statement_type=statement_type):
+                    if is_breakdown_dimension(item, statement_type=statement_type,
+                                              xbrl=self.xbrl, role_uri=role_uri):
                         continue
 
                 # Get the value for appropriate period
@@ -482,9 +493,27 @@ class CurrentPeriodView:
                     }
 
                     # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
-                    row['is_breakdown'] = is_breakdown_dimension(item, statement_type=statement_type) if is_dimension else False
-                    # Add dimension label (always include column for schema consistency)
-                    row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
+                    # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+                    row['is_breakdown'] = is_breakdown_dimension(
+                        item, statement_type=statement_type, xbrl=self.xbrl, role_uri=role_uri
+                    ) if is_dimension else False
+
+                    # Issue #574: Add structured dimension fields (axis, member, label)
+                    if is_dimension:
+                        dim_metadata = item.get('dimension_metadata', [])
+                        if dim_metadata:
+                            primary_dim = dim_metadata[0]
+                            row['dimension_axis'] = primary_dim.get('dimension', '')
+                            row['dimension_member'] = primary_dim.get('member', '')
+                            row['dimension_label'] = primary_dim.get('member_label', '')
+                        else:
+                            row['dimension_axis'] = None
+                            row['dimension_member'] = None
+                            row['dimension_label'] = item.get('full_dimension_label', '')
+                    else:
+                        row['dimension_axis'] = None
+                        row['dimension_member'] = None
+                        row['dimension_label'] = None
 
                     # Add metadata columns from lookup (Issue #522)
                     original_concept = item.get('concept', concept_name)
@@ -503,9 +532,10 @@ class CurrentPeriodView:
                     rows.append(row)
 
             if not rows:
-                # Create empty DataFrame with expected structure (Issue #522)
+                # Create empty DataFrame with expected structure (Issue #522, #574)
                 columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
-                           'dimension_label', 'balance', 'weight', 'preferred_sign',
+                           'is_breakdown', 'dimension_axis', 'dimension_member', 'dimension_label',
+                           'balance', 'weight', 'preferred_sign',
                            'parent_concept', 'parent_abstract_concept']
                 return pd.DataFrame(columns=columns)
 
@@ -935,13 +965,19 @@ class CurrentPeriodStatement:
         # Convert to DataFrame format matching Statement.to_dataframe() schema
         rows = []
         for item in raw_data:
+            # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+            if is_xbrl_structural_element(item):
+                continue
+
             is_dimension = item.get('is_dimension', False)
 
             # Skip breakdown dimensions when include_dimensions=False
             # Issue #569: Keep classification dimensions (PPE type, equity components) on face
             # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
             if not dims and is_dimension:
-                if is_breakdown_dimension(item, statement_type=self.canonical_type):
+                if is_breakdown_dimension(item, statement_type=self.canonical_type,
+                                          xbrl=self.xbrl, role_uri=self.role_or_type):
                     continue
 
             values = item.get('values', {})
@@ -974,9 +1010,28 @@ class CurrentPeriodStatement:
                 }
 
                 # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
-                row['is_breakdown'] = is_breakdown_dimension(item, statement_type=self.canonical_type) if is_dimension else False
-                # Add dimension label (always include column for schema consistency)
-                row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
+                # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+                row['is_breakdown'] = is_breakdown_dimension(
+                    item, statement_type=self.canonical_type,
+                    xbrl=self.xbrl, role_uri=self.role_or_type
+                ) if is_dimension else False
+
+                # Issue #574: Add structured dimension fields (axis, member, label)
+                if is_dimension:
+                    dim_metadata = item.get('dimension_metadata', [])
+                    if dim_metadata:
+                        primary_dim = dim_metadata[0]
+                        row['dimension_axis'] = primary_dim.get('dimension', '')
+                        row['dimension_member'] = primary_dim.get('member', '')
+                        row['dimension_label'] = primary_dim.get('member_label', '')
+                    else:
+                        row['dimension_axis'] = None
+                        row['dimension_member'] = None
+                        row['dimension_label'] = item.get('full_dimension_label', '')
+                else:
+                    row['dimension_axis'] = None
+                    row['dimension_member'] = None
+                    row['dimension_label'] = None
 
                 # Add metadata columns from lookup (Issue #522)
                 original_concept = item.get('concept', concept_name)
@@ -995,9 +1050,10 @@ class CurrentPeriodStatement:
                 rows.append(row)
 
         if not rows:
-            # Create empty DataFrame with expected structure (Issue #522)
+            # Create empty DataFrame with expected structure (Issue #522, #574)
             columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
-                       'dimension_label', 'balance', 'weight', 'preferred_sign',
+                       'is_breakdown', 'dimension_axis', 'dimension_member', 'dimension_label',
+                       'balance', 'weight', 'preferred_sign',
                        'parent_concept', 'parent_abstract_concept']
             return pd.DataFrame(columns=columns)
 

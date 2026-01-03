@@ -827,6 +827,12 @@ class XBRL:
             from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
             line_items = RevenueDeduplicator.deduplicate_statement_items(line_items)
 
+        # Issue #575: Reorder items so components appear before their totals
+        # This fixes cases where the presentation linkbase has incorrect ordering
+        # (e.g., IESC filing puts Cash at the end instead of with Current Assets)
+        if actual_statement_type == 'BalanceSheet':
+            line_items = self._reorder_by_calculation_parent(line_items)
+
         return line_items
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
@@ -1218,6 +1224,65 @@ class XBRL:
                                       should_display_dimensions, valid_dimensional_members)
 
     @staticmethod
+    def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Reorder line items so that components appear before their totals.
+
+        Issue #575: Some filings (e.g., IESC) have presentation linkbase orders that
+        put components after their totals (e.g., Cash at the end instead of with
+        Current Assets). This method uses the calculation_parent relationship to
+        move misplaced items to appear just before their calculation parent.
+
+        Args:
+            line_items: List of line items from the presentation tree
+
+        Returns:
+            Reordered list with components before their totals
+        """
+        if not line_items:
+            return line_items
+
+        # Build a concept -> index map
+        concept_to_index = {item['concept']: i for i, item in enumerate(line_items)}
+
+        # Find items that need to be moved (appear after their calculation parent)
+        items_to_move = []
+        for i, item in enumerate(line_items):
+            calc_parent = item.get('calculation_parent')
+            if calc_parent and calc_parent in concept_to_index:
+                parent_index = concept_to_index[calc_parent]
+                if i > parent_index:
+                    # This item appears after its parent - needs to be moved
+                    items_to_move.append((i, item, calc_parent))
+
+        if not items_to_move:
+            return line_items
+
+        # Remove items that need to be moved (in reverse order to preserve indices)
+        result = list(line_items)
+        for i, item, _ in sorted(items_to_move, key=lambda x: x[0], reverse=True):
+            result.pop(i)
+
+        # Re-insert items before their calculation parent
+        # Process in order of where they should be inserted
+        for _, item, calc_parent in sorted(items_to_move, key=lambda x: concept_to_index.get(x[2], 0)):
+            # Find current index of the calculation parent in the result
+            parent_index = None
+            for j, r_item in enumerate(result):
+                if r_item['concept'] == calc_parent:
+                    parent_index = j
+                    break
+
+            if parent_index is not None:
+                # Insert before the parent
+                result.insert(parent_index, item)
+            else:
+                # Parent not found (shouldn't happen), append at end
+                result.append(item)
+
+        return result
+
+    @staticmethod
     def _get_fact_precision(fact) -> int:
         """
         Get a numeric precision value for a fact based on its decimals attribute.
@@ -1592,6 +1657,7 @@ class XBRL:
 
         # Render the statement
         # Issue #569: Pass include_dimensions to filter breakdown dimensions in render
+        # Issue #577/cf9o: Pass role_uri for definition linkbase-based filtering
         return render_statement(
             statement_data,
             periods_to_display,
@@ -1602,7 +1668,8 @@ class XBRL:
             show_date_range,
             show_comparisons=True,
             xbrl_instance=self,
-            include_dimensions=include_dimensions
+            include_dimensions=include_dimensions,
+            role_uri=found_role
         )
 
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
@@ -1855,6 +1922,125 @@ class XBRL:
         # Cache the result (including None values to avoid repeated lookups)
         self._currency_cache[cache_key] = currency_measure
         return currency_measure
+
+    # =========================================================================
+    # DEFINITION LINKBASE - DIMENSION VALIDATION
+    # =========================================================================
+
+    def get_valid_dimensions_for_role(self, role_uri: str) -> set:
+        """
+        Get axes (dimensions) that are valid for a statement role per definition linkbase.
+
+        The definition linkbase declares which dimensions are valid for each statement
+        via hypercube (table) definitions. This is the authoritative source for determining
+        whether a dimensional fact is a "face value" or a "breakdown".
+
+        Args:
+            role_uri: The statement role URI (e.g., "http://company.com/role/IncomeStatement")
+
+        Returns:
+            Set of axis element IDs that are valid for this role.
+            Returns empty set if no hypercube definitions exist for this role.
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> axes = xbrl.get_valid_dimensions_for_role(
+            ...     "http://www.boeing.com/role/ConsolidatedStatementsofOperations"
+            ... )
+            >>> print(axes)
+            {'srt_ProductOrServiceAxis'}
+        """
+        if not hasattr(self, '_valid_dimensions_cache'):
+            self._valid_dimensions_cache = {}
+
+        if role_uri in self._valid_dimensions_cache:
+            return self._valid_dimensions_cache[role_uri]
+
+        valid_axes = set()
+
+        # Get tables defined for this role
+        if role_uri in self.tables:
+            for table in self.tables[role_uri]:
+                valid_axes.update(table.axes)
+
+        self._valid_dimensions_cache[role_uri] = valid_axes
+        return valid_axes
+
+    def _normalize_axis_id(self, axis_id: str) -> str:
+        """
+        Normalize axis ID to consistent format for comparison.
+
+        Handles both formats:
+        - Underscore format: srt_ProductOrServiceAxis (from definition linkbase)
+        - Colon format: srt:ProductOrServiceAxis (from dimension metadata)
+
+        Returns the base axis name for comparison.
+        """
+        # Extract just the axis name (after prefix)
+        if ':' in axis_id:
+            return axis_id.split(':', 1)[1]
+        if '_' in axis_id:
+            # Handle cases like 'srt_ProductOrServiceAxis' -> 'ProductOrServiceAxis'
+            # But also handle 'us-gaap_StatementTable' correctly
+            parts = axis_id.split('_', 1)
+            if len(parts) == 2:
+                return parts[1]
+        return axis_id
+
+    def is_dimension_valid_for_role(self, dimension: str, role_uri: str) -> bool:
+        """
+        Check if a dimension (axis) is declared valid for a statement role.
+
+        This checks the definition linkbase hypercube declarations to determine
+        if a dimension should be treated as a "face value" dimension for this
+        statement (as opposed to a breakdown/detail dimension).
+
+        Args:
+            dimension: The dimension/axis name (e.g., "srt:ProductOrServiceAxis")
+            role_uri: The statement role URI
+
+        Returns:
+            True if the dimension is declared valid for this role's hypercubes.
+            False if not declared (meaning it's likely a breakdown dimension).
+
+        Example:
+            >>> xbrl.is_dimension_valid_for_role(
+            ...     "srt:ProductOrServiceAxis",
+            ...     "http://www.boeing.com/role/ConsolidatedStatementsofOperations"
+            ... )
+            True
+        """
+        valid_axes = self.get_valid_dimensions_for_role(role_uri)
+
+        if not valid_axes:
+            # No definition linkbase data for this role
+            return False
+
+        # Normalize the input dimension for comparison
+        dim_normalized = self._normalize_axis_id(dimension)
+
+        # Check if any valid axis matches
+        for axis in valid_axes:
+            axis_normalized = self._normalize_axis_id(axis)
+            if dim_normalized == axis_normalized:
+                return True
+
+        return False
+
+    def has_definition_linkbase_for_role(self, role_uri: str) -> bool:
+        """
+        Check if definition linkbase data exists for a statement role.
+
+        This is useful for determining whether to use definition linkbase-based
+        dimension filtering or fall back to heuristic-based filtering.
+
+        Args:
+            role_uri: The statement role URI
+
+        Returns:
+            True if hypercube/table definitions exist for this role.
+        """
+        return role_uri in self.tables and len(self.tables[role_uri]) > 0
 
     def __rich__(self):
         """Rich representation for pretty printing in console."""

@@ -16,6 +16,17 @@ from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
+# Statement types that use equity/roll-forward period selection
+# These statements show changes in equity over time and need relaxed fact thresholds
+# (typically 4-11 facts per period vs 25+ for income statements)
+EQUITY_STATEMENT_TYPES = frozenset({
+    'StatementOfEquity',
+    'StatementOfStockholdersEquity',
+    'StatementOfChangesInEquity',
+    'ComprehensiveIncome',
+    'StatementOfComprehensiveIncome'
+})
+
 
 def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tuple[str, str]]:
     """
@@ -47,8 +58,11 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
         # Step 2: Statement-specific logic
         # Instant-based statements (point-in-time snapshots)
         instant_statement_types = {'BalanceSheet', 'ScheduleOfInvestments', 'FinancialHighlights'}
+
         if statement_type in instant_statement_types:
             candidate_periods = _select_balance_sheet_periods(filtered_periods, xbrl.entity_info, max_periods)
+        elif statement_type in EQUITY_STATEMENT_TYPES:
+            candidate_periods = _select_equity_statement_periods(filtered_periods, xbrl.entity_info, max_periods)
         else:  # Income/Cash Flow statements (duration-based)
             candidate_periods = _select_duration_periods(filtered_periods, xbrl.entity_info, max_periods)
 
@@ -172,6 +186,33 @@ def _select_balance_sheet_periods(periods: List[Dict], entity_info: Dict[str, An
             break
 
     return selected_periods
+
+
+def _select_equity_statement_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int) -> List[Tuple[str, str]]:
+    """
+    Select periods for Statement of Equity.
+
+    Statement of Equity uses the same period selection as Income Statement (duration periods),
+    but the rendering layer handles merging instant facts (beginning/ending balances) into
+    the same columns as duration facts (activity during the year).
+
+    SEC EDGAR XBRL Guide Section 7.13: Mixed instant/duration facts render in the same
+    column when dates align - this is handled at render time, not period selection.
+
+    SEC Regulation S-X Rule 3-04: Requires equity analysis for each period an income
+    statement is required (3 years for large filers).
+
+    Args:
+        periods: List of period dictionaries
+        entity_info: Entity information including fiscal year details
+        max_periods: Maximum number of periods to return
+
+    Returns:
+        List of (period_key, period_label) tuples for duration periods (fiscal years)
+    """
+    # Use the same logic as income statement - select duration periods
+    # The rendering layer will handle merging instant facts into the same columns
+    return _select_duration_periods(periods, entity_info, max_periods)
 
 
 def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int) -> List[Tuple[str, str]]:
@@ -514,6 +555,16 @@ ESSENTIAL_CONCEPT_PATTERNS = {
         ['FinancingCashFlow', 'NetCashProvidedByUsedInFinancingActivities',
          'CashProvidedByUsedInFinancingActivities']
     ],
+    # Statement of Equity patterns - uses roll-forward structure
+    'StatementOfEquity': [
+        ['StockholdersEquity', 'ShareholdersEquity', 'PartnersCapital', 'MembersEquity'],
+        ['Dividends', 'DividendsCommonStock', 'DividendsPreferredStock'],
+        ['StockIssuedDuringPeriod', 'StockRepurchased', 'ShareBasedCompensation']
+    ],
+    'ComprehensiveIncome': [
+        ['ComprehensiveIncome', 'ComprehensiveIncomeLoss', 'OtherComprehensiveIncome'],
+        ['NetIncome', 'NetIncomeLoss', 'ProfitLoss']
+    ],
     # Fund-specific statement patterns (for BDCs, closed-end funds, etc.)
     'ScheduleOfInvestments': [
         ['InvestmentOwnedAtFairValue', 'InvestmentsFairValueDisclosure', 'InvestmentOwnedAtCost'],
@@ -652,6 +703,9 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
 
     periods_with_data = []
 
+    # Equity statements typically have fewer facts per period (4-11 vs 25+ for income statements)
+    is_equity_statement = statement_type in EQUITY_STATEMENT_TYPES
+
     # Loop through candidates using pre-computed groups (no DataFrame conversions!)
     for period_key, period_label in candidate_periods:
         try:
@@ -661,6 +715,20 @@ def _filter_periods_with_sufficient_data(xbrl, candidate_periods: List[Tuple[str
 
             statement_fact_count = len(statement_facts)
             total_fact_count = len(period_facts)
+
+            # For equity statements, use relaxed fact count (typically 4-11 facts per period)
+            # This is lower than income statement because equity activity facts are fewer
+            # Some companies like AMZN have only 4 facts per period
+            if is_equity_statement:
+                equity_min_facts = 3  # Equity statements can have as few as 4 facts
+                if statement_fact_count >= equity_min_facts:
+                    periods_with_data.append((period_key, period_label))
+                    logger.debug("Period %s accepted as equity with %d facts",
+                               period_label, statement_fact_count)
+                else:
+                    logger.debug("Period %s skipped - equity with insufficient facts (%d < %d)",
+                               period_label, statement_fact_count, equity_min_facts)
+                continue
 
             # Check statement-specific threshold
             if statement_fact_count < statement_min_facts:

@@ -15,6 +15,39 @@ from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
 
+# XBRL structural element patterns (Issue #03zg)
+# These are XBRL metadata, not financial data, and should be filtered from user-facing output
+STRUCTURAL_LABEL_PATTERNS = ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']
+STRUCTURAL_CONCEPT_SUFFIXES = ('Axis', 'Domain', 'Member', 'LineItems', 'Table')
+
+
+def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
+    """
+    Check if an item is an XBRL structural element that should be hidden from user output.
+
+    XBRL structural elements include:
+    - Axes: Dimensional axes like ProductOrServiceAxis
+    - Domains: Domain members like ProductsAndServicesDomain
+    - Tables: Hypercube tables like StatementTable
+    - Line Items: Container elements like StatementLineItems
+
+    These are internal XBRL constructs, not actual financial data.
+
+    Issue #03zg: Filter these from to_dataframe() output for cleaner presentation.
+    """
+    label = item.get('label', '')
+    concept = item.get('concept', '')
+
+    # Check label for bracket patterns (e.g., "[Axis]", "[Table]")
+    if any(pattern in label for pattern in STRUCTURAL_LABEL_PATTERNS):
+        return True
+
+    # Check concept name suffix (e.g., "ProductOrServiceAxis", "StatementTable")
+    if concept.endswith(STRUCTURAL_CONCEPT_SUFFIXES):
+        return True
+
+    return False
+
 
 @dataclass
 class StatementInfo:
@@ -302,12 +335,19 @@ class Statement:
         df_rows = []
 
         for item in raw_data:
+            # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+            # These are internal XBRL constructs, not financial data
+            if is_xbrl_structural_element(item):
+                continue
+
             # Skip breakdown dimensions when include_dimensions=False
             # Issue #569: Keep classification dimensions (PPE type, equity components) on face
             # Only filter out breakdown dimensions (geographic, segment, acquisition)
             # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
             if not include_dimensions and item.get('is_dimension'):
-                if is_breakdown_dimension(item, statement_type=self.canonical_type):
+                if is_breakdown_dimension(item, statement_type=self.canonical_type,
+                                          xbrl=self.xbrl, role_uri=self.role_or_type):
                     continue
 
             # Build base row
@@ -361,9 +401,31 @@ class Statement:
             row['abstract'] = item.get('is_abstract', False)
             row['dimension'] = item.get('is_dimension', False)
             # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
-            row['is_breakdown'] = is_breakdown_dimension(item, statement_type=self.canonical_type) if item.get('is_dimension') else False
-            # Issue #522: Add dimension_label for consistency with CurrentPeriodView
-            row['dimension_label'] = item.get('full_dimension_label', '') if item.get('is_dimension', False) else None
+            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+            row['is_breakdown'] = is_breakdown_dimension(
+                item, statement_type=self.canonical_type,
+                xbrl=self.xbrl, role_uri=self.role_or_type
+            ) if item.get('is_dimension') else False
+
+            # Issue #574: Add structured dimension fields (axis, member, label)
+            # dimension_metadata is a list of dicts with 'dimension', 'member', 'member_label' keys
+            if item.get('is_dimension', False):
+                dim_metadata = item.get('dimension_metadata', [])
+                if dim_metadata:
+                    # Use first dimension (primary axis) for the columns
+                    primary_dim = dim_metadata[0]
+                    row['dimension_axis'] = primary_dim.get('dimension', '')
+                    row['dimension_member'] = primary_dim.get('member', '')
+                    row['dimension_label'] = primary_dim.get('member_label', '')
+                else:
+                    # Fallback to legacy format if metadata not available
+                    row['dimension_axis'] = None
+                    row['dimension_member'] = None
+                    row['dimension_label'] = item.get('full_dimension_label', '')
+            else:
+                row['dimension_axis'] = None
+                row['dimension_member'] = None
+                row['dimension_label'] = None
 
             df_rows.append(row)
 
