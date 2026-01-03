@@ -36,10 +36,10 @@ def test_msft_segment_member_values():
     dimensional_rows = df[df['dimension'] == True]
     assert len(dimensional_rows) > 10, f"Expected dimensional rows, found {len(dimensional_rows)}"
     
-    # Verify segment member concepts exist (these are the member definitions)
-    segment_concepts = ['us-gaap_ProductMember', 'us-gaap_ServiceOtherMember']
-    found_concepts = df[df['concept'].isin(segment_concepts)]
-    assert len(found_concepts) == 2, f"Expected 2 segment member concepts, found {len(found_concepts)}"
+    # Verify segment member values exist in dimension_member column (GH-574 moved these from concept)
+    segment_members = ['us-gaap_ProductMember', 'us-gaap_ServiceOtherMember']
+    found_members = df[df['dimension_member'].isin(segment_members)]
+    assert len(found_members) >= 2, f"Expected at least 2 segment member rows, found {len(found_members)}"
     
     # Verify dimensional revenue facts exist with actual values
     revenue_rows = df[

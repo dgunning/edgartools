@@ -29,9 +29,11 @@ def test_boeing_product_service_axis_not_breakdown():
     stmt = xbrl.statements.income_statement()
     df = stmt.to_dataframe(include_dimensions=False)
 
-    # Find rows with ProductOrServiceAxis
+    # Find rows with ProductOrServiceAxis (check dimension_axis column, not dimension_label)
+    # dimension_axis contains the axis name (e.g., 'srt:ProductOrServiceAxis')
+    # dimension_label contains the member label (e.g., 'Sales of products')
     product_service_rows = df[
-        df['dimension_label'].str.contains('ProductOrService', case=False, na=False)
+        df['dimension_axis'].str.contains('ProductOrService', case=False, na=False)
     ]
 
     # These should be included (not filtered out)
