@@ -827,6 +827,12 @@ class XBRL:
             from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
             line_items = RevenueDeduplicator.deduplicate_statement_items(line_items)
 
+        # Issue #575: Reorder items so components appear before their totals
+        # This fixes cases where the presentation linkbase has incorrect ordering
+        # (e.g., IESC filing puts Cash at the end instead of with Current Assets)
+        if actual_statement_type == 'BalanceSheet':
+            line_items = self._reorder_by_calculation_parent(line_items)
+
         return line_items
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
@@ -1216,6 +1222,65 @@ class XBRL:
         for child_id in node.children:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
                                       should_display_dimensions, valid_dimensional_members)
+
+    @staticmethod
+    def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Reorder line items so that components appear before their totals.
+
+        Issue #575: Some filings (e.g., IESC) have presentation linkbase orders that
+        put components after their totals (e.g., Cash at the end instead of with
+        Current Assets). This method uses the calculation_parent relationship to
+        move misplaced items to appear just before their calculation parent.
+
+        Args:
+            line_items: List of line items from the presentation tree
+
+        Returns:
+            Reordered list with components before their totals
+        """
+        if not line_items:
+            return line_items
+
+        # Build a concept -> index map
+        concept_to_index = {item['concept']: i for i, item in enumerate(line_items)}
+
+        # Find items that need to be moved (appear after their calculation parent)
+        items_to_move = []
+        for i, item in enumerate(line_items):
+            calc_parent = item.get('calculation_parent')
+            if calc_parent and calc_parent in concept_to_index:
+                parent_index = concept_to_index[calc_parent]
+                if i > parent_index:
+                    # This item appears after its parent - needs to be moved
+                    items_to_move.append((i, item, calc_parent))
+
+        if not items_to_move:
+            return line_items
+
+        # Remove items that need to be moved (in reverse order to preserve indices)
+        result = list(line_items)
+        for i, item, _ in sorted(items_to_move, key=lambda x: x[0], reverse=True):
+            result.pop(i)
+
+        # Re-insert items before their calculation parent
+        # Process in order of where they should be inserted
+        for _, item, calc_parent in sorted(items_to_move, key=lambda x: concept_to_index.get(x[2], 0)):
+            # Find current index of the calculation parent in the result
+            parent_index = None
+            for j, r_item in enumerate(result):
+                if r_item['concept'] == calc_parent:
+                    parent_index = j
+                    break
+
+            if parent_index is not None:
+                # Insert before the parent
+                result.insert(parent_index, item)
+            else:
+                # Parent not found (shouldn't happen), append at end
+                result.append(item)
+
+        return result
 
     @staticmethod
     def _get_fact_precision(fact) -> int:
