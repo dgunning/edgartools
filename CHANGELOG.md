@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.7.3] - 2026-01-03
+
+### Fixed
+
+- **Balance Sheet Item Ordering** (Issue #575)
+  - Fixed incorrect ordering of balance sheet items when using flat presentation linkbase
+  - IESC's 10-K had Cash appearing at bottom instead of top due to flat presentation structure
+  - Added `_reorder_by_calculation_parent()` method to enforce proper ordering based on calculation linkbase
+  - Balance sheet components now correctly appear before their totals
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Correct visual ordering of balance sheet line items
+
+- **Empty Filings Table ArrowTypeError** (Issue #576)
+  - Fixed ArrowTypeError when filtering filings for dates with no data
+  - Added early return when filtering results in empty table
+  - Proper empty table handling prevents type conversion errors
+  - **Files**: `edgar/_filings.py`
+  - **Impact**: Robust handling of empty filing results
+
+### Summary
+
+Release 5.7.3 is a patch release addressing two P0 bugs: balance sheet item ordering and empty filings table handling. Both issues have regression tests to prevent recurrence.
+
 ## [5.7.2] - 2026-01-02
 
 ### Fixed
