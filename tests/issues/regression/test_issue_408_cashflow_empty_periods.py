@@ -14,7 +14,8 @@ import pandas as pd
 METADATA_COLUMNS = [
     'concept', 'label', 'level', 'abstract', 'dimension',
     'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept',
-    'dimension_label', 'unit', 'point_in_time'
+    'dimension_label', 'unit', 'point_in_time',
+    'is_breakdown', 'dimension_axis', 'dimension_member'  # Added by GH-574
 ]
 
 

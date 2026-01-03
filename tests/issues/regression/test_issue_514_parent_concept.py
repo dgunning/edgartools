@@ -84,7 +84,8 @@ def test_parent_concept_with_metadata():
     all_metadata_cols = [
         'concept', 'label', 'balance', 'weight', 'preferred_sign',
         'parent_concept', 'parent_abstract_concept', 'level', 'abstract',
-        'dimension', 'unit', 'point_in_time', 'dimension_label', 'is_breakdown'
+        'dimension', 'unit', 'point_in_time', 'dimension_label', 'is_breakdown',
+        'dimension_axis', 'dimension_member'  # Added by GH-574
     ]
 
     # Verify parent columns don't interfere with period columns
