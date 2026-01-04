@@ -894,16 +894,71 @@ class FactsView:
 
                 # Add dimensions - handle both object and dict representation
                 if hasattr(context, 'dimensions') and context.dimensions:
-                    # Check if dimensions is a dict or an attribute
+                    dimensions_dict = None
                     if isinstance(context.dimensions, dict):
-                        for dim_name, dim_value in context.dimensions.items():
-                            dim_key = f"dim_{dim_name.replace(':', '_')}"
-                            fact_dict[dim_key] = dim_value
+                        dimensions_dict = context.dimensions
                     elif hasattr(context.dimensions, 'items'):
-                        # Handle case where dimensions has items() method but isn't a dict
-                        for dim_name, dim_value in context.dimensions.items():
+                        dimensions_dict = dict(context.dimensions.items())
+
+                    if dimensions_dict:
+                        # Add raw dim_ columns for backwards compatibility
+                        for dim_name, dim_value in dimensions_dict.items():
                             dim_key = f"dim_{dim_name.replace(':', '_')}"
                             fact_dict[dim_key] = dim_value
+
+                        # Issue #574: Add structured dimension fields (dimension, member, dimension_label)
+                        # Use the last dimension for member_label (most specific in multi-dimensional cases)
+                        dimension_metadata = []
+                        for dim_name, dim_value in dimensions_dict.items():
+                            dim_label = dim_name
+                            mem_label = dim_value
+
+                            # Look up human-readable dimension label from element catalog
+                            dim_name_normalized = dim_name.replace(':', '_')
+                            if dim_name_normalized in self.xbrl.element_catalog:
+                                dim_element = self.xbrl.element_catalog[dim_name_normalized]
+                                for role in ['http://www.xbrl.org/2003/role/terseLabel',
+                                             'http://www.xbrl.org/2003/role/label']:
+                                    if role in dim_element.labels:
+                                        dim_label = dim_element.labels[role]
+                                        break
+
+                            # Look up human-readable member label from element catalog
+                            dim_value_normalized = dim_value.replace(':', '_')
+                            if dim_value_normalized in self.xbrl.element_catalog:
+                                mem_element = self.xbrl.element_catalog[dim_value_normalized]
+                                for role in ['http://www.xbrl.org/2003/role/verboseLabel',
+                                             'http://www.xbrl.org/2003/role/terseLabel',
+                                             'http://www.xbrl.org/2003/role/label']:
+                                    if role in mem_element.labels:
+                                        mem_label = mem_element.labels[role]
+                                        break
+
+                            # Clean up labels (remove [Axis], [Member], etc.)
+                            dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
+                            mem_label = mem_label.replace('[Member]', '').strip()
+
+                            dimension_metadata.append({
+                                'dimension': dim_name,
+                                'member': dim_value,
+                                'dimension_label': dim_label,
+                                'member_label': mem_label
+                            })
+
+                        if dimension_metadata:
+                            # Use first dimension for axis/member (primary dimension)
+                            primary_dim = dimension_metadata[0]
+                            fact_dict['dimension'] = primary_dim['dimension']
+                            fact_dict['member'] = primary_dim['member']
+
+                            # Use last dimension's member_label (most specific for multi-dimensional)
+                            last_dim = dimension_metadata[-1]
+                            fact_dict['dimension_label'] = last_dim['member_label']
+
+                            # Full dimension label for backwards compatibility
+                            # Format: "Axis Label: Member Label" for each dimension
+                            full_labels = [f"{d['dimension_label']}: {d['member_label']}" for d in dimension_metadata]
+                            fact_dict['full_dimension_label'] = ", ".join(full_labels)
 
                 # Get period key from context_period_map if available
                 period_key = self.xbrl.context_period_map.get(fact.context_ref)
