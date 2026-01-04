@@ -244,10 +244,8 @@ class Statement:
         if Table is None:
             return str(self)
 
-        # Use matrix rendering for equity statements (Issue edgartools-uqg7)
-        if self._is_matrix_statement():
-            return self._render_matrix()
-
+        # Matrix rendering for equity statements is opt-in via to_dataframe(matrix=True)
+        # Automatic detection deferred to future release (Issue edgartools-uqg7)
         return self.render()
 
     def _is_matrix_statement(self) -> bool:
@@ -413,18 +411,22 @@ class Statement:
 
         # Abbreviate column headers for readability
         def abbreviate_member(member: str) -> str:
-            """Abbreviate long equity component names."""
+            """Abbreviate long equity component names for column headers."""
             member_lower = member.lower()
 
-            # Common stock variants
-            if 'common stock' in member_lower or 'paid-in capital' in member_lower or 'paid in capital' in member_lower:
-                if 'class a' in member_lower or 'class b' in member_lower or 'class c' in member_lower:
-                    return 'Common Stock\n& APIC'
-                return 'Common Stock\n& APIC'
+            # Common stock variants (with or without APIC)
+            if 'common stock' in member_lower and 'paid-in capital' in member_lower:
+                return 'Common\n& APIC'
+            if 'common stock' in member_lower:
+                return 'Common\nStock'
+            if 'paid-in capital' in member_lower or 'paid in capital' in member_lower:
+                return 'APIC'
 
-            # Retained earnings
+            # Retained earnings / Accumulated income
             if 'retained earnings' in member_lower or 'accumulated deficit' in member_lower:
                 return 'Retained\nEarnings'
+            if 'accumulated income' in member_lower and 'comprehensive' not in member_lower:
+                return 'Accum\nIncome'
 
             # AOCI
             if 'accumulated other comprehensive' in member_lower or 'aoci' in member_lower:
@@ -446,25 +448,22 @@ class Statement:
             if 'preferred' in member_lower:
                 return 'Preferred\nStock'
 
-            # Truncate unknown
+            # Right to recover (VISA specific)
+            if 'right to recover' in member_lower:
+                return 'Right to\nRecover'
+
+            # Truncate unknown - use two lines if long
+            if len(member) > 15:
+                words = member.split()
+                if len(words) >= 2:
+                    mid = len(words) // 2
+                    return ' '.join(words[:mid]) + '\n' + ' '.join(words[mid:])
             return member[:12] + '...' if len(member) > 12 else member
 
-        # Group columns by period for better organization
-        # Extract unique periods
-        periods = []
-        for col in value_cols:
-            if '|' in col:
-                _, period = col.rsplit('|', 1)
-                if period not in periods:
-                    periods.append(period)
-
         # Add equity component columns with abbreviated headers
+        # Columns are now just component names (no period suffix)
         for col in value_cols:
-            if '|' in col:
-                member, period = col.rsplit('|', 1)
-                header = f"{abbreviate_member(member)}\n{period}"
-            else:
-                header = abbreviate_member(col)
+            header = abbreviate_member(col)
             table.add_column(header, justify="right", no_wrap=True)
 
         # Add rows
@@ -521,14 +520,7 @@ class Statement:
 
     def __str__(self):
         """String representation using improved rendering with proper width."""
-        # Use matrix rendering for equity statements (Issue edgartools-uqg7)
-        if self._is_matrix_statement():
-            from rich.console import Console
-            console = Console(force_terminal=True, width=200)
-            with console.capture() as capture:
-                console.print(self._render_matrix())
-            return capture.get()
-
+        # Matrix rendering is opt-in via to_dataframe(matrix=True)
         rendered_statement = self.render()
         return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
@@ -1007,10 +999,11 @@ class Statement:
 
     def _pivot_to_matrix(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Pivot Statement of Equity DataFrame to matrix format.
+        Pivot Statement of Equity DataFrame to SEC-style matrix format.
 
-        Issue edgartools-uqg7: Transform equity statement to SEC-style matrix format
-        with equity components as columns and activities as rows.
+        Issue edgartools-uqg7: Transform equity statement to matrix format
+        with equity components as columns (not multiplied by periods) and
+        activities as rows. This matches how the SEC presents equity statements.
 
         Args:
             df: Standard flat DataFrame from _build_dataframe_from_raw_data
@@ -1048,8 +1041,6 @@ class Statement:
             return df
 
         # Filter to only PRIMARY equity components, exclude sub-breakdowns
-        # Primary: Common Stock, APIC, Retained Earnings, AOCI (aggregate), Treasury Stock
-        # Exclude: AOCI sub-components (Foreign Currency, Unrealized gains/losses, etc.)
         primary_patterns = [
             'common stock',
             'paid-in capital',
@@ -1057,18 +1048,15 @@ class Statement:
             'apic',
             'retained earnings',
             'accumulated deficit',
-            'accumulated other comprehensive',  # AOCI aggregate, not sub-components
+            'accumulated other comprehensive',
             'treasury stock',
             'preferred stock',
-            'class a',
-            'class b',
-            'class c',
+            'accumulated income',
+            'right to recover',
             'noncontrolling',
-            'total stockholders',
-            'total equity',
         ]
 
-        # Sub-breakdown patterns to exclude (children of AOCI, etc.)
+        # Sub-breakdown patterns to exclude
         exclude_patterns = [
             'foreign currency',
             'translation adjustment',
@@ -1080,30 +1068,32 @@ class Statement:
             'hedge',
             'reclassification',
             'derivative',
-            'investment',  # "Unrealized on investments"
+            'class a',  # Share class details
+            'class b',
+            'class c',
+            'series a',
+            'series b',
+            'series c',
         ]
 
         def is_primary_member(member: str) -> bool:
             member_lower = member.lower()
-            # Exclude sub-breakdowns
             if any(excl in member_lower for excl in exclude_patterns):
                 return False
-            # Check for primary patterns
             if any(prim in member_lower for prim in primary_patterns):
                 return True
-            # If no patterns match, include by default (conservative)
-            return True
+            return False  # Only include explicit primary patterns
 
         equity_members = [m for m in all_members if is_primary_member(m)]
 
         if not equity_members:
             return df
 
-        # Build matrix: rows = activities, columns = equity components × periods
-        # Group by concept to aggregate across equity components
-        matrix_rows = []
+        # SEC-style matrix: components as columns, one value per row
+        # Use only the most recent period for values
+        primary_period = period_cols[0]  # Most recent period
 
-        # Get non-dimensional rows (activity labels) - these become row headers
+        matrix_rows = []
         non_dim_df = df[~df['dimension'].fillna(False)]
 
         for _, row in non_dim_df.iterrows():
@@ -1117,28 +1107,20 @@ class Statement:
                 'abstract': row.get('abstract', False),
             }
 
-            # For each period, get values for each equity component
-            for period_col in period_cols:
-                # Get dimensional values for this concept and period
-                dim_values = df[
-                    (df['concept'] == concept) &
-                    (df['dimension_axis'].str.contains('StatementEquityComponentsAxis', na=False))
-                ]
+            # Get dimensional values for this concept
+            dim_values = df[
+                (df['concept'] == concept) &
+                (df['dimension_axis'].str.contains('StatementEquityComponentsAxis', na=False))
+            ]
 
-                for member in equity_members:
-                    member_row = dim_values[dim_values['dimension_member_label'] == member]
-                    if not member_row.empty:
-                        value = member_row[period_col].iloc[0]
-                    else:
-                        value = None
-
-                    # Column name: "Member | Period" for multi-period, or just "Member" for single
-                    if len(period_cols) == 1:
-                        col_name = member
-                    else:
-                        col_name = f"{member}|{period_col}"
-
-                    matrix_row[col_name] = value
+            # Fill in value for each equity component (single period)
+            for member in equity_members:
+                member_row = dim_values[dim_values['dimension_member_label'] == member]
+                if not member_row.empty:
+                    value = member_row[primary_period].iloc[0]
+                else:
+                    value = None
+                matrix_row[member] = value
 
             matrix_rows.append(matrix_row)
 
@@ -1147,10 +1129,9 @@ class Statement:
 
         result_df = pd.DataFrame(matrix_rows)
 
-        # Reorder columns: concept, label, level, abstract, then equity components
+        # Reorder columns: metadata first, then equity components in order
         base_cols = ['concept', 'label', 'level', 'abstract']
-        value_cols = [c for c in result_df.columns if c not in base_cols]
-        result_df = result_df[base_cols + value_cols]
+        result_df = result_df[base_cols + equity_members]
 
         return result_df
 
