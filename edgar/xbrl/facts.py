@@ -271,6 +271,10 @@ class FactQuery:
             self._filters.append(lambda f: not any(key.startswith('dim_') for key in f.keys()))
             return self
 
+        # GH-574: When filtering by dimension, automatically include dimension columns in output
+        # since the user is explicitly working with dimensional data
+        self._include_dimensions = True
+
         # Normalize the input dimension to match stored format
         normalized_dim = self._normalize_dimension_key(dimension)
 
@@ -958,6 +962,8 @@ class FactsView:
                             # Use last dimension's member_label (most specific for multi-dimensional)
                             last_dim = dimension_metadata[-1]
                             fact_dict['dimension_label'] = last_dim['member_label']
+                            # GH-574: Add dimension_member_label for consistency with statement DataFrames
+                            fact_dict['dimension_member_label'] = last_dim['member_label']
 
                             # Full dimension label for backwards compatibility
                             # Format: "Axis Label: Member Label" for each dimension

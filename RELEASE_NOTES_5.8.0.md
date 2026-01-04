@@ -53,12 +53,15 @@ Structured dimension fields now available in both statement DataFrames and XBRL 
 # - dimension_member_label: Just the member (e.g., 'Products')
 
 # XBRL facts queries have matching columns
-facts = financials.query("RevenueFromContractWithCustomerExcludingAssessedTax")
+# Note: by_dimension() queries automatically include dimension columns
+product_facts = financials.facts.query().by_dimension('srt:ProductOrServiceAxis').to_dataframe()
 # Filter by specific dimensions
-product_revenue = facts[facts['dimension_member_label'] == 'Products']
+product_revenue = product_facts[product_facts['dimension_member_label'] == 'Products']
 ```
 
 For multi-dimensional items, `dimension_member_label` uses the LAST (most specific) dimension's member label, fixing ambiguities like "Operating segments" vs "Americas".
+
+**New in 5.8.0:** Calling `by_dimension()` automatically includes dimension columns in the query results, since you're explicitly working with dimensional data.
 
 **Related Issue:** GH-574
 
