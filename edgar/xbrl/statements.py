@@ -468,24 +468,30 @@ class Statement:
                 xbrl=self.xbrl, role_uri=self.role_or_type
             ) if item.get('is_dimension') else False
 
-            # Issue #574: Add structured dimension fields (axis, member, label)
+            # Issue #574: Add structured dimension fields (axis, member, member_label)
             # dimension_metadata is a list of dicts with 'dimension', 'member', 'member_label' keys
+            # For multi-dimensional items, use LAST dimension (most specific) for member_label
             if item.get('is_dimension', False):
                 dim_metadata = item.get('dimension_metadata', [])
                 if dim_metadata:
-                    # Use first dimension (primary axis) for the columns
+                    # Use first dimension for axis/member (primary grouping)
                     primary_dim = dim_metadata[0]
                     row['dimension_axis'] = primary_dim.get('dimension', '')
                     row['dimension_member'] = primary_dim.get('member', '')
-                    row['dimension_label'] = primary_dim.get('member_label', '')
+                    # Use LAST dimension's member_label (most specific for multi-dimensional)
+                    # e.g., for "Operating segments - Americas": use "Americas" not "Operating segments"
+                    last_dim = dim_metadata[-1]
+                    row['dimension_member_label'] = last_dim.get('member_label', '')
                 else:
-                    # Fallback to legacy format if metadata not available
                     row['dimension_axis'] = None
                     row['dimension_member'] = None
-                    row['dimension_label'] = item.get('full_dimension_label', '')
+                    row['dimension_member_label'] = None
+                # Preserve original dimension_label for backwards compatibility (Issue #522)
+                row['dimension_label'] = item.get('full_dimension_label', '')
             else:
                 row['dimension_axis'] = None
                 row['dimension_member'] = None
+                row['dimension_member_label'] = None
                 row['dimension_label'] = None
 
             df_rows.append(row)
