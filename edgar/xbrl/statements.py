@@ -5,6 +5,7 @@ This module provides functions for working with financial statements.
 """
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
@@ -334,6 +335,28 @@ class Statement:
         # Build DataFrame rows
         df_rows = []
 
+        # Issue #572: Track concept occurrences for Statement of Equity roll-forward logic
+        # First occurrence = beginning balance, later occurrences = ending balance
+        is_equity_statement = statement_type in (
+            'StatementOfEquity', 'StatementOfStockholdersEquity',
+            'StatementOfChangesInEquity', 'ComprehensiveIncome',
+            'StatementOfComprehensiveIncome'
+        )
+        concept_occurrence_count = {}  # Tracks total occurrences of each concept
+        concept_current_index = {}     # Tracks current occurrence during iteration
+
+        # First pass: count total occurrences of each concept (needed for beginning/ending logic)
+        if is_equity_statement:
+            for item in raw_data:
+                if is_xbrl_structural_element(item):
+                    continue
+                if not include_dimensions and item.get('is_dimension'):
+                    if is_breakdown_dimension(item, statement_type=self.canonical_type,
+                                              xbrl=self.xbrl, role_uri=self.role_or_type):
+                        continue
+                concept = item.get('concept', '')
+                concept_occurrence_count[concept] = concept_occurrence_count.get(concept, 0) + 1
+
         for item in raw_data:
             # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
             # These are internal XBRL constructs, not financial data
@@ -350,9 +373,14 @@ class Statement:
                                           xbrl=self.xbrl, role_uri=self.role_or_type):
                     continue
 
+            # Issue #572: Track concept occurrence for roll-forward logic
+            concept = item.get('concept', '')
+            if is_equity_statement:
+                concept_current_index[concept] = concept_current_index.get(concept, 0) + 1
+
             # Build base row
             row = {
-                'concept': item.get('concept', ''),
+                'concept': concept,
                 'label': item.get('label', '')
             }
 
@@ -361,18 +389,51 @@ class Statement:
             for period_key, period_label in periods_to_display:
                 # Use end date as column name (more concise than full label)
                 # Extract date from period_key (e.g., "duration_2016-09-25_2017-09-30" → "2017-09-30")
+                start_date = None
+                end_date = None
                 if '_' in period_key:
                     parts = period_key.split('_')
-                    if len(parts) >= 2:
-                        # Use end date for duration periods, or the date for instant periods
-                        column_name = parts[-1] if len(parts) > 2 else parts[1]
+                    if len(parts) >= 3:
+                        # Duration period: duration_START_END
+                        start_date = parts[1]
+                        end_date = parts[2]
+                        column_name = end_date
+                    elif len(parts) == 2:
+                        # Instant period: instant_DATE
+                        end_date = parts[1]
+                        column_name = end_date
                     else:
                         column_name = period_label
                 else:
                     column_name = period_label
 
                 # Use raw value from instance document
-                row[column_name] = values_dict.get(period_key)
+                value = values_dict.get(period_key)
+
+                # Issue #572: For Statement of Equity, match instant facts when duration key is empty
+                # This mirrors the logic in rendering.py (Issue #450) for consistent DataFrame output
+                # Roll-forward structure: first occurrence = beginning balance, later = ending balance
+                if value is None and is_equity_statement:
+                    total_occurrences = concept_occurrence_count.get(concept, 1)
+                    current_occurrence = concept_current_index.get(concept, 1)
+                    is_first_occurrence = current_occurrence == 1
+
+                    if is_first_occurrence and total_occurrences > 1 and start_date:
+                        # Beginning balance: try instant at day before start_date
+                        try:
+                            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                            beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+                            instant_key = f"instant_{beginning_date}"
+                            value = values_dict.get(instant_key)
+                        except (ValueError, AttributeError):
+                            pass  # Fall through to try end_date
+
+                    # If still no value, try instant at end_date (ending balances and most facts)
+                    if value is None and end_date:
+                        instant_key = f"instant_{end_date}"
+                        value = values_dict.get(instant_key)
+
+                row[column_name] = value
 
             # Add unit if requested
             if include_unit:
