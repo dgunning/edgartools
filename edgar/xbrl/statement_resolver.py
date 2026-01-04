@@ -178,13 +178,17 @@ statement_registry = {
         primary_concepts=["us-gaap_StatementOfStockholdersEquityAbstract"],
         alternative_concepts=[
             "us-gaap_StatementOfShareholdersEquityAbstract",
-            "us-gaap_StatementOfPartnersCapitalAbstract"
+            "us-gaap_StatementOfPartnersCapitalAbstract",
+            # Issue edgartools-8ad8: ORCL uses roll-forward concept for main equity statement
+            "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward"
         ],
         concept_patterns=[
             r".*_StatementOfStockholdersEquityAbstract$",
             r".*_StatementOfShareholdersEquityAbstract$",
             r".*_StatementOfChangesInEquityAbstract$",
-            r".*_ConsolidatedStatementsOfShareholdersEquityAbstract$"
+            r".*_ConsolidatedStatementsOfShareholdersEquityAbstract$",
+            # Issue edgartools-8ad8: Match roll-forward patterns for equity statements
+            r".*_IncreaseDecreaseInStockholdersEquityRollForward$"
         ],
         key_concepts=["us-gaap_StockholdersEquity", "us-gaap_CommonStock", "us-gaap_RetainedEarnings"],
         role_patterns=[
@@ -195,7 +199,7 @@ statement_registry = {
             r".*StatementConsolidatedStatementsOfStockholdersEquity.*"
         ],
         title="Consolidated Statement of Equity",
-        supports_parenthetical=False
+        supports_parenthetical=True  # Issue edgartools-8ad8: Enable parenthetical filtering
     ),
 
     "ComprehensiveIncome": StatementType(
@@ -603,6 +607,12 @@ class StatementResolver:
                 if indicator in clean_def or indicator in clean_uri:
                     score -= 100  # Strong penalty to avoid selecting wrong statement
                     break
+
+        # Issue edgartools-8ad8: Penalize parenthetical statements to prefer main statements
+        # Parenthetical statements contain supplementary details (e.g., share counts)
+        # and should not be selected when the main statement is available
+        if 'parenthetical' in role_def or 'parenthetical' in role_uri:
+            score -= 80  # Strong penalty to avoid selecting parenthetical over main statement
 
         # Prefer "Consolidated" statements (primary statements)
         if 'consolidated' in role_def or 'consolidated' in role_uri:
