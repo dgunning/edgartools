@@ -1,0 +1,1634 @@
+{
+  "metadata": {
+    "generated": "2026-01-01T21:15:04.110110",
+    "min_occurrence_rate": 0.3
+  },
+  "data_summary": {
+    "companies_processed": 126,
+    "companies_successful": 98,
+    "companies_failed": 28,
+    "success_rate": 0.7777777777777778,
+    "total_observations": 58622,
+    "avg_processing_time_ms": 8786.34730229775,
+    "total_processing_time_s": 843.4893410205841
+  },
+  "failure_analysis": {
+    "by_reason": {
+      "no_10k_filings": {
+        "count": 28,
+        "tickers": [
+          "AQNB",
+          "FRMI",
+          "ENLT",
+          "BIPC",
+          "WAVE",
+          "RNWWW",
+          "BNRG",
+          "EBR",
+          "CIG-C",
+          "ELPC",
+          "CIG",
+          "BEPC",
+          "AQN",
+          "RNW",
+          "ELP",
+          "HTOO",
+          "EBR-B",
+          "SUUN",
+          "NGG",
+          "ENIC"
+        ]
+      }
+    },
+    "total_failures": 28
+  },
+  "concept_counts": {
+    "total_unique_concepts": 2698,
+    "standard_concepts": 1391,
+    "custom_concepts": 1307,
+    "custom_rate": 0.4844329132690882,
+    "canonical_concepts": 119,
+    "canonical_rate": 0.04410674573758339,
+    "filtered_out": 2579,
+    "filtered_rate": 0.9558932542624166
+  },
+  "per_company_stats": {
+    "concepts": {
+      "min": 105,
+      "max": 262,
+      "mean": 176.40625,
+      "median": 171.5,
+      "stdev": 37.386622466781944
+    },
+    "custom_concepts": {
+      "min": 0,
+      "max": 55,
+      "mean": 20.625,
+      "median": 18.0
+    },
+    "coverage": {
+      "min": 0.3179916317991632,
+      "max": 0.6439393939393939,
+      "mean": 0.47917988836970515,
+      "median": 0.4845679012345679
+    }
+  },
+  "by_statement": {
+    "BalanceSheet": {
+      "total_concepts": 771,
+      "canonical_concepts": 47,
+      "canonical_rate": 0.0609597924773022
+    },
+    "IncomeStatement": {
+      "total_concepts": 511,
+      "canonical_concepts": 34,
+      "canonical_rate": 0.06653620352250489
+    },
+    "CashFlowStatement": {
+      "total_concepts": 1080,
+      "canonical_concepts": 39,
+      "canonical_rate": 0.03611111111111111
+    },
+    "StatementOfEquity": {
+      "total_concepts": 508,
+      "canonical_concepts": 28,
+      "canonical_rate": 0.05511811023622047
+    },
+    "ComprehensiveIncome": {
+      "total_concepts": 305,
+      "canonical_concepts": 32,
+      "canonical_rate": 0.10491803278688525
+    }
+  },
+  "custom_concepts_by_company": {
+    "ee": {
+      "count": 53,
+      "examples": [
+        "ee_GainLossOnNonCashItems",
+        "ee_ShareOfComprehensiveLossOfEquityMethodInvestee",
+        "ee_LongTermDebtRelatedParty",
+        "ee_GasSalesMember",
+        "ee_DistributionsOfIncome"
+      ]
+    },
+    "ppl": {
+      "count": 43,
+      "examples": [
+        "ppl_OtherComprehensiveIncomeLossReclassificationsToNetIncomeLossNetOfTaxAbstract",
+        "ppl_ProceedsFromPollutionControlBond1",
+        "ppl_LouisvilleGasAndElectricMember",
+        "ppl_LGAndEAndKUEnergyLLCMember",
+        "ppl_PriceRiskManagementLiabilities"
+      ]
+    },
+    "d": {
+      "count": 43,
+      "examples": [
+        "d_DepreciationDepletionAndAmortizationIncludingNuclearFuel",
+        "d_RepaymentOfSecuritizationBonds",
+        "d_PaymentsToShortTermDeposit",
+        "d_ProceedsFromIssuanceRepaymentOfShortTermDebtExcludingCreditBorrowingFacilities",
+        "d_ProceedsFromEastOhioQuestarGasAndPsncTransactions"
+      ]
+    },
+    "so": {
+      "count": 40,
+      "examples": [
+        "so_OtherRegulatoryAssetsDeferred",
+        "so_OtherElectricRevenueMember",
+        "so_UnbilledRevenuesCurrent",
+        "so_ProceedsAbstract",
+        "so_RetailFuelCostUnderRecoveryLongTerm"
+      ]
+    },
+    "wdq": {
+      "count": 39,
+      "examples": [
+        "wdq_TreasuryStockSharesAcquiredFairValue",
+        "wdq_TemporaryEquityIncreaseFromStockBasedCompensation",
+        "wdq_LossOnExchangeOfWarrants",
+        "wdq_ConvertibleNotesReceivableCurrent",
+        "wdq_ProceedsFromNonredeemableNoncontrollingInterestRelatedParty"
+      ]
+    },
+    "etr": {
+      "count": 39,
+      "examples": [
+        "etr_PublicUtilitiesPropertyPlantAndEquipmentNaturalGas",
+        "etr_RegulatoryLiabilityForIncomeTaxesNet",
+        "etr_PreferredDividendRequirementsOfSubsidiariesAndNetIncomeLossAttributableToNoncontrollingInterests",
+        "etr_RedemptionOfPreferredMembershipInterestsOfAffiliate",
+        "etr_CashPaidReceivedDuringThePeriodForAbstract"
+      ]
+    },
+    "ora": {
+      "count": 35,
+      "examples": [
+        "ora_IncreaseDecreaseInSeverancePayFundAssetNet",
+        "ora_PaymentForPurchaseOfCappedCallInstruments",
+        "ora_IssuanceOfCommonStock",
+        "ora_PropertyPlantAndEquipmentNetExcludingConstructionInProgress",
+        "ora_RepaymentsOfLongTermLoans"
+      ]
+    },
+    "smr": {
+      "count": 32,
+      "examples": [
+        "smr_TemporaryEquityReverseRecapitalizationNet",
+        "smr_NetIncomeLossAttributableToLegacyShareholdersPriorToReverseRecapitalization",
+        "smr_LongLeadMaterialLiabilityCurrent",
+        "smr_ProceedsFromReverseRecapitalizationNet",
+        "smr_RebalancingOfOwnershipPercentageForConversionOfCombinedInterestIntoClassAShares"
+      ]
+    },
+    "pcg": {
+      "count": 31,
+      "examples": [
+        "pcg_StockBasedCompensationAmortization",
+        "pcg_AdjustmentsToTreasuryStockAcquiredNoncash",
+        "pcg_RepaymentsOfRecoveryBonds",
+        "pcg_ProceedsFromRepaymentsOfIntercompanyNote",
+        "pcg_LitigationAssetNoncurrent"
+      ]
+    },
+    "sre": {
+      "count": 31,
+      "examples": [
+        "sre_PreferredDividendsPaidbySubsidiaries",
+        "sre_GreenhouseGasAllowancesNoncurrent",
+        "sre_ComprehensiveIncomeLossBeforePreferredStockDividendRequirements",
+        "sre_ComprehensiveIncomeLossBeforePreferredStockDividendRequirementsTaxAttributableToParent",
+        "sre_NaturalGasAndElectricityUnregulatedMember"
+      ]
+    },
+    "awr": {
+      "count": 31,
+      "examples": [
+        "awr_AccountReceivablefromUSGovernmentNetNoncurrent",
+        "awr_SupplyCostBalancingAccounts",
+        "awr_UtilitiesWaterPropertyPlantAndEquipmentGross",
+        "awr_AdditionAbstract",
+        "awr_DividendsEquivalentRightsOnShareBasedCompensationNetOfTax"
+      ]
+    },
+    "wttr": {
+      "count": 29,
+      "examples": [
+        "wttr_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsExercisesInPeriodCash",
+        "wttr_CommonClassOneMember",
+        "wttr_StockIssuedDuringPeriodValueStockOptionsExercisedCashless",
+        "wttr_AccruedContributionsFromNoncontrollingInterest",
+        "wttr_TaxReceivableAgreementsLiabilitiesNoncurrent"
+      ]
+    },
+    "njr": {
+      "count": 29,
+      "examples": [
+        "njr_SolarEquipmentMember",
+        "njr_ProceedsFromWaiverDiscountIssuanceOfCommonStock",
+        "njr_AccumulatedDepreciationDepletionandAmortizationOtherPropertyPlantandEquipment",
+        "njr_NetProceedsfromSaleLeasebackTransactionFinancingActivities",
+        "njr_PaymentstoAcquirePropertyPlantAndEquipmentAndRemovalCostsAbstract"
+      ]
+    },
+    "cpk": {
+      "count": 28,
+      "examples": [
+        "cpk_LongtermDebtandCapitalLeaseObligationsNetofCurrentMaturities",
+        "cpk_AccumulatedGainLossfromCommodityContractsCashFlowsHedgesMember",
+        "cpk_ReceivablesAndOtherDeferredCharges",
+        "cpk_StockIssuedValueDuringThePeriodSharesRetirementSavingsPlanAndDividendReinvestmentPlan",
+        "cpk_UnregulatedEnergyPropertyPlantAndEquipment"
+      ]
+    },
+    "srt": {
+      "count": 27,
+      "examples": [
+        "srt_ScenarioPreviouslyReportedMember",
+        "srt_ProductOrServiceAxis",
+        "srt_ConsolidatedEntityExcludingVariableInterestEntitiesVIEMember",
+        "srt_PayablesToCustomers",
+        "srt_RepurchaseAgreementCounterpartyNameDomain"
+      ]
+    }
+  },
+  "outliers": {
+    "high_concept_count": [
+      {
+        "cik": "0000922224",
+        "ticker": "PPL",
+        "total_concepts": 262,
+        "deviation": 2.2894218400191177
+      }
+    ],
+    "low_concept_count": [],
+    "high_custom_rate": [
+      {
+        "cik": "0001888447",
+        "ticker": "EE",
+        "custom_rate": 0.3055555555555556,
+        "custom_concepts": 55
+      }
+    ],
+    "low_coverage": [
+      {
+        "cik": "0000928340",
+        "ticker": "CWCO",
+        "coverage_rate": 0.46794871794871795,
+        "total_concepts": 156
+      },
+      {
+        "cik": "0001868941",
+        "ticker": "FLNC",
+        "coverage_rate": 0.4876543209876543,
+        "total_concepts": 162
+      },
+      {
+        "cik": "0000092122",
+        "ticker": "SOMN",
+        "coverage_rate": 0.4170403587443946,
+        "total_concepts": 223
+      },
+      {
+        "cik": "0000041091",
+        "ticker": "GPJA",
+        "coverage_rate": 0.4170403587443946,
+        "total_concepts": 223
+      },
+      {
+        "cik": "0001822966",
+        "ticker": "SMR",
+        "coverage_rate": 0.3961038961038961,
+        "total_concepts": 154
+      },
+      {
+        "cik": "0000276720",
+        "ticker": "PCYO",
+        "coverage_rate": 0.43283582089552236,
+        "total_concepts": 134
+      },
+      {
+        "cik": "0001032208",
+        "ticker": "SREA",
+        "coverage_rate": 0.3677685950413223,
+        "total_concepts": 242
+      },
+      {
+        "cik": "0001032208",
+        "ticker": "SRE",
+        "coverage_rate": 0.3677685950413223,
+        "total_concepts": 242
+      },
+      {
+        "cik": "0000066004",
+        "ticker": "MSEX",
+        "coverage_rate": 0.46206896551724136,
+        "total_concepts": 145
+      },
+      {
+        "cik": "0000007323",
+        "ticker": "EAI",
+        "coverage_rate": 0.39183673469387753,
+        "total_concepts": 245
+      }
+    ]
+  },
+  "company_details": [
+    {
+      "cik": "0001130464",
+      "ticker": "BKH",
+      "name": "BLACK HILLS CORP /SD/",
+      "total_concepts": 132,
+      "canonical_covered": 85,
+      "coverage_rate": 0.6439393939393939,
+      "custom_concepts": 5,
+      "custom_rate": 0.03787878787878788,
+      "processing_time_ms": 7350.745916366577
+    },
+    {
+      "cik": "0000066756",
+      "ticker": "ALE",
+      "name": "ALLETE INC",
+      "total_concepts": 144,
+      "canonical_covered": 90,
+      "coverage_rate": 0.625,
+      "custom_concepts": 9,
+      "custom_rate": 0.0625,
+      "processing_time_ms": 5522.899389266968
+    },
+    {
+      "cik": "0001993004",
+      "ticker": "NWE",
+      "name": "NorthWestern Energy Group, Inc.",
+      "total_concepts": 131,
+      "canonical_covered": 80,
+      "coverage_rate": 0.6106870229007634,
+      "custom_concepts": 4,
+      "custom_rate": 0.030534351145038167,
+      "processing_time_ms": 4823.467493057251
+    },
+    {
+      "cik": "0001466593",
+      "ticker": "OTTR",
+      "name": "Otter Tail Corp",
+      "total_concepts": 137,
+      "canonical_covered": 83,
+      "coverage_rate": 0.6058394160583942,
+      "custom_concepts": 6,
+      "custom_rate": 0.043795620437956206,
+      "processing_time_ms": 2765.5043601989746
+    },
+    {
+      "cik": "0000104918",
+      "ticker": "AVA",
+      "name": "AVISTA CORP",
+      "total_concepts": 145,
+      "canonical_covered": 85,
+      "coverage_rate": 0.5862068965517241,
+      "custom_concepts": 13,
+      "custom_rate": 0.0896551724137931,
+      "processing_time_ms": 7660.31813621521
+    },
+    {
+      "cik": "0000755001",
+      "ticker": "UTL",
+      "name": "UNITIL CORP",
+      "total_concepts": 132,
+      "canonical_covered": 77,
+      "coverage_rate": 0.5833333333333334,
+      "custom_concepts": 11,
+      "custom_rate": 0.08333333333333333,
+      "processing_time_ms": 5156.31365776062
+    },
+    {
+      "cik": "0000352541",
+      "ticker": "LNT",
+      "name": "ALLIANT ENERGY CORP",
+      "total_concepts": 152,
+      "canonical_covered": 88,
+      "coverage_rate": 0.5789473684210527,
+      "custom_concepts": 6,
+      "custom_rate": 0.039473684210526314,
+      "processing_time_ms": 10724.472045898438
+    },
+    {
+      "cik": "0000108985",
+      "ticker": "YORW",
+      "name": "YORK WATER CO",
+      "total_concepts": 118,
+      "canonical_covered": 68,
+      "coverage_rate": 0.576271186440678,
+      "custom_concepts": 5,
+      "custom_rate": 0.0423728813559322,
+      "processing_time_ms": 5702.337026596069
+    },
+    {
+      "cik": "0001849056",
+      "ticker": "OKLO",
+      "name": "Oklo Inc.",
+      "total_concepts": 118,
+      "canonical_covered": 67,
+      "coverage_rate": 0.5677966101694916,
+      "custom_concepts": 15,
+      "custom_rate": 0.1271186440677966,
+      "processing_time_ms": 4933.850288391113
+    },
+    {
+      "cik": "0000072741",
+      "ticker": "ES",
+      "name": "EVERSOURCE ENERGY",
+      "total_concepts": 149,
+      "canonical_covered": 84,
+      "coverage_rate": 0.5637583892617449,
+      "custom_concepts": 11,
+      "custom_rate": 0.0738255033557047,
+      "processing_time_ms": 10644.967079162598
+    },
+    {
+      "cik": "0001826600",
+      "ticker": "MNTK",
+      "name": "Montauk Renewables, Inc.",
+      "total_concepts": 128,
+      "canonical_covered": 72,
+      "coverage_rate": 0.5625,
+      "custom_concepts": 13,
+      "custom_rate": 0.1015625,
+      "processing_time_ms": 1557.1205615997314
+    },
+    {
+      "cik": "0001002910",
+      "ticker": "AEE",
+      "name": "AMEREN CORP",
+      "total_concepts": 159,
+      "canonical_covered": 89,
+      "coverage_rate": 0.559748427672956,
+      "custom_concepts": 10,
+      "custom_rate": 0.06289308176100629,
+      "processing_time_ms": 5120.564222335815
+    },
+    {
+      "cik": "0000783325",
+      "ticker": "WEC",
+      "name": "WEC ENERGY GROUP, INC.",
+      "total_concepts": 154,
+      "canonical_covered": 85,
+      "coverage_rate": 0.551948051948052,
+      "custom_concepts": 13,
+      "custom_rate": 0.08441558441558442,
+      "processing_time_ms": 8200.875282287598
+    },
+    {
+      "cik": "0001410636",
+      "ticker": "AWK",
+      "name": "American Water Works Company, Inc.",
+      "total_concepts": 146,
+      "canonical_covered": 80,
+      "coverage_rate": 0.547945205479452,
+      "custom_concepts": 7,
+      "custom_rate": 0.04794520547945205,
+      "processing_time_ms": 6960.91103553772
+    },
+    {
+      "cik": "0001069533",
+      "ticker": "RGCO",
+      "name": "RGC RESOURCES INC",
+      "total_concepts": 149,
+      "canonical_covered": 81,
+      "coverage_rate": 0.5436241610738255,
+      "custom_concepts": 11,
+      "custom_rate": 0.0738255033557047,
+      "processing_time_ms": 3530.4508209228516
+    },
+    {
+      "cik": "0001057877",
+      "ticker": "IDA",
+      "name": "IDACORP INC",
+      "total_concepts": 166,
+      "canonical_covered": 90,
+      "coverage_rate": 0.5421686746987951,
+      "custom_concepts": 6,
+      "custom_rate": 0.03614457831325301,
+      "processing_time_ms": 2031.559705734253
+    },
+    {
+      "cik": "0001587732",
+      "ticker": "OGS",
+      "name": "ONE Gas, Inc.",
+      "total_concepts": 139,
+      "canonical_covered": 75,
+      "coverage_rate": 0.539568345323741,
+      "custom_concepts": 11,
+      "custom_rate": 0.07913669064748201,
+      "processing_time_ms": 3508.301019668579
+    },
+    {
+      "cik": "0000827052",
+      "ticker": "EIX",
+      "name": "EDISON INTERNATIONAL",
+      "total_concepts": 169,
+      "canonical_covered": 91,
+      "coverage_rate": 0.5384615384615384,
+      "custom_concepts": 18,
+      "custom_rate": 0.10650887573964497,
+      "processing_time_ms": 7248.225450515747
+    },
+    {
+      "cik": "0001005210",
+      "ticker": "SPH",
+      "name": "SUBURBAN PROPANE PARTNERS LP",
+      "total_concepts": 121,
+      "canonical_covered": 65,
+      "coverage_rate": 0.5371900826446281,
+      "custom_concepts": 8,
+      "custom_rate": 0.06611570247933884,
+      "processing_time_ms": 8216.390371322632
+    },
+    {
+      "cik": "0001434728",
+      "ticker": "GWRS",
+      "name": "Global Water Resources, Inc.",
+      "total_concepts": 136,
+      "canonical_covered": 73,
+      "coverage_rate": 0.5367647058823529,
+      "custom_concepts": 10,
+      "custom_rate": 0.07352941176470588,
+      "processing_time_ms": 1826.2989521026611
+    },
+    {
+      "cik": "0001108426",
+      "ticker": "TXNM",
+      "name": "TXNM ENERGY INC",
+      "total_concepts": 179,
+      "canonical_covered": 96,
+      "coverage_rate": 0.5363128491620112,
+      "custom_concepts": 18,
+      "custom_rate": 0.1005586592178771,
+      "processing_time_ms": 10161.120653152466
+    },
+    {
+      "cik": "0001981599",
+      "ticker": "CTRI",
+      "name": "Centuri Holdings, Inc.",
+      "total_concepts": 131,
+      "canonical_covered": 70,
+      "coverage_rate": 0.5343511450381679,
+      "custom_concepts": 4,
+      "custom_rate": 0.030534351145038167,
+      "processing_time_ms": 2949.057102203369
+    },
+    {
+      "cik": "0000721693",
+      "ticker": "CREG",
+      "name": "Smart Powerr Corp.",
+      "total_concepts": 105,
+      "canonical_covered": 56,
+      "coverage_rate": 0.5333333333333333,
+      "custom_concepts": 5,
+      "custom_rate": 0.047619047619047616,
+      "processing_time_ms": 1110.4555130004883
+    },
+    {
+      "cik": "0000731802",
+      "ticker": "ATO",
+      "name": "ATMOS ENERGY CORP",
+      "total_concepts": 137,
+      "canonical_covered": 73,
+      "coverage_rate": 0.5328467153284672,
+      "custom_concepts": 15,
+      "custom_rate": 0.10948905109489052,
+      "processing_time_ms": 5980.105400085449
+    },
+    {
+      "cik": "0001996810",
+      "ticker": "GEV",
+      "name": "GE Vernova Inc.",
+      "total_concepts": 136,
+      "canonical_covered": 72,
+      "coverage_rate": 0.5294117647058824,
+      "custom_concepts": 13,
+      "custom_rate": 0.09558823529411764,
+      "processing_time_ms": 5297.939300537109
+    },
+    {
+      "cik": "0000884614",
+      "ticker": "UGI",
+      "name": "UGI CORP /PA/",
+      "total_concepts": 154,
+      "canonical_covered": 80,
+      "coverage_rate": 0.5194805194805194,
+      "custom_concepts": 9,
+      "custom_rate": 0.05844155844155844,
+      "processing_time_ms": 2098.024606704712
+    },
+    {
+      "cik": "0001711269",
+      "ticker": "EVRG",
+      "name": "Evergy, Inc.",
+      "total_concepts": 164,
+      "canonical_covered": 85,
+      "coverage_rate": 0.5182926829268293,
+      "custom_concepts": 27,
+      "custom_rate": 0.16463414634146342,
+      "processing_time_ms": 9198.238372802734
+    },
+    {
+      "cik": "0000072903",
+      "ticker": "XEL",
+      "name": "XCEL ENERGY INC",
+      "total_concepts": 166,
+      "canonical_covered": 86,
+      "coverage_rate": 0.5180722891566265,
+      "custom_concepts": 12,
+      "custom_rate": 0.07228915662650602,
+      "processing_time_ms": 3123.288869857788
+    },
+    {
+      "cik": "0001692115",
+      "ticker": "SWX",
+      "name": "Southwest Gas Holdings, Inc.",
+      "total_concepts": 170,
+      "canonical_covered": 88,
+      "coverage_rate": 0.5176470588235295,
+      "custom_concepts": 14,
+      "custom_rate": 0.08235294117647059,
+      "processing_time_ms": 7380.07926940918
+    },
+    {
+      "cik": "0000766829",
+      "ticker": "HTO",
+      "name": "H2O AMERICA",
+      "total_concepts": 164,
+      "canonical_covered": 84,
+      "coverage_rate": 0.5121951219512195,
+      "custom_concepts": 22,
+      "custom_rate": 0.13414634146341464,
+      "processing_time_ms": 5803.067922592163
+    },
+    {
+      "cik": "0001126956",
+      "ticker": "SR",
+      "name": "SPIRE INC",
+      "total_concepts": 166,
+      "canonical_covered": 85,
+      "coverage_rate": 0.5120481927710844,
+      "custom_concepts": 11,
+      "custom_rate": 0.06626506024096386,
+      "processing_time_ms": 9195.781946182251
+    },
+    {
+      "cik": "0001841425",
+      "ticker": "VGAS",
+      "name": "Verde Clean Fuels, Inc.",
+      "total_concepts": 127,
+      "canonical_covered": 65,
+      "coverage_rate": 0.5118110236220472,
+      "custom_concepts": 22,
+      "custom_rate": 0.1732283464566929,
+      "processing_time_ms": 3025.442600250244
+    },
+    {
+      "cik": "0000078128",
+      "ticker": "WTRG",
+      "name": "Essential Utilities, Inc.",
+      "total_concepts": 149,
+      "canonical_covered": 76,
+      "coverage_rate": 0.5100671140939598,
+      "custom_concepts": 13,
+      "custom_rate": 0.087248322147651,
+      "processing_time_ms": 3274.1570472717285
+    },
+    {
+      "cik": "0002028293",
+      "ticker": "RAIN",
+      "name": "Rain Enhancement Technologies Holdco, Inc.",
+      "total_concepts": 108,
+      "canonical_covered": 55,
+      "coverage_rate": 0.5092592592592593,
+      "custom_concepts": 19,
+      "custom_rate": 0.17592592592592593,
+      "processing_time_ms": 2472.409963607788
+    },
+    {
+      "cik": "0000784977",
+      "ticker": "POR",
+      "name": "PORTLAND GENERAL ELECTRIC CO /OR/",
+      "total_concepts": 134,
+      "canonical_covered": 68,
+      "coverage_rate": 0.5074626865671642,
+      "custom_concepts": 5,
+      "custom_rate": 0.03731343283582089,
+      "processing_time_ms": 4126.2311935424805
+    },
+    {
+      "cik": "0001828536",
+      "ticker": "NRGV",
+      "name": "Energy Vault Holdings, Inc.",
+      "total_concepts": 140,
+      "canonical_covered": 71,
+      "coverage_rate": 0.5071428571428571,
+      "custom_concepts": 16,
+      "custom_rate": 0.11428571428571428,
+      "processing_time_ms": 20845.152616500854
+    },
+    {
+      "cik": "0000727273",
+      "ticker": "CDZI",
+      "name": "CADIZ INC",
+      "total_concepts": 119,
+      "canonical_covered": 60,
+      "coverage_rate": 0.5042016806722689,
+      "custom_concepts": 9,
+      "custom_rate": 0.07563025210084033,
+      "processing_time_ms": 2635.1096630096436
+    },
+    {
+      "cik": "0001161728",
+      "ticker": "MGEE",
+      "name": "MGE ENERGY INC",
+      "total_concepts": 163,
+      "canonical_covered": 82,
+      "coverage_rate": 0.5030674846625767,
+      "custom_concepts": 18,
+      "custom_rate": 0.11042944785276074,
+      "processing_time_ms": 8957.460403442383
+    },
+    {
+      "cik": "0001749723",
+      "ticker": "NFE",
+      "name": "New Fortress Energy Inc.",
+      "total_concepts": 167,
+      "canonical_covered": 84,
+      "coverage_rate": 0.5029940119760479,
+      "custom_concepts": 20,
+      "custom_rate": 0.11976047904191617,
+      "processing_time_ms": 2273.3991146087646
+    },
+    {
+      "cik": "0001035201",
+      "ticker": "CWT",
+      "name": "CALIFORNIA WATER SERVICE GROUP",
+      "total_concepts": 167,
+      "canonical_covered": 84,
+      "coverage_rate": 0.5029940119760479,
+      "custom_concepts": 12,
+      "custom_rate": 0.0718562874251497,
+      "processing_time_ms": 5231.295347213745
+    },
+    {
+      "cik": "0000936340",
+      "ticker": "DTW",
+      "name": "DTE ENERGY CO",
+      "total_concepts": 182,
+      "canonical_covered": 91,
+      "coverage_rate": 0.5,
+      "custom_concepts": 11,
+      "custom_rate": 0.06043956043956044,
+      "processing_time_ms": 8633.874416351318
+    },
+    {
+      "cik": "0000936340",
+      "ticker": "DTB",
+      "name": "DTE ENERGY CO",
+      "total_concepts": 182,
+      "canonical_covered": 91,
+      "coverage_rate": 0.5,
+      "custom_concepts": 11,
+      "custom_rate": 0.06043956043956044,
+      "processing_time_ms": 8548.351049423218
+    },
+    {
+      "cik": "0000936340",
+      "ticker": "DTG",
+      "name": "DTE ENERGY CO",
+      "total_concepts": 182,
+      "canonical_covered": 91,
+      "coverage_rate": 0.5,
+      "custom_concepts": 11,
+      "custom_rate": 0.06043956043956044,
+      "processing_time_ms": 8058.536767959595
+    },
+    {
+      "cik": "0000936340",
+      "ticker": "DTE",
+      "name": "DTE ENERGY CO",
+      "total_concepts": 182,
+      "canonical_covered": 91,
+      "coverage_rate": 0.5,
+      "custom_concepts": 11,
+      "custom_rate": 0.06043956043956044,
+      "processing_time_ms": 8172.911882400513
+    },
+    {
+      "cik": "0000004904",
+      "ticker": "AEP",
+      "name": "AMERICAN ELECTRIC POWER CO INC",
+      "total_concepts": 186,
+      "canonical_covered": 92,
+      "coverage_rate": 0.4946236559139785,
+      "custom_concepts": 23,
+      "custom_rate": 0.12365591397849462,
+      "processing_time_ms": 19165.5216217041
+    },
+    {
+      "cik": "0001733998",
+      "ticker": "NWN",
+      "name": "Northwest Natural Holding Co",
+      "total_concepts": 166,
+      "canonical_covered": 82,
+      "coverage_rate": 0.4939759036144578,
+      "custom_concepts": 12,
+      "custom_rate": 0.07228915662650602,
+      "processing_time_ms": 23914.631605148315
+    },
+    {
+      "cik": "0001130310",
+      "ticker": "CNP",
+      "name": "CENTERPOINT ENERGY INC",
+      "total_concepts": 158,
+      "canonical_covered": 78,
+      "coverage_rate": 0.4936708860759494,
+      "custom_concepts": 13,
+      "custom_rate": 0.08227848101265822,
+      "processing_time_ms": 13520.260334014893
+    },
+    {
+      "cik": "0001868941",
+      "ticker": "FLNC",
+      "name": "Fluence Energy, Inc.",
+      "total_concepts": 162,
+      "canonical_covered": 79,
+      "coverage_rate": 0.4876543209876543,
+      "custom_concepts": 7,
+      "custom_rate": 0.043209876543209874,
+      "processing_time_ms": 1525.0966548919678
+    },
+    {
+      "cik": "0000863110",
+      "ticker": "ARTNA",
+      "name": "ARTESIAN RESOURCES CORP",
+      "total_concepts": 162,
+      "canonical_covered": 78,
+      "coverage_rate": 0.48148148148148145,
+      "custom_concepts": 13,
+      "custom_rate": 0.08024691358024691,
+      "processing_time_ms": 4457.560062408447
+    },
+    {
+      "cik": "0001567683",
+      "ticker": "CWEN",
+      "name": "Clearway Energy, Inc.",
+      "total_concepts": 176,
+      "canonical_covered": 84,
+      "coverage_rate": 0.4772727272727273,
+      "custom_concepts": 21,
+      "custom_rate": 0.11931818181818182,
+      "processing_time_ms": 5168.894529342651
+    },
+    {
+      "cik": "0000811156",
+      "ticker": "CMSD",
+      "name": "CMS ENERGY CORP",
+      "total_concepts": 196,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4744897959183674,
+      "custom_concepts": 19,
+      "custom_rate": 0.09693877551020408,
+      "processing_time_ms": 3807.91974067688
+    },
+    {
+      "cik": "0000811156",
+      "ticker": "CMSA",
+      "name": "CMS ENERGY CORP",
+      "total_concepts": 196,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4744897959183674,
+      "custom_concepts": 19,
+      "custom_rate": 0.09693877551020408,
+      "processing_time_ms": 10058.649778366089
+    },
+    {
+      "cik": "0000811156",
+      "ticker": "CMSC",
+      "name": "CMS ENERGY CORP",
+      "total_concepts": 196,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4744897959183674,
+      "custom_concepts": 19,
+      "custom_rate": 0.09693877551020408,
+      "processing_time_ms": 9155.154943466187
+    },
+    {
+      "cik": "0000811156",
+      "ticker": "CMS",
+      "name": "CMS ENERGY CORP",
+      "total_concepts": 196,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4744897959183674,
+      "custom_concepts": 19,
+      "custom_rate": 0.09693877551020408,
+      "processing_time_ms": 9127.830505371094
+    },
+    {
+      "cik": "0000928340",
+      "ticker": "CWCO",
+      "name": "Consolidated Water Co. Ltd.",
+      "total_concepts": 156,
+      "canonical_covered": 73,
+      "coverage_rate": 0.46794871794871795,
+      "custom_concepts": 12,
+      "custom_rate": 0.07692307692307693,
+      "processing_time_ms": 3515.784502029419
+    },
+    {
+      "cik": "0000764622",
+      "ticker": "PNW",
+      "name": "PINNACLE WEST CAPITAL CORP",
+      "total_concepts": 187,
+      "canonical_covered": 87,
+      "coverage_rate": 0.46524064171123,
+      "custom_concepts": 15,
+      "custom_rate": 0.08021390374331551,
+      "processing_time_ms": 5519.726514816284
+    },
+    {
+      "cik": "0001109357",
+      "ticker": "EXC",
+      "name": "EXELON CORP",
+      "total_concepts": 192,
+      "canonical_covered": 89,
+      "coverage_rate": 0.4635416666666667,
+      "custom_concepts": 12,
+      "custom_rate": 0.0625,
+      "processing_time_ms": 17416.885137557983
+    },
+    {
+      "cik": "0000066004",
+      "ticker": "MSEX",
+      "name": "MIDDLESEX WATER CO",
+      "total_concepts": 145,
+      "canonical_covered": 67,
+      "coverage_rate": 0.46206896551724136,
+      "custom_concepts": 12,
+      "custom_rate": 0.08275862068965517,
+      "processing_time_ms": 2090.698719024658
+    },
+    {
+      "cik": "0001326160",
+      "ticker": "DUK",
+      "name": "Duke Energy CORP",
+      "total_concepts": 208,
+      "canonical_covered": 96,
+      "coverage_rate": 0.46153846153846156,
+      "custom_concepts": 20,
+      "custom_rate": 0.09615384615384616,
+      "processing_time_ms": 16559.114694595337
+    },
+    {
+      "cik": "0001326160",
+      "ticker": "DUKB",
+      "name": "Duke Energy CORP",
+      "total_concepts": 208,
+      "canonical_covered": 96,
+      "coverage_rate": 0.46153846153846156,
+      "custom_concepts": 20,
+      "custom_rate": 0.09615384615384616,
+      "processing_time_ms": 18945.149183273315
+    },
+    {
+      "cik": "0000753308",
+      "ticker": "NEE",
+      "name": "NEXTERA ENERGY INC",
+      "total_concepts": 186,
+      "canonical_covered": 84,
+      "coverage_rate": 0.45161290322580644,
+      "custom_concepts": 24,
+      "custom_rate": 0.12903225806451613,
+      "processing_time_ms": 5455.756664276123
+    },
+    {
+      "cik": "0001004980",
+      "ticker": "PCG",
+      "name": "PG&E Corp",
+      "total_concepts": 199,
+      "canonical_covered": 89,
+      "coverage_rate": 0.4472361809045226,
+      "custom_concepts": 33,
+      "custom_rate": 0.1658291457286432,
+      "processing_time_ms": 7106.576442718506
+    },
+    {
+      "cik": "0000788784",
+      "ticker": "PEG",
+      "name": "PUBLIC SERVICE ENTERPRISE GROUP INC",
+      "total_concepts": 179,
+      "canonical_covered": 80,
+      "coverage_rate": 0.44692737430167595,
+      "custom_concepts": 18,
+      "custom_rate": 0.1005586592178771,
+      "processing_time_ms": 15569.529056549072
+    },
+    {
+      "cik": "0001021635",
+      "ticker": "OGE",
+      "name": "OGE ENERGY CORP.",
+      "total_concepts": 193,
+      "canonical_covered": 86,
+      "coverage_rate": 0.44559585492227977,
+      "custom_concepts": 22,
+      "custom_rate": 0.11398963730569948,
+      "processing_time_ms": 8445.326089859009
+    },
+    {
+      "cik": "0001111711",
+      "ticker": "NI",
+      "name": "NISOURCE INC.",
+      "total_concepts": 199,
+      "canonical_covered": 88,
+      "coverage_rate": 0.44221105527638194,
+      "custom_concepts": 21,
+      "custom_rate": 0.10552763819095477,
+      "processing_time_ms": 7375.425577163696
+    },
+    {
+      "cik": "0001868275",
+      "ticker": "CEG",
+      "name": "Constellation Energy Corp",
+      "total_concepts": 181,
+      "canonical_covered": 80,
+      "coverage_rate": 0.4419889502762431,
+      "custom_concepts": 16,
+      "custom_rate": 0.08839779005524862,
+      "processing_time_ms": 11892.108917236328
+    },
+    {
+      "cik": "0001056903",
+      "ticker": "AWR",
+      "name": "AMERICAN STATES WATER CO",
+      "total_concepts": 171,
+      "canonical_covered": 75,
+      "coverage_rate": 0.43859649122807015,
+      "custom_concepts": 34,
+      "custom_rate": 0.19883040935672514,
+      "processing_time_ms": 5924.204587936401
+    },
+    {
+      "cik": "0001031296",
+      "ticker": "FE",
+      "name": "FIRSTENERGY CORP",
+      "total_concepts": 193,
+      "canonical_covered": 84,
+      "coverage_rate": 0.43523316062176165,
+      "custom_concepts": 29,
+      "custom_rate": 0.15025906735751296,
+      "processing_time_ms": 6265.907764434814
+    },
+    {
+      "cik": "0001888447",
+      "ticker": "EE",
+      "name": "Excelerate Energy, Inc.",
+      "total_concepts": 180,
+      "canonical_covered": 78,
+      "coverage_rate": 0.43333333333333335,
+      "custom_concepts": 55,
+      "custom_rate": 0.3055555555555556,
+      "processing_time_ms": 5538.980007171631
+    },
+    {
+      "cik": "0000276720",
+      "ticker": "PCYO",
+      "name": "PURE CYCLE CORP",
+      "total_concepts": 134,
+      "canonical_covered": 58,
+      "coverage_rate": 0.43283582089552236,
+      "custom_concepts": 22,
+      "custom_rate": 0.16417910447761194,
+      "processing_time_ms": 1734.1210842132568
+    },
+    {
+      "cik": "0001528356",
+      "ticker": "GNE",
+      "name": "Genie Energy Ltd.",
+      "total_concepts": 194,
+      "canonical_covered": 83,
+      "coverage_rate": 0.42783505154639173,
+      "custom_concepts": 14,
+      "custom_rate": 0.07216494845360824,
+      "processing_time_ms": 5789.484024047852
+    },
+    {
+      "cik": "0000354707",
+      "ticker": "HE",
+      "name": "HAWAIIAN ELECTRIC INDUSTRIES INC",
+      "total_concepts": 182,
+      "canonical_covered": 77,
+      "coverage_rate": 0.4230769230769231,
+      "custom_concepts": 23,
+      "custom_rate": 0.12637362637362637,
+      "processing_time_ms": 8918.148279190063
+    },
+    {
+      "cik": "0000092122",
+      "ticker": "SOMN",
+      "name": "SOUTHERN CO",
+      "total_concepts": 223,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4170403587443946,
+      "custom_concepts": 43,
+      "custom_rate": 0.19282511210762332,
+      "processing_time_ms": 16106.623649597168
+    },
+    {
+      "cik": "0000041091",
+      "ticker": "GPJA",
+      "name": "GEORGIA POWER CO",
+      "total_concepts": 223,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4170403587443946,
+      "custom_concepts": 43,
+      "custom_rate": 0.19282511210762332,
+      "processing_time_ms": 18820.132970809937
+    },
+    {
+      "cik": "0000092122",
+      "ticker": "SO",
+      "name": "SOUTHERN CO",
+      "total_concepts": 223,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4170403587443946,
+      "custom_concepts": 43,
+      "custom_rate": 0.19282511210762332,
+      "processing_time_ms": 18606.438398361206
+    },
+    {
+      "cik": "0000092122",
+      "ticker": "SOJC",
+      "name": "SOUTHERN CO",
+      "total_concepts": 223,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4170403587443946,
+      "custom_concepts": 43,
+      "custom_rate": 0.19282511210762332,
+      "processing_time_ms": 18556.467533111572
+    },
+    {
+      "cik": "0000092122",
+      "ticker": "SOJD",
+      "name": "SOUTHERN CO",
+      "total_concepts": 223,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4170403587443946,
+      "custom_concepts": 43,
+      "custom_rate": 0.19282511210762332,
+      "processing_time_ms": 18607.55681991577
+    },
+    {
+      "cik": "0000092122",
+      "ticker": "SOJE",
+      "name": "SOUTHERN CO",
+      "total_concepts": 223,
+      "canonical_covered": 93,
+      "coverage_rate": 0.4170403587443946,
+      "custom_concepts": 43,
+      "custom_rate": 0.19282511210762332,
+      "processing_time_ms": 19849.181413650513
+    },
+    {
+      "cik": "0001693256",
+      "ticker": "WTTR",
+      "name": "Select Water Solutions, Inc.",
+      "total_concepts": 186,
+      "canonical_covered": 77,
+      "coverage_rate": 0.41397849462365593,
+      "custom_concepts": 31,
+      "custom_rate": 0.16666666666666666,
+      "processing_time_ms": 5984.992742538452
+    },
+    {
+      "cik": "0001047862",
+      "ticker": "ED",
+      "name": "CONSOLIDATED EDISON INC",
+      "total_concepts": 208,
+      "canonical_covered": 85,
+      "coverage_rate": 0.40865384615384615,
+      "custom_concepts": 25,
+      "custom_rate": 0.1201923076923077,
+      "processing_time_ms": 10491.901636123657
+    },
+    {
+      "cik": "0000019745",
+      "ticker": "CPK",
+      "name": "CHESAPEAKE UTILITIES CORP",
+      "total_concepts": 203,
+      "canonical_covered": 81,
+      "coverage_rate": 0.39901477832512317,
+      "custom_concepts": 32,
+      "custom_rate": 0.15763546798029557,
+      "processing_time_ms": 7015.2387619018555
+    },
+    {
+      "cik": "0001822966",
+      "ticker": "SMR",
+      "name": "NUSCALE POWER Corp",
+      "total_concepts": 154,
+      "canonical_covered": 61,
+      "coverage_rate": 0.3961038961038961,
+      "custom_concepts": 32,
+      "custom_rate": 0.2077922077922078,
+      "processing_time_ms": 4073.6374855041504
+    },
+    {
+      "cik": "0000715957",
+      "ticker": "D",
+      "name": "DOMINION ENERGY, INC",
+      "total_concepts": 223,
+      "canonical_covered": 88,
+      "coverage_rate": 0.39461883408071746,
+      "custom_concepts": 46,
+      "custom_rate": 0.2062780269058296,
+      "processing_time_ms": 16001.227140426636
+    },
+    {
+      "cik": "0000356309",
+      "ticker": "NJR",
+      "name": "NEW JERSEY RESOURCES CORP",
+      "total_concepts": 204,
+      "canonical_covered": 80,
+      "coverage_rate": 0.39215686274509803,
+      "custom_concepts": 29,
+      "custom_rate": 0.14215686274509803,
+      "processing_time_ms": 7729.779005050659
+    },
+    {
+      "cik": "0000007323",
+      "ticker": "EAI",
+      "name": "ENTERGY ARKANSAS, LLC",
+      "total_concepts": 245,
+      "canonical_covered": 96,
+      "coverage_rate": 0.39183673469387753,
+      "custom_concepts": 42,
+      "custom_rate": 0.17142857142857143,
+      "processing_time_ms": 9658.609628677368
+    },
+    {
+      "cik": "0000066901",
+      "ticker": "EMP",
+      "name": "ENTERGY MISSISSIPPI, LLC",
+      "total_concepts": 245,
+      "canonical_covered": 96,
+      "coverage_rate": 0.39183673469387753,
+      "custom_concepts": 42,
+      "custom_rate": 0.17142857142857143,
+      "processing_time_ms": 24033.313274383545
+    },
+    {
+      "cik": "0000071508",
+      "ticker": "ENO",
+      "name": "ENTERGY NEW ORLEANS, LLC",
+      "total_concepts": 245,
+      "canonical_covered": 96,
+      "coverage_rate": 0.39183673469387753,
+      "custom_concepts": 42,
+      "custom_rate": 0.17142857142857143,
+      "processing_time_ms": 22413.479566574097
+    },
+    {
+      "cik": "0000071508",
+      "ticker": "ENJ",
+      "name": "ENTERGY NEW ORLEANS, LLC",
+      "total_concepts": 245,
+      "canonical_covered": 96,
+      "coverage_rate": 0.39183673469387753,
+      "custom_concepts": 42,
+      "custom_rate": 0.17142857142857143,
+      "processing_time_ms": 28034.115314483643
+    },
+    {
+      "cik": "0001348952",
+      "ticker": "ELC",
+      "name": "ENTERGY LOUISIANA, LLC",
+      "total_concepts": 245,
+      "canonical_covered": 96,
+      "coverage_rate": 0.39183673469387753,
+      "custom_concepts": 42,
+      "custom_rate": 0.17142857142857143,
+      "processing_time_ms": 23627.241373062134
+    },
+    {
+      "cik": "0000065984",
+      "ticker": "ETR",
+      "name": "ENTERGY CORP /DE/",
+      "total_concepts": 245,
+      "canonical_covered": 96,
+      "coverage_rate": 0.39183673469387753,
+      "custom_concepts": 42,
+      "custom_rate": 0.17142857142857143,
+      "processing_time_ms": 24283.18428993225
+    },
+    {
+      "cik": "0001817004",
+      "ticker": "NXXT",
+      "name": "NEXTNRG, INC.",
+      "total_concepts": 172,
+      "canonical_covered": 64,
+      "coverage_rate": 0.37209302325581395,
+      "custom_concepts": 0,
+      "custom_rate": 0.0,
+      "processing_time_ms": 3449.777126312256
+    },
+    {
+      "cik": "0001032208",
+      "ticker": "SREA",
+      "name": "SEMPRA",
+      "total_concepts": 242,
+      "canonical_covered": 89,
+      "coverage_rate": 0.3677685950413223,
+      "custom_concepts": 33,
+      "custom_rate": 0.13636363636363635,
+      "processing_time_ms": 4550.947666168213
+    },
+    {
+      "cik": "0001032208",
+      "ticker": "SRE",
+      "name": "SEMPRA",
+      "total_concepts": 242,
+      "canonical_covered": 89,
+      "coverage_rate": 0.3677685950413223,
+      "custom_concepts": 33,
+      "custom_rate": 0.13636363636363635,
+      "processing_time_ms": 4737.950801849365
+    },
+    {
+      "cik": "0001296445",
+      "ticker": "ORA",
+      "name": "ORMAT TECHNOLOGIES, INC.",
+      "total_concepts": 212,
+      "canonical_covered": 77,
+      "coverage_rate": 0.3632075471698113,
+      "custom_concepts": 37,
+      "custom_rate": 0.17452830188679244,
+      "processing_time_ms": 2500.5943775177
+    },
+    {
+      "cik": "0000922224",
+      "ticker": "PPL",
+      "name": "PPL Corp",
+      "total_concepts": 262,
+      "canonical_covered": 93,
+      "coverage_rate": 0.3549618320610687,
+      "custom_concepts": 46,
+      "custom_rate": 0.17557251908396945,
+      "processing_time_ms": 13755.218267440796
+    },
+    {
+      "cik": "0001842279",
+      "ticker": "OPAL",
+      "name": "OPAL Fuels Inc.",
+      "total_concepts": 239,
+      "canonical_covered": 76,
+      "coverage_rate": 0.3179916317991632,
+      "custom_concepts": 39,
+      "custom_rate": 0.16317991631799164,
+      "processing_time_ms": 4600.2209186553955
+    }
+  ],
+  "lookups": {
+    "cik_to_ticker": {
+      "0000928340": "CWCO",
+      "0001174169": "AQN",
+      "0001434728": "GWRS",
+      "0002071778": "FRMI",
+      "0001868941": "FLNC",
+      "0000092122": "SOJE",
+      "0001826600": "MNTK",
+      "0001922641": "ENLT",
+      "0001692115": "SWX",
+      "0001711269": "EVRG",
+      "0000352541": "LNT",
+      "0001788348": "BIPC",
+      "0000041091": "GPJA",
+      "0001822966": "SMR",
+      "0000276720": "PCYO",
+      "0001032208": "SRE",
+      "0000072903": "XEL",
+      "0001466593": "OTTR",
+      "0001846715": "WAVE",
+      "0001981599": "CTRI",
+      "0000078128": "WTRG",
+      "0001848763": "RNW",
+      "0000066004": "MSEX",
+      "0000721693": "CREG",
+      "0001901215": "BNRG",
+      "0000727273": "CDZI",
+      "0001606268": "VIASP",
+      "0000007323": "EAI",
+      "0001002910": "AEE",
+      "0001749723": "NFE",
+      "-999999999": "EBR-B",
+      "0000884614": "UGI",
+      "0001157557": "CIG",
+      "0001041792": "ELP",
+      "0000811156": "CMS",
+      "0001567683": "CWEN",
+      "0001057877": "IDA",
+      "0001296445": "ORA",
+      "0001791863": "BEPC",
+      "0000784977": "POR",
+      "0000066756": "ALE",
+      "0000936340": "DTE",
+      "0000104918": "AVA",
+      "0000019745": "CPK",
+      "0001035201": "CWT",
+      "0000004904": "AEP",
+      "0001733998": "NWN",
+      "0000354707": "HE",
+      "0001005210": "SPH",
+      "0001888447": "EE",
+      "0000755001": "UTL",
+      "0001161728": "MGEE",
+      "0001693256": "WTTR",
+      "0001828536": "NRGV",
+      "0000066901": "EMP",
+      "0000071508": "ENJ",
+      "0001868275": "CEG",
+      "0001109357": "EXC",
+      "0000766829": "HTO",
+      "0001993004": "NWE",
+      "0000863110": "ARTNA",
+      "0001069533": "RGCO",
+      "0001817004": "NXXT",
+      "0001842279": "OPAL",
+      "0001587732": "OGS",
+      "0001130464": "BKH",
+      "0001841425": "VGAS",
+      "0000108985": "YORW",
+      "0001819794": "HTOO",
+      "0001326160": "DUKB",
+      "0000788784": "PEG",
+      "0001348952": "ELC",
+      "0001047862": "ED",
+      "0000783325": "WEC",
+      "0001004980": "PCG",
+      "0001410636": "AWK",
+      "0000072741": "ES",
+      "0001108426": "TXNM",
+      "0000356309": "NJR",
+      "0002011053": "SUUN",
+      "0001056903": "AWR",
+      "0002028293": "RAIN",
+      "0001126956": "SR",
+      "0000753308": "NEE",
+      "0001004315": "NGG",
+      "0001659939": "ENIC",
+      "0001849056": "OKLO",
+      "0001996810": "GEV",
+      "0001021635": "OGE",
+      "0001666175": "FTS",
+      "0000715957": "D",
+      "0000065984": "ETR",
+      "0001395213": "EDN",
+      "0000731802": "ATO",
+      "0001031296": "FE",
+      "0000922224": "PPL",
+      "0001130310": "CNP",
+      "0001717161": "CEPU",
+      "0000827052": "EIX",
+      "0001111711": "NI",
+      "0001170858": "SBS",
+      "0001406234": "BIP",
+      "0001528356": "GNE",
+      "0001127248": "EMA",
+      "0001533232": "BEP",
+      "0000887225": "KEP",
+      "0000764622": "PNW",
+      "0000874761": "AES"
+    },
+    "ticker_to_cik": {
+      "CWCO": "0000928340",
+      "AQNB": "0001174169",
+      "GWRS": "0001434728",
+      "FRMI": "0002071778",
+      "FLNC": "0001868941",
+      "SOMN": "0000092122",
+      "MNTK": "0001826600",
+      "ENLT": "0001922641",
+      "SWX": "0001692115",
+      "EVRG": "0001711269",
+      "LNT": "0000352541",
+      "BIPC": "0001788348",
+      "GPJA": "0000041091",
+      "SMR": "0001822966",
+      "PCYO": "0000276720",
+      "SREA": "0001032208",
+      "XEL": "0000072903",
+      "OTTR": "0001466593",
+      "WAVE": "0001846715",
+      "SRE": "0001032208",
+      "CTRI": "0001981599",
+      "WTRG": "0000078128",
+      "RNWWW": "0001848763",
+      "MSEX": "0000066004",
+      "CREG": "0000721693",
+      "BNRG": "0001901215",
+      "CDZI": "0000727273",
+      "VIASP": "0001606268",
+      "EAI": "0000007323",
+      "AEE": "0001002910",
+      "NFE": "0001749723",
+      "EBR": "-999999999",
+      "UGI": "0000884614",
+      "CIG-C": "0001157557",
+      "ELPC": "0001041792",
+      "CMSD": "0000811156",
+      "CWEN": "0001567683",
+      "IDA": "0001057877",
+      "ORA": "0001296445",
+      "CIG": "0001157557",
+      "BEPC": "0001791863",
+      "POR": "0000784977",
+      "AQN": "0001174169",
+      "ALE": "0000066756",
+      "DTW": "0000936340",
+      "DTB": "0000936340",
+      "DTG": "0000936340",
+      "AVA": "0000104918",
+      "CPK": "0000019745",
+      "CWT": "0001035201",
+      "AEP": "0000004904",
+      "NWN": "0001733998",
+      "HE": "0000354707",
+      "SPH": "0001005210",
+      "EE": "0001888447",
+      "UTL": "0000755001",
+      "MGEE": "0001161728",
+      "WTTR": "0001693256",
+      "NRGV": "0001828536",
+      "EMP": "0000066901",
+      "ENO": "0000071508",
+      "ENJ": "0000071508",
+      "CEG": "0001868275",
+      "EXC": "0001109357",
+      "RNW": "0001848763",
+      "HTO": "0000766829",
+      "NWE": "0001993004",
+      "ARTNA": "0000863110",
+      "ELP": "0001041792",
+      "RGCO": "0001069533",
+      "NXXT": "0001817004",
+      "OPAL": "0001842279",
+      "OGS": "0001587732",
+      "BKH": "0001130464",
+      "VGAS": "0001841425",
+      "YORW": "0000108985",
+      "HTOO": "0001819794",
+      "SO": "0000092122",
+      "DUK": "0001326160",
+      "PEG": "0000788784",
+      "ELC": "0001348952",
+      "ED": "0001047862",
+      "WEC": "0000783325",
+      "PCG": "0001004980",
+      "AWK": "0001410636",
+      "EBR-B": "-999999999",
+      "ES": "0000072741",
+      "TXNM": "0001108426",
+      "NJR": "0000356309",
+      "SUUN": "0002011053",
+      "AWR": "0001056903",
+      "RAIN": "0002028293",
+      "SR": "0001126956",
+      "CMSA": "0000811156",
+      "NEE": "0000753308",
+      "NGG": "0001004315",
+      "ENIC": "0001659939",
+      "OKLO": "0001849056",
+      "GEV": "0001996810",
+      "OGE": "0001021635",
+      "FTS": "0001666175",
+      "D": "0000715957",
+      "ETR": "0000065984",
+      "EDN": "0001395213",
+      "ATO": "0000731802",
+      "DTE": "0000936340",
+      "FE": "0001031296",
+      "PPL": "0000922224",
+      "CNP": "0001130310",
+      "CMSC": "0000811156",
+      "CEPU": "0001717161",
+      "SOJC": "0000092122",
+      "EIX": "0000827052",
+      "SOJD": "0000092122",
+      "SOJE": "0000092122",
+      "DUKB": "0001326160",
+      "NI": "0001111711",
+      "SBS": "0001170858",
+      "BIP": "0001406234",
+      "GNE": "0001528356",
+      "EMA": "0001127248",
+      "BEP": "0001533232",
+      "CMS": "0000811156",
+      "KEP": "0000887225",
+      "PNW": "0000764622",
+      "AES": "0000874761"
+    }
+  }
+}

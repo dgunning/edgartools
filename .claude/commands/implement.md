@@ -13,6 +13,12 @@ I'll implement the plan phase by phase, verifying each step before proceeding.
 Please provide the path to your implementation plan from Phase 2.
 ```
 
+## Soft Fork Protocol (Required)
+- `edgar/` is read-only; do not modify core files.
+- Implement new behavior in `quant/` (e.g., `quant/core.py`, `quant/utils.py`).
+- Extend core classes via inheritance (e.g., `class QuantCompany(Company)`) and use `super()`.
+- Use relative imports inside `quant/` (e.g., `from .utils import TTMCalculator`).
+
 ## Implementation Process:
 
 ### 1. **Load and Review Plan**
@@ -29,7 +35,7 @@ git status
 git diff
 
 # Run existing tests to ensure baseline
-python -m pytest
+python -m pytest quant/tests
 
 # Check current branch
 git branch --show-current
@@ -111,11 +117,11 @@ After all phases complete:
 
 ```bash
 # Run full test suite
-python -m pytest tests/ --cov=edgar --cov-report=term-missing
+python -m pytest quant/tests
 
 # Check code quality
-ruff check edgar/
-mypy edgar/
+ruff check quant/
+mypy quant/
 
 # Verify examples work
 python examples/relevant_example.py
