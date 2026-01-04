@@ -59,13 +59,45 @@ When a gap is detected, check SEC for related entities and add to `LEGACY_CIKS`.
 
 
 ## Bulk Data Support
+
+### Download & Setup
 ```python
 from edgar import download_edgar_data, use_local_storage
 
-download_edgar_data(facts=True, submissions=True, reference=True)  # ~7 GB
+download_edgar_data(facts=True, submissions=True, reference=True)
 use_local_storage(True)
 # Now all API calls read from local files
 ```
+
+### Test Run (2026-01-04)
+We created `explore_mag7_bulk.py` to test bulk data extraction. Results:
+
+**Download Location:** `~/.edgar/`
+| Folder | Size |
+|--------|------|
+| `submissions/` | 7.1 GB |
+| `companyfacts/` | ~4 GB |
+| **Total** | ~11 GB |
+
+**Download Time:** ~15 minutes (910s)
+
+**Extraction Results (from LOCAL bulk data):**
+| Ticker | Facts Found | Periods Extracted |
+|--------|-------------|-------------------|
+| GOOG | 29,283 (combined) | 66 |
+| AMZN | 28,172 | 66 |
+| AAPL | 23,807 | 66 |
+| MSFT | 29,910 | 65 |
+| NVDA | 26,034 | 62 |
+| TSLA | 22,842 | 58 |
+| META | 16,895 | 54 |
+
+**Output:** 437 records saved to `sandbox/data/mag7_financials_bulk.parquet`
+
+### Key Observations
+-   GOOG dual-CIK handling worked correctly (19,170 + 10,113 facts merged)
+-   Local storage mode eliminates network latency for repeated queries
+-   Script: `explore_mag7_bulk.py` is reusable for future bulk analysis
 
 ## Open Questions
 -   Why does `former_names` not show the 2015 restructuring?
