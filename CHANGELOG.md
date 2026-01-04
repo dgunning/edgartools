@@ -7,6 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.8.0] - 2026-01-04
+
+### Added
+
+- **StatementView Enum for Semantic Dimension Filtering** (Issue #574, edgartools-dvel)
+  - New `StatementView` enum replaces confusing `include_dimensions` boolean
+  - Three presentation modes: STANDARD (face presentation), DETAILED (all dimensions), SUMMARY (totals only)
+  - Different defaults per use case: STANDARD for rendering, DETAILED for DataFrames
+  - Backward compatible with deprecation warning for `include_dimensions` (removed in v6.0)
+  - **Files**: `edgar/xbrl/presentation.py`, `edgar/xbrl/statements.py`
+  - **Impact**: Clearer, more semantic API for dimension filtering
+
+- **Enhanced Dimension Labels** (Issue #574)
+  - Added `dimension_member_label` column with just the member label (e.g., "Products")
+  - For multi-dimensional items, uses LAST (most specific) dimension's member label
+  - Structured dimension fields now available in XBRL facts queries
+  - `dimension_label` preserves original full format for backward compatibility
+  - **Files**: `edgar/xbrl/statements.py`, `edgar/xbrl/facts.py`
+  - **Impact**: Better disambiguation of dimensional data
+
+- **Matrix Rendering for Statement of Equity** (Issue #574, edgartools-uqg7)
+  - Opt-in matrix format via `to_dataframe(matrix=True)`
+  - Components as columns, activities as rows for cleaner visualization
+  - Works well for simple structures (AAPL, GOOGL, MSFT)
+  - Default remains standard list format for reliability across all companies
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Enhanced equity statement presentation for opt-in users
+
+### Fixed
+
+- **Statement of Equity Roll-Forward Period Matching** (Issue #572, edgartools-096c)
+  - Beginning balance rows now correctly use instant_{start_date - 1 day} values
+  - Ending balance rows use instant_{end_date} values
+  - Tracks concept occurrences to distinguish first vs. later appearances
+  - Consistent with render() behavior from Issue #450
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Correct balance values in Statement of Equity DataFrames
+
+- **Balance Sheet Concept Names** (Issue #570, edgartools-17ow)
+  - Fixed recognition and rendering of balance sheet items with certain concept patterns
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Complete balance sheet item display
+
+- **ORCL Statement Resolver** (edgartools-8ad8)
+  - Prefer main equity statements over parentheticals
+  - Added roll-forward concept pattern matching
+  - -80 score penalty for parenthetical statements ensures correct selection
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct statement selection for Oracle and similar companies
+
+- **XBRL Structural Element Filtering**
+  - Filters empty structural element rows (ProductMember, ServiceMember) from rendered statements
+  - Combined with dimension filtering for cleaner output
+  - **Files**: `edgar/xbrl/rendering.py`
+  - **Impact**: Cleaner statement rendering without empty XBRL artifacts
+
+- **Test Suite**
+  - Fixed mock test to account for new `view` parameter in Statement constructor
+  - **Files**: `tests/test_xbrl_statement_error_handling.py`
+  - **Impact**: All tests passing
+
+### Deprecated
+
+- **include_dimensions parameter**
+  - Use `view=StatementView.DETAILED` instead of `include_dimensions=True`
+  - Use `view=StatementView.STANDARD` instead of `include_dimensions=False`
+  - Deprecation warning raised when used
+  - Will be removed in v6.0.0
+  - **Impact**: Migration path provided with clear warnings
+
+### Summary
+
+Release 5.8.0 is a feature release introducing the StatementView enum for clearer dimension filtering semantics, enhanced dimension labels with better multi-dimensional handling, opt-in matrix rendering for Statement of Equity, and critical fixes for equity statement period matching and balance sheet rendering. The release maintains full backward compatibility while providing a clear migration path away from the deprecated `include_dimensions` parameter.
+
 ## [5.7.4] - 2026-01-03
 
 ### Added

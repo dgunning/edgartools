@@ -134,7 +134,7 @@ def test_statement_of_equity_successful_resolution():
         # Note: include_dimensions defaults to True for Statement of Equity (v5.7.1 fix for Issue #571)
         mock_statement_class.assert_called_once_with(
             mock_xbrl, 'test_role', canonical_type="StatementOfEquity",
-            include_dimensions=True
+            include_dimensions=True, view=None
         )
 
 
