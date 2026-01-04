@@ -243,13 +243,292 @@ class Statement:
         """
         if Table is None:
             return str(self)
+
+        # Use matrix rendering for equity statements (Issue edgartools-uqg7)
+        if self._is_matrix_statement():
+            return self._render_matrix()
+
         return self.render()
+
+    def _is_matrix_statement(self) -> bool:
+        """
+        Check if this statement should be rendered as a matrix.
+
+        Returns True for Statement of Equity with StatementEquityComponentsAxis
+        that has detailed equity component members (not just aggregates).
+
+        Matrix format requires detailed components like:
+        - Common Stock / Additional Paid-in Capital
+        - Retained Earnings
+        - Accumulated Other Comprehensive Income/Loss
+        - Treasury Stock
+
+        If the axis only has aggregates (Total Stockholders' Equity, Noncontrolling Interests),
+        the statement should be rendered as a list, not a matrix.
+        """
+        # Check if this is an equity statement by canonical type OR role URI
+        statement_type = self.canonical_type if self.canonical_type else ''
+        role_lower = self.role_or_type.lower() if self.role_or_type else ''
+
+        is_equity_by_type = statement_type in (
+            'StatementOfEquity', 'StatementOfStockholdersEquity',
+            'StatementOfChangesInEquity'
+        )
+        is_equity_by_role = (
+            ('equity' in role_lower or 'stockholder' in role_lower) and
+            'parenthetical' not in role_lower and
+            'disclosure' not in role_lower
+        )
+
+        if not (is_equity_by_type or is_equity_by_role):
+            return False
+
+        # Collect equity component member labels from DataFrame
+        # DataFrame has more complete dimension info than raw_data's dimension_metadata
+        try:
+            df = self.to_dataframe()
+            equity_axis_rows = df[
+                df['dimension_axis'].fillna('').str.contains('StatementEquityComponentsAxis', case=False)
+            ]
+            equity_members = set(
+                equity_axis_rows['dimension_member_label'].dropna().str.lower().unique()
+            )
+        except Exception:
+            # Fallback to raw data if DataFrame fails
+            raw_data = self.get_raw_data()
+            equity_members = set()
+            for item in raw_data:
+                dim_meta = item.get('dimension_metadata', [])
+                for dm in dim_meta:
+                    if 'StatementEquityComponentsAxis' in dm.get('dimension', ''):
+                        member_label = dm.get('member_label', '').lower()
+                        equity_members.add(member_label)
+
+        if not equity_members:
+            return False
+
+        # PRIMARY equity components that form matrix columns
+        # These are the standard equity buckets that fit in a matrix format
+        primary_component_patterns = [
+            'common stock',
+            'paid-in capital',
+            'paid in capital',
+            'apic',
+            'retained earnings',
+            'accumulated deficit',
+            'accumulated other comprehensive',  # AOCI as single column
+            'aoci',
+            'treasury stock',
+            'preferred stock',
+            'noncontrolling interest',
+            'non-controlling interest',
+        ]
+
+        # Sub-component patterns that indicate AOCI breakdown or other detailed views
+        # If these exist as separate members, the company uses list format
+        sub_component_patterns = [
+            'unrealized gain',
+            'unrealized loss',
+            'translation adjustment',
+            'foreign currency',
+            'fair value hedge',
+            'cash flow hedge',
+            'pension',
+            'opeb',
+            'dva on fair value',
+            'defined benefit',
+        ]
+
+        # Aggregate patterns that should NOT count as components
+        aggregate_patterns = [
+            'total stockholders',
+            'total equity',
+            'parent company',
+            'redeemable',
+            'adjustment',
+        ]
+
+        # Count primary components and sub-component breakdowns
+        primary_components = set()
+        sub_component_count = 0
+
+        for member in equity_members:
+            # Skip aggregates
+            if any(agg in member for agg in aggregate_patterns):
+                continue
+
+            # Check if this is a sub-component breakdown (e.g., AOCI details)
+            if any(sub in member for sub in sub_component_patterns):
+                sub_component_count += 1
+                continue
+
+            # Check if this is a primary component
+            for pattern in primary_component_patterns:
+                if pattern in member:
+                    primary_components.add(pattern)
+                    break
+
+        # Matrix format requires:
+        # 1. At least 2 primary components
+        # 2. No more than 7 primary components (otherwise too wide)
+        # 3. Few AOCI sub-component breakdowns (<=3 can be aggregated, >3 needs list format)
+        #    - GOOGL has 3 sub-components, uses matrix in SEC
+        #    - JPM has 6 sub-components, uses list format in SEC
+        has_enough_components = len(primary_components) >= 2
+        not_too_many = len(primary_components) <= 7
+        few_sub_components = sub_component_count <= 3
+
+        return has_enough_components and not_too_many and few_sub_components
+
+    def _render_matrix(self) -> Table:
+        """
+        Render Statement of Equity as a matrix table.
+
+        Uses the matrix DataFrame to create a Rich table with equity components
+        as columns and activities as rows.
+        """
+        from edgar.xbrl.rendering import get_xbrl_styles
+        from rich.text import Text
+
+        # Get matrix DataFrame
+        df = self.to_dataframe(matrix=True)
+        if df is None or df.empty:
+            return self.render()  # Fall back to standard rendering
+
+        styles = get_xbrl_styles()
+
+        # Build title with units note
+        title = self.title if hasattr(self, 'title') else "Statement of Stockholders' Equity"
+        title_parts = [f"[bold]{title}[/bold]", "[dim](in millions)[/dim]"]
+        full_title = "\n".join(title_parts)
+
+        table = Table(title=full_title, box=box.SIMPLE, border_style=styles['structure']['border'])
+
+        # Add label column (wider for activity names)
+        table.add_column("", justify="left", min_width=30)
+
+        # Get equity component columns (exclude metadata columns)
+        metadata_cols = {'concept', 'label', 'level', 'abstract'}
+        value_cols = [c for c in df.columns if c not in metadata_cols]
+
+        # Abbreviate column headers for readability
+        def abbreviate_member(member: str) -> str:
+            """Abbreviate long equity component names."""
+            member_lower = member.lower()
+
+            # Common stock variants
+            if 'common stock' in member_lower or 'paid-in capital' in member_lower or 'paid in capital' in member_lower:
+                if 'class a' in member_lower or 'class b' in member_lower or 'class c' in member_lower:
+                    return 'Common Stock\n& APIC'
+                return 'Common Stock\n& APIC'
+
+            # Retained earnings
+            if 'retained earnings' in member_lower or 'accumulated deficit' in member_lower:
+                return 'Retained\nEarnings'
+
+            # AOCI
+            if 'accumulated other comprehensive' in member_lower or 'aoci' in member_lower:
+                return 'AOCI'
+
+            # Treasury stock
+            if 'treasury' in member_lower:
+                return 'Treasury\nStock'
+
+            # Noncontrolling interests
+            if 'noncontrolling' in member_lower or 'non-controlling' in member_lower:
+                return 'NCI'
+
+            # Total
+            if 'total stockholders' in member_lower or 'total equity' in member_lower:
+                return 'Total\nEquity'
+
+            # Preferred stock
+            if 'preferred' in member_lower:
+                return 'Preferred\nStock'
+
+            # Truncate unknown
+            return member[:12] + '...' if len(member) > 12 else member
+
+        # Group columns by period for better organization
+        # Extract unique periods
+        periods = []
+        for col in value_cols:
+            if '|' in col:
+                _, period = col.rsplit('|', 1)
+                if period not in periods:
+                    periods.append(period)
+
+        # Add equity component columns with abbreviated headers
+        for col in value_cols:
+            if '|' in col:
+                member, period = col.rsplit('|', 1)
+                header = f"{abbreviate_member(member)}\n{period}"
+            else:
+                header = abbreviate_member(col)
+            table.add_column(header, justify="right", no_wrap=True)
+
+        # Add rows
+        for _, row in df.iterrows():
+            label = row['label']
+            level = row.get('level', 0)
+            is_abstract = row.get('abstract', False)
+
+            # Format label based on level
+            indent = "  " * level
+
+            if is_abstract:
+                if level == 0:
+                    label_text = label.upper()
+                    style = styles['header']['top_level']
+                else:
+                    label_text = f"{indent}{label}"
+                    style = styles['header']['section']
+            else:
+                label_text = f"{indent}{label}"
+                style = None
+
+            styled_label = Text(label_text, style=style) if style else Text(label_text)
+
+            # Format cell values (scale to millions)
+            cell_values = []
+            for col in value_cols:
+                value = row.get(col)
+                if value is None or pd.isna(value):
+                    cell_values.append(Text("—", justify="right", style="dim"))
+                else:
+                    try:
+                        num_value = float(value) / 1_000_000  # Convert to millions
+                        if abs(num_value) < 0.5:
+                            # Very small values show as dash
+                            cell_values.append(Text("—", justify="right", style="dim"))
+                        elif num_value < 0:
+                            formatted = f"({abs(num_value):,.0f})"
+                            cell_style = styles['value']['negative']
+                            cell_values.append(Text(formatted, style=cell_style, justify="right"))
+                        else:
+                            formatted = f"{num_value:,.0f}"
+                            cell_style = styles['value']['positive']
+                            cell_values.append(Text(formatted, style=cell_style, justify="right"))
+                    except (ValueError, TypeError):
+                        cell_values.append(Text(str(value), justify="right"))
+
+            table.add_row(styled_label, *cell_values)
+
+        return table
 
     def __repr__(self):
         return repr_rich(self.__rich__())
 
     def __str__(self):
         """String representation using improved rendering with proper width."""
+        # Use matrix rendering for equity statements (Issue edgartools-uqg7)
+        if self._is_matrix_statement():
+            from rich.console import Console
+            console = Console(force_terminal=True, width=200)
+            with console.capture() as capture:
+                console.print(self._render_matrix())
+            return capture.get()
+
         rendered_statement = self.render()
         return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
@@ -285,7 +564,8 @@ class Statement:
                      include_dimensions: Optional[bool] = None,
                      include_unit: bool = False,
                      include_point_in_time: bool = False,
-                     presentation: bool = False) -> Any:
+                     presentation: bool = False,
+                     matrix: bool = False) -> Any:
         """Convert statement to pandas DataFrame.
 
         Args:
@@ -305,9 +585,13 @@ class Statement:
                          Cash Flow: outflows (balance='credit') shown as negative
                          Income: apply preferred_sign transformations
                          Default: False (raw instance values)
+            matrix: If True, return matrix format for Statement of Equity (equity components
+                   as columns, activities as rows). Ignored for non-equity statements.
+                   Default: False (standard flat format for backwards compatibility).
 
         Returns:
-            DataFrame with raw values + metadata (balance, weight, preferred_sign) by default
+            DataFrame with raw values + metadata (balance, weight, preferred_sign) by default.
+            If matrix=True and this is a Statement of Equity, returns pivoted matrix format.
 
         Examples:
             >>> # Default: DETAILED view for complete data
@@ -317,6 +601,9 @@ class Statement:
             >>> df = statement.to_dataframe(view='standard')  # Clean, SEC Viewer style
             >>> df = statement.to_dataframe(view='detailed')  # All dimensional data
             >>> df = statement.to_dataframe(view='summary')   # Non-dimensional only
+            >>>
+            >>> # Matrix format for Statement of Equity
+            >>> equity_df = equity_statement.to_dataframe(matrix=True)
         """
         # Handle deprecated include_dimensions parameter
         if include_dimensions is not None:
@@ -371,6 +658,10 @@ class Statement:
             # Apply presentation transformation if requested (Issue #463)
             if presentation:
                 df = self._apply_presentation(df)
+
+            # Apply matrix transformation for equity statements (Issue edgartools-uqg7)
+            if matrix:
+                df = self._pivot_to_matrix(df)
 
             return df
 
@@ -714,6 +1005,154 @@ class Statement:
 
         return result
 
+    def _pivot_to_matrix(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Pivot Statement of Equity DataFrame to matrix format.
+
+        Issue edgartools-uqg7: Transform equity statement to SEC-style matrix format
+        with equity components as columns and activities as rows.
+
+        Args:
+            df: Standard flat DataFrame from _build_dataframe_from_raw_data
+
+        Returns:
+            Matrix-format DataFrame if this is an equity statement with
+            detailed equity component members, otherwise returns original DataFrame unchanged.
+        """
+        # Use the same detection logic as _is_matrix_statement()
+        if not self._is_matrix_statement():
+            return df
+
+        # Verify we have the required columns
+        if 'dimension_axis' not in df.columns:
+            return df
+
+        # Identify period columns (date-like columns)
+        metadata_cols = {
+            'concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown',
+            'dimension_axis', 'dimension_member', 'dimension_member_label',
+            'dimension_label', 'balance', 'weight', 'preferred_sign',
+            'parent_concept', 'parent_abstract_concept', 'unit', 'point_in_time'
+        }
+        period_cols = [col for col in df.columns if col not in metadata_cols]
+
+        if not period_cols:
+            return df
+
+        # Get unique equity component members (column headers for matrix)
+        all_members = df[
+            df['dimension_axis'].str.contains('StatementEquityComponentsAxis', na=False)
+        ]['dimension_member_label'].dropna().unique().tolist()
+
+        if not all_members:
+            return df
+
+        # Filter to only PRIMARY equity components, exclude sub-breakdowns
+        # Primary: Common Stock, APIC, Retained Earnings, AOCI (aggregate), Treasury Stock
+        # Exclude: AOCI sub-components (Foreign Currency, Unrealized gains/losses, etc.)
+        primary_patterns = [
+            'common stock',
+            'paid-in capital',
+            'paid in capital',
+            'apic',
+            'retained earnings',
+            'accumulated deficit',
+            'accumulated other comprehensive',  # AOCI aggregate, not sub-components
+            'treasury stock',
+            'preferred stock',
+            'class a',
+            'class b',
+            'class c',
+            'noncontrolling',
+            'total stockholders',
+            'total equity',
+        ]
+
+        # Sub-breakdown patterns to exclude (children of AOCI, etc.)
+        exclude_patterns = [
+            'foreign currency',
+            'translation adjustment',
+            'unrealized gain',
+            'unrealized loss',
+            'unrealized (gain',
+            'pension',
+            'benefit plan',
+            'hedge',
+            'reclassification',
+            'derivative',
+            'investment',  # "Unrealized on investments"
+        ]
+
+        def is_primary_member(member: str) -> bool:
+            member_lower = member.lower()
+            # Exclude sub-breakdowns
+            if any(excl in member_lower for excl in exclude_patterns):
+                return False
+            # Check for primary patterns
+            if any(prim in member_lower for prim in primary_patterns):
+                return True
+            # If no patterns match, include by default (conservative)
+            return True
+
+        equity_members = [m for m in all_members if is_primary_member(m)]
+
+        if not equity_members:
+            return df
+
+        # Build matrix: rows = activities, columns = equity components × periods
+        # Group by concept to aggregate across equity components
+        matrix_rows = []
+
+        # Get non-dimensional rows (activity labels) - these become row headers
+        non_dim_df = df[~df['dimension'].fillna(False)]
+
+        for _, row in non_dim_df.iterrows():
+            concept = row['concept']
+            label = row['label']
+
+            matrix_row = {
+                'concept': concept,
+                'label': label,
+                'level': row.get('level', 0),
+                'abstract': row.get('abstract', False),
+            }
+
+            # For each period, get values for each equity component
+            for period_col in period_cols:
+                # Get dimensional values for this concept and period
+                dim_values = df[
+                    (df['concept'] == concept) &
+                    (df['dimension_axis'].str.contains('StatementEquityComponentsAxis', na=False))
+                ]
+
+                for member in equity_members:
+                    member_row = dim_values[dim_values['dimension_member_label'] == member]
+                    if not member_row.empty:
+                        value = member_row[period_col].iloc[0]
+                    else:
+                        value = None
+
+                    # Column name: "Member | Period" for multi-period, or just "Member" for single
+                    if len(period_cols) == 1:
+                        col_name = member
+                    else:
+                        col_name = f"{member}|{period_col}"
+
+                    matrix_row[col_name] = value
+
+            matrix_rows.append(matrix_row)
+
+        if not matrix_rows:
+            return df
+
+        result_df = pd.DataFrame(matrix_rows)
+
+        # Reorder columns: concept, label, level, abstract, then equity components
+        base_cols = ['concept', 'label', 'level', 'abstract']
+        value_cols = [c for c in result_df.columns if c not in base_cols]
+        result_df = result_df[base_cols + value_cols]
+
+        return result_df
 
     def _validate_statement(self, skip_concept_check: bool = False) -> None:
         """
