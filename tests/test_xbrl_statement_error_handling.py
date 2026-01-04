@@ -131,10 +131,10 @@ def test_statement_of_equity_successful_resolution():
         assert result == mock_statement_instance
         
         # Should call Statement constructor with correct parameters
-        # Note: include_dimensions defaults to True for Statement of Equity (v5.7.1 fix for Issue #571)
+        # Note: include_dimensions is deprecated, now passes view parameter
         mock_statement_class.assert_called_once_with(
             mock_xbrl, 'test_role', canonical_type="StatementOfEquity",
-            include_dimensions=True, view=None
+            view=None
         )
 
 

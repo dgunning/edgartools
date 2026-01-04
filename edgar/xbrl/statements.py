@@ -1328,6 +1328,32 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
 
+    def _resolve_view(self, view: ViewType, include_dimensions: Optional[bool]) -> ViewType:
+        """
+        Resolve view parameter from deprecated include_dimensions.
+
+        Args:
+            view: Explicit view parameter (takes precedence)
+            include_dimensions: Deprecated parameter
+
+        Returns:
+            Resolved view (may be None if neither specified)
+        """
+        if include_dimensions is not None:
+            if view is not None:
+                raise ValueError(
+                    "Cannot specify both 'view' and 'include_dimensions'. "
+                    "Use 'view' only (include_dimensions is deprecated)."
+                )
+            warnings.warn(
+                "include_dimensions is deprecated and will be removed in v6.0. "
+                "Use view='standard', 'detailed', or 'summary' instead.",
+                DeprecationWarning,
+                stacklevel=3
+            )
+            return StatementView.DETAILED if include_dimensions else StatementView.STANDARD
+        return view
+
     @staticmethod
     def classify_statement(stmt: dict) -> str:
         """
@@ -1741,7 +1767,7 @@ class Statements:
 
     def balance_sheet(self, parenthetical: bool = False,
                       view: ViewType = None,
-                      include_dimensions: bool = False) -> Optional[Statement]:
+                      include_dimensions: Optional[bool] = None) -> Optional[Statement]:
         """
         Get a balance sheet.
 
@@ -1756,27 +1782,27 @@ class Statements:
         Returns:
             A balance sheet statement, or None if unable to resolve the statement
         """
+        # Handle deprecated include_dimensions parameter
+        effective_view = self._resolve_view(view, include_dimensions)
+
         try:
             role = self.find_statement_by_primary_concept("BalanceSheet", is_parenthetical=parenthetical)
             if role:
-                return Statement(self.xbrl, role, canonical_type="BalanceSheet",
-                               include_dimensions=include_dimensions, view=view)
+                return Statement(self.xbrl, role, canonical_type="BalanceSheet", view=effective_view)
 
             # Try using the xbrl.render_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("BalanceSheet", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="BalanceSheet",
-                                   include_dimensions=include_dimensions, view=view)
+                    return Statement(self.xbrl, found_role, canonical_type="BalanceSheet", view=effective_view)
 
-            return Statement(self.xbrl, "BalanceSheet", canonical_type="BalanceSheet",
-                           include_dimensions=include_dimensions, view=view)
+            return Statement(self.xbrl, "BalanceSheet", canonical_type="BalanceSheet", view=effective_view)
         except Exception as e:
             return self._handle_statement_error(e, "BalanceSheet")
 
     def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False,
                          view: ViewType = None,
-                         include_dimensions: bool = False) -> Optional[Statement]:
+                         include_dimensions: Optional[bool] = None) -> Optional[Statement]:
         """
         Get an income statement.
 
@@ -1792,6 +1818,9 @@ class Statements:
         Returns:
             An income statement, or None if unable to resolve the statement
         """
+        # Handle deprecated include_dimensions parameter
+        effective_view = self._resolve_view(view, include_dimensions)
+
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
@@ -1799,19 +1828,17 @@ class Statements:
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type="IncomeStatement",
                                    skip_concept_check=skip_concept_check,
-                                   include_dimensions=include_dimensions,
-                                   view=view)
+                                   view=effective_view)
 
             return Statement(self.xbrl, "IncomeStatement", canonical_type="IncomeStatement",
                            skip_concept_check=skip_concept_check,
-                           include_dimensions=include_dimensions,
-                           view=view)
+                           view=effective_view)
         except Exception as e:
             return self._handle_statement_error(e, "IncomeStatement")
 
     def cashflow_statement(self, parenthetical: bool = False,
                            view: ViewType = None,
-                           include_dimensions: bool = False) -> Optional[Statement]:
+                           include_dimensions: Optional[bool] = None) -> Optional[Statement]:
         """
         Get a cash flow statement.
 
@@ -1826,22 +1853,25 @@ class Statements:
         Returns:
              The cash flow statement, or None if unable to resolve the statement
         """
+        # Handle deprecated include_dimensions parameter
+        effective_view = self._resolve_view(view, include_dimensions)
+
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("CashFlowStatement", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type="CashFlowStatement",
-                                   include_dimensions=include_dimensions, view=view)
+                                   view=effective_view)
 
             return Statement(self.xbrl, "CashFlowStatement", canonical_type="CashFlowStatement",
-                           include_dimensions=include_dimensions, view=view)
+                           view=effective_view)
         except Exception as e:
             return self._handle_statement_error(e, "CashFlowStatement")
 
     def statement_of_equity(self, parenthetical: bool = False,
                             view: ViewType = None,
-                            include_dimensions: bool = True) -> Optional[Statement]:
+                            include_dimensions: Optional[bool] = None) -> Optional[Statement]:
         """
         Get a statement of equity.
 
@@ -1852,28 +1882,29 @@ class Statements:
                   DETAILED: All dimensional data (default for to_dataframe)
                   SUMMARY: Non-dimensional totals only
             include_dimensions: Deprecated. Use view parameter instead.
-                              (default: True for Statement of Equity since it's
-                              an inherently dimensional statement)
 
         Returns:
            The statement of equity, or None if unable to resolve the statement
         """
+        # Handle deprecated include_dimensions parameter
+        effective_view = self._resolve_view(view, include_dimensions)
+
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("StatementOfEquity", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type="StatementOfEquity",
-                                   include_dimensions=include_dimensions, view=view)
+                                   view=effective_view)
 
             return Statement(self.xbrl, "StatementOfEquity", canonical_type="StatementOfEquity",
-                           include_dimensions=include_dimensions, view=view)
+                           view=effective_view)
         except Exception as e:
             return self._handle_statement_error(e, "StatementOfEquity")
 
     def comprehensive_income(self, parenthetical: bool = False,
                              view: ViewType = None,
-                             include_dimensions: bool = True) -> Optional[Statement]:
+                             include_dimensions: Optional[bool] = None) -> Optional[Statement]:
         """
         Get a statement of comprehensive income.
 
@@ -1888,22 +1919,23 @@ class Statements:
                   DETAILED: All dimensional data (default for to_dataframe)
                   SUMMARY: Non-dimensional totals only
             include_dimensions: Deprecated. Use view parameter instead.
-                              (default: True for Comprehensive Income since it's
-                              an inherently dimensional statement)
 
         Returns:
             The comprehensive income statement, or None if unable to resolve the statement
         """
+        # Handle deprecated include_dimensions parameter
+        effective_view = self._resolve_view(view, include_dimensions)
+
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("ComprehensiveIncome", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type="ComprehensiveIncome",
-                                   include_dimensions=include_dimensions, view=view)
+                                   view=effective_view)
 
             return Statement(self.xbrl, "ComprehensiveIncome", canonical_type="ComprehensiveIncome",
-                           include_dimensions=include_dimensions, view=view)
+                           view=effective_view)
         except Exception as e:
             return self._handle_statement_error(e, "ComprehensiveIncome")
 
