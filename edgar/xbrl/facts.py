@@ -690,7 +690,11 @@ class FactQuery:
 
         # Filter columns based on inclusion flags
         if not self._include_dimensions:
-            df = df.loc[:, [col for col in df.columns if not col.startswith('dim_')]]
+            # Exclude both dim_* columns (old style) and structured dimension columns (GH-574)
+            dimension_cols = {'dimension', 'member', 'dimension_label', 'member_label', 'full_dimension_label',
+                              'dimension_axis', 'dimension_member', 'dimension_member_label'}
+            df = df.loc[:, [col for col in df.columns
+                            if not col.startswith('dim_') and col not in dimension_cols]]
 
         if not self._include_contexts:
             context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',

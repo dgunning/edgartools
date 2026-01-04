@@ -109,7 +109,6 @@ def test_xbrl_query(intc_xbrl: XBRL):
 
     df = (intc_xbrl.query(include_dimensions=False)
           .by_concept("Revenue").to_dataframe())
-
     assert not any('dim' in col for col in df.columns)
 
 
