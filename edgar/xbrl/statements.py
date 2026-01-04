@@ -33,10 +33,13 @@ def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
     - Domains: Domain members like ProductsAndServicesDomain
     - Tables: Hypercube tables like StatementTable
     - Line Items: Container elements like StatementLineItems
+    - Root statement abstracts: Top-level abstract concepts with no proper label
+      (e.g., StatementOfFinancialPositionAbstract where label equals concept)
 
     These are internal XBRL constructs, not actual financial data.
 
     Issue #03zg: Filter these from to_dataframe() output for cleaner presentation.
+    Issue #416h: Filter root statement abstracts from rendered statements.
     """
     label = item.get('label', '')
     concept = item.get('concept', '')
@@ -47,6 +50,13 @@ def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
 
     # Check concept name suffix (e.g., "ProductOrServiceAxis", "StatementTable")
     if concept.endswith(STRUCTURAL_CONCEPT_SUFFIXES):
+        return True
+
+    # Issue #416h: Filter root statement abstracts where label equals concept
+    # These are structural root nodes like "us-gaap_StatementOfFinancialPositionAbstract"
+    # that have no proper label assigned. Section headers like "Assets" have proper labels
+    # and should be kept.
+    if concept.endswith('Abstract') and label == concept:
         return True
 
     return False
