@@ -35,6 +35,7 @@ Example usage:
 """
 
 from edgar.xbrl.facts import FactQuery, FactsView
+from edgar.xbrl.presentation import StatementView, normalize_view
 from edgar.xbrl.rendering import RenderedStatement
 from edgar.xbrl.standardization import StandardConcept
 from edgar.xbrl.statements import Statement, Statements, StitchedStatement, StitchedStatements
@@ -59,6 +60,8 @@ __all__ = [
     'Statement',
     'StitchedStatements',
     'StitchedStatement',
+    'StatementView',
+    'normalize_view',
     'StandardConcept',
     'StatementStitcher',
     'stitch_statements',

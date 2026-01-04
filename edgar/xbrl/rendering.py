@@ -1238,7 +1238,8 @@ def render_statement(
     show_comparisons: bool = True,
     xbrl_instance: Optional[Any] = None,
     include_dimensions: bool = False,
-    role_uri: Optional[str] = None
+    role_uri: Optional[str] = None,
+    view: Optional['StatementView'] = None
 ) -> RenderedStatement:
     """
     Render a financial statement as a structured intermediate representation.
@@ -1256,26 +1257,48 @@ def render_statement(
             When False, only breakdown dimensions (geographic, segment) are filtered out.
             Classification dimensions (PPE type, equity components) are always shown.
         role_uri: Role URI for definition linkbase-based dimension filtering (optional)
+        view: StatementView controlling dimensional filtering (STANDARD, DETAILED, SUMMARY).
+            SUMMARY filters ALL dimensions, STANDARD filters breakdowns, DETAILED shows all.
 
     Returns:
         RenderedStatement: A structured representation of the statement that can be rendered
                            in various formats
     """
+    from edgar.xbrl.presentation import StatementView
+    from edgar.xbrl.statements import is_xbrl_structural_element
+
     if entity_info is None:
         entity_info = {}
 
-    # Issue #569: Filter breakdown dimensions (geographic, segment) when include_dimensions=False
-    # Keep classification dimensions (PPE type, equity components) that appear on the face
-    # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
-    # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
-    if not include_dimensions:
+    # Combined filtering: structural elements + dimension filtering in single pass
+    # 1. Always filter XBRL structural elements (Axis, Domain, Member, Table, LineItems)
+    #    These are metadata, not financial data (e.g., ProductMember, ServiceMember empty rows)
+    # 2. Apply StatementView-based dimension filtering:
+    #    - SUMMARY: Filter ALL dimensional items (non-dimensional totals only)
+    #    - STANDARD: Filter BREAKDOWN dimensions only (keep face-level like Products/Services)
+    #    - DETAILED: Show ALL dimensional data
+    if view == StatementView.SUMMARY:
+        # SUMMARY: Filter structural elements + ALL dimensional items
+        statement_data = [
+            item for item in statement_data
+            if not is_xbrl_structural_element(item) and not item.get('is_dimension')
+        ]
+    elif not include_dimensions:
+        # STANDARD: Filter structural elements + breakdown dimensions only
+        # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+        # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
         from edgar.xbrl.dimensions import is_breakdown_dimension
         statement_data = [
             item for item in statement_data
-            if not item.get('is_dimension') or not is_breakdown_dimension(
-                item, statement_type=statement_type, xbrl=xbrl_instance, role_uri=role_uri
+            if not is_xbrl_structural_element(item) and (
+                not item.get('is_dimension') or not is_breakdown_dimension(
+                    item, statement_type=statement_type, xbrl=xbrl_instance, role_uri=role_uri
+                )
             )
         ]
+    else:
+        # DETAILED: Filter structural elements only, keep all dimensional data
+        statement_data = [item for item in statement_data if not is_xbrl_structural_element(item)]
 
     # Filter out periods with only empty strings (Fix for Issue #408)
     # Apply to all major financial statement types that could have empty periods

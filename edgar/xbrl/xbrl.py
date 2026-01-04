@@ -780,7 +780,8 @@ class XBRL:
 
     def get_statement(self, role_or_type: str,
                       period_filter: Optional[str] = None,
-                      should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
+                      should_display_dimensions: Optional[bool] = None,
+                      view: Optional['StatementView'] = None) -> List[Dict[str, Any]]:
         """
         Get a financial statement by role URI, statement type, or statement short name.
 
@@ -792,10 +793,15 @@ class XBRL:
             period_filter: Optional period key to filter facts
             should_display_dimensions: Whether to display dimensions for this statement.
                 If None, the method will determine based on statement type and role.
+            view: StatementView controlling dimensional filtering:
+                  STANDARD: Strict member filtering per presentation linkbase
+                  DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
+                  SUMMARY: No dimensional facts shown
 
         Returns:
             List of line items with values
         """
+        from edgar.xbrl.presentation import StatementView
         # Use the centralized statement finder to get statement information
         matching_statements, found_role, actual_statement_type = self.find_statement(role_or_type)
 
@@ -820,7 +826,7 @@ class XBRL:
         # Generate line items recursively
         line_items = []
         self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
-                                  should_display_dimensions, valid_dimensional_members)
+                                  should_display_dimensions, valid_dimensional_members, view)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
@@ -838,7 +844,8 @@ class XBRL:
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
                              path: Optional[List[str]] = None, should_display_dimensions: bool = False,
-                             valid_dimensional_members: Optional[Dict[str, Set[str]]] = None) -> None:
+                             valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
+                             view: Optional['StatementView'] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -851,7 +858,12 @@ class XBRL:
             should_display_dimensions: Whether to display dimensions for this statement
             valid_dimensional_members: Dict mapping axis names to sets of valid member names
                 from the presentation linkbase. Only facts with members in this set will be shown.
+            view: StatementView controlling dimensional filtering:
+                  STANDARD: Strict member filtering per presentation linkbase
+                  DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
+                  SUMMARY: No dimensional facts shown
         """
+        from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
             return
 
@@ -954,7 +966,14 @@ class XBRL:
                         # This filters out facts from other disclosures that happen to use the same concept
                         # but with different dimensional members (e.g., revenue members on balance sheet)
                         is_valid_dimension = True
-                        if valid_dimensional_members:
+
+                        # DETAILED view bypasses strict member filtering (GH-574 fix)
+                        # This restores iPhone/iPad/Mac data for companies like AAPL
+                        if view == StatementView.DETAILED:
+                            # Show all dimensional facts regardless of presentation linkbase
+                            is_valid_dimension = True
+                        elif valid_dimensional_members:
+                            # STANDARD view: strict filtering per presentation linkbase
                             for dim_data in dimension_info:
                                 # Get the axis and member from the dimension info
                                 axis = dim_data.get('dimension', '').replace(':', '_')
@@ -1221,7 +1240,7 @@ class XBRL:
         # Process children
         for child_id in node.children:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
-                                      should_display_dimensions, valid_dimensional_members)
+                                      should_display_dimensions, valid_dimensional_members, view)
 
     @staticmethod
     def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -1602,7 +1621,8 @@ class XBRL:
                          standard: bool = True,
                          show_date_range: bool = False,
                          parenthetical: bool = False,
-                         include_dimensions: bool = False) -> Optional[RenderedStatement]:
+                         include_dimensions: bool = False,
+                         view: Optional['StatementView'] = None) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         Args:
@@ -1614,9 +1634,12 @@ class XBRL:
             show_date_range: Whether to show full date ranges for duration periods (default: False)
             parenthetical: Whether to look for a parenthetical statement (default: False)
             include_dimensions: Whether to include dimensional segment data (default: False)
+            view: StatementView controlling dimensional filtering (STANDARD, DETAILED, SUMMARY)
         Returns:
             RichTable: A formatted table representation of the statement
         """
+        from edgar.xbrl.presentation import StatementView
+
         # Find the statement using the unified statement finder with parenthetical support
         matching_statements, found_role, actual_statement_type = self.find_statement(statement_type, parenthetical)
 
@@ -1630,8 +1653,8 @@ class XBRL:
         # This ensures face-level classification dimensions (PPE type, equity) are shown
         should_display_dimensions = True
 
-        # Get the statement data with all dimensional data
-        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)
+        # Get the statement data with all dimensional data, passing view for filtering
+        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions, view=view)
         if not statement_data:
             return None
 
@@ -1658,6 +1681,7 @@ class XBRL:
         # Render the statement
         # Issue #569: Pass include_dimensions to filter breakdown dimensions in render
         # Issue #577/cf9o: Pass role_uri for definition linkbase-based filtering
+        # StatementView: Pass view for STANDARD/DETAILED/SUMMARY filtering
         return render_statement(
             statement_data,
             periods_to_display,
@@ -1669,7 +1693,8 @@ class XBRL:
             show_comparisons=True,
             xbrl_instance=self,
             include_dimensions=include_dimensions,
-            role_uri=found_role
+            role_uri=found_role,
+            view=view
         )
 
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
