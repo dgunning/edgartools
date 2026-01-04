@@ -267,7 +267,7 @@ def main():
     
     if all_data:
         final_df = pd.concat(all_data)
-        output_file = "mag7_financials.parquet"
+        output_file = Path(__file__).parent.parent.parent / "data" / "mag7_financials.parquet"
         final_df.to_parquet(output_file)
         print(f"\nSaved data to {output_file}")
         
@@ -305,8 +305,8 @@ def export_to_csv(df: pd.DataFrame):
     import os
     from pathlib import Path
     
-    # Output directory
-    output_dir = Path("Notes/001_initial_mag7_mapping_observation")
+    # Output directory (same folder as this script)
+    output_dir = Path(__file__).parent
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Metrics to include (ordered)
