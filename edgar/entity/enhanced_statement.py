@@ -25,7 +25,7 @@ from rich.text import Text
 from edgar.core import log
 from edgar.entity.mappings_loader import (
     get_all_statements_for_concept,
-    get_industry_for_sic,
+    get_industry,
     get_primary_statement,
     load_industry_extension,
     load_learned_mappings,
@@ -1426,7 +1426,7 @@ class EnhancedStatementBuilder:
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
     }
 
-    def __init__(self, sic_code: Optional[str] = None):
+    def __init__(self, sic_code: Optional[str] = None, ticker: Optional[str] = None):
         """
         Initialize the statement builder.
 
@@ -1434,16 +1434,20 @@ class EnhancedStatementBuilder:
             sic_code: Optional SIC code for industry-specific extensions.
                      If provided and matches a known industry, industry-specific
                      concepts will be merged into the virtual trees.
+            ticker: Optional ticker symbol for industry lookup. Used for industries
+                   like payment_networks where SIC codes don't map cleanly.
+                   Ticker-based lookup takes priority over SIC-based lookup.
         """
         self.learned_mappings = load_learned_mappings()
         self.virtual_trees = load_virtual_trees()
         self.sic_code = sic_code
+        self.ticker = ticker
         self.industry = None
         self.industry_extension = None
 
-        # Load industry extension if SIC code provided
-        if sic_code:
-            self.industry = get_industry_for_sic(sic_code)
+        # Load industry extension using ticker (for curated industries) or SIC code
+        if ticker or sic_code:
+            self.industry = get_industry(sic_code=sic_code, ticker=ticker)
             if self.industry:
                 self.industry_extension = load_industry_extension(self.industry)
                 if self.industry_extension:

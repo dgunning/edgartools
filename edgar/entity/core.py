@@ -667,7 +667,7 @@ class Company(Entity):
         """
         Get structured facts about this company with industry-specific enhancements.
 
-        Overrides Entity.get_facts() to inject SIC code for industry-specific
+        Overrides Entity.get_facts() to inject SIC code and ticker for industry-specific
         virtual tree extensions.
 
         Args:
@@ -675,12 +675,14 @@ class Company(Entity):
                         or string ('annual', 'quarterly', 'monthly').
 
         Returns:
-            EntityFacts object with SIC code set, optionally filtered by period type
+            EntityFacts object with SIC code and ticker set, optionally filtered by period type
         """
         facts = super().get_facts(period_type)
         if facts:
-            # Inject SIC code for industry-specific statement building
+            # Inject SIC code and ticker for industry-specific statement building
+            # Ticker is used for curated industries like payment_networks where SIC doesn't map well
             facts._sic_code = self.sic
+            facts._ticker = self.tickers[0] if self.tickers else None
         return facts
 
     @property

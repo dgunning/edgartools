@@ -106,6 +106,12 @@
       "sic_ranges": [[6200, 6289]],
       "extension_file": "securities.json",
       "description": "Security brokers, dealers, investment advisors, asset managers"
+    },
+    "payment_networks": {
+      "name": "Payment Networks & Processors",
+      "curated_tickers": ["V", "MA", "AXP", "DFS", "PYPL", "SQ", "FIS", "FISV", "GPN", "ADYEY", "PAYX", "ADP", "BILL", "WU", "MGI", "AFRM", "FOUR", "RPAY", "PAYO", "TOST", "COF", "SYF", "COIN", "EVTC", "FLYW", "RELY", "PSFE"],
+      "extension_file": "payment_networks.json",
+      "description": "Card networks, payment processors, fintech (V, MA, PYPL, etc.)"
     }
   }
 }

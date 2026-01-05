@@ -41,8 +41,13 @@ def get_industry_companies(industry: str, max_companies: int = 200) -> List[str]
     """
     Get list of tickers for companies in the specified industry.
 
+    Supports two modes:
+    1. SIC-based: Uses sic_ranges to find companies by SIC code
+    2. Ticker-based: Uses a curated list of tickers directly (for industries
+       like payment_networks where SIC codes don't map cleanly)
+
     Args:
-        industry: Industry key (banking, tech, etc.)
+        industry: Industry key (banking, tech, payment_networks, etc.)
         max_companies: Maximum number of companies to return
 
     Returns:
@@ -56,17 +61,24 @@ def get_industry_companies(industry: str, max_companies: int = 200) -> List[str]
     industry_info = INDUSTRIES[industry]
     all_companies = []
 
-    # Get companies for each SIC range
-    for sic_start, sic_end in industry_info['sic_ranges']:
-        try:
-            df = get_companies_by_industry(sic_range=(sic_start, sic_end))
-            if df is not None and not df.empty:
-                # Filter for companies with tickers
-                if 'ticker' in df.columns:
-                    tickers = df['ticker'].dropna().tolist()
-                    all_companies.extend(tickers)
-        except Exception as e:
-            logger.warning(f"Error getting companies for SIC {sic_start}-{sic_end}: {e}")
+    # Check if industry uses curated ticker list (for industries where SIC doesn't map well)
+    if 'tickers' in industry_info:
+        all_companies = list(industry_info['tickers'])
+        logger.info(f"Using curated ticker list for {industry}: {len(all_companies)} companies")
+    elif 'sic_ranges' in industry_info:
+        # Get companies for each SIC range
+        for sic_start, sic_end in industry_info['sic_ranges']:
+            try:
+                df = get_companies_by_industry(sic_range=(sic_start, sic_end))
+                if df is not None and not df.empty:
+                    # Filter for companies with tickers
+                    if 'ticker' in df.columns:
+                        tickers = df['ticker'].dropna().tolist()
+                        all_companies.extend(tickers)
+            except Exception as e:
+                logger.warning(f"Error getting companies for SIC {sic_start}-{sic_end}: {e}")
+    else:
+        raise ValueError(f"Industry {industry} must have either 'tickers' or 'sic_ranges' defined")
 
     # Remove duplicates and limit
     unique_tickers = list(dict.fromkeys(all_companies))  # Preserves order
@@ -185,16 +197,24 @@ def generate_industry_extension(learner, industry: str,
 
     logger.info(f"Excluding {len(canonical_concepts)} canonical concepts")
 
-    # Build extension
+    # Build extension metadata
+    industry_info = INDUSTRIES[industry]
+    metadata = {
+        'industry': industry,
+        'industry_name': industry_info['name'],
+        'companies_analyzed': learner.successful_companies,
+        'min_occurrence_rate': min_occurrence,
+        'generated': datetime.now().isoformat(),
+    }
+    # Include either sic_ranges or tickers based on how industry is defined
+    if 'sic_ranges' in industry_info:
+        metadata['sic_ranges'] = industry_info['sic_ranges']
+    if 'tickers' in industry_info:
+        metadata['curated_tickers'] = True
+        metadata['ticker_count'] = len(industry_info['tickers'])
+
     extension = {
-        'metadata': {
-            'industry': industry,
-            'industry_name': INDUSTRIES[industry]['name'],
-            'sic_ranges': INDUSTRIES[industry]['sic_ranges'],
-            'companies_analyzed': learner.successful_companies,
-            'min_occurrence_rate': min_occurrence,
-            'generated': datetime.now().isoformat(),
-        }
+        'metadata': metadata
     }
 
     # Process each statement type
@@ -297,10 +317,13 @@ def main():
         print("\nAvailable Industries:")
         print("-" * 70)
         for key, info in sorted(INDUSTRIES.items()):
-            sic_str = ', '.join(f"{s}-{e}" for s, e in info['sic_ranges'])
             threshold = info.get('default_threshold', DEFAULT_OCCURRENCE_THRESHOLD)
             print(f"  {key:20} - {info['name']}")
-            print(f"                       SIC: {sic_str}, threshold: {threshold:.0%}")
+            if 'sic_ranges' in info:
+                sic_str = ', '.join(f"{s}-{e}" for s, e in info['sic_ranges'])
+                print(f"                       SIC: {sic_str}, threshold: {threshold:.0%}")
+            elif 'tickers' in info:
+                print(f"                       Curated: {len(info['tickers'])} tickers, threshold: {threshold:.0%}")
         return 0
 
     if not args.industry and not args.all:

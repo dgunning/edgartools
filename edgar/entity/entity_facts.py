@@ -106,7 +106,7 @@ class EntityFacts:
     """
 
     def __init__(self, cik: int, name: str, facts: List[FinancialFact],
-                 sic_code: Optional[str] = None):
+                 sic_code: Optional[str] = None, ticker: Optional[str] = None):
         """
         Initialize EntityFacts with company information and facts.
 
@@ -115,11 +115,14 @@ class EntityFacts:
             name: Company name
             facts: List of FinancialFact objects
             sic_code: Optional SIC code for industry-specific statement enhancements
+            ticker: Optional ticker symbol for industry lookup (for curated industries
+                   like payment_networks where SIC codes don't map cleanly)
         """
         self.cik = cik
         self.name = name
         self._facts = facts
         self._sic_code = sic_code
+        self._ticker = ticker
         self._fact_index = self._build_indices()
         self._cache = {}
 
@@ -281,7 +284,8 @@ class EntityFacts:
             cik=self.cik,
             name=self.name,
             facts=filtered_facts,
-            sic_code=self._sic_code
+            sic_code=self._sic_code,
+            ticker=self._ticker
         )
 
     def __rich__(self):
@@ -1110,7 +1114,7 @@ class EntityFacts:
         """
         # Always build the enhanced multi-period statement
         from edgar.entity.enhanced_statement import EnhancedStatementBuilder
-        builder = EnhancedStatementBuilder(sic_code=self._sic_code)
+        builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
         enhanced_stmt = builder.build_multi_period_statement(
             facts=self._facts,
             statement_type='IncomeStatement',
@@ -1157,7 +1161,7 @@ class EntityFacts:
         if not as_of:
             # Always build the enhanced multi-period statement for regular periods
             from edgar.entity.enhanced_statement import EnhancedStatementBuilder
-            builder = EnhancedStatementBuilder(sic_code=self._sic_code)
+            builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
             enhanced_stmt = builder.build_multi_period_statement(
                 facts=self._facts,
                 statement_type='BalanceSheet',
@@ -1273,7 +1277,7 @@ class EntityFacts:
         """
         # Always build the enhanced multi-period statement
         from edgar.entity.enhanced_statement import EnhancedStatementBuilder
-        builder = EnhancedStatementBuilder(sic_code=self._sic_code)
+        builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
         enhanced_stmt = builder.build_multi_period_statement(
             facts=self._facts,
             statement_type='CashFlow',
