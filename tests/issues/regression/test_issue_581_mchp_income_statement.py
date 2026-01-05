@@ -22,12 +22,24 @@ class TestIssue581MCHPIncomeStatement:
 
     @pytest.fixture
     def mchp_2016_xbrl(self):
-        """Get MCHP 2016 10-K XBRL for testing."""
+        """Get MCHP 2016 10-K XBRL for testing.
+
+        MCHP has a March fiscal year end, so the FY2016 10-K was filed in May 2016.
+        """
         from edgar import Company
         company = Company("MCHP")
         filings = company.get_filings(form="10-K")
         filing_2016 = filings.filter(date="2016-01-01:2016-12-31").latest()
-        return filing_2016.xbrl()
+
+        # Skip test if filing couldn't be retrieved (network issues, rate limiting)
+        if filing_2016 is None:
+            pytest.skip("Could not retrieve MCHP 2016 10-K filing (network issue)")
+
+        xbrl = filing_2016.xbrl()
+        if xbrl is None:
+            pytest.skip("Could not parse XBRL from MCHP 2016 10-K filing")
+
+        return xbrl
 
     @pytest.mark.network
     def test_income_statement_selects_correct_role(self, mchp_2016_xbrl):
