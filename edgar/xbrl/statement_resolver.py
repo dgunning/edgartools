@@ -136,9 +136,12 @@ statement_registry = {
             "ifrs-full_Revenue", "ifrs-full_ProfitLoss"  # IFRS equivalents
         ],
         role_patterns=[
-            r".*[Ii]ncome[Ss]tatement.*",
-            r".*[Ss]tatement[Oo]f[Ii]ncome.*",
-            r".*[Oo]perations.*",
+            r".*[Ii]ncome[Ss]tatements?.*",
+            # Issue #581: Match both singular and plural (Statement/Statements)
+            r".*[Ss]tatements?[Oo]f[Ii]ncome.*",
+            # Issue #581: Make Operations pattern more specific to avoid matching tax disclosures
+            # Match "StatementOfOperations" or "StatementsOfOperations" but NOT "ContinuingOperationsDetails"
+            r".*[Ss]tatements?[Oo]f[Oo]perations.*",
             r".*StatementConsolidatedStatementsOfIncome.*"
         ],
         title="Consolidated Statement of Income",
@@ -606,6 +609,14 @@ class StatementResolver:
             for indicator in comprehensive_indicators:
                 if indicator in clean_def or indicator in clean_uri:
                     score -= 100  # Strong penalty to avoid selecting wrong statement
+                    break
+
+            # Issue #581: Penalize tax-related disclosures that may accidentally match
+            # e.g., IncomeTaxBenefitProvisionFromContinuingOperationsDetails
+            tax_indicators = ['incometax', 'taxbenefit', 'taxprovision', 'taxexpense', 'deferredtax']
+            for indicator in tax_indicators:
+                if indicator in clean_def or indicator in clean_uri:
+                    score -= 100  # Strong penalty to avoid selecting tax disclosure
                     break
 
         # Issue edgartools-8ad8: Penalize parenthetical statements to prefer main statements
