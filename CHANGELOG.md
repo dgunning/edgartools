@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.8.1] - 2026-01-05
+
+### Fixed
+
+- **Income Statement Resolver Tax Disclosure Issue** (Issue #581, edgartools-8wlx)
+  - Fixed resolver incorrectly selecting tax disclosure statements instead of main income statement
+  - Affected companies with both income statement and tax disclosure in same filing (e.g., MCHP 2016)
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct income statement selection for affected filings
+
+- **DataFrame Conversion None Value Handling** (Issue #582)
+  - Prevented None values from overwriting valid data during DataFrame conversion
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate data preservation in statement DataFrames
+
+- **Schedule 13 Hierarchical Ownership Calculation**
+  - Fixed `total_shares` and `total_percent` for corporate control chain filings
+  - Previously summed all reporting persons (e.g., 393% total), now correctly detects hierarchical
+    ownership when percentages sum > 100.5% and returns the max (top of hierarchy)
+  - Caps `total_percent` at 100% to handle rounding artifacts in source data
+  - **Files**: `edgar/beneficial_ownership/schedule13.py`
+  - **Impact**: Accurate beneficial ownership totals for complex corporate structures
+
 ## [5.8.0] - 2026-01-04
 
 ### Added
