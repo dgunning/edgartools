@@ -826,7 +826,11 @@ class Statement:
                         instant_key = f"instant_{end_date}"
                         value = values_dict.get(instant_key)
 
-                row[column_name] = value
+                # Issue #582: Don't overwrite a valid value with None
+                # Multiple periods can map to the same column (e.g., transition periods for
+                # accounting standard changes). If we already have a value, don't overwrite with None.
+                if value is not None or column_name not in row:
+                    row[column_name] = value
 
             # Add unit if requested
             if include_unit:
