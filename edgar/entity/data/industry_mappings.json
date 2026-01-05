@@ -107,6 +107,12 @@
       "extension_file": "securities.json",
       "description": "Security brokers, dealers, investment advisors, asset managers"
     },
+    "semiconductors": {
+      "name": "Semiconductors",
+      "sic_ranges": [[3674, 3674]],
+      "extension_file": "semiconductors.json",
+      "description": "Semiconductor and related device manufacturing (NVDA, AMD, INTC, etc.)"
+    },
     "payment_networks": {
       "name": "Payment Networks & Processors",
       "curated_tickers": ["V", "MA", "AXP", "DFS", "PYPL", "SQ", "FIS", "FISV", "GPN", "ADYEY", "PAYX", "ADP", "BILL", "WU", "MGI", "AFRM", "FOUR", "RPAY", "PAYO", "TOST", "COF", "SYF", "COIN", "EVTC", "FLYW", "RELY", "PSFE"],

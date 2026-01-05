@@ -141,6 +141,12 @@ INDUSTRIES = {
         'min_companies': 50,
         'default_threshold': 0.20,  # Heterogeneous (brokers, advisors, ETFs)
     },
+    'semiconductors': {
+        'name': 'Semiconductors',
+        'sic_ranges': [(3674, 3674)],  # Semiconductors and related devices
+        'min_companies': 30,
+        'default_threshold': 0.22,  # Moderate diversity (fabless, IDM, foundry)
+    },
     'payment_networks': {
         'name': 'Payment Networks & Processors',
         # Note: SIC codes don't map cleanly to payment networks
