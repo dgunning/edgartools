@@ -1899,16 +1899,20 @@ class Statements:
         # Handle deprecated include_dimensions parameter
         effective_view = self._resolve_view(view, include_dimensions)
 
+        # Issue #571: Statement of Equity is inherently dimensional - default to include_dimensions=True
+        # when neither view nor include_dimensions was explicitly set
+        effective_include_dimensions = True if (view is None and include_dimensions is None) else (include_dimensions if include_dimensions is not None else False)
+
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("StatementOfEquity", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type="StatementOfEquity",
-                                   view=effective_view)
+                                   view=effective_view, include_dimensions=effective_include_dimensions)
 
             return Statement(self.xbrl, "StatementOfEquity", canonical_type="StatementOfEquity",
-                           view=effective_view)
+                           view=effective_view, include_dimensions=effective_include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "StatementOfEquity")
 
@@ -1936,16 +1940,20 @@ class Statements:
         # Handle deprecated include_dimensions parameter
         effective_view = self._resolve_view(view, include_dimensions)
 
+        # Issue #571: Comprehensive Income is inherently dimensional - default to include_dimensions=True
+        # when neither view nor include_dimensions was explicitly set
+        effective_include_dimensions = True if (view is None and include_dimensions is None) else (include_dimensions if include_dimensions is not None else False)
+
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("ComprehensiveIncome", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type="ComprehensiveIncome",
-                                   view=effective_view)
+                                   view=effective_view, include_dimensions=effective_include_dimensions)
 
             return Statement(self.xbrl, "ComprehensiveIncome", canonical_type="ComprehensiveIncome",
-                           view=effective_view)
+                           view=effective_view, include_dimensions=effective_include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "ComprehensiveIncome")
 
