@@ -568,6 +568,59 @@ class SectionExtractor:
 
         return False
 
+    def _is_main_section_header(self, text: str) -> bool:
+        """
+        Check if header text looks like a main section header vs a cross-reference.
+
+        Main section headers are typically:
+        - All uppercase: "ITEM 4. INFORMATION ON THE COMPANY"
+        - Without subsection paths
+        - Short and standalone
+
+        Cross-references are typically:
+        - Mixed case: "Item 4. Information on the Company"
+        - Include subsection paths: "- C. Organizational Structure"
+        - Part of a sentence: "See Item 4..." or "...in this annual report"
+
+        Args:
+            text: Header text to check
+
+        Returns:
+            True if this appears to be a main section header, False if likely a cross-reference
+        """
+        if not text:
+            return False
+
+        text = text.strip()
+
+        # Check if the ITEM part is uppercase (main headers are usually all caps)
+        # Match "ITEM X" at the start
+        item_match = re.match(r'^(ITEM|Item|item)\s+\d+', text)
+        if item_match:
+            item_part = item_match.group(1)
+            # Main headers have uppercase ITEM
+            if item_part == 'ITEM':
+                # Check for subsection paths even in uppercase headers
+                # e.g., "ITEM 4. INFORMATION ON THE COMPANY - A. HISTORY"
+                if re.search(r'[\s\n]+-\s*[A-Z]\.', text):
+                    return False
+                return True
+
+        # Check for subsection path indicators (cross-references)
+        # e.g., "Item 4. Information on the Company - C. Organizational Structure"
+        # Also catches paths after newlines like "Item 4...\n- B. Business Overview"
+        if re.search(r'[\s\n]+-\s*[A-Z]\.', text):
+            return False
+
+        # Check for sentence context indicators (cross-references embedded in text)
+        # e.g., 'See "Item 4...' or '...in this annual report'
+        lower = text.lower()
+        if 'see ' in lower or 'in this' in lower or 'described in' in lower:
+            return False
+
+        # Default: assume it could be a main header
+        return True
+
     def _find_section_headers(self, document: Document) -> List[Tuple[Node, str, int]]:
         """
         Find all potential section headers.
@@ -730,12 +783,20 @@ class SectionExtractor:
                        patterns: Dict[str, List[Tuple[str, str]]],
                        document: Document,
                        part_context: Optional[Dict[int, str]] = None) -> Dict[str, Tuple[Node, str, int, int]]:
-        """Match headers to section patterns."""
+        """
+        Match headers to section patterns.
+
+        Collects all candidate headers for each section and prefers main section headers
+        (uppercase like "ITEM 4") over cross-references (mixed case like "Item 4...").
+        """
         matched_sections = {}
         used_headers = set()
 
         # Try to match each pattern
         for section_name, section_patterns in patterns.items():
+            # Collect all candidate headers for this section
+            candidates = []
+
             for pattern, title in section_patterns:
                 for i, (node, text, position) in enumerate(headers):
                     if i in used_headers:
@@ -759,15 +820,42 @@ class SectionExtractor:
                         if part_context and i in part_context:
                             final_title = f"{part_context[i]} - {title}"
 
-                        # Use section_name as key (already part-qualified for 10-Q)
-                        section_key = section_name
-                        matched_sections[section_key] = (node, final_title, position, end_position)
-                        used_headers.add(i)
-                        break
+                        # Check if this is a main header vs cross-reference
+                        is_main = self._is_main_section_header(text)
 
-                # If we found a match, move to next section
-                if section_name in matched_sections:
-                    break
+                        # Store candidate with metadata
+                        candidates.append({
+                            'index': i,
+                            'node': node,
+                            'text': text,
+                            'position': position,
+                            'end_position': end_position,
+                            'title': final_title,
+                            'is_main': is_main,
+                            'content_size': end_position - position
+                        })
+
+            # Choose the best candidate if any were found
+            if candidates:
+                # Prefer main headers (uppercase) over cross-references
+                main_headers = [c for c in candidates if c['is_main']]
+                if main_headers:
+                    # Among main headers, pick the one with the most content
+                    best = max(main_headers, key=lambda c: c['content_size'])
+                else:
+                    # No main headers found, fall back to the one with most content
+                    # (likely the actual section, not a TOC link with tiny range)
+                    best = max(candidates, key=lambda c: c['content_size'])
+
+                # Store the matched section
+                section_key = section_name
+                matched_sections[section_key] = (
+                    best['node'],
+                    best['title'],
+                    best['position'],
+                    best['end_position']
+                )
+                used_headers.add(best['index'])
 
         return matched_sections
 
