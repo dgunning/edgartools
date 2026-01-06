@@ -219,3 +219,54 @@ class TwentyF(CompanyReport):
 
     def __str__(self):
         return f"""TwentyF('{self.company}')"""
+
+    # Convenience properties for common sections
+    @property
+    def key_information(self):
+        """Item 3 - Key Information (includes risk factors and selected financial data)."""
+        return self['Item 3']
+
+    @property
+    def risk_factors(self):
+        """Item 3 - Key Information (contains risk factors section)."""
+        return self['Item 3']
+
+    @property
+    def business(self):
+        """Item 4 - Information on the Company (business overview, operations, properties)."""
+        return self['Item 4']
+
+    @property
+    def company_information(self):
+        """Item 4 - Information on the Company (alias for business)."""
+        return self['Item 4']
+
+    @property
+    def operating_review(self):
+        """Item 5 - Operating and Financial Review and Prospects (similar to MD&A)."""
+        return self['Item 5']
+
+    @property
+    def management_discussion(self):
+        """Item 5 - Operating and Financial Review and Prospects (alias for operating_review)."""
+        return self['Item 5']
+
+    @property
+    def directors_and_employees(self):
+        """Item 6 - Directors, Senior Management and Employees."""
+        return self['Item 6']
+
+    @property
+    def major_shareholders(self):
+        """Item 7 - Major Shareholders and Related Party Transactions."""
+        return self['Item 7']
+
+    @property
+    def financial_information(self):
+        """Item 8 - Financial Information."""
+        return self['Item 8']
+
+    @property
+    def controls_and_procedures(self):
+        """Item 15 - Controls and Procedures."""
+        return self['Item 15']
