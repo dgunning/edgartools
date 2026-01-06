@@ -102,10 +102,10 @@
       "description": "Motor vehicles and parts"
     },
     "securities": {
-      "name": "Securities & Asset Management",
-      "sic_ranges": [[6200, 6289]],
+      "name": "Securities, Broker-Dealers & Asset Management",
+      "sic_ranges": [[6200, 6299]],
       "extension_file": "securities.json",
-      "description": "Security brokers, dealers, investment advisors, asset managers"
+      "description": "Security brokers, dealers, investment banks, asset managers (GS, MS, SCHW, etc.)"
     },
     "semiconductors": {
       "name": "Semiconductors",

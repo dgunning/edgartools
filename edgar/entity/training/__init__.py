@@ -136,8 +136,8 @@ INDUSTRIES = {
         'default_threshold': 0.22,  # Moderate diversity
     },
     'securities': {
-        'name': 'Securities & Asset Management',
-        'sic_ranges': [(6200, 6289)],
+        'name': 'Securities, Broker-Dealers & Asset Management',
+        'sic_ranges': [(6200, 6299)],  # Expanded to include full broker-dealer range
         'min_companies': 50,
         'default_threshold': 0.20,  # Heterogeneous (brokers, advisors, ETFs)
     },
