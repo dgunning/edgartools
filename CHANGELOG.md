@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.8.2] - 2026-01-06
+
+### Added
+
+- **TwentyF Convenience Properties**
+  - Added properties for common 20-F sections matching TenK API style
+  - `business` / `company_information` → Item 4 (Information on the Company)
+  - `risk_factors` / `key_information` → Item 3 (Key Information)
+  - `management_discussion` / `operating_review` → Item 5 (Operating and Financial Review)
+  - `directors_and_employees` → Item 6
+  - `major_shareholders` → Item 7
+  - `financial_information` → Item 8
+  - `controls_and_procedures` → Item 15
+  - **Files**: `edgar/company_reports/twenty_f.py`
+
+- **Industry Extensions**
+  - Payment Networks industry with ticker-based lookup (V, MA, PYPL, etc.)
+  - Semiconductors industry extension (SIC 3674)
+  - Expanded Securities industry to include full Broker-Dealers range
+  - **Files**: `edgar/reference/industry_extensions/`
+
+### Fixed
+
+- **20-F Section Extraction** (edgartools-vvzd related)
+  - Fixed pattern extractor selecting cross-references instead of main section headers
+  - Cross-references like "See Item 4..." were incorrectly detected as section starts
+  - Now prefers uppercase main headers (e.g., "ITEM 4") over mixed-case cross-references
+  - **Files**: `edgar/documents/extractors/pattern_section_extractor.py`
+  - **Impact**: 20-F sections now return full content instead of truncated snippets
+
+- **Section Boundary Artifacts**
+  - Removed trailing page numbers from extracted section text (e.g., "\n\n  100")
+  - Removed next section headers bleeding into current section (e.g., "\n\n  PART IV\n\nItem 15")
+  - **Files**: `edgar/documents/document.py`
+  - **Impact**: Cleaner section text extraction for all filing types
+
 ## [5.8.1] - 2026-01-05
 
 ### Fixed
