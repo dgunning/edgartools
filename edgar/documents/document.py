@@ -4,6 +4,7 @@ Document model for parsed HTML.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
 
@@ -103,12 +104,43 @@ class Section:
         """Extract text from section."""
         # If we have a text extractor callback (TOC-based sections), use it
         if self._text_extractor is not None:
-            return self._text_extractor(self.name, **kwargs)
+            text = self._text_extractor(self.name, **kwargs)
+        else:
+            # Otherwise extract from node (heading/pattern-based sections)
+            from edgar.documents.extractors.text_extractor import TextExtractor
+            extractor = TextExtractor(**kwargs)
+            text = extractor.extract_from_node(self.node)
 
-        # Otherwise extract from node (heading/pattern-based sections)
-        from edgar.documents.extractors.text_extractor import TextExtractor
-        extractor = TextExtractor(**kwargs)
-        return extractor.extract_from_node(self.node)
+        # Clean up boundary artifacts (page numbers, next section headers)
+        return self._clean_boundary_artifacts(text)
+
+    def _clean_boundary_artifacts(self, text: str) -> str:
+        """
+        Remove common artifacts at section boundaries.
+
+        Cleans up:
+        - Trailing page numbers (e.g., "\\n\\n  100")
+        - Next section headers bleeding into current section
+          (e.g., "\\n\\n  PART IV\\n\\nItem 15")
+        """
+        if not text:
+            return text
+
+        # Order matters: strip larger structures first, then smaller artifacts
+
+        # 1. Remove trailing PART headers (may include page numbers and items after them)
+        # e.g., "\n\n  PART IV\n\nItem 15\n\n  PART IV"
+        text = re.sub(r'(\n\s*PART\s+[IVX]+[\s\S]*?)$', '', text, flags=re.IGNORECASE)
+
+        # 2. Remove trailing Item headers if they appear at the very end
+        # e.g., "\n\nItem 15" or "\n\nITEM 15."
+        text = re.sub(r'\n\s*Item\s+\d+[A-Za-z]?\.?\s*$', '', text, flags=re.IGNORECASE)
+
+        # 3. Remove trailing page numbers: whitespace followed by 1-3 digits at end
+        # e.g., "\n\n  100" or "\n  92"
+        text = re.sub(r'\n\s*\d{1,3}\s*$', '', text)
+
+        return text.rstrip()
 
     def tables(self) -> List[TableNode]:
         """Get all tables in section."""
