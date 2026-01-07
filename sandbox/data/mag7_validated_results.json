@@ -1,0 +1,2019 @@
+{
+  "GOOG": {
+    "Revenue": {
+      "metric": "Revenue",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_OperatingIncomeLoss",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.309233",
+      "version": "1.0.0"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CostOfRevenue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CostOfRevenue in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_CostsAndExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.309641",
+      "version": "1.0.0"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:SellingAndMarketingExpense",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:SellingAndMarketingExpense in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_CostsAndExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.310011",
+      "version": "1.0.0"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:OperatingIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:OperatingIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "children": [
+          "us-gaap_CostsAndExpenses",
+          "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.310492",
+      "version": "1.0.0"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_NetIncomeLoss",
+        "children": [
+          "us-gaap_OperatingIncomeLoss",
+          "us-gaap_NonoperatingIncomeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.310830",
+      "version": "1.0.0"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": null,
+        "children": [
+          "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "us-gaap_IncomeTaxExpenseBenefit"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.311162",
+      "version": "1.0.0"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetCashProvidedByUsedInOperatingActivities in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+        "parent": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "children": [
+          "us-gaap_NetIncomeLoss",
+          "us-gaap_Depreciation",
+          "us-gaap_ShareBasedCompensation",
+          "us-gaap_DeferredIncomeTaxesAndTaxCredits",
+          "us-gaap_DebtAndEquitySecuritiesGainLoss"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.311493",
+      "version": "1.0.0"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:PaymentsToAcquirePropertyPlantAndEquipment in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+        "parent": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.311838",
+      "version": "1.0.0"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": null,
+        "children": [
+          "us-gaap_AssetsCurrent",
+          "us-gaap_OtherLongTermInvestments",
+          "us-gaap_DeferredIncomeTaxAssetsNet",
+          "us-gaap_PropertyPlantAndEquipmentNet",
+          "us-gaap_OperatingLeaseRightOfUseAsset"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.312190",
+      "version": "1.0.0"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Goodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Goodwill in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.312544",
+      "version": "1.0.0"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.8,
+      "confidence_level": "medium",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": null,
+        "children": [
+          "us-gaap_AssetsCurrent",
+          "us-gaap_OtherLongTermInvestments",
+          "us-gaap_DeferredIncomeTaxAssetsNet",
+          "us-gaap_PropertyPlantAndEquipmentNet",
+          "us-gaap_OperatingLeaseRightOfUseAsset"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.312878",
+      "version": "1.0.0"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebtCurrent",
+      "value": null,
+      "confidence": 0.8,
+      "confidence_level": "medium",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebtCurrent in known_concepts",
+      "tree_context": {
+        "tree": "DebtLongTermDebtDetails_1",
+        "parent": "us-gaap_LongTermDebt",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.313338",
+      "version": "1.0.0"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebt",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebt in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_Liabilities",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.313726",
+      "version": "1.0.0"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "company": "GOOG",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CashAndCashEquivalentsAtCarryingValue in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_CashCashEquivalentsAndShortTermInvestments",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:01.314069",
+      "version": "1.0.0"
+    }
+  },
+  "AMZN": {
+    "Revenue": {
+      "metric": "Revenue",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_OperatingIncomeLoss",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.655363",
+      "version": "1.0.0"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CostOfGoodsAndServicesSold",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CostOfGoodsAndServicesSold in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_CostsAndExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.655694",
+      "version": "1.0.0"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:GeneralAndAdministrativeExpense",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:GeneralAndAdministrativeExpense in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_CostsAndExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.656012",
+      "version": "1.0.0"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:OperatingIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:OperatingIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
+        "children": [
+          "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+          "us-gaap_CostsAndExpenses"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.656326",
+      "version": "1.0.0"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_NetIncomeLoss",
+        "children": [
+          "us-gaap_OperatingIncomeLoss",
+          "us-gaap_NonoperatingIncomeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.656653",
+      "version": "1.0.0"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofCashFlows",
+        "parent": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.657042",
+      "version": "1.0.0"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetCashProvidedByUsedInOperatingActivities in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofCashFlows",
+        "parent": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "children": [
+          "us-gaap_NetIncomeLoss",
+          "us-gaap_DepreciationDepletionAndAmortization",
+          "us-gaap_ShareBasedCompensation",
+          "us-gaap_OtherNoncashIncomeExpense",
+          "us-gaap_DeferredIncomeTaxExpenseBenefit"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.657357",
+      "version": "1.0.0"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Found in facts (not in calc tree): Direct match: PaymentsToAcquirePropertyPlantAndEquipment",
+      "tree_context": null,
+      "timestamp": "2026-01-06T23:14:25.550551",
+      "version": "1.0.0"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofCashFlows",
+        "parent": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.658075",
+      "version": "1.0.0"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Goodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Goodwill in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.658391",
+      "version": "1.0.0"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:FiniteLivedIntangibleAssetsNet",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:FiniteLivedIntangibleAssetsNet in known_concepts",
+      "tree_context": {
+        "tree": "AcquisitionsGoodwillandAcquiredIntangibleAssetsAcquiredIntangibleAssetsDetails",
+        "parent": "us-gaap_IntangibleAssetsNetExcludingGoodwill",
+        "children": [
+          "us-gaap_FiniteLivedIntangibleAssetsGross",
+          "us-gaap_FiniteLivedIntangibleAssetsAccumulatedAmortization"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.658743",
+      "version": "1.0.0"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:ShortTermBorrowings",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Found in facts (not in calc tree): Direct match: ShortTermBorrowings",
+      "tree_context": null,
+      "timestamp": "2026-01-06T23:14:25.550589",
+      "version": "1.0.0"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebt",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebt in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofCashFlows",
+        "parent": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.659472",
+      "version": "1.0.0"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "company": "AMZN",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CashAndCashEquivalentsAtCarryingValue in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_AssetsCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:13:03.659783",
+      "version": "1.0.0"
+    }
+  },
+  "AAPL": {
+    "Revenue": {
+      "metric": "Revenue",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.371694",
+      "version": "1.0.0"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CostOfGoodsAndServicesSold",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CostOfGoodsAndServicesSold in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.371970",
+      "version": "1.0.0"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:SellingGeneralAndAdministrativeExpense",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:SellingGeneralAndAdministrativeExpense in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+        "parent": "us-gaap_OperatingExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.372271",
+      "version": "1.0.0"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:OperatingIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:OperatingIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+        "parent": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "children": [
+          "us-gaap_GrossProfit",
+          "us-gaap_OperatingExpenses"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.372558",
+      "version": "1.0.0"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+        "parent": "us-gaap_NetIncomeLoss",
+        "children": [
+          "us-gaap_OperatingIncomeLoss",
+          "us-gaap_NonoperatingIncomeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.372849",
+      "version": "1.0.0"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+        "parent": null,
+        "children": [
+          "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "us-gaap_IncomeTaxExpenseBenefit"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.373396",
+      "version": "1.0.0"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetCashProvidedByUsedInOperatingActivities in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+        "parent": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "children": [
+          "us-gaap_NetIncomeLoss",
+          "us-gaap_DepreciationDepletionAndAmortization",
+          "us-gaap_ShareBasedCompensation",
+          "us-gaap_OtherNoncashIncomeExpense",
+          "us-gaap_IncreaseDecreaseInAccountsReceivable"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.373772",
+      "version": "1.0.0"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:PaymentsToAcquirePropertyPlantAndEquipment in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+        "parent": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.374082",
+      "version": "1.0.0"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": null,
+        "children": [
+          "us-gaap_AssetsCurrent",
+          "us-gaap_AssetsNoncurrent"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.374389",
+      "version": "1.0.0"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Goodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Found in facts (not in calc tree): Direct match: Goodwill",
+      "tree_context": null,
+      "timestamp": "2026-01-06T23:14:30.496607",
+      "version": "1.0.0"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.8,
+      "confidence_level": "medium",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": null,
+        "children": [
+          "us-gaap_AssetsCurrent",
+          "us-gaap_AssetsNoncurrent"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.374954",
+      "version": "1.0.0"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebtCurrent",
+      "value": null,
+      "confidence": 0.8,
+      "confidence_level": "medium",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebtCurrent in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_LiabilitiesCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.375252",
+      "version": "1.0.0"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebt",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebt in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_LiabilitiesCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.375509",
+      "version": "1.0.0"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "company": "AAPL",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CashAndCashEquivalentsAtCarryingValue in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_AssetsCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:27.375781",
+      "version": "1.0.0"
+    }
+  },
+  "MSFT": {
+    "Revenue": {
+      "metric": "Revenue",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementINCOMESTATEMENTS",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.218782",
+      "version": "1.0.0"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CostOfGoodsAndServicesSold",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CostOfGoodsAndServicesSold in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementINCOMESTATEMENTS",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.219126",
+      "version": "1.0.0"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:SellingAndMarketingExpense",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:SellingAndMarketingExpense in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementINCOMESTATEMENTS",
+        "parent": "us-gaap_OperatingIncomeLoss",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.219478",
+      "version": "1.0.0"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:OperatingIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:OperatingIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementINCOMESTATEMENTS",
+        "parent": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "children": [
+          "us-gaap_GrossProfit",
+          "us-gaap_ResearchAndDevelopmentExpense",
+          "us-gaap_SellingAndMarketingExpense",
+          "us-gaap_GeneralAndAdministrativeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.219794",
+      "version": "1.0.0"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementINCOMESTATEMENTS",
+        "parent": "us-gaap_NetIncomeLoss",
+        "children": [
+          "us-gaap_OperatingIncomeLoss",
+          "us-gaap_NonoperatingIncomeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.220115",
+      "version": "1.0.0"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementINCOMESTATEMENTS",
+        "parent": null,
+        "children": [
+          "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "us-gaap_IncomeTaxExpenseBenefit"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.220427",
+      "version": "1.0.0"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetCashProvidedByUsedInOperatingActivities in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementCASHFLOWSSTATEMENTS",
+        "parent": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "children": [
+          "us-gaap_NetIncomeLoss",
+          "msft_DepreciationAmortizationAndOther",
+          "us-gaap_ShareBasedCompensation",
+          "msft_GainLossOnInvestmentsAndDerivativeInstruments",
+          "us-gaap_DeferredIncomeTaxExpenseBenefit"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.220743",
+      "version": "1.0.0"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:PaymentsToAcquirePropertyPlantAndEquipment in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementCASHFLOWSSTATEMENTS",
+        "parent": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.221041",
+      "version": "1.0.0"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementBALANCESHEETS",
+        "parent": null,
+        "children": [
+          "us-gaap_AssetsCurrent",
+          "us-gaap_PropertyPlantAndEquipmentNet",
+          "us-gaap_OperatingLeaseRightOfUseAsset",
+          "us-gaap_LongTermInvestments",
+          "us-gaap_Goodwill"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.221371",
+      "version": "1.0.0"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Goodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Goodwill in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementBALANCESHEETS",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.221683",
+      "version": "1.0.0"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:FiniteLivedIntangibleAssetsNet",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:FiniteLivedIntangibleAssetsNet in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementBALANCESHEETS",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.222031",
+      "version": "1.0.0"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebtCurrent",
+      "value": null,
+      "confidence": 0.8,
+      "confidence_level": "medium",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebtCurrent in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementBALANCESHEETS",
+        "parent": "us-gaap_LiabilitiesCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.222373",
+      "version": "1.0.0"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebt",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebt in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementBALANCESHEETS",
+        "parent": "us-gaap_LiabilitiesCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.222672",
+      "version": "1.0.0"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "company": "MSFT",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CashAndCashEquivalentsAtCarryingValue in known_concepts",
+      "tree_context": {
+        "tree": "Role_StatementBALANCESHEETS",
+        "parent": "us-gaap_CashCashEquivalentsAndShortTermInvestments",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:35.222971",
+      "version": "1.0.0"
+    }
+  },
+  "NVDA": {
+    "Revenue": {
+      "metric": "Revenue",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Revenues",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Revenues in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofIncome",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.330663",
+      "version": "1.0.0"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CostOfRevenue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CostOfRevenue in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofIncome",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.330973",
+      "version": "1.0.0"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:SellingGeneralAndAdministrativeExpense",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:SellingGeneralAndAdministrativeExpense in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofIncome",
+        "parent": "us-gaap_OperatingExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.331259",
+      "version": "1.0.0"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:OperatingIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:OperatingIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofIncome",
+        "parent": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "children": [
+          "us-gaap_GrossProfit",
+          "us-gaap_OperatingExpenses"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.331579",
+      "version": "1.0.0"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofIncome",
+        "parent": "us-gaap_NetIncomeLoss",
+        "children": [
+          "us-gaap_OperatingIncomeLoss",
+          "us-gaap_NonoperatingIncomeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.331865",
+      "version": "1.0.0"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofIncome",
+        "parent": null,
+        "children": [
+          "us-gaap_IncomeTaxExpenseBenefit",
+          "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.332143",
+      "version": "1.0.0"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetCashProvidedByUsedInOperatingActivities in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofCashFlows",
+        "parent": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "children": [
+          "us-gaap_NetIncomeLoss",
+          "us-gaap_DepreciationDepletionAndAmortization",
+          "us-gaap_ShareBasedCompensation",
+          "us-gaap_DeferredIncomeTaxExpenseBenefit",
+          "us-gaap_OtherNoncashIncomeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.332418",
+      "version": "1.0.0"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:nvda_PaymentsForFinancedPropertyPlantAndEquipmentAndIntangibleAssetsFinancingActivities",
+      "value": null,
+      "confidence": 0.9,
+      "confidence_level": "high",
+      "source": "ai",
+      "reasoning": "The XBRL concept 'nvda_PaymentsForFinancedPropertyPlantAndEquipmentAndIntangibleAssetsFinancingActivities' describes payments for financed property, plant, equipment, and intangible assets, which are core components of capital expenditures (Capex). The parent context (financing activities) and negative weight (-1.0) align with Capex being an outflow in cash flow statements. The description closely matches the target metric.",
+      "tree_context": {
+        "full_id": "nvda_PaymentsForFinancedPropertyPlantAndEquipmentAndIntangibleAssetsFinancingActivities",
+        "trees": [
+          "ConsolidatedStatementsofCashFlows"
+        ],
+        "parent": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:39.578960",
+      "version": "1.0.0"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": null,
+        "children": [
+          "us-gaap_AssetsCurrent",
+          "us-gaap_PropertyPlantAndEquipmentNet",
+          "us-gaap_OperatingLeaseRightOfUseAsset",
+          "us-gaap_Goodwill",
+          "us-gaap_IntangibleAssetsNetExcludingGoodwill"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.333047",
+      "version": "1.0.0"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Goodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Goodwill in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.333381",
+      "version": "1.0.0"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:FiniteLivedIntangibleAssetsNet",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:FiniteLivedIntangibleAssetsNet in known_concepts",
+      "tree_context": {
+        "tree": "AmortizableIntangibleAssetsDetails",
+        "parent": null,
+        "children": [
+          "us-gaap_FiniteLivedIntangibleAssetsAmortizationExpenseYearThree",
+          "us-gaap_FiniteLivedIntangibleAssetsAmortizationExpenseNextTwelveMonths",
+          "us-gaap_FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive",
+          "us-gaap_FiniteLivedIntangibleAssetsAmortizationExpenseYearFive",
+          "us-gaap_FiniteLivedIntangibleAssetsAmortizationExpenseYearTwo"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.333671",
+      "version": "1.0.0"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:DebtCurrent",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:DebtCurrent in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_LiabilitiesCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.333967",
+      "version": "1.0.0"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebt",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebt in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_Liabilities",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.334276",
+      "version": "1.0.0"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "company": "NVDA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CashAndCashEquivalentsAtCarryingValue in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_AssetsCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:37.334549",
+      "version": "1.0.0"
+    }
+  },
+  "TSLA": {
+    "Revenue": {
+      "metric": "Revenue",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.043910",
+      "version": "1.0.0"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CostOfRevenue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CostOfRevenue in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_GrossProfit",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.044233",
+      "version": "1.0.0"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:SellingGeneralAndAdministrativeExpense",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:SellingGeneralAndAdministrativeExpense in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_OperatingExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.044525",
+      "version": "1.0.0"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:OperatingIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:OperatingIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "children": [
+          "us-gaap_GrossProfit",
+          "us-gaap_OperatingExpenses"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.044810",
+      "version": "1.0.0"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": "us-gaap_ProfitLoss",
+        "children": [
+          "us-gaap_OperatingIncomeLoss",
+          "us-gaap_InvestmentIncomeInterest",
+          "us-gaap_OtherNonoperatingIncomeExpense",
+          "us-gaap_InterestExpenseNonoperating"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.045088",
+      "version": "1.0.0"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofOperations",
+        "parent": null,
+        "children": [
+          "us-gaap_ProfitLoss",
+          "us-gaap_NetIncomeLossAttributableToNoncontrollingInterest"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.045403",
+      "version": "1.0.0"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetCashProvidedByUsedInOperatingActivities in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofCashFlows",
+        "parent": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "children": [
+          "us-gaap_ProfitLoss",
+          "us-gaap_IncreaseDecreaseInContractWithCustomerLiability",
+          "us-gaap_InventoryWriteDown",
+          "us-gaap_ForeignCurrencyTransactionGainLossUnrealized",
+          "tsla_NoncashInterestIncomeExpenseAndOtherOperatingActivities"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.045688",
+      "version": "1.0.0"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:PaymentsToAcquirePropertyPlantAndEquipment in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedStatementsofCashFlows",
+        "parent": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.046025",
+      "version": "1.0.0"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": null,
+        "children": [
+          "us-gaap_AssetsCurrent",
+          "us-gaap_DeferredCostsLeasingNetNoncurrent",
+          "tsla_DigitalAssetsNetNonCurrent",
+          "tsla_LeasedAssetsNet",
+          "us-gaap_PropertyPlantAndEquipmentNet"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.046315",
+      "version": "1.0.0"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Goodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Goodwill in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.046621",
+      "version": "1.0.0"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IntangibleAssetsNetExcludingGoodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IntangibleAssetsNetExcludingGoodwill in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.046899",
+      "version": "1.0.0"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:tsla_LongTermDebtAndFinanceLeasesCurrent",
+      "value": null,
+      "confidence": 0.9,
+      "confidence_level": "high",
+      "source": "ai",
+      "reasoning": "The XBRL concept 'tsla_LongTermDebtAndFinanceLeasesCurrent' is a component of 'LiabilitiesCurrent' with a weight of 1.0, indicating it is part of current liabilities. The name suggests it represents the current portion of long-term debt and finance leases, which is a common component of short-term debt. The context in the 'ConsolidatedBalanceSheets' tree further supports this as it aligns with the definition of short-term borrowings and current debt.",
+      "tree_context": {
+        "full_id": "tsla_LongTermDebtAndFinanceLeasesCurrent",
+        "trees": [
+          "ConsolidatedBalanceSheets"
+        ],
+        "parent": "us-gaap_LiabilitiesCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:47.026900",
+      "version": "1.0.0"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:tsla_LongTermDebtAndFinanceLeasesCurrent",
+      "value": null,
+      "confidence": 0.8,
+      "confidence_level": "medium",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:tsla_LongTermDebtAndFinanceLeasesCurrent in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_LiabilitiesCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.047576",
+      "version": "1.0.0"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "company": "TSLA",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CashAndCashEquivalentsAtCarryingValue in known_concepts",
+      "tree_context": {
+        "tree": "ConsolidatedBalanceSheets",
+        "parent": "us-gaap_AssetsCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:42.047855",
+      "version": "1.0.0"
+    }
+  },
+  "META": {
+    "Revenue": {
+      "metric": "Revenue",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_OperatingIncomeLoss",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.699555",
+      "version": "1.0.0"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": null,
+      "value": null,
+      "confidence": 0.0,
+      "confidence_level": "none",
+      "source": "config",
+      "reasoning": "Metric excluded for META in config",
+      "tree_context": null,
+      "timestamp": "2026-01-06T23:14:49.699598",
+      "version": "1.0.0"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:SellingAndMarketingExpense",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:SellingAndMarketingExpense in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_CostsAndExpenses",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.699911",
+      "version": "1.0.0"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:OperatingIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:OperatingIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "children": [
+          "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+          "us-gaap_CostsAndExpenses"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.700197",
+      "version": "1.0.0"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": "us-gaap_NetIncomeLoss",
+        "children": [
+          "us-gaap_OperatingIncomeLoss",
+          "us-gaap_NonoperatingIncomeExpense"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.700467",
+      "version": "1.0.0"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetIncomeLoss",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetIncomeLoss in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFINCOME",
+        "parent": null,
+        "children": [
+          "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "us-gaap_IncomeTaxExpenseBenefit"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.700733",
+      "version": "1.0.0"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:NetCashProvidedByUsedInOperatingActivities in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+        "parent": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "children": [
+          "us-gaap_NetIncomeLoss",
+          "us-gaap_IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+          "us-gaap_IncreaseDecreaseInAccruedLiabilities",
+          "us-gaap_DepreciationDepletionAndAmortization",
+          "us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.701037",
+      "version": "1.0.0"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:PaymentsToAcquirePropertyPlantAndEquipment in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+        "parent": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "children": [],
+        "weight": -1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.701319",
+      "version": "1.0.0"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Assets",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Assets in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": null,
+        "children": [
+          "meta_NonmarketableEquitySecuritiesCarryingValue",
+          "us-gaap_PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+          "us-gaap_OperatingLeaseRightOfUseAsset",
+          "us-gaap_OtherAssetsNoncurrent",
+          "us-gaap_AssetsCurrent"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.701586",
+      "version": "1.0.0"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:Goodwill",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:Goodwill in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_Assets",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.701849",
+      "version": "1.0.0"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:FiniteLivedIntangibleAssetsNet",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:FiniteLivedIntangibleAssetsNet in known_concepts",
+      "tree_context": {
+        "tree": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails",
+        "parent": "us-gaap_IntangibleAssetsNetExcludingGoodwill",
+        "children": [
+          "us-gaap_FiniteLivedIntangibleAssetsGross",
+          "us-gaap_FiniteLivedIntangibleAssetsAccumulatedAmortization"
+        ],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.702208",
+      "version": "1.0.0"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": null,
+      "value": null,
+      "confidence": 0.0,
+      "confidence_level": "none",
+      "source": "unknown",
+      "reasoning": "No match in calculation trees",
+      "tree_context": null,
+      "timestamp": "2026-01-06T23:14:49.702557",
+      "version": "1.0.0"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:LongTermDebt",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:LongTermDebt in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_Liabilities",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.702828",
+      "version": "1.0.0"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "company": "META",
+      "fiscal_period": "2025-FY",
+      "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "value": null,
+      "confidence": 0.95,
+      "confidence_level": "high",
+      "source": "tree",
+      "reasoning": "Direct match: us-gaap:CashAndCashEquivalentsAtCarryingValue in known_concepts",
+      "tree_context": {
+        "tree": "CONSOLIDATEDBALANCESHEETS",
+        "parent": "us-gaap_AssetsCurrent",
+        "children": [],
+        "weight": 1.0
+      },
+      "timestamp": "2026-01-06T23:14:49.703125",
+      "version": "1.0.0"
+    }
+  }
+}

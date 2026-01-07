@@ -1,0 +1,179 @@
+# Metric Definitions for Concept Mapping
+# This file is the single source of truth for target metrics
+
+version: "1.0.0"
+
+# Target metrics with known XBRL concepts and tree hints
+metrics:
+  Revenue:
+    description: "Total revenue from operations"
+    known_concepts:
+      - RevenueFromContractWithCustomerExcludingAssessedTax
+      - Revenues
+      - SalesRevenueNet
+      - Revenue
+      - TotalRevenues
+      - NetSales
+    tree_hints:
+      statements: [INCOME, OPERATIONS]
+      parent_pattern: OperatingIncome
+      weight: 1.0
+    universal: true  # Present in all MAG7
+
+  COGS:
+    description: "Cost of goods/services sold"
+    known_concepts:
+      - CostOfGoodsAndServicesSold
+      - CostOfRevenue
+      - CostOfGoodsSold
+      - CostOfSales
+    tree_hints:
+      statements: [INCOME, OPERATIONS]
+      parent_pattern: OperatingIncome
+      weight: -1.0
+    universal: false
+    notes: "Services companies (META) may not have traditional COGS"
+
+  SGA:
+    description: "Selling, general, and administrative expenses"
+    known_concepts:
+      - SellingGeneralAndAdministrativeExpense
+      - SellingAndMarketingExpense
+      - GeneralAndAdministrativeExpense
+    tree_hints:
+      statements: [INCOME, OPERATIONS]
+      parent_pattern: CostsAndExpenses
+      weight: 1.0
+    universal: false
+    notes: "Often split into separate line items"
+
+  OperatingIncome:
+    description: "Income from operations"
+    known_concepts:
+      - OperatingIncomeLoss
+    tree_hints:
+      statements: [INCOME, OPERATIONS]
+      parent_pattern: IncomeLossBeforeTax
+      weight: 1.0
+    universal: true
+
+  PretaxIncome:
+    description: "Income before income taxes"
+    known_concepts:
+      - IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+      - IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
+      - IncomeLossFromContinuingOperationsBeforeIncomeTaxes
+    tree_hints:
+      statements: [INCOME, OPERATIONS]
+      parent_pattern: NetIncome
+      weight: 1.0
+    universal: true
+
+  NetIncome:
+    description: "Net income/loss"
+    known_concepts:
+      - NetIncomeLoss
+      - ProfitLoss
+      - NetIncome
+    tree_hints:
+      statements: [INCOME, OPERATIONS]
+      is_root: true
+    universal: true
+
+  OperatingCashFlow:
+    description: "Cash from operating activities"
+    known_concepts:
+      - NetCashProvidedByUsedInOperatingActivities
+    tree_hints:
+      statements: [CASHFLOW]
+      section: operating
+    universal: true
+
+  Capex:
+    description: "Capital expenditures"
+    known_concepts:
+      - PaymentsToAcquirePropertyPlantAndEquipment
+      - CapitalExpendituresIncurredButNotYetPaid
+    tree_hints:
+      statements: [CASHFLOW]
+      section: investing
+      weight: -1.0
+    universal: false
+
+  TotalAssets:
+    description: "Total assets"
+    known_concepts:
+      - Assets
+      - TotalAssets
+    tree_hints:
+      statements: [BALANCE, FINANCIAL_POSITION]
+      is_root: true
+    universal: true
+
+  Goodwill:
+    description: "Goodwill from acquisitions"
+    known_concepts:
+      - Goodwill
+    tree_hints:
+      statements: [BALANCE]
+      section: assets
+    universal: true
+
+  IntangibleAssets:
+    description: "Intangible assets net of amortization"
+    known_concepts:
+      - FiniteLivedIntangibleAssetsNet
+      - IntangibleAssetsNetExcludingGoodwill
+      - IndefiniteLivedIntangibleAssetsExcludingGoodwill
+    tree_hints:
+      statements: [BALANCE]
+      section: assets
+    universal: true
+
+  ShortTermDebt:
+    description: "Short-term borrowings and current debt"
+    known_concepts:
+      - ShortTermBorrowings
+      - DebtCurrent
+      - ShortTermDebtAndCapitalLeaseObligationsCurrent
+    tree_hints:
+      statements: [BALANCE]
+      section: liabilities_current
+    universal: false
+    notes: "Naming varies significantly across companies"
+
+  LongTermDebt:
+    description: "Long-term debt"
+    known_concepts:
+      - LongTermDebt
+      - LongTermDebtNoncurrent
+      - LongTermDebtAndCapitalLeaseObligations
+    tree_hints:
+      statements: [BALANCE]
+      section: liabilities_noncurrent
+    universal: true
+
+  CashAndEquivalents:
+    description: "Cash and cash equivalents"
+    known_concepts:
+      - CashAndCashEquivalentsAtCarryingValue
+      - CashAndCashEquivalents
+      - Cash
+    tree_hints:
+      statements: [BALANCE, CASHFLOW]
+      section: assets_current
+    universal: true
+
+# Derived metrics (calculated from above)
+derived_metrics:
+  FreeCashFlow:
+    formula: "OperatingCashFlow - Capex"
+    requires: [OperatingCashFlow, Capex]
+
+  TangibleAssets:
+    formula: "TotalAssets - Goodwill - IntangibleAssets"
+    requires: [TotalAssets, Goodwill, IntangibleAssets]
+
+  NetDebt:
+    formula: "ShortTermDebt + LongTermDebt - CashAndEquivalents"
+    requires: [ShortTermDebt, LongTermDebt, CashAndEquivalents]

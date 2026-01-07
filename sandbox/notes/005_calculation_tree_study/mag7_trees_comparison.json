@@ -1,0 +1,3004 @@
+{
+  "companies": [
+    {
+      "ticker": "GOOG",
+      "filing_date": "2025-02-05",
+      "accession": "0001652044-25-000014",
+      "tree_count": 30,
+      "trees": [
+        {
+          "name": "CONSOLIDATEDBALANCESHEETS",
+          "definition": "CONSOLIDATEDBALANCESHEETS",
+          "root": "Assets",
+          "node_count": 31,
+          "statement_type": "balance",
+          "concepts": [
+            "Assets",
+            "AssetsCurrent",
+            "CashCashEquivalentsAndShortTermInvestments",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "MarketableSecuritiesCurrent",
+            "AccountsReceivableNetCurrent",
+            "OtherAssetsCurrent",
+            "OtherLongTermInvestments",
+            "DeferredIncomeTaxAssetsNet",
+            "PropertyPlantAndEquipmentNet",
+            "OperatingLeaseRightOfUseAsset",
+            "Goodwill",
+            "OtherAssetsNoncurrent",
+            "LiabilitiesAndStockholdersEquity",
+            "Liabilities",
+            "LiabilitiesCurrent",
+            "AccountsPayableCurrent",
+            "EmployeeRelatedLiabilitiesCurrent",
+            "AccruedLiabilitiesCurrent",
+            "goog_AccruedRevenueShare",
+            "ContractWithCustomerLiabilityCurrent",
+            "LongTermDebtAndCapitalLeaseObligations",
+            "AccruedIncomeTaxesNoncurrent",
+            "OperatingLeaseLiabilityNoncurrent",
+            "OtherLiabilitiesNoncurrent",
+            "CommitmentsAndContingencies",
+            "StockholdersEquity",
+            "ConvertiblePreferredStockNonredeemableOrRedeemableIssuerOptionValue",
+            "CommonStocksIncludingAdditionalPaidInCapital",
+            "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+            "RetainedEarningsAccumulatedDeficit"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFINCOME",
+          "definition": "CONSOLIDATEDSTATEMENTSOFINCOME",
+          "root": "NetIncomeLoss",
+          "node_count": 11,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLoss",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "OperatingIncomeLoss",
+            "CostsAndExpenses",
+            "CostOfRevenue",
+            "ResearchAndDevelopmentExpense",
+            "SellingAndMarketingExpense",
+            "GeneralAndAdministrativeExpense",
+            "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "NonoperatingIncomeExpense",
+            "IncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+          "definition": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+          "root": "ComprehensiveIncomeNetOfTax",
+          "node_count": 10,
+          "statement_type": "income",
+          "concepts": [
+            "ComprehensiveIncomeNetOfTax",
+            "NetIncomeLoss",
+            "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationAfterTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationAfterTax",
+            "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+            "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+            "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax",
+            "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIForSaleOfSecuritiesNetOfTax"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+          "definition": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+          "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "node_count": 31,
+          "statement_type": "cashflow",
+          "concepts": [
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            "NetCashProvidedByUsedInOperatingActivities",
+            "NetIncomeLoss",
+            "Depreciation",
+            "ShareBasedCompensation",
+            "DeferredIncomeTaxesAndTaxCredits",
+            "DebtAndEquitySecuritiesGainLoss",
+            "OtherNoncashIncomeExpense",
+            "IncreaseDecreaseInAccountsReceivable",
+            "IncreaseDecreaseInIncomeTaxes",
+            "IncreaseDecreaseInOtherOperatingAssets",
+            "IncreaseDecreaseInAccountsPayable",
+            "IncreaseDecreaseInAccruedLiabilities",
+            "goog_IncreaseDecreaseInAccruedRevenueShare",
+            "IncreaseDecreaseInContractWithCustomerLiability",
+            "NetCashProvidedByUsedInInvestingActivities",
+            "PaymentsToAcquirePropertyPlantAndEquipment",
+            "PaymentsToAcquireMarketableSecurities",
+            "ProceedsFromSaleAndMaturityOfMarketableSecurities",
+            "PaymentsToAcquireOtherInvestments",
+            "ProceedsFromSaleAndMaturityOfOtherInvestments",
+            "goog_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets",
+            "PaymentsForProceedsFromOtherInvestingActivities",
+            "NetCashProvidedByUsedInFinancingActivities",
+            "ProceedsFromDebtNetOfIssuanceCosts",
+            "RepaymentsOfDebtAndCapitalLeaseObligations",
+            "goog_NetProceedsPaymentsRelatedToStockBasedAwardActivities",
+            "ProceedsFromMinorityShareholders",
+            "PaymentsOfDividends",
+            "PaymentsForRepurchaseOfCommonStock",
+            "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsMarketableSecuritiesDetails",
+          "definition": "FinancialInstrumentsMarketableSecuritiesDetails",
+          "root": "[custom] CashCashEquivalentsAndAvailableForSaleDebtSecuritiesAmortizedCost",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "goog_CashCashEquivalentsAndAvailableForSaleDebtSecuritiesAmortizedCost",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+            "goog_CashCashEquivalentsAndMarketableSecurities",
+            "CashAndCashEquivalentsFairValueDisclosure",
+            "MarketableSecuritiesCurrent"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsContractualMaturityDateofMarketableDebtSecuritiesDetails",
+          "definition": "FinancialInstrumentsContractualMaturityDateofMarketableDebtSecuritiesDetails",
+          "root": "AvailableForSaleSecuritiesDebtSecurities",
+          "node_count": 5,
+          "statement_type": "other",
+          "concepts": [
+            "AvailableForSaleSecuritiesDebtSecurities",
+            "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsGrossUnrealizedLossesandFairValuesforInvestmentsinUnrealizedLossPositionDetails",
+          "definition": "FinancialInstrumentsGrossUnrealizedLossesandFairValuesforInvestmentsinUnrealizedLossPositionDetails",
+          "root": "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPosition",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12Months",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLonger"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsSummaryofGainsandLossesforDebtSecuritiesDetails",
+          "definition": "FinancialInstrumentsSummaryofGainsandLossesforDebtSecuritiesDetails",
+          "root": "DebtSecuritiesAvailableForSaleGainLoss",
+          "node_count": 5,
+          "statement_type": "other",
+          "concepts": [
+            "DebtSecuritiesAvailableForSaleGainLoss",
+            "goog_FairValueOptionDebtSecuritiesAvailableForSaleUnrealizedGainLoss",
+            "DebtSecuritiesAvailableForSaleRealizedGain",
+            "DebtSecuritiesAvailableForSaleRealizedLoss",
+            "DebtSecuritiesAvailableForSaleAllowanceForCreditLossPeriodIncreaseDecrease"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsCarryingValuesforMarketableandNonMarketableEquitySecuritiesDetails",
+          "definition": "FinancialInstrumentsCarryingValuesforMarketableandNonMarketableEquitySecuritiesDetails",
+          "root": "EquitySecuritiesWithoutReadilyDeterminableFairValueAmount",
+          "node_count": 9,
+          "statement_type": "other",
+          "concepts": [
+            "EquitySecuritiesWithoutReadilyDeterminableFairValueAmount",
+            "goog_EquitySecuritiesWithoutReadilyDeterminableFairValueAccumulatedGrossUnrealizedGainLossBeforeTax",
+            "goog_EquitySecuritiesWithoutReadilyDeterminableFairValueCost",
+            "EquitySecuritiesFvNi",
+            "goog_EquitySecuritiesFVNIAccumulatedGrossUnrealizedGainLossBeforeTax",
+            "EquitySecuritiesFvNiCost",
+            "EquitySecuritiesFvNiAndWithoutReadilyDeterminableFairValue",
+            "goog_EquitySecuritiesFVNIAndWithoutReadilyDeterminableFairValueCost",
+            "goog_EquitySecuritiesFVNIAndWithoutReadilyDeterminableFairValueAccumulatedGrossUnrealizedGainLossBeforeTax"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsCarryingValuesforMarketableandNonMarketableEquitySecuritiesDetails_1",
+          "definition": "FinancialInstrumentsCarryingValuesforMarketableandNonMarketableEquitySecuritiesDetails 1",
+          "root": "EquitySecuritiesFvNiAndWithoutReadilyDeterminableFairValue",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "EquitySecuritiesFvNiAndWithoutReadilyDeterminableFairValue",
+            "EquitySecuritiesWithoutReadilyDeterminableFairValueAmount",
+            "EquitySecuritiesFvNi"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsGainsandLossesonMarketableandNonMarketableEquitySecuritiesDetails",
+          "definition": "FinancialInstrumentsGainsandLossesonMarketableandNonMarketableEquitySecuritiesDetails",
+          "root": "EquitySecuritiesFvNiGainLoss",
+          "node_count": 4,
+          "statement_type": "other",
+          "concepts": [
+            "EquitySecuritiesFvNiGainLoss",
+            "EquitySecuritiesFvNiRealizedGainLoss",
+            "EquitySecuritiesFvNiUnrealizedGainLoss",
+            "goog_EquitySecuritiesWithoutReadilyDeterminableFairValueFVNIUnrealizedGainLoss"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsEffectofDerivativeInstrumentsonIncomeandAccumulatedOtherComprehensiveIncomeDetails",
+          "definition": "FinancialInstrumentsEffectofDerivativeInstrumentsonIncomeandAccumulatedOtherComprehensiveIncomeDetails",
+          "root": "OtherComprehensiveIncomeLossBeforeTaxPortionAttributableToParent",
+          "node_count": 12,
+          "statement_type": "income",
+          "concepts": [
+            "OtherComprehensiveIncomeLossBeforeTaxPortionAttributableToParent",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationAndTax",
+            "OtherComprehensiveIncomeLossDerivativeExcludedComponentIncreaseDecreaseBeforeAdjustmentsAndTax",
+            "OtherComprehensiveIncomeLossNetInvestmentHedgeGainLossBeforeReclassificationAndTax",
+            "DerivativeGainLossOnDerivativeNet",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationBeforeTax",
+            "goog_DerivativeInstrumentsGainLossRecognizedInIncomeIneffectivePortionAndAmountExcludedFromEffectivenessTestingAmortizationApproachNet",
+            "ChangeInUnrealizedGainLossOnHedgedItemInFairValueHedge1",
+            "ChangeInUnrealizedGainLossOnFairValueHedgingInstruments1",
+            "GainLossFromComponentsExcludedFromAssessmentOfFairValueHedgeEffectivenessNet",
+            "goog_GainLossFromComponentsExcludedFromAssessmentOfNetInvestmentHedgeEffectivenessNet",
+            "DerivativeInstrumentsNotDesignatedAsHedgingInstrumentsGainLossNet"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsOffsettingofFinancialAssetsandFinancialLiabilitiesDetails",
+          "definition": "FinancialInstrumentsOffsettingofFinancialAssetsandFinancialLiabilitiesDetails",
+          "root": "DerivativeLiabilityFairValueOffsetAgainstCollateralNetOfNotSubjectToMasterNettingArrangementPolicyElection",
+          "node_count": 12,
+          "statement_type": "other",
+          "concepts": [
+            "DerivativeLiabilityFairValueOffsetAgainstCollateralNetOfNotSubjectToMasterNettingArrangementPolicyElection",
+            "DerivativeLiabilities",
+            "DerivativeFairValueOfDerivativeLiability",
+            "DerivativeLiabilityFairValueGrossAsset",
+            "DerivativeLiabilityNotOffsetPolicyElectionDeduction",
+            "goog_DerivativeLiabilitySubjectToMasterNettingArrangementCollateralRightToReclaimCashAndSecurityNotOffset",
+            "DerivativeAssetFairValueOffsetAgainstCollateralNetOfNotSubjectToMasterNettingArrangementPolicyElection",
+            "DerivativeAssets",
+            "DerivativeFairValueOfDerivativeAsset",
+            "DerivativeAssetFairValueGrossLiability",
+            "DerivativeAssetNotOffsetPolicyElectionDeduction",
+            "goog_DerivativeAssetSubjectToMasterNettingArrangementCollateralObligationToReturnCashAndSecurityNotOffset"
+          ]
+        },
+        {
+          "name": "LeasesComponentsofOperatingLeaseExpenseDetails",
+          "definition": "LeasesComponentsofOperatingLeaseExpenseDetails",
+          "root": "LeaseCost",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "LeaseCost",
+            "VariableLeaseCost",
+            "OperatingLeaseCost",
+            "goog_FinanceLeaseCost",
+            "FinanceLeaseInterestExpense",
+            "FinanceLeaseRightOfUseAssetAmortization"
+          ]
+        },
+        {
+          "name": "LeasesSupplementalBalanceSheetInformationDetails",
+          "definition": "LeasesSupplementalBalanceSheetInformationDetails",
+          "root": "FinanceLeaseLiability",
+          "node_count": 9,
+          "statement_type": "balance",
+          "concepts": [
+            "FinanceLeaseLiability",
+            "FinanceLeaseLiabilityCurrent",
+            "FinanceLeaseLiabilityNoncurrent",
+            "FinanceLeaseRightOfUseAsset",
+            "FinanceLeaseRightOfUseAssetBeforeAccumulatedAmortization",
+            "FinanceLeaseRightOfUseAssetAccumulatedAmortization",
+            "OperatingLeaseLiability",
+            "OperatingLeaseLiabilityNoncurrent",
+            "OperatingLeaseLiabilityCurrent"
+          ]
+        },
+        {
+          "name": "LeasesFutureMinimumLeasePaymentsDetails",
+          "definition": "LeasesFutureMinimumLeasePaymentsDetails",
+          "root": "FinanceLeaseLiabilityPaymentsDue",
+          "node_count": 14,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityPaymentsDueYearThree",
+            "FinanceLeaseLiabilityPaymentsDueAfterYearFive",
+            "FinanceLeaseLiabilityPaymentsDueYearFour",
+            "FinanceLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "FinanceLeaseLiabilityPaymentsDueYearTwo",
+            "FinanceLeaseLiabilityPaymentsDueYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearThree",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFour",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive"
+          ]
+        },
+        {
+          "name": "LeasesFutureMinimumLeasePaymentsDetails_1",
+          "definition": "LeasesFutureMinimumLeasePaymentsDetails 1",
+          "root": "FinanceLeaseLiabilityPaymentsDue",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiability",
+            "FinanceLeaseLiabilityUndiscountedExcessAmount",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount",
+            "OperatingLeaseLiability"
+          ]
+        },
+        {
+          "name": "DebtLongTermDebtDetails",
+          "definition": "DebtLongTermDebtDetails",
+          "root": "LongTermDebt",
+          "node_count": 2,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "DebtInstrumentCarryingAmount"
+          ]
+        },
+        {
+          "name": "DebtLongTermDebtDetails_1",
+          "definition": "DebtLongTermDebtDetails 1",
+          "root": "LongTermDebt",
+          "node_count": 4,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "DebtInstrumentUnamortizedDiscountPremiumAndDebtIssuanceCostsNet",
+            "LongTermDebtCurrent",
+            "LongTermDebtNoncurrent"
+          ]
+        },
+        {
+          "name": "DebtFuturePrincipalPaymentsforBorrowingsDetails",
+          "definition": "DebtFuturePrincipalPaymentsforBorrowingsDetails",
+          "root": "LongTermDebt",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearTwo",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearThree",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFour",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFive",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFive"
+          ]
+        },
+        {
+          "name": "SupplementalFinancialStatementInformationPropertyandEquipmentNetDetails",
+          "definition": "SupplementalFinancialStatementInformationPropertyandEquipmentNetDetails",
+          "root": "PropertyPlantAndEquipmentNet",
+          "node_count": 4,
+          "statement_type": "other",
+          "concepts": [
+            "PropertyPlantAndEquipmentNet",
+            "AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment",
+            "PropertyPlantAndEquipmentGross",
+            "ConstructionInProgressGross"
+          ]
+        },
+        {
+          "name": "SupplementalFinancialStatementInformationAccruedExpensesandOtherCurrentLiabilitiesDetails",
+          "definition": "SupplementalFinancialStatementInformationAccruedExpensesandOtherCurrentLiabilitiesDetails",
+          "root": "AccruedLiabilitiesCurrent",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "AccruedLiabilitiesCurrent",
+            "LossContingencyAccrualCarryingValueCurrent",
+            "goog_AccruedPurchasesOfPropertyAndEquipmentCurrent",
+            "goog_AccruedCustomerLiabilitiesCurrent",
+            "OperatingLeaseLiabilityCurrent",
+            "AccruedIncomeTaxesCurrent",
+            "OtherAccruedLiabilitiesCurrent"
+          ]
+        },
+        {
+          "name": "SupplementalFinancialStatementInformationComponentsofAccumulatedOtherComprehensiveIncomeDetails",
+          "definition": "SupplementalFinancialStatementInformationComponentsofAccumulatedOtherComprehensiveIncomeDetails",
+          "root": "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+          "node_count": 4,
+          "statement_type": "income",
+          "concepts": [
+            "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+            "OciBeforeReclassificationsNetOfTaxAttributableToParent",
+            "ReclassificationFromAociCurrentPeriodNetOfTaxAttributableToParent",
+            "goog_GainLossFromComponentsExcludedFromAssessmentOfCashFlowHedgeEffectivenessRecordedInAOCINet"
+          ]
+        },
+        {
+          "name": "SupplementalFinancialStatementInformationComponentsofOtherIncomeExpenseNetDetails",
+          "definition": "SupplementalFinancialStatementInformationComponentsofOtherIncomeExpenseNetDetails",
+          "root": "NonoperatingIncomeExpense",
+          "node_count": 9,
+          "statement_type": "income",
+          "concepts": [
+            "NonoperatingIncomeExpense",
+            "DebtSecuritiesRealizedGainLoss",
+            "goog_IncomeLossFromEquityMethodInvestmentsAndOtherThanTemporaryImpairmentNet",
+            "InterestExpenseNonoperating",
+            "InterestIncomeOther",
+            "EquitySecuritiesFvNiGainLoss",
+            "goog_InvestmentPerformanceFees",
+            "ForeignCurrencyTransactionGainLossBeforeTax",
+            "OtherNonoperatingIncomeExpense"
+          ]
+        },
+        {
+          "name": "NetIncomePerShareScheduleofEarningsPerShareDetails",
+          "definition": "NetIncomePerShareScheduleofEarningsPerShareDetails",
+          "root": "NetIncomeLossAvailableToCommonStockholdersDiluted",
+          "node_count": 8,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLossAvailableToCommonStockholdersDiluted",
+            "goog_ReallocationOfUndistributedEarningsAsResultOfConversionOfShares",
+            "goog_ReallocationOfUndistributedEarnings",
+            "NetIncomeLossAvailableToCommonStockholdersBasic",
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberOfSharesOutstandingBasic",
+            "goog_IncrementalCommonSharesAttributableToConversionOfCommonStock",
+            "IncrementalCommonSharesAttributableToShareBasedPaymentArrangements"
+          ]
+        },
+        {
+          "name": "IncomeTaxesIncomeFromContinuingOperationsBeforeIncomeTaxesDetails",
+          "definition": "IncomeTaxesIncomeFromContinuingOperationsBeforeIncomeTaxesDetails",
+          "root": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign"
+          ]
+        },
+        {
+          "name": "IncomeTaxesProvisionforIncomeTaxesDetails",
+          "definition": "IncomeTaxesProvisionforIncomeTaxesDetails",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 7,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "CurrentIncomeTaxExpenseBenefit",
+            "CurrentFederalStateAndLocalTaxExpenseBenefit",
+            "CurrentForeignTaxExpenseBenefit",
+            "DeferredIncomeTaxExpenseBenefit",
+            "DeferredFederalStateAndLocalTaxExpenseBenefit",
+            "DeferredForeignIncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "IncomeTaxesReconciliationofFederalStatutoryIncomeTaxRatetoEffectiveIncomeTaxRateDetails",
+          "definition": "IncomeTaxesReconciliationofFederalStatutoryIncomeTaxRatetoEffectiveIncomeTaxRateDetails",
+          "root": "EffectiveIncomeTaxRateContinuingOperations",
+          "node_count": 10,
+          "statement_type": "income",
+          "concepts": [
+            "EffectiveIncomeTaxRateContinuingOperations",
+            "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate",
+            "EffectiveIncomeTaxRateReconciliationForeignIncomeTaxRateDifferential",
+            "EffectiveIncomeTaxRateReconciliationFdiiPercent",
+            "EffectiveIncomeTaxRateReconciliationNondeductibleExpenseShareBasedCompensationCost",
+            "EffectiveIncomeTaxRateReconciliationTaxCreditsResearch",
+            "EffectiveIncomeTaxRateReconciliationChangeInDeferredTaxAssetsValuationAllowance",
+            "EffectiveIncomeTaxRateReconciliationStateAndLocalIncomeTaxes",
+            "goog_EffectiveIncomeTaxRateReconciliationImpactOfTaxLawChangePercent",
+            "EffectiveIncomeTaxRateReconciliationOtherAdjustments"
+          ]
+        },
+        {
+          "name": "IncomeTaxesSignificantComponentsofDeferredTaxAssetsandLiabilitiesDetails",
+          "definition": "IncomeTaxesSignificantComponentsofDeferredTaxAssetsandLiabilitiesDetails",
+          "root": "DeferredTaxAssetsLiabilitiesNet",
+          "node_count": 16,
+          "statement_type": "income",
+          "concepts": [
+            "DeferredTaxAssetsLiabilitiesNet",
+            "DeferredTaxAssetsNet",
+            "DeferredTaxAssetsGross",
+            "DeferredTaxAssetsTaxDeferredExpenseCompensationAndBenefitsEmployeeBenefits",
+            "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccrualsOther",
+            "DeferredTaxAssetsTaxCreditCarryforwardsOther",
+            "DeferredTaxAssetsOperatingLossCarryforwards",
+            "goog_DeferredTaxAssetsOperatingLeaseRightOfUseAsset",
+            "DeferredTaxAssetsInProcessResearchAndDevelopment",
+            "DeferredTaxAssetsOther",
+            "DeferredTaxAssetsValuationAllowance",
+            "DeferredIncomeTaxLiabilities",
+            "DeferredTaxLiabilitiesPropertyPlantAndEquipment",
+            "DeferredTaxLiabilitiesInvestments",
+            "DeferredTaxLiabilitiesOther",
+            "goog_DeferredTaxLiabilitiesOperatingLeaseLiability"
+          ]
+        },
+        {
+          "name": "InformationaboutSegmentsandGeographicAreasRevenueandOperatingIncomeLossbySegmentDetails",
+          "definition": "InformationaboutSegmentsandGeographicAreasRevenueandOperatingIncomeLossbySegmentDetails",
+          "root": "CostsAndExpenses",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "CostsAndExpenses",
+            "LaborAndRelatedExpense",
+            "OperatingExpenses"
+          ]
+        }
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "filing_date": "2025-02-07",
+      "accession": "0001018724-25-000004",
+      "tree_count": 25,
+      "trees": [
+        {
+          "name": "ConsolidatedStatementsofCashFlows",
+          "definition": "ConsolidatedStatementsofCashFlows",
+          "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "node_count": 28,
+          "statement_type": "cashflow",
+          "concepts": [
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            "NetCashProvidedByUsedInOperatingActivities",
+            "NetIncomeLoss",
+            "DepreciationDepletionAndAmortization",
+            "ShareBasedCompensation",
+            "OtherNoncashIncomeExpense",
+            "DeferredIncomeTaxExpenseBenefit",
+            "IncreaseDecreaseInInventories",
+            "IncreaseDecreaseInAccountsReceivableAndOtherOperatingAssets",
+            "IncreaseDecreaseInAccountsPayable",
+            "IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities",
+            "IncreaseDecreaseInContractWithCustomerLiability",
+            "IncreaseDecreaseInOtherNoncurrentAssets",
+            "NetCashProvidedByUsedInInvestingActivities",
+            "PaymentsToAcquireProductiveAssets",
+            "amzn_ProceedsFromPropertyPlantAndEquipmentSalesAndIncentives",
+            "amzn_PaymentsToAcquireBusinessesNetOfCashAcquiredAndPaymentsToAcquireNonmarketableSecuritiesAndOther",
+            "ProceedsFromSaleAndMaturityOfMarketableSecurities",
+            "PaymentsToAcquireMarketableSecurities",
+            "NetCashProvidedByUsedInFinancingActivities",
+            "ProceedsFromIssuanceOfLongTermDebt",
+            "RepaymentsOfLongTermDebt",
+            "FinanceLeasePrincipalPayments",
+            "amzn_RepaymentsOfLongTermFinancingObligations",
+            "ProceedsFromShortTermDebt",
+            "RepaymentsOfShortTermDebt",
+            "PaymentsForRepurchaseOfCommonStock",
+            "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations"
+          ]
+        },
+        {
+          "name": "ConsolidatedStatementsofOperations",
+          "definition": "ConsolidatedStatementsofOperations",
+          "root": "NetIncomeLoss",
+          "node_count": 17,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLoss",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
+            "OperatingIncomeLoss",
+            "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "CostsAndExpenses",
+            "CostOfGoodsAndServicesSold",
+            "amzn_FulfillmentExpense",
+            "MarketingExpense",
+            "amzn_TechnologyAndInfrastructureExpense",
+            "GeneralAndAdministrativeExpense",
+            "OtherOperatingIncomeExpenseNet",
+            "NonoperatingIncomeExpense",
+            "InvestmentIncomeInterest",
+            "InterestExpenseNonoperating",
+            "OtherNonoperatingIncomeExpense",
+            "IncomeTaxExpenseBenefit",
+            "IncomeLossFromEquityMethodInvestments"
+          ]
+        },
+        {
+          "name": "ConsolidatedStatementsofComprehensiveIncomeLoss",
+          "definition": "ConsolidatedStatementsofComprehensiveIncomeLoss",
+          "root": "ComprehensiveIncomeNetOfTax",
+          "node_count": 8,
+          "statement_type": "income",
+          "concepts": [
+            "ComprehensiveIncomeNetOfTax",
+            "NetIncomeLoss",
+            "OtherComprehensiveIncomeLossNetOfTax",
+            "OtherComprehensiveIncomeOtherNetOfTax",
+            "OtherComprehensiveIncomeForeignCurrencyTransactionAndTranslationGainLossArisingDuringPeriodNetOfTax",
+            "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+            "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIForSaleOfSecuritiesNetOfTax",
+            "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax"
+          ]
+        },
+        {
+          "name": "ConsolidatedBalanceSheets",
+          "definition": "ConsolidatedBalanceSheets",
+          "root": "Assets",
+          "node_count": 26,
+          "statement_type": "balance",
+          "concepts": [
+            "Assets",
+            "AssetsCurrent",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "MarketableSecuritiesCurrent",
+            "InventoryNet",
+            "AccountsReceivableNetCurrent",
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+            "Goodwill",
+            "OtherAssetsNoncurrent",
+            "OperatingLeaseRightOfUseAsset",
+            "LiabilitiesAndStockholdersEquity",
+            "LiabilitiesCurrent",
+            "AccountsPayableCurrent",
+            "AccruedLiabilitiesCurrent",
+            "ContractWithCustomerLiabilityCurrent",
+            "LongTermDebtNoncurrent",
+            "OtherLiabilitiesNoncurrent",
+            "StockholdersEquity",
+            "PreferredStockValue",
+            "CommonStockValue",
+            "TreasuryStockCommonValue",
+            "AdditionalPaidInCapital",
+            "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+            "RetainedEarningsAccumulatedDeficit",
+            "CommitmentsAndContingencies",
+            "amzn_LeaseLiabilityNoncurrent"
+          ]
+        },
+        {
+          "name": "DescriptionofBusinessAccountingPoliciesandSupplementalDisclosuresCalculationofDilutedSharesDetails",
+          "definition": "DescriptionofBusinessAccountingPoliciesandSupplementalDisclosuresCalculationofDilutedSharesDetails",
+          "root": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberOfSharesOutstandingBasic",
+            "IncrementalCommonSharesAttributableToShareBasedPaymentArrangements"
+          ]
+        },
+        {
+          "name": "DescriptionofBusinessAccountingPoliciesandSupplementalDisclosuresOtherIncomeExpenseNetDetails",
+          "definition": "DescriptionofBusinessAccountingPoliciesandSupplementalDisclosuresOtherIncomeExpenseNetDetails",
+          "root": "OtherNonoperatingIncomeExpense",
+          "node_count": 6,
+          "statement_type": "income",
+          "concepts": [
+            "OtherNonoperatingIncomeExpense",
+            "FairValueAdjustmentOfWarrants",
+            "ForeignCurrencyTransactionGainLossBeforeTax",
+            "amzn_MiscellaneousIncomeExpense",
+            "EquitySecuritiesWithoutReadilyDeterminableFairValueUpwardPriceAdjustmentAnnualAmount",
+            "MarketableSecuritiesUnrealizedGainLoss"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsFairValuesonRecurringBasisDetails",
+          "definition": "FinancialInstrumentsFairValuesonRecurringBasisDetails",
+          "root": "[custom] CashCashEquivalentsAndMarketableSecuritiesAmortizedCostBasis",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "amzn_CashCashEquivalentsAndMarketableSecuritiesAmortizedCostBasis",
+            "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+            "Cash",
+            "CashEquivalentsAtCarryingValue",
+            "amzn_CashCashEquivalentsAndMarketableSecurities",
+            "amzn_CashCashEquivalentsAndMarketableSecuritiesExcludingRestrictedCashAndInvestments",
+            "RestrictedCashAndInvestments"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsFairValuesonRecurringBasisDetails_1",
+          "definition": "FinancialInstrumentsFairValuesonRecurringBasisDetails 1",
+          "root": "[custom] CashCashEquivalentsAndMarketableSecurities",
+          "node_count": 5,
+          "statement_type": "other",
+          "concepts": [
+            "amzn_CashCashEquivalentsAndMarketableSecurities",
+            "AvailableForSaleSecuritiesDebtSecurities",
+            "Cash",
+            "CashEquivalentsAtCarryingValue",
+            "EquitySecuritiesFvNi"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsContractualMaturitiesDetails",
+          "definition": "FinancialInstrumentsContractualMaturitiesDetails",
+          "root": "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate",
+          "node_count": 10,
+          "statement_type": "other",
+          "concepts": [
+            "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate",
+            "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDateAmortizedCostBasis",
+            "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsAmortizedCost",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsAmortizedCost"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsReconciliationtoCashFlowDetails",
+          "definition": "FinancialInstrumentsReconciliationtoCashFlowDetails",
+          "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+          "node_count": 4,
+          "statement_type": "cashflow",
+          "concepts": [
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "RestrictedCashCurrent",
+            "RestrictedCashNoncurrent"
+          ]
+        },
+        {
+          "name": "PropertyandEquipmentComponentsDetails",
+          "definition": "PropertyandEquipmentComponentsDetails",
+          "root": "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization",
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization"
+          ]
+        },
+        {
+          "name": "LeasesLeaseCostsDetails",
+          "definition": "LeasesLeaseCostsDetails",
+          "root": "LeaseCost",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "LeaseCost",
+            "OperatingLeaseCost",
+            "amzn_FinanceLeaseCost",
+            "FinanceLeaseRightOfUseAssetAmortization",
+            "FinanceLeaseInterestExpense",
+            "VariableLeaseCost"
+          ]
+        },
+        {
+          "name": "LeasesOperatingandFinanceLeaseReconciliationDetails",
+          "definition": "LeasesOperatingandFinanceLeaseReconciliationDetails",
+          "root": "FinanceLeaseLiabilityPaymentsDue",
+          "node_count": 15,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityUndiscountedExcessAmount",
+            "FinanceLeaseLiability",
+            "FinanceLeaseLiabilityCurrent",
+            "FinanceLeaseLiabilityNoncurrent",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount",
+            "OperatingLeaseLiability",
+            "OperatingLeaseLiabilityCurrent",
+            "OperatingLeaseLiabilityNoncurrent",
+            "amzn_LeaseLiabilityPaymentsDue",
+            "amzn_LeaseLiabilityUndiscountedExcessAmount",
+            "amzn_LeaseLiability",
+            "amzn_LeaseLiabilityCurrent",
+            "amzn_LeaseLiabilityNoncurrent"
+          ]
+        },
+        {
+          "name": "AcquisitionsGoodwillandAcquiredIntangibleAssetsAcquiredIntangibleAssetsDetails",
+          "definition": "AcquisitionsGoodwillandAcquiredIntangibleAssetsAcquiredIntangibleAssetsDetails",
+          "root": "IntangibleAssetsGrossExcludingGoodwill",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "IntangibleAssetsGrossExcludingGoodwill",
+            "FiniteLivedIntangibleAssetsGross",
+            "IndefiniteLivedIntangibleAssetsExcludingGoodwill",
+            "IntangibleAssetsNetExcludingGoodwill",
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsAccumulatedAmortization"
+          ]
+        },
+        {
+          "name": "AcquisitionsGoodwillandAcquiredIntangibleAssetsAcquiredIntangibleAssetsDetails_1",
+          "definition": "AcquisitionsGoodwillandAcquiredIntangibleAssetsAcquiredIntangibleAssetsDetails 1",
+          "root": "IntangibleAssetsNetExcludingGoodwill",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "IntangibleAssetsNetExcludingGoodwill",
+            "IntangibleAssetsGrossExcludingGoodwill",
+            "FiniteLivedIntangibleAssetsAccumulatedAmortization"
+          ]
+        },
+        {
+          "name": "AcquisitionsGoodwillandAcquiredIntangibleAssetsExpectedFutureAmortizationExpenseofAcquiredIntangibleAssetsDetails",
+          "definition": "AcquisitionsGoodwillandAcquiredIntangibleAssetsExpectedFutureAmortizationExpenseofAcquiredIntangibleAssetsDetails",
+          "root": "FiniteLivedIntangibleAssetsNet",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseNextTwelveMonths",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearTwo",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearThree",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFour",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFive",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive"
+          ]
+        },
+        {
+          "name": "DebtFuturePrincipalPaymentforDebtDetails",
+          "definition": "DebtFuturePrincipalPaymentforDebtDetails",
+          "root": "LongTermDebt",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearTwo",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearThree",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFour",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFive",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFive"
+          ]
+        },
+        {
+          "name": "CommitmentsandContingenciesPrincipalContractualCommitmentsExcludingOpenOrdersDetails",
+          "definition": "CommitmentsandContingenciesPrincipalContractualCommitmentsExcludingOpenOrdersDetails",
+          "root": "[custom] LongTermDebtIncludingInterest",
+          "node_count": 49,
+          "statement_type": "other",
+          "concepts": [
+            "amzn_LongTermDebtIncludingInterest",
+            "amzn_LongTermDebtMaturitiesRepaymentsOfPrincipalAndInterestInNextTwelveMonths",
+            "amzn_LongTermDebtMaturitiesRepaymentsOfPrincipalAndInterestInYearTwo",
+            "amzn_LongTermDebtMaturitiesRepaymentsOfPrincipalAndInterestInYearThree",
+            "amzn_LongTermDebtMaturitiesRepaymentsOfPrincipalAndInterestInYearFour",
+            "amzn_LongTermDebtMaturitiesRepaymentsOfPrincipalAndInterestInYearFive",
+            "amzn_LongTermDebtMaturitiesRepaymentsOfPrincipalAndInterestAfterYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearThree",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFour",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive",
+            "UnrecordedUnconditionalPurchaseObligationBalanceSheetAmount",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnFirstAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnSecondAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnThirdAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnFourthAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnFifthAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationDueAfterFiveYears",
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "FinanceLeaseLiabilityPaymentsDueYearTwo",
+            "FinanceLeaseLiabilityPaymentsDueYearThree",
+            "FinanceLeaseLiabilityPaymentsDueYearFour",
+            "FinanceLeaseLiabilityPaymentsDueYearFive",
+            "FinanceLeaseLiabilityPaymentsDueAfterYearFive",
+            "ContractualObligation",
+            "ContractualObligationDueInNextTwelveMonths",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDueNextTwelveMonths",
+            "OtherCommitmentDueInNextTwelveMonths",
+            "ContractualObligationDueInSecondYear",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDueInTwoYears",
+            "OtherCommitmentDueInSecondYear",
+            "ContractualObligationDueInThirdYear",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDueInThreeYears",
+            "OtherCommitmentDueInThirdYear",
+            "ContractualObligationDueInFourthYear",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDueInFourYears",
+            "OtherCommitmentDueInFourthYear",
+            "ContractualObligationDueInFifthYear",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDueInFiveYears",
+            "OtherCommitmentDueInFifthYear",
+            "ContractualObligationDueAfterFifthYear",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDueAfterYearFive",
+            "OtherCommitmentDueAfterFifthYear",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDue",
+            "OtherCommitment"
+          ]
+        },
+        {
+          "name": "CommitmentsandContingenciesPrincipalContractualCommitmentsExcludingOpenOrdersDetails_1",
+          "definition": "CommitmentsandContingenciesPrincipalContractualCommitmentsExcludingOpenOrdersDetails 1",
+          "root": "ContractualObligation",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "ContractualObligation",
+            "amzn_LongTermDebtIncludingInterest",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityPaymentsDue",
+            "amzn_FinancingObligationsFutureMinimumPaymentsDue",
+            "OtherCommitment",
+            "UnrecordedUnconditionalPurchaseObligationBalanceSheetAmount"
+          ]
+        },
+        {
+          "name": "StockholdersEquityScheduledVestingforOutstandingRestrictedStockUnitsDetails",
+          "definition": "StockholdersEquityScheduledVestingforOutstandingRestrictedStockUnitsDetails",
+          "root": "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsNonvestedNumber",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsNonvestedNumber",
+            "amzn_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingNextTwelveMonths",
+            "amzn_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingYearTwo",
+            "amzn_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingYearThree",
+            "amzn_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingYearFour",
+            "amzn_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingYearFive",
+            "amzn_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestingAfterYearFive"
+          ]
+        },
+        {
+          "name": "IncomeTaxesComponentsofProvisionforIncomeTaxesNetDetails",
+          "definition": "IncomeTaxesComponentsofProvisionforIncomeTaxesNetDetails",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 7,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "CurrentFederalTaxExpenseBenefit",
+            "DeferredFederalIncomeTaxExpenseBenefit",
+            "CurrentStateAndLocalTaxExpenseBenefit",
+            "DeferredStateAndLocalIncomeTaxExpenseBenefit",
+            "CurrentForeignTaxExpenseBenefit",
+            "DeferredForeignIncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "IncomeTaxesUSandInternationalComponentsofIncomeBeforeIncomeTaxesDetails",
+          "definition": "IncomeTaxesUSandInternationalComponentsofIncomeBeforeIncomeTaxesDetails",
+          "root": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign"
+          ]
+        },
+        {
+          "name": "IncomeTaxesItemsAccountingforDifferencesBetweenIncomeTaxesComputedatFederalStatutoryRateandProvisionRecordedforIncomeTaxesDetails",
+          "definition": "IncomeTaxesItemsAccountingforDifferencesBetweenIncomeTaxesComputedatFederalStatutoryRateandProvisionRecordedforIncomeTaxesDetails",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 8,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate",
+            "IncomeTaxReconciliationForeignIncomeTaxRateDifferential",
+            "IncomeTaxReconciliationStateAndLocalIncomeTaxes",
+            "IncomeTaxReconciliationTaxCredits",
+            "IncomeTaxReconciliationNondeductibleExpenseShareBasedCompensationCost",
+            "IncomeTaxReconciliationOtherAdjustments",
+            "EffectiveIncomeTaxRateReconciliationFdiiAmount"
+          ]
+        },
+        {
+          "name": "IncomeTaxesDeferredIncomeTaxAssetsandLiabilitiesDetails",
+          "definition": "IncomeTaxesDeferredIncomeTaxAssetsandLiabilitiesDetails",
+          "root": "DeferredTaxAssetsLiabilitiesNet",
+          "node_count": 16,
+          "statement_type": "income",
+          "concepts": [
+            "DeferredTaxAssetsLiabilitiesNet",
+            "amzn_DeferredTaxLiabilitiesOperatingLeaseAssets",
+            "DeferredTaxAssetsNet",
+            "DeferredTaxAssetsGross",
+            "DeferredTaxAssetsOperatingLossCarryforwardsDomestic",
+            "DeferredTaxAssetsOperatingLossCarryforwardsForeign",
+            "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccruals",
+            "DeferredTaxAssetsTaxDeferredExpenseCompensationAndBenefitsShareBasedCompensationCost",
+            "DeferredTaxAssetsPropertyPlantAndEquipment",
+            "DeferredTaxAssetsOther",
+            "DeferredTaxAssetsTaxCreditCarryforwards",
+            "amzn_DeferredTaxAssetsOperatingLeaseLiabilities",
+            "DeferredTaxAssetsInProcessResearchAndDevelopment",
+            "DeferredTaxAssetsValuationAllowance",
+            "DeferredTaxLiabilitiesPropertyPlantAndEquipment",
+            "DeferredTaxLiabilitiesOther"
+          ]
+        },
+        {
+          "name": "SegmentInformationReportableSegmentsandReconciliationtoConsolidatedNetIncomeDetails",
+          "definition": "SegmentInformationReportableSegmentsandReconciliationtoConsolidatedNetIncomeDetails",
+          "root": "NetIncomeLoss",
+          "node_count": 5,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLoss",
+            "OperatingIncomeLoss",
+            "NonoperatingIncomeExpense",
+            "IncomeTaxExpenseBenefit",
+            "IncomeLossFromEquityMethodInvestments"
+          ]
+        }
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "filing_date": "2025-10-31",
+      "accession": "0000320193-25-000079",
+      "tree_count": 23,
+      "trees": [
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+          "definition": "CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+          "root": "NetIncomeLoss",
+          "node_count": 11,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLoss",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "OperatingIncomeLoss",
+            "GrossProfit",
+            "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "CostOfGoodsAndServicesSold",
+            "OperatingExpenses",
+            "ResearchAndDevelopmentExpense",
+            "SellingGeneralAndAdministrativeExpense",
+            "NonoperatingIncomeExpense",
+            "IncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+          "definition": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+          "root": "ComprehensiveIncomeNetOfTax",
+          "node_count": 13,
+          "statement_type": "income",
+          "concepts": [
+            "ComprehensiveIncomeNetOfTax",
+            "NetIncomeLoss",
+            "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+            "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+            "aapl_OtherComprehensiveIncomeLossDerivativeInstrumentGainLossafterReclassificationandTax",
+            "aapl_OtherComprehensiveIncomeLossDerivativeInstrumentGainLossbeforeReclassificationafterTax",
+            "aapl_OtherComprehensiveIncomeLossDerivativeInstrumentGainLossReclassificationAfterTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationAfterTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationAfterTax",
+            "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+            "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax",
+            "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIForSaleOfSecuritiesNetOfTax"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDBALANCESHEETS",
+          "definition": "CONSOLIDATEDBALANCESHEETS",
+          "root": "Assets",
+          "node_count": 28,
+          "statement_type": "balance",
+          "concepts": [
+            "Assets",
+            "AssetsCurrent",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "MarketableSecuritiesCurrent",
+            "AccountsReceivableNetCurrent",
+            "NontradeReceivablesCurrent",
+            "InventoryNet",
+            "OtherAssetsCurrent",
+            "AssetsNoncurrent",
+            "MarketableSecuritiesNoncurrent",
+            "PropertyPlantAndEquipmentNet",
+            "OtherAssetsNoncurrent",
+            "LiabilitiesAndStockholdersEquity",
+            "Liabilities",
+            "LiabilitiesCurrent",
+            "AccountsPayableCurrent",
+            "OtherLiabilitiesCurrent",
+            "ContractWithCustomerLiabilityCurrent",
+            "CommercialPaper",
+            "LongTermDebtCurrent",
+            "LiabilitiesNoncurrent",
+            "LongTermDebtNoncurrent",
+            "OtherLiabilitiesNoncurrent",
+            "CommitmentsAndContingencies",
+            "StockholdersEquity",
+            "CommonStocksIncludingAdditionalPaidInCapital",
+            "RetainedEarningsAccumulatedDeficit",
+            "AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+          "definition": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+          "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "node_count": 26,
+          "statement_type": "cashflow",
+          "concepts": [
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            "NetCashProvidedByUsedInOperatingActivities",
+            "NetIncomeLoss",
+            "DepreciationDepletionAndAmortization",
+            "ShareBasedCompensation",
+            "OtherNoncashIncomeExpense",
+            "IncreaseDecreaseInAccountsReceivable",
+            "IncreaseDecreaseInOtherReceivables",
+            "IncreaseDecreaseInInventories",
+            "IncreaseDecreaseInOtherOperatingAssets",
+            "IncreaseDecreaseInAccountsPayable",
+            "IncreaseDecreaseInOtherOperatingLiabilities",
+            "NetCashProvidedByUsedInInvestingActivities",
+            "PaymentsToAcquireAvailableForSaleSecuritiesDebt",
+            "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+            "ProceedsFromSaleOfAvailableForSaleSecuritiesDebt",
+            "PaymentsToAcquirePropertyPlantAndEquipment",
+            "PaymentsForProceedsFromOtherInvestingActivities",
+            "NetCashProvidedByUsedInFinancingActivities",
+            "PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+            "PaymentsOfDividends",
+            "PaymentsForRepurchaseOfCommonStock",
+            "ProceedsFromIssuanceOfLongTermDebt",
+            "RepaymentsOfLongTermDebt",
+            "ProceedsFromRepaymentsOfCommercialPaper",
+            "ProceedsFromPaymentsForOtherFinancingActivities"
+          ]
+        },
+        {
+          "name": "EarningsPerShareComputationofBasicandDilutedEarningsPerShareDetails",
+          "definition": "EarningsPerShareComputationofBasicandDilutedEarningsPerShareDetails",
+          "root": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberOfSharesOutstandingBasic",
+            "IncrementalCommonSharesAttributableToShareBasedPaymentArrangements"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsCashCashEquivalentsandMarketableSecuritiesDetails",
+          "definition": "FinancialInstrumentsCashCashEquivalentsandMarketableSecuritiesDetails",
+          "root": "[custom] CashEquivalentsAndMarketableSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+          "node_count": 16,
+          "statement_type": "other",
+          "concepts": [
+            "aapl_CashEquivalentsAndMarketableSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+            "aapl_EquitySecuritiesFVNIAccumulatedGrossUnrealizedGainBeforeTax",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+            "aapl_CashEquivalentsAndMarketableSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+            "aapl_EquitySecuritiesFVNIAccumulatedGrossUnrealizedLossBeforeTax",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+            "aapl_CashCashEquivalentsAndMarketableSecuritiesCost",
+            "Cash",
+            "EquitySecuritiesFvNiCost",
+            "EquitySecuritiesFvNiCurrentAndNoncurrent",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "MarketableSecuritiesCurrent",
+            "MarketableSecuritiesNoncurrent",
+            "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+            "AvailableForSaleSecuritiesDebtSecurities",
+            "aapl_CashCashEquivalentsAndMarketableSecurities"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsCashCashEquivalentsandMarketableSecuritiesDetails_1",
+          "definition": "FinancialInstrumentsCashCashEquivalentsandMarketableSecuritiesDetails 1",
+          "root": "[custom] CashCashEquivalentsAndMarketableSecuritiesCost",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "aapl_CashCashEquivalentsAndMarketableSecuritiesCost",
+            "aapl_CashEquivalentsAndMarketableSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+            "aapl_CashEquivalentsAndMarketableSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+            "aapl_CashCashEquivalentsAndMarketableSecurities",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "MarketableSecuritiesCurrent",
+            "MarketableSecuritiesNoncurrent"
+          ]
+        },
+        {
+          "name": "PropertyPlantandEquipmentGrossPropertyPlantandEquipmentbyMajorAssetClassandAccumulatedDepreciationDetails",
+          "definition": "PropertyPlantandEquipmentGrossPropertyPlantandEquipmentbyMajorAssetClassandAccumulatedDepreciationDetails",
+          "root": "PropertyPlantAndEquipmentNet",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "PropertyPlantAndEquipmentNet",
+            "PropertyPlantAndEquipmentGross",
+            "AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment"
+          ]
+        },
+        {
+          "name": "ConsolidatedFinancialStatementDetailsOtherNonCurrentAssetsDetails",
+          "definition": "ConsolidatedFinancialStatementDetailsOtherNonCurrentAssetsDetails",
+          "root": "OtherAssetsNoncurrent",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "OtherAssetsNoncurrent",
+            "DeferredIncomeTaxAssetsNet",
+            "OtherAssetsMiscellaneousNoncurrent"
+          ]
+        },
+        {
+          "name": "ConsolidatedFinancialStatementDetailsOtherCurrentLiabilitiesDetails",
+          "definition": "ConsolidatedFinancialStatementDetailsOtherCurrentLiabilitiesDetails",
+          "root": "OtherLiabilitiesCurrent",
+          "node_count": 4,
+          "statement_type": "other",
+          "concepts": [
+            "OtherLiabilitiesCurrent",
+            "AccruedIncomeTaxesCurrent",
+            "aapl_AccruedDistributionAndMarketingCurrent",
+            "OtherAccruedLiabilitiesCurrent"
+          ]
+        },
+        {
+          "name": "IncomeTaxesProvisionforIncomeTaxesDetails",
+          "definition": "IncomeTaxesProvisionforIncomeTaxesDetails",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 10,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "FederalIncomeTaxExpenseBenefitContinuingOperations",
+            "CurrentFederalTaxExpenseBenefit",
+            "DeferredFederalIncomeTaxExpenseBenefit",
+            "StateAndLocalIncomeTaxExpenseBenefitContinuingOperations",
+            "CurrentStateAndLocalTaxExpenseBenefit",
+            "DeferredStateAndLocalIncomeTaxExpenseBenefit",
+            "ForeignIncomeTaxExpenseBenefitContinuingOperations",
+            "CurrentForeignTaxExpenseBenefit",
+            "DeferredForeignIncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "IncomeTaxesReconciliationofProvisionforIncomeTaxestoAmountComputedbyApplyingtheStatutoryFederalIncomeTaxRatetoIncomeBeforeProvisionforIncomeTaxesDetails",
+          "definition": "IncomeTaxesReconciliationofProvisionforIncomeTaxestoAmountComputedbyApplyingtheStatutoryFederalIncomeTaxRatetoIncomeBeforeProvisionforIncomeTaxesDetails",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 7,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate",
+            "IncomeTaxReconciliationForeignIncomeTaxRateDifferential",
+            "IncomeTaxReconciliationChangeInDeferredTaxAssetsValuationAllowance",
+            "IncomeTaxReconciliationTaxCreditsResearch",
+            "aapl_EffectiveIncomeTaxRateReconciliationImpactOfTheStateAidDecisionAmount",
+            "IncomeTaxReconciliationOtherAdjustments"
+          ]
+        },
+        {
+          "name": "IncomeTaxesSignificantComponentsofDeferredTaxAssetsandLiabilitiesDetails",
+          "definition": "IncomeTaxesSignificantComponentsofDeferredTaxAssetsandLiabilitiesDetails",
+          "root": "DeferredTaxAssetsLiabilitiesNet",
+          "node_count": 15,
+          "statement_type": "income",
+          "concepts": [
+            "DeferredTaxAssetsLiabilitiesNet",
+            "DeferredTaxAssetsNet",
+            "DeferredTaxAssetsGross",
+            "aapl_DeferredTaxAssetsCapitalizedResearchAndDevelopment",
+            "DeferredTaxAssetsTaxCreditCarryforwards",
+            "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccruals",
+            "DeferredTaxAssetsDeferredIncome",
+            "aapl_DeferredTaxAssetsLeaseLiabilities",
+            "DeferredTaxAssetsOther",
+            "DeferredTaxAssetsValuationAllowance",
+            "DeferredIncomeTaxLiabilities",
+            "DeferredTaxLiabilitiesPropertyPlantAndEquipment",
+            "DeferredTaxLiabilitiesLeasingArrangements",
+            "aapl_DeferredTaxLiabilitiesMinimumTaxonForeignEarnings",
+            "DeferredTaxLiabilitiesOther"
+          ]
+        },
+        {
+          "name": "LeasesROUAssetsandLeaseLiabilitiesDetails",
+          "definition": "LeasesROUAssetsandLeaseLiabilitiesDetails",
+          "root": "[custom] OperatingandFinanceLeaseLiability",
+          "node_count": 8,
+          "statement_type": "other",
+          "concepts": [
+            "aapl_OperatingandFinanceLeaseLiability",
+            "OperatingLeaseLiabilityCurrent",
+            "OperatingLeaseLiabilityNoncurrent",
+            "FinanceLeaseLiabilityCurrent",
+            "FinanceLeaseLiabilityNoncurrent",
+            "aapl_OperatingandFinanceLeaseRightofUseAsset",
+            "OperatingLeaseRightOfUseAsset",
+            "FinanceLeaseRightOfUseAsset"
+          ]
+        },
+        {
+          "name": "LeasesLeaseLiabilityMaturitiesDetails",
+          "definition": "LeasesLeaseLiabilityMaturitiesDetails",
+          "root": "[custom] LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearOne",
+          "node_count": 27,
+          "statement_type": "other",
+          "concepts": [
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearOne",
+            "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "FinanceLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearFour",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFour",
+            "FinanceLeaseLiabilityPaymentsDueYearFour",
+            "aapl_OperatingandFinanceLeaseLiability",
+            "OperatingLeaseLiability",
+            "FinanceLeaseLiability",
+            "aapl_LesseeOperatingandFinanceLeaseLiabilityUndiscountedExcessAmount",
+            "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount",
+            "FinanceLeaseLiabilityUndiscountedExcessAmount",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidAfterYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive",
+            "FinanceLeaseLiabilityPaymentsDueAfterYearFive",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearTwo",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo",
+            "FinanceLeaseLiabilityPaymentsDueYearTwo",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaid",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearThree",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFive",
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityPaymentsDueYearThree",
+            "FinanceLeaseLiabilityPaymentsDueYearFive",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearThree",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearFive"
+          ]
+        },
+        {
+          "name": "LeasesLeaseLiabilityMaturitiesDetails_1",
+          "definition": "LeasesLeaseLiabilityMaturitiesDetails 1",
+          "root": "FinanceLeaseLiabilityPaymentsDue",
+          "node_count": 13,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityUndiscountedExcessAmount",
+            "FinanceLeaseLiability",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount",
+            "OperatingLeaseLiability",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaid",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearOne",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearTwo",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearThree",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearFour",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidYearFive",
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaidAfterYearFive"
+          ]
+        },
+        {
+          "name": "LeasesLeaseLiabilityMaturitiesDetails_2",
+          "definition": "LeasesLeaseLiabilityMaturitiesDetails 2",
+          "root": "[custom] LesseeOperatingAndFinanceLeaseLiabilityToBePaid",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "aapl_LesseeOperatingAndFinanceLeaseLiabilityToBePaid",
+            "aapl_LesseeOperatingandFinanceLeaseLiabilityUndiscountedExcessAmount",
+            "aapl_OperatingandFinanceLeaseLiability"
+          ]
+        },
+        {
+          "name": "DebtSummaryofCashFlowsAssociatedwithCommercialPaperDetails",
+          "definition": "DebtSummaryofCashFlowsAssociatedwithCommercialPaperDetails",
+          "root": "ProceedsFromRepaymentsOfCommercialPaper",
+          "node_count": 5,
+          "statement_type": "cashflow",
+          "concepts": [
+            "ProceedsFromRepaymentsOfCommercialPaper",
+            "ProceedsFromRepaymentsOfShortTermDebtMaturingInThreeMonthsOrLess",
+            "ProceedsFromRepaymentsOfShortTermDebtMaturingInMoreThanThreeMonths",
+            "ProceedsFromShortTermDebtMaturingInMoreThanThreeMonths",
+            "RepaymentsOfShortTermDebtMaturingInMoreThanThreeMonths"
+          ]
+        },
+        {
+          "name": "DebtSummaryofTermDebtDetails",
+          "definition": "DebtSummaryofTermDebtDetails",
+          "root": "LongTermDebt",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "LongTermDebtCurrent",
+            "LongTermDebtNoncurrent"
+          ]
+        },
+        {
+          "name": "DebtSummaryofTermDebtDetails_1",
+          "definition": "DebtSummaryofTermDebtDetails 1",
+          "root": "LongTermDebt",
+          "node_count": 4,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "DebtInstrumentCarryingAmount",
+            "DebtInstrumentUnamortizedDiscountPremiumAndDebtIssuanceCostsNet",
+            "aapl_HedgeAccountingAdjustmentsRelatedToLongTermDebt"
+          ]
+        },
+        {
+          "name": "DebtFuturePrincipalPaymentsforTermDebtDetails",
+          "definition": "DebtFuturePrincipalPaymentsforTermDebtDetails",
+          "root": "DebtInstrumentCarryingAmount",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "DebtInstrumentCarryingAmount",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearTwo",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearThree",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFour",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFive",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFive"
+          ]
+        },
+        {
+          "name": "CommitmentsContingenciesandSupplyConcentrationsFuturePaymentsUnderUnconditionalPurchaseObligationsDetails",
+          "definition": "CommitmentsContingenciesandSupplyConcentrationsFuturePaymentsUnderUnconditionalPurchaseObligationsDetails",
+          "root": "UnrecordedUnconditionalPurchaseObligationBalanceSheetAmount",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "UnrecordedUnconditionalPurchaseObligationBalanceSheetAmount",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnFirstAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnSecondAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnThirdAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnFourthAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationBalanceOnFifthAnniversary",
+            "UnrecordedUnconditionalPurchaseObligationDueAfterFiveYears"
+          ]
+        },
+        {
+          "name": "SegmentInformationandGeographicDataInformationbyReportableSegmentDetails",
+          "definition": "SegmentInformationandGeographicDataInformationbyReportableSegmentDetails",
+          "root": "OperatingIncomeLoss",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "OperatingIncomeLoss",
+            "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "CostOfGoodsAndServicesSold",
+            "ResearchAndDevelopmentExpense",
+            "SellingAndMarketingExpense",
+            "GeneralAndAdministrativeExpense"
+          ]
+        }
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "filing_date": "2025-07-30",
+      "accession": "0000950170-25-100235",
+      "tree_count": 28,
+      "trees": [
+        {
+          "name": "Role_StatementINCOMESTATEMENTS",
+          "definition": "Role StatementINCOMESTATEMENTS",
+          "root": "NetIncomeLoss",
+          "node_count": 11,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLoss",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "OperatingIncomeLoss",
+            "GrossProfit",
+            "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "CostOfGoodsAndServicesSold",
+            "ResearchAndDevelopmentExpense",
+            "SellingAndMarketingExpense",
+            "GeneralAndAdministrativeExpense",
+            "NonoperatingIncomeExpense",
+            "IncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "Role_StatementCOMPREHENSIVEINCOMESTATEMENTS",
+          "definition": "Role StatementCOMPREHENSIVEINCOMESTATEMENTS",
+          "root": "ComprehensiveIncomeNetOfTax",
+          "node_count": 6,
+          "statement_type": "income",
+          "concepts": [
+            "ComprehensiveIncomeNetOfTax",
+            "NetIncomeLoss",
+            "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+            "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+            "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax"
+          ]
+        },
+        {
+          "name": "Role_StatementBALANCESHEETS",
+          "definition": "Role StatementBALANCESHEETS",
+          "root": "Assets",
+          "node_count": 35,
+          "statement_type": "balance",
+          "concepts": [
+            "Assets",
+            "AssetsCurrent",
+            "CashCashEquivalentsAndShortTermInvestments",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "ShortTermInvestments",
+            "AccountsReceivableNetCurrent",
+            "InventoryNet",
+            "OtherAssetsCurrent",
+            "PropertyPlantAndEquipmentNet",
+            "OperatingLeaseRightOfUseAsset",
+            "LongTermInvestments",
+            "Goodwill",
+            "FiniteLivedIntangibleAssetsNet",
+            "OtherAssetsNoncurrent",
+            "LiabilitiesAndStockholdersEquity",
+            "Liabilities",
+            "LiabilitiesCurrent",
+            "AccountsPayableCurrent",
+            "CommercialPaper",
+            "LongTermDebtCurrent",
+            "EmployeeRelatedLiabilitiesCurrent",
+            "AccruedIncomeTaxesCurrent",
+            "ContractWithCustomerLiabilityCurrent",
+            "OtherLiabilitiesCurrent",
+            "LongTermDebtNoncurrent",
+            "AccruedIncomeTaxesNoncurrent",
+            "ContractWithCustomerLiabilityNoncurrent",
+            "DeferredIncomeTaxLiabilitiesNet",
+            "OperatingLeaseLiabilityNoncurrent",
+            "OtherLiabilitiesNoncurrent",
+            "CommitmentsAndContingencies",
+            "StockholdersEquity",
+            "CommonStocksIncludingAdditionalPaidInCapital",
+            "RetainedEarningsAccumulatedDeficit",
+            "AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+          ]
+        },
+        {
+          "name": "Role_StatementCASHFLOWSSTATEMENTS",
+          "definition": "Role StatementCASHFLOWSSTATEMENTS",
+          "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "node_count": 32,
+          "statement_type": "cashflow",
+          "concepts": [
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            "NetCashProvidedByUsedInOperatingActivities",
+            "NetIncomeLoss",
+            "msft_DepreciationAmortizationAndOther",
+            "ShareBasedCompensation",
+            "msft_GainLossOnInvestmentsAndDerivativeInstruments",
+            "DeferredIncomeTaxExpenseBenefit",
+            "IncreaseDecreaseInAccountsReceivable",
+            "IncreaseDecreaseInInventories",
+            "IncreaseDecreaseInOtherCurrentAssets",
+            "IncreaseDecreaseInOtherNoncurrentAssets",
+            "IncreaseDecreaseInAccountsPayable",
+            "IncreaseDecreaseInContractWithCustomerLiability",
+            "IncreaseDecreaseInAccruedIncomeTaxesPayable",
+            "IncreaseDecreaseInOtherCurrentLiabilities",
+            "IncreaseDecreaseInOtherNoncurrentLiabilities",
+            "NetCashProvidedByUsedInFinancingActivities",
+            "ProceedsFromRepaymentsOfShortTermDebtMaturingInThreeMonthsOrLess",
+            "ProceedsFromDebtMaturingInMoreThanThreeMonths",
+            "RepaymentsOfDebtMaturingInMoreThanThreeMonths",
+            "ProceedsFromIssuanceOfCommonStock",
+            "PaymentsForRepurchaseOfCommonStock",
+            "PaymentsOfDividendsCommonStock",
+            "ProceedsFromPaymentsForOtherFinancingActivities",
+            "NetCashProvidedByUsedInInvestingActivities",
+            "PaymentsToAcquirePropertyPlantAndEquipment",
+            "msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets",
+            "PaymentsToAcquireInvestments",
+            "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+            "msft_ProceedsFromInvestments",
+            "PaymentsForProceedsFromOtherInvestingActivities",
+            "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations"
+          ]
+        },
+        {
+          "name": "Role_DisclosureBasicAndDilutedEarningsPerShareDetail",
+          "definition": "Role DisclosureBasicAndDilutedEarningsPerShareDetail",
+          "root": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberOfSharesOutstandingBasic",
+            "IncrementalCommonSharesAttributableToShareBasedPaymentArrangements"
+          ]
+        },
+        {
+          "name": "Role_DisclosureComponentsOfOtherIncomeExpenseNetDetail",
+          "definition": "Role DisclosureComponentsOfOtherIncomeExpenseNetDetail",
+          "root": "NonoperatingIncomeExpense",
+          "node_count": 7,
+          "statement_type": "income",
+          "concepts": [
+            "NonoperatingIncomeExpense",
+            "InvestmentIncomeNet",
+            "InterestExpenseNonoperating",
+            "GainLossOnInvestments",
+            "GainLossOnDerivativeInstrumentsNetPretax",
+            "ForeignCurrencyTransactionGainLossBeforeTax",
+            "OtherNonoperatingIncomeExpense"
+          ]
+        },
+        {
+          "name": "Role_DisclosureNetRecognizedGainsLossesOnDebtInvestmentsDetail",
+          "definition": "Role DisclosureNetRecognizedGainsLossesOnDebtInvestmentsDetail",
+          "root": "GainLossOnInvestments",
+          "node_count": 4,
+          "statement_type": "other",
+          "concepts": [
+            "GainLossOnInvestments",
+            "DebtSecuritiesAvailableForSaleRealizedGain",
+            "DebtSecuritiesAvailableForSaleRealizedLoss",
+            "msft_CreditLossAllowanceAndImpairmentOfInvestments"
+          ]
+        },
+        {
+          "name": "Role_DisclosureNetRecognizedGainsLossesOnEquityInvestmentsDetail",
+          "definition": "Role DisclosureNetRecognizedGainsLossesOnEquityInvestmentsDetail",
+          "root": "GainLossOnInvestments",
+          "node_count": 4,
+          "statement_type": "other",
+          "concepts": [
+            "GainLossOnInvestments",
+            "EquitySecuritiesFvNiRealizedGainLoss",
+            "EquitySecuritiesFvNiUnrealizedGainLoss",
+            "msft_ImpairmentOfEquityInvestments"
+          ]
+        },
+        {
+          "name": "Role_DisclosureInvestmentComponentsDetail",
+          "definition": "Role DisclosureInvestmentComponentsDetail",
+          "root": "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+          "node_count": 8,
+          "statement_type": "other",
+          "concepts": [
+            "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+            "AvailableForSaleSecuritiesDebtSecurities",
+            "msft_CashCashEquivalentsAndInvestments",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "ShortTermInvestments",
+            "LongTermInvestments"
+          ]
+        },
+        {
+          "name": "Role_DisclosureUnrealizedLossesOnDebtInvestmentsDetail",
+          "definition": "Role DisclosureUnrealizedLossesOnDebtInvestmentsDetail",
+          "root": "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPosition",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12Months",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLonger"
+          ]
+        },
+        {
+          "name": "Role_DisclosureDebtInvestmentMaturitiesDetail",
+          "definition": "Role DisclosureDebtInvestmentMaturitiesDetail",
+          "root": "AvailableForSaleSecuritiesDebtSecurities",
+          "node_count": 10,
+          "statement_type": "other",
+          "concepts": [
+            "AvailableForSaleSecuritiesDebtSecurities",
+            "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenFairValue",
+            "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+            "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsAmortizedCostBasis",
+            "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveAmortizedCostBasis",
+            "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenAmortizedCostBasis",
+            "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenAmortizedCostBasis"
+          ]
+        },
+        {
+          "name": "Role_DisclosureFairValuesOfDerivativeInstrumentsDetail",
+          "definition": "Role DisclosureFairValuesOfDerivativeInstrumentsDetail",
+          "root": "DerivativeLiabilities",
+          "node_count": 8,
+          "statement_type": "other",
+          "concepts": [
+            "DerivativeLiabilities",
+            "DerivativeLiabilityFairValueGrossLiabilityIncludingNotSubjectToMasterNettingArrangement",
+            "DerivativeLiabilityFairValueGrossAsset",
+            "DerivativeCollateralObligationToReturnCash",
+            "DerivativeAssets",
+            "DerivativeAssetFairValueGrossAssetIncludingNotSubjectToMasterNettingArrangement",
+            "DerivativeAssetFairValueGrossLiability",
+            "DerivativeCollateralRightToReclaimCash"
+          ]
+        },
+        {
+          "name": "Role_DisclosureComponentsOfPropertyAndEquipmentDetail",
+          "definition": "Role DisclosureComponentsOfPropertyAndEquipmentDetail",
+          "root": "PropertyPlantAndEquipmentNet",
+          "node_count": 8,
+          "statement_type": "other",
+          "concepts": [
+            "PropertyPlantAndEquipmentNet",
+            "PropertyPlantAndEquipmentGross",
+            "Land",
+            "BuildingsAndImprovementsGross",
+            "LeaseholdImprovementsGross",
+            "msft_ComputerHardwareAndSoftware",
+            "FurnitureAndFixturesGross",
+            "AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment"
+          ]
+        },
+        {
+          "name": "Role_DisclosureMajorClassesOfAssetsAndLiabilitiesAllocatedPurchasePriceDetail",
+          "definition": "Role DisclosureMajorClassesOfAssetsAndLiabilitiesAllocatedPurchasePriceDetail",
+          "root": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredGoodwillAndLiabilitiesAssumedNet",
+          "node_count": 9,
+          "statement_type": "other",
+          "concepts": [
+            "BusinessCombinationRecognizedIdentifiableAssetsAcquiredGoodwillAndLiabilitiesAssumedNet",
+            "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedCashAndEquivalents",
+            "Goodwill",
+            "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles",
+            "msft_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOtherAssets",
+            "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNoncurrentLiabilitiesLongTermDebt",
+            "msft_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIncomeTaxLiabilitiesNoncurrent",
+            "msft_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOtherLiabilities",
+            "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxLiabilities"
+          ]
+        },
+        {
+          "name": "Role_DisclosureFiniteLivedIntangibleAssetsDetail",
+          "definition": "Role DisclosureFiniteLivedIntangibleAssetsDetail",
+          "root": "FiniteLivedIntangibleAssetsNet",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsGross",
+            "FiniteLivedIntangibleAssetsAccumulatedAmortization"
+          ]
+        },
+        {
+          "name": "Role_DisclosureEstimatedFutureAmortizationExpenseRelatedToIntangibleAssetsDetail",
+          "definition": "Role DisclosureEstimatedFutureAmortizationExpenseRelatedToIntangibleAssetsDetail",
+          "root": "FiniteLivedIntangibleAssetsNet",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseNextTwelveMonths",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearTwo",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearThree",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFour",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFive",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive"
+          ]
+        },
+        {
+          "name": "DisclosureComponentsOfLongtermDebtDetail",
+          "definition": "DisclosureComponentsOfLongtermDebtDetail",
+          "root": "LongTermDebt",
+          "node_count": 5,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "DebtInstrumentCarryingAmount",
+            "DebtInstrumentUnamortizedDiscountPremiumAndDebtIssuanceCostsNet",
+            "msft_HedgeAccountingFairValueAdjustments",
+            "msft_PremiumOnDebtExchange1"
+          ]
+        },
+        {
+          "name": "Role_DisclosureMaturitiesOfLongTermDebtIncludingCurrentPortionDetail",
+          "definition": "Role DisclosureMaturitiesOfLongTermDebtIncludingCurrentPortionDetail",
+          "root": "DebtInstrumentCarryingAmount",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "DebtInstrumentCarryingAmount",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearTwo",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearThree",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFour",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFive",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFive"
+          ]
+        },
+        {
+          "name": "Role_DisclosureProvisionForIncomeTaxesDetail",
+          "definition": "Role DisclosureProvisionForIncomeTaxesDetail",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 9,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "CurrentIncomeTaxExpenseBenefit",
+            "CurrentFederalTaxExpenseBenefit",
+            "CurrentStateAndLocalTaxExpenseBenefit",
+            "CurrentForeignTaxExpenseBenefit",
+            "DeferredIncomeTaxExpenseBenefit",
+            "DeferredFederalIncomeTaxExpenseBenefit",
+            "DeferredStateAndLocalIncomeTaxExpenseBenefit",
+            "DeferredForeignIncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "Role_DisclosureIncomeBeforeIncomeTaxesDetail",
+          "definition": "Role DisclosureIncomeBeforeIncomeTaxesDetail",
+          "root": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign"
+          ]
+        },
+        {
+          "name": "DisclosureComponentsOfLongtermDebtDetail2",
+          "definition": "DisclosureComponentsOfLongtermDebtDetail2",
+          "root": "LongTermDebt",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "LongTermDebtCurrent",
+            "LongTermDebtNoncurrent"
+          ]
+        },
+        {
+          "name": "Role_DisclosureDifferenceBetweenIncomeTaxesComputedAtFederalStatutoryRateAndProvisionForIncomeTaxesDetail",
+          "definition": "Role DisclosureDifferenceBetweenIncomeTaxesComputedAtFederalStatutoryRateAndProvisionForIncomeTaxesDetail",
+          "root": "EffectiveIncomeTaxRateContinuingOperations",
+          "node_count": 9,
+          "statement_type": "income",
+          "concepts": [
+            "EffectiveIncomeTaxRateContinuingOperations",
+            "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate",
+            "EffectiveIncomeTaxRateReconciliationForeignIncomeTaxRateDifferential",
+            "EffectiveIncomeTaxRateReconciliationFdiiPercent",
+            "EffectiveIncomeTaxRateReconciliationStateAndLocalIncomeTaxes",
+            "EffectiveIncomeTaxRateReconciliationTaxCreditsResearch",
+            "msft_EffectiveIncomeTaxRateReconciliationDeductionsExcessTaxBenefitsStockBasedCompensation",
+            "msft_EffectiveIncomeTaxRateReconciliationInterestIncomeExpense",
+            "EffectiveIncomeTaxRateReconciliationOtherAdjustments"
+          ]
+        },
+        {
+          "name": "Role_DisclosureDeferredIncomeTaxAssetsAndLiabilitiesDetail",
+          "definition": "Role DisclosureDeferredIncomeTaxAssetsAndLiabilitiesDetail",
+          "root": "DeferredTaxAssetsLiabilitiesNet",
+          "node_count": 18,
+          "statement_type": "income",
+          "concepts": [
+            "DeferredTaxAssetsLiabilitiesNet",
+            "DeferredTaxAssetsNet",
+            "DeferredTaxAssetsGross",
+            "DeferredTaxAssetsTaxDeferredExpenseCompensationAndBenefitsShareBasedCompensationCost",
+            "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccrualsOther",
+            "msft_DeferredTaxAssetsOperatingLossAndTaxCreditCarryForwards",
+            "msft_DeferredTaxAssetsAmortization",
+            "msft_DeferredTaxAssetsLeasingLiabilities",
+            "DeferredTaxAssetsDeferredIncome",
+            "msft_DeferredTaxAssetsBookTaxBasisDifferencesInInvestmentsAndDebt",
+            "msft_DeferredTaxAssetsCapitalizedResearchAndDevelopment",
+            "DeferredTaxAssetsOther",
+            "DeferredTaxAssetsValuationAllowance",
+            "DeferredIncomeTaxLiabilities",
+            "DeferredTaxLiabilitiesLeasingArrangements",
+            "msft_DeferredTaxLiabilitiesDepreciation",
+            "msft_DeferredTaxLiabilitiesDeferredTaxOnForeignEarnings",
+            "DeferredTaxLiabilitiesOther"
+          ]
+        },
+        {
+          "name": "Role_DisclosureDeferredIncomeTaxAssetsAndLiabilitiesDetail2",
+          "definition": "Role DisclosureDeferredIncomeTaxAssetsAndLiabilitiesDetail2",
+          "root": "DeferredTaxAssetsLiabilitiesNet",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "DeferredTaxAssetsLiabilitiesNet",
+            "DeferredIncomeTaxAssetsNet",
+            "DeferredIncomeTaxLiabilitiesNet"
+          ]
+        },
+        {
+          "name": "Role_DisclosureComponentsOfLeaseExpenseDetail",
+          "definition": "Role DisclosureComponentsOfLeaseExpenseDetail",
+          "root": "[custom] FinanceLeaseCost",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "msft_FinanceLeaseCost",
+            "FinanceLeaseRightOfUseAssetAmortization",
+            "FinanceLeaseInterestExpense"
+          ]
+        },
+        {
+          "name": "Role_DisclosureMaturitiesOfLeaseLiabilitiesDetail",
+          "definition": "Role DisclosureMaturitiesOfLeaseLiabilitiesDetail",
+          "root": "FinanceLeaseLiabilityPaymentsDue",
+          "node_count": 14,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "FinanceLeaseLiabilityPaymentsDueYearTwo",
+            "FinanceLeaseLiabilityPaymentsDueYearThree",
+            "FinanceLeaseLiabilityPaymentsDueYearFour",
+            "FinanceLeaseLiabilityPaymentsDueYearFive",
+            "FinanceLeaseLiabilityPaymentsDueAfterYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearThree",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFour",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive"
+          ]
+        },
+        {
+          "name": "Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetail",
+          "definition": "Role DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetail",
+          "root": "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+          "node_count": 5,
+          "statement_type": "income",
+          "concepts": [
+            "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+            "OciBeforeReclassificationsNetOfTaxAttributableToParent",
+            "ReclassificationFromAociCurrentPeriodNetOfTaxAttributableToParent",
+            "ReclassificationFromAociCurrentPeriodBeforeTaxAttributableToParent",
+            "ReclassificationFromAociCurrentPeriodTax"
+          ]
+        },
+        {
+          "name": "Role_DisclosureMaturitiesOfLeaseLiabilitiesDetail2",
+          "definition": "Role DisclosureMaturitiesOfLeaseLiabilitiesDetail2",
+          "root": "FinanceLeaseLiabilityPaymentsDue",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityUndiscountedExcessAmount",
+            "FinanceLeaseLiability",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount",
+            "OperatingLeaseLiability"
+          ]
+        }
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "filing_date": "2025-02-26",
+      "accession": "0001045810-25-000023",
+      "tree_count": 25,
+      "trees": [
+        {
+          "name": "ConsolidatedStatementsofIncome",
+          "definition": "ConsolidatedStatementsofIncome",
+          "root": "NetIncomeLoss",
+          "node_count": 15,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLoss",
+            "IncomeTaxExpenseBenefit",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "OperatingIncomeLoss",
+            "GrossProfit",
+            "Revenues",
+            "CostOfRevenue",
+            "OperatingExpenses",
+            "ResearchAndDevelopmentExpense",
+            "SellingGeneralAndAdministrativeExpense",
+            "nvda_BusinessCombinationAdvancedConsiderationWrittenOff",
+            "NonoperatingIncomeExpense",
+            "InvestmentIncomeInterest",
+            "InterestExpenseNonoperating",
+            "OtherNonoperatingIncomeExpense"
+          ]
+        },
+        {
+          "name": "ConsolidatedStatementsofComprehensiveIncome",
+          "definition": "ConsolidatedStatementsofComprehensiveIncome",
+          "root": "ComprehensiveIncomeNetOfTax",
+          "node_count": 9,
+          "statement_type": "income",
+          "concepts": [
+            "ComprehensiveIncomeNetOfTax",
+            "OtherComprehensiveIncomeLossNetOfTax",
+            "OtherComprehensiveIncomeAvailableforsaleSecuritiesAdjustmentNetOfTaxPortionAttributableToParent",
+            "OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIForSaleOfSecuritiesNetOfTax",
+            "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationAfterTax",
+            "OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationAfterTax",
+            "NetIncomeLoss"
+          ]
+        },
+        {
+          "name": "ConsolidatedBalanceSheets",
+          "definition": "ConsolidatedBalanceSheets",
+          "root": "LiabilitiesAndStockholdersEquity",
+          "node_count": 29,
+          "statement_type": "balance",
+          "concepts": [
+            "LiabilitiesAndStockholdersEquity",
+            "Liabilities",
+            "LiabilitiesCurrent",
+            "AccountsPayableCurrent",
+            "AccruedLiabilitiesCurrent",
+            "DebtCurrent",
+            "LongTermDebtNoncurrent",
+            "OperatingLeaseLiabilityNoncurrent",
+            "OtherLiabilitiesNoncurrent",
+            "CommitmentsAndContingencies",
+            "StockholdersEquity",
+            "PreferredStockValueOutstanding",
+            "CommonStockValue",
+            "AdditionalPaidInCapital",
+            "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+            "RetainedEarningsAccumulatedDeficit",
+            "Assets",
+            "AssetsCurrent",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "MarketableSecuritiesCurrent",
+            "AccountsReceivableNetCurrent",
+            "InventoryNet",
+            "PrepaidExpenseAndOtherAssetsCurrent",
+            "PropertyPlantAndEquipmentNet",
+            "OperatingLeaseRightOfUseAsset",
+            "Goodwill",
+            "IntangibleAssetsNetExcludingGoodwill",
+            "DeferredIncomeTaxAssetsNet",
+            "OtherAssetsNoncurrent"
+          ]
+        },
+        {
+          "name": "ConsolidatedStatementsofCashFlows",
+          "definition": "ConsolidatedStatementsofCashFlows",
+          "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "node_count": 32,
+          "statement_type": "cashflow",
+          "concepts": [
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            "NetCashProvidedByUsedInOperatingActivities",
+            "NetIncomeLoss",
+            "DepreciationDepletionAndAmortization",
+            "ShareBasedCompensation",
+            "DeferredIncomeTaxExpenseBenefit",
+            "OtherNoncashIncomeExpense",
+            "IncreaseDecreaseInAccountsReceivable",
+            "IncreaseDecreaseInInventories",
+            "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+            "IncreaseDecreaseInAccountsPayable",
+            "IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities",
+            "IncreaseDecreaseInOtherNoncurrentLiabilities",
+            "GainLossOnInvestments",
+            "nvda_BusinessCombinationAdvancedConsiderationWrittenOff",
+            "NetCashProvidedByUsedInInvestingActivities",
+            "ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+            "ProceedsFromSaleOfEquitySecuritiesFvNi",
+            "PaymentsToAcquireBusinessesNetOfCashAcquired",
+            "PaymentsToAcquireProductiveAssets",
+            "PaymentsForProceedsFromOtherInvestingActivities",
+            "ProceedsFromSaleOfAvailableForSaleSecuritiesDebt",
+            "PaymentsToAcquireAvailableForSaleSecuritiesDebt",
+            "PaymentsToAcquireEquitySecuritiesFvNi",
+            "NetCashProvidedByUsedInFinancingActivities",
+            "ProceedsFromStockPlans",
+            "PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+            "ProceedsFromPaymentsForOtherFinancingActivities",
+            "nvda_PaymentsForFinancedPropertyPlantAndEquipmentAndIntangibleAssetsFinancingActivities",
+            "RepaymentsOfDebt",
+            "PaymentsOfDividends",
+            "PaymentsForRepurchaseOfCommonStock"
+          ]
+        },
+        {
+          "name": "NetIncomePerShareDetails",
+          "definition": "NetIncomePerShareDetails",
+          "root": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberDilutedSharesOutstandingAdjustment",
+            "WeightedAverageNumberOfSharesOutstandingBasic"
+          ]
+        },
+        {
+          "name": "AmortizableIntangibleAssetsDetails",
+          "definition": "AmortizableIntangibleAssetsDetails",
+          "root": "FiniteLivedIntangibleAssetsNet",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearThree",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseNextTwelveMonths",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFive",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearTwo",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFour"
+          ]
+        },
+        {
+          "name": "AmortizableIntangibleAssetsDetails_1",
+          "definition": "AmortizableIntangibleAssetsDetails 1",
+          "root": "FiniteLivedIntangibleAssetsNet",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsGross",
+            "FiniteLivedIntangibleAssetsAccumulatedAmortization"
+          ]
+        },
+        {
+          "name": "CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails",
+          "definition": "CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails",
+          "root": "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+          "node_count": 9,
+          "statement_type": "other",
+          "concepts": [
+            "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+            "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+            "AvailableForSaleSecuritiesDebtSecurities",
+            "CashEquivalentsAtCarryingValue",
+            "MarketableSecurities",
+            "nvda_DebtSecuritiesAvailableForSaleAndEquitySecuritiesFVNI",
+            "EquitySecuritiesFvNiCurrentAndNoncurrent",
+            "nvda_MarketableSecuritiesAndEquitySecuritiesFVNI"
+          ]
+        },
+        {
+          "name": "CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails_1",
+          "definition": "CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails 1",
+          "root": "[custom] DebtSecuritiesAvailableForSaleAndEquitySecuritiesFVNI",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "nvda_DebtSecuritiesAvailableForSaleAndEquitySecuritiesFVNI",
+            "nvda_MarketableSecuritiesAndEquitySecuritiesFVNI",
+            "CashEquivalentsAtCarryingValue"
+          ]
+        },
+        {
+          "name": "CashEquivalentsandMarketableSecuritiesUnrealizedLossesAggregatedbyInvestmentCategoryDetails",
+          "definition": "CashEquivalentsandMarketableSecuritiesUnrealizedLossesAggregatedbyInvestmentCategoryDetails",
+          "root": "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPosition",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLonger",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12Months"
+          ]
+        },
+        {
+          "name": "CashEquivalentsandMarketableSecuritiesAmortizedCostandEstimatedFairValueofCashEquivalentsandMarketableSecuritiesDetails",
+          "definition": "CashEquivalentsandMarketableSecuritiesAmortizedCostandEstimatedFairValueofCashEquivalentsandMarketableSecuritiesDetails",
+          "root": "AvailableForSaleSecuritiesDebtSecurities",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "AvailableForSaleSecuritiesDebtSecurities",
+            "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+            "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+            "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost"
+          ]
+        },
+        {
+          "name": "BalanceSheetComponentsInventoriesDetails",
+          "definition": "BalanceSheetComponentsInventoriesDetails",
+          "root": "InventoryNet",
+          "node_count": 4,
+          "statement_type": "balance",
+          "concepts": [
+            "InventoryNet",
+            "InventoryRawMaterialsNetOfReserves",
+            "InventoryWorkInProcessNetOfReserves",
+            "InventoryFinishedGoodsNetOfReserves"
+          ]
+        },
+        {
+          "name": "BalanceSheetComponentsPropertyandEquipmentDetails",
+          "definition": "BalanceSheetComponentsPropertyandEquipmentDetails",
+          "root": "PropertyPlantAndEquipmentNet",
+          "node_count": 3,
+          "statement_type": "balance",
+          "concepts": [
+            "PropertyPlantAndEquipmentNet",
+            "AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment",
+            "PropertyPlantAndEquipmentGross"
+          ]
+        },
+        {
+          "name": "BalanceSheetComponentsOtherAssetsDetails",
+          "definition": "BalanceSheetComponentsOtherAssetsDetails",
+          "root": "OtherAssetsNoncurrent",
+          "node_count": 6,
+          "statement_type": "balance",
+          "concepts": [
+            "OtherAssetsNoncurrent",
+            "OtherAssetsMiscellaneousNoncurrent",
+            "IncomeTaxesReceivableNoncurrent",
+            "nvda_PrepaidSupplyAndCapacityAgreementsNoncurrent",
+            "nvda_PrepaidRoyaltiesNoncurrent",
+            "EquitySecuritiesFVNINoncurrent"
+          ]
+        },
+        {
+          "name": "BalanceSheetComponentsAccruedandOtherCurrentLiabilitiesDetails",
+          "definition": "BalanceSheetComponentsAccruedandOtherCurrentLiabilitiesDetails",
+          "root": "AccruedLiabilitiesCurrent",
+          "node_count": 11,
+          "statement_type": "balance",
+          "concepts": [
+            "AccruedLiabilitiesCurrent",
+            "nvda_AccruedShareRepurchaseLiabilityCurrent",
+            "nvda_ExcessInventoryPurchaseObligationsCurrent",
+            "EmployeeRelatedLiabilitiesCurrent",
+            "nvda_AccruedLicensesAndRoyalties",
+            "nvda_AccruedCustomerProgramsCurrent",
+            "nvda_ProductWarrantyAccrualsAndReturnProvisionsCurrent",
+            "ContractWithCustomerLiabilityCurrent",
+            "OtherAccruedLiabilitiesCurrent",
+            "OperatingLeaseLiabilityCurrent",
+            "TaxesPayableCurrent"
+          ]
+        },
+        {
+          "name": "BalanceSheetComponentsOtherLongTermLiabilitiesDetails",
+          "definition": "BalanceSheetComponentsOtherLongTermLiabilitiesDetails",
+          "root": "OtherLiabilitiesNoncurrent",
+          "node_count": 6,
+          "statement_type": "balance",
+          "concepts": [
+            "OtherLiabilitiesNoncurrent",
+            "OtherSundryLiabilitiesNoncurrent",
+            "AccruedIncomeTaxesNoncurrent",
+            "nvda_LicensesPayableNoncurrent",
+            "DeferredIncomeTaxLiabilitiesNet",
+            "ContractWithCustomerLiabilityNoncurrent"
+          ]
+        },
+        {
+          "name": "DebtScheduleofDebtDetails",
+          "definition": "DebtScheduleofDebtDetails",
+          "root": "LongTermDebt",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "DebtInstrumentCarryingAmount",
+            "DebtInstrumentUnamortizedDiscountPremiumAndDebtIssuanceCostsNet"
+          ]
+        },
+        {
+          "name": "DebtScheduleofDebtDetails_1",
+          "definition": "DebtScheduleofDebtDetails 1",
+          "root": "LongTermDebt",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "LongTermDebtNoncurrent",
+            "LongTermDebtCurrent"
+          ]
+        },
+        {
+          "name": "CommitmentsandContingenciesSummaryofFutureCommitmentsDuebyYearDetails",
+          "definition": "CommitmentsandContingenciesSummaryofFutureCommitmentsDuebyYearDetails",
+          "root": "PurchaseObligation",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "PurchaseObligation",
+            "PurchaseObligationDueInSecondYear",
+            "PurchaseObligationDueInNextTwelveMonths",
+            "PurchaseObligationDueInFifthYear",
+            "PurchaseObligationDueInFourthYear",
+            "PurchaseObligationDueInThirdYear",
+            "PurchaseObligationDueAfterFifthYear"
+          ]
+        },
+        {
+          "name": "IncomeTaxesComponentsofIncomeTaxExpenseDetails",
+          "definition": "IncomeTaxesComponentsofIncomeTaxExpenseDetails",
+          "root": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "node_count": 12,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign",
+            "IncomeTaxExpenseBenefit",
+            "CurrentIncomeTaxExpenseBenefit",
+            "CurrentFederalTaxExpenseBenefit",
+            "CurrentStateAndLocalTaxExpenseBenefit",
+            "CurrentForeignTaxExpenseBenefit",
+            "DeferredIncomeTaxExpenseBenefit",
+            "DeferredStateAndLocalIncomeTaxExpenseBenefit",
+            "DeferredForeignIncomeTaxExpenseBenefit",
+            "DeferredFederalIncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "IncomeTaxesIncomeTaxReconciliationDetails",
+          "definition": "IncomeTaxesIncomeTaxReconciliationDetails",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 18,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "IncomeTaxReconciliationForeignIncomeTaxRateDifferential",
+            "EffectiveIncomeTaxRateReconciliationFdiiAmount",
+            "IncomeTaxReconciliationNondeductibleExpenseShareBasedCompensationCost",
+            "IncomeTaxReconciliationOtherAdjustments",
+            "nvda_EffectiveIncomeTaxRateReconciliationAcquisitionTerminationCost",
+            "IncomeTaxReconciliationStateAndLocalIncomeTaxes",
+            "IncomeTaxReconciliationTaxCreditsResearch",
+            "IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate",
+            "EffectiveIncomeTaxRateContinuingOperations",
+            "EffectiveIncomeTaxRateReconciliationFdiiPercent",
+            "EffectiveIncomeTaxRateReconciliationNondeductibleExpenseShareBasedCompensationCost",
+            "EffectiveIncomeTaxRateReconciliationTaxCreditsResearch",
+            "nvda_EffectiveIncomeTaxRateReconciliationAcquisitionTerminationCostPercent",
+            "EffectiveIncomeTaxRateReconciliationStateAndLocalIncomeTaxes",
+            "EffectiveIncomeTaxRateReconciliationOtherAdjustments",
+            "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate",
+            "EffectiveIncomeTaxRateReconciliationForeignIncomeTaxRateDifferential"
+          ]
+        },
+        {
+          "name": "IncomeTaxesDeferredTaxesDetails",
+          "definition": "IncomeTaxesDeferredTaxesDetails",
+          "root": "DeferredTaxAssetsLiabilitiesNet",
+          "node_count": 18,
+          "statement_type": "income",
+          "concepts": [
+            "DeferredTaxAssetsLiabilitiesNet",
+            "DeferredIncomeTaxLiabilities",
+            "DeferredTaxLiabilitiesUndistributedForeignEarnings",
+            "DeferredTaxLiabilitiesInvestments",
+            "nvda_DeferredTaxLiabilitiesRightOfUseAssets",
+            "DeferredTaxLiabilitiesGoodwillAndIntangibleAssetsIntangibleAssets",
+            "DeferredTaxAssetsNet",
+            "DeferredTaxAssetsGross",
+            "DeferredTaxAssetsOperatingLossCarryforwards",
+            "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccruals",
+            "nvda_DeferredTaxAssetsPropertyEquipmentAndIntangibleAssets",
+            "nvda_DeferredTaxAssetsLeaseLiability",
+            "DeferredTaxAssetsTaxCreditCarryforwards",
+            "DeferredTaxAssetsTaxDeferredExpenseCompensationAndBenefitsShareBasedCompensationCost",
+            "nvda_DeferredTaxAssetsTaxCutsAndJobsAct",
+            "DeferredTaxAssetsOther",
+            "nvda_DeferredTaxAssetsTaxDeferredExpenseCapitalizedResearchAndDevelopmentCosts",
+            "DeferredTaxAssetsValuationAllowance"
+          ]
+        },
+        {
+          "name": "SegmentInformationReconcilingItemsDetails",
+          "definition": "SegmentInformationReconcilingItemsDetails",
+          "root": "OperatingIncomeLoss",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "OperatingIncomeLoss",
+            "OtherOperatingIncome",
+            "nvda_AcquisitionTerminationCost",
+            "nvda_UnallocatedCorporateOperatingExpendituresAndOtherExpenses",
+            "nvda_AcquisitionRelatedAndOtherCosts",
+            "ShareBasedCompensation"
+          ]
+        },
+        {
+          "name": "LeasesScheduleofFutureMinimumLeasePaymentsDetails",
+          "definition": "LeasesScheduleofFutureMinimumLeasePaymentsDetails",
+          "root": "LesseeOperatingLeaseLiabilityPaymentsDue",
+          "node_count": 10,
+          "statement_type": "other",
+          "concepts": [
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearThree",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFour",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive",
+            "OperatingLeaseLiability",
+            "OperatingLeaseLiabilityCurrent",
+            "OperatingLeaseLiabilityNoncurrent"
+          ]
+        },
+        {
+          "name": "LeasesScheduleofFutureMinimumLeasePaymentsDetails_1",
+          "definition": "LeasesScheduleofFutureMinimumLeasePaymentsDetails 1",
+          "root": "LesseeOperatingLeaseLiabilityPaymentsDue",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount",
+            "OperatingLeaseLiability"
+          ]
+        }
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "filing_date": "2025-04-30",
+      "accession": "0001104659-25-042659",
+      "tree_count": 0,
+      "trees": []
+    },
+    {
+      "ticker": "META",
+      "filing_date": "2025-01-30",
+      "accession": "0001326801-25-000017",
+      "tree_count": 26,
+      "trees": [
+        {
+          "name": "CONSOLIDATEDBALANCESHEETS",
+          "definition": "CONSOLIDATEDBALANCESHEETS",
+          "root": "Assets",
+          "node_count": 27,
+          "statement_type": "balance",
+          "concepts": [
+            "Assets",
+            "meta_NonmarketableEquitySecuritiesCarryingValue",
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+            "OperatingLeaseRightOfUseAsset",
+            "OtherAssetsNoncurrent",
+            "AssetsCurrent",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "MarketableSecuritiesCurrent",
+            "AccountsReceivableNetCurrent",
+            "PrepaidExpenseAndOtherAssetsCurrent",
+            "Goodwill",
+            "LiabilitiesAndStockholdersEquity",
+            "StockholdersEquity",
+            "CommonStockValue",
+            "AdditionalPaidInCapital",
+            "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+            "RetainedEarningsAccumulatedDeficit",
+            "Liabilities",
+            "OperatingLeaseLiabilityNoncurrent",
+            "AccruedIncomeTaxesNoncurrent",
+            "LiabilitiesCurrent",
+            "AccountsPayableTradeCurrent",
+            "OperatingLeaseLiabilityCurrent",
+            "AccruedLiabilitiesCurrent",
+            "OtherLiabilitiesNoncurrent",
+            "LongTermDebtNoncurrent",
+            "CommitmentsAndContingencies"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFINCOME",
+          "definition": "CONSOLIDATEDSTATEMENTSOFINCOME",
+          "root": "NetIncomeLoss",
+          "node_count": 11,
+          "statement_type": "income",
+          "concepts": [
+            "NetIncomeLoss",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "OperatingIncomeLoss",
+            "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "CostsAndExpenses",
+            "CostOfRevenue",
+            "ResearchAndDevelopmentExpense",
+            "SellingAndMarketingExpense",
+            "GeneralAndAdministrativeExpense",
+            "NonoperatingIncomeExpense",
+            "IncomeTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+          "definition": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+          "root": "ComprehensiveIncomeNetOfTax",
+          "node_count": 4,
+          "statement_type": "income",
+          "concepts": [
+            "ComprehensiveIncomeNetOfTax",
+            "NetIncomeLoss",
+            "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+            "OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax"
+          ]
+        },
+        {
+          "name": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+          "definition": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+          "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+          "node_count": 33,
+          "statement_type": "cashflow",
+          "concepts": [
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+            "RestrictedCashAndCashEquivalentsNoncurrent",
+            "CashAndCashEquivalentsAtCarryingValue",
+            "RestrictedCashAndCashEquivalentsAtCarryingValue",
+            "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            "NetCashProvidedByUsedInFinancingActivities",
+            "PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+            "ProceedsFromIssuanceOfLongTermDebt",
+            "ProceedsFromPaymentsForOtherFinancingActivities",
+            "PaymentsOfDividends",
+            "FinanceLeasePrincipalPayments",
+            "PaymentsForRepurchaseOfCommonStock",
+            "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+            "NetCashProvidedByUsedInOperatingActivities",
+            "NetIncomeLoss",
+            "IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets",
+            "IncreaseDecreaseInAccruedLiabilities",
+            "DepreciationDepletionAndAmortization",
+            "IncreaseDecreaseInOtherNoncurrentLiabilities",
+            "IncreaseDecreaseInAccountsReceivable",
+            "ImpairmentOfLongLivedAssetsHeldForUse",
+            "ShareBasedCompensation",
+            "RestructuringCharges",
+            "DeferredIncomeTaxesAndTaxCredits",
+            "IncreaseDecreaseInAccountsPayableTrade",
+            "IncreaseDecreaseInOtherOperatingAssets",
+            "OtherNoncashIncomeExpense",
+            "NetCashProvidedByUsedInInvestingActivities",
+            "PaymentsToAcquireMarketableSecurities",
+            "PaymentsForProceedsFromOtherInvestingActivities",
+            "ProceedsFromSaleAndMaturityOfMarketableSecurities",
+            "meta_PaymentsToAcquireBusinessesNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets",
+            "PaymentsToAcquirePropertyPlantAndEquipment"
+          ]
+        },
+        {
+          "name": "EarningsperShareScheduleofNumeratorsandDenominatorsofBasicandDilutedEPSComputationsforCommonStockDetails",
+          "definition": "EarningsperShareScheduleofNumeratorsandDenominatorsofBasicandDilutedEPSComputationsforCommonStockDetails",
+          "root": "WeightedAverageNumberOfDilutedSharesOutstanding",
+          "node_count": 5,
+          "statement_type": "income",
+          "concepts": [
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberOfSharesOutstandingBasic",
+            "IncrementalCommonSharesAttributableToShareBasedPaymentArrangements",
+            "NetIncomeLossAttributableToParentDiluted",
+            "NetIncomeLoss"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsScheduleofAssetsMeasuredatFairValueonaRecurringBasisDetails",
+          "definition": "FinancialInstrumentsScheduleofAssetsMeasuredatFairValueonaRecurringBasisDetails",
+          "root": "AssetsFairValueDisclosure",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "AssetsFairValueDisclosure",
+            "RestrictedCashEquivalents",
+            "MarketableSecuritiesCurrent",
+            "DebtSecuritiesAvailableForSaleExcludingAccruedInterest",
+            "EquitySecuritiesFvNi",
+            "OtherAssetsFairValueDisclosure",
+            "CashAndCashEquivalentsFairValueDisclosure"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsAvailableforsaleMarketableSecuritiesDetails",
+          "definition": "FinancialInstrumentsAvailableforsaleMarketableSecuritiesDetails",
+          "root": "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+            "DebtSecuritiesAvailableForSaleUnrealizedLossPosition",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPosition12MonthsOrLonger",
+            "DebtSecuritiesAvailableForSaleContinuousUnrealizedLossPositionLessThan12Months"
+          ]
+        },
+        {
+          "name": "FinancialInstrumentsContractualMaturitiesofMarketableDebtSecuritiesDetails",
+          "definition": "FinancialInstrumentsContractualMaturitiesofMarketableDebtSecuritiesDetails",
+          "root": "DebtSecuritiesAvailableForSaleExcludingAccruedInterest",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "DebtSecuritiesAvailableForSaleExcludingAccruedInterest",
+            "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+            "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue"
+          ]
+        },
+        {
+          "name": "NonmarketableEquitySecuritiesScheduleofNonMarketableEquitySecuritiesDetails",
+          "definition": "NonmarketableEquitySecuritiesScheduleofNonMarketableEquitySecuritiesDetails",
+          "root": "[custom] NonmarketableEquitySecuritiesCarryingValue",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "meta_NonmarketableEquitySecuritiesCarryingValue",
+            "EquityMethodInvestments",
+            "EquitySecuritiesWithoutReadilyDeterminableFairValueAmount"
+          ]
+        },
+        {
+          "name": "PropertyandEquipmentScheduleofPropertyandEquipmentDetails",
+          "definition": "PropertyandEquipmentScheduleofPropertyandEquipmentDetails",
+          "root": "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+          "node_count": 5,
+          "statement_type": "other",
+          "concepts": [
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization",
+            "PropertyPlantAndEquipmentGross",
+            "FinanceLeaseRightOfUseAssetBeforeAccumulatedAmortization",
+            "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization"
+          ]
+        },
+        {
+          "name": "LeasesComponentsofLeaseCostandSupplementaryInfoDetails",
+          "definition": "LeasesComponentsofLeaseCostandSupplementaryInfoDetails",
+          "root": "LeaseCost",
+          "node_count": 5,
+          "statement_type": "other",
+          "concepts": [
+            "LeaseCost",
+            "VariableLeaseCost",
+            "FinanceLeaseInterestExpense",
+            "FinanceLeaseRightOfUseAssetAmortization",
+            "OperatingLeaseCost"
+          ]
+        },
+        {
+          "name": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails",
+          "definition": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails",
+          "root": "FinanceLeaseLiability",
+          "node_count": 15,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiability",
+            "FinanceLeaseLiabilityNoncurrent",
+            "FinanceLeaseLiabilityCurrent",
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "FinanceLeaseLiabilityPaymentsDueYearTwo",
+            "FinanceLeaseLiabilityPaymentsDueYearThree",
+            "FinanceLeaseLiabilityPaymentsDueYearFour",
+            "FinanceLeaseLiabilityPaymentsDueYearFive",
+            "FinanceLeaseLiabilityPaymentsDueAfterYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "OperatingLeaseLiability",
+            "OperatingLeaseLiabilityNoncurrent",
+            "OperatingLeaseLiabilityCurrent",
+            "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount"
+          ]
+        },
+        {
+          "name": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails_1",
+          "definition": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails 1",
+          "root": "FinanceLeaseLiabilityPaymentsDue",
+          "node_count": 10,
+          "statement_type": "other",
+          "concepts": [
+            "FinanceLeaseLiabilityPaymentsDue",
+            "FinanceLeaseLiabilityUndiscountedExcessAmount",
+            "FinanceLeaseLiability",
+            "LesseeOperatingLeaseLiabilityPaymentsDue",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearThree",
+            "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFive",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo",
+            "LesseeOperatingLeaseLiabilityPaymentsDueYearFour"
+          ]
+        },
+        {
+          "name": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails",
+          "definition": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails",
+          "root": "IntangibleAssetsGrossExcludingGoodwill",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "IntangibleAssetsGrossExcludingGoodwill",
+            "IndefiniteLivedIntangibleAssetsExcludingGoodwill",
+            "FiniteLivedIntangibleAssetsGross",
+            "IntangibleAssetsNetExcludingGoodwill",
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsAccumulatedAmortization"
+          ]
+        },
+        {
+          "name": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails_1",
+          "definition": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails 1",
+          "root": "IntangibleAssetsNetExcludingGoodwill",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "IntangibleAssetsNetExcludingGoodwill",
+            "IntangibleAssetsGrossExcludingGoodwill",
+            "FiniteLivedIntangibleAssetsAccumulatedAmortization"
+          ]
+        },
+        {
+          "name": "GoodwillandIntangibleAssetsScheduleofAmortizationExpenseDetails",
+          "definition": "GoodwillandIntangibleAssetsScheduleofAmortizationExpenseDetails",
+          "root": "FiniteLivedIntangibleAssetsNet",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "FiniteLivedIntangibleAssetsNet",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseNextTwelveMonths",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearTwo",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearThree",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFour",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseYearFive",
+            "FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive"
+          ]
+        },
+        {
+          "name": "LongtermDebtScheduleofCarryingValuesandEstimatedFairValuesofDebtInstrumentsDetails",
+          "definition": "LongtermDebtScheduleofCarryingValuesandEstimatedFairValuesofDebtInstrumentsDetails",
+          "root": "LongTermDebt",
+          "node_count": 3,
+          "statement_type": "other",
+          "concepts": [
+            "LongTermDebt",
+            "DebtInstrumentCarryingAmount",
+            "DebtInstrumentUnamortizedDiscountPremiumAndDebtIssuanceCostsNet"
+          ]
+        },
+        {
+          "name": "LongtermDebtScheduleofMaturitiesofLongTermDebtDetails",
+          "definition": "LongtermDebtScheduleofMaturitiesofLongTermDebtDetails",
+          "root": "DebtInstrumentCarryingAmount",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "DebtInstrumentCarryingAmount",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFive",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearFour",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalInYearThree",
+            "LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFive",
+            "meta_LongTermDebtMaturityYearOneToYearTwo"
+          ]
+        },
+        {
+          "name": "AccruedExpensesandOtherCurrentLiabilitiesScheduleofAccruedExpensesandOtherCurrentLiabilitiesDetails",
+          "definition": "AccruedExpensesandOtherCurrentLiabilitiesScheduleofAccruedExpensesandOtherCurrentLiabilitiesDetails",
+          "root": "AccruedLiabilitiesCurrent",
+          "node_count": 6,
+          "statement_type": "other",
+          "concepts": [
+            "AccruedLiabilitiesCurrent",
+            "EmployeeRelatedLiabilitiesCurrent",
+            "TaxesPayableCurrent",
+            "meta_LegalRelatedAccruedLiabilitiesCurrent",
+            "OtherAccruedLiabilitiesCurrent",
+            "meta_PropertyAndEquipmentAccruedLiabilitiesCurrent"
+          ]
+        },
+        {
+          "name": "CommitmentsandContingenciesContractualCommitmentsDetails",
+          "definition": "CommitmentsandContingenciesContractualCommitmentsDetails",
+          "root": "ContractualObligation",
+          "node_count": 7,
+          "statement_type": "other",
+          "concepts": [
+            "ContractualObligation",
+            "ContractualObligationDueInFourthYear",
+            "ContractualObligationDueInNextTwelveMonths",
+            "ContractualObligationDueInFifthYear",
+            "ContractualObligationDueInThirdYear",
+            "ContractualObligationDueAfterFifthYear",
+            "ContractualObligationDueInSecondYear"
+          ]
+        },
+        {
+          "name": "InterestandOtherIncomeExpenseNetDetails",
+          "definition": "InterestandOtherIncomeExpenseNetDetails",
+          "root": "NonoperatingIncomeExpense",
+          "node_count": 5,
+          "statement_type": "income",
+          "concepts": [
+            "NonoperatingIncomeExpense",
+            "ForeignCurrencyTransactionGainLossBeforeTax",
+            "InvestmentIncomeInterest",
+            "OtherNonoperatingIncomeExpense",
+            "InterestExpenseNonoperating"
+          ]
+        },
+        {
+          "name": "IncomeTaxesScheduleforIncomeBeforeIncomeTaxDetails",
+          "definition": "IncomeTaxesScheduleforIncomeBeforeIncomeTaxDetails",
+          "root": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+          "node_count": 3,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",
+            "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign"
+          ]
+        },
+        {
+          "name": "IncomeTaxesScheduleofProvisionforIncomeTaxesDetails",
+          "definition": "IncomeTaxesScheduleofProvisionforIncomeTaxesDetails",
+          "root": "IncomeTaxExpenseBenefit",
+          "node_count": 9,
+          "statement_type": "income",
+          "concepts": [
+            "IncomeTaxExpenseBenefit",
+            "DeferredIncomeTaxExpenseBenefit",
+            "DeferredFederalIncomeTaxExpenseBenefit",
+            "DeferredStateAndLocalIncomeTaxExpenseBenefit",
+            "DeferredForeignIncomeTaxExpenseBenefit",
+            "CurrentIncomeTaxExpenseBenefit",
+            "CurrentFederalTaxExpenseBenefit",
+            "CurrentStateAndLocalTaxExpenseBenefit",
+            "CurrentForeignTaxExpenseBenefit"
+          ]
+        },
+        {
+          "name": "IncomeTaxesScheduleofEffectiveIncomeTaxRateReconciliationDetails",
+          "definition": "IncomeTaxesScheduleofEffectiveIncomeTaxRateReconciliationDetails",
+          "root": "EffectiveIncomeTaxRateContinuingOperations",
+          "node_count": 8,
+          "statement_type": "income",
+          "concepts": [
+            "EffectiveIncomeTaxRateContinuingOperations",
+            "EffectiveIncomeTaxRateReconciliationTaxCreditsResearch",
+            "EffectiveIncomeTaxRateReconciliationNondeductibleExpenseShareBasedCompensationCost",
+            "EffectiveIncomeTaxRateReconciliationForeignIncomeTaxRateDifferential",
+            "EffectiveIncomeTaxRateReconciliationStateAndLocalIncomeTaxes",
+            "EffectiveIncomeTaxRateReconciliationFdiiPercent",
+            "EffectiveIncomeTaxRateReconciliationOtherAdjustments",
+            "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+          ]
+        },
+        {
+          "name": "IncomeTaxesScheduleofDeferredTaxAssetsandLiabilitiesDetails",
+          "definition": "IncomeTaxesScheduleofDeferredTaxAssetsandLiabilitiesDetails",
+          "root": "DeferredTaxAssetsLiabilitiesNet",
+          "node_count": 15,
+          "statement_type": "income",
+          "concepts": [
+            "DeferredTaxAssetsLiabilitiesNet",
+            "DeferredTaxAssetsNet",
+            "DeferredTaxAssetsGross",
+            "DeferredTaxAssetsOperatingLossCarryforwards",
+            "meta_DeferredTaxAssetsLeaseLiabilities",
+            "meta_DeferredTaxAssetsTaxDeferredExpenseCapitalizedResearchAndDevelopmentCosts",
+            "DeferredTaxAssetsTaxDeferredExpenseCompensationAndBenefitsShareBasedCompensationCost",
+            "DeferredTaxAssetsUnrealizedLossesOnAvailableforSaleSecuritiesGross",
+            "DeferredTaxAssetsTaxCreditCarryforwards",
+            "DeferredTaxAssetsOther",
+            "DeferredTaxAssetsTaxDeferredExpenseReservesAndAccrualsAccruedLiabilities",
+            "DeferredTaxAssetsValuationAllowance",
+            "DeferredIncomeTaxLiabilities",
+            "DeferredTaxLiabilitiesPropertyPlantAndEquipment",
+            "DeferredTaxLiabilitiesLeasingArrangements"
+          ]
+        },
+        {
+          "name": "SegmentandGeographicalInformationSegmentRevenueandIncomeforOperationsDetails",
+          "definition": "SegmentandGeographicalInformationSegmentRevenueandIncomeforOperationsDetails",
+          "root": "OperatingIncomeLoss",
+          "node_count": 4,
+          "statement_type": "income",
+          "concepts": [
+            "OperatingIncomeLoss",
+            "RevenueFromContractWithCustomerExcludingAssessedTax",
+            "LaborAndRelatedExpense",
+            "OtherCostAndExpenseOperating"
+          ]
+        }
+      ]
+    }
+  ],
+  "analysis": {
+    "summary": {
+      "GOOG": {
+        "tree_count": 30,
+        "filing_date": "2025-02-05",
+        "income_trees": 11,
+        "balance_trees": 2,
+        "cashflow_trees": 1
+      },
+      "AMZN": {
+        "tree_count": 25,
+        "filing_date": "2025-02-07",
+        "income_trees": 8,
+        "balance_trees": 1,
+        "cashflow_trees": 2
+      },
+      "AAPL": {
+        "tree_count": 23,
+        "filing_date": "2025-10-31",
+        "income_trees": 6,
+        "balance_trees": 1,
+        "cashflow_trees": 2
+      },
+      "MSFT": {
+        "tree_count": 28,
+        "filing_date": "2025-07-30",
+        "income_trees": 10,
+        "balance_trees": 1,
+        "cashflow_trees": 1
+      },
+      "NVDA": {
+        "tree_count": 25,
+        "filing_date": "2025-02-26",
+        "income_trees": 6,
+        "balance_trees": 6,
+        "cashflow_trees": 1
+      },
+      "TSLA": {
+        "tree_count": 0,
+        "filing_date": "2025-04-30",
+        "income_trees": 0,
+        "balance_trees": 0,
+        "cashflow_trees": 0
+      },
+      "META": {
+        "tree_count": 26,
+        "filing_date": "2025-01-30",
+        "income_trees": 9,
+        "balance_trees": 1,
+        "cashflow_trees": 1
+      }
+    },
+    "universal_concepts": [
+      "CashAndCashEquivalentsAtCarryingValue",
+      "MarketableSecuritiesCurrent",
+      "PropertyPlantAndEquipmentNet",
+      "OtherAssetsNoncurrent",
+      "AccruedLiabilitiesCurrent",
+      "OperatingLeaseLiabilityNoncurrent",
+      "OtherLiabilitiesNoncurrent",
+      "NetIncomeLoss",
+      "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "OperatingIncomeLoss",
+      "RevenueFromContractWithCustomerExcludingAssessedTax",
+      "NonoperatingIncomeExpense",
+      "IncomeTaxExpenseBenefit",
+      "ShareBasedCompensation",
+      "AvailableForSaleSecuritiesDebtSecurities",
+      "FinanceLeaseLiability",
+      "OperatingLeaseLiability",
+      "OperatingLeaseLiabilityCurrent",
+      "FinanceLeaseLiabilityPaymentsDue",
+      "LesseeOperatingLeaseLiabilityPaymentsDue",
+      "LesseeOperatingLeaseLiabilityUndiscountedExcessAmount",
+      "LongTermDebt",
+      "DebtInstrumentCarryingAmount",
+      "LongTermDebtNoncurrent",
+      "DeferredIncomeTaxExpenseBenefit",
+      "DeferredTaxAssetsLiabilitiesNet",
+      "FiniteLivedIntangibleAssetsNet"
+    ]
+  }
+}

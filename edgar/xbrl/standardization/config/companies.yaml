@@ -1,0 +1,62 @@
+# Company-specific configuration for concept mapping
+# Override defaults for companies with special handling needs
+
+version: "1.0.0"
+
+# MAG7 Companies
+companies:
+  GOOG:
+    name: "Alphabet Inc."
+    cik: 1652044
+    legacy_ciks: [1288776]  # Before restructuring
+    notes: "Uses multiple CIKs due to corporate restructuring"
+
+  AMZN:
+    name: "Amazon.com, Inc."
+    cik: 1018724
+
+  AAPL:
+    name: "Apple Inc."
+    cik: 320193
+
+  MSFT:
+    name: "Microsoft Corporation"
+    cik: 789019
+
+  NVDA:
+    name: "NVIDIA Corporation"
+    cik: 1045810
+    fiscal_year_end: "January"  # Non-calendar fiscal year
+
+  TSLA:
+    name: "Tesla, Inc."
+    cik: 1318605
+    notes: "Amended filings (10-K/A) may have missing XBRL data"
+
+  META:
+    name: "Meta Platforms, Inc."
+    cik: 1326801
+    exclude_metrics:
+      - COGS  # Services company, no traditional COGS
+    metric_overrides:
+      Revenue:
+        preferred_concept: AdvertisingRevenue
+        notes: "Primary revenue is advertising"
+
+# Default settings
+defaults:
+  confidence_thresholds:
+    tree_high: 0.95
+    tree_medium: 0.80
+    ai_high: 0.90
+    ai_medium: 0.70
+  
+  fallback_chain:
+    - tree_parser
+    - ai_semantic
+    - temporal
+    - manual
+
+  filing_preferences:
+    amendments: false  # Exclude amended filings by default
+    forms: ["10-K", "10-Q"]
