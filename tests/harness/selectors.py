@@ -176,7 +176,7 @@ class FilingSelector:
         if seed is not None:
             random.seed(seed)
 
-        filings = get_filings(form=form, year=year)
+        filings = get_filings(form=form, year=year, quarter=1)
 
         # Convert to list and use random.sample for reproducibility with seed
         filings_list = list(filings)
@@ -313,10 +313,10 @@ class FilingSelector:
             >>> count = FilingSelector.count_available("10-K", year=2024)
         """
         if year:
-            filings = get_filings(form=form, year=year)
+            filings = get_filings(form=form, year=year, quarter=1)
         else:
             # Get current year
             current_year = datetime.now().year
-            filings = get_filings(form=form, year=current_year)
+            filings = get_filings(form=form, year=current_year, quarter=1)
 
         return len(filings)
