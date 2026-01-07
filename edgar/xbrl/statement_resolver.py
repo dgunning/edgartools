@@ -600,16 +600,27 @@ class StatementResolver:
                 score -= 50
                 break  # One hit is enough
 
-        # Issue #506: When looking for IncomeStatement, deprioritize ComprehensiveIncome
-        # ComprehensiveIncome contains "Income" in its name but is a different statement type
+        # Issue #506/#584: When looking for IncomeStatement, deprioritize PURE ComprehensiveIncome
+        # But allow combined "Statement of Operations and Comprehensive Income" which is valid
         if statement_type == "IncomeStatement":
-            comprehensive_indicators = ['comprehensiveincome', 'othercomprehensive']
             clean_def = role_def.replace(' ', '').replace('-', '').replace('_', '')
             clean_uri = role_uri.replace(' ', '').replace('-', '').replace('_', '')
-            for indicator in comprehensive_indicators:
-                if indicator in clean_def or indicator in clean_uri:
-                    score -= 100  # Strong penalty to avoid selecting wrong statement
-                    break
+
+            # Check if this is a combined Operations + Comprehensive Income statement
+            # These are VALID income statements and should NOT be penalized
+            operations_indicators = ['operations', 'statementsofincome', 'statementsofearnings',
+                                     'incomestatement', 'operationsand']
+            is_combined_statement = any(ind in clean_def or ind in clean_uri for ind in operations_indicators)
+
+            # Only penalize PURE comprehensive income statements (not combined ones)
+            # Issue #584: REGN uses "CONSOLIDATEDSTATEMENTSOFOPERATIONSANDCOMPREHENSIVEINCOME"
+            # which is a valid income statement that should not be penalized
+            if not is_combined_statement:
+                comprehensive_indicators = ['comprehensiveincome', 'othercomprehensive']
+                for indicator in comprehensive_indicators:
+                    if indicator in clean_def or indicator in clean_uri:
+                        score -= 100  # Strong penalty only for pure comprehensive income
+                        break
 
             # Issue #581: Penalize tax-related disclosures that may accidentally match
             # e.g., IncomeTaxBenefitProvisionFromContinuingOperationsDetails
