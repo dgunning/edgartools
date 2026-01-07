@@ -123,7 +123,10 @@ statement_registry = {
         primary_concepts=["us-gaap_IncomeStatementAbstract"],
         alternative_concepts=[
             "us-gaap_StatementOfIncomeAbstract",
-            "ifrs-full_IncomeStatementAbstract"  # IFRS equivalent
+            "ifrs-full_IncomeStatementAbstract",  # IFRS equivalent
+            # IFRS often combines income + comprehensive income into one statement
+            "ifrs-full_StatementOfComprehensiveIncomeAbstract",
+            "ifrs-full_StatementOfProfitOrLossAbstract"
         ],
         concept_patterns=[
             r".*_IncomeStatementAbstract$",
@@ -183,7 +186,9 @@ statement_registry = {
             "us-gaap_StatementOfShareholdersEquityAbstract",
             "us-gaap_StatementOfPartnersCapitalAbstract",
             # Issue edgartools-8ad8: ORCL uses roll-forward concept for main equity statement
-            "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward"
+            "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+            # IFRS equivalents
+            "ifrs-full_StatementOfChangesInEquityAbstract"
         ],
         concept_patterns=[
             r".*_StatementOfStockholdersEquityAbstract$",
@@ -193,7 +198,11 @@ statement_registry = {
             # Issue edgartools-8ad8: Match roll-forward patterns for equity statements
             r".*_IncreaseDecreaseInStockholdersEquityRollForward$"
         ],
-        key_concepts=["us-gaap_StockholdersEquity", "us-gaap_CommonStock", "us-gaap_RetainedEarnings"],
+        key_concepts=[
+            "us-gaap_StockholdersEquity", "us-gaap_CommonStock", "us-gaap_RetainedEarnings",
+            # IFRS equivalents
+            "ifrs-full_Equity", "ifrs-full_IssuedCapital", "ifrs-full_RetainedEarnings"
+        ],
         role_patterns=[
             r".*[Ee]quity.*",
             r".*[Ss]tockholders.*",
@@ -209,13 +218,23 @@ statement_registry = {
         name="ComprehensiveIncome",
         category=StatementCategory.FINANCIAL_STATEMENT,
         primary_concepts=["us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract"],
-        alternative_concepts=["us-gaap_StatementOfComprehensiveIncomeAbstract"],
+        alternative_concepts=[
+            "us-gaap_StatementOfComprehensiveIncomeAbstract",
+            # IFRS equivalents
+            "ifrs-full_StatementOfComprehensiveIncomeAbstract",
+            "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract"
+        ],
         concept_patterns=[
             r".*_ComprehensiveIncomeAbstract$",
             r".*_StatementOfComprehensiveIncomeAbstract$",
             r".*_ConsolidatedStatementsOfComprehensiveIncomeAbstract$"
         ],
-        key_concepts=["us-gaap_ComprehensiveIncomeNetOfTax"],
+        key_concepts=[
+            "us-gaap_ComprehensiveIncomeNetOfTax",
+            # IFRS equivalents
+            "ifrs-full_ComprehensiveIncome",
+            "ifrs-full_OtherComprehensiveIncome"
+        ],
         role_patterns=[
             r".*[Cc]omprehensive[Ii]ncome.*",
             r".*[Oo]ther[Cc]omprehensive.*",
@@ -368,6 +387,62 @@ statement_registry = {
 }
 
 
+# Essential concepts that should be present in each statement type for validation
+# These are used to verify that the resolved statement is actually the correct type
+# At least one concept from each group should be present for a valid statement
+ESSENTIAL_CONCEPTS = {
+    "IncomeStatement": {
+        "revenue": [
+            "us-gaap_Revenues", "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+            "us-gaap_SalesRevenueNet", "us-gaap_NetSales", "us-gaap_TotalRevenuesAndOtherIncome",
+            "ifrs-full_Revenue"
+        ],
+        "net_income": [
+            "us-gaap_NetIncomeLoss", "us-gaap_ProfitLoss", "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic",
+            "ifrs-full_ProfitLoss", "ifrs-full_ProfitLossAttributableToOwnersOfParent"
+        ]
+    },
+    "BalanceSheet": {
+        "assets": [
+            "us-gaap_Assets", "us-gaap_AssetsCurrent", "us-gaap_AssetsNoncurrent",
+            "ifrs-full_Assets", "ifrs-full_CurrentAssets", "ifrs-full_NoncurrentAssets"
+        ],
+        "liabilities_or_equity": [
+            "us-gaap_Liabilities", "us-gaap_StockholdersEquity", "us-gaap_LiabilitiesAndStockholdersEquity",
+            "ifrs-full_Liabilities", "ifrs-full_Equity", "ifrs-full_EquityAndLiabilities"
+        ]
+    },
+    "CashFlowStatement": {
+        "operating": [
+            "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+            "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperations",
+            "ifrs-full_CashFlowsFromUsedInOperatingActivities"
+        ],
+        "cash_change": [
+            "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+            "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
+            "ifrs-full_IncreaseDecreaseInCashAndCashEquivalents"
+        ]
+    },
+    "ComprehensiveIncome": {
+        "comprehensive_income": [
+            "us-gaap_ComprehensiveIncomeNetOfTax",
+            "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+            "ifrs-full_ComprehensiveIncome"
+        ]
+    },
+    "StatementOfEquity": {
+        "equity": [
+            "us-gaap_StockholdersEquity", "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+            "ifrs-full_Equity"
+        ]
+    }
+}
+
+# Minimum threshold for validation - at least this percentage of concept groups must be satisfied
+VALIDATION_THRESHOLD = 0.5
+
+
 class StatementResolver:
     """
     Resolves statement identifiers to actual XBRL statement roles.
@@ -456,6 +531,75 @@ class StatementResolver:
                 if def_key not in self._statement_by_role_def:
                     self._statement_by_role_def[def_key] = []
                 self._statement_by_role_def[def_key].append(stmt)
+
+    def _validate_statement(self, stmt: Dict[str, Any], statement_type: str) -> Tuple[bool, float, str]:
+        """
+        Validate that a resolved statement contains expected essential concepts.
+
+        This helps catch misclassifications where a statement is incorrectly identified
+        (e.g., a tax disclosure being selected as an income statement).
+
+        Args:
+            stmt: Statement dictionary with role information
+            statement_type: The type of statement being validated
+
+        Returns:
+            Tuple of (is_valid, confidence_score, reason)
+            - is_valid: True if statement passes validation
+            - confidence_score: 0.0 to 1.0 based on concept coverage
+            - reason: Human-readable explanation of validation result
+        """
+        # Get essential concepts for this statement type
+        if statement_type not in ESSENTIAL_CONCEPTS:
+            # No validation defined for this type - assume valid
+            return True, 1.0, "No validation rules defined"
+
+        essential_groups = ESSENTIAL_CONCEPTS[statement_type]
+        role = stmt.get('role', '')
+
+        # Check if role exists in presentation trees
+        if role not in self.xbrl.presentation_trees:
+            return False, 0.0, f"Role {role} not found in presentation trees"
+
+        # Get all concept nodes for this role
+        tree = self.xbrl.presentation_trees[role]
+        all_nodes = set(tree.all_nodes.keys())
+
+        # Check each group of essential concepts
+        groups_satisfied = 0
+        total_groups = len(essential_groups)
+        missing_groups = []
+
+        for group_name, concepts in essential_groups.items():
+            # Check if any concept from this group is present
+            group_found = False
+            for concept in concepts:
+                # Normalize concept name (handle : vs _ separator)
+                normalized = concept.replace(':', '_')
+                if concept in all_nodes or normalized in all_nodes:
+                    group_found = True
+                    break
+
+            if group_found:
+                groups_satisfied += 1
+            else:
+                missing_groups.append(group_name)
+
+        # Calculate confidence score
+        confidence = groups_satisfied / total_groups if total_groups > 0 else 1.0
+
+        # Determine validity based on threshold
+        is_valid = confidence >= VALIDATION_THRESHOLD
+
+        if is_valid:
+            if confidence == 1.0:
+                reason = "All essential concept groups present"
+            else:
+                reason = f"Validation passed ({groups_satisfied}/{total_groups} groups): missing {missing_groups}"
+        else:
+            reason = f"Validation failed ({groups_satisfied}/{total_groups} groups): missing {missing_groups}"
+
+        return is_valid, confidence, reason
 
     def _match_by_primary_concept(self, statement_type: str, is_parenthetical: bool = False) -> Tuple[List[Dict[str, Any]], Optional[str], float]:
         """
@@ -657,6 +801,19 @@ class StatementResolver:
         clean_def = role_def.replace(' ', '').replace('-', '').replace('_', '')
         if clean_def in primary_names:
             score += 50
+
+        # Post-resolution validation: boost/penalize based on essential concept presence
+        # This helps catch misclassifications (e.g., tax disclosure selected as income statement)
+        if statement_type in ESSENTIAL_CONCEPTS:
+            is_valid, validation_conf, reason = self._validate_statement(stmt, statement_type)
+            if is_valid:
+                # Boost score based on validation confidence
+                score += int(validation_conf * 30)  # Up to +30 for fully validated
+            else:
+                # Penalize statements that fail validation
+                score -= 50
+                if VERBOSE_EXCEPTIONS:
+                    log.debug(f"Statement validation failed for {statement_type}: {reason}")
 
         return score
 
