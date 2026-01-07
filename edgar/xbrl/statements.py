@@ -701,6 +701,16 @@ class Statement:
         # Determine which periods to display
         statement_type = self.canonical_type if self.canonical_type else self.role_or_type
 
+        # Issue #583: Apply label standardization if requested
+        # This transforms labels like "Ending balances" → "Total Stockholders' Equity"
+        if standard:
+            from edgar.xbrl import standardization
+            mapper = standardization.ConceptMapper(standardization.initialize_default_mappings())
+            # Add statement type context for better mapping
+            for item in raw_data:
+                item['statement_type'] = statement_type
+            raw_data = standardization.standardize_statement(raw_data, mapper)
+
         # Determine which periods to display
         # determine_periods_to_display handles:
         # - period_filter: return only the specific period requested
@@ -725,10 +735,12 @@ class Statement:
             'StatementOfChangesInEquity', 'ComprehensiveIncome',
             'StatementOfComprehensiveIncome'
         )
-        concept_occurrence_count = {}  # Tracks total occurrences of each concept
-        concept_current_index = {}     # Tracks current occurrence during iteration
+        # Issue #583: Track by (concept, label) tuple to handle dimensional items correctly
+        # Different dimensional items have same concept but different labels
+        item_occurrence_count = {}  # Tracks total occurrences of each (concept, label) pair
+        item_current_index = {}     # Tracks current occurrence during iteration
 
-        # First pass: count total occurrences of each concept (needed for beginning/ending logic)
+        # First pass: count total occurrences of each (concept, label) pair (needed for beginning/ending logic)
         if is_equity_statement:
             for item in raw_data:
                 if is_xbrl_structural_element(item):
@@ -742,7 +754,9 @@ class Statement:
                                               xbrl=self.xbrl, role_uri=self.role_or_type):
                         continue
                 concept = item.get('concept', '')
-                concept_occurrence_count[concept] = concept_occurrence_count.get(concept, 0) + 1
+                label = item.get('label', '')
+                item_key = (concept, label)
+                item_occurrence_count[item_key] = item_occurrence_count.get(item_key, 0) + 1
 
         for item in raw_data:
             # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
@@ -768,13 +782,33 @@ class Statement:
 
             # Issue #572: Track concept occurrence for roll-forward logic
             concept = item.get('concept', '')
+            # Get base label
+            base_label = item.get('label', '')
+
+            # Issue #583: Track by (concept, label) for proper beginning/ending suffix
             if is_equity_statement:
-                concept_current_index[concept] = concept_current_index.get(concept, 0) + 1
+                item_key = (concept, base_label)
+                item_current_index[item_key] = item_current_index.get(item_key, 0) + 1
+
+            # Issue #583: For Statement of Equity, add "Beginning balance" / "Ending balance"
+            # to labels when (concept, label) pair appears multiple times
+            # This handles dimensional items correctly - each unique label gets its own tracking
+            label = base_label
+            if is_equity_statement and concept:
+                item_key = (concept, base_label)
+                total_occurrences = item_occurrence_count.get(item_key, 1)
+                current_occurrence = item_current_index.get(item_key, 1)
+
+                if total_occurrences > 1:
+                    if current_occurrence == 1:
+                        label = f"{base_label} - Beginning balance"
+                    elif current_occurrence == total_occurrences:
+                        label = f"{base_label} - Ending balance"
 
             # Build base row
             row = {
                 'concept': concept,
-                'label': item.get('label', '')
+                'label': label
             }
 
             # Add period values (raw from instance document)
@@ -803,12 +837,14 @@ class Statement:
                 # Use raw value from instance document
                 value = values_dict.get(period_key)
 
-                # Issue #572: For Statement of Equity, match instant facts when duration key is empty
+                # Issue #572/#583: For Statement of Equity, match instant facts when duration key is empty
                 # This mirrors the logic in rendering.py (Issue #450) for consistent DataFrame output
                 # Roll-forward structure: first occurrence = beginning balance, later = ending balance
+                # Issue #583: Use (concept, label) tracking for proper beginning/ending logic with dimensions
                 if value is None and is_equity_statement:
-                    total_occurrences = concept_occurrence_count.get(concept, 1)
-                    current_occurrence = concept_current_index.get(concept, 1)
+                    item_key = (concept, base_label)
+                    total_occurrences = item_occurrence_count.get(item_key, 1)
+                    current_occurrence = item_current_index.get(item_key, 1)
                     is_first_occurrence = current_occurrence == 1
 
                     if is_first_occurrence and total_occurrences > 1 and start_date:
