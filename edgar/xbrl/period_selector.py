@@ -73,7 +73,15 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
             return periods_with_data
         else:
             # If no periods have sufficient data, return the candidates anyway
-            logger.warning("No periods with sufficient data found for %s %s, returning all candidates", xbrl.entity_name, statement_type)
+            # Issue #585: Downgrade to debug - this is a normal fallback, not a user-actionable warning
+            fiscal_year = xbrl.entity_info.get('fiscal_year_end', 'Unknown')
+            period_of_report = xbrl.period_of_report or 'Unknown'
+            logger.debug(
+                "Period filtering fallback for %s %s: No periods met data thresholds. "
+                "Returning %d candidate periods. Period: %s | Fiscal Year End: %s",
+                xbrl.entity_name, statement_type, len(candidate_periods),
+                period_of_report, fiscal_year
+            )
             return candidate_periods
 
     except Exception as e:
