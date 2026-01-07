@@ -20,7 +20,7 @@ from typing import List, Optional, Dict, Any, Set
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 
-from edgar import Company
+from edgar import Company, use_local_storage
 from edgar.xbrl.xbrl import XBRL
 
 
@@ -254,7 +254,8 @@ def discover(metric: str, ticker: str) -> List[CandidateConcept]:
     """Quick way to discover concepts for a metric+ticker."""
     from edgar import set_identity
     set_identity("Dev Gunning developer-gunning@gmail.com")
-    
+    use_local_storage(True)  # Use bulk data, no API calls
+
     try:
         company = Company(ticker)
         filing = list(company.get_filings(form='10-K'))[0]

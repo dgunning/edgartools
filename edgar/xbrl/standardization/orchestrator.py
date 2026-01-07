@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
 
-from edgar import Company, set_identity
+from edgar import Company, set_identity, use_local_storage
 
 from .config_loader import get_config, MappingConfig
 from .models import MappingResult, MappingSource, AuditLogEntry
@@ -142,13 +142,14 @@ class Orchestrator:
     ) -> Dict[str, Dict[str, MappingResult]]:
         """
         Map all metrics for multiple companies.
-        
+
         Args:
             tickers: List of tickers (defaults to MAG7)
             use_ai: Whether to use AI layer
             validate: Whether to validate mappings against yfinance
         """
         set_identity("Dev Gunning developer-gunning@gmail.com")
+        use_local_storage(True)  # Use bulk data, no API calls
         
         if tickers is None:
             tickers = list(self.config.companies.keys())

@@ -17,7 +17,7 @@ import re
 from typing import List, Dict, Optional, Set
 from dataclasses import dataclass, field
 
-from edgar import Company, set_identity
+from edgar import Company, set_identity, use_local_storage
 
 
 @dataclass
@@ -63,7 +63,8 @@ def learn_mappings(
         LearningResult with successful mappings, new variants, and patterns
     """
     set_identity("Dev Gunning developer-gunning@gmail.com")
-    
+    use_local_storage(True)  # Use bulk data, no API calls
+
     existing_known = set(existing_known_concepts) if existing_known_concepts else set()
     successful_mappings = {}
     failed_companies = {}

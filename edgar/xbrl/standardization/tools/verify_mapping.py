@@ -253,9 +253,10 @@ def _extract_xbrl_value(xbrl: XBRL, concept: str) -> Optional[float]:
 # Convenience function for quick testing
 def verify(metric: str, concept: str, ticker: str) -> MappingVerification:
     """Quick way to verify a mapping."""
-    from edgar import Company, set_identity
+    from edgar import Company, set_identity, use_local_storage
     set_identity("Dev Gunning developer-gunning@gmail.com")
-    
+    use_local_storage(True)  # Use bulk data, no API calls
+
     try:
         company = Company(ticker)
         filing = list(company.get_filings(form='10-K'))[0]
