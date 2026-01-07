@@ -119,24 +119,60 @@ class Section:
         Remove common artifacts at section boundaries.
 
         Cleans up:
-        - Trailing page numbers (e.g., "\\n\\n  100")
-        - Next section headers bleeding into current section
-          (e.g., "\\n\\n  PART IV\\n\\nItem 15")
+        - Interior page headers (page number + PART + Item appearing mid-document)
+        - Trailing page footer (page number + PART + next section header at end)
+        - Trailing Item headers bleeding into current section
+        - Trailing page numbers
         """
         if not text:
             return text
 
-        # Order matters: strip larger structures first, then smaller artifacts
+        # Order matters: clean interior artifacts first, then trailing artifacts
 
-        # 1. Remove trailing PART headers (may include page numbers and items after them)
-        # e.g., "\n\n  PART IV\n\nItem 15\n\n  PART IV"
-        text = re.sub(r'(\n\s*PART\s+[IVX]+[\s\S]*?)$', '', text, flags=re.IGNORECASE)
+        # 1a. Remove interior page headers for 10-K/10-Q (PART + Item format)
+        # Pattern: page number followed by PART header followed by Item number
+        # e.g., "\n\n  16\n\n  PART I\n\nItem 1A\n\n" (this is a page break artifact)
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*\n',
+            '\n\n',
+            text,
+            flags=re.IGNORECASE
+        )
 
-        # 2. Remove trailing Item headers if they appear at the very end
+        # 1b. Remove interior page headers for 20-F (Table of Contents format)
+        # Pattern: page number followed by "Table of Contents"
+        # e.g., "\n\n  1\n\n  Table of Contents\n\n" (this is a page break artifact)
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*Table of Contents\s*\n',
+            '\n\n',
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # 2a. Remove trailing page footer for 10-K/10-Q (PART + Item at end)
+        # Pattern: page number + PART + Item header at end (next section bleeding in)
+        # e.g., "\n\n  29\n\n  PART I\n\nItem 1B, 1C" at end
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # 2b. Remove trailing page footer for 20-F (Table of Contents at end)
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*Table of Contents\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # 3. Remove trailing Item headers if they appear at the very end
+        # (without preceding PART header)
         # e.g., "\n\nItem 15" or "\n\nITEM 15."
         text = re.sub(r'\n\s*Item\s+\d+[A-Za-z]?\.?\s*$', '', text, flags=re.IGNORECASE)
 
-        # 3. Remove trailing page numbers: whitespace followed by 1-3 digits at end
+        # 4. Remove trailing page numbers: whitespace followed by 1-3 digits at end
         # e.g., "\n\n  100" or "\n  92"
         text = re.sub(r'\n\s*\d{1,3}\s*$', '', text)
 
@@ -599,7 +635,7 @@ class Document:
             # Normalize form type by removing /A suffix for amendments
             base_form = form.replace('/A', '') if form else None
 
-            if base_form and base_form in ['10-K', '10-Q', '8-K']:
+            if base_form and base_form in ['10-K', '10-Q', '8-K', '20-F']:
                 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
                 # Pass thresholds from config if available
                 thresholds = self._config.detection_thresholds if self._config else None

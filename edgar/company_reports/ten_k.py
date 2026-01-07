@@ -369,11 +369,21 @@ class TenK(CompanyReport):
             'Item 16': 'summary'
         }
 
+        # Reverse mapping: friendly names to Item numbers
+        # (TOC-based detection uses "Item X" keys, so we need to map friendly names back)
+        section_to_item = {v: k for k, v in item_to_section.items()}
+
         # Try new parser sections first
         if self.sections:
-            # Direct key lookup (e.g., 'business', 'Item 1')
+            # Direct key lookup (e.g., 'Item 1', 'business' if pattern-based)
             if item_or_part in self.sections:
                 return self.sections[item_or_part].text()
+
+            # Try friendly name -> Item mapping (for TOC-based sections with "Item X" keys)
+            if item_or_part in section_to_item:
+                item_key = section_to_item[item_or_part]
+                if item_key in self.sections:
+                    return self.sections[item_key].text()
 
             # Normalize input
             normalized = item_or_part.strip()
