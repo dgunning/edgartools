@@ -105,7 +105,6 @@ company = Company("TSLA")
 latest_10k = company.get_filings(form="10-K").latest()
 financials = latest_10k.obj().financials()
 ```
-`
 
 ## Popular Use Cases
 
@@ -164,25 +163,15 @@ Your support helps maintain and improve EdgarTools for the entire community!
 
 ## What's Next?
 
-**[Installation Guide](installation.md)**
+**[Quick Start](quickstart.md)** - Your first analysis in 5 minutes
 
-Complete setup instructions and troubleshooting
+**[Company Financials](guides/company-facts.md)** - Extract balance sheets, income statements
 
-**[Quick Start Tutorial](quick-guide.md)**
+**[Filing Types](data-objects.md)** - Work with 10-K, 8-K, 13F, and more
 
-Your first analysis in 5 minutes
+**[API Reference](api/company.md)** - Complete documentation
 
-**[API Reference](company.md)**
-
-Complete documentation of all classes and methods
-
-**[Examples & Recipes](examples.md)**
-
-Real-world analysis patterns and code templates
-
-**[Advanced Search](advanced-search.md)**
-
-BM25 ranking, semantic search, and intelligent caching
+**[Examples](examples.md)** - Real-world code patterns
 
 ---
 
