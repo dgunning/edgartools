@@ -8,6 +8,7 @@ Key insight: Calculation trees are just ONE way XBRL organizes data.
 Facts can exist independently of calculation relationships.
 """
 
+import re
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 
@@ -18,6 +19,11 @@ from ..models import (
     MappingResult, MappingSource, ConfidenceLevel,
     MetricConfig
 )
+
+# Regex pattern to strip namespace prefixes (us-gaap:, dei:) and company prefixes (nvda_, tsla_, etc.)
+# Company prefixes are typically 2-5 lowercase letters followed by underscore
+NAMESPACE_PREFIX_PATTERN = re.compile(r'^(us-gaap:|dei:|ifrs-full:)')
+COMPANY_PREFIX_PATTERN = re.compile(r'^[a-z]{2,5}_', re.IGNORECASE)
 
 
 class FactsSearcher:
@@ -109,8 +115,16 @@ class FactsSearcher:
         
         Returns (concept, confidence, reasoning) if found.
         """
+        # Build a lookup: stripped_name -> original_concept
+        stripped_lookup = {}
+        for concept in all_concepts:
+            stripped = self._strip_prefix(concept)
+            stripped_lookup[stripped.lower()] = concept
+        
         # Direct match against known concepts
         for known in metric_config.known_concepts:
+            known_lower = known.lower()
+            
             # Try with us-gaap prefix
             full_concept = f"us-gaap:{known}"
             if full_concept in all_concepts:
@@ -127,20 +141,43 @@ class FactsSearcher:
                     self._thresholds.get("tree_high", 0.95),
                     f"Direct match: {known}"
                 )
+            
+            # Try matching against stripped concept names (handles company prefixes)
+            if known_lower in stripped_lookup:
+                original = stripped_lookup[known_lower]
+                return (
+                    original,
+                    self._thresholds.get("tree_high", 0.95),
+                    f"Prefix-stripped match: {known} -> {original}"
+                )
         
         # Partial match (concept name contains known pattern)
         for known in metric_config.known_concepts:
-            for concept in all_concepts:
-                # Clean and compare
-                concept_clean = concept.replace('us-gaap:', '')
-                if known.lower() in concept_clean.lower():
+            known_lower = known.lower()
+            for stripped, original in stripped_lookup.items():
+                if known_lower in stripped:
                     return (
-                        concept,
+                        original,
                         self._thresholds.get("tree_medium", 0.80),
-                        f"Partial match with {known}"
+                        f"Partial match with {known} (stripped: {stripped})"
                     )
         
         return None
+    
+    def _strip_prefix(self, concept: str) -> str:
+        """
+        Strip namespace and company prefixes from a concept name.
+        
+        Examples:
+            us-gaap:Revenue -> Revenue
+            nvda_PaymentsForFinanced... -> PaymentsForFinanced...
+            tsla_LongTermDebt -> LongTermDebt
+        """
+        # First strip namespace prefix
+        result = NAMESPACE_PREFIX_PATTERN.sub('', concept)
+        # Then strip company prefix (e.g., nvda_, tsla_)
+        result = COMPANY_PREFIX_PATTERN.sub('', result)
+        return result
     
     def _get_confidence_level(self, confidence: float) -> ConfidenceLevel:
         """Convert numeric confidence to level."""

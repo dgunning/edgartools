@@ -183,14 +183,20 @@ class Orchestrator:
         results: Dict[str, Dict[str, MappingResult]],
         xbrl_cache: Dict[str, any] = None
     ):
-        """Validate all mappings against yfinance reference."""
+        """Validate all mappings against yfinance reference.
+        
+        Uses validate_and_update_mappings to implement the FEEDBACK LOOP:
+        mappings that fail validation are marked as INVALID.
+        """
         if xbrl_cache is None:
             xbrl_cache = {}
             
         for ticker, metrics in results.items():
             print(f"\n{ticker}:")
             xbrl = xbrl_cache.get(ticker)
-            validations = self.validator.validate_company(ticker, metrics, xbrl)
+            
+            # Use validate_and_update_mappings to mark INVALID mappings
+            validations = self.validator.validate_and_update_mappings(ticker, metrics, xbrl)
             self.validation_results[ticker] = validations
             
             matches = 0
@@ -203,7 +209,7 @@ class Orchestrator:
                 elif v.status == "mismatch":
                     mismatches += 1
                     var = v.variance_pct if v.variance_pct else 0
-                    print(f"  [MISMATCH] {metric}: XBRL={v.xbrl_value/1e9:.2f}B vs yf={v.reference_value/1e9:.2f}B ({var:.1f}%)")
+                    print(f"  [INVALID] {metric}: XBRL={v.xbrl_value/1e9:.2f}B vs yf={v.reference_value/1e9:.2f}B ({var:.1f}%)")
                 elif v.status == "mapping_needed":
                     val = v.reference_value / 1e9 if v.reference_value else 0
                     print(f"  [NEED] {metric}: yfinance shows {val:.2f}B but no mapping")
@@ -216,7 +222,9 @@ class Orchestrator:
                 elif pending > 0:
                     print(f"  ⚠ {pending} values pending extraction")
                 else:
-                    print("  ✓ All mapped metrics validated")
+                    print(f"  ✓ All mapped metrics validated")
+            else:
+                print(f"  ⚠ {mismatches} mapping(s) marked as INVALID - need retry or review")
 
     
     def _get_filing(self, ticker: str, amendments: bool = False):

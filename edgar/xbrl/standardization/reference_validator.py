@@ -19,7 +19,7 @@ except ImportError:
     yf = None
 
 from .config_loader import get_config, MappingConfig
-from .models import MappingResult, MappingSource
+from .models import MappingResult, MappingSource, ConfidenceLevel
 
 
 @dataclass
@@ -126,6 +126,59 @@ class ReferenceValidator:
                 metric, ticker, xbrl_value, ref_value, result
             )
             validations[metric] = validation
+        
+        return validations
+    
+    def validate_and_update_mappings(
+        self,
+        ticker: str,
+        results: Dict[str, MappingResult],
+        xbrl=None
+    ) -> Dict[str, ValidationResult]:
+        """
+        Validate mappings and update MappingResult objects with validation status.
+        
+        This implements the VALIDATION FEEDBACK LOOP:
+        - Pass: Mark mapping as validation_status="valid"
+        - Fail: Mark mapping as validation_status="invalid", confidence_level=INVALID
+        
+        Args:
+            ticker: Company ticker
+            results: Mapping results to validate (will be modified in place)
+            xbrl: Optional XBRL object to extract values
+            
+        Returns:
+            Dict of validation results per metric
+        """
+        validations = self.validate_company(ticker, results, xbrl)
+        
+        # Update MappingResult objects based on validation
+        for metric, validation in validations.items():
+            if metric not in results:
+                continue
+            
+            result = results[metric]
+            
+            if validation.status == "match":
+                result.validation_status = "valid"
+                result.validation_notes = "Value matches reference"
+            elif validation.status == "mismatch":
+                # FEEDBACK LOOP: Mark as INVALID
+                result.validation_status = "invalid"
+                result.validation_notes = f"Value mismatch: {validation.notes}"
+                result.confidence_level = ConfidenceLevel.INVALID
+            elif validation.status == "missing_ref":
+                result.validation_status = "valid"  # Can't validate, assume OK
+                result.validation_notes = "No reference data available"
+            elif validation.status == "mapping_needed":
+                result.validation_status = "pending"
+                result.validation_notes = "Mapping required"
+            elif validation.status == "pending_extraction":
+                result.validation_status = "pending"
+                result.validation_notes = "Value extraction pending"
+            elif validation.status == "excluded":
+                result.validation_status = "valid"
+                result.validation_notes = "Metric excluded for this company"
         
         return validations
     

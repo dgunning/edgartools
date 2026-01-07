@@ -31,6 +31,7 @@ class ConfidenceLevel(Enum):
     MEDIUM = "medium"   # >= 0.70
     LOW = "low"         # < 0.70
     NONE = "none"       # Not mapped
+    INVALID = "invalid" # Validation failed
 
 
 @dataclass
@@ -53,6 +54,8 @@ class MappingResult:
     tree_context: Optional[Dict] = None # Parent, siblings, weight from tree
     timestamp: datetime = field(default_factory=datetime.utcnow)
     version: str = "1.0.0"              # Config version used
+    validation_status: str = "pending"  # "pending" | "valid" | "invalid"
+    validation_notes: Optional[str] = None  # Details about validation result
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
