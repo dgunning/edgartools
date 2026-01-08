@@ -285,24 +285,35 @@ class ReverseIndex:
         """
         Disambiguate between candidate concepts using context.
 
-        Phase 3: Uses section membership to resolve ambiguous tags.
+        Phase 3/4: Uses section membership and label clues to resolve ambiguous tags.
 
         Args:
             xbrl_tag: The original XBRL tag
             candidates: List of possible standard concepts
-            context: Context dict with section, balance, statement_type
+            context: Context dict with section, balance, statement_type, is_total
 
         Returns:
             The resolved concept, or None if disambiguation failed
         """
         section = context.get('section')
         statement_type = context.get('statement_type', 'BalanceSheet')
-
-        if not section:
-            return None
+        is_total = context.get('is_total', False)
 
         try:
             from .sections import get_section_for_concept
+
+            # Phase 4: Special case - if is_total is True, prefer "Total" concepts
+            if is_total:
+                for candidate in candidates:
+                    if 'total' in candidate.lower():
+                        logger.debug(
+                            "Disambiguated %s to %s (is_total=True)",
+                            xbrl_tag, candidate
+                        )
+                        return candidate
+
+            if not section:
+                return None
 
             # Find which candidate belongs in this section
             for candidate in candidates:

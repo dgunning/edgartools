@@ -548,13 +548,14 @@ class ConceptMapper:
         Returns:
             The standard concept or None if no mapping found
         """
-        # Use cache for faster lookups
-        cache_key = (company_concept, context.get('statement_type', ''))
+        # Use cache for faster lookups - include section for ambiguous tag disambiguation
+        cache_key = (company_concept, context.get('statement_type', ''), context.get('section', ''))
         if cache_key in self._cache:
             return self._cache[cache_key]
 
         # Check if we already have a mapping in the store
-        standard_concept = self.mapping_store.get_standard_concept(company_concept)
+        # Pass context for context-aware disambiguation of ambiguous tags (Phase 3/4)
+        standard_concept = self.mapping_store.get_standard_concept(company_concept, context)
         if standard_concept:
             self._cache[cache_key] = standard_concept
             return standard_concept
