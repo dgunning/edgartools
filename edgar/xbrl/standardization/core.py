@@ -7,12 +7,28 @@ statements regardless of the filing entity.
 """
 
 import json
+import logging
 import os
 from difflib import SequenceMatcher
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pandas as pd
+
+# Module-level logger (avoid creating logger inside hot paths)
+logger = logging.getLogger(__name__)
+
+# Lazy import to avoid circular dependencies
+_reverse_index = None
+
+
+def _get_reverse_index():
+    """Lazy load the reverse index singleton."""
+    global _reverse_index
+    if _reverse_index is None:
+        from .reverse_index import ReverseIndex
+        _reverse_index = ReverseIndex()
+    return _reverse_index
 
 
 class StandardConcept(str, Enum):
@@ -214,9 +230,6 @@ class MappingStore:
         # Find enum values not in JSON (just for information)
         missing_in_json = standard_values - json_keys
 
-        import logging
-        logger = logging.getLogger(__name__)
-
         if missing_in_enum:
             logger.warning("Found %d keys in concept_mappings.json that don't exist in StandardConcept enum: %s", len(missing_in_enum), sorted(missing_in_enum))
 
@@ -262,8 +275,6 @@ class MappingStore:
                             company_data = json.load(f)
                             mappings[entity_id] = company_data
                     except (FileNotFoundError, json.JSONDecodeError) as e:
-                        import logging
-                        logger = logging.getLogger(__name__)
                         logger.warning("Failed to load %s: %s", file, e)
 
         return mappings
@@ -352,8 +363,6 @@ class MappingStore:
                     pass
             except Exception:
                 # If all attempts fail, log a warning
-                import logging
-                logger = logging.getLogger(__name__)
                 logger.warning("Could not load concept_mappings.json. Standardization will be limited.")
 
         # If we have data, process it based on its structure
@@ -409,14 +418,30 @@ class MappingStore:
         """
         Get the standard concept for a given company concept with priority-based resolution.
 
+        Uses a multi-tier lookup strategy:
+        1. Reverse index (O(1) lookup, 2,067 GAAP tags) - NEW
+        2. Company-specific mappings (priority-based)
+        3. Core mappings fallback
+
         Args:
             company_concept: The company-specific concept
-            context: Optional context information (not used in current implementation)
+            context: Optional context information (for future disambiguation)
 
         Returns:
             The standard concept or None if not found
         """
-        # Use merged mappings with priority-based resolution
+        # Tier 1: Try the reverse index first (O(1) lookup, covers 95% of tags)
+        try:
+            reverse_index = _get_reverse_index()
+            display_name = reverse_index.get_display_name(company_concept, context)
+            if display_name:
+                logger.debug("Reverse index match: %s -> %s", company_concept, display_name)
+                return display_name
+        except (ImportError, FileNotFoundError, json.JSONDecodeError) as e:
+            # Only catch expected errors - let other exceptions propagate
+            logger.debug("Reverse index lookup failed for %s: %s", company_concept, e)
+
+        # Tier 2: Use merged mappings with priority-based resolution
         if self.merged_mappings:
             # Detect company from concept prefix (e.g., 'tsla:Revenue' -> 'tsla')
             detected_entity = self._detect_entity_from_concept(company_concept)
@@ -437,16 +462,37 @@ class MappingStore:
             # Return highest priority match
             if candidates:
                 best_match = max(candidates, key=lambda x: x[1])
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.debug("Mapping applied: %s -> %s (source: %s, priority: %s)", company_concept, best_match[0], best_match[2], best_match[1])
+                logger.debug("Merged mapping applied: %s -> %s (source: %s, priority: %s)", company_concept, best_match[0], best_match[2], best_match[1])
                 return best_match[0]
 
-        # Fallback to core mappings
+        # Tier 3: Fallback to core mappings
         for standard_concept, company_concepts in self.mappings.items():
             if company_concept in company_concepts:
+                logger.debug("Core mapping fallback: %s -> %s", company_concept, standard_concept)
                 return standard_concept
+
         return None
+
+    def get_display_name(self, company_concept: str, context: Optional[Dict] = None) -> Optional[str]:
+        """
+        Get the user-friendly display name for a company concept.
+
+        This method returns the standardized display name (e.g., "Accounts Payable")
+        rather than the internal concept name (e.g., "TradePayables").
+
+        Args:
+            company_concept: The company-specific XBRL concept
+            context: Optional context information (for future disambiguation)
+
+        Returns:
+            The user-friendly display name, or None if not found
+        """
+        try:
+            reverse_index = _get_reverse_index()
+            return reverse_index.get_display_name(company_concept, context)
+        except (ImportError, FileNotFoundError, json.JSONDecodeError):
+            # Fallback to get_standard_concept for backwards compatibility
+            return self.get_standard_concept(company_concept, context)
 
     def get_company_concepts(self, standard_concept: str) -> Set[str]:
         """
