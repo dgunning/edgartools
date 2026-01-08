@@ -322,7 +322,10 @@ valid_dims = xbrl.get_valid_dimensions_for_role(role_uri)
 
 ## Related Resources
 
-- [XBRL Roadmap](xbrl-roadmap.md) - Planned XBRL enhancements
+- [XBRL Documentation Hub](../index.md) - Central navigation for all XBRL docs
+- [Extract Financial Statements Guide](../../guides/extract-statements.md) - Complete guide to extracting financial data
+- [XBRL Standardization Concepts](standardization.md) - 95 standard concepts for cross-company comparison
+- [Multi-Period Analysis](../guides/multi-period-analysis.md) - Working with multiple filings
 - [GitHub Issue #577](https://github.com/dgunning/edgartools/issues/577) - Original problem documentation
 - [SEC Financial Statement Data Sets](https://www.sec.gov/data-research/sec-markets-data/financial-statement-notes-data-sets) - SEC's processed XBRL data
 

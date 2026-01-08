@@ -165,7 +165,7 @@ Your support helps maintain and improve EdgarTools for the entire community!
 
 **[Quick Start](quickstart.md)** - Your first analysis in 5 minutes
 
-**[Company Financials](guides/company-facts.md)** - Extract balance sheets, income statements
+**[Financial Data](guides/financial-data.md)** - Get income statements, balance sheets, cash flow
 
 **[Filing Types](data-objects.md)** - Work with 10-K, 8-K, 13F, and more
 

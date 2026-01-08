@@ -82,28 +82,23 @@ print(income)  # Beautiful table output
 
 ### 2. XBRL API (Full Statement Access)
 
-Use the **XBRL** class for complete access to all statement types from a specific filing. This is where `StatementType` and `get_statement()` are used.
+Use the **XBRL** class for complete access to all statement types from a specific filing.
 
 ```python
 from edgar import Company
-from edgar.enums import StatementType
 
 company = Company("AAPL")
 filing = company.get_filings(form="10-K").latest()
 xbrl = filing.xbrl()
 
-# Using StatementType enum with get_statement()
-income = xbrl.get_statement(StatementType.INCOME_STATEMENT)
-balance = xbrl.get_statement(StatementType.BALANCE_SHEET)
-cash_flow = xbrl.get_statement(StatementType.CASH_FLOW)
-
-# Analytical statements (only available via XBRL)
-segments = xbrl.get_statement(StatementType.SEGMENTS)
-footnotes = xbrl.get_statement(StatementType.FOOTNOTES)
-
-# Or use the statements property for common statements
+# Recommended: Use the statements property for common statements
 income = xbrl.statements.income_statement()
 balance = xbrl.statements.balance_sheet()
+cash_flow = xbrl.statements.cash_flow_statement()
+
+# For analytical statements, use get_statement() with string names
+segments = xbrl.get_statement("SegmentDisclosure")
+comprehensive = xbrl.get_statement("ComprehensiveIncome")
 ```
 
 **Best for:**
@@ -118,16 +113,13 @@ Segment data is only available through the XBRL API:
 
 ```python
 from edgar import Company
-from edgar.enums import StatementType
 
 company = Company("AAPL")
 filing = company.get_filings(form="10-K").latest()
 xbrl = filing.xbrl()
 
-# Get segment statement data
-segment_data = xbrl.get_statement(StatementType.SEGMENTS)
-# Or use the string value
-segment_data = xbrl.get_statement("segment_reporting")
+# Get segment statement data using PascalCase string name
+segment_data = xbrl.get_statement("SegmentDisclosure")
 
 # Segment dimensional data also appears in income statements
 income = xbrl.statements.income_statement()
@@ -338,7 +330,7 @@ income = company.income_statement(periods=5, annual=True)  # 5 years of data
 # You need specific filing data or analytical statements
 filing = company.get_filings(form="10-K").latest()
 xbrl = filing.xbrl()
-segments = xbrl.get_statement(StatementType.SEGMENTS)  # Only available here
+segments = xbrl.get_statement("SegmentDisclosure")  # Only available here
 ```
 
 ## Consistency with Other Types
@@ -362,23 +354,28 @@ StatementType follows the same design pattern as FormType and PeriodType:
 company = Company("AAPL")
 income = company.income_statement(periods=4)
 
-# Specific filing analysis - use XBRL API
+# Specific filing analysis - use XBRL statements property (recommended)
 xbrl = company.get_filings(form="10-K").latest().xbrl()
-income = xbrl.get_statement(StatementType.INCOME_STATEMENT)
+income = xbrl.statements.income_statement()
+balance = xbrl.statements.balance_sheet()
+cash_flow = xbrl.statements.cash_flow_statement()
 ```
 
-### 2. Use Enums for IDE Support
+### 2. Access Analytical Statements
 ```python
-# Recommended: Enhanced developer experience
-from edgar.enums import StatementType
-segment = xbrl.get_statement(StatementType.SEGMENTS)
+# For statements beyond the Big Three, use get_statement() with PascalCase names
+xbrl = filing.xbrl()
+segments = xbrl.get_statement("SegmentDisclosure")
+comprehensive = xbrl.get_statement("ComprehensiveIncome")
+equity = xbrl.get_statement("StatementOfEquity")
 ```
 
-### 3. Leverage Collections
+### 3. Enumerate Available Statements
 ```python
-# Use predefined collections
-for statement_type in PRIMARY_STATEMENTS:
-    process_statement(xbrl.get_statement(statement_type))
+# See what statements are available in a filing
+xbrl = filing.xbrl()
+available = xbrl.statements.available_statements()
+print(available)  # ['IncomeStatement', 'BalanceSheet', 'CashFlowStatement', ...]
 ```
 
 ## Error Handling

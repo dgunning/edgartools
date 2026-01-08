@@ -352,6 +352,26 @@ balance = statements.balance_sheet()
 cash_flow = statements.cash_flow_statement()
 ```
 
+### Controlling Dimensional Data
+
+By default, statements show dimensional segment data (product breakdowns, geography, etc.).
+Use `include_dimensions` to control this:
+
+```python
+# Default: includes segment breakdowns (product, geography, etc.)
+df = income.to_dataframe()  # May have 40+ rows with breakdowns
+
+# Simplified: excludes dimensional breakdowns
+df = income.to_dataframe(include_dimensions=False)  # ~20 rows, just totals
+```
+
+**When to use `include_dimensions=False`:**
+- Simple analysis that only needs totals
+- Cross-company comparison (more consistent structure)
+- When breakdowns add noise to your analysis
+
+See [dimension-handling.md](../../docs/xbrl/dimension-handling.md) for details.
+
 ### Helper Functions
 
 ```python

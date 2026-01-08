@@ -91,9 +91,18 @@ This enhancement works automatically across companies that provide segment data 
 
 ## Standardized Financial Data Access
 
-### Simple Metric Extraction (New!)
+EdgarTools automatically standardizes XBRL data across companies, mapping ~2,000 different XBRL tags to 95 consistent concepts. This means you can compare Apple's revenue with Tesla's revenue using the same API, even though they use different underlying XBRL concepts.
 
-The easiest way to get key financial metrics is using the new standardized accessor methods:
+**Why this matters:**
+- Companies use different XBRL tags for the same concept (e.g., "Revenues", "RevenueFromContractWithCustomer", "SalesRevenueNet")
+- EdgarTools normalizes these to standard concepts like "Revenue"
+- Cross-company analysis becomes trivial
+
+For the complete list of 95 standard concepts and their mappings, see [Standardization Concepts Reference](../xbrl/concepts/standardization.md).
+
+### Simple Metric Extraction
+
+The easiest way to get key financial metrics is using the standardized accessor methods:
 
 ```python
 from edgar import Company
@@ -766,10 +775,15 @@ else:
 
 Now that you can extract financial statements, explore these advanced topics:
 
-- **[Query XBRL Data](../xbrl-querying.md)** - Advanced XBRL fact querying and analysis
-- 
+- **[XBRL Documentation Hub](../xbrl/index.md)** - Central navigation for all XBRL documentation
+- **[Multi-Period Analysis](../xbrl/guides/multi-period-analysis.md)** - Compare financials across multiple years
+- **[Choosing the Right API](../xbrl/getting-started/choosing-the-right-api.md)** - Decision guide for which API to use
+- **[Dimension Handling Guide](../xbrl/concepts/dimension-handling.md)** - Understanding dimensional data (segments, breakdowns)
+- **[Standardization Concepts](../xbrl/concepts/standardization.md)** - 95 standard concepts for cross-company comparison
+
 ## Related Documentation
 
 - **[Getting XBRL from Filings](../getting-xbrl.md)** - Original XBRL documentation
 - **[Company Financials](../company-financials.md)** - Company financials API
 - **[XBRL API Reference](../api/xbrl.md)** - Complete XBRL class documentation
+- **[StatementType Quick Reference](../StatementType-Quick-Reference.md)** - Statement type enums and API comparison

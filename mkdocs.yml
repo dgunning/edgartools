@@ -20,85 +20,67 @@ nav:
   # ==========================================
   - Get Started:
     - Overview: index.md
-    - Why EdgarTools: why-edgartools.md
     - Installation: installation.md
     - Quick Start: quickstart.md
-    - Key Concepts: concepts/sec-filings.md
     - Configuration: configuration.md
+    - Key Concepts: concepts/sec-filings.md
 
   # ==========================================
-  # GUIDES - Task-organized for intermediate users
+  # COMPANY - Find and analyze companies
   # ==========================================
-  - Guides:
-    # Companies
-    - Companies:
-      - Find a Company: guides/finding-companies.md
-      - Get Company Financials: guides/company-facts.md
-      - Entity API: guides/entity-api-guide.md
-      - Multi-Year Financial Data: guides/multi-year-financial-data-api.md
-      - Track Insiders: guides/company-insiders.md
-      - Company Subsets: company-subsets.md
+  - Company:
+    - Find a Company: guides/finding-companies.md
+    - Company Subsets: company-subsets.md
+    - Track Insiders: guides/company-insiders.md
+    - Entity API: guides/entity-api-guide.md
 
-    # Filings
-    - Filings:
-      - Working with Filings: guides/working-with-filing.md
-      - Search for Filings: guides/searching-filings.md
-      - Filter by Date/Type: guides/filtering-filings.md
-      - Access Attachments: guides/filing-attachments.md
-      - Most Recent Filings: guides/current-filings.md
-
-    # Financial Data
-    - Financial Data:
-      - Extract Statements: guides/extract-statements.md
-      - Query XBRL Facts: xbrl-querying.md
-      - Getting XBRL from Filings: getting-xbrl.md
-      - XBRL Footnotes: guides/xbrl-footnotes.md
-
-    # Filing Types (Data Objects)
+  # ==========================================
+  # FILINGS - Access SEC filings
+  # ==========================================
+  - Filings:
+    - Working with Filings: guides/working-with-filing.md
+    - Search & Filter: guides/searching-filings.md
+    - Current Filings: guides/current-filings.md
+    - Attachments: guides/filing-attachments.md
     - Filing Types:
       - Overview: data-objects.md
-      - "10-K / 10-Q Annual & Quarterly": concepts/data-objects.md
+      - "10-K / 10-Q": concepts/data-objects.md
       - "8-K Current Reports": guides/eightk-data-object-guide.md
-      - "8-K Overview": eightk-filings.md
-      - "Form 3/4/5 Insider Trading": insider-filings.md
-      - "Form 4 Transaction Tracking": guides/track-form4.md
-      - "13F Institutional Holdings": guides/thirteenf-data-object-guide.md
-      - "13F Overview": 13f-filings.md
-      - "DEF 14A Proxy Statements": guides/proxystatement-data-object-guide.md
-      - "Form D Private Offerings": guides/formd-data-object-guide.md
-      - "Form 144 Sales Notices": guides/form144-data-object-guide.md
+      - "Form 4 Insider Trading": insider-filings.md
+      - "13F Holdings": guides/thirteenf-data-object-guide.md
+      - "DEF 14A Proxy": guides/proxystatement-data-object-guide.md
+      - "Form D Offerings": guides/formd-data-object-guide.md
+      - "Form 144 Sales": guides/form144-data-object-guide.md
       - "N-PX Fund Voting": guides/npx-data-object-guide.md
-      - "MA-I Municipal Advisor": guides/mai-data-object-guide.md
-
-    # Examples
+      - "MA-I Municipal": guides/mai-data-object-guide.md
     - Examples: examples.md
 
   # ==========================================
-  # REFERENCE - Quick lookups for all users
+  # FINANCIALS - Financial statements & data
   # ==========================================
-  - Reference:
-    - API:
-      - Company: api/company.md
-      - Filing: api/filing.md
-      - Filings: api/filings.md
-      - XBRL: api/xbrl.md
-      - EntityFacts: api/entity-facts-reference.md
-    - Form Types: FormType-Quick-Reference.md
-    - Period Types: PeriodType-Quick-Reference.md
-    - Statement Types: StatementType-Quick-Reference.md
-    - SEC Compliance & Rate Limits: resources/sec-compliance.md
+  - Financials:
+    - Overview: guides/financial-data.md
+    - Extract Statements: guides/extract-statements.md
+    - Company Facts: guides/company-facts.md
+    - Multi-Period Analysis: guides/multi-year-financial-data-api.md
+    - XBRL Deep Dive:
+      - Overview: xbrl/index.md
+      - Query Facts: xbrl-querying.md
+      - Getting XBRL: getting-xbrl.md
+      - Dimensions: xbrl/concepts/dimension-handling.md
+      - Standardization: xbrl/concepts/standardization.md
+      - Footnotes: guides/xbrl-footnotes.md
 
   # ==========================================
-  # ADVANCED - Power users
+  # ADVANCED - Power users & customization
   # ==========================================
   - Advanced:
-    - Local Storage: guides/local-storage.md
-    - Cloud Storage (S3): guides/cloud-storage.md
-    - Advanced Search (BM25): advanced-search.md
-    - SSL Configuration: guides/ssl_verification.md
-    - XBRL Customization: advanced/customizing-standardization.md
-    - Parsing SGML: guides/sgml.md
+    - Storage:
+      - Local Storage: guides/local-storage.md
+      - Cloud Storage (S3): guides/cloud-storage.md
+    - Advanced Search: advanced-search.md
     - AI Integration: ai-integration.md
+    - SEC Compliance: resources/sec-compliance.md
     - Troubleshooting: resources/troubleshooting.md
-    - Performance Tips: resources/performance.md
+    - Performance: resources/performance.md
     - Contributing: contributing.md
