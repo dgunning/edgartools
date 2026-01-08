@@ -1307,15 +1307,17 @@ def render_statement(
 
     # Apply standardization if requested
     if standard:
-        # Use module-level singleton mapper for performance (eliminates redundant file I/O)
-        mapper = standardization.get_default_mapper()
-
-        # Add statement type to context for better mapping
-        for item in statement_data:
-            item['statement_type'] = statement_type
-
-        # Standardize the statement data
-        statement_data = standardization.standardize_statement(statement_data, mapper)
+        # Use XBRL instance's standardization cache if available for efficient caching
+        if xbrl_instance is not None and hasattr(xbrl_instance, 'standardization'):
+            statement_data = xbrl_instance.standardization.standardize_statement_data(
+                statement_data, statement_type
+            )
+        else:
+            # Fall back to module-level singleton mapper
+            mapper = standardization.get_default_mapper()
+            for item in statement_data:
+                item['statement_type'] = statement_type
+            statement_data = standardization.standardize_statement(statement_data, mapper)
 
         # Update facts with standardized labels if XBRL instance is available
         entity_xbrl_instance = entity_info.get('xbrl_instance')

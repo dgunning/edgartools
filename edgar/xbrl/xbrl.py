@@ -128,6 +128,9 @@ class XBRL:
         self._validated_period_of_report_cache: Optional[str] = None
         self._period_of_report_warning_logged: bool = False
 
+        # Standardization cache for this XBRL instance (lazy-initialized)
+        self._standardization_cache = None
+
     def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
         """
         Determine if a statement should display dimensioned line items.
@@ -200,6 +203,36 @@ class XBRL:
     def footnotes(self):
         """Access to XBRL footnotes."""
         return self.parser.footnotes
+
+    @property
+    def standardization(self):
+        """
+        Access the standardization cache for this XBRL instance.
+
+        The cache provides efficient label standardization by:
+        - Caching concept-to-label mappings
+        - Caching standardized statement data
+        - Using the module-level singleton mapper
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> # Get standardized label for a concept
+            >>> label = xbrl.standardization.get_standard_label(
+            ...     'us-gaap_Revenue', 'Revenues',
+            ...     {'statement_type': 'IncomeStatement'}
+            ... )
+            >>> # Standardize statement data with caching
+            >>> data = xbrl.standardization.standardize_statement_data(
+            ...     raw_data, 'IncomeStatement'
+            ... )
+
+        Returns:
+            StandardizationCache instance for this XBRL
+        """
+        if self._standardization_cache is None:
+            from edgar.xbrl.standardization import StandardizationCache
+            self._standardization_cache = StandardizationCache(self)
+        return self._standardization_cache
 
     @property
     def _facts(self):
@@ -1828,14 +1861,10 @@ class XBRL:
                                 stmt_type = stmt['type']
                                 break
 
-                    # Add statement type to each item
-                    for item in statement_data:
-                        item['statement_type'] = stmt_type
-
-                    # Apply standardization using module-level singleton mapper
-                    from edgar.xbrl.standardization import get_default_mapper, standardize_statement
-                    mapper = get_default_mapper()
-                    statement_data = standardize_statement(statement_data, mapper)
+                    # Apply standardization using XBRL instance's cache
+                    statement_data = self.standardization.standardize_statement_data(
+                        statement_data, stmt_type
+                    )
 
                 # Create rows for the DataFrame
                 rows = []

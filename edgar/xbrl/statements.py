@@ -712,13 +712,10 @@ class Statement:
         # Issue #583: Apply label standardization if requested
         # This transforms labels like "Ending balances" → "Total Stockholders' Equity"
         if standard:
-            from edgar.xbrl import standardization
-            # Use module-level singleton mapper for performance (eliminates redundant file I/O)
-            mapper = standardization.get_default_mapper()
-            # Add statement type context for better mapping
-            for item in raw_data:
-                item['statement_type'] = statement_type
-            raw_data = standardization.standardize_statement(raw_data, mapper)
+            # Use XBRL instance's standardization cache for efficient caching
+            raw_data = self.xbrl.standardization.standardize_statement_data(
+                raw_data, statement_type
+            )
 
         # Determine which periods to display
         # determine_periods_to_display handles:
