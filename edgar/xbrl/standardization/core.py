@@ -768,6 +768,90 @@ def _should_preserve_label(original_label: str, standardized_label: str) -> bool
     return False
 
 
+def _derive_section_from_parent(calculation_parent: str, statement_type: str) -> Optional[str]:
+    """
+    Derive the balance sheet section from a calculation parent concept.
+
+    Phase 3: Uses the calculation parent to determine which section an item
+    belongs to, enabling disambiguation of ambiguous tags.
+
+    The key insight is that if an item's calculation parent is "AssetsCurrent",
+    then the item belongs to the "Current Assets" section.
+
+    Args:
+        calculation_parent: The calculation parent concept (e.g., "us-gaap:AssetsCurrent")
+        statement_type: The statement type (e.g., "BalanceSheet")
+
+    Returns:
+        Section name (e.g., "Current Assets") or None if not determinable
+    """
+    if not calculation_parent:
+        return None
+
+    # Normalize the parent concept name
+    parent_normalized = calculation_parent.lower()
+    # Remove namespace prefix
+    if ":" in parent_normalized:
+        parent_normalized = parent_normalized.split(":")[-1]
+    if "_" in parent_normalized:
+        parent_normalized = parent_normalized.split("_")[-1]
+
+    # Map parent totals to their sections
+    # Items under AssetsCurrent belong to "Current Assets" section
+    parent_to_section = {
+        # Current Assets - items rolling up to AssetsCurrent
+        "assetscurrent": "Current Assets",
+        "currentassets": "Current Assets",
+
+        # Non-Current Assets - items rolling up to AssetsNoncurrent
+        "assetsnoncurrent": "Non-Current Assets",
+        "noncurrentassets": "Non-Current Assets",
+
+        # Current Liabilities - items rolling up to LiabilitiesCurrent
+        "liabilitiescurrent": "Current Liabilities",
+        "currentliabilities": "Current Liabilities",
+
+        # Non-Current Liabilities - items rolling up to LiabilitiesNoncurrent
+        "liabilitiesnoncurrent": "Non-Current Liabilities",
+        "noncurrentliabilities": "Non-Current Liabilities",
+
+        # Equity - items rolling up to StockholdersEquity
+        "stockholdersequity": "Equity",
+        "stockholdersequityincludingportionattributabletononcontrollinginterest": "Equity",
+        "equity": "Equity",
+
+        # Top-level totals (less specific)
+        "assets": "Assets",
+        "liabilities": "Liabilities",
+        "liabilitiesandstockholdersequity": "Liabilities and Equity",
+    }
+
+    # Direct lookup
+    if parent_normalized in parent_to_section:
+        return parent_to_section[parent_normalized]
+
+    # Partial match fallback
+    for pattern, section in parent_to_section.items():
+        if pattern in parent_normalized:
+            return section
+
+    # Try reverse index as last resort
+    try:
+        reverse_index = _get_reverse_index()
+        parent_standard = reverse_index.get_standard_concept(calculation_parent)
+
+        if parent_standard:
+            from .sections import get_section_for_concept
+            section = get_section_for_concept(parent_standard, statement_type)
+            if section and section != "Totals":
+                return section
+
+    except Exception as e:
+        logger.debug("Could not derive section from parent %s: %s", calculation_parent, e)
+
+    return None
+
+
 def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper) -> List[Dict[str, Any]]:
     """
     Standardize labels in a statement using the concept mapper.
@@ -798,12 +882,20 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
         if not label:
             continue
 
-        # Build minimal context once, reuse for multiple calls
+        # Build enhanced context for disambiguation (Phase 3)
+        calculation_parent = item.get("calculation_parent")
         context = {
             "statement_type": item.get("statement_type", "") or statement_type,
             "level": item.get("level", 0),
-            "is_total": "total" in label.lower() or item.get("is_total", False)
+            "is_total": "total" in label.lower() or item.get("is_total", False),
+            "calculation_parent": calculation_parent,  # Phase 3: for section determination
+            "balance": item.get("balance"),  # debit/credit for sign-based disambiguation
+            "weight": item.get("weight", 1.0),  # calculation weight
         }
+
+        # Phase 3: Derive section from calculation parent if available
+        if calculation_parent:
+            context["section"] = _derive_section_from_parent(calculation_parent, statement_type)
 
         items_to_standardize.append((i, concept, label, context))
 

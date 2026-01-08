@@ -237,12 +237,14 @@ class ReverseIndex:
         Get the standard concept for an XBRL tag.
 
         This is the primary lookup method for standardization.
-        For ambiguous tags, returns the first candidate (context-aware
-        resolution will be added in Phase 4).
+        For ambiguous tags, uses context (section, balance type) to disambiguate.
 
         Args:
             xbrl_tag: The XBRL tag to look up
-            context: Optional context for disambiguation (future use)
+            context: Optional context for disambiguation:
+                     - section: Balance sheet section (e.g., "Current Assets")
+                     - balance: Debit/credit balance type
+                     - statement_type: Type of statement
 
         Returns:
             The standard concept name, or None if not found/excluded
@@ -251,16 +253,134 @@ class ReverseIndex:
         if result is None:
             return None
 
-        # For now, return primary concept
-        # Phase 4 will add context-aware resolution for ambiguous tags
-        if result.is_ambiguous and context:
-            # TODO: Phase 4 - Use context to disambiguate
-            logger.debug(
-                "Ambiguous tag %s maps to %s - using first candidate (context resolution pending)",
-                xbrl_tag, result.standard_concepts
-            )
+        # Non-ambiguous tags: return primary concept
+        if not result.is_ambiguous:
+            return result.primary_concept
 
+        # Ambiguous tags: try to disambiguate using context
+        if context and len(result.standard_concepts) > 1:
+            resolved = self._disambiguate_by_context(
+                xbrl_tag, result.standard_concepts, context
+            )
+            if resolved:
+                logger.debug(
+                    "Disambiguated %s to %s using context (section=%s)",
+                    xbrl_tag, resolved, context.get('section')
+                )
+                return resolved
+
+        # Fallback: return primary concept
+        logger.debug(
+            "Ambiguous tag %s maps to %s - using first candidate",
+            xbrl_tag, result.standard_concepts
+        )
         return result.primary_concept
+
+    def _disambiguate_by_context(
+        self,
+        xbrl_tag: str,
+        candidates: List[str],
+        context: Dict
+    ) -> Optional[str]:
+        """
+        Disambiguate between candidate concepts using context.
+
+        Phase 3: Uses section membership to resolve ambiguous tags.
+
+        Args:
+            xbrl_tag: The original XBRL tag
+            candidates: List of possible standard concepts
+            context: Context dict with section, balance, statement_type
+
+        Returns:
+            The resolved concept, or None if disambiguation failed
+        """
+        section = context.get('section')
+        statement_type = context.get('statement_type', 'BalanceSheet')
+
+        if not section:
+            return None
+
+        try:
+            from .sections import get_section_for_concept
+
+            # Find which candidate belongs in this section
+            for candidate in candidates:
+                candidate_section = get_section_for_concept(candidate, statement_type)
+                if candidate_section and self._sections_match(section, candidate_section):
+                    return candidate
+
+            # Secondary: check if section name is in concept name
+            section_lower = section.lower()
+            for candidate in candidates:
+                candidate_lower = candidate.lower()
+                if 'current' in section_lower and 'noncurrent' not in section_lower:
+                    if 'current' in candidate_lower and 'noncurrent' not in candidate_lower:
+                        return candidate
+                elif 'noncurrent' in section_lower or 'non-current' in section_lower:
+                    if 'noncurrent' in candidate_lower or 'nonoperating' in candidate_lower:
+                        return candidate
+
+        except Exception as e:
+            logger.debug("Disambiguation failed for %s: %s", xbrl_tag, e)
+
+        return None
+
+    def _sections_match(self, context_section: str, concept_section: str) -> bool:
+        """Check if two section names match (handles variations)."""
+        if not context_section or not concept_section:
+            return False
+
+        # Normalize for comparison
+        ctx = context_section.lower().replace('-', ' ').replace('_', ' ')
+        cpt = concept_section.lower().replace('-', ' ').replace('_', ' ')
+
+        # Direct match
+        if ctx == cpt:
+            return True
+
+        # Determine if sections are current vs non-current
+        ctx_is_current = 'current' in ctx and 'non' not in ctx.split('current')[0]
+        ctx_is_noncurrent = 'non current' in ctx or 'noncurrent' in ctx or ('non' in ctx and 'current' in ctx)
+
+        cpt_is_current = 'current' in cpt and 'non' not in cpt.split('current')[0]
+        cpt_is_noncurrent = 'non current' in cpt or 'noncurrent' in cpt or ('non' in cpt and 'current' in cpt)
+
+        # Current vs Non-Current must match
+        if ctx_is_current != cpt_is_current:
+            return False
+        if ctx_is_noncurrent != cpt_is_noncurrent:
+            return False
+
+        # Check asset/liability type
+        ctx_is_asset = 'asset' in ctx
+        ctx_is_liability = 'liabilit' in ctx
+        cpt_is_asset = 'asset' in cpt
+        cpt_is_liability = 'liabilit' in cpt
+
+        # If both specify asset/liability, they must match
+        if ctx_is_asset and cpt_is_liability:
+            return False
+        if ctx_is_liability and cpt_is_asset:
+            return False
+
+        # Current Assets match
+        if ctx_is_current and cpt_is_current and ctx_is_asset and cpt_is_asset:
+            return True
+
+        # Current Liabilities match
+        if ctx_is_current and cpt_is_current and ctx_is_liability and cpt_is_liability:
+            return True
+
+        # Non-Current Assets match
+        if ctx_is_noncurrent and cpt_is_noncurrent and ctx_is_asset and cpt_is_asset:
+            return True
+
+        # Non-Current Liabilities match
+        if ctx_is_noncurrent and cpt_is_noncurrent and ctx_is_liability and cpt_is_liability:
+            return True
+
+        return False
 
     def get_display_name(self, xbrl_tag: str, context: Optional[Dict] = None) -> Optional[str]:
         """
@@ -268,7 +388,10 @@ class ReverseIndex:
 
         Args:
             xbrl_tag: The XBRL tag to look up
-            context: Optional context for disambiguation (future use)
+            context: Optional context for disambiguation:
+                     - section: Balance sheet section (e.g., "Current Assets")
+                     - balance: Debit/credit balance type
+                     - statement_type: Type of statement
 
         Returns:
             The display name, or None if not found/excluded
@@ -276,6 +399,19 @@ class ReverseIndex:
         result = self.lookup(xbrl_tag)
         if result is None:
             return None
+
+        # Non-ambiguous tags: return primary display name
+        if not result.is_ambiguous:
+            return result.primary_display_name
+
+        # Ambiguous tags: try to disambiguate using context
+        if context and len(result.standard_concepts) > 1:
+            resolved = self._disambiguate_by_context(
+                xbrl_tag, result.standard_concepts, context
+            )
+            if resolved:
+                # Return the display name for the resolved concept
+                return self._display_names.get(resolved, resolved)
 
         return result.primary_display_name
 
