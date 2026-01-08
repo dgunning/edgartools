@@ -120,15 +120,23 @@ metrics:
     universal: true
 
   IntangibleAssets:
-    description: "Intangible assets net of amortization"
-    known_concepts:
-      - FiniteLivedIntangibleAssetsNet
+    description: "Goodwill and other intangible assets (matches yfinance)"
+    # Composite metric: sum of Goodwill + IntangibleAssetsNetExcludingGoodwill
+    # yfinance field: "Goodwill And Other Intangible Assets"
+    composite: true
+    components:
+      - Goodwill
       - IntangibleAssetsNetExcludingGoodwill
+    known_concepts:
+      - Goodwill
+      - IntangibleAssetsNetExcludingGoodwill
+      - FiniteLivedIntangibleAssetsNet
       - IndefiniteLivedIntangibleAssetsExcludingGoodwill
     tree_hints:
       statements: [BALANCE]
       section: assets
     universal: true
+    notes: "Sum of Goodwill + IntangibleAssetsNet to match yfinance definition"
 
   ShortTermDebt:
     description: "Short-term borrowings and current debt"
