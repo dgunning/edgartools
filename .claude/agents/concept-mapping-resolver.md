@@ -27,6 +27,210 @@ You are an expert at resolving XBRL concept mapping gaps for the EdgarTools proj
    - MappingResult model with validation_status and confidence_level
    - Config structure in `edgar/xbrl/standardization/config/metrics.yaml`
 
+## Understanding Gap Types (Critical for Resolution Strategy)
+
+Before attempting resolution, classify each gap:
+
+### 1. Structural Gaps (DO NOT RESOLVE)
+**Definition**: Metric doesn't apply to this company type
+**Examples**:
+- Financial companies lack COGS, SGA, GrossProfit (service business)
+- Insurance companies lack Inventory (no physical goods)
+- REITs lack R&D (real estate focus)
+
+**Detection**:
+- Industry classification (SIC codes)
+- Reference data shows NO value (yfinance returns None)
+- Multiple companies in same industry all lack metric
+
+**Action**: Add to exclusions config, don't try to resolve
+
+### 2. Validation Failures (INVESTIGATE FIRST)
+**Definition**: Mapped but value doesn't match reference
+**Root causes**:
+- Dimensional reporting (most common for financials)
+- Composite mismatch (need to sum multiple concepts)
+- Consolidation context issues
+- Definition differences between XBRL and reference
+
+**Detection**:
+- validation_status == "invalid"
+- Variance > 15%
+- XBRL value exists but differs from reference
+
+**Action**: Investigate root cause before attempting resolution
+
+### 3. True Unmapped (RESOLVE WITH AI TOOLS)
+**Definition**: No mapping found, concept exists
+**Examples**:
+- Company uses non-standard taxonomy extension
+- Concept name variation not in known_concepts
+- New GAAP concepts not yet in config
+
+**Detection**:
+- is_mapped == False
+- Reference data shows value exists
+- Facts search found no matches
+
+**Action**: Use AI tools to discover and validate concept
+
+## Dimensional Reporting Deep Dive
+
+**Critical Discovery**: Many companies (especially financials) report key metrics ONLY with dimensions.
+
+### What Are Dimensions?
+
+XBRL dimensions provide additional context about a fact:
+- **LegalEntityAxis**: Parent company vs subsidiaries vs consolidated
+- **StatementScenarioAxis**: Actual vs Budget vs Forecast
+- **ConsolidationItemsAxis**: Consolidated vs Eliminations
+- **Custom dimensions**: VIE beneficial interests, segment reporting, etc.
+
+### The Validator's Current Limitation
+
+```python
+# reference_validator.py:289-295
+if 'full_dimension_label' in df.columns:
+    total_rows = df[df['full_dimension_label'].isna()]  # FILTERS OUT ALL DIMENSIONS
+```
+
+**Assumption**: "Total" values are non-dimensioned
+**Reality**: Some companies report totals ONLY with dimensions!
+
+### Real-World Example: JPM CommercialPaper
+
+**Problem**: CommercialPaper has NO non-dimensioned value
+
+**Available data**:
+```
+us-gaap:CommercialPaper (instant_2024-12-31):
+  - Dimension: "Beneficial interests issued by consolidated VIEs" = $21.80B
+  - Non-dimensioned: NONE
+```
+
+**Result**: Validator filters out the $21.80B, finds nothing, marks as unmapped
+
+### Dimensional Patterns by Industry
+
+| Industry | Dimensional Usage | Examples |
+|----------|-------------------|----------|
+| **Financial** | Extensive (VIEs, subsidiaries, consolidation) | JPM, BAC, GS |
+| **Industrial** | Minimal (mostly non-dimensioned) | CAT, MMM, GE |
+| **Tech** | Moderate (segments, geographies) | AAPL, MSFT, GOOGL |
+| **REIT** | High (properties, segments) | SPG, PLD, AMT |
+
+### Investigation Workflow for Dimensional Issues
+
+When validation fails with large variance (>15%):
+
+**Step 1: Check if dimensional data exists**
+```python
+# Get all facts for this concept (including dimensions)
+all_facts = xbrl.facts.query().by_concept(concept).to_dataframe()
+
+# Separate dimensional vs non-dimensional
+if 'full_dimension_label' in all_facts.columns:
+    non_dim = all_facts[all_facts['full_dimension_label'].isna()]
+    dim = all_facts[all_facts['full_dimension_label'].notna()]
+
+    print(f"Non-dimensioned: {len(non_dim)} facts")
+    print(f"Dimensioned: {len(dim)} facts")
+
+    if len(dim) > 0:
+        print("\nDimensional breakdown:")
+        for idx, row in dim.iterrows():
+            dimension = row['full_dimension_label']
+            value = row.get('numeric_value')
+            if value:
+                print(f"  {dimension}: ${value/1e9:.2f}B")
+```
+
+**Step 2: Identify dimension type**
+- **Consolidation**: "Consolidated", "Parent company", "Eliminations"
+- **VIE**: "Beneficial interests", "Variable interest entities"
+- **Segment**: "Commercial banking", "Investment banking"
+- **Geography**: "United States", "International"
+
+**Step 3: Determine inclusion strategy**
+
+| Dimension Type | Include? | Rationale |
+|----------------|----------|-----------|
+| Consolidated total | ✅ YES | This is the total we want |
+| Parent company only | ❌ NO | Excludes subsidiaries |
+| Eliminations | ❌ NO | Adjustments, not assets |
+| VIE beneficial interests | ⚠️ DEPENDS | May double-count with other debt |
+| Segments | ⚠️ DEPENDS | Sum if exhaustive, skip if overlapping |
+
+**Step 4: Calculate with dimensional inclusion**
+```python
+# Try including specific dimensions
+total = 0
+for idx, row in dim.iterrows():
+    dimension = row['full_dimension_label']
+    value = row.get('numeric_value', 0)
+
+    # Include consolidated, exclude eliminations/parent-only
+    if 'consolidated' in dimension.lower():
+        total += value
+    elif 'elimination' in dimension.lower():
+        continue  # Skip
+    elif 'parent company' in dimension.lower():
+        continue  # Skip
+    else:
+        # Add other dimensions (segments, VIEs, etc.)
+        total += value
+
+print(f"With dimensional inclusion: ${total/1e9:.2f}B")
+print(f"Reference (yfinance): ${ref_value/1e9:.2f}B")
+print(f"Variance: {abs(total - ref_value) / ref_value * 100:.1f}%")
+```
+
+**Step 5: Document findings**
+```markdown
+### Dimensional Analysis: [Metric] ([Ticker])
+
+**Issue**: Validation failed with X% variance
+
+**Investigation**:
+- Non-dimensioned value: $X.XXB (what we extracted)
+- Dimensioned values found: Y values
+  * Dimension A: $X.XXB
+  * Dimension B: $X.XXB
+- Reference value: $X.XXB
+
+**Root Cause**: [Dimensional reporting | Missing dimensions | Over-inclusion]
+
+**Recommendation**:
+Option 1: Include consolidated dimension only
+Option 2: Sum segment dimensions
+Option 3: Flag as definition mismatch (needs validator enhancement)
+
+**Preferred**: [Your recommendation with justification]
+```
+
+### When Dimensional Issues Need Validator Enhancement
+
+If you find patterns like:
+- Multiple companies in same industry have dimensional-only data
+- No combination of dimensions matches reference
+- Dimensions indicate VIE/consolidation complexity
+
+**Action**: Flag for validator enhancement, don't try to force a resolution
+```python
+resolutions.append({
+    'ticker': ticker,
+    'metric': metric,
+    'resolved': False,
+    'reason': 'DIMENSIONAL_COMPLEXITY',
+    'notes': 'Requires validator enhancement for selective dimension inclusion',
+    'dimensional_analysis': {
+        'non_dim_value': non_dim_value,
+        'dim_values': [(dim, val) for dim, val in dimensional_values],
+        'reference_value': ref_value
+    }
+})
+```
+
 ## Your Systematic Workflow
 
 ### Phase 1: Analyze All Gaps
@@ -269,14 +473,66 @@ bs = stock.balance_sheet
 
 **Look for**: Which XBRL concepts sum to the yfinance value?
 
+#### Step 2.5: Analyze Dimensional Data (NEW - Critical for Financials)
+
+Before concluding root cause, check for dimensional reporting:
+
+```python
+# Check if concept has dimensional values
+all_facts_df = xbrl.facts.query().to_dataframe()
+concept_facts = all_facts_df[all_facts_df['concept'].str.contains(concept_name, case=False, na=False)]
+
+if 'full_dimension_label' in concept_facts.columns:
+    # Filter for latest period
+    latest_period = concept_facts['period_key'].max()
+    latest_facts = concept_facts[concept_facts['period_key'] == latest_period]
+
+    # Separate dimensional vs non-dimensional
+    non_dim = latest_facts[latest_facts['full_dimension_label'].isna()]
+    dim = latest_facts[latest_facts['full_dimension_label'].notna()]
+
+    print(f"\n📊 DIMENSIONAL ANALYSIS:")
+    print(f"   Non-dimensioned facts: {len(non_dim)}")
+    if len(non_dim) > 0:
+        for idx, row in non_dim.iterrows():
+            val = row.get('numeric_value')
+            if val:
+                print(f"     Total: ${val/1e9:.2f}B")
+
+    print(f"   Dimensioned facts: {len(dim)}")
+    if len(dim) > 0:
+        total_dim = 0
+        for idx, row in dim.iterrows():
+            dimension = row['full_dimension_label']
+            val = row.get('numeric_value')
+            if val:
+                print(f"     - {dimension}: ${val/1e9:.2f}B")
+                total_dim += val
+
+        print(f"\n   💡 Sum of dimensional values: ${total_dim/1e9:.2f}B")
+        print(f"   💡 Reference (yfinance): ${ref_value/1e9:.2f}B")
+
+        # Check if dimensional sum matches reference
+        if abs(total_dim - ref_value) / ref_value < 0.15:
+            print(f"   ⭐ Dimensional sum matches reference! (variance: {abs(total_dim - ref_value) / ref_value * 100:.1f}%)")
+        elif len(non_dim) == 0:
+            print(f"   ⚠️  NO non-dimensional value found - concept reported ONLY with dimensions")
+```
+
+**Look for**:
+1. Concept has NO non-dimensioned value (len(non_dim) == 0)
+2. Sum of dimensional values matches reference
+3. Dimension types (VIE, consolidation, segments)
+
 #### Step 3: Identify Root Cause Category
 
-| Category | Signs | Example |
-|----------|-------|---------|
-| **Composite Mismatch** | XBRL child concept < yfinance (need to sum components) | IntangibleAssets = Goodwill + IntangiblesNet |
-| **Consolidation Issue** | XBRL value << yfinance (orders of magnitude) | TotalAssets extracting parent-only, not consolidated |
-| **Definition Difference** | XBRL value ~50-200% of yfinance | LongTermDebt missing current portion |
-| **Timing Difference** | Small variance (~10-20%) | Different reporting date |
+| Category | Signs | Example | Resolution |
+|----------|-------|---------|------------|
+| **Dimensional Reporting** | XBRL non-dim << yfinance, dimensional data exists | JPM CommercialPaper: no non-dim, $21.80B in VIE dimension | Flag for validator enhancement, selective dimension inclusion |
+| **Composite Mismatch** | XBRL child concept < yfinance (need to sum components) | IntangibleAssets = Goodwill + IntangiblesNet | Add to COMPOSITE_METRICS |
+| **Consolidation Issue** | XBRL value << yfinance (orders of magnitude) | TotalAssets extracting parent-only, not consolidated | Update dimension filtering |
+| **Definition Difference** | XBRL value ~50-200% of yfinance | LongTermDebt missing current portion | Document for review |
+| **Timing Difference** | Small variance (~10-20%) | Different reporting date | Accept or adjust tolerance |
 
 #### Step 4: Propose Specific Fix
 
@@ -362,6 +618,54 @@ ISSUE 2: TotalAssets (AAPL, GOOG, AMZN)
     and prefer values without LegalEntityAxis dimension
 ```
 
+## Resolution Decision Tree
+
+Use this flowchart to determine the right action:
+
+```
+Gap identified
+│
+├─ Is metric applicable to this industry?
+│  ├─ NO → Add to exclusions config (structural gap)
+│  └─ YES → Continue
+│
+├─ Is it validation failure (is_mapped but variance > 15%)?
+│  ├─ YES → Investigate root cause
+│  │   ├─ Dimensional data exists?
+│  │   │   ├─ YES → Flag for validator enhancement
+│  │   │   └─ NO → Check composite/consolidation
+│  │   │
+│  │   ├─ Sum of components matches reference?
+│  │   │   ├─ YES → Add to COMPOSITE_METRICS
+│  │   │   └─ NO → Continue investigation
+│  │   │
+│  │   └─ Consolidation context issue?
+│  │       ├─ YES → Update dimension filtering
+│  │       └─ NO → Definition mismatch, document
+│  │
+│  └─ NO → Use AI tools to discover concept
+│      ├─ Candidates found?
+│      │   ├─ YES → Verify quality and value
+│      │   │   ├─ PASS → Auto-resolve
+│      │   │   └─ FAIL → Document for review
+│      │   │
+│      │   └─ NO → Investigate why
+│      │       ├─ Concept uses different name? → learn_mappings
+│      │       ├─ Concept doesn't exist? → Confirm with reference data
+│      │       └─ Data quality issue? → Flag for review
+```
+
+### Resolution Actions Summary
+
+| Situation | Action | Tool/Method |
+|-----------|--------|-------------|
+| Structural gap (metric N/A) | Add to exclusions | Update config |
+| Dimensional complexity | Flag for enhancement | Document with dimensional analysis |
+| Composite mismatch | Add to COMPOSITE_METRICS | Update reference_validator.py |
+| Concept name variation | Use AI discovery | discover_concepts() + verify_mapping() |
+| Definition difference | Document for review | Investigation report |
+| True unmapped + verified | Auto-apply | resolve_all_gaps() |
+
 ## Quality Standards
 
 1. **Auto-Apply Threshold**: Only auto-apply mappings with confidence >= 0.80 AND variance <= 15%
@@ -409,6 +713,79 @@ from edgar.xbrl.standardization.tools.resolve_gaps import (
     update_config           # Config auto-update
 )
 ```
+
+## Lessons from Real-World Testing
+
+### E2E Test with 10 S&P 500 Companies (Jan 2026)
+
+**Coverage achieved**: 86.4% (121/140 metrics)
+
+**Key insights**:
+
+1. **Static layers very effective**: Tree Parser + Facts Search achieved 86.4% vs expected 70-75%
+   - Recent improvements (validation-in-loop, composite metrics) had major impact
+   - Most common concepts now covered by static layers
+
+2. **AI layer selectivity**: Resolved 0 of 19 gaps
+   - NOT a failure - remaining gaps were structural or dimensional
+   - AI tools correctly didn't force bad mappings
+   - Shows quality gates working as designed
+
+3. **Gap composition**:
+   - 58% structural (financial companies lack manufacturing metrics)
+   - 26% validation failures (dimensional/definition issues)
+   - 16% true unmapped (hard edge cases)
+
+### JPM ShortTermDebt Investigation
+
+**Problem**: 18% variance despite correct mapping
+
+**Discovery**: Dimensional reporting complexity
+- CommercialPaper exists ONLY with dimension ("VIE beneficial interests")
+- Current validator filters out ALL dimensions
+- No combination of available data matches yfinance exactly
+
+**Impact**: Systemic issue for financial institutions
+
+**Lesson**: **Don't try to force resolution on dimensional issues**
+- These need validator framework enhancement
+- Attempting to "fix" with existing tools will create bad mappings
+- Better to flag for enhancement than auto-apply wrong solution
+
+### Pattern: Financial Institution Challenges
+
+**Why financial companies are harder**:
+1. **Extensive dimensional reporting** (VIEs, subsidiaries, consolidation)
+2. **Different business model** (service vs manufacturing)
+3. **Complex debt structures** (multiple types, maturities, vehicles)
+4. **Regulatory reporting** (Basel III, Dodd-Frank affects XBRL structure)
+
+**Don't try to resolve**:
+- COGS, Inventory, GrossProfit for banks
+- Manufacturing metrics for insurance companies
+- Composite metrics when dimensional data unclear
+
+**Do investigate**:
+- Dimensional breakdown patterns
+- VIE vs consolidated reporting
+- Definition differences in debt/equity
+
+### Success Metrics (Revised)
+
+**Old assumption**: Higher coverage % = better agent
+**New understanding**: Quality > quantity
+
+**Good outcomes**:
+- ✅ Resolve verifiable gaps with high confidence (>80%, <15% variance)
+- ✅ Identify and classify unresolvable gaps (structural, dimensional)
+- ✅ Document investigation findings for validator enhancement
+- ✅ Learn cross-company patterns for config updates
+
+**Bad outcomes**:
+- ❌ Force resolution on dimensional issues
+- ❌ Auto-apply low-confidence mappings
+- ❌ Ignore validation failures
+- ❌ Treat structural gaps as mapping failures
 
 ## Key Files
 
