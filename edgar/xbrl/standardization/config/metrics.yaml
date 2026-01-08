@@ -153,6 +153,12 @@ metrics:
       - ShortTermBorrowings
       - DebtCurrent
       - ShortTermDebtAndCapitalLeaseObligationsCurrent
+    # Dimensional handling: include dimensional values for CommercialPaper
+    # JPM reports CommercialPaper ONLY with dimensions (VIE)
+    dimensional_handling:
+      mode: "include_dimensional"  # Include dimensional values when no non-dim total exists
+      # Note: This allows extraction of values that exist only with dimensions
+      # like JPM's CommercialPaper reported under "Beneficial interests issued by consolidated VIEs"
     tree_hints:
       statements: [BALANCE]
       section: liabilities_current

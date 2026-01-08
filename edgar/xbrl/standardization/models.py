@@ -149,6 +149,7 @@ class MetricConfig:
     tree_hints: Dict[str, Any] = field(default_factory=dict)
     universal: bool = False
     notes: Optional[str] = None
+    dimensional_handling: Optional[Dict[str, Any]] = None  # Config for dimensional value handling
     
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""

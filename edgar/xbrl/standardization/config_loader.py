@@ -60,7 +60,8 @@ class ConfigLoader:
                 known_concepts=data.get("known_concepts", []),
                 tree_hints=data.get("tree_hints", {}),
                 universal=data.get("universal", False),
-                notes=data.get("notes")
+                notes=data.get("notes"),
+                dimensional_handling=data.get("dimensional_handling")
             )
         
         # Parse companies

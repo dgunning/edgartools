@@ -195,8 +195,10 @@ class ReferenceValidator:
             if result.is_mapped and xbrl:
                 # Check if metric is composite (sum of multiple concepts)
                 if metric in self.COMPOSITE_METRICS:
+                    self._current_metric = metric  # Set context for dimensional config lookup
                     xbrl_value = self._extract_composite_value(xbrl, metric)
                 else:
+                    self._current_metric = metric  # Set context for dimensional config lookup
                     xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
             
             # Validate
@@ -344,6 +346,28 @@ class ReferenceValidator:
                 if len(total_rows) == 0:
                     dim_rows = df[df['full_dimension_label'].notna()]
                     if len(dim_rows) > 0:
+                        # Check if metric config allows dimensional inclusion
+                        dim_config = None
+                        if hasattr(self, '_current_metric') and self._current_metric:
+                            metric_config = self.config.get_metric(self._current_metric)
+                            if metric_config:
+                                dim_config = metric_config.dimensional_handling
+                        
+                        if dim_config and dim_config.get('mode') == 'include_dimensional':
+                            # Sum dimensional values as fallback
+                            dim_rows = dim_rows[dim_rows['numeric_value'].notna()]
+                            if len(dim_rows) > 0:
+                                # Sort by period_key to get most recent
+                                if 'period_key' in dim_rows.columns:
+                                    dim_rows = dim_rows.sort_values('period_key', ascending=False)
+                                # Get the latest period and sum all dimensional values for it
+                                latest_period = dim_rows.iloc[0]['period_key'] if 'period_key' in dim_rows.columns else None
+                                if latest_period:
+                                    period_rows = dim_rows[dim_rows['period_key'] == latest_period]
+                                    return float(period_rows['numeric_value'].sum())
+                                else:
+                                    return float(dim_rows['numeric_value'].sum())
+                        
                         # Log this dimensional-only case for investigation
                         dim_sum = dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None
                         warning = {
