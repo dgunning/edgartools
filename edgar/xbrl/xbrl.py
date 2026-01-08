@@ -1832,9 +1832,9 @@ class XBRL:
                     for item in statement_data:
                         item['statement_type'] = stmt_type
 
-                    # Apply standardization
-                    from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
-                    mapper = ConceptMapper(initialize_default_mappings(read_only=True))
+                    # Apply standardization using module-level singleton mapper
+                    from edgar.xbrl.standardization import get_default_mapper, standardize_statement
+                    mapper = get_default_mapper()
                     statement_data = standardize_statement(statement_data, mapper)
 
                 # Create rows for the DataFrame

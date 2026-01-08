@@ -1307,8 +1307,8 @@ def render_statement(
 
     # Apply standardization if requested
     if standard:
-        # Create a concept mapper with default mappings
-        mapper = standardization.ConceptMapper(standardization.initialize_default_mappings())
+        # Use module-level singleton mapper for performance (eliminates redundant file I/O)
+        mapper = standardization.get_default_mapper()
 
         # Add statement type to context for better mapping
         for item in statement_data:

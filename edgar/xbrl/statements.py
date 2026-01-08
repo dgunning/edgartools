@@ -566,6 +566,7 @@ class Statement:
                      include_dimensions: Optional[bool] = None,
                      include_unit: bool = False,
                      include_point_in_time: bool = False,
+                     include_standardization: bool = False,
                      presentation: bool = False,
                      matrix: bool = False) -> Any:
         """Convert statement to pandas DataFrame.
@@ -583,6 +584,11 @@ class Statement:
                               If specified, emits DeprecationWarning.
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
+            include_standardization: If True, add columns showing standardization details:
+                                    - 'original_label': the raw label before standardization
+                                    - 'standard_label': the standardized label (if mapped)
+                                    - 'was_standardized': boolean indicating if label was changed
+                                    Requires standard=True to have any effect.
             presentation: If True, apply HTML-matching presentation logic (Issue #463)
                          Cash Flow: outflows (balance='credit') shown as negative
                          Income: apply preferred_sign transformations
@@ -648,6 +654,7 @@ class Statement:
                 include_dimensions=effective_include_dimensions,
                 include_unit=include_unit,
                 include_point_in_time=include_point_in_time,
+                include_standardization=include_standardization,
                 view=effective_view
             )
 
@@ -678,6 +685,7 @@ class Statement:
         include_dimensions: bool = False,
         include_unit: bool = False,
         include_point_in_time: bool = False,
+        include_standardization: bool = False,
         view: StatementView = StatementView.DETAILED
     ) -> pd.DataFrame:
         """
@@ -705,7 +713,8 @@ class Statement:
         # This transforms labels like "Ending balances" → "Total Stockholders' Equity"
         if standard:
             from edgar.xbrl import standardization
-            mapper = standardization.ConceptMapper(standardization.initialize_default_mappings())
+            # Use module-level singleton mapper for performance (eliminates redundant file I/O)
+            mapper = standardization.get_default_mapper()
             # Add statement type context for better mapping
             for item in raw_data:
                 item['statement_type'] = statement_type
@@ -926,6 +935,20 @@ class Statement:
                 row['dimension_member'] = None
                 row['dimension_member_label'] = None
                 row['dimension_label'] = None
+
+            # Add standardization columns if requested (requires standard=True to be effective)
+            if include_standardization and standard:
+                original = item.get('original_label')
+                if original:
+                    # Item was standardized - show both labels
+                    row['original_label'] = original
+                    row['standard_label'] = label  # 'label' is the current (standardized) label
+                    row['was_standardized'] = True
+                else:
+                    # Item was not standardized - original and standard are the same
+                    row['original_label'] = label
+                    row['standard_label'] = label
+                    row['was_standardized'] = False
 
             df_rows.append(row)
 
