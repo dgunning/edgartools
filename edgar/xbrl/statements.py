@@ -1210,6 +1210,43 @@ class Statement:
                 raise StatementValidationError(
                     f"Missing required concepts for {validate_type}: {', '.join(missing_concepts)}")
 
+    def validate(self, level: str = "fundamental") -> "ValidationResult":
+        """
+        Validate the financial statement for accounting compliance.
+
+        For balance sheets, validates the fundamental accounting equation:
+            Assets = Liabilities + Equity
+
+        Args:
+            level: Validation level - "fundamental", "sections", or "detailed"
+                   - fundamental: Basic equation check
+                   - sections: Also validates section subtotals
+                   - detailed: Full line-item rollup validation
+
+        Returns:
+            ValidationResult with is_valid flag and any issues found
+
+        Example:
+            >>> bs = xbrl.statements.balance_sheet()
+            >>> result = bs.validate()
+            >>> print(result)
+            ValidationResult: VALID (0 errors, 0 warnings)
+            >>> if not result.is_valid:
+            ...     for error in result.errors:
+            ...         print(f"Error: {error.message}")
+        """
+        from edgar.xbrl.validation import validate_statement, ValidationLevel
+
+        # Map string level to enum
+        level_map = {
+            "fundamental": ValidationLevel.FUNDAMENTAL,
+            "sections": ValidationLevel.SECTIONS,
+            "detailed": ValidationLevel.DETAILED,
+        }
+        validation_level = level_map.get(level.lower(), ValidationLevel.FUNDAMENTAL)
+
+        return validate_statement(self, self.canonical_type, level=validation_level)
+
     def calculate_ratios(self) -> Dict[str, float]:
         """Calculate common financial ratios for this statement."""
         ratios = {}
