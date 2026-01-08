@@ -78,14 +78,11 @@ def select_display_label(
     # generic "Intangible Assets"
     if element_id and selected_label and not used_company_label:
         try:
-            from edgar.xbrl.standardization.core import initialize_default_mappings
+            # Use module-level singleton for efficient caching across all calls
+            from edgar.xbrl.standardization import get_default_store
 
-            # Initialize mapping store (cached after first call)
-            if not hasattr(select_display_label, '_mapping_store'):
-                select_display_label._mapping_store = initialize_default_mappings(read_only=True)
-
-            # Try to get standardized concept
-            standardized_label = select_display_label._mapping_store.get_standard_concept(element_id)
+            # Try to get standardized concept using the singleton store
+            standardized_label = get_default_store().get_standard_concept(element_id)
 
             if standardized_label:
                 return standardized_label

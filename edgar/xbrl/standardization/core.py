@@ -7,12 +7,28 @@ statements regardless of the filing entity.
 """
 
 import json
+import logging
 import os
 from difflib import SequenceMatcher
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pandas as pd
+
+# Module-level logger (avoid creating logger inside hot paths)
+logger = logging.getLogger(__name__)
+
+# Lazy import to avoid circular dependencies
+_reverse_index = None
+
+
+def _get_reverse_index():
+    """Lazy load the reverse index singleton."""
+    global _reverse_index
+    if _reverse_index is None:
+        from .reverse_index import ReverseIndex
+        _reverse_index = ReverseIndex()
+    return _reverse_index
 
 
 class StandardConcept(str, Enum):
@@ -214,9 +230,6 @@ class MappingStore:
         # Find enum values not in JSON (just for information)
         missing_in_json = standard_values - json_keys
 
-        import logging
-        logger = logging.getLogger(__name__)
-
         if missing_in_enum:
             logger.warning("Found %d keys in concept_mappings.json that don't exist in StandardConcept enum: %s", len(missing_in_enum), sorted(missing_in_enum))
 
@@ -262,8 +275,6 @@ class MappingStore:
                             company_data = json.load(f)
                             mappings[entity_id] = company_data
                     except (FileNotFoundError, json.JSONDecodeError) as e:
-                        import logging
-                        logger = logging.getLogger(__name__)
                         logger.warning("Failed to load %s: %s", file, e)
 
         return mappings
@@ -352,8 +363,6 @@ class MappingStore:
                     pass
             except Exception:
                 # If all attempts fail, log a warning
-                import logging
-                logger = logging.getLogger(__name__)
                 logger.warning("Could not load concept_mappings.json. Standardization will be limited.")
 
         # If we have data, process it based on its structure
@@ -409,14 +418,30 @@ class MappingStore:
         """
         Get the standard concept for a given company concept with priority-based resolution.
 
+        Uses a multi-tier lookup strategy:
+        1. Reverse index (O(1) lookup, 2,067 GAAP tags) - NEW
+        2. Company-specific mappings (priority-based)
+        3. Core mappings fallback
+
         Args:
             company_concept: The company-specific concept
-            context: Optional context information (not used in current implementation)
+            context: Optional context information (for future disambiguation)
 
         Returns:
             The standard concept or None if not found
         """
-        # Use merged mappings with priority-based resolution
+        # Tier 1: Try the reverse index first (O(1) lookup, covers 95% of tags)
+        try:
+            reverse_index = _get_reverse_index()
+            display_name = reverse_index.get_display_name(company_concept, context)
+            if display_name:
+                logger.debug("Reverse index match: %s -> %s", company_concept, display_name)
+                return display_name
+        except (ImportError, FileNotFoundError, json.JSONDecodeError) as e:
+            # Only catch expected errors - let other exceptions propagate
+            logger.debug("Reverse index lookup failed for %s: %s", company_concept, e)
+
+        # Tier 2: Use merged mappings with priority-based resolution
         if self.merged_mappings:
             # Detect company from concept prefix (e.g., 'tsla:Revenue' -> 'tsla')
             detected_entity = self._detect_entity_from_concept(company_concept)
@@ -437,16 +462,37 @@ class MappingStore:
             # Return highest priority match
             if candidates:
                 best_match = max(candidates, key=lambda x: x[1])
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.debug("Mapping applied: %s -> %s (source: %s, priority: %s)", company_concept, best_match[0], best_match[2], best_match[1])
+                logger.debug("Merged mapping applied: %s -> %s (source: %s, priority: %s)", company_concept, best_match[0], best_match[2], best_match[1])
                 return best_match[0]
 
-        # Fallback to core mappings
+        # Tier 3: Fallback to core mappings
         for standard_concept, company_concepts in self.mappings.items():
             if company_concept in company_concepts:
+                logger.debug("Core mapping fallback: %s -> %s", company_concept, standard_concept)
                 return standard_concept
+
         return None
+
+    def get_display_name(self, company_concept: str, context: Optional[Dict] = None) -> Optional[str]:
+        """
+        Get the user-friendly display name for a company concept.
+
+        This method returns the standardized display name (e.g., "Accounts Payable")
+        rather than the internal concept name (e.g., "TradePayables").
+
+        Args:
+            company_concept: The company-specific XBRL concept
+            context: Optional context information (for future disambiguation)
+
+        Returns:
+            The user-friendly display name, or None if not found
+        """
+        try:
+            reverse_index = _get_reverse_index()
+            return reverse_index.get_display_name(company_concept, context)
+        except (ImportError, FileNotFoundError, json.JSONDecodeError):
+            # Fallback to get_standard_concept for backwards compatibility
+            return self.get_standard_concept(company_concept, context)
 
     def get_company_concepts(self, standard_concept: str) -> Set[str]:
         """
@@ -502,13 +548,14 @@ class ConceptMapper:
         Returns:
             The standard concept or None if no mapping found
         """
-        # Use cache for faster lookups
-        cache_key = (company_concept, context.get('statement_type', ''))
+        # Use cache for faster lookups - include section for ambiguous tag disambiguation
+        cache_key = (company_concept, context.get('statement_type', ''), context.get('section', ''))
         if cache_key in self._cache:
             return self._cache[cache_key]
 
         # Check if we already have a mapping in the store
-        standard_concept = self.mapping_store.get_standard_concept(company_concept)
+        # Pass context for context-aware disambiguation of ambiguous tags (Phase 3/4)
+        standard_concept = self.mapping_store.get_standard_concept(company_concept, context)
         if standard_concept:
             self._cache[cache_key] = standard_concept
             return standard_concept
@@ -722,6 +769,217 @@ def _should_preserve_label(original_label: str, standardized_label: str) -> bool
     return False
 
 
+def _derive_section_from_parent(calculation_parent: str, statement_type: str) -> Optional[str]:
+    """
+    Derive the balance sheet section from a calculation parent concept.
+
+    Phase 3: Uses the calculation parent to determine which section an item
+    belongs to, enabling disambiguation of ambiguous tags.
+
+    The key insight is that if an item's calculation parent is "AssetsCurrent",
+    then the item belongs to the "Current Assets" section.
+
+    Args:
+        calculation_parent: The calculation parent concept (e.g., "us-gaap:AssetsCurrent")
+        statement_type: The statement type (e.g., "BalanceSheet")
+
+    Returns:
+        Section name (e.g., "Current Assets") or None if not determinable
+    """
+    if not calculation_parent:
+        return None
+
+    # Normalize the parent concept name
+    parent_normalized = calculation_parent.lower()
+    # Remove namespace prefix
+    if ":" in parent_normalized:
+        parent_normalized = parent_normalized.split(":")[-1]
+    if "_" in parent_normalized:
+        parent_normalized = parent_normalized.split("_")[-1]
+
+    # Map parent totals to their sections
+    # Items under AssetsCurrent belong to "Current Assets" section
+    parent_to_section = {
+        # Current Assets - items rolling up to AssetsCurrent
+        "assetscurrent": "Current Assets",
+        "currentassets": "Current Assets",
+
+        # Non-Current Assets - items rolling up to AssetsNoncurrent
+        "assetsnoncurrent": "Non-Current Assets",
+        "noncurrentassets": "Non-Current Assets",
+
+        # Current Liabilities - items rolling up to LiabilitiesCurrent
+        "liabilitiescurrent": "Current Liabilities",
+        "currentliabilities": "Current Liabilities",
+
+        # Non-Current Liabilities - items rolling up to LiabilitiesNoncurrent
+        "liabilitiesnoncurrent": "Non-Current Liabilities",
+        "noncurrentliabilities": "Non-Current Liabilities",
+
+        # Equity - items rolling up to StockholdersEquity
+        "stockholdersequity": "Equity",
+        "stockholdersequityincludingportionattributabletononcontrollinginterest": "Equity",
+        "equity": "Equity",
+
+        # Top-level totals (less specific)
+        "assets": "Assets",
+        "liabilities": "Liabilities",
+        "liabilitiesandstockholdersequity": "Liabilities and Equity",
+    }
+
+    # Direct lookup
+    if parent_normalized in parent_to_section:
+        return parent_to_section[parent_normalized]
+
+    # Partial match fallback
+    for pattern, section in parent_to_section.items():
+        if pattern in parent_normalized:
+            return section
+
+    # Try reverse index as last resort
+    try:
+        reverse_index = _get_reverse_index()
+        parent_standard = reverse_index.get_standard_concept(calculation_parent)
+
+        if parent_standard:
+            from .sections import get_section_for_concept
+            section = get_section_for_concept(parent_standard, statement_type)
+            if section and section != "Totals":
+                return section
+
+    except Exception as e:
+        logger.debug("Could not derive section from parent %s: %s", calculation_parent, e)
+
+    return None
+
+
+def _assign_sections_bottom_up(
+    items_to_standardize: List[Tuple[int, str, str, Dict[str, Any]]],
+    statement_data: List[Dict[str, Any]]
+) -> None:
+    """
+    Assign sections to items using bottom-up scanning (mpreiss9's method).
+
+    Process line items from bottom to top. When we encounter a subtotal,
+    that defines the current section, and all items above it (until the
+    next subtotal) belong to that section.
+
+    This approach is more robust than calculation-parent-based section
+    derivation because:
+    1. Some filings have incomplete/missing calculation trees
+    2. The statement's own structure (subtotals) is always present
+    3. Subtotals naturally demarcate section boundaries
+
+    Args:
+        items_to_standardize: List of tuples (index, concept, label, context)
+                             - modifies context dicts in-place
+        statement_data: Original statement data for accessing item properties
+
+    Note:
+        This function modifies the context dicts in items_to_standardize in-place.
+    """
+    if not items_to_standardize:
+        return
+
+    # Map standard subtotal labels to section names
+    subtotal_to_section = {
+        # Current Assets subtotals
+        "total current assets": "Current Assets",
+        "current assets, total": "Current Assets",
+
+        # Non-Current Assets subtotals
+        "total non-current assets": "Non-Current Assets",
+        "total noncurrent assets": "Non-Current Assets",
+        "non-current assets, total": "Non-Current Assets",
+        "total other assets": "Non-Current Assets",
+
+        # Current Liabilities subtotals
+        "total current liabilities": "Current Liabilities",
+        "current liabilities, total": "Current Liabilities",
+
+        # Non-Current Liabilities subtotals
+        "total non-current liabilities": "Non-Current Liabilities",
+        "total noncurrent liabilities": "Non-Current Liabilities",
+        "non-current liabilities, total": "Non-Current Liabilities",
+        "total long-term debt": "Non-Current Liabilities",
+
+        # Equity subtotals
+        "total stockholders' equity": "Equity",
+        "total stockholders equity": "Equity",
+        "total shareholders' equity": "Equity",
+        "total shareholders equity": "Equity",
+        "total equity": "Equity",
+        "stockholders' equity, total": "Equity",
+
+        # Income Statement sections
+        "total revenue": "Revenue",
+        "total revenues": "Revenue",
+        "total operating expenses": "Operating Expenses",
+        "operating expenses, total": "Operating Expenses",
+        "total cost of revenue": "Cost of Revenue",
+        "total cost of sales": "Cost of Revenue",
+    }
+
+    # Build index map for quick lookup: original_index -> items_to_standardize index
+    idx_map = {item[0]: i for i, item in enumerate(items_to_standardize)}
+
+    # Get all indices in original order
+    all_indices = sorted([item[0] for item in items_to_standardize])
+
+    # Process bottom-to-top
+    current_section = None
+
+    for orig_idx in reversed(all_indices):
+        item_idx = idx_map[orig_idx]
+        _, _, label, context = items_to_standardize[item_idx]
+
+        # Get item properties from original data
+        original_item = statement_data[orig_idx]
+        is_total = original_item.get("is_total", False) or "total" in label.lower()
+        level = original_item.get("level", 0)
+
+        # Check if this is a section subtotal (level 0 or 1 total)
+        if is_total and level <= 1:
+            # Try to derive section from the subtotal label
+            label_lower = label.lower()
+
+            # Direct lookup
+            section_from_subtotal = subtotal_to_section.get(label_lower)
+
+            # Partial match fallback
+            if not section_from_subtotal:
+                for pattern, section in subtotal_to_section.items():
+                    if pattern in label_lower or label_lower in pattern:
+                        section_from_subtotal = section
+                        break
+
+            # Infer from label patterns if still not found
+            if not section_from_subtotal:
+                if "current asset" in label_lower:
+                    section_from_subtotal = "Current Assets"
+                elif "current liabilit" in label_lower:
+                    section_from_subtotal = "Current Liabilities"
+                elif "noncurrent asset" in label_lower or "non-current asset" in label_lower:
+                    section_from_subtotal = "Non-Current Assets"
+                elif "noncurrent liabilit" in label_lower or "non-current liabilit" in label_lower:
+                    section_from_subtotal = "Non-Current Liabilities"
+                elif "equity" in label_lower:
+                    section_from_subtotal = "Equity"
+                elif "revenue" in label_lower:
+                    section_from_subtotal = "Revenue"
+                elif "operating expense" in label_lower:
+                    section_from_subtotal = "Operating Expenses"
+
+            if section_from_subtotal:
+                current_section = section_from_subtotal
+                logger.debug("Bottom-up: Found section boundary '%s' at '%s'", current_section, label)
+
+        # Assign section to this item if it doesn't have one
+        if current_section and not context.get("section"):
+            context["section"] = current_section
+            logger.debug("Bottom-up: Assigned section '%s' to '%s'", current_section, label)
+
+
 def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper) -> List[Dict[str, Any]]:
     """
     Standardize labels in a statement using the concept mapper.
@@ -752,18 +1010,31 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
         if not label:
             continue
 
-        # Build minimal context once, reuse for multiple calls
+        # Build enhanced context for disambiguation (Phase 3)
+        calculation_parent = item.get("calculation_parent")
         context = {
             "statement_type": item.get("statement_type", "") or statement_type,
             "level": item.get("level", 0),
-            "is_total": "total" in label.lower() or item.get("is_total", False)
+            "is_total": "total" in label.lower() or item.get("is_total", False),
+            "calculation_parent": calculation_parent,  # Phase 3: for section determination
+            "balance": item.get("balance"),  # debit/credit for sign-based disambiguation
+            "weight": item.get("weight", 1.0),  # calculation weight
         }
+
+        # Phase 3: Derive section from calculation parent if available
+        if calculation_parent:
+            context["section"] = _derive_section_from_parent(calculation_parent, statement_type)
 
         items_to_standardize.append((i, concept, label, context))
 
     # If no items need standardization, return early with unchanged data
     if not items_to_standardize:
         return statement_data
+
+    # Bottom-up section assignment (mpreiss9's method)
+    # This fills in sections for items that didn't get one from calculation_parent
+    # by scanning from bottom to top and using subtotals as section boundaries
+    _assign_sections_bottom_up(items_to_standardize, statement_data)
 
     # Second pass - create result list with standardized items
     result = []

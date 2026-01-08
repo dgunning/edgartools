@@ -1,0 +1,154 @@
+{
+  "_metadata": {
+    "description": "Maps standard concepts to their statement sections for context-aware disambiguation",
+    "version": "1.0.0",
+    "total_concepts": 96
+  },
+  "BalanceSheet": {
+    "Current Assets": [
+      "CashAndMarketableSecurities",
+      "TradeReceivables",
+      "Inventories",
+      "DeferredTaxCurrentAssets",
+      "OtherOperatingCurrentAssets",
+      "OtherNonOperatingCurrentAssets",
+      "RetirementRelatedCurrentAssets"
+    ],
+    "Non-Current Assets": [
+      "PlantPropertyEquipmentNet",
+      "Goodwill",
+      "IntangibleAssets",
+      "LongtermInvestments",
+      "DeferredTaxNoncurrentAssets",
+      "OtherOperatingNonCurrentAssets",
+      "OtherNonOperatingNonCurrentAssets",
+      "OperatingLeaseRightOfUseAsset",
+      "RetirementRelatedNonCurrentAssets"
+    ],
+    "Current Liabilities": [
+      "TradePayables",
+      "ShortTermDebt",
+      "DeferredTaxCurrentLiabilities",
+      "TaxesPayable",
+      "DividendsPayable",
+      "OtherOperatingCurrentLiabilities",
+      "OtherNonOperatingCurrentLiabilities",
+      "RetirementRelatedCurrentLiabilities",
+      "OperatingLeaseCurrentDebtEquivalent"
+    ],
+    "Non-Current Liabilities": [
+      "LongTermDebt",
+      "DeferredTaxNonCurrentLiabilities",
+      "OtherOperatingNonCurrentLiabilities",
+      "OtherNonOperatingNonCurrentLiabilities",
+      "RetirementRelatedNonCurrentLiabilities",
+      "OperatingLeaseNonCurrentDebtEquivalent",
+      "OngoingOperatingProvisions(WarrantiesEtc)",
+      "DefinteLivedOperatingProvisions(DecommissioningEtc)",
+      "RestructuringProvisions"
+    ],
+    "Equity": [
+      "CommonEquity",
+      "AllEquityBalance",
+      "AllEquityBalanceIncludingMinorityInterest",
+      "MinorityInterestBalance",
+      "PreferredStock",
+      "TreasuryShares",
+      "TemporaryAndMezzanineFinancing"
+    ],
+    "Totals": [
+      "Assets",
+      "CurrentAssetsTotal",
+      "NonCurrentAssetsTotal",
+      "Liabilities",
+      "CurrentLiabilitiesTotal",
+      "NonCurrentLiabilitiesTotal",
+      "LiabilitiesAndEquity"
+    ]
+  },
+  "IncomeStatement": {
+    "Revenue": [
+      "Revenue"
+    ],
+    "Cost of Revenue": [
+      "CostOfGoodsAndServicesSold"
+    ],
+    "Gross Profit": [
+      "GrossProfit"
+    ],
+    "Operating Expenses": [
+      "ResearchAndDevelopementExpenses",
+      "SellingGeneralAndAdminExpenses",
+      "MarketingExpenses",
+      "DepreciationExpense",
+      "AmortizationOfIntangibles",
+      "OtherOperatingExpense",
+      "RestructuringExpenseBenefit",
+      "GoodwillWriteoffs",
+      "CostsSubtotal"
+    ],
+    "Operating Income": [
+      "OperatingIncomeLoss"
+    ],
+    "Non-Operating Items": [
+      "NonoperatingIncomeExpense",
+      "InterestExpense",
+      "InterestIncome"
+    ],
+    "Income Before Tax": [
+      "PretaxIncomeLoss"
+    ],
+    "Income Tax": [
+      "IncomeTaxes"
+    ],
+    "Net Income": [
+      "IncomeLossContinuingOperations",
+      "ExtraordinaryItemsIncomeExpense(PostTax)",
+      "SpecialItemsIncomeExpense(Pretax)",
+      "MinorityInterestIncomeExpense",
+      "ProfitLoss",
+      "NetIncome",
+      "NetIncomeToCommonShareholders",
+      "PreferredDividendExpense"
+    ]
+  },
+  "CashFlowStatement": {
+    "Investing Activities": [
+      "CapitalExpenses"
+    ],
+    "Financing Activities": [
+      "CommonDividendsPaid",
+      "EquityExpenseIncome(BuybackIssued)"
+    ]
+  },
+  "PerShareData": {
+    "Shares Outstanding": [
+      "SharesAverage",
+      "SharesDilutionAdjustment",
+      "SharesFullyDilutedAverage",
+      "SharesIssued",
+      "SharesYearEnd"
+    ],
+    "Dividends": [
+      "CommonDividendsPerShare"
+    ]
+  },
+  "Commitments": {
+    "Operating Lease Commitments": [
+      "OperatingLeaseCommitmentYear1",
+      "OperatingLeaseCommitmentYear2",
+      "OperatingLeaseCommitmentYear3",
+      "OperatingLeaseCommitmentYear4",
+      "OperatingLeaseCommitmentYear5",
+      "OperatingLeaseCommitmentAfterYear5"
+    ],
+    "Amortization Forecasts": [
+      "ForecastedIntangibleAmortizationYear1",
+      "ForecastedIntangibleAmortizationYear2",
+      "ForecastedIntangibleAmortizationYear3",
+      "ForecastedIntangibleAmortizationYear4",
+      "ForecastedIntangibleAmortizationYear5",
+      "ForecastedIntangibleAmortizationAfterYear5"
+    ]
+  }
+}
