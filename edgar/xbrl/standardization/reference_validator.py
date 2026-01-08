@@ -96,6 +96,57 @@ class ReferenceValidator:
         
         return self._yf_cache[ticker]
     
+    def _check_dimensional_only(
+        self,
+        xbrl,
+        concept: str
+    ) -> Optional[Dict]:
+        """
+        Check if a concept has values ONLY with dimensions (no consolidated total).
+        
+        This helps identify cases like JPM's CommercialPaper which is reported
+        only under dimensional contexts (e.g., "Beneficial interests issued by
+        consolidated VIEs") with no non-dimensioned total.
+        
+        Args:
+            xbrl: XBRL object
+            concept: Concept name to check
+            
+        Returns:
+            Dict with dimensional breakdown if concept is dimensional-only,
+            None if concept has non-dimensioned values or doesn't exist.
+        """
+        try:
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            facts = xbrl.facts
+            df = facts.get_facts_by_concept(concept_name)
+            
+            if df is None or len(df) == 0:
+                return None
+            
+            # Check for non-dimensioned and dimensioned values
+            if 'full_dimension_label' not in df.columns:
+                return None  # No dimension info available
+            
+            has_non_dim = len(df[df['full_dimension_label'].isna()]) > 0
+            has_dim = len(df[df['full_dimension_label'].notna()]) > 0
+            
+            if has_dim and not has_non_dim:
+                # This concept is ONLY reported with dimensions
+                dim_rows = df[df['full_dimension_label'].notna()]
+                return {
+                    'concept': concept,
+                    'dimensional_only': True,
+                    'dimension_count': len(dim_rows),
+                    'total_value': dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None,
+                    'dimensions': dim_rows[['full_dimension_label', 'numeric_value']].head(5).to_dict('records')
+                }
+            
+            return None
+            
+        except Exception:
+            return None
+    
     def validate_company(
         self,
         ticker: str,
@@ -288,6 +339,25 @@ class ReferenceValidator:
             # Filter for non-dimensioned (total) values only
             if 'full_dimension_label' in df.columns:
                 total_rows = df[df['full_dimension_label'].isna()]
+                
+                # Check if we're filtering out dimensional-only values
+                if len(total_rows) == 0:
+                    dim_rows = df[df['full_dimension_label'].notna()]
+                    if len(dim_rows) > 0:
+                        # Log this dimensional-only case for investigation
+                        dim_sum = dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None
+                        warning = {
+                            'concept': concept,
+                            'dimensional_only': True,
+                            'dimension_count': len(dim_rows),
+                            'dimensional_sum': dim_sum,
+                            'sample_dimensions': dim_rows['full_dimension_label'].head(3).tolist()
+                        }
+                        # Store warning for later retrieval
+                        if not hasattr(self, '_dimensional_warnings'):
+                            self._dimensional_warnings = {}
+                        self._dimensional_warnings[concept] = warning
+                    return None
             else:
                 total_rows = df
 
@@ -448,3 +518,37 @@ class ReferenceValidator:
                     print(f"  [OK]   {metric}: values match")
                 elif v.status == "mismatch":
                     print(f"  [ERR]  {metric}: values differ by {v.variance_pct:.1f}%")
+    
+    def get_dimensional_warnings(self) -> Dict[str, Dict]:
+        """
+        Get all dimensional-only warnings logged during validation.
+        
+        These are concepts that have values ONLY with dimensions,
+        with no non-dimensioned (consolidated) total.
+        
+        Returns:
+            Dict mapping concept name to warning details
+        """
+        return getattr(self, '_dimensional_warnings', {})
+    
+    def print_dimensional_warnings(self):
+        """Print any dimensional-only warnings logged during validation."""
+        warnings = self.get_dimensional_warnings()
+        if not warnings:
+            return
+        
+        print("\n" + "=" * 70)
+        print("DIMENSIONAL-ONLY CONCEPTS DETECTED")
+        print("=" * 70)
+        print("These concepts have values ONLY with dimensions (no consolidated total):")
+        print()
+        
+        for concept, info in warnings.items():
+            dim_sum_b = info.get('dimensional_sum', 0) / 1e9 if info.get('dimensional_sum') else 0
+            print(f"  {concept}:")
+            print(f"    Dimensional values sum: ${dim_sum_b:.2f}B")
+            print(f"    Dimension count: {info.get('dimension_count', 0)}")
+            sample_dims = info.get('sample_dimensions', [])[:2]
+            for dim in sample_dims:
+                print(f"      - {dim[:60]}..." if len(dim) > 60 else f"      - {dim}")
+        print()
