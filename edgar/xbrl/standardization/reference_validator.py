@@ -96,6 +96,32 @@ class ReferenceValidator:
         
         return self._yf_cache[ticker]
     
+    def _get_tolerance_for_company(self, ticker: str) -> float:
+        """
+        Get validation tolerance for a specific company.
+        
+        Priority:
+        1. Company-specific tolerance (validation_tolerance_pct)
+        2. Industry-specific tolerance (from defaults.industry_tolerances)
+        3. Default tolerance (self.tolerance)
+        """
+        company_config = self.config.get_company(ticker.upper())
+        
+        if company_config:
+            # Check company-specific tolerance first
+            if company_config.validation_tolerance_pct is not None:
+                return company_config.validation_tolerance_pct / 100.0
+            
+            # Check industry-specific tolerance
+            if company_config.industry:
+                industry_tolerances = self.config.defaults.get('industry_tolerances', {})
+                industry_tolerance = industry_tolerances.get(company_config.industry)
+                if industry_tolerance is not None:
+                    return industry_tolerance / 100.0
+        
+        # Fall back to default tolerance
+        return self.tolerance
+    
     def _check_dimensional_only(
         self,
         xbrl,
@@ -485,7 +511,10 @@ class ReferenceValidator:
         abs_xbrl = abs(xbrl_value)
         abs_ref = abs(ref_value)
         variance = abs(abs_xbrl - abs_ref) / abs_ref if abs_ref != 0 else 0
-        is_match = variance <= self.tolerance
+        
+        # Use company-specific tolerance if available
+        tolerance = self._get_tolerance_for_company(ticker)
+        is_match = variance <= tolerance
         
         return ValidationResult(
             metric=metric,
@@ -495,7 +524,7 @@ class ReferenceValidator:
             is_valid=is_match,
             variance_pct=variance * 100,
             status="match" if is_match else "mismatch",
-            notes=f"Variance: {variance*100:.1f}%" if not is_match else None
+            notes=f"Variance: {variance*100:.1f}% (tolerance: {tolerance*100:.0f}%)" if not is_match else f"Used {tolerance*100:.0f}% tolerance"
         )
     
     def check_metric_exists(

@@ -43,6 +43,17 @@ companies:
         preferred_concept: AdvertisingRevenue
         notes: "Primary revenue is advertising"
 
+  # Financial Services Companies - require higher validation tolerance
+  JPM:
+    name: "JPMorgan Chase & Co."
+    cik: 19617
+    industry: "financial_services"
+    validation_tolerance_pct: 20.0  # 20% tolerance for financials
+    exclude_metrics:
+      - COGS  # Banks don't have traditional COGS
+      - SGA   # Banks use different expense categories
+    notes: "Financial company - uses dimensional XBRL reporting (VIEs)"
+
 # Default settings
 defaults:
   confidence_thresholds:
@@ -50,6 +61,15 @@ defaults:
     tree_medium: 0.80
     ai_high: 0.90
     ai_medium: 0.70
+  
+  # Default validation tolerance (15%)
+  validation_tolerance_pct: 15.0
+  
+  # Industry-specific tolerance overrides
+  industry_tolerances:
+    financial_services: 20.0  # Banks, insurance, etc.
+    technology: 15.0
+    default: 15.0
   
   fallback_chain:
     - tree_parser

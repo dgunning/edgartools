@@ -75,7 +75,9 @@ class ConfigLoader:
                 exclude_metrics=data.get("exclude_metrics", []),
                 metric_overrides=data.get("metric_overrides", {}),
                 notes=data.get("notes"),
-                fiscal_year_end=data.get("fiscal_year_end", "December")
+                fiscal_year_end=data.get("fiscal_year_end", "December"),
+                industry=data.get("industry"),
+                validation_tolerance_pct=data.get("validation_tolerance_pct")
             )
         
         # Get defaults

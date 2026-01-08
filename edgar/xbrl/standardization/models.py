@@ -169,6 +169,8 @@ class CompanyConfig:
     metric_overrides: Dict[str, Dict] = field(default_factory=dict)
     notes: Optional[str] = None
     fiscal_year_end: str = "December"
+    industry: Optional[str] = None  # e.g., "financial_services", "technology"
+    validation_tolerance_pct: Optional[float] = None  # Company-specific tolerance override
     
     def should_skip_metric(self, metric: str) -> bool:
         """Check if a metric should be skipped for this company."""
