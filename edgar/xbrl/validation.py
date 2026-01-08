@@ -88,30 +88,83 @@ class ValidationResult:
             f"({self.error_count} errors, {self.warning_count} warnings)"
         )
 
-    def __rich__(self) -> str:
+    def __rich__(self):
         """Rich console representation."""
+        from rich.console import Group
         from rich.panel import Panel
+        from rich.table import Table
         from rich.text import Text
 
-        lines = []
         status_color = "green" if self.is_valid else "red"
+        status_symbol = "✓" if self.is_valid else "✗"
         status = "VALID" if self.is_valid else "INVALID"
 
-        lines.append(Text(f"Validation: {status}", style=f"bold {status_color}"))
-        lines.append(Text(f"Checks: {len(self.checks_performed)}", style="dim"))
+        # Build content sections
+        sections = []
 
+        # Status header
+        header = Text()
+        header.append(f" {status_symbol} ", style=f"bold {status_color}")
+        header.append(f"Validation: ", style="bold")
+        header.append(status, style=f"bold {status_color}")
+        sections.append(header)
+
+        # Equation check details (if available)
+        equation_data = self.metadata.get('liab_equity_check') or self.metadata.get('equation_check')
+        if equation_data:
+            sections.append(Text(""))  # spacer
+
+            eq_table = Table(show_header=False, box=None, padding=(0, 1))
+            eq_table.add_column("Label", style="dim")
+            eq_table.add_column("Value", justify="right")
+
+            assets = equation_data.get('assets')
+            if assets is not None:
+                eq_table.add_row("Total Assets", f"${assets:,.0f}")
+
+            liab_eq = equation_data.get('liabilities_and_equity')
+            if liab_eq is not None:
+                eq_table.add_row("Liabilities + Equity", f"${liab_eq:,.0f}")
+            else:
+                liab = equation_data.get('liabilities')
+                equity = equation_data.get('equity')
+                if liab is not None and equity is not None:
+                    eq_table.add_row("Liabilities", f"${liab:,.0f}")
+                    eq_table.add_row("Equity", f"${equity:,.0f}")
+
+            diff = equation_data.get('difference', 0)
+            diff_style = "green" if diff == 0 else "red"
+            eq_table.add_row("Difference", Text(f"${diff:,.0f}", style=diff_style))
+
+            sections.append(eq_table)
+
+        # Errors
         if self.errors:
-            lines.append(Text(f"\nErrors ({len(self.errors)}):", style="bold red"))
+            sections.append(Text(""))
+            sections.append(Text(f"Errors ({len(self.errors)}):", style="bold red"))
             for error in self.errors:
-                lines.append(Text(f"  - {error.message}", style="red"))
+                sections.append(Text(f"  ✗ {error.message}", style="red"))
 
+        # Warnings
         if self.warnings:
-            lines.append(Text(f"\nWarnings ({len(self.warnings)}):", style="bold yellow"))
+            sections.append(Text(""))
+            sections.append(Text(f"Warnings ({len(self.warnings)}):", style="bold yellow"))
             for warning in self.warnings:
-                lines.append(Text(f"  - {warning.message}", style="yellow"))
+                sections.append(Text(f"  ⚠ {warning.message}", style="yellow"))
 
-        content = Text("\n").join(lines)
-        return Panel(content, title="Balance Sheet Validation")
+        # Info messages (only if no errors/warnings)
+        info_issues = [i for i in self.issues if i.severity == ValidationSeverity.INFO]
+        if info_issues and not self.errors and not self.warnings:
+            sections.append(Text(""))
+            for info in info_issues:
+                sections.append(Text(f"  ℹ {info.message}", style="dim"))
+
+        return Panel(
+            Group(*sections),
+            title="Balance Sheet Validation",
+            border_style=status_color,
+            padding=(0, 1)
+        )
 
 
 # Standard concepts for balance sheet validation
