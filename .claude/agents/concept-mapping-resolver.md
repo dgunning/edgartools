@@ -230,21 +230,85 @@ CONFIG CHANGES (AUTO-APPLIED)
 
 ### Phase 6: Investigate Unresolved Issues (CRITICAL)
 
-For each gap that couldn't be auto-resolved, **investigate WHY** by examining the calculation tree structure and comparing with reference definitions:
+For each gap that couldn't be auto-resolved, **investigate WHY** using this systematic approach:
+
+#### Step 1: Examine the Calculation Tree Structure
 
 ```python
-# When a gap fails verification, investigate the calc tree
+# Find all related concepts in calc trees
 for role, tree in xbrl.calculation_trees.items():
     for node_id, node in tree.all_nodes.items():
         if metric.lower() in node_id.lower():
-            # Found related concept - check its structure
             print(f"Concept: {node_id}")
             print(f"  Parent: {node.parent}")
             print(f"  Children: {node.children}")
             print(f"  Weight: {node.weight}")
 ```
 
-Then report findings like this:
+**Look for**: Parent-child relationships that show how the metric is composed.
+
+#### Step 2: Compare XBRL Facts vs yfinance Values
+
+```python
+# Get all related facts
+facts = company.get_facts().to_dataframe()
+related = facts[facts['concept'].str.contains(metric, case=False, na=False)]
+for concept in related['concept'].unique():
+    vals = related[related['concept'] == concept]
+    if len(vals[vals['numeric_value'].notna()]) > 0:
+        val = float(vals.iloc[-1]['numeric_value'])
+        print(f"{concept}: {val/1e9:.2f}B")
+
+# Compare with yfinance
+import yfinance as yf
+stock = yf.Ticker(ticker)
+bs = stock.balance_sheet
+# Find yfinance field and compare
+```
+
+**Look for**: Which XBRL concepts sum to the yfinance value?
+
+#### Step 3: Identify Root Cause Category
+
+| Category | Signs | Example |
+|----------|-------|---------|
+| **Composite Mismatch** | XBRL child concept < yfinance (need to sum components) | IntangibleAssets = Goodwill + IntangiblesNet |
+| **Consolidation Issue** | XBRL value << yfinance (orders of magnitude) | TotalAssets extracting parent-only, not consolidated |
+| **Definition Difference** | XBRL value ~50-200% of yfinance | LongTermDebt missing current portion |
+| **Timing Difference** | Small variance (~10-20%) | Different reporting date |
+
+#### Step 4: Propose Specific Fix
+
+**For Composite Mismatch:**
+```python
+# Add to reference_validator.py COMPOSITE_METRICS:
+COMPOSITE_METRICS = {
+    'IntangibleAssets': ['Goodwill', 'IntangibleAssetsNetExcludingGoodwill'],
+    'LongTermDebt': ['LongTermDebtNoncurrent', 'LongTermDebtCurrent'],  # Example
+}
+```
+
+**For Consolidation Issue:**
+```python
+# Update _extract_xbrl_value to prefer consolidated (no dimension)
+if 'full_dimension_label' in df.columns:
+    consolidated = df[df['full_dimension_label'].isna()]
+    if len(consolidated) > 0:
+        return consolidated  # Prefer consolidated
+```
+
+**For Definition Difference:**
+```yaml
+# Update metrics.yaml known_concepts:
+LongTermDebt:
+  known_concepts:
+    - LongTermDebt
+    - LongTermDebtAndCapitalLeaseObligations  # Includes leases
+```
+
+---
+
+#### Example Investigation Report Format
 
 ```
 === DEFINITION MISMATCH INVESTIGATIONS ===
@@ -260,41 +324,47 @@ ISSUE 1: IntangibleAssets (AMZN, GOOG, AAPL)
         ├── FiniteLivedIntangibleAssetsNet (7.44B)
         └── IndefiniteLivedIntangibleAssetsExcludingGoodwill (1.16B)
     
+    XBRL Facts found:
+      us-gaap:Goodwill = 23.26B
+      us-gaap:IntangibleAssetsNetExcludingGoodwill = 8.60B
+      SUM = 31.86B ≈ yfinance 31.68B ✓
+    
     yfinance "Goodwill And Other Intangible Assets" = 31.68B
-      = Goodwill (23.07B) + IntangibleAssetsNet (~8.6B)
   
-  Root Cause: Definition mismatch - our metric excludes Goodwill, yfinance includes it
+  Root Cause: COMPOSITE MISMATCH
+    - Our mapping uses child concept (7.44B)
+    - yfinance definition includes Goodwill (23.07B) + IntangiblesNet (8.6B)
   
-  Suggestions:
-    A) Change metrics.yaml to map IntangibleAssets -> "IntangibleAssetsNetExcludingGoodwill" 
-       AND update YFINANCE_MAP to compare against correct field
-    B) Create new metric "GoodwillAndIntangibles" = Goodwill + IntangibleAssetsNet
-    C) Update known_concepts to include parent concept instead of child
+  Suggested Fix:
+    Add to COMPOSITE_METRICS in reference_validator.py:
+    'IntangibleAssets': ['Goodwill', 'IntangibleAssetsNetExcludingGoodwill']
   
-  Recommended: Option A - align with yfinance definition
+  Verification: 31.86B XBRL vs 31.68B yf = 0.6% variance ✓
 
 ISSUE 2: TotalAssets (AAPL, GOOG, AMZN)
   
-  Problem: XBRL value (14.59B) differs from yfinance (359.24B)
+  Problem: XBRL value (14.59B) differs from yfinance (359.24B) - 95.9% variance!
   
   Investigation:
-    Multiple Assets facts found with dimensions:
-      - Legal entity context may be extracting parent-only, not consolidated
-      - Check for 'full_dimension_label' being null (consolidated) vs specific entity
+    Facts show multiple 'Assets' values with different dimensions:
+      - us-gaap:Assets (no dimension): 14.59B  <- we're extracting this
+      - us-gaap:Assets (Consolidated): 359.24B  <- this is the right one
+    
+    The 14.59B appears to be a parent company / legal entity value
   
-  Root Cause: Entity consolidation context - extracting wrong dimension
+  Root Cause: CONSOLIDATION ISSUE
+    - Extracting parent-only instead of consolidated entity
+    - Need to filter for consolidated context
   
-  Suggestions:
-    A) Update _extract_xbrl_value() to prefer facts with no dimension (consolidated)
-    B) Filter for 'Consolidated' entity explicitly
-  
-  Recommended: Option A
+  Suggested Fix:
+    Update _extract_xbrl_value() to check segment dimensions
+    and prefer values without LegalEntityAxis dimension
 ```
 
 ## Quality Standards
 
-1. **Auto-Apply Threshold**: Only auto-apply mappings with confidence >= 0.80 AND variance <= 10%
-2. **Investigate Threshold**: For gaps with variance > 10%, investigate and report
+1. **Auto-Apply Threshold**: Only auto-apply mappings with confidence >= 0.80 AND variance <= 15%
+2. **Investigate Threshold**: For gaps with variance > 15%, investigate and report
 3. **No Parent Fallbacks**: Reject generic parent concepts (e.g., Assets for IntangibleAssets)
 4. **Document Everything**: Track all candidates tried and reasons for rejection
 5. **Human Review Required**: Definition mismatches and consolidation issues need human approval
