@@ -62,6 +62,12 @@ class ReferenceValidator:
         'CashAndEquivalents': ('balance_sheet', 'Cash And Cash Equivalents'),
     }
     
+    # Composite metrics: sum of multiple XBRL concepts
+    # These metrics require summing components to match yfinance definition
+    COMPOSITE_METRICS = {
+        'IntangibleAssets': ['Goodwill', 'IntangibleAssetsNetExcludingGoodwill'],
+    }
+    
     def __init__(
         self,
         config: Optional[MappingConfig] = None,
@@ -119,7 +125,11 @@ class ReferenceValidator:
             # Get XBRL value (if we have a mapping and XBRL object)
             xbrl_value = None
             if result.is_mapped and xbrl:
-                xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
+                # Check if metric is composite (sum of multiple concepts)
+                if metric in self.COMPOSITE_METRICS:
+                    xbrl_value = self._extract_composite_value(xbrl, metric)
+                else:
+                    xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
             
             # Validate
             validation = self._compare_values(
@@ -264,6 +274,31 @@ class ReferenceValidator:
             
         except Exception as e:
             return None
+    
+    def _extract_composite_value(
+        self,
+        xbrl,
+        metric: str
+    ) -> Optional[float]:
+        """
+        Extract composite metric value by summing component concepts.
+        
+        Used for metrics like IntangibleAssets = Goodwill + IntangibleAssetsNetExcludingGoodwill
+        """
+        if metric not in self.COMPOSITE_METRICS:
+            return None
+        
+        components = self.COMPOSITE_METRICS[metric]
+        total = 0.0
+        found_any = False
+        
+        for component in components:
+            value = self._extract_xbrl_value(xbrl, f"us-gaap:{component}")
+            if value is not None:
+                total += value
+                found_any = True
+        
+        return total if found_any else None
     
     def _compare_values(
         self,
