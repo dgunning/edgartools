@@ -139,8 +139,17 @@ metrics:
     notes: "Sum of Goodwill + IntangibleAssetsNet to match yfinance definition"
 
   ShortTermDebt:
-    description: "Short-term borrowings and current debt"
+    description: "Short-term borrowings and current debt (matches yfinance Current Debt)"
+    # Composite metric: yfinance includes all current debt obligations
+    # Common components: LongTermDebtCurrent + CommercialPaper + ShortTermBorrowings
+    composite: true
+    components:
+      - LongTermDebtCurrent
+      - CommercialPaper
+      - ShortTermBorrowings
     known_concepts:
+      - LongTermDebtCurrent
+      - CommercialPaper
       - ShortTermBorrowings
       - DebtCurrent
       - ShortTermDebtAndCapitalLeaseObligationsCurrent
@@ -148,18 +157,19 @@ metrics:
       statements: [BALANCE]
       section: liabilities_current
     universal: false
-    notes: "Naming varies significantly across companies"
+    notes: "yfinance 'Current Debt' sums multiple short-term debt types"
 
   LongTermDebt:
-    description: "Long-term debt"
+    description: "Long-term debt (non-current portion)"
     known_concepts:
-      - LongTermDebt
       - LongTermDebtNoncurrent
+      - LongTermDebt
       - LongTermDebtAndCapitalLeaseObligations
     tree_hints:
       statements: [BALANCE]
       section: liabilities_noncurrent
     universal: true
+    notes: "LongTermDebtNoncurrent preferred (excludes current portion)"
 
   CashAndEquivalents:
     description: "Cash and cash equivalents"

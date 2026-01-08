@@ -66,6 +66,7 @@ class ReferenceValidator:
     # These metrics require summing components to match yfinance definition
     COMPOSITE_METRICS = {
         'IntangibleAssets': ['Goodwill', 'IntangibleAssetsNetExcludingGoodwill'],
+        'ShortTermDebt': ['LongTermDebtCurrent', 'CommercialPaper', 'ShortTermBorrowings'],
     }
     
     def __init__(
@@ -229,49 +230,71 @@ class ReferenceValidator:
     ) -> Optional[float]:
         """
         Extract value from XBRL for a concept.
-        
+
         Finds the total (non-dimensioned) value for the most recent period.
         """
         try:
             # Remove namespace prefix if present
             concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
-            
+
             # Handle company-specific prefixes
             for prefix in ['nvda_', 'tsla_', 'aapl_', 'msft_', 'goog_', 'amzn_', 'meta_']:
                 concept_name = concept_name.replace(prefix, '')
-            
+
             facts = xbrl.facts
             df = facts.get_facts_by_concept(concept_name)
-            
+
             if df is None or len(df) == 0:
                 return None
-            
+
+            # Filter for EXACT concept match (get_facts_by_concept returns partial matches)
+            # e.g., "Assets" query returns Assets, AssetsCurrent, AssetsNoncurrent, etc.
+            if 'concept' in df.columns:
+                # Build expected concept variations
+                expected_concepts = [
+                    f'us-gaap:{concept_name}',
+                    f'us-gaap_{concept_name}',
+                    concept_name,
+                    # Company-specific prefixes
+                    f'nvda:{concept_name}', f'nvda_{concept_name}',
+                    f'tsla:{concept_name}', f'tsla_{concept_name}',
+                    f'aapl:{concept_name}', f'aapl_{concept_name}',
+                    f'msft:{concept_name}', f'msft_{concept_name}',
+                    f'goog:{concept_name}', f'goog_{concept_name}',
+                    f'amzn:{concept_name}', f'amzn_{concept_name}',
+                    f'meta:{concept_name}', f'meta_{concept_name}',
+                ]
+                df = df[df['concept'].isin(expected_concepts)]
+
+            if len(df) == 0:
+                return None
+
             # Filter for non-dimensioned (total) values only
             if 'full_dimension_label' in df.columns:
                 total_rows = df[df['full_dimension_label'].isna()]
             else:
                 total_rows = df
-            
+
             if len(total_rows) == 0:
                 return None
-            
+
             # Filter for rows with actual numeric values
             total_rows = total_rows[total_rows['numeric_value'].notna()]
             if len(total_rows) == 0:
                 return None
-            
+
             # Sort by period_key (e.g., "instant_2024-12-31" or "duration_2024-01-01_2024-12-31")
             # to get the most recent
             if 'period_key' in total_rows.columns:
                 total_rows = total_rows.sort_values('period_key', ascending=False)
-            
+
             # Get the latest value
             latest = total_rows.iloc[0]
             value = float(latest['numeric_value'])
-            
+
             # Handle absolute value for cash flows (some are negative in yfinance)
             return value
-            
+
         except Exception as e:
             return None
     
