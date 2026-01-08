@@ -1415,12 +1415,12 @@
   },
   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "CashAndCashEquivalents"
     ]
   },
   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "CashAndCashEquivalents"
     ]
   },
   "CashEquivalentsAtCarryingValue": {

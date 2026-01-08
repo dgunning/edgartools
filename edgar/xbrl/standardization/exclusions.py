@@ -28,6 +28,8 @@ EXCLUDED_TAGS: Set[str] = {
     "BusinessCombinationSeparatelyRecognizedTransactionsAdditionalDisclosuresAcquisitionCostExpensed",
     "CapitalizedContractCostAmortization",
     "CashAndCashEquivalentsPeriodIncreaseDecrease",
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
     "ChangeInReportingEntityEarningsPerShareBasic",
     "ChangeInReportingEntityEarningsPerShareDiluted",
     "CommitmentsAndContingencies",
@@ -295,14 +297,19 @@ EXCLUDED_TAGS: Set[str] = {
 def should_exclude(concept: str) -> bool:
     """
     Check if a concept should be excluded from standardization.
-    
+
     Args:
-        concept: The XBRL concept name (without namespace prefix)
-        
+        concept: The XBRL concept name (with or without namespace prefix)
+
     Returns:
         True if the concept should be excluded, False otherwise
     """
-    # Strip any namespace prefix
+    # Strip any namespace prefix (handles both 'us-gaap:Tag' and 'us-gaap_Tag' formats)
     if ':' in concept:
         concept = concept.split(':')[-1]
+    if '_' in concept:
+        # Handle us-gaap_Tag format - take the part after the first underscore
+        parts = concept.split('_', 1)
+        if len(parts) > 1 and parts[0].lower() in ('us-gaap', 'dei', 'srt', 'country'):
+            concept = parts[1]
     return concept in EXCLUDED_TAGS
