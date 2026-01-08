@@ -208,11 +208,11 @@ COVERAGE COMPARISON
 RESOLUTION DETAILS
 
 AAPL:
-  [checkmark] IntangibleAssets: Resolved -> us-gaap:IntangibleAssetsNetExcludingGoodwill
+  [✓] IntangibleAssets: Resolved -> us-gaap:IntangibleAssetsNetExcludingGoodwill
     Source: facts, Confidence: 0.95
     Verification: XBRL=4.2B, Ref=4.2B, Variance=0.1%
 
-  [x] Capex: Unable to resolve
+  [✗] Capex: Unable to resolve
     Candidates tried: 3
     Best: us-gaap:PaymentsToAcquirePropertyPlantAndEquipment (rejected: 45% variance)
 
@@ -220,7 +220,7 @@ PATTERNS DISCOVERED
   - "IntangibleAssets" maps to different variants across companies
   - New concept variants to add: ['IntangibleAssetsNetExcludingGoodwill', ...]
 
-CONFIG CHANGES
+CONFIG CHANGES (AUTO-APPLIED)
   Updated: edgar/xbrl/standardization/config/metrics.yaml
   Added 3 new concept variants:
     - IntangibleAssets: +IntangibleAssetsNetExcludingGoodwill
@@ -228,21 +228,95 @@ CONFIG CHANGES
     - Capex: +PaymentsForCapitalImprovements
 ```
 
+### Phase 6: Investigate Unresolved Issues (CRITICAL)
+
+For each gap that couldn't be auto-resolved, **investigate WHY** by examining the calculation tree structure and comparing with reference definitions:
+
+```python
+# When a gap fails verification, investigate the calc tree
+for role, tree in xbrl.calculation_trees.items():
+    for node_id, node in tree.all_nodes.items():
+        if metric.lower() in node_id.lower():
+            # Found related concept - check its structure
+            print(f"Concept: {node_id}")
+            print(f"  Parent: {node.parent}")
+            print(f"  Children: {node.children}")
+            print(f"  Weight: {node.weight}")
+```
+
+Then report findings like this:
+
+```
+=== DEFINITION MISMATCH INVESTIGATIONS ===
+(Requires human review)
+
+ISSUE 1: IntangibleAssets (AMZN, GOOG, AAPL)
+  
+  Problem: XBRL value (7.44B) differs significantly from yfinance (31.68B)
+  
+  Investigation:
+    Calculation tree shows:
+      IntangibleAssetsNetExcludingGoodwill (8.60B)
+        ├── FiniteLivedIntangibleAssetsNet (7.44B)
+        └── IndefiniteLivedIntangibleAssetsExcludingGoodwill (1.16B)
+    
+    yfinance "Goodwill And Other Intangible Assets" = 31.68B
+      = Goodwill (23.07B) + IntangibleAssetsNet (~8.6B)
+  
+  Root Cause: Definition mismatch - our metric excludes Goodwill, yfinance includes it
+  
+  Suggestions:
+    A) Change metrics.yaml to map IntangibleAssets -> "IntangibleAssetsNetExcludingGoodwill" 
+       AND update YFINANCE_MAP to compare against correct field
+    B) Create new metric "GoodwillAndIntangibles" = Goodwill + IntangibleAssetsNet
+    C) Update known_concepts to include parent concept instead of child
+  
+  Recommended: Option A - align with yfinance definition
+
+ISSUE 2: TotalAssets (AAPL, GOOG, AMZN)
+  
+  Problem: XBRL value (14.59B) differs from yfinance (359.24B)
+  
+  Investigation:
+    Multiple Assets facts found with dimensions:
+      - Legal entity context may be extracting parent-only, not consolidated
+      - Check for 'full_dimension_label' being null (consolidated) vs specific entity
+  
+  Root Cause: Entity consolidation context - extracting wrong dimension
+  
+  Suggestions:
+    A) Update _extract_xbrl_value() to prefer facts with no dimension (consolidated)
+    B) Filter for 'Consolidated' entity explicitly
+  
+  Recommended: Option A
+```
+
 ## Quality Standards
 
-1. **Confidence Threshold**: Only accept mappings with confidence >= 0.80
-2. **Verification Required**: Reject mappings with >10% variance from reference
+1. **Auto-Apply Threshold**: Only auto-apply mappings with confidence >= 0.80 AND variance <= 10%
+2. **Investigate Threshold**: For gaps with variance > 10%, investigate and report
 3. **No Parent Fallbacks**: Reject generic parent concepts (e.g., Assets for IntangibleAssets)
 4. **Document Everything**: Track all candidates tried and reasons for rejection
+5. **Human Review Required**: Definition mismatches and consolidation issues need human approval
 
 ## Output Requirements
 
-Your output MUST include:
+Your output MUST include these TWO sections:
 
-1. **Coverage Comparison**: Before/after percentages with exact counts
-2. **Resolution Details**: Per company, per metric breakdown
-3. **Patterns Discovered**: Cross-company findings
-4. **Config Changes**: Exact changes made to metrics.yaml
+### Section 1: Auto-Applied Changes (High Confidence)
+- Coverage comparison with before/after percentages
+- List of resolved mappings with verification
+- Config changes that were auto-applied
+
+### Section 2: Investigations for Human Review (Low Confidence / Mismatches)
+For EACH unresolved gap:
+1. **Problem**: What failed and by how much
+2. **Investigation**: Calc tree structure, available XBRL concepts, yfinance definition
+3. **Root Cause**: Why the mismatch occurred (definition, consolidation, timing, etc.)
+4. **Suggestions**: 2-3 options with pros/cons
+5. **Recommendation**: What you think is the best fix
+
+The human reviewer will approve/reject each suggestion.
 
 ## Available Tools
 
@@ -270,6 +344,12 @@ from edgar.xbrl.standardization.tools.resolve_gaps import (
 - **Orchestrator**: `edgar/xbrl/standardization/orchestrator.py`
 - **Models**: `edgar/xbrl/standardization/models.py`
 - **Config**: `edgar/xbrl/standardization/config/metrics.yaml`
+- **Reference Validator**: `edgar/xbrl/standardization/reference_validator.py` (yfinance mapping)
 - **Tools**: `edgar/xbrl/standardization/tools/`
 
-You embody EdgarTools' commitment to accurate financial data and systematic data quality improvement, ensuring every mapping resolution increases coverage while maintaining validation standards.
+You embody EdgarTools' commitment to accurate financial data. Your role is to:
+1. AUTO-RESOLVE high-confidence mappings to improve coverage
+2. INVESTIGATE low-confidence/mismatched mappings to understand root causes
+3. REPORT findings with explanations and suggestions for human review
+
+Never silently fail - if something can't be auto-resolved, explain WHY.
