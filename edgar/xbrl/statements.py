@@ -712,9 +712,10 @@ class Statement:
         # Issue #583: Apply label standardization if requested
         # This transforms labels like "Ending balances" → "Total Stockholders' Equity"
         if standard:
-            # Use XBRL instance's standardization cache for efficient caching
+            # Use XBRL instance's standardization cache (disable statement caching since
+            # raw_data varies by view/period_filter parameters)
             raw_data = self.xbrl.standardization.standardize_statement_data(
-                raw_data, statement_type
+                raw_data, statement_type, use_cache=False
             )
 
         # Determine which periods to display

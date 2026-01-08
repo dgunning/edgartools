@@ -1861,9 +1861,10 @@ class XBRL:
                                 stmt_type = stmt['type']
                                 break
 
-                    # Apply standardization using XBRL instance's cache
+                    # Apply standardization using XBRL instance's cache (disable statement caching
+                    # for consistency with other call sites where input data varies)
                     statement_data = self.standardization.standardize_statement_data(
-                        statement_data, stmt_type
+                        statement_data, stmt_type, use_cache=False
                     )
 
                 # Create rows for the DataFrame

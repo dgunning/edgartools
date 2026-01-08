@@ -1307,10 +1307,11 @@ def render_statement(
 
     # Apply standardization if requested
     if standard:
-        # Use XBRL instance's standardization cache if available for efficient caching
+        # Use XBRL instance's standardization cache if available (disable statement caching
+        # since statement_data varies by view/period parameters)
         if xbrl_instance is not None and hasattr(xbrl_instance, 'standardization'):
             statement_data = xbrl_instance.standardization.standardize_statement_data(
-                statement_data, statement_type
+                statement_data, statement_type, use_cache=False
             )
         else:
             # Fall back to module-level singleton mapper

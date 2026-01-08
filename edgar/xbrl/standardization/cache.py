@@ -93,18 +93,22 @@ class StandardizationCache:
         self,
         raw_data: List[Dict[str, Any]],
         statement_type: str,
-        use_cache: bool = True
+        use_cache: bool = False
     ) -> List[Dict[str, Any]]:
         """
-        Standardize statement data with caching.
+        Standardize statement data with optional caching.
 
-        This method applies label standardization to raw statement data,
-        caching the result for subsequent calls with the same statement type.
+        This method applies label standardization to raw statement data.
+
+        Note: Statement caching is disabled by default because raw_data typically
+        varies based on view/period parameters. Only enable caching when you know
+        the input data is consistent for the given statement_type.
 
         Args:
             raw_data: List of line item dicts from statement
             statement_type: The statement type (e.g., 'IncomeStatement', 'BalanceSheet')
-            use_cache: If True, cache and return cached results. If False, always recompute.
+            use_cache: If True, cache and return cached results. Default False since
+                      input data typically varies by view/period parameters.
 
         Returns:
             List of line item dicts with standardized labels
