@@ -34,6 +34,22 @@ class ConfidenceLevel(Enum):
     INVALID = "invalid" # Validation failed
 
 
+class FailurePattern(Enum):
+    """
+    Classification of extraction failures for systematic handling.
+    
+    Each pattern has a known fix that can be automatically applied.
+    Adding new patterns here enables the workflow to learn from failures.
+    """
+    DIMENSIONAL_ONLY = "dimensional_only"       # Values exist only with dimensions
+    AMENDED_FILING = "amended_filing"           # Filing is amended (10-K/A)
+    CONCEPT_NOT_IN_FACTS = "concept_not_in_facts"  # In calc tree but not facts
+    PERIOD_MISMATCH = "period_mismatch"         # Value exists but wrong period
+    YFINANCE_NAN = "yfinance_nan"               # Reference value is NaN
+    NO_VALUE = "no_value"                       # No numeric value found
+    UNKNOWN = "unknown"                         # Unclassified failure
+
+
 @dataclass
 class MappingResult:
     """

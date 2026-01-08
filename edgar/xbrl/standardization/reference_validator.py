@@ -19,7 +19,7 @@ except ImportError:
     yf = None
 
 from .config_loader import get_config, MappingConfig
-from .models import MappingResult, MappingSource, ConfidenceLevel
+from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern
 
 
 @dataclass
@@ -173,6 +173,123 @@ class ReferenceValidator:
         except Exception:
             return None
     
+    def _classify_failure(
+        self,
+        xbrl,
+        concept: str,
+        ticker: str
+    ) -> FailurePattern:
+        """
+        Classify why extraction failed for systematic handling.
+        
+        This enables the workflow to learn from failures by categorizing
+        them into known patterns that can be automatically fixed.
+        """
+        try:
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            
+            # Check 1: Dimensional-only
+            dim_check = self._check_dimensional_only(xbrl, concept)
+            if dim_check:
+                return FailurePattern.DIMENSIONAL_ONLY
+            
+            # Check 2: Amended filing
+            if hasattr(self, '_current_filing') and self._current_filing:
+                form = getattr(self._current_filing, 'form', '')
+                if '/A' in str(form):
+                    return FailurePattern.AMENDED_FILING
+            
+            # Check 3: Concept exists but no numeric value
+            facts = xbrl.facts
+            df = facts.get_facts_by_concept(concept_name)
+            if df is not None and len(df) > 0:
+                if 'numeric_value' in df.columns:
+                    if df['numeric_value'].notna().sum() == 0:
+                        return FailurePattern.NO_VALUE
+                return FailurePattern.PERIOD_MISMATCH  # Has data but didn't match period
+            
+            # Check 4: Concept not in facts at all
+            return FailurePattern.CONCEPT_NOT_IN_FACTS
+            
+        except Exception:
+            return FailurePattern.UNKNOWN
+    
+    def _apply_fix_for_pattern(
+        self,
+        pattern: FailurePattern,
+        xbrl,
+        concept: str,
+        ticker: str
+    ) -> Optional[float]:
+        """
+        Apply known fix for classified failure pattern.
+        
+        Each pattern has a specific remediation strategy.
+        """
+        if pattern == FailurePattern.DIMENSIONAL_ONLY:
+            return self._extract_dimensional_sum(xbrl, concept)
+        
+        elif pattern == FailurePattern.CONCEPT_NOT_IN_FACTS:
+            # Try searching company facts API instead
+            return self._extract_from_company_facts(ticker, concept)
+        
+        # Other patterns don't have automatic fixes yet
+        return None
+    
+    def _extract_dimensional_sum(self, xbrl, concept: str) -> Optional[float]:
+        """Extract sum of all dimensional values for a concept."""
+        try:
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            facts = xbrl.facts
+            df = facts.get_facts_by_concept(concept_name)
+            
+            if df is None or len(df) == 0:
+                return None
+            
+            if 'full_dimension_label' not in df.columns:
+                return None
+            
+            dim_rows = df[df['full_dimension_label'].notna()]
+            dim_rows = dim_rows[dim_rows['numeric_value'].notna()]
+            
+            if len(dim_rows) == 0:
+                return None
+            
+            # Get latest period
+            if 'period_key' in dim_rows.columns:
+                dim_rows = dim_rows.sort_values('period_key', ascending=False)
+                latest_period = dim_rows.iloc[0]['period_key']
+                period_rows = dim_rows[dim_rows['period_key'] == latest_period]
+                return float(period_rows['numeric_value'].sum())
+            
+            return float(dim_rows['numeric_value'].sum())
+            
+        except Exception:
+            return None
+    
+    def _extract_from_company_facts(self, ticker: str, concept: str) -> Optional[float]:
+        """Extract value from company facts API as fallback."""
+        try:
+            from edgar import Company
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            
+            c = Company(ticker)
+            facts = c.get_facts()
+            df = facts.to_dataframe()
+            
+            # Find matching concept
+            matches = df[df['concept'].str.contains(concept_name, case=False, na=False)]
+            if len(matches) > 0:
+                # Get latest value
+                matches = matches.sort_values('period', ascending=False)
+                val = matches.iloc[0].get('value') or matches.iloc[0].get('numeric_value')
+                if val is not None:
+                    return float(val)
+            return None
+            
+        except Exception:
+            return None
+    
     def validate_company(
         self,
         ticker: str,
@@ -219,6 +336,8 @@ class ReferenceValidator:
             # Get XBRL value (if we have a mapping and XBRL object)
             xbrl_value = None
             if result.is_mapped and xbrl:
+                # Set context for pattern classification
+                self._current_ticker = ticker
                 # Check if metric is composite (sum of multiple concepts)
                 if metric in self.COMPOSITE_METRICS:
                     self._current_metric = metric  # Set context for dimensional config lookup
@@ -432,6 +551,13 @@ class ReferenceValidator:
             return value
 
         except Exception as e:
+            # Try auto-fix for known patterns
+            if hasattr(self, '_current_ticker') and self._current_ticker:
+                pattern = self._classify_failure(xbrl, concept, self._current_ticker)
+                if pattern != FailurePattern.UNKNOWN:
+                    fixed_value = self._apply_fix_for_pattern(pattern, xbrl, concept, self._current_ticker)
+                    if fixed_value is not None:
+                        return fixed_value
             return None
     
     def _extract_composite_value(
