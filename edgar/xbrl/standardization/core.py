@@ -853,6 +853,133 @@ def _derive_section_from_parent(calculation_parent: str, statement_type: str) ->
     return None
 
 
+def _assign_sections_bottom_up(
+    items_to_standardize: List[Tuple[int, str, str, Dict[str, Any]]],
+    statement_data: List[Dict[str, Any]]
+) -> None:
+    """
+    Assign sections to items using bottom-up scanning (mpreiss9's method).
+
+    Process line items from bottom to top. When we encounter a subtotal,
+    that defines the current section, and all items above it (until the
+    next subtotal) belong to that section.
+
+    This approach is more robust than calculation-parent-based section
+    derivation because:
+    1. Some filings have incomplete/missing calculation trees
+    2. The statement's own structure (subtotals) is always present
+    3. Subtotals naturally demarcate section boundaries
+
+    Args:
+        items_to_standardize: List of tuples (index, concept, label, context)
+                             - modifies context dicts in-place
+        statement_data: Original statement data for accessing item properties
+
+    Note:
+        This function modifies the context dicts in items_to_standardize in-place.
+    """
+    if not items_to_standardize:
+        return
+
+    # Map standard subtotal labels to section names
+    subtotal_to_section = {
+        # Current Assets subtotals
+        "total current assets": "Current Assets",
+        "current assets, total": "Current Assets",
+
+        # Non-Current Assets subtotals
+        "total non-current assets": "Non-Current Assets",
+        "total noncurrent assets": "Non-Current Assets",
+        "non-current assets, total": "Non-Current Assets",
+        "total other assets": "Non-Current Assets",
+
+        # Current Liabilities subtotals
+        "total current liabilities": "Current Liabilities",
+        "current liabilities, total": "Current Liabilities",
+
+        # Non-Current Liabilities subtotals
+        "total non-current liabilities": "Non-Current Liabilities",
+        "total noncurrent liabilities": "Non-Current Liabilities",
+        "non-current liabilities, total": "Non-Current Liabilities",
+        "total long-term debt": "Non-Current Liabilities",
+
+        # Equity subtotals
+        "total stockholders' equity": "Equity",
+        "total stockholders equity": "Equity",
+        "total shareholders' equity": "Equity",
+        "total shareholders equity": "Equity",
+        "total equity": "Equity",
+        "stockholders' equity, total": "Equity",
+
+        # Income Statement sections
+        "total revenue": "Revenue",
+        "total revenues": "Revenue",
+        "total operating expenses": "Operating Expenses",
+        "operating expenses, total": "Operating Expenses",
+        "total cost of revenue": "Cost of Revenue",
+        "total cost of sales": "Cost of Revenue",
+    }
+
+    # Build index map for quick lookup: original_index -> items_to_standardize index
+    idx_map = {item[0]: i for i, item in enumerate(items_to_standardize)}
+
+    # Get all indices in original order
+    all_indices = sorted([item[0] for item in items_to_standardize])
+
+    # Process bottom-to-top
+    current_section = None
+
+    for orig_idx in reversed(all_indices):
+        item_idx = idx_map[orig_idx]
+        _, _, label, context = items_to_standardize[item_idx]
+
+        # Get item properties from original data
+        original_item = statement_data[orig_idx]
+        is_total = original_item.get("is_total", False) or "total" in label.lower()
+        level = original_item.get("level", 0)
+
+        # Check if this is a section subtotal (level 0 or 1 total)
+        if is_total and level <= 1:
+            # Try to derive section from the subtotal label
+            label_lower = label.lower()
+
+            # Direct lookup
+            section_from_subtotal = subtotal_to_section.get(label_lower)
+
+            # Partial match fallback
+            if not section_from_subtotal:
+                for pattern, section in subtotal_to_section.items():
+                    if pattern in label_lower or label_lower in pattern:
+                        section_from_subtotal = section
+                        break
+
+            # Infer from label patterns if still not found
+            if not section_from_subtotal:
+                if "current asset" in label_lower:
+                    section_from_subtotal = "Current Assets"
+                elif "current liabilit" in label_lower:
+                    section_from_subtotal = "Current Liabilities"
+                elif "noncurrent asset" in label_lower or "non-current asset" in label_lower:
+                    section_from_subtotal = "Non-Current Assets"
+                elif "noncurrent liabilit" in label_lower or "non-current liabilit" in label_lower:
+                    section_from_subtotal = "Non-Current Liabilities"
+                elif "equity" in label_lower:
+                    section_from_subtotal = "Equity"
+                elif "revenue" in label_lower:
+                    section_from_subtotal = "Revenue"
+                elif "operating expense" in label_lower:
+                    section_from_subtotal = "Operating Expenses"
+
+            if section_from_subtotal:
+                current_section = section_from_subtotal
+                logger.debug("Bottom-up: Found section boundary '%s' at '%s'", current_section, label)
+
+        # Assign section to this item if it doesn't have one
+        if current_section and not context.get("section"):
+            context["section"] = current_section
+            logger.debug("Bottom-up: Assigned section '%s' to '%s'", current_section, label)
+
+
 def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper) -> List[Dict[str, Any]]:
     """
     Standardize labels in a statement using the concept mapper.
@@ -903,6 +1030,11 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     # If no items need standardization, return early with unchanged data
     if not items_to_standardize:
         return statement_data
+
+    # Bottom-up section assignment (mpreiss9's method)
+    # This fills in sections for items that didn't get one from calculation_parent
+    # by scanning from bottom to top and using subtotals as section boundaries
+    _assign_sections_bottom_up(items_to_standardize, statement_data)
 
     # Second pass - create result list with standardized items
     result = []
