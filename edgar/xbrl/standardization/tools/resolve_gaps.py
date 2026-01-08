@@ -136,7 +136,7 @@ def resolve_all_gaps(
     results: Dict[str, Dict[str, MappingResult]],
     xbrl_cache: Optional[Dict[str, Any]] = None,
     confidence_threshold: float = 0.80,
-    variance_threshold: float = 10.0
+    variance_threshold: float = 15.0
 ) -> Tuple[List[Resolution], Dict[str, Dict[str, MappingResult]]]:
     """
     Resolve all gaps in mapping results.

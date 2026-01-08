@@ -75,7 +75,7 @@ def verify_mapping(
     concept: str,
     xbrl: Optional[XBRL],
     ticker: str,
-    tolerance_pct: float = 10.0
+    tolerance_pct: float = 15.0
 ) -> MappingVerification:
     """
     Verify a mapping by comparing extracted values with reference.

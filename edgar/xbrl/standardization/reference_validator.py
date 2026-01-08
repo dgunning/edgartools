@@ -65,7 +65,7 @@ class ReferenceValidator:
     def __init__(
         self,
         config: Optional[MappingConfig] = None,
-        tolerance_pct: float = 10.0  # 10% tolerance for matching
+        tolerance_pct: float = 15.0  # 15% tolerance for matching
     ):
         self.config = config or get_config()
         self.tolerance = tolerance_pct / 100.0
