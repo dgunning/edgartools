@@ -232,7 +232,12 @@ class ReverseIndex:
             comment=comment,
         )
 
-    def get_standard_concept(self, xbrl_tag: str, context: Optional[Dict] = None) -> Optional[str]:
+    def get_standard_concept(
+        self,
+        xbrl_tag: str,
+        context: Optional[Dict] = None,
+        log_ambiguous: bool = False
+    ) -> Optional[str]:
         """
         Get the standard concept for an XBRL tag.
 
@@ -245,6 +250,7 @@ class ReverseIndex:
                      - section: Balance sheet section (e.g., "Current Assets")
                      - balance: Debit/credit balance type
                      - statement_type: Type of statement
+            log_ambiguous: If True, log ambiguous resolutions to UnmappedTagLogger
 
         Returns:
             The standard concept name, or None if not found/excluded
@@ -258,23 +264,51 @@ class ReverseIndex:
             return result.primary_concept
 
         # Ambiguous tags: try to disambiguate using context
+        resolution_method = "fallback"
+        resolved = None
+
         if context and len(result.standard_concepts) > 1:
             resolved = self._disambiguate_by_context(
                 xbrl_tag, result.standard_concepts, context
             )
             if resolved:
+                # Determine resolution method for logging
+                if context.get('is_total'):
+                    resolution_method = "is_total"
+                elif context.get('section'):
+                    resolution_method = "section"
                 logger.debug(
                     "Disambiguated %s to %s using context (section=%s)",
                     xbrl_tag, resolved, context.get('section')
                 )
-                return resolved
 
-        # Fallback: return primary concept
-        logger.debug(
-            "Ambiguous tag %s maps to %s - using first candidate",
-            xbrl_tag, result.standard_concepts
-        )
-        return result.primary_concept
+        # Use fallback if disambiguation failed
+        if not resolved:
+            resolved = result.primary_concept
+            resolution_method = "fallback"
+            logger.debug(
+                "Ambiguous tag %s maps to %s - using first candidate",
+                xbrl_tag, result.standard_concepts
+            )
+
+        # Log ambiguous resolution if requested (Phase 5)
+        if log_ambiguous:
+            try:
+                from .unmapped_logger import log_ambiguous as log_amb
+                log_amb(
+                    concept=xbrl_tag,
+                    label=context.get('label', '') if context else '',
+                    candidates=result.standard_concepts,
+                    resolved_to=resolved,
+                    resolution_method=resolution_method,
+                    statement_type=context.get('statement_type') if context else None,
+                    section=context.get('section') if context else None,
+                    confidence=1.0 if resolution_method != "fallback" else 0.5,
+                )
+            except Exception as e:
+                logger.debug("Failed to log ambiguous resolution: %s", e)
+
+        return resolved
 
     def _disambiguate_by_context(
         self,
@@ -509,18 +543,23 @@ def lookup(xbrl_tag: str) -> Optional[MappingResult]:
     return get_reverse_index().lookup(xbrl_tag)
 
 
-def get_standard_concept(xbrl_tag: str, context: Optional[Dict] = None) -> Optional[str]:
+def get_standard_concept(
+    xbrl_tag: str,
+    context: Optional[Dict] = None,
+    log_ambiguous: bool = False
+) -> Optional[str]:
     """
     Convenience function to get standard concept for an XBRL tag.
 
     Args:
         xbrl_tag: The XBRL tag to look up
         context: Optional context for disambiguation
+        log_ambiguous: If True, log ambiguous resolutions to UnmappedTagLogger
 
     Returns:
         Standard concept name or None
     """
-    return get_reverse_index().get_standard_concept(xbrl_tag, context)
+    return get_reverse_index().get_standard_concept(xbrl_tag, context, log_ambiguous)
 
 
 def get_display_name(xbrl_tag: str, context: Optional[Dict] = None) -> Optional[str]:
