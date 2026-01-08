@@ -1,8 +1,13 @@
 """
 Orchestrator for the multi-layer mapping architecture.
 
-Runs all mapping layers in sequence with fallback:
-Layer 1 (Tree) → Layer 2 (AI) → Layer 4 (Facts Search) → Validate
+Runs all mapping layers in sequence with validation-in-loop:
+Layer 1 (Tree Parser) → Validate → Layer 2 (Facts Search) → Validate → Layer 3 (AI Semantic) → Validate
+
+Key design principles:
+1. Static methods first - exhaust deterministic options before AI
+2. Validation after each layer - early detection of invalid mappings
+3. Gap = unmapped OR invalid - invalid mappings retry with next layer
 """
 
 import json
@@ -44,10 +49,15 @@ class Orchestrator:
         """
         Map all metrics for a company using all available layers.
         
+        Layers run in order with validation after each:
+        1. Tree Parser (static, uses calc tree)
+        2. Facts Search (static, uses facts database)
+        3. AI Semantic (dynamic, uses LLM)
+        
         Args:
             ticker: Company ticker
-            use_ai: Whether to use Layer 2 AI for gaps
-            use_facts: Whether to use Layer 4 Facts Search for gaps
+            use_ai: Whether to use Layer 3 AI for gaps
+            use_facts: Whether to use Layer 2 Facts Search for gaps
             amendments: Whether to include amended filings
             
         Returns:
@@ -65,33 +75,81 @@ class Orchestrator:
         
         fiscal_period = self.tree_parser._get_fiscal_period(filing)
         
-        # Layer 1: Tree Parser
+        # Layer 1: Tree Parser (static)
         results = self.tree_parser.map_company(ticker, filing)
         self._log_layer_results(ticker, fiscal_period, results, "tree")
         
-        # Count gaps
-        gaps = [m for m, r in results.items() 
-                if not r.is_mapped and r.source != MappingSource.CONFIG]
+        # Validate Layer 1 and get gaps (unmapped OR invalid)
+        gaps = self._validate_layer(ticker, results, xbrl)
+        total = len([m for m in results if results[m].source != MappingSource.CONFIG])
+        print(f"  Layer 1 (Tree): {total - len(gaps)}/{total} resolved")
         
+        # Layer 2: Facts Search (static) - run BEFORE AI
+        if gaps and use_facts:
+            results = self.facts_searcher.search_gaps(
+                results, ticker, fiscal_period
+            )
+            self._log_layer_results(ticker, fiscal_period, results, "tree")
+            
+            # Validate Layer 2 and get gaps
+            gaps = self._validate_layer(ticker, results, xbrl)
+            print(f"  Layer 2 (Facts): {total - len(gaps)}/{total} resolved")
+        
+        # Layer 3: AI Semantic (dynamic) - run AFTER static methods
         if gaps and use_ai:
-            # Layer 2: AI Semantic
             results = self.ai_mapper.map_gaps(
                 results, xbrl, ticker, fiscal_period
             )
             self._log_layer_results(ticker, fiscal_period, results, "ai")
             
-            # Update gaps
-            gaps = [m for m, r in results.items() 
-                    if not r.is_mapped and r.source != MappingSource.CONFIG]
+            # Validate Layer 3 and get gaps
+            gaps = self._validate_layer(ticker, results, xbrl)
+            print(f"  Layer 3 (AI): {total - len(gaps)}/{total} resolved")
         
-        if gaps and use_facts:
-            # Layer 4: Facts Search  
-            results = self.facts_searcher.search_gaps(
-                results, ticker, fiscal_period
-            )
-            self._log_layer_results(ticker, fiscal_period, results, "tree")  # Mark as tree since it's XBRL
+        if gaps:
+            print(f"  Remaining gaps: {gaps}")
         
         return results
+    
+    def _validate_layer(
+        self,
+        ticker: str,
+        results: Dict[str, MappingResult],
+        xbrl
+    ) -> List[str]:
+        """
+        Validate after a layer and return updated gaps.
+        
+        A gap is a metric that is:
+        - Not mapped, OR
+        - Mapped but validation_status == 'invalid'
+        
+        Invalid mappings are reset so the next layer can retry.
+        
+        Returns:
+            List of metric names that are gaps
+        """
+        # Run validation on all mappings
+        self.validator.validate_and_update_mappings(ticker, results, xbrl)
+        
+        # Recalculate gaps including invalid mappings
+        gaps = []
+        for metric, result in results.items():
+            if result.source == MappingSource.CONFIG:
+                continue  # Excluded
+            
+            if not result.is_mapped:
+                gaps.append(metric)
+            elif result.validation_status == 'invalid':
+                # Reset mapping so next layer can retry
+                result.concept = None
+                result.confidence = 0.0
+                result.confidence_level = result.confidence_level  # Keep INVALID marker
+                result.source = MappingSource.UNKNOWN
+                result.reasoning = f"Previous mapping failed validation: {result.validation_notes}"
+                gaps.append(metric)
+        
+        return gaps
     
     def _map_company_with_xbrl(
         self,
@@ -103,6 +161,9 @@ class Orchestrator:
         """
         Map company and return both results and XBRL object.
         Used internally for validation.
+        
+        Uses same layer order as map_company:
+        Layer 1 (Tree) -> Layer 2 (Facts) -> Layer 3 (AI)
         """
         filing = self._get_filing(ticker, amendments)
         if filing is None:
@@ -115,22 +176,31 @@ class Orchestrator:
         
         fiscal_period = self.tree_parser._get_fiscal_period(filing)
         
-        # Layer 1: Tree Parser
+        # Layer 1: Tree Parser (static)
         results = self.tree_parser.map_company(ticker, filing)
         self._log_layer_results(ticker, fiscal_period, results, "tree")
         
-        gaps = [m for m, r in results.items() 
-                if not r.is_mapped and r.source != MappingSource.CONFIG]
+        # Validate Layer 1 and get gaps
+        gaps = self._validate_layer(ticker, results, xbrl)
+        total = len([m for m in results if results[m].source != MappingSource.CONFIG])
+        print(f"  Layer 1 (Tree): {total - len(gaps)}/{total} resolved")
         
-        if gaps and use_ai:
-            results = self.ai_mapper.map_gaps(results, xbrl, ticker, fiscal_period)
-            self._log_layer_results(ticker, fiscal_period, results, "ai")
-            gaps = [m for m, r in results.items() 
-                    if not r.is_mapped and r.source != MappingSource.CONFIG]
-        
+        # Layer 2: Facts Search (static) - run BEFORE AI
         if gaps and use_facts:
             results = self.facts_searcher.search_gaps(results, ticker, fiscal_period)
             self._log_layer_results(ticker, fiscal_period, results, "tree")
+            gaps = self._validate_layer(ticker, results, xbrl)
+            print(f"  Layer 2 (Facts): {total - len(gaps)}/{total} resolved")
+        
+        # Layer 3: AI Semantic (dynamic) - run AFTER static methods
+        if gaps and use_ai:
+            results = self.ai_mapper.map_gaps(results, xbrl, ticker, fiscal_period)
+            self._log_layer_results(ticker, fiscal_period, results, "ai")
+            gaps = self._validate_layer(ticker, results, xbrl)
+            print(f"  Layer 3 (AI): {total - len(gaps)}/{total} resolved")
+        
+        if gaps:
+            print(f"  Remaining gaps: {gaps}")
         
         return results, xbrl
     

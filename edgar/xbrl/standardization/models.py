@@ -77,6 +77,21 @@ class MappingResult:
     def is_mapped(self) -> bool:
         """Check if this result has a valid mapping."""
         return self.concept is not None and self.confidence >= 0.7
+    
+    @property
+    def is_resolved(self) -> bool:
+        """
+        Check if this result is both mapped AND validated.
+        
+        A metric is truly resolved only when:
+        1. It has a mapping (concept with confidence >= 0.7)
+        2. The mapping has been validated (validation_status == 'valid')
+        """
+        return (
+            self.concept is not None 
+            and self.confidence >= 0.7
+            and self.validation_status == 'valid'
+        )
 
 
 @dataclass

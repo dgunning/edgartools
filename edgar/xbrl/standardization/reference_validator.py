@@ -76,9 +76,25 @@ class ReferenceValidator:
     ):
         self.config = config or get_config()
         self.tolerance = tolerance_pct / 100.0
+        self._yf_cache = {}  # Cache yfinance Stock objects by ticker
         
         if yf is None:
             print("Warning: yfinance not installed. Install with: pip install yfinance")
+    
+    def _get_stock(self, ticker: str):
+        """
+        Get yfinance Stock object with caching.
+        
+        Caches Stock objects to avoid redundant API calls when 
+        validating after each layer.
+        """
+        if yf is None:
+            return None
+        
+        if ticker not in self._yf_cache:
+            self._yf_cache[ticker] = yf.Ticker(ticker)
+        
+        return self._yf_cache[ticker]
     
     def validate_company(
         self,
@@ -100,8 +116,8 @@ class ReferenceValidator:
         if yf is None:
             return {}
         
-        # Get yfinance data
-        stock = yf.Ticker(ticker)
+        # Get yfinance data (cached)
+        stock = self._get_stock(ticker)
         
         validations = {}
         
@@ -401,7 +417,7 @@ class ReferenceValidator:
         if yf is None:
             return (False, None)
         
-        stock = yf.Ticker(ticker)
+        stock = self._get_stock(ticker)
         value = self._get_yfinance_value(stock, metric)
         
         return (value is not None, value)
