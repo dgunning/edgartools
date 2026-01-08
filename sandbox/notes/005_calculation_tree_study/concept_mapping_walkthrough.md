@@ -34,6 +34,9 @@ The concept mapping system was developed iteratively. Here's the evolution based
 | `16aea1a1` | XBRL value extraction fixes | Fixed extraction and composite debt metrics |
 | `70a06066` | E2E test documentation | Added investigation scripts and test results |
 | `f71a2d7f` | **Workflow restructure** | Reordered layers (Facts before AI), validation-in-loop |
+| `dfc231d3` | E2E test SP500 | 86.4% coverage on 10 diverse S&P 500 companies |
+| `3c09bd5a` | **JPM investigation** | Deep dive into dimensional XBRL reporting issues |
+| `6977c22d` | Agent enhancements | Added gap types, dimensional reporting guide, decision tree |
 
 ---
 
@@ -550,3 +553,46 @@ Comparison test on 10 random SP500 companies:
 
 Most remaining gaps are **validation failures** (value mismatch), not missing mappings.
 
+### E2E with Diverse SP500 Companies (10 companies)
+
+Tested with: JPM, WMT, CVS, XOM, CMCSA, UNH, HD, PFE, KO, DIS
+
+| Metric | Result |
+|--------|--------|
+| Coverage | **86.4% (121/140)** |
+| AI Resolution | 0% (all gaps structural/validation) |
+| Sectors | Finance, Retail, Healthcare, Energy, Media |
+
+---
+
+## Understanding Gap Types
+
+Based on real-world testing (commit `6977c22d`), gaps fall into three categories:
+
+| Type | Description | Resolution |
+|------|-------------|------------|
+| **Structural** | Metric doesn't exist (banks lack COGS) | Exclude in config |
+| **Validation** | Mapping exists but value mismatch | Investigate definition |
+| **Unmapped** | No concept found | Use AI tools |
+
+---
+
+## Dimensional Reporting Issues
+
+> [!CAUTION]
+> **Key Discovery from JPM Investigation (commit `3c09bd5a`)**
+>
+> Current validator filters ALL dimensional values, but some companies report concepts ONLY with dimensions.
+
+**Example: JPM CommercialPaper**
+- `ShortTermBorrowings`: $52.89B (non-dimensioned, extracted ✓)
+- `CommercialPaper`: $21.80B (dimensioned as "VIE", filtered out ✗)
+- Gap vs yfinance: 18% variance
+
+**Root cause:** JPM reports CommercialPaper ONLY under "Beneficial interests issued by consolidated VIEs" dimension.
+
+**Recommendations:**
+1. **Short-term:** Industry-specific tolerance (20% for financials)
+2. **Long-term:** Selective dimensional value inclusion framework
+
+See: [jpm_investigation_summary.md](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/sandbox/notes/005_calculation_tree_study/jpm_investigation_summary.md)
