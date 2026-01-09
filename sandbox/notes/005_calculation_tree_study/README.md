@@ -190,6 +190,38 @@ python -m edgar.xbrl.standardization.orchestrator --output results.json
 
 ---
 
+## Discrepancy Documentation System
+
+When XBRL values differ from reference data due to definition differences (not mapping errors), document the discrepancy.
+
+### Tools
+
+| Tool | Purpose |
+|------|---------|
+| `tools/discrepancy_manager.py` | Add, search, check discrepancies |
+| `tools/kpi_tracker.py` | Track coverage and knowledge metrics |
+| `company_mappings/discrepancies.json` | Known mismatches |
+| `company_mappings/validation_history.json` | Multi-period trust |
+
+### Usage
+
+```bash
+# Check stats
+python -m edgar.xbrl.standardization.tools.discrepancy_manager stats
+
+# Search discrepancies
+python -m edgar.xbrl.standardization.tools.discrepancy_manager search --ticker TSLA
+
+# View KPI history
+python -m edgar.xbrl.standardization.tools.kpi_tracker history
+```
+
+### Agent Workflow
+
+See `.agent/workflows/document-discrepancy.md` for step-by-step instructions.
+
+---
+
 ## Related Notes
 
 - [004_ai_agent_concept_mapping](../004_ai_agent_concept_mapping/) - AI agent design

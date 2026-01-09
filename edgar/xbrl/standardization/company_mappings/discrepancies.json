@@ -1,0 +1,80 @@
+{
+    "schema_version": "1.0",
+    "description": "Known discrepancies between XBRL extracted values and reference data (yfinance)",
+    "statistics": {
+        "total": 2,
+        "by_classification": {
+            "definition_mismatch": 1,
+            "reference_unavailable": 1
+        },
+        "by_status": {
+            "accepted": 2
+        }
+    },
+    "discrepancies": [
+        {
+            "id": "TSLA-IntangibleAssets-2024FY",
+            "ticker": "TSLA",
+            "metric": "IntangibleAssets",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-09",
+            "xbrl": {
+                "value": 390000000,
+                "concepts": [
+                    "us-gaap:Goodwill",
+                    "us-gaap:IntangibleAssetsNetExcludingGoodwill"
+                ],
+                "method": "composite_sum"
+            },
+            "reference": {
+                "source": "yfinance",
+                "field": "Goodwill And Other Intangible Assets",
+                "value": 1470000000
+            },
+            "variance_pct": 73.5,
+            "classification": "definition_mismatch",
+            "status": "accepted",
+            "investigation": {
+                "date": "2026-01-09",
+                "root_cause": "yfinance includes items that XBRL categorizes under different concepts. XBRL value is the sum of explicit balance sheet intangibles.",
+                "verified_correct": true,
+                "verified_by": "agent"
+            },
+            "action": "use_xbrl_value"
+        },
+        {
+            "id": "NVDA-ShortTermDebt-2024FY",
+            "ticker": "NVDA",
+            "metric": "ShortTermDebt",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-09",
+            "xbrl": {
+                "value": 0,
+                "concepts": [
+                    "us-gaap:LongTermDebtCurrent"
+                ],
+                "method": "direct"
+            },
+            "reference": {
+                "source": "yfinance",
+                "field": "Current Debt",
+                "value": null
+            },
+            "variance_pct": null,
+            "classification": "reference_unavailable",
+            "status": "accepted",
+            "investigation": {
+                "date": "2026-01-09",
+                "root_cause": "NVDA has no short-term debt. yfinance correctly returns NaN. XBRL mapping to LongTermDebtCurrent is correct.",
+                "verified_correct": true,
+                "verified_periods": [
+                    "2024-FY",
+                    "2023-FY",
+                    "2022-FY"
+                ],
+                "verified_by": "agent"
+            },
+            "action": "use_xbrl_value"
+        }
+    ]
+}
