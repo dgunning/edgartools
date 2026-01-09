@@ -41,7 +41,7 @@ class MappingConfig:
         
         Combines:
         1. Company-specific excludes from company config
-        2. Industry-based excludes from defaults.industry_exclusions
+        2. Industry-based excludes (auto-detected from SEC SIC code, or manual fallback)
         
         Args:
             ticker: Company ticker (e.g., 'JPM')
@@ -56,13 +56,43 @@ class MappingConfig:
         if company and company.exclude_metrics:
             excluded.update(company.exclude_metrics)
         
-        # Industry-based exclusions (from defaults)
-        if company and company.industry:
+        # Get industry - auto-detect from SIC or use manual config
+        industry = self._get_industry_for_company(ticker, company)
+        
+        # Industry-based exclusions
+        if industry:
             industry_exclusions = self.defaults.get('industry_exclusions', {})
-            industry_metrics = industry_exclusions.get(company.industry, [])
+            industry_metrics = industry_exclusions.get(industry, [])
             excluded.update(industry_metrics)
         
         return list(excluded)
+    
+    def _get_industry_for_company(self, ticker: str, company: Optional[CompanyConfig] = None) -> Optional[str]:
+        """Auto-detect industry from SEC SIC code, with fallback to manual config.
+        
+        Priority:
+        1. Auto-detect from SEC SIC code
+        2. Manual industry from company config
+        """
+        # Try auto-detection from SIC first
+        try:
+            from edgar import Company
+            from edgar.entity.mappings_loader import get_industry_for_sic
+            
+            c = Company(ticker)
+            sic = c.data.sic
+            if sic:
+                industry = get_industry_for_sic(sic)
+                if industry:
+                    return industry
+        except Exception:
+            pass  # Fall through to manual config
+        
+        # Fallback to manual industry config
+        if company and company.industry:
+            return company.industry
+        
+        return None
 
 
 class ConfigLoader:

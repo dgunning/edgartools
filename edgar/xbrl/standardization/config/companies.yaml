@@ -83,18 +83,36 @@ defaults:
   
   # Industry-based metric exclusions
   # These metrics are structurally N/A for specific industries
+  # Industry names must match get_industry_for_sic() output
   industry_exclusions:
-    financial_services:
-      # Banks, insurance, asset management
-      # Use interest income model, not manufacturing model
+    # Banking (SIC 6020-6029)
+    banking:
       - COGS           # No cost of goods - money is the product
       - SGA            # Use Non-Interest Expense instead
-      - OperatingIncome  # Use PretaxIncome instead (interest is primary revenue)
-      - Capex          # Capital-light business model, loan book is the "investment"
+      - OperatingIncome  # Use PretaxIncome (interest is primary revenue)
+      - Capex          # Capital-light, loan book is the "investment"
     
-    # Future industries can be added:
-    # real_estate:
-    #   - Inventory    # Properties are assets, not inventory
-    # professional_services:
-    #   - COGS         # No physical product
-    #   - Inventory    # N/A
+    # Securities & Asset Management (SIC 6200-6289)
+    securities:
+      - COGS           # Fees/commissions, not products
+      - SGA            # Different expense structure
+      - OperatingIncome  # Use PretaxIncome
+      - Capex          # Asset-light
+    
+    # Insurance (SIC 6300-6399)
+    insurance:
+      - COGS           # Premiums/claims model
+      - OperatingIncome  # Underwriting income different
+    
+    # Investment Companies (SIC 6720-6799)
+    investment_companies:
+      - COGS           # AUM fees model
+      - Capex          # Asset-light
+    
+    # Legacy: financial_services (manual fallback)
+    financial_services:
+      - COGS
+      - SGA
+      - OperatingIncome
+      - Capex
+
