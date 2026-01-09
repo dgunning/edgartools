@@ -1,0 +1,64 @@
+{
+    "schema_version": "1.0",
+    "description": "Default extraction rules applied to all companies unless overridden",
+    "extraction_rules": {
+        "IntangibleAssets": {
+            "method": "composite_sum",
+            "components": [
+                "Goodwill",
+                "IntangibleAssetsNetExcludingGoodwill"
+            ],
+            "concept_priority": {
+                "Goodwill": [
+                    "us-gaap:Goodwill"
+                ],
+                "IntangibleAssetsNetExcludingGoodwill": [
+                    "us-gaap:IntangibleAssetsNetExcludingGoodwill",
+                    "us-gaap:FiniteLivedIntangibleAssetsNet"
+                ]
+            },
+            "notes": "Sum of Goodwill + Other Intangibles. Prefer exact Goodwill match over impairment variants."
+        },
+        "ShortTermDebt": {
+            "method": "composite_sum",
+            "components": [
+                "LongTermDebtCurrent",
+                "CommercialPaper",
+                "ShortTermBorrowings"
+            ],
+            "concept_priority": {
+                "LongTermDebtCurrent": [
+                    "us-gaap:LongTermDebtCurrent"
+                ],
+                "CommercialPaper": [
+                    "us-gaap:CommercialPaper"
+                ],
+                "ShortTermBorrowings": [
+                    "us-gaap:ShortTermBorrowings"
+                ]
+            },
+            "notes": "Sum of current portion of LT debt + commercial paper + short-term borrowings"
+        }
+    },
+    "period_selection": {
+        "duration_metrics": [
+            "Revenue",
+            "NetIncome",
+            "GrossProfit",
+            "OperatingIncome",
+            "OperatingCashFlow",
+            "Capex",
+            "COGS",
+            "SGA",
+            "RnD"
+        ],
+        "prefer_annual": true,
+        "min_days_for_annual": 300,
+        "notes": "For income/cashflow metrics, prefer 12-month periods over quarterly"
+    },
+    "namespace_priority": [
+        "us-gaap:",
+        "ifrs-full:",
+        "dei:"
+    ]
+}

@@ -20,6 +20,7 @@ except ImportError:
 
 from .config_loader import get_config, MappingConfig
 from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern
+from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components
 
 
 @dataclass
@@ -64,25 +65,19 @@ class ReferenceValidator:
     
     # Composite metrics: sum of multiple XBRL concepts
     # These metrics require summing components to match yfinance definition
+    # NOTE: These are fallbacks. Prefer extraction_rules.py JSON config.
     COMPOSITE_METRICS = {
         'IntangibleAssets': ['Goodwill', 'IntangibleAssetsNetExcludingGoodwill'],
         'ShortTermDebt': ['LongTermDebtCurrent', 'CommercialPaper', 'ShortTermBorrowings'],
     }
     
-    # Concept priority for composite extraction
-    # Prevents selecting impairment/adjustment concepts over primary asset concepts
-    # Format: {component_name: [priority_variations]}
+    # DEPRECATED: Use extraction_rules.py instead
+    # Kept as fallback if JSON config not available
     CONCEPT_PRIORITY = {
-        'Goodwill': [
-            'Goodwill',  # Exact match - the actual asset value (119.51B for MSFT)
-            # NOT included (these are changes/adjustments, not the asset balance):
-            # - GoodwillImpairedAccumulatedImpairmentLoss (impairment accumulation)
-            # - GoodwillAcquiredDuringPeriod (period change)
-            # - GoodwillImpairmentLoss (expense)
-        ],
+        'Goodwill': ['Goodwill'],
         'IntangibleAssetsNetExcludingGoodwill': [
-            'IntangibleAssetsNetExcludingGoodwill',  # Standard concept
-            'FiniteLivedIntangibleAssetsNet',  # MSFT uses this (22.60B)
+            'IntangibleAssetsNetExcludingGoodwill',
+            'FiniteLivedIntangibleAssetsNet',
         ],
     }
     
@@ -628,31 +623,41 @@ class ReferenceValidator:
         """
         Extract composite metric value by summing component concepts.
         
-        Uses CONCEPT_PRIORITY to ensure we get exact asset values, not
-        impairment or adjustment concepts for components like Goodwill.
+        Uses extraction_rules.py JSON config with fallback to hardcoded values.
+        Priority: company-specific > industry > defaults > hardcoded
         
         Used for metrics like IntangibleAssets = Goodwill + IntangibleAssetsNetExcludingGoodwill
         """
-        if metric not in self.COMPOSITE_METRICS:
-            return None
+        # Try to get components from extraction_rules (JSON config)
+        ticker = getattr(self, '_current_ticker', None)
+        components = get_composite_components(ticker, metric) if ticker else None
         
-        components = self.COMPOSITE_METRICS[metric]
+        # Fall back to hardcoded if no config
+        if not components:
+            if metric not in self.COMPOSITE_METRICS:
+                return None
+            components = self.COMPOSITE_METRICS[metric]
+        
         total = 0.0
         found_any = False
         
         for component in components:
             value = None
             
-            # Check if this component has priority variants
-            if component in self.CONCEPT_PRIORITY:
-                # Try priority concepts in order (exact match first)
-                for variant in self.CONCEPT_PRIORITY[component]:
-                    value = self._extract_xbrl_value(xbrl, f"us-gaap:{variant}")
-                    if value is not None:
-                        break  # Use first matching variant
+            # Get priority from extraction_rules (JSON config)
+            if ticker:
+                priority_variants = get_concept_priority(ticker, metric, component)
             else:
-                # No priority - use component directly
-                value = self._extract_xbrl_value(xbrl, f"us-gaap:{component}")
+                # Fallback to hardcoded priority
+                priority_variants = self.CONCEPT_PRIORITY.get(component, [component])
+            
+            # Try each variant in priority order
+            for variant in priority_variants:
+                # Add us-gaap prefix if not present
+                concept = variant if ':' in variant else f"us-gaap:{variant}"
+                value = self._extract_xbrl_value(xbrl, concept)
+                if value is not None:
+                    break
             
             if value is not None:
                 total += value
