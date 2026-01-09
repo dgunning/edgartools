@@ -295,30 +295,78 @@ class Orchestrator:
                 else:
                     print(f"  ✓ All mapped metrics validated")
             else:
-                print(f"  ⚠ {mismatches} mapping(s) marked as INVALID - need retry or review")    
+                print(f"  ⚠ {mismatches} mapping(s) marked as INVALID - need retry or review")
+    
     def _get_filing(self, ticker: str, amendments: bool = None):
-        """Get the latest 10-K filing.
+        """Get a filing with optional amendments filter.
         
         Args:
             ticker: Company ticker
             amendments: Whether to include amended filings (10-K/A).
-                       If None, uses config.defaults.filing_preferences.amendments.
-                       Defaults to False (exclude amendments) as amended filings
-                       often have incomplete XBRL data.
         """
-        # Use config default if not explicitly set
-        if amendments is None:
-            filing_prefs = self.config.defaults.get('filing_preferences', {})
-            amendments = filing_prefs.get('amendments', False)
-        
         try:
             c = Company(ticker)
-            filings = c.get_filings(form='10-K', amendments=amendments)
+            filings = c.get_filings(form='10-K', amendments=amendments if amendments is not None else True)
             for f in filings:
                 return f
         except Exception:
             pass
         return None
+    
+    def _get_best_filing(self, ticker: str):
+        """Get the best filing: prefer amendment if XBRL complete, fallback to original.
+        
+        Smart filing selection strategy:
+        1. Try to get both amended (10-K/A) and original (10-K) filing
+        2. If amendment exists and has complete XBRL (calculation trees), use it
+        3. Otherwise use original
+        4. Return metadata about which source was used
+        
+        Returns:
+            Tuple of (filing, metadata_dict)
+        """
+        original = None
+        amended = None
+        
+        try:
+            c = Company(ticker)
+            
+            # Get original (exclude amendments)
+            orig_filings = c.get_filings(form='10-K', amendments=False)
+            for f in orig_filings:
+                original = f
+                break
+            
+            # Get latest filing (may be amendment)
+            all_filings = c.get_filings(form='10-K', amendments=True)
+            for f in all_filings:
+                if '/A' in str(f.form):
+                    amended = f
+                break
+        except Exception:
+            pass
+        
+        if not original and not amended:
+            return None, {'source': 'none', 'error': 'no filing found'}
+        
+        # If no amendment, use original
+        if not amended or amended == original:
+            return original, {'source': 'original'}
+        
+        # Try amendment first - check if XBRL is complete
+        try:
+            amended_xbrl = amended.xbrl()
+            if amended_xbrl and len(amended_xbrl.calculation_trees) > 0:
+                # Amendment has complete XBRL - use it
+                return amended, {
+                    'source': 'amendment',
+                    'calc_trees': len(amended_xbrl.calculation_trees)
+                }
+        except Exception:
+            pass
+        
+        # Amendment incomplete - use original
+        return original, {'source': 'original', 'reason': 'amendment_incomplete'}
     
     def _log_layer_results(
         self,
