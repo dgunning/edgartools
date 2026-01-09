@@ -69,6 +69,23 @@ class ReferenceValidator:
         'ShortTermDebt': ['LongTermDebtCurrent', 'CommercialPaper', 'ShortTermBorrowings'],
     }
     
+    # Concept priority for composite extraction
+    # Prevents selecting impairment/adjustment concepts over primary asset concepts
+    # Format: {component_name: [priority_variations]}
+    CONCEPT_PRIORITY = {
+        'Goodwill': [
+            'Goodwill',  # Exact match - the actual asset value (119.51B for MSFT)
+            # NOT included (these are changes/adjustments, not the asset balance):
+            # - GoodwillImpairedAccumulatedImpairmentLoss (impairment accumulation)
+            # - GoodwillAcquiredDuringPeriod (period change)
+            # - GoodwillImpairmentLoss (expense)
+        ],
+        'IntangibleAssetsNetExcludingGoodwill': [
+            'IntangibleAssetsNetExcludingGoodwill',  # Standard concept
+            'FiniteLivedIntangibleAssetsNet',  # MSFT uses this (22.60B)
+        ],
+    }
+    
     def __init__(
         self,
         config: Optional[MappingConfig] = None,
@@ -235,6 +252,23 @@ class ReferenceValidator:
         
         # Other patterns don't have automatic fixes yet
         return None
+    
+    def _calculate_period_days(self, period_key: str) -> int:
+        """Calculate days in a period from period_key like 'duration_2024-01-01_2024-12-31'.
+        
+        Used to differentiate annual periods (>300 days) from quarterly (<100 days).
+        """
+        try:
+            if not period_key.startswith('duration_'):
+                return 0
+            parts = period_key.replace('duration_', '').split('_')
+            if len(parts) == 2:
+                start = datetime.strptime(parts[0], '%Y-%m-%d')
+                end = datetime.strptime(parts[1], '%Y-%m-%d')
+                return (end - start).days
+        except Exception:
+            pass
+        return 0
     
     def _extract_dimensional_sum(self, xbrl, concept: str) -> Optional[float]:
         """Extract sum of all dimensional values for a concept."""
@@ -541,10 +575,36 @@ class ReferenceValidator:
             # Sort by period_key (e.g., "instant_2024-12-31" or "duration_2024-01-01_2024-12-31")
             # to get the most recent
             if 'period_key' in total_rows.columns:
-                total_rows = total_rows.sort_values('period_key', ascending=False)
+                # Separate instant vs duration facts
+                duration_mask = total_rows['period_key'].str.startswith('duration_')
+                duration_rows = total_rows[duration_mask]
+                instant_rows = total_rows[~duration_mask]
+                
+                if len(duration_rows) > 0:
+                    # For duration-based metrics (income/cashflow), prefer annual periods
+                    # Calculate period length and filter for 12-month periods if available
+                    duration_rows = duration_rows.copy()
+                    duration_rows['period_days'] = duration_rows['period_key'].apply(
+                        self._calculate_period_days
+                    )
+                    
+                    # Prefer annual periods (>300 days) over quarterly
+                    annual_rows = duration_rows[duration_rows['period_days'] > 300]
+                    if len(annual_rows) > 0:
+                        duration_rows = annual_rows
+                    
+                    # Sort by period end date (descending) to get most recent
+                    duration_rows = duration_rows.sort_values('period_key', ascending=False)
+                    latest = duration_rows.iloc[0]
+                elif len(instant_rows) > 0:
+                    instant_rows = instant_rows.sort_values('period_key', ascending=False)
+                    latest = instant_rows.iloc[0]
+                else:
+                    latest = total_rows.iloc[0]
+            else:
+                latest = total_rows.iloc[0]
 
-            # Get the latest value
-            latest = total_rows.iloc[0]
+            # Get the value
             value = float(latest['numeric_value'])
 
             # Handle absolute value for cash flows (some are negative in yfinance)
@@ -568,6 +628,9 @@ class ReferenceValidator:
         """
         Extract composite metric value by summing component concepts.
         
+        Uses CONCEPT_PRIORITY to ensure we get exact asset values, not
+        impairment or adjustment concepts for components like Goodwill.
+        
         Used for metrics like IntangibleAssets = Goodwill + IntangibleAssetsNetExcludingGoodwill
         """
         if metric not in self.COMPOSITE_METRICS:
@@ -578,7 +641,19 @@ class ReferenceValidator:
         found_any = False
         
         for component in components:
-            value = self._extract_xbrl_value(xbrl, f"us-gaap:{component}")
+            value = None
+            
+            # Check if this component has priority variants
+            if component in self.CONCEPT_PRIORITY:
+                # Try priority concepts in order (exact match first)
+                for variant in self.CONCEPT_PRIORITY[component]:
+                    value = self._extract_xbrl_value(xbrl, f"us-gaap:{variant}")
+                    if value is not None:
+                        break  # Use first matching variant
+            else:
+                # No priority - use component directly
+                value = self._extract_xbrl_value(xbrl, f"us-gaap:{component}")
+            
             if value is not None:
                 total += value
                 found_any = True

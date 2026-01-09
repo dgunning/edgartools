@@ -80,3 +80,21 @@ defaults:
   filing_preferences:
     amendments: false  # Exclude amended filings by default
     forms: ["10-K", "10-Q"]
+  
+  # Industry-based metric exclusions
+  # These metrics are structurally N/A for specific industries
+  industry_exclusions:
+    financial_services:
+      # Banks, insurance, asset management
+      # Use interest income model, not manufacturing model
+      - COGS           # No cost of goods - money is the product
+      - SGA            # Use Non-Interest Expense instead
+      - OperatingIncome  # Use PretaxIncome instead (interest is primary revenue)
+      - Capex          # Capital-light business model, loan book is the "investment"
+    
+    # Future industries can be added:
+    # real_estate:
+    #   - Inventory    # Properties are assets, not inventory
+    # professional_services:
+    #   - COGS         # No physical product
+    #   - Inventory    # N/A

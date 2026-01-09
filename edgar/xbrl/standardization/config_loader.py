@@ -35,6 +35,34 @@ class MappingConfig:
     def get_universal_metrics(self) -> List[str]:
         """Get metrics marked as universal."""
         return [name for name, m in self.metrics.items() if m.universal]
+    
+    def get_excluded_metrics_for_company(self, ticker: str) -> List[str]:
+        """Get all excluded metrics for a company (company-specific + industry).
+        
+        Combines:
+        1. Company-specific excludes from company config
+        2. Industry-based excludes from defaults.industry_exclusions
+        
+        Args:
+            ticker: Company ticker (e.g., 'JPM')
+            
+        Returns:
+            List of metric names to exclude for this company
+        """
+        company = self.get_company(ticker)
+        excluded = set()
+        
+        # Company-specific exclusions (from company config)
+        if company and company.exclude_metrics:
+            excluded.update(company.exclude_metrics)
+        
+        # Industry-based exclusions (from defaults)
+        if company and company.industry:
+            industry_exclusions = self.defaults.get('industry_exclusions', {})
+            industry_metrics = industry_exclusions.get(company.industry, [])
+            excluded.update(industry_metrics)
+        
+        return list(excluded)
 
 
 class ConfigLoader:

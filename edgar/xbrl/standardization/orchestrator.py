@@ -295,11 +295,22 @@ class Orchestrator:
                 else:
                     print(f"  ✓ All mapped metrics validated")
             else:
-                print(f"  ⚠ {mismatches} mapping(s) marked as INVALID - need retry or review")
-
-    
-    def _get_filing(self, ticker: str, amendments: bool = False):
-        """Get the latest 10-K filing."""
+                print(f"  ⚠ {mismatches} mapping(s) marked as INVALID - need retry or review")    
+    def _get_filing(self, ticker: str, amendments: bool = None):
+        """Get the latest 10-K filing.
+        
+        Args:
+            ticker: Company ticker
+            amendments: Whether to include amended filings (10-K/A).
+                       If None, uses config.defaults.filing_preferences.amendments.
+                       Defaults to False (exclude amendments) as amended filings
+                       often have incomplete XBRL data.
+        """
+        # Use config default if not explicitly set
+        if amendments is None:
+            filing_prefs = self.config.defaults.get('filing_preferences', {})
+            amendments = filing_prefs.get('amendments', False)
+        
         try:
             c = Company(ticker)
             filings = c.get_filings(form='10-K', amendments=amendments)

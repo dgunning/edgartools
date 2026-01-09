@@ -69,15 +69,19 @@ class TreeParser:
         
         # Map each metric
         results = {}
+        
+        # Get all excluded metrics (company-specific + industry-based)
+        excluded_metrics = set(self.config.get_excluded_metrics_for_company(ticker))
+        
         for metric_name in self.config.get_all_metric_names():
             # Check if metric should be skipped for this company
-            if company_config and company_config.should_skip_metric(metric_name):
+            if metric_name in excluded_metrics:
                 results[metric_name] = MappingResult(
                     metric=metric_name,
                     company=ticker,
                     fiscal_period=fiscal_period,
                     source=MappingSource.CONFIG,
-                    reasoning=f"Metric excluded for {ticker} in config"
+                    reasoning=f"Metric excluded for {ticker} (company or industry)"
                 )
                 continue
             
