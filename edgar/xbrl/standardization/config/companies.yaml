@@ -115,4 +115,13 @@ defaults:
       - SGA
       - OperatingIncome
       - Capex
-
+    
+    # Finance Services (SIC 6199) - AXP
+    finance_services:
+      - COGS
+      - SGA
+      - Capex
+    
+    # Business Services (SIC 7389) - V, MA (payment networks)
+    business_services:
+      - COGS  # Services model, no goods

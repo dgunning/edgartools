@@ -439,9 +439,13 @@ class ReferenceValidator:
     def _get_yfinance_value(
         self,
         stock,
-        metric: str
+        metric: str,
+        max_periods: int = 4
     ) -> Optional[float]:
-        """Get a value from yfinance for a metric."""
+        """Get a value from yfinance for a metric.
+        
+        Checks multiple periods if current period returns NaN.
+        """
         if metric not in self.YFINANCE_MAP:
             return None
         
@@ -457,14 +461,24 @@ class ReferenceValidator:
             else:
                 return None
             
-            if field_name in df.index:
-                val = df.loc[field_name].iloc[0]
+            if df is None or df.empty:
+                return None
+                
+            if field_name not in df.index:
+                return None
+            
+            # Try multiple periods, use first non-NaN value
+            for col_idx in range(min(max_periods, len(df.columns))):
+                val = df.loc[field_name].iloc[col_idx]
                 if val is not None and not (hasattr(val, 'isna') and val.isna()):
-                    return float(val)
+                    try:
+                        return float(val)
+                    except (ValueError, TypeError):
+                        continue
         except Exception:
             pass
         
-        return None
+        return None  # All periods NaN or error
     
     def _extract_xbrl_value(
         self,

@@ -51,9 +51,8 @@ metrics:
     description: "Income from operations"
     known_concepts:
       - OperatingIncomeLoss
-      # Fallbacks for pharma/other companies with different calc tree structure
-      - IncomeLossFromContinuingOperationsBeforeIncomeTaxes
-      - IncomeLossFromContinuingOperationsBeforeInterestExpenseInterestIncomeIncomeTaxesExtraordinaryItemsNoncontrollingInterestsNet
+      # Note: IncomeLossFromContinuingOperationsBeforeIncomeTaxes is PretaxIncome, NOT OperatingIncome
+      # Removed incorrect fallbacks that were causing wrong mappings
     tree_hints:
       statements: [INCOME, OPERATIONS]
       parent_pattern: IncomeLossBeforeTax
