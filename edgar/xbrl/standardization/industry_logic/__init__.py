@@ -159,8 +159,26 @@ class DefaultExtractor(IndustryExtractor):
                 extraction_method=ExtractionMethod.DIRECT
             )
         
-        # Fallback: Calculate from components (including D&A per architect guidance)
-        # Try Revenue - COGS - R&D - SGA - D&A
+        # Fallback: Calculate from GrossProfit (preferred - matches yfinance)
+        # IMPORTANT: yfinance OpIncome = GrossProfit - R&D - SGA (NO D&A!)
+        # Verified: LLY 36.62 - 10.99 - 8.13 = 17.50B exactly
+        gross_profit = self._get_fact_value(facts_df, 'GrossProfit')
+        rd = self._get_fact_value(facts_df, 'ResearchAndDevelopmentExpense')
+        sga = self._get_fact_value(facts_df, 'SellingGeneralAndAdministrativeExpense')
+        
+        if gross_profit is not None and (rd is not None or sga is not None):
+            # GrossProfit - R&D - SGA (NO D&A - matches yfinance)
+            calculated = gross_profit - (rd or 0) - (sga or 0)
+            return ExtractedMetric(
+                standard_name="OperatingIncome",
+                industry_counterpart=None,
+                xbrl_concept=None,
+                value=calculated,
+                extraction_method=ExtractionMethod.CALCULATED,
+                notes="Calculated: GrossProfit - R&D - SGA (yfinance formula)"
+            )
+        
+        # Secondary fallback: Revenue - COGS - R&D - SGA
         revenue = (
             self._get_fact_value(facts_df, 'Revenues') or
             self._get_fact_value(facts_df, 'SalesRevenueNet') or
@@ -174,40 +192,15 @@ class DefaultExtractor(IndustryExtractor):
             self._get_fact_value(facts_df, 'CostOfSales')
         )
         
-        rd = self._get_fact_value(facts_df, 'ResearchAndDevelopmentExpense')
-        sga = self._get_fact_value(facts_df, 'SellingGeneralAndAdministrativeExpense')
-        
-        # D&A - critical for pharma (Depreciation Trap fix)
-        da = (
-            self._get_fact_value(facts_df, 'DepreciationAndAmortization') or
-            self._get_fact_value(facts_df, 'DepreciationDepletionAndAmortization') or
-            self._get_fact_value(facts_df, 'AmortizationOfIntangibleAssets')
-        )
-        
-        # Also try GrossProfit path if available
-        gross_profit = self._get_fact_value(facts_df, 'GrossProfit')
-        
-        if gross_profit is not None and (rd is not None or sga is not None):
-            # GrossProfit already has COGS deducted
-            calculated = gross_profit - (rd or 0) - (sga or 0) - (da or 0)
-            return ExtractedMetric(
-                standard_name="OperatingIncome",
-                industry_counterpart=None,
-                xbrl_concept=None,
-                value=calculated,
-                extraction_method=ExtractionMethod.CALCULATED,
-                notes="Calculated: GrossProfit - R&D - SGA - D&A"
-            )
-        
         if revenue is not None and cogs is not None:
-            calculated = revenue - cogs - (rd or 0) - (sga or 0) - (da or 0)
+            calculated = revenue - cogs - (rd or 0) - (sga or 0)
             return ExtractedMetric(
                 standard_name="OperatingIncome",
                 industry_counterpart=None,
                 xbrl_concept=None,
                 value=calculated,
                 extraction_method=ExtractionMethod.CALCULATED,
-                notes="Calculated: Revenue - COGS - R&D - SGA - D&A"
+                notes="Calculated: Revenue - COGS - R&D - SGA"
             )
         
         return ExtractedMetric(
