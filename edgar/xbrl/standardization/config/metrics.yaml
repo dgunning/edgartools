@@ -92,15 +92,20 @@ metrics:
     universal: true
 
   Capex:
-    description: "Capital expenditures"
+    description: "Capital expenditures (including intangibles)"
     known_concepts:
       - PaymentsToAcquirePropertyPlantAndEquipment
       - CapitalExpendituresIncurredButNotYetPaid
+      # Expanded per architect guidance - pharma/tech need intangibles
+      - PaymentsToAcquireIntangibleAssets
+      - PaymentsToDevelopSoftware
+      - PaymentsToAcquireBusinessesNetOfCashAcquired
     tree_hints:
       statements: [CASHFLOW]
       section: investing
       weight: -1.0
     universal: false
+    notes: "Includes intangible investments for pharma/tech"
 
   TotalAssets:
     description: "Total assets"

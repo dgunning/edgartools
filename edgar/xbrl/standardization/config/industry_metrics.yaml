@@ -1,0 +1,84 @@
+# Industry-Specific Metric Mapping Configuration
+# Maps standard metrics to industry counterparts
+
+version: "1.0.0"
+
+# Banking (SIC 6020-6099)
+banking:
+  sic_ranges: [[6020, 6099]]
+  
+  concept_mapping:
+    COGS:
+      counterpart: InterestExpense
+      xbrl_concepts:
+        - InterestExpense
+        - InterestExpenseTotal
+      notes: "Bank raw material cost is interest paid to depositors"
+    
+    GrossProfit:
+      counterpart: NetInterestIncome
+      calculation: "InterestIncome - InterestExpense"
+    
+    OperatingIncome:
+      counterpart: PPNR
+      calculation: "NetInterestIncome + NonInterestIncome - NonInterestExpense"
+      notes: "Pre-Provision Net Revenue - excludes credit loss provisions"
+    
+    SGA:
+      counterpart: NonInterestExpense
+      xbrl_concepts:
+        - NoninterestExpense
+    
+    ShortTermDebt:
+      extraction_strategy: "exclude_operational_funding"
+      exclude_concepts:
+        - SecuritiesSoldUnderAgreementsToRepurchase
+        - FederalFundsPurchased
+      primary_concepts:
+        - CommercialPaper
+        - OtherShortTermBorrowings
+
+# Insurance (SIC 6300-6399)
+insurance:
+  sic_ranges: [[6300, 6399]]
+  
+  concept_mapping:
+    COGS:
+      counterpart: LossesAndAdjustments
+      xbrl_concepts:
+        - BenefitsLossesAndExpenses
+        - PolicyholderBenefitsAndClaimsIncurredNet
+    
+    OperatingIncome:
+      counterpart: UnderwritingIncome
+      calculation: "Premiums - Claims - UnderwritingExpenses"
+
+# REITs (SIC 6500-6553, 6798)
+reits:
+  sic_ranges: [[6500, 6553], [6798, 6798]]
+  
+  concept_mapping:
+    COGS:
+      counterpart: PropertyOperatingExpenses
+      xbrl_concepts:
+        - RealEstateOperatingExpenses
+        - DirectCostsOfRealEstateAndRentalOperations
+    
+    OperatingIncome:
+      counterpart: NOI
+      calculation: "Revenue - PropertyOperatingExpenses"
+      notes: "Excludes depreciation (phantom expense for RE)"
+
+# Default (All other sectors)
+default:
+  concept_mapping:
+    Capex:
+      components:
+        - PaymentsToAcquirePropertyPlantAndEquipment
+        - PaymentsToAcquireIntangibleAssets
+        - PaymentsToDevelopSoftware
+      notes: "Expanded to include intangible investments"
+    
+    OperatingIncome:
+      primary: OperatingIncomeLoss
+      fallback_calculation: "GrossProfit - ResearchAndDevelopmentExpense - SellingGeneralAndAdministrativeExpense"
