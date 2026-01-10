@@ -159,20 +159,55 @@ class DefaultExtractor(IndustryExtractor):
                 extraction_method=ExtractionMethod.DIRECT
             )
         
-        # Fallback: Calculate from components
-        gross_profit = self._get_fact_value(facts_df, 'GrossProfit')
+        # Fallback: Calculate from components (including D&A per architect guidance)
+        # Try Revenue - COGS - R&D - SGA - D&A
+        revenue = (
+            self._get_fact_value(facts_df, 'Revenues') or
+            self._get_fact_value(facts_df, 'SalesRevenueNet') or
+            self._get_fact_value(facts_df, 'SalesRevenueServicesNet') or
+            self._get_fact_value(facts_df, 'RevenueFromContractWithCustomerExcludingAssessedTax')
+        )
+        
+        cogs = (
+            self._get_fact_value(facts_df, 'CostOfGoodsAndServicesSold') or
+            self._get_fact_value(facts_df, 'CostOfRevenue') or
+            self._get_fact_value(facts_df, 'CostOfSales')
+        )
+        
         rd = self._get_fact_value(facts_df, 'ResearchAndDevelopmentExpense')
         sga = self._get_fact_value(facts_df, 'SellingGeneralAndAdministrativeExpense')
         
+        # D&A - critical for pharma (Depreciation Trap fix)
+        da = (
+            self._get_fact_value(facts_df, 'DepreciationAndAmortization') or
+            self._get_fact_value(facts_df, 'DepreciationDepletionAndAmortization') or
+            self._get_fact_value(facts_df, 'AmortizationOfIntangibleAssets')
+        )
+        
+        # Also try GrossProfit path if available
+        gross_profit = self._get_fact_value(facts_df, 'GrossProfit')
+        
         if gross_profit is not None and (rd is not None or sga is not None):
-            calculated = gross_profit - (rd or 0) - (sga or 0)
+            # GrossProfit already has COGS deducted
+            calculated = gross_profit - (rd or 0) - (sga or 0) - (da or 0)
             return ExtractedMetric(
                 standard_name="OperatingIncome",
                 industry_counterpart=None,
                 xbrl_concept=None,
                 value=calculated,
                 extraction_method=ExtractionMethod.CALCULATED,
-                notes="Calculated: GrossProfit - R&D - SGA"
+                notes="Calculated: GrossProfit - R&D - SGA - D&A"
+            )
+        
+        if revenue is not None and cogs is not None:
+            calculated = revenue - cogs - (rd or 0) - (sga or 0) - (da or 0)
+            return ExtractedMetric(
+                standard_name="OperatingIncome",
+                industry_counterpart=None,
+                xbrl_concept=None,
+                value=calculated,
+                extraction_method=ExtractionMethod.CALCULATED,
+                notes="Calculated: Revenue - COGS - R&D - SGA - D&A"
             )
         
         return ExtractedMetric(
@@ -191,39 +226,71 @@ class BankingExtractor(IndustryExtractor):
     
     def extract_short_term_debt(self, xbrl, facts_df) -> ExtractedMetric:
         """
-        Bank ShortTermDebt: Exclude Repos and Fed Funds (operational funding).
+        Bank ShortTermDebt: Dual-track approach per architect guidance.
         
-        Logic:
-        1. Try CommercialPaper + OtherShortTermBorrowings
-        2. Else: ShortTermBorrowings - Repos - FedFunds
+        Returns: yfinance-aligned value (excludes Repos) for validation.
+        Use extract_short_term_debt_economic() for ground truth.
         """
-        cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
-        other = self._get_fact_value(facts_df, 'OtherShortTermBorrowings') or 0
+        return self.extract_short_term_debt_yfinance(xbrl, facts_df)
+    
+    def extract_short_term_debt_yfinance(self, xbrl, facts_df) -> ExtractedMetric:
+        """
+        Bank ShortTermDebt: yfinance-aligned (excludes Repos/FedFunds).
         
-        if cp > 0 or other > 0:
+        Used for validation against yfinance.
+        """
+        # yfinance uses OtherShortTermBorrowings for banks
+        other = self._get_fact_value(facts_df, 'OtherShortTermBorrowings')
+        if other is not None and other > 0:
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="OtherShortTermBorrowings",
+                xbrl_concept="us-gaap:OtherShortTermBorrowings",
+                value=other,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes="Bank (yfinance-aligned): OtherShortTermBorrowings only"
+            )
+        
+        # Fallback: CommercialPaper
+        cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
+        if cp > 0:
             return ExtractedMetric(
                 standard_name="ShortTermDebt",
                 industry_counterpart="CommercialPaper",
                 xbrl_concept="us-gaap:CommercialPaper",
-                value=cp + other,
-                extraction_method=ExtractionMethod.COMPOSITE,
-                notes="Bank: CommercialPaper + OtherBorrowings (excludes Repos)"
+                value=cp,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes="Bank (yfinance-aligned): CommercialPaper"
             )
-        
-        # Fallback: subtract operational funding
-        total_borrowings = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
-        repos = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
-        fed_funds = self._get_fact_value(facts_df, 'FederalFundsPurchased') or 0
-        
-        adjusted = total_borrowings - repos - fed_funds
         
         return ExtractedMetric(
             standard_name="ShortTermDebt",
-            industry_counterpart="AdjustedShortTermBorrowings",
+            industry_counterpart=None,
             xbrl_concept=None,
-            value=adjusted if adjusted > 0 else None,
-            extraction_method=ExtractionMethod.CALCULATED,
-            notes="Bank: ShortTermBorrowings - Repos - FedFunds"
+            value=None,
+            extraction_method=ExtractionMethod.DIRECT
+        )
+    
+    def extract_short_term_debt_economic(self, xbrl, facts_df) -> ExtractedMetric:
+        """
+        Bank ShortTermDebt: Economic view (includes Repos/FedFunds).
+        
+        Used for risk analysis - captures true leverage.
+        """
+        # Sum all short-term debt components (ground truth)
+        st_borrowings = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+        repos = self._get_fact_value(facts_df, 'FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase') or 0
+        cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
+        
+        total = st_borrowings + repos + cp
+        
+        return ExtractedMetric(
+            standard_name="ShortTermDebt_Economic",
+            industry_counterpart="AllShortTermDebt",
+            xbrl_concept=None,
+            value=total if total > 0 else None,
+            extraction_method=ExtractionMethod.COMPOSITE,
+            notes="Bank (economic): ShortTermBorrowings + Repos + CP"
         )
     
     def extract_capex(self, xbrl, facts_df) -> ExtractedMetric:
