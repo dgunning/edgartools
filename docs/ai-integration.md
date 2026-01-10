@@ -379,6 +379,15 @@ Exported skills include:
 - YAML frontmatter for tool integration
 - Helper function documentation
 
+#### Install with `sk`
+
+Install via [sk](https://github.com/803/skills-supply), the universal package manager for AI agent skills (supports Claude, Codex, OpenCode, Amp, and other compatible agents).
+
+```bash
+sk pkg add github dgunning/edgartools --path edgar/ai/skills
+sk sync
+```
+
 ## Model Context Protocol (MCP) Server
 
 Run EdgarTools as an MCP server for Claude Desktop and other MCP clients.
