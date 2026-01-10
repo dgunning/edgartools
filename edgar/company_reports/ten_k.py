@@ -375,26 +375,66 @@ class TenK(CompanyReport):
 
         # Try new parser sections first
         if self.sections:
-            # Direct key lookup (e.g., 'Item 1', 'business' if pattern-based)
+            # Normalize input
+            normalized = item_or_part.strip()
+
+            # PRIORITY 1: Try part-based naming convention first (most reliable)
+            # These have proper part context (e.g., "part_i_item_1", "part_ii_item_5")
+            item_num = None
+            if normalized.startswith('Item '):
+                # Extract item number: "Item 1" -> "1", "Item 1A" -> "1a"
+                item_num = normalized[5:].strip().lower()
+            elif re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
+                # Short format: "1", "1A" -> "1", "1a"
+                item_num = normalized.lower()
+            elif normalized in section_to_item:
+                # Friendly name: "business" -> "Item 1" -> "1"
+                item_key = section_to_item[normalized]
+                item_num = item_key[5:].strip().lower()
+
+            if item_num:
+                # Try Part I first (most common for Items 1-4)
+                part_i_key = f'part_i_item_{item_num}'
+                if part_i_key in self.sections:
+                    text = self.sections[part_i_key].text()
+                    if text and text.strip():
+                        return text
+                # Try Part II for Items 5-9C
+                part_ii_key = f'part_ii_item_{item_num}'
+                if part_ii_key in self.sections:
+                    text = self.sections[part_ii_key].text()
+                    if text and text.strip():
+                        return text
+                # Try Part III for Items 10-14
+                part_iii_key = f'part_iii_item_{item_num}'
+                if part_iii_key in self.sections:
+                    text = self.sections[part_iii_key].text()
+                    if text and text.strip():
+                        return text
+                # Try Part IV for Items 15-16
+                part_iv_key = f'part_iv_item_{item_num}'
+                if part_iv_key in self.sections:
+                    text = self.sections[part_iv_key].text()
+                    if text and text.strip():
+                        return text
+
+            # PRIORITY 2: Direct key lookup (e.g., 'Item 1', 'business' if pattern-based)
             if item_or_part in self.sections:
                 return self.sections[item_or_part].text()
 
-            # Try friendly name -> Item mapping (for TOC-based sections with "Item X" keys)
+            # PRIORITY 3: Try friendly name -> Item mapping
             if item_or_part in section_to_item:
                 item_key = section_to_item[item_or_part]
                 if item_key in self.sections:
                     return self.sections[item_key].text()
 
-            # Normalize input
-            normalized = item_or_part.strip()
-
-            # Handle 'Item X' format -> try friendly name
+            # PRIORITY 4: Handle 'Item X' format -> try friendly name
             if normalized in item_to_section:
                 friendly_name = item_to_section[normalized]
                 if friendly_name in self.sections:
                     return self.sections[friendly_name].text()
 
-            # Handle short format '1', '1A', etc. -> convert to 'Item X'
+            # PRIORITY 5: Handle short format '1', '1A', etc. -> convert to 'Item X'
             if re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
                 item_key = f'Item {normalized.upper()}'
                 # Try direct lookup
@@ -406,8 +446,8 @@ class TenK(CompanyReport):
                     if friendly_name in self.sections:
                         return self.sections[friendly_name].text()
 
-            # Try part-based naming convention (e.g., "part_i_item_1", "part_i_item_1a")
-            # Some filings use this format for section detection
+            # Legacy fallback: Try part-based naming convention again
+            # (This code path may not be reached now, but kept for safety)
             if normalized.startswith('Item '):
                 # Extract item number: "Item 1" -> "1", "Item 1A" -> "1a"
                 item_num = normalized[5:].strip().lower()
