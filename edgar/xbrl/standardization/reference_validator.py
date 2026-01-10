@@ -108,6 +108,49 @@ class ReferenceValidator:
         
         return self._yf_cache[ticker]
     
+    def _try_industry_extraction(self, ticker: str, metric: str, xbrl) -> Optional[float]:
+        """
+        Try industry-specific extraction for special metrics.
+        
+        Uses industry_logic module for:
+        - ShortTermDebt (banks): Excludes Repos/FedFunds
+        - OperatingIncome: Calculated fallback if tag missing
+        
+        Returns None if industry extraction doesn't apply or fails.
+        """
+        try:
+            from .industry_logic import get_industry_extractor, BankingExtractor, DefaultExtractor
+            from edgar.entity.mappings_loader import get_industry_for_sic
+            from edgar import Company
+            
+            # Get industry for this company
+            c = Company(ticker)
+            sic = c.data.sic
+            industry = get_industry_for_sic(sic) if sic else None
+            
+            # Get facts dataframe
+            facts_df = None
+            if xbrl and xbrl.facts:
+                facts_df = xbrl.facts.to_dataframe()
+            
+            # Banking-specific extraction for ShortTermDebt
+            if industry == 'banking' and metric == 'ShortTermDebt':
+                extractor = BankingExtractor()
+                result = extractor.extract_short_term_debt(xbrl, facts_df)
+                return result.value
+            
+            # Calculated OperatingIncome fallback for any industry
+            if metric == 'OperatingIncome':
+                extractor = DefaultExtractor()
+                result = extractor.extract_operating_income(xbrl, facts_df)
+                if result.extraction_method.value == 'calculated':
+                    return result.value
+            
+            return None
+            
+        except Exception:
+            return None
+    
     def _get_tolerance_for_company(self, ticker: str) -> float:
         """
         Get validation tolerance for a specific company.
@@ -367,12 +410,16 @@ class ReferenceValidator:
             if result.is_mapped and xbrl:
                 # Set context for pattern classification
                 self._current_ticker = ticker
+                self._current_metric = metric
+                
+                # Try industry-specific extraction first for special metrics
+                industry_value = self._try_industry_extraction(ticker, metric, xbrl)
+                if industry_value is not None:
+                    xbrl_value = industry_value
                 # Check if metric is composite (sum of multiple concepts)
-                if metric in self.COMPOSITE_METRICS:
-                    self._current_metric = metric  # Set context for dimensional config lookup
+                elif metric in self.COMPOSITE_METRICS:
                     xbrl_value = self._extract_composite_value(xbrl, metric)
                 else:
-                    self._current_metric = metric  # Set context for dimensional config lookup
                     xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
             
             # Validate
