@@ -584,11 +584,11 @@ class Statement:
                               If specified, emits DeprecationWarning.
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
-            include_standardization: If True, add columns showing standardization details:
-                                    - 'original_label': the raw label before standardization
-                                    - 'standard_label': the standardized label (if mapped)
-                                    - 'was_standardized': boolean indicating if label was changed
-                                    Requires standard=True to have any effect.
+            include_standardization: If True, add a 'standard_concept' column showing
+                                    the mapped standard concept identifier (e.g., "CommonEquity").
+                                    This is useful for cross-company analysis and filtering.
+                                    Note: The 'standard_concept' column is always available in
+                                    the DataFrame when standard=True; this parameter is deprecated.
             presentation: If True, apply HTML-matching presentation logic (Issue #463)
                          Cash Flow: outflows (balance='credit') shown as negative
                          Income: apply preferred_sign transformations
@@ -815,7 +815,8 @@ class Statement:
             # Build base row
             row = {
                 'concept': concept,
-                'label': label
+                'label': label,
+                'standard_concept': item.get('standard_concept')  # Standard concept identifier for analysis
             }
 
             # Add period values (raw from instance document)
@@ -934,19 +935,9 @@ class Statement:
                 row['dimension_member_label'] = None
                 row['dimension_label'] = None
 
-            # Add standardization columns if requested (requires standard=True to be effective)
-            if include_standardization and standard:
-                original = item.get('original_label')
-                if original:
-                    # Item was standardized - show both labels
-                    row['original_label'] = original
-                    row['standard_label'] = label  # 'label' is the current (standardized) label
-                    row['was_standardized'] = True
-                else:
-                    # Item was not standardized - original and standard are the same
-                    row['original_label'] = label
-                    row['standard_label'] = label
-                    row['was_standardized'] = False
+            # Note: include_standardization parameter is deprecated.
+            # The 'standard_concept' column is now always included when standard=True.
+            # It contains the concept identifier (e.g., "CommonEquity") for cross-company analysis.
 
             df_rows.append(row)
 

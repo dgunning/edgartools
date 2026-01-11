@@ -982,14 +982,20 @@ def _assign_sections_bottom_up(
 
 def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper) -> List[Dict[str, Any]]:
     """
-    Standardize labels in a statement using the concept mapper.
+    Add standard concept metadata to statement items without replacing labels.
+
+    This function preserves the original company labels (fidelity to the filing)
+    while adding standard_concept metadata for cross-company analysis and filtering.
+
+    The standard_concept field contains the concept identifier (e.g., "CommonEquity")
+    which can be used for programmatic grouping and comparison across companies.
 
     Args:
         statement_data: List of statement line items
-        mapper: ConceptMapper instance
+        mapper: ConceptMapper instance (used for context building)
 
     Returns:
-        Statement data with standardized labels where possible
+        Statement data with standard_concept metadata added where mappings exist
     """
     # Pre-filter to identify which items need standardization
     # This avoids unnecessary copying and processing
@@ -1036,7 +1042,10 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     # by scanning from bottom to top and using subtotals as section boundaries
     _assign_sections_bottom_up(items_to_standardize, statement_data)
 
-    # Second pass - create result list with standardized items
+    # Get the reverse index for standard concept lookups
+    reverse_index = _get_reverse_index()
+
+    # Second pass - add standard_concept metadata without changing labels
     result = []
 
     # Track which indices need standardization for faster lookup
@@ -1052,23 +1061,14 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
         # Get the prepared data for this item
         _, concept, label, context = next((x for x in items_to_standardize if x[0] == i), (None, None, None, None))
 
-        # Try to map the concept
-        standard_label = mapper.map_concept(concept, label, context)
+        # Get the standard concept identifier (e.g., "CommonEquity", not "Total Stockholders' Equity")
+        standard_concept = reverse_index.get_standard_concept(concept, context)
 
-        # If we found a mapping, check if we should preserve the original label
-        if standard_label:
-            # Check if the original label contains important qualifiers
-            # that would be lost in standardization (e.g., "Other intangible assets, net"
-            # should not become generic "Intangible Assets")
-            if _should_preserve_label(label, standard_label):
-                # Preserve original label - it has more specific context
-                result.append(item)
-            else:
-                # Create a shallow copy only when needed
-                standardized_item = item.copy()
-                standardized_item["label"] = standard_label
-                standardized_item["original_label"] = label
-                result.append(standardized_item)
+        if standard_concept:
+            # Add standard_concept as metadata, preserve original label
+            item_with_metadata = item.copy()
+            item_with_metadata["standard_concept"] = standard_concept
+            result.append(item_with_metadata)
         else:
             # No mapping found, use original item
             result.append(item)

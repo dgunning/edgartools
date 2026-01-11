@@ -1320,35 +1320,25 @@ def render_statement(
                 item['statement_type'] = statement_type
             statement_data = standardization.standardize_statement(statement_data, mapper)
 
-        # Update facts with standardized labels if XBRL instance is available
-        entity_xbrl_instance = entity_info.get('xbrl_instance')
-        # Use passed xbrl_instance or fall back to entity info
+        # Add standard_concept metadata to facts if XBRL instance is available
+        entity_xbrl_instance = entity_info.get('xbrl_instance') if entity_info else None
         facts_xbrl_instance = xbrl_instance or entity_xbrl_instance
         if facts_xbrl_instance and hasattr(facts_xbrl_instance, 'facts_view'):
             facts_view = facts_xbrl_instance.facts_view
             facts = facts_view.get_facts()
 
-            # Create a mapping of concept -> standardized label from statement data
-            standardization_map = {}
+            # Create a mapping of concept -> standard_concept from statement data
+            standard_concept_map = {}
             for item in statement_data:
-                if 'concept' in item and 'label' in item and 'original_label' in item:
+                if 'concept' in item and 'standard_concept' in item:
                     if item.get('is_dimension', False):
                         continue
-                    standardization_map[item['concept']] = {
-                        'label': item['label'],
-                        'original_label': item['original_label']
-                    }
+                    standard_concept_map[item['concept']] = item['standard_concept']
 
-            # Update facts with standardized labels
+            # Add standard_concept metadata to facts (don't change labels)
             for fact in facts:
-                if 'concept' in fact and fact['concept'] in standardization_map:
-                    mapping = standardization_map[fact['concept']]
-                    if fact.get('label') == mapping.get('original_label'):
-                        # Store original label if not already set
-                        if 'original_label' not in fact:
-                            fact['original_label'] = fact['label']
-                        # Update with standardized label
-                        fact['label'] = mapping['label']
+                if 'concept' in fact and fact['concept'] in standard_concept_map:
+                    fact['standard_concept'] = standard_concept_map[fact['concept']]
 
             # Clear the cache to ensure it's rebuilt with updated facts
             facts_view.clear_cache()
@@ -1618,6 +1608,7 @@ def render_statement(
             cells=[],
             metadata={
                 'concept': item.get('concept', ''),
+                'standard_concept': item.get('standard_concept'),  # Standard concept identifier for analysis
                 'has_values': item.get('has_values', False),
                 'children': item.get('children', []),
                 'dimension_metadata': item.get('dimension_metadata', {}),
