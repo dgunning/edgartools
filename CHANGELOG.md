@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Standardization Now Preserves Original Labels** (Breaking Change)
+  - `standard=True` no longer replaces labels with standardized names
+  - Labels now always show the company's original presentation (fidelity to filing)
+  - New `standard_concept` column added to DataFrames for programmatic analysis
+  - This fixes duplicate label issues where multiple concepts mapped to the same standard name
+  - **Migration**: Use `df.groupby('standard_concept')` for cross-company aggregation
+  - **Files**: `edgar/xbrl/standardization/core.py`, `edgar/xbrl/rendering.py`, `edgar/xbrl/statements.py`
+
+### Added
+
+- **Statement._to_df() Debug Helper**
+  - Convenience method for viewing statement DataFrames with nice formatting
+  - Numbers formatted with commas (no scientific notation)
+  - Configurable columns: `show_concept`, `show_standard_concept`, `max_rows`
+  - Example: `bs._to_df(view='summary', max_rows=20)`
+
 ## [5.8.3] - 2026-01-07
 
 ### Fixed
