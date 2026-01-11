@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.8.3] - 2026-01-07
+
+### Fixed
+
+- **Combined Operations and Comprehensive Income Statements** (Issue #584)
+  - Statement resolver was incorrectly penalizing all roles containing "comprehensiveincome"
+  - This excluded valid combined statements like "CONSOLIDATEDSTATEMENTSOFOPERATIONSANDCOMPREHENSIVEINCOME"
+  - Caused REGN 2024 10-K to return only 3 rows instead of 78 for `income_statement()`
+  - Now only penalizes pure comprehensive income statements, not combined ones
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct income statement selection for companies using combined formats
+
+- **Statement of Equity Labels and Dimensional Value Matching** (Issue #583)
+  - Fixed dimensional items showing identical values for beginning/ending balance rows
+  - Track occurrences by (concept, label) tuple instead of concept only
+  - Added label standardization to transform "Ending balances" → semantic labels
+  - Added " - Beginning balance" / " - Ending balance" suffixes for multi-occurrence items
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate equity statement with proper beginning/ending balance differentiation
+
+- **Period Selection Logging Noise** (Issue #585)
+  - Downgraded period selection fallback from warning to debug level
+  - This was logging noise, not a user-actionable warning - data retrieval is correct
+  - Added context (fiscal year, period of report, candidate count) for debugging
+  - **Files**: `edgar/xbrl/period_selector.py`
+  - **Impact**: Cleaner logs without spurious warnings
+
 ## [5.8.2] - 2026-01-06
 
 ### Added
