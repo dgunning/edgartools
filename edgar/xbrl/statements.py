@@ -943,6 +943,90 @@ class Statement:
 
         return pd.DataFrame(df_rows)
 
+    def _to_df(self,
+               columns: Optional[List[str]] = None,
+               max_rows: Optional[int] = None,
+               show_concept: bool = True,
+               show_standard_concept: bool = True,
+               **kwargs) -> 'pd.DataFrame':
+        """
+        Debug helper: Get a nicely formatted DataFrame for easy viewing.
+
+        Formats numbers with commas, shows all columns/rows, and optionally
+        filters to specific columns for cleaner output.
+
+        Args:
+            columns: Specific columns to include (default: label, standard_concept, period columns)
+            max_rows: Limit number of rows displayed (default: all)
+            show_concept: Include 'concept' column (default: True)
+            show_standard_concept: Include 'standard_concept' column (default: True)
+            **kwargs: Passed to to_dataframe()
+
+        Returns:
+            Formatted DataFrame ready for display
+
+        Example:
+            >>> bs = xbrl.statements.balance_sheet()
+            >>> bs._to_df()  # Shows label, standard_concept, and period values
+            >>> bs._to_df(columns=['label', '2024-09-30'])  # Specific columns
+            >>> bs._to_df(max_rows=20)  # First 20 rows
+        """
+        import pandas as pd
+
+        # Get the DataFrame
+        df = self.to_dataframe(**kwargs)
+
+        if df.empty:
+            return df
+
+        # Identify period columns (date-like columns)
+        period_cols = [c for c in df.columns if '-' in str(c) and len(str(c)) == 10]
+
+        # Default columns: label, optional concept/standard_concept, then periods
+        if columns is None:
+            columns = ['label']
+            if show_concept and 'concept' in df.columns:
+                columns.append('concept')
+            if show_standard_concept and 'standard_concept' in df.columns:
+                columns.append('standard_concept')
+            columns.extend(period_cols)
+
+        # Filter to requested columns (keep only those that exist)
+        available_cols = [c for c in columns if c in df.columns]
+        df = df[available_cols]
+
+        # Limit rows if requested
+        if max_rows is not None:
+            df = df.head(max_rows)
+
+        # Format numeric columns with commas and no decimals for large numbers
+        def format_number(x):
+            if pd.isna(x):
+                return ''
+            if isinstance(x, (int, float)):
+                if abs(x) >= 1000:
+                    return f'{x:,.0f}'
+                elif x == 0:
+                    return '0'
+                else:
+                    return f'{x:,.2f}'
+            return x
+
+        # Apply formatting to period columns
+        for col in period_cols:
+            if col in df.columns:
+                df[col] = df[col].apply(format_number)
+
+        # Set pandas display options for this DataFrame
+        with pd.option_context(
+            'display.max_rows', None,
+            'display.max_columns', None,
+            'display.width', None,
+            'display.max_colwidth', 60
+        ):
+            # Return DataFrame with nice __repr__
+            return df
+
     def _add_metadata_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Add metadata columns (balance, weight, preferred_sign, parent_concept, parent_abstract_concept) to DataFrame.
