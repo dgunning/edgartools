@@ -4,17 +4,28 @@ This document explains the XBRL Concept Mapping system for new developers joinin
 
 ## Overview
 
-The concept mapping system **standardizes XBRL concepts across different company filings**. Each company may use different XBRL concept names for the same financial metric (e.g., "Revenue" might be `RevenueFromContractWithCustomerExcludingAssessedTax` for one company and `Revenues` for another). This system resolves those differences.
+The concept mapping system does **three things**:
+
+1. **Maps** XBRL concepts - Standardizes company-specific concept names to unified metrics
+2. **Organizes** data - Builds composite structures from multiple XBRL facts
+3. **Extracts** values - Uses industry-aware logic to compute financial metrics
+
+Each company may use different XBRL concept names for the same financial metric (e.g., "Revenue" might be `RevenueFromContractWithCustomerExcludingAssessedTax` for one company and `Revenues` for another). Some metrics don't exist as direct XBRL tags and must be **calculated from components**. This system resolves all these differences.
 
 ```mermaid
 flowchart LR
     A[Company XBRL Filing] --> B[Multi-Layer Mapper]
     B --> C[Standardized Metrics]
-    C --> D[Validated Output]
+    C --> D[Industry Extractors]
+    D --> E[Validated Output]
     
     B --> B1[Layer 1: Tree Parser]
     B --> B2[Layer 2: Facts Search]
     B --> B3[Layer 3: AI Semantic]
+    
+    D --> D1[DefaultExtractor]
+    D --> D2[BankingExtractor]
+    D --> D3[Composite Builder]
 ```
 
 ---
@@ -23,20 +34,41 @@ flowchart LR
 
 The concept mapping system was developed iteratively. Here's the evolution based on recent commits:
 
+### Phase 1: Core Mapping Infrastructure
+
 | Commit | Description | Key Changes |
 |--------|-------------|-------------|
 | `45c31700` | Initial AI agent tools | Created reusable tools for concept mapping workflow |
 | `7a954a2b` | Concept-mapping-resolver agent | Added the AI agent definition and bulk data support |
-| `67b1e510` | Investigation reporting | Enhanced agent with detailed investigation methodology |
-| `f2a8f115` | Tolerance tuning | Increased variance tolerance from 10% to 15% |
-| `139e298d` | Composite metrics (IntangibleAssets) | Defined IntangibleAssets as a composite metric |
-| `69c4ffbc` | Composite metric extraction | Added extraction logic for composite metrics |
-| `16aea1a1` | XBRL value extraction fixes | Fixed extraction and composite debt metrics |
-| `70a06066` | E2E test documentation | Added investigation scripts and test results |
 | `f71a2d7f` | **Workflow restructure** | Reordered layers (Facts before AI), validation-in-loop |
-| `dfc231d3` | E2E test SP500 | 86.4% coverage on 10 diverse S&P 500 companies |
-| `3c09bd5a` | **JPM investigation** | Deep dive into dimensional XBRL reporting issues |
-| `6977c22d` | Agent enhancements | Added gap types, dimensional reporting guide, decision tree |
+| `139e298d` | Composite metrics | Defined IntangibleAssets as a composite metric |
+
+### Phase 2: Self-Improving Workflow
+
+| Commit | Description | Key Changes |
+|--------|-------------|-------------|
+| `09c21d7e` | Failure pattern classification | Auto-classify extraction failures by pattern |
+| `8876ac84` | Industry-specific tolerance | Banking gets 20% tolerance vs 15% default |
+| `179e9c49` | Dimensional-only detection | Find concepts reported only with dimensions |
+| `2eb41379` | **Auto-discovery system** | Record new mappings, track patterns, suggest updates |
+
+### Phase 3: Industry-Aware Architecture
+
+| Commit | Description | Key Changes |
+|--------|-------------|-------------|
+| `ba8a0da9` | **Industry extractors** | `DefaultExtractor`, `BankingExtractor` classes |
+| `10238ed8` | Validation integration | Industry logic integrated into reference validator |
+| `d1e96020` | **Bank dual-track debt** | yfinance-aligned vs economic view (with/without Repos) |
+| `8f22fba3` | OperatingIncome formula | yfinance excludes D&A; formula corrected |
+
+### Phase 4: Configuration & Rules
+
+| Commit | Description | Key Changes |
+|--------|-------------|-------------|
+| `46fb8949` | **Extraction rules JSON** | `company_mappings/_defaults.json` for composite logic |
+| `fd0f6d75` | SIC auto-detection | Detect industry from SEC filing SIC code |
+| `168720cd` | Discrepancy documentation | Track known yfinance/XBRL mismatches |
+| `15051ba1` | Progress tracker | S&P25: 93.6%, S&P50: 92.9% coverage |
 
 ---
 
@@ -47,21 +79,34 @@ The concept mapping system was developed iteratively. Here's the evolution based
 ```
 edgar/xbrl/standardization/
 ├── config/
-│   ├── metrics.yaml       # Target metric definitions
-│   └── companies.yaml     # Company-specific overrides
+│   ├── metrics.yaml           # Target metric definitions
+│   ├── companies.yaml         # Company-specific overrides
+│   └── industry_metrics.yaml  # Industry counterpart mappings
+├── company_mappings/           # JSON extraction rules
+│   ├── _defaults.json         # Universal extraction rules
+│   ├── _industry_banking.json # Banking-specific rules
+│   └── {ticker}_mappings.json # Per-company overrides
+├── industry_logic/             # Sector-specific extractors
+│   └── __init__.py            # DefaultExtractor, BankingExtractor
 ├── layers/
-│   ├── tree_parser.py     # Layer 1: XBRL calc tree parsing
-│   ├── ai_semantic.py     # Layer 2: AI-powered semantic mapping
-│   └── facts_search.py    # Layer 3: Facts database search
+│   ├── tree_parser.py         # Layer 1: XBRL calc tree parsing
+│   ├── facts_search.py        # Layer 2: Facts database search
+│   ├── ai_semantic.py         # Layer 3: AI-powered semantic mapping
+│   └── dimensional_aggregator.py # [NEW] Aggregate dimensional values
 ├── tools/
 │   ├── discover_concepts.py
 │   ├── check_fallback_quality.py
 │   ├── verify_mapping.py
 │   ├── learn_mappings.py
-│   └── resolve_gaps.py    # Main gap resolution entry point
-├── models.py              # Data structures (MappingResult, etc.)
-├── orchestrator.py        # Main pipeline coordinator
-├── reference_validator.py # yfinance validation
+│   ├── resolve_gaps.py        # Main gap resolution entry point
+│   ├── auto_discovery.py      # Record new mappings automatically
+│   ├── discrepancy_manager.py # Track known data mismatches
+│   ├── kpi_tracker.py         # Coverage metrics tracking
+│   └── validate_multi_period.py # Multi-period yfinance checks
+├── models.py                  # Data structures (MappingResult, etc.)
+├── orchestrator.py            # Main pipeline coordinator
+├── extraction_rules.py        # Load/apply extraction rules
+├── reference_validator.py     # yfinance validation + industry logic + PiT handling
 └── README.md
 ```
 
@@ -69,9 +114,13 @@ edgar/xbrl/standardization/
 
 ---
 
-### 1. Configuration: [metrics.yaml](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/config/metrics.yaml)
+### 1. Configuration Layer
 
-Defines **target metrics** we want to extract. Each metric has:
+The system uses a **three-tier configuration hierarchy**:
+
+#### 1.1 [metrics.yaml](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/config/metrics.yaml)
+
+Defines **target metrics** we want to extract:
 
 ```yaml
 Revenue:
@@ -86,19 +135,87 @@ Revenue:
   universal: true      # Present in all MAG7 companies
 ```
 
-**Composite metrics** (added in `139e298d`) sum multiple concepts:
+#### 1.2 [industry_metrics.yaml](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/config/industry_metrics.yaml)
+
+Maps standard metrics to **industry counterparts** by SIC range:
 
 ```yaml
-IntangibleAssets:
-  composite: true
-  components:
-    - Goodwill
-    - IntangibleAssetsNetExcludingGoodwill
+banking:
+  sic_ranges: [[6020, 6099]]
+  concept_mapping:
+    COGS:
+      counterpart: InterestExpense
+      notes: "Bank raw material cost is interest paid to depositors"
+    OperatingIncome:
+      counterpart: PPNR
+      calculation: "NetInterestIncome + NonInterestIncome - NonInterestExpense"
+```
+
+#### 1.3 [company_mappings/](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/company_mappings)
+
+JSON files with **extraction rules** for composite metrics:
+
+```json
+// _defaults.json - applies to all companies
+{
+  "extraction_rules": {
+    "IntangibleAssets": {
+      "method": "composite_sum",
+      "components": ["Goodwill", "IntangibleAssetsNetExcludingGoodwill"],
+      "concept_priority": {
+        "Goodwill": ["us-gaap:Goodwill"],
+        "IntangibleAssetsNetExcludingGoodwill": [
+          "us-gaap:IntangibleAssetsNetExcludingGoodwill",
+          "us-gaap:FiniteLivedIntangibleAssetsNet"
+        ]
+      }
+    }
+  }
+}
 ```
 
 ---
 
-### 2. Data Models: [models.py](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/models.py)
+### 2. Industry-Aware Extraction: [industry_logic/](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/industry_logic)
+
+> [!IMPORTANT]
+> **Key Architecture: Extractors, Not Just Mappers**
+>
+> Some metrics like `OperatingIncome` for pharma companies or `ShortTermDebt` for banks **don't have direct XBRL tags**. The industry extractors **calculate** these values from components.
+
+```mermaid
+classDiagram
+    class IndustryExtractor {
+        <<abstract>>
+        +industry_name: str
+        +extract_short_term_debt(xbrl, facts_df)
+        +extract_capex(xbrl, facts_df)
+        +extract_operating_income(xbrl, facts_df)
+    }
+    class DefaultExtractor {
+        +industry_name = "default"
+    }
+    class BankingExtractor {
+        +industry_name = "banking"
+        +extract_short_term_debt_yfinance()
+        +extract_short_term_debt_economic()
+    }
+    IndustryExtractor <|-- DefaultExtractor
+    IndustryExtractor <|-- BankingExtractor
+```
+
+**Key extractor methods:**
+
+| Extractor | Metric | Logic |
+|-----------|--------|-------|
+| `DefaultExtractor` | `OperatingIncome` | `GrossProfit - R&D - SGA` (no D&A per yfinance) |
+| `DefaultExtractor` | `Capex` | Includes intangibles (software, patents) |
+| `BankingExtractor` | `ShortTermDebt` | **Dual-track**: yfinance view (excludes Repos) + economic view (includes Repos) |
+| `BankingExtractor` | `OperatingIncome` | PPNR = `NetInterestIncome + NonInterestIncome - NonInterestExpense` |
+
+---
+
+### 3. Data Models: [models.py](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/models.py)
 
 **Core data structures:**
 
@@ -112,7 +229,7 @@ IntangibleAssets:
 
 ---
 
-### 3. The Mapping Layers
+### 4. The Mapping Layers
 
 #### Layer 1: Tree Parser - [tree_parser.py](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/layers/tree_parser.py)
 
@@ -132,7 +249,14 @@ flowchart TD
 2. Use `tree_hints` (parent patterns, statement type) for discovery
 3. Return with appropriate confidence level
 
-#### Layer 2: AI Semantic - [ai_semantic.py](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/layers/ai_semantic.py)
+#### Layer 2: Facts Search - [facts_search.py](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/layers/facts_search.py)
+
+Searches the company facts database. Only matches against **known concepts from config**.
+
+> [!NOTE]
+> **Layer order changed!** Facts Search (static) now runs before AI Semantic (dynamic) - cheaper/faster methods first.
+
+#### Layer 3: AI Semantic - [ai_semantic.py](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/layers/ai_semantic.py)
 
 > [!IMPORTANT]
 > **What is "AI Semantic" exactly?**
@@ -163,10 +287,6 @@ Tree Context:
 
 Does this concept represent Revenue?"""
 ```
-
-#### Layer 3: Facts Search - [facts_search.py](file:///mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools/edgar/xbrl/standardization/layers/facts_search.py)
-
-Searches the company facts database. Only matches against **known concepts from config**.
 
 ---
 
@@ -485,12 +605,17 @@ report = resolve()  # Defaults to MAG7
 | Task | Location |
 |------|----------|
 | Add new metric | `config/metrics.yaml` |
+| Add industry mapping | `config/industry_metrics.yaml` |
 | Add company override | `config/companies.yaml` |
+| Add extraction rule | `company_mappings/_defaults.json` |
 | Debug mapping | `TreeParser.map_metric()` |
-| Add composite metric | `metrics.yaml` + `reference_validator.py` |
+| Add composite metric | `company_mappings/_defaults.json` |
+| Add industry extractor | `industry_logic/__init__.py` |
 | Run full pipeline | `orchestrator.py` |
 | Resolve gaps | `tools/resolve_gaps.py` |
-| AI agent config | `.claude/agents/concept-mapping-resolver.md` |
+| Track discoveries | `tools/auto_discovery.py` |
+| Document discrepancy | `tools/discrepancy_manager.py` |
+| AI agent config | `.agent/workflows/concept-mapping-resolver.md` |
 
 ---
 
@@ -511,57 +636,52 @@ This agent can be invoked by Claude or similar AI assistants to systematically i
 
 ## Summary
 
-The concept mapping system uses a **multi-layer fallback architecture** with **validation-in-loop** to map company-specific XBRL concepts to standardized metrics:
+The concept mapping system uses a **multi-layer fallback architecture** with **industry-aware extraction** to map company-specific XBRL concepts to standardized metrics:
 
 1. **Layer 1 (Tree Parser)** - Primary, handles ~85%
 2. **Layer 2 (Facts Search)** - Static lookup for known concepts
 3. **Layer 3 (AI Semantic)** - Dynamic discovery for new concepts
 4. **Validation after each layer** - Invalid mappings retry with next layer
+5. **Industry Extractors** - Calculate metrics from components for banks, pharma, etc.
 
-The system is **configurable** via YAML, **extensible** with new metrics/companies, and **self-improving** through the AI agent tools that discover patterns and update configuration.
+The system is:
+- **Configurable** via YAML (metrics, industry mappings) and JSON (extraction rules)
+- **Extensible** with new metrics, companies, and industry extractors
+- **Self-improving** through auto-discovery and pattern learning
+- **Industry-aware** with dual-track approaches (yfinance-aligned vs economic reality)
 
 ---
 
-## E2E Test Results (2026-01-08)
+## E2E Test Results (2026-01-10)
 
-### MAG7 Companies (Without AI Layer)
+### Latest Coverage Statistics
 
-| Company | Resolved | Coverage |
-|---------|----------|----------|
-| AAPL    | 14/14    | 100%     |
-| GOOG    | 14/14    | 100%     |
-| MSFT    | 13/14    | 93%      |
-| AMZN    | 13/14    | 93%      |
-| META    | 13/13    | 100%     |
-| NVDA    | 12/14    | 86%      |
-| TSLA    | 10/14    | 71%      |
-| **TOTAL** | **89/97** | **91.8%** |
+> [!TIP]
+> **Current Performance:** S&P25: **93.6%**, S&P50: **92.9%**
 
-### SP500 Random Sample - AI Layer Impact
+| Test Set | Companies | Coverage | Notes |
+|----------|-----------|----------|-------|
+| S&P25 | 25 | **93.6%** | Diverse industries |
+| S&P50 | 50 | **92.9%** | Full sector coverage |
+| MAG7 | 7 | ~95% | Tech focus |
 
-Comparison test on 10 random SP500 companies:
+### Key Wins from Recent Development
 
-| Metric | Without AI | With AI |
-|--------|------------|---------|
-| Coverage | 70.7% | **80.7%** |
-| Improvement | - | **+14 metrics** |
+| Company | Metric | Resolution |
+|---------|--------|------------|
+| BAC | ShortTermDebt | **Exact match** with yfinance using `OtherShortTermBorrowings` |
+| LLY | OperatingIncome | Corrected formula (yfinance excludes D&A) |
+| AXP | Full coverage | SIC 6199 (finance services) classification |
+| V, MA | COGS | Correctly excluded (payment networks) |
 
-**Key finding**: AI layer provides +10% coverage improvement, primarily helping when:
-- Concepts are not in our `known_concepts` config
-- Companies use non-standard concept names
-- Local filing data was unavailable (AI still works via calc tree context)
+### Historical Progression
 
-Most remaining gaps are **validation failures** (value mismatch), not missing mappings.
-
-### E2E with Diverse SP500 Companies (10 companies)
-
-Tested with: JPM, WMT, CVS, XOM, CMCSA, UNH, HD, PFE, KO, DIS
-
-| Metric | Result |
-|--------|--------|
-| Coverage | **86.4% (121/140)** |
-| AI Resolution | 0% (all gaps structural/validation) |
-| Sectors | Finance, Retail, Healthcare, Energy, Media |
+| Date | S&P50 Coverage | Key Change |
+|------|----------------|------------|
+| 2026-01-07 | 86.4% | Initial diverse SP500 test |
+| 2026-01-08 | 90.5% | SIC auto-detection |
+| 2026-01-09 | 93.0% | Multi-period validation |
+| 2026-01-10 | **92.9%** | Removed incorrect OperatingIncome fallback (more accurate) |
 
 ---
 

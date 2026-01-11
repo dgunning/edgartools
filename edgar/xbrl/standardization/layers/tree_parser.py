@@ -165,7 +165,7 @@ class TreeParser:
         )
     
     def _get_all_concepts(self, xbrl: XBRL) -> Dict[str, Dict]:
-        """Get all concepts from calculation trees with their context."""
+        """Get all concepts from calculation trees with their context including balance type."""
         concepts = {}
         
         for role, tree in xbrl.calculation_trees.items():
@@ -176,16 +176,98 @@ class TreeParser:
                 concept = node_id.replace('us-gaap_', '').replace('us-gaap:', '')
                 
                 if concept not in concepts:
+                    # Get balance type for signage normalization
+                    balance_type = self._get_balance_type(concept)
+                    
                     concepts[concept] = {
                         'full_id': node_id,
                         'trees': [],
                         'parent': node.parent,
                         'children': node.children,
-                        'weight': node.weight
+                        'weight': node.weight,
+                        'balance': balance_type  # NEW: 'debit' or 'credit' for signage
                     }
                 concepts[concept]['trees'].append(tree_name)
         
         return concepts
+    
+    def _get_balance_type(self, concept: str) -> Optional[str]:
+        """
+        Get balance type (debit/credit) for signage normalization.
+        
+        XBRL Balance Types:
+        - Debit: Assets, Expenses, Losses (increase with debits)
+        - Credit: Liabilities, Equity, Revenue, Gains (increase with credits)
+        
+        This is crucial for correctly calculating formulas:
+        - GrossProfit = Revenue (credit) - COGS (debit)
+        - When XBRL reports COGS with negative sign (credit memo), we need to normalize
+        """
+        # Known balance types for common financial concepts
+        # Based on US-GAAP taxonomy definitions
+        KNOWN_BALANCE_TYPES = {
+            # Revenue and Gains (Credit)
+            'Revenues': 'credit',
+            'RevenueFromContractWithCustomerExcludingAssessedTax': 'credit',
+            'SalesRevenueNet': 'credit',
+            'NetIncomeLoss': 'credit',
+            'GrossProfit': 'credit',
+            'OperatingIncomeLoss': 'credit',
+            'IncomeLossFromContinuingOperationsBeforeIncomeTaxes': 'credit',
+            'ComprehensiveIncomeNetOfTax': 'credit',
+            'InterestIncomeExpenseNet': 'credit',
+            'NetInterestIncome': 'credit',
+            'NoninterestIncome': 'credit',
+            'GainLossOnSaleOfPropertyPlantEquipment': 'credit',
+            'OtherIncome': 'credit',
+            
+            # Expenses and Losses (Debit)
+            'CostOfRevenue': 'debit',
+            'CostOfGoodsAndServicesSold': 'debit',
+            'CostOfGoodsSold': 'debit',
+            'SellingGeneralAndAdministrativeExpense': 'debit',
+            'ResearchAndDevelopmentExpense': 'debit',
+            'DepreciationAndAmortization': 'debit',
+            'InterestExpense': 'debit',
+            'IncomeTaxExpenseBenefit': 'debit',
+            'NoninterestExpense': 'debit',
+            'OperatingExpenses': 'debit',
+            'OtherExpenses': 'debit',
+            
+            # Assets (Debit)
+            'Assets': 'debit',
+            'AssetsCurrent': 'debit',
+            'CashAndCashEquivalentsAtCarryingValue': 'debit',
+            'AccountsReceivableNetCurrent': 'debit',
+            'Inventory': 'debit',
+            'PropertyPlantAndEquipmentNet': 'debit',
+            'Goodwill': 'debit',
+            'IntangibleAssetsNetExcludingGoodwill': 'debit',
+            
+            # Liabilities (Credit)
+            'Liabilities': 'credit',
+            'LiabilitiesCurrent': 'credit',
+            'AccountsPayableCurrent': 'credit',
+            'LongTermDebt': 'credit',
+            'LongTermDebtCurrent': 'credit',
+            'ShortTermBorrowings': 'credit',
+            'CommercialPaper': 'credit',
+            'DeferredRevenue': 'credit',
+            'ContractWithCustomerLiabilityCurrent': 'credit',
+            
+            # Equity (Credit)
+            'StockholdersEquity': 'credit',
+            'RetainedEarningsAccumulatedDeficit': 'credit',
+            'CommonStockValue': 'credit',
+            'AdditionalPaidInCapital': 'credit',
+            
+            # Cash Flow (Mixed - depends on nature)
+            'NetCashProvidedByUsedInOperatingActivities': 'debit',
+            'PaymentsToAcquirePropertyPlantAndEquipment': 'credit',  # Cash outflow
+            'DepreciationDepletionAndAmortization': 'debit',
+        }
+        
+        return KNOWN_BALANCE_TYPES.get(concept)
     
     def _match_known_concepts(
         self,

@@ -21,6 +21,7 @@ except ImportError:
 from .config_loader import get_config, MappingConfig
 from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern
 from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components
+from .layers.dimensional_aggregator import DimensionalAggregator
 
 
 @dataclass
@@ -89,6 +90,7 @@ class ReferenceValidator:
         self.config = config or get_config()
         self.tolerance = tolerance_pct / 100.0
         self._yf_cache = {}  # Cache yfinance Stock objects by ticker
+        self._dimensional_aggregator = DimensionalAggregator()  # For dimensional value aggregation
         
         if yf is None:
             print("Warning: yfinance not installed. Install with: pip install yfinance")
@@ -308,6 +310,83 @@ class ReferenceValidator:
             pass
         return 0
     
+    def _select_latest_filing(self, df) -> 'pd.DataFrame':
+        """
+        Select facts from the most recent filing for each period.
+        
+        Implements Point-in-Time (PiT) handling for restatements:
+        - If FY2023 was filed in 2024 and restated in 2025, use the 2025 restated value
+        - When multiple values exist for the same period, select MAX(filed_date)
+        
+        Args:
+            df: DataFrame of XBRL facts with 'period_key' column
+            
+        Returns:
+            DataFrame sorted by period_key (desc) with filing date precedence applied
+        """
+        if df is None or len(df) == 0:
+            return df
+        
+        # Check if 'filed' column exists (filing date)
+        # Common column names: 'filed', 'filing_date', 'filed_date'
+        filed_col = None
+        for col in ['filed', 'filing_date', 'filed_date']:
+            if col in df.columns:
+                filed_col = col
+                break
+        
+        if filed_col is not None:
+            # Parse filing date to datetime for proper sorting
+            df = df.copy()
+            try:
+                df['_filed_dt'] = df[filed_col].apply(self._parse_filing_date)
+                
+                # Sort by period_key (desc) first, then by filing date (desc)
+                # This gives us: most recent period + most recent filing for that period
+                df = df.sort_values(
+                    ['period_key', '_filed_dt'],
+                    ascending=[False, False]
+                )
+                
+                # For each unique period, keep only the row with the latest filing date
+                df = df.drop_duplicates(subset=['period_key'], keep='first')
+                
+                # Clean up temp column
+                df = df.drop(columns=['_filed_dt'])
+                
+            except Exception:
+                # Fallback to simple period_key sort if date parsing fails
+                df = df.sort_values('period_key', ascending=False)
+        else:
+            # No filing date column available, fallback to period_key sort
+            df = df.sort_values('period_key', ascending=False)
+        
+        return df
+    
+    def _parse_filing_date(self, date_val) -> datetime:
+        """
+        Parse filing date from various formats to datetime.
+        
+        Handles:
+        - datetime objects (passthrough)
+        - ISO 8601 strings ('2024-01-15')
+        - Common date strings ('2024-01-15T10:30:00')
+        """
+        if date_val is None:
+            return datetime.min
+        
+        if isinstance(date_val, datetime):
+            return date_val
+        
+        try:
+            date_str = str(date_val)
+            # Handle ISO 8601 with or without time
+            if 'T' in date_str:
+                date_str = date_str.split('T')[0]
+            return datetime.strptime(date_str, '%Y-%m-%d')
+        except Exception:
+            return datetime.min
+    
     def _extract_dimensional_sum(self, xbrl, concept: str) -> Optional[float]:
         """Extract sum of all dimensional values for a concept."""
         try:
@@ -464,10 +543,18 @@ class ReferenceValidator:
                 result.validation_status = "valid"
                 result.validation_notes = "Value matches reference"
             elif validation.status == "mismatch":
-                # FEEDBACK LOOP: Mark as INVALID
-                result.validation_status = "invalid"
-                result.validation_notes = f"Value mismatch: {validation.notes}"
-                result.confidence_level = ConfidenceLevel.INVALID
+                # SMART RETRY: For OperatingIncome, try calculation if direct tag failed
+                retry_successful = False
+                if metric == 'OperatingIncome' and xbrl is not None:
+                    retry_successful = self._retry_with_calculation(
+                        ticker, metric, result, validation, xbrl
+                    )
+                
+                if not retry_successful:
+                    # FEEDBACK LOOP: Mark as INVALID
+                    result.validation_status = "invalid"
+                    result.validation_notes = f"Value mismatch: {validation.notes}"
+                    result.confidence_level = ConfidenceLevel.INVALID
             elif validation.status == "missing_ref":
                 result.validation_status = "valid"  # Can't validate, assume OK
                 result.validation_notes = "No reference data available"
@@ -482,6 +569,77 @@ class ReferenceValidator:
                 result.validation_notes = "Metric excluded for this company"
         
         return validations
+    
+    def _retry_with_calculation(
+        self,
+        ticker: str,
+        metric: str,
+        result: 'MappingResult',
+        validation: 'ValidationResult',
+        xbrl
+    ) -> bool:
+        """
+        Smart Retry: Attempt calculated value when direct tag fails validation.
+        
+        For OperatingIncome, if the XBRL tag exists but doesn't match yfinance,
+        try the GrossProfit - SGA - R&D formula instead.
+        
+        Returns True if calculation succeeds and is valid.
+        """
+        try:
+            from .industry_logic import get_industry_extractor, DefaultExtractor
+            from edgar.entity.mappings_loader import get_industry_for_sic
+            from edgar import Company
+            
+            # Get industry and facts
+            c = Company(ticker)
+            sic = c.data.sic
+            industry = get_industry_for_sic(sic) if sic else None
+            
+            facts_df = None
+            if xbrl and xbrl.facts:
+                facts_df = xbrl.facts.to_dataframe()
+            
+            # Get extractor and calculate
+            extractor = get_industry_extractor(industry) if industry else DefaultExtractor()
+            calc_result = extractor.extract_operating_income(xbrl, facts_df)
+            
+            # Only use if it was actually calculated (not direct tag)
+            if calc_result.value is None or calc_result.extraction_method.value == 'direct':
+                return False
+            
+            # Check if calculated value matches reference better
+            ref_value = validation.reference_value
+            if ref_value is None or ref_value == 0:
+                return False
+            
+            calc_variance = abs(calc_result.value - ref_value) / abs(ref_value) * 100
+            
+            # Success: variance within tolerance (15%)
+            if calc_variance <= 15.0:
+                # Overwrite mapping with calculated result
+                result.concept = None  # No single concept, it's calculated
+                result.confidence = 0.85
+                result.source = MappingSource.TREE  # Mark as derived
+                result.validation_status = "valid"
+                result.validation_notes = (
+                    f"Smart Retry: Calculated value ({calc_result.value/1e9:.2f}B) matches reference "
+                    f"({ref_value/1e9:.2f}B, variance={calc_variance:.1f}%). "
+                    f"Formula: {calc_result.notes}"
+                )
+                
+                # Log the swap
+                print(f"    [SMART RETRY] {ticker} {metric}: Swapped to calculated value "
+                      f"({calc_result.value/1e9:.2f}B vs tag {validation.xbrl_value/1e9:.2f}B)")
+                
+                return True
+            
+            # Calculation also fails validation
+            return False
+            
+        except Exception as e:
+            # Calculation failed, continue with original failure
+            return False
     
     def _get_yfinance_value(
         self,
@@ -581,27 +739,23 @@ class ReferenceValidator:
                 if len(total_rows) == 0:
                     dim_rows = df[df['full_dimension_label'].notna()]
                     if len(dim_rows) > 0:
-                        # Check if metric config allows dimensional inclusion
-                        dim_config = None
-                        if hasattr(self, '_current_metric') and self._current_metric:
-                            metric_config = self.config.get_metric(self._current_metric)
-                            if metric_config:
-                                dim_config = metric_config.dimensional_handling
+                        # Use DimensionalAggregator for proper aggregation
+                        aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                            xbrl, concept_name, consolidated_value=None
+                        )
                         
-                        if dim_config and dim_config.get('mode') == 'include_dimensional':
-                            # Sum dimensional values as fallback
-                            dim_rows = dim_rows[dim_rows['numeric_value'].notna()]
-                            if len(dim_rows) > 0:
-                                # Sort by period_key to get most recent
-                                if 'period_key' in dim_rows.columns:
-                                    dim_rows = dim_rows.sort_values('period_key', ascending=False)
-                                # Get the latest period and sum all dimensional values for it
-                                latest_period = dim_rows.iloc[0]['period_key'] if 'period_key' in dim_rows.columns else None
-                                if latest_period:
-                                    period_rows = dim_rows[dim_rows['period_key'] == latest_period]
-                                    return float(period_rows['numeric_value'].sum())
-                                else:
-                                    return float(dim_rows['numeric_value'].sum())
+                        if aggregation_result.aggregated_value is not None:
+                            # Store aggregation info for transparency
+                            if not hasattr(self, '_dimensional_aggregations'):
+                                self._dimensional_aggregations = {}
+                            self._dimensional_aggregations[concept] = {
+                                'value': aggregation_result.aggregated_value,
+                                'dimension_count': aggregation_result.dimension_count,
+                                'dimensions_used': aggregation_result.dimensions_used,
+                                'method': aggregation_result.method,
+                                'notes': aggregation_result.notes
+                            }
+                            return aggregation_result.aggregated_value
                         
                         # Log this dimensional-only case for investigation
                         dim_sum = dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None
@@ -649,11 +803,13 @@ class ReferenceValidator:
                     if len(annual_rows) > 0:
                         duration_rows = annual_rows
                     
-                    # Sort by period end date (descending) to get most recent
-                    duration_rows = duration_rows.sort_values('period_key', ascending=False)
+                    # PiT: Sort by period_key first, then by filed date (if available)
+                    # This ensures we get the LATEST FILING for the most recent period
+                    duration_rows = self._select_latest_filing(duration_rows)
                     latest = duration_rows.iloc[0]
                 elif len(instant_rows) > 0:
-                    instant_rows = instant_rows.sort_values('period_key', ascending=False)
+                    # PiT: Apply filing date precedence to instant facts too
+                    instant_rows = self._select_latest_filing(instant_rows)
                     latest = instant_rows.iloc[0]
                 else:
                     latest = total_rows.iloc[0]
@@ -662,6 +818,25 @@ class ReferenceValidator:
 
             # Get the value
             value = float(latest['numeric_value'])
+
+            # Handle "placeholder zero" - consolidated is 0 but dimensions have data
+            # This occurs when companies report 0 as a placeholder but have real values in dimensions
+            if value == 0:
+                aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                    xbrl, concept_name, consolidated_value=value
+                )
+                if self._dimensional_aggregator.should_aggregate(value, aggregation_result.aggregated_value or 0):
+                    # Store aggregation info for transparency
+                    if not hasattr(self, '_dimensional_aggregations'):
+                        self._dimensional_aggregations = {}
+                    self._dimensional_aggregations[concept] = {
+                        'value': aggregation_result.aggregated_value,
+                        'dimension_count': aggregation_result.dimension_count,
+                        'dimensions_used': aggregation_result.dimensions_used,
+                        'method': aggregation_result.method,
+                        'notes': f'Placeholder zero replaced: consolidated=0, dimensional_sum={aggregation_result.aggregated_value}'
+                    }
+                    return aggregation_result.aggregated_value
 
             # Handle absolute value for cash flows (some are negative in yfinance)
             return value

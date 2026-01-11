@@ -52,10 +52,14 @@
         [
           1300,
           1399
+        ],
+        [
+          2900,
+          2999
         ]
       ],
       "extension_file": "energy.json",
-      "description": "Oil & gas extraction"
+      "description": "Oil & gas extraction, petroleum refining"
     },
     "insurance": {
       "name": "Insurance",
