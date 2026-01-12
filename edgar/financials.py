@@ -336,9 +336,11 @@ class Financials:
         """
         patterns = [
             r'Capital Expenditures',
+            r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
             r'Property.*Plant.*Equipment',
             r'Payments.*Property',
             r'Acquisitions.*Property',
+            r'Purchase.*Property',
             r'Capex'
         ]
         return self._get_standardized_concept_value('cashflow', patterns, period_offset)
