@@ -15,7 +15,7 @@ METADATA_COLUMNS = [
     'concept', 'label', 'level', 'abstract', 'dimension',
     'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept',
     'dimension_axis', 'dimension_member', 'dimension_member_label', 'dimension_label',
-    'unit', 'point_in_time', 'is_breakdown'
+    'unit', 'point_in_time', 'is_breakdown', 'standard_concept'
 ]
 
 

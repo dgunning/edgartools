@@ -79,7 +79,8 @@ class TestIssue583EquityLabels:
         meta_cols = ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown',
                      'dimension_axis', 'dimension_member', 'dimension_member_label',
                      'dimension_label', 'balance', 'weight', 'preferred_sign',
-                     'parent_concept', 'parent_abstract_concept']
+                     'parent_concept', 'parent_abstract_concept', 'unit', 'point_in_time',
+                     'standard_concept']
         value_cols = [c for c in df.columns if c not in meta_cols]
 
         if not value_cols:
@@ -137,7 +138,8 @@ class TestIssue583EquityLabels:
         meta_cols = ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown',
                      'dimension_axis', 'dimension_member', 'dimension_member_label',
                      'dimension_label', 'balance', 'weight', 'preferred_sign',
-                     'parent_concept', 'parent_abstract_concept']
+                     'parent_concept', 'parent_abstract_concept', 'unit', 'point_in_time',
+                     'standard_concept']
         value_cols = [c for c in df.columns if c not in meta_cols]
 
         if not value_cols:
