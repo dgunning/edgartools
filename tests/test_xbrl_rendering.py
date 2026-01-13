@@ -57,20 +57,22 @@ def test_render_statement_with_shares():
     periods_to_display = [('instant_2023-12-31', 'Dec 31, 2023')]
     
     # Render the statement
-    table = render_statement(
+    rendered = render_statement(
         statement_data,
         periods_to_display,
         'Test Statement',
         'BalanceSheet'
-    ).__rich__()
-    
-    # Basic check that the table was created
-    assert table is not None
-    
-    # The title should include the scale note (In millions, except shares in thousands)
-    assert "millions" in table.title
-    assert "shares" in table.title
-    assert "thousands" in table.title
+    )
+    panel = rendered.__rich__()
+
+    # Basic check that the panel was created
+    assert panel is not None
+
+    # The rendered output should include the scale note (In millions, except shares in thousands)
+    rendered_str = str(rendered)
+    assert "millions" in rendered_str
+    assert "shares" in rendered_str
+    assert "thousands" in rendered_str
 
 
 def test_render_statement_showing_date_range(aapl_xbrl):
