@@ -395,7 +395,7 @@ class Statement:
         Uses the matrix DataFrame to create a Rich table with equity components
         as columns and activities as rows.
         """
-        from edgar.xbrl.rendering import get_xbrl_styles
+        from edgar.display import get_statement_styles
         from rich.text import Text
 
         # Get matrix DataFrame
@@ -403,11 +403,11 @@ class Statement:
         if df is None or df.empty:
             return self.render()  # Fall back to standard rendering
 
-        styles = get_xbrl_styles()
+        styles = get_statement_styles()
 
         # Build title with units note
         title = self.title if hasattr(self, 'title') else "Statement of Stockholders' Equity"
-        title_parts = [f"[bold]{title}[/bold]", "[dim](in millions)[/dim]"]
+        title_parts = [f"[bold]{title}[/bold]", f"[{styles['metadata']['units']}](in millions)[/{styles['metadata']['units']}]"]
         full_title = "\n".join(title_parts)
 
         table = Table(title=full_title, box=box.SIMPLE, border_style=styles['structure']['border'])
@@ -482,19 +482,19 @@ class Statement:
             level = row.get('level', 0)
             is_abstract = row.get('abstract', False)
 
-            # Format label based on level
+            # Format label based on level using semantic styles
             indent = "  " * level
 
             if is_abstract:
                 if level == 0:
                     label_text = label.upper()
-                    style = styles['header']['top_level']
+                    style = styles['row']['abstract']  # cyan bold
                 else:
                     label_text = f"{indent}{label}"
                     style = styles['header']['section']
             else:
                 label_text = f"{indent}{label}"
-                style = None
+                style = styles['row']['item']
 
             styled_label = Text(label_text, style=style) if style else Text(label_text)
 
@@ -503,21 +503,19 @@ class Statement:
             for col in value_cols:
                 value = row.get(col)
                 if value is None or pd.isna(value):
-                    cell_values.append(Text("—", justify="right", style="dim"))
+                    cell_values.append(Text("—", justify="right", style=styles['value']['empty']))
                 else:
                     try:
                         num_value = float(value) / 1_000_000  # Convert to millions
                         if abs(num_value) < 0.5:
                             # Very small values show as dash
-                            cell_values.append(Text("—", justify="right", style="dim"))
+                            cell_values.append(Text("—", justify="right", style=styles['value']['empty']))
                         elif num_value < 0:
                             formatted = f"({abs(num_value):,.0f})"
-                            cell_style = styles['value']['negative']
-                            cell_values.append(Text(formatted, style=cell_style, justify="right"))
+                            cell_values.append(Text(formatted, style=styles['value']['negative'], justify="right"))
                         else:
                             formatted = f"{num_value:,.0f}"
-                            cell_style = styles['value']['positive']
-                            cell_values.append(Text(formatted, style=cell_style, justify="right"))
+                            cell_values.append(Text(formatted, style=styles['value']['default'], justify="right"))
                     except (ValueError, TypeError):
                         cell_values.append(Text(str(value), justify="right"))
 
@@ -584,11 +582,11 @@ class Statement:
                               If specified, emits DeprecationWarning.
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
-            include_standardization: If True, add columns showing standardization details:
-                                    - 'original_label': the raw label before standardization
-                                    - 'standard_label': the standardized label (if mapped)
-                                    - 'was_standardized': boolean indicating if label was changed
-                                    Requires standard=True to have any effect.
+            include_standardization: If True, add a 'standard_concept' column showing
+                                    the mapped standard concept identifier (e.g., "CommonEquity").
+                                    This is useful for cross-company analysis and filtering.
+                                    Note: The 'standard_concept' column is always available in
+                                    the DataFrame when standard=True; this parameter is deprecated.
             presentation: If True, apply HTML-matching presentation logic (Issue #463)
                          Cash Flow: outflows (balance='credit') shown as negative
                          Income: apply preferred_sign transformations
@@ -815,7 +813,8 @@ class Statement:
             # Build base row
             row = {
                 'concept': concept,
-                'label': label
+                'label': label,
+                'standard_concept': item.get('standard_concept')  # Standard concept identifier for analysis
             }
 
             # Add period values (raw from instance document)
@@ -934,23 +933,97 @@ class Statement:
                 row['dimension_member_label'] = None
                 row['dimension_label'] = None
 
-            # Add standardization columns if requested (requires standard=True to be effective)
-            if include_standardization and standard:
-                original = item.get('original_label')
-                if original:
-                    # Item was standardized - show both labels
-                    row['original_label'] = original
-                    row['standard_label'] = label  # 'label' is the current (standardized) label
-                    row['was_standardized'] = True
-                else:
-                    # Item was not standardized - original and standard are the same
-                    row['original_label'] = label
-                    row['standard_label'] = label
-                    row['was_standardized'] = False
+            # Note: include_standardization parameter is deprecated.
+            # The 'standard_concept' column is now always included when standard=True.
+            # It contains the concept identifier (e.g., "CommonEquity") for cross-company analysis.
 
             df_rows.append(row)
 
         return pd.DataFrame(df_rows)
+
+    def _to_df(self,
+               columns: Optional[List[str]] = None,
+               max_rows: Optional[int] = None,
+               show_concept: bool = True,
+               show_standard_concept: bool = True,
+               **kwargs) -> 'pd.DataFrame':
+        """
+        Debug helper: Get a nicely formatted DataFrame for easy viewing.
+
+        Formats numbers with commas, shows all columns/rows, and optionally
+        filters to specific columns for cleaner output.
+
+        Args:
+            columns: Specific columns to include (default: label, standard_concept, period columns)
+            max_rows: Limit number of rows displayed (default: all)
+            show_concept: Include 'concept' column (default: True)
+            show_standard_concept: Include 'standard_concept' column (default: True)
+            **kwargs: Passed to to_dataframe()
+
+        Returns:
+            Formatted DataFrame ready for display
+
+        Example:
+            >>> bs = xbrl.statements.balance_sheet()
+            >>> bs._to_df()  # Shows label, standard_concept, and period values
+            >>> bs._to_df(columns=['label', '2024-09-30'])  # Specific columns
+            >>> bs._to_df(max_rows=20)  # First 20 rows
+        """
+        import pandas as pd
+
+        # Get the DataFrame
+        df = self.to_dataframe(**kwargs)
+
+        if df.empty:
+            return df
+
+        # Identify period columns (date-like columns)
+        period_cols = [c for c in df.columns if '-' in str(c) and len(str(c)) == 10]
+
+        # Default columns: label, optional concept/standard_concept, then periods
+        if columns is None:
+            columns = ['label']
+            if show_concept and 'concept' in df.columns:
+                columns.append('concept')
+            if show_standard_concept and 'standard_concept' in df.columns:
+                columns.append('standard_concept')
+            columns.extend(period_cols)
+
+        # Filter to requested columns (keep only those that exist)
+        available_cols = [c for c in columns if c in df.columns]
+        df = df[available_cols]
+
+        # Limit rows if requested
+        if max_rows is not None:
+            df = df.head(max_rows)
+
+        # Format numeric columns with commas and no decimals for large numbers
+        def format_number(x):
+            if pd.isna(x):
+                return ''
+            if isinstance(x, (int, float)):
+                if abs(x) >= 1000:
+                    return f'{x:,.0f}'
+                elif x == 0:
+                    return '0'
+                else:
+                    return f'{x:,.2f}'
+            return x
+
+        # Apply formatting to period columns
+        for col in period_cols:
+            if col in df.columns:
+                df[col] = df[col].apply(format_number)
+
+        # Set pandas display options for this DataFrame
+        with pd.option_context(
+            'display.max_rows', None,
+            'display.max_columns', None,
+            'display.width', None,
+            'display.max_colwidth', 60
+        ):
+            # Return DataFrame with nice __repr__
+            return df
 
     def _add_metadata_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """

@@ -5,6 +5,7 @@ import pandas as pd
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
+from edgar.xbrl.presentation import ViewType
 from edgar.xbrl.statements import StitchedStatement
 from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
@@ -23,80 +24,100 @@ class Financials:
             log.warning(f"Filing {filing} does not contain XBRL data: {e}")
             return None
 
-    def balance_sheet(self, include_dimensions: bool = False):
+    def balance_sheet(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the balance sheet.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
                               when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the balance sheet, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.balance_sheet(include_dimensions=include_dimensions)
+        return self.xb.statements.balance_sheet(include_dimensions=include_dimensions, view=view)
 
-    def income_statement(self, include_dimensions: bool = False):
+    def income_statement(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the income statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
                               when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the income statement, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.income_statement(include_dimensions=include_dimensions)
+        return self.xb.statements.income_statement(include_dimensions=include_dimensions, view=view)
 
-    def cashflow_statement(self, include_dimensions: bool = False):
+    def cashflow_statement(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the cash flow statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
                               when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the cash flow statement, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions)
+        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions, view=view)
 
-    def statement_of_equity(self, include_dimensions: bool = False):
+    def statement_of_equity(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the statement of equity.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
                               when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the statement of equity, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions)
+        return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions, view=view)
 
-    def comprehensive_income(self, include_dimensions: bool = False):
+    def comprehensive_income(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the comprehensive income statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
                               when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the comprehensive income statement, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.comprehensive_income(include_dimensions=include_dimensions)
+        return self.xb.statements.comprehensive_income(include_dimensions=include_dimensions, view=view)
 
     def cover(self):
         """
@@ -336,9 +357,11 @@ class Financials:
         """
         patterns = [
             r'Capital Expenditures',
+            r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
             r'Property.*Plant.*Equipment',
             r'Payments.*Property',
             r'Acquisitions.*Property',
+            r'Purchase.*Property',
             r'Capex'
         ]
         return self._get_standardized_concept_value('cashflow', patterns, period_offset)

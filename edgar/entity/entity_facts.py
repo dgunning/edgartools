@@ -1122,6 +1122,7 @@ class EntityFacts:
             annual=annual
         )
         enhanced_stmt.company_name = self.name
+        enhanced_stmt.ticker = self._ticker
         enhanced_stmt.cik = str(self.cik)
         enhanced_stmt.concise_format = concise_format
 
@@ -1169,6 +1170,7 @@ class EntityFacts:
                 annual=annual
             )
             enhanced_stmt.company_name = self.name
+            enhanced_stmt.ticker = self._ticker
             enhanced_stmt.cik = str(self.cik)
             enhanced_stmt.concise_format = concise_format
 
@@ -1285,6 +1287,7 @@ class EntityFacts:
             annual=annual
         )
         enhanced_stmt.company_name = self.name
+        enhanced_stmt.ticker = self._ticker
         enhanced_stmt.cik = str(self.cik)
         enhanced_stmt.concise_format = concise_format
 

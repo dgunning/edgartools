@@ -17,7 +17,6 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from rich import box
 from rich.console import Group
-from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
@@ -185,6 +184,7 @@ class MultiPeriodStatement:
 
     # Metadata
     company_name: Optional[str] = None
+    ticker: Optional[str] = None
     cik: Optional[str] = None
     canonical_coverage: float = 0.0
 
@@ -203,26 +203,35 @@ class MultiPeriodStatement:
             'CashFlow': 'Cash Flow Statement'
         }
 
-        # Build title hierarchy (like XBRL statements)
+        # Build centered header like actual SEC filings:
+        # Line 1: Company name (ticker) (bold)
+        # Line 2: Statement name (bold)
+        # Line 3: Period range (dim)
         statement_display = statement_names.get(self.statement_type, self.statement_type)
         period_range = f"{self.periods[-1]} to {self.periods[0]}" if len(self.periods) > 1 else self.periods[0] if self.periods else ""
 
-        title_lines = [
-            Text(statement_display, style=styles["header"]["statement_title"]),
-            Text(period_range, style=styles["metadata"]["period_range"]),
-            Text("Amounts in USD", style=styles["metadata"]["units"]),
-        ]
-        title = Text("\n").join(title_lines)
-
-        # Build footer with company info and source attribution
-        footer_parts = []
+        header_lines = []
         if self.company_name:
-            footer_parts.append((self.company_name, styles["header"]["company_name"]))
-            footer_parts.append(("  ", ""))
-            footer_parts.append((SYMBOLS["bullet"], styles["structure"]["separator"]))
-            footer_parts.append(("  ", ""))
-        footer_parts.append(("Source: ", styles["metadata"]["source"]))
-        footer_parts.append(("EntityFacts", styles["metadata"]["source_entity_facts"]))
+            company_line = Text(self.company_name.upper(), style=styles["header"]["company_name"])
+            if self.ticker:
+                company_line.append("  ")
+                company_line.append(f" {self.ticker.upper()} ", style=styles["header"]["ticker_badge"])
+            header_lines.append(company_line)
+        header_lines.append(Text(statement_display.upper(), style=styles["header"]["statement_title"]))
+        if period_range:
+            header_lines.append(Text(period_range, style="dim"))
+
+        title = Text("\n").join(header_lines)
+
+        # Build footer with source and units note
+        footer_parts = [
+            ("Source: ", styles["metadata"]["source"]),
+            ("EntityFacts", styles["metadata"]["source_entity_facts"]),
+            ("  ", ""),
+            (SYMBOLS["bullet"], styles["structure"]["separator"]),
+            ("  ", ""),
+            ("Amounts in USD", styles["metadata"]["units"]),
+        ]
         footer = Text.assemble(*footer_parts)
 
         # Main table with multiple period columns
@@ -316,18 +325,16 @@ class MultiPeriodStatement:
         for item in self.items:
             add_item_to_table(item)
 
-        # Combine content
-        content_parts = [
-            Padding("", (1, 0, 0, 0)),
+        # Combine content with title inside for proper multi-line rendering
+        # Header is centered like actual SEC filings
+        from rich.align import Align
+        content = Group(
+            Align.center(title),
             stmt_table
-        ]
-
-        content = Group(*content_parts)
+        )
 
         return Panel(
             content,
-            title=title,
-            title_align="left",
             subtitle=footer,
             subtitle_align="left",
             border_style=styles["structure"]["border"],

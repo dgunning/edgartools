@@ -5,6 +5,29 @@ XBRL financial data across different companies. These concepts enable cross-comp
 comparison by mapping the ~18,000 possible SEC GAAP taxonomy tags to a consistent
 set of standardized line items.
 
+## How Standardization Works
+
+**Labels are always preserved** - the company's original presentation is shown exactly as filed.
+
+Standardization adds a `standard_concept` column to DataFrames, mapping each line item to
+one of 95 standard categories:
+
+```python
+# Get a statement DataFrame
+df = statement.to_dataframe()
+
+# Labels show original company presentation
+# standard_concept maps to standard categories for analysis
+print(df[['label', 'standard_concept']].head())
+#                          label           standard_concept
+# 0        Cash and cash items  CashAndMarketableSecurities
+# 1      Trade receivables, net             TradeReceivables
+# 2        Prepaid expenses       OtherNonOperatingCurrentAssets
+
+# Aggregate by standard concept for cross-company comparison
+standardized = df.groupby('standard_concept')[['2024-09-30']].sum()
+```
+
 ## Overview
 
 | Metric | Value |

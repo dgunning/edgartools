@@ -77,40 +77,42 @@ def test_concept_mapper_direct_mapping(temp_mapping_store):
 
 
 def test_standardize_statement():
-    """Test standardizing a statement."""
+    """Test standardizing a statement.
+
+    Standardization now preserves original labels and adds standard_concept metadata.
+    This allows users to see the original filing presentation while still having
+    standard concept identifiers for cross-company analysis.
+    """
     # Create test statement data
+    # Note: us-gaap_Revenues (with 's') and us-gaap_CostOfGoodsAndServicesSold are correct tags
     statement_data = [
         {
-            "concept": "us-gaap_Revenue",
+            "concept": "us-gaap_Revenues",  # Correct tag (with 's')
             "label": "Revenue",
             "statement_type": "IncomeStatement",
             "is_abstract": False
         },
         {
-            "concept": "us-gaap_CostOfGoodsSold",
+            "concept": "us-gaap_CostOfGoodsAndServicesSold",  # Correct tag
             "label": "Cost of Sales",
             "statement_type": "IncomeStatement",
             "is_abstract": False
         }
     ]
-    
-    # Create mapper with mock behavior
+
+    # Create mapper (mapper is passed for context building, but actual lookup uses reverse_index)
     mapper = MagicMock()
-    mapper.map_concept.side_effect = [
-        "Revenue", 
-        "Cost of Revenue"
-    ]
-    
+
     # Standardize the statement
     result = standardize_statement(statement_data, mapper)
-    
-    # Verify labels are updated
+
+    # Verify original labels are PRESERVED (not changed)
     assert result[0]["label"] == "Revenue"
-    assert result[1]["label"] == "Cost of Revenue"
-    
-    # Verify original labels are preserved
-    assert result[0]["original_label"] == "Revenue"
-    assert result[1]["original_label"] == "Cost of Sales"
+    assert result[1]["label"] == "Cost of Sales"  # Original label preserved
+
+    # Verify standard_concept metadata is added
+    assert result[0]["standard_concept"] == "Revenue"  # Concept identifier
+    assert result[1]["standard_concept"] == "CostOfGoodsAndServicesSold"  # Concept identifier
 
 
 def test_initialize_default_mappings():
@@ -213,14 +215,14 @@ def test_standardize_income_statement(test_companies):
     # Standardize statement
     statement_data = income_statement.get_raw_data()
     standardized = standardize_statement(statement_data, mapper)
-    
-    # Verify at least some items were standardized (count items with original_label)
-    standardized_count = sum(1 for item in standardized if "original_label" in item)
-    
+
+    # Verify at least some items have standard_concept metadata added
+    standardized_count = sum(1 for item in standardized if "standard_concept" in item and item["standard_concept"] is not None)
+
     # Note: This is a loose test that depends on the default mappings
     # If it fails, it likely means the default mappings aren't matching
     # concepts in the test companies
-    assert standardized_count > 0, f"No concepts were standardized for {ticker}"
+    assert standardized_count > 0, f"No concepts were mapped to standard_concept for {ticker}"
 
 
 def test_dimensional_statement_standardization(test_dimensional_data):

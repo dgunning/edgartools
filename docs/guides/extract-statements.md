@@ -417,20 +417,23 @@ filings = company.get_filings(form="10-K").head(3)
 xbrls = XBRLS.from_filings(filings)
 stitched = xbrls.statements
 
-# Use standardized labels for cross-company comparison (default)
-standardized = stitched.income_statement(standard=True)
+# Get income statement with standard_concept metadata (default)
+income = stitched.income_statement(standard=True)
 
-# Use company-specific labels as reported in filing
-company_specific = stitched.income_statement(standard=False)
+# Labels always show original company presentation
+# Use standard_concept for cross-company analysis
+df = income.to_dataframe()
+print("Labels with Standard Concept Mapping:")
+print(df[['label', 'standard_concept']].head(10))
 
-print("Standardized Labels:")
-print(standardized.to_dataframe()['label'].head(10))
-
-print("\nCompany-Specific Labels:")
-print(company_specific.to_dataframe()['label'].head(10))
+# Aggregate by standard concept for comparison
+standardized = df.groupby('standard_concept')[df.columns[2:4]].sum()
+print("\nAggregated by Standard Concept:")
+print(standardized.head(10))
 ```
 
-Note: The `standard` parameter is available on stitched statements (`XBRLS.statements`), not on single-filing statements (`xbrl.statements`).
+> **Note**: The `standard=True` parameter adds `standard_concept` metadata for cross-company analysis.
+> Labels always preserve the company's original presentation.
 
 ## Cross-Company Analysis
 

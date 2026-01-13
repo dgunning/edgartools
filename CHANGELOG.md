@@ -5,7 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [5.9.0] - 2026-01-12
+
+### Changed
+
+- **Standardization Now Preserves Original Labels** (Breaking Change)
+  - `standard=True` no longer replaces labels with standardized names
+  - Labels now always show the company's original presentation (fidelity to filing)
+  - New `standard_concept` column added to DataFrames for programmatic analysis
+  - This fixes duplicate label issues where multiple concepts mapped to the same standard name
+  - **Migration**: Use `df.groupby('standard_concept')` for cross-company aggregation
+  - **Files**: `edgar/xbrl/standardization/core.py`, `edgar/xbrl/rendering.py`, `edgar/xbrl/statements.py`
+
+### Added
+
+- **Statement._to_df() Debug Helper**
+  - Convenience method for viewing statement DataFrames with nice formatting
+  - Numbers formatted with commas (no scientific notation)
+  - Configurable columns: `show_concept`, `show_standard_concept`, `max_rows`
+  - Example: `bs._to_df(view='summary', max_rows=20)`
+
+## [5.8.3] - 2026-01-07
+
+### Fixed
+
+- **Combined Operations and Comprehensive Income Statements** (Issue #584)
+  - Statement resolver was incorrectly penalizing all roles containing "comprehensiveincome"
+  - This excluded valid combined statements like "CONSOLIDATEDSTATEMENTSOFOPERATIONSANDCOMPREHENSIVEINCOME"
+  - Caused REGN 2024 10-K to return only 3 rows instead of 78 for `income_statement()`
+  - Now only penalizes pure comprehensive income statements, not combined ones
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct income statement selection for companies using combined formats
+
+- **Statement of Equity Labels and Dimensional Value Matching** (Issue #583)
+  - Fixed dimensional items showing identical values for beginning/ending balance rows
+  - Track occurrences by (concept, label) tuple instead of concept only
+  - Added label standardization to transform "Ending balances" → semantic labels
+  - Added " - Beginning balance" / " - Ending balance" suffixes for multi-occurrence items
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate equity statement with proper beginning/ending balance differentiation
+
+- **Period Selection Logging Noise** (Issue #585)
+  - Downgraded period selection fallback from warning to debug level
+  - This was logging noise, not a user-actionable warning - data retrieval is correct
+  - Added context (fiscal year, period of report, candidate count) for debugging
+  - **Files**: `edgar/xbrl/period_selector.py`
+  - **Impact**: Cleaner logs without spurious warnings
 
 ## [5.8.2] - 2026-01-06
 

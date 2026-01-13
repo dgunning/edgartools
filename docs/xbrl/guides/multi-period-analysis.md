@@ -550,35 +550,37 @@ for xbrl in xbrls.xbrl_list:
 - Different statement structures across years
 - Missing required concepts in some years
 
-**Solution:** Use standardization (enabled by default):
+**Solution:** Use standardization metadata (enabled by default):
 
 ```python
-# Standardization normalizes concept names
+# Standardization adds standard_concept metadata for cross-company analysis
 income = xbrls.statements.income_statement(standard=True)
 
-# Or disable if you want raw company labels
-income = xbrls.statements.income_statement(standard=False)
+# Labels always show original company presentation
+# Use standard_concept column for filtering/aggregation
+df = income.to_dataframe()
+print(df[['label', 'standard_concept']].head())
 ```
 
 ### Concept Alignment Issues
 
-**Problem**: Same line item appears multiple times with different names
+**Problem**: Need to compare similar line items across companies
 
-This usually happens when standardization is disabled. Enable it:
+Use the `standard_concept` column to identify equivalent concepts:
 
 ```python
-# Use standardized labels (default)
-income = xbrls.statements.income_statement(standard=True)
+# Get DataFrame with standard_concept metadata
+df = income.to_dataframe()
 
-# Check what concepts are being merged
-from edgar.xbrl.standardization import ConceptMapper
-mapper = ConceptMapper()
+# Filter by standard concept
+revenue_rows = df[df['standard_concept'] == 'Revenue']
 
-# See if concepts are recognized
-print(mapper.standardize_label("Total Revenues"))
-print(mapper.standardize_label("Net Sales"))
-# Both should map to "Revenue"
+# Aggregate by standard concept for comparison
+standardized = df.groupby('standard_concept')[['2024-09-30', '2023-09-30']].sum()
 ```
+
+> **Note**: Labels preserve the company's original presentation. The `standard_concept` column
+> maps each line item to a standard category for programmatic analysis.
 
 ### Performance Tips
 
