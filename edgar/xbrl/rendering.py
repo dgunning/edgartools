@@ -192,6 +192,7 @@ class StatementRow:
     metadata: Dict[str, Any] = field(default_factory=dict)  # Additional info like concept name, type, etc.
     is_abstract: bool = False
     is_dimension: bool = False
+    is_breakdown: bool = False  # True if dimension is breakdown (segment/geo), False if face value
     has_dimension_children: bool = False
 
 
@@ -452,6 +453,7 @@ class RenderedStatement:
                 df_row['level'] = row.level
                 df_row['abstract'] = row.is_abstract
                 df_row['dimension'] = row.is_dimension
+                df_row['is_breakdown'] = row.is_breakdown
 
                 df_rows.append(df_row)
 
@@ -1617,6 +1619,14 @@ def render_statement(
                 elif current_occurrence == total_occurrences:
                     label = f"{label} - Ending balance"
 
+        # Determine if this is a breakdown dimension
+        from edgar.xbrl.dimensions import is_breakdown_dimension
+        is_dim = item.get('is_dimension', False)
+        is_breakdown = is_breakdown_dimension(
+            item, statement_type=statement_type,
+            xbrl=xbrl_instance, role_uri=role_uri
+        ) if is_dim else False
+
         # Create the row with metadata
         row = StatementRow(
             label=label,
@@ -1632,7 +1642,8 @@ def render_statement(
                 'period_types': item.get('period_types', {})  # Pass through period_type for each period
             },
             is_abstract=item.get('is_abstract', False),
-            is_dimension=item.get('is_dimension', False),
+            is_dimension=is_dim,
+            is_breakdown=is_breakdown,
             has_dimension_children=item.get('has_dimension_children', False)
         )
 
