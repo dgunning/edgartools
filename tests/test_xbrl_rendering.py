@@ -69,10 +69,11 @@ def test_render_statement_with_shares():
     assert panel is not None
 
     # The rendered output should include the scale note (In millions, except shares in thousands)
-    rendered_str = str(rendered)
-    assert "millions" in rendered_str
-    assert "shares" in rendered_str
-    assert "thousands" in rendered_str
+    # Check the units_note attribute directly since str() may truncate
+    assert rendered.units_note is not None
+    assert "millions" in rendered.units_note
+    assert "shares" in rendered.units_note
+    assert "thousands" in rendered.units_note
 
 
 def test_render_statement_showing_date_range(aapl_xbrl):
