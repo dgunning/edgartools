@@ -136,6 +136,7 @@ PALETTE = {
     # Source badges - distinguish data origin
     "badge_source_xbrl": "bold white on gold3",
     "badge_source_entity_facts": "bold white on cyan",
+    "badge_ticker": "bold black on green",
 
     # Status badges
     "badge_error": "bold white on red",
@@ -250,6 +251,7 @@ def get_statement_styles() -> dict:
             "top_level": PALETTE["stmt_abstract_top"],
             "section": PALETTE["stmt_abstract_section"],
             "subsection": PALETTE["subsection"],
+            "ticker_badge": PALETTE["badge_ticker"],
         },
         # Row styles
         "row": {
