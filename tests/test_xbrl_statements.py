@@ -131,7 +131,7 @@ def test_statement_to_dataframe(aapl_xbrl):
     rendered_statement:RenderedStatement = cashflow_statement.render()
     df = rendered_statement.to_dataframe()
     assert df.columns.tolist() ==['concept', 'label', '2023-09-30', '2022-09-24', '2021-09-25',
-                                  'level','abstract', 'dimension']
+                                  'level','abstract', 'dimension', 'is_breakdown']
 
     # Issue #504: Filter for non-dimensional rows to avoid duplicate NetIncomeLoss entries
     net_income_filter = (df.concept == 'us-gaap_NetIncomeLoss') & (df.dimension == False)
