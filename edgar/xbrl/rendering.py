@@ -16,6 +16,7 @@ from rich.table import Table as RichTable
 from rich.text import Text
 
 from edgar.documents import HTMLParser, ParserConfig
+from edgar.display import get_statement_styles, SYMBOLS
 from edgar.display.formatting import cik_text
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
@@ -222,145 +223,154 @@ class RenderedStatement:
     def periods(self):
         return self.header.periods
 
-    def __rich__(self) -> RichTable:
-        """Render as a rich table with professional styling"""
-        # Get professional color scheme
-        styles = get_xbrl_styles()
+    def __rich__(self) -> Panel:
+        """Render as a rich panel with design language styling."""
+        # Use unified design language styles
+        styles = get_statement_styles()
 
-        # Clean up title - remove internal terminology like "(Standardized)"
+        # Get company name and ticker for header
+        company_name = self.metadata.get('company_name', '')
+        ticker = self.metadata.get('ticker', '')
+
+        # Clean up title - remove internal terminology and simplify
         clean_title = self.title.replace("(Standardized)", "").strip()
 
-        # Build title hierarchy with improved visual design
-        title_parts = []
+        # Build period range from columns
+        columns = self.header.columns
+        if len(columns) > 1:
+            period_range = f"{columns[-1]} to {columns[0]}"
+        elif len(columns) == 1:
+            period_range = columns[0]
+        else:
+            period_range = ""
 
-        # Main title (bold, prominent)
-        title_parts.append(f"[{styles['header']['statement_title']}]{clean_title}[/{styles['header']['statement_title']}]")
-
-        # Subtitle: fiscal period indicator (normal weight)
-        if self.fiscal_period_indicator:
-            title_parts.append(f"{self.fiscal_period_indicator}")
-
-        # Units note (dim, subtle)
+        # Build units note
+        import re
+        clean_units = ""
         if self.units_note:
-            title_parts.append(f"[{styles['structure']['separator']}]{self.units_note}[/{styles['structure']['separator']}]")
+            clean_units = re.sub(r'\[/?[^\]]+\]', '', self.units_note)
 
-        # Create the table with clean title hierarchy
-        table = RichTable(title="\n".join(title_parts), 
-                         box=box.SIMPLE, 
-                         border_style=styles['structure']['border'])
+        # Build centered header like actual SEC filings:
+        # Line 1: Company name (ticker) (bold)
+        # Line 2: Statement name (bold)
+        # Line 3: Period range (dim)
+        header_lines = []
+        if company_name:
+            company_line = Text(company_name.upper(), style=styles["header"]["company_name"])
+            if ticker:
+                company_line.append("  ")
+                company_line.append(f" {ticker.upper()} ", style=styles["header"]["ticker_badge"])
+            header_lines.append(company_line)
+        header_lines.append(Text(clean_title.upper(), style=styles["header"]["statement_title"]))
+        if period_range:
+            header_lines.append(Text(period_range, style="dim"))
 
-        # Add columns with right-alignment for numeric columns
+        title = Text("\n").join(header_lines)
+
+        # Create the main table
+        table = RichTable(
+            box=box.SIMPLE,
+            show_header=True,
+            padding=(0, 1),
+        )
+
+        # Add label column
         table.add_column("", justify="left")
-        for column in self.header.columns:
-            # Apply styling to column headers
-            header_style = styles['structure']['total']
-            if header_style:
-                styled_column = Text(column, style=header_style)
-                table.add_column(styled_column)
-            else:
-                table.add_column(column)
 
-        # Add rows with professional styling
+        # Add period columns with bold styling
+        for column in columns:
+            table.add_column(column, justify="right", style="bold")
+
+        # Add rows with semantic styling
         for row in self.rows:
-            # Format the label based on level and properties with professional colors
             indent = "  " * row.level
 
             if row.is_dimension:
-                # Format dimension items with italic style
+                # Dimension items - dim/italic
                 label_text = f"{indent}{row.label}"
-                style = styles['structure']['low_confidence']
-                styled_label = Text(label_text, style=style) if style else Text(label_text)
+                styled_label = Text(label_text, style=styles["row"]["item_dim"])
             elif row.is_abstract:
                 if row.level == 0:
-                    # Top-level header - major sections like ASSETS, LIABILITIES
+                    # Top-level abstract - cyan bold (ASSETS, LIABILITIES)
                     label_text = row.label.upper()
-                    style = styles['header']['top_level']
-                    styled_label = Text(label_text, style=style) if style else Text(label_text)
+                    styled_label = Text(label_text, style=styles["row"]["abstract"])
                 elif row.level == 1:
-                    # Section header - subtotals like Current assets
-                    label_text = row.label
-                    style = styles['header']['section']
-                    styled_label = Text(label_text, style=style) if style else Text(label_text)
+                    # Section header - bold
+                    styled_label = Text(row.label, style=styles["header"]["section"])
                 else:
-                    # Sub-section header - indented, bold
+                    # Sub-section header
                     sub_indent = "  " * (row.level - 1)
-                    label_text = f"{sub_indent}{row.label}"
-                    style = styles['header']['subsection']
-                    styled_label = Text(label_text, style=style) if style else Text(label_text)
+                    styled_label = Text(f"{sub_indent}{row.label}", style=styles["header"]["subsection"])
             else:
-                # Regular line items - indented based on level
+                # Regular line items
                 if row.has_dimension_children and row.cells:
                     # Items with dimension children get bold styling and colon
                     label_text = f"{indent}{row.label}:"
-                    style = styles['structure']['total']
-                    styled_label = Text(label_text, style=style) if style else Text(label_text)
-                else:
-                    # Regular line items
+                    styled_label = Text(label_text, style=styles["row"]["total"])
+                elif "Total" in row.label:
+                    # Total rows - bold
                     label_text = f"{indent}{row.label}"
-                    style = styles['header']['subsection'] if styles['header']['subsection'] else None
-                    styled_label = Text(label_text, style=style) if style else Text(label_text)
+                    styled_label = Text(label_text, style=styles["row"]["total"])
+                else:
+                    # Regular line items - default style
+                    label_text = f"{indent}{row.label}"
+                    styled_label = Text(label_text, style=styles["row"]["item"])
 
-            # Convert cells to their display representation with value-based styling
+            # Convert cells to display values with styling
             cell_values = []
             for cell in row.cells:
                 if cell.value is None or cell.value == "":
-                    # Empty values - create empty Text object
                     cell_values.append(Text("", justify="right"))
                 else:
-                    # Format the cell value first
                     cell_value = cell.formatter(cell.value)
                     cell_str = str(cell_value)
 
-                    # Determine the style to apply based on content
-                    if row.is_abstract or "Total" in row.label:
-                        # Totals get special styling
-                        style = styles['value']['total']
-                    elif cell_str.startswith('(') or cell_str.startswith('-') or cell_str.startswith('$('):
-                        # Negative values
-                        style = styles['value']['negative']
-                    else:
-                        # Positive values
-                        style = styles['value']['positive']
+                    # Determine style based on value and row type
+                    is_total = row.is_abstract or "Total" in row.label
+                    is_negative = cell_str.startswith('(') or cell_str.startswith('-') or cell_str.startswith('$(')
 
-                    # Create Rich Text object with proper styling
-                    if style:
-                        # Apply the style directly to the Text object
-                        text_obj = Text(cell_str, style=style, justify="right")
+                    if is_total and is_negative:
+                        style = f"{styles['value']['total']} {styles['value']['negative']}"
+                    elif is_total:
+                        style = styles["value"]["total"]
+                    elif is_negative:
+                        style = styles["value"]["negative"]
                     else:
-                        text_obj = Text(cell_str, justify="right")
+                        style = styles["value"]["default"]
 
-                    cell_values.append(text_obj)
+                    cell_values.append(Text(cell_str, style=style, justify="right"))
 
             table.add_row(styled_label, *cell_values)
 
-        # Add footer metadata as table caption
-        footer_parts = []
+        # Build footer with source and units note
+        footer_parts = [
+            ("Source: ", styles["metadata"]["source"]),
+            ("SEC XBRL", styles["metadata"]["source_xbrl"]),
+        ]
+        if clean_units:
+            footer_parts.append(("  ", ""))
+            footer_parts.append((SYMBOLS["bullet"], styles["structure"]["separator"]))
+            footer_parts.append(("  ", ""))
+            footer_parts.append((clean_units, styles["metadata"]["units"]))
+        footer = Text.assemble(*footer_parts)
 
-        # Extract metadata if available
-        company_name = self.metadata.get('company_name')
-        form_type = self.metadata.get('form_type')
-        period_end = self.metadata.get('period_end')
-        fiscal_period = self.metadata.get('fiscal_period')
+        # Wrap in Panel with design language styling
+        # Header is centered like actual SEC filings
+        from rich.align import Align
+        content = Group(
+            Align.center(title),
+            table
+        )
 
-        # Build footer with available information
-        if company_name:
-            footer_parts.append(company_name)
-        if form_type:
-            footer_parts.append(f"Form {form_type}")
-        if period_end:
-            footer_parts.append(f"Period ending {period_end}")
-        if fiscal_period:
-            footer_parts.append(f"Fiscal {fiscal_period}")
-
-        # Always add source
-        footer_parts.append("Source: SEC XBRL")
-
-        # Apply dim styling to footer
-        if footer_parts:
-            footer_text = " • ".join(footer_parts)
-            table.caption = f"[{styles['structure']['separator']}]{footer_text}[/{styles['structure']['separator']}]"
-
-        return table
+        return Panel(
+            content,
+            subtitle=footer,
+            subtitle_align="left",
+            border_style=styles["structure"]["border"],
+            box=box.SIMPLE,
+            padding=(0, 1),
+            expand=False,
+        )
 
     def __repr__(self):
         return repr_rich(self.__rich__())
@@ -1521,6 +1531,12 @@ def render_statement(
         footer_metadata['company_name'] = xbrl_instance.entity_name
     elif hasattr(xbrl_instance, 'company_name') and xbrl_instance.company_name:
         footer_metadata['company_name'] = xbrl_instance.company_name
+
+    # Extract ticker
+    if hasattr(xbrl_instance, 'entity_info') and xbrl_instance.entity_info:
+        ticker = xbrl_instance.entity_info.get('ticker', '')
+        if ticker:
+            footer_metadata['ticker'] = ticker
 
     # Extract form type and periods
     if hasattr(xbrl_instance, 'form_type') and xbrl_instance.form_type:
