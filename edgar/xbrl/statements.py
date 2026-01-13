@@ -395,7 +395,7 @@ class Statement:
         Uses the matrix DataFrame to create a Rich table with equity components
         as columns and activities as rows.
         """
-        from edgar.xbrl.rendering import get_xbrl_styles
+        from edgar.display import get_statement_styles
         from rich.text import Text
 
         # Get matrix DataFrame
@@ -403,11 +403,11 @@ class Statement:
         if df is None or df.empty:
             return self.render()  # Fall back to standard rendering
 
-        styles = get_xbrl_styles()
+        styles = get_statement_styles()
 
         # Build title with units note
         title = self.title if hasattr(self, 'title') else "Statement of Stockholders' Equity"
-        title_parts = [f"[bold]{title}[/bold]", "[dim](in millions)[/dim]"]
+        title_parts = [f"[bold]{title}[/bold]", f"[{styles['metadata']['units']}](in millions)[/{styles['metadata']['units']}]"]
         full_title = "\n".join(title_parts)
 
         table = Table(title=full_title, box=box.SIMPLE, border_style=styles['structure']['border'])
@@ -482,19 +482,19 @@ class Statement:
             level = row.get('level', 0)
             is_abstract = row.get('abstract', False)
 
-            # Format label based on level
+            # Format label based on level using semantic styles
             indent = "  " * level
 
             if is_abstract:
                 if level == 0:
                     label_text = label.upper()
-                    style = styles['header']['top_level']
+                    style = styles['row']['abstract']  # cyan bold
                 else:
                     label_text = f"{indent}{label}"
                     style = styles['header']['section']
             else:
                 label_text = f"{indent}{label}"
-                style = None
+                style = styles['row']['item']
 
             styled_label = Text(label_text, style=style) if style else Text(label_text)
 
@@ -503,21 +503,19 @@ class Statement:
             for col in value_cols:
                 value = row.get(col)
                 if value is None or pd.isna(value):
-                    cell_values.append(Text("—", justify="right", style="dim"))
+                    cell_values.append(Text("—", justify="right", style=styles['value']['empty']))
                 else:
                     try:
                         num_value = float(value) / 1_000_000  # Convert to millions
                         if abs(num_value) < 0.5:
                             # Very small values show as dash
-                            cell_values.append(Text("—", justify="right", style="dim"))
+                            cell_values.append(Text("—", justify="right", style=styles['value']['empty']))
                         elif num_value < 0:
                             formatted = f"({abs(num_value):,.0f})"
-                            cell_style = styles['value']['negative']
-                            cell_values.append(Text(formatted, style=cell_style, justify="right"))
+                            cell_values.append(Text(formatted, style=styles['value']['negative'], justify="right"))
                         else:
                             formatted = f"{num_value:,.0f}"
-                            cell_style = styles['value']['positive']
-                            cell_values.append(Text(formatted, style=cell_style, justify="right"))
+                            cell_values.append(Text(formatted, style=styles['value']['default'], justify="right"))
                     except (ValueError, TypeError):
                         cell_values.append(Text(str(value), justify="right"))
 
