@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.9.1] - 2026-01-14
+
+### Added
+
+- **Statement View Control** (edgartools-766g)
+  - Added `view` parameter to all Financials statement methods (income_statement, balance_sheet, cashflow_statement, etc.)
+  - Supports three view modes: STANDARD (face presentation), DETAILED (all dimensional data), SUMMARY (non-dimensional totals)
+  - Enables control over dimensional data display at the statement method level
+  - **Files**: `edgar/financials.py`, `edgar/xbrl/statements.py`
+
+- **Statement Row Breakdown Detection**
+  - Added `is_breakdown` boolean field to StatementRow dataclass
+  - Distinguishes face dimensions from breakdown dimensions in rendered statements
+  - Included in DataFrame output via `to_dataframe()`
+  - **Files**: `edgar/xbrl/statements.py`, `edgar/xbrl/rendering.py`
+
+- **Enhanced Statement Display**
+  - Aligned XBRL and EntityFacts statement displays with SEC filing format
+  - Added centered headers with company name and ticker badge
+  - Moved units note from header to footer for cleaner presentation
+  - Added ticker badge style (bold black on green) to design language
+  - Pass ticker to MultiPeriodStatement for display
+  - **Files**: `edgar/xbrl/rendering.py`, `edgar/entity/enhanced_statement.py`, `edgar/display/styles.py`, `edgar/entity/entity_facts.py`
+
+### Fixed
+
+- **10-K Section Extraction Improvements**
+  - Fixed TOC anchors pointing to PART headers instead of actual Item content (e.g., NovoCure filing)
+  - Now searches for actual ITEM headers when TOC returns suspiciously short content (<200 chars)
+  - Prefer part-based section keys (e.g., 'part_i_item_1') over direct keys (e.g., 'Item 1') in TenK lookup
+  - Fixes Snowflake case where both keys existed pointing to different sections
+  - **Files**: `edgar/company_reports/ten_k.py`, `edgar/documents/extractors/toc_section_extractor.py`
+
+- **Pattern Extractor TOC Confusion**
+  - Fixed pattern extractor matching Table of Contents entries instead of actual section headers
+  - Added TOC boundary detection and position-based filtering
+  - Prefer case-sensitive "ITEM" matches over case-insensitive matches
+  - Fixes extraction for filings without internal anchor links (Park Aerospace, SUIC Worldwide)
+  - **Files**: `edgar/documents/extractors/pattern_section_extractor.py`, `edgar/documents/utils/toc_analyzer.py`
+
+### Changed
+
+- **Unified Statement Rendering Styles**
+  - Migrated Statement matrix rendering from get_xbrl_styles() to get_statement_styles()
+  - Ensures consistency across all statement displays using unified design language
+  - **Files**: `edgar/xbrl/rendering.py`
+
 ## [5.9.0] - 2026-01-12
 
 ### Changed
