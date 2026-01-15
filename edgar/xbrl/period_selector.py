@@ -241,8 +241,17 @@ def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], m
     fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
     fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
 
+    # Issue #600: Also check document_type and annual_report flag
+    # Some filings (like GE 2015 10-K) report fiscal_period='Q4' even for annual reports
+    is_annual_report = entity_info.get('annual_report', False)
+    document_type = entity_info.get('document_type', '')
+    annual_form_types = ('10-K', '10-K/A', '20-F', '20-F/A', '40-F', '40-F/A')
+
+    # Consider it annual if: fiscal_period == 'FY' OR it's flagged as annual OR it's an annual form type
+    is_annual = fiscal_period == 'FY' or is_annual_report or document_type in annual_form_types
+
     # Filter for annual periods if this is an annual report
-    if fiscal_period == 'FY':
+    if is_annual:
         annual_periods = _get_annual_periods(duration_periods)
         if annual_periods:
             # Apply fiscal year alignment scoring
