@@ -1644,6 +1644,37 @@ class Filing:
             if text_content:
                 print(text_content)
 
+    @lru_cache(maxsize=4)
+    def parse(self) -> Optional['Document']:
+        """
+        Parse the primary HTML document into a structured Document object.
+
+        Returns a Document with a parsed node tree suitable for advanced operations
+        like DocumentSearch, section extraction, and structured navigation.
+
+        Returns:
+            Parsed Document object, or None if HTML is not available
+
+        Example:
+            >>> from edgar import Company
+            >>> from edgar.documents.search import DocumentSearch
+            >>> company = Company("AAPL")
+            >>> filing = company.get_filings(form="10-K").latest(1)
+            >>> document = filing.parse()
+            >>> searcher = DocumentSearch(document)
+            >>> results = searcher.ranked_search("revenue growth", top_k=5)
+
+        Note:
+            This method is cached - subsequent calls return the same Document object.
+            For simple text extraction, use filing.text() instead.
+            For XBRL data, use filing.xbrl() instead.
+        """
+        html_content = self.html()
+        if not html_content or not is_probably_html(html_content):
+            return None
+        parser = HTMLParser(ParserConfig(form=self.form))
+        return parser.parse(html_content)
+
     def xbrl(self) -> Optional[XBRL]:
         """
         Get the XBRL document for the filing, parsed and as a FilingXbrl object
