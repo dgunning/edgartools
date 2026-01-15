@@ -1009,6 +1009,13 @@ class FactsView:
                 # Store original label (will be used for standardization comparison)
                 fact_dict['original_label'] = label
 
+                # Issue #597: For dimensional facts, use dimension member label instead of concept label
+                # This makes Facts API consistent with Statement API behavior where dimensional
+                # breakdowns show the member label (e.g., "Equity Method Investment...") rather
+                # than the parent concept label (e.g., "Total Assets")
+                if 'dimension_member_label' in fact_dict and fact_dict['dimension_member_label']:
+                    fact_dict['label'] = fact_dict['dimension_member_label']
+
                 # Add balance from element catalog (Issue #463)
                 # Balance indicates accounting classification (debit/credit)
                 # Try element catalog first, then fall back to static US-GAAP mapping

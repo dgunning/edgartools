@@ -418,3 +418,56 @@ def test_dimension_format_normalization():
     assert not query._dimension_value_matches("us-gaap:ServiceMember", "ProductMember")
     
     print("✅ All dimension normalization tests passed!")
+
+
+@pytest.mark.network
+def test_dimensional_facts_have_distinct_labels_issue_597():
+    """
+    Regression test for issue #597: Dimensional facts should use dimension member labels.
+
+    When a concept has both non-dimensional and dimensional facts, the dimensional facts
+    should have labels that reflect the dimension member (like "Corporate Joint Venture")
+    rather than the parent concept label (like "Total Assets").
+
+    This ensures users can filter by label to get only non-dimensional totals.
+    """
+    # Use the filing from issue #597: CAL-MAINE FOODS INC
+    filing = Filing(company='CAL-MAINE FOODS INC', cik=16160, form='10-K',
+                   filing_date='2024-07-16', accession_no='0001562762-24-000177')
+    xbrl = filing.xbrl()
+
+    # Get all facts for us-gaap:Assets
+    facts_df = xbrl.facts.to_dataframe()
+    assets_facts = facts_df[facts_df['concept'] == 'us-gaap:Assets']
+
+    # Should have 5 facts: 2 non-dimensional + 3 dimensional
+    assert len(assets_facts) >= 2, "Should have at least 2 Assets facts"
+
+    # Non-dimensional facts should have label "Total assets"
+    # Dimensional facts should have different labels (dimension member labels)
+    labels = assets_facts['label'].unique().tolist()
+
+    # Should have more than one unique label (non-dimensional + dimensional have different labels)
+    assert len(labels) >= 2, f"Dimensional facts should have different labels, got: {labels}"
+
+    # "Total assets" should be one of the labels (for non-dimensional facts)
+    total_assets_labels = [l for l in labels if 'total' in l.lower() and 'assets' in l.lower()]
+    assert len(total_assets_labels) == 1, f"Should have exactly one 'Total assets' label, got: {total_assets_labels}"
+
+    # Filtering by "Total assets" should return fewer rows than total (only non-dimensional)
+    total_assets_facts = facts_df[facts_df['label'].str.lower() == 'total assets']
+    assets_concept_total = len(facts_df[facts_df['concept'] == 'us-gaap:Assets'])
+
+    if assets_concept_total > 2:  # If there are dimensional facts
+        assert len(total_assets_facts) < assets_concept_total, \
+            "Filtering by 'Total assets' label should exclude dimensional facts"
+
+    # original_label should still contain the concept's original label
+    assert 'original_label' in assets_facts.columns, "Should have original_label column"
+    orig_labels = assets_facts['original_label'].unique().tolist()
+    assert any('assets' in l.lower() for l in orig_labels), \
+        f"original_label should contain concept's original label, got: {orig_labels}"
+
+    print(f"✅ Issue #597 regression test passed!")
+    print(f"   Total Assets facts: {len(assets_facts)}")
+    print(f"   Unique labels: {labels}")
