@@ -1024,7 +1024,7 @@ class Document:
         return iter(self.root.children)
 
     def __repr__(self) -> str:
-        return self.text()
+        return self.text(table_max_col_width=200)  # Terminal-friendly width
 
     def walk(self) -> Iterator[Node]:
         """Walk entire document tree."""

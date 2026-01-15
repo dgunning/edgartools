@@ -25,7 +25,7 @@ class TestTableMaxColWidth:
     def test_table_style_max_col_width_default(self):
         """Verify TableStyle.simple() has correct default max_col_width."""
         style = TableStyle.simple()
-        assert style.max_col_width == 200
+        assert style.max_col_width == 500  # AI-friendly default
 
     def test_table_style_max_col_width_customizable(self):
         """Verify TableStyle max_col_width can be customized."""
