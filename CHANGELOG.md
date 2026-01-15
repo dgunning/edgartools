@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.10.0] - 2026-01-15
+
+### Added
+
+- **Shares Outstanding API** (Issue #587)
+  - Added `get_shares_outstanding_basic()` and `get_shares_outstanding_diluted()` methods to Financials API
+  - New `_get_concept_value()` helper method for XBRL concept-based search (more reliable than label matching)
+  - Shares now included in `get_financial_metrics()` dictionary output
+  - Supports both annual and quarterly financials with period offset functionality
+  - Example: `financials.get_shares_outstanding_basic(period_offset=0)`
+  - **Files**: `edgar/financials.py`
+
+- **Filing.parse() Method** (Issue #598)
+  - Added `filing.parse()` convenience method returning structured Document object for DocumentSearch compatibility
+  - Method is cached with lru_cache for performance
+  - Returns None if HTML is not available (graceful edge case handling)
+  - Complements existing filing methods: `filing.html()`, `filing.text()`, `filing.xbrl()`
+  - Updated documentation in docs/advanced-search.md with correct usage examples
+  - **Files**: `edgar/_filings.py`, `docs/advanced-search.md`
+
+- **Table Width Control for AI Processing** (Issue #596)
+  - Added `table_max_col_width` parameter to TextExtractor, Document.text(), and get_text()
+  - Allows control over table column width to prevent truncation of long labels
+  - Default raised from 200 to 500 for AI/LLM processing (doc.text())
+  - Terminal display (print(doc)) uses 200 for readability
+  - Enables complete information extraction for AI analysis
+  - **Files**: `edgar/documents/document.py`, `edgar/documents/extractors/text_extractor.py`, `edgar/documents/renderers/fast_table.py`, `edgar/documents/migration.py`
+
+### Fixed
+
+- **Pandas FutureWarning in Statement Presentation** (Issue #599)
+  - Fixed incomplete metadata_cols list in _apply_presentation() causing FutureWarning
+  - Added missing metadata columns to exclusion list: standard_concept, is_breakdown, dimension_axis, dimension_member, dimension_member_label, dimension_label
+  - Boolean columns like is_breakdown were incorrectly processed through numeric transformation
+  - Added explicit numeric conversion before masked assignment for safety
+  - **Files**: `edgar/xbrl/statements.py`
+
+- **Empty Income Statements for 10-K Filings** (Issue #600)
+  - Fixed period selector using only fiscal_period == 'FY' to identify annual reports
+  - Some 10-K filings (like GE 2015) have fiscal_period='Q4' in XBRL metadata
+  - Now also checks document_type and annual_report flag for correct identification
+  - Prevents selector from choosing quarterly periods instead of annual periods (4-7% vs 70%+ data density)
+  - Affected filings: GE 2015/2016, CHTR 2017/2018, KHC 2015, WMB 2018, YUM 2016/2017, XOM 2015/2016
+  - Expanded annual form types to include 10-KT, 10-KT/A, 10-KSB, 10-KSB/A
+  - **Files**: `edgar/xbrl/period_selector.py`
+
+- **Dimension Member Labels in Facts API** (Issue #597)
+  - Dimensional facts now display their dimension member label (e.g., "Corporate Joint Venture") instead of parent concept label (e.g., "Total Assets")
+  - Makes Facts API consistent with Statement API behavior
+  - **Files**: `edgar/xbrl/facts.py`
+
 ## [5.9.1] - 2026-01-14
 
 ### Added
