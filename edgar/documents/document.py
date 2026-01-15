@@ -679,7 +679,8 @@ class Document:
              clean: bool = True,
              include_tables: bool = True,
              include_metadata: bool = False,
-             max_length: Optional[int] = None) -> str:
+             max_length: Optional[int] = None,
+             table_max_col_width: Optional[int] = None) -> str:
         """
         Extract text from document.
         
@@ -688,6 +689,9 @@ class Document:
             include_tables: Include table content in text
             include_metadata: Include metadata annotations
             max_length: Maximum text length
+            table_max_col_width: Maximum column width for table rendering (default: 200).
+                                Set higher (e.g., 500) to avoid truncating long table labels,
+                                or None for unlimited width. Useful for AI/LLM processing.
             
         Returns:
             Extracted text
@@ -707,7 +711,8 @@ class Document:
             clean=clean,
             include_tables=include_tables,
             include_metadata=include_metadata,
-            max_length=max_length
+            max_length=max_length,
+            table_max_col_width=table_max_col_width
         )
         text = extractor.extract(self)
 
