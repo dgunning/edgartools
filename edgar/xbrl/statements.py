@@ -1116,8 +1116,11 @@ class Statement:
         result = df.copy()
 
         # Get period columns (exclude metadata and structural columns)
+        # FIX (Issue #599): Include all metadata columns to prevent processing non-date columns
         metadata_cols = ['concept', 'label', 'balance', 'weight', 'preferred_sign', 'parent_concept',
-                        'parent_abstract_concept', 'level', 'abstract', 'dimension', 'unit', 'point_in_time']
+                        'parent_abstract_concept', 'level', 'abstract', 'dimension', 'unit', 'point_in_time',
+                        'standard_concept', 'is_breakdown', 'dimension_axis', 'dimension_member',
+                        'dimension_member_label', 'dimension_label']
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
         # Get statement type
@@ -1133,6 +1136,9 @@ class Statement:
                     # This is needed because columns with None values become object dtype
                     numeric_col = pd.to_numeric(result[col], errors='coerce')
                     if pd.api.types.is_numeric_dtype(numeric_col):
+                        # FIX (Issue #599): Convert entire column to numeric first to prevent
+                        # pandas FutureWarning about assigning incompatible dtype to object column
+                        result[col] = numeric_col
                         # Apply preferred_sign where it's not None and not 0
                         mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
                         result.loc[mask, col] = numeric_col[mask] * result.loc[mask, 'preferred_sign']
