@@ -15,7 +15,7 @@ from edgar.core import listify, log
 from edgar.dates import InvalidDateException
 from edgar.entity.filings import EntityFilings
 from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
-from edgar.formatting import reverse_name
+from edgar.display.formatting import reverse_name
 from edgar.storage import is_using_local_storage
 
 # Module-level import cache for lazy imports
@@ -525,7 +525,7 @@ class EntityData:
         Text = lazy_import('rich.text.Text')
         find_ticker = lazy_import('edgar.reference.tickers.find_ticker')
         zip_longest = lazy_import('itertools.zip_longest')
-        datefmt = lazy_import('edgar.formatting.datefmt')
+        datefmt = lazy_import('edgar.display.formatting.datefmt')
 
         # Primary entity identification section
         if self.is_company:

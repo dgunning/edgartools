@@ -150,12 +150,16 @@ The rendering system offers several customization options:
 
 | Option | Description |
 | ------ | ----------- |
-| `standard=True` | Use standardized labels for cross-company comparison (default) |
-| `standard=False` | Use company-specific labels as reported in the filing |
+| `standard=True` | Add `standard_concept` metadata for cross-company analysis (default). Labels remain as company-reported. |
+| `standard=False` | Skip standardization metadata entirely |
 | `show_date_range=True` | Show complete date ranges for duration periods (e.g., "Jan 1 - Mar 31, 2023") |
 | `show_date_range=False` | Show only end dates for cleaner presentation (default) |
 | `period_view="Name"` | Select a predefined period view ("Annual Comparison", "Quarterly Comparison", etc.) |
 | `period_filter="duration_..."` | Filter to a specific period by period key |
+
+> **Note**: Labels always show the company's original presentation. The `standard_concept` column
+> maps each line item to a standard category (e.g., "Revenue", "CommonEquity") for filtering and
+> cross-company aggregation. Use `df.groupby('standard_concept').sum()` to aggregate by standard concepts.
 
 ### The `RenderedStatement` Class
 

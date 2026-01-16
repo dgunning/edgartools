@@ -1,10 +1,11 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
+from edgar.xbrl.presentation import ViewType
 from edgar.xbrl.statements import StitchedStatement
 from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
@@ -23,80 +24,100 @@ class Financials:
             log.warning(f"Filing {filing} does not contain XBRL data: {e}")
             return None
 
-    def balance_sheet(self, include_dimensions: bool = True):
+    def balance_sheet(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the balance sheet.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the balance sheet, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.balance_sheet(include_dimensions=include_dimensions)
+        return self.xb.statements.balance_sheet(include_dimensions=include_dimensions, view=view)
 
-    def income_statement(self, include_dimensions: bool = True):
+    def income_statement(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the income statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the income statement, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.income_statement(include_dimensions=include_dimensions)
+        return self.xb.statements.income_statement(include_dimensions=include_dimensions, view=view)
 
-    def cashflow_statement(self, include_dimensions: bool = True):
+    def cashflow_statement(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the cash flow statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the cash flow statement, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions)
+        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions, view=view)
 
-    def statement_of_equity(self, include_dimensions: bool = True):
+    def statement_of_equity(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the statement of equity.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the statement of equity, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions)
+        return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions, view=view)
 
-    def comprehensive_income(self, include_dimensions: bool = True):
+    def comprehensive_income(self, include_dimensions: bool = False, view: ViewType = None):
         """
         Get the comprehensive income statement.
 
         Args:
             include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: True)
+                              when rendering or converting to DataFrame (default: False)
+            view: StatementView controlling dimensional data display.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
 
         Returns:
             A Statement object for the comprehensive income statement, or None if not available
         """
         if self.xb is None:
             return None
-        return self.xb.statements.comprehensive_income(include_dimensions=include_dimensions)
+        return self.xb.statements.comprehensive_income(include_dimensions=include_dimensions, view=view)
 
     def cover(self):
         """
@@ -336,9 +357,11 @@ class Financials:
         """
         patterns = [
             r'Capital Expenditures',
+            r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
             r'Property.*Plant.*Equipment',
             r'Payments.*Property',
             r'Acquisitions.*Property',
+            r'Purchase.*Property',
             r'Capex'
         ]
         return self._get_standardized_concept_value('cashflow', patterns, period_offset)
@@ -377,6 +400,139 @@ class Financials:
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
+    def _get_concept_value(self, statement_type: str, concept_patterns: List[str], period_offset: int = 0) -> Optional[Union[int, float]]:
+        """
+        Helper method to extract values by XBRL concept name (not label).
+
+        This is more reliable than label-based search for concepts like shares outstanding
+        where the display label varies by company but the XBRL concept is standardized.
+
+        Args:
+            statement_type: Type of statement ('income', 'balance', 'cashflow')
+            concept_patterns: List of concept name patterns to search for (case-insensitive regex)
+            period_offset: Which period to get (0=most recent, 1=previous, etc.)
+
+        Returns:
+            The concept value if found, None otherwise
+        """
+        if self.xb is None:
+            return None
+
+        try:
+            # Get the appropriate statement
+            if statement_type == 'income':
+                statement = self.income_statement()
+            elif statement_type == 'balance':
+                statement = self.balance_sheet()
+            elif statement_type == 'cashflow':
+                statement = self.cashflow_statement()
+            else:
+                return None
+
+            if statement is None:
+                return None
+
+            # Render with standardization enabled
+            rendered = statement.render(standard=True)
+            df = rendered.to_dataframe()
+
+            if df.empty or 'concept' not in df.columns:
+                return None
+
+            # Find the concept using pattern matching on concept column
+            for pattern in concept_patterns:
+                matches = df[df['concept'].str.contains(pattern, case=False, na=False)]
+                if not matches.empty:
+                    # Get available period columns (excluding metadata columns)
+                    period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
+
+                    if len(period_columns) > period_offset:
+                        period_col = period_columns[period_offset]
+                        value = matches.iloc[0][period_col]
+
+                        # Skip empty/NA values - try next pattern
+                        if pd.isna(value) or value == '':
+                            continue
+
+                        # Convert to numeric
+                        try:
+                            return float(value) if '.' in str(value) else int(value)
+                        except (ValueError, TypeError):
+                            # Non-numeric value, try next pattern
+                            continue
+
+            return None
+
+        except Exception as e:
+            log.debug(f"Error getting concept value: {e}")
+            return None
+
+    def get_shares_outstanding_basic(self, period_offset: int = 0) -> Optional[Union[int, float]]:
+        """
+        Get weighted average basic shares outstanding from the income statement.
+
+        This returns the weighted average number of basic shares outstanding used
+        in computing basic earnings per share (EPS).
+
+        Args:
+            period_offset: Which period to get (0=most recent, 1=previous, etc.)
+
+        Returns:
+            Basic shares outstanding if found, None otherwise
+
+        Example:
+            >>> company = Company('AAPL')
+            >>> financials = company.get_financials()
+            >>> shares = financials.get_shares_outstanding_basic()
+            >>> print(f"Basic shares: {shares:,.0f}")
+
+            >>> # Get previous period
+            >>> prev_shares = financials.get_shares_outstanding_basic(period_offset=1)
+
+            >>> # Also works with quarterly financials
+            >>> quarterly = company.get_quarterly_financials()
+            >>> q_shares = quarterly.get_shares_outstanding_basic()
+        """
+        # Search by XBRL concept name - more reliable than label matching
+        concept_patterns = [
+            r'WeightedAverageNumberOfSharesOutstandingBasic',
+            r'CommonStockSharesOutstanding',  # Fallback for some filings
+        ]
+        return self._get_concept_value('income', concept_patterns, period_offset)
+
+    def get_shares_outstanding_diluted(self, period_offset: int = 0) -> Optional[Union[int, float]]:
+        """
+        Get weighted average diluted shares outstanding from the income statement.
+
+        This returns the weighted average number of diluted shares outstanding used
+        in computing diluted earnings per share (EPS). Diluted shares include the
+        effect of stock options, convertible securities, and other dilutive instruments.
+
+        Args:
+            period_offset: Which period to get (0=most recent, 1=previous, etc.)
+
+        Returns:
+            Diluted shares outstanding if found, None otherwise
+
+        Example:
+            >>> company = Company('AAPL')
+            >>> financials = company.get_financials()
+            >>> diluted_shares = financials.get_shares_outstanding_diluted()
+            >>> print(f"Diluted shares: {diluted_shares:,.0f}")
+
+            >>> # Compare basic vs diluted
+            >>> basic = financials.get_shares_outstanding_basic()
+            >>> diluted = financials.get_shares_outstanding_diluted()
+            >>> dilution = (diluted - basic) / basic * 100 if basic else None
+            >>> print(f"Dilution effect: {dilution:.2f}%")
+        """
+        # Search by XBRL concept name - more reliable than label matching
+        concept_patterns = [
+            r'WeightedAverageNumberOfDilutedSharesOutstanding',
+            r'WeightedAverageNumberOfSharesOutstandingDiluted',  # Alternative naming
+        ]
+        return self._get_concept_value('income', concept_patterns, period_offset)
+
     def get_financial_metrics(self) -> Dict[str, Any]:
         """
         Get a dictionary of common financial metrics using standardized labels.
@@ -407,6 +563,10 @@ class Financials:
         metrics['operating_cash_flow'] = self.get_operating_cash_flow()
         metrics['capital_expenditures'] = self.get_capital_expenditures()
         metrics['free_cash_flow'] = self.get_free_cash_flow()
+
+        # Share Metrics
+        metrics['shares_outstanding_basic'] = self.get_shares_outstanding_basic()
+        metrics['shares_outstanding_diluted'] = self.get_shares_outstanding_diluted()
 
         # Calculate basic ratios if we have the data
         if metrics['current_assets'] and metrics['current_liabilities']:

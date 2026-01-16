@@ -56,7 +56,7 @@ from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
 from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, filter_by_form, filter_by_ticker
-from edgar.formatting import accession_number_text, display_size
+from edgar.display.formatting import accession_number_text, display_size
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.reference import describe_form
@@ -705,7 +705,7 @@ class Filings:
         # Filter by form
         if forms:
             filing_index = filter_by_form(filing_index, form=forms, amendments=amendments if amendments is not None else False)
-        elif amendments is not None:
+        elif amendments is not None and filing_index.num_rows > 0:
             # Get the unique values of the form as a pylist
             forms = list(set([form.replace("/A", "") for form in pc.unique(filing_index['form']).to_pylist()]))
             filing_index = filter_by_form(filing_index, form=forms, amendments=amendments)
@@ -718,7 +718,7 @@ class Filings:
                 # Warn if user is requesting today's filings but data is from yesterday
                 if _is_requesting_current_filings(filing_date):
                     latest_date = self.date_range[1]
-                    if _get_data_staleness_days(latest_date) >= 1:
+                    if latest_date is not None and _get_data_staleness_days(latest_date) >= 1:
                         _warn_use_current_filings(
                             f"Filtering for current-day filings, but data only includes filings through {latest_date.date() if isinstance(latest_date, datetime) else latest_date}"
                         )
@@ -1643,6 +1643,37 @@ class Filing:
             text_content = self.text()
             if text_content:
                 print(text_content)
+
+    @lru_cache(maxsize=4)
+    def parse(self) -> Optional['Document']:
+        """
+        Parse the primary HTML document into a structured Document object.
+
+        Returns a Document with a parsed node tree suitable for advanced operations
+        like DocumentSearch, section extraction, and structured navigation.
+
+        Returns:
+            Parsed Document object, or None if HTML is not available
+
+        Example:
+            >>> from edgar import Company
+            >>> from edgar.documents.search import DocumentSearch
+            >>> company = Company("AAPL")
+            >>> filing = company.get_filings(form="10-K").latest(1)
+            >>> document = filing.parse()
+            >>> searcher = DocumentSearch(document)
+            >>> results = searcher.ranked_search("revenue growth", top_k=5)
+
+        Note:
+            This method is cached - subsequent calls return the same Document object.
+            For simple text extraction, use filing.text() instead.
+            For XBRL data, use filing.xbrl() instead.
+        """
+        html_content = self.html()
+        if not html_content or not is_probably_html(html_content):
+            return None
+        parser = HTMLParser(ParserConfig(form=self.form))
+        return parser.parse(html_content)
 
     def xbrl(self) -> Optional[XBRL]:
         """

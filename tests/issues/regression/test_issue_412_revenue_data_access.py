@@ -86,8 +86,7 @@ class TestIssue412RevenueDataAccess:
             for item in data_list:
                 if (isinstance(item, dict) and
                     'RevenueFromContractWithCustomer' in item.get('concept', '') and
-                    item.get('has_values', False) and
-                    item.get('label') == 'Contract Revenue'):
+                    item.get('has_values', False)):
                     main_revenue_concept = item
                     break
             

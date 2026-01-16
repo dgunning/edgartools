@@ -27,11 +27,12 @@ from rich.text import Text
 
 from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
+from edgar.display.styles import get_style, SYMBOLS
 from edgar.entity.data import Address, CompanyData, EntityData
 from edgar.entity.entity_facts import EntityFacts, NoCompanyFactsFound, get_company_facts
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
-from edgar.formatting import datefmt, reverse_name
+from edgar.display.formatting import cik_text, datefmt, reverse_name
 from edgar.reference.tickers import find_cik
 from edgar.richtools import Docs, repr_rich
 
@@ -500,6 +501,156 @@ class Company(Entity):
         return None
 
     @property
+    def is_foreign(self) -> bool:
+        """
+        Check if this company is incorporated outside the United States.
+
+        Uses the SEC state of incorporation code to determine if the company
+        is registered in a foreign jurisdiction.
+
+        Returns:
+            True if incorporated in a foreign country, False if US or unknown
+
+        Example:
+            >>> company = Company('BABA')
+            >>> company.is_foreign
+            True
+            >>> Company('AAPL').is_foreign
+            False
+        """
+        if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
+            from edgar.reference._codes import is_foreign_company
+            return is_foreign_company(self.data.state_of_incorporation)
+        return False
+
+    @property
+    def filer_type(self) -> Optional[str]:
+        """
+        Get the filer type based on state of incorporation.
+
+        Returns:
+            'Domestic' - Incorporated in US
+            'Canadian' - Incorporated in Canada
+            'Foreign' - Incorporated elsewhere
+            None - Unknown or state of incorporation not available
+
+        Example:
+            >>> Company('AAPL').filer_type
+            'Domestic'
+            >>> Company('BABA').filer_type
+            'Foreign'
+            >>> Company('CNQ').filer_type  # Canadian Natural Resources
+            'Canadian'
+        """
+        if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
+            from edgar.reference._codes import get_filer_type
+            return get_filer_type(self.data.state_of_incorporation)
+        return None
+
+    def _get_form_types(self, limit: int = 100) -> set:
+        """
+        Get unique form types from recent filings efficiently.
+
+        Args:
+            limit: Maximum number of recent filings to check
+
+        Returns:
+            Set of form type strings (e.g., {'10-K', '10-Q', '8-K'})
+        """
+        filings = self.get_filings(trigger_full_load=False)
+        if filings is None or filings.empty:
+            return set()
+
+        form_column = filings.data['form']
+        actual_limit = min(limit, len(form_column))
+        return set(form_column.slice(0, actual_limit).to_pylist())
+
+    @cached_property
+    def business_category(self) -> str:
+        """
+        Get the primary business category for this company.
+
+        Classification uses multiple signals:
+        - SIC code (definitive for REITs, Banks, Insurance, SPACs)
+        - SEC form types filed (investment company forms, 13F, N-2)
+        - Entity type from SEC data
+        - Company name patterns (for disambiguation)
+
+        Returns:
+            One of: 'Operating Company', 'ETF', 'Mutual Fund', 'Closed-End Fund',
+                   'BDC', 'REIT', 'Investment Manager', 'Bank', 'Insurance Company',
+                   'SPAC', 'Holding Company', 'Unknown'
+
+        Example:
+            >>> Company('AAPL').business_category
+            'Operating Company'
+
+            >>> Company('O').business_category
+            'REIT'
+
+            >>> Company('JPM').business_category
+            'Bank'
+        """
+        from edgar.entity.categorization import classify_business_category
+
+        form_types = self._get_form_types()
+        entity_type = getattr(self.data, 'entity_type', None)
+
+        return classify_business_category(
+            sic=self.sic,
+            entity_type=entity_type,
+            name=self.name or '',
+            form_types=form_types
+        )
+
+    def is_fund(self) -> bool:
+        """
+        Check if company is an investment fund (ETF, Mutual Fund, or Closed-End Fund).
+
+        Returns:
+            True if the company is classified as any type of fund
+
+        Example:
+            >>> Company('AAPL').is_fund()
+            False
+        """
+        return self.business_category in ['ETF', 'Mutual Fund', 'Closed-End Fund']
+
+    def is_financial_institution(self) -> bool:
+        """
+        Check if company is a financial institution.
+
+        Includes Banks, Insurance Companies, Investment Managers, and BDCs.
+
+        Returns:
+            True if classified as a financial institution
+
+        Example:
+            >>> Company('JPM').is_financial_institution()
+            True
+            >>> Company('AAPL').is_financial_institution()
+            False
+        """
+        return self.business_category in [
+            'Bank', 'Insurance Company', 'Investment Manager', 'BDC'
+        ]
+
+    def is_operating_company(self) -> bool:
+        """
+        Check if company is a standard operating company.
+
+        Returns:
+            True if classified as an Operating Company
+
+        Example:
+            >>> Company('AAPL').is_operating_company()
+            True
+            >>> Company('JPM').is_operating_company()
+            False
+        """
+        return self.business_category == 'Operating Company'
+
+    @property
     def latest_tenk(self) -> Optional[TenK]:
         """Get the latest 10-K filing for this company."""
         latest_10k = self.get_filings(form='10-K', trigger_full_load=False).latest()
@@ -523,7 +674,7 @@ class Company(Entity):
         """
         Get structured facts about this company with industry-specific enhancements.
 
-        Overrides Entity.get_facts() to inject SIC code for industry-specific
+        Overrides Entity.get_facts() to inject SIC code and ticker for industry-specific
         virtual tree extensions.
 
         Args:
@@ -531,12 +682,14 @@ class Company(Entity):
                         or string ('annual', 'quarterly', 'monthly').
 
         Returns:
-            EntityFacts object with SIC code set, optionally filtered by period type
+            EntityFacts object with SIC code and ticker set, optionally filtered by period type
         """
         facts = super().get_facts(period_type)
         if facts:
-            # Inject SIC code for industry-specific statement building
+            # Inject SIC code and ticker for industry-specific statement building
+            # Ticker is used for curated industries like payment_networks where SIC doesn't map well
             facts._sic_code = self.sic
+            facts._ticker = self.tickers[0] if self.tickers else None
         return facts
 
     @property
@@ -1161,165 +1314,189 @@ class Company(Entity):
         return self.to_context(max_tokens=max_tokens)
 
     def __rich__(self):
-        """Creates a rich representation of the company with detailed information."""
+        """Creates a rich representation of the company with detailed information.
 
-        # The title of the panel
-        ticker = self.get_ticker()
-        if self.data.is_company:
-            entity_title = Text.assemble("🏢 ",
-                                  (self.data.name, "bold green"),
-                                  " ",
-                                  (ticker if ticker else "", "bold yellow")
-                                  )
-        else:
-            entity_title = Text.assemble("👤", (self.data.name, "bold green"))
-
-        # Primary Information Table
-        main_info = Table(box=box.SIMPLE_HEAVY, show_header=False, padding=(0, 1))
-        main_info.add_column("Row", style="")  # Single column for the entire row
-
-        row_parts = []
-        row_parts.extend([Text("CIK", style="grey60"), Text(str(self.cik), style="bold deep_sky_blue3")])
-        if hasattr(self.data, 'entity_type') and self.data.entity_type:
-            if self.data.is_individual:
-                row_parts.extend([Text("Type", style="grey60"),
-                              Text("Individual", style="bold yellow")])
+        Design follows the EdgarTools display language (docs/internal/design-language.md):
+        - Single outer border (card-based) with box.ROUNDED
+        - No emojis - uses unicode symbols from SYMBOLS
+        - Semantic colors from edgar.display.styles
+        - Compact layout with whitespace section separation
+        """
+        # Build header line: Company Name + Ticker(s)
+        # Show up to 2 tickers, then "+ N more" for additional
+        tickers = self.tickers if hasattr(self, 'tickers') else []
+        if tickers:
+            if len(tickers) == 1:
+                ticker_text = Text(tickers[0], style=get_style("ticker"))
+            elif len(tickers) == 2:
+                ticker_text = Text.assemble(
+                    (tickers[0], get_style("ticker")),
+                    (" / ", get_style("metadata")),
+                    (tickers[1], get_style("ticker"))
+                )
             else:
-                row_parts.extend([Text("Type", style="grey60"),
-                              Text(self.data.entity_type.title(), style="bold yellow"),
-                              Text(self._get_operating_type_emoticon(self.data.entity_type), style="bold yellow")])
-        main_info.add_row(*row_parts)
-
-        # Detailed Information Table
-        details = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-        details.add_column("Category")
-        details.add_column("Industry")
-        details.add_column("Fiscal Year End")
-
-        details.add_row(
-            getattr(self.data, 'category', '-') or "-",
-            f"{getattr(self.data, 'sic', '')}: {getattr(self.data, 'sic_description', '')}" if hasattr(self.data, 'sic') and self.data.sic else "-",
-            self._format_fiscal_year_date(getattr(self.data, 'fiscal_year_end', '')) if hasattr(self.data, 'fiscal_year_end') and self.data.fiscal_year_end else "-"
-        )
-
-        # Combine main_info and details in a single panel
-        if self.data.is_company:
-            basic_info_renderables = [main_info, details]
-        else:
-            basic_info_renderables = [main_info]
-        basic_info_panel = Panel(
-            Group(*basic_info_renderables),
-            title="📋 Entity",
-            border_style="grey50"
-        )
-
-        # Trading Information
-        if hasattr(self.data, 'tickers') and hasattr(self.data, 'exchanges') and self.data.tickers and self.data.exchanges:
-            trading_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-            trading_info.add_column("Exchange")
-            trading_info.add_column("Symbol", style="bold yellow")
-
-            for exchange, ticker in zip(self.data.exchanges, self.data.tickers, strict=False):
-                trading_info.add_row(exchange, ticker)
-
-            trading_panel = Panel(
-                trading_info,
-                title="📈 Exchanges",
-                border_style="grey50"
+                ticker_text = Text.assemble(
+                    (tickers[0], get_style("ticker")),
+                    (" / ", get_style("metadata")),
+                    (tickers[1], get_style("ticker")),
+                    (f" +{len(tickers) - 2}", get_style("metadata"))
+                )
+            header = Text.assemble(
+                (self.data.name, get_style("company_name")),
+                "  ",
+                ticker_text
             )
         else:
-            trading_panel = Panel(
-                Text("No trading information available", style="grey58"),
-                title="📈 Trading Information",
-                border_style="grey50"
-            )
+            header = Text(self.data.name, style=get_style("company_name"))
 
-        # Contact Information
-        contact_info = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
-        contact_info.add_column("Label", style="bold grey70")
-        contact_info.add_column("Value")
+        # Build subtitle line: CIK • Exchange • Category
+        subtitle_parts = [cik_text(self.cik)]
 
-        has_contact_info = any([
-            hasattr(self.data, 'phone') and self.data.phone, 
-            hasattr(self.data, 'website') and self.data.website, 
-            hasattr(self.data, 'investor_website') and self.data.investor_website
-        ])
+        # Add exchange if available
+        if hasattr(self.data, 'exchanges') and self.data.exchanges:
+            subtitle_parts.append(Text(self.data.exchanges[0], style=get_style("value")))
 
-        if hasattr(self.data, 'website') and self.data.website:
-            contact_info.add_row("Website", self.data.website)
-        if hasattr(self.data, 'investor_website') and self.data.investor_website:
-            contact_info.add_row("Investor Relations", self.data.investor_website)
+        # Add simplified category
+        if hasattr(self.data, 'category') and self.data.category:
+            # Shorten the category text
+            category = self.data.category
+            if 'Emerging growth' in category:
+                category = 'Emerging Growth'
+            elif 'Large accelerated' in category:
+                category = 'Large Accelerated Filer'
+            elif 'accelerated' in category.lower():
+                category = 'Accelerated Filer'
+            elif 'Non-accelerated' in category:
+                category = 'Non-accelerated Filer'
+            subtitle_parts.append(Text(category, style=get_style("metadata")))
+
+        # Add filer type indicator for non-domestic companies
+        if self.filer_type == 'Foreign':
+            subtitle_parts.append(Text(self.filer_type, style=get_style("foreign")))
+        elif self.filer_type == 'Canadian':
+            subtitle_parts.append(Text(self.filer_type, style=get_style("canadian")))
+
+        subtitle = Text(f" {SYMBOLS['bullet']} ").join(subtitle_parts)
+
+        # Build content sections
+        content_lines = []
+
+        # Section 1: Core details (compact key-value pairs)
+        details_table = Table(box=None, show_header=False, padding=(0, 2), expand=False)
+        details_table.add_column("Label", style=get_style("label"), width=14)
+        details_table.add_column("Value", style=get_style("value_highlight"))
+
+        # Industry
+        if hasattr(self.data, 'sic') and self.data.sic:
+            sic_desc = getattr(self.data, 'sic_description', '') or ''
+            details_table.add_row("Industry", f"{self.data.sic}: {sic_desc}")
+
+        # Fiscal Year End
+        if hasattr(self.data, 'fiscal_year_end') and self.data.fiscal_year_end:
+            fy_end = self._format_fiscal_year_date(self.data.fiscal_year_end)
+            details_table.add_row("Fiscal Year", fy_end)
+
+        # State of Incorporation
+        if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
+            from edgar.reference._codes import get_place_name
+            code = self.data.state_of_incorporation
+            # Always look up full name from place_codes.csv, fallback to description or code
+            state_name = get_place_name(code)
+            if not state_name:
+                state_name = getattr(self.data, 'state_of_incorporation_description', None) or code
+            details_table.add_row("Incorporated", state_name)
+
+        # Entity Type (for non-companies or when relevant)
+        if hasattr(self.data, 'entity_type') and self.data.entity_type and self.data.is_individual:
+            details_table.add_row("Type", "Individual")
+
+        # Phone
         if hasattr(self.data, 'phone') and self.data.phone:
-            contact_info.add_row("Phone", self.data.phone)
+            details_table.add_row("Phone", self.data.phone)
 
-        # Three-column layout for addresses and contact info
-        contact_renderables = []
+        # Website
+        if hasattr(self.data, 'website') and self.data.website:
+            details_table.add_row("Website", self.data.website)
+
+        # Address (single line, business address preferred)
+        address = None
         if hasattr(self.data, 'business_address') and not self.data.business_address.empty:
-            contact_renderables.append(Panel(
-                Text(str(self.data.business_address)),
-                title="🏢 Business Address",
-                border_style="grey50"
-            ))
-        if hasattr(self.data, 'mailing_address') and not self.data.mailing_address.empty:
-            contact_renderables.append(Panel(
-                Text(str(self.data.mailing_address)),
-                title="📫 Mailing Address",
-                border_style="grey50"
-            ))
-        if has_contact_info:
-            contact_renderables.append(Panel(
-                contact_info,
-                title="📞 Contact Information",
-                border_style="grey50"
-            ))
+            address = self.data.business_address
+        elif hasattr(self.data, 'mailing_address') and not self.data.mailing_address.empty:
+            address = self.data.mailing_address
 
-        # Former Names Table (if any exist)
-        former_names_panel = None
+        if address:
+            # Format address as single line
+            addr_parts = []
+            if address.street1:
+                addr_parts.append(address.street1)
+            if address.street2:
+                addr_parts.append(address.street2)
+            city_state = []
+            if address.city:
+                city_state.append(address.city)
+            if address.state_or_country:
+                city_state.append(address.state_or_country)
+            if city_state:
+                addr_parts.append(", ".join(city_state))
+            if address.zipcode:
+                addr_parts[-1] = addr_parts[-1] + " " + address.zipcode if addr_parts else address.zipcode
+
+            if addr_parts:
+                details_table.add_row("Address", ", ".join(addr_parts[:2]) if len(addr_parts) > 2 else ", ".join(addr_parts))
+
+        content_lines.append(details_table)
+
+        # Section 2: Former Names (only if most recent change was within last 2 years)
         if hasattr(self.data, 'former_names') and self.data.former_names:
+            from datetime import date, timedelta
+            most_recent = self.data.former_names[0]
+            two_years_ago = date.today() - timedelta(days=730)
+            # Check if the most recent name change was within last 2 years
+            most_recent_date_str = most_recent.get('to')
+            most_recent_date = date.fromisoformat(most_recent_date_str) if most_recent_date_str else None
+            if most_recent_date and most_recent_date >= two_years_ago:
+                content_lines.append(Text(""))  # Spacing
+                content_lines.append(Text("Former Names", style=get_style("section_header")))
 
+                for former_name in self.data.former_names[:3]:  # Limit to 3
+                    from_date = datefmt(former_name['from'], '%b %Y')
+                    to_date = datefmt(former_name['to'], '%b %Y')
+                    content_lines.append(Text.assemble(
+                        ("  ", ""),
+                        (former_name['name'], "italic"),
+                        (" (", get_style("metadata")),
+                        (f"{from_date} {SYMBOLS['arrow_right']} {to_date}", get_style("metadata")),
+                        (")", get_style("metadata"))
+                    ))
 
-            former_names_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
-            former_names_table.add_column("Previous Company Names")
-            former_names_table.add_column("")  # Empty column for better spacing
+                # Show count if more than 3
+                if len(self.data.former_names) > 3:
+                    remaining = len(self.data.former_names) - 3
+                    content_lines.append(Text(f"  {SYMBOLS['ellipsis']} and {remaining} more", style=get_style("metadata")))
 
-            for former_name in self.data.former_names:
-                from_date = datefmt(former_name['from'], '%B %Y')
-                to_date = datefmt(former_name['to'], '%B %Y')
-                former_names_table.add_row(Text(former_name['name'], style="italic"), f"{from_date} to {to_date}")
+        content = Group(
+            header,
+            subtitle,
+            Text(""),  # Spacing after header
+            *content_lines
+        )
 
-            former_names_panel = Panel(
-                former_names_table,
-                title="📜 Former Names",
-                border_style="grey50"
-            )
-
-        # Combine all sections using Group
-        if self.data.is_company:
-            content_renderables = [Padding("", (1, 0, 0, 0)), basic_info_panel, trading_panel]
-            if len(contact_renderables):
-                contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
-                content_renderables.append(contact_and_addresses)
-            if former_names_panel:
-                content_renderables.append(former_names_panel)
-        else:
-            content_renderables = [Padding("", (1, 0, 0, 0)), basic_info_panel]
-            if len(contact_renderables):
-                contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
-                content_renderables.append(contact_and_addresses)
-
-        content = Group(*content_renderables)
-
-        # Create the main panel
+        # Create the card with single border (design language compliant)
+        # Fixed width ensures consistent appearance across different companies
         return Panel(
             content,
-            title=entity_title,
+            border_style=get_style("border"),
+            box=box.ROUNDED,
+            padding=(0, 1),
+            width=85,
             subtitle=Text.assemble(
-                ("SEC Entity Data", "dim"),
-                " • ",
-                ("company.docs", "cyan dim"),
-                (" for usage guide", "dim")
+                ("SEC Entity Data", get_style("metadata")),
+                f" {SYMBOLS['bullet']} ",
+                ("company.docs", get_style("hint")),
+                (" for usage guide", get_style("metadata"))
             ),
-            border_style="grey50"
+            subtitle_align="right"
         )
 
     @staticmethod

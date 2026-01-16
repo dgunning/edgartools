@@ -17,7 +17,7 @@ from rich.text import Text
 
 from edgar._filings import Filing, Filings, PagingState
 from edgar.core import IntString, listify, log
-from edgar.formatting import accession_number_text, display_size
+from edgar.display.formatting import accession_number_text, display_size
 from edgar.reference.forms import describe_form
 from edgar.richtools import Docs, df_to_rich_table, repr_rich
 
@@ -131,9 +131,25 @@ class EntityFiling(Filing):
             pattern = r'(?:ITEM|Item)\s+(\d+(?:\.\d+)?)\s*[:\.]?\s*([^\n]*)'
             matches = re.findall(pattern, text, re.IGNORECASE)
 
+            # Valid 8-K item numbers:
+            # - Modern format: X.XX where X is 1-9 (e.g., 1.01, 2.02, 5.02, 9.01)
+            # - Legacy format: single digit 1-9
+            # Invalid: 401, 404 (from Section 401(k) or Section 404 references)
+            def is_valid_8k_item(item: str) -> bool:
+                if '.' in item:
+                    parts = item.split('.')
+                    # Format: X.XX where first part is 1-9
+                    return len(parts) == 2 and parts[0] in '123456789' and len(parts[1]) <= 2
+                else:
+                    # Legacy format: single digit 1-9
+                    return item in '123456789'
+
             # Filter out items marked "Not Applicable" (common in legacy filings)
             substantive_items = []
             for item_num, description in matches:
+                # Skip invalid item numbers (like 401, 404 from Section references)
+                if not is_valid_8k_item(item_num):
+                    continue
                 desc_lower = description.lower().strip()
                 # Skip items explicitly marked as not applicable
                 if 'not applicable' in desc_lower:

@@ -12,7 +12,14 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/463
 
 import pytest
 import pandas as pd
+import re
 from edgar import Company
+
+
+def get_period_columns(df):
+    """Get period columns (date format YYYY-MM-DD) from DataFrame."""
+    date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+    return [col for col in df.columns if date_pattern.match(str(col))]
 
 
 @pytest.mark.network
@@ -102,10 +109,8 @@ class TestIssue463ValueTransformations:
         dividend_row = df[df['concept'].str.contains('PaymentsOfDividends', na=False)]
 
         if not dividend_row.empty:
-            # Get first period column
-            period_cols = [col for col in df.columns
-                          if col not in ['concept', 'label', 'balance', 'weight',
-                                        'preferred_sign', 'level', 'abstract', 'dimension']]
+            # Get first period column using date format matching
+            period_cols = get_period_columns(df)
 
             if period_cols:
                 value = dividend_row.iloc[0][period_cols[0]]
@@ -128,10 +133,8 @@ class TestIssue463ValueTransformations:
         dividend_row = df[df['concept'].str.contains('PaymentsOfDividends', na=False)]
 
         if not dividend_row.empty:
-            # Get first period column
-            period_cols = [col for col in df.columns
-                          if col not in ['concept', 'label', 'balance', 'weight',
-                                        'preferred_sign', 'level', 'abstract', 'dimension']]
+            # Get first period column using date format matching
+            period_cols = get_period_columns(df)
 
             if period_cols:
                 value = dividend_row.iloc[0][period_cols[0]]
@@ -158,21 +161,18 @@ class TestIssue463ValueTransformations:
         dividend_row = df[df['concept'].str.contains('PaymentsOfDividends', na=False)]
 
         if not dividend_row.empty:
-            # Get first period column
-            period_cols = [col for col in df.columns
-                          if col not in ['concept', 'label', 'balance', 'weight',
-                                        'preferred_sign', 'level', 'abstract', 'dimension']]
+            # Get first period column using date format matching
+            period_cols = get_period_columns(df)
 
             if period_cols:
                 value = dividend_row.iloc[0][period_cols[0]]
                 # With presentation=True, cash outflows should be negative
-                assert pd.notna(value) and value >0, \
+                assert pd.notna(value) and value > 0, \
                     f"Presentation mode: PaymentsOfDividends should be positive (got {value})"
 
                 # Should have balance='credit' metadata
                 assert dividend_row.iloc[0]['balance'] == 'credit', \
                     "PaymentsOfDividends should have balance='credit'"
-
 
     def test_rich_display_uses_presentation_logic(self, aapl_2017_filing):
         """

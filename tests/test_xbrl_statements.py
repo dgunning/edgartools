@@ -131,7 +131,7 @@ def test_statement_to_dataframe(aapl_xbrl):
     rendered_statement:RenderedStatement = cashflow_statement.render()
     df = rendered_statement.to_dataframe()
     assert df.columns.tolist() ==['concept', 'label', '2023-09-30', '2022-09-24', '2021-09-25',
-                                  'level','abstract', 'dimension']
+                                  'level','abstract', 'dimension', 'is_breakdown']
 
     # Issue #504: Filter for non-dimensional rows to avoid duplicate NetIncomeLoss entries
     net_income_filter = (df.concept == 'us-gaap_NetIncomeLoss') & (df.dimension == False)
@@ -139,11 +139,11 @@ def test_statement_to_dataframe(aapl_xbrl):
     assert df[net_income_filter]['2022-09-24'].item() == 99803000000.0
     assert df[net_income_filter]['2021-09-25'].item() == 94680000000.0
 
-    #Labels
+    # Labels - now using original company labels (not standardized)
     labels = df.label.tolist()
     assert labels[0] == 'Cash, cash equivalents and restricted cash, ending balances'
     assert labels[1] == 'Operating activities:'
-    assert labels[2] == 'Net Income'
+    assert labels[2] == 'Net income'  # Original company label (lowercase)
     print(df[['label', '2023-09-30']])
 
     assert all(col in df.columns for col in ['2023-09-30', '2022-09-24', '2021-09-25'])
@@ -157,9 +157,14 @@ def test_xbrls_cashflow_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     columns = df.columns.tolist()
     print(columns)
     labels = df.label.tolist()
-    assert 'Net Change in Cash' in labels
+    # Original labels are preserved (check case-insensitively for common patterns)
+    # Apple's cash flow has "Cash, cash equivalents and restricted cash" patterns
+    cash_related = [l for l in labels if 'cash' in l.lower()]
+    assert len(cash_related) > 0, "Should have cash-related labels"
     assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2023-09-30'].item() == 96995000000.0
-    assert df[(df.label == 'Net Income')]['2023-09-30'].item() == 96995000000.0
+    # Use concept filter instead of label since labels are now original (may differ by company)
+    net_income_row = df[df.concept == 'us-gaap_NetIncomeLoss']
+    assert net_income_row['2023-09-30'].item() == 96995000000.0
 
 def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     xbs = XBRLS([aapl_xbrl, aapl_xbrl_2022])
@@ -170,7 +175,11 @@ def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     assert columns == ['label', 'concept', '2023-09-30', '2022-09-24']
     labels = df.label.tolist()
     print(labels)
-    assert 'Total Assets' in labels
+    # Check using concept filter instead of label since labels are now original company labels
+    # Apple uses 'Total assets' (lowercase) not 'Total Assets'
+    assert any('assets' in l.lower() for l in labels), "Should have asset-related labels"
+    # Verify the Assets concept is present
+    assert df[df.concept == 'us-gaap_Assets'].shape[0] > 0, "Should have Assets concept"
 
 
 @pytest.mark.slow

@@ -39,14 +39,19 @@ def select_display_label(
     """
     # First, select the best available label using existing priority logic
     selected_label = None
+    # Track if we used a company-specific label (preferred or terse) vs a generic fallback
+    # Standardization should only override generic labels, not company-specific ones
+    used_company_label = False
 
     # 1. Use preferred label if specified and available
     if preferred_label and labels and preferred_label in labels:
         selected_label = labels[preferred_label]
+        used_company_label = True
 
     # 2. Use terse label if available (more user-friendly)
     elif labels and TERSE_LABEL in labels:
         selected_label = labels[TERSE_LABEL]
+        used_company_label = True
 
     # 3. Fall back to standard label
     elif standard_label:
@@ -68,17 +73,16 @@ def select_display_label(
     else:
         selected_label = element_id or ""
 
-    # Apply standardization if we have an element_id (concept)
-    if element_id and selected_label:
+    # Apply standardization only when using generic labels (not company-specific preferred/terse)
+    # This preserves company-specific context like "Other intangible assets, net" instead of
+    # generic "Intangible Assets"
+    if element_id and selected_label and not used_company_label:
         try:
-            from edgar.xbrl.standardization.core import initialize_default_mappings
+            # Use module-level singleton for efficient caching across all calls
+            from edgar.xbrl.standardization import get_default_store
 
-            # Initialize mapping store (cached after first call)
-            if not hasattr(select_display_label, '_mapping_store'):
-                select_display_label._mapping_store = initialize_default_mappings(read_only=True)
-
-            # Try to get standardized concept
-            standardized_label = select_display_label._mapping_store.get_standard_concept(element_id)
+            # Try to get standardized concept using the singleton store
+            standardized_label = get_default_store().get_standard_concept(element_id)
 
             if standardized_label:
                 return standardized_label
@@ -223,6 +227,34 @@ class PresentationNode(BaseModel):
             preferred_label=self.preferred_label,
             element_id=self.element_id
         )
+
+    @property
+    def is_company_preferred_label(self) -> bool:
+        """
+        Check if the display_label came from a company-specific preferred source.
+
+        Returns True if the label came from:
+        1. A specific preferred_label role (not STANDARD_LABEL) specified in presentation linkbase
+        2. A terseLabel when no preferred_label was specified
+
+        This is used to determine whether standardization should be skipped
+        for this item, as company-preferred labels should be preserved.
+        The key insight is that terseLabel often contains company-specific context
+        (e.g., "Other intangible assets, net") that would be lost with standardization
+        (e.g., "Intangible Assets").
+        """
+        # Check if we have a specific preferred_label (not the default STANDARD_LABEL)
+        if self.preferred_label and self.labels and self.preferred_label in self.labels:
+            # If preferred_label is the standard label role, that's not "company preferred"
+            if self.preferred_label != STANDARD_LABEL:
+                return True
+
+        # Check if terseLabel was used (i.e., no preferred_label was specified but terseLabel exists)
+        # This means the company provided a shorter, more user-friendly label
+        if not self.preferred_label and self.labels and TERSE_LABEL in self.labels:
+            return True
+
+        return False
 
 
 class PresentationTree(BaseModel):

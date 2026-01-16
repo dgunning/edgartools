@@ -444,12 +444,129 @@ class TOCAnalyzer:
 def analyze_toc_for_sections(html_content: str) -> Dict[str, str]:
     """
     Convenience function to analyze TOC and return section mapping.
-    
+
     Args:
         html_content: Raw HTML content
-        
+
     Returns:
         Dict mapping section names to anchor IDs
     """
     analyzer = TOCAnalyzer()
     return analyzer.analyze_toc_structure(html_content)
+
+
+def find_toc_boundaries(html_content: str) -> Tuple[int, int]:
+    """
+    Find the start and end positions of the Table of Contents region in HTML.
+
+    This is used by pattern-based section extraction to skip TOC entries
+    and only match actual section headers in the document body.
+
+    The function uses two strategies:
+    1. Look for explicit "TABLE OF CONTENTS" heading
+    2. Fallback: Find tables with Item + page number pattern
+
+    Args:
+        html_content: Raw HTML content
+
+    Returns:
+        Tuple of (start_position, end_position) for TOC region.
+        Returns (0, 0) if no TOC is found.
+
+    Example:
+        >>> start, end = find_toc_boundaries(html)
+        >>> if start < match_position < end:
+        ...     # Skip this match - it's inside the TOC
+        ...     continue
+    """
+    if not html_content:
+        return (0, 0)
+
+    # Handle XML declaration
+    if html_content.startswith('<?xml'):
+        html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+
+    # Strategy 1: Look for explicit "TABLE OF CONTENTS" heading
+    toc_start = html_content.find('TABLE OF CONTENTS')
+    if toc_start == -1:
+        # Try case-insensitive
+        toc_start_lower = html_content.lower().find('table of contents')
+        if toc_start_lower > 0:
+            toc_start = toc_start_lower
+
+    # Strategy 2: If no heading found, look for table with TOC-like structure
+    if toc_start == -1:
+        toc_start = _find_toc_table_start(html_content)
+
+    if toc_start == -1:
+        return (0, 0)  # No TOC found
+
+    # Find TOC end by locating "SIGNATURES" (last item in most TOCs)
+    # then finding the closing </table> tag
+    signatures_pos = html_content.find('SIGNATURES', toc_start)
+    if signatures_pos == -1:
+        # Fallback: look for case-insensitive
+        signatures_lower = html_content.lower().find('signatures', toc_start)
+        if signatures_lower > 0:
+            signatures_pos = signatures_lower
+
+    if signatures_pos > 0:
+        # Find the closing </table> after SIGNATURES
+        toc_end = html_content.find('</table>', signatures_pos)
+        if toc_end > 0:
+            # Add length of </table> tag to include it
+            toc_end += len('</table>')
+            return (toc_start, toc_end)
+
+    # Fallback: estimate TOC end as ~50KB after start (typical TOC size)
+    # This is a safety fallback if SIGNATURES isn't found
+    return (toc_start, min(toc_start + 50000, len(html_content)))
+
+
+def _find_toc_table_start(html_content: str) -> int:
+    """
+    Find the start position of a TOC table by detecting Item + page number pattern.
+
+    This handles filings that don't have an explicit "TABLE OF CONTENTS" heading
+    but do have a structured TOC table.
+
+    Args:
+        html_content: Raw HTML content
+
+    Returns:
+        Start position of TOC table, or -1 if not found
+    """
+    try:
+        tree = lxml_html.fromstring(html_content)
+        tables = tree.xpath('//table')
+
+        for table in tables:
+            rows = table.xpath('.//tr')
+            if len(rows) < 3:
+                continue
+
+            # Count rows with TOC-like pattern: "Item X" + page number at end
+            toc_like_rows = 0
+            for row in rows[:20]:  # Check first 20 rows
+                row_text = row.text_content().strip()
+                # Pattern: "Item X" followed by page number (1-3 digits) at end
+                has_item = re.search(r'Item\s+\d', row_text, re.IGNORECASE)
+                has_page_num = re.search(r'\d{1,3}\s*$', row_text)
+                if has_item and has_page_num:
+                    toc_like_rows += 1
+
+            # If 3+ rows match the pattern, this is likely a TOC table
+            if toc_like_rows >= 3:
+                # Find the table's position by searching for its first row content
+                first_row_text = rows[0].text_content().strip()
+                if first_row_text:
+                    # Use first 30 chars to find position
+                    search_text = first_row_text[:30]
+                    pos = html_content.find(search_text)
+                    if pos > 0:
+                        return pos
+
+    except Exception:
+        pass
+
+    return -1

@@ -136,10 +136,60 @@ INDUSTRIES = {
         'default_threshold': 0.22,  # Moderate diversity
     },
     'securities': {
-        'name': 'Securities & Asset Management',
-        'sic_ranges': [(6200, 6289)],
+        'name': 'Securities, Broker-Dealers & Asset Management',
+        'sic_ranges': [(6200, 6299)],  # Expanded to include full broker-dealer range
         'min_companies': 50,
         'default_threshold': 0.20,  # Heterogeneous (brokers, advisors, ETFs)
+    },
+    'semiconductors': {
+        'name': 'Semiconductors',
+        'sic_ranges': [(3674, 3674)],  # Semiconductors and related devices
+        'min_companies': 30,
+        'default_threshold': 0.22,  # Moderate diversity (fabless, IDM, foundry)
+    },
+    'payment_networks': {
+        'name': 'Payment Networks & Processors',
+        # Note: SIC codes don't map cleanly to payment networks
+        # (scattered across 7389, 6099, 6199), so we use a curated ticker list
+        'tickers': [
+            # Card Networks
+            'V',      # Visa
+            'MA',     # Mastercard
+            'AXP',    # American Express
+            'DFS',    # Discover Financial
+            # Payment Processors
+            'PYPL',   # PayPal
+            'SQ',     # Block (Square)
+            'FIS',    # Fidelity National Information Services
+            'FISV',   # Fiserv
+            'GPN',    # Global Payments
+            'ADYEY',  # Adyen (ADR)
+            # Payroll & Business Payments
+            'PAYX',   # Paychex
+            'ADP',    # Automatic Data Processing
+            'BILL',   # Bill.com
+            # Money Transfer
+            'WU',     # Western Union
+            'MGI',    # MoneyGram
+            # Buy Now Pay Later / Fintech
+            'AFRM',   # Affirm
+            'FOUR',   # Shift4 Payments
+            'RPAY',   # Repay Holdings
+            'PAYO',   # Payoneer
+            'TOST',   # Toast
+            # Card Issuers with Payment Focus
+            'COF',    # Capital One
+            'SYF',    # Synchrony Financial
+            # Digital/Crypto Payments
+            'COIN',   # Coinbase
+            # Regional Payment Processors
+            'EVTC',   # Evertec
+            'FLYW',   # Flywire
+            'RELY',   # Remitly
+            'PSFE',   # Paysafe
+        ],
+        'min_companies': 20,
+        'default_threshold': 0.22,  # Moderate diversity across payment types
     },
 }
 

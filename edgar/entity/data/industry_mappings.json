@@ -102,10 +102,22 @@
       "description": "Motor vehicles and parts"
     },
     "securities": {
-      "name": "Securities & Asset Management",
-      "sic_ranges": [[6200, 6289]],
+      "name": "Securities, Broker-Dealers & Asset Management",
+      "sic_ranges": [[6200, 6299]],
       "extension_file": "securities.json",
-      "description": "Security brokers, dealers, investment advisors, asset managers"
+      "description": "Security brokers, dealers, investment banks, asset managers (GS, MS, SCHW, etc.)"
+    },
+    "semiconductors": {
+      "name": "Semiconductors",
+      "sic_ranges": [[3674, 3674]],
+      "extension_file": "semiconductors.json",
+      "description": "Semiconductor and related device manufacturing (NVDA, AMD, INTC, etc.)"
+    },
+    "payment_networks": {
+      "name": "Payment Networks & Processors",
+      "curated_tickers": ["V", "MA", "AXP", "DFS", "PYPL", "SQ", "FIS", "FISV", "GPN", "ADYEY", "PAYX", "ADP", "BILL", "WU", "MGI", "AFRM", "FOUR", "RPAY", "PAYO", "TOST", "COF", "SYF", "COIN", "EVTC", "FLYW", "RELY", "PSFE"],
+      "extension_file": "payment_networks.json",
+      "description": "Card networks, payment processors, fintech (V, MA, PYPL, etc.)"
     }
   }
 }

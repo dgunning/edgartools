@@ -376,8 +376,13 @@ class Schedule13D:
         - "a" = group member (joint filers) → take unique count
         - "b" or None = separate filers → sum all positions
 
-        Also detects undeclared joint filers: when all reporting persons have
-        identical share amounts, they are joint filers regardless of member_of_group.
+        Also detects:
+        - Undeclared joint filers: when all reporting persons have identical
+          share amounts, they are joint filers regardless of member_of_group.
+        - Hierarchical ownership: when percentages sum > 100.5%, this indicates
+          a corporate control chain where parent entities report beneficial
+          ownership of shares held through subsidiaries. In this case, the
+          top of the hierarchy has the true total.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
@@ -399,6 +404,14 @@ class Schedule13D:
             # Joint filers: all report the same shares
             # Take max in case of any data inconsistencies
             return max(p.aggregate_amount for p in group_members)
+
+        # Check for hierarchical ownership: if percentages sum > 100.5%
+        # this indicates overlapping beneficial ownership through control chain
+        # (using 100.5% buffer to avoid false positives from rounding)
+        total_pct = sum(p.percent_of_class for p in included_persons)
+        if total_pct > 100.5:
+            # Hierarchical structure: top of chain has the true total
+            return max(p.aggregate_amount for p in included_persons)
 
         # Check for undeclared joint filers: identical values across all persons
         # When XML doesn't specify member_of_group but all persons report same position
@@ -422,8 +435,13 @@ class Schedule13D:
         - "a" = group member (joint filers) → take unique percentage
         - "b" or None = separate filers → sum all percentages
 
-        Also detects undeclared joint filers: when all reporting persons have
-        identical percentages, they are joint filers regardless of member_of_group.
+        Also detects:
+        - Undeclared joint filers: when all reporting persons have identical
+          percentages, they are joint filers regardless of member_of_group.
+        - Hierarchical ownership: when percentages sum > 100.5%, this indicates
+          a corporate control chain where parent entities report beneficial
+          ownership of shares held through subsidiaries. In this case, the
+          top of the hierarchy has the true percentage.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
@@ -446,6 +464,14 @@ class Schedule13D:
             # Take max in case of any data inconsistencies
             return max(p.percent_of_class for p in group_members)
 
+        # Check for hierarchical ownership: if percentages sum > 100.5%
+        # this indicates overlapping beneficial ownership through control chain
+        # (using 100.5% buffer to avoid false positives from rounding)
+        total_pct = sum(p.percent_of_class for p in included_persons)
+        if total_pct > 100.5:
+            # Hierarchical structure: top of chain has the true percentage
+            return max(p.percent_of_class for p in included_persons)
+
         # Check for undeclared joint filers: identical values across all persons
         # When XML doesn't specify member_of_group but all persons report same position
         percent_list = [p.percent_of_class for p in included_persons]
@@ -455,8 +481,9 @@ class Schedule13D:
             # All persons have identical percentages - joint filers
             return percent_list[0]
 
-        # Separate filers: sum all percentages
-        return sum(p.percent_of_class for p in included_persons)
+        # Separate filers: sum all percentages, capped at 100%
+        # (can exceed 100% slightly due to rounding in source data)
+        return min(total_pct, 100.0)
 
     def __rich__(self):
         """Rich console rendering"""
@@ -770,8 +797,13 @@ class Schedule13G:
         - "a" = group member (joint filers) → take unique count
         - "b" or None = separate filers → sum all positions
 
-        Also detects undeclared joint filers: when all reporting persons have
-        identical share amounts, they are joint filers regardless of member_of_group.
+        Also detects:
+        - Undeclared joint filers: when all reporting persons have identical
+          share amounts, they are joint filers regardless of member_of_group.
+        - Hierarchical ownership: when percentages sum > 100.5%, this indicates
+          a corporate control chain where parent entities report beneficial
+          ownership of shares held through subsidiaries. In this case, the
+          top of the hierarchy has the true total.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
@@ -793,6 +825,14 @@ class Schedule13G:
             # Joint filers: all report the same shares
             # Take max in case of any data inconsistencies
             return max(p.aggregate_amount for p in group_members)
+
+        # Check for hierarchical ownership: if percentages sum > 100.5%
+        # this indicates overlapping beneficial ownership through control chain
+        # (using 100.5% buffer to avoid false positives from rounding)
+        total_pct = sum(p.percent_of_class for p in included_persons)
+        if total_pct > 100.5:
+            # Hierarchical structure: top of chain has the true total
+            return max(p.aggregate_amount for p in included_persons)
 
         # Check for undeclared joint filers: identical values across all persons
         # When XML doesn't specify member_of_group but all persons report same position
@@ -816,8 +856,13 @@ class Schedule13G:
         - "a" = group member (joint filers) → take unique percentage
         - "b" or None = separate filers → sum all percentages
 
-        Also detects undeclared joint filers: when all reporting persons have
-        identical percentages, they are joint filers regardless of member_of_group.
+        Also detects:
+        - Undeclared joint filers: when all reporting persons have identical
+          percentages, they are joint filers regardless of member_of_group.
+        - Hierarchical ownership: when percentages sum > 100.5%, this indicates
+          a corporate control chain where parent entities report beneficial
+          ownership of shares held through subsidiaries. In this case, the
+          top of the hierarchy has the true percentage.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
         """
@@ -840,6 +885,14 @@ class Schedule13G:
             # Take max in case of any data inconsistencies
             return max(p.percent_of_class for p in group_members)
 
+        # Check for hierarchical ownership: if percentages sum > 100.5%
+        # this indicates overlapping beneficial ownership through control chain
+        # (using 100.5% buffer to avoid false positives from rounding)
+        total_pct = sum(p.percent_of_class for p in included_persons)
+        if total_pct > 100.5:
+            # Hierarchical structure: top of chain has the true percentage
+            return max(p.percent_of_class for p in included_persons)
+
         # Check for undeclared joint filers: identical values across all persons
         # When XML doesn't specify member_of_group but all persons report same position
         percent_list = [p.percent_of_class for p in included_persons]
@@ -849,8 +902,9 @@ class Schedule13G:
             # All persons have identical percentages - joint filers
             return percent_list[0]
 
-        # Separate filers: sum all percentages
-        return sum(p.percent_of_class for p in included_persons)
+        # Separate filers: sum all percentages, capped at 100%
+        # (can exceed 100% slightly due to rounding in source data)
+        return min(total_pct, 100.0)
 
     @property
     def is_passive_investor(self) -> bool:

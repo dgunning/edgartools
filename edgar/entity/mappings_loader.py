@@ -200,6 +200,61 @@ def get_industry_for_sic(sic_code: str) -> Optional[str]:
     return None
 
 
+def get_industry_for_ticker(ticker: str) -> Optional[str]:
+    """
+    Determine industry category from ticker symbol.
+
+    This is used for industries with curated ticker lists (like payment_networks)
+    where SIC codes don't map cleanly to the industry.
+
+    Args:
+        ticker: Stock ticker symbol (e.g., "V", "MA", "PYPL")
+
+    Returns:
+        Industry name (e.g., "payment_networks") or None if no match
+    """
+    if not ticker:
+        return None
+
+    ticker_upper = ticker.upper()
+    mappings = load_industry_mappings()
+    industries = mappings.get('industries', {})
+
+    for industry_key, industry_info in industries.items():
+        curated_tickers = industry_info.get('curated_tickers')
+        if isinstance(curated_tickers, list) and ticker_upper in curated_tickers:
+            return industry_key
+
+    return None
+
+
+def get_industry(sic_code: Optional[str] = None, ticker: Optional[str] = None) -> Optional[str]:
+    """
+    Determine industry category from SIC code or ticker symbol.
+
+    Tries ticker-based lookup first (for curated industries like payment_networks),
+    then falls back to SIC-based lookup.
+
+    Args:
+        sic_code: SIC code as string (e.g., "6021")
+        ticker: Stock ticker symbol (e.g., "V", "MA")
+
+    Returns:
+        Industry name or None if no match
+    """
+    # Try ticker-based lookup first (for curated industries)
+    if ticker:
+        industry = get_industry_for_ticker(ticker)
+        if industry:
+            return industry
+
+    # Fall back to SIC-based lookup
+    if sic_code:
+        return get_industry_for_sic(sic_code)
+
+    return None
+
+
 @lru_cache(maxsize=10)
 def load_industry_extension(industry: str) -> Dict[str, Any]:
     """
