@@ -758,8 +758,8 @@ class Company(Entity):
                 adjusted_facts = self._get_split_adjusted_facts()
                 adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
 
-                from edgar.ttm.entity_facts import TTMEntityFacts
-                ttm_facts = TTMEntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
                 builder = TTMStatementBuilder(ttm_facts)
                 stmt = builder.build_income_statement()
 
@@ -772,8 +772,8 @@ class Company(Entity):
                 adjusted_facts = self._get_split_adjusted_facts()
                 adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
 
-                from edgar.ttm.entity_facts import TTMEntityFacts
-                ttm_facts = TTMEntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
                 return ttm_facts.income_statement(
                     periods=periods,
                     annual=False,
@@ -870,8 +870,8 @@ class Company(Entity):
                 adjusted_facts = self._get_split_adjusted_facts()
                 adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
 
-                from edgar.ttm.entity_facts import TTMEntityFacts
-                ttm_facts = TTMEntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
                 builder = TTMStatementBuilder(ttm_facts)
                 stmt = builder.build_cashflow_statement()
 
@@ -884,8 +884,8 @@ class Company(Entity):
                 adjusted_facts = self._get_split_adjusted_facts()
                 adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
 
-                from edgar.ttm.entity_facts import TTMEntityFacts
-                ttm_facts = TTMEntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
                 return ttm_facts.cash_flow(
                     periods=periods,
                     annual=False,
