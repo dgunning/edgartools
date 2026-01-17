@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.10.1] - 2026-01-17
+
+### Fixed
+
+- **Non-Deterministic XBRL Parsing** (Issue #601)
+  - Fixed non-deterministic results when loading Filing from pickle across Python processes
+  - Root cause: Set iteration order varies with Python hash randomization (PYTHONHASHSEED)
+  - Solution: Sort root_elements before iteration in calculation/presentation/rendering parsers
+  - Ensures identical DataFrame output regardless of Python's hash seed
+  - Critical for data pipelines requiring reproducible results
+  - **Files**: `edgar/xbrl/parsers/calculation.py`, `edgar/xbrl/parsers/presentation.py`, `edgar/xbrl/rendering.py`
+
+- **Incorrect Dimension Member Labels** (Issue #603)
+  - Fixed dimension_member_label showing incorrect values for multi-dimensional breakdowns
+  - Root cause: Used LAST dimension instead of PRIMARY (first) dimension
+  - Solution: Use dim_metadata[0] for primary_dim instead of dim_metadata[-1]
+  - Affects companies like GOOGL with multi-dimensional revenue breakdowns (YouTube ads, Google Network, etc.)
+  - Now consistent with dimension_axis and dimension_member which already use first dimension
+  - **Files**: `edgar/xbrl/statements.py`
+
 ## [5.10.0] - 2026-01-15
 
 ### Added
