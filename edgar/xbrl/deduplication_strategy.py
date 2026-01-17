@@ -75,6 +75,13 @@ class RevenueDeduplicator:
                     # Items have different labels indicating segment data - preserve all
                     continue
 
+                # Issue #604: Check if group contains parent item with dimensional children
+                # Parent items (has_dimension_children=True) must be preserved alongside
+                # their dimensional children (is_dimension=True) even if they have the
+                # same value and label - they serve different purposes in statement views
+                if cls._has_parent_with_dimensional_children(items):
+                    continue
+
                 # This is a group of revenue items with the same value and dimensions
                 # Keep only the highest precedence item
                 items_to_remove.update(cls._select_duplicates_to_remove(items))
@@ -227,6 +234,40 @@ class RevenueDeduplicator:
 
         # If we have labels that aren't pure revenue synonyms, this is segment data
         return len(non_revenue_labels) > 0
+
+    @classmethod
+    def _has_parent_with_dimensional_children(cls, indexed_items: List[tuple]) -> bool:
+        """
+        Check if items include a parent item with dimensional children.
+
+        Issue #604: When a parent item (has_dimension_children=True) and a dimensional
+        child item (is_dimension=True) have the same value and label, they should NOT
+        be deduplicated. The parent provides the total value for summary views, while
+        the dimensional child provides the face-level dimensional data.
+
+        Example: GOOGL 2022 10-K has:
+        - Parent: Revenues (has_dimension_children=True) - total $282.8B
+        - Child: Revenues (is_dimension=True, IncomeStatementLocationAxis) - $282.8B
+
+        Both are needed: parent for summary view, child for standard/detailed views.
+
+        Args:
+            indexed_items: List of (index, item) tuples
+
+        Returns:
+            True if group contains both parent and dimensional child items
+        """
+        has_parent = False
+        has_dimensional_child = False
+
+        for _, item in indexed_items:
+            if item.get('has_dimension_children'):
+                has_parent = True
+            if item.get('is_dimension'):
+                has_dimensional_child = True
+
+        # If we have both a parent and a dimensional child, don't deduplicate
+        return has_parent and has_dimensional_child
 
     @classmethod
     def _select_duplicates_to_remove(cls, indexed_items: List[tuple]) -> Set[int]:
