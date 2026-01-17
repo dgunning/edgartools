@@ -691,7 +691,8 @@ def _format_period_labels(
                         period_types.append("other")
 
             # Generate fiscal period indicator based on detected types
-            unique_types = list(set(period_types))
+            # Issue #601: Sort for deterministic ordering across Python processes
+            unique_types = sorted(set(period_types))
 
             if len(unique_types) == 1:
                 # Single period type
