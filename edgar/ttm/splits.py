@@ -102,8 +102,8 @@ def apply_split_adjustments(facts: List[FinancialFact], splits: List[Dict[str, A
                             numeric_value=new_val, 
                             calculation_context=f"split_adj_ratio_{cum_ratio:.2f}")
             adjusted_facts.append(new_f)
-        except Exception:
-            # Fallback if replace doesn't work (though it should for dataclass)
+        except TypeError:
+            # Fallback if replace doesn't work (non-dataclass object)
             adjusted_facts.append(f)
 
     return adjusted_facts

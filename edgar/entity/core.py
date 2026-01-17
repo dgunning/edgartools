@@ -959,7 +959,8 @@ class Company(Entity):
                 for qf in quarterly:
                     if qf.calculation_context and 'derived' in qf.calculation_context:
                         derived_facts.append(qf)
-            except Exception:
+            except (ValueError, KeyError, AttributeError, IndexError, TypeError):
+                # Skip concepts that can't be quarterized (e.g., insufficient data, balance sheet items)
                 continue
 
         # Derive EPS for Q4 using Net Income and Shares
