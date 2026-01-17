@@ -141,3 +141,14 @@ def test_issue_603_query_by_dimension():
 
         # Should have specific product labels, not just generic segment labels
         # Bug was: all showed "Google Services" instead of specific products
+        # GH-603: The dimension_member_label should be primary dimension's label
+        expected_products = ['YouTube ads', 'Google Search & other', 'Google Network']
+        for expected in expected_products:
+            assert expected in labels, f"Expected product label '{expected}' not found in dimension_member_label"
+
+        # Bug check: "Google Services" should NOT be the label for ProductOrServiceAxis items
+        # (unless it's actually a valid product, which it isn't for GOOGL revenue breakdown)
+        for _, row in revenue_by_product.iterrows():
+            label = row.get('dimension_member_label')
+            if label == 'Google Services':
+                pytest.fail(f"BUG: dimension_member_label should NOT be 'Google Services' for ProductOrServiceAxis")

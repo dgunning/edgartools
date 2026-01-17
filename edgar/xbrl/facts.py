@@ -959,11 +959,12 @@ class FactsView:
                             fact_dict['dimension'] = primary_dim['dimension']
                             fact_dict['member'] = primary_dim['member']
 
-                            # Use last dimension's member_label (most specific for multi-dimensional)
+                            # Use last dimension's member_label for dimension_label (backward compat)
                             last_dim = dimension_metadata[-1]
                             fact_dict['dimension_label'] = last_dim['member_label']
-                            # GH-574: Add dimension_member_label for consistency with statement DataFrames
-                            fact_dict['dimension_member_label'] = last_dim['member_label']
+                            # GH-603: Use PRIMARY dimension's member_label for consistency with statements
+                            # e.g., for GOOGL "YouTube ads" should show "YouTube ads", not "Google Services"
+                            fact_dict['dimension_member_label'] = primary_dim['member_label']
 
                             # Full dimension label for backwards compatibility
                             # Format: "Axis Label: Member Label" for each dimension
