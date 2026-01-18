@@ -59,12 +59,115 @@ __all__ = [
     'Company',
     'EntityData',
     'CompanyData',
+    'ConceptList',
     'get_entity',
     'get_company',
     'NoCompanyFactsFound',
     'has_company_filings',
     'COMPANY_FORMS',
 ]
+
+
+class ConceptList:
+    """
+    A list of XBRL concepts available for a company.
+
+    Provides convenient iteration, display, and conversion methods.
+
+    Example:
+        >>> concepts = company.list_concepts(search="revenue")
+        >>> concepts  # Rich table display
+        >>> for c in concepts:
+        ...     print(c['concept'])
+        >>> concepts.to_list()  # Get as plain list
+        >>> concepts.to_dataframe()  # Get as DataFrame
+    """
+
+    def __init__(self, concepts: List[dict], search: Optional[str] = None,
+                 statement: Optional[str] = None, company_name: Optional[str] = None):
+        self._concepts = concepts
+        self._search = search
+        self._statement = statement
+        self._company_name = company_name
+
+    def __len__(self) -> int:
+        return len(self._concepts)
+
+    def __iter__(self):
+        return iter(self._concepts)
+
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self._concepts[item]
+        elif isinstance(item, slice):
+            return ConceptList(
+                self._concepts[item],
+                search=self._search,
+                statement=self._statement,
+                company_name=self._company_name
+            )
+        else:
+            raise TypeError(f"indices must be integers or slices, not {type(item).__name__}")
+
+    def __bool__(self) -> bool:
+        return len(self._concepts) > 0
+
+    def to_list(self) -> List[dict]:
+        """Return concepts as a plain list of dicts."""
+        return list(self._concepts)
+
+    def to_dataframe(self) -> "pd.DataFrame":
+        """Return concepts as a pandas DataFrame."""
+        import pandas as pd
+        if not self._concepts:
+            return pd.DataFrame(columns=['concept', 'label', 'statements', 'fact_count'])
+        return pd.DataFrame(self._concepts)
+
+    def __rich__(self):
+        """Rich display with formatted table."""
+        # Build title
+        title_parts = ["Concepts"]
+        if self._company_name:
+            title_parts = [f"{self._company_name} Concepts"]
+        if self._search:
+            title_parts.append(f"matching '{self._search}'")
+        if self._statement:
+            title_parts.append(f"in {self._statement}")
+        title = " ".join(title_parts)
+
+        if not self._concepts:
+            return Panel(
+                Text("No concepts found", style="dim italic"),
+                title=title,
+                box=box.ROUNDED
+            )
+
+        # Simple list format - full concept names for copy-paste usability
+        lines = []
+        for c in self._concepts:
+            # Format: "  123  us-gaap:ConceptName  Label"
+            line = Text.assemble(
+                (f"{c['fact_count']:>5}  ", "green"),
+                (c['concept'], "cyan"),
+                ("  ", ""),
+                (c['label'], "dim"),
+            )
+            line.no_wrap = True
+            lines.append(line)
+
+        # Add summary footer
+        footer = Text(f"\n{len(self._concepts)} concepts", style="dim")
+
+        return Group(
+            Text(title, style="bold deep_sky_blue1"),
+            Text(""),
+            *lines,
+            footer
+        )
+
+    def __repr__(self) -> str:
+        return repr_rich(self)
+
 
 class SecFiler(ABC):
     """
@@ -916,8 +1019,7 @@ class Company(Entity):
         search: Optional[str] = None,
         statement: Optional[str] = None,
         limit: int = 20,
-        as_dataframe: bool = False
-    ) -> Union[List[dict], "pd.DataFrame"]:
+    ) -> ConceptList:
         """List available XBRL concepts for this company.
 
         Helps discover valid concept names for use with get_ttm() and other methods.
@@ -928,27 +1030,26 @@ class Company(Entity):
             statement: Filter by statement type ('IncomeStatement', 'BalanceSheet',
                       'CashFlowStatement', 'ComprehensiveIncome', 'StatementOfEquity')
             limit: Maximum number of concepts to return (default: 20, use 0 for all)
-            as_dataframe: If True, return pandas DataFrame instead of list
 
         Returns:
-            List of dicts with keys: concept, label, statements, fact_count
-            Or DataFrame if as_dataframe=True
+            ConceptList object with rich display, iteration, and conversion methods
 
         Example:
             >>> company = Company("AAPL")
-            >>> # Find revenue-related concepts
+            >>> # Find revenue-related concepts (displays as nice table)
             >>> company.list_concepts(search="revenue")
-            [{'concept': 'us-gaap:RevenueFromContractWithCustomer...', 'label': '...', ...}]
 
-            >>> # List income statement concepts
-            >>> company.list_concepts(statement="IncomeStatement", limit=10)
+            >>> # Iterate over concepts
+            >>> for c in company.list_concepts(search="revenue"):
+            ...     print(c['concept'])
 
-            >>> # Get all concepts as DataFrame for exploration
-            >>> df = company.list_concepts(limit=0, as_dataframe=True)
+            >>> # Get as plain list or DataFrame
+            >>> company.list_concepts().to_list()
+            >>> company.list_concepts().to_dataframe()
         """
         facts_obj = self.facts
         if not facts_obj or not facts_obj._facts:
-            return [] if not as_dataframe else pd.DataFrame()
+            return ConceptList([], search=search, statement=statement, company_name=self.name)
 
         # Build concept index with metadata
         concept_info: dict = {}
@@ -1002,11 +1103,7 @@ class Company(Entity):
         if limit > 0:
             results = results[:limit]
 
-        if as_dataframe:
-            import pandas as pd
-            return pd.DataFrame(results)
-
-        return results
+        return ConceptList(results, search=search, statement=statement, company_name=self.name)
 
     # -------------------------------------------------------------------------
     # TTM (Trailing Twelve Months) Methods

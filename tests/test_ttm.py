@@ -274,8 +274,9 @@ class TestListConcepts:
 
     def test_list_concepts_with_mock_facts(self):
         """Test list_concepts logic with mock data."""
-        from unittest.mock import MagicMock, PropertyMock
+        from unittest.mock import MagicMock
         from edgar import Company
+        from edgar.entity.core import Company as RealCompany, ConceptList
 
         # Create mock facts
         mock_facts = [
@@ -303,13 +304,14 @@ class TestListConcepts:
 
         # Create mock company with mock facts
         company = MagicMock(spec=Company)
+        company.name = "Test Company"
         company.facts = MagicMock()
         company.facts._facts = mock_facts
 
         # Call the actual method (need to bind it)
-        from edgar.entity.core import Company as RealCompany
         result = RealCompany.list_concepts(company, search="revenue")
 
+        assert isinstance(result, ConceptList)
         assert len(result) == 1
         assert result[0]['concept'] == "us-gaap:Revenues"
         assert result[0]['fact_count'] == 2
@@ -318,7 +320,7 @@ class TestListConcepts:
         """Test filtering by statement type."""
         from unittest.mock import MagicMock
         from edgar import Company
-        from edgar.entity.core import Company as RealCompany
+        from edgar.entity.core import Company as RealCompany, ConceptList
 
         mock_facts = [
             MagicMock(concept="us-gaap:Revenues", label="Revenues", statement_type="IncomeStatement"),
@@ -327,16 +329,18 @@ class TestListConcepts:
         ]
 
         company = MagicMock(spec=Company)
+        company.name = "Test Company"
         company.facts = MagicMock()
         company.facts._facts = mock_facts
 
         result = RealCompany.list_concepts(company, statement="IncomeStatement")
 
+        assert isinstance(result, ConceptList)
         assert len(result) == 1
         assert result[0]['concept'] == "us-gaap:Revenues"
 
-    def test_list_concepts_returns_dataframe(self):
-        """Test as_dataframe option."""
+    def test_list_concepts_to_dataframe(self):
+        """Test to_dataframe() method."""
         import pandas as pd
         from unittest.mock import MagicMock
         from edgar import Company
@@ -347,12 +351,59 @@ class TestListConcepts:
         ]
 
         company = MagicMock(spec=Company)
+        company.name = "Test Company"
         company.facts = MagicMock()
         company.facts._facts = mock_facts
 
-        result = RealCompany.list_concepts(company, as_dataframe=True)
+        result = RealCompany.list_concepts(company)
+        df = result.to_dataframe()
 
-        assert isinstance(result, pd.DataFrame)
-        assert 'concept' in result.columns
-        assert 'label' in result.columns
-        assert 'fact_count' in result.columns
+        assert isinstance(df, pd.DataFrame)
+        assert 'concept' in df.columns
+        assert 'label' in df.columns
+        assert 'fact_count' in df.columns
+
+    def test_list_concepts_iteration(self):
+        """Test that ConceptList is iterable."""
+        from unittest.mock import MagicMock
+        from edgar import Company
+        from edgar.entity.core import Company as RealCompany
+
+        mock_facts = [
+            MagicMock(concept="us-gaap:Revenues", label="Revenues", statement_type="IncomeStatement"),
+            MagicMock(concept="us-gaap:Assets", label="Assets", statement_type="BalanceSheet"),
+        ]
+
+        company = MagicMock(spec=Company)
+        company.name = "Test Company"
+        company.facts = MagicMock()
+        company.facts._facts = mock_facts
+
+        result = RealCompany.list_concepts(company)
+
+        # Test iteration
+        concepts = [c['concept'] for c in result]
+        assert "us-gaap:Revenues" in concepts
+        assert "us-gaap:Assets" in concepts
+
+    def test_list_concepts_to_list(self):
+        """Test to_list() method."""
+        from unittest.mock import MagicMock
+        from edgar import Company
+        from edgar.entity.core import Company as RealCompany
+
+        mock_facts = [
+            MagicMock(concept="us-gaap:Revenues", label="Revenues", statement_type="IncomeStatement"),
+        ]
+
+        company = MagicMock(spec=Company)
+        company.name = "Test Company"
+        company.facts = MagicMock()
+        company.facts._facts = mock_facts
+
+        result = RealCompany.list_concepts(company)
+        as_list = result.to_list()
+
+        assert isinstance(as_list, list)
+        assert len(as_list) == 1
+        assert as_list[0]['concept'] == "us-gaap:Revenues"
