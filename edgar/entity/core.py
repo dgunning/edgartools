@@ -4,6 +4,7 @@ Core entity classes for working with SEC filings.
 This module provides the main classes for interacting with SEC entities,
 including companies, funds, and individuals.
 """
+import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from datetime import date
@@ -905,6 +906,107 @@ class Company(Entity):
             from edgar.core import log
             log.debug(f"Error getting cash flow for {self.name}: {e}")
         return None
+
+    # -------------------------------------------------------------------------
+    # Concept Discovery Methods
+    # -------------------------------------------------------------------------
+
+    def list_concepts(
+        self,
+        search: Optional[str] = None,
+        statement: Optional[str] = None,
+        limit: int = 20,
+        as_dataframe: bool = False
+    ) -> Union[List[dict], "pd.DataFrame"]:
+        """List available XBRL concepts for this company.
+
+        Helps discover valid concept names for use with get_ttm() and other methods.
+        Concepts are sorted by frequency (most reported first).
+
+        Args:
+            search: Filter concepts containing this string (case-insensitive)
+            statement: Filter by statement type ('IncomeStatement', 'BalanceSheet',
+                      'CashFlowStatement', 'ComprehensiveIncome', 'StatementOfEquity')
+            limit: Maximum number of concepts to return (default: 20, use 0 for all)
+            as_dataframe: If True, return pandas DataFrame instead of list
+
+        Returns:
+            List of dicts with keys: concept, label, statements, fact_count
+            Or DataFrame if as_dataframe=True
+
+        Example:
+            >>> company = Company("AAPL")
+            >>> # Find revenue-related concepts
+            >>> company.list_concepts(search="revenue")
+            [{'concept': 'us-gaap:RevenueFromContractWithCustomer...', 'label': '...', ...}]
+
+            >>> # List income statement concepts
+            >>> company.list_concepts(statement="IncomeStatement", limit=10)
+
+            >>> # Get all concepts as DataFrame for exploration
+            >>> df = company.list_concepts(limit=0, as_dataframe=True)
+        """
+        facts_obj = self.facts
+        if not facts_obj or not facts_obj._facts:
+            return [] if not as_dataframe else pd.DataFrame()
+
+        # Build concept index with metadata
+        concept_info: dict = {}
+        for f in facts_obj._facts:
+            if f.concept not in concept_info:
+                concept_info[f.concept] = {
+                    'labels': set(),
+                    'statements': set(),
+                    'count': 0
+                }
+            info = concept_info[f.concept]
+            info['count'] += 1
+            if f.label:
+                info['labels'].add(f.label)
+            if f.statement_type:
+                info['statements'].add(f.statement_type)
+
+        # Build results with filtering
+        results = []
+        search_lower = search.lower() if search else None
+
+        for concept, info in concept_info.items():
+            # Apply search filter
+            if search_lower and search_lower not in concept.lower():
+                continue
+
+            # Apply statement filter
+            if statement and statement not in info['statements']:
+                continue
+
+            # Get primary label (first one, or derive from concept name)
+            if info['labels']:
+                label = next(iter(info['labels']))
+            else:
+                # Extract readable name from concept (e.g., "us-gaap:NetIncomeLoss" -> "Net Income Loss")
+                name = concept.split(':')[-1]
+                # Add spaces before capital letters
+                label = re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
+
+            results.append({
+                'concept': concept,
+                'label': label,
+                'statements': sorted(info['statements']),
+                'fact_count': info['count']
+            })
+
+        # Sort by fact count (most reported = most important)
+        results.sort(key=lambda x: x['fact_count'], reverse=True)
+
+        # Apply limit
+        if limit > 0:
+            results = results[:limit]
+
+        if as_dataframe:
+            import pandas as pd
+            return pd.DataFrame(results)
+
+        return results
 
     # -------------------------------------------------------------------------
     # TTM (Trailing Twelve Months) Methods

@@ -267,3 +267,92 @@ class TestEPSDerivation:
         # Q4 Shares = 4 * 1000 - 3 * 900 = 4000 - 2700 = 1300
         # Q4 EPS = 100 / 1300
         assert pytest.approx(q4_eps.numeric_value, rel=1e-6) == (100 / 1300)
+
+
+class TestListConcepts:
+    """Tests for Company.list_concepts() method."""
+
+    def test_list_concepts_with_mock_facts(self):
+        """Test list_concepts logic with mock data."""
+        from unittest.mock import MagicMock, PropertyMock
+        from edgar import Company
+
+        # Create mock facts
+        mock_facts = [
+            MagicMock(
+                concept="us-gaap:Revenues",
+                label="Revenues",
+                statement_type="IncomeStatement"
+            ),
+            MagicMock(
+                concept="us-gaap:Revenues",
+                label="Revenues",
+                statement_type="IncomeStatement"
+            ),
+            MagicMock(
+                concept="us-gaap:NetIncomeLoss",
+                label="Net Income (Loss)",
+                statement_type="IncomeStatement"
+            ),
+            MagicMock(
+                concept="us-gaap:Assets",
+                label="Assets",
+                statement_type="BalanceSheet"
+            ),
+        ]
+
+        # Create mock company with mock facts
+        company = MagicMock(spec=Company)
+        company.facts = MagicMock()
+        company.facts._facts = mock_facts
+
+        # Call the actual method (need to bind it)
+        from edgar.entity.core import Company as RealCompany
+        result = RealCompany.list_concepts(company, search="revenue")
+
+        assert len(result) == 1
+        assert result[0]['concept'] == "us-gaap:Revenues"
+        assert result[0]['fact_count'] == 2
+
+    def test_list_concepts_filters_by_statement(self):
+        """Test filtering by statement type."""
+        from unittest.mock import MagicMock
+        from edgar import Company
+        from edgar.entity.core import Company as RealCompany
+
+        mock_facts = [
+            MagicMock(concept="us-gaap:Revenues", label="Revenues", statement_type="IncomeStatement"),
+            MagicMock(concept="us-gaap:Assets", label="Assets", statement_type="BalanceSheet"),
+            MagicMock(concept="us-gaap:CashFlows", label="Cash Flows", statement_type="CashFlowStatement"),
+        ]
+
+        company = MagicMock(spec=Company)
+        company.facts = MagicMock()
+        company.facts._facts = mock_facts
+
+        result = RealCompany.list_concepts(company, statement="IncomeStatement")
+
+        assert len(result) == 1
+        assert result[0]['concept'] == "us-gaap:Revenues"
+
+    def test_list_concepts_returns_dataframe(self):
+        """Test as_dataframe option."""
+        import pandas as pd
+        from unittest.mock import MagicMock
+        from edgar import Company
+        from edgar.entity.core import Company as RealCompany
+
+        mock_facts = [
+            MagicMock(concept="us-gaap:Revenues", label="Revenues", statement_type="IncomeStatement"),
+        ]
+
+        company = MagicMock(spec=Company)
+        company.facts = MagicMock()
+        company.facts._facts = mock_facts
+
+        result = RealCompany.list_concepts(company, as_dataframe=True)
+
+        assert isinstance(result, pd.DataFrame)
+        assert 'concept' in result.columns
+        assert 'label' in result.columns
+        assert 'fact_count' in result.columns
