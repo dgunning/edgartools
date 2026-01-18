@@ -7,11 +7,12 @@ from dataclasses import replace
 from typing import Any, Dict, List
 
 from edgar.entity.models import FinancialFact
+from edgar.ttm.calculator import MAX_SPLIT_DURATION_DAYS, MAX_SPLIT_LAG_DAYS
 
 
 def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
     """Detect stock splits from facts.
-    
+
     Identifies 'StockSplitConversionRatio' facts and filters for valid
     split events (rejecting filing lags and long-duration aggregations).
     """
@@ -28,16 +29,16 @@ def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
             # Filter out "historical echo" facts (e.g. 2023 10-K reporting a 2020 split)
             if f.filing_date:
                 lag = (f.filing_date - f.period_end).days
-                if lag > 280:
+                if lag > MAX_SPLIT_LAG_DAYS:
                     continue
 
-            # Accept Instant facts OR short-duration facts (<=31 days)
+            # Accept Instant facts OR short-duration facts
             # Instant: period_start is None (true event date)
             # Short duration: Split event reported for the month (e.g., NVDA May 2024 = 30 days)
             # Reject long durations: Comparative quarters/years (90+ days)
             if f.period_start is not None:
                 duration_days = (f.period_end - f.period_start).days
-                if duration_days > 31:  # Reject quarterly/annual comparative periods
+                if duration_days > MAX_SPLIT_DURATION_DAYS:
                     continue
 
             if split_key in seen_splits:

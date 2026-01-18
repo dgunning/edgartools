@@ -443,9 +443,15 @@ class TTMStatementBuilder:
                     'depth': depth,
                     'is_total': getattr(item, 'is_total', False)
                 })
-            except (ValueError, KeyError, AttributeError, IndexError, TypeError):
-                # Concept doesn't have quarterly data or TTM calculation failed
-                # Skip this line item
+            except (ValueError, KeyError) as e:
+                # Expected: Concept doesn't have sufficient quarterly data
+                from edgar.core import log
+                log.debug(f"Skipping {concept}: insufficient data - {e}")
+                continue
+            except (AttributeError, IndexError, TypeError) as e:
+                # Unexpected: May indicate a bug, log at higher level
+                from edgar.core import log
+                log.warning(f"Unexpected error processing {concept}: {type(e).__name__}: {e}")
                 continue
 
         return TTMStatement(

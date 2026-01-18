@@ -13,7 +13,8 @@ from typing import TYPE_CHECKING, Iterable, List, Optional, Tuple, TypeVar, Unio
 import pyarrow as pa
 
 if TYPE_CHECKING:
-    from edgar.entity.enhanced_statement import StructuredStatement
+    import pandas as pd
+    from edgar.entity.enhanced_statement import MultiPeriodStatement, StructuredStatement
     from edgar.entity.filings import EntityFilings
     from edgar.enums import FilerCategory, FormType, PeriodType
 
@@ -45,7 +46,7 @@ from edgar.entity.utils import has_company_filings, normalize_cik
 
 # TTM (Trailing Twelve Months) imports
 from edgar.ttm.calculator import TTMCalculator, TTMMetric
-from edgar.ttm.statement import TTMStatementBuilder
+from edgar.ttm.statement import TTMStatement, TTMStatementBuilder
 from edgar.ttm.splits import detect_splits, apply_split_adjustments
 
 # Type variables for better type annotations
@@ -725,7 +726,7 @@ class Company(Entity):
         annual: Optional[bool] = None,
         as_dataframe: bool = False,
         concise_format: bool = False
-    ):
+    ) -> Union["MultiPeriodStatement", TTMStatement, "pd.DataFrame", None]:
         """
         Get income statement data for this company.
 
@@ -800,7 +801,7 @@ class Company(Entity):
         annual: Optional[bool] = None,
         as_dataframe: bool = False,
         concise_format: bool = False
-    ):
+    ) -> Union["MultiPeriodStatement", "pd.DataFrame", None]:
         """
         Get balance sheet data for this company.
 
@@ -844,7 +845,7 @@ class Company(Entity):
         annual: Optional[bool] = None,
         as_dataframe: bool = False,
         concise_format: bool = False
-    ):
+    ) -> Union["MultiPeriodStatement", TTMStatement, "pd.DataFrame", None]:
         """
         Get cash flow statement data for this company.
 
@@ -912,9 +913,17 @@ class Company(Entity):
     def _get_split_adjusted_facts(self) -> List:
         """Get all facts, adjusted for stock splits.
 
+        Results are cached to avoid redundant computation when called
+        multiple times (e.g., for income_statement and cash_flow).
+
         Returns:
             List of FinancialFact objects with split-adjusted values
         """
+        # Check cache first
+        cache_attr = '_cached_split_adjusted_facts'
+        if hasattr(self, cache_attr):
+            return getattr(self, cache_attr)
+
         facts_obj = self.facts
         if not facts_obj or not facts_obj._facts:
             return []
@@ -926,6 +935,8 @@ class Company(Entity):
         if splits:
             facts = apply_split_adjustments(facts, splits)
 
+        # Cache the result
+        object.__setattr__(self, cache_attr, facts)
         return facts
 
     def _prepare_quarterly_facts(self, facts: List) -> List:

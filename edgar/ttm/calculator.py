@@ -21,6 +21,36 @@ import pandas as pd
 
 from edgar.entity.models import FinancialFact
 
+# =============================================================================
+# Duration Classification Constants
+# =============================================================================
+# These ranges define how we classify SEC filing periods by their duration.
+# Ranges are non-overlapping to ensure deterministic classification.
+
+# Quarter: ~90 days (shortest valid quarter to longest, accounting for calendar variations)
+QUARTER_MIN_DAYS = 70
+QUARTER_MAX_DAYS = 120
+
+# YTD 6-Month: ~180 days (Jan-Jun or equivalent fiscal periods)
+YTD_6M_MIN_DAYS = 140
+YTD_6M_MAX_DAYS = 229  # Non-overlapping with YTD_9M
+
+# YTD 9-Month: ~270 days (Jan-Sep or equivalent fiscal periods)
+YTD_9M_MIN_DAYS = 230
+YTD_9M_MAX_DAYS = 329  # Non-overlapping with Annual
+
+# Annual: ~365 days (full fiscal year)
+ANNUAL_MIN_DAYS = 330
+ANNUAL_MAX_DAYS = 420
+
+# Calculation limits
+MAX_TTM_PERIODS = 100  # Maximum periods for TTM trend calculation
+MIN_QUARTERS_FOR_TTM = 4  # Minimum quarters needed for a single TTM value
+
+# Split detection
+MAX_SPLIT_LAG_DAYS = 280  # Maximum days between period_end and filing_date for valid split
+MAX_SPLIT_DURATION_DAYS = 31  # Maximum duration for a valid split fact (instant or short)
+
 
 class DurationBucket:
     """Duration classification buckets for period facts."""
@@ -194,8 +224,8 @@ class TTMCalculator:
 
         """
         # Validate periods parameter
-        if periods < 1 or periods > 100:
-            raise ValueError(f"periods must be between 1 and 100, got {periods}")
+        if periods < 1 or periods > MAX_TTM_PERIODS:
+            raise ValueError(f"periods must be between 1 and {MAX_TTM_PERIODS}, got {periods}")
 
         # 1. Filter to quarterly facts
         quarterly = self._filter_quarterly_facts()
@@ -204,10 +234,9 @@ class TTMCalculator:
         sorted_facts = sorted(quarterly, key=lambda f: f.period_end)
 
         # 3. Check minimum quarters needed
-        # Need at least 4 quarters for a single TTM calculation
-        if len(sorted_facts) < 4:
+        if len(sorted_facts) < MIN_QUARTERS_FOR_TTM:
             raise ValueError(
-                f"Insufficient data for TTM trend: need at least 4 quarters, "
+                f"Insufficient data for TTM trend: need at least {MIN_QUARTERS_FOR_TTM} quarters, "
                 f"found {len(sorted_facts)} quarters"
             )
 
@@ -326,15 +355,15 @@ class TTMCalculator:
 
         days = (fact.period_end - fact.period_start).days
 
-        # Non-overlapping ranges for clear classification
-        # Quarter: ~90 days (70-120)
-        # YTD_6M: ~180 days (140-229)
-        # YTD_9M: ~270 days (230-329)
-        # Annual: ~365 days (330-420)
-        if 70 <= days <= 120:   return DurationBucket.QUARTER
-        if 140 <= days <= 229:  return DurationBucket.YTD_6M
-        if 230 <= days <= 329:  return DurationBucket.YTD_9M
-        if 330 <= days <= 420:  return DurationBucket.ANNUAL
+        # Use module constants for non-overlapping ranges
+        if QUARTER_MIN_DAYS <= days <= QUARTER_MAX_DAYS:
+            return DurationBucket.QUARTER
+        if YTD_6M_MIN_DAYS <= days <= YTD_6M_MAX_DAYS:
+            return DurationBucket.YTD_6M
+        if YTD_9M_MIN_DAYS <= days <= YTD_9M_MAX_DAYS:
+            return DurationBucket.YTD_9M
+        if ANNUAL_MIN_DAYS <= days <= ANNUAL_MAX_DAYS:
+            return DurationBucket.ANNUAL
         return DurationBucket.OTHER
 
     def _filter_by_duration(
