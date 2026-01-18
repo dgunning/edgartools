@@ -210,6 +210,24 @@ parallel = true
 source = ["edgar"]
 omit = [
   "edgar/__about__.py",
+  # Example and demo files (not part of core library)
+  "edgar/**/examples.py",
+  "edgar/**/examples/*.py",
+  "edgar/display/demo.py",
+  # Training scripts (ML training utilities, not runtime code)
+  "edgar/entity/training/*",
+  # Migration utilities (one-time migration helpers)
+  "edgar/documents/migration.py",
+  "edgar/documents/migration_example.py",
+  # CLI entry points (tested via integration, not unit tests)
+  "edgar/**/__main__.py",
+  # MCP server (optional external integration, requires MCP runtime)
+  "edgar/ai/mcp/*",
+  # Experimental AI features
+  "edgar/ai/formats.py",
+  "edgar/ai/helpers.py",
+  # SSL diagnostics (CLI tool, not library code)
+  "edgar/diagnose_ssl/*",
 ]
 
 [tool.coverage.report]
