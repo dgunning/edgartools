@@ -22,6 +22,23 @@ class TestExtractYear:
         from datetime import date
         assert _extract_year(date(2024, 12, 31)) == 2024
 
+    def test_extract_year_from_datetime_object(self):
+        from datetime import datetime
+        assert _extract_year(datetime(2024, 12, 31, 10, 30)) == 2024
+
+    def test_extract_year_from_pandas_timestamp(self):
+        """Test extraction from pandas Timestamp."""
+        import pandas as pd
+        ts = pd.Timestamp("2024-12-31")
+        assert _extract_year(ts) == 2024
+
+    def test_extract_year_from_non_date_object(self):
+        """Test that non-date objects return None."""
+        assert _extract_year(12345) is None
+        assert _extract_year(3.14) is None
+        assert _extract_year([2024, 12, 31]) is None
+        assert _extract_year({'year': 2024}) is None  # dict doesn't have .year attribute
+
 
 class TestExchangeRate:
     """Tests for the ExchangeRate dataclass."""
@@ -38,11 +55,32 @@ class TestExchangeRate:
         assert "avg=689.0" in repr(rate)
         assert "close=714.0" in repr(rate)
 
-    def test_exchange_rate_partial(self):
+    def test_exchange_rate_partial_average_only(self):
         rate = ExchangeRate(year=2024, average=1.08)
         assert rate.year == 2024
         assert rate.average == 1.08
         assert rate.closing is None
+        repr_str = repr(rate)
+        assert "avg=1.08" in repr_str
+        assert "close" not in repr_str
+
+    def test_exchange_rate_partial_closing_only(self):
+        rate = ExchangeRate(year=2024, closing=714.0)
+        assert rate.year == 2024
+        assert rate.average is None
+        assert rate.closing == 714.0
+        repr_str = repr(rate)
+        assert "close=714.0" in repr_str
+        assert "avg" not in repr_str
+
+    def test_exchange_rate_no_rates(self):
+        """Test ExchangeRate with no rates (just year)."""
+        rate = ExchangeRate(year=2024)
+        assert rate.year == 2024
+        assert rate.average is None
+        assert rate.closing is None
+        repr_str = repr(rate)
+        assert "2024" in repr_str
 
 
 class TestCurrencyConverterUnit:
@@ -196,6 +234,185 @@ class TestCurrencyConverterUnit:
 
         repr_str = repr(converter)
         assert "no rates found" in repr_str
+
+    def test_repr_direct_scale_format(self):
+        """Test __repr__ with direct rate scale (rates < 10)."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "EUR"
+        converter.target_currency = "USD"
+        converter._rate_scale = 1.0  # Direct rate format
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=1.0824, closing=1.0389),
+        }
+
+        repr_str = repr(converter)
+        assert "EUR per USD" in repr_str  # Not "per 100"
+        assert "1.0824" in repr_str
+        assert "1.0389" in repr_str
+
+    def test_to_usd_with_missing_rate_type(self):
+        """Test to_usd returns None when specific rate type is missing."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "DKK"
+        converter.target_currency = "USD"
+        converter._rate_scale = 100.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=689.0),  # No closing rate
+        }
+
+        # Average rate works
+        result = converter.to_usd(1000, 2024, rate_type='average')
+        assert result is not None
+
+        # Closing rate returns None (not available)
+        result = converter.to_usd(1000, 2024, rate_type='closing')
+        assert result is None
+
+    def test_from_usd_with_closing_rate(self):
+        """Test from_usd with closing rate type."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "DKK"
+        converter.target_currency = "USD"
+        converter._rate_scale = 100.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=689.0, closing=714.0),
+        }
+
+        # 100 USD at 714 DKK per 100 USD = 714 DKK
+        result = converter.from_usd(100, 2024, rate_type='closing')
+        assert result is not None
+        assert abs(result - 714.0) < 0.01
+
+    def test_from_usd_missing_year(self):
+        """Test from_usd returns None for missing year."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "DKK"
+        converter.target_currency = "USD"
+        converter._rate_scale = 100.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=689.0),
+        }
+
+        result = converter.from_usd(100, 2020, rate_type='average')
+        assert result is None
+
+    def test_from_usd_invalid_rate_type(self):
+        """Test from_usd raises for invalid rate_type."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "DKK"
+        converter.target_currency = "USD"
+        converter._rate_scale = 100.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=689.0),
+        }
+
+        with pytest.raises(ValueError, match="rate_type must be"):
+            converter.from_usd(100, 2024, rate_type='invalid')
+
+    def test_from_usd_with_missing_rate_type(self):
+        """Test from_usd returns None when specific rate type is missing."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "DKK"
+        converter.target_currency = "USD"
+        converter._rate_scale = 100.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, closing=714.0),  # No average rate
+        }
+
+        # Closing rate works
+        result = converter.from_usd(100, 2024, rate_type='closing')
+        assert result is not None
+
+        # Average rate returns None (not available)
+        result = converter.from_usd(100, 2024, rate_type='average')
+        assert result is None
+
+    def test_get_rate_invalid_rate_type(self):
+        """Test get_rate returns None for invalid rate_type."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=689.0, closing=714.0),
+        }
+
+        # Invalid rate_type returns None (not raising)
+        result = converter.get_rate(2024, 'invalid')
+        assert result is None
+
+    def test_rich_display(self):
+        """Test __rich__ method returns a Table."""
+        from rich.table import Table
+
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "DKK"
+        converter.target_currency = "USD"
+        converter._rate_scale = 100.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=689.0, closing=714.0),
+            2023: ExchangeRate(year=2023, average=689.0, closing=674.0),
+        }
+
+        rich_output = converter.__rich__()
+        assert isinstance(rich_output, Table)
+        assert "DKK" in rich_output.title
+        assert "USD" in rich_output.title
+
+    def test_rich_display_with_missing_rates(self):
+        """Test __rich__ handles missing average/closing rates."""
+        from rich.table import Table
+
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "EUR"
+        converter.target_currency = "USD"
+        converter._rate_scale = 1.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=1.08),  # No closing
+            2023: ExchangeRate(year=2023, closing=1.10),  # No average
+        }
+
+        rich_output = converter.__rich__()
+        assert isinstance(rich_output, Table)
+
+    def test_available_years_empty(self):
+        """Test available_years with no rates."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.exchange_rates = {}
+
+        assert converter.available_years == []
+
+    def test_to_usd_with_direct_scale(self):
+        """Test to_usd conversion with direct rate scale."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "EUR"
+        converter.target_currency = "USD"
+        converter._rate_scale = 1.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=1.0824, closing=1.0389),
+        }
+
+        # 1.0824 EUR per USD means 1000 EUR = 1000 / 1.0824 = ~923.85 USD
+        result = converter.to_usd(1000, 2024, rate_type='average')
+        assert result is not None
+        assert abs(result - 923.85) < 0.1
+
+        # Test closing rate
+        result = converter.to_usd(1000, 2024, rate_type='closing')
+        assert result is not None
+        assert abs(result - 962.56) < 0.1
+
+    def test_from_usd_with_direct_scale(self):
+        """Test from_usd conversion with direct rate scale."""
+        converter = CurrencyConverter.__new__(CurrencyConverter)
+        converter.home_currency = "EUR"
+        converter.target_currency = "USD"
+        converter._rate_scale = 1.0
+        converter.exchange_rates = {
+            2024: ExchangeRate(year=2024, average=1.0824),
+        }
+
+        # 1.0824 EUR per USD means 1000 USD = 1000 * 1.0824 = 1082.4 EUR
+        result = converter.from_usd(1000, 2024, rate_type='average')
+        assert result is not None
+        assert abs(result - 1082.4) < 0.01
 
 
 @pytest.mark.network
