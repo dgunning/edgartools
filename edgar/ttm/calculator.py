@@ -7,8 +7,7 @@ provide a current view of annual performance.
 Example:
     >>> from edgar import Company
     >>> company = Company('AAPL')
-    >>> facts = company.get_facts()
-    >>> ttm = facts.get_ttm_revenue()
+    >>> ttm = company.get_ttm_revenue()
     >>> print(f"TTM Revenue: ${ttm.value / 1e9:.1f}B")
     TTM Revenue: $391.0B
 
