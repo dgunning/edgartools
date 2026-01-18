@@ -207,9 +207,9 @@ python = ["39", "310", "311", "312"]
 [tool.coverage.run]
 branch = true
 parallel = true
+source = ["edgar"]
 omit = [
   "edgar/__about__.py",
-  "tests/perf/*"
 ]
 
 [tool.coverage.report]
