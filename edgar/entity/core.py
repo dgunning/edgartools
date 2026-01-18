@@ -5,6 +5,8 @@ This module provides the main classes for interacting with SEC entities,
 including companies, funds, and individuals.
 """
 from abc import ABC, abstractmethod
+from collections import defaultdict
+from datetime import date
 from functools import cached_property
 from typing import TYPE_CHECKING, Iterable, List, Optional, Tuple, TypeVar, Union
 
@@ -40,6 +42,11 @@ if TYPE_CHECKING:
 # Import constants and utilities from separate modules
 from edgar.entity.constants import COMPANY_FORMS
 from edgar.entity.utils import has_company_filings, normalize_cik
+
+# TTM (Trailing Twelve Months) imports
+from edgar.ttm.calculator import TTMCalculator, TTMMetric
+from edgar.ttm.statement import TTMStatementBuilder
+from edgar.ttm.splits import detect_splits, apply_split_adjustments
 
 # Type variables for better type annotations
 T = TypeVar('T')
@@ -711,70 +718,433 @@ class Company(Entity):
             return facts.shares_outstanding
         return None
 
-    def income_statement(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
+    def income_statement(
+        self,
+        periods: int = 4,
+        period: str = 'annual',
+        annual: Optional[bool] = None,
+        as_dataframe: bool = False,
+        concise_format: bool = False
+    ):
         """
         Get income statement data for this company.
 
         Args:
-            periods: Number of periods to retrieve
-            annual: If True, prefer annual periods; if False, get quarterly
-            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
+            periods: Number of periods to retrieve (default: 4)
+            period: 'annual', 'quarterly', or 'ttm' (trailing twelve months)
+            annual: Legacy parameter - if provided, overrides period (True='annual', False='quarterly')
+            as_dataframe: If True, return DataFrame; if False, return Statement object
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
-            MultiPeriodStatement or DataFrame with income statement data, or None if not available
+            MultiPeriodStatement, TTMStatement, or DataFrame with income statement data
+
+        Example:
+            >>> company = Company("AAPL")
+            >>> stmt = company.income_statement(period='ttm')  # Trailing 12 months
+            >>> stmt = company.income_statement(period='quarterly', periods=8)
         """
+        # Handle legacy parameter
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
         facts = self.facts
-        if facts:
-            try:
-                return facts.income_statement(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
-            except Exception as e:
-                from edgar.core import log
-                log.debug(f"Error getting income statement for {self.name}: {e}")
+        if not facts:
+            return None
+
+        try:
+            if period == 'ttm':
+                # Build TTM statement with split-adjusted facts
+                adjusted_facts = self._get_split_adjusted_facts()
+                adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
+
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                builder = TTMStatementBuilder(ttm_facts)
+                stmt = builder.build_income_statement()
+
+                if as_dataframe:
+                    return stmt.to_dataframe()
+                return stmt
+
+            elif period == 'quarterly':
+                # Build quarterly statement with derived Q4
+                adjusted_facts = self._get_split_adjusted_facts()
+                adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
+
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                return ttm_facts.income_statement(
+                    periods=periods,
+                    annual=False,
+                    as_dataframe=as_dataframe,
+                    concise_format=concise_format
+                )
+
+            else:  # annual
+                return facts.income_statement(
+                    periods=periods,
+                    annual=True,
+                    as_dataframe=as_dataframe,
+                    concise_format=concise_format
+                )
+        except Exception as e:
+            from edgar.core import log
+            log.debug(f"Error getting income statement for {self.name}: {e}")
         return None
 
-    def balance_sheet(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
+    def balance_sheet(
+        self,
+        periods: int = 4,
+        period: str = 'annual',
+        annual: Optional[bool] = None,
+        as_dataframe: bool = False,
+        concise_format: bool = False
+    ):
         """
         Get balance sheet data for this company.
 
         Args:
-            periods: Number of periods to retrieve
-            annual: If True, prefer annual periods; if False, get quarterly
-            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
+            periods: Number of periods to retrieve (default: 4)
+            period: 'annual' or 'quarterly' (TTM not applicable for balance sheet)
+            annual: Legacy parameter - if provided, overrides period
+            as_dataframe: If True, return DataFrame; if False, return Statement object
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
-            MultiPeriodStatement or DataFrame with balance sheet data, or None if not available
+            MultiPeriodStatement or DataFrame with balance sheet data
+
+        Raises:
+            ValueError: If period='ttm' (not applicable for balance sheet)
         """
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
+        if period == 'ttm':
+            raise ValueError("TTM not applicable for Balance Sheet (point-in-time data)")
+
         facts = self.facts
         if facts:
             try:
-                return facts.balance_sheet(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
+                return facts.balance_sheet(
+                    periods=periods,
+                    annual=(period == 'annual'),
+                    as_dataframe=as_dataframe,
+                    concise_format=concise_format
+                )
             except Exception as e:
                 from edgar.core import log
                 log.debug(f"Error getting balance sheet for {self.name}: {e}")
         return None
 
-    def cash_flow(self, periods: int = 4, annual: bool = True, as_dataframe: bool = False, concise_format: bool = False):
+    def cash_flow(
+        self,
+        periods: int = 4,
+        period: str = 'annual',
+        annual: Optional[bool] = None,
+        as_dataframe: bool = False,
+        concise_format: bool = False
+    ):
         """
         Get cash flow statement data for this company.
 
         Args:
-            periods: Number of periods to retrieve
-            annual: If True, prefer annual periods; if False, get quarterly
-            as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
+            periods: Number of periods to retrieve (default: 4)
+            period: 'annual', 'quarterly', or 'ttm' (trailing twelve months)
+            annual: Legacy parameter - if provided, overrides period
+            as_dataframe: If True, return DataFrame; if False, return Statement object
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
-            MultiPeriodStatement or DataFrame with cash flow data, or None if not available
+            MultiPeriodStatement, TTMStatement, or DataFrame with cash flow data
         """
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
         facts = self.facts
-        if facts:
+        if not facts:
+            return None
+
+        try:
+            if period == 'ttm':
+                adjusted_facts = self._get_split_adjusted_facts()
+                adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
+
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                builder = TTMStatementBuilder(ttm_facts)
+                stmt = builder.build_cashflow_statement()
+
+                if as_dataframe:
+                    return stmt.to_dataframe()
+                return stmt
+
+            elif period == 'quarterly':
+                # Build quarterly statement with derived Q4
+                adjusted_facts = self._get_split_adjusted_facts()
+                adjusted_facts = self._prepare_quarterly_facts(adjusted_facts)
+
+                # TTMEntityFacts removed - using EntityFacts directly
+                ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
+                return ttm_facts.cash_flow(
+                    periods=periods,
+                    annual=False,
+                    as_dataframe=as_dataframe,
+                    concise_format=concise_format
+                )
+
+            else:  # annual
+                return facts.cash_flow(
+                    periods=periods,
+                    annual=True,
+                    as_dataframe=as_dataframe,
+                    concise_format=concise_format
+                )
+        except Exception as e:
+            from edgar.core import log
+            log.debug(f"Error getting cash flow for {self.name}: {e}")
+        return None
+
+    # -------------------------------------------------------------------------
+    # TTM (Trailing Twelve Months) Methods
+    # -------------------------------------------------------------------------
+
+    def _get_split_adjusted_facts(self) -> List:
+        """Get all facts, adjusted for stock splits.
+
+        Returns:
+            List of FinancialFact objects with split-adjusted values
+        """
+        facts_obj = self.facts
+        if not facts_obj or not facts_obj._facts:
+            return []
+
+        facts = facts_obj._facts
+
+        # Detect and apply split adjustments
+        splits = detect_splits(facts)
+        if splits:
+            facts = apply_split_adjustments(facts, splits)
+
+        return facts
+
+    def _prepare_quarterly_facts(self, facts: List) -> List:
+        """Enhance facts with derived Q4 data for quarterly analysis.
+
+        Derives Q2, Q3, Q4 from YTD and annual facts when discrete quarters
+        are not available. Also derives Q4 EPS from net income and shares.
+
+        Args:
+            facts: List of FinancialFact objects
+
+        Returns:
+            Original facts plus derived quarterly facts
+        """
+        from edgar.entity.models import FinancialFact
+
+        # Group by concept
+        concept_facts = defaultdict(list)
+        for f in facts:
+            concept_facts[f.concept].append(f)
+
+        derived_facts = []
+
+        # Derive quarterly data for each concept
+        for _, c_facts in concept_facts.items():
             try:
-                return facts.cash_flow(periods=periods, annual=annual, as_dataframe=as_dataframe, concise_format=concise_format)
-            except Exception as e:
-                from edgar.core import log
-                log.debug(f"Error getting cash flow for {self.name}: {e}")
+                calc = TTMCalculator(c_facts)
+                quarterly = calc._quarterize_facts()
+
+                # Add only derived quarters
+                for qf in quarterly:
+                    if qf.calculation_context and 'derived' in qf.calculation_context:
+                        derived_facts.append(qf)
+            except (ValueError, KeyError, AttributeError, IndexError, TypeError):
+                # Skip concepts that can't be quarterized (e.g., insufficient data, balance sheet items)
+                continue
+
+        # Derive EPS for Q4 using Net Income and Shares
+        def _collect_facts(concepts: List[str]) -> List[FinancialFact]:
+            collected = []
+            for name in concepts:
+                if name in concept_facts:
+                    collected.extend(concept_facts[name])
+                prefixed = f"us-gaap:{name}"
+                if prefixed in concept_facts:
+                    collected.extend(concept_facts[prefixed])
+            return collected
+
+        net_income_facts = _collect_facts([
+            "NetIncomeLoss",
+            "NetIncomeLossAvailableToCommonStockholdersBasic",
+        ])
+
+        shares_basic = _collect_facts([
+            "WeightedAverageNumberOfSharesOutstandingBasic",
+            "WeightedAverageNumberOfSharesOutstandingBasicAndDiluted",
+        ])
+        shares_diluted = _collect_facts([
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberOfSharesOutstandingDiluted",
+        ])
+
+        def _has_eps_for_period(concept_name: str, period_end: date, fiscal_period: str) -> bool:
+            candidates = [concept_name]
+            if ":" in concept_name:
+                candidates.append(concept_name.split(":", 1)[1])
+            else:
+                candidates.append(f"us-gaap:{concept_name}")
+
+            for name in candidates:
+                for fact in concept_facts.get(name, []):
+                    if (fact.period_end == period_end and
+                        fact.fiscal_period == fiscal_period and
+                        fact.period_type == "duration"):
+                        return True
+            return False
+
+        # Derive basic EPS
+        if net_income_facts and shares_basic:
+            calc = TTMCalculator(net_income_facts)
+            for eps_fact in calc.derive_eps_for_quarter(
+                net_income_facts, shares_basic, "us-gaap:EarningsPerShareBasic"
+            ):
+                if not _has_eps_for_period(eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period):
+                    derived_facts.append(eps_fact)
+
+        # Derive diluted EPS
+        if net_income_facts and shares_diluted:
+            calc = TTMCalculator(net_income_facts)
+            for eps_fact in calc.derive_eps_for_quarter(
+                net_income_facts, shares_diluted, "us-gaap:EarningsPerShareDiluted"
+            ):
+                if not _has_eps_for_period(eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period):
+                    derived_facts.append(eps_fact)
+
+        return facts + derived_facts
+
+    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None) -> TTMMetric:
+        """Calculate Trailing Twelve Months value for a concept.
+
+        Args:
+            concept: XBRL concept name (e.g., 'Revenues', 'us-gaap:NetIncomeLoss')
+            as_of: Calculate TTM as of this date. Accepts:
+                   - date object
+                   - ISO string 'YYYY-MM-DD'
+                   - Quarter string 'YYYY-QN' (e.g., '2024-Q2')
+
+        Returns:
+            TTMMetric with value, periods, and metadata
+
+        Raises:
+            KeyError: If concept not found
+            ValueError: If insufficient data for TTM calculation
+
+        Example:
+            >>> company = Company("AAPL")
+            >>> ttm = company.get_ttm("Revenues")
+            >>> print(f"TTM Revenue: ${ttm.value / 1e9:.1f}B")
+        """
+        facts = self._get_split_adjusted_facts()
+
+        # Handle concept name normalization
+        if ':' not in concept:
+            concept_candidates = [concept, f'us-gaap:{concept}']
+        else:
+            concept_candidates = [concept]
+
+        target_facts = [f for f in facts if f.concept in concept_candidates]
+
+        if not target_facts:
+            raise KeyError(f"Concept '{concept}' not found in facts")
+
+        calc = TTMCalculator(target_facts)
+        as_of_date = self._parse_ttm_date(as_of)
+
+        return calc.calculate_ttm(as_of=as_of_date)
+
+    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> TTMMetric:
+        """Get Trailing Twelve Months revenue.
+
+        Tries common revenue concepts in order of preference.
+
+        Args:
+            as_of: Calculate TTM as of this date (optional)
+
+        Returns:
+            TTMMetric with revenue value and metadata
+
+        Raises:
+            KeyError: If no revenue concept found
+        """
+        revenue_concepts = [
+            'RevenueFromContractWithCustomerExcludingAssessedTax',
+            'Revenues',
+            'SalesRevenueNet',
+            'Revenue'
+        ]
+        for concept in revenue_concepts:
+            try:
+                return self.get_ttm(concept, as_of)
+            except KeyError:
+                continue
+        raise KeyError("Could not find revenue concept in company facts")
+
+    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> TTMMetric:
+        """Get Trailing Twelve Months net income.
+
+        Tries common net income concepts in order of preference.
+
+        Args:
+            as_of: Calculate TTM as of this date (optional)
+
+        Returns:
+            TTMMetric with net income value and metadata
+
+        Raises:
+            KeyError: If no net income concept found
+        """
+        income_concepts = ['NetIncomeLoss', 'NetIncome', 'ProfitLoss']
+        for concept in income_concepts:
+            try:
+                return self.get_ttm(concept, as_of)
+            except KeyError:
+                continue
+        raise KeyError("Could not find net income concept in company facts")
+
+    def _parse_ttm_date(self, as_of: Optional[Union[date, str]]) -> Optional[date]:
+        """Parse TTM 'as_of' parameter into a date object.
+
+        Args:
+            as_of: Date, ISO string, quarter string, or None
+
+        Returns:
+            Parsed date or None
+        """
+        if as_of is None or isinstance(as_of, date):
+            return as_of
+
+        if isinstance(as_of, str):
+            # Try ISO format: YYYY-MM-DD
+            if '-' in as_of and len(as_of.split('-')) == 3:
+                try:
+                    return date.fromisoformat(as_of)
+                except ValueError:
+                    pass
+
+            # Try quarter format: YYYY-QN
+            parts = as_of.upper().split('-')
+            if len(parts) == 2 and 'Q' in parts[1]:
+                try:
+                    year = int(parts[0])
+                    q = int(parts[1].replace('Q', ''))
+                    # Map to quarter end dates
+                    quarter_ends = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
+                    month, day = quarter_ends.get(q, (12, 31))
+                    return date(year, month, day)
+                except (ValueError, TypeError):
+                    pass
+
         return None
 
     def __str__(self):
