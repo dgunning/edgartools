@@ -7,9 +7,9 @@
   "industries": {
     "banking": {
       "name": "Banking & Financial Services",
-      "sic_ranges": [[6020, 6029]],
+      "sic_ranges": [[6020, 6099]],
       "extension_file": "banking.json",
-      "description": "Commercial banks, savings institutions"
+      "description": "Commercial banks, savings institutions, credit unions, mortgage banks"
     },
     "tech": {
       "name": "Technology & Software",
@@ -19,15 +19,15 @@
     },
     "healthcare": {
       "name": "Healthcare & Pharmaceuticals",
-      "sic_ranges": [[2833, 2836], [8000, 8099]],
+      "sic_ranges": [[2833, 2836], [8000, 8099], [3841, 3845]],
       "extension_file": "healthcare.json",
-      "description": "Pharmaceuticals, biotechnology, health services"
+      "description": "Pharmaceuticals, biotechnology, health services, medical devices"
     },
     "energy": {
       "name": "Energy & Oil/Gas",
-      "sic_ranges": [[1300, 1399]],
+      "sic_ranges": [[1300, 1399], [2911, 2911], [4610, 4619]],
       "extension_file": "energy.json",
-      "description": "Oil & gas extraction"
+      "description": "Oil & gas extraction, refining, pipelines"
     },
     "insurance": {
       "name": "Insurance",

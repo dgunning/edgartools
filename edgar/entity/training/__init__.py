@@ -53,9 +53,9 @@ INDUSTRIES = {
     },
     'banking': {
         'name': 'Banking & Financial Services',
-        'sic_ranges': [(6020, 6029)],
+        'sic_ranges': [(6020, 6099)],  # Expanded: savings banks, credit unions, mortgage banks
         'min_companies': 50,
-        'default_threshold': 0.30,  # Homogeneous (56% avg rate)
+        'default_threshold': 0.25,  # Lowered slightly for broader range
     },
     'consumergoods': {
         'name': 'Consumer Goods',
@@ -65,15 +65,15 @@ INDUSTRIES = {
     },
     'energy': {
         'name': 'Energy & Oil/Gas',
-        'sic_ranges': [(1300, 1399)],
+        'sic_ranges': [(1300, 1399), (2911, 2911), (4610, 4619)],  # Expanded: refining, pipelines
         'min_companies': 50,
-        'default_threshold': 0.22,  # Moderate diversity
+        'default_threshold': 0.20,  # Lowered for broader range
     },
     'healthcare': {
         'name': 'Healthcare & Pharmaceuticals',
-        'sic_ranges': [(2833, 2836), (8000, 8099)],
+        'sic_ranges': [(2833, 2836), (8000, 8099), (3841, 3845)],  # Expanded: medical devices
         'min_companies': 50,
-        'default_threshold': 0.25,  # Somewhat homogeneous
+        'default_threshold': 0.22,  # Lowered for broader range
     },
     'hospitality': {
         'name': 'Hospitality',
