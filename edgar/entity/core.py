@@ -1116,36 +1116,59 @@ class Company(Entity):
         """Parse TTM 'as_of' parameter into a date object.
 
         Args:
-            as_of: Date, ISO string, quarter string, or None
+            as_of: Date, ISO string 'YYYY-MM-DD', or quarter string 'YYYY-QN'
 
         Returns:
-            Parsed date or None
+            Parsed date or None if as_of is None
+
+        Raises:
+            TypeError: If as_of is not a date, str, or None
+            ValueError: If string format is invalid or values are out of range
         """
-        if as_of is None or isinstance(as_of, date):
+        if as_of is None:
+            return None
+
+        if isinstance(as_of, date):
             return as_of
 
-        if isinstance(as_of, str):
-            # Try ISO format: YYYY-MM-DD
-            if '-' in as_of and len(as_of.split('-')) == 3:
-                try:
-                    return date.fromisoformat(as_of)
-                except ValueError:
-                    pass
+        if not isinstance(as_of, str):
+            raise TypeError(f"as_of must be date, str, or None, got {type(as_of).__name__}")
 
-            # Try quarter format: YYYY-QN
-            parts = as_of.upper().split('-')
-            if len(parts) == 2 and 'Q' in parts[1]:
-                try:
-                    year = int(parts[0])
-                    q = int(parts[1].replace('Q', ''))
-                    # Map to quarter end dates
-                    quarter_ends = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
-                    month, day = quarter_ends.get(q, (12, 31))
-                    return date(year, month, day)
-                except (ValueError, TypeError):
-                    pass
+        # Try ISO format: YYYY-MM-DD
+        if '-' in as_of and len(as_of.split('-')) == 3:
+            try:
+                parsed = date.fromisoformat(as_of)
+                # Validate reasonable year range
+                if parsed.year < 1900 or parsed.year > 2100:
+                    raise ValueError(f"Year must be between 1900 and 2100, got {parsed.year}")
+                return parsed
+            except ValueError as e:
+                if "year" in str(e).lower():
+                    raise
+                raise ValueError(f"Invalid date format: '{as_of}'. Expected ISO format YYYY-MM-DD") from e
 
-        return None
+        # Try quarter format: YYYY-QN
+        parts = as_of.upper().split('-')
+        if len(parts) == 2 and 'Q' in parts[1]:
+            try:
+                year = int(parts[0])
+                if year < 1900 or year > 2100:
+                    raise ValueError(f"Year must be between 1900 and 2100, got {year}")
+
+                q = int(parts[1].replace('Q', ''))
+                if q not in (1, 2, 3, 4):
+                    raise ValueError(f"Quarter must be 1-4, got {q}")
+
+                # Map to quarter end dates
+                quarter_ends = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
+                month, day = quarter_ends[q]
+                return date(year, month, day)
+            except ValueError:
+                raise
+            except (TypeError, KeyError) as e:
+                raise ValueError(f"Invalid quarter format: '{as_of}'. Expected YYYY-QN (e.g., '2024-Q2')") from e
+
+        raise ValueError(f"Invalid date format: '{as_of}'. Use 'YYYY-MM-DD' or 'YYYY-QN'")
 
     def __str__(self):
         ticker = self.get_ticker()
