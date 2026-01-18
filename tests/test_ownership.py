@@ -7,7 +7,9 @@ from rich import print
 import pytest
 from edgar._filings import Filing
 from edgar.ownership import *
-from edgar.ownership.core import compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric
+from edgar.ownership.core import (
+    compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric, detect_10b5_1_plan
+)
 from edgar.core import has_html_content
 
 pd.options.display.max_columns = None
@@ -43,6 +45,28 @@ def test_is_numeric():
     assert not is_numeric(pd.Series([1.0, 2.0, 3.0, 'None']))
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'nan']))
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'NAN']))
+
+
+def test_detect_10b5_1_plan():
+    """Test detection of Rule 10b5-1 trading plan references in footnotes"""
+    # Returns None for empty/missing footnotes
+    assert detect_10b5_1_plan(None) is None
+    assert detect_10b5_1_plan('') is None
+    assert detect_10b5_1_plan('   ') is None
+
+    # Returns True for 10b5-1 references
+    assert detect_10b5_1_plan('Transaction pursuant to Rule 10b5-1 trading plan') is True
+    assert detect_10b5_1_plan('Sold under a 10b5-1 plan') is True
+    assert detect_10b5_1_plan('Made pursuant to 10b-5-1 plan adopted June 2024') is True
+    assert detect_10b5_1_plan('RULE 10B5-1 TRADING PLAN') is True  # Case insensitive
+    assert detect_10b5_1_plan('Rule 10b5 plan') is True
+    assert detect_10b5_1_plan('Sale under Rule 10b-5 plan') is True
+
+    # Returns False for footnotes without 10b5-1 references
+    assert detect_10b5_1_plan('Regular quarterly grant of stock options') is False
+    assert detect_10b5_1_plan('Shares held by family trust') is False
+    assert detect_10b5_1_plan('Tax withholding') is False
+
 
 def test_translate():
     assert translate_ownership('I') == 'Indirect'
