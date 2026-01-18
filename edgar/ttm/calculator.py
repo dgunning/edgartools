@@ -170,7 +170,7 @@ class TTMCalculator:
         and growth patterns over time.
 
         Args:
-            periods: Number of TTM values to calculate (default: 8)
+            periods: Number of TTM values to calculate (default: 8, max: 100)
 
         Returns:
             DataFrame with columns:
@@ -182,7 +182,7 @@ class TTMCalculator:
             - periods_included: List of quarters in this TTM window
 
         Raises:
-            ValueError: If insufficient data (need periods + 3 quarters)
+            ValueError: If periods < 1 or > 100, or insufficient data
 
         Example:
             >>> trend = calculator.calculate_ttm_trend(periods=8)
@@ -193,6 +193,10 @@ class TTMCalculator:
             ...
 
         """
+        # Validate periods parameter
+        if periods < 1 or periods > 100:
+            raise ValueError(f"periods must be between 1 and 100, got {periods}")
+
         # 1. Filter to quarterly facts
         quarterly = self._filter_quarterly_facts()
 
@@ -207,10 +211,15 @@ class TTMCalculator:
                 f"found {len(sorted_facts)} quarters"
             )
 
-        # 4. Calculate TTM for ALL rolling windows
+        # 4. Calculate only the requested number of TTM windows (from most recent)
+        # For YoY growth, we need 4 extra quarters, so calculate a few more if available
         results = []
+        total_available = len(sorted_facts) - 3  # Number of possible TTM windows
+        num_to_calculate = min(periods, total_available)
 
-        for i in range(3, len(sorted_facts)):
+        # Calculate from most recent backwards
+        for offset in range(num_to_calculate):
+            i = len(sorted_facts) - 1 - offset
             # TTM window: quarters [i-3, i-2, i-1, i] (4 quarters)
             ttm_window = sorted_facts[i-3:i+1]
             ttm_value = sum(q.numeric_value for q in ttm_window)
@@ -220,7 +229,8 @@ class TTMCalculator:
             if i >= 7:  # Need 8 total quarters for YoY comparison
                 prior_ttm_window = sorted_facts[i-7:i-3]
                 prior_ttm = sum(q.numeric_value for q in prior_ttm_window)
-                if prior_ttm != 0:
+                # Only calculate YoY for positive prior values (negative = losses)
+                if prior_ttm > 0:
                     yoy_growth = (ttm_value - prior_ttm) / prior_ttm
 
             # Build result row
@@ -237,17 +247,8 @@ class TTMCalculator:
                 ]
             })
 
-        # 5. Convert to DataFrame
-        df = pd.DataFrame(results)
-
-        # Reverse so most recent quarter is first
-        df = df.iloc[::-1].reset_index(drop=True)
-
-        # 6. Return only the requested number of periods (most recent)
-        if len(df) > periods:
-            df = df.head(periods)
-
-        return df
+        # 5. Convert to DataFrame (already in most-recent-first order)
+        return pd.DataFrame(results)
 
     def _filter_quarterly_facts(self) -> List[FinancialFact]:
         """Get discrete quarterly facts.
@@ -325,9 +326,14 @@ class TTMCalculator:
 
         days = (fact.period_end - fact.period_start).days
 
+        # Non-overlapping ranges for clear classification
+        # Quarter: ~90 days (70-120)
+        # YTD_6M: ~180 days (140-229)
+        # YTD_9M: ~270 days (230-329)
+        # Annual: ~365 days (330-420)
         if 70 <= days <= 120:   return DurationBucket.QUARTER
-        if 140 <= days <= 240:  return DurationBucket.YTD_6M
-        if 230 <= days <= 330:  return DurationBucket.YTD_9M
+        if 140 <= days <= 229:  return DurationBucket.YTD_6M
+        if 230 <= days <= 329:  return DurationBucket.YTD_9M
         if 330 <= days <= 420:  return DurationBucket.ANNUAL
         return DurationBucket.OTHER
 
@@ -411,6 +417,48 @@ class TTMCalculator:
 
         return True
 
+    def _is_positive_concept(self, concept: str) -> bool:
+        """Check if a concept should always be positive (e.g., revenue, assets).
+
+        For these concepts, a negative derived value indicates data quality issues
+        rather than legitimate negative values (like losses).
+
+        Args:
+            concept: XBRL concept name (may include namespace prefix)
+
+        Returns:
+            True if concept should be positive, False if negatives are valid
+        """
+        # Normalize concept name (remove namespace prefix)
+        name = concept.split(':')[-1].lower() if ':' in concept else concept.lower()
+
+        # Concepts that should always be positive
+        positive_keywords = [
+            'revenue', 'sales', 'asset', 'cash', 'inventory',
+            'receivable', 'property', 'equipment', 'goodwill',
+            'grossprofit',  # Gross profit should be positive
+        ]
+
+        # Concepts that can legitimately be negative
+        negative_ok_keywords = [
+            'income', 'loss', 'expense', 'cost', 'liability',
+            'deficit', 'impairment', 'depreciation', 'amortization',
+            'interest', 'tax', 'earnings', 'profit',  # Can be loss
+        ]
+
+        # Check for negative-OK keywords first (more specific)
+        for keyword in negative_ok_keywords:
+            if keyword in name:
+                return False
+
+        # Check for positive-required keywords
+        for keyword in positive_keywords:
+            if keyword in name:
+                return True
+
+        # Default: allow negatives (conservative)
+        return False
+
     def _quarterize_facts(self) -> List[FinancialFact]:
         """Convert YTD and annual facts into discrete quarters.
 
@@ -469,8 +517,12 @@ class TTMCalculator:
             q1 = self._find_prior_quarter(quarters, before=ytd6.period_end)
             if q1:
                 q2_value = ytd6.numeric_value - q1.numeric_value
-                if q2_value < 0:
-                    log.debug(f"Negative Q2 value detected: ${q2_value/1e9:.2f}B for {ytd6.concept}.")
+
+                # Skip if negative and concept should be positive (revenue-like)
+                if q2_value < 0 and self._is_positive_concept(ytd6.concept):
+                    log.warning(f"Data quality issue: Q1 ({q1.numeric_value/1e9:.2f}B) > "
+                                f"YTD_6M ({ytd6.numeric_value/1e9:.2f}B) for {ytd6.concept}, skipping Q2 derivation")
+                    continue
 
                 from datetime import timedelta
                 q2_start = q1.period_end + timedelta(days=1)
@@ -496,8 +548,12 @@ class TTMCalculator:
             ytd6 = self._find_prior_ytd6(ytd_6m, before=ytd9.period_end)
             if ytd6:
                 q3_value = ytd9.numeric_value - ytd6.numeric_value
-                if q3_value < 0:
-                    log.debug(f"Negative Q3 value detected: ${q3_value/1e9:.2f}B for {ytd9.concept}.")
+
+                # Skip if negative and concept should be positive (revenue-like)
+                if q3_value < 0 and self._is_positive_concept(ytd9.concept):
+                    log.warning(f"Data quality issue: YTD_6M ({ytd6.numeric_value/1e9:.2f}B) > "
+                                f"YTD_9M ({ytd9.numeric_value/1e9:.2f}B) for {ytd9.concept}, skipping Q3 derivation")
+                    continue
 
                 from datetime import timedelta
                 q3_start = ytd6.period_end + timedelta(days=1)
@@ -533,8 +589,12 @@ class TTMCalculator:
             )
             if ytd9:
                 q4_value = fy.numeric_value - ytd9.numeric_value
-                if q4_value < 0:
-                    log.debug(f"Negative Q4 value detected: ${q4_value/1e9:.2f}B for {fy.concept}.")
+
+                # Skip if negative and concept should be positive (revenue-like)
+                if q4_value < 0 and self._is_positive_concept(fy.concept):
+                    log.warning(f"Data quality issue: YTD_9M ({ytd9.numeric_value/1e9:.2f}B) > "
+                                f"FY ({fy.numeric_value/1e9:.2f}B) for {fy.concept}, skipping Q4 derivation")
+                    continue
 
                 from datetime import timedelta
                 q4_start = ytd9.period_end + timedelta(days=1)
@@ -588,8 +648,13 @@ class TTMCalculator:
                 continue
 
             q4_value = fy.numeric_value - (q1.numeric_value + q2.numeric_value + q3.numeric_value)
-            if q4_value < 0:
-                log.debug(f"Negative Q4 value detected: ${q4_value/1e9:.2f}B for {fy.concept}.")
+
+            # Skip if negative and concept should be positive (revenue-like)
+            if q4_value < 0 and self._is_positive_concept(fy.concept):
+                q1_q3_sum = q1.numeric_value + q2.numeric_value + q3.numeric_value
+                log.warning(f"Data quality issue: Q1+Q2+Q3 ({q1_q3_sum/1e9:.2f}B) > "
+                            f"FY ({fy.numeric_value/1e9:.2f}B) for {fy.concept}, skipping Q4 derivation")
+                continue
 
             from datetime import timedelta
             q4_start = q3.period_end + timedelta(days=1)
