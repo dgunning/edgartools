@@ -176,7 +176,7 @@ test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
 # 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
 # 4. Selective parallel: Only parallelize tests safe from SEC rate limits
-# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 70% threshold
+# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 65% threshold
 #
 # Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
 
@@ -237,7 +237,7 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 # Coverage threshold moved to CI combined coverage check
-# Individual test groups don't meet 70% alone, only combined
+# Individual test groups don't meet 65% alone, only combined
 
 
 [tool.ruff]
