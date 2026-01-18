@@ -88,6 +88,13 @@ def apply_split_adjustments(facts: List[FinancialFact], splits: List[Dict[str, A
             adjusted_facts.append(f)
             continue
 
+        # Guard against invalid split ratios
+        if cum_ratio <= 0:
+            from edgar.core import log
+            log.warning(f"Invalid cumulative split ratio {cum_ratio} for {f.concept}, skipping adjustment")
+            adjusted_facts.append(f)
+            continue
+
         # Apply adjustment
         if is_per_share:
             new_val = f.numeric_value / cum_ratio
