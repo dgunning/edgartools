@@ -696,6 +696,11 @@ class TTMCalculator:
         else:
             log.debug(f"FY{fy}: No YTD9 shares, using FY shares")
 
+        # Guard against division by zero
+        if q4_shares <= 0:
+            log.warning(f"FY{fy}: Invalid Q4 shares ({q4_shares}) - cannot calculate EPS")
+            return None
+
         q4_eps_value = q4_ni.numeric_value / q4_shares
 
         log.debug(f"Derived Q4 EPS for FY{fy}: ${q4_eps_value:.2f} "
@@ -886,7 +891,13 @@ class TTMCalculator:
         by_end = {}
         for fact in facts:
             key = fact.period_end
-            if key not in by_end or fact.filing_date > by_end[key].filing_date:
+            if key not in by_end:
+                by_end[key] = fact
+            elif fact.filing_date and by_end[key].filing_date and fact.filing_date > by_end[key].filing_date:
+                # Keep the more recently filed version
+                by_end[key] = fact
+            elif fact.filing_date and not by_end[key].filing_date:
+                # Prefer fact with filing_date over one without
                 by_end[key] = fact
         return sorted(by_end.values(), key=lambda f: f.period_end)
 
