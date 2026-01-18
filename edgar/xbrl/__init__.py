@@ -34,6 +34,7 @@ Example usage:
     df = stitched_income.to_dataframe()
 """
 
+from edgar.xbrl.currency import CurrencyConverter, ExchangeRate
 from edgar.xbrl.facts import FactQuery, FactsView
 from edgar.xbrl.presentation import StatementView, normalize_view
 from edgar.xbrl.rendering import RenderedStatement
@@ -71,5 +72,7 @@ __all__ = [
     'FactsView',
     'FactQuery',
     'StitchedFactsView',
-    'StitchedFactQuery'
+    'StitchedFactQuery',
+    'CurrencyConverter',
+    'ExchangeRate',
 ]
