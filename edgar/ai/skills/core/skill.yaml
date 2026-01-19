@@ -75,15 +75,18 @@ patterns:
   - name: Choose Output Method by Purpose
     when_to_use: When displaying or logging EdgarTools objects
     implementation: |
-      # str() for browsing data, to_context() for guidance on next steps
-      print(str(company))            # "Apple Inc. [AAPL] CIK:320193 • Electronic Computers"
+      # str() answers "What's IN here?" - use when ready to browse/select
       print(str(filings))            # Indexed list of 50 filings for selection
+      print(str(company))            # "Apple Inc. [AAPL] CIK:320193 • Electronic Computers"
       print(str(financials))         # "Financials(Apple Inc. [AAPL] 10-K FY2025 • 1,131 facts)"
+
+      # to_context() answers "What can I DO?" - use when learning capabilities
       print(filings.to_context())    # Available actions: .filter(), .latest(), [index]
       print(financials.to_context()) # Available statements and metrics
     why: |
-      str() = browse/select data, to_context() = discover available actions.
-      LLMs should use str() or .to_context(), never repr().
+      First encounter / unfamiliar object → to_context() to learn capabilities.
+      Ready to work with data → str() to browse and select.
+      Never use repr() for LLMs (too many tokens, meant for humans).
 
 anti_patterns:
   - name: Fetching All When Few Suffice
