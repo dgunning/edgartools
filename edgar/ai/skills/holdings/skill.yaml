@@ -2,76 +2,36 @@ id: edgartools-holdings
 name: EdgarTools Holdings
 version: "1.0"
 
-identity: Institutional holdings analyst. Extract 13F portfolio data from investment managers.
-
-context: |
-  13F-HR filings are quarterly reports from institutional managers with $100M+ AUM.
-  Filed within 45 days of quarter end. Shows equity holdings at quarter end.
+identity: Institutional holdings analyst. Extract 13F portfolio data. Holdings sorted by value, infotable has raw manager breakdown.
 
 patterns:
   - name: Get 13F Holdings
     when: Analyze institutional investor portfolio
     code: |
-      # Find 13F filings for an institution
       filings = get_filings(form="13F-HR", year=2024, quarter=3)
       filing = filings.filter(company="BERKSHIRE HATHAWAY")[0]
-
-      # Parse as ThirteenF object
       thirteenf = filing.obj()
-      print(thirteenf.to_context())          # See available data
 
   - name: Holdings Data
     when: Get portfolio positions
     code: |
-      thirteenf = filing.obj()
+      holdings = thirteenf.holdings      # DataFrame sorted by value (aggregated)
+      holdings.head(10)                  # Top 10 positions
 
-      # Aggregated holdings (recommended - one row per security)
-      holdings = thirteenf.holdings           # DataFrame sorted by value
-      print(holdings.head(10))                # Top 10 positions
+      infotable = thirteenf.infotable    # Raw data with OtherManager column
 
-      # Disaggregated (shows manager breakdown for multi-manager filers)
-      infotable = thirteenf.infotable         # Raw data with OtherManager column
-
-  - name: Holdings DataFrame Columns
-    when: Understanding holdings data
-    code: |
-      # holdings DataFrame columns:
-      # Issuer        - Company name (e.g., "APPLE INC")
-      # Class         - Security class (e.g., "COM")
-      # Cusip         - CUSIP identifier
-      # Ticker        - Stock ticker (when available)
-      # Value         - Position value in $1000s
-      # SharesPrnAmount - Number of shares
-      # Type          - SH (shares) or PRN (principal)
-      # SoleVoting    - Shares with sole voting power
-      # SharedVoting  - Shares with shared voting power
-      # NonVoting     - Shares with no voting power
+      # DataFrame columns:
+      # Issuer, Class, Cusip, Ticker, Value ($1000s), SharesPrnAmount, Type,
+      # SoleVoting, SharedVoting, NonVoting
 
   - name: Analyze Portfolio
     when: Portfolio analysis tasks
     code: |
       holdings = thirteenf.holdings
 
-      # Total portfolio value
       total_value = holdings['Value'].sum() * 1000  # Convert from $1000s
-
-      # Top holdings by value
-      top5 = holdings.nlargest(5, 'Value')
-
-      # Filter by ticker
-      apple = holdings[holdings['Ticker'] == 'AAPL']
-
-      # New positions vs prior quarter (requires comparing two 13Fs)
-
-  - name: Find Institutional Holders
-    when: Who owns a specific stock
-    code: |
-      # Get recent 13F filings
-      filings = get_filings(form="13F-HR", year=2024, quarter=3)
-
-      # Search for holdings of specific stock (requires iterating)
-      # Better: Use dedicated services for reverse lookup
-      # EdgarTools is optimized for institution → holdings, not stock → holders
+      top5 = holdings.nlargest(5, 'Value')          # Top holdings by value
+      apple = holdings[holdings['Ticker'] == 'AAPL'] # Filter by ticker
 
 avoid:
   - pattern: "for f in get_filings(form='13F-HR'): f.obj().holdings"

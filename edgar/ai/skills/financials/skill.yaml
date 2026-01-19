@@ -2,55 +2,45 @@ id: edgartools-financials
 name: EdgarTools Financials
 version: "1.0"
 
-identity: Financial statement analyst. Extract metrics efficiently, use views to control detail level.
+identity: Financial statement analyst. Use get_X() for single metrics, statements for full data. View parameter controls detail level.
 
 patterns:
-  - name: Get Financials Object
-    when: Start of financial analysis
+  - name: Get Financials
+    when: Start financial analysis
     code: |
       financials = company.get_financials()              # Annual (from 10-K)
       quarterly = company.get_quarterly_financials()     # Quarterly (from 10-Q)
-      print(financials.to_context())                     # See available methods
 
   - name: Quick Metrics
     when: Need specific values without full statements
     code: |
-      # Income metrics
-      revenue = financials.get_revenue()                 # Total revenue
-      net_income = financials.get_net_income()           # Net income
+      financials.get_revenue()                    # Total revenue
+      financials.get_net_income()                 # Net income
+      financials.get_total_assets()               # Total assets
+      financials.get_total_liabilities()          # Total liabilities
+      financials.get_stockholders_equity()        # Stockholders equity
+      financials.get_current_assets()             # Current assets
+      financials.get_current_liabilities()        # Current liabilities
+      financials.get_operating_cash_flow()        # Operating cash flow
+      financials.get_free_cash_flow()             # Free cash flow
+      financials.get_capital_expenditures()       # CapEx
+      financials.get_shares_outstanding_basic()   # Basic shares
+      financials.get_shares_outstanding_diluted() # Diluted shares
 
-      # Balance sheet metrics
-      assets = financials.get_total_assets()
-      liabilities = financials.get_total_liabilities()
-      equity = financials.get_stockholders_equity()
-      current_assets = financials.get_current_assets()
-      current_liabilities = financials.get_current_liabilities()
-
-      # Cash flow metrics
-      operating_cf = financials.get_operating_cash_flow()
-      free_cf = financials.get_free_cash_flow()
-      capex = financials.get_capital_expenditures()
-
-      # Share counts
-      shares_basic = financials.get_shares_outstanding_basic()
-      shares_diluted = financials.get_shares_outstanding_diluted()
-
-      # Prior periods: use period_offset (0=current, 1=prior, 2=two years ago)
-      prior_revenue = financials.get_revenue(period_offset=1)
+      # Prior periods: period_offset (0=current, 1=prior, 2=two years ago)
+      financials.get_revenue(period_offset=1)     # Prior year revenue
 
   - name: Full Statements
     when: Need complete financial statement
     code: |
-      # view parameter controls detail level
-      income = financials.income_statement()                     # standard (default)
-      income = financials.income_statement(view="detailed")      # all line items
-      income = financials.income_statement(view="summary")       # key totals only
-
-      balance = financials.balance_sheet(view="standard")
-      cashflow = financials.cashflow_statement(view="summary")
+      # view parameter: standard (default), detailed (all line items), summary (key totals)
+      income = financials.income_statement()                    # standard
+      income = financials.income_statement(view="detailed")     # all line items
+      balance = financials.balance_sheet(view="summary")        # key totals only
+      cashflow = financials.cashflow_statement()
 
   - name: All Metrics at Once
-    when: Need comprehensive snapshot
+    when: Comprehensive snapshot
     code: |
       metrics = financials.get_financial_metrics()  # Returns dict with:
       # revenue, net_income, total_assets, total_liabilities, stockholders_equity,
@@ -58,27 +48,15 @@ patterns:
       # shares_outstanding_basic, shares_outstanding_diluted,
       # current_ratio, debt_to_equity, return_on_equity, profit_margin
 
-  - name: Multi-Period Comparison
-    when: Trend analysis across years
-    code: |
-      # Get values for multiple periods
-      for i in range(3):  # Current + 2 prior years
-          rev = financials.get_revenue(period_offset=i)
-          print(f"Year -{i}: {rev:,}")
-
-      # Or get full statement (includes multiple periods in columns)
-      income = financials.income_statement()  # Shows all available periods
-
   - name: Compare Companies
     when: Side-by-side comparison
     code: |
-      tickers = ["AAPL", "MSFT", "GOOGL"]
-      for ticker in tickers:
+      for ticker in ["AAPL", "MSFT", "GOOGL"]:
           f = Company(ticker).get_financials()
           print(f"{ticker}: Rev={f.get_revenue():,} NI={f.get_net_income():,}")
 
 avoid:
-  - pattern: "income = financials.income_statement(view='detailed')"
+  - pattern: "financials.income_statement(view='detailed')"
     when: Just need one metric
-    fix: "revenue = financials.get_revenue()"
+    fix: "financials.get_revenue()"
     why: Quick getters are faster and return exact values

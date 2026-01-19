@@ -123,5 +123,7 @@ handoffs:
     when: Report sections (MD&A, risk factors, Item 1-8), TenK/TenQ/EightK objects
   - to: holdings
     when: 13F filings, portfolio analysis, institutional holdings
+  - to: ownership
+    when: Form 4 insider transactions, Form 3/5, executive trades
   - to: xbrl
     when: Low-level XBRL (facts, concepts, taxonomy, dimensions)
