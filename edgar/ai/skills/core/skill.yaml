@@ -34,13 +34,12 @@ patterns:
       # filing_date filters WITHIN the selected year/quarter
       filings = get_filings(form="8-K", year=2024, quarter=4, filing_date="2024-12-16")
 
-      # Check result size: repr() shows first page (50 filings)
+      # Check result size: str() shows browsable list (50 filings)
       # If ≤50: browse and select
       filing = filings[4]                    # By index from display
-      filing = filings.filter(cik="320193")  # Narrow further
       filing = filings.latest()              # Most recent
 
-      # If >50: tighten filters, ask user, or write code
+      # If >50: tighten filters or ask user to narrow
       # Edge case: paginate to browse more pages next() and previous()
       page2 = filings.next()                 # Next 50 filings
       filing = page2[3]                      # Select from page 2
@@ -76,11 +75,14 @@ patterns:
   - name: Choose Output Method by Purpose
     when_to_use: When displaying or logging EdgarTools objects
     implementation: |
-      # For LLMs: use str() for concise data or .to_context() for guidance
-      print(str(company))           # "Apple Inc. [AAPL] CIK:320193 • Electronic Computers"
-      print(str(financials))        # "Financials(Apple Inc. [AAPL] 10-K FY2025 • 1,131 facts)"
-      print(financials.to_context()) # Lists available statements and metrics
+      # str() for browsing data, to_context() for guidance on next steps
+      print(str(company))            # "Apple Inc. [AAPL] CIK:320193 • Electronic Computers"
+      print(str(filings))            # Indexed list of 50 filings for selection
+      print(str(financials))         # "Financials(Apple Inc. [AAPL] 10-K FY2025 • 1,131 facts)"
+      print(filings.to_context())    # Available actions: .filter(), .latest(), [index]
+      print(financials.to_context()) # Available statements and metrics
     why: |
+      str() = browse/select data, to_context() = discover available actions.
       LLMs should use str() or .to_context(), never repr().
 
 anti_patterns:
