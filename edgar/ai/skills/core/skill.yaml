@@ -101,22 +101,6 @@ anti_patterns:
       for filing in company.get_filings(form="10-K").head(5):
           process(filing)
 
-  - name: Ignoring Rate Limits
-    why_bad: |
-      SEC rate limits requests. Rapid-fire requests will get throttled or blocked,
-      and failures are often silent (empty results, not errors).
-    what_to_do_instead: Add delays in loops, batch thoughtfully, check for empty results
-    example_bad: |
-      for ticker in sp500_tickers:
-          company = Company(ticker)
-          data.append(company.get_filings())  # 500 rapid requests
-    example_good: |
-      import time
-      for ticker in sp500_tickers[:20]:  # Limit batch size
-          company = Company(ticker)
-          data.append(company.get_filings(form="10-K").head(1))
-          time.sleep(0.1)  # Be respectful
-
 handoffs:
   - trigger: "balance sheet|income statement|cash flow|financial statement|revenue|assets|liabilities|net income|metrics"
     to: financials
