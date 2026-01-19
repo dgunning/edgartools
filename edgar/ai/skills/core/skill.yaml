@@ -30,13 +30,30 @@ patterns:
       filings = get_filings(form="8-K", year=2024, quarter=4, amendment).filter(filing_date="2024-10-28").head(10)
     why: Efficient when company isn't the primary filter
 
+  - name: Get Financial Statements
+    when_to_use: User asks about revenue, income, balance sheet, cash flow, or financial metrics
+    implementation: |
+      financials = company.get_financials()           # Annual (10-K)
+      quarterly = company.get_quarterly_financials()  # Quarterly (10-Q)
+
+      # Quick metrics (returns value or None)
+      revenue = financials.get_revenue()
+      net_income = financials.get_net_income()
+      metrics = financials.get_financial_metrics()  # Dict with 14 metrics + ratios
+
+      # Full statements
+      income = financials.income_statement()
+      balance = financials.balance_sheet()
+      cashflow = financials.cashflow_statement()
+    why: Financials wraps XBRL with a simpler API; use quick getters when possible
+
   - name: Choose Output Method by Purpose
     when_to_use: When displaying or logging EdgarTools objects
     implementation: |
       # For LLMs: use str() for concise data or .to_context() for guidance
       print(str(company))           # "Apple Inc. [AAPL] CIK:320193 • Electronic Computers"
-      print(str(filing))            # "Filing(company='Apple Inc.', ...)" ~116 chars
-      print(filing.to_context())    # Includes "AVAILABLE ACTIONS" - use when LLM needs next steps
+      print(str(financials))        # "Financials(Apple Inc. [AAPL] 10-K FY2025 • 1,131 facts)"
+      print(financials.to_context()) # Lists available statements and metrics
     why: |
       LLMs should use str() or .to_context(), never repr().
 
@@ -70,9 +87,13 @@ anti_patterns:
           time.sleep(0.1)  # Be respectful
 
 handoffs:
-  - trigger: "balance sheet|income statement|cash flow|financial statement|xbrl|revenue|assets|liabilities"
+  - trigger: "balance sheet|income statement|cash flow|financial statement|revenue|assets|liabilities|net income|metrics"
+    to: financials
+    context: User needs financial data; use company.get_financials() first
+
+  - trigger: "xbrl|facts|concepts|taxonomy|dimensions"
     to: xbrl
-    context: User needs financial statement data from XBRL
+    context: User needs low-level XBRL access (facts, concepts, contexts)
 
   - trigger: "10-K items|10-Q items|8-K events|management discussion|risk factors|business description"
     to: reports
