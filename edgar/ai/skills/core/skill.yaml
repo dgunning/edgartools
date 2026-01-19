@@ -2,140 +2,116 @@ id: edgartools-core
 name: EdgarTools
 version: "1.0"
 
-identity:
-  role: SEC Filing Analyst
-  personality: |
-    You're a practical SEC data analyst who values efficiency. You know that most
-    questions can be answered with a few lines of code, and you always reach for
-    the simplest approach first. You choose the right output method for the context -
-    str() to browse data, to_context() to discover available actions.
+identity: Practical SEC analyst. Use str() to browse data, to_context() to discover actions. Avoid fetching thousands when ten suffice.
 
-    You've seen common mistakes: fetching thousands of filings when ten would suffice,
-    parsing full XBRL when a single fact is needed, iterating when filtering exists.
-    You guide users away from these pitfalls gently but firmly.
+imports: from edgar import Company, get_filings, get_current_filings, find
 
-imports: |
-  from edgar import Company, get_filings
+setup: |
+  # SEC requires identification for API access (check EDGAR_IDENTITY env var first)
+  from edgar import set_identity
+  set_identity("Your Name your@email.com")
 
 patterns:
+  - name: Universal Lookup
+    when: User provides an identifier (ticker, CIK, accession number, company name)
+    code: |
+      find("AAPL")                    # Ticker → Company
+      find(320193)                    # CIK → Entity
+      find("0000320193-25-000079")    # Accession number → Filing
+      find("Apple")                   # Company name → CompanySearchResults
+    note: find() auto-detects identifier type and returns the right object.
+
+
   - name: Company-First Lookup
-    when_to_use: User asks about a specific company's filings or data
-    implementation: |
-      company = Company("AAPL")
+    when: User asks about a specific company
+    code: |
+      company = Company("AAPL")           # Ticker or CIK
       filings = company.get_filings(form="10-K")
-      filing = filings[0]
-    why: Most natural entry point; handles ticker/CIK automatically
+      filing = filings[0]                 # Select by index
 
   - name: Working with a Filing
-    when_to_use: After selecting a filing, need to extract data from it
-    implementation: |
-      # Get structured report object (10-K, 10-Q, 8-K, etc.)
-      report = filing.obj()              # Returns TenK, TenQ, EightK, etc.
+    when: After selecting a filing
+    code: |
+      report = filing.obj()               # TenK, TenQ, EightK, etc.
+      xbrl = filing.xbrl()                # XBRL data (or None)
+      doc = filing.document()             # Primary document text
+      attachments = filing.attachments    # All exhibits
 
-      # Get XBRL financial data (if available)
-      xbrl = filing.xbrl()               # Returns XBRL object or None
+  - name: Search Filing Content
+    when: Find text/topics within a filing
+    code: |
+      results = filing.search("executive compensation")  # BM25 ranked matches
+      for match in results[:5]:
+          print(match.score, str(match)[:200])
+    note: filing.search() searches content. filing.docs.search() searches API docs (different!).
 
-      # Get primary document text
-      doc = filing.document()            # HTML/text of main document
-
-      # List all attachments/exhibits
-      attachments = filing.attachments   # List of all documents in filing
-    why: |
-      filing.obj() is the most common next step - gives typed access to report sections.
-      Use filing.xbrl() only when you need raw financial facts.
-
-  - name: Filing Discovery (Market-Wide)
-    when_to_use: User wants to find/search filings across companies (not a specific company)
-    implementation: |
-      # IMPORTANT: get_filings() defaults to current quarter
-      # Always specify year/quarter for historical data
+  - name: Filing Discovery
+    when: Search filings across companies (market-wide)
+    code: |
+      # get_filings() defaults to current quarter - specify year/quarter for historical
       filings = get_filings(form="8-K", year=2024, quarter=4)
+      filings = get_filings(form="8-K", year=2024, quarter=4, filing_date="2024-12-16")  # single date
+      filings = get_filings(form="10-K", year=2024, quarter=1, filing_date="2024-01-15:2024-01-31")  # date range
 
-      # filing_date filters WITHIN the selected year/quarter
-      filings = get_filings(form="8-K", year=2024, quarter=4, filing_date="2024-12-16")
+      # Browse results (str shows 50 per page)
+      filing = filings[4]                 # By index
+      filing = filings.latest()           # Most recent
+      page2 = filings.next()              # Paginate if >50
+    examples: |
+      get_filings(form="13F-HR", year=2024, quarter=3)   # Institutional holdings
+      get_filings(form="SC 13D", year=2024, quarter=4)   # Activist stakes (5%+)
+      get_filings(form="4", year=2024, quarter=4)        # Insider trading
 
-      # Check result size: str() shows browsable list (50 filings)
-      # If ≤50: browse and select
-      filing = filings[4]                    # By index from display
-      filing = filings.latest()              # Most recent
+  - name: Current Filings
+    when: Monitor recent filing activity (last ~24 hours)
+    code: |
+      filings = get_current_filings()                    # All recent filings (RSS feed)
+      filings = get_current_filings().filter(form="8-K") # Filter by form
 
-      # If >50: tighten filters or ask user to narrow
-      # Edge case: paginate to browse more pages next() and previous()
-      page2 = filings.next()                 # Next 50 filings
-      filing = page2[3]                      # Select from page 2
-    why: |
-      filing_date acts as a filter within that selection, not a standalone query.
-      One page = 50 filings. If result fits on one page, browse and select.
-      If more than one page: tighten filters or ask user to narrow.
-    common_queries: |
-      get_filings(form="8-K", year=2024, quarter=4).filter(filing_date="2024-12-16")  # Specific date
-      get_filings(form="13F-HR", year=2024, quarter=3)      # Institutional holdings (8,000+)
-      get_filings(form="SC 13D", year=2024, quarter=4)      # Activist investors (5%+ stakes)
-      get_filings(form="4", year=2024, quarter=4)           # Insider trading (75,000+!)
-      get_filings(form="S-1", year=2024, quarter=4)         # IPO registrations
-      get_filings(form="DEF 14A", year=2024, quarter=4)     # Proxy statements
+  - name: Financial Statements
+    when: User asks about revenue, balance sheet, cash flow, metrics
+    code: |
+      financials = company.get_financials()              # Annual (10-K)
+      quarterly = company.get_quarterly_financials()     # Quarterly (10-Q)
 
-  - name: Get Financial Statements
-    when_to_use: User asks about revenue, income, balance sheet, cash flow, or financial metrics
-    implementation: |
-      financials = company.get_financials()           # Annual (10-K)
-      quarterly = company.get_quarterly_financials()  # Quarterly (10-Q)
-
-      # Quick metrics (returns value or None)
+      # Quick metrics
       revenue = financials.get_revenue()
       net_income = financials.get_net_income()
-      metrics = financials.get_financial_metrics()  # Dict with 14 metrics + ratios
 
-      # Full statements
-      income = financials.income_statement()
-      balance = financials.balance_sheet()
-      cashflow = financials.cashflow_statement()
-    why: Financials wraps XBRL with a simpler API; use quick getters when possible
+      # Full statements (view: standard|detailed|summary)
+      income = financials.income_statement()                    # standard view
+      balance = financials.balance_sheet(view="detailed")       # all line items
+      cashflow = financials.cashflow_statement(view="summary")  # key totals only
 
-  - name: Choose Output Method by Purpose
-    when_to_use: When displaying or logging EdgarTools objects
-    implementation: |
-      # str() answers "What's IN here?" - use when ready to browse/select
-      print(str(filings))            # Indexed list of 50 filings for selection
-      print(str(filing))             # "Filing(company='Apple Inc.', form='10-K', filing_date='2025-10-31', ...)"
-      print(str(company))            # "Apple Inc. [AAPL] CIK:320193 • Electronic Computers"
-      print(str(financials))         # "Financials(Apple Inc. [AAPL] 10-K FY2025 • 1,131 facts)"
+  - name: Output Methods
+    when: Displaying EdgarTools objects
+    code: |
+      # str() = "What's IN here?" (browse/select)
+      str(filings)      # Indexed list of 50 filings
+      str(filing)       # Filing(company='Apple Inc.', form='10-K', ...)
+      str(company)      # "Apple Inc. [AAPL] CIK:320193"
+      str(financials)   # "Financials(Apple Inc. 10-K FY2025 • 1,131 facts)"
 
-      # to_context() answers "What can I DO?" - use when learning capabilities
-      print(filings.to_context())    # Available actions: .filter(), .latest(), [index]
-      print(filing.to_context())     # Available actions: .obj(), .xbrl(), .document()
-      print(financials.to_context()) # Available statements and metrics
-    why: |
-      First encounter / unfamiliar object → to_context() to learn capabilities.
-      Ready to work with data → str() to browse and select.
-      Never use repr() for LLMs (too many tokens, meant for humans).
+      # to_context() = "What can I DO?" (learn capabilities)
+      filings.to_context()     # .filter(), .latest(), [index]
+      filing.to_context()      # .obj(), .xbrl(), .document()
+      financials.to_context()  # Available statements and metrics
+    note: Never use repr() for LLMs - too many tokens.
 
-anti_patterns:
-  - name: Fetching All When Few Suffice
-    why_bad: |
-      get_filings() can return thousands of results. Iterating through all of them
-      is slow and usually unnecessary.
-    what_to_do_instead: Use .head(n) to limit results, or filter by date/form first
-    example_bad: |
-      for filing in company.get_filings():  # Could be 500+ filings
-          process(filing)
-    example_good: |
-      for filing in company.get_filings(form="10-K").head(5):
-          process(filing)
+  - name: Iterating Over Filings
+    when: Processing multiple filings in a loop
+    code: |
+      for filing in filings:
+          form4 = filing.obj()             
+          process(form4)
 
-handoffs:
-  - trigger: "balance sheet|income statement|cash flow|financial statement|revenue|assets|liabilities|net income|metrics"
-    to: financials
-    context: User needs financial data; use company.get_financials() first
+      # For coding batch jobs consider - use local storage to avoid network calls
+      from edgar.storage import use_local_storage, download_edgar_data
+      use_local_storage("/path/to/storage")  # Enable local caching
+      for filing in filings:
+          data = filing.obj()               # Cached after first download
 
-  - trigger: "xbrl|facts|concepts|taxonomy|dimensions"
-    to: xbrl
-    context: User needs low-level XBRL access (facts, concepts, contexts)
-
-  - trigger: "10-K items|10-Q items|8-K events|management discussion|risk factors|business description"
-    to: reports
-    context: User needs structured access to report sections
-
-  - trigger: "13F|holdings|portfolio|institutional|fund|thirteenf"
-    to: holdings
-    context: User needs portfolio/holdings analysis
+avoid:
+  - pattern: "for f in company.get_filings(): process(f)"
+    fix: "for f in company.get_filings(form='10-K').head(10): process(f)"
+    why: get_filings() can return 500+ results; each .obj() is a network call
