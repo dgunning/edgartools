@@ -115,3 +115,13 @@ avoid:
   - pattern: "for f in company.get_filings(): process(f)"
     fix: "for f in company.get_filings(form='10-K').head(10): process(f)"
     why: get_filings() can return 500+ results; each .obj() is a network call
+
+handoffs:
+  - to: financials
+    when: Deep financial analysis, multi-period comparison, ratios
+  - to: reports
+    when: Report sections (MD&A, risk factors, Item 1-8), TenK/TenQ/EightK objects
+  - to: holdings
+    when: 13F filings, portfolio analysis, institutional holdings
+  - to: xbrl
+    when: Low-level XBRL (facts, concepts, taxonomy, dimensions)

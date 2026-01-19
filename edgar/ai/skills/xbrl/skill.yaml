@@ -1,0 +1,72 @@
+id: edgartools-xbrl
+name: EdgarTools XBRL
+version: "1.0"
+
+identity: XBRL specialist. Low-level access to facts, concepts, and taxonomy. Use Financials skill for simpler needs.
+
+context: |
+  XBRL (eXtensible Business Reporting Language) is the structured data format for SEC filings.
+  Use this skill when you need raw facts, concept details, or dimensional data.
+  For typical financial analysis, prefer the Financials skill (simpler API).
+
+patterns:
+  - name: Get XBRL Object
+    when: Need low-level XBRL access
+    code: |
+      filing = company.get_filings(form="10-K")[0]
+      xbrl = filing.xbrl()                 # Returns XBRL object or None
+      print(xbrl.to_context())             # See available data
+
+      # Key properties
+      print(xbrl.entity_name)              # Company name
+      print(xbrl.fiscal_year)              # e.g., 2024
+      print(xbrl.fiscal_period)            # FY, Q1, Q2, Q3, Q4
+
+  - name: Access Statements
+    when: Get financial statements from XBRL
+    code: |
+      # Statement access
+      income = xbrl.statements.income_statement()
+      balance = xbrl.statements.balance_sheet()
+      cashflow = xbrl.statements.cash_flow_statement()
+
+      # List all available statements
+      print(xbrl.statements.names)         # ['IncomeStatement', 'BalanceSheet', ...]
+
+  - name: Facts Access
+    when: Query individual facts or search concepts
+    code: |
+      facts = xbrl.facts                   # FactsView object
+
+      # Get facts by concept pattern
+      revenue_facts = facts.get_facts_by_concept("Revenue")
+      assets_facts = facts.get_facts_by_concept("Assets", exact=True)
+
+      # Get facts with dimensions (segment breakdowns)
+      dimensional = facts.get_facts_with_dimensions()
+
+      # Get facts for specific period
+      period_facts = facts.get_facts_by_fiscal_period(2024, "FY")
+
+  - name: Concept History
+    when: Track a value over time
+    code: |
+      # Get history of a concept across periods
+      history = xbrl.facts.facts_history("Revenue")
+      # Returns DataFrame with period_end, value columns
+
+  - name: Raw Fact Details
+    when: Need fact metadata (units, decimals, context)
+    code: |
+      # Get all facts as enriched dictionaries
+      all_facts = xbrl.facts.get_facts()
+
+      # Each fact contains:
+      # concept, value, unit, decimals, period_start, period_end,
+      # dimensions (if any), context_ref
+
+avoid:
+  - pattern: "xbrl = filing.xbrl(); balance = xbrl.statements.balance_sheet()"
+    when: Just need total assets
+    fix: "assets = company.get_financials().get_total_assets()"
+    why: Financials API is simpler for common metrics

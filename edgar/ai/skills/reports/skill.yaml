@@ -1,0 +1,88 @@
+id: edgartools-reports
+name: EdgarTools Reports
+version: "1.0"
+
+identity: Report section analyst. Extract specific items from 10-K, 10-Q, 8-K filings.
+
+patterns:
+  - name: Get Report Object
+    when: Need structured access to filing sections
+    code: |
+      filing = company.get_filings(form="10-K")[0]
+      tenk = filing.obj()                # Returns TenK object
+      print(tenk.to_context())           # See available items/sections
+
+      # Same pattern for other forms
+      tenq = company.get_filings(form="10-Q")[0].obj()   # TenQ object
+      eightk = company.get_filings(form="8-K")[0].obj()  # EightK object
+
+  - name: 10-K Sections
+    when: Extract annual report sections
+    code: |
+      tenk = filing.obj()
+
+      # Convenience properties
+      business = tenk.business              # Item 1: Business description
+      risks = tenk.risk_factors             # Item 1A: Risk factors
+      mda = tenk.management_discussion      # Item 7: MD&A
+
+      # Access any item by key
+      item = tenk['Item 1']                 # By item number
+      item = tenk['Item 7A']                # Quantitative risk disclosures
+
+      # List all available items
+      print(tenk.items)                     # ['Item 1', 'Item 1A', 'Item 2', ...]
+
+  - name: 10-Q Sections
+    when: Extract quarterly report sections
+    code: |
+      tenq = filing.obj()
+
+      # Key items
+      financials = tenq['Item 1']           # Financial statements
+      mda = tenq['Item 2']                  # MD&A
+      market_risk = tenq['Item 3']          # Market risk disclosures
+
+      print(tenq.items)                     # List available items
+
+  - name: 8-K Events
+    when: Extract current report events
+    code: |
+      eightk = filing.obj()
+
+      # 8-K uses item numbers like "Item 1.01", "Item 2.02"
+      print(eightk.items)                   # ['Item 1.01', 'Item 2.02', ...]
+
+      # Common 8-K items:
+      # Item 1.01 - Material agreement
+      # Item 2.02 - Results of operations (earnings)
+      # Item 5.02 - Director/officer changes
+      # Item 7.01 - Regulation FD disclosure
+      # Item 8.01 - Other events
+
+  - name: Item Content
+    when: Work with extracted item text
+    code: |
+      item = tenk.risk_factors
+
+      # Get text content
+      text = str(item)                      # Full text
+      text = item.text                      # Same as str()
+
+      # Item metadata
+      print(item.title)                     # "Risk Factors"
+      print(len(item.text))                 # Character count
+
+  - name: Search Within Report
+    when: Find specific content in filing
+    code: |
+      # Search across all items
+      results = filing.search("supply chain")
+      for match in results[:3]:
+          print(match.score, str(match)[:150])
+
+avoid:
+  - pattern: "text = filing.document().text"
+    when: Need specific section
+    fix: "text = filing.obj().risk_factors.text"
+    why: Report objects parse sections; document() gives raw HTML
