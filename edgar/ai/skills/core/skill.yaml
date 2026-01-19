@@ -24,11 +24,37 @@ patterns:
       latest = filings[0]
     why: Most natural entry point; handles ticker/CIK automatically
 
-  - name: Filing-First Search
-    when_to_use: User wants filings across multiple companies or by criteria
+  - name: Filing Discovery (Market-Wide)
+    when_to_use: User wants to find/search filings across companies (not a specific company)
     implementation: |
-      filings = get_filings(form="8-K", year=2024, quarter=4, amendment).filter(filing_date="2024-10-28").head(10)
-    why: Efficient when company isn't the primary filter
+      # IMPORTANT: get_filings() defaults to current quarter
+      # Always specify year/quarter for historical data
+      filings = get_filings(form="8-K", year=2024, quarter=4)
+
+      # filing_date filters WITHIN the selected year/quarter
+      filings = get_filings(form="8-K", year=2024, quarter=4, filing_date="2024-12-16")
+
+      # Check result size: repr() shows first page (50 filings)
+      # If ≤50: browse and select
+      filing = filings[4]                    # By index from display
+      filing = filings.filter(cik="320193")  # Narrow further
+      filing = filings.latest()              # Most recent
+
+      # If >50: tighten filters, ask user, or write code
+      # Edge case: paginate to browse more pages next() and previous()
+      page2 = filings.next()                 # Next 50 filings
+      filing = page2[3]                      # Select from page 2
+    why: |
+      filing_date acts as a filter within that selection, not a standalone query.
+      One page = 50 filings. If result fits on one page, browse and select.
+      If more than one page: tighten filters, ask user to narrow, or write code for batch analysis.
+    common_queries: |
+      get_filings(form="8-K", year=2024, quarter=4).filter(filing_date="2024-12-16")  # Specific date
+      get_filings(form="13F-HR", year=2024, quarter=3)      # Institutional holdings (8,000+)
+      get_filings(form="SC 13D", year=2024, quarter=4)      # Activist investors (5%+ stakes)
+      get_filings(form="4", year=2024, quarter=4)           # Insider trading (75,000+!)
+      get_filings(form="S-1", year=2024, quarter=4)         # IPO registrations
+      get_filings(form="DEF 14A", year=2024, quarter=4)     # Proxy statements
 
   - name: Get Financial Statements
     when_to_use: User asks about revenue, income, balance sheet, cash flow, or financial metrics
