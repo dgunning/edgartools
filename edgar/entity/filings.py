@@ -378,6 +378,58 @@ class EntityFilings(Filings):
                             company_name=self.company_name,
                             original_state=filings_state)
 
+    def __str__(self):
+        """Compact string representation optimized for LLMs."""
+        if self.empty:
+            return f"Filings: empty | {self.company_name}"
+
+        total = len(self)
+        start_date, end_date = self.date_range
+
+        # Show filings: all if ≤100 total, otherwise 50 (matches pager page size)
+        current_page = self.data_pager.current()
+        start_idx = self._original_state.page_start if self._original_state else self.data_pager.start_index
+        if total <= 100:
+            show_count = len(current_page)
+        else:
+            show_count = min(50, len(current_page))
+
+        # Check if all displayed filings have the same date
+        displayed_dates = [current_page['filing_date'][i].as_py() for i in range(show_count)]
+        all_same_date = len(set(str(d) for d in displayed_dates)) == 1
+
+        # Header with company name (since all filings are from same entity)
+        if all_same_date and show_count > 0:
+            lines = [f"Filings: {total:,} | {self.company_name} | {displayed_dates[0]}"]
+        else:
+            lines = [f"Filings: {total:,} | {self.company_name} | {start_date} to {end_date}"]
+
+        # Column header (no company column needed - all same entity)
+        if all_same_date:
+            lines.append("   #  Form")
+        else:
+            lines.append("   #  Filed       Form")
+
+        for i in range(show_count):
+            idx = start_idx + i
+            form = current_page['form'][i].as_py()
+
+            if all_same_date:
+                lines.append(f"  {idx:>2}. {form}")
+            else:
+                filing_date = current_page['filing_date'][i].as_py()
+                lines.append(f"  {idx:>2}. {filing_date}  {form}")
+
+        # Footer with navigation hints
+        if total > show_count:
+            remaining = total - show_count
+            lines.append(f"  ... ({remaining:,} more)")
+            lines.append("[filings[n] to select | .filter(form=) to narrow | .next() for more]")
+        else:
+            lines.append("[filings[n] to select | .filter(form=) to narrow]")
+
+        return "\n".join(lines)
+
     def __repr__(self):
         return repr_rich(self.__rich__())
 
