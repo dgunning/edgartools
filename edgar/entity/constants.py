@@ -26,7 +26,7 @@ COMPANY_FORMS = {
     # Other corporate filings
     "424B1", "424B2", "424B3", "424B4", "424B5",
     "ARS", "NT 10-K", "NT 10-Q",
-    "SC 13D", "SC 13G", "SC TO-I", "SC TO-T",
+    "SC TO-I", "SC TO-T",
     "SD", "PX14A6G",
     # Specialized corporate filings
     "N-CSR", "N-Q", "N-MFP", "N-CEN",
@@ -35,7 +35,7 @@ COMPANY_FORMS = {
     "ATS-N",
     # Corporate disclosures
     "EFFECT", "FWP", "425", "CB",
-    "POS AM", "CORRESP", "UPLOAD"
+    "POS AM", "UPLOAD"
 }
 
 # Fund-specific form types
