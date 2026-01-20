@@ -98,6 +98,20 @@ patterns:
       financials.to_context()  # Available statements and metrics
     note: Never use repr() for LLMs - too many tokens.
 
+  - name: API Discovery
+    when: Don't know what methods/properties are available
+    code: |
+      # .docs = full API guide for any object
+      company.docs                       # Company API reference
+      filing.docs                        # Filing API reference
+      xbrl.docs                          # XBRL API reference
+
+      # .docs.search() = find specific functionality
+      company.docs.search("get_filings") # How to get filings
+      filing.docs.search("xbrl")         # How to access XBRL
+      filings.docs.search("filter")      # How to filter results
+    note: filing.search("keyword") searches content; filing.docs.search("keyword") searches API docs.
+
   - name: Iterating Over Filings
     when: Processing multiple filings in a loop
     code: |
