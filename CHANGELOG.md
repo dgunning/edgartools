@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.11.0] - 2026-01-20
+
+### Added
+
+- **Trailing Twelve Months (TTM) Calculations**
+  - Added comprehensive TTM calculations integrated into Company class
+  - Automatic Q4 derivation from annual and quarterly data
+  - Stock split adjustment support for accurate historical comparisons
+  - Robust input validation and data quality handling
+  - Methods for calculating TTM metrics from EntityFacts
+  - **Files**: `edgar/entity/ttm.py`, `edgar/entity/core.py`
+
+- **XBRL Concept Discovery**
+  - Added `list_concepts()` method to Company class for exploring available XBRL concepts
+  - New `ConceptList` class with rich display formatting for concept browsing
+  - Enables users to discover what financial data is available before querying
+  - **Files**: `edgar/entity/core.py`
+
+- **Currency Conversion for Foreign Filers**
+  - Added `CurrencyConverter` utility class for handling IFRS and foreign currency filings
+  - Supports automatic conversion of foreign currencies to USD
+  - Essential for analyzing international companies and IFRS reporters
+  - **Files**: `edgar/xbrl/currency.py`
+
+- **Rule 10b5-1 Trading Plan Detection**
+  - Added detection of Rule 10b5-1 trading plans in insider transactions
+  - Identifies pre-arranged trading plans vs. discretionary trades
+  - Enhanced transparency for insider trading analysis
+  - **Files**: `edgar/insider_transactions.py`
+
+- **Expanded Industry Classification**
+  - Expanded SIC code ranges for banking, healthcare, and energy industries
+  - Improved industry categorization accuracy
+  - Better support for sector-specific analysis
+  - **Files**: `edgar/reference/data/sic_ranges.py`
+
+### Fixed
+
+- **TTM Calculation Robustness**
+  - Added comprehensive input validation for TTM calculations
+  - Fixed division by zero and None comparison edge cases
+  - Replaced bare Exception catches with specific exception types
+  - Improved error messages and data quality handling
+  - **Files**: `edgar/entity/ttm.py`
+
+### Changed
+
+- **Test Coverage Requirements**
+  - Lowered coverage threshold to 65% to accommodate new experimental features
+  - Allows for faster feature development while maintaining core stability
+  - **Files**: `pyproject.toml`
+
 ## [5.10.1] - 2026-01-17
 
 ### Fixed
