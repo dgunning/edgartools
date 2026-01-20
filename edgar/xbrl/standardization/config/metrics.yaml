@@ -101,6 +101,7 @@ metrics:
       - PaymentsToAcquireIntangibleAssets
       - PaymentsToDevelopSoftware
       - PaymentsToAcquireOilAndGasPropertyAndEquipment  # Energy sector
+      - PaymentsToAcquireOtherPropertyPlantAndEquipment # LLY uses this ($5.06B vs 5.34B yfinance)
       - PaymentsToAcquireBusinessesNetOfCashAcquired  # Last resort - M&A, not pure Capex
     tree_hints:
       statements: [CASHFLOW]
@@ -159,11 +160,12 @@ metrics:
       - CommercialPaper
       - ShortTermBorrowings
     known_concepts:
+      - DebtCurrent  # "Total" concept - Preferred over components if available
+      - ShortTermDebt  # "Total" concept
+      - ShortTermDebtAndCapitalLeaseObligationsCurrent
       - LongTermDebtCurrent
       - CommercialPaper
       - ShortTermBorrowings
-      - DebtCurrent
-      - ShortTermDebtAndCapitalLeaseObligationsCurrent
     # Dimensional handling: include dimensional values for CommercialPaper
     # JPM reports CommercialPaper ONLY with dimensions (VIE)
     dimensional_handling:

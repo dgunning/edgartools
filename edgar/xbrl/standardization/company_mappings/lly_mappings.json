@@ -1,0 +1,15 @@
+{
+    "ticker": "LLY",
+    "extraction_rules": {
+        "Capex": {
+            "method": "concept_priority",
+            "concept_priority": {
+                "Capex": [
+                    "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment",
+                    "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+                ]
+            },
+            "notes": "LLY uses 'Other' PPE tag for capital expenditures ($5.06B) instead of standard tag."
+        }
+    }
+}

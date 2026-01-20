@@ -29,13 +29,15 @@
             ],
             "concept_priority": {
                 "LongTermDebtCurrent": [
-                    "us-gaap:LongTermDebtCurrent"
+                    "us-gaap:LongTermDebtCurrent",
+                    "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent"
                 ],
                 "CommercialPaper": [
                     "us-gaap:CommercialPaper"
                 ],
                 "ShortTermBorrowings": [
-                    "us-gaap:ShortTermBorrowings"
+                    "us-gaap:ShortTermBorrowings",
+                    "us-gaap:ShortTermDebtAndCapitalLeaseObligationsCurrent"
                 ]
             },
             "notes": "Sum of current portion of LT debt + commercial paper + short-term borrowings"
