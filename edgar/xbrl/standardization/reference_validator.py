@@ -167,11 +167,13 @@ class ReferenceValidator:
                 result = extractor.extract_short_term_debt(xbrl, facts_df)
                 return result.value
             
-            # Calculated OperatingIncome fallback for any industry
+            # Calculated OperatingIncome for any industry
+            # Always return calculated value - handles companies like NKE/MRK
+            # that don't report OperatingIncomeLoss concept at all
             if metric == 'OperatingIncome':
-                extractor = DefaultExtractor()
+                extractor = get_industry_extractor(industry) if industry else DefaultExtractor()
                 result = extractor.extract_operating_income(xbrl, facts_df)
-                if result.extraction_method.value == 'calculated':
+                if result.value is not None:
                     return result.value
             
             return None
@@ -526,6 +528,18 @@ class ReferenceValidator:
                     xbrl_value = self._extract_composite_value(xbrl, metric)
                 else:
                     xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
+            
+            # FALLBACK: For OperatingIncome with no mapping, try calculated extraction
+            # This handles companies like NKE/MRK that don't report OperatingIncomeLoss
+            elif not result.is_mapped and xbrl and metric == 'OperatingIncome' and ref_value:
+                industry_value = self._try_industry_extraction(ticker, metric, xbrl)
+                if industry_value is not None:
+                    xbrl_value = industry_value
+                    # Create a synthetic mapping for the calculated value
+                    result.concept = None  # Calculated, no single concept
+                    result.confidence = 0.85
+                    result.source = MappingSource.TREE
+                    result.reasoning = "Calculated from GrossProfit - SG&A - R&D"
             
             # Validate
             validation = self._compare_values(
@@ -962,7 +976,8 @@ class ReferenceValidator:
                 notes="No reference data available (metric may not exist for this company)"
             )
         
-        if not result.is_mapped:
+        # Only return mapping_needed if we have no mapping AND no calculated value
+        if not result.is_mapped and xbrl_value is None:
             return ValidationResult(
                 metric=metric,
                 company=ticker,
