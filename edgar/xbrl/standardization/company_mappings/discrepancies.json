@@ -1,17 +1,56 @@
 {
-    "schema_version": "1.0",
+    "schema_version": "1.1",
     "description": "Known discrepancies between XBRL extracted values and reference data (yfinance)",
     "statistics": {
-        "total": 2,
+        "total": 3,
         "by_classification": {
             "definition_mismatch": 1,
-            "reference_unavailable": 1
+            "reference_unavailable": 1,
+            "data_provider_adjustment": 1
         },
         "by_status": {
-            "accepted": 2
+            "accepted": 2,
+            "documented": 1
         }
     },
     "discrepancies": [
+        {
+            "id": "KO-OperatingIncome-2024FY",
+            "ticker": "KO",
+            "metric": "OperatingIncome",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-20",
+            "xbrl": {
+                "value": 9992000000,
+                "concepts": [
+                    "us-gaap:OperatingIncomeLoss"
+                ],
+                "method": "direct"
+            },
+            "reference": {
+                "source": "yfinance",
+                "gaap_field": "Total Operating Income As Reported",
+                "gaap_value": 9992000000,
+                "calculated_field": "Operating Income",
+                "calculated_value": 14020000000
+            },
+            "variance_pct": 0.0,
+            "classification": "data_provider_adjustment",
+            "status": "documented",
+            "investigation": {
+                "date": "2026-01-20",
+                "root_cause": "Yahoo normalizes OperatingIncome by adding back special charges ($2.3B impairments, restructuring). The 'As Reported' field contains GAAP value matching XBRL.",
+                "yahoo_adjustment_items": [
+                    "Special Income Charges: -$2.30B",
+                    "Impairment Of Capital Assets: $0.89B",
+                    "Restructuring And Merger Acquisition: $2.25B"
+                ],
+                "verified_correct": true,
+                "verified_by": "agent"
+            },
+            "action": "use_gaap_field",
+            "notes": "First documented case of yfinance 'As Reported' pattern. See reference_validator.py YFINANCE_GAAP_FALLBACKS."
+        },
         {
             "id": "TSLA-IntangibleAssets-2024FY",
             "ticker": "TSLA",

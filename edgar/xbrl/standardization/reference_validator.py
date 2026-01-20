@@ -48,11 +48,31 @@ class ReferenceValidator:
     """
     
     # Mapping from our metrics to yfinance field names
+    #
+    # IMPORTANT: yfinance "As Reported" Pattern
+    # -----------------------------------------
+    # yfinance sometimes provides TWO values for the same metric:
+    #   - "<Metric>" = Yahoo-calculated/normalized value (may adjust for one-time items)
+    #   - "<Metric> As Reported" or "Total <Metric> As Reported" = GAAP value from filing
+    #
+    # For most companies, these are identical. But for companies with significant
+    # special charges (e.g., KO with $2.3B impairments), Yahoo "normalizes" the
+    # base metric by adding back these charges.
+    #
+    # Our strategy: Use GAAP fields ("As Reported") when available, fallback to
+    # calculated fields when not. See YFINANCE_GAAP_FALLBACKS below.
+    #
+    # Example (KO 2024):
+    #   - "Operating Income" = $14.02B (Yahoo adds back special charges)
+    #   - "Total Operating Income As Reported" = $9.99B (GAAP, matches XBRL)
+    #
+    # Search keywords: yfinance GAAP, As Reported, normalized, adjusted
+    #
     YFINANCE_MAP = {
         'Revenue': ('financials', 'Total Revenue'),
         'COGS': ('financials', 'Cost Of Revenue'),
         'SGA': ('financials', 'Selling General And Administrative'),
-        'OperatingIncome': ('financials', 'Operating Income'),
+        'OperatingIncome': ('financials', 'Total Operating Income As Reported'),  # GAAP field
         'NetIncome': ('financials', 'Net Income'),
         'OperatingCashFlow': ('cashflow', 'Operating Cash Flow'),
         'Capex': ('cashflow', 'Capital Expenditure'),
@@ -62,6 +82,12 @@ class ReferenceValidator:
         'ShortTermDebt': ('balance_sheet', 'Current Debt'),
         'LongTermDebt': ('balance_sheet', 'Long Term Debt'),
         'CashAndEquivalents': ('balance_sheet', 'Cash And Cash Equivalents'),
+    }
+    
+    # Fallback fields when GAAP "As Reported" field is not available
+    # Some companies only have the calculated field (e.g., NKE, LLY)
+    YFINANCE_GAAP_FALLBACKS = {
+        'OperatingIncome': ('financials', 'Operating Income'),  # Fallback if "As Reported" missing
     }
     
     # Composite metrics: sum of multiple XBRL concepts
@@ -649,6 +675,9 @@ class ReferenceValidator:
     ) -> Optional[float]:
         """Get a value from yfinance for a metric.
         
+        Uses GAAP "As Reported" fields when available, falls back to
+        calculated fields for companies that don't have the GAAP field.
+        
         Checks multiple periods if current period returns NaN.
         """
         if metric not in self.YFINANCE_MAP:
@@ -668,18 +697,27 @@ class ReferenceValidator:
             
             if df is None or df.empty:
                 return None
-                
-            if field_name not in df.index:
-                return None
             
-            # Try multiple periods, use first non-NaN value
-            for col_idx in range(min(max_periods, len(df.columns))):
-                val = df.loc[field_name].iloc[col_idx]
-                if val is not None and not (hasattr(val, 'isna') and val.isna()):
-                    try:
-                        return float(val)
-                    except (ValueError, TypeError):
-                        continue
+            # Try primary field first, then fallback if not available
+            fields_to_try = [field_name]
+            if metric in self.YFINANCE_GAAP_FALLBACKS:
+                fallback_sheet, fallback_field = self.YFINANCE_GAAP_FALLBACKS[metric]
+                if fallback_sheet == sheet_name:
+                    fields_to_try.append(fallback_field)
+            
+            for try_field in fields_to_try:
+                if try_field not in df.index:
+                    continue
+                    
+                # Try multiple periods, use first non-NaN value
+                for col_idx in range(min(max_periods, len(df.columns))):
+                    val = df.loc[try_field].iloc[col_idx]
+                    if val is not None and not (hasattr(val, 'isna') and val.isna()):
+                        try:
+                            return float(val)
+                        except (ValueError, TypeError):
+                            continue
+                            
         except Exception:
             pass
         

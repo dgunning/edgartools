@@ -3,51 +3,62 @@
 ## Summary
 
 **XBRL Value**: $9.99B (GAAP OperatingIncomeLoss)  
-**yfinance Value**: $14.02B (Non-GAAP "Comparable Operating Income")  
-**Gap**: $4.03B (28.7%)
+**yfinance GAAP Value**: $9.99B (`Total Operating Income As Reported`)  
+**yfinance Calculated Value**: $14.02B (`Operating Income` - Yahoo-normalized)  
+**Gap**: 0.0% ✓ RESOLVED
 
-**Resolution Status**: DATA_SOURCE_MISMATCH - Requires RAG system for 8-K earnings release parsing
-
----
-
-## Investigation Findings
-
-### 1. The "Golden Source" Tag Does Not Exist in XBRL
-
-Searched KO's 10-K for custom tags:
-- Found 76 `ko:` namespace concepts
-- **None** contain "Comparable", "Adjusted", or "CurrencyNeutral" operating income
-- The ~$14B "Street" number exists only in 8-K Earnings Release (Exhibit 99.1)
-
-### 2. yfinance Uses Non-GAAP Metric
-
-yfinance's "Operating Income" for KO is NOT the GAAP `OperatingIncomeLoss` tag. It sources the "Comparable Currency Neutral Operating Income" figure from earnings releases.
-
-### 3. Add-Back Components Found (But Incomplete)
-
-| XBRL Tag | Value |
-|----------|-------|
-| `AssetImpairmentCharges` | $0.05B |
-| `ImpairmentOfIntangibleAssetsExcludingGoodwill` | $0.89B (BODYARMOR) |
-| `BusinessCombinationContingentConsideration` | $6.13B (Fairlife - balance sheet) |
-
-Total add-backs found: $7.06B (exceeds gap - selective application unclear)
-
-### 4. Currency Neutral Adjustment Not Available
-
-KO reports "Comparable Currency Neutral" metrics that adjust for FX headwinds. This is a derived figure in MD&A narrative, not a discrete XBRL concept.
+**Resolution Status**: RESOLVED - Was comparing to wrong yfinance field
 
 ---
 
-## Why XBRL Cannot Solve This
+## Root Cause (2026-01-20 Investigation)
 
-1. **Non-GAAP metrics are not required** to be XBRL-tagged
-2. **Earnings releases (8-K Exhibit 99.1)** contain these figures as unstructured text
-3. **"Items Impacting Comparability"** are company-defined adjustments with no standard taxonomy
+### The Issue Was NOT Non-GAAP vs GAAP
+
+yfinance provides **two** OperatingIncome fields:
+
+| Field | Value | Source |
+|-------|-------|--------|
+| `Total Operating Income As Reported` | $9.99B | GAAP from 10-K |
+| `Operating Income` | $14.02B | Yahoo-calculated/normalized |
+
+We were comparing XBRL to `Operating Income` (the Yahoo-calculated field).
+When we switch to `Total Operating Income As Reported`, the variance is **0.0%**.
+
+### Why Yahoo's Calculated Value Differs
+
+Yahoo normalizes by adding back one-time charges:
+- Special Income Charges: -$2.30B
+- Impairment Of Capital Assets: $0.89B  
+- Restructuring And Merger Acquisition: $2.25B
 
 ---
 
-## Recommendation: RAG System for Earnings Releases
+## Fix Applied
+
+**File**: `reference_validator.py`
+
+```python
+# Changed OperatingIncome mapping to use GAAP field
+'OperatingIncome': ('financials', 'Total Operating Income As Reported'),
+
+# Added fallback for companies without GAAP field (NKE, LLY)
+YFINANCE_GAAP_FALLBACKS = {
+    'OperatingIncome': ('financials', 'Operating Income'),
+}
+```
+
+---
+
+## Previous Analysis (Incorrect Conclusion)
+
+~~The original analysis concluded that yfinance uses "Comparable Currency Neutral~~
+~~Operating Income" from 8-K earnings releases, requiring a RAG system to extract.~~
+
+**Corrected**: yfinance's `Operating Income` is Yahoo's own normalization, NOT KO's
+"Comparable" metric. The GAAP value is available in a different field.
+
+---
 
 To resolve KO-type gaps, the system needs:
 
