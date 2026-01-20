@@ -1,0 +1,85 @@
+UNITED STATES
+
+SECURITIES AND EXCHANGE COMMISSION
+
+Washington, D. C. 20549
+
+FORM8-K
+
+CURRENT REPORT
+
+Pursuant to Section 13 OR 15(d)
+
+of The Securities Exchange Act of 1934
+
+Date of Report (Date of earliest event reported): December12, 2025
+
+WaterBridge Infrastructure LLC
+
+(Exact name of registrant as specified in its charter)
+
+  Delaware                          001-42850         33-4546086           
+  (State or other jurisdiction      (Commission       (IRS Employer        
+
+  5555 San Felipe Street, Suite 1200                     
+  (Address of principal executive offices and zip code)  
+
+Registrant’s telephone number, including area code: (713)230-8864
+
+Not applicable
+
+(Former name or former address, if changed since last report.)
+
+Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions:
+
+  Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425)  
+
+  Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12)  
+
+  Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))  
+
+  Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c))  
+
+Securities registered pursuant to Section 12(b) of the Securities Exchange Act of 1934:
+
+  Title of each class                                                  Trading        Name of each exchange    
+                                                                       Symbol(s)      on which registered      
+  Class A shares representing limited liability company interests      WBI            New York Stock Exchange  
+                                                                                                               
+                                                                                      NYSE Texas, Inc.         
+ ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (§230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (§240.12b-2 of this chapter).
+
+Emerging growth company☐
+
+If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. ☐
+
+  Item 5.02      Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers.  
+
+On December 12, 2025, the Board of Directors (the “ Board”) of WaterBridge Infrastructure LLC (NYSE: WBI; NYSE TX: WBI) (the “ Company”) appointed Janet Carrig to serve on the Board, with a term expiring at the Company’s 2026 annual meeting of shareholders or her earlier resignation or removal. The Board has determined that Ms. Carrig is an “independent director” under the applicable rules of the New York Stock Exchange and NYSE Texas, Inc. and the U. S. Securities and Exchange Commission (“ 
+SEC”) and has appointed her to serve as a member of the Audit Committee of the Board. Ms. Carrig will replace Michael Sulton on the Audit Committee and Mr. Sulton will continue to serve as a member of the Board.
+
+Ms. Carrig has more than 20 years of experience as an attorney in both public and private practice, including most recently as the Senior Vice President, General Counsel and Corporate Secretary of ConocoPhillips from 2007 until 2018 and ten years as the Executive Vice President, Corporate Development, General Counsel and Secretary of Kellogg Company. Ms. Carrig also serves on the boards of Columbia Seligman Premium Technology Growth Fund, Inc. (NYSE: STK) and Tri-Continental Corp. (NYSE: TY) and
+previously served on the boards of EQT Corporation and Whiting Petroleum. Ms. Carrig received a Bachelor of Arts in History from Grinnell College and a Juris Doctor from Yale Law School.
+
+We believe that Ms. Carrig’s legal, corporate governance and capital markets expertise make her well qualified to serve as a member of the Board.
+
+In accordance with the Company’s policies for compensating non-employee directors, Ms. Carrig will receive a grant of 6,500 restricted stock units (“ RSUs”) under the WaterBridge Infrastructure LLC Long Term Incentive Plan, as may be amended and/or supplemented from time to time (the “ Plan”) and an annual cash retainer of $100,000 as compensation for her service on the Board, as well as an additional annual cash retainer of $10,000 for her service on the Audit Committee, in each case, to be 
+paid quarterly in advance and prorated for any partial quarter of service. The terms of her RSUs are generally in accordance with the Form of Restricted Share Unit Award Agreement, a copy of which was filed with the SEC on September 24, 2025, as Exhibit 10.3 to the Company’s Current Report on Form 8-K.
+
+In connection with her appointment as a director on the Board, the Company entered into an indemnification agreement with Ms. Carrig, dated December 12, 2025 (the “ Indemnification Agreement”). The Indemnification Agreement requires, among other things, the Company to indemnify Ms. Carrig to the fullest extent permitted by law against liabilities that may arise by reason of her service to the Company, and to advance or pay expenses incurred as a result of any proceeding against her as to which 
+she could be indemnified. The terms of the Indemnification Agreement are generally in accordance with the Form of Indemnification Agreement, a copy of which was filed as Exhibit 10.3 to the Company’s Registration Statement on Form S-1, as amended, filed with the SEC on September 3, 2025. The foregoing description is not complete and is qualified in its entirety by reference to the full text of the Form of Indemnification Agreement.
+
+There are no arrangements or understandings between Ms. Carrig and any other person pursuant to which she was selected to serve as a director of the Board, and there are no relationships or transactions involving Ms. Carrig with the Company or any of its subsidiaries that would require disclosure under Item 404(a) of Regulation S-K under the Securities Act of 1933, as amended.
+
+SIGNATURES
+
+Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by the undersigned hereunto duly authorized.
+
+  WATERBRIDGE INFRASTRUCTURE LLC                                      
+  By:                                 /s/ Scott L. McNeely            
+                                      Name: Scott L. McNeely          
+                                      Title: Chief Financial Officer  
+
+Date: December 15, 2025

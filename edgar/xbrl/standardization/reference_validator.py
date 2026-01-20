@@ -94,6 +94,8 @@ class ReferenceValidator:
     # These metrics require summing components to match yfinance definition
     # NOTE: These are fallbacks. Prefer extraction_rules.py JSON config.
     COMPOSITE_METRICS = {
+        # IntangibleAssets = Goodwill + (IntangibleAssetsNet OR IndefiniteLivedTrademarks)
+        # IndefiniteLivedTrademarks is a FALLBACK for IntangibleAssetsNet (via CONCEPT_PRIORITY)
         'IntangibleAssets': ['Goodwill', 'IntangibleAssetsNetExcludingGoodwill'],
         'ShortTermDebt': ['LongTermDebtCurrent', 'CommercialPaper', 'ShortTermBorrowings'],
     }
@@ -104,6 +106,7 @@ class ReferenceValidator:
         'Goodwill': ['Goodwill'],
         'IntangibleAssetsNetExcludingGoodwill': [
             'IntangibleAssetsNetExcludingGoodwill',
+            'IndefiniteLivedTrademarks',  # KO uses this instead
             'FiniteLivedIntangibleAssetsNet',
         ],
     }

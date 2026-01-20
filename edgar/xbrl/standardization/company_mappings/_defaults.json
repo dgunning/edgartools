@@ -14,10 +14,11 @@
                 ],
                 "IntangibleAssetsNetExcludingGoodwill": [
                     "us-gaap:IntangibleAssetsNetExcludingGoodwill",
+                    "us-gaap:IndefiniteLivedTrademarks",
                     "us-gaap:FiniteLivedIntangibleAssetsNet"
                 ]
             },
-            "notes": "Sum of Goodwill + Other Intangibles. Prefer exact Goodwill match over impairment variants."
+            "notes": "Sum of Goodwill + Other Intangibles. KO uses IndefiniteLivedTrademarks instead of IntangibleAssetsNet."
         },
         "ShortTermDebt": {
             "method": "composite_sum",

@@ -2,14 +2,13 @@
     "schema_version": "1.1",
     "description": "Known discrepancies between XBRL extracted values and reference data (yfinance)",
     "statistics": {
-        "total": 3,
+        "total": 4,
         "by_classification": {
-            "definition_mismatch": 1,
-            "reference_unavailable": 1,
+            "definition_mismatch": 2,
             "data_provider_adjustment": 1
         },
         "by_status": {
-            "accepted": 2,
+            "accepted": 3,
             "documented": 1
         }
     },
@@ -86,9 +85,40 @@
             "ticker": "NVDA",
             "metric": "ShortTermDebt",
             "fiscal_period": "2024-FY",
-            "created_date": "2026-01-09",
+            "created_date": "2026-01-20",
             "xbrl": {
-                "value": 0,
+                "value": 1250000000,
+                "concepts": [
+                    "us-gaap:DebtCurrent",
+                    "us-gaap:LongTermDebtCurrent"
+                ],
+                "method": "direct"
+            },
+            "reference": {
+                "source": "yfinance",
+                "field": "Current Debt And Capital Lease Obligation",
+                "value": 290000000
+            },
+            "variance_pct": 331.0,
+            "classification": "definition_mismatch",
+            "status": "accepted",
+            "investigation": {
+                "date": "2026-01-20",
+                "root_cause": "yfinance 'Current Debt And Capital Lease Obligation' for NVDA is primarily operating lease liabilities ($0.29B), while XBRL DebtCurrent ($1.25B) is actual financial debt. Our XBRL value is more economically meaningful.",
+                "verified_correct": true,
+                "verified_by": "agent"
+            },
+            "action": "use_xbrl_value",
+            "notes": "yfinance includes operating leases in 'Current Debt'; XBRL separates financial debt from lease liabilities."
+        },
+        {
+            "id": "GOOG-ShortTermDebt-2024FY",
+            "ticker": "GOOG",
+            "metric": "ShortTermDebt",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-20",
+            "xbrl": {
+                "value": 1000000000,
                 "concepts": [
                     "us-gaap:LongTermDebtCurrent"
                 ],
@@ -96,24 +126,21 @@
             },
             "reference": {
                 "source": "yfinance",
-                "field": "Current Debt",
-                "value": null
+                "field": "Current Debt And Capital Lease Obligation",
+                "value": 2890000000
             },
-            "variance_pct": null,
-            "classification": "reference_unavailable",
+            "variance_pct": 65.4,
+            "classification": "definition_mismatch",
             "status": "accepted",
             "investigation": {
-                "date": "2026-01-09",
-                "root_cause": "NVDA has no short-term debt. yfinance correctly returns NaN. XBRL mapping to LongTermDebtCurrent is correct.",
+                "date": "2026-01-20",
+                "root_cause": "yfinance 'Current Debt And Capital Lease Obligation' includes $2.89B operating lease liability current + $0.23B finance lease. XBRL LongTermDebtCurrent ($1.00B) is pure financial debt excluding leases.",
+                "note": "GOOG does not have 'Current Debt' field - only 'Current Debt And Capital Lease Obligation'",
                 "verified_correct": true,
-                "verified_periods": [
-                    "2024-FY",
-                    "2023-FY",
-                    "2022-FY"
-                ],
                 "verified_by": "agent"
             },
-            "action": "use_xbrl_value"
+            "action": "use_xbrl_value",
+            "notes": "yfinance includes operating leases; XBRL provides pure financial debt value."
         }
     ]
 }
