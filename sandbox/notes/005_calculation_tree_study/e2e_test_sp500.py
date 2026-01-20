@@ -1,117 +1,194 @@
 """
-E2E Test: 10 S&P 500 Companies with AI Agent Resolution
+E2E Test: S&P25 and S&P50 Multi-Period Validation
 
-Tests the complete concept mapping workflow:
-1. Static layers (Tree Parser + Facts Search)
-2. AI agent resolution of gaps
-3. Coverage comparison and reporting
+Tests the concept mapping workflow across:
+1. S&P25: 25 Companies (5 Years 10-K + 6 Quarters 10-Q)
+2. S&P50: 50 Companies (5 Years 10-K + 6 Quarters 10-Q)
+
+The test reports pass rates for both groups to track progress.
 """
 
-from edgar import set_identity, use_local_storage
+from edgar import set_identity, use_local_storage, Company
 from edgar.xbrl.standardization.orchestrator import Orchestrator
-from edgar.xbrl.standardization.tools.resolve_gaps import (
-    resolve_all_gaps,
-    calculate_coverage,
-    generate_report,
-    learn_patterns,
-    update_config
-)
 from edgar.xbrl.standardization.models import MappingSource
+
+# Define S&P25 and S&P50 Company Lists
+SP25 = [
+    "AAPL", "MSFT", "GOOG", "AMZN", "NVDA", "META", "TSLA",
+    "JPM", "V", "MA", "BAC", "WFC", "GS", "MS", "AXP", "BLK", "C",
+    "UNH", "JNJ", "LLY", "PFE", "MRK", "ABBV", "TMO", "DHR"
+]
+
+SP50 = [
+    "AAPL", "MSFT", "GOOG", "AMZN", "NVDA", "META", "TSLA",
+    "JPM", "V", "MA", "BAC", "WFC", "GS", "MS", "AXP", "BLK", "C",
+    "UNH", "JNJ", "LLY", "PFE", "MRK", "ABBV", "TMO", "DHR", "ABT",
+    "WMT", "PG", "KO", "PEP", "COST", "MCD", "DIS", "NKE", "SBUX",
+    "XOM", "CVX", "CAT", "GE", "RTX", "HON", "UPS", "BA",
+    "CRM", "ORCL", "ADBE", "NFLX", "CSCO", "ACN", "IBM"
+]
+
+
+def run_test_for_group(group_name: str, tickers: list, orchestrator: Orchestrator):
+    """Run E2E test for a specific group of companies."""
+    print(f"\n{'='*60}")
+    print(f"TESTING: {group_name} ({len(tickers)} Companies)")
+    print(f"{'='*60}")
+
+    stats = {
+        '10-K': {'total': 0, 'passed': 0, 'missing_ref': 0},
+        '10-Q': {'total': 0, 'passed': 0, 'missing_ref': 0}
+    }
+
+    for ticker in tickers:
+        print(f"\n>> {ticker}", end=" ", flush=True)
+        
+        try:
+            company = Company(ticker)
+        except Exception as e:
+            print(f"[LOAD FAIL: {e}]")
+            continue
+
+        # --- PROCESS 10-K (Annual) ---
+        filings_10k = company.get_filings(form='10-K').latest(5)
+        if filings_10k is not None and not hasattr(filings_10k, '__iter__'):
+            filings_10k = [filings_10k]
+        if not filings_10k:
+            filings_10k = []
+
+        for filing in filings_10k:
+            try:
+                period_date = filing.period_of_report
+                xbrl = filing.xbrl()
+                if not xbrl:
+                    continue
+                
+                results = orchestrator.tree_parser.map_company(ticker, filing)
+                validations = orchestrator.validator.validate_and_update_mappings(
+                    ticker, results, xbrl, filing_date=period_date
+                )
+                
+                passes = sum(1 for v in validations.values() if v.status == 'match')
+                fails = sum(1 for v in validations.values() if v.status == 'mismatch')
+                missing_ref = sum(1 for v in validations.values() if v.status == 'missing_ref')
+                
+                stats['10-K']['total'] += (passes + fails)
+                stats['10-K']['passed'] += passes
+                stats['10-K']['missing_ref'] += missing_ref
+            except Exception:
+                pass  # Silently skip errors for batch processing
+
+        # --- PROCESS 10-Q (Quarterly) ---
+        filings_10q = company.get_filings(form='10-Q').latest(6)
+        if filings_10q is not None and not hasattr(filings_10q, '__iter__'):
+            filings_10q = [filings_10q]
+        if not filings_10q:
+            filings_10q = []
+
+        for filing in filings_10q:
+            try:
+                period_date = filing.period_of_report
+                xbrl = filing.xbrl()
+                if not xbrl:
+                    continue
+
+                results = orchestrator.tree_parser.map_company(ticker, filing)
+                
+                # Switch to quarterly yfinance data
+                original_map = orchestrator.validator.YFINANCE_MAP.copy()
+                quarterly_map = {
+                    k: (v[0].replace('financials', 'quarterly_financials')
+                           .replace('balance_sheet', 'quarterly_balance_sheet')
+                           .replace('cashflow', 'quarterly_cashflow'), v[1]) 
+                    for k, v in original_map.items()
+                }
+                orchestrator.validator.YFINANCE_MAP = quarterly_map
+                
+                validations = orchestrator.validator.validate_and_update_mappings(
+                    ticker, results, xbrl, filing_date=period_date
+                )
+                orchestrator.validator.YFINANCE_MAP = original_map
+                
+                passes = sum(1 for v in validations.values() if v.status == 'match')
+                fails = sum(1 for v in validations.values() if v.status == 'mismatch')
+                missing_ref = sum(1 for v in validations.values() if v.status == 'missing_ref')
+                
+                stats['10-Q']['total'] += (passes + fails)
+                stats['10-Q']['passed'] += passes
+                stats['10-Q']['missing_ref'] += missing_ref
+            except Exception:
+                pass
+
+        print(".", end="", flush=True)  # Progress indicator
+
+    # Group Summary
+    print(f"\n\n--- {group_name} SUMMARY ---")
+    if stats['10-K']['total'] > 0:
+        k_rate = stats['10-K']['passed'] / stats['10-K']['total'] * 100
+        print(f"10-K Pass Rate: {k_rate:.1f}% ({stats['10-K']['passed']}/{stats['10-K']['total']})")
+    else:
+        print("10-K Pass Rate: N/A")
+    
+    if stats['10-Q']['total'] > 0:
+        q_rate = stats['10-Q']['passed'] / stats['10-Q']['total'] * 100
+        print(f"10-Q Pass Rate: {q_rate:.1f}% ({stats['10-Q']['passed']}/{stats['10-Q']['total']})")
+    else:
+        print("10-Q Pass Rate: N/A")
+
+    return stats
+
 
 def run_sp500_test():
     print("="*60)
-    print("E2E TEST: 10 S&P 500 COMPANIES")
+    print("E2E TEST: S&P25 & S&P50 (MULTI-PERIOD)")
+    print("Scope: 5 Years 10-K + 6 Quarters 10-Q")
     print("="*60)
 
-    # Setup
     set_identity("Dev Gunning developer-gunning@gmail.com")
     use_local_storage(True)
-
-    tickers = ['JPM', 'WMT', 'JNJ', 'XOM', 'BAC', 'PG', 'CVX', 'UNH', 'HD', 'DIS']
-
-    # Phase 1: Static Workflow
-    print("\nPHASE 1: STATIC WORKFLOW (Tree Parser + Facts Search)")
-    print("-"*60)
+    
     orchestrator = Orchestrator()
-    results = orchestrator.map_companies(
-        tickers=tickers,
-        use_ai=False,  # Static only
-        validate=True
-    )
 
-    before = calculate_coverage(results)
-    print(f"Coverage: {before}")
-
-    # Phase 2: Analyze Gaps
-    print("\nPHASE 2: ANALYZE GAPS")
-    print("-"*60)
-    gaps = []
-    for ticker, metrics in results.items():
-        for metric, result in metrics.items():
-            if result.source == MappingSource.CONFIG:
-                continue
-
-            if not result.is_mapped or result.validation_status == "invalid":
-                gaps.append({
-                    'ticker': ticker,
-                    'metric': metric,
-                    'status': 'unmapped' if not result.is_mapped else 'invalid'
-                })
-
-    print(f"Total gaps: {len(gaps)}")
-    print(f"Sample gaps:")
-    for gap in gaps[:10]:
-        print(f"  {gap['ticker']} {gap['metric']}: {gap['status']}")
-
-    # Phase 3: AI Resolution
-    print("\nPHASE 3: AI AGENT RESOLUTION")
-    print("-"*60)
-    resolutions, updated_results = resolve_all_gaps(results)
-
-    after = calculate_coverage(updated_results)
-    print(f"Coverage: {after}")
-
-    improvement = after.coverage_pct - before.coverage_pct
-    resolved_count = sum(1 for r in resolutions if r.resolved)
-    print(f"Improvement: +{improvement:.1f}% (+{resolved_count} metrics resolved)")
-
-    # Phase 4: Pattern Learning
-    print("\nPHASE 4: PATTERN LEARNING")
-    print("-"*60)
-    patterns = learn_patterns(resolutions)
-    if patterns:
-        print("Patterns discovered:")
-        for metric, concepts in patterns.items():
-            print(f"  {metric}: {concepts}")
-    else:
-        print("No patterns discovered")
-
-    # Phase 5: Config Update
-    print("\nPHASE 5: CONFIG UPDATE")
-    print("-"*60)
-    config_changes = update_config(resolutions)
-    if config_changes:
-        print(f"Config updated: {len(config_changes)} changes")
-        for change in config_changes[:10]:
-            print(f"  {change}")
-    else:
-        print("No config changes needed")
-
-    # Phase 6: Generate Report
-    print("\n")
-    print("="*60)
-    print("FINAL REPORT")
-    print("="*60)
-    report = generate_report(before, after, resolutions, patterns, config_changes)
-    print(report)
-
-    return {
-        'before': before,
-        'after': after,
-        'resolutions': resolutions,
-        'patterns': patterns,
-        'config_changes': config_changes
+    # Run S&P25 Test
+    sp25_stats = run_test_for_group("S&P25", SP25, orchestrator)
+    
+    # Run S&P50 Test (S&P50 includes S&P25, so we only test the additional companies)
+    sp50_additional = [t for t in SP50 if t not in SP25]
+    sp50_additional_stats = run_test_for_group("S&P50 (Additional 25)", sp50_additional, orchestrator)
+    
+    # Combine S&P50 stats
+    sp50_stats = {
+        '10-K': {
+            'total': sp25_stats['10-K']['total'] + sp50_additional_stats['10-K']['total'],
+            'passed': sp25_stats['10-K']['passed'] + sp50_additional_stats['10-K']['passed'],
+            'missing_ref': sp25_stats['10-K']['missing_ref'] + sp50_additional_stats['10-K']['missing_ref']
+        },
+        '10-Q': {
+            'total': sp25_stats['10-Q']['total'] + sp50_additional_stats['10-Q']['total'],
+            'passed': sp25_stats['10-Q']['passed'] + sp50_additional_stats['10-Q']['passed'],
+            'missing_ref': sp25_stats['10-Q']['missing_ref'] + sp50_additional_stats['10-Q']['missing_ref']
+        }
     }
 
+    # Final Combined Report
+    print("\n" + "="*60)
+    print("FINAL COMBINED RESULTS")
+    print("="*60)
+    
+    print("\n** S&P25 **")
+    if sp25_stats['10-K']['total'] > 0:
+        print(f"  10-K: {sp25_stats['10-K']['passed']/sp25_stats['10-K']['total']*100:.1f}%")
+    if sp25_stats['10-Q']['total'] > 0:
+        print(f"  10-Q: {sp25_stats['10-Q']['passed']/sp25_stats['10-Q']['total']*100:.1f}%")
+
+    print("\n** S&P50 (Full) **")
+    if sp50_stats['10-K']['total'] > 0:
+        print(f"  10-K: {sp50_stats['10-K']['passed']/sp50_stats['10-K']['total']*100:.1f}%")
+    if sp50_stats['10-Q']['total'] > 0:
+        print(f"  10-Q: {sp50_stats['10-Q']['passed']/sp50_stats['10-Q']['total']*100:.1f}%")
+
+    return {'sp25': sp25_stats, 'sp50': sp50_stats}
+
+
 if __name__ == "__main__":
-    results = run_sp500_test()
+    run_sp500_test()

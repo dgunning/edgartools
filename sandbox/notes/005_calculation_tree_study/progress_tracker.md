@@ -4,30 +4,27 @@ This document tracks data coverage improvements over time.
 
 ---
 
-## Latest Run: 2026-01-20 (Final Resolution)
+## Latest Run: 2026-01-20 (Multi-Period Validation)
 
-| Test Set | Coverage | Matched/Accepted | Notes |
-|----------|----------|------------------|-------|
-| **S&P25 Subset (7)** | 100% | 100% | All metrics Valid or Accepted Mismatch |
+| Test Set | 10-K Pass Rate | 10-Q Pass Rate | Notes |
+|----------|----------------|----------------|-------|
+| **S&P25** | **86.9%** (741/853) | **72.1%** (782/1084) | 5 Years + 6 Quarters |
+| **S&P50** | **85.8%** (1704/1986) | **70.7%** (1641/2321) | 5 Years + 6 Quarters |
 
 ### Changes Since Last Run
 
-1. **LLY Capex Fix** (JSON Override)
-   - Created `lly_mappings.json` to force `OtherPPE` extraction
-   - Result: $5.06B (Valid)
+1. **Multi-Period E2E Test Expansion**
+   - Now tests 5 years of 10-K + 6 quarters of 10-Q per company
+   - Date-aware validation in `ReferenceValidator`
+   - Quarterly yfinance data support
 
-2. **LLY ShortTermDebt** (Hybrid Logic)
-   - Updated `ReferenceValidator` to prefer mapped "Total" concepts overriding composite
-   - Result: $5.12B (Valid 0% variance)
+2. **LLY Capex Fix** (JSON Override)
+   - Confirmed robust across 3 years (2022-2024)
+   - Consistently uses `OtherPPE`
 
-3. **KO ShortTermDebt** (Hybrid + Tolerance)
-   - Added `LTD&CL_Current` to Total list
-   - Increased debt tolerance to 20%
-   - Result: $1.79B (Valid 16.8% variance)
-
-4. **CVX ShortTermDebt** (Mismatch)
-   - Documented definition mismatch between XBRL Total vs yfinance Borrowings
-   - Result: Accepted
+3. **LLY ShortTermDebt** (Hybrid Logic)
+   - Confirmed robust across 3 years
+   - Validates correctly against composite sums
 
 ---
 
@@ -40,15 +37,15 @@ All 7 companies pass.
 All 7 companies pass.
 
 ### Capex ✓ RESOLVED
-All 7 companies pass (LLY via override).
+All 7 companies pass.
 
-### ShortTermDebt ✓ RESOLVED (with Mismatches)
+### ShortTermDebt - Pending Re-Evaluation
 
 | Ticker | Status | Components |
 |--------|--------|------------|
 | **LLY** | Valid | DebtCurrent ($5.12B) |
-| **KO** | Valid | LTD&CL_Current ($1.79B) |
-| **CVX** | Accepted | XBRL $13.80B vs yf $4.35B |
+| **KO** | **FAIL** | Reverted fixes |
+| **CVX** | **FAIL** | Reverted documentation |
 | **NVDA** | Accepted | Definition Mismatch |
 | **GOOG** | Accepted | Definition Mismatch |
 

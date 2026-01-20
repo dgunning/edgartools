@@ -9,7 +9,7 @@ Key principle: We map XBRL concepts → extract XBRL values → validate against
 """
 
 import os
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from datetime import datetime
 from dataclasses import dataclass
 
@@ -489,7 +489,8 @@ class ReferenceValidator:
         self,
         ticker: str,
         results: Dict[str, MappingResult],
-        xbrl=None
+        xbrl=None,
+        filing_date: Optional[Union[str, datetime]] = None
     ) -> Dict[str, ValidationResult]:
         """
         Validate all mappings for a company against yfinance.
@@ -498,6 +499,7 @@ class ReferenceValidator:
             ticker: Company ticker
             results: Mapping results to validate
             xbrl: Optional XBRL object to extract values
+            filing_date: Date of the filing (for historical matching)
             
         Returns:
             Dict of validation results per metric
@@ -526,7 +528,7 @@ class ReferenceValidator:
                 continue
             
             # Get reference value from yfinance
-            ref_value = self._get_yfinance_value(stock, metric)
+            ref_value = self._get_yfinance_value(stock, metric, target_date=filing_date)
             
             # Get XBRL value (if we have a mapping and XBRL object)
             xbrl_value = None
@@ -598,7 +600,8 @@ class ReferenceValidator:
         self,
         ticker: str,
         results: Dict[str, MappingResult],
-        xbrl=None
+        xbrl=None,
+        filing_date: Optional[Union[str, datetime]] = None
     ) -> Dict[str, ValidationResult]:
         """
         Validate mappings and update MappingResult objects with validation status.
@@ -611,11 +614,12 @@ class ReferenceValidator:
             ticker: Company ticker
             results: Mapping results to validate (will be modified in place)
             xbrl: Optional XBRL object to extract values
+            filing_date: Date of the filing (for historical matching)
             
         Returns:
             Dict of validation results per metric
         """
-        validations = self.validate_company(ticker, results, xbrl)
+        validations = self.validate_company(ticker, results, xbrl, filing_date=filing_date)
         
         # Update MappingResult objects based on validation
         for metric, validation in validations.items():
@@ -730,14 +734,22 @@ class ReferenceValidator:
         self,
         stock,
         metric: str,
-        max_periods: int = 4
+        max_periods: int = 4,
+        target_date: Optional[Union[str, datetime]] = None
     ) -> Optional[float]:
         """Get a value from yfinance for a metric.
         
         Uses GAAP "As Reported" fields when available, falls back to
         calculated fields for companies that don't have the GAAP field.
         
-        Checks multiple periods if current period returns NaN.
+        Args:
+            stock: yfinance Ticker object
+            metric: Metric name
+            max_periods: Max periods to search if no target_date
+            target_date: Optional specific date to match (within 7 days)
+            
+        Returns:
+            Float value or None
         """
         if metric not in self.YFINANCE_MAP:
             return None
@@ -745,12 +757,9 @@ class ReferenceValidator:
         sheet_name, field_name = self.YFINANCE_MAP[metric]
         
         try:
-            if sheet_name == 'financials':
-                df = stock.financials
-            elif sheet_name == 'cashflow':
-                df = stock.cashflow
-            elif sheet_name == 'balance_sheet':
-                df = stock.balance_sheet
+            # Dynamically get the dataframe (financials, quarterly_financials, etc.)
+            if hasattr(stock, sheet_name):
+                df = getattr(stock, sheet_name)
             else:
                 return None
             
@@ -767,7 +776,48 @@ class ReferenceValidator:
             for try_field in fields_to_try:
                 if try_field not in df.index:
                     continue
-                    
+                
+                # DATE MATCHING LOGIC
+                if target_date:
+                    # Ensure target_date is datetime
+                    if isinstance(target_date, str):
+                        try:
+                            # Handle YYYY-MM-DD or ISO format
+                            if 'T' in target_date:
+                                target_date = target_date.split('T')[0]
+                            t_date = datetime.strptime(target_date, '%Y-%m-%d')
+                        except:
+                            # Fallback if parsing fails - just use first avail
+                            t_date = None
+                    else:
+                        t_date = target_date
+                        
+                    if t_date:
+                        # Find column nearest to target date
+                        best_col = None
+                        min_diff = 365 # Start huge
+                        
+                        for col in df.columns:
+                            try:
+                                col_date = col if isinstance(col, datetime) else datetime.strptime(str(col).split(' ')[0], '%Y-%m-%d')
+                                diff = abs((col_date - t_date).days)
+                                
+                                # Match within 7 days window (accounting for filing lag vs period end)
+                                if diff <= 7 and diff < min_diff:
+                                    min_diff = diff
+                                    best_col = col
+                            except:
+                                continue
+                        
+                        if best_col is not None:
+                            val = df.loc[try_field, best_col]
+                            if val is not None and not (hasattr(val, 'isna') and val.isna()):
+                                return float(val)
+                        
+                        # If no date match found, return None (don't fallback to random other date)
+                        return None
+
+                # DEFAULT LOGIC (If no target_date or date parsing failed)
                 # Try multiple periods, use first non-NaN value
                 for col_idx in range(min(max_periods, len(df.columns))):
                     val = df.loc[try_field].iloc[col_idx]
@@ -1061,7 +1111,7 @@ class ReferenceValidator:
         # Debt metrics get higher tolerance due to definition mismatches
         # (yfinance may include/exclude leases, commercial paper differently)
         if metric in ['ShortTermDebt', 'LongTermDebt']:
-            tolerance = max(base_tolerance, 0.20)  # At least 20% for debt
+            tolerance = max(base_tolerance, 0.10)  # At least 10% for debt
         else:
             tolerance = max(base_tolerance, 0.05)
         
