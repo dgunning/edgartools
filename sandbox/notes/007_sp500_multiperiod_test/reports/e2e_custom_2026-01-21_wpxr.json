@@ -1,6 +1,6 @@
 {
-  "run_id": "e2e_2026-01-21T12:37:38.021538",
-  "timestamp": "2026-01-21T12:37:38.021548",
+  "run_id": "e2e_2026-01-21T12:49:24.612166",
+  "timestamp": "2026-01-21T12:49:24.612175",
   "config": {
     "group": "custom",
     "workers": 8,
@@ -20,8 +20,16 @@
       "10k_passed": 0,
       "10q_total": 0,
       "10q_passed": 0
+    },
+    "custom": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
     }
   },
   "failure_count": 0,
-  "failures": []
+  "error_count": 0,
+  "failures": [],
+  "errors": []
 }

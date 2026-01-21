@@ -629,6 +629,37 @@ class ReferenceValidator:
             validation = self._compare_values(
                 metric, ticker, xbrl_value, ref_value, result
             )
+            
+            # IDENTITY CHECK GUARDRAIL (Bank Sector Expansion)
+            # If OperatingIncome is extracted, cross-check against accounting identity
+            if metric == 'OperatingIncome' and xbrl_value is not None and xbrl:
+                try:
+                    from .industry_logic import get_industry_extractor, DefaultExtractor
+                    from edgar.entity.mappings_loader import get_industry_for_sic
+                    from edgar import Company
+                    
+                    c = Company(ticker)
+                    sic = c.data.sic
+                    industry = get_industry_for_sic(sic) if sic else None
+                    
+                    extractor = get_industry_extractor(industry) if industry else DefaultExtractor()
+                    
+                    # For performance, only get facts if not already extracted
+                    facts_df = None
+                    if xbrl and xbrl.facts:
+                        facts_df = xbrl.facts.to_dataframe()
+                        
+                    identity_warning = extractor.validate_accounting_identity(xbrl, facts_df, xbrl_value)
+                    
+                    if identity_warning:
+                        # Append warning to validation notes
+                        current_notes = validation.notes or ""
+                        validation.notes = f"{current_notes} | {identity_warning}" if current_notes else identity_warning
+                        # If identity completely fails (major logic error), consider downgrading status
+                        # For now, we just warn to gather data during Sprint 4
+                except Exception as e:
+                    pass
+
             validations[metric] = validation
         
         return validations

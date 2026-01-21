@@ -16,7 +16,7 @@ import os
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 # S&P25 and S&P50 Company Lists
 SP25 = [
@@ -74,7 +74,9 @@ def process_company(args: tuple) -> Dict[str, Any]:
     Worker function: Process a single company.
     Returns dict with stats and failures.
     """
-    ticker, config = args
+    worker_config = args  # rename for clarity
+    ticker = worker_config["ticker"]
+    target_metrics = worker_config.get("metrics")
     
     # Import here to avoid multiprocessing pickle issues
     from edgar import set_identity, use_local_storage, Company
@@ -103,11 +105,14 @@ def process_company(args: tuple) -> Dict[str, Any]:
             industry = None
         
         # Process 10-K filings
-        filings_10k = company.get_filings(form='10-K').latest(config["years"])
+        filings_10k = company.get_filings(form='10-K').latest(worker_config["years"])
         if filings_10k is not None and not hasattr(filings_10k, '__iter__'):
             filings_10k = [filings_10k]
         if not filings_10k:
+            print(f"DEBUG {ticker}: No 10-K filings found (years={worker_config['years']})")
             filings_10k = []
+        else:
+            print(f"DEBUG {ticker}: Found {len(filings_10k)} 10-Ks (Industry: {industry})")
             
         for filing in filings_10k:
             try:
@@ -122,6 +127,11 @@ def process_company(args: tuple) -> Dict[str, Any]:
                 )
                 
                 for metric, v in validations.items():
+                    print(f"DEBUG {ticker} 10-K {metric}: {v.status} (Ref: {v.reference_value})")
+                    # Filter by target metrics if specified
+                    if target_metrics and metric not in target_metrics:
+                        continue
+                        
                     if v.status == 'match':
                         result["10k_stats"]["passed"] += 1
                         result["10k_stats"]["total"] += 1
@@ -154,11 +164,14 @@ def process_company(args: tuple) -> Dict[str, Any]:
                 pass  # Skip individual filing errors
         
         # Process 10-Q filings
-        filings_10q = company.get_filings(form='10-Q').latest(config["quarters"])
+        filings_10q = company.get_filings(form='10-Q').latest(worker_config["quarters"])
         if filings_10q is not None and not hasattr(filings_10q, '__iter__'):
             filings_10q = [filings_10q]
         if not filings_10q:
+            print(f"DEBUG {ticker}: No 10-Q filings found (quarters={worker_config['quarters']})")
             filings_10q = []
+        else:
+             print(f"DEBUG {ticker}: Found {len(filings_10q)} 10-Qs")
             
         for filing in filings_10q:
             try:
@@ -185,6 +198,10 @@ def process_company(args: tuple) -> Dict[str, Any]:
                 orchestrator.validator.YFINANCE_MAP = original_map
                 
                 for metric, v in validations.items():
+                    # Filter by target metrics if specified
+                    if target_metrics and metric not in target_metrics:
+                        continue
+
                     if v.status == 'match':
                         result["10q_stats"]["passed"] += 1
                         result["10q_stats"]["total"] += 1
@@ -216,6 +233,9 @@ def process_company(args: tuple) -> Dict[str, Any]:
                 pass
                 
     except Exception as e:
+        import traceback
+        print(f"ERROR processing {ticker}: {e}")
+        traceback.print_exc()
         result["error"] = str(e)
     
     return result
@@ -224,29 +244,53 @@ def process_company(args: tuple) -> Dict[str, Any]:
 def write_json_report(results: List[Dict], output_path: Path, config: Dict):
     """Write detailed JSON report."""
     all_failures = []
+    all_errors = []
     summary = {
         "sp25": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0},
-        "sp50": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0}
+        "sp50": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0},
+        "custom": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0}
     }
     
     for r in results:
         all_failures.extend(r["failures"])
+        if "error" in r:
+            all_errors.append({"ticker": r["ticker"], "error": r["error"]})
         
         # Aggregate stats
-        for key in ["sp25", "sp50"]:
-            if r["ticker"] in (SP25 if key == "sp25" else SP50):
-                summary[key]["10k_total"] += r["10k_stats"]["total"]
-                summary[key]["10k_passed"] += r["10k_stats"]["passed"]
-                summary[key]["10q_total"] += r["10q_stats"]["total"]
-                summary[key]["10q_passed"] += r["10q_stats"]["passed"]
+        ticker = r["ticker"]
+        in_sp25 = ticker in SP25
+        in_sp50 = ticker in SP50
+        
+        # Always add to custom/total stats if it's a custom run
+        if config["group"] == "custom" or (not in_sp25 and not in_sp50):
+             summary["custom"]["10k_total"] += r["10k_stats"]["total"]
+             summary["custom"]["10k_passed"] += r["10k_stats"]["passed"]
+             summary["custom"]["10q_total"] += r["10q_stats"]["total"]
+             summary["custom"]["10q_passed"] += r["10q_stats"]["passed"]
+
+        # Also add to specific groups if applicable
+        if in_sp25:
+            summary["sp25"]["10k_total"] += r["10k_stats"]["total"]
+            summary["sp25"]["10k_passed"] += r["10k_stats"]["passed"]
+            summary["sp25"]["10q_total"] += r["10q_stats"]["total"]
+            summary["sp25"]["10q_passed"] += r["10q_stats"]["passed"]
+            
+        if in_sp50:
+            summary["sp50"]["10k_total"] += r["10k_stats"]["total"]
+            summary["sp50"]["10k_passed"] += r["10k_stats"]["passed"]
+            summary["sp50"]["10q_total"] += r["10q_stats"]["total"]
+            summary["sp50"]["10q_passed"] += r["10q_stats"]["passed"]
     
     report = {
         "run_id": f"e2e_{datetime.now().isoformat()}",
         "timestamp": datetime.now().isoformat(),
         "config": config,
+        "config": config,
         "summary": summary,
         "failure_count": len(all_failures),
-        "failures": all_failures
+        "error_count": len(all_errors),
+        "failures": all_failures,
+        "errors": all_errors
     }
     
     with open(output_path, 'w') as f:
@@ -270,14 +314,18 @@ def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path
     ]
     
     # Determine which groups to show based on what was tested
-    groups_to_show = ["sp25"] if config["group"] == "sp25" else ["sp25", "sp50"]
+    groups_to_show = ["sp25", "sp50"]
+    if config["group"] == "custom":
+        groups_to_show = ["custom"]
+    elif config["group"] == "sp25":
+        groups_to_show = ["sp25"]
     
     for key in groups_to_show:
         s = summary[key]
         if s['10k_total'] > 0 or s['10q_total'] > 0:
             k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
             q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
-            label = "SP25" if key == "sp25" else "SP50 (Full)"
+            label = "Custom/Selected" if key == "custom" else ("SP25" if key == "sp25" else "SP50")
             lines.append(f"| **{label}** | {k_rate} ({s['10k_passed']}/{s['10k_total']}) | {q_rate} ({s['10q_passed']}/{s['10q_total']}) |")
     
     # Top failing metrics
@@ -326,6 +374,8 @@ def main():
                         help="Number of 10-Q quarters to test")
     parser.add_argument("--tickers", type=str, metavar="TICKERS",
                         help="Comma-separated list of tickers to test (overrides --group)")
+    parser.add_argument("--metrics", type=str, metavar="METRICS",
+                        help="Comma-separated list of metrics to test")
     args = parser.parse_args()
     
     # Cap workers
@@ -335,23 +385,31 @@ def main():
         "group": args.group if not args.tickers else "custom",
         "workers": max_workers,
         "years": args.years,
-        "quarters": args.quarters
+        "quarters": args.quarters,
+        "metrics": [m.strip() for m in args.metrics.split(',')] if args.metrics else None
     }
     
     if args.tickers:
         tickers = [t.strip().upper() for t in args.tickers.split(',') if t.strip()]
-        group_name = "CUSTOM"
+        group_name = "custom"
     else:
         tickers = SP25 if args.group == "sp25" else SP50
-        group_name = args.group.upper()
+        group_name = args.group
     
     print(f"="*60)
-    print(f"E2E TEST: {group_name} ({len(tickers)} companies)")
+    print(f"E2E TEST: {group_name.upper()} ({len(tickers)} companies)")
+    if config["metrics"]:
+        print(f"Metrics: {config['metrics']}")
     print(f"Workers: {max_workers}, Years: {args.years}, Quarters: {args.quarters}")
     print(f"="*60)
     
     # Run parallel processing
-    work_items = [(ticker, config) for ticker in tickers]
+    # Create worker config for each ticker (needs to be pickleable)
+    work_items = []
+    for ticker in tickers:
+        item = config.copy()
+        item["ticker"] = ticker
+        work_items.append(item)
     
     print(f"\nProcessing {len(tickers)} companies with {max_workers} workers...")
     with Pool(processes=max_workers) as pool:
@@ -367,9 +425,15 @@ def main():
     reports_dir = script_dir / "reports"
     reports_dir.mkdir(exist_ok=True)
     
+    import random
+    import string
+    
     date_str = datetime.now().strftime("%Y-%m-%d")
-    json_path = reports_dir / f"e2e_{date_str}.json"
-    md_path = reports_dir / f"e2e_{date_str}.md"
+    time_str = datetime.now().strftime("%H%M")
+    filename_base = f"e2e_{group_name}_{date_str}_{time_str}"
+    
+    json_path = reports_dir / f"{filename_base}.json"
+    md_path = reports_dir / f"{filename_base}.md"
     
     summary = write_json_report(results, json_path, config)
     write_markdown_report(summary, all_failures, md_path, config)
@@ -379,12 +443,18 @@ def main():
     print("RESULTS")
     print(f"{'='*60}")
     
-    for key in ["sp25", "sp50"]:
-        s = summary[key]
-        if s['10k_total'] > 0 or s['10q_total'] > 0:
+    # Check if any summary has data
+    has_results = False
+    for key in ["sp25", "sp50", "custom"]:
+        s = summary.get(key)
+        if s and (s['10k_total'] > 0 or s['10q_total'] > 0):
             k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
             q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
-            print(f"{key.upper()}: 10-K {k_rate}, 10-Q {q_rate}")
+            print(f"{key.upper()}: 10-K {k_rate} ({s['10k_passed']}/{s['10k_total']}), 10-Q {q_rate} ({s['10q_passed']}/{s['10q_total']})")
+            has_results = True
+            
+    if not has_results:
+        print("No validation results recorded.")
     
     print(f"\nTotal failures: {len(all_failures)}")
     print(f"Reports written to: {reports_dir}")

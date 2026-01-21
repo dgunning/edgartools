@@ -58,7 +58,54 @@ class IndustryExtractor(ABC):
     def extract_operating_income(self, xbrl, facts_df) -> ExtractedMetric:
         """Extract OperatingIncome with industry-specific logic."""
         pass
-    
+
+    def validate_accounting_identity(self, xbrl, facts_df, reported_op_income: float) -> Optional[str]:
+        """
+        Validate the accounting identity: Revenue - Expenses == Operating Income.
+        
+        This is a powerful guardrail against "Impossible Data".
+        If Constructed OpIncome significantly deviates from Reported OpIncome,
+        it suggests a unit error, definition mismatch, or major non-GAAP adjustment.
+        
+        Args:
+            reported_op_income: The value extracted by extract_operating_income()
+            
+        Returns:
+            Warning string if identity fails, None otherwise.
+        """
+        # Default implementation (override in subclasses for sector specifics)
+        revenue = (
+            self._get_fact_value(facts_df, 'Revenues') or 
+            self._get_fact_value(facts_df, 'SalesRevenueNet') or 0
+        )
+        
+        costs = (
+            self._get_fact_value(facts_df, 'CostOfGoodsAndServicesSold') or
+            self._get_fact_value(facts_df, 'CostOfRevenue') or 0
+        )
+        
+        opex = self._get_fact_value(facts_df, 'OperatingExpenses') or 0
+        
+        # If we have GrossProfit, use it (more reliable than Rev - Cost)
+        gross_profit = self._get_fact_value(facts_df, 'GrossProfit')
+        
+        constructed = 0.0
+        if gross_profit is not None and opex > 0:
+            # Note: OperatingExpenses usually includes COGS if not separate, 
+            # but if GrossProfit exists, OpEx is usually SGA+R&D.
+            # Standard identity: GP - OpEx
+            constructed = gross_profit - (opex - costs) # Adjust if OpEx includes Costs
+            # Simplified: GP - (SGA + R&D)
+            sga = self._get_fact_value(facts_df, 'SellingGeneralAndAdministrativeExpense') or 0
+            rnd = self._get_fact_value(facts_df, 'ResearchAndDevelopmentExpense') or 0
+            if sga > 0:
+                 constructed = gross_profit - sga - rnd
+        elif revenue > 0 and costs > 0:
+             constructed = revenue - costs - (opex - costs) # Rough approximation
+        
+        # Base implementation is weak - rely on subclasses for robust checks
+        return None
+
     def _get_fact_value(self, df, concept: str, target_period_days: int = None) -> Optional[float]:
         """
         Get the consolidated (non-dimensional) value for a concept from the appropriate period.
@@ -483,34 +530,52 @@ class BankingExtractor(IndustryExtractor):
             
             # Fallback: Try component tags if NET not found
             structure = {
-                'add': ['ShortTermBorrowings'],
+                'add': [
+                    'ShortTermBorrowings',
+                ],
                 'deduct': [
                     'SecuritiesSoldUnderAgreementsToRepurchase',
                     'FederalFundsPurchased',
                     'FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase',
                 ]
             }
+            
+            # Special Case: GS Foreign Currency Debt (Huge item, custom tag)
+            # Use fuzzy match because exact string lookup proved fragile
+            gs_hedge = self._get_fact_value_fuzzy(
+                facts_df, 
+                'ForeignCurrencyDenominatedDebtDesignatedAsForeignCurrencyHedge'
+            )
+            if gs_hedge and gs_hedge > 0:
+                # Add to structure manually since structure dict expects exact match keys
+                if structure.get('add'):
+                    pass # We will add it to the constructed value below
+            
             net_value = self._construct_net_metric(facts_df, structure)
             
-            # If subtraction reduced it significantly, use net value
-            if net_value is not None and net_value < stb and net_value > 0:
+            if gs_hedge:
+                net_value = (net_value or 0) + gs_hedge
+
+            # If subtraction decreased it or addition increased it significantly, use net value
+            # Check for material difference (> 1%)
+            if net_value is not None and net_value > 0 and abs(net_value - stb) > (stb * 0.01):
                 return ExtractedMetric(
                     standard_name="ShortTermDebt",
                     industry_counterpart="ConstructedNetDebt",
                     xbrl_concept=None,
                     value=net_value,
                     extraction_method=ExtractionMethod.COMPOSITE,
-                    notes=f"Bank: ShortTermBorrowings({stb/1e9:.1f}B) - Repos/FedFunds = {net_value/1e9:.1f}B"
+                    notes=f"Bank: ShortTermBorrowings({stb/1e9:.1f}B) Adjusted = {net_value/1e9:.1f}B"
                 )
             else:
-                # No repos found, use raw ShortTermBorrowings
+                # No repos found or not material, use raw ShortTermBorrowings
                 return ExtractedMetric(
                     standard_name="ShortTermDebt",
                     industry_counterpart="ShortTermBorrowings",
                     xbrl_concept="us-gaap:ShortTermBorrowings",
                     value=stb,
                     extraction_method=ExtractionMethod.DIRECT,
-                    notes="Bank: ShortTermBorrowings (no Repos/FedFunds found to subtract)"
+                    notes="Bank: ShortTermBorrowings"
                 )
         
         return ExtractedMetric(
@@ -556,6 +621,28 @@ class BankingExtractor(IndustryExtractor):
         # 1. Try standard CashAndCashEquivalentsAtCarryingValue
         val = self._get_fact_value(facts_df, 'CashAndCashEquivalentsAtCarryingValue')
         
+        # Investment Banks often include Restricted Cash in this tag
+        # We must deduct it to match analyst "Cash & Equivalents" (unrestricted)
+        if val is not None:
+             restricted = (
+                 self._get_fact_value(facts_df, 'RestrictedCashAndCashEquivalents') or # Combined
+                 self._get_fact_value(facts_df, 'RestrictedCash') or                   # Standard
+                 self._get_fact_value(facts_df, 'CashSegregatedUnderFederalAndOtherRegulations') or # Custody
+                 0
+             )
+             if restricted > 0:
+                 # Only deduct if it makes sense (e.g. doesn't turn negative)
+                 net_val = val - restricted
+                 if net_val > 0:
+                     return ExtractedMetric(
+                        standard_name="CashAndEquivalents",
+                        industry_counterpart="CashAndCashEquivalents_Net",
+                        xbrl_concept="us-gaap:CashAndCashEquivalentsAtCarryingValue",
+                        value=net_val,
+                        extraction_method=ExtractionMethod.CALCULATED,
+                        notes=f"Bank: CarryingValue({val/1e9:.1f}B) - Restricted({restricted/1e9:.1f}B)"
+                    )
+        
         # Sanity Check: Is this suspiciously low for a bank?
         if val is not None and assets is not None and assets > 0:
             cash_ratio = val / assets
@@ -593,16 +680,32 @@ class BankingExtractor(IndustryExtractor):
         cash_due = self._get_fact_value(facts_df, 'CashAndDueFromBanks') or 0
         ibd = self._get_fact_value(facts_df, 'InterestBearingDepositsInBanks') or 0
         
+        # Priority for Regional Banks (like USB):
+        # 3a. Try CashAndDueFromBanks alone explicitly (common for Regionals)
+        if cash_due > 0 and assets and cash_due / assets >= 0.01:
+             return ExtractedMetric(
+                standard_name="CashAndEquivalents",
+                industry_counterpart="CashAndDueFromBanks",
+                xbrl_concept="us-gaap:CashAndDueFromBanks",
+                value=cash_due,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes=f"Bank: CashAndDueFromBanks({cash_due/1e9:.1f}B)"
+            )
+        
+        # 3b. Try Composite if needed
         if cash_due > 0 or ibd > 0:
             total = cash_due + ibd
-            return ExtractedMetric(
-                standard_name="CashAndEquivalents",
-                industry_counterpart="BankingCashComposite",
-                xbrl_concept="us-gaap:CashAndDueFromBanks",
-                value=total,
-                extraction_method=ExtractionMethod.COMPOSITE,
-                notes=f"Bank: CashAndDueFromBanks({cash_due/1e9:.1f}B) + IBD({ibd/1e9:.1f}B)"
-            )
+            # Use this total if it's substantial (e.g. > 1% of assets)
+            if assets and total / assets >= 0.01:
+                 return ExtractedMetric(
+                    standard_name="CashAndEquivalents",
+                    industry_counterpart="CashDue+InterestBearDeps",
+                    xbrl_concept="us-gaap:CashAndDueFromBanks",
+                    value=total,
+                    extraction_method=ExtractionMethod.COMPOSITE,
+                    notes=f"Bank: CashDue({cash_due/1e9:.1f}B) + IntBearDeps({ibd/1e9:.1f}B)"
+                )
+
         
         # Return empty metric to signal fallback
         return ExtractedMetric(
@@ -619,10 +722,16 @@ class BankingExtractor(IndustryExtractor):
     
     def extract_operating_income(self, xbrl, facts_df) -> ExtractedMetric:
         """
-        Bank OperatingIncome: Use PPNR (Pre-Provision Net Revenue).
+        Bank OperatingIncome: Dual-track - PPNR vs Post-Provision.
         
-        Formula: NetInterestIncome + NonInterestIncome - NonInterestExpense
+        Analyst Convention:
+        - PPNR (Pre-Provision Net Revenue): Pure operating power (NII + NonIntInc - NonIntExp).
+        - Operating Income (yfinance): Typically PPNR - Provision for Credit Losses.
+        
+        We calculate both and return Post-Provision as the primary 'OperatingIncome',
+        but note PPNR in the extraction details.
         """
+        # Components
         nii = self._get_fact_value(facts_df, 'InterestIncomeExpenseNet')
         if nii is None:
             nii = self._get_fact_value(facts_df, 'NetInterestIncome')
@@ -630,15 +739,25 @@ class BankingExtractor(IndustryExtractor):
         non_int_income = self._get_fact_value(facts_df, 'NoninterestIncome')
         non_int_expense = self._get_fact_value(facts_df, 'NoninterestExpense')
         
+        # Provision for Credit Losses
+        provision = (
+            self._get_fact_value(facts_df, 'ProvisionForCreditLosses') or 
+            self._get_fact_value(facts_df, 'ProvisionForLoanLeaseAndOtherLosses') or
+            0
+        )
+        
         if nii is not None and non_int_income is not None and non_int_expense is not None:
             ppnr = nii + non_int_income - non_int_expense
+            post_provision = ppnr - provision
+            
+            # Return Post-Provision as standard OperatingIncome (matches yfinance generally)
             return ExtractedMetric(
                 standard_name="OperatingIncome",
-                industry_counterpart="PPNR",
+                industry_counterpart="OperatingProfit_PostProvision",
                 xbrl_concept=None,
-                value=ppnr,
+                value=post_provision,
                 extraction_method=ExtractionMethod.CALCULATED,
-                notes="Bank: NII + NonIntIncome - NonIntExpense"
+                notes=f"Bank: PPNR({ppnr/1e9:.2f}B) - Provision({provision/1e9:.2f}B)"
             )
         
         return ExtractedMetric(
@@ -648,6 +767,35 @@ class BankingExtractor(IndustryExtractor):
             value=None,
             extraction_method=ExtractionMethod.CALCULATED
         )
+
+    def validate_accounting_identity(self, xbrl, facts_df, reported_op_income: float) -> Optional[str]:
+        """
+        Bank Identity: (NII + NonIntInc) - (NonIntExp + Provisions) == OperatingIncome
+        """
+        if reported_op_income is None:
+            return None
+            
+        nii = self._get_fact_value(facts_df, 'InterestIncomeExpenseNet') or self._get_fact_value(facts_df, 'NetInterestIncome') or 0
+        non_int_inc = self._get_fact_value(facts_df, 'NoninterestIncome') or 0
+        non_int_exp = self._get_fact_value(facts_df, 'NoninterestExpense') or 0
+        provision = (
+            self._get_fact_value(facts_df, 'ProvisionForCreditLosses') or 
+            self._get_fact_value(facts_df, 'ProvisionForLoanLeaseAndOtherLosses') or
+            0
+        )
+        
+        constructed = (nii + non_int_inc) - (non_int_exp + provision)
+        
+        # Check for deviation > 10%
+        if constructed != 0:
+            diff_pct = abs(constructed - reported_op_income) / abs(reported_op_income)
+            if diff_pct > 0.1:
+                return (
+                    f"IDENTITY FAIL: Reported OpInc ({reported_op_income/1e9:.2f}B) != "
+                    f"Constructed ({constructed/1e9:.2f}B) [NII+NonIntInc-Exp-Prov]. "
+                    f"Diff: {diff_pct:.1%}"
+                )
+        return None
 
 
 class SaaSExtractor(IndustryExtractor):

@@ -1,6 +1,6 @@
 {
-  "run_id": "e2e_2026-01-21T12:37:38.021538",
-  "timestamp": "2026-01-21T12:37:38.021548",
+  "run_id": "e2e_2026-01-21T12:45:57.442434",
+  "timestamp": "2026-01-21T12:45:57.442443",
   "config": {
     "group": "custom",
     "workers": 8,
@@ -16,6 +16,12 @@
       "10q_passed": 0
     },
     "sp50": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
+    },
+    "custom": {
       "10k_total": 0,
       "10k_passed": 0,
       "10q_total": 0,
