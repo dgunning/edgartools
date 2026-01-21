@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
-S&P500 Multi-Period E2E Test Runner
+Bank Sector standardized E2E Test Runner
 
-Parallel validation of XBRL concept mappings against yfinance.
-Outputs detailed JSON logs and markdown summaries for debugging.
-
-Usage:
-    python run_e2e.py --group sp25 --workers 4
-    python run_e2e.py --group sp50 --workers 8 --years 3 --quarters 4
+Validates XBRL concept mappings for major banking institutions against yfinance.
+Hardcoded to test: BK, C, GS, JPM, MS, PNC, STT, USB, WFC
+Defaults: 2 years, 2 quarters
 """
 
 import argparse
@@ -18,18 +15,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-# S&P25 and S&P50 Company Lists
-SP25 = [
-    "AAPL", "MSFT", "GOOG", "AMZN", "NVDA", "META", "TSLA",
-    "JPM", "V", "MA", "BAC", "WFC", "GS", "MS", "AXP", "BLK", "C",
-    "UNH", "JNJ", "LLY", "PFE", "MRK", "ABBV", "TMO", "DHR"
-]
-
-SP50 = SP25 + [
-    "ABT", "WMT", "PG", "KO", "PEP", "COST", "MCD", "DIS", "NKE", "SBUX",
-    "XOM", "CVX", "CAT", "GE", "RTX", "HON", "UPS", "BA",
-    "CRM", "ORCL", "ADBE", "NFLX", "CSCO", "ACN", "IBM"
-]
+# Hardcoded Bank List
+BANKS = ['BK', 'C', 'GS', 'JPM', 'MS', 'PNC', 'STT', 'USB', 'WFC']
 
 # Suggested action patterns
 SUGGESTED_ACTIONS = {
@@ -252,8 +239,6 @@ def write_json_report(results: List[Dict], output_path: Path, config: Dict):
     all_failures = []
     all_errors = []
     summary = {
-        "sp25": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0},
-        "sp50": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0},
         "custom": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0}
     }
     
@@ -262,35 +247,15 @@ def write_json_report(results: List[Dict], output_path: Path, config: Dict):
         if "error" in r:
             all_errors.append({"ticker": r["ticker"], "error": r["error"]})
         
-        # Aggregate stats
-        ticker = r["ticker"]
-        in_sp25 = ticker in SP25
-        in_sp50 = ticker in SP50
-        
-        # Always add to custom/total stats if it's a custom run
-        if config["group"] == "custom" or (not in_sp25 and not in_sp50):
-             summary["custom"]["10k_total"] += r["10k_stats"]["total"]
-             summary["custom"]["10k_passed"] += r["10k_stats"]["passed"]
-             summary["custom"]["10q_total"] += r["10q_stats"]["total"]
-             summary["custom"]["10q_passed"] += r["10q_stats"]["passed"]
+        # Aggregate stats (all custom for this script)
+        summary["custom"]["10k_total"] += r["10k_stats"]["total"]
+        summary["custom"]["10k_passed"] += r["10k_stats"]["passed"]
+        summary["custom"]["10q_total"] += r["10q_stats"]["total"]
+        summary["custom"]["10q_passed"] += r["10q_stats"]["passed"]
 
-        # Also add to specific groups if applicable
-        if in_sp25:
-            summary["sp25"]["10k_total"] += r["10k_stats"]["total"]
-            summary["sp25"]["10k_passed"] += r["10k_stats"]["passed"]
-            summary["sp25"]["10q_total"] += r["10q_stats"]["total"]
-            summary["sp25"]["10q_passed"] += r["10q_stats"]["passed"]
-            
-        if in_sp50:
-            summary["sp50"]["10k_total"] += r["10k_stats"]["total"]
-            summary["sp50"]["10k_passed"] += r["10k_stats"]["passed"]
-            summary["sp50"]["10q_total"] += r["10q_stats"]["total"]
-            summary["sp50"]["10q_passed"] += r["10q_stats"]["passed"]
-    
     report = {
-        "run_id": f"e2e_{datetime.now().isoformat()}",
+        "run_id": f"e2e_banks_{datetime.now().isoformat()}",
         "timestamp": datetime.now().isoformat(),
-        "config": config,
         "config": config,
         "summary": summary,
         "failure_count": len(all_failures),
@@ -308,43 +273,36 @@ def write_json_report(results: List[Dict], output_path: Path, config: Dict):
 def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path, config: Dict):
     """Write markdown summary report."""
     lines = [
-        f"# E2E Test Results - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        f"# Bank Sector E2E Test - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         "",
-        f"**Config:** Group={config['group']}, Workers={config['workers']}, "
+        f"**Config:** Group=Banking, Workers={config['workers']}, "
         f"Years={config['years']}, Quarters={config['quarters']}",
+    ]
+    
+    if config.get("tickers"):
+        lines.append("")
+        lines.append(f"**Includes:** {', '.join(sorted(config['tickers']))}")
+        
+    lines.extend([
         "",
         "## Pass Rates",
         "",
         "| Group | 10-K | 10-Q |",
         "|-------|------|------|",
-    ]
+    ])
     
-    if config["group"] == "custom" and config.get("tickers"):
-        # Insert ticker list after config line
-        lines.insert(4, "")
-        lines.insert(5, f"**Includes:** {', '.join(sorted(config['tickers']))}")
-    
-    # Determine which groups to show based on what was tested
-    groups_to_show = ["sp25", "sp50"]
-    if config["group"] == "custom":
-        groups_to_show = ["custom"]
-    elif config["group"] == "sp25":
-        groups_to_show = ["sp25"]
-    
-    for key in groups_to_show:
-        s = summary[key]
-        if s['10k_total'] > 0 or s['10q_total'] > 0:
-            k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
-            q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
-            label = "Custom/Selected" if key == "custom" else ("SP25" if key == "sp25" else "SP50")
-            lines.append(f"| **{label}** | {k_rate} ({s['10k_passed']}/{s['10k_total']}) | {q_rate} ({s['10q_passed']}/{s['10q_total']}) |")
+    s = summary["custom"]
+    if s['10k_total'] > 0 or s['10q_total'] > 0:
+        k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
+        q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
+        lines.append(f"| **Banking** | {k_rate} ({s['10k_passed']}/{s['10k_total']}) | {q_rate} ({s['10q_passed']}/{s['10q_total']}) |")
     
     # Top failing metrics
     from collections import Counter
     metric_counts = Counter(f["metric"] for f in failures)
     lines.extend([
         "",
-        "## Top 10 Failing Metrics",
+        "## Top Failing Metrics",
         "",
         "| Metric | Failures |",
         "|--------|----------|",
@@ -356,7 +314,7 @@ def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path
     ticker_counts = Counter(f["ticker"] for f in failures)
     lines.extend([
         "",
-        "## Top 10 Failing Companies",
+        "## Top Failing Companies",
         "",
         "| Ticker | Failures |",
         "|--------|----------|",
@@ -374,56 +332,41 @@ def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path
 
 
 def main():
-    parser = argparse.ArgumentParser(description="S&P500 Multi-Period E2E Test")
-    parser.add_argument("--group", choices=["sp25", "sp50"], default="sp25", 
-                        help="Company group to test")
+    parser = argparse.ArgumentParser(description="Bank Sector E2E Test")
     parser.add_argument("--workers", type=int, default=8, 
                         help="Number of parallel workers")
-    parser.add_argument("--years", type=int, default=5, 
-                        help="Number of 10-K years to test")
-    parser.add_argument("--quarters", type=int, default=6, 
-                        help="Number of 10-Q quarters to test")
-    parser.add_argument("--tickers", type=str, metavar="TICKERS",
-                        help="Comma-separated list of tickers to test (overrides --group)")
     parser.add_argument("--metrics", type=str, metavar="METRICS",
                         help="Comma-separated list of metrics to test")
     args = parser.parse_args()
     
-    if args.tickers:
-        tickers = [t.strip().upper() for t in args.tickers.split(',') if t.strip()]
-        group_name = "custom"
-    else:
-        tickers = SP25 if args.group == "sp25" else SP50
-        group_name = args.group
-
     # Cap workers
     max_workers = min(args.workers, cpu_count(), 8)
     
     config = {
-        "group": group_name,
+        "group": "banking",
         "workers": max_workers,
-        "years": args.years,
-        "quarters": args.quarters,
+        "years": 2,
+        "quarters": 2,
         "metrics": [m.strip() for m in args.metrics.split(',')] if args.metrics else None,
-        "tickers": tickers
+        "tickers": BANKS
     }
     
     print(f"="*60)
-    print(f"E2E TEST: {group_name.upper()} ({len(tickers)} companies)")
+    print(f"E2E TEST: BANKING SECTOR ({len(BANKS)} companies)")
+    print(f"Includes: {', '.join(BANKS)}")
     if config["metrics"]:
         print(f"Metrics: {config['metrics']}")
-    print(f"Workers: {max_workers}, Years: {args.years}, Quarters: {args.quarters}")
+    print(f"Workers: {max_workers}, Years: 2, Quarters: 2")
     print(f"="*60)
     
     # Run parallel processing
-    # Create worker config for each ticker (needs to be pickleable)
     work_items = []
-    for ticker in tickers:
+    for ticker in BANKS:
         item = config.copy()
         item["ticker"] = ticker
         work_items.append(item)
     
-    print(f"\nProcessing {len(tickers)} companies with {max_workers} workers...")
+    print(f"\nProcessing {len(BANKS)} companies with {max_workers} workers...")
     with Pool(processes=max_workers) as pool:
         results = pool.map(process_company, work_items)
     
@@ -432,20 +375,19 @@ def main():
     for r in results:
         all_failures.extend(r["failures"])
     
-    # Write reports
-    script_dir = Path(__file__).parent
-    reports_dir = script_dir / "reports"
-    reports_dir.mkdir(exist_ok=True)
-    
-    import random
-    import string
+    # Write reports to specific directory
+    # File is in .agent/skills/bank-sector-test/scripts/run_bank_e2e.py
+    # We want to go to project root (edgartools) then sandbox/...
+    project_root = Path(__file__).resolve().parents[4]
+    script_dir = project_root / "sandbox/notes/008_bank_sector_expansion/reports"
+    script_dir.mkdir(parents=True, exist_ok=True)
     
     date_str = datetime.now().strftime("%Y-%m-%d")
     time_str = datetime.now().strftime("%H%M")
-    filename_base = f"e2e_{group_name}_{date_str}_{time_str}"
+    filename_base = f"e2e_banks_{date_str}_{time_str}"
     
-    json_path = reports_dir / f"{filename_base}.json"
-    md_path = reports_dir / f"{filename_base}.md"
+    json_path = script_dir / f"{filename_base}.json"
+    md_path = script_dir / f"{filename_base}.md"
     
     summary = write_json_report(results, json_path, config)
     write_markdown_report(summary, all_failures, md_path, config)
@@ -455,21 +397,13 @@ def main():
     print("RESULTS")
     print(f"{'='*60}")
     
-    # Check if any summary has data
-    has_results = False
-    for key in ["sp25", "sp50", "custom"]:
-        s = summary.get(key)
-        if s and (s['10k_total'] > 0 or s['10q_total'] > 0):
-            k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
-            q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
-            print(f"{key.upper()}: 10-K {k_rate} ({s['10k_passed']}/{s['10k_total']}), 10-Q {q_rate} ({s['10q_passed']}/{s['10q_total']})")
-            has_results = True
-            
-    if not has_results:
-        print("No validation results recorded.")
-    
+    s = summary["custom"]
+    k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
+    q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
+    print(f"BANKING: 10-K {k_rate} ({s['10k_passed']}/{s['10k_total']}), 10-Q {q_rate} ({s['10q_passed']}/{s['10q_total']})")
+
     print(f"\nTotal failures: {len(all_failures)}")
-    print(f"Reports written to: {reports_dir}")
+    print(f"Reports written to: {script_dir}")
     print(f"  - {json_path.name}")
     print(f"  - {md_path.name}")
 

@@ -32,6 +32,7 @@ banking:
     # Street View: Economic Liquidity (not statutory cash)
     CashAndEquivalents:
       extraction_strategy: "street_cash_composite"
+      fallback_to_tree: false
       primary_concepts:
         - CashAndDueFromBanks
         - InterestBearingDepositsInBanks  # Critical for BK/STT custodial banks
@@ -44,6 +45,7 @@ banking:
     # Street View: Wholesale Funding (Strict Component Summation)
     ShortTermDebt:
       extraction_strategy: "wholesale_funding_composite"
+      fallback_to_tree: false
       include_concepts:
         - CommercialPaper
         - OtherShortTermBorrowings

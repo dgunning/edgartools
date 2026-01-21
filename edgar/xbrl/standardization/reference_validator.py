@@ -178,17 +178,83 @@ class ReferenceValidator:
             if xbrl and xbrl.facts:
                 facts_df = xbrl.facts.to_dataframe()
             
+            # Check for explicitly disabled tree fallback (Safety Guardrail)
+            # If industry logic returns None (extraction failed) and fallback_to_tree is False,
+            # we return a SENTINEL that prevents the Tree Mapper from taking over.
+            # We use float('nan') as a provisional sentinel or handle it in the caller.
+            # actually, a better way is to check the rule configs.
+            
+            # Load config for this metric
+            from .config_loader import get_config
+            conf = get_config()
+            
             # Banking-specific extraction for ShortTermDebt
             if industry == 'banking' and metric == 'ShortTermDebt':
                 extractor = BankingExtractor()
                 result = extractor.extract_short_term_debt(xbrl, facts_df)
-                return result.value
-            
+                if result.value is not None:
+                    return result.value
+                
+                # CHECK FALLBACK FLAG
+                # If extraction failed (value is None), should we fall back to Tree?
+                # We check the industry_metrics.yaml config via the extraction rules or direct config access
+                # For now, hardcode the check based on the plan or safer implementation
+                # But to follow the plan, we should read the config.
+                
+                # Quick access to industry config
+                industry_conf = conf.data.get('industry_metrics', {}).get('banking', {})
+                metric_conf = industry_conf.get('concept_mapping', {}).get('ShortTermDebt', {})
+                if metric_conf.get('fallback_to_tree') is False:
+                     # Return a special indicator that validation failed/missing (e.g. -1.0 or raise)
+                     # But _try_industry_extraction signature is Optional[float].
+                     # If we return None, it falls back to Tree.
+                     # We need to signal "STOP".
+                     # Limitation: The current architecture falls back to Tree if None is returned.
+                     # We might need to return 0.0 or a specific small negative number if we want to force failure?
+                     # No, that's hacky.
+                     # The feedback said: "Explicitly return a sentinel... that doesn't proceed to Tree Mapping."
+                     # Since I cannot easily change the caller `validate_company` logic without reading it fully (I did separate read),
+                     # I will assume returning a specific "Missing" object or similar would break things.
+                     # Wait, I can raise an exception? No.
+                     # Let's look at `validate_company` (lines 583-585):
+                     # industry_value = self._try_industry_extraction(ticker, metric, xbrl)
+                     # if industry_value is not None: xbrl_value = industry_value
+                     # elif metric in COMPOSITE... extraction logic
+                     # else: ...
+                     
+                     # It doesn't seem to have a "Tree Mapping" step *inside* validate_company. 
+                     # `validate_company` takes `results` (which come from Tree).
+                     # Ah, `validate_company` is validating the *Tree Result*.
+                     # If `industry_value` is found, it overrides `xbrl_value` (which came from Tree result... wait).
+                     
+                     # Line 576: if result.is_mapped and xbrl: ...
+                     # The Tree Mapping has ALREADY happened before Validation.
+                     # The Validation stage is overriding the Tree value with Industry value if available.
+                     # If Industry Logic fails (returns None), it currently proceeds to use the Tree Mapped value (result.concept).
+                     
+                     # To "Disable Tree Fallback", we must INVALIDATE the Tree Result if Industry Logic fails!
+                     
+                     if metric_conf.get('fallback_to_tree') is False:
+                         # We verified Industry Logic returned None (failed).
+                         # We must now Tell the caller to discarding the Tree Result.
+                         # But this method only returns float.
+                         
+                         # CRITICAL ARCHITECTURE ADAPTATION:
+                         # We must return a Sentinel Float (NaN) to signal "STOP USE OF TREE".
+                         return float('nan') # Sentinel for "Hard Missing"
+
             # Banking-specific extraction for CashAndEquivalents
             if industry == 'banking' and metric == 'CashAndEquivalents':
                 extractor = BankingExtractor()
                 result = extractor.extract_cash_and_equivalents(xbrl, facts_df)
-                return result.value
+                if result.value is not None:
+                    return result.value
+                
+                # Fallback Check
+                industry_conf = conf.data.get('industry_metrics', {}).get('banking', {})
+                metric_conf = industry_conf.get('concept_mapping', {}).get('CashAndEquivalents', {})
+                if metric_conf.get('fallback_to_tree') is False:
+                     return float('nan') # Sentinel to kill Tree Result
             
             # Calculated OperatingIncome for any industry
             # Always return calculated value - handles companies like NKE/MRK
@@ -566,7 +632,7 @@ class ReferenceValidator:
                     # Invalidate the mapping - prevents using semantically wrong tag
                     result.concept = None 
                     result.confidence = 0.0
-                    result.source = MappingSource.NONE
+                    result.source = MappingSource.UNKNOWN
             
             # Get reference value from yfinance
             ref_value = self._get_yfinance_value(stock, metric, target_date=filing_date)
@@ -582,7 +648,21 @@ class ReferenceValidator:
                 # Try industry-specific extraction first for special metrics
                 industry_value = self._try_industry_extraction(ticker, metric, xbrl)
                 if industry_value is not None:
-                    xbrl_value = industry_value
+                    # Check for SENTINEL (NaN) -> Hard Failure of Industry Logic
+                    import math
+                    if isinstance(industry_value, float) and math.isnan(industry_value):
+                        # Sentinel received: Industry Logic Failed AND Tree Fallback Disabled
+                        # Invalidate the Tree Mapping to prevent "guessing"
+                        result.concept = None
+                        result.source = MappingSource.UNKNOWN
+                        xbrl_value = None
+                        # Proceed as if unmapped (will hit fallback logic, but that's fine as it won't use Tree)
+                    else:
+                        xbrl_value = industry_value
+                        # Update result to reflect industry extraction
+                        result.source = MappingSource.INDUSTRY
+                        result.concept = f"industry_logic:{metric}"
+                        result.confidence = 1.0
                 # Check if metric is composite (sum of multiple concepts)
                 elif metric in self.COMPOSITE_METRICS:
                     # HYBRID LOGIC: If mapped to a "Total" concept, use direct extraction

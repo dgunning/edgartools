@@ -22,6 +22,7 @@ class MappingSource(Enum):
     TEMPORAL = "temporal"   # Layer 3: Temporal tracker
     MANUAL = "manual"       # Manual override
     CONFIG = "config"       # From known_concepts in config
+    INDUSTRY = "industry"   # Layer 4: Sector-specific logic
     UNKNOWN = "unknown"     # Not mapped
 
 

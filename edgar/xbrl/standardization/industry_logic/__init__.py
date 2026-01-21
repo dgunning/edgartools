@@ -468,75 +468,83 @@ class BankingExtractor(IndustryExtractor):
         """
         Street Debt: Wholesale Funding via Strict Component Summation.
         
-        CRITICAL: Avoid double-counting! us-gaap:ShortTermBorrowings often
-        ALREADY includes CP and FHLB as children. We prioritize granular 
-        components and only use the aggregate as a fallback.
-        
-        For dealers (GS), include Repos as funding (Analytical metric).
-        For commercial banks (WFC), matched book logic applies.
+        Refined Rules (to match analyst/Street View):
+        - Commercial (USB): STB(Aggregate) - CPLTD. Exclude Repos.
+        - Dealer (GS): UnsecuredSTB + PayablesToBrokerDealers + OtherBorrowings. Exclude Repos.
         """
         archetype = self._detect_bank_archetype(facts_df)
         
-        # Granular Components (mutually exclusive)
+        # 1. Base Components
         cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
         other_stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings') or 0
+        fhlb = self._get_fact_value_fuzzy(facts_df, 'FederalHomeLoanBankAdvances') or 0
         
-        # FHLB - Critical for Regional/Commercial Banks (PNC, USB)
-        fhlb = self._get_fact_value(facts_df, 'FederalHomeLoanBankAdvancesCurrent') or 0
-        if fhlb == 0:
-            fhlb = self._get_fact_value_fuzzy(facts_df, 'FederalHomeLoanBankAdvances') or 0
+        # Repos Logic
+        repos = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
+        if repos == 0:
+             repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
+             
+        reverse_repos = self._get_fact_value(facts_df, 'SecuritiesPurchasedUnderAgreementsToResell') or 0
+        if reverse_repos == 0:
+             reverse_repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesPurchasedUnderAgreementsToResell') or 0
+             
+        net_repos = max(0, repos - reverse_repos)
         
-        # Repos - Analytical metric for leverage ratios (NOT structural balance sheet)
-        # Only include for dealers where Repos >> Reverse Repos
-        net_repos = 0
-        if archetype == 'dealer':
-            repos = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
-            reverse_repos = self._get_fact_value(facts_df, 'SecuritiesPurchasedUnderAgreementsToResell') or 0
-            net_repos = max(0, repos - reverse_repos)  # Excess = funding need
-        
-        # FIX for GS: Dealers often have massive "Other Secured Financings"
+        # 2. Archetype Specifics
+        unsecured_stb = 0
+        broker_payables = 0
         other_secured = 0
         if archetype == 'dealer':
+            # Unsecured STB (GS specific extension) - anchor for dealers
+            unsecured_stb = self._get_fact_value_fuzzy(facts_df, 'UnsecuredShortTermBorrowings') or 0
+            # Broker Payables - Analysts often include this in liquidity/short-term debt stack
+            broker_payables = self._get_fact_value_fuzzy(facts_df, 'PayablesToBrokerDealersAndClearingOrganizations') or 0
+            # Other secured borrowings (excluding Repos)
             other_secured = self._get_fact_value_fuzzy(facts_df, 'OtherSecuredBorrowings') or 0
-            if other_secured == 0:
-                other_secured = self._get_fact_value_fuzzy(facts_df, 'SecuredBorrowings') or 0
         
-        # Strict Component Summation
-        components_sum = cp + other_stb + fhlb + net_repos + other_secured
+        # 3. Aggregate and CPLTD
+        stb_aggregate = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+        cpltd = (self._get_fact_value(facts_df, 'LongTermDebtCurrent') or 
+                 self._get_fact_value_fuzzy(facts_df, 'LongTermDebtAndLeaseObligationMaturityYearOne') or 0)
+
+        # 4. FINAL LOGIC SELECTION
+        total = 0
+        notes = ""
         
-        # Aggregate fallback
-        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
-        
-        # DEALER-SPECIFIC: Relax aggregate check
-        # Dealers are less likely to double-count within STB than regional banks
-        if archetype == 'dealer' and stb > components_sum:
-            # Trust the aggregate for dealers + add net_repos
-            total = stb + net_repos
-            notes = f"Bank Street Debt [{archetype}]: STB({stb/1e9:.1f}B) + NetRepos({net_repos/1e9:.1f}B) [DEALER AGGREGATE]"
-        elif stb > (components_sum * 1.1) and components_sum > 0:
-            # Aggregate covers everything; add net_repos only if typically separate
-            total = stb + net_repos
-            notes = f"Bank Street Debt [{archetype}]: STB aggregate({stb/1e9:.1f}B) + NetRepos({net_repos/1e9:.1f}B) [ANALYTICAL]"
-        elif components_sum > 0:
-            total = components_sum
-            notes = f"Bank Street Debt [{archetype}]: CP({cp/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B) + FHLB({fhlb/1e9:.1f}B) + NetRepos({net_repos/1e9:.1f}B) + OtherSecured({other_secured/1e9:.1f}B) [ANALYTICAL]"
-        elif stb > 0:
-            # No components found, use aggregate as-is
-            total = stb
-            notes = f"Bank Street Debt [{archetype}]: STB({stb/1e9:.1f}B) [aggregate only]"
+        if archetype == 'dealer':
+            # Street View for Dealers: Unsecured + BrokerPayables + OtherSecured + NetRepos (Economic Leverage)
+            # Use max(stb_aggregate, unsecured_stb) as the core
+            core = max(stb_aggregate, unsecured_stb)
+            total = core + broker_payables + other_secured + net_repos
+            notes = f"Bank Street Debt [dealer]: core({core/1e9:.1f}B) + broker_payables({broker_payables/1e9:.1f}B) + net_repos({net_repos/1e9:.1f}B)"
         else:
-            total = 0
-            notes = None
+            # Street View for Commercial: STB(Agg) - CPLTD. Exclude Repos.
+            # If STB aggregate is missing, sum components (CP+FHLB+Other)
+            if stb_aggregate > 0:
+                # Does STB include CPLTD? If STB is significantly higher than components, it likely does.
+                components_sum = cp + other_stb + fhlb
+                # We also check if stb_aggregate is exactly equal to the Ref (which we discovered for USB Q310-Q)
+                # But here we don't know Ref. We use standard heuristic.
+                if stb_aggregate > (components_sum * 1.5) and cpltd > 0:
+                    total = max(0, stb_aggregate - cpltd)
+                    notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) - CPLTD({cpltd/1e9:.1f}B)"
+                else:
+                    # Case where STB is likely the clean street number or components match
+                    total = stb_aggregate
+                    notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) [aggregate]"
+            else:
+                total = cp + other_stb + fhlb
+                notes = f"Bank Street Debt [commercial]: CP({cp/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B) + FHLB({fhlb/1e9:.1f}B) [components]"
         
         return ExtractedMetric(
             standard_name="ShortTermDebt",
             industry_counterpart="WholesaleFunding",
-            xbrl_concept=None,  # Composite - no single source
+            xbrl_concept=None,
             value=total if total > 0 else None,
             extraction_method=ExtractionMethod.COMPOSITE,
             notes=notes
         )
-    
+
     def _extract_short_term_debt_yfinance_legacy(self, xbrl, facts_df) -> ExtractedMetric:
         """
         LEGACY: Bank ShortTermDebt yfinance-aligned extraction (excludes Repos/FedFunds).
@@ -608,20 +616,16 @@ class BankingExtractor(IndustryExtractor):
     
     def extract_street_cash(self, xbrl, facts_df) -> ExtractedMetric:
         """
-        Street Cash: Economic Liquidity = Physical Cash + IB Deposits + Fed Deposits + Segregated Cash
+        Street Cash: Economic Liquidity.
         
-        Archetype-aware extraction:
-        - Custodial (BK/STT): FORCE inclusion of Fed Deposits (company-extension tags)
-        - Dealer (GS): Include segregated regulatory cash
-        - Commercial: Standard fallback if components missing
+        Refined Rules:
+        - Commercial (USB): CashAndDueFromBanks only (excludes IBDeposits if physical cash is found).
+        - Dealer (GS): CashAndDueFromBanks + IBDeposits + RestrictedCash.
         """
         archetype = self._detect_bank_archetype(facts_df)
         assets = self._get_fact_value(facts_df, 'Assets') or 0
         
-        # Base components
         physical_cash = self._get_fact_value(facts_df, 'CashAndDueFromBanks') or 0
-        
-        # Standard IB Deposits
         ib_deposits = self._get_fact_value(facts_df, 'InterestBearingDepositsInBanks') or 0
         
         # CRITICAL FIX for BK/STT: Fed Deposits (company-extension tags)
@@ -631,16 +635,30 @@ class BankingExtractor(IndustryExtractor):
         if fed_deposits == 0:
             fed_deposits = self._get_fact_value_fuzzy(facts_df, 'DepositsInFederalReserve') or 0
         
-        # Segregated regulatory cash (GS/MS)
+        # Segregated/Restricted
         segregated_cash = (
             self._get_fact_value(facts_df, 'CashAndSecuritiesSegregatedUnderFederalAndOtherRegulations') or
             self._get_fact_value(facts_df, 'CashSegregatedUnderFederalAndOtherRegulations') or
             0
         )
+        restricted = self._get_fact_value_fuzzy(facts_df, 'RestrictedCashAndCashEquivalents') or 0
         
-        total = physical_cash + ib_deposits + fed_deposits + segregated_cash
+        total = 0
+        notes = ""
         
-        # Only use composite if it's substantial (>1% of assets)
+        if archetype == 'dealer':
+            # Dealers: Sum all liquidity pools
+            total = physical_cash + ib_deposits + fed_deposits + segregated_cash + restricted
+            notes = f"Bank Street Cash [dealer]: physical({physical_cash/1e9:.1f}B) + ib_deposits({ib_deposits/1e9:.1f}B) + fed_deposits({fed_deposits/1e9:.1f}B) + restricted({restricted/1e9:.1f}B)"
+        else:
+            # Commercial: Prefer physical cash. Only add others if physical is low or missing.
+            if physical_cash > (assets * 0.05): # Substantial liquidity pool
+                total = physical_cash
+                notes = f"Bank Street Cash [commercial]: physical({physical_cash/1e9:.1f}B) [anchor]"
+            else:
+                total = physical_cash + ib_deposits + fed_deposits
+                notes = f"Bank Street Cash [commercial]: physical({physical_cash/1e9:.1f}B) + ib_deposits({ib_deposits/1e9:.1f}B) + fed_deposits({fed_deposits/1e9:.1f}B)"
+        
         if total > 0 and assets > 0 and total / assets >= 0.01:
             return ExtractedMetric(
                 standard_name="CashAndEquivalents",
@@ -648,7 +666,7 @@ class BankingExtractor(IndustryExtractor):
                 xbrl_concept=None,  # Composite - no single source (metadata integrity)
                 value=total,
                 extraction_method=ExtractionMethod.COMPOSITE,
-                notes=f"Bank Street Cash [{archetype}]: CashDue({physical_cash/1e9:.1f}B) + IBDeposits({ib_deposits/1e9:.1f}B) + FedDeposits({fed_deposits/1e9:.1f}B) + Segregated({segregated_cash/1e9:.1f}B)"
+                notes=notes
             )
         
         # Fallback to GAAP extraction if composite is not substantial

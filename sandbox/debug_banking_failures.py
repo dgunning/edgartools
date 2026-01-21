@@ -1,119 +1,150 @@
+import sys
+import os
+sys.path.insert(0, "/mnt/c/Users/Sangicook/LAB_FHI/Project/Side_project/edgartools")
+
 from edgar import Company, set_identity, use_local_storage
+print(f"EDGAR FILE: {Company.__module__}")
+try:
+    from edgar.xbrl.standardization.orchestrator import Orchestrator
+except ImportError as e:
+    print(f"ImportError: {e}")
+    import edgar.xbrl.standardization
+    print(f"Standardization dir: {edgar.xbrl.standardization.__file__}")
+
+from edgar.xbrl.standardization.industry_logic import BankingExtractor
+print(f"BankingExtractor File: {sys.modules['edgar.xbrl.standardization.industry_logic'].__file__}")
 import pandas as pd
 
 set_identity("Debug Agent e2e@test.local")
 use_local_storage(True)
 
-def inspect_gs_custom_tag():
-    print("\n=== Inspecting GS Custom Tag (10-K 2024) ===")
-    ticker = "GS"
-    company = Company(ticker)
-    filing = company.get_filings(form='10-K').latest()
-    xbrl = filing.xbrl()
-    facts = xbrl.facts.to_dataframe()
+def debug_company(ticker, accession_no=None, form='10-K'):
+    print(f"\n{'='*50}")
+    print(f"DEBUGGING {ticker} ({form}) - Accession: {accession_no}")
+    print(f"{'='*50}")
     
-    tag = "ForeignCurrencyDenominatedDebtDesignatedAsForeignCurrencyHedge"
-    
-    # Try finding it with and without prefix
-    matches = facts[facts['concept'].str.contains(tag, case=False, na=False)]
-    if not matches.empty:
-        print(f"Found matches for '{tag}':")
-        for _, r in matches.iterrows():
-            print(f"  - {r['concept']} (Dim: {r.get('full_dimension_label')}): {r['numeric_value']/1e9:.2f}B")
+    c = Company(ticker)
+    filings = c.get_filings(form=form)
+    if accession_no:
+        filing = next((f for f in filings if accession_no in f.accession_no), None)
+        if not filing:
+            print(f"Filing {accession_no} not found")
+            return
     else:
-        print(f"No matches found for '{tag}'")
-
-def inspect_bk_assets():
-    print(f"\n=== Inspecting BK Assets (10-K 2024) ===")
-    company = Company("BK")
-    filing = company.get_filings(form='10-K').latest()
+        filing = filings[0]
+        
+    print(f"Filing: {filing.accession_no} ({filing.period_of_report})")
+    
     xbrl = filing.xbrl()
-    facts = xbrl.facts.to_dataframe()
-    
-    # 1. Look for huge components (e.g. > 20B) to see where the money is
-    print("Top 10 Largest (Non-Dim) Asset/Cash Concepts:")
-    # Filter for non-dim
-    nondim = facts[facts['full_dimension_label'].isna()].copy()
-    # Sort by value
-    nondim = nondim.sort_values('numeric_value', ascending=False)
-    
-    unique_concepts = set()
-    count = 0
-    for _, r in nondim.iterrows():
-        if r['concept'] not in unique_concepts and r['numeric_value'] > 1e9:
-            print(f"  {r['concept']}: {r['numeric_value']/1e9:.2f}B")
-            unique_concepts.add(r['concept'])
-            count += 1
-            if count >= 15:
-                break
+    facts_df = xbrl.facts.to_dataframe()
+    try:
+        extractor = BankingExtractor()
+    except Exception as e:
+        print(f"Error creating extractor: {e}")
+        return
 
-def simulate_gs_match():
-    print("\n=== Simulating GS Match Logic ===")
-    # Replicate _get_fact_value logic
-    ticker = "GS"
-    company = Company(ticker)
-    filing = company.get_filings(form='10-K').latest()
-    facts = filing.xbrl().facts.to_dataframe()
+    orchestrator = Orchestrator()
+    results = orchestrator.tree_parser.map_company(ticker, filing)
     
-    target = "gs:ForeignCurrencyDenominatedDebtDesignatedAsForeignCurrencyHedge"
-    target_lower = target.lower()
+    # helper to print concept name
+    def get_val_and_concept(df, concept, fuzzy=False):
+        if fuzzy:
+            matches = df[df['concept'].str.lower().str.contains(concept.lower(), regex=False, na=False)]
+        else:
+             matches = df[df['concept'] == f"us-gaap:{concept}"]
+        
+        if matches.empty:
+            return None, None
+            
+        # Filter non-dim
+        non_dim = matches.copy()
+        if 'full_dimension_label' in non_dim.columns:
+            non_dim = non_dim[non_dim['full_dimension_label'].isna() | (non_dim['full_dimension_label'] == '')]
+        
+        if non_dim.empty:
+            return None, None
+            
+        val = non_dim['numeric_value'].iloc[0] # simplified
+        name = non_dim['concept'].iloc[0]
+        return val, name
+
+    # 1. Archetype
+    archetype = extractor._detect_bank_archetype(facts_df)
+    print(f"\nDetected Archetype: {archetype}")
     
-    # Logic 1: Strip us-gaap and lower
-    facts['match_key_1'] = facts['concept'].str.replace('us-gaap:', '', regex=False).str.lower()
-    match1 = facts[facts['match_key_1'] == target_lower]
-    print(f"Logic 1 (Strip us-gaap) Match Count: {len(match1)}")
-    if not match1.empty:
-        print(f"  Sample: {match1.iloc[0]['concept']}")
-
-    # Logic 2: Exact lower match
-    facts['match_key_2'] = facts['concept'].str.lower()
-    match2 = facts[facts['match_key_2'] == target_lower]
-    print(f"Logic 2 (Exact lower) Match Count: {len(match2)}")
-
-def inspect_stt_filing():
-    print("\n=== Inspecting STT Filing ===")
-    company = Company("STT")
-    filing = company.get_filings(form='10-K').latest()
-    print(f"Accession: {filing.accession_no}")
-    print(f"XML URL: {filing.document.url}")
-    # Don't load full XBRL if it failed before, just check metadata
-
-def inspect_stt_debt():
-    print("\n=== Inspecting STT ShortTermDebt (10-K 2024) ===")
-    ticker = "STT"
-    company = Company(ticker)
-    filing = company.get_filings(form='10-K').latest()
-    xbrl = filing.xbrl()
-    facts = xbrl.facts.to_dataframe()
+    # 2. ShortTermDebt Analysis
+    print(f"\n--- ShortTermDebt Analysis ---")
+    stb_agg = extractor._get_fact_value(facts_df, 'ShortTermBorrowings')
+    print(f"us-gaap:ShortTermBorrowings (Aggregate): {stb_agg/1e9 if stb_agg else 'None'} B")
     
-    concepts = [
-        'ShortTermBorrowings',
+    concepts_to_check = [
         'CommercialPaper',
-        'SecuritiesSoldUnderAgreementsToRepurchase',
         'OtherShortTermBorrowings',
-        'LongTermDebtCurrent'
+        'FederalHomeLoanBankAdvancesCurrent',
+        'FederalHomeLoanBankAdvances', 
+        'LongTermDebtCurrent',
+        'SecuritiesSoldUnderAgreementsToRepurchase', 
+        'SecuritiesPurchasedUnderAgreementsToResell',
+        'OtherSecuredBorrowings',
+        'SecuredBorrowings',
+        'OtherBorrowings'
     ]
     
-    if facts.empty:
-        print("STT Facts dataframe is empty")
-        return
-        
-    for c in concepts:
-        # Check column existence to avoid KeyError
-        if 'concept' not in facts.columns:
-            print(f"STT Facts missing 'concept' column. Columns: {facts.columns}")
-            break
+    print("\n[Components Check]")
+    for c in concepts_to_check:
+        val, name = get_val_and_concept(facts_df, c, fuzzy=False)
+        fuzzy_val, fuzzy_name = get_val_and_concept(facts_df, c, fuzzy=True)
+        print(f"{c}:")
+        if val: print(f"  Direct: {name} = {val/1e9:.3f} B")
+        if fuzzy_val: print(f"  Fuzzy:  {fuzzy_name} = {fuzzy_val/1e9:.3f} B")
+
+    print(f"\n[Validation of extraction logic]")
+    extracted_debt = extractor.extract_street_debt(xbrl, facts_df)
+    print(f"ShortTermDebt Value: {extracted_debt.value/1e9 if extracted_debt.value else 'None'} B")
+    print(f"ShortTermDebt Notes: {extracted_debt.notes}")
+
+    extracted_cash = extractor.extract_street_cash(xbrl, facts_df)
+    print(f"CashAndEquivalents Value: {extracted_cash.value/1e9 if extracted_cash.value else 'None'} B")
+    print(f"CashAndEquivalents Notes: {extracted_cash.notes}")
+
+    # DISCOVERY: List all large liability concepts to find the missing pieces
+    print(f"\n[Discovery: Top Liability Concepts > $1B]")
+    if not facts_df.empty:
+        # Check specific GS gap candidate
+        gap_concept = 'ForeignCurrencyDenominatedDebtDesignatedAsForeignCurrencyHedge'
+        gap_val = extractor._get_fact_value_fuzzy(facts_df, gap_concept)
+        if gap_val:
+            print(f"  *** GAP CANDIDATE *** {gap_concept}: {gap_val/1e9:.3f} B")
             
-        rows = facts[facts['concept'] == f'us-gaap:{c}']
-        nondim = rows[rows['full_dimension_label'].isna()]
-        if not nondim.empty:
-            val = nondim.sort_values('period_key', ascending=False).iloc[0]['numeric_value']
-            print(f"  {c}: {val/1e9:.2f}B")
+        # Filter likely liability patterns
+        potential = facts_df[facts_df['concept'].str.contains('Debt|Borrow|Payable|Liabilit', case=False, regex=True)]
+        potential = potential[potential['numeric_value'] > 1e9]
+        # Unique concepts with values
+        for concept in potential['concept'].unique():
+            val = extractor._get_fact_value(facts_df, concept)
+            if val and val > 1e9:
+                print(f"  {concept}: {val/1e9:.3f} B")
+
+    # 3. Cash Analysis
+    print(f"\n--- Cash Analysis ---")
+    cash_concepts = [
+        'CashAndDueFromBanks',
+        'InterestBearingDepositsInBanks',
+        'InterestBearingDepositsInFederalReserve',
+        'DepositsInFederalReserve',
+        'RestrictedCash', 
+        'RestrictedCashAndCashEquivalents'
+    ]
+    
+    for c in cash_concepts:
+        val, name = get_val_and_concept(facts_df, c, fuzzy=False)
+        fuzzy_val, fuzzy_name = get_val_and_concept(facts_df, c, fuzzy=True)
+        print(f"{c}:")
+        if val: print(f"  Direct: {name} = {val/1e9:.3f} B")
+        if fuzzy_val: print(f"  Fuzzy:  {fuzzy_name} = {fuzzy_val/1e9:.3f} B")
+
+
 
 if __name__ == "__main__":
-    inspect_gs_custom_tag()
-    simulate_gs_match()
-    inspect_bk_assets()
-    # inspect_custody_cash("USB") # Replacing with standard inspection if needed, or just skip
-    inspect_stt_filing()
-    inspect_stt_debt()
+    # GS (Dealer) - 10-K 2024 (Accession 0000886982-25-000005)
+    debug_company("GS", accession_no="0000886982-25-000005", form="10-K")
