@@ -53,6 +53,7 @@ class FactQuery:
         self._sort_ascending = True
         self._limit = None
         self._statement_type = None
+        self._requested_dimension = None  # GH-607: Track requested dimension for accurate member_label selection
 
     def by_concept(self, pattern: str, exact: bool = False) -> FactQuery:
         """
@@ -274,6 +275,9 @@ class FactQuery:
         # GH-574: When filtering by dimension, automatically include dimension columns in output
         # since the user is explicitly working with dimensional data
         self._include_dimensions = True
+
+        # GH-607: Store the requested dimension for accurate member_label selection in to_dataframe()
+        self._requested_dimension = dimension
 
         # Normalize the input dimension to match stored format
         normalized_dim = self._normalize_dimension_key(dimension)
@@ -676,6 +680,71 @@ class FactQuery:
 
         return results
 
+    def _update_dimension_fields_for_requested_dimension(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Update dimension fields to reflect the specifically requested dimension.
+
+        GH-607: When by_dimension() is called with a specific dimension (e.g., "StatementBusinessSegmentsAxis"),
+        the dimension_member_label should show the member of THAT dimension, not an arbitrary first/last one.
+
+        Args:
+            df: DataFrame with fact results
+
+        Returns:
+            DataFrame with updated dimension fields
+        """
+        if not self._requested_dimension:
+            return df
+
+        # Find which dim_* columns match the requested dimension
+        dim_cols = [col for col in df.columns if col.startswith('dim_')]
+
+        # Find the matching dimension column
+        matching_col = None
+        for col in dim_cols:
+            if self._dimension_key_matches(col, self._requested_dimension):
+                matching_col = col
+                break
+
+        if not matching_col:
+            return df
+
+        # Extract the dimension name from the column (remove 'dim_' prefix and convert back)
+        dim_name = matching_col[4:].replace('_', ':')  # e.g., 'dim_us-gaap_StatementBusinessSegmentsAxis' -> 'us-gaap:StatementBusinessSegmentsAxis'
+
+        # Update dimension fields for each row
+        def update_row_dimension(row):
+            member_value = row.get(matching_col)
+            if pd.isna(member_value) or not member_value:
+                return row
+
+            # Look up human-readable member label from element catalog
+            member_label = member_value  # Default to the raw value
+            member_value_normalized = member_value.replace(':', '_')
+            if member_value_normalized in self._facts_view.xbrl.element_catalog:
+                mem_element = self._facts_view.xbrl.element_catalog[member_value_normalized]
+                for role in ['http://www.xbrl.org/2003/role/verboseLabel',
+                             'http://www.xbrl.org/2003/role/terseLabel',
+                             'http://www.xbrl.org/2003/role/label']:
+                    if role in mem_element.labels:
+                        member_label = mem_element.labels[role]
+                        break
+                # Clean up label (remove [Member], etc.)
+                member_label = member_label.replace('[Member]', '').strip()
+
+            # Update the dimension fields
+            row = row.copy()
+            row['dimension'] = dim_name
+            row['member'] = member_value
+            row['dimension_member_label'] = member_label
+            # Also update label to match (GH-597 behavior)
+            row['label'] = member_label
+            return row
+
+        # Apply updates to each row
+        df = df.apply(update_row_dimension, axis=1)
+        return df
+
     @lru_cache(maxsize=8)
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
@@ -691,6 +760,11 @@ class FactQuery:
             return pd.DataFrame()
 
         df = pd.DataFrame(results)
+
+        # GH-607: When a specific dimension was requested via by_dimension(),
+        # update dimension fields to reflect that dimension's member info
+        if self._requested_dimension and self._include_dimensions and len(df) > 0:
+            df = self._update_dimension_fields_for_requested_dimension(df)
 
         # Filter columns based on inclusion flags
         if not self._include_dimensions:
