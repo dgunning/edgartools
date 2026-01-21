@@ -492,6 +492,28 @@ class ReferenceValidator:
         except Exception:
             return None
     
+    def _is_balance_sheet_metric(self, metric: str) -> bool:
+        """Check if metric is Point-in-Time (Balance Sheet)."""
+        bs_metrics = {
+            'TotalAssets', 'limit_stock', 'StockholdersEquity',
+            'CashAndEquivalents', 'ShortTermDebt', 'LongTermDebt',
+            'Goodwill', 'IntangibleAssets', 'Inventory', 'Receivables',
+            'RestrictedCash'
+        }
+        return metric in bs_metrics
+
+    def _is_flow_concept(self, concept: str) -> bool:
+        """Check if concept implies Duration/Flow (Cash Flow)."""
+        if not concept:
+            return False
+        flow_keywords = [
+            'Proceeds', 'Payments', 'Repayments', 'CashFlow', 
+            'NetChange', 'Increase', 'Decrease', 'Issuance', 'Retirement', 
+            'Acquisition', 'Disposal'
+        ]
+        concept_clean = concept.split(':')[-1]
+        return any(k.lower() in concept_clean.lower() for k in flow_keywords)
+
     def validate_company(
         self,
         ticker: str,
@@ -535,6 +557,16 @@ class ReferenceValidator:
                     notes="Metric excluded in config"
                 )
                 continue
+            
+            # GUARDRAIL: Flow vs Stock Sieve (STT Fix)
+            # If Balance Sheet metric mapped to Flow tag, invalidate it immediately
+            # CPA Rule: Balance Sheet = Point-in-Time, Cash Flow = Duration.
+            if result.is_mapped and self._is_balance_sheet_metric(metric):
+                if self._is_flow_concept(result.concept):
+                    # Invalidate the mapping - prevents using semantically wrong tag
+                    result.concept = None 
+                    result.confidence = 0.0
+                    result.source = MappingSource.NONE
             
             # Get reference value from yfinance
             ref_value = self._get_yfinance_value(stock, metric, target_date=filing_date)
@@ -595,17 +627,28 @@ class ReferenceValidator:
                     else:
                         xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
             
-            # FALLBACK: For OperatingIncome with no mapping, try calculated extraction
-            # This handles companies like NKE/MRK that don't report OperatingIncomeLoss
-            elif not result.is_mapped and xbrl and metric == 'OperatingIncome' and ref_value:
+            # FALLBACK: Industry/Calculated Logic when no mapping exists (or was invalidated)
+            elif not result.is_mapped and xbrl and ref_value:
+                # 1. Try Industry Extraction (OperatingIncome, Banking Debt/Cash, etc.)
+                # This covers STT Flow/Stock invalidated case - we still try industry logic!
                 industry_value = self._try_industry_extraction(ticker, metric, xbrl)
                 if industry_value is not None:
                     xbrl_value = industry_value
                     # Create a synthetic mapping for the calculated value
-                    result.concept = None  # Calculated, no single concept
+                    result.concept = None  # Composite/Calculated
                     result.confidence = 0.85
                     result.source = MappingSource.TREE
-                    result.reasoning = "Calculated from GrossProfit - SG&A - R&D"
+                    result.reasoning = "Industry Logic Extraction (Unmapped Fallback)"
+                
+                # 2. Try Composite Metrics Fallback
+                elif metric in self.COMPOSITE_METRICS:
+                     composite_value = self._extract_composite_value(xbrl, metric)
+                     if composite_value is not None:
+                        xbrl_value = composite_value
+                        result.concept = f"Composite: {', '.join(self.COMPOSITE_METRICS[metric])}"
+                        result.confidence = 0.85
+                        result.source = MappingSource.TREE
+                        result.reasoning = f"Synthesized from {len(self.COMPOSITE_METRICS[metric])} components via Fallback"
             
             # FALLBACK: Generalized Composite Metrics (ShortTermDebt, IntangibleAssets, etc.)
             # Per Principal Architect: attempt composite construction before giving up
