@@ -1,0 +1,70 @@
+{
+  "run_id": "e2e_2026-01-21T15:29:19.835579",
+  "timestamp": "2026-01-21T15:29:19.835594",
+  "config": {
+    "group": "custom",
+    "workers": 8,
+    "years": 5,
+    "quarters": 6,
+    "metrics": null
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 2,
+      "10k_passed": 2,
+      "10q_total": 6,
+      "10q_passed": 5
+    },
+    "sp50": {
+      "10k_total": 2,
+      "10k_passed": 2,
+      "10q_total": 6,
+      "10q_passed": 5
+    },
+    "custom": {
+      "10k_total": 4,
+      "10k_passed": 3,
+      "10q_total": 14,
+      "10q_passed": 13
+    }
+  },
+  "failure_count": 2,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "STT",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000093751-24-000498",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 2660000000.0,
+      "ref_value": 4637000000.0,
+      "variance_pct": 42.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ProceedsFromRepaymentsOfShortTermDebtMaturingInThreeMonthsOrLess",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-03-31",
+      "accession_no": "0000886982-25-000009",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 65018000000.0,
+      "ref_value": 89012000000.0,
+      "variance_pct": 27.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -29,14 +29,31 @@ banking:
       xbrl_concepts:
         - NoninterestExpense
     
-    ShortTermDebt:
-      extraction_strategy: "exclude_operational_funding"
-      exclude_concepts:
-        - SecuritiesSoldUnderAgreementsToRepurchase
-        - FederalFundsPurchased
+    # Street View: Economic Liquidity (not statutory cash)
+    CashAndEquivalents:
+      extraction_strategy: "street_cash_composite"
       primary_concepts:
+        - CashAndDueFromBanks
+        - InterestBearingDepositsInBanks  # Critical for BK/STT custodial banks
+        - CashAndSecuritiesSegregatedUnderFederalAndOtherRegulations  # GS regulatory
+      fallback_concepts:
+        - CashAndCashEquivalentsAtCarryingValue
+        - CashAndCashEquivalents
+      notes: "Street View: Economic liquidity, not statutory cash"
+    
+    # Street View: Wholesale Funding (Strict Component Summation)
+    ShortTermDebt:
+      extraction_strategy: "wholesale_funding_composite"
+      include_concepts:
         - CommercialPaper
         - OtherShortTermBorrowings
+        - FederalHomeLoanBankAdvancesCurrent  # Critical for PNC/USB regional
+        - SecuritiesSoldUnderAgreementsToRepurchase  # Dealers only (net of matched book)
+      exclude_concepts:
+        - TradingLiabilities
+        - PayablesToBrokerDealersAndClearingOrganizations
+      aggregate_fallback: ShortTermBorrowings
+      notes: "Street View: Wholesale funding, Strict Component Summation to avoid double-count"
 
 # Insurance (SIC 6300-6399)
 insurance:
