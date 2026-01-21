@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.11.1] - 2026-01-21
+
+### Fixed
+
+- **Timezone Handling**
+  - Replaced pytz with stdlib zoneinfo for timezone handling
+  - Removed undeclared pytz dependency
+  - Uses standard library for better compatibility
+  - **Files**: `edgar/` (various timezone-related files)
+
+- **Pandas 3.0 Compatibility**
+  - Pinned pandas to <3.0 to avoid breaking changes
+  - Fixed NaN handling in balance tests
+  - Ensures stability until pandas 3.0 migration is complete
+  - **Files**: `pyproject.toml`, test files
+
+- **Income Statement Selection** (Issue #608)
+  - Fixed incorrect income statement selection when multiple ComprehensiveIncome roles exist
+  - Resolves issue where OCI (Other Comprehensive Income) items were returned instead of P&L data
+  - Affects companies like STZ (Constellation Brands) with complex financial statement structures
+  - **Files**: `edgar/xbrl/statements.py` or related XBRL parsing files
+
 ## [5.11.0] - 2026-01-20
 
 ### Added
