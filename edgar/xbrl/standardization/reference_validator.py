@@ -22,6 +22,7 @@ from .config_loader import get_config, MappingConfig
 from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern
 from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components
 from .layers.dimensional_aggregator import DimensionalAggregator
+from edgar import Company
 
 
 @dataclass
@@ -181,6 +182,12 @@ class ReferenceValidator:
             if industry == 'banking' and metric == 'ShortTermDebt':
                 extractor = BankingExtractor()
                 result = extractor.extract_short_term_debt(xbrl, facts_df)
+                return result.value
+            
+            # Banking-specific extraction for CashAndEquivalents
+            if industry == 'banking' and metric == 'CashAndEquivalents':
+                extractor = BankingExtractor()
+                result = extractor.extract_cash_and_equivalents(xbrl, facts_df)
                 return result.value
             
             # Calculated OperatingIncome for any industry
@@ -490,7 +497,8 @@ class ReferenceValidator:
         ticker: str,
         results: Dict[str, MappingResult],
         xbrl=None,
-        filing_date: Optional[Union[str, datetime]] = None
+        filing_date: Optional[Union[str, datetime]] = None,
+        form_type: Optional[str] = None
     ) -> Dict[str, ValidationResult]:
         """
         Validate all mappings for a company against yfinance.
@@ -500,6 +508,7 @@ class ReferenceValidator:
             results: Mapping results to validate
             xbrl: Optional XBRL object to extract values
             filing_date: Date of the filing (for historical matching)
+            form_type: Form type (10-K or 10-Q) for period-aware extraction
             
         Returns:
             Dict of validation results per metric
@@ -533,9 +542,10 @@ class ReferenceValidator:
             # Get XBRL value (if we have a mapping and XBRL object)
             xbrl_value = None
             if result.is_mapped and xbrl:
-                # Set context for pattern classification
+                # Set context for pattern classification and period-aware extraction
                 self._current_ticker = ticker
                 self._current_metric = metric
+                self._current_form_type = form_type  # For period filtering (10-K vs 10-Q)
                 
                 # Try industry-specific extraction first for special metrics
                 industry_value = self._try_industry_extraction(ticker, metric, xbrl)
@@ -556,7 +566,34 @@ class ReferenceValidator:
                     else:
                         xbrl_value = self._extract_composite_value(xbrl, metric)
                 else:
-                    xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
+                    # Specialized Logic for 10-Q Flow Metrics (Derivation)
+                    if form_type == '10-Q' and metric in ['OperatingCashFlow', 'Capex']:
+                        # Force strict quarterly extraction (90 days)
+                        strict_val = self._extract_xbrl_value(xbrl, result.concept, target_days=90)
+                        
+                        if strict_val is not None:
+                            xbrl_value = strict_val
+                        else:
+                            # Strict extraction failed -> Quarterly fact missing -> Trigger Derivation
+                            # Get YTD value (fallback behavior)
+                            ytd_val = self._extract_xbrl_value(xbrl, result.concept, target_days=None)
+                            
+                            if ytd_val is not None:
+                                derived = self._derive_quarterly_value(
+                                    ticker, 
+                                    result.concept, 
+                                    filing_date, 
+                                    ytd_val
+                                )
+                                if derived is not None:
+                                    xbrl_value = derived
+                                else:
+                                    # If derivation fails (e.g. no prior filing), default to YTD
+                                    xbrl_value = ytd_val
+                            else:
+                                xbrl_value = None
+                    else:
+                        xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
             
             # FALLBACK: For OperatingIncome with no mapping, try calculated extraction
             # This handles companies like NKE/MRK that don't report OperatingIncomeLoss
@@ -601,7 +638,8 @@ class ReferenceValidator:
         ticker: str,
         results: Dict[str, MappingResult],
         xbrl=None,
-        filing_date: Optional[Union[str, datetime]] = None
+        filing_date: Optional[Union[str, datetime]] = None,
+        form_type: Optional[str] = None
     ) -> Dict[str, ValidationResult]:
         """
         Validate mappings and update MappingResult objects with validation status.
@@ -615,11 +653,12 @@ class ReferenceValidator:
             results: Mapping results to validate (will be modified in place)
             xbrl: Optional XBRL object to extract values
             filing_date: Date of the filing (for historical matching)
+            form_type: Form type (10-K or 10-Q) for period-aware extraction
             
         Returns:
             Dict of validation results per metric
         """
-        validations = self.validate_company(ticker, results, xbrl, filing_date=filing_date)
+        validations = self.validate_company(ticker, results, xbrl, filing_date=filing_date, form_type=form_type)
         
         # Update MappingResult objects based on validation
         for metric, validation in validations.items():
@@ -842,151 +881,186 @@ class ReferenceValidator:
 
         Finds the total (non-dimensioned) value for the most recent period.
         """
+    def _extract_xbrl_value(self, xbrl, concept: Union[str, List[str]], target_days: Optional[int] = None) -> Optional[float]:
+        """
+        Extract value for a concept (or list of candidate concepts).
+        """
         try:
-            # Remove namespace prefix if present
-            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
-
-            # Handle company-specific prefixes
-            for prefix in ['nvda_', 'tsla_', 'aapl_', 'msft_', 'goog_', 'amzn_', 'meta_']:
-                concept_name = concept_name.replace(prefix, '')
-
-            facts = xbrl.facts
-            df = facts.get_facts_by_concept(concept_name)
-
-            if df is None or len(df) == 0:
+            if not xbrl:
                 return None
-
-            # Filter for EXACT concept match (get_facts_by_concept returns partial matches)
-            # e.g., "Assets" query returns Assets, AssetsCurrent, AssetsNoncurrent, etc.
-            if 'concept' in df.columns:
-                # Build expected concept variations
-                expected_concepts = [
-                    f'us-gaap:{concept_name}',
-                    f'us-gaap_{concept_name}',
-                    concept_name,
-                    # Company-specific prefixes
-                    f'nvda:{concept_name}', f'nvda_{concept_name}',
-                    f'tsla:{concept_name}', f'tsla_{concept_name}',
-                    f'aapl:{concept_name}', f'aapl_{concept_name}',
-                    f'msft:{concept_name}', f'msft_{concept_name}',
-                    f'goog:{concept_name}', f'goog_{concept_name}',
-                    f'amzn:{concept_name}', f'amzn_{concept_name}',
-                    f'meta:{concept_name}', f'meta_{concept_name}',
-                ]
-                df = df[df['concept'].isin(expected_concepts)]
-
-            if len(df) == 0:
-                return None
-
-            # Filter for non-dimensioned (total) values only
-            if 'full_dimension_label' in df.columns:
-                total_rows = df[df['full_dimension_label'].isna()]
+            
+            concepts = [concept] if isinstance(concept, str) else concept
+            
+            for concept in concepts:
+                if not concept:
+                    continue
+                    
+                # Get facts for this concept
+                # We want exact matches or namespace matches
+                # Check if concept has prefix
+                concept_name = concept.split(':')[-1] if ':' in concept else concept
                 
-                # Check if we're filtering out dimensional-only values
+                df = xbrl.facts.get_facts_by_concept(concept)
+                if df is None or len(df) == 0:
+                    continue
+
+                # Filter for expected concept name to be safe
+                if 'concept' in df.columns:
+                    # Normalized compare
+                    expected_concepts = [
+                        concept.lower(), 
+                        f"us-gaap:{concept.lower()}",
+                        f"ifrs-full:{concept.lower()}"
+                    ]
+                    df = df[df['concept'].isin(expected_concepts)]
+
+                if len(df) == 0:
+                    return None
+
+                # Filter for non-dimensioned (total) values only
+                if 'full_dimension_label' in df.columns:
+                    total_rows = df[df['full_dimension_label'].isna()]
+                    
+                    # Check if we're filtering out dimensional-only values
+                    if len(total_rows) == 0:
+                        dim_rows = df[df['full_dimension_label'].notna()]
+                        if len(dim_rows) > 0:
+                            # Determine target period days from form type OR override
+                            if target_days is not None:
+                                target_period_days = target_days
+                            else:
+                                form_type = getattr(self, '_current_form_type', None)
+                                target_period_days = 90 if form_type == '10-Q' else None
+                            
+                            # Use DimensionalAggregator for proper aggregation (with period filtering)
+                            aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                                xbrl, concept_name, consolidated_value=None,
+                                target_period_days=target_period_days
+                            )
+                            
+                            if aggregation_result.aggregated_value is not None:
+                                # Store aggregation info for transparency
+                                if not hasattr(self, '_dimensional_aggregations'):
+                                    self._dimensional_aggregations = {}
+                                self._dimensional_aggregations[concept] = {
+                                    'value': aggregation_result.aggregated_value,
+                                    'dimension_count': aggregation_result.dimension_count,
+                                    'dimensions_used': aggregation_result.dimensions_used,
+                                    'method': aggregation_result.method,
+                                    'notes': aggregation_result.notes
+                                }
+                                return aggregation_result.aggregated_value
+                            
+                            # Log this dimensional-only case for investigation
+                            dim_sum = dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None
+                            warning = {
+                                'concept': concept,
+                                'dimensional_only': True,
+                                'dimension_count': len(dim_rows),
+                                'dimensional_sum': dim_sum,
+                                'sample_dimensions': dim_rows['full_dimension_label'].head(3).tolist()
+                            }
+                            # Store warning for later retrieval
+                            if not hasattr(self, '_dimensional_warnings'):
+                                self._dimensional_warnings = {}
+                            self._dimensional_warnings[concept] = warning
+                        return None
+                else:
+                    total_rows = df
+
                 if len(total_rows) == 0:
-                    dim_rows = df[df['full_dimension_label'].notna()]
-                    if len(dim_rows) > 0:
-                        # Use DimensionalAggregator for proper aggregation
-                        aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
-                            xbrl, concept_name, consolidated_value=None
+                    return None
+
+                # Filter for rows with actual numeric values
+                total_rows = total_rows[total_rows['numeric_value'].notna()]
+                if len(total_rows) == 0:
+                    return None
+
+                # Sort by period_key to get most recent
+                if 'period_key' in total_rows.columns:
+                    # Separate instant vs duration facts
+                    duration_mask = total_rows['period_key'].str.startswith('duration_')
+                    duration_rows = total_rows[duration_mask]
+                    instant_rows = total_rows[~duration_mask]
+                    
+                    if len(duration_rows) > 0:
+                        # For duration-based metrics (income/cashflow), prefer annual periods
+                        duration_rows = duration_rows.copy()
+                        duration_rows['period_days'] = duration_rows['period_key'].apply(
+                            self._calculate_period_days
                         )
                         
-                        if aggregation_result.aggregated_value is not None:
-                            # Store aggregation info for transparency
-                            if not hasattr(self, '_dimensional_aggregations'):
-                                self._dimensional_aggregations = {}
-                            self._dimensional_aggregations[concept] = {
-                                'value': aggregation_result.aggregated_value,
-                                'dimension_count': aggregation_result.dimension_count,
-                                'dimensions_used': aggregation_result.dimensions_used,
-                                'method': aggregation_result.method,
-                                'notes': aggregation_result.notes
-                            }
-                            return aggregation_result.aggregated_value
+                        # PERIOD-AWARE EXTRACTION: Filter by form type or override
+                        if target_days is not None:
+                             target_period_days = target_days
+                             # Use simple range overlap for matching
+                             filtered = duration_rows[
+                                (duration_rows['period_days'] >= target_period_days - 30) &
+                                (duration_rows['period_days'] <= target_period_days + 30)
+                             ]
+                             if len(filtered) > 0:
+                                 duration_rows = filtered
+                             # If strict and no match?
+                             # In IndustryLogic we made it strict.
+                             # Here, let's also be strict if override is provided.
+                             else:
+                                 # Checking if this is explicitly requested target
+                                 return None
+                        else:
+                            form_type = getattr(self, '_current_form_type', None)
+                            
+                            if form_type == '10-Q':
+                                # For 10-Q filings: filter for quarterly periods (~90 days)
+                                quarterly_rows = duration_rows[
+                                    (duration_rows['period_days'] >= 60) & 
+                                    (duration_rows['period_days'] <= 100)
+                                ]
+                                if len(quarterly_rows) > 0:
+                                    duration_rows = quarterly_rows
+                            else:
+                                # For 10-K or unknown: prefer annual periods (>300 days)
+                                annual_rows = duration_rows[duration_rows['period_days'] > 300]
+                                if len(annual_rows) > 0:
+                                    duration_rows = annual_rows
                         
-                        # Log this dimensional-only case for investigation
-                        dim_sum = dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None
-                        warning = {
-                            'concept': concept,
-                            'dimensional_only': True,
-                            'dimension_count': len(dim_rows),
-                            'dimensional_sum': dim_sum,
-                            'sample_dimensions': dim_rows['full_dimension_label'].head(3).tolist()
-                        }
-                        # Store warning for later retrieval
-                        if not hasattr(self, '_dimensional_warnings'):
-                            self._dimensional_warnings = {}
-                        self._dimensional_warnings[concept] = warning
-                    return None
-            else:
-                total_rows = df
-
-            if len(total_rows) == 0:
-                return None
-
-            # Filter for rows with actual numeric values
-            total_rows = total_rows[total_rows['numeric_value'].notna()]
-            if len(total_rows) == 0:
-                return None
-
-            # Sort by period_key (e.g., "instant_2024-12-31" or "duration_2024-01-01_2024-12-31")
-            # to get the most recent
-            if 'period_key' in total_rows.columns:
-                # Separate instant vs duration facts
-                duration_mask = total_rows['period_key'].str.startswith('duration_')
-                duration_rows = total_rows[duration_mask]
-                instant_rows = total_rows[~duration_mask]
-                
-                if len(duration_rows) > 0:
-                    # For duration-based metrics (income/cashflow), prefer annual periods
-                    # Calculate period length and filter for 12-month periods if available
-                    duration_rows = duration_rows.copy()
-                    duration_rows['period_days'] = duration_rows['period_key'].apply(
-                        self._calculate_period_days
-                    )
-                    
-                    # Prefer annual periods (>300 days) over quarterly
-                    annual_rows = duration_rows[duration_rows['period_days'] > 300]
-                    if len(annual_rows) > 0:
-                        duration_rows = annual_rows
-                    
-                    # PiT: Sort by period_key first, then by filed date (if available)
-                    # This ensures we get the LATEST FILING for the most recent period
-                    duration_rows = self._select_latest_filing(duration_rows)
-                    latest = duration_rows.iloc[0]
-                elif len(instant_rows) > 0:
-                    # PiT: Apply filing date precedence to instant facts too
-                    instant_rows = self._select_latest_filing(instant_rows)
-                    latest = instant_rows.iloc[0]
+                        # PiT: Sort by period_key first, then by filed date (if available)
+                        duration_rows = self._select_latest_filing(duration_rows)
+                        if len(duration_rows) == 0:
+                            return None
+                        latest = duration_rows.iloc[0]
+                    elif len(instant_rows) > 0:
+                        # PiT: Apply filing date precedence to instant facts too
+                        instant_rows = self._select_latest_filing(instant_rows)
+                        if len(instant_rows) == 0:
+                             return None
+                        latest = instant_rows.iloc[0]
+                    else:
+                        latest = total_rows.iloc[0]
                 else:
                     latest = total_rows.iloc[0]
-            else:
-                latest = total_rows.iloc[0]
 
-            # Get the value
-            value = float(latest['numeric_value'])
+                # Get the value
+                value = float(latest['numeric_value'])
 
-            # Handle "placeholder zero" - consolidated is 0 but dimensions have data
-            # This occurs when companies report 0 as a placeholder but have real values in dimensions
-            if value == 0:
-                aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
-                    xbrl, concept_name, consolidated_value=value
-                )
-                if self._dimensional_aggregator.should_aggregate(value, aggregation_result.aggregated_value or 0):
-                    # Store aggregation info for transparency
-                    if not hasattr(self, '_dimensional_aggregations'):
-                        self._dimensional_aggregations = {}
-                    self._dimensional_aggregations[concept] = {
-                        'value': aggregation_result.aggregated_value,
-                        'dimension_count': aggregation_result.dimension_count,
-                        'dimensions_used': aggregation_result.dimensions_used,
-                        'method': aggregation_result.method,
-                        'notes': f'Placeholder zero replaced: consolidated=0, dimensional_sum={aggregation_result.aggregated_value}'
-                    }
-                    return aggregation_result.aggregated_value
+                # Handle "placeholder zero"
+                if value == 0:
+                    aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                        xbrl, concept_name, consolidated_value=value
+                    )
+                    if self._dimensional_aggregator.should_aggregate(value, aggregation_result.aggregated_value or 0):
+                        if not hasattr(self, '_dimensional_aggregations'):
+                            self._dimensional_aggregations = {}
+                        self._dimensional_aggregations[concept] = {
+                            'value': aggregation_result.aggregated_value,
+                            'dimension_count': aggregation_result.dimension_count,
+                            'dimensions_used': aggregation_result.dimensions_used,
+                            'method': aggregation_result.method,
+                            'notes': f'Placeholder zero replaced: consolidated=0, dimensional_sum={aggregation_result.aggregated_value}'
+                        }
+                        return aggregation_result.aggregated_value
 
-            # Handle absolute value for cash flows (some are negative in yfinance)
-            return value
+                # Handle absolute value for cash flows (some are negative in yfinance)
+                return value
 
         except Exception as e:
             # Try auto-fix for known patterns
@@ -997,6 +1071,56 @@ class ReferenceValidator:
                     if fixed_value is not None:
                         return fixed_value
             return None
+        
+    def _derive_quarterly_value(
+        self, 
+        ticker: str, 
+        concept: str, 
+        current_filing_date: str, 
+        current_ytd_value: float
+    ) -> Optional[float]:
+        """
+        Derive quarterly value by subtracting Prior YTD from Current YTD.
+        Q3_Quarterly = Q3_YTD (Current) - Q2_YTD (Prior)
+        """
+        try:
+             # Need Company to fetch filings
+             company = Company(ticker)
+             
+             # Fetch 10-Q/10-K prior to current date
+             # Filter is string "YYYY-MM-DD"
+             date_str = str(current_filing_date).split(' ')[0]
+             filings = company.get_filings(form=['10-Q', '10-K']).filter(date=f"<{date_str}")
+             
+             if not filings:
+                 return None
+                 
+             # Get immediate prior filing
+             prior_filing = filings.latest(1)
+             if not prior_filing:
+                 return None
+                 
+             # Extract Prior YTD
+             prior_xbrl = prior_filing.xbrl()
+             if not prior_xbrl:
+                  return None
+                  
+             # Extract Prior YTD (pass strict=None to allow finding YTD/Latest)
+             # We use the same concept as current
+             prior_ytd = self._extract_xbrl_value(prior_xbrl, concept, target_days=None)
+             
+             if prior_ytd is not None:
+                  # Calculate Delta
+                  quarterly_val = current_ytd_value - prior_ytd
+                  return quarterly_val
+                  
+             return None
+             
+        except Exception as e:
+             # Just log and fail gracefully
+             print(f"Derivation failed for {ticker} {concept}: {e}")
+             return None
+
     
     def _extract_composite_value(
         self,

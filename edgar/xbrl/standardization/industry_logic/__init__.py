@@ -59,15 +59,22 @@ class IndustryExtractor(ABC):
         """Extract OperatingIncome with industry-specific logic."""
         pass
     
-    def _get_fact_value(self, df, concept: str) -> Optional[float]:
+    def _get_fact_value(self, df, concept: str, target_period_days: int = None) -> Optional[float]:
         """
-        Get the consolidated (non-dimensional) value for a concept from the latest period.
+        Get the consolidated (non-dimensional) value for a concept from the appropriate period.
         
         Key logic:
         1. Match exact concept name (handle namespace prefix)
         2. Filter out dimensional values (keep only totals)
-        3. Select the most recent period
-        4. For same period, prefer single value without dimensions
+        3. Filter by target period duration if specified
+        4. Select the most recent period
+        5. For same period, prefer single value without dimensions
+        
+        Args:
+            df: DataFrame of facts
+            concept: XBRL concept name
+            target_period_days: Optional. Target period duration (90 for quarterly, 365 for annual).
+                               If None, uses most recent period without duration filtering.
         """
         if df is None or len(df) == 0:
             return None
@@ -117,6 +124,26 @@ class IndustryExtractor(ABC):
         if len(numeric_df) == 0:
             return None
         
+        # PERIOD FILTERING: Filter by target duration if specified
+        if target_period_days and 'period_key' in numeric_df.columns:
+            duration_mask = numeric_df['period_key'].str.startswith('duration_')
+            if duration_mask.any():
+                duration_rows = numeric_df[duration_mask].copy()
+                duration_rows['period_days'] = duration_rows['period_key'].apply(
+                    self._calculate_period_days
+                )
+                # 30-day tolerance band for period matching
+                filtered = duration_rows[
+                    (duration_rows['period_days'] >= target_period_days - 30) & 
+                    (duration_rows['period_days'] <= target_period_days + 30)
+                ]
+                if len(filtered) > 0:
+                    numeric_df = filtered
+                else:
+                    # Strict filtering: If target days specified but no match, return None
+                    # This prevents 10-Q failing back to YTD (9mo) when we wanted Q (3mo)
+                    return None
+        
         # Sort by period to get most recent
         if 'period_key' in numeric_df.columns:
             numeric_df = numeric_df.sort_values('period_key', ascending=False)
@@ -124,6 +151,21 @@ class IndustryExtractor(ABC):
         # Return first value (most recent period, non-dimensional)
         val = numeric_df.iloc[0]['numeric_value']
         return float(val) if val is not None else None
+    
+    def _calculate_period_days(self, period_key: str) -> int:
+        """Calculate days in a period from period_key like 'duration_2024-01-01_2024-12-31'."""
+        try:
+            if not period_key.startswith('duration_'):
+                return 0
+            parts = period_key.replace('duration_', '').split('_')
+            if len(parts) == 2:
+                from datetime import datetime
+                start = datetime.strptime(parts[0], '%Y-%m-%d')
+                end = datetime.strptime(parts[1], '%Y-%m-%d')
+                return (end - start).days
+        except Exception:
+            pass
+        return 0
 
 
 class DefaultExtractor(IndustryExtractor):
@@ -312,6 +354,20 @@ class BankingExtractor(IndustryExtractor):
         
         # Fallback: CommercialPaper
         cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
+        
+        # Fallback: ShortTermBorrowings (standard tag used by JPM when Other is missing)
+        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+        
+        if stb > 0 and stb > cp:
+             return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="ShortTermBorrowings",
+                xbrl_concept="us-gaap:ShortTermBorrowings",
+                value=stb,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes="Bank (yfinance-aligned): ShortTermBorrowings"
+            )
+        
         if cp > 0:
             return ExtractedMetric(
                 standard_name="ShortTermDebt",
@@ -352,6 +408,64 @@ class BankingExtractor(IndustryExtractor):
             notes="Bank (economic): ShortTermBorrowings + Repos + CP"
         )
     
+    def extract_cash_and_equivalents(self, xbrl, facts_df) -> ExtractedMetric:
+        """
+        Bank Cash: Prioritize CashAndDueFromBanks and similar liquid assets.
+        Crucially helps avoid falling back to OCI/Hedge tags in the tree.
+        """
+        # 1. Try standard CashAndCashEquivalentsAtCarryingValue
+        val = self._get_fact_value(facts_df, 'CashAndCashEquivalentsAtCarryingValue')
+        if val is not None:
+             return ExtractedMetric(
+                standard_name="CashAndEquivalents",
+                industry_counterpart="CashAndCashEquivalentsAtCarryingValue",
+                xbrl_concept="us-gaap:CashAndCashEquivalentsAtCarryingValue",
+                value=val,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes="Bank: Standard CashAndCashEquivalentsAtCarryingValue"
+            )
+            
+        # 2. Try simple CashAndCashEquivalents
+        val = self._get_fact_value(facts_df, 'CashAndCashEquivalents')
+        if val is not None:
+             return ExtractedMetric(
+                standard_name="CashAndEquivalents",
+                industry_counterpart="CashAndCashEquivalents",
+                xbrl_concept="us-gaap:CashAndCashEquivalents",
+                value=val,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes="Bank: Standard CashAndCashEquivalents"
+            )
+            
+        # 3. Try CashAndDueFromBanks (Classic bank tag)
+        # We sum with InterestBearingDepositsInBanks to approximate "Cash & Equivalents"
+        val = self._get_fact_value(facts_df, 'CashAndDueFromBanks')
+        if val is not None:
+            ibd = self._get_fact_value(facts_df, 'InterestBearingDepositsInBanks') or 0
+            total = val + ibd
+            
+            note = "Bank: CashAndDueFromBanks"
+            if ibd > 0:
+                note += " + InterestBearingDepositsInBanks"
+                
+            return ExtractedMetric(
+                standard_name="CashAndEquivalents",
+                industry_counterpart="CashAndDueFromBanks",
+                xbrl_concept="us-gaap:CashAndDueFromBanks",
+                value=total,
+                extraction_method=ExtractionMethod.COMPOSITE if ibd > 0 else ExtractionMethod.DIRECT,
+                notes=note
+            )
+
+        # Return empty metric to signal fallback
+        return ExtractedMetric(
+            standard_name="CashAndEquivalents",
+            industry_counterpart=None,
+            xbrl_concept=None,
+            value=None,
+            extraction_method=ExtractionMethod.DIRECT
+        )
+
     def extract_capex(self, xbrl, facts_df) -> ExtractedMetric:
         # Banks have minimal Capex - use default logic
         return DefaultExtractor().extract_capex(xbrl, facts_df)

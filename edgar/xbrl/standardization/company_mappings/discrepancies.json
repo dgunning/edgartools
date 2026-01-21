@@ -2,13 +2,13 @@
     "schema_version": "1.1",
     "description": "Known discrepancies between XBRL extracted values and reference data (yfinance)",
     "statistics": {
-        "total": 5,
+        "total": 4,
         "by_classification": {
-            "definition_mismatch": 4,
+            "definition_mismatch": 3,
             "data_provider_adjustment": 1
         },
         "by_status": {
-            "accepted": 4,
+            "accepted": 3,
             "documented": 1
         }
     },
@@ -141,36 +141,6 @@
             },
             "action": "use_xbrl_value",
             "notes": "yfinance includes operating leases; XBRL provides pure financial debt value."
-        },
-        {
-            "id": "CVX-ShortTermDebt-2024FY",
-            "ticker": "CVX",
-            "metric": "ShortTermDebt",
-            "fiscal_period": "2024-FY",
-            "created_date": "2026-01-20",
-            "xbrl": {
-                "value": 13800000000,
-                "concepts": [
-                    "us-gaap:DebtCurrent"
-                ],
-                "method": "hybrid_total"
-            },
-            "reference": {
-                "source": "yfinance",
-                "field": "Current Debt",
-                "value": 4350000000
-            },
-            "variance_pct": 217.5,
-            "classification": "definition_mismatch",
-            "status": "accepted",
-            "investigation": {
-                "date": "2026-01-20",
-                "root_cause": "XBRL DebtCurrent ($13.80B) is the total short-term debt including commercial paper ($5.39B) and LT debt current ($4.01B). yfinance ($4.35B) aligns with ShortTermBorrowings ($4.41B), excluding other components.",
-                "verified_correct": true,
-                "verified_by": "agent"
-            },
-            "action": "use_xbrl_value",
-            "notes": "yfinance appears to exclude commercial paper and LT debt current from this field for CVX."
         }
     ]
 }

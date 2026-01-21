@@ -118,7 +118,7 @@ def process_company(args: tuple) -> Dict[str, Any]:
                 
                 results = orchestrator.tree_parser.map_company(ticker, filing)
                 validations = orchestrator.validator.validate_and_update_mappings(
-                    ticker, results, xbrl, filing_date=period_date
+                    ticker, results, xbrl, filing_date=period_date, form_type='10-K'
                 )
                 
                 for metric, v in validations.items():
@@ -180,7 +180,7 @@ def process_company(args: tuple) -> Dict[str, Any]:
                 orchestrator.validator.YFINANCE_MAP = quarterly_map
                 
                 validations = orchestrator.validator.validate_and_update_mappings(
-                    ticker, results, xbrl, filing_date=period_date
+                    ticker, results, xbrl, filing_date=period_date, form_type='10-Q'
                 )
                 orchestrator.validator.YFINANCE_MAP = original_map
                 
@@ -324,22 +324,29 @@ def main():
                         help="Number of 10-K years to test")
     parser.add_argument("--quarters", type=int, default=6, 
                         help="Number of 10-Q quarters to test")
+    parser.add_argument("--tickers", type=str, metavar="TICKERS",
+                        help="Comma-separated list of tickers to test (overrides --group)")
     args = parser.parse_args()
     
     # Cap workers
     max_workers = min(args.workers, cpu_count(), 8)
     
     config = {
-        "group": args.group,
+        "group": args.group if not args.tickers else "custom",
         "workers": max_workers,
         "years": args.years,
         "quarters": args.quarters
     }
     
-    tickers = SP25 if args.group == "sp25" else SP50
+    if args.tickers:
+        tickers = [t.strip().upper() for t in args.tickers.split(',') if t.strip()]
+        group_name = "CUSTOM"
+    else:
+        tickers = SP25 if args.group == "sp25" else SP50
+        group_name = args.group.upper()
     
     print(f"="*60)
-    print(f"E2E TEST: {args.group.upper()} ({len(tickers)} companies)")
+    print(f"E2E TEST: {group_name} ({len(tickers)} companies)")
     print(f"Workers: {max_workers}, Years: {args.years}, Quarters: {args.quarters}")
     print(f"="*60)
     

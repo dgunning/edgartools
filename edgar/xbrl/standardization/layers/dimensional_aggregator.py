@@ -116,7 +116,8 @@ class DimensionalAggregator:
         self,
         xbrl,
         concept: str,
-        consolidated_value: Optional[float] = None
+        consolidated_value: Optional[float] = None,
+        target_period_days: Optional[int] = None
     ) -> AggregationResult:
         """
         Return aggregated dimensional value if consolidated is missing or zero.
@@ -125,14 +126,16 @@ class DimensionalAggregator:
             xbrl: XBRL object with facts
             concept: Concept name to aggregate (e.g., 'CommercialPaper')
             consolidated_value: Known consolidated value (if any)
+            target_period_days: Optional. Target period duration in days.
+                               90 for quarterly (10-Q), 365 for annual (10-K).
             
         Returns:
             AggregationResult with aggregated value and metadata
         """
         concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
         
-        # Get dimensional facts
-        dimensional_data = self._get_dimensional_facts(xbrl, concept_name)
+        # Get dimensional facts (with optional period filtering)
+        dimensional_data = self._get_dimensional_facts(xbrl, concept_name, target_period_days)
         
         if not dimensional_data['facts']:
             return AggregationResult(
@@ -170,9 +173,37 @@ class DimensionalAggregator:
                 notes='No facts matched aggregation rules'
             )
         
-        # Aggregate values
-        aggregated_value = self._aggregate_values(filtered_facts, rule['method'])
-        dimensions_used = list(set(f.get('axis', 'unknown') for f in filtered_facts))
+        # Aggregate values - Group by Axis and take Max of Sums
+        # This handles double counting when multiple orthogonal axes are present
+        # e.g., Sum(Product) = 100, Sum(Geo) = 100. We want 100, not 200.
+        
+        # Group by axis
+        by_axis = {}
+        for fact in filtered_facts:
+            axis = fact.get('axis', 'unknown')
+            if axis not in by_axis:
+                by_axis[axis] = []
+            by_axis[axis].append(fact)
+            
+        # Calculate sum for each axis
+        axis_sums = {}
+        for axis, facts in by_axis.items():
+            axis_sums[axis] = self._aggregate_values(facts, rule['method'])
+            
+        # Take the MINIMUM of the axis sums
+        # We use MIN because hierarchies (Parent + Child) inflate the sum.
+        # Usually at least one axis (e.g. Geo/Segment) is "flat" and correct.
+        if not axis_sums:
+            aggregated_value = 0.0
+        else:
+            # Filter out near-zero sums (noise)
+            valid_sums = [s for s in axis_sums.values() if s > 1000]
+            if not valid_sums:
+                aggregated_value = 0.0
+            else:
+                aggregated_value = min(valid_sums)
+        
+        dimensions_used = list(by_axis.keys())
         
         # Check if aggregation should be used
         if not self.should_aggregate(consolidated_value, aggregated_value):
@@ -251,9 +282,17 @@ class DimensionalAggregator:
     def _get_dimensional_facts(
         self,
         xbrl,
-        concept_name: str
+        concept_name: str,
+        target_period_days: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Extract dimensional facts for a concept."""
+        """Extract dimensional facts for a concept.
+        
+        Args:
+            xbrl: XBRL object
+            concept_name: Name of concept to extract
+            target_period_days: Optional. Target period duration.
+                               90 for quarterly, 365 for annual.
+        """
         try:
             facts = xbrl.facts
             df = facts.get_facts_by_concept(concept_name)
@@ -271,22 +310,58 @@ class DimensionalAggregator:
             if len(dim_rows) == 0:
                 return {'facts': [], 'period': None}
             
-            # Get latest period
+            # PERIOD-AWARE FILTERING: Filter by target duration if specified
             latest_period = None
-            if 'period_key' in dim_rows.columns:
-                dim_rows = dim_rows.sort_values('period_key', ascending=False)
-                latest_period = dim_rows.iloc[0]['period_key']
-                dim_rows = dim_rows[dim_rows['period_key'] == latest_period]
+            period_selected = False
             
-            # Convert to list of dicts
+            if 'period_key' in dim_rows.columns:
+                duration_mask = dim_rows['period_key'].str.startswith('duration_')
+                if duration_mask.any() and target_period_days is not None:
+                    duration_rows = dim_rows[duration_mask].copy()
+                    # Calculate period days for each row
+                    duration_rows['period_days'] = duration_rows['period_key'].apply(
+                        self._calculate_period_days
+                    )
+                    # Filter for periods matching target (30-day tolerance)
+                    filtered = duration_rows[
+                        (duration_rows['period_days'] >= target_period_days - 30) & 
+                        (duration_rows['period_days'] <= target_period_days + 30)
+                    ]
+                    if len(filtered) > 0:
+                        dim_rows = filtered
+                        # Get the most recent matching period
+                        dim_rows = dim_rows.sort_values('period_key', ascending=False)
+                        latest_period = dim_rows.iloc[0]['period_key']
+                        dim_rows = dim_rows[dim_rows['period_key'] == latest_period]
+                        period_selected = True
+                
+                if not period_selected:
+                    # No target period specified OR no matching duration found
+                    # Fallback: use most recent period of any type
+                    dim_rows = dim_rows.sort_values('period_key', ascending=False)
+                    latest_period = dim_rows.iloc[0]['period_key']
+                    dim_rows = dim_rows[dim_rows['period_key'] == latest_period]
+            
+            # Convert to list of dicts with deduplication
             facts_list = []
+            seen_facts = set()  # (dimension_label, value)
+            
             for _, row in dim_rows.iterrows():
                 # Extract axis from dimension label
                 dim_label = row['full_dimension_label']
+                val = float(row['numeric_value'])
+                
+                # Deduplicate exact matches (same label, same value)
+                # This handles cases where same fact appears multiple times
+                fact_key = (dim_label, val)
+                if fact_key in seen_facts:
+                    continue
+                seen_facts.add(fact_key)
+                
                 axis = self._extract_axis_from_label(dim_label)
                 
                 facts_list.append({
-                    'value': float(row['numeric_value']),
+                    'value': val,
                     'dimension_label': dim_label,
                     'axis': axis,
                     'period': row.get('period_key', None)
@@ -300,19 +375,49 @@ class DimensionalAggregator:
         except Exception as e:
             return {'facts': [], 'period': None, 'error': str(e)}
     
+    def _calculate_period_days(self, period_key: str) -> int:
+        """Calculate days in a period from period_key like 'duration_2024-01-01_2024-12-31'."""
+        try:
+            if not period_key.startswith('duration_'):
+                return 0
+            parts = period_key.replace('duration_', '').split('_')
+            if len(parts) == 2:
+                start = datetime.strptime(parts[0], '%Y-%m-%d')
+                end = datetime.strptime(parts[1], '%Y-%m-%d')
+                return (end - start).days
+        except Exception:
+            pass
+        return 0
+    
     def _extract_axis_from_label(self, dimension_label: str) -> str:
         """Extract the Axis name from a full dimension label."""
         if not dimension_label:
             return 'unknown'
         
         # Dimension labels typically look like:
-        # "VariableInterestEntitiesByClassificationOfEntityAxis=ConsolidatedVIEsMember"
-        # or "Segment [Axis] = Consumer Banking [Member]"
+        # "VariableInterestEntitiesByClassificationOfEntityAxis=ConsolidatedVIEsMember" (Standard)
+        # "Segment [Axis] = Consumer Banking [Member]" (Standard)
+        # "Product and Service: Google Search & other" (Human readable)
+        # "Geographical: United States" (Human readable)
         
         if '=' in dimension_label:
             return dimension_label.split('=')[0].strip()
         elif '[Axis]' in dimension_label:
             return dimension_label.split('[Axis]')[0].strip()
+        elif ':' in dimension_label:
+            # Handle "Product and Service: ..." -> ProductOrServiceAxis
+            prefix = dimension_label.split(':')[0].strip().lower()
+            if 'product' in prefix:
+                return 'ProductOrServiceAxis'
+            elif 'geographical' in prefix:
+                return 'StatementGeographicalAxis'
+            elif 'segment' in prefix:
+                return 'StatementBusinessSegmentsAxis'
+            elif 'variable interest' in prefix:
+                return 'VariableInterestEntitiesByClassificationOfEntityAxis'
+            elif 'legal entity' in prefix:
+                return 'LegalEntityAxis'
+            return prefix # Use strict prefix as fallback axis
         
         return dimension_label.split()[0] if dimension_label else 'unknown'
     
