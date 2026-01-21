@@ -494,19 +494,32 @@ class BankingExtractor(IndustryExtractor):
             reverse_repos = self._get_fact_value(facts_df, 'SecuritiesPurchasedUnderAgreementsToResell') or 0
             net_repos = max(0, repos - reverse_repos)  # Excess = funding need
         
-        # Strict Component Summation
-        components_sum = cp + other_stb + fhlb + net_repos
+        # FIX for GS: Dealers often have massive "Other Secured Financings"
+        other_secured = 0
+        if archetype == 'dealer':
+            other_secured = self._get_fact_value_fuzzy(facts_df, 'OtherSecuredBorrowings') or 0
+            if other_secured == 0:
+                other_secured = self._get_fact_value_fuzzy(facts_df, 'SecuredBorrowings') or 0
         
-        # Aggregate fallback: Only use if it's massively larger (implies missed component)
+        # Strict Component Summation
+        components_sum = cp + other_stb + fhlb + net_repos + other_secured
+        
+        # Aggregate fallback
         stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
         
-        if stb > (components_sum * 1.1) and components_sum > 0:
+        # DEALER-SPECIFIC: Relax aggregate check
+        # Dealers are less likely to double-count within STB than regional banks
+        if archetype == 'dealer' and stb > components_sum:
+            # Trust the aggregate for dealers + add net_repos
+            total = stb + net_repos
+            notes = f"Bank Street Debt [{archetype}]: STB({stb/1e9:.1f}B) + NetRepos({net_repos/1e9:.1f}B) [DEALER AGGREGATE]"
+        elif stb > (components_sum * 1.1) and components_sum > 0:
             # Aggregate covers everything; add net_repos only if typically separate
             total = stb + net_repos
             notes = f"Bank Street Debt [{archetype}]: STB aggregate({stb/1e9:.1f}B) + NetRepos({net_repos/1e9:.1f}B) [ANALYTICAL]"
         elif components_sum > 0:
             total = components_sum
-            notes = f"Bank Street Debt [{archetype}]: CP({cp/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B) + FHLB({fhlb/1e9:.1f}B) + NetRepos({net_repos/1e9:.1f}B) [ANALYTICAL]"
+            notes = f"Bank Street Debt [{archetype}]: CP({cp/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B) + FHLB({fhlb/1e9:.1f}B) + NetRepos({net_repos/1e9:.1f}B) + OtherSecured({other_secured/1e9:.1f}B) [ANALYTICAL]"
         elif stb > 0:
             # No components found, use aggregate as-is
             total = stb
