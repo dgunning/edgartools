@@ -1,156 +1,37 @@
 {
-  "run_id": "e2e_2026-01-21T01:20:08.706601",
-  "timestamp": "2026-01-21T01:20:08.706610",
+  "run_id": "e2e_2026-01-21T10:20:00.731281",
+  "timestamp": "2026-01-21T10:20:00.731291",
   "config": {
     "group": "custom",
     "workers": 8,
-    "years": 3,
-    "quarters": 4
+    "years": 2,
+    "quarters": 2
   },
   "summary": {
     "sp25": {
-      "10k_total": 13,
-      "10k_passed": 9,
-      "10q_total": 30,
-      "10q_passed": 23
+      "10k_total": 7,
+      "10k_passed": 7,
+      "10q_total": 10,
+      "10q_passed": 8
     },
     "sp50": {
-      "10k_total": 13,
-      "10k_passed": 9,
-      "10q_total": 30,
-      "10q_passed": 23
+      "10k_total": 7,
+      "10k_passed": 7,
+      "10q_total": 10,
+      "10q_passed": 8
     }
   },
-  "failure_count": 11,
+  "failure_count": 2,
   "failures": [
-    {
-      "ticker": "BAC",
-      "form": "10-K",
-      "filing_date": "2024-12-31",
-      "accession_no": "0000070858-25-000139",
-      "metric": "CashAndEquivalents",
-      "xbrl_value": 4613000000.0,
-      "ref_value": 296486000000.0,
-      "variance_pct": 98.4,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "C",
-      "form": "10-K",
-      "filing_date": "2024-12-31",
-      "accession_no": "0000831001-25-000067",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 19589000000.0,
-      "ref_value": 48505000000.0,
-      "variance_pct": 59.6,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:CommercialPaper",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "C",
-      "form": "10-Q",
-      "filing_date": "2025-09-30",
-      "accession_no": "0000831001-25-000154",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 35369000000.0,
-      "ref_value": 54760000000.0,
-      "variance_pct": 35.4,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:CommercialPaper",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "C",
-      "form": "10-Q",
-      "filing_date": "2025-06-30",
-      "accession_no": "0000831001-25-000131",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 33228000000.0,
-      "ref_value": 55560000000.0,
-      "variance_pct": 40.2,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:CommercialPaper",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "C",
-      "form": "10-Q",
-      "filing_date": "2025-03-31",
-      "accession_no": "0000831001-25-000086",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 26450000000.0,
-      "ref_value": 49139000000.0,
-      "variance_pct": 46.2,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:CommercialPaper",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "WFC",
-      "form": "10-K",
-      "filing_date": "2024-12-31",
-      "accession_no": "0000072971-25-000066",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 108806000000.0,
-      "ref_value": 13571000000.0,
-      "variance_pct": 701.8,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:ShortTermBorrowings",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "WFC",
-      "form": "10-K",
-      "filing_date": "2023-12-31",
-      "accession_no": "0000072971-24-000064",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 89559000000.0,
-      "ref_value": 11883000000.0,
-      "variance_pct": 653.7,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:ShortTermBorrowings",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
     {
       "ticker": "WFC",
       "form": "10-Q",
       "filing_date": "2025-09-30",
       "accession_no": "0000072971-25-000253",
       "metric": "ShortTermDebt",
-      "xbrl_value": 230649000000.0,
+      "xbrl_value": 28389000000.0,
       "ref_value": 36409000000.0,
-      "variance_pct": 533.5,
+      "variance_pct": 22.0,
       "mapping_source": "tree",
       "concept_used": "us-gaap:ShortTermBorrowings",
       "industry": "banking",
@@ -165,43 +46,9 @@
       "filing_date": "2025-06-30",
       "accession_no": "0000072971-25-000201",
       "metric": "ShortTermDebt",
-      "xbrl_value": 187995000000.0,
+      "xbrl_value": 26392000000.0,
       "ref_value": 33984000000.0,
-      "variance_pct": 453.2,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:ShortTermBorrowings",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "WFC",
-      "form": "10-Q",
-      "filing_date": "2025-03-31",
-      "accession_no": "0000072971-25-000129",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 139776000000.0,
-      "ref_value": 14951000000.0,
-      "variance_pct": 834.9,
-      "mapping_source": "tree",
-      "concept_used": "us-gaap:ShortTermBorrowings",
-      "industry": "banking",
-      "alternative_concepts": [],
-      "suggested_actions": [
-        "Check dual-track extraction logic in industry_logic/"
-      ]
-    },
-    {
-      "ticker": "WFC",
-      "form": "10-Q",
-      "filing_date": "2024-09-30",
-      "accession_no": "0000072971-24-000243",
-      "metric": "ShortTermDebt",
-      "xbrl_value": 111894000000.0,
-      "ref_value": 14350000000.0,
-      "variance_pct": 679.7,
+      "variance_pct": 22.3,
       "mapping_source": "tree",
       "concept_used": "us-gaap:ShortTermBorrowings",
       "industry": "banking",

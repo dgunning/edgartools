@@ -166,6 +166,89 @@ class IndustryExtractor(ABC):
         except Exception:
             pass
         return 0
+    
+    def _construct_net_metric(self, facts_df, structure: Dict) -> Optional[float]:
+        """
+        Constructs a metric by summing 'add' components and subtracting 'deduct' components.
+        
+        This enables arithmetic construction patterns like:
+        - WFC: ShortTermBorrowings - Repos = Net Financial Debt
+        - Citi: CP + LT Current + FHLB = Total Short-Term Debt
+        
+        Args:
+            facts_df: DataFrame of XBRL facts
+            structure: {'add': [concepts...], 'deduct': [concepts...]}
+        
+        Returns:
+            Net calculated value, or None if no components found
+        """
+        total = 0.0
+        found_any = False
+        
+        # Summation Logic (Fixes Citi-style composite)
+        for concept in structure.get('add', []):
+            val = self._get_fact_value(facts_df, concept)
+            if val is not None:
+                total += val
+                found_any = True
+        
+        # Subtraction Logic (Fixes WFC-style exclusion)
+        # Use fuzzy matching for deduct because banks use company-extension prefixes
+        for concept in structure.get('deduct', []):
+            # First try exact match
+            val = self._get_fact_value(facts_df, concept)
+            if val is None:
+                # Try fuzzy match (handles wfc:, jpm:, bac: company extensions)
+                val = self._get_fact_value_fuzzy(facts_df, concept)
+            if val is not None:
+                total -= val
+                found_any = True
+        
+        return total if found_any else None
+    
+    def _get_fact_value_fuzzy(self, df, concept_pattern: str) -> Optional[float]:
+        """
+        Get fact value using fuzzy/suffix matching.
+        
+        Banks often use company-extension prefixes (wfc:, jpm:, bac:) for
+        concepts that should theoretically be us-gaap. This method searches
+        by concept suffix pattern (case-insensitive contains).
+        
+        Example: "SecuritiesSoldUnderAgreementsToRepurchase" matches:
+        - us-gaap:SecuritiesSoldUnderAgreementsToRepurchase
+        - wfc:SecuritiesSoldUnderAgreementsToRepurchaseAtFairValue
+        """
+        if df is None or len(df) == 0:
+            return None
+        
+        # Search by suffix pattern (case-insensitive)
+        pattern_lower = concept_pattern.lower()
+        matches = df[df['concept'].str.lower().str.contains(pattern_lower, regex=False, na=False)]
+        
+        if len(matches) == 0:
+            return None
+        
+        # Filter for non-dimensional (total) values only
+        non_dim = matches.copy()
+        if 'full_dimension_label' in non_dim.columns:
+            subset = non_dim[non_dim['full_dimension_label'].isna() | (non_dim['full_dimension_label'] == '')]
+            if len(subset) > 0:
+                non_dim = subset
+        
+        # Get numeric values only
+        if 'numeric_value' not in non_dim.columns:
+            return None
+        
+        numeric_df = non_dim[non_dim['numeric_value'].notna()]
+        if len(numeric_df) == 0:
+            return None
+        
+        # Sort by period to get most recent
+        if 'period_key' in numeric_df.columns:
+            numeric_df = numeric_df.sort_values('period_key', ascending=False)
+        
+        val = numeric_df.iloc[0]['numeric_value']
+        return float(val) if val is not None else None
 
 
 class DefaultExtractor(IndustryExtractor):
@@ -336,47 +419,99 @@ class BankingExtractor(IndustryExtractor):
     
     def extract_short_term_debt_yfinance(self, xbrl, facts_df) -> ExtractedMetric:
         """
-        Bank ShortTermDebt: yfinance-aligned (excludes Repos/FedFunds).
+        Bank ShortTermDebt: Street-aligned extraction (excludes Repos/FedFunds).
         
-        Used for validation against yfinance.
+        Strategy (Per Analyst Guidance):
+        1. Path A: Direct clean tag (OtherShortTermBorrowings - JPM style)
+        2. Path B: Bottom-Up Construction (sum clean components - preferred for G-SIBs)
+        3. Path C: Top-Down Subtraction (Aggregate - Repos/FedFunds)
         """
-        # yfinance uses OtherShortTermBorrowings for banks
+        # Path A: Direct clean tag (JPM-style)
+        # ONLY use if OtherShortTermBorrowings == ShortTermBorrowings (meaning it's the total, not a component)
         other = self._get_fact_value(facts_df, 'OtherShortTermBorrowings')
+        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings')
+        
+        # Check if OtherShortTermBorrowings is the whole thing (JPM) or just a piece (Citi)
         if other is not None and other > 0:
-            return ExtractedMetric(
-                standard_name="ShortTermDebt",
-                industry_counterpart="OtherShortTermBorrowings",
-                xbrl_concept="us-gaap:OtherShortTermBorrowings",
-                value=other,
-                extraction_method=ExtractionMethod.DIRECT,
-                notes="Bank (yfinance-aligned): OtherShortTermBorrowings only"
-            )
+            # If no aggregate or Other == Aggregate, use it (JPM pattern)
+            if stb is None or abs(other - stb) < 1e6:  # Within $1M = same value
+                return ExtractedMetric(
+                    standard_name="ShortTermDebt",
+                    industry_counterpart="OtherShortTermBorrowings",
+                    xbrl_concept="us-gaap:OtherShortTermBorrowings",
+                    value=other,
+                    extraction_method=ExtractionMethod.DIRECT,
+                    notes="Bank: OtherShortTermBorrowings (clean, equals aggregate)"
+                )
+            # If Other < Aggregate, Other is a component - skip to aggregate paths
         
-        # Fallback: CommercialPaper
-        cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
+        # Path B & C combined: Check if ShortTermBorrowings aggregate exists
+        # If aggregate exists and is reasonable, use it (with/without subtraction)
+        # If no aggregate OR aggregate is smaller than components, use bottom-up sum
         
-        # Fallback: ShortTermBorrowings (standard tag used by JPM when Other is missing)
-        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
-        
-        if stb > 0 and stb > cp:
-             return ExtractedMetric(
-                standard_name="ShortTermDebt",
-                industry_counterpart="ShortTermBorrowings",
-                xbrl_concept="us-gaap:ShortTermBorrowings",
-                value=stb,
-                extraction_method=ExtractionMethod.DIRECT,
-                notes="Bank (yfinance-aligned): ShortTermBorrowings"
-            )
-        
-        if cp > 0:
-            return ExtractedMetric(
-                standard_name="ShortTermDebt",
-                industry_counterpart="CommercialPaper",
-                xbrl_concept="us-gaap:CommercialPaper",
-                value=cp,
-                extraction_method=ExtractionMethod.DIRECT,
-                notes="Bank (yfinance-aligned): CommercialPaper"
-            )
+        if stb is not None and stb > 0:
+            # Path C: Top-Down (WFC/Citi style - use aggregate with potential subtraction)
+            # Try NET repos tags first (comprehensive - avoid double counting)
+            # Try NET tags first (comprehensive - avoid double counting)
+            # WFC uses combined Repos+Loaned NET in balance sheet tag
+            net_repos_tags = [
+                'SecuritiesSoldUnderAgreementsToRepurchaseAndSecuritiesLoanedNetAmountInConsolidatedBalanceSheet',
+                'SecuritiesLoanedAndSecuritiesSoldUnderAgreementToRepurchaseNetAmount',
+            ]
+            
+            net_repos = None
+            for tag in net_repos_tags:
+                val = self._get_fact_value(facts_df, tag)
+                if val is None:
+                    val = self._get_fact_value_fuzzy(facts_df, tag.split('SecuritiesSold')[-1] if 'SecuritiesSold' in tag else tag)
+                if val is not None:
+                    net_repos = val
+                    break
+            
+            if net_repos is not None:
+                # Use NET tag exclusively (includes all components)
+                net_value = stb - net_repos
+                if net_value > 0:
+                    return ExtractedMetric(
+                        standard_name="ShortTermDebt",
+                        industry_counterpart="ConstructedNetDebt",
+                        xbrl_concept=None,
+                        value=net_value,
+                        extraction_method=ExtractionMethod.COMPOSITE,
+                        notes=f"Bank: ShortTermBorrowings({stb/1e9:.1f}B) - Repos/Loaned(NET {net_repos/1e9:.1f}B) = {net_value/1e9:.1f}B"
+                    )
+            
+            # Fallback: Try component tags if NET not found
+            structure = {
+                'add': ['ShortTermBorrowings'],
+                'deduct': [
+                    'SecuritiesSoldUnderAgreementsToRepurchase',
+                    'FederalFundsPurchased',
+                    'FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase',
+                ]
+            }
+            net_value = self._construct_net_metric(facts_df, structure)
+            
+            # If subtraction reduced it significantly, use net value
+            if net_value is not None and net_value < stb and net_value > 0:
+                return ExtractedMetric(
+                    standard_name="ShortTermDebt",
+                    industry_counterpart="ConstructedNetDebt",
+                    xbrl_concept=None,
+                    value=net_value,
+                    extraction_method=ExtractionMethod.COMPOSITE,
+                    notes=f"Bank: ShortTermBorrowings({stb/1e9:.1f}B) - Repos/FedFunds = {net_value/1e9:.1f}B"
+                )
+            else:
+                # No repos found, use raw ShortTermBorrowings
+                return ExtractedMetric(
+                    standard_name="ShortTermDebt",
+                    industry_counterpart="ShortTermBorrowings",
+                    xbrl_concept="us-gaap:ShortTermBorrowings",
+                    value=stb,
+                    extraction_method=ExtractionMethod.DIRECT,
+                    notes="Bank: ShortTermBorrowings (no Repos/FedFunds found to subtract)"
+                )
         
         return ExtractedMetric(
             standard_name="ShortTermDebt",
@@ -410,13 +545,26 @@ class BankingExtractor(IndustryExtractor):
     
     def extract_cash_and_equivalents(self, xbrl, facts_df) -> ExtractedMetric:
         """
-        Bank Cash: Prioritize CashAndDueFromBanks and similar liquid assets.
-        Crucially helps avoid falling back to OCI/Hedge tags in the tree.
+        Bank Cash: Context-aware extraction with sanity check.
+        
+        Guardrail: Cash < 1% of Assets triggers fallback to bank-specific tags.
+        This prevents returning subsidiary/restricted cash instead of consolidated total.
         """
+        # Get Total Assets for context validation
+        assets = self._get_fact_value(facts_df, 'Assets')
+        
         # 1. Try standard CashAndCashEquivalentsAtCarryingValue
         val = self._get_fact_value(facts_df, 'CashAndCashEquivalentsAtCarryingValue')
+        
+        # Sanity Check: Is this suspiciously low for a bank?
+        if val is not None and assets is not None and assets > 0:
+            cash_ratio = val / assets
+            if cash_ratio < 0.01:  # Less than 1% of assets
+                # Likely subsidiary/restricted cash - force fallback
+                val = None
+        
         if val is not None:
-             return ExtractedMetric(
+            return ExtractedMetric(
                 standard_name="CashAndEquivalents",
                 industry_counterpart="CashAndCashEquivalentsAtCarryingValue",
                 xbrl_concept="us-gaap:CashAndCashEquivalentsAtCarryingValue",
@@ -424,11 +572,15 @@ class BankingExtractor(IndustryExtractor):
                 extraction_method=ExtractionMethod.DIRECT,
                 notes="Bank: Standard CashAndCashEquivalentsAtCarryingValue"
             )
-            
-        # 2. Try simple CashAndCashEquivalents
+        
+        # 2. Try simple CashAndCashEquivalents (with same sanity check)
         val = self._get_fact_value(facts_df, 'CashAndCashEquivalents')
+        if val is not None and assets is not None and assets > 0:
+            if val / assets < 0.01:
+                val = None
+        
         if val is not None:
-             return ExtractedMetric(
+            return ExtractedMetric(
                 standard_name="CashAndEquivalents",
                 industry_counterpart="CashAndCashEquivalents",
                 xbrl_concept="us-gaap:CashAndCashEquivalents",
@@ -436,27 +588,22 @@ class BankingExtractor(IndustryExtractor):
                 extraction_method=ExtractionMethod.DIRECT,
                 notes="Bank: Standard CashAndCashEquivalents"
             )
-            
-        # 3. Try CashAndDueFromBanks (Classic bank tag)
-        # We sum with InterestBearingDepositsInBanks to approximate "Cash & Equivalents"
-        val = self._get_fact_value(facts_df, 'CashAndDueFromBanks')
-        if val is not None:
-            ibd = self._get_fact_value(facts_df, 'InterestBearingDepositsInBanks') or 0
-            total = val + ibd
-            
-            note = "Bank: CashAndDueFromBanks"
-            if ibd > 0:
-                note += " + InterestBearingDepositsInBanks"
-                
+        
+        # 3. Bank-specific: CashAndDueFromBanks + InterestBearingDeposits
+        cash_due = self._get_fact_value(facts_df, 'CashAndDueFromBanks') or 0
+        ibd = self._get_fact_value(facts_df, 'InterestBearingDepositsInBanks') or 0
+        
+        if cash_due > 0 or ibd > 0:
+            total = cash_due + ibd
             return ExtractedMetric(
                 standard_name="CashAndEquivalents",
-                industry_counterpart="CashAndDueFromBanks",
+                industry_counterpart="BankingCashComposite",
                 xbrl_concept="us-gaap:CashAndDueFromBanks",
                 value=total,
-                extraction_method=ExtractionMethod.COMPOSITE if ibd > 0 else ExtractionMethod.DIRECT,
-                notes=note
+                extraction_method=ExtractionMethod.COMPOSITE,
+                notes=f"Bank: CashAndDueFromBanks({cash_due/1e9:.1f}B) + IBD({ibd/1e9:.1f}B)"
             )
-
+        
         # Return empty metric to signal fallback
         return ExtractedMetric(
             standard_name="CashAndEquivalents",
