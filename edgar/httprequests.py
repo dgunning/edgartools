@@ -128,10 +128,65 @@ def should_retry(exc: Exception) -> bool:
 
 
 class TooManyRequestsError(Exception):
-    def __init__(self, url, message="Too Many Requests"):
+    """
+    Raised when SEC returns HTTP 429 (Too Many Requests).
+
+    The SEC limits requests to 10 per second. When exceeded, your IP is blocked
+    for approximately 10 minutes. Continuing to send requests during this period
+    will extend the block duration.
+
+    Important: Do NOT retry immediately - wait for the block to expire.
+    """
+
+    BLOCK_DURATION_MINUTES = 10
+
+    def __init__(self, url, retry_after: int = None):
         self.url = url
-        self.message = message
-        super().__init__(self.message)
+        self.retry_after = retry_after  # From Retry-After header, if present
+
+        # Build informative error message
+        header = f"""
+SEC Rate Limit Exceeded (HTTP 429)
+==================================
+
+URL: {self.url}"""
+
+        if retry_after:
+            wait_info = f"""
+Retry-After: {retry_after} seconds (from SEC response header)"""
+        else:
+            wait_info = f"""
+Estimated Wait: ~{self.BLOCK_DURATION_MINUTES} minutes"""
+
+        cause = """
+
+What happened:
+  Your request rate exceeded the SEC's limit of 10 requests/second.
+  Your IP address has been temporarily blocked."""
+
+        warning = """
+
+{warning} Important: Do NOT retry immediately!
+  Continuing to send requests during the block period will EXTEND it.
+  The SEC penalizes continued requests during timeout.""".format(warning="\u26A0")
+
+        solution = f"""
+
+What to do:
+  1. Wait at least {self.BLOCK_DURATION_MINUTES} minutes before retrying
+  2. Reduce your request rate (edgartools defaults to 9 req/sec)
+  3. Consider using local storage: download_edgar_data()
+
+To adjust rate limit:
+  import os
+  os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = '5'  # More conservative"""
+
+        footer = """
+
+Details: https://www.sec.gov/os/webmaster-faq#developers"""
+
+        message = f"{header}{wait_info}{cause}{warning}{solution}{footer}"
+        super().__init__(message)
 
 
 class IdentityNotSetException(Exception):
@@ -516,6 +571,41 @@ def is_redirect(response):
     return response.status_code in [301, 302]
 
 
+def _get_retry_after(response: Response) -> Optional[int]:
+    """
+    Extract Retry-After header value from response.
+
+    The Retry-After header can be either:
+    - An integer (seconds to wait)
+    - An HTTP date (when to retry)
+
+    Returns:
+        Number of seconds to wait, or None if header not present/parseable.
+    """
+    retry_after = response.headers.get("Retry-After")
+    if not retry_after:
+        return None
+
+    # Try parsing as integer (seconds)
+    try:
+        return int(retry_after)
+    except ValueError:
+        pass
+
+    # Try parsing as HTTP date
+    try:
+        from email.utils import parsedate_to_datetime
+        retry_date = parsedate_to_datetime(retry_after)
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+        delta = retry_date - now
+        return max(0, int(delta.total_seconds()))
+    except (ValueError, TypeError):
+        pass
+
+    return None
+
+
 def with_identity(func):
     @wraps(func)
     def wrapper(url, identity=None, identity_callable=None, *args, **kwargs):
@@ -586,7 +676,7 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
         with http_client() as client:
             response = client.get(url, **kwargs)
             if response.status_code == 429:
-                raise TooManyRequestsError(url)
+                raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
             elif is_redirect(response):
                 return get_with_retry(url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
             return response
@@ -625,7 +715,7 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
     try:
         response = await client.get(url, **kwargs)
         if response.status_code == 429:
-            raise TooManyRequestsError(url)
+            raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
         elif is_redirect(response):
             return await get_with_retry_async(
                 client=client, url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs
@@ -668,7 +758,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
         with http_client() as client:
             with client.stream("GET", url, **kwargs) as response:
                 if response.status_code == 429:
-                    raise TooManyRequestsError(url)
+                    raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
                 elif is_redirect(response):
                     response = stream_with_retry(response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
                     yield from response
@@ -712,7 +802,7 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
         with http_client() as client:
             response = client.post(url, data=data, json=json, **kwargs)
             if response.status_code == 429:
-                raise TooManyRequestsError(url)
+                raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
             elif is_redirect(response):
                 return post_with_retry(
                     response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
@@ -755,7 +845,7 @@ async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, 
     try:
         response = await client.post(url, data=data, json=json, **kwargs)
         if response.status_code == 429:
-            raise TooManyRequestsError(url)
+            raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
         elif is_redirect(response):
             return await post_with_retry_async(
                 client, response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
