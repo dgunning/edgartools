@@ -76,6 +76,9 @@ RETRYABLE_EXCEPTIONS = (
     httpcore.ReadTimeout, httpcore.WriteTimeout, httpcore.ConnectTimeout,
     httpcore.PoolTimeout, httpcore.ConnectError, httpcore.NetworkError,
     httpcore.TimeoutException,
+    # Protocol errors - connection dropped mid-download ("peer closed connection
+    # without sending complete message body")
+    httpcore.RemoteProtocolError,
     # Gzip decompression exceptions - can occur with corrupted downloads
     EOFError, gzip.BadGzipFile
 )
