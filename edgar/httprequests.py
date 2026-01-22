@@ -63,6 +63,9 @@ QUICK_WAIT_MAX = 16  # max 16s delay
 BULK_RETRY_ATTEMPTS = 8
 BULK_RETRY_TIMEOUT = None  # unlimited
 BULK_WAIT_MAX = 120  # max 2min delay
+# Longer read timeout for bulk downloads - SEC files can be slow on congested connections
+# Connect stays short (10s), but read timeout is generous (5 min per chunk)
+BULK_TIMEOUT = Timeout(300.0, connect=10.0)
 
 # SSL errors - retry once in case of transient issues, then fail with helpful message
 SSL_RETRY_ATTEMPTS = 2  # 1 retry = 2 total attempts
@@ -1086,7 +1089,7 @@ async def stream_file(
     temp_file = Path(temp_dir) / f"download_{uuid.uuid1()}"
 
     try:
-        async with async_http_client(client, timeout=TIMEOUT, bypass_cache=True) as async_client:
+        async with async_http_client(client, timeout=BULK_TIMEOUT, bypass_cache=True) as async_client:
             async with async_client.stream("GET", url) as response:
                 inspect_response(response)
                 total_size = int(response.headers.get("Content-Length", 0))
