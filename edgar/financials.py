@@ -134,7 +134,99 @@ class Financials:
     # These methods provide easy access to common financial metrics
     # using standardized labels across different companies
 
-    def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list, 
+    def _get_standardized_concept_by_xbrl(self, statement_type: str,
+                                          standard_concept_names: List[str],
+                                          period_offset: int = 0) -> Optional[Union[int, float]]:
+        """
+        Robust helper method to extract concept values by XBRL concept names.
+
+        This method uses the standardization system's concept mappings to search
+        by XBRL concept names (e.g., 'us-gaap_RevenueFromContractWithCustomer...')
+        rather than display labels, making it more reliable across companies.
+
+        Args:
+            statement_type: Type of statement ('income', 'balance', 'cashflow')
+            standard_concept_names: List of standardized concept names to try in order
+                                   (e.g., ['Contract Revenue', 'Revenue'])
+            period_offset: Which period to get (0=most recent, 1=previous, etc.)
+
+        Returns:
+            The concept value if found, None otherwise
+        """
+        if self.xb is None:
+            return None
+
+        try:
+            # Load the standardization mappings
+            from edgar.xbrl.standardization import get_default_store
+            standardizer = get_default_store()
+
+            # Get the appropriate statement
+            if statement_type == 'income':
+                statement = self.income_statement()
+            elif statement_type == 'balance':
+                statement = self.balance_sheet()
+            elif statement_type == 'cashflow':
+                statement = self.cashflow_statement()
+            else:
+                return None
+
+            if statement is None:
+                return None
+
+            # Render the statement
+            rendered = statement.render(standard=True)
+            df = rendered.to_dataframe()
+
+            if df.empty or 'concept' not in df.columns:
+                return None
+
+            # Filter out abstract rows - they never have values
+            if 'abstract' in df.columns:
+                df = df[df['abstract'] == False].copy()
+
+            # Get period columns
+            period_columns = [col for col in df.columns
+                            if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
+
+            if len(period_columns) <= period_offset:
+                return None
+
+            period_col = period_columns[period_offset]
+
+            # Try each standard concept name in order
+            for std_concept_name in standard_concept_names:
+                # Get all XBRL concepts that map to this standard concept
+                xbrl_concepts = standardizer.mappings.get(std_concept_name, [])
+
+                # Search for any of these concepts in the dataframe
+                for xbrl_concept in xbrl_concepts:
+                    # Match the concept name (handle both full name and base name)
+                    concept_pattern = xbrl_concept.replace('us-gaap_', '').replace('dei_', '')
+                    matches = df[df['concept'].str.contains(concept_pattern, case=False, na=False, regex=False)]
+
+                    if not matches.empty:
+                        # Try each match until we find one with a valid value
+                        for idx in range(len(matches)):
+                            value = matches.iloc[idx][period_col]
+
+                            # Skip empty/NA values
+                            if pd.isna(value) or value == '':
+                                continue
+
+                            # Convert to numeric
+                            try:
+                                return float(value) if '.' in str(value) else int(value)
+                            except (ValueError, TypeError):
+                                continue
+
+            return None
+
+        except Exception as e:
+            log.debug(f"Error getting standardized concept by XBRL: {e}")
+            return None
+
+    def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
                                       period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Helper method to extract standardized concept values from financial statements.
@@ -171,27 +263,33 @@ class Financials:
             if df.empty:
                 return None
 
+            # Filter out abstract rows - they never have values
+            if 'abstract' in df.columns:
+                df = df[df['abstract'] == False].copy()
+
             # Find the concept using pattern matching
             for pattern in concept_patterns:
                 matches = df[df['label'].str.contains(pattern, case=False, na=False)]
                 if not matches.empty:
                     # Get available period columns (excluding metadata columns)
-                    period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension']]
+                    period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
 
                     if len(period_columns) > period_offset:
                         period_col = period_columns[period_offset]
-                        value = matches.iloc[0][period_col]
 
-                        # Skip empty/NA values - try next pattern
-                        if pd.isna(value) or value == '':
-                            continue
+                        # Try each match until we find one with a valid value
+                        for idx in range(len(matches)):
+                            value = matches.iloc[idx][period_col]
 
-                        # Convert to numeric
-                        try:
-                            return float(value) if '.' in str(value) else int(value)
-                        except (ValueError, TypeError):
-                            # Non-numeric value, try next pattern
-                            continue
+                            # Skip empty/NA values
+                            if pd.isna(value) or value == '':
+                                continue
+
+                            # Convert to numeric
+                            try:
+                                return float(value) if '.' in str(value) else int(value)
+                            except (ValueError, TypeError):
+                                continue
 
             return None
 
@@ -201,7 +299,10 @@ class Financials:
 
     def get_revenue(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get revenue from the income statement using standardized labels.
+        Get revenue from the income statement using standardized XBRL concepts.
+
+        This method uses a robust concept-based search that works across different
+        companies regardless of how they label their revenue in presentations.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -215,9 +316,21 @@ class Financials:
             >>> revenue = financials.get_revenue()  # Most recent revenue
             >>> prev_revenue = financials.get_revenue(1)  # Previous period revenue
         """
+        # First try concept-based search using standardization mappings
+        # Try "Contract Revenue" first (more specific), then "Revenue" (more general)
+        result = self._get_standardized_concept_by_xbrl(
+            'income',
+            ['Contract Revenue', 'Revenue'],
+            period_offset
+        )
+
+        if result is not None:
+            return result
+
+        # Fallback to label-based search for edge cases
         patterns = [
             r'Revenue$',           # Exact match for "Revenue"
-            r'^Revenue',           # Starts with "Revenue"  
+            r'^Revenue',           # Starts with "Revenue"
             r'Contract Revenue',   # Common standardized label
             r'Sales Revenue',      # Alternative form
             r'Total Revenue',      # Comprehensive revenue
