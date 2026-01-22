@@ -327,3 +327,19 @@ print(xbrl.reporting_periods)
 - **[Multi-Period Analysis](../xbrl/guides/multi-period-analysis.md)** – Build custom time series
 - **[Standardization](../xbrl/concepts/standardization.md)** – How cross-company comparison works
 - **[XBRL Documentation](../xbrl/index.md)** – Complete XBRL reference
+
+---
+
+[![edgar.tools](https://app.edgar.tools/images/logo-full.svg)](https://edgar.tools)
+
+Want to share SEC data with colleagues who don't use Python? 
+
+**edgar.tools** provides the same data through a visual interface:
+
+- **No code required** — Browse filings, view financials, search companies
+- **Share with your team** — Analysts and executives can access data directly
+- **REST API** — For JavaScript, mobile apps, or other non-Python integrations
+- **MCP server** — Query SEC data through Claude and other AI assistants
+
+[Try edgar.tools →](https://edgar.tools)
+
