@@ -21,7 +21,9 @@ import pandas as pd
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
+from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
+from edgar.xbrl.statements import is_xbrl_structural_element
 
 if TYPE_CHECKING:
     from edgar.xbrl.statements import Statement
@@ -275,7 +277,7 @@ class CurrentPeriodView:
             return self.period_key
 
     def balance_sheet(self, raw_concepts: bool = False, as_statement: bool = True,
-                       include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                       include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period balance sheet data.
 
@@ -284,8 +286,8 @@ class CurrentPeriodView:
                          (e.g., "us-gaap:Assets" instead of "Assets")
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
                          Useful when companies report ONLY dimensional data.
 
         Returns:
@@ -308,7 +310,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def income_statement(self, raw_concepts: bool = False, as_statement: bool = True,
-                          include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                          include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period income statement data.
 
@@ -317,8 +319,8 @@ class CurrentPeriodView:
                          (e.g., "us-gaap:Revenues" instead of "Revenue")
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
                          Useful when companies report ONLY dimensional data (e.g., AOS Revenue).
 
         Returns:
@@ -341,7 +343,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def cashflow_statement(self, raw_concepts: bool = False, as_statement: bool = True,
-                            include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                            include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period cash flow statement data.
 
@@ -350,8 +352,8 @@ class CurrentPeriodView:
                          (e.g., "us-gaap:NetCashProvidedByUsedInOperatingActivities")
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with rich formatting by default,
@@ -370,7 +372,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def statement_of_equity(self, raw_concepts: bool = False, as_statement: bool = True,
-                             include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                             include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period statement of equity data.
 
@@ -378,8 +380,8 @@ class CurrentPeriodView:
             raw_concepts: If True, preserve original XBRL concept names
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with rich formatting by default,
@@ -391,7 +393,7 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def comprehensive_income(self, raw_concepts: bool = False, as_statement: bool = True,
-                              include_dimensions: bool = True) -> Union[pd.DataFrame, 'Statement']:
+                              include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period comprehensive income statement data.
 
@@ -399,8 +401,8 @@ class CurrentPeriodView:
             raw_concepts: If True, preserve original XBRL concept names
             as_statement: If True, return a Statement object (default),
                          if False, return DataFrame
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with rich formatting by default,
@@ -412,15 +414,15 @@ class CurrentPeriodView:
                                              include_dimensions=include_dimensions)
 
     def _get_statement_dataframe(self, statement_type: str, raw_concepts: bool = False,
-                                   include_dimensions: bool = True) -> pd.DataFrame:
+                                   include_dimensions: bool = False) -> pd.DataFrame:
         """
         Internal method to get statement data as DataFrame for current period.
 
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
             raw_concepts: Whether to preserve raw XBRL concept names
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             pandas DataFrame with statement data filtered to current period.
@@ -434,6 +436,10 @@ class CurrentPeriodView:
         try:
             # Select appropriate period based on statement type
             period_filter = self._get_appropriate_period_for_statement(statement_type)
+
+            # Get role_uri for definition linkbase-based dimension filtering
+            # Issue #577/cf9o: Use authoritative hypercube data when available
+            _, role_uri, _ = self.xbrl.find_statement(statement_type)
 
             # Get raw statement data filtered to current period
             statement_data = self.xbrl.get_statement(statement_type, period_filter=period_filter)
@@ -454,11 +460,20 @@ class CurrentPeriodView:
             # Convert to DataFrame
             rows = []
             for item in statement_data:
+                # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+                if is_xbrl_structural_element(item):
+                    continue
+
                 is_dimension = item.get('is_dimension', False)
 
-                # Skip dimensional items if include_dimensions=False
+                # Skip breakdown dimensions when include_dimensions=False
+                # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+                # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+                # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
                 if not include_dimensions and is_dimension:
-                    continue
+                    if is_breakdown_dimension(item, statement_type=statement_type,
+                                              xbrl=self.xbrl, role_uri=role_uri):
+                        continue
 
                 # Get the value for appropriate period
                 values = item.get('values', {})
@@ -477,8 +492,28 @@ class CurrentPeriodView:
                         'dimension': is_dimension,  # Renamed for consistency
                     }
 
-                    # Add dimension label (always include column for schema consistency)
-                    row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
+                    # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
+                    # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+                    row['is_breakdown'] = is_breakdown_dimension(
+                        item, statement_type=statement_type, xbrl=self.xbrl, role_uri=role_uri
+                    ) if is_dimension else False
+
+                    # Issue #574: Add structured dimension fields (axis, member, label)
+                    if is_dimension:
+                        dim_metadata = item.get('dimension_metadata', [])
+                        if dim_metadata:
+                            primary_dim = dim_metadata[0]
+                            row['dimension_axis'] = primary_dim.get('dimension', '')
+                            row['dimension_member'] = primary_dim.get('member', '')
+                            row['dimension_label'] = primary_dim.get('member_label', '')
+                        else:
+                            row['dimension_axis'] = None
+                            row['dimension_member'] = None
+                            row['dimension_label'] = item.get('full_dimension_label', '')
+                    else:
+                        row['dimension_axis'] = None
+                        row['dimension_member'] = None
+                        row['dimension_label'] = None
 
                     # Add metadata columns from lookup (Issue #522)
                     original_concept = item.get('concept', concept_name)
@@ -497,9 +532,10 @@ class CurrentPeriodView:
                     rows.append(row)
 
             if not rows:
-                # Create empty DataFrame with expected structure (Issue #522)
+                # Create empty DataFrame with expected structure (Issue #522, #574)
                 columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
-                           'dimension_label', 'balance', 'weight', 'preferred_sign',
+                           'is_breakdown', 'dimension_axis', 'dimension_member', 'dimension_label',
+                           'balance', 'weight', 'preferred_sign',
                            'parent_concept', 'parent_abstract_concept']
                 return pd.DataFrame(columns=columns)
 
@@ -517,14 +553,14 @@ class CurrentPeriodView:
                 reason=f"Failed to retrieve {statement_type}: {str(e)}"
             ) from e
 
-    def _get_statement_object(self, statement_type: str, include_dimensions: bool = True) -> 'Statement':
+    def _get_statement_object(self, statement_type: str, include_dimensions: bool = False) -> 'Statement':
         """
         Internal method to get statement as a Statement object for current period.
 
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
 
         Returns:
             Statement object with current period filtering applied
@@ -839,7 +875,7 @@ class CurrentPeriodStatement:
 
     def __init__(self, xbrl, role_or_type: str, canonical_type: Optional[str] = None,
                  period_filter: Optional[str] = None, period_label: Optional[str] = None,
-                 include_dimensions: bool = True):
+                 include_dimensions: bool = False):
         """
         Initialize with period filtering.
 
@@ -849,8 +885,8 @@ class CurrentPeriodStatement:
             canonical_type: Optional canonical statement type
             period_filter: Period key to filter to
             period_label: Human-readable period label
-            include_dimensions: If True (default), include dimensional segment data.
-                         If False, filter to primary non-dimensional values only.
+            include_dimensions: If False (default), filter to primary non-dimensional values only.
+                         If True, include dimensional segment data.
         """
         self.xbrl = xbrl
         self.role_or_type = role_or_type
@@ -929,11 +965,20 @@ class CurrentPeriodStatement:
         # Convert to DataFrame format matching Statement.to_dataframe() schema
         rows = []
         for item in raw_data:
+            # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+            if is_xbrl_structural_element(item):
+                continue
+
             is_dimension = item.get('is_dimension', False)
 
-            # Skip dimensional items if include_dimensions=False
+            # Skip breakdown dimensions when include_dimensions=False
+            # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+            # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
             if not dims and is_dimension:
-                continue
+                if is_breakdown_dimension(item, statement_type=self.canonical_type,
+                                          xbrl=self.xbrl, role_uri=self.role_or_type):
+                    continue
 
             values = item.get('values', {})
             current_value = values.get(self.period_filter)
@@ -964,8 +1009,29 @@ class CurrentPeriodStatement:
                     'dimension': is_dimension,  # Renamed for consistency
                 }
 
-                # Add dimension label (always include column for schema consistency)
-                row['dimension_label'] = item.get('full_dimension_label', '') if is_dimension else None
+                # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
+                # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+                row['is_breakdown'] = is_breakdown_dimension(
+                    item, statement_type=self.canonical_type,
+                    xbrl=self.xbrl, role_uri=self.role_or_type
+                ) if is_dimension else False
+
+                # Issue #574: Add structured dimension fields (axis, member, label)
+                if is_dimension:
+                    dim_metadata = item.get('dimension_metadata', [])
+                    if dim_metadata:
+                        primary_dim = dim_metadata[0]
+                        row['dimension_axis'] = primary_dim.get('dimension', '')
+                        row['dimension_member'] = primary_dim.get('member', '')
+                        row['dimension_label'] = primary_dim.get('member_label', '')
+                    else:
+                        row['dimension_axis'] = None
+                        row['dimension_member'] = None
+                        row['dimension_label'] = item.get('full_dimension_label', '')
+                else:
+                    row['dimension_axis'] = None
+                    row['dimension_member'] = None
+                    row['dimension_label'] = None
 
                 # Add metadata columns from lookup (Issue #522)
                 original_concept = item.get('concept', concept_name)
@@ -984,9 +1050,10 @@ class CurrentPeriodStatement:
                 rows.append(row)
 
         if not rows:
-            # Create empty DataFrame with expected structure (Issue #522)
+            # Create empty DataFrame with expected structure (Issue #522, #574)
             columns = ['concept', 'label', 'value', 'level', 'abstract', 'dimension',
-                       'dimension_label', 'balance', 'weight', 'preferred_sign',
+                       'is_breakdown', 'dimension_axis', 'dimension_member', 'dimension_label',
+                       'balance', 'weight', 'preferred_sign',
                        'parent_concept', 'parent_abstract_concept']
             return pd.DataFrame(columns=columns)
 

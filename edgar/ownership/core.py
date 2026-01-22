@@ -4,14 +4,15 @@ from typing import Any, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from lxml import etree
+from lxml import etree  # type: ignore[import-untyped]
 
-__all__ = ['is_numeric', 'compute_average_price', 'compute_total_value', 
-           'format_currency', 'format_amount', 'safe_numeric', 'format_numeric']
+__all__ = ['is_numeric', 'compute_average_price', 'compute_total_value',
+           'format_currency', 'format_amount', 'safe_numeric', 'format_numeric',
+           'detect_10b5_1_plan']
 
 
 def is_numeric(series: pd.Series) -> bool:
-    if np.issubdtype(series.dtype, np.number):
+    if np.issubdtype(series.dtype, np.number):  # type: ignore[arg-type]
         return True
     try:
         series.astype(float)
@@ -196,3 +197,38 @@ def _format_xml_date(date_str: str) -> str:
         return f"{month}/{day}/{year}"
     except ValueError:
         return date_str
+
+
+def detect_10b5_1_plan(footnotes_text: Optional[str]) -> Optional[bool]:
+    """
+    Detect if a transaction was executed under a Rule 10b5-1 trading plan.
+
+    Rule 10b5-1 trading plans allow insiders to set up predetermined trading
+    schedules to avoid accusations of insider trading. This information is
+    typically disclosed in the footnotes of Form 4 filings.
+
+    Args:
+        footnotes_text: Combined text of footnotes associated with a transaction.
+                       Can be None or empty string if no footnotes.
+
+    Returns:
+        True if 10b5-1 plan detected in footnotes
+        False if footnotes exist but no plan mentioned
+        None if no footnotes available
+    """
+    if not footnotes_text or not footnotes_text.strip():
+        return None
+
+    text = footnotes_text.lower()
+
+    # Common patterns for 10b5-1 references in SEC filings
+    patterns = [
+        "10b5-1",
+        "10b-5-1",
+        "rule 10b5",
+        "rule 10b-5",
+        "10b5 plan",
+        "10b-5 plan",
+    ]
+
+    return any(pattern in text for pattern in patterns)

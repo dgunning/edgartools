@@ -25,8 +25,10 @@ from edgar._party import Address
 from edgar.core import IntString, get_bool
 from edgar.datatools import convert_to_numeric
 from edgar.entity import Entity
-from edgar.formatting import reverse_name, yes_no
-from edgar.ownership.core import format_amount, format_currency, format_numeric, safe_numeric
+from edgar.display.formatting import reverse_name, yes_no
+from edgar.ownership.core import (
+    format_amount, format_currency, format_numeric, safe_numeric, detect_10b5_1_plan
+)
 from edgar.ownership.html_render import ownership_to_html
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.xmltools import child_text, child_value
@@ -1103,6 +1105,8 @@ class TransactionActivity:
     underlying_security: str = ""  # For derivative securities
     exercise_date: Optional[str] = None
     expiration_date: Optional[str] = None
+    footnote_ids: str = ""  # Newline-separated footnote IDs (e.g., "F1\nF2")
+    footnotes_text: str = ""  # Combined text of all footnotes for this transaction
 
     @property
     def shares_numeric(self) -> Optional[Union[int, float]]:
@@ -1123,6 +1127,21 @@ class TransactionActivity:
     def is_derivative(self) -> bool:
         """Check if this is a derivative transaction"""
         return self.security_type == "derivative"
+
+    @property
+    def is_10b5_1_plan(self) -> Optional[bool]:
+        """
+        Check if this transaction was executed under a Rule 10b5-1 trading plan.
+
+        Rule 10b5-1 trading plans allow insiders to set up predetermined trading
+        schedules to avoid accusations of insider trading.
+
+        Returns:
+            True if 10b5-1 plan detected in transaction footnotes
+            False if footnotes exist but no plan mentioned
+            None if no footnotes available for this transaction
+        """
+        return detect_10b5_1_plan(self.footnotes_text)
 
     @property
     def code_description(self) -> str:
@@ -1399,6 +1418,33 @@ class TransactionSummary(OwnershipSummary):
     def has_non_derivatives(self) -> bool:
         """Check if filing contains non-derivative transactions"""
         return any(not t.is_derivative for t in self.transactions)
+
+    @property
+    def has_10b5_1_plan(self) -> Optional[bool]:
+        """
+        Check if any transaction in this summary was executed under a Rule 10b5-1 trading plan.
+
+        Returns:
+            True if any transaction has 10b5-1 plan detected
+            False if transactions have footnotes but no 10b5-1 plan mentioned
+            None if no transactions or no footnotes available
+        """
+        if not self.transactions:
+            return None
+
+        # Check each transaction
+        results = [t.is_10b5_1_plan for t in self.transactions]
+
+        # If any transaction is under a 10b5-1 plan, return True
+        if any(r is True for r in results):
+            return True
+
+        # If we have footnotes but no plan detected, return False
+        if any(r is False for r in results):
+            return False
+
+        # No footnotes available
+        return None
 
     @property
     def net_change(self) -> int:
@@ -1752,6 +1798,29 @@ class Ownership:
 
         return holdings
 
+    def _resolve_footnotes(self, footnote_ids: str) -> str:
+        """
+        Resolve footnote IDs to their full text.
+
+        Args:
+            footnote_ids: Newline-separated string of footnote IDs (e.g., "F1\nF2")
+
+        Returns:
+            Combined text of all footnotes, separated by spaces
+        """
+        if not footnote_ids or not footnote_ids.strip():
+            return ""
+
+        texts = []
+        for fid in footnote_ids.strip().split('\n'):
+            fid = fid.strip()
+            if fid and self.footnotes:
+                text = self.footnotes.get(fid, "")
+                if text:
+                    texts.append(text)
+
+        return " ".join(texts)
+
     def get_transaction_activities(self) -> List[TransactionActivity]:
         """Extract all transaction activities from the filing"""
         activities = []
@@ -1762,6 +1831,7 @@ class Ownership:
                 transaction_type = "purchase" if row.AcquiredDisposed == 'A' else "sale"
                 row_shares = int("0" + "".join(itertools.takewhile(str.isdigit, row.Shares))) \
                     if isinstance(row.Shares, str) else row.Shares
+                footnote_ids = getattr(row, 'footnotes', '') or ''
                 activities.append(TransactionActivity(
                     transaction_type=transaction_type,
                     code=row.Code,
@@ -1770,6 +1840,8 @@ class Ownership:
                     value=row_shares * row.Price if not pd.isna(row.Price) else 0,
                     security_type="non-derivative",
                     security_title=row.Security,
+                    footnote_ids=footnote_ids,
+                    footnotes_text=self._resolve_footnotes(footnote_ids),
                 ))
 
         # Process non-derivative non-market transactions (other codes)
@@ -1794,6 +1866,7 @@ class Ownership:
 
                 row_shares = int("0" + "".join(itertools.takewhile(str.isdigit, row.Shares))) \
                     if isinstance(row.Shares, str) else row.Shares
+                footnote_ids = getattr(row, 'footnotes', '') or ''
                 activities.append(TransactionActivity(
                     transaction_type=transaction_type,
                     code=row.Code,
@@ -1803,6 +1876,8 @@ class Ownership:
                     value=row_shares * row.Price if pd.notna(row.Price) and row.Price > 0 else 0,
                     security_type="non-derivative",
                     security_title=row.Security,
+                    footnote_ids=footnote_ids,
+                    footnotes_text=self._resolve_footnotes(footnote_ids),
                 ))
 
         # Process derivative transactions
@@ -1815,6 +1890,7 @@ class Ownership:
 
                     row_underlying_shares = int("0" + "".join(itertools.takewhile(str.isdigit, row.UnderlyingShares))) \
                         if isinstance(row.UnderlyingShares, str) else row.UnderlyingShares
+                    footnote_ids = getattr(row, 'footnotes', '') or ''
                     activities.append(TransactionActivity(
                         transaction_type=transaction_type,
                         code=row.Code,
@@ -1826,6 +1902,8 @@ class Ownership:
                         underlying_security=row.Underlying,
                         exercise_date=row.ExerciseDate if pd.notna(row.ExerciseDate) else None,
                         expiration_date=row.ExpirationDate if pd.notna(row.ExpirationDate) else None,
+                        footnote_ids=footnote_ids,
+                        footnotes_text=self._resolve_footnotes(footnote_ids),
                     ))
         return activities
 

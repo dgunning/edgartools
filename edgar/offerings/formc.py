@@ -21,7 +21,7 @@ from rich.table import Column, Table
 from edgar._party import Address
 from edgar.core import get_bool
 from edgar.entity import Company
-from edgar.formatting import yes_no
+from edgar.display.formatting import yes_no
 from edgar.reference import states
 from edgar.richtools import Docs, repr_rich
 from edgar.xmltools import child_text

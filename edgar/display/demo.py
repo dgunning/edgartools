@@ -26,7 +26,7 @@ from edgar.display.styles import (
     get_statement_styles,
     source_text,
 )
-from edgar.formatting import accession_number_text, cik_text
+from edgar.display.formatting import accession_number_text, cik_text
 
 console = Console()
 
@@ -588,6 +588,362 @@ def demo_formatted_identifiers():
     return table
 
 
+# =============================================================================
+# BACKGROUND FILL PROTOTYPES
+# =============================================================================
+
+def demo_background_fills():
+    """Demonstrate background fill options for added visual pop."""
+    from rich.padding import Padding
+    from rich.console import Group
+
+    console.print("[bold]Background Fill Options[/bold]\n")
+
+    # Option 1: Section headers with background fills
+    console.print("[dim]Section Headers with Background Fills:[/dim]\n")
+
+    headers = [
+        ("Current (no fill)", "bold cyan", None),
+        ("Subtle grey", "bold white", "grey19"),
+        ("Darker grey", "bold white", "grey15"),
+        ("Very dark", "bold white", "grey11"),
+        ("Dark blue tint", "bold white", "grey7"),
+    ]
+
+    for label, fg, bg in headers:
+        style = f"{fg} on {bg}" if bg else fg
+        # Use Padding with expand=True for full-width background
+        header_text = Padding(f"  ASSETS  ", (0, 0), style=style, expand=True)
+        console.print(f"  {label}:")
+        console.print(header_text)
+        console.print()
+
+    return None
+
+
+def demo_statement_with_fills():
+    """Demonstrate financial statement with background fills on key rows."""
+    from rich.padding import Padding
+
+    styles = get_statement_styles()
+
+    # Build statement with background fills
+    table = Table(
+        box=None,
+        show_header=True,
+        header_style="bold",
+        padding=(0, 1),
+        expand=True,
+    )
+
+    table.add_column("", width=40)
+    table.add_column("FY 2024", justify="right", width=12)
+    table.add_column("FY 2023", justify="right", width=12)
+    table.add_column("FY 2022", justify="right", width=12)
+
+    # Helper to create styled row
+    def make_row(label, v1, v2, v3, row_type="item"):
+        def fmt_val(v):
+            if v is None:
+                return ""
+            return f"{v:,}"
+
+        if row_type == "abstract":
+            return (
+                Text(label, style="bold white on grey19"),
+                Text(fmt_val(v1), style="on grey19"),
+                Text(fmt_val(v2), style="on grey19"),
+                Text(fmt_val(v3), style="on grey19"),
+            )
+        elif row_type == "total":
+            return (
+                Text(label, style="bold on grey15"),
+                Text(fmt_val(v1), style="bold on grey15"),
+                Text(fmt_val(v2), style="bold on grey15"),
+                Text(fmt_val(v3), style="bold on grey15"),
+            )
+        elif row_type == "subtotal":
+            return (
+                Text(label, style="bold dim"),
+                Text(fmt_val(v1), style="bold dim"),
+                Text(fmt_val(v2), style="bold dim"),
+                Text(fmt_val(v3), style="bold dim"),
+            )
+        else:
+            return (
+                Text(label),
+                Text(fmt_val(v1)),
+                Text(fmt_val(v2)),
+                Text(fmt_val(v3)),
+            )
+
+    # Data rows
+    data = [
+        ("REVENUE", None, None, None, "abstract"),
+        ("Net Sales", 391035, 383285, 394328, "total"),
+        ("  Products", 298085, 298085, 316199, "item"),
+        ("  Services", 96169, 85200, 78129, "item"),
+        ("COSTS AND EXPENSES", None, None, None, "abstract"),
+        ("Cost of Sales", 214137, 214137, 223546, "item"),
+        ("Gross Profit", 176898, 169148, 170782, "total"),
+        ("OPERATING EXPENSES", None, None, None, "abstract"),
+        ("  Research and Development", 29915, 29915, 26251, "item"),
+        ("  Selling, General and Admin", 26097, 24932, 25094, "item"),
+        ("Total Operating Expenses", 56012, 54847, 51345, "subtotal"),
+        ("Operating Income", 120886, 114301, 119437, "total"),
+    ]
+
+    for label, v1, v2, v3, row_type in data:
+        row = make_row(label, v1, v2, v3, row_type)
+        table.add_row(*row)
+
+    # Title - Panel titles must be Text objects, not Padding
+    # For a full-width title bar, we'd need to construct outside the panel
+    title = Text.assemble(
+        (" Income Statement ", "bold on grey11"),
+        ("  ", ""),
+        ("Apple Inc. ", get_style("company_name")),
+        ("AAPL", get_style("ticker")),
+    )
+
+    footer = Text.assemble(
+        ("Amounts in millions USD", styles["metadata"]["units"]),
+        ("  ", ""),
+        (SYMBOLS["bullet"], "dim"),
+        ("  ", ""),
+        ("Source: EntityFacts", styles["metadata"]["source"]),
+    )
+
+    panel = Panel(
+        table,
+        title=title,
+        title_align="left",
+        subtitle=footer,
+        subtitle_align="left",
+        border_style=styles["structure"]["border"],
+        box=box.ROUNDED,
+        padding=(0, 0),
+    )
+
+    return panel
+
+
+def demo_status_with_fills():
+    """Demonstrate status messages with background fills."""
+    from rich.padding import Padding
+
+    console.print("[dim]Status Messages with Background Fills:[/dim]\n")
+
+    statuses = [
+        ("Error: Filing not found", "bold white on red"),
+        ("Warning: Data may be incomplete", "bold black on yellow"),
+        ("Success: 42 filings loaded", "bold white on green"),
+        ("Info: Using cached data from 2024-01-15", "bold white on blue"),
+    ]
+
+    for message, style in statuses:
+        status = Padding(f"  {message}  ", (0, 0), style=style, expand=False)
+        console.print(status)
+        console.print()
+
+    return None
+
+
+def demo_highlight_rows():
+    """Demonstrate highlighted rows in a table context."""
+
+    table = Table(
+        box=box.SIMPLE,
+        show_header=True,
+        header_style="bold",
+        padding=(0, 1),
+    )
+
+    table.add_column("Metric", width=30)
+    table.add_column("Value", justify="right", width=15)
+    table.add_column("Change", justify="right", width=10)
+
+    # Mix of regular and highlighted rows
+    rows = [
+        ("Revenue", "391,035", "+2.0%", None),
+        ("Net Income", "96,995", "+7.5%", "on grey15"),  # Highlighted
+        ("EPS (Diluted)", "6.42", "+9.2%", "on grey15"),  # Highlighted
+        ("Operating Margin", "31.0%", "+1.2pp", None),
+        ("Cash & Equivalents", "29,965", "-12.3%", None),
+        ("Total Assets", "352,583", "-1.8%", None),
+        ("Free Cash Flow", "108,807", "+5.4%", "on grey15"),  # Highlighted
+    ]
+
+    for label, value, change, bg in rows:
+        if bg:
+            table.add_row(
+                Text(label, style=f"bold {bg}"),
+                Text(value, style=f"bold {bg}"),
+                Text(change, style=f"green {bg}" if not change.startswith("-") else f"red {bg}"),
+            )
+        else:
+            change_style = "green" if not change.startswith("-") else "red"
+            table.add_row(label, value, Text(change, style=change_style))
+
+    panel = Panel(
+        table,
+        title="Key Metrics (highlighted rows have background)",
+        title_align="left",
+        border_style=get_style("border"),
+        box=card_border(),
+        padding=(0, 0),
+        expand=False,
+    )
+
+    return panel
+
+
+def demo_title_bar_fills():
+    """Demonstrate panel titles with background fills."""
+    from rich.console import Group
+
+    # Standard panel (no fill)
+    standard = Panel(
+        "Content goes here...",
+        title="Standard Panel Title",
+        title_align="left",
+        border_style=get_style("border"),
+        box=card_border(),
+        expand=False,
+    )
+
+    # Panel with filled title effect using nested structure
+    title_bar = Text.assemble(
+        (" 10-K ", get_style("badge_10k")),
+        ("  ", ""),
+        ("Apple Inc.", get_style("company_name")),
+        (" ", ""),
+        ("AAPL", get_style("ticker")),
+    )
+
+    with_badge = Panel(
+        "Content goes here...",
+        title=title_bar,
+        title_align="left",
+        border_style=get_style("border"),
+        box=card_border(),
+        expand=False,
+    )
+
+    # Form type badges with different colors (now using PALETTE)
+    badges = [
+        ("10-K", get_style("badge_10k")),
+        ("10-Q", get_style("badge_10q")),
+        ("8-K", get_style("badge_8k")),
+        ("DEF 14A", get_style("badge_proxy")),
+    ]
+
+    badge_row = Text()
+    for form, style in badges:
+        badge_row.append(f" {form} ", style=style)
+        badge_row.append("  ")
+
+    return Group(
+        Text("[dim]Standard panel:[/dim]"),
+        standard,
+        Text("\n[dim]Panel with form type badge:[/dim]"),
+        with_badge,
+        Text("\n[dim]Form type badge options:[/dim]"),
+        badge_row,
+    )
+
+
+def demo_source_badges():
+    """Demonstrate source badges for financial data origin."""
+    from rich.console import Group
+
+    # Source badges distinguish where financial data comes from
+    console.print("[dim]Source Badges - Distinguish data origin:[/dim]\n")
+
+    # XBRL source badge
+    xbrl_footer = Text.assemble(
+        ("Amounts in millions USD", get_style("units")),
+        ("  ", ""),
+        (SYMBOLS["bullet"], "dim"),
+        ("  ", ""),
+        (" XBRL ", get_style("badge_source_xbrl")),
+        (" ", ""),
+        ("10-K filed 2024-11-01", get_style("hint")),
+    )
+
+    # EntityFacts source badge
+    ef_footer = Text.assemble(
+        ("Amounts in millions USD", get_style("units")),
+        ("  ", ""),
+        (SYMBOLS["bullet"], "dim"),
+        ("  ", ""),
+        (" EntityFacts ", get_style("badge_source_entity_facts")),
+        (" ", ""),
+        ("Q3 2022 to Q3 2025", get_style("hint")),
+    )
+
+    console.print("  XBRL source (single filing):")
+    console.print(f"    {xbrl_footer}")
+    console.print()
+    console.print("  EntityFacts source (aggregated):")
+    console.print(f"    {ef_footer}")
+    console.print()
+
+    # Side by side comparison
+    console.print("[dim]Why this matters:[/dim]")
+    console.print("  • [bold white on gold3] XBRL [/bold white on gold3] = Parsed from a specific SEC filing (exact, point-in-time)")
+    console.print("  • [bold white on cyan] EntityFacts [/bold white on cyan] = SEC's aggregated company data (convenient, multi-period)")
+    console.print()
+
+    # Example in context - mini statement footers
+    console.print("[dim]Example statement footers:[/dim]\n")
+
+    # XBRL statement
+    xbrl_panel = Panel(
+        Text("Revenue: 391,035\nNet Income: 96,995", style=""),
+        title=Text.assemble(
+            (" 10-K ", get_style("badge_10k")),
+            ("  Income Statement", "bold"),
+        ),
+        title_align="left",
+        subtitle=Text.assemble(
+            (" XBRL ", get_style("badge_source_xbrl")),
+            (" Apple Inc. ", get_style("company_name")),
+            ("2024-11-01", get_style("date")),
+        ),
+        subtitle_align="left",
+        border_style=get_style("border"),
+        box=card_border(),
+        expand=False,
+    )
+
+    # EntityFacts statement
+    ef_panel = Panel(
+        Text("Revenue: 391,035  383,285  394,328\nNet Income: 96,995  93,736  99,803", style=""),
+        title=Text.assemble(
+            ("Income Statement", "bold"),
+            ("  ", ""),
+            ("FY 2024 → FY 2022", get_style("period_range")),
+        ),
+        title_align="left",
+        subtitle=Text.assemble(
+            (" EntityFacts ", get_style("badge_source_entity_facts")),
+            (" Apple Inc. ", get_style("company_name")),
+            ("AAPL", get_style("ticker")),
+        ),
+        subtitle_align="left",
+        border_style=get_style("border"),
+        box=card_border(),
+        expand=False,
+    )
+
+    console.print(xbrl_panel)
+    console.print()
+    console.print(ef_panel)
+
+    return None
+
+
 def demo_accession_blue_comparison():
     """Compare bright_blue (current) vs dodger_blue1 (new palette) for accession year."""
 
@@ -714,6 +1070,35 @@ def main():
 
     console.print("[bold]10. Accession Year: bright_blue vs dodger_blue1[/bold]\n")
     console.print(demo_accession_blue_comparison())
+    console.print("\n")
+
+    # Background fill prototypes
+    console.print("[bold]" + "=" * 60 + "[/bold]")
+    console.print("[bold]BACKGROUND FILL PROTOTYPES[/bold]", justify="center")
+    console.print("[bold]" + "=" * 60 + "[/bold]\n")
+
+    console.print("[bold]11. Section Header Fill Options[/bold]\n")
+    demo_background_fills()
+    console.print("\n")
+
+    console.print("[bold]12. Financial Statement with Background Fills[/bold]\n")
+    console.print(demo_statement_with_fills())
+    console.print("\n")
+
+    console.print("[bold]13. Status Messages with Fills[/bold]\n")
+    demo_status_with_fills()
+    console.print("\n")
+
+    console.print("[bold]14. Highlighted Rows in Tables[/bold]\n")
+    console.print(demo_highlight_rows())
+    console.print("\n")
+
+    console.print("[bold]15. Form Type Badges with Background Fills[/bold]\n")
+    console.print(demo_title_bar_fills())
+    console.print("\n")
+
+    console.print("[bold]16. Source Badges (XBRL vs EntityFacts)[/bold]\n")
+    demo_source_badges()
     console.print("\n")
 
     # Usage hints

@@ -15,7 +15,7 @@ from edgar.core import listify, log
 from edgar.dates import InvalidDateException
 from edgar.entity.filings import EntityFilings
 from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
-from edgar.formatting import reverse_name
+from edgar.display.formatting import reverse_name
 from edgar.storage import is_using_local_storage
 
 # Module-level import cache for lazy imports
@@ -276,7 +276,7 @@ class Address:
         # Simplified representation that avoids unnecessary string operations
         return f'Address(street1="{self.street1}", street2="{self.street2}", city="{self.city}", zipcode="{self.zipcode}")'
 
-    def to_json(self) -> Dict[str, str]:
+    def to_json(self) -> Dict[str, Optional[str]]:
         """Convert the address to a JSON-serializable dict."""
         # Direct dictionary creation is faster than multiple assignments
         return {
@@ -395,7 +395,7 @@ class EntityData:
                     is_inline_xbrl: Optional[bool] = None,
                     sort_by: Optional[Union[str, List[Tuple[str, str]]]] = None,
                     trigger_full_load: bool = True
-                    ) -> EntityFilings:
+                    ) -> Optional[EntityFilings]:
         """
         Get entity filings with lazy loading behavior.
 
@@ -544,7 +544,7 @@ class EntityData:
         Text = lazy_import('rich.text.Text')
         find_ticker = lazy_import('edgar.reference.tickers.find_ticker')
         zip_longest = lazy_import('itertools.zip_longest')
-        datefmt = lazy_import('edgar.formatting.datefmt')
+        datefmt = lazy_import('edgar.display.formatting.datefmt')
 
         # Primary entity identification section
         if self.is_company:

@@ -21,7 +21,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar.core import get_bool
-from edgar.formatting import moneyfmt
+from edgar.display.formatting import moneyfmt
 from edgar.funds import FundCompany, FundSeries
 from edgar.richtools import df_to_rich_table, repr_rich
 from edgar.xmltools import child_text, find_element, optional_decimal

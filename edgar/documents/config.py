@@ -47,7 +47,7 @@ class ParserConfig:
     """
 
     # Performance settings
-    max_document_size: int = 100 * 1024 * 1024  # 100MB (handles large filings like JPM)
+    max_document_size: int = 110 * 1024 * 1024  # 110MB (handles large filings like NPORT-P)
     streaming_threshold: int = 10 * 1024 * 1024  # 10MB
     cache_size: int = 1000
     enable_parallel: bool = True

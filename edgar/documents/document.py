@@ -3,12 +3,15 @@ Document model for parsed HTML.
 """
 from __future__ import annotations
 
+import logging
+import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
 
 if TYPE_CHECKING:
     import pandas as pd
 
+from lxml.etree import LxmlError, XMLSyntaxError
 from rich.console import Group
 from rich.table import Table as RichTable
 from rich.text import Text
@@ -17,6 +20,8 @@ from edgar.documents.nodes import Node, SectionNode
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.types import SearchResult, XBRLFact
 from edgar.richtools import repr_rich
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -78,6 +83,8 @@ class Section:
         part: Optional part identifier for 10-Q filings ("I", "II", or None for 10-K)
         item: Optional item identifier (e.g., "1", "1A", "2")
         _text_extractor: Optional callback for lazy text extraction (for TOC-based sections)
+        _html_source: Optional HTML source for TOC-based table extraction
+        _section_extractor: Optional section extractor for TOC-based sections
     """
     name: str
     title: str
@@ -90,21 +97,206 @@ class Section:
     part: Optional[str] = None  # Part identifier for 10-Q: "I", "II", or None for 10-K
     item: Optional[str] = None  # Item identifier: "1", "1A", "2", etc.
     _text_extractor: Optional[Any] = field(default=None, repr=False)  # Callback for lazy text extraction
+    _html_source: Optional[str] = field(default=None, repr=False)  # HTML source for TOC table extraction
+    _section_extractor: Optional[Any] = field(default=None, repr=False)  # Section extractor for TOC sections
 
     def text(self, **kwargs) -> str:
         """Extract text from section."""
         # If we have a text extractor callback (TOC-based sections), use it
         if self._text_extractor is not None:
-            return self._text_extractor(self.name, **kwargs)
+            text = self._text_extractor(self.name, **kwargs)
+        else:
+            # Otherwise extract from node (heading/pattern-based sections)
+            from edgar.documents.extractors.text_extractor import TextExtractor
+            extractor = TextExtractor(**kwargs)
+            text = extractor.extract_from_node(self.node)
 
-        # Otherwise extract from node (heading/pattern-based sections)
-        from edgar.documents.extractors.text_extractor import TextExtractor
-        extractor = TextExtractor(**kwargs)
-        return extractor.extract_from_node(self.node)
+        # Clean up boundary artifacts (page numbers, next section headers)
+        return self._clean_boundary_artifacts(text)
+
+    def _clean_boundary_artifacts(self, text: str) -> str:
+        """
+        Remove common artifacts at section boundaries.
+
+        Cleans up:
+        - Interior page headers (page number + PART + Item appearing mid-document)
+        - Trailing page footer (page number + PART + next section header at end)
+        - Trailing Item headers bleeding into current section
+        - Trailing page numbers
+        """
+        if not text:
+            return text
+
+        # Order matters: clean interior artifacts first, then trailing artifacts
+
+        # 1a. Remove interior page headers for 10-K/10-Q (PART + Item format)
+        # Pattern: page number followed by PART header followed by Item number
+        # e.g., "\n\n  16\n\n  PART I\n\nItem 1A\n\n" (this is a page break artifact)
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*\n',
+            '\n\n',
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # 1b. Remove interior page headers for 20-F (Table of Contents format)
+        # Pattern: page number followed by "Table of Contents"
+        # e.g., "\n\n  1\n\n  Table of Contents\n\n" (this is a page break artifact)
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*Table of Contents\s*\n',
+            '\n\n',
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # 2a. Remove trailing page footer for 10-K/10-Q (PART + Item at end)
+        # Pattern: page number + PART + Item header at end (next section bleeding in)
+        # e.g., "\n\n  29\n\n  PART I\n\nItem 1B, 1C" at end
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # 2b. Remove trailing page footer for 20-F (Table of Contents at end)
+        text = re.sub(
+            r'\n\s*\d{1,3}\s*\n\s*Table of Contents\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE
+        )
+
+        # 3. Remove trailing Item headers if they appear at the very end
+        # (without preceding PART header)
+        # e.g., "\n\nItem 15" or "\n\nITEM 15."
+        text = re.sub(r'\n\s*Item\s+\d+[A-Za-z]?\.?\s*$', '', text, flags=re.IGNORECASE)
+
+        # 4. Remove trailing page numbers: whitespace followed by 1-3 digits at end
+        # e.g., "\n\n  100" or "\n  92"
+        text = re.sub(r'\n\s*\d{1,3}\s*$', '', text)
+
+        return text.rstrip()
 
     def tables(self) -> List[TableNode]:
         """Get all tables in section."""
-        return self.node.find(lambda n: isinstance(n, TableNode))
+        # For TOC-based sections, node.children is empty so we need special handling
+        if self.detection_method == 'toc' and self._text_extractor is not None:
+            return self._get_tables_from_toc_section()
+
+        # For heading/pattern-based sections, use node tree search
+        return cast(List[TableNode], self.node.find(lambda n: isinstance(n, TableNode)))
+
+    def _get_tables_from_toc_section(self) -> List[TableNode]:
+        """
+        Extract tables from TOC-based section.
+
+        TOC sections have empty node children, so we extract tables
+        by parsing the section HTML directly.
+        """
+        try:
+            # Import here to avoid circular dependency
+            from edgar.documents.strategies.table_processing import TableProcessor
+            from edgar.documents.config import ParserConfig
+            import lxml.html as lxml_html
+
+            # Check if we have HTML source and extractor (passed from TOC detector)
+            if self._html_source is None or self._section_extractor is None:
+                return []
+
+            # Use the stored extractor (already initialized with HTML)
+            extractor = self._section_extractor
+
+            # Get section HTML by extracting elements between boundaries
+            section_html = self._extract_section_html(extractor, self._html_source)
+
+            if not section_html:
+                return []
+
+            # Parse section HTML and extract tables
+            tree = lxml_html.fromstring(section_html)
+            table_elements = tree.xpath('.//table')
+
+            # Process each table element
+            config = ParserConfig()
+            table_processor = TableProcessor(config)
+            tables = []
+
+            for table_elem in table_elements:
+                try:
+                    table_node = table_processor.process(table_elem)
+                    tables.append(table_node)
+                except (LxmlError, XMLSyntaxError, ValueError, TypeError, AttributeError) as e:
+                    logger.debug(f"Failed to process table in section '{self.name}': {e}")
+                    continue
+
+            return tables
+
+        except (LxmlError, XMLSyntaxError, ValueError, TypeError) as e:
+            logger.debug(f"TOC table extraction failed for section '{self.name}': {e}")
+            return []
+
+    def _extract_section_html(self, extractor, html_source: str) -> str:
+        """Extract HTML content for this section from full document HTML."""
+        try:
+            import lxml.html as lxml_html
+            from lxml import etree
+            import re
+
+            # Handle XML declaration
+            if html_source.startswith('<?xml'):
+                html_source = re.sub(r'<\?xml[^>]*\?>', '', html_source, count=1)
+
+            tree = lxml_html.fromstring(html_source)
+
+            # Get section boundary info
+            if self.name not in extractor.section_boundaries:
+                return ""
+
+            boundary = extractor.section_boundaries[self.name]
+
+            # Find start anchor
+            start_elements = tree.xpath(f'//*[@id="{boundary.anchor_id}"]')
+            if not start_elements:
+                return ""
+
+            # Collect all elements between start and end anchors
+            collected_elements = []
+            in_range = False
+
+            for event, el in etree.iterwalk(tree, events=('start',)):
+                if not hasattr(el, 'get'):
+                    continue
+
+                el_id = el.get('id', '')
+
+                # Check if we've reached the start anchor
+                if el_id == boundary.anchor_id:
+                    in_range = True
+                    continue
+
+                # Check if we've reached the end boundary
+                if boundary.end_element_id and el_id == boundary.end_element_id:
+                    break
+
+                # Collect elements in range
+                if in_range:
+                    collected_elements.append(el)
+
+            # Convert collected elements back to HTML string
+            html_parts = []
+            for elem in collected_elements:
+                try:
+                    html_parts.append(lxml_html.tostring(elem, encoding='unicode'))
+                except (LxmlError, TypeError, AttributeError) as e:
+                    logger.debug(f"Failed to serialize element in section '{self.name}': {e}")
+                    continue
+
+            return ''.join(html_parts)
+
+        except (LxmlError, XMLSyntaxError, ValueError) as e:
+            logger.debug(f"HTML extraction failed for section '{self.name}': {e}")
+            return ""
 
     def search(self, query: str) -> List[SearchResult]:
         """Search within section."""
@@ -443,7 +635,7 @@ class Document:
             # Normalize form type by removing /A suffix for amendments
             base_form = form.replace('/A', '') if form else None
 
-            if base_form and base_form in ['10-K', '10-Q', '8-K']:
+            if base_form and base_form in ['10-K', '10-Q', '8-K', '20-F']:
                 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
                 # Pass thresholds from config if available
                 thresholds = self._config.detection_thresholds if self._config else None
@@ -487,7 +679,8 @@ class Document:
              clean: bool = True,
              include_tables: bool = True,
              include_metadata: bool = False,
-             max_length: Optional[int] = None) -> str:
+             max_length: Optional[int] = None,
+             table_max_col_width: Optional[int] = None) -> str:
         """
         Extract text from document.
         
@@ -496,6 +689,9 @@ class Document:
             include_tables: Include table content in text
             include_metadata: Include metadata annotations
             max_length: Maximum text length
+            table_max_col_width: Maximum column width for table rendering (default: 200).
+                                Set higher (e.g., 500) to avoid truncating long table labels,
+                                or None for unlimited width. Useful for AI/LLM processing.
             
         Returns:
             Extracted text
@@ -515,7 +711,8 @@ class Document:
             clean=clean,
             include_tables=include_tables,
             include_metadata=include_metadata,
-            max_length=max_length
+            max_length=max_length,
+            table_max_col_width=table_max_col_width
         )
         text = extractor.extract(self)
 
@@ -538,20 +735,20 @@ class Document:
 
         return text
 
-    def search(self, query: str, top_k: int = 10) -> List[SearchResult]:
+    def search(self, query: str, top_k: int = 10):
         """
         Search document for query.
-        
+
         Args:
             query: Search query
             top_k: Maximum results to return
-            
+
         Returns:
             List of search results
         """
         from edgar.documents.search import DocumentSearch
         searcher = DocumentSearch(self)
-        return searcher.search(query, top_k=top_k)
+        return searcher.search(query, limit=top_k)
 
     def get_section(self, section_name: str, part: Optional[str] = None) -> Optional[Section]:
         """
@@ -827,7 +1024,7 @@ class Document:
         return iter(self.root.children)
 
     def __repr__(self) -> str:
-        return self.text()
+        return self.text(table_max_col_width=200)  # Terminal-friendly width
 
     def walk(self) -> Iterator[Node]:
         """Walk entire document tree."""

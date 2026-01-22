@@ -35,7 +35,8 @@ from edgar import Company
 METADATA_COLUMNS = [
     'concept', 'label', 'level', 'abstract', 'dimension',
     'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept',
-    'dimension_label', 'unit', 'point_in_time'
+    'dimension_axis', 'dimension_member', 'dimension_member_label', 'dimension_label',
+    'unit', 'point_in_time'
 ]
 
 

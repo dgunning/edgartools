@@ -43,6 +43,14 @@ from edgar.reference.company_subsets import (
     get_top_companies_by_metric,
     intersect_company_sets,
 )
+from edgar.reference._codes import (
+    get_filer_type,
+    get_place_name,
+    get_place_type,
+    is_canadian_company,
+    is_foreign_company,
+    is_us_company,
+)
 from edgar.reference.forms import describe_form
 from edgar.reference.tickers import cusip_ticker_mapping, get_icon_from_ticker, get_ticker_from_cusip
 

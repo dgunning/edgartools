@@ -11,7 +11,7 @@ from rich.table import Table
 
 import edgar
 from edgar.dates import extract_dates, InvalidDateException
-from edgar.formatting import display_size, reverse_name, split_camel_case
+from edgar.display.formatting import display_size, reverse_name, split_camel_case
 from edgar.core import (decode_content,
                         get_identity,
                         set_identity,

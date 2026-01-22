@@ -106,6 +106,9 @@ class TOCSectionDetector:
                 # Parse section name to extract part and item identifiers
                 part, item = Section.parse_section_name(section_name)
 
+                # Get HTML source from document metadata for table extraction
+                html_source = getattr(self.document.metadata, 'original_html', None)
+
                 # Create Section with TOC confidence
                 section = Section(
                     name=section_name,
@@ -117,7 +120,9 @@ class TOCSectionDetector:
                     detection_method='toc',
                     part=part,
                     item=item,
-                    _text_extractor=make_text_extractor(self.extractor, section_name)
+                    _text_extractor=make_text_extractor(self.extractor, section_name),
+                    _html_source=html_source,  # Store HTML for table extraction
+                    _section_extractor=self.extractor  # Store extractor for table extraction
                 )
 
                 sections[section_name] = section

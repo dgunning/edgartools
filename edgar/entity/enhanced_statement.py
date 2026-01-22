@@ -17,7 +17,6 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from rich import box
 from rich.console import Group
-from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
@@ -25,7 +24,7 @@ from rich.text import Text
 from edgar.core import log
 from edgar.entity.mappings_loader import (
     get_all_statements_for_concept,
-    get_industry_for_sic,
+    get_industry,
     get_primary_statement,
     load_industry_extension,
     load_learned_mappings,
@@ -45,6 +44,43 @@ def _is_statement_abstract(label: str, depth: int) -> bool:
 def _clean_label(label: str) -> str:
     """Remove XBRL jargon like '[Abstract]' from labels."""
     return label.replace(" [Abstract]", "").replace("[Abstract]", "").strip()
+
+
+def _calculate_label_width(num_periods: int, console_width: int | None = None) -> int:
+    """
+    Calculate label column width based on number of periods and available console width.
+
+    Dynamically allocates space: wider labels when fewer periods or wider console,
+    narrower labels when more periods or narrower console.
+
+    Args:
+        num_periods: Number of period columns in the statement
+        console_width: Available console width in characters. If None, uses sensible defaults.
+
+    Returns:
+        Width for the label column
+    """
+    # Constraints
+    min_label_width = 30
+    max_label_width = 55
+    value_column_width = 12  # Space needed per value column (value + padding)
+    table_overhead = 10  # Borders, panel padding, etc.
+
+    if console_width is None:
+        # Fallback to tier-based defaults when console width unknown
+        if num_periods < 4:
+            return 50
+        elif num_periods < 6:
+            return 46
+        else:
+            return 42
+
+    # Calculate available space for label column
+    space_for_values = num_periods * value_column_width
+    available_for_label = console_width - space_for_values - table_overhead
+
+    # Clamp to min/max bounds
+    return max(min_label_width, min(max_label_width, available_for_label))
 
 
 # Define which statements accept linked concepts from which source statements
@@ -148,6 +184,7 @@ class MultiPeriodStatement:
 
     # Metadata
     company_name: Optional[str] = None
+    ticker: Optional[str] = None
     cik: Optional[str] = None
     canonical_coverage: float = 0.0
 
@@ -166,25 +203,35 @@ class MultiPeriodStatement:
             'CashFlow': 'Cash Flow Statement'
         }
 
-        # Build title hierarchy (like XBRL statements)
+        # Build centered header like actual SEC filings:
+        # Line 1: Company name (ticker) (bold)
+        # Line 2: Statement name (bold)
+        # Line 3: Period range (dim)
         statement_display = statement_names.get(self.statement_type, self.statement_type)
         period_range = f"{self.periods[-1]} to {self.periods[0]}" if len(self.periods) > 1 else self.periods[0] if self.periods else ""
 
-        title_lines = [
-            Text(statement_display, style=styles["header"]["statement_title"]),
-            Text(period_range, style=styles["metadata"]["hint"]),
-            Text("Amounts in USD", style=styles["metadata"]["units"]),
-        ]
-        title = Text("\n").join(title_lines)
-
-        # Build footer with company info and source attribution
-        footer_parts = []
+        header_lines = []
         if self.company_name:
-            footer_parts.append((self.company_name, styles["header"]["company_name"]))
-            footer_parts.append(("  ", ""))
-            footer_parts.append((SYMBOLS["bullet"], styles["structure"]["separator"]))
-            footer_parts.append(("  ", ""))
-        footer_parts.append(("Source: EntityFacts", styles["metadata"]["source"]))
+            company_line = Text(self.company_name.upper(), style=styles["header"]["company_name"])
+            if self.ticker:
+                company_line.append("  ")
+                company_line.append(f" {self.ticker.upper()} ", style=styles["header"]["ticker_badge"])
+            header_lines.append(company_line)
+        header_lines.append(Text(statement_display.upper(), style=styles["header"]["statement_title"]))
+        if period_range:
+            header_lines.append(Text(period_range, style="dim"))
+
+        title = Text("\n").join(header_lines)
+
+        # Build footer with source and units note
+        footer_parts = [
+            ("Source: ", styles["metadata"]["source"]),
+            ("EntityFacts", styles["metadata"]["source_entity_facts"]),
+            ("  ", ""),
+            (SYMBOLS["bullet"], styles["structure"]["separator"]),
+            ("  ", ""),
+            ("Amounts in USD", styles["metadata"]["units"]),
+        ]
         footer = Text.assemble(*footer_parts)
 
         # Main table with multiple period columns
@@ -194,12 +241,15 @@ class MultiPeriodStatement:
             padding=(0, 1),
         )
 
-        # Add concept column with fixed width and wrapping
-        stmt_table.add_column("", style="", width=42, no_wrap=False)
+        # Add concept column with dynamic width based on terminal size and number of periods
+        import shutil
+        terminal_width = shutil.get_terminal_size().columns
+        label_width = _calculate_label_width(len(self.periods), terminal_width)
+        stmt_table.add_column("", style="", width=label_width, no_wrap=False)
 
-        # Add period columns
+        # Add period columns with minimum width for values like "$138.6B"
         for period in self.periods:
-            stmt_table.add_column(period, justify="right", style="bold")
+            stmt_table.add_column(period, justify="right", style="bold", min_width=10)
 
         def add_item_to_table(item: 'MultiPeriodItem', depth: int = 0):
             """Add an item row to the table."""
@@ -275,18 +325,16 @@ class MultiPeriodStatement:
         for item in self.items:
             add_item_to_table(item)
 
-        # Combine content
-        content_parts = [
-            Padding("", (1, 0, 0, 0)),
+        # Combine content with title inside for proper multi-line rendering
+        # Header is centered like actual SEC filings
+        from rich.align import Align
+        content = Group(
+            Align.center(title),
             stmt_table
-        ]
-
-        content = Group(*content_parts)
+        )
 
         return Panel(
             content,
-            title=title,
-            title_align="left",
             subtitle=footer,
             subtitle_align="left",
             border_style=styles["structure"]["border"],
@@ -1385,7 +1433,7 @@ class EnhancedStatementBuilder:
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
     }
 
-    def __init__(self, sic_code: Optional[str] = None):
+    def __init__(self, sic_code: Optional[str] = None, ticker: Optional[str] = None):
         """
         Initialize the statement builder.
 
@@ -1393,16 +1441,20 @@ class EnhancedStatementBuilder:
             sic_code: Optional SIC code for industry-specific extensions.
                      If provided and matches a known industry, industry-specific
                      concepts will be merged into the virtual trees.
+            ticker: Optional ticker symbol for industry lookup. Used for industries
+                   like payment_networks where SIC codes don't map cleanly.
+                   Ticker-based lookup takes priority over SIC-based lookup.
         """
         self.learned_mappings = load_learned_mappings()
         self.virtual_trees = load_virtual_trees()
         self.sic_code = sic_code
+        self.ticker = ticker
         self.industry = None
         self.industry_extension = None
 
-        # Load industry extension if SIC code provided
-        if sic_code:
-            self.industry = get_industry_for_sic(sic_code)
+        # Load industry extension using ticker (for curated industries) or SIC code
+        if ticker or sic_code:
+            self.industry = get_industry(sic_code=sic_code, ticker=ticker)
             if self.industry:
                 self.industry_extension = load_industry_extension(self.industry)
                 if self.industry_extension:
@@ -1681,19 +1733,32 @@ class EnhancedStatementBuilder:
             selected_period_info = sorted_periods[:periods]
 
         # Extract period labels and build a mapping for the selected periods
-        # For annual periods, use the fiscal year from facts (most reliable)
+        # For annual periods: use period_end.year for Dec FYE, fiscal_year for others
         # For quarterly periods, calculate fiscal year from period_end (Issue #460)
         selected_periods = []
         for pk, info in selected_period_info:
             if annual and info.get('is_annual') and pk[2]:  # pk[2] is period_end
-                # Use fiscal_year from facts if available (handles 52/53-week calendars correctly)
-                # Falls back to period_end.year with early January adjustment for edge cases
-                if 'fiscal_year' in info and info['fiscal_year']:
+                period_end = pk[2]
+
+                # FIX for Issue edgartools-t3tr: For December fiscal year end companies,
+                # use period_end.year for the label instead of SEC's fiscal_year.
+                # This fixes duplicate labels for comparative data where SEC tags all
+                # periods with the filing's fiscal_year (e.g., BLK's 2023 data tagged as FY 2024).
+                #
+                # For non-December FYE companies (e.g., DLTR with Feb FYE), trust SEC's
+                # fiscal_year since their FY doesn't align with calendar year.
+                if fiscal_year_end_month == 12:
+                    # December FYE: fiscal year = calendar year, use period_end.year
+                    # Handle early January edge case (52/53-week calendars)
+                    if period_end.month == 1 and period_end.day <= 7:
+                        label = f"FY {period_end.year - 1}"
+                    else:
+                        label = f"FY {period_end.year}"
+                elif 'fiscal_year' in info and info['fiscal_year']:
+                    # Non-December FYE: trust SEC's fiscal_year tag
                     label = f"FY {info['fiscal_year']}"
                 else:
-                    period_end = pk[2]
-                    # For periods ending Jan 1-7, use prior year (52/53-week calendar convention)
-                    # This handles cases like fiscal year ending Jan 1, 2023 being FY 2022
+                    # Fallback: use period_end.year with early January adjustment
                     if period_end.month == 1 and period_end.day <= 7:
                         label = f"FY {period_end.year - 1}"
                     else:

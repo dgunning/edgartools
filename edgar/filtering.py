@@ -39,6 +39,9 @@ def filter_by_date(data: pa.Table,
 def filter_by_accession_number(data: pa.Table,
                                accession_number: Union[IntString, List[IntString]]) -> pa.Table:
     """Return the data filtered by accession number"""
+    # Handle empty tables - return early to avoid type mismatch errors
+    if data.num_rows == 0:
+        return data
     # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
     accession_numbers = [str(el) for el in listify(accession_number)]
     data = data.filter(pc.is_in(data['accession_number'], pa.array(accession_numbers)))
@@ -50,6 +53,9 @@ def filter_by_form(data: pa.Table,
                    form: Union[str, List[str]],
                    amendments: bool = True) -> pa.Table:
     """Return the data filtered by form"""
+    # Handle empty tables - return early to avoid type mismatch errors
+    if data.num_rows == 0:
+        return data
     # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
     forms = [str(el) for el in listify(form)]
     if amendments:
@@ -63,6 +69,9 @@ def filter_by_form(data: pa.Table,
 def filter_by_cik(data: pa.Table,
                   cik: Union[IntString, List[IntString]]) -> pa.Table:
     """Return the data filtered by CIK"""
+    # Handle empty tables - return early to avoid type mismatch errors
+    if data.num_rows == 0:
+        return data
     # Ensure that CIKs is a list of integers
     ciks = [int(el) for el in listify(cik)]
     data = data.filter(pc.is_in(data['cik'], pa.array(ciks)))
@@ -70,6 +79,9 @@ def filter_by_cik(data: pa.Table,
 
 def filter_by_exchange(data: pa.Table, exchange: Union[str, List[str]]) -> pa.Table:
     """Return the data filtered by exchange"""
+    # Handle empty tables - return early to avoid type mismatch errors
+    if data.num_rows == 0:
+        return data
     # Ensure that forms is a list of strings ... it can accept int like form 3, 4, 5
     from edgar.reference.tickers import get_company_ticker_name_exchange
     exchanges = [str(el).upper() for el in listify(exchange)]
@@ -82,6 +94,9 @@ def filter_by_exchange(data: pa.Table, exchange: Union[str, List[str]]) -> pa.Ta
 def filter_by_ticker(data: pa.Table,
                      ticker: Union[str, List[str]]) -> pa.Table:
     """Return the data filtered by ticker"""
+    # Handle empty tables - return early to avoid type mismatch errors
+    if data.num_rows == 0:
+        return data
     # Ensure that tickers is a list of strings
     from edgar.reference.tickers import get_cik_tickers
     company_tickers = get_cik_tickers()

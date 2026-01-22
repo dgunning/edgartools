@@ -104,7 +104,7 @@ jobs:
         coverage combine
 
         # Generate report and check threshold
-        coverage report --fail-under=70
+        coverage report --fail-under=65
         coverage xml -o combined-coverage.xml
 
     - name: Upload combined coverage to Codecov

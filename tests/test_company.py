@@ -24,8 +24,9 @@ def test_company_repr():
     company = get_test_company("NVDA")
     print()
     repr_ = repr(company)
+    print(repr_)
     assert 'NVDA' in repr_
-    assert 'Large accelerated' in company.__repr__()
+    assert 'Large Accelerated' in company.__repr__()
     assert '1045810' in company.__repr__()
     assert 'Semiconductors' in company.__repr__()
 

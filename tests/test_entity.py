@@ -137,7 +137,8 @@ def test_company_repr():
     print()
     print(c_repr)
     assert "MICROSOFT CORP" in c_repr
-    assert 'Operating' in c_repr
+    assert 'MSFT' in c_repr  # Ticker should be displayed
+    assert 'Industry' in c_repr  # Industry section
 
 @pytest.mark.network
 def test_individual_repr():

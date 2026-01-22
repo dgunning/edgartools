@@ -160,6 +160,18 @@ class SECSectionExtractor:
         try:
             section_text = self._extract_section_content(html_content, boundary, include_subsections, clean)
 
+            # Check if extracted content is suspiciously short for an Item section
+            # This can happen when TOC anchors point to "PART I" header instead of actual Item content
+            if section_text and len(section_text.strip()) < 200:
+                # Check if this is an Item section that should have more content
+                item_match = re.match(r'(?:part_[iv]+_)?item[_\s]*(\d+[a-z]?)', normalized_name, re.IGNORECASE)
+                if item_match:
+                    item_num = item_match.group(1).upper()
+                    # Try to find actual Item content in HTML
+                    actual_content = self._find_actual_item_content(html_content, item_num, boundary, clean)
+                    if actual_content and len(actual_content) > len(section_text):
+                        section_text = actual_content
+
             # If no direct content but include_subsections=True, aggregate subsection text
             if not section_text and include_subsections:
                 subsections = self._get_subsections(normalized_name)
@@ -321,6 +333,102 @@ class SECSectionExtractor:
             text = filter_with_cached_patterns(text, html_content)
 
         return text.strip()
+
+    def _find_actual_item_content(self, html_content: str, item_num: str,
+                                    boundary: SectionBoundary, clean: bool) -> Optional[str]:
+        """
+        Find actual Item content when TOC anchor points to wrong location.
+
+        Some filings have TOC anchors that point to "PART I" header instead of
+        the actual "ITEM 1. BUSINESS" content. This method searches for the
+        actual Item header in the HTML and extracts content from there.
+
+        Args:
+            html_content: Full HTML content
+            item_num: Item number (e.g., "1", "1A", "7")
+            boundary: Original section boundary
+            clean: Whether to clean the text
+
+        Returns:
+            Extracted section text, or None if not found
+        """
+        from lxml import html as lxml_html
+
+        # Handle XML declaration
+        if html_content.startswith('<?xml'):
+            html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+
+        # Build pattern to find actual ITEM header
+        # Match "ITEM 1." or "ITEM 1A." with various spacing/entities
+        # Examples: "ITEM 1. BUSINESS", "ITEM 1.&#160;&#160;BUSINESS", "ITEM&#160;1. BUSINESS"
+        item_pattern = rf'ITEM[\s&#;0-9xnbsp]+{re.escape(item_num)}\.?[\s&#;0-9xnbsp]*'
+
+        # Common titles for different items
+        item_titles = {
+            '1': r'BUSINESS',
+            '1A': r'RISK\s*FACTORS?',
+            '1B': r'UNRESOLVED\s*STAFF\s*COMMENTS?',
+            '1C': r'CYBERSECURITY',
+            '2': r'PROPERTIES',
+            '3': r'LEGAL\s*PROCEEDINGS?',
+            '4': r'MINE\s*SAFETY',
+            '5': r'MARKET\s*FOR',
+            '6': r'(SELECTED|RESERVED)',
+            '7': r'MANAGEMENT',
+            '7A': r'QUANTITATIVE',
+            '8': r'FINANCIAL\s*STATEMENTS?',
+            '9': r'CHANGES?\s*IN',
+            '9A': r'CONTROLS?',
+            '9B': r'OTHER\s*INFORMATION',
+            '9C': r'DISCLOSURE',
+        }
+
+        title_pattern = item_titles.get(item_num, r'\w+')
+        full_pattern = rf'{item_pattern}{title_pattern}'
+
+        # Search for the pattern in HTML
+        match = re.search(full_pattern, html_content, re.IGNORECASE)
+        if not match:
+            return None
+
+        start_pos = match.start()
+
+        # Find the end of this section (next ITEM header)
+        # Start searching after current match
+        search_start = start_pos + len(match.group())
+
+        # Find next ITEM or PART header
+        next_item_pattern = rf'ITEM[\s&#;0-9xnbsp]*\d+[A-Z]?\.?\s*[A-Z]'
+        next_match = re.search(next_item_pattern, html_content[search_start:], re.IGNORECASE)
+
+        if next_match:
+            end_pos = search_start + next_match.start()
+        else:
+            # No next item found - use end boundary anchor if available
+            if boundary.end_element_id:
+                end_anchor_pos = html_content.find(f'id="{boundary.end_element_id}"')
+                if end_anchor_pos > start_pos:
+                    end_pos = end_anchor_pos
+                else:
+                    end_pos = len(html_content)
+            else:
+                end_pos = len(html_content)
+
+        # Extract HTML content
+        section_html = html_content[start_pos:end_pos]
+
+        # Parse and extract text
+        try:
+            wrapped = f'<div>{section_html}</div>'
+            tree = lxml_html.fromstring(wrapped)
+            text = tree.text_content()
+
+            if clean:
+                text = self._clean_section_text(text)
+
+            return text.strip()
+        except Exception:
+            return None
 
     def _extract_section_fallback(self, section_name: str, clean: bool) -> Optional[str]:
         """

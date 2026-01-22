@@ -13,7 +13,7 @@ from rich.text import Text
 
 from edgar._party import Address, get_addresses_as_columns
 from edgar.config import SEC_BASE_URL
-from edgar.formatting import display_size
+from edgar.display.formatting import display_size
 from edgar.httprequests import download_file
 from edgar.reference import describe_form
 from edgar.richtools import repr_rich

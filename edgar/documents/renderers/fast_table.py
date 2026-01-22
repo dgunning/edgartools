@@ -83,7 +83,7 @@ class TableStyle:
             corner_char="",            # No corners
             padding=2,                 # Generous spacing (was 1 in pipe_table)
             min_col_width=6,          # Slightly relaxed (was 8)
-            max_col_width=200         # High limit to avoid truncating SEC filing text (fixes #248)
+            max_col_width=500         # High limit for AI/LLM processing (raised from 200)
         )
 
 

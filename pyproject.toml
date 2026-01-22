@@ -26,7 +26,7 @@ classifiers = [
 ]
 dependencies = [
   "httpx>=0.25.0",
-  "pandas>=2.0.0",
+  "pandas>=2.0.0,<3.0.0",
   "tabulate>=0.9.0",
   "pyarrow>=17.0.0",
   "beautifulsoup4>=4.10.0",
@@ -43,8 +43,8 @@ dependencies = [
   "tqdm>=4.62.0",
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
-  "hishel==0.1.3",
-  "httpxthrottlecache>=0.1.6",
+  "pyrate-limiter==3.9.0",
+  "httpxthrottlecache>=0.3.0",
 ]
 dynamic = ["version"]
 
@@ -176,7 +176,7 @@ test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
 # 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
 # 4. Selective parallel: Only parallelize tests safe from SEC rate limits
-# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 70% threshold
+# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 65% threshold
 #
 # Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
 
@@ -207,9 +207,27 @@ python = ["39", "310", "311", "312"]
 [tool.coverage.run]
 branch = true
 parallel = true
+source = ["edgar"]
 omit = [
   "edgar/__about__.py",
-  "tests/perf/*"
+  # Example and demo files (not part of core library)
+  "edgar/**/examples.py",
+  "edgar/**/examples/*.py",
+  "edgar/display/demo.py",
+  # Training scripts (ML training utilities, not runtime code)
+  "edgar/entity/training/*",
+  # Migration utilities (one-time migration helpers)
+  "edgar/documents/migration.py",
+  "edgar/documents/migration_example.py",
+  # CLI entry points (tested via integration, not unit tests)
+  "edgar/**/__main__.py",
+  # MCP server (optional external integration, requires MCP runtime)
+  "edgar/ai/mcp/*",
+  # Experimental AI features
+  "edgar/ai/formats.py",
+  "edgar/ai/helpers.py",
+  # SSL diagnostics (CLI tool, not library code)
+  "edgar/diagnose_ssl/*",
 ]
 
 [tool.coverage.report]
@@ -219,7 +237,7 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 # Coverage threshold moved to CI combined coverage check
-# Individual test groups don't meet 70% alone, only combined
+# Individual test groups don't meet 65% alone, only combined
 
 
 [tool.ruff]

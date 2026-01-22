@@ -485,14 +485,14 @@ class DocumentNode:
         """Helper method for accessing text content"""
         if not is_text_content(self.content):
             raise ValueError(f"Cannot get text from {self.type} node")
-        return self.content
+        return self.content  # type: ignore[return-value]
 
     @property
     def rows(self) -> List[TableRow]:
         """Helper method for accessing table rows"""
         if not is_table_content(self.content):
             raise ValueError(f"Cannot get rows from {self.type} node")
-        return self.content
+        return self.content  # type: ignore[return-value]
 
 
 
@@ -1660,7 +1660,7 @@ class SECHTMLParser:
 
             # For alignment, if they differ, don't merge
             if style1.text_align != style2.text_align:
-                return None
+                return None  # type: ignore[return-value]
             merged.text_align = style1.text_align
 
             # Improved width handling

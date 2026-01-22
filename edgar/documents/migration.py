@@ -40,10 +40,10 @@ class LegacyHTMLDocument:
         self._deprecation_warning("text", "Document.text()")
         return self._doc.text()
 
-    def get_text(self, clean: bool = True) -> str:
+    def get_text(self, clean: bool = True, table_max_col_width: Optional[int] = None) -> str:
         """Get text with options (old API)."""
         self._deprecation_warning("get_text()", "Document.text()")
-        return self._doc.text()
+        return self._doc.text(clean=clean, table_max_col_width=table_max_col_width)
 
     @property
     def tables(self) -> List[Any]:

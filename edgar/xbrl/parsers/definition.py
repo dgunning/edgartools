@@ -203,19 +203,20 @@ class DefinitionParser(BaseParser):
                     self.domains[domain_id].members = members
 
         # Process 'all' relationships to identify line items and build hypercubes (tables)
+        # The 'all' arc connects: LineItems (from) -> Hypercube (to)
         if ALL in grouped_rels:
             tables_by_role = []
             for rel in grouped_rels[ALL]:
-                line_items_id = rel['to_element']
-                table_id = rel['from_element']
+                line_items_id = rel['from_element']  # Line items element
+                hypercube_id = rel['to_element']     # Hypercube/table element
 
-                # Only process if this table has axes defined
-                if table_id in hypercube_axes:
+                # Only process if this hypercube has axes defined
+                if hypercube_id in hypercube_axes:
                     table = Table(
-                        element_id=table_id,
-                        label=self._get_element_label(table_id),
+                        element_id=hypercube_id,
+                        label=self._get_element_label(hypercube_id),
                         role_uri=role,
-                        axes=hypercube_axes[table_id],
+                        axes=hypercube_axes[hypercube_id],
                         line_items=[line_items_id],
                         closed=False  # Default
                     )

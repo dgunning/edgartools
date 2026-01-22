@@ -262,7 +262,7 @@ class StitchedFactQuery(FactQuery):
         self._filters = []
         self._transformations = []
         self._aggregations = []
-        self._include_dimensions = True
+        self._include_dimensions = False
         self._include_contexts = True
         self._include_element_info = True
         self._sort_by = None

@@ -54,8 +54,11 @@ PALETTE = {
     "metadata": "dim",
     "hint": "dim italic",
     "date": "dim",
-    "source": "dim italic",  # For "Source: EntityFacts" etc.
+    "source": "dim italic",  # For "Source:" prefix
+    "source_entity_facts": "cyan",  # EntityFacts API source
+    "source_xbrl": "gold1",  # XBRL filing source
     "units": "dim",  # For "Amounts in millions USD"
+    "period_range": "bold",  # For "Q3 2022 to Q3 2025" - high visibility
 
     # =========================================================================
     # BORDERS AND SEPARATORS
@@ -71,6 +74,8 @@ PALETTE = {
     "neutral": "dim",
     "warning": "yellow",
     "info": "cyan",
+    "foreign": "magenta",  # Foreign company indicator
+    "canadian": "red",  # Canadian company indicator
 
     # =========================================================================
     # FINANCIAL STATEMENTS - Row Types
@@ -117,6 +122,27 @@ PALETTE = {
     # =========================================================================
     "link": "blue underline",
     "reference": "cyan",
+
+    # =========================================================================
+    # BADGES - Background fills for visual emphasis
+    # =========================================================================
+    # Form type badges
+    "badge_10k": "bold white on dodger_blue1",
+    "badge_10q": "bold white on green",
+    "badge_8k": "bold white on dark_orange",
+    "badge_proxy": "bold white on magenta",
+    "badge_default": "bold white on grey50",
+
+    # Source badges - distinguish data origin
+    "badge_source_xbrl": "bold white on gold3",
+    "badge_source_entity_facts": "bold white on cyan",
+    "badge_ticker": "bold black on green",
+
+    # Status badges
+    "badge_error": "bold white on red",
+    "badge_warning": "bold black on yellow",
+    "badge_success": "bold white on green",
+    "badge_info": "bold white on blue",
 }
 
 
@@ -225,6 +251,7 @@ def get_statement_styles() -> dict:
             "top_level": PALETTE["stmt_abstract_top"],
             "section": PALETTE["stmt_abstract_section"],
             "subsection": PALETTE["subsection"],
+            "ticker_badge": PALETTE["badge_ticker"],
         },
         # Row styles
         "row": {
@@ -251,9 +278,12 @@ def get_statement_styles() -> dict:
         # Metadata styles
         "metadata": {
             "source": PALETTE["source"],
+            "source_entity_facts": PALETTE["source_entity_facts"],
+            "source_xbrl": PALETTE["source_xbrl"],
             "units": PALETTE["units"],
             "date": PALETTE["date"],
             "hint": PALETTE["hint"],
+            "period_range": PALETTE["period_range"],
         },
         # Comparison indicators
         "comparison": {

@@ -14,7 +14,7 @@ and handling dimensional qualifiers.
 import datetime
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
@@ -128,6 +128,9 @@ class XBRL:
         self._validated_period_of_report_cache: Optional[str] = None
         self._period_of_report_warning_logged: bool = False
 
+        # Standardization cache for this XBRL instance (lazy-initialized)
+        self._standardization_cache = None
+
     def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
         """
         Determine if a statement should display dimensioned line items.
@@ -200,6 +203,36 @@ class XBRL:
     def footnotes(self):
         """Access to XBRL footnotes."""
         return self.parser.footnotes
+
+    @property
+    def standardization(self):
+        """
+        Access the standardization cache for this XBRL instance.
+
+        The cache provides efficient label standardization by:
+        - Caching concept-to-label mappings
+        - Caching standardized statement data
+        - Using the module-level singleton mapper
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> # Get standardized label for a concept
+            >>> label = xbrl.standardization.get_standard_label(
+            ...     'us-gaap_Revenue', 'Revenues',
+            ...     {'statement_type': 'IncomeStatement'}
+            ... )
+            >>> # Standardize statement data with caching
+            >>> data = xbrl.standardization.standardize_statement_data(
+            ...     raw_data, 'IncomeStatement'
+            ... )
+
+        Returns:
+            StandardizationCache instance for this XBRL
+        """
+        if self._standardization_cache is None:
+            from edgar.xbrl.standardization import StandardizationCache
+            self._standardization_cache = StandardizationCache(self)
+        return self._standardization_cache
 
     @property
     def _facts(self):
@@ -538,15 +571,15 @@ class XBRL:
         return self._current_period_view
 
     def query(self,
-              include_dimensions: bool = True,
+              include_dimensions: bool = False,
               include_contexts: bool = False,
               include_element_info: bool = False) -> 'FactQuery':
         """
         Start a new query for XBRL facts.
         """
         fact_query = self.facts.query()
-        if not include_dimensions:
-            fact_query = fact_query.exclude_dimensions()
+        # Explicitly set the include_dimensions flag based on the parameter
+        fact_query._include_dimensions = include_dimensions
         if not include_contexts:
             fact_query = fact_query.exclude_contexts()
         if not include_element_info:
@@ -654,13 +687,13 @@ class XBRL:
         self._all_statements_cached = statements
         return statements
 
-    def get_statement_by_type(self, statement_type: str, include_dimensions: bool = True) -> Optional[Dict[str, Any]]:
+    def get_statement_by_type(self, statement_type: str, include_dimensions: bool = False) -> Optional[Dict[str, Any]]:
         """
         Get the first statement matching the given type.
 
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', 'Notes', etc.)
-            include_dimensions: Whether to include dimensional segment data (default: True)
+            include_dimensions: Whether to include dimensional segment data (default: False)
 
         Returns:
             Statement data if found, None otherwise
@@ -737,9 +770,51 @@ class XBRL:
         from edgar.xbrl.stitching import render_stitched_statement as _render_stitched_statement
         return _render_stitched_statement(stitched_data, statement_title, statement_type, self.entity_info)
 
+    def _get_valid_dimensional_members(self, tree) -> Dict[str, Set[str]]:
+        """
+        Extract valid dimensional members from a presentation tree.
+
+        The presentation linkbase defines which dimensional members should appear
+        on a statement. This function builds a mapping from axis to valid members
+        by examining the Domain nodes in the tree.
+
+        Pattern in presentation tree:
+        - Axis nodes (e.g., PropertyPlantAndEquipmentByTypeAxis) have Domain children
+        - Domain nodes (e.g., PropertyPlantAndEquipmentTypeDomain) have Member children
+        - The valid members are the children of the Domain nodes
+
+        Args:
+            tree: PresentationTree for the statement
+
+        Returns:
+            Dict mapping axis names (normalized) to sets of valid member names (normalized)
+        """
+        valid_members = {}
+
+        for node_id, node in tree.all_nodes.items():
+            # Find Domain nodes - they contain valid members as children
+            if 'Domain' in node_id and node.children:
+                # Find the parent Axis node
+                # Domain nodes are children of Axis nodes
+                parent_node = tree.all_nodes.get(node.parent)
+                if parent_node and 'Axis' in node.parent:
+                    # Normalize axis name (remove prefix, use underscore)
+                    axis_name = node.parent.replace(':', '_')
+
+                    # Collect all member children (normalized)
+                    members = set()
+                    for child in node.children:
+                        # Normalize member name
+                        members.add(child.replace(':', '_'))
+
+                    valid_members[axis_name] = members
+
+        return valid_members
+
     def get_statement(self, role_or_type: str,
                       period_filter: Optional[str] = None,
-                      should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
+                      should_display_dimensions: Optional[bool] = None,
+                      view: Optional['StatementView'] = None) -> List[Dict[str, Any]]:
         """
         Get a financial statement by role URI, statement type, or statement short name.
 
@@ -747,14 +822,19 @@ class XBRL:
             role_or_type: Can be one of:
                 - Extended link role URI (e.g. "http://apple.com/role/ConsolidatedStatementOfIncome")
                 - Statement type name (e.g. "BalanceSheet")
-                - Statement short name (e.g. "ConsolidatedStatementOfIncome") 
+                - Statement short name (e.g. "ConsolidatedStatementOfIncome")
             period_filter: Optional period key to filter facts
             should_display_dimensions: Whether to display dimensions for this statement.
                 If None, the method will determine based on statement type and role.
+            view: StatementView controlling dimensional filtering:
+                  STANDARD: Strict member filtering per presentation linkbase
+                  DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
+                  SUMMARY: No dimensional facts shown
 
         Returns:
             List of line items with values
         """
+        from edgar.xbrl.presentation import StatementView
         # Use the centralized statement finder to get statement information
         matching_statements, found_role, actual_statement_type = self.find_statement(role_or_type)
 
@@ -772,20 +852,33 @@ class XBRL:
         if should_display_dimensions is None:
             should_display_dimensions = True
 
+        # Get valid dimensional members from presentation tree
+        # This ensures we only show members that are actually defined in the linkbase
+        valid_dimensional_members = self._get_valid_dimensional_members(tree) if should_display_dimensions else {}
+
         # Generate line items recursively
         line_items = []
-        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None, should_display_dimensions)
+        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
+                                  should_display_dimensions, valid_dimensional_members, view)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
             from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
             line_items = RevenueDeduplicator.deduplicate_statement_items(line_items)
 
+        # Issue #575: Reorder items so components appear before their totals
+        # This fixes cases where the presentation linkbase has incorrect ordering
+        # (e.g., IESC filing puts Cash at the end instead of with Current Assets)
+        if actual_statement_type == 'BalanceSheet':
+            line_items = self._reorder_by_calculation_parent(line_items)
+
         return line_items
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
-                             path: Optional[List[str]] = None, should_display_dimensions: bool = False) -> None:
+                             path: Optional[List[str]] = None, should_display_dimensions: bool = False,
+                             valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
+                             view: Optional['StatementView'] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -796,7 +889,14 @@ class XBRL:
             period_filter: Optional period key to filter facts
             path: Current path in hierarchy
             should_display_dimensions: Whether to display dimensions for this statement
+            valid_dimensional_members: Dict mapping axis names to sets of valid member names
+                from the presentation linkbase. Only facts with members in this set will be shown.
+            view: StatementView controlling dimensional filtering:
+                  STANDARD: Strict member filtering per presentation linkbase
+                  DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
+                  SUMMARY: No dimensional facts shown
         """
+        from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
             return
 
@@ -886,61 +986,102 @@ class XBRL:
         for period_key, period_facts in facts_by_period.items():
             if should_display_dimensions:
                 # For statements that should display dimensions, group facts by dimension
+                # Issue #564: Collect non-dimensioned facts separately to select most precise
+                non_dimensioned_facts_for_period = []
+
                 for context_id, wrapped_fact in period_facts:
                     fact = wrapped_fact['fact']
                     dimension_info = wrapped_fact['dimension_info']
                     dimension_key = wrapped_fact['dimension_key']
 
                     if dimension_info:
+                        # Check if this dimensional fact has valid members per the presentation linkbase
+                        # This filters out facts from other disclosures that happen to use the same concept
+                        # but with different dimensional members (e.g., revenue members on balance sheet)
+                        is_valid_dimension = True
+
+                        # DETAILED view bypasses strict member filtering (GH-574 fix)
+                        # This restores iPhone/iPad/Mac data for companies like AAPL
+                        if view == StatementView.DETAILED:
+                            # Show all dimensional facts regardless of presentation linkbase
+                            is_valid_dimension = True
+                        elif valid_dimensional_members:
+                            # STANDARD view: strict filtering per presentation linkbase
+                            for dim_data in dimension_info:
+                                # Get the axis and member from the dimension info
+                                axis = dim_data.get('dimension', '').replace(':', '_')
+                                member = dim_data.get('member', '').replace(':', '_')
+
+                                # If this axis is defined in the presentation tree,
+                                # check if the member is valid
+                                if axis in valid_dimensional_members:
+                                    if member not in valid_dimensional_members[axis]:
+                                        # Member not in presentation tree - skip this fact
+                                        is_valid_dimension = False
+                                        break
+
+                        if not is_valid_dimension:
+                            # Skip this dimensional fact - member not in presentation linkbase
+                            continue
+
                         # Use the dimension_key we already generated
                         dim_key_str = dimension_key
 
                         # Store dimensioned fact with the full dimension metadata
                         dimensioned_facts[dim_key_str].append((period_key, fact, dimension_info))
                     else:
-                        # This is a non-dimensioned fact for this concept, use in the main item
-                        if not values.get(period_key):
-                            values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+                        # Collect non-dimensioned facts to select most precise later
+                        non_dimensioned_facts_for_period.append((context_id, wrapped_fact))
 
-                            # Store the decimals info for proper scaling
-                            if fact.decimals is not None:
-                                try:
-                                    if fact.decimals == 'INF':
-                                        decimals[period_key] = 0  # Infinite precision, no scaling
-                                    else:
-                                        decimals[period_key] = int(fact.decimals)
-                                except (ValueError, TypeError):
-                                    decimals[period_key] = 0  # Default
+                # Issue #564: Select the most precise non-dimensioned fact for this period
+                # (Multiple contexts may map to same period; select highest precision)
+                if non_dimensioned_facts_for_period and not values.get(period_key):
+                    if len(non_dimensioned_facts_for_period) == 1:
+                        context_id, wrapped_fact = non_dimensioned_facts_for_period[0]
+                        fact = wrapped_fact['fact']
+                    else:
+                        # Multiple non-dimensioned contexts for same period - select by precision
+                        best = max(non_dimensioned_facts_for_period,
+                                   key=lambda x: self._get_fact_precision(x[1]['fact']))
+                        context_id, wrapped_fact = best
+                        fact = wrapped_fact['fact']
 
-                            # Store unit_ref for this period
-                            units[period_key] = fact.unit_ref
+                    # Store the selected fact's value
+                    values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                            # Store period_type from context
-                            if context_id in self.contexts:
-                                context = self.contexts[context_id]
-                                if hasattr(context, 'period') and context.period:
-                                    pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
-                                    period_types[period_key] = pt
+                    # Store the decimals info for proper scaling
+                    if fact.decimals is not None:
+                        try:
+                            if fact.decimals == 'INF':
+                                decimals[period_key] = 0  # Infinite precision, no scaling
+                            else:
+                                decimals[period_key] = int(fact.decimals)
+                        except (ValueError, TypeError):
+                            decimals[period_key] = 0  # Default
+
+                    # Store unit_ref for this period
+                    units[period_key] = fact.unit_ref
+
+                    # Store period_type from context
+                    if context_id in self.contexts:
+                        context = self.contexts[context_id]
+                        if hasattr(context, 'period') and context.period:
+                            pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                            period_types[period_key] = pt
 
             else:
                 # For standard financial statements, prefer non-dimensioned facts
-                # If only one fact, use it
+                # Issue #564: Select by (1) fewest dimensions, (2) highest precision
                 if len(period_facts) == 1:
                     context_id, wrapped_fact = period_facts[0]
                     fact = wrapped_fact['fact']
                 else:
-                    # Multiple facts for same period - prioritize based on dimensions
-                    # Sort facts by preference: no dimensions first, then by dimension count (fewer dimensions preferred)
-                    sorted_facts = []
-                    for ctx_id, wrapped_fact in period_facts:
-                        dimension_count = len(wrapped_fact['dimension_info'])
-                        sorted_facts.append((dimension_count, ctx_id, wrapped_fact))
-
-                    # Sort by dimension count (no dimensions or fewer dimensions first)
-                    sorted_facts.sort()
-
-                    # Use the first fact (with fewest dimensions)
-                    _, context_id, wrapped_fact = sorted_facts[0]
+                    # Multiple contexts for same period - select best by dimensions and precision
+                    # min() with tuple key: (dimension_count ASC, -precision DESC)
+                    best = min(period_facts,
+                               key=lambda x: (len(x[1]['dimension_info']),
+                                              -self._get_fact_precision(x[1]['fact'])))
+                    context_id, wrapped_fact = best
                     fact = wrapped_fact['fact']
 
                 # Store the value
@@ -996,7 +1137,8 @@ class XBRL:
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
                 'children': node.children,
                 'has_values': len(values) > 0,  # True if we have total values
-                'has_dimension_children': True  # Mark as having dimension children
+                'has_dimension_children': True,  # Mark as having dimension children
+                'is_company_preferred_label': node.is_company_preferred_label  # Skip standardization if company-preferred
             }
         else:
             # Non-dimensional case: Create normal line item with values
@@ -1018,7 +1160,8 @@ class XBRL:
                 'preferred_label': node.preferred_label,
                 'is_abstract': node.is_abstract,
                 'children': node.children,
-                'has_values': len(values) > 0  # Flag to indicate if we found values
+                'has_values': len(values) > 0,  # Flag to indicate if we found values
+                'is_company_preferred_label': node.is_company_preferred_label  # Skip standardization if company-preferred
             }
 
         # Add to result
@@ -1129,7 +1272,123 @@ class XBRL:
 
         # Process children
         for child_id in node.children:
-            self._generate_line_items(child_id, nodes, result, period_filter, current_path, should_display_dimensions)
+            self._generate_line_items(child_id, nodes, result, period_filter, current_path,
+                                      should_display_dimensions, valid_dimensional_members, view)
+
+    @staticmethod
+    def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Reorder line items so that components appear before their totals.
+
+        Issue #575: Some filings (e.g., IESC) have presentation linkbase orders that
+        put components after their totals (e.g., Cash at the end instead of with
+        Current Assets). This method uses the calculation_parent relationship to
+        move misplaced items to appear just before their calculation parent.
+
+        Args:
+            line_items: List of line items from the presentation tree
+
+        Returns:
+            Reordered list with components before their totals
+        """
+        if not line_items:
+            return line_items
+
+        # Build a concept -> index map
+        concept_to_index = {item['concept']: i for i, item in enumerate(line_items)}
+
+        # Find items that need to be moved (appear after their calculation parent)
+        items_to_move = []
+        for i, item in enumerate(line_items):
+            calc_parent = item.get('calculation_parent')
+            if calc_parent and calc_parent in concept_to_index:
+                parent_index = concept_to_index[calc_parent]
+                if i > parent_index:
+                    # This item appears after its parent - needs to be moved
+                    items_to_move.append((i, item, calc_parent))
+
+        if not items_to_move:
+            return line_items
+
+        # Remove items that need to be moved (in reverse order to preserve indices)
+        result = list(line_items)
+        for i, item, _ in sorted(items_to_move, key=lambda x: x[0], reverse=True):
+            result.pop(i)
+
+        # Re-insert items before their calculation parent
+        # Process in order of where they should be inserted
+        for _, item, calc_parent in sorted(items_to_move, key=lambda x: concept_to_index.get(x[2], 0)):
+            # Find current index of the calculation parent in the result
+            parent_index = None
+            for j, r_item in enumerate(result):
+                if r_item['concept'] == calc_parent:
+                    parent_index = j
+                    break
+
+            if parent_index is not None:
+                # Insert before the parent
+                result.insert(parent_index, item)
+            else:
+                # Parent not found (shouldn't happen), append at end
+                result.append(item)
+
+        return result
+
+    @staticmethod
+    def _get_fact_precision(fact) -> int:
+        """
+        Get a numeric precision value for a fact based on its decimals attribute.
+
+        Higher return value = more precise:
+        - INF (infinite precision) returns 1_000_000
+        - Numeric decimals return their value (e.g., -6 for millions, 2 for hundredths)
+        - None or invalid returns 0 (default/unknown precision)
+
+        Args:
+            fact: An XBRL Fact object with a decimals attribute
+
+        Returns:
+            Integer precision value for comparison (higher = more precise)
+        """
+        if fact.decimals == 'INF':
+            return 1_000_000  # Infinite precision = highest
+        elif fact.decimals is not None:
+            try:
+                return int(fact.decimals)
+            except (ValueError, TypeError):
+                return 0
+        return 0  # Default/unknown precision
+
+    @staticmethod
+    def _select_most_precise_fact(facts: list):
+        """
+        Select the most precise fact from a list of facts.
+
+        When multiple facts exist for the same concept/context with different
+        precision (decimals attribute), this selects the one with highest precision.
+        This is critical for maintaining data accuracy (Issue #564).
+
+        Args:
+            facts: List of Fact objects to choose from
+
+        Returns:
+            The fact with highest precision, or None if list is empty
+        """
+        if not facts:
+            return None
+        if len(facts) == 1:
+            return facts[0]
+
+        best_fact = None
+        best_precision = None
+
+        for fact in facts:
+            precision = XBRL._get_fact_precision(fact)
+            if best_precision is None or precision > best_precision:
+                best_precision = precision
+                best_fact = fact
+
+        return best_fact
 
     def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None,
                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
@@ -1149,8 +1408,9 @@ class XBRL:
 
         # Check each context
         for context_id in self.contexts:
-            # Use parser's get_fact method which handles normalization internally
-            fact = self.parser.get_fact(element_name, context_id)
+            # Issue #564: Get ALL facts for this element/context and select the most precise
+            facts_list = self.parser.get_facts_by_key(element_name, context_id)
+            fact = self._select_most_precise_fact(facts_list)
 
             if fact:
                 # If period filter is specified, check if context matches period
@@ -1220,9 +1480,11 @@ class XBRL:
                         if dim_value in self.element_catalog:
                             mem_element = self.element_catalog[dim_value]
                             # Try different label roles in order of preference
-                            for role in ['http://www.xbrl.org/2003/role/terseLabel',
-                                         'http://www.xbrl.org/2003/role/label',
-                                         'http://www.xbrl.org/2003/role/verboseLabel']:
+                            # Prefer verboseLabel which provides full accounting terms
+                            # (e.g., "Rental equipment, net" vs "Sales of rental equipment")
+                            for role in ['http://www.xbrl.org/2003/role/verboseLabel',
+                                         'http://www.xbrl.org/2003/role/terseLabel',
+                                         'http://www.xbrl.org/2003/role/label']:
                                 if role in mem_element.labels:
                                     mem_label = mem_element.labels[role]
                                     break
@@ -1392,7 +1654,8 @@ class XBRL:
                          standard: bool = True,
                          show_date_range: bool = False,
                          parenthetical: bool = False,
-                         include_dimensions: bool = True) -> Optional[RenderedStatement]:
+                         include_dimensions: bool = False,
+                         view: Optional['StatementView'] = None) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         Args:
@@ -1403,10 +1666,13 @@ class XBRL:
             standard: Whether to use standardized concept labels (default: True)
             show_date_range: Whether to show full date ranges for duration periods (default: False)
             parenthetical: Whether to look for a parenthetical statement (default: False)
-            include_dimensions: Whether to include dimensional segment data (default: True)
+            include_dimensions: Whether to include dimensional segment data (default: False)
+            view: StatementView controlling dimensional filtering (STANDARD, DETAILED, SUMMARY)
         Returns:
             RichTable: A formatted table representation of the statement
         """
+        from edgar.xbrl.presentation import StatementView
+
         # Find the statement using the unified statement finder with parenthetical support
         matching_statements, found_role, actual_statement_type = self.find_statement(statement_type, parenthetical)
 
@@ -1415,14 +1681,13 @@ class XBRL:
         if matching_statements:
             role_definition = matching_statements[0]['definition']
 
-        # Determine if this statement should display dimensions
-        # Issue #504: Honor the user's explicit include_dimensions parameter
-        # Previously, even when include_dimensions=True, dimensional data was filtered out for balance sheets
-        # because _is_dimension_display_statement() returned False for core statements without segment keywords
-        should_display_dimensions = include_dimensions
+        # Issue #569: Always get full dimensional data from get_statement
+        # Then filter breakdown dimensions (geographic, segment) in render_statement
+        # This ensures face-level classification dimensions (PPE type, equity) are shown
+        should_display_dimensions = True
 
-        # Get the statement data with dimension display flag
-        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)
+        # Get the statement data with all dimensional data, passing view for filtering
+        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions, view=view)
         if not statement_data:
             return None
 
@@ -1447,6 +1712,9 @@ class XBRL:
         )
 
         # Render the statement
+        # Issue #569: Pass include_dimensions to filter breakdown dimensions in render
+        # Issue #577/cf9o: Pass role_uri for definition linkbase-based filtering
+        # StatementView: Pass view for STANDARD/DETAILED/SUMMARY filtering
         return render_statement(
             statement_data,
             periods_to_display,
@@ -1456,7 +1724,10 @@ class XBRL:
             standard,
             show_date_range,
             show_comparisons=True,
-            xbrl_instance=self
+            xbrl_instance=self,
+            include_dimensions=include_dimensions,
+            role_uri=found_role,
+            view=view
         )
 
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
@@ -1590,14 +1861,11 @@ class XBRL:
                                 stmt_type = stmt['type']
                                 break
 
-                    # Add statement type to each item
-                    for item in statement_data:
-                        item['statement_type'] = stmt_type
-
-                    # Apply standardization
-                    from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
-                    mapper = ConceptMapper(initialize_default_mappings(read_only=True))
-                    statement_data = standardize_statement(statement_data, mapper)
+                    # Apply standardization using XBRL instance's cache (disable statement caching
+                    # for consistency with other call sites where input data varies)
+                    statement_data = self.standardization.standardize_statement_data(
+                        statement_data, stmt_type, use_cache=False
+                    )
 
                 # Create rows for the DataFrame
                 rows = []
@@ -1709,6 +1977,125 @@ class XBRL:
         # Cache the result (including None values to avoid repeated lookups)
         self._currency_cache[cache_key] = currency_measure
         return currency_measure
+
+    # =========================================================================
+    # DEFINITION LINKBASE - DIMENSION VALIDATION
+    # =========================================================================
+
+    def get_valid_dimensions_for_role(self, role_uri: str) -> set:
+        """
+        Get axes (dimensions) that are valid for a statement role per definition linkbase.
+
+        The definition linkbase declares which dimensions are valid for each statement
+        via hypercube (table) definitions. This is the authoritative source for determining
+        whether a dimensional fact is a "face value" or a "breakdown".
+
+        Args:
+            role_uri: The statement role URI (e.g., "http://company.com/role/IncomeStatement")
+
+        Returns:
+            Set of axis element IDs that are valid for this role.
+            Returns empty set if no hypercube definitions exist for this role.
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> axes = xbrl.get_valid_dimensions_for_role(
+            ...     "http://www.boeing.com/role/ConsolidatedStatementsofOperations"
+            ... )
+            >>> print(axes)
+            {'srt_ProductOrServiceAxis'}
+        """
+        if not hasattr(self, '_valid_dimensions_cache'):
+            self._valid_dimensions_cache = {}
+
+        if role_uri in self._valid_dimensions_cache:
+            return self._valid_dimensions_cache[role_uri]
+
+        valid_axes = set()
+
+        # Get tables defined for this role
+        if role_uri in self.tables:
+            for table in self.tables[role_uri]:
+                valid_axes.update(table.axes)
+
+        self._valid_dimensions_cache[role_uri] = valid_axes
+        return valid_axes
+
+    def _normalize_axis_id(self, axis_id: str) -> str:
+        """
+        Normalize axis ID to consistent format for comparison.
+
+        Handles both formats:
+        - Underscore format: srt_ProductOrServiceAxis (from definition linkbase)
+        - Colon format: srt:ProductOrServiceAxis (from dimension metadata)
+
+        Returns the base axis name for comparison.
+        """
+        # Extract just the axis name (after prefix)
+        if ':' in axis_id:
+            return axis_id.split(':', 1)[1]
+        if '_' in axis_id:
+            # Handle cases like 'srt_ProductOrServiceAxis' -> 'ProductOrServiceAxis'
+            # But also handle 'us-gaap_StatementTable' correctly
+            parts = axis_id.split('_', 1)
+            if len(parts) == 2:
+                return parts[1]
+        return axis_id
+
+    def is_dimension_valid_for_role(self, dimension: str, role_uri: str) -> bool:
+        """
+        Check if a dimension (axis) is declared valid for a statement role.
+
+        This checks the definition linkbase hypercube declarations to determine
+        if a dimension should be treated as a "face value" dimension for this
+        statement (as opposed to a breakdown/detail dimension).
+
+        Args:
+            dimension: The dimension/axis name (e.g., "srt:ProductOrServiceAxis")
+            role_uri: The statement role URI
+
+        Returns:
+            True if the dimension is declared valid for this role's hypercubes.
+            False if not declared (meaning it's likely a breakdown dimension).
+
+        Example:
+            >>> xbrl.is_dimension_valid_for_role(
+            ...     "srt:ProductOrServiceAxis",
+            ...     "http://www.boeing.com/role/ConsolidatedStatementsofOperations"
+            ... )
+            True
+        """
+        valid_axes = self.get_valid_dimensions_for_role(role_uri)
+
+        if not valid_axes:
+            # No definition linkbase data for this role
+            return False
+
+        # Normalize the input dimension for comparison
+        dim_normalized = self._normalize_axis_id(dimension)
+
+        # Check if any valid axis matches
+        for axis in valid_axes:
+            axis_normalized = self._normalize_axis_id(axis)
+            if dim_normalized == axis_normalized:
+                return True
+
+        return False
+
+    def has_definition_linkbase_for_role(self, role_uri: str) -> bool:
+        """
+        Check if definition linkbase data exists for a statement role.
+
+        This is useful for determining whether to use definition linkbase-based
+        dimension filtering or fall back to heuristic-based filtering.
+
+        Args:
+            role_uri: The statement role URI
+
+        Returns:
+            True if hypercube/table definitions exist for this role.
+        """
+        return role_uri in self.tables and len(self.tables[role_uri]) > 0
 
     def __rich__(self):
         """Rich representation for pretty printing in console."""

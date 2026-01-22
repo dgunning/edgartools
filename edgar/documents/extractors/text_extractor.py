@@ -28,7 +28,8 @@ class TextExtractor:
                  include_metadata: bool = False,
                  include_links: bool = False,
                  max_length: Optional[int] = None,
-                 preserve_structure: bool = False):
+                 preserve_structure: bool = False,
+                 table_max_col_width: Optional[int] = None):
         """
         Initialize text extractor.
         
@@ -39,6 +40,8 @@ class TextExtractor:
             include_links: Include link URLs
             max_length: Maximum text length
             preserve_structure: Preserve document structure with markers
+            table_max_col_width: Maximum column width for table rendering (default: 200).
+                                Set higher to avoid truncating long labels, or None for unlimited.
         """
         self.clean = clean
         self.include_tables = include_tables
@@ -46,6 +49,7 @@ class TextExtractor:
         self.include_links = include_links
         self.max_length = max_length
         self.preserve_structure = preserve_structure
+        self.table_max_col_width = table_max_col_width
 
         # Track what we've extracted to avoid duplicates
         self._extracted_ids: Set[str] = set()
@@ -201,7 +205,16 @@ class TextExtractor:
                 parts.append(caption_text)
 
         # Extract table text - PRESERVE FORMATTING (like old parser's TableBlock.get_text())
-        table_text = table.text()
+        # Use custom max_col_width if specified for AI-friendly rendering
+        if self.table_max_col_width is not None:
+            from edgar.documents.renderers.fast_table import FastTableRenderer, TableStyle
+            style = TableStyle.simple()
+            style.max_col_width = self.table_max_col_width
+            renderer = FastTableRenderer(style)
+            table_text = renderer.render_table_node(table)
+        else:
+            table_text = table.text()
+            
         if table_text:
             # Tables render their own formatting - don't apply text cleaning to preserve alignment
             parts.append(table_text)  # Keep original spacing and alignment

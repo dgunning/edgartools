@@ -26,7 +26,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from . import INDUSTRIES, STATEMENT_TYPES, get_industry_output_dir
+from . import DEFAULT_OCCURRENCE_THRESHOLD, INDUSTRIES, STATEMENT_TYPES, get_industry_output_dir
 from .run_learning import ConceptLearner
 
 # Configure logging
@@ -41,8 +41,13 @@ def get_industry_companies(industry: str, max_companies: int = 200) -> List[str]
     """
     Get list of tickers for companies in the specified industry.
 
+    Supports two modes:
+    1. SIC-based: Uses sic_ranges to find companies by SIC code
+    2. Ticker-based: Uses a curated list of tickers directly (for industries
+       like payment_networks where SIC codes don't map cleanly)
+
     Args:
-        industry: Industry key (banking, tech, etc.)
+        industry: Industry key (banking, tech, payment_networks, etc.)
         max_companies: Maximum number of companies to return
 
     Returns:
@@ -56,17 +61,24 @@ def get_industry_companies(industry: str, max_companies: int = 200) -> List[str]
     industry_info = INDUSTRIES[industry]
     all_companies = []
 
-    # Get companies for each SIC range
-    for sic_start, sic_end in industry_info['sic_ranges']:
-        try:
-            df = get_companies_by_industry(sic_range=(sic_start, sic_end))
-            if df is not None and not df.empty:
-                # Filter for companies with tickers
-                if 'ticker' in df.columns:
-                    tickers = df['ticker'].dropna().tolist()
-                    all_companies.extend(tickers)
-        except Exception as e:
-            logger.warning(f"Error getting companies for SIC {sic_start}-{sic_end}: {e}")
+    # Check if industry uses curated ticker list (for industries where SIC doesn't map well)
+    if 'tickers' in industry_info:
+        all_companies = list(industry_info['tickers'])
+        logger.info(f"Using curated ticker list for {industry}: {len(all_companies)} companies")
+    elif 'sic_ranges' in industry_info:
+        # Get companies for each SIC range
+        for sic_start, sic_end in industry_info['sic_ranges']:
+            try:
+                df = get_companies_by_industry(sic_range=(sic_start, sic_end))
+                if df is not None and not df.empty:
+                    # Filter for companies with tickers
+                    if 'ticker' in df.columns:
+                        tickers = df['ticker'].dropna().tolist()
+                        all_companies.extend(tickers)
+            except Exception as e:
+                logger.warning(f"Error getting companies for SIC {sic_start}-{sic_end}: {e}")
+    else:
+        raise ValueError(f"Industry {industry} must have either 'tickers' or 'sic_ranges' defined")
 
     # Remove duplicates and limit
     unique_tickers = list(dict.fromkeys(all_companies))  # Preserves order
@@ -74,7 +86,7 @@ def get_industry_companies(industry: str, max_companies: int = 200) -> List[str]
 
 
 def run_industry_learning(industry: str, max_companies: int, output_dir: Path,
-                          min_occurrence: float = 0.30) -> dict:
+                          min_occurrence: float = DEFAULT_OCCURRENCE_THRESHOLD) -> dict:
     """
     Run concept learning for a specific industry.
 
@@ -185,16 +197,24 @@ def generate_industry_extension(learner, industry: str,
 
     logger.info(f"Excluding {len(canonical_concepts)} canonical concepts")
 
-    # Build extension
+    # Build extension metadata
+    industry_info = INDUSTRIES[industry]
+    metadata = {
+        'industry': industry,
+        'industry_name': industry_info['name'],
+        'companies_analyzed': learner.successful_companies,
+        'min_occurrence_rate': min_occurrence,
+        'generated': datetime.now().isoformat(),
+    }
+    # Include either sic_ranges or tickers based on how industry is defined
+    if 'sic_ranges' in industry_info:
+        metadata['sic_ranges'] = industry_info['sic_ranges']
+    if 'tickers' in industry_info:
+        metadata['curated_tickers'] = True
+        metadata['ticker_count'] = len(industry_info['tickers'])
+
     extension = {
-        'metadata': {
-            'industry': industry,
-            'industry_name': INDUSTRIES[industry]['name'],
-            'sic_ranges': INDUSTRIES[industry]['sic_ranges'],
-            'companies_analyzed': learner.successful_companies,
-            'min_occurrence_rate': min_occurrence,
-            'generated': datetime.now().isoformat(),
-        }
+        'metadata': metadata
     }
 
     # Process each statement type
@@ -277,8 +297,8 @@ def main():
     parser.add_argument(
         '--min-occurrence', '-m',
         type=float,
-        default=0.30,
-        help='Minimum occurrence rate threshold (default: 0.30)'
+        default=None,
+        help='Minimum occurrence rate threshold (default: uses industry-specific threshold)'
     )
     parser.add_argument(
         '--list-industries',
@@ -295,11 +315,15 @@ def main():
 
     if args.list_industries:
         print("\nAvailable Industries:")
-        print("-" * 60)
-        for key, info in INDUSTRIES.items():
-            sic_str = ', '.join(f"{s}-{e}" for s, e in info['sic_ranges'])
-            print(f"  {key:12} - {info['name']}")
-            print(f"               SIC: {sic_str}")
+        print("-" * 70)
+        for key, info in sorted(INDUSTRIES.items()):
+            threshold = info.get('default_threshold', DEFAULT_OCCURRENCE_THRESHOLD)
+            print(f"  {key:20} - {info['name']}")
+            if 'sic_ranges' in info:
+                sic_str = ', '.join(f"{s}-{e}" for s, e in info['sic_ranges'])
+                print(f"                       SIC: {sic_str}, threshold: {threshold:.0%}")
+            elif 'tickers' in info:
+                print(f"                       Curated: {len(info['tickers'])} tickers, threshold: {threshold:.0%}")
         return 0
 
     if not args.industry and not args.all:
@@ -309,14 +333,17 @@ def main():
 
     # Determine which industries to process
     if args.all:
-        industries_to_process = list(INDUSTRIES.keys())
-        print("\n" + "=" * 60)
+        industries_to_process = sorted(INDUSTRIES.keys())
+        print("\n" + "=" * 70)
         print("TRAINING ALL INDUSTRIES")
-        print("=" * 60)
-        print(f"Industries: {', '.join(industries_to_process)}")
+        print("=" * 70)
+        print(f"Industries: {len(industries_to_process)}")
         print(f"Companies per industry: {args.companies}")
-        print(f"Min occurrence: {args.min_occurrence}")
-        print("=" * 60 + "\n")
+        if args.min_occurrence is not None:
+            print(f"Min occurrence: {args.min_occurrence:.0%} (override)")
+        else:
+            print("Min occurrence: using industry-specific thresholds")
+        print("=" * 70 + "\n")
     else:
         industries_to_process = [args.industry]
 
@@ -325,17 +352,24 @@ def main():
 
     for industry in industries_to_process:
         try:
+            # Use industry-specific threshold if not explicitly provided
+            if args.min_occurrence is not None:
+                min_occurrence = args.min_occurrence
+            else:
+                min_occurrence = INDUSTRIES[industry].get('default_threshold', DEFAULT_OCCURRENCE_THRESHOLD)
+
             summary = run_industry_learning(
                 industry=industry,
                 max_companies=args.companies,
                 output_dir=output_dir,
-                min_occurrence=args.min_occurrence
+                min_occurrence=min_occurrence
             )
             all_summaries[industry] = summary
 
             print("\n" + "-" * 60)
             print(f"COMPLETED: {industry.upper()}")
             print("-" * 60)
+            print(f"Threshold: {summary['min_occurrence_rate']:.0%}")
             print(f"Companies analyzed: {summary['successful_companies']}")
             print(f"Concepts learned: {sum(summary['concepts_by_statement'].values())}")
             for stmt, count in summary['concepts_by_statement'].items():
@@ -356,10 +390,11 @@ def main():
     if all_summaries:
         print("\nSummary:")
         total_concepts = 0
-        for industry, summary in all_summaries.items():
+        for industry, summary in sorted(all_summaries.items()):
             concepts = sum(summary['concepts_by_statement'].values())
             total_concepts += concepts
-            print(f"  {industry:12} - {summary['successful_companies']:3} companies, {concepts:3} concepts")
+            threshold = summary['min_occurrence_rate']
+            print(f"  {industry:20} - {summary['successful_companies']:3} companies, {concepts:3} concepts @ {threshold:.0%}")
 
         if args.all:
             print(f"\nTotal: {len(all_summaries)} industries, {total_concepts} concepts")

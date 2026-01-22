@@ -97,37 +97,25 @@ In 5 minutes, you:
 6. ✅ **Converted filings to data objects** for easy analysis
 7. ✅ **Explored company filings** and insider activity
 
-<!-- 
 ## Next Steps
 
-Now that you've seen the basics, explore more advanced features:
+Now that you've seen the basics, explore by what you want to do:
 
-### 🔍 **Deep Dive Analysis**
-- **[Financial Statement Analysis](guides/extract-statements.md)** - Balance sheets, cash flow statements
-- **[XBRL Querying](xbrl-querying.md)** - Custom financial metrics and ratios
-- **[Time Series Analysis](guides/compare-periods.md)** - Multi-year trend analysis
+**Working with Companies**
 
-### 📈 **Specialized Use Cases**
-- **[Insider Trading Monitoring](guides/track-form4.md)** - Track insider transactions
-- **[Fund Holdings Analysis](guides/analyze-13f.md)** - Research institutional investments
-- **[Event Monitoring](guides/monitor-8k.md)** - Track corporate events via 8-K filings
+- [Get Company Financials](guides/company-facts.md) - Balance sheets, income statements
+- [Track Insiders](guides/company-insiders.md) - Monitor insider transactions
 
-### 🚀 **Advanced Features**
-- **[Bulk Processing](guides/bulk-processing.md)** - Analyze hundreds of companies
-- **[Custom Dashboards](cookbook/dashboards.md)** - Build interactive visualizations
-- **[AI Integration](guides/ai-integration.md)** - LLM-powered analysis
+**Analyzing Filings**
 
-### 📚 **Learning Resources**
-- **[Complete Tutorials](tutorials/company-analysis.md)** - Step-by-step guides
-- **[API Reference](api/company.md)** - Full documentation
-- **[Cookbook](cookbook/revenue-growth.md)** - Ready-to-use recipes
+- [Extract Financial Statements](guides/extract-statements.md) - XBRL data extraction
+- [Query XBRL Facts](xbrl-querying.md) - Custom financial metrics
 
-### Rate Limiting
-EdgarTools automatically handles SEC rate limits. If you hit limits:
-- Add delays between requests
-- Use local caching to reduce API calls
-- Process data in smaller batches
--->
+**Filing Types**
+
+- [8-K Current Reports](guides/eightk-data-object-guide.md) - Material events
+- [13F Holdings](guides/thirteenf-data-object-guide.md) - Institutional portfolios
+- [Form 4 Transactions](guides/track-form4.md) - Insider trading details
 
 ## Getting Help
 

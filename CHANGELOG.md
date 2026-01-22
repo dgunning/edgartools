@@ -7,6 +7,725 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependencies**
+  - Upgraded `httpxthrottlecache` from >=0.1.6 to >=0.3.0
+  - Removed `hishel` dependency (no longer needed in httpxthrottlecache v0.3.0)
+  - httpxthrottlecache v0.3.0 uses FileCache as default backend instead of Hishel
+  - Better suited for Edgar's large immutable file downloads
+  - **Files**: `pyproject.toml`, `docs/configuration.md`
+
+## [5.11.2] - 2026-01-22
+
+### Fixed
+
+- **EntityFacts Revenue Extraction**
+  - Fixed `get_revenue()` and other financial methods returning None for companies like TSLA
+  - Root cause: Abstract header rows matched label patterns before actual data rows
+  - Solution: Added concept-based search using standardization mappings, filters abstract rows
+  - Now uses XBRL concept names (e.g., `us-gaap_RevenueFromContractWithCustomer...`) instead of fragile label matching
+  - Falls back to label-based search for edge cases
+  - **Files**: `edgar/financials.py`
+
+- **Amended Filing Handling**
+  - Fixed `latest_tenk` and `latest_tenq` returning amended filings (10-K/A, 10-Q/A) which often lack complete XBRL data
+  - Solution: Added `amendments=False` filter to exclude amended filings
+  - **Files**: `edgar/entity/core.py`
+
+### Changed
+
+- **⚠️ BEHAVIORAL CHANGE: EntityFacts Default Period Selection**
+  - **EntityFacts financial methods now default to annual (FY) periods instead of most recent**
+  - Affected methods: `get_revenue()`, `get_net_income()`, `get_total_assets()`, `get_total_liabilities()`, `get_shareholders_equity()`, `get_operating_income()`, `get_gross_profit()`, and their `_detailed()` variants
+  - **Before**: `facts.get_revenue()` returned most recent fact (could be quarterly Q3 data)
+  - **After**: `facts.get_revenue()` returns most recent annual FY data (falls back to most recent if no annual available)
+  - **Migration**:
+    - To get the old behavior (most recent regardless of period): `facts.get_revenue(annual=False)`
+    - To explicitly request quarterly: `facts.get_revenue(period="2024-Q3")`
+    - To explicitly request annual: `facts.get_revenue(period="2024-FY")` or `facts.get_revenue(annual=True)` (default)
+  - **Rationale**: Annual facts are more meaningful for financial analysis and consistent with `get_financials()` behavior
+  - **Files**: `edgar/entity/entity_facts.py`
+
+- **Dependencies**
+  - Pinned `pyrate-limiter` to version 3.9.0 to avoid API breakage in 4.0
+  - **Files**: `pyproject.toml`
+
+## [5.11.1] - 2026-01-21
+
+### Fixed
+
+- **Timezone Handling**
+  - Replaced pytz with stdlib zoneinfo for timezone handling
+  - Removed undeclared pytz dependency
+  - Uses standard library for better compatibility
+  - **Files**: `edgar/` (various timezone-related files)
+
+- **Pandas 3.0 Compatibility**
+  - Pinned pandas to <3.0 to avoid breaking changes
+  - Fixed NaN handling in balance tests
+  - Ensures stability until pandas 3.0 migration is complete
+  - **Files**: `pyproject.toml`, test files
+
+- **Income Statement Selection** (Issue #608)
+  - Fixed incorrect income statement selection when multiple ComprehensiveIncome roles exist
+  - Resolves issue where OCI (Other Comprehensive Income) items were returned instead of P&L data
+  - Affects companies like STZ (Constellation Brands) with complex financial statement structures
+  - **Files**: `edgar/xbrl/statements.py` or related XBRL parsing files
+
+## [5.11.0] - 2026-01-20
+
+### Added
+
+- **Trailing Twelve Months (TTM) Calculations**
+  - Added comprehensive TTM calculations integrated into Company class
+  - Automatic Q4 derivation from annual and quarterly data
+  - Stock split adjustment support for accurate historical comparisons
+  - Robust input validation and data quality handling
+  - Methods for calculating TTM metrics from EntityFacts
+  - **Files**: `edgar/entity/ttm.py`, `edgar/entity/core.py`
+
+- **XBRL Concept Discovery**
+  - Added `list_concepts()` method to Company class for exploring available XBRL concepts
+  - New `ConceptList` class with rich display formatting for concept browsing
+  - Enables users to discover what financial data is available before querying
+  - **Files**: `edgar/entity/core.py`
+
+- **Currency Conversion for Foreign Filers**
+  - Added `CurrencyConverter` utility class for handling IFRS and foreign currency filings
+  - Supports automatic conversion of foreign currencies to USD
+  - Essential for analyzing international companies and IFRS reporters
+  - **Files**: `edgar/xbrl/currency.py`
+
+- **Rule 10b5-1 Trading Plan Detection**
+  - Added detection of Rule 10b5-1 trading plans in insider transactions
+  - Identifies pre-arranged trading plans vs. discretionary trades
+  - Enhanced transparency for insider trading analysis
+  - **Files**: `edgar/insider_transactions.py`
+
+- **Expanded Industry Classification**
+  - Expanded SIC code ranges for banking, healthcare, and energy industries
+  - Improved industry categorization accuracy
+  - Better support for sector-specific analysis
+  - **Files**: `edgar/reference/data/sic_ranges.py`
+
+### Fixed
+
+- **TTM Calculation Robustness**
+  - Added comprehensive input validation for TTM calculations
+  - Fixed division by zero and None comparison edge cases
+  - Replaced bare Exception catches with specific exception types
+  - Improved error messages and data quality handling
+  - **Files**: `edgar/entity/ttm.py`
+
+### Changed
+
+- **Test Coverage Requirements**
+  - Lowered coverage threshold to 65% to accommodate new experimental features
+  - Allows for faster feature development while maintaining core stability
+  - **Files**: `pyproject.toml`
+
+## [5.10.1] - 2026-01-17
+
+### Fixed
+
+- **Non-Deterministic XBRL Parsing** (Issue #601)
+  - Fixed non-deterministic results when loading Filing from pickle across Python processes
+  - Root cause: Set iteration order varies with Python hash randomization (PYTHONHASHSEED)
+  - Solution: Sort root_elements before iteration in calculation/presentation/rendering parsers
+  - Ensures identical DataFrame output regardless of Python's hash seed
+  - Critical for data pipelines requiring reproducible results
+  - **Files**: `edgar/xbrl/parsers/calculation.py`, `edgar/xbrl/parsers/presentation.py`, `edgar/xbrl/rendering.py`
+
+- **Incorrect Dimension Member Labels** (Issue #603)
+  - Fixed dimension_member_label showing incorrect values for multi-dimensional breakdowns
+  - Root cause: Used LAST dimension instead of PRIMARY (first) dimension
+  - Solution: Use dim_metadata[0] for primary_dim instead of dim_metadata[-1]
+  - Affects companies like GOOGL with multi-dimensional revenue breakdowns (YouTube ads, Google Network, etc.)
+  - Now consistent with dimension_axis and dimension_member which already use first dimension
+  - **Files**: `edgar/xbrl/statements.py`
+
+## [5.10.0] - 2026-01-15
+
+### Added
+
+- **Shares Outstanding API** (Issue #587)
+  - Added `get_shares_outstanding_basic()` and `get_shares_outstanding_diluted()` methods to Financials API
+  - New `_get_concept_value()` helper method for XBRL concept-based search (more reliable than label matching)
+  - Shares now included in `get_financial_metrics()` dictionary output
+  - Supports both annual and quarterly financials with period offset functionality
+  - Example: `financials.get_shares_outstanding_basic(period_offset=0)`
+  - **Files**: `edgar/financials.py`
+
+- **Filing.parse() Method** (Issue #598)
+  - Added `filing.parse()` convenience method returning structured Document object for DocumentSearch compatibility
+  - Method is cached with lru_cache for performance
+  - Returns None if HTML is not available (graceful edge case handling)
+  - Complements existing filing methods: `filing.html()`, `filing.text()`, `filing.xbrl()`
+  - Updated documentation in docs/advanced-search.md with correct usage examples
+  - **Files**: `edgar/_filings.py`, `docs/advanced-search.md`
+
+- **Table Width Control for AI Processing** (Issue #596)
+  - Added `table_max_col_width` parameter to TextExtractor, Document.text(), and get_text()
+  - Allows control over table column width to prevent truncation of long labels
+  - Default raised from 200 to 500 for AI/LLM processing (doc.text())
+  - Terminal display (print(doc)) uses 200 for readability
+  - Enables complete information extraction for AI analysis
+  - **Files**: `edgar/documents/document.py`, `edgar/documents/extractors/text_extractor.py`, `edgar/documents/renderers/fast_table.py`, `edgar/documents/migration.py`
+
+### Fixed
+
+- **Pandas FutureWarning in Statement Presentation** (Issue #599)
+  - Fixed incomplete metadata_cols list in _apply_presentation() causing FutureWarning
+  - Added missing metadata columns to exclusion list: standard_concept, is_breakdown, dimension_axis, dimension_member, dimension_member_label, dimension_label
+  - Boolean columns like is_breakdown were incorrectly processed through numeric transformation
+  - Added explicit numeric conversion before masked assignment for safety
+  - **Files**: `edgar/xbrl/statements.py`
+
+- **Empty Income Statements for 10-K Filings** (Issue #600)
+  - Fixed period selector using only fiscal_period == 'FY' to identify annual reports
+  - Some 10-K filings (like GE 2015) have fiscal_period='Q4' in XBRL metadata
+  - Now also checks document_type and annual_report flag for correct identification
+  - Prevents selector from choosing quarterly periods instead of annual periods (4-7% vs 70%+ data density)
+  - Affected filings: GE 2015/2016, CHTR 2017/2018, KHC 2015, WMB 2018, YUM 2016/2017, XOM 2015/2016
+  - Expanded annual form types to include 10-KT, 10-KT/A, 10-KSB, 10-KSB/A
+  - **Files**: `edgar/xbrl/period_selector.py`
+
+- **Dimension Member Labels in Facts API** (Issue #597)
+  - Dimensional facts now display their dimension member label (e.g., "Corporate Joint Venture") instead of parent concept label (e.g., "Total Assets")
+  - Makes Facts API consistent with Statement API behavior
+  - **Files**: `edgar/xbrl/facts.py`
+
+## [5.9.1] - 2026-01-14
+
+### Added
+
+- **Statement View Control** (edgartools-766g)
+  - Added `view` parameter to all Financials statement methods (income_statement, balance_sheet, cashflow_statement, etc.)
+  - Supports three view modes: STANDARD (face presentation), DETAILED (all dimensional data), SUMMARY (non-dimensional totals)
+  - Enables control over dimensional data display at the statement method level
+  - **Files**: `edgar/financials.py`, `edgar/xbrl/statements.py`
+
+- **Statement Row Breakdown Detection**
+  - Added `is_breakdown` boolean field to StatementRow dataclass
+  - Distinguishes face dimensions from breakdown dimensions in rendered statements
+  - Included in DataFrame output via `to_dataframe()`
+  - **Files**: `edgar/xbrl/statements.py`, `edgar/xbrl/rendering.py`
+
+- **Enhanced Statement Display**
+  - Aligned XBRL and EntityFacts statement displays with SEC filing format
+  - Added centered headers with company name and ticker badge
+  - Moved units note from header to footer for cleaner presentation
+  - Added ticker badge style (bold black on green) to design language
+  - Pass ticker to MultiPeriodStatement for display
+  - **Files**: `edgar/xbrl/rendering.py`, `edgar/entity/enhanced_statement.py`, `edgar/display/styles.py`, `edgar/entity/entity_facts.py`
+
+### Fixed
+
+- **10-K Section Extraction Improvements**
+  - Fixed TOC anchors pointing to PART headers instead of actual Item content (e.g., NovoCure filing)
+  - Now searches for actual ITEM headers when TOC returns suspiciously short content (<200 chars)
+  - Prefer part-based section keys (e.g., 'part_i_item_1') over direct keys (e.g., 'Item 1') in TenK lookup
+  - Fixes Snowflake case where both keys existed pointing to different sections
+  - **Files**: `edgar/company_reports/ten_k.py`, `edgar/documents/extractors/toc_section_extractor.py`
+
+- **Pattern Extractor TOC Confusion**
+  - Fixed pattern extractor matching Table of Contents entries instead of actual section headers
+  - Added TOC boundary detection and position-based filtering
+  - Prefer case-sensitive "ITEM" matches over case-insensitive matches
+  - Fixes extraction for filings without internal anchor links (Park Aerospace, SUIC Worldwide)
+  - **Files**: `edgar/documents/extractors/pattern_section_extractor.py`, `edgar/documents/utils/toc_analyzer.py`
+
+### Changed
+
+- **Unified Statement Rendering Styles**
+  - Migrated Statement matrix rendering from get_xbrl_styles() to get_statement_styles()
+  - Ensures consistency across all statement displays using unified design language
+  - **Files**: `edgar/xbrl/rendering.py`
+
+## [5.9.0] - 2026-01-12
+
+### Changed
+
+- **Standardization Now Preserves Original Labels** (Breaking Change)
+  - `standard=True` no longer replaces labels with standardized names
+  - Labels now always show the company's original presentation (fidelity to filing)
+  - New `standard_concept` column added to DataFrames for programmatic analysis
+  - This fixes duplicate label issues where multiple concepts mapped to the same standard name
+  - **Migration**: Use `df.groupby('standard_concept')` for cross-company aggregation
+  - **Files**: `edgar/xbrl/standardization/core.py`, `edgar/xbrl/rendering.py`, `edgar/xbrl/statements.py`
+
+### Added
+
+- **Statement._to_df() Debug Helper**
+  - Convenience method for viewing statement DataFrames with nice formatting
+  - Numbers formatted with commas (no scientific notation)
+  - Configurable columns: `show_concept`, `show_standard_concept`, `max_rows`
+  - Example: `bs._to_df(view='summary', max_rows=20)`
+
+## [5.8.3] - 2026-01-07
+
+### Fixed
+
+- **Combined Operations and Comprehensive Income Statements** (Issue #584)
+  - Statement resolver was incorrectly penalizing all roles containing "comprehensiveincome"
+  - This excluded valid combined statements like "CONSOLIDATEDSTATEMENTSOFOPERATIONSANDCOMPREHENSIVEINCOME"
+  - Caused REGN 2024 10-K to return only 3 rows instead of 78 for `income_statement()`
+  - Now only penalizes pure comprehensive income statements, not combined ones
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct income statement selection for companies using combined formats
+
+- **Statement of Equity Labels and Dimensional Value Matching** (Issue #583)
+  - Fixed dimensional items showing identical values for beginning/ending balance rows
+  - Track occurrences by (concept, label) tuple instead of concept only
+  - Added label standardization to transform "Ending balances" → semantic labels
+  - Added " - Beginning balance" / " - Ending balance" suffixes for multi-occurrence items
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate equity statement with proper beginning/ending balance differentiation
+
+- **Period Selection Logging Noise** (Issue #585)
+  - Downgraded period selection fallback from warning to debug level
+  - This was logging noise, not a user-actionable warning - data retrieval is correct
+  - Added context (fiscal year, period of report, candidate count) for debugging
+  - **Files**: `edgar/xbrl/period_selector.py`
+  - **Impact**: Cleaner logs without spurious warnings
+
+## [5.8.2] - 2026-01-06
+
+### Added
+
+- **TwentyF Convenience Properties**
+  - Added properties for common 20-F sections matching TenK API style
+  - `business` / `company_information` → Item 4 (Information on the Company)
+  - `risk_factors` / `key_information` → Item 3 (Key Information)
+  - `management_discussion` / `operating_review` → Item 5 (Operating and Financial Review)
+  - `directors_and_employees` → Item 6
+  - `major_shareholders` → Item 7
+  - `financial_information` → Item 8
+  - `controls_and_procedures` → Item 15
+  - **Files**: `edgar/company_reports/twenty_f.py`
+
+- **Industry Extensions**
+  - Payment Networks industry with ticker-based lookup (V, MA, PYPL, etc.)
+  - Semiconductors industry extension (SIC 3674)
+  - Expanded Securities industry to include full Broker-Dealers range
+  - **Files**: `edgar/reference/industry_extensions/`
+
+### Fixed
+
+- **20-F Section Extraction** (edgartools-vvzd related)
+  - Fixed pattern extractor selecting cross-references instead of main section headers
+  - Cross-references like "See Item 4..." were incorrectly detected as section starts
+  - Now prefers uppercase main headers (e.g., "ITEM 4") over mixed-case cross-references
+  - **Files**: `edgar/documents/extractors/pattern_section_extractor.py`
+  - **Impact**: 20-F sections now return full content instead of truncated snippets
+
+- **Section Boundary Artifacts**
+  - Removed trailing page numbers from extracted section text (e.g., "\n\n  100")
+  - Removed next section headers bleeding into current section (e.g., "\n\n  PART IV\n\nItem 15")
+  - **Files**: `edgar/documents/document.py`
+  - **Impact**: Cleaner section text extraction for all filing types
+
+## [5.8.1] - 2026-01-05
+
+### Fixed
+
+- **Income Statement Resolver Tax Disclosure Issue** (Issue #581, edgartools-8wlx)
+  - Fixed resolver incorrectly selecting tax disclosure statements instead of main income statement
+  - Affected companies with both income statement and tax disclosure in same filing (e.g., MCHP 2016)
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct income statement selection for affected filings
+
+- **DataFrame Conversion None Value Handling** (Issue #582)
+  - Prevented None values from overwriting valid data during DataFrame conversion
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate data preservation in statement DataFrames
+
+- **Schedule 13 Hierarchical Ownership Calculation**
+  - Fixed `total_shares` and `total_percent` for corporate control chain filings
+  - Previously summed all reporting persons (e.g., 393% total), now correctly detects hierarchical
+    ownership when percentages sum > 100.5% and returns the max (top of hierarchy)
+  - Caps `total_percent` at 100% to handle rounding artifacts in source data
+  - **Files**: `edgar/beneficial_ownership/schedule13.py`
+  - **Impact**: Accurate beneficial ownership totals for complex corporate structures
+
+## [5.8.0] - 2026-01-04
+
+### Added
+
+- **StatementView Enum for Semantic Dimension Filtering** (Issue #574, edgartools-dvel)
+  - New `StatementView` enum replaces confusing `include_dimensions` boolean
+  - Three presentation modes: STANDARD (face presentation), DETAILED (all dimensions), SUMMARY (totals only)
+  - Different defaults per use case: STANDARD for rendering, DETAILED for DataFrames
+  - Backward compatible with deprecation warning for `include_dimensions` (removed in v6.0)
+  - **Files**: `edgar/xbrl/presentation.py`, `edgar/xbrl/statements.py`
+  - **Impact**: Clearer, more semantic API for dimension filtering
+
+- **Enhanced Dimension Labels** (Issue #574)
+  - Added `dimension_member_label` column with just the member label (e.g., "Products")
+  - For multi-dimensional items, uses LAST (most specific) dimension's member label
+  - Structured dimension fields now available in XBRL facts queries
+  - `dimension_label` preserves original full format for backward compatibility
+  - **Files**: `edgar/xbrl/statements.py`, `edgar/xbrl/facts.py`
+  - **Impact**: Better disambiguation of dimensional data
+
+- **Matrix Rendering for Statement of Equity** (Issue #574, edgartools-uqg7)
+  - Opt-in matrix format via `to_dataframe(matrix=True)`
+  - Components as columns, activities as rows for cleaner visualization
+  - Works well for simple structures (AAPL, GOOGL, MSFT)
+  - Default remains standard list format for reliability across all companies
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Enhanced equity statement presentation for opt-in users
+
+### Fixed
+
+- **Statement of Equity Roll-Forward Period Matching** (Issue #572, edgartools-096c)
+  - Beginning balance rows now correctly use instant_{start_date - 1 day} values
+  - Ending balance rows use instant_{end_date} values
+  - Tracks concept occurrences to distinguish first vs. later appearances
+  - Consistent with render() behavior from Issue #450
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Correct balance values in Statement of Equity DataFrames
+
+- **Balance Sheet Concept Names** (Issue #570, edgartools-17ow)
+  - Fixed recognition and rendering of balance sheet items with certain concept patterns
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Complete balance sheet item display
+
+- **ORCL Statement Resolver** (edgartools-8ad8)
+  - Prefer main equity statements over parentheticals
+  - Added roll-forward concept pattern matching
+  - -80 score penalty for parenthetical statements ensures correct selection
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct statement selection for Oracle and similar companies
+
+- **XBRL Structural Element Filtering**
+  - Filters empty structural element rows (ProductMember, ServiceMember) from rendered statements
+  - Combined with dimension filtering for cleaner output
+  - **Files**: `edgar/xbrl/rendering.py`
+  - **Impact**: Cleaner statement rendering without empty XBRL artifacts
+
+- **Test Suite**
+  - Fixed mock test to account for new `view` parameter in Statement constructor
+  - **Files**: `tests/test_xbrl_statement_error_handling.py`
+  - **Impact**: All tests passing
+
+### Deprecated
+
+- **include_dimensions parameter**
+  - Use `view=StatementView.DETAILED` instead of `include_dimensions=True`
+  - Use `view=StatementView.STANDARD` instead of `include_dimensions=False`
+  - Deprecation warning raised when used
+  - Will be removed in v6.0.0
+  - **Impact**: Migration path provided with clear warnings
+
+### Summary
+
+Release 5.8.0 is a feature release introducing the StatementView enum for clearer dimension filtering semantics, enhanced dimension labels with better multi-dimensional handling, opt-in matrix rendering for Statement of Equity, and critical fixes for equity statement period matching and balance sheet rendering. The release maintains full backward compatibility while providing a clear migration path away from the deprecated `include_dimensions` parameter.
+
+## [5.7.4] - 2026-01-03
+
+### Added
+
+- **Structured Dimension Fields in Statement DataFrames** (Issue #574)
+  - Added `dimension_axis`, `dimension_member`, and `dimension_label` columns to statement DataFrames
+  - Provides clear separation of dimension metadata from financial concept data
+  - `dimension_axis`: Contains the axis name (e.g., `srt:ProductOrServiceAxis`)
+  - `dimension_member`: Contains the member QName (e.g., `us-gaap_ProductMember`)
+  - `dimension_label`: Contains the human-readable member label (e.g., `Product`)
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Cleaner data structure for dimensional analysis
+
+- **Definition Linkbase-Based Dimension Filtering** (Issue #577)
+  - Uses XBRL definition linkbase to determine which dimensions are valid for each statement
+  - Dimensions declared in hypercubes are treated as face values (not filtered out)
+  - Undeclared dimensions are treated as breakdowns (filtered when `include_dimensions=False`)
+  - Critical for filers like Boeing who report face values only through dimensional XBRL
+  - New XBRL methods: `has_definition_linkbase_for_role()`, `get_valid_dimensions_for_role()`, `is_dimension_valid_for_role()`
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/dimensions.py`
+  - **Impact**: More accurate dimension filtering based on XBRL specification
+
+- **Filter XBRL Structural Elements from DataFrames** (edgartools-03zg)
+  - Filters out XBRL structural artifacts (hypercube, dimension, member declarations)
+  - Cleaner DataFrames containing only financial data
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Cleaner output without technical XBRL elements
+
+### Fixed
+
+- **Statement of Equity Period Selection** (Issue #572, edgartools-rywt)
+  - Fixed period selection returning only 1 period instead of 3 fiscal years
+  - Equity and Comprehensive Income statements now correctly display 3 fiscal years
+  - Relaxed fact threshold (3 vs 10) for equity statements which have fewer facts per period
+  - **Files**: `edgar/xbrl/period_selector.py`
+  - **Impact**: Complete period data for equity statements
+
+- **8-K Item Parsing Validation**
+  - Added validation to filter invalid 8-K item numbers (e.g., "401", "404" from Section references)
+  - Valid formats: X.XX (e.g., "5.02") or legacy single digit (1-9)
+  - **Files**: `edgar/entity/filings.py`
+  - **Impact**: Accurate 8-K item extraction
+
+### Summary
+
+Release 5.7.4 introduces structured dimension fields and definition linkbase-based dimension filtering for more accurate XBRL data handling. Statement of Equity now correctly displays 3 fiscal years. This release is recommended for all users working with dimensional XBRL data.
+
+## [5.7.3] - 2026-01-03
+
+### Fixed
+
+- **Balance Sheet Item Ordering** (Issue #575)
+  - Fixed incorrect ordering of balance sheet items when using flat presentation linkbase
+  - IESC's 10-K had Cash appearing at bottom instead of top due to flat presentation structure
+  - Added `_reorder_by_calculation_parent()` method to enforce proper ordering based on calculation linkbase
+  - Balance sheet components now correctly appear before their totals
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Correct visual ordering of balance sheet line items
+
+- **Empty Filings Table ArrowTypeError** (Issue #576)
+  - Fixed ArrowTypeError when filtering filings for dates with no data
+  - Added early return when filtering results in empty table
+  - Proper empty table handling prevents type conversion errors
+  - **Files**: `edgar/_filings.py`
+  - **Impact**: Robust handling of empty filing results
+
+### Summary
+
+Release 5.7.3 is a patch release addressing two P0 bugs: balance sheet item ordering and empty filings table handling. Both issues have regression tests to prevent recurrence.
+
+## [5.7.2] - 2026-01-02
+
+### Fixed
+
+- **Dimension Filtering for Balance Sheet Line Items** (Issues #568, #569)
+  - Fixed missing balance sheet items when `include_dimensions=False`
+  - Contra accounts (Treasury Stock, etc.) now correctly apply `preferred_sign`
+  - Equity Method Investment breakdowns are properly filtered
+  - Presentation-linkbase validation ensures face values are shown while hiding unnecessary breakdowns
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/statements.py`
+
+- **Statement of Equity Dimension Handling** (Issue #571 follow-up)
+  - Statement-type aware dimension filtering for Statement of Equity
+  - Structural equity dimensions (common stock, retained earnings components) preserved
+  - **Files**: `edgar/xbrl/statements.py`
+
+### Changed
+
+- **Enhanced Dimension Classification**
+  - Improved pattern-based detection for classifying dimensions as structural vs. breakdown
+  - Better handling of segment and geographic dimensions on face of statements
+  - **Files**: `edgar/xbrl/xbrl.py`
+
+### Summary
+
+Release 5.7.2 completes the dimension filtering improvements started in v5.7.0/v5.7.1. Balance sheets now correctly show all face-value line items while filtering out breakdown dimensions. This release is recommended for all users.
+
+## [5.7.1] - 2026-01-01
+
+### Fixed
+
+- **Statement of Equity and Comprehensive Income NaN Values** (Issue #571, edgartools-rywt)
+  - Critical bug fix: v5.7.0 regression caused Statement of Equity and Comprehensive Income to show mostly NaN values
+  - Root cause: The v5.7.0 change to `include_dimensions=False` default filtered out dimensional data that these statements require
+  - Statement of Equity and Comprehensive Income are inherently dimensional statements (tracking changes across equity components)
+  - Changed default for `statement_of_equity()` and `comprehensive_income()` to `include_dimensions=True`
+  - Also fixed in `StitchedStatements` class for multi-period analysis
+  - AAPL values improved from 4/13 concepts with values (31%) to 12/27 (44%)
+  - Users can still explicitly set `include_dimensions=False` for previous behavior
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate financial data in Statement of Equity and Comprehensive Income
+
+### Summary
+
+Release 5.7.1 is a critical point release fixing a data accuracy regression in v5.7.0. Statement of Equity and Comprehensive Income statements now correctly display dimensional data by default, ensuring accurate financial values.
+
+This release is highly recommended for all users working with equity statements.
+
+## [5.7.0] - 2026-01-01
+
+### Changed
+
+- **Include Dimensions Default to False for Cleaner Statement Output** (57665eb1)
+  - Changed `include_dimensions` parameter default from `True` to `False` for most financial statements
+  - Provides cleaner output by hiding dimensional segment data by default
+  - Users can explicitly set `include_dimensions=True` when dimensional breakdown is needed
+  - **Note**: This change was partially reverted in v5.7.1 for Statement of Equity and Comprehensive Income
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Cleaner default output for Balance Sheet, Income Statement, Cash Flow Statement
+
+### Added
+
+- **Business Category Property for Company** (33b63b8c)
+  - Added `business_category` property to Company class
+  - **Files**: `edgar/entity/core.py`
+
+### Summary
+
+Release 5.7.0 changes the default behavior for dimensional data display in financial statements, providing cleaner output by default.
+
+## [5.6.4] - 2025-12-29
+
+### Fixed
+
+- **XBRL Assets Values Incorrectly Rounded Breaking Balance Sheet Equation** (Issue #564, 25617183)
+  - Critical bug fix: XBRL was selecting less precise facts when duplicates existed
+  - PFE 2017 Assets showed $172,000M instead of correct $171,797M ($203M error)
+  - Added _get_fact_precision() helper to calculate decimal precision from fact decimals attribute
+  - Added _select_most_precise_fact() to choose fact with highest precision when duplicates exist
+  - Now correctly selects most precise fact, preserving balance sheet equation integrity
+  - **Files**: `edgar/xbrl/facts.py`
+  - **Impact**: Accurate XBRL financial statement values, especially for duplicate facts with different precision
+
+### Summary
+
+Release 5.6.4 is a critical bug fix release addressing XBRL fact precision. This fix ensures that when duplicate facts exist with different precision levels, the most precise value is selected, maintaining the integrity of financial statements and the fundamental accounting equation (Assets = Liabilities + Equity).
+
+This release is highly recommended for users working with XBRL financial data.
+
+## [5.6.3] - 2025-12-28
+
+### Fixed
+
+- **Duplicate Period Labels for December FYE Companies** (df153797, edgartools-t3tr)
+  - Fixed duplicate "FY 2024" labels when both current and comparative periods had fiscal_year=2024
+  - For December fiscal year end companies, now uses period_end.year for labels instead of SEC's fiscal_year tag
+  - Non-December FYE companies continue to trust SEC's fiscal_year since their FY doesn't align with calendar year
+  - **Files**: `edgar/entity/` modules
+  - **Impact**: Accurate period labeling for December FYE companies in EntityFacts statements
+
+### Added
+
+- **Industry-Specific Concept Learning** (d4571f63)
+  - Added new securities industry (SIC 6200-6289) for broker-dealers and asset managers
+  - Updated all 16 industry extensions with per-industry occurrence thresholds
+  - Thresholds now based on industry homogeneity (18-30% range)
+  - Added investment_companies extension (SIC 6720-6799)
+  - Learns 902+ industry-specific concepts across all industries
+  - **Files**: `edgar/entity/industry_mappings.json`, industry extension files
+  - **Impact**: More accurate industry-specific financial concept recognition
+
+- **Dynamic Label Width for Entity Facts Statements** (f0df927c)
+  - Calculates label column width based on terminal size and number of periods
+  - Wider labels (up to 55 chars) for fewer periods, narrower (min 30) for more
+  - Added min_width=10 on value columns to prevent truncation
+  - Falls back to tier-based defaults when terminal width unavailable
+  - **Files**: `edgar/entity/` display modules
+  - **Impact**: Optimal use of terminal space for statement display
+
+### Improved
+
+- **Statement Display Styling** (fc10074e, c4bfb3d1)
+  - Made period range bold for better visibility (was previously dim italic)
+  - Color-coded source attribution: EntityFacts (cyan) vs XBRL (gold)
+  - **Files**: `edgar/entity/styles.py`, `edgar/entity/enhanced_statement.py`
+  - **Impact**: Improved readability and visual distinction between data sources
+
+### Summary
+
+Release 5.6.3 is a feature and fix release focused on EntityFacts statement display improvements. Key highlights:
+
+- Fixed duplicate period labels for December FYE companies
+- Added industry-specific concept learning with 902+ concepts
+- Dynamic label width based on terminal size
+- Enhanced statement styling with color-coded sources
+
+This release is recommended for users working with EntityFacts API data and industry-specific financial analysis.
+
+## [5.6.2] - 2025-12-27
+
+### Fixed
+
+- **XBRL Presentation Mode Not Applied to Columns with None Values** (#556, 5f404f3d)
+  - Fixed presentation mode not being applied to columns containing None values
+  - Ensures consistent formatting across all XBRL statement columns
+  - **Files**: `edgar/xbrl/` modules
+  - **Impact**: Proper presentation mode rendering for statements with missing data
+
+- **Type Checker Invalid Return Type Errors** (8eef4721)
+  - Fixed 17 invalid-return-type errors detected by ty type checker
+  - Improved type safety across multiple modules
+  - **Files**: Various edgar modules
+  - **Impact**: Enhanced type safety and IDE support
+
+- **Document Size Limit for Large NPORT-P Filings** (edgartools-ypvp)
+  - Increased max_document_size from 100MB to 110MB to handle edge cases
+  - Resolves DocumentTooLargeError for large NPORT-P filings (e.g., Voya FUNDS TRUST)
+  - **Files**: `edgar/documents/config.py`
+  - **Impact**: Successfully processes NPORT-P filings that were previously failing by 48 bytes
+
+### Documentation
+
+- **Proxy Statement Text Extraction Guide** (c0415007)
+  - Added comprehensive guide for extracting text from proxy statements
+  - Includes TSLA example test script
+  - **Files**: `edgar/proxy/docs/`
+
+- **Proxy Package Documentation** (0b0c54fb)
+  - Added detailed documentation to edgar.proxy package
+  - **Impact**: Better developer experience for proxy statement analysis
+
+- **Company API Documentation Updates** (b230a647)
+  - Updated Company.md with recent API additions
+  - Reflects latest company data access methods
+
+### Summary
+
+Release 5.6.2 is a maintenance release focusing on edge case fixes and documentation improvements. Key highlights:
+
+- Fixed XBRL presentation mode for columns with None values
+- Increased document size limit to handle large NPORT-P filings
+- Enhanced type safety with 17 type error fixes
+- Improved proxy statement documentation
+
+This release is recommended for users working with large filings or proxy statements.
+
+## [5.6.1] - 2025-12-25
+
+### Fixed
+
+- **Type Checker Issues in Source Code** (20ac62d9)
+  - Added type ignore comments for lxml.etree imports (missing type stubs)
+  - Fixed EntityFilings import path in offerings/__init__.py
+  - Added type ignore for np.issubdtype pandas dtype argument
+  - **Files**: `edgar/documents/utils/streaming.py`, `edgar/npx/parsing.py`, `edgar/offerings/__init__.py`, `edgar/ownership/core.py`
+  - **Impact**: Zero type errors in main edgar source code with `uvx ty check`
+
+- **Financial Ratio Calculation Type Mismatches** (#549, 03a4e486)
+  - Fixed type mismatches in FinancialRatios class calculations
+  - Added missing configuration for ratio computations
+  - **Files**: `edgar/financials/ratios.py`
+  - **Impact**: Reliable financial ratio calculations across all company types
+
+- **TypeError in get_financial_metrics() for MSFT** (#553, f0886207)
+  - Fixed get_financial_metrics() returning empty strings instead of numeric values
+  - Improved handling of missing or malformed financial data
+  - **Files**: `edgar/financials/metrics.py`
+  - **Impact**: Consistent numeric returns from financial metrics API
+
+- **Section Tables Returning Empty for TOC-Based Sections** (#554, 28b02a4b)
+  - Fixed section.tables() returning empty lists for table-of-contents based sections
+  - Improved table extraction from document sections
+  - **Files**: `edgar/documents/` modules
+  - **Impact**: Reliable table extraction from all document section types
+
+### Documentation
+
+- **Comprehensive Ownership Module Documentation**
+  - Added detailed documentation for edgar.ownership module
+  - **Files**: `docs/` ownership documentation
+  - **Impact**: Better developer experience for insider transaction analysis
+
+### Summary
+
+Release 5.6.1 is a bug fix release focusing on type safety and reliability improvements. Key highlights:
+
+- Zero type errors in main source code
+- Fixed financial ratio and metrics calculation issues
+- Improved table extraction from document sections
+- Enhanced ownership module documentation
+
+This release is recommended for all users.
+
 ## [5.6.0] - 2025-12-22
 
 ### Fixed
