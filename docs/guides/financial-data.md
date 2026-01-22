@@ -128,11 +128,11 @@ income = financials.income_statement(view="standard")
 income = financials.income_statement(view="detailed")
 ```
 
-### Summary Statement
+### Summary View
 
 ![AAPL Detailed Income Statement](../images/aapl-income-summary.webp)
 
-### Detailed Statement
+### Detailed View
 
 ![AAPL Detailed Income Statement](../images/aapl-income-detailed.webp)
 
