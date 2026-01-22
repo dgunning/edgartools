@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependencies**
+  - Upgraded `httpxthrottlecache` from >=0.1.6 to >=0.3.0
+  - Removed `hishel` dependency (no longer needed in httpxthrottlecache v0.3.0)
+  - httpxthrottlecache v0.3.0 uses FileCache as default backend instead of Hishel
+  - Better suited for Edgar's large immutable file downloads
+  - **Files**: `pyproject.toml`, `docs/configuration.md`
+
 ## [5.11.2] - 2026-01-22
 
 ### Fixed
