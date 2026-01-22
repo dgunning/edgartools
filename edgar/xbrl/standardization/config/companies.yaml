@@ -47,12 +47,127 @@ companies:
   JPM:
     name: "JPMorgan Chase & Co."
     cik: 19617
-    industry: "financial_services"
+    industry: "banking"
+    bank_archetype: "commercial"
     validation_tolerance_pct: 20.0  # 20% tolerance for financials
     exclude_metrics:
       - COGS  # Banks don't have traditional COGS
       - SGA   # Banks use different expense categories
     notes: "Financial company - uses dimensional XBRL reporting (VIEs)"
+
+  # Investment Banks (Dealer Archetype)
+  GS:
+    name: "Goldman Sachs Group, Inc."
+    cik: 886982
+    industry: "banking"
+    bank_archetype: "dealer"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    street_view_notes:
+      ShortTermDebt: "Includes Net Repos (~$90B) for economic leverage view. GAAP extraction excludes Repos for yfinance validation."
+      CashAndEquivalents: "Includes Segregated Cash for regulatory liquidity view."
+    notes: "Dealer bank - high trading assets, low loan book. Street View differs from GAAP for leverage analysis."
+
+  MS:
+    name: "Morgan Stanley"
+    cik: 895421
+    industry: "banking"
+    bank_archetype: "dealer"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    street_view_notes:
+      ShortTermDebt: "Includes Net Repos for economic leverage view. GAAP extraction excludes Repos for yfinance validation."
+      CashAndEquivalents: "Includes Restricted Cash (~$30B) per Street analyst convention."
+    notes: "Dealer bank - wealth management + institutional securities."
+
+  # Commercial Banks
+  WFC:
+    name: "Wells Fargo & Company"
+    cik: 72971
+    industry: "banking"
+    bank_archetype: "commercial"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    street_view_notes:
+      ShortTermDebt: "Street View excludes TradingLiabilities for clean economic debt measure."
+    notes: "Commercial bank - high loan book, traditional banking model."
+
+  C:
+    name: "Citigroup Inc."
+    cik: 831001
+    industry: "banking"
+    bank_archetype: "commercial"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    street_view_notes:
+      ShortTermDebt: "Street View excludes TradingLiabilities for clean economic debt measure."
+    notes: "Commercial bank with significant global presence."
+
+  BAC:
+    name: "Bank of America Corporation"
+    cik: 70858
+    industry: "banking"
+    bank_archetype: "commercial"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    notes: "Commercial bank - one of the Big Four."
+
+  USB:
+    name: "U.S. Bancorp"
+    cik: 36104
+    industry: "banking"
+    bank_archetype: "commercial"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    notes: "Regional commercial bank."
+
+  # Custodial Banks
+  BK:
+    name: "Bank of New York Mellon Corporation"
+    cik: 1390777
+    industry: "banking"
+    bank_archetype: "custodial"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    street_view_notes:
+      CashAndEquivalents: "Includes Fed Deposits via company-extension tags (bk:InterestBearingDepositsInFederalReserve)."
+    notes: "Custodial bank - high PayablesToCustomers from custody operations."
+
+  STT:
+    name: "State Street Corporation"
+    cik: 93751
+    industry: "banking"
+    bank_archetype: "custodial"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    notes: "Custodial bank - asset servicing and management."
+
+  PNC:
+    name: "PNC Financial Services Group, Inc."
+    cik: 713676
+    industry: "banking"
+    bank_archetype: "commercial"
+    validation_tolerance_pct: 20.0
+    exclude_metrics:
+      - COGS
+      - SGA
+    notes: "Regional commercial bank."
 
 # Default settings
 defaults:
