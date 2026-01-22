@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **EntityFacts Revenue Extraction**
+  - Fixed `get_revenue()` and other financial methods returning None for companies like TSLA
+  - Root cause: Abstract header rows matched label patterns before actual data rows
+  - Solution: Added concept-based search using standardization mappings, filters abstract rows
+  - Now uses XBRL concept names (e.g., `us-gaap_RevenueFromContractWithCustomer...`) instead of fragile label matching
+  - Falls back to label-based search for edge cases
+  - **Files**: `edgar/financials.py`
+
+- **Amended Filing Handling**
+  - Fixed `latest_tenk` and `latest_tenq` returning amended filings (10-K/A, 10-Q/A) which often lack complete XBRL data
+  - Solution: Added `amendments=False` filter to exclude amended filings
+  - **Files**: `edgar/entity/core.py`
+
+### Changed
+
+- **⚠️ BEHAVIORAL CHANGE: EntityFacts Default Period Selection**
+  - **EntityFacts financial methods now default to annual (FY) periods instead of most recent**
+  - Affected methods: `get_revenue()`, `get_net_income()`, `get_total_assets()`, `get_total_liabilities()`, `get_shareholders_equity()`, `get_operating_income()`, `get_gross_profit()`, and their `_detailed()` variants
+  - **Before**: `facts.get_revenue()` returned most recent fact (could be quarterly Q3 data)
+  - **After**: `facts.get_revenue()` returns most recent annual FY data (falls back to most recent if no annual available)
+  - **Migration**:
+    - To get the old behavior (most recent regardless of period): `facts.get_revenue(annual=False)`
+    - To explicitly request quarterly: `facts.get_revenue(period="2024-Q3")`
+    - To explicitly request annual: `facts.get_revenue(period="2024-FY")` or `facts.get_revenue(annual=True)` (default)
+  - **Rationale**: Annual facts are more meaningful for financial analysis and consistent with `get_financials()` behavior
+  - **Files**: `edgar/entity/entity_facts.py`
+
 ## [5.11.1] - 2026-01-21
 
 ### Fixed
