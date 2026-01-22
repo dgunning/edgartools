@@ -301,8 +301,8 @@ print(xbrl.reporting_periods)
 | Method | Description |
 |--------|-------------|
 | `statement.to_dataframe()` | Convert to pandas DataFrame |
-| `statement.to_dataframe(view="summary")` | Totals only |
-| `statement.to_dataframe(view="standard")` | Face presentation (SEC Viewer style) |
+| `statement.to_dataframe(view="summary")` | Matches SEC Viewer |
+| `statement.to_dataframe(view="standard")` | Matches filing document |
 | `statement.to_dataframe(view="detailed")` | All dimensional breakdowns |
 
 ### Filing-Level (More Control)
