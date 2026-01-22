@@ -44,6 +44,7 @@ dependencies = [
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
   "hishel==0.1.3",
+  "pyrate-limiter==3.9.0",
   "httpxthrottlecache>=0.1.6",
 ]
 dynamic = ["version"]
