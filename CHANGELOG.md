@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.11.2] - 2026-01-22
+
 ### Fixed
 
 - **EntityFacts Revenue Extraction**
@@ -35,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - To explicitly request annual: `facts.get_revenue(period="2024-FY")` or `facts.get_revenue(annual=True)` (default)
   - **Rationale**: Annual facts are more meaningful for financial analysis and consistent with `get_financials()` behavior
   - **Files**: `edgar/entity/entity_facts.py`
+
+- **Dependencies**
+  - Pinned `pyrate-limiter` to version 3.9.0 to avoid API breakage in 4.0
+  - **Files**: `pyproject.toml`
 
 ## [5.11.1] - 2026-01-21
 
