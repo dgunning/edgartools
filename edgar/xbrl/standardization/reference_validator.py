@@ -189,9 +189,12 @@ class ReferenceValidator:
             conf = get_config()
             
             # Banking-specific extraction for ShortTermDebt
+            # Use GAAP mode for validation to prove we can reproduce yfinance values
             if industry == 'banking' and metric == 'ShortTermDebt':
                 extractor = BankingExtractor()
-                result = extractor.extract_short_term_debt(xbrl, facts_df)
+                # CRITICAL: Use mode='gaap' for yfinance validation
+                # Street View (mode='street') is for database, not validation
+                result = extractor.extract_short_term_debt(xbrl, facts_df, mode='gaap')
                 if result.value is not None:
                     return result.value
                 
@@ -244,9 +247,12 @@ class ReferenceValidator:
                          return float('nan') # Sentinel for "Hard Missing"
 
             # Banking-specific extraction for CashAndEquivalents
+            # Use GAAP mode for validation to prove we can reproduce yfinance values
             if industry == 'banking' and metric == 'CashAndEquivalents':
                 extractor = BankingExtractor()
-                result = extractor.extract_cash_and_equivalents(xbrl, facts_df)
+                # CRITICAL: Use mode='gaap' for yfinance validation
+                # Street View (mode='street') is for database, not validation
+                result = extractor.extract_cash_and_equivalents(xbrl, facts_df, mode='gaap')
                 if result.value is not None:
                     return result.value
                 

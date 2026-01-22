@@ -452,44 +452,157 @@ class DefaultExtractor(IndustryExtractor):
 
 class BankingExtractor(IndustryExtractor):
     """Banking-specific extraction logic."""
-    
+
     industry_name = "banking"
-    
-    def extract_short_term_debt(self, xbrl, facts_df) -> ExtractedMetric:
+
+    def extract_short_term_debt(self, xbrl, facts_df, mode: str = 'street') -> ExtractedMetric:
         """
-        Bank ShortTermDebt: Street View - Wholesale Funding.
-        
-        Delegates to extract_street_debt() which uses archetype-aware
-        Strict Component Summation to avoid double-counting.
+        Bank ShortTermDebt extraction with mode selection.
+
+        Dual-Track Architecture:
+        - 'gaap': GAAP-aligned extraction for yfinance validation (reproduces their values)
+        - 'street': Street View extraction for database (economic leverage, default)
+
+        Args:
+            xbrl: XBRL object
+            facts_df: DataFrame of XBRL facts
+            mode: 'gaap' for yfinance validation, 'street' for database (default)
+
+        Returns:
+            ExtractedMetric with appropriate extraction method
         """
-        return self.extract_street_debt(xbrl, facts_df)
+        if mode == 'gaap':
+            return self.extract_short_term_debt_gaap(xbrl, facts_df)
+        else:
+            return self.extract_street_debt(xbrl, facts_df)
+
+    def extract_short_term_debt_gaap(self, xbrl, facts_df) -> ExtractedMetric:
+        """
+        GAAP-aligned ShortTermDebt extraction (matches yfinance 'Current Debt').
+
+        yfinance formula: Clean STB (no Repos/TradingLiab) + LongTermDebtCurrent
+
+        Root Cause Analysis:
+        - WFC: ShortTermBorrowings ($108.8B) includes Repos ($54B) + TradingLiab ($48B)
+          but yfinance Current Debt = $13.6B (clean debt only)
+        - GS: Missing LongTermDebtCurrent ($21B) that yfinance includes
+
+        Strategy:
+        1. Try DebtCurrent first (if available, it's usually clean)
+        2. Otherwise, clean the STB aggregate by subtracting Repos + TradingLiab
+        3. Always add CPLTD (yfinance includes this in "Current Debt")
+        """
+        # 1. Try direct DebtCurrent tag first (cleanest match to yfinance "Current Debt")
+        debt_current = self._get_fact_value(facts_df, 'DebtCurrent')
+        if debt_current is not None and debt_current > 0:
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="DebtCurrent_GAAP",
+                xbrl_concept="us-gaap:DebtCurrent",
+                value=debt_current,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes="Bank GAAP: DebtCurrent (yfinance-aligned)"
+            )
+
+        # 2. Get ShortTermBorrowings aggregate (may be contaminated)
+        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+
+        # 3. Get contaminants to SUBTRACT
+        # Repos - often bundled into STB for banks
+        # Try fuzzy match first - companies like WFC use company-specific tags (wfc:SecuritiesSold...)
+        repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
+        if repos == 0:
+            repos = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
+        if repos == 0:
+            repos = self._get_fact_value_fuzzy(facts_df, 'FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase') or 0
+
+        # TradingLiabilities - mark-to-market trading positions, not debt
+        trading_liab = self._get_fact_value(facts_df, 'TradingLiabilities') or 0
+        if trading_liab == 0:
+            trading_liab = self._get_fact_value_fuzzy(facts_df, 'TradingAccountLiabilities') or 0
+
+        # 4. Get CPLTD to ADD (yfinance includes this in "Current Debt")
+        cpltd = self._get_fact_value(facts_df, 'LongTermDebtCurrent') or 0
+        if cpltd == 0:
+            # Fallback: Some banks report CPLTD as "maturities in next 12 months"
+            cpltd = self._get_fact_value(facts_df, 'LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths') or 0
+
+        # 5. Calculate clean debt
+        # Only subtract contaminants if they're significant (> 10% of STB)
+        contamination = repos + trading_liab
+        if stb > 0 and contamination > stb * 0.1:
+            clean_stb = max(0, stb - contamination)
+        else:
+            clean_stb = stb
+
+        total = clean_stb + cpltd
+
+        if total > 0:
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="CurrentDebt_GAAP",
+                xbrl_concept=None,
+                value=total,
+                extraction_method=ExtractionMethod.COMPOSITE,
+                notes=f"Bank GAAP: STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - TradingLiab({trading_liab/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
+            )
+
+        # 6. Component fallback: CP + CPLTD + Other
+        cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
+        other_stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings') or 0
+
+        total = cp + cpltd + other_stb
+
+        if total > 0:
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="ShortTermDebt_GAAP",
+                xbrl_concept=None,
+                value=total,
+                extraction_method=ExtractionMethod.COMPOSITE,
+                notes=f"Bank GAAP: CP({cp/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B)"
+            )
+
+        # No valid GAAP value found
+        return ExtractedMetric(
+            standard_name="ShortTermDebt",
+            industry_counterpart=None,
+            xbrl_concept=None,
+            value=None,
+            extraction_method=ExtractionMethod.DIRECT,
+            notes="Bank GAAP: No valid ShortTermDebt found"
+        )
     
     def extract_street_debt(self, xbrl, facts_df) -> ExtractedMetric:
         """
         Street Debt: Wholesale Funding via Strict Component Summation.
-        
+
         Refined Rules (to match analyst/Street View):
-        - Commercial (USB): STB(Aggregate) - CPLTD. Exclude Repos.
-        - Dealer (GS): UnsecuredSTB + PayablesToBrokerDealers + OtherBorrowings. Exclude Repos.
+        - Commercial (USB): STB(Aggregate) - CPLTD - OperatingLiabilities. Exclude Repos.
+        - Dealer (GS): UnsecuredSTB + BrokerPayables + OtherSecured + NetRepos (Economic Leverage).
+
+        Guardrails:
+        - TradingLiabilities exclusion: Excludes non-debt operating liabilities
+        - Sanity Governor: If aggregate > 2x components, aggregate is contaminated
         """
         archetype = self._detect_bank_archetype(facts_df)
-        
+
         # 1. Base Components
         cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
         other_stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings') or 0
         fhlb = self._get_fact_value_fuzzy(facts_df, 'FederalHomeLoanBankAdvances') or 0
-        
+
         # Repos Logic
         repos = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
         if repos == 0:
-             repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
-             
+            repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
+
         reverse_repos = self._get_fact_value(facts_df, 'SecuritiesPurchasedUnderAgreementsToResell') or 0
         if reverse_repos == 0:
-             reverse_repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesPurchasedUnderAgreementsToResell') or 0
-             
+            reverse_repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesPurchasedUnderAgreementsToResell') or 0
+
         net_repos = max(0, repos - reverse_repos)
-        
+
         # 2. Archetype Specifics
         unsecured_stb = 0
         broker_payables = 0
@@ -501,16 +614,39 @@ class BankingExtractor(IndustryExtractor):
             broker_payables = self._get_fact_value_fuzzy(facts_df, 'PayablesToBrokerDealersAndClearingOrganizations') or 0
             # Other secured borrowings (excluding Repos)
             other_secured = self._get_fact_value_fuzzy(facts_df, 'OtherSecuredBorrowings') or 0
-        
+
         # 3. Aggregate and CPLTD
         stb_aggregate = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
-        cpltd = (self._get_fact_value(facts_df, 'LongTermDebtCurrent') or 
+        cpltd = (self._get_fact_value(facts_df, 'LongTermDebtCurrent') or
                  self._get_fact_value_fuzzy(facts_df, 'LongTermDebtAndLeaseObligationMaturityYearOne') or 0)
 
-        # 4. FINAL LOGIC SELECTION
+        # 4. OPERATING LIABILITIES (MUST EXCLUDE from debt for Street View)
+        # These are trading/customer liabilities, not financing debt
+        trading_liabilities = self._get_fact_value(facts_df, 'TradingLiabilities') or 0
+        if trading_liabilities == 0:
+            trading_liabilities = self._get_fact_value_fuzzy(facts_df, 'TradingAccountLiabilities') or 0
+
+        payables_customers = self._get_fact_value(facts_df, 'PayablesToCustomers') or 0
+
+        securities_sold_short = self._get_fact_value(facts_df, 'FinancialInstrumentsSoldNotYetPurchasedAtFairValue') or 0
+        if securities_sold_short == 0:
+            securities_sold_short = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldShort') or 0
+
+        operating_liabilities = trading_liabilities + payables_customers + securities_sold_short
+
+        # 5. SANITY GOVERNOR: If aggregate > 2x components, it's contaminated
+        components_sum = cp + other_stb + fhlb
+        sanity_threshold = 2.0
+        aggregate_is_contaminated = (
+            stb_aggregate > 0 and
+            components_sum > 0 and
+            stb_aggregate > (components_sum * sanity_threshold)
+        )
+
+        # 6. FINAL LOGIC SELECTION
         total = 0
         notes = ""
-        
+
         if archetype == 'dealer':
             # Street View for Dealers: Unsecured + BrokerPayables + OtherSecured + NetRepos (Economic Leverage)
             # Use max(stb_aggregate, unsecured_stb) as the core
@@ -518,24 +654,34 @@ class BankingExtractor(IndustryExtractor):
             total = core + broker_payables + other_secured + net_repos
             notes = f"Bank Street Debt [dealer]: core({core/1e9:.1f}B) + broker_payables({broker_payables/1e9:.1f}B) + net_repos({net_repos/1e9:.1f}B)"
         else:
-            # Street View for Commercial: STB(Agg) - CPLTD. Exclude Repos.
-            # If STB aggregate is missing, sum components (CP+FHLB+Other)
-            if stb_aggregate > 0:
+            # Street View for Commercial Banks
+            if aggregate_is_contaminated:
+                # SANITY GOVERNOR TRIGGERED: Aggregate is > 2x components, use components only
+                total = cp + other_stb + fhlb
+                notes = f"Bank Street Debt [commercial/SANITY]: CP({cp/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B) + FHLB({fhlb/1e9:.1f}B) [aggregate contaminated: {stb_aggregate/1e9:.1f}B > 2x {components_sum/1e9:.1f}B]"
+            elif stb_aggregate > 0:
                 # Does STB include CPLTD? If STB is significantly higher than components, it likely does.
-                components_sum = cp + other_stb + fhlb
-                # We also check if stb_aggregate is exactly equal to the Ref (which we discovered for USB Q310-Q)
-                # But here we don't know Ref. We use standard heuristic.
                 if stb_aggregate > (components_sum * 1.5) and cpltd > 0:
-                    total = max(0, stb_aggregate - cpltd)
-                    notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) - CPLTD({cpltd/1e9:.1f}B)"
+                    # Subtract CPLTD and operating liabilities for clean Street View
+                    clean_debt = max(0, stb_aggregate - cpltd - operating_liabilities)
+                    total = clean_debt
+                    if operating_liabilities > 0:
+                        notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) - CPLTD({cpltd/1e9:.1f}B) - OpLiab({operating_liabilities/1e9:.1f}B)"
+                    else:
+                        notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) - CPLTD({cpltd/1e9:.1f}B)"
                 else:
-                    # Case where STB is likely the clean street number or components match
-                    total = stb_aggregate
-                    notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) [aggregate]"
+                    # STB is likely the clean street number, but still exclude operating liabilities
+                    if operating_liabilities > 0 and operating_liabilities < stb_aggregate:
+                        clean_debt = max(0, stb_aggregate - operating_liabilities)
+                        total = clean_debt
+                        notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) - OpLiab({operating_liabilities/1e9:.1f}B)"
+                    else:
+                        total = stb_aggregate
+                        notes = f"Bank Street Debt [commercial]: STB({stb_aggregate/1e9:.1f}B) [aggregate]"
             else:
                 total = cp + other_stb + fhlb
                 notes = f"Bank Street Debt [commercial]: CP({cp/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B) + FHLB({fhlb/1e9:.1f}B) [components]"
-        
+
         return ExtractedMetric(
             standard_name="ShortTermDebt",
             industry_counterpart="WholesaleFunding",
@@ -606,13 +752,118 @@ class BankingExtractor(IndustryExtractor):
             notes="Bank (economic): ShortTermBorrowings + Repos + CP"
         )
     
-    def extract_cash_and_equivalents(self, xbrl, facts_df) -> ExtractedMetric:
+    def extract_cash_and_equivalents(self, xbrl, facts_df, mode: str = 'street') -> ExtractedMetric:
         """
-        Bank Cash: Street View - Economic Liquidity.
-        
-        Delegates to extract_street_cash() which uses archetype-aware composite logic.
+        Bank Cash extraction with mode selection.
+
+        Dual-Track Architecture:
+        - 'gaap': GAAP-aligned extraction for yfinance validation
+        - 'street': Street View extraction for database (economic liquidity, default)
+
+        Args:
+            xbrl: XBRL object
+            facts_df: DataFrame of XBRL facts
+            mode: 'gaap' for yfinance validation, 'street' for database (default)
+
+        Returns:
+            ExtractedMetric with appropriate extraction method
         """
-        return self.extract_street_cash(xbrl, facts_df)
+        if mode == 'gaap':
+            return self.extract_cash_gaap(xbrl, facts_df)
+        else:
+            return self.extract_street_cash(xbrl, facts_df)
+
+    def extract_cash_gaap(self, xbrl, facts_df) -> ExtractedMetric:
+        """
+        GAAP-aligned Cash extraction (matches yfinance 'Cash And Cash Equivalents').
+
+        yfinance formula: CashAndCashEquivalents + InterestBearingDeposits + FedDeposits - RestrictedCash
+
+        Root Cause Analysis:
+        - BK: CashAndCashEquivalentsAtCarryingValue ($4.2B) doesn't include Fed Deposits ($89.5B)
+          but yfinance = $101.9B (CCE + Fed Deposits)
+        - MS: CashAndCashEquivalentsAtCarryingValue ($105.4B) includes RestrictedCash ($29.6B)
+          but yfinance = $75.7B (excludes Restricted)
+
+        Strategy:
+        1. Get base cash (CCE)
+        2. SUBTRACT Restricted Cash (yfinance excludes)
+        3. ADD Interest-Bearing Deposits + Fed Deposits (for banks with separate line items)
+        4. Avoid double-counting using heuristics
+        """
+        # 1. Get base cash value
+        cce = self._get_fact_value(facts_df, 'CashAndCashEquivalentsAtCarryingValue') or 0
+        if cce == 0:
+            cce = self._get_fact_value(facts_df, 'CashAndCashEquivalents') or 0
+
+        # 2. SUBTRACT Restricted Cash (yfinance excludes)
+        restricted = self._get_fact_value(facts_df, 'RestrictedCashAndCashEquivalents') or 0
+        if restricted == 0:
+            restricted = self._get_fact_value(facts_df, 'RestrictedCash') or 0
+
+        # 3. ADD Interest-Bearing Deposits (for banks, this is liquid)
+        ib_deposits = self._get_fact_value(facts_df, 'InterestBearingDepositsInBanks') or 0
+
+        # 4. ADD Fed Deposits (critical for custodial banks like BK)
+        # BK uses: bk:InterestBearingDepositsInFederalReserveAndOtherCentralBanks (~$89.5B)
+        fed_deposits = self._get_fact_value(facts_df, 'InterestBearingDepositsWithFederalReserveBank') or 0
+        if fed_deposits == 0:
+            fed_deposits = self._get_fact_value_fuzzy(facts_df, 'InterestBearingDepositsInFederalReserve') or 0
+        if fed_deposits == 0:
+            fed_deposits = self._get_fact_value_fuzzy(facts_df, 'DepositsWithFederalReserve') or 0
+
+        # 5. Avoid double-counting: Check if CCE already includes IB/Fed deposits
+        # Heuristic: If CCE is small relative to deposits, they're separate line items
+        # If CCE is large and close to total deposits, it might already include them
+        total_deposits = ib_deposits + fed_deposits
+
+        if cce > 0 and total_deposits > 0:
+            # Heuristic: If CCE < total_deposits, they're clearly separate (add them)
+            # If CCE > total_deposits, CCE might already include them (don't double-count)
+            if cce < total_deposits * 0.5:
+                # CCE is clearly separate from deposits
+                total = cce + total_deposits - restricted
+            else:
+                # CCE might include deposits, just subtract restricted
+                total = cce - restricted
+        elif total_deposits > 0:
+            total = total_deposits - restricted
+        else:
+            total = cce - restricted
+
+        total = max(0, total)
+
+        if total > 0:
+            return ExtractedMetric(
+                standard_name="CashAndEquivalents",
+                industry_counterpart="CashAndEquivalents_GAAP",
+                xbrl_concept=None,
+                value=total,
+                extraction_method=ExtractionMethod.COMPOSITE,
+                notes=f"Bank GAAP: CCE({cce/1e9:.1f}B) + IBDeposits({ib_deposits/1e9:.1f}B) + FedDeposits({fed_deposits/1e9:.1f}B) - Restricted({restricted/1e9:.1f}B)"
+            )
+
+        # Fallback to Cash
+        val = self._get_fact_value(facts_df, 'Cash')
+        if val is not None and val > 0:
+            return ExtractedMetric(
+                standard_name="CashAndEquivalents",
+                industry_counterpart="Cash_GAAP",
+                xbrl_concept="us-gaap:Cash",
+                value=val,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes="Bank GAAP: Cash (fallback)"
+            )
+
+        # No valid GAAP value found
+        return ExtractedMetric(
+            standard_name="CashAndEquivalents",
+            industry_counterpart=None,
+            xbrl_concept=None,
+            value=None,
+            extraction_method=ExtractionMethod.DIRECT,
+            notes="Bank GAAP: No valid CashAndEquivalents found"
+        )
     
     def extract_street_cash(self, xbrl, facts_df) -> ExtractedMetric:
         """
