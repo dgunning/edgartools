@@ -24,7 +24,7 @@ class Financials:
             log.warning(f"Filing {filing} does not contain XBRL data: {e}")
             return None
 
-    def balance_sheet(self, include_dimensions: bool = False, view: ViewType = None):
+    def balance_sheet(self, include_dimensions: bool = None, view: ViewType = None):
         """
         Get the balance sheet.
 
@@ -43,7 +43,7 @@ class Financials:
             return None
         return self.xb.statements.balance_sheet(include_dimensions=include_dimensions, view=view)
 
-    def income_statement(self, include_dimensions: bool = False, view: ViewType = None):
+    def income_statement(self, include_dimensions: bool = None, view: ViewType = None):
         """
         Get the income statement.
 
@@ -62,7 +62,7 @@ class Financials:
             return None
         return self.xb.statements.income_statement(include_dimensions=include_dimensions, view=view)
 
-    def cashflow_statement(self, include_dimensions: bool = False, view: ViewType = None):
+    def cashflow_statement(self, include_dimensions: bool = None, view: ViewType = None):
         """
         Get the cash flow statement.
 
@@ -81,7 +81,7 @@ class Financials:
             return None
         return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions, view=view)
 
-    def statement_of_equity(self, include_dimensions: bool = False, view: ViewType = None):
+    def statement_of_equity(self, include_dimensions: bool = None, view: ViewType = None):
         """
         Get the statement of equity.
 
@@ -100,7 +100,7 @@ class Financials:
             return None
         return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions, view=view)
 
-    def comprehensive_income(self, include_dimensions: bool = False, view: ViewType = None):
+    def comprehensive_income(self, include_dimensions: bool = None, view: ViewType = None):
         """
         Get the comprehensive income statement.
 
