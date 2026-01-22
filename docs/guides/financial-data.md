@@ -128,6 +128,12 @@ income = financials.income_statement(view="standard")
 income = financials.income_statement(view="detailed")
 ```
 
+### Summary Statement
+
+![AAPL Detailed Income Statement](../images/aapl-income-summary.webp)
+
+### Detailed Statement
+
 ![AAPL Detailed Income Statement](../images/aapl-income-detailed.webp)
 
 | View | Shows | Typical Rows | Best For |
@@ -175,9 +181,9 @@ df_detailed = income.to_dataframe(view="detailed")
 
 ### When to Use Each View
 
-- **Summary**: Quick checks, comparing many companies, screening
-- **Standard**: Matches what you see on SEC.gov, good for validation
-- **Detailed**: Data analysis, segment research, complete extraction
+- **Summary**: Quick checks, matches SEC Viewer, comparing many companies
+- **Standard**: Matches the filing document, full context with face-level dimensions
+- **Detailed**: Data extraction, segment analysis, complete dimensional breakdowns
 
 **Learn more:** [Dimension Handling Guide](../xbrl/concepts/dimension-handling.md)
 
