@@ -88,13 +88,20 @@ if industry == 'banking' and metric == 'ShortTermDebt':
 
 **ShortTermDebt GAAP Extraction:**
 1. Try `DebtCurrent` tag (cleanest match to yfinance)
-2. Try `ShortTermBorrowings` aggregate
-3. Fall back to component sum: `CP + CPLTD + OtherSTB`
+2. Try `ShortTermBorrowings` aggregate with archetype-aware cleaning:
+   - **Commercial banks:** Subtract Repos + TradingLiabilities (if nested)
+   - **Dealer banks:** Use STB directly (repos are separate line items, not nested)
+3. Add `LongTermDebtCurrent` (CPLTD)
+   - ⚠️ **NO maturity schedule fallback** - `LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths` is a footnote disclosure (ASC 470-10-50-1), not a balance sheet classification
+4. Fall back to component sum: `CP + CPLTD + OtherSTB`
 
 **CashAndEquivalents GAAP Extraction:**
 1. Try `CashAndCashEquivalentsAtCarryingValue`
-2. Try `CashAndCashEquivalents`
-3. Fall back to `Cash`
+2. Try `CashAndDueFromBanks` (common for commercial banks like USB)
+3. Try `CashAndCashEquivalents`
+4. Add `InterestBearingDepositsInBanks` + `FedDeposits` (if separate line items)
+5. Subtract `RestrictedCash` (yfinance excludes)
+6. Fall back to `Cash`
 
 **Expected Outcome:** < 15% variance vs yfinance (validation passes)
 
@@ -146,11 +153,13 @@ if stb_aggregate > (components_sum * 2.0):
 
 We classify banks into three archetypes to tailor extraction logic:
 
-| Archetype | Characteristics | Examples | Street View Differences |
-|-----------|-----------------|----------|-------------------------|
-| **Commercial** | Loan/Deposit centric | USB, WFC, JPM, C, PNC, BAC | Clean debt (excludes TradingLiab) |
-| **Dealer** | Trading/Market Making | GS, MS | Includes Net Repos, Broker Payables |
-| **Custodial** | Asset Servicing | BK, STT | High Fed Deposits in Cash |
+| Archetype | Characteristics | Examples | GAAP Track Differences | Street View Differences |
+|-----------|-----------------|----------|------------------------|-------------------------|
+| **Commercial** | Loan/Deposit centric | USB, WFC, JPM, C, PNC, BAC | Subtract repos/trading from STB (nested) | Clean debt (excludes TradingLiab) |
+| **Dealer** | Trading/Market Making | GS, MS | Use STB directly (repos are separate) | Includes Net Repos, Broker Payables |
+| **Custodial** | Asset Servicing | BK, STT | Standard GAAP extraction | High Fed Deposits in Cash |
+
+**Key Insight for GAAP Track:** Dealers (GS, MS) report repos as *separate* balance sheet line items (~$274B for GS), not nested inside ShortTermBorrowings (~$70B). Subtracting repos from STB for dealers causes massive under-extraction.
 
 Archetype detection happens dynamically in `BankingExtractor._detect_bank_archetype()`:
 - **Custodial:** `PayablesToCustomers / Liabilities > 20%`
@@ -242,23 +251,68 @@ python .claude/skills/bank-sector-test/scripts/run_bank_e2e.py --metrics ShortTe
 
 ## 9. Troubleshooting
 
-### 9.1 High Variance in ShortTermDebt
+### 9.1 High Variance in ShortTermDebt (Over-extraction)
 
-**Symptoms:** XBRL value >> yfinance (e.g., 500%+ variance)
+**Symptoms:** XBRL value >> yfinance (e.g., 82-996% over-extraction)
 
 **Likely Causes:**
-1. `ShortTermBorrowings` aggregate includes Repos/Fed Funds
-2. GAAP extraction not finding clean `DebtCurrent` tag
-3. Commercial bank being treated with dealer logic
+1. Using maturity schedule (`LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths`) as CPLTD fallback - this is a footnote disclosure, not balance sheet
+2. `ShortTermBorrowings` aggregate includes Repos/Fed Funds for commercial banks
+3. Contamination subtraction not working properly
+
+**Known Cases (Fixed):**
+- **WFC:** Was 82% over ($24.8B vs $13.6B yfinance) due to maturity schedule CPLTD
+- **BK:** Was 996% over ($3.3B vs $0.3B yfinance) due to maturity schedule CPLTD
 
 **Debug Steps:**
 ```python
-# Check what tags are available
-facts_df[facts_df['concept'].str.contains('ShortTerm', case=False)]['concept'].unique()
-facts_df[facts_df['concept'].str.contains('Debt', case=False)]['concept'].unique()
+# Check for maturity schedule vs balance sheet CPLTD
+facts_df[facts_df['concept'].str.contains('Maturities|LongTermDebtCurrent', case=False)]['concept'].unique()
 ```
 
-### 9.2 Missing Cash for Custodial Banks (BK, STT)
+### 9.2 Low Variance in ShortTermDebt (Under-extraction for Dealers)
+
+**Symptoms:** XBRL value << yfinance for dealer banks (e.g., 95% under-extraction)
+
+**Likely Causes:**
+1. Subtracting repos from STB for dealers when repos are *separate* line items
+2. Dealer banks (GS, MS) report massive repos (~$274B) as standalone liabilities, not nested in STB (~$70B)
+
+**Known Cases (Fixed):**
+- **GS:** Was 95% under ($4.6B vs $90.6B yfinance) due to subtracting $274B repos from $70B STB
+
+**Debug Steps:**
+```python
+# Check archetype detection
+extractor = BankingExtractor()
+archetype = extractor._detect_bank_archetype(facts_df)
+print(f"Archetype: {archetype}")  # Should be 'dealer' for GS/MS
+
+# Check repos vs STB magnitude
+stb = extractor._get_fact_value(facts_df, 'ShortTermBorrowings')
+repos = extractor._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase')
+print(f"STB: {stb/1e9:.1f}B, Repos: {repos/1e9:.1f}B")
+# If repos >> STB, they're separate line items (don't subtract)
+```
+
+### 9.3 Missing Cash for Commercial Banks
+
+**Symptoms:** XBRL value << yfinance for commercial banks (e.g., 83% under-extraction)
+
+**Likely Causes:**
+1. Bank uses `CashAndDueFromBanks` instead of `CashAndCashEquivalentsAtCarryingValue`
+2. GAAP extraction not finding the correct tag in hierarchy
+
+**Known Cases (Fixed):**
+- **USB:** Was 83% under ($9.4B vs $56.5B yfinance) due to missing `CashAndDueFromBanks` in hierarchy
+
+**Debug Steps:**
+```python
+# Check which cash tags are available
+facts_df[facts_df['concept'].str.contains('Cash', case=False)]['concept'].unique()
+```
+
+### 9.4 Missing Cash for Custodial Banks (BK, STT)
 
 **Symptoms:** XBRL value << yfinance (e.g., 95%+ variance)
 
@@ -298,5 +352,25 @@ facts_df[facts_df['concept'].str.contains('FederalReserve|CentralBank', case=Fal
 
 ---
 
-*Updated: Jan 2026 - Dual-Track Extraction System*
+## Appendix B: Changelog
+
+### Jan 22, 2026 - GAAP Extraction Remediation
+
+**Fixes Applied:**
+
+| Issue | Company | Root Cause | Fix |
+|-------|---------|------------|-----|
+| Dealer Debt Subtraction | GS | Subtracting repos ($274B) that are separate line items | Added archetype check - skip subtraction for dealers |
+| Maturity Schedule Ban | WFC, BK | Using footnote disclosure as balance sheet | Removed `LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths` fallback |
+| Cash Hierarchy | USB | Missing `CashAndDueFromBanks` tag | Added to GAAP cash hierarchy as priority #2 |
+
+**Results:**
+- 10-K Pass Rate: 58.3% → 81.8%
+- 10-Q Pass Rate: 76.0% → 90.0%
+- CashAndEquivalents failures: 3 → 0
+- ShortTermDebt failures: 13 → 7
+
+---
+
+*Updated: Jan 22, 2026 - GAAP Extraction Remediation*
 *Created by the Advanced Agentic Coding Team*
