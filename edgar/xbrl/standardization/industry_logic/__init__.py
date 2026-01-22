@@ -507,6 +507,9 @@ class BankingExtractor(IndustryExtractor):
         # 2. Get ShortTermBorrowings aggregate (may be contaminated)
         stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
 
+        # 2.5 Get archetype to determine contamination subtraction strategy
+        archetype = self._detect_bank_archetype(facts_df)
+
         # 3. Get contaminants to SUBTRACT
         # Repos - often bundled into STB for banks
         # Try fuzzy match first - companies like WFC use company-specific tags (wfc:SecuritiesSold...)
@@ -522,29 +525,46 @@ class BankingExtractor(IndustryExtractor):
             trading_liab = self._get_fact_value_fuzzy(facts_df, 'TradingAccountLiabilities') or 0
 
         # 4. Get CPLTD to ADD (yfinance includes this in "Current Debt")
+        # STRICT: Only use balance sheet classification, NOT maturity schedule (footnote disclosure)
+        # Maturity schedules (ASC 470-10-50-1) show future cash flows, not current liabilities
         cpltd = self._get_fact_value(facts_df, 'LongTermDebtCurrent') or 0
-        if cpltd == 0:
-            # Fallback: Some banks report CPLTD as "maturities in next 12 months"
-            cpltd = self._get_fact_value(facts_df, 'LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths') or 0
+        # REMOVED: LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths fallback
+        # This was causing 82-996% over-extraction for WFC and BK
 
         # 5. Calculate clean debt
-        # Only subtract contaminants if they're significant (> 10% of STB)
+        # CRITICAL FIX: For dealers (GS, MS), repos are SEPARATE line items, not nested in STB
+        # Only subtract contaminants for commercial banks where repos ARE nested
         contamination = repos + trading_liab
-        if stb > 0 and contamination > stb * 0.1:
+
+        # Determine if we should subtract contamination
+        # For dealers: repos are usually massive separate line items (GS: $274B repos vs $69.7B STB)
+        # For commercial: repos may be nested inside STB
+        should_subtract = (
+            archetype != 'dealer' and  # Commercial banks: subtract contamination
+            stb > 0 and
+            contamination > stb * 0.1 and  # Contamination is significant
+            contamination < stb * 1.5  # Sanity check: can't subtract more than exists
+        )
+
+        if should_subtract:
             clean_stb = max(0, stb - contamination)
         else:
-            clean_stb = stb
+            clean_stb = stb  # For dealers, use STB directly (repos are separate)
 
         total = clean_stb + cpltd
 
         if total > 0:
+            if should_subtract:
+                notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - TradingLiab({trading_liab/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
+            else:
+                notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B) [no subtraction - repos/trading separate] + CPLTD({cpltd/1e9:.1f}B)"
             return ExtractedMetric(
                 standard_name="ShortTermDebt",
                 industry_counterpart="CurrentDebt_GAAP",
                 xbrl_concept=None,
                 value=total,
                 extraction_method=ExtractionMethod.COMPOSITE,
-                notes=f"Bank GAAP: STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - TradingLiab({trading_liab/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
+                notes=notes
             )
 
         # 6. Component fallback: CP + CPLTD + Other
@@ -791,8 +811,12 @@ class BankingExtractor(IndustryExtractor):
         3. ADD Interest-Bearing Deposits + Fed Deposits (for banks with separate line items)
         4. Avoid double-counting using heuristics
         """
-        # 1. Get base cash value
+        # 1. Get base cash value - with expanded hierarchy for commercial banks
         cce = self._get_fact_value(facts_df, 'CashAndCashEquivalentsAtCarryingValue') or 0
+        if cce == 0:
+            # Priority 2: CashAndDueFromBanks (common for commercial banks like USB)
+            # USB reports $56.5B here, which is exact match to yfinance
+            cce = self._get_fact_value(facts_df, 'CashAndDueFromBanks') or 0
         if cce == 0:
             cce = self._get_fact_value(facts_df, 'CashAndCashEquivalents') or 0
 
