@@ -110,6 +110,79 @@ income = quarterly.income_statement()
 
 ---
 
+
+## Getting Different Levels of Detail
+
+Financial statements can show different levels of detail. Use the `view` parameter to control what you see:
+
+```python
+financials = company.get_financials()
+
+# Summary: Matches SEC Viewer (~15-20 rows)
+income = financials.income_statement(view="summary")
+
+# Standard: Matches the filing document (default)
+income = financials.income_statement(view="standard")
+
+# Detailed: All dimensional breakdowns
+income = financials.income_statement(view="detailed")
+```
+
+![AAPL Detailed Income Statement](../images/aapl-income-detailed.webp)
+
+| View | Shows | Typical Rows | Best For |
+|------|-------|--------------|----------|
+| `"summary"` | Matches SEC Viewer | ~15-20 | Quick overview, validation |
+| `"standard"` | Matches filing document | ~25-35 | Display, full context |
+| `"detailed"` | All dimensional breakdowns | ~50+ | Data extraction, segment analysis |
+
+### Example: Apple Revenue
+
+With `view="summary"`:
+```
+Revenue                              $391,035M
+```
+
+With `view="standard"`:
+```
+Revenue:
+  Products                           $298,085M
+  Services                            $92,950M
+```
+
+With `view="detailed"`:
+```
+Revenue:
+  Products                           $298,085M
+    iPhone                           $201,183M
+    Mac                               $29,357M
+    iPad                              $26,694M
+    Wearables, Home and Accessories   $40,851M
+  Services                            $92,950M
+```
+
+### Views with DataFrames
+
+The `view` parameter also works when exporting to DataFrame:
+
+```python
+income = financials.income_statement()
+
+df_summary = income.to_dataframe(view="summary")
+df_standard = income.to_dataframe(view="standard")
+df_detailed = income.to_dataframe(view="detailed")
+```
+
+### When to Use Each View
+
+- **Summary**: Quick checks, comparing many companies, screening
+- **Standard**: Matches what you see on SEC.gov, good for validation
+- **Detailed**: Data analysis, segment research, complete extraction
+
+**Learn more:** [Dimension Handling Guide](../xbrl/concepts/dimension-handling.md)
+
+---
+
 ## Compare Multiple Periods
 
 To analyze trends across multiple filings, use `XBRLS`:
@@ -133,41 +206,6 @@ This aligns the periods and concepts across filings for easy comparison.
 
 ---
 
-## Cross-Company Comparison
-
-The same API works for any public company:
-
-```python
-for ticker in ["AAPL", "MSFT", "GOOGL"]:
-    company = Company(ticker)
-    financials = company.get_financials()
-    if financials:
-        revenue = financials.get_revenue()
-        print(f"{ticker}: ${revenue:,.0f}")
-```
-
-EdgarTools standardizes ~2,000 company-specific XBRL tags to 95 standard concepts, making cross-company analysis straightforward.
-
----
-
-## Going Deeper: Filing-Level Access
-
-The methods above use the latest filing automatically. When you need a specific filing—like last year's 10-K or a particular quarter—access the XBRL directly:
-
-```python
-# Get a specific filing
-filing = company.get_filings(form="10-K", amendments=False).latest()
-
-# Parse XBRL
-xbrl = filing.xbrl()
-
-# Get statements
-income = xbrl.statements.income_statement()
-balance = xbrl.statements.balance_sheet()
-```
-
-This gives you full control over which filing you're analyzing.
-
 ### Why skip amendments?
 
 Use `amendments=False` when fetching filings. Amended filings (10-K/A) sometimes contain only the corrected sections, not complete financial statements.
@@ -175,27 +213,6 @@ Use `amendments=False` when fetching filings. Amended filings (10-K/A) sometimes
 ---
 
 ## Advanced Topics
-
-### Working with Dimensions
-
-Companies report breakdowns by segment, product, or geography:
-
-```python
-income = financials.income_statement()
-
-# Default: totals only
-df = income.to_dataframe()
-
-# Include dimensional breakdowns
-df_full = income.to_dataframe(include_dimensions=True)
-```
-
-Common dimensions:
-- `ProductOrServiceAxis` – Revenue by product vs service
-- `StatementBusinessSegmentsAxis` – Business unit breakdown
-- `StatementGeographicalAxis` – Geographic regions
-
-**Learn more:** [Dimension Handling Guide](../xbrl/concepts/dimension-handling.md)
 
 ### Raw Facts Query
 
@@ -235,10 +252,10 @@ else:
 
 ### "Statement is empty"
 
-Try including dimensional data:
+Try using the detailed view to include all dimensional data:
 
 ```python
-df = income.to_dataframe(include_dimensions=True)
+df = income.to_dataframe(view="detailed")
 ```
 
 ### "Numbers don't match the SEC website"
@@ -278,7 +295,9 @@ print(xbrl.reporting_periods)
 | Method | Description |
 |--------|-------------|
 | `statement.to_dataframe()` | Convert to pandas DataFrame |
-| `statement.to_dataframe(include_dimensions=True)` | Include dimensional breakdowns |
+| `statement.to_dataframe(view="summary")` | Totals only |
+| `statement.to_dataframe(view="standard")` | Face presentation (SEC Viewer style) |
+| `statement.to_dataframe(view="detailed")` | All dimensional breakdowns |
 
 ### Filing-Level (More Control)
 
