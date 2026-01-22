@@ -757,16 +757,16 @@ class Company(Entity):
 
     @property
     def latest_tenk(self) -> Optional[TenK]:
-        """Get the latest 10-K filing for this company."""
-        latest_10k = self.get_filings(form='10-K', trigger_full_load=False).latest()
+        """Get the latest unamended 10-K filing for this company."""
+        latest_10k = self.get_filings(form='10-K', amendments=False, trigger_full_load=False).latest()
         if latest_10k is not None:
             return latest_10k.obj()
         return None
 
     @property
     def latest_tenq(self) -> Optional[TenQ]:
-        """Get the latest 10-Q filing for this company."""
-        latest_10q = self.get_filings(form='10-Q', trigger_full_load=False).latest()
+        """Get the latest unamended 10-Q filing for this company."""
+        latest_10q = self.get_filings(form='10-Q', amendments=False, trigger_full_load=False).latest()
         if latest_10q is not None:
             return latest_10q.obj()
         return None

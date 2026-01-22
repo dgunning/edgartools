@@ -541,6 +541,46 @@ class EntityFacts:
 
         return None
 
+    def get_annual_fact(self, concept: str, fiscal_year: Optional[int] = None) -> Optional[FinancialFact]:
+        """
+        Get an annual (FY) fact by concept and optional fiscal year.
+
+        This method filters for fiscal_period == 'FY' to return annual values,
+        which is more intuitive for financial metrics like revenue and net income.
+
+        Args:
+            concept: Concept name or label
+            fiscal_year: Optional fiscal year (defaults to most recent FY if not specified)
+
+        Returns:
+            The matching annual fact, or None if not found
+        """
+        # Try exact concept match first
+        facts = self._fact_index['by_concept'].get(concept, [])
+
+        # Try case-insensitive label match
+        if not facts:
+            facts = self._fact_index['by_concept'].get(concept.lower(), [])
+
+        if not facts:
+            return None
+
+        # Filter for annual periods (FY)
+        annual_facts = [f for f in facts if f.fiscal_period == 'FY']
+
+        if not annual_facts:
+            return None
+
+        # Filter by fiscal year if specified
+        if fiscal_year:
+            annual_facts = [f for f in annual_facts if f.fiscal_year == fiscal_year]
+
+        # Return most recent annual fact
+        if annual_facts:
+            return max(annual_facts, key=lambda f: (f.filing_date, f.period_end))
+
+        return None
+
     def time_series(self, concept: str, periods: int = 20) -> pd.DataFrame:
         """
         Get time series data for a concept.
@@ -676,6 +716,8 @@ class EntityFacts:
         This method handles various revenue concept names (Revenue, Contract Revenue, Net Sales, etc.)
         and provides consistent access regardless of company-specific naming conventions.
 
+        When period is not specified, defaults to the most recent annual (FY) period.
+
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
             unit: Optional unit filter (defaults to USD if not specified)
@@ -684,7 +726,7 @@ class EntityFacts:
             Revenue value as float, or None if not found
 
         Example:
-            >>> revenue = facts.get_revenue()
+            >>> revenue = facts.get_revenue()  # Returns annual revenue
             >>> quarterly_revenue = facts.get_revenue(period="2024-Q1")
         """
         return self._get_standardized_concept_value(
@@ -699,7 +741,8 @@ class EntityFacts:
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
-            strict_unit_match=True
+            strict_unit_match=True,
+            prefer_annual=True
         )
 
     def get_net_income(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
@@ -707,6 +750,8 @@ class EntityFacts:
         Get standardized net income value across all companies.
 
         Handles various net income concept names and provides consistent access.
+
+        When period is not specified, defaults to the most recent annual (FY) period.
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
@@ -716,7 +761,7 @@ class EntityFacts:
             Net income value as float, or None if not found
 
         Example:
-            >>> net_income = facts.get_net_income()
+            >>> net_income = facts.get_net_income()  # Returns annual net income
             >>> annual_income = facts.get_net_income(period="2024-FY")
         """
         return self._get_standardized_concept_value(
@@ -728,7 +773,8 @@ class EntityFacts:
                 'NetIncomeLossAttributableToParent'
             ],
             period=period,
-            unit=unit
+            unit=unit,
+            prefer_annual=True
         )
 
     def get_total_assets(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
@@ -810,6 +856,8 @@ class EntityFacts:
         """
         Get standardized operating income value across all companies.
 
+        When period is not specified, defaults to the most recent annual (FY) period.
+
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
             unit: Optional unit filter (defaults to USD if not specified)
@@ -818,7 +866,7 @@ class EntityFacts:
             Operating income value as float, or None if not found
 
         Example:
-            >>> op_income = facts.get_operating_income()
+            >>> op_income = facts.get_operating_income()  # Returns annual operating income
         """
         return self._get_standardized_concept_value(
             concept_variants=[
@@ -828,12 +876,15 @@ class EntityFacts:
                 'OperatingProfit'
             ],
             period=period,
-            unit=unit
+            unit=unit,
+            prefer_annual=True
         )
 
     def get_gross_profit(self, period: Optional[str] = None, unit: Optional[str] = None) -> Optional[float]:
         """
         Get standardized gross profit value across all companies.
+
+        When period is not specified, defaults to the most recent annual (FY) period.
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
@@ -843,7 +894,7 @@ class EntityFacts:
             Gross profit value as float, or None if not found
 
         Example:
-            >>> gross_profit = facts.get_gross_profit()
+            >>> gross_profit = facts.get_gross_profit()  # Returns annual gross profit
         """
         return self._get_standardized_concept_value(
             concept_variants=[
@@ -852,7 +903,8 @@ class EntityFacts:
             ],
             period=period,
             unit=unit,
-            fallback_calculation=self._calculate_gross_profit_from_components
+            fallback_calculation=self._calculate_gross_profit_from_components,
+            prefer_annual=True
         )
 
     # ═══════════════════════════════════════════════════════════════════════════
@@ -1581,7 +1633,8 @@ class EntityFacts:
                                       unit: Optional[str] = None,
                                       fallback_calculation: Optional[Callable] = None,
                                       return_detailed: bool = False,
-                                      strict_unit_match: bool = False) -> Optional[float]:
+                                      strict_unit_match: bool = False,
+                                      prefer_annual: bool = False) -> Optional[float]:
         """
         Core method for retrieving standardized concept values with enhanced unit handling.
 
@@ -1592,6 +1645,7 @@ class EntityFacts:
             fallback_calculation: Optional function to calculate value from components
             return_detailed: If True, return UnitResult instead of just value
             strict_unit_match: If True, require exact unit match. If False, allow compatible units.
+            prefer_annual: If True and period is None, prefer annual (FY) facts over quarterly
 
         Returns:
             Numeric value or None if not found (or UnitResult if return_detailed=True)
@@ -1605,7 +1659,11 @@ class EntityFacts:
         for concept in concept_variants:
             # Try both with and without namespace prefix
             for concept_variant in [concept, f'us-gaap:{concept}']:
-                fact = self.get_fact(concept_variant, period)
+                # Use annual fact if preferred and no specific period requested
+                if prefer_annual and period is None:
+                    fact = self.get_annual_fact(concept_variant)
+                else:
+                    fact = self.get_fact(concept_variant, period)
                 if fact and fact.numeric_value is not None:
                     # Use enhanced unit handling
                     unit_result = UnitNormalizer.get_normalized_value(
@@ -1786,6 +1844,8 @@ class EntityFacts:
         """
         Get revenue with detailed unit information and error reporting.
 
+        When period is not specified, defaults to the most recent annual (FY) period.
+
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
             unit: Optional unit filter (defaults to USD)
@@ -1794,7 +1854,7 @@ class EntityFacts:
             UnitResult with value, unit info, and error details
 
         Example:
-            >>> result = facts.get_revenue_detailed()
+            >>> result = facts.get_revenue_detailed()  # Returns annual revenue details
             >>> if result.success:
             ...     print(f"Revenue: ${result.value/1e9:.1f}B (unit: {result.normalized_unit})")
             ... else:
@@ -1814,12 +1874,15 @@ class EntityFacts:
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
-            return_detailed=True
+            return_detailed=True,
+            prefer_annual=True
         )
 
     def get_net_income_detailed(self, period: Optional[str] = None, unit: Optional[str] = None):
         """
         Get net income with detailed unit information and error reporting.
+
+        When period is not specified, defaults to the most recent annual (FY) period.
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
@@ -1838,7 +1901,8 @@ class EntityFacts:
             ],
             period=period,
             unit=unit,
-            return_detailed=True
+            return_detailed=True,
+            prefer_annual=True
         )
 
     def check_unit_compatibility(self, concept1: str, concept2: str, period: Optional[str] = None) -> Dict[str, Any]:
