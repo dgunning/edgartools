@@ -346,6 +346,147 @@ class CurrentReport(CompanyReport):
         return self.press_releases is not None
 
     @property
+    def has_earnings(self) -> bool:
+        """
+        Check if this 8-K contains earnings data (Item 2.02).
+
+        Item 2.02 reports "Results of Operations and Financial Condition",
+        which typically includes quarterly/annual earnings with financial tables.
+
+        Returns:
+            True if this filing contains Item 2.02
+        """
+        return any('2.02' in item for item in self.items)
+
+    @cached_property
+    def earnings(self):
+        """
+        Get parsed earnings data from EX-99.1 exhibit.
+
+        Parses financial tables from the earnings press release attachment,
+        providing structured access to income statements, balance sheets,
+        cash flow statements, and other financial data.
+
+        Returns:
+            EarningsRelease object with properties like:
+            - income_statement: Parsed income statement DataFrame
+            - balance_sheet: Parsed balance sheet DataFrame
+            - cash_flow_statement: Parsed cash flow DataFrame
+            - segment_data: Business segment breakdown
+            - financial_tables: All parsed tables
+
+            None if no EX-99 earnings exhibit found.
+
+        Example:
+            >>> eight_k = filing.obj()
+            >>> if eight_k.earnings:
+            ...     df = eight_k.earnings.income_statement.dataframe
+            ...     print(df['Net revenue'])
+        """
+        from edgar.earnings import EarningsRelease
+        return EarningsRelease.from_filing(self._filing)
+
+    @property
+    def income_statement(self):
+        """
+        Shortcut to get income statement from earnings release.
+
+        Returns:
+            FinancialTable with income statement data, or None
+
+        Note:
+            Check for None before accessing .dataframe, or use
+            get_income_statement() for safe access with empty DataFrame default.
+        """
+        if self.earnings:
+            return self.earnings.income_statement
+        return None
+
+    @property
+    def balance_sheet(self):
+        """
+        Shortcut to get balance sheet from earnings release.
+
+        Returns:
+            FinancialTable with balance sheet data, or None
+
+        Note:
+            Check for None before accessing .dataframe, or use
+            get_balance_sheet() for safe access with empty DataFrame default.
+        """
+        if self.earnings:
+            return self.earnings.balance_sheet
+        return None
+
+    @property
+    def cash_flow_statement(self):
+        """
+        Shortcut to get cash flow statement from earnings release.
+
+        Returns:
+            FinancialTable with cash flow data, or None
+
+        Note:
+            Check for None before accessing .dataframe, or use
+            get_cash_flow_statement() for safe access with empty DataFrame default.
+        """
+        if self.earnings:
+            return self.earnings.cash_flow_statement
+        return None
+
+    def get_income_statement(self, default=None):
+        """
+        Safely get income statement DataFrame.
+
+        Args:
+            default: Value to return if no income statement found.
+                     If None (default), returns empty DataFrame.
+
+        Returns:
+            pandas DataFrame with income statement data, or default value.
+
+        Example:
+            >>> df = eight_k.get_income_statement()  # Empty DataFrame if missing
+            >>> df = eight_k.get_income_statement(default=my_fallback_df)
+        """
+        import pandas as pd
+        if self.income_statement:
+            return self.income_statement.dataframe
+        return default if default is not None else pd.DataFrame()
+
+    def get_balance_sheet(self, default=None):
+        """
+        Safely get balance sheet DataFrame.
+
+        Args:
+            default: Value to return if no balance sheet found.
+                     If None (default), returns empty DataFrame.
+
+        Returns:
+            pandas DataFrame with balance sheet data, or default value.
+        """
+        import pandas as pd
+        if self.balance_sheet:
+            return self.balance_sheet.dataframe
+        return default if default is not None else pd.DataFrame()
+
+    def get_cash_flow_statement(self, default=None):
+        """
+        Safely get cash flow statement DataFrame.
+
+        Args:
+            default: Value to return if no cash flow statement found.
+                     If None (default), returns empty DataFrame.
+
+        Returns:
+            pandas DataFrame with cash flow data, or default value.
+        """
+        import pandas as pd
+        if self.cash_flow_statement:
+            return self.cash_flow_statement.dataframe
+        return default if default is not None else pd.DataFrame()
+
+    @property
     def press_releases(self):
         from edgar.company_reports.press_release import PressReleases
 
