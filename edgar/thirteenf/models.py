@@ -254,9 +254,10 @@ class ThirteenF:
         # Columns to sum across managers
         sum_cols = ['SharesPrnAmount', 'Value', 'SoleVoting', 'SharedVoting', 'NonVoting']
 
-        # Check if numeric columns need conversion (handle potential object dtypes)
+        # Check if numeric columns need conversion (handle potential object/string dtypes)
+        # Use pd.api.types for pandas 2.x/3.x compatibility
         for col in sum_cols:
-            if col in df.columns and df[col].dtype == 'object':
+            if col in df.columns and (pd.api.types.is_object_dtype(df[col]) or pd.api.types.is_string_dtype(df[col])):
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype('int64')
 
         # Aggregate by CUSIP

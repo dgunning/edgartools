@@ -302,11 +302,12 @@ def describe_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 def convert_to_pyarrow_backend(data:pd.DataFrame):
     # Convert dtypes carefully
+    # Use pd.api.types for pandas 2.x/3.x compatibility
     for col in data.columns:
-        if data[col].dtype == 'object':
-            # For object columns, convert to string
+        if pd.api.types.is_object_dtype(data[col]) or pd.api.types.is_string_dtype(data[col]):
+            # For object/string columns, convert to string
             data[col] = data[col].astype(str)
-        elif data[col].dtype == 'float64':
+        elif pd.api.types.is_float_dtype(data[col]):
             # For float columns, use float32 to match PyArrow's default
             data[col] = data[col].astype('float32')
 

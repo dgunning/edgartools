@@ -122,9 +122,10 @@ def _clean_soi_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     if new_cols:
         df = df.rename(columns=new_cols)
 
-    # Clean up values in object columns - remove "[Member]" suffix
-    for col in df.select_dtypes(include=['object']).columns:
-        if df[col].dtype == 'object':
+    # Clean up values in object/string columns - remove "[Member]" suffix
+    # Use pd.api.types for pandas 2.x/3.x compatibility
+    for col in df.columns:
+        if pd.api.types.is_object_dtype(df[col]) or pd.api.types.is_string_dtype(df[col]):
             df[col] = df[col].apply(
                 lambda x: x.replace(' [Member]', '').strip() if isinstance(x, str) and '[Member]' in x else x
             )
