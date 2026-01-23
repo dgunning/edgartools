@@ -16,8 +16,8 @@ Usage:
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 from enum import Enum
 
 
@@ -26,6 +26,64 @@ class ExtractionMethod(Enum):
     COMPOSITE = "composite"    # Sum of multiple concepts
     CALCULATED = "calculated"  # Derived from other metrics
     MAPPED = "mapped"          # Industry counterpart mapping
+
+
+# =============================================================================
+# ARCHETYPE EXTRACTION RULES
+# =============================================================================
+# Per Senior Architect directive: Deterministic archetype-based extraction rules
+# These define HOW to extract ShortTermDebt for each bank archetype
+#
+# Archetypes:
+#   - commercial: WFC, USB, PNC - traditional banks, repos bundled into STB
+#   - dealer: GS, MS - investment banks, repos as separate line items
+#   - custodial: BK, STT - custody banks, minimal STB, return None rather than fuzzy
+#   - hybrid: JPM, BAC, C - universal banks, check nesting before subtracting
+#   - regional: Smaller banks (SIC 6022) - fallback to commercial rules
+# =============================================================================
+
+ARCHETYPE_EXTRACTION_RULES = {
+    'commercial': {
+        # WFC, USB, PNC - traditional banks
+        'repos_treatment': 'exclude_from_stb',      # Repos are NOT operating debt
+        'trading_treatment': 'exclude_from_stb',    # Trading liabilities are NOT debt
+        'extraction_strategy': 'hybrid',            # Try bottom-up, fall back to top-down
+        'formula': 'STB - Repos - TradingLiab + CPLTD',
+        'safe_fallback': True,                      # Allow top-down fallback
+    },
+    'dealer': {
+        # GS, MS - investment banks
+        'repos_treatment': 'separate_line_item',    # Repos already separate
+        'trading_treatment': 'separate_line_item',
+        'extraction_strategy': 'direct',            # Use UnsecuredSTB directly
+        'formula': 'UnsecuredSTB + CPLTD',
+        'safe_fallback': True,
+    },
+    'custodial': {
+        # BK, STT - custody banks
+        'repos_treatment': 'include_as_debt',       # Repos ARE financing for custody ops
+        'trading_treatment': 'exclude',
+        'extraction_strategy': 'component_sum',     # Sum specific components only
+        'formula': 'OtherSTB + FedFundsPurchased + CPLTD',
+        'safe_fallback': False,                     # NEVER fall back to fuzzy match!
+    },
+    'hybrid': {
+        # JPM, BAC, C - universal banks
+        'repos_treatment': 'check_nesting_first',   # Check if already separated
+        'trading_treatment': 'separate_line_item',
+        'extraction_strategy': 'direct',            # No subtraction unless confirmed nested
+        'formula': 'STB + CPLTD (no subtraction)',
+        'safe_fallback': True,
+    },
+    'regional': {
+        # Smaller banks (SIC 6022) - fallback to commercial rules
+        'repos_treatment': 'exclude_from_stb',
+        'trading_treatment': 'exclude_from_stb',
+        'extraction_strategy': 'hybrid',
+        'formula': 'Commercial rules (default)',
+        'safe_fallback': True,
+    },
+}
 
 
 @dataclass
@@ -37,6 +95,9 @@ class ExtractedMetric:
     value: Optional[float]
     extraction_method: ExtractionMethod
     notes: Optional[str] = None
+    # Per Senior Architect directive: Store supplemental data (repos, trading liab, archetype)
+    # Don't discard data - store it for future analysis
+    metadata: Optional[Dict[str, Any]] = field(default=None)
 
 
 class IndustryExtractor(ABC):
@@ -515,10 +576,11 @@ class BankingExtractor(IndustryExtractor):
 
     def _is_concept_nested_in_stb(self, xbrl, concept: str) -> bool:
         """
-        Dual-Check Strategy: Determine if a concept is nested inside ShortTermBorrowings.
+        Dual-Check Strategy with SUFFIX MATCHING for namespace resilience.
 
-        Per Principal Architect directive, this replaces the fragile 1.5x magnitude
-        heuristic with structural linkbase verification.
+        Per Senior Architect directive:
+        - Use endswith() matching to catch wfc:, jpm:, bac: extensions
+        - Do NOT rely on exact QName matching
 
         Check Order:
         1. Calculation Linkbase - definitive parent/child with weight
@@ -531,11 +593,10 @@ class BankingExtractor(IndustryExtractor):
         import logging
         logger = logging.getLogger(__name__)
 
-        stb_concepts = ['ShortTermBorrowings', 'us-gaap_ShortTermBorrowings',
-                        'us-gaap:ShortTermBorrowings']
-
-        # Normalize concept name
-        concept_normalized = concept.replace('us-gaap_', '').replace('us-gaap:', '')
+        # Extract suffix for namespace-resilient matching
+        # e.g., "us-gaap:SecuritiesSoldUnderAgreementsToRepurchase" -> "SecuritiesSoldUnderAgreementsToRepurchase"
+        concept_suffix = concept.split(':')[-1] if ':' in concept else concept
+        concept_suffix = concept_suffix.replace('us-gaap_', '')
 
         # --- CHECK 1: Calculation Linkbase ---
         try:
@@ -546,31 +607,32 @@ class BankingExtractor(IndustryExtractor):
                     if 'BalanceSheet' not in role and 'Position' not in role:
                         continue
 
-                    for stb_name in stb_concepts:
-                        # Handle tree node lookup with various name formats
-                        stb_node = None
-                        for node_key in tree.keys() if hasattr(tree, 'keys') else []:
-                            if stb_name in str(node_key) or str(node_key).endswith('ShortTermBorrowings'):
-                                stb_node = tree.get(node_key)
-                                break
+                    # Find STB node using suffix matching
+                    stb_node = None
+                    for node_key in tree.keys() if hasattr(tree, 'keys') else []:
+                        node_str = str(node_key)
+                        if node_str.endswith('ShortTermBorrowings'):
+                            stb_node = tree.get(node_key)
+                            break
 
-                        if stb_node and hasattr(stb_node, 'children'):
-                            # Check if concept is in STB's children
-                            for child_id in stb_node.children:
-                                child_str = str(child_id)
-                                if concept_normalized in child_str or child_str.endswith(concept_normalized):
-                                    logger.debug(f"CALC LINKBASE: {concept} IS child of STB -> SUBTRACT")
-                                    return True
+                    if stb_node and hasattr(stb_node, 'children'):
+                        # Check if concept is in STB's children using SUFFIX matching
+                        for child_id in stb_node.children:
+                            child_str = str(child_id)
+                            # Suffix match: catches wfc:SecuritiesSold..., us-gaap:SecuritiesSold...
+                            if child_str.endswith(concept_suffix):
+                                logger.debug(f"CALC LINKBASE: {concept} IS child of STB (suffix match) -> SUBTRACT")
+                                return True
 
-                            # Check if concept is sibling (both under same parent)
-                            if hasattr(stb_node, 'parent') and stb_node.parent:
-                                parent_node = tree.get(stb_node.parent)
-                                if parent_node and hasattr(parent_node, 'children'):
-                                    for sibling_id in parent_node.children:
-                                        sibling_str = str(sibling_id)
-                                        if concept_normalized in sibling_str or sibling_str.endswith(concept_normalized):
-                                            logger.debug(f"CALC LINKBASE: {concept} IS sibling of STB -> DO NOT SUBTRACT")
-                                            return False
+                        # Check if concept is sibling (both under same parent)
+                        if hasattr(stb_node, 'parent') and stb_node.parent:
+                            parent_node = tree.get(stb_node.parent)
+                            if parent_node and hasattr(parent_node, 'children'):
+                                for sibling_id in parent_node.children:
+                                    sibling_str = str(sibling_id)
+                                    if sibling_str.endswith(concept_suffix):
+                                        logger.debug(f"CALC LINKBASE: {concept} IS sibling of STB -> DO NOT SUBTRACT")
+                                        return False
         except Exception as e:
             logger.debug(f"Calculation linkbase check failed: {e}")
 
@@ -583,27 +645,52 @@ class BankingExtractor(IndustryExtractor):
                     if 'BalanceSheet' not in role and 'Position' not in role:
                         continue
 
-                    for stb_name in stb_concepts:
-                        # Handle tree node lookup
-                        stb_node = None
-                        for node_key in tree.keys() if hasattr(tree, 'keys') else []:
-                            if stb_name in str(node_key) or str(node_key).endswith('ShortTermBorrowings'):
-                                stb_node = tree.get(node_key)
-                                break
+                    # Find STB node using suffix matching
+                    stb_node = None
+                    for node_key in tree.keys() if hasattr(tree, 'keys') else []:
+                        node_str = str(node_key)
+                        if node_str.endswith('ShortTermBorrowings'):
+                            stb_node = tree.get(node_key)
+                            break
 
-                        if stb_node and hasattr(stb_node, 'children'):
-                            # Check if concept appears indented under STB
-                            for child_id in stb_node.children:
-                                child_str = str(child_id)
-                                if concept_normalized in child_str or child_str.endswith(concept_normalized):
-                                    logger.debug(f"PRES LINKBASE: {concept} IS indented under STB -> SUBTRACT")
-                                    return True
+                    if stb_node and hasattr(stb_node, 'children'):
+                        # Check if concept appears indented under STB using SUFFIX matching
+                        for child_id in stb_node.children:
+                            child_str = str(child_id)
+                            if child_str.endswith(concept_suffix):
+                                logger.debug(f"PRES LINKBASE: {concept} IS indented under STB (suffix match) -> SUBTRACT")
+                                return True
         except Exception as e:
             logger.debug(f"Presentation linkbase check failed: {e}")
 
         # --- DEFAULT: Assume SIBLING ---
         logger.debug(f"DEFAULT: {concept} not found nested in STB linkbases -> DO NOT SUBTRACT")
         return False
+
+    def _get_repos_value(self, facts_df) -> Optional[float]:
+        """
+        Get repos value using suffix matching (namespace-resilient).
+
+        Per Senior Architect directive:
+        - Catches: us-gaap:, wfc:, jpm:, bac:, gs: prefixed repos concepts
+        - Uses fuzzy matching to handle company-extension namespaces
+
+        Returns:
+            Repos value if found, None otherwise
+        """
+        # Primary: Suffix match on SecuritiesSoldUnderAgreementsToRepurchase
+        val = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase')
+        if val is not None and val > 0:
+            return val
+
+        # Fallback: Combined FedFunds + Repos concept
+        val = self._get_fact_value_fuzzy(facts_df, 'FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase')
+        if val is not None and val > 0:
+            return val
+
+        # Fallback: Try exact us-gaap match
+        val = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase')
+        return val
 
     def _get_dimensional_sum(self, facts_df, concept: str, axis: str = None) -> Optional[float]:
         """
@@ -759,19 +846,22 @@ class BankingExtractor(IndustryExtractor):
 
     def extract_short_term_debt_gaap(self, xbrl, facts_df, ticker: str = None) -> ExtractedMetric:
         """
-        GAAP-aligned ShortTermDebt extraction (matches yfinance 'Current Debt').
+        GAAP-aligned ShortTermDebt extraction using Archetype-Driven Waterfall.
 
-        yfinance formula: Clean STB (no Repos/TradingLiab) + LongTermDebtCurrent
+        Per Senior Architect directive:
+        Waterfall by Archetype:
+        1. Commercial: Try Bottom-Up → Fall back to Top-Down
+        2. Custodial: Component Sum only → Return None if missing (NEVER fuzzy)
+        3. Dealer: Direct UnsecuredSTB
+        4. Hybrid: Check nesting before subtracting
 
-        Root Cause Analysis:
-        - WFC: ShortTermBorrowings ($108.8B) includes Repos ($54B) + TradingLiab ($48B)
-          but yfinance Current Debt = $13.6B (clean debt only)
-        - GS: Missing LongTermDebtCurrent ($21B) that yfinance includes
+        Args:
+            xbrl: XBRL object for linkbase checks
+            facts_df: DataFrame of XBRL facts
+            ticker: Optional ticker for config-based archetype lookup
 
-        Strategy:
-        1. Try DebtCurrent first (if available, it's usually clean)
-        2. Otherwise, clean the STB aggregate by subtracting Repos + TradingLiab
-        3. Always add CPLTD (yfinance includes this in "Current Debt")
+        Returns:
+            ExtractedMetric with GAAP-aligned value and extraction notes
         """
         # 1. Try direct DebtCurrent tag first (cleanest match to yfinance "Current Debt")
         debt_current = self._get_fact_value(facts_df, 'DebtCurrent')
@@ -785,138 +875,264 @@ class BankingExtractor(IndustryExtractor):
                 notes="Bank GAAP: DebtCurrent (yfinance-aligned)"
             )
 
-        # 2. Get ShortTermBorrowings aggregate (may be contaminated)
-        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
-
-        # 2.5 Get archetype and extraction rules (config-based or dynamic)
+        # Get archetype and rules
         archetype = self._get_archetype(facts_df, ticker)
-        rules = self._get_extraction_rules(ticker) if ticker else {}
+        rules = ARCHETYPE_EXTRACTION_RULES.get(archetype, ARCHETYPE_EXTRACTION_RULES['commercial'])
 
-        # 3. Get contaminants to SUBTRACT
-        # Repos - often bundled into STB for banks
-        # Try fuzzy match first - companies like WFC use company-specific tags (wfc:SecuritiesSold...)
-        repos = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
-        if repos == 0:
-            repos = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
-        if repos == 0:
-            repos = self._get_fact_value_fuzzy(facts_df, 'FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase') or 0
-
-        # TradingLiabilities - mark-to-market trading positions, not debt
-        trading_liab = self._get_fact_value(facts_df, 'TradingLiabilities') or 0
-        if trading_liab == 0:
-            trading_liab = self._get_fact_value_fuzzy(facts_df, 'TradingAccountLiabilities') or 0
-
-        # 4. Get CPLTD to ADD (yfinance includes this in "Current Debt")
-        # STRICT: Only use balance sheet classification, NOT maturity schedule (footnote disclosure)
-        # Maturity schedules (ASC 470-10-50-1) show future cash flows, not current liabilities
+        # Get CPLTD (always needed across all archetypes)
+        # STRICT: Only use balance sheet classification, NOT maturity schedule
         cpltd = self._get_fact_value(facts_df, 'LongTermDebtCurrent') or 0
-        # REMOVED: LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths fallback
-        # This was causing 82-996% over-extraction for WFC and BK
 
-        # 5. Calculate clean debt using STRUCTURAL LINKBASE CHECK (Principal Architect Directive #2)
-        # Replaces fragile 1.5x magnitude heuristic with calculation/presentation linkbase verification
-        # Check if repos and trading liabilities are structurally NESTED inside STB (children)
-        # or if they are SIBLINGS (separate line items) in the balance sheet
+        # === STRATEGY DISPATCH ===
+        if archetype == 'custodial':
+            return self._extract_custodial_stb(facts_df, cpltd, ticker, rules)
 
-        # Check if repos should be subtracted (rule-based override takes precedence)
-        subtract_repos_rule = rules.get('subtract_repos_from_stb', None)
+        elif archetype == 'dealer':
+            return self._extract_dealer_stb(facts_df, cpltd, ticker, rules)
 
-        if subtract_repos_rule is not None:
-            # Explicit rule from config - use it directly
-            repos_nested = subtract_repos_rule
-            trading_nested = subtract_repos_rule  # Apply same rule to both
-        else:
-            # No explicit rule - use structural linkbase check
-            repos_nested = self._is_concept_nested_in_stb(xbrl, 'SecuritiesSoldUnderAgreementsToRepurchase')
-            trading_nested = self._is_concept_nested_in_stb(xbrl, 'TradingLiabilities')
+        elif archetype == 'hybrid':
+            return self._extract_hybrid_stb(xbrl, facts_df, cpltd, ticker, rules)
 
-        # Only subtract components that are structurally nested
-        contamination_to_subtract = 0
-        nested_components = []
-        if repos_nested and repos > 0:
-            contamination_to_subtract += repos
-            nested_components.append(f"Repos({repos/1e9:.1f}B)")
-        if trading_nested and trading_liab > 0:
-            contamination_to_subtract += trading_liab
-            nested_components.append(f"TradingLiab({trading_liab/1e9:.1f}B)")
+        else:  # commercial or regional (default)
+            return self._extract_commercial_stb(xbrl, facts_df, cpltd, ticker, rules)
 
-        # Sanity check: never subtract more than 90% of STB (prevents going negative)
-        max_subtraction = stb * 0.9
-        contamination_to_subtract = min(contamination_to_subtract, max_subtraction)
+    def _extract_custodial_stb(self, facts_df, cpltd: float, ticker: str, rules: dict) -> ExtractedMetric:
+        """
+        Custodial Banks (STT, BK): Component Sum ONLY.
 
-        # Determine if we should subtract based on archetype and rule
-        # Hybrid and dealer archetypes have separate repos line items by definition
-        should_subtract = (
-            archetype not in ['dealer', 'hybrid'] and  # Dealers/hybrids have separate repos
-            contamination_to_subtract > 0
+        Per Senior Architect directive:
+        - If components missing, return None
+        - NEVER fall back to fuzzy ShortTermBorrowings match
+        - Custodial banks have repos as financing, not contamination
+        """
+        # Specific components for custodial banks
+        other_stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings')
+        fed_funds = self._get_fact_value(facts_df, 'FederalFundsPurchased')
+
+        # Check for company-specific repos (STT uses stt: prefix)
+        # For custodial, repos ARE debt (unlike commercial)
+        repos_liability = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
+
+        components = []
+        total = 0.0
+
+        if other_stb is not None and other_stb > 0:
+            total += other_stb
+            components.append(f"OtherSTB({other_stb/1e9:.1f}B)")
+
+        if fed_funds is not None and fed_funds > 0:
+            total += fed_funds
+            components.append(f"FedFunds({fed_funds/1e9:.1f}B)")
+
+        # Add repos for custodial (it's financing, not contamination)
+        if repos_liability > 0:
+            total += repos_liability
+            components.append(f"Repos({repos_liability/1e9:.1f}B)")
+
+        if cpltd > 0:
+            total += cpltd
+            components.append(f"CPLTD({cpltd/1e9:.1f}B)")
+
+        # CRITICAL: If no components found, return None - do NOT fuzzy match
+        # Per architect: "return None rather than fuzzy-match for STT/BK"
+        if total == 0 or not components:
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart=None,
+                xbrl_concept=None,
+                value=None,
+                extraction_method=ExtractionMethod.DIRECT,
+                notes=f"Custodial [{ticker}]: No components found - flagged for manual review"
+            )
+
+        return ExtractedMetric(
+            standard_name="ShortTermDebt",
+            industry_counterpart="ShortTermDebt_GAAP_Custodial",
+            xbrl_concept=None,
+            value=total,
+            extraction_method=ExtractionMethod.COMPOSITE,
+            notes=f"Custodial [{ticker}]: {' + '.join(components)}"
         )
 
-        if should_subtract:
-            clean_stb = max(0, stb - contamination_to_subtract)
-            notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B) - {' - '.join(nested_components)} [linkbase verified] + CPLTD({cpltd/1e9:.1f}B)"
-        else:
-            clean_stb = stb
-            sibling_info = []
-            if repos > 0 and not repos_nested:
-                sibling_info.append(f"Repos({repos/1e9:.1f}B)=sibling")
-            if trading_liab > 0 and not trading_nested:
-                sibling_info.append(f"TradingLiab({trading_liab/1e9:.1f}B)=sibling")
-            sibling_str = f" [{', '.join(sibling_info)}]" if sibling_info else ""
-            notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B){sibling_str} + CPLTD({cpltd/1e9:.1f}B)"
+    def _extract_commercial_stb(self, xbrl, facts_df, cpltd: float, ticker: str, rules: dict) -> ExtractedMetric:
+        """
+        Commercial Banks (WFC, USB, PNC): Hybrid Bottom-Up/Top-Down.
 
-        total = clean_stb + cpltd
+        Strategy:
+        1. TRY Bottom-Up: CP + FHLB + OtherSTB + CPLTD
+        2. IF Bottom-Up yields $0: Top-Down subtraction (STB - Repos - Trading)
 
-        if total > 0:
-            return ExtractedMetric(
-                standard_name="ShortTermDebt",
-                industry_counterpart="CurrentDebt_GAAP",
-                xbrl_concept=None,
-                value=total,
-                extraction_method=ExtractionMethod.COMPOSITE,
-                notes=notes
-            )
-
-        # 5.5. DIMENSIONAL FALLBACK (Principal Architect Directive #4)
-        # Check for dimensional breakdown (e.g., STT reports ShortTermBorrowings by ShortTermDebtTypeAxis)
-        dim_sum = self._get_dimensional_sum(facts_df, 'ShortTermBorrowings', 'ShortTermDebtTypeAxis')
-
-        # Use dimensional sum if consolidated is missing or suspect
-        if self._should_use_dimensional_fallback(stb, dim_sum):
-            total = dim_sum + cpltd
-            if total > 0:
-                return ExtractedMetric(
-                    standard_name="ShortTermDebt",
-                    industry_counterpart="ShortTermDebt_GAAP_Dimensional",
-                    xbrl_concept=None,
-                    value=total,
-                    extraction_method=ExtractionMethod.COMPOSITE,
-                    notes=f"Bank GAAP [{archetype}]: STB({dim_sum/1e9:.1f}B) via dimensional fallback (ShortTermDebtTypeAxis) + CPLTD({cpltd/1e9:.1f}B)"
-                )
-
-        # 6. Component fallback: CP + CPLTD + Other
+        Per architect: Commercial banks bundle repos into STB, so we must subtract.
+        """
+        # === ATTEMPT 1: Bottom-Up Aggregation ===
         cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
+        fhlb = self._get_fact_value_fuzzy(facts_df, 'FederalHomeLoanBankAdvances') or 0
         other_stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings') or 0
 
-        total = cp + cpltd + other_stb
+        bottom_up = cp + fhlb + other_stb + cpltd
 
-        if total > 0:
+        if bottom_up > 0:
+            components = []
+            if cp > 0:
+                components.append(f"CP({cp/1e9:.1f}B)")
+            if fhlb > 0:
+                components.append(f"FHLB({fhlb/1e9:.1f}B)")
+            if other_stb > 0:
+                components.append(f"OtherSTB({other_stb/1e9:.1f}B)")
+            if cpltd > 0:
+                components.append(f"CPLTD({cpltd/1e9:.1f}B)")
+
             return ExtractedMetric(
                 standard_name="ShortTermDebt",
-                industry_counterpart="ShortTermDebt_GAAP",
+                industry_counterpart="ShortTermDebt_GAAP_BottomUp",
+                xbrl_concept=None,
+                value=bottom_up,
+                extraction_method=ExtractionMethod.COMPOSITE,
+                notes=f"Commercial [{ticker}]: Bottom-Up = {' + '.join(components)}"
+            )
+
+        # === ATTEMPT 2: Top-Down Subtraction ===
+        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+
+        if stb > 0:
+            # Get contaminants using SUFFIX MATCHING (namespace-resilient)
+            repos = self._get_repos_value(facts_df) or 0
+            trading = self._get_fact_value(facts_df, 'TradingLiabilities') or 0
+            if trading == 0:
+                trading = self._get_fact_value_fuzzy(facts_df, 'TradingAccountLiabilities') or 0
+
+            # Always subtract for commercial (per architect rules)
+            clean_stb = max(0, stb - repos - trading)
+            total = clean_stb + cpltd
+
+            # Per architect: Store repos value in metadata - don't discard
+            metadata = {
+                'secured_funding_repos': repos,
+                'trading_liabilities': trading,
+                'archetype': 'commercial',
+                'raw_stb': stb,
+            }
+
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="ShortTermDebt_GAAP_TopDown",
                 xbrl_concept=None,
                 value=total,
                 extraction_method=ExtractionMethod.COMPOSITE,
-                notes=f"Bank GAAP: CP({cp/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B) + OtherSTB({other_stb/1e9:.1f}B)"
+                notes=f"Commercial [{ticker}]: Top-Down = STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - Trading({trading/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)",
+                metadata=metadata
             )
 
-        # No valid GAAP value found
+        # No valid value found
         return ExtractedMetric(
             standard_name="ShortTermDebt",
             industry_counterpart=None,
             xbrl_concept=None,
             value=None,
             extraction_method=ExtractionMethod.DIRECT,
-            notes="Bank GAAP: No valid ShortTermDebt found"
+            notes=f"Commercial [{ticker}]: No valid ShortTermDebt found"
+        )
+
+    def _extract_hybrid_stb(self, xbrl, facts_df, cpltd: float, ticker: str, rules: dict) -> ExtractedMetric:
+        """
+        Hybrid Banks (JPM, BAC, C): Check nesting before subtracting.
+
+        Per Senior Architect directive:
+        - Ensure we don't double-subtract if filer already reports Repos separately
+        - Check calculation/presentation linkbase for nesting relationship
+        """
+        stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+
+        # Get repos value (using suffix matching)
+        repos = self._get_repos_value(facts_df) or 0
+
+        # CHECK: Is repos nested inside STB, or is it a separate line item?
+        # For hybrid banks, check the calculation linkbase relationship
+        repos_is_nested = self._is_concept_nested_in_stb(xbrl, 'SecuritiesSoldUnderAgreementsToRepurchase')
+
+        if repos_is_nested and repos > 0:
+            # Repos IS nested - we need to subtract
+            clean_stb = max(0, stb - repos)
+            total = clean_stb + cpltd
+            notes = f"Hybrid [{ticker}]: STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) [nested] + CPLTD({cpltd/1e9:.1f}B)"
+        else:
+            # Repos is separate line item - do NOT subtract (would double-count)
+            total = stb + cpltd
+            notes = f"Hybrid [{ticker}]: STB({stb/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B) [repos separate: {repos/1e9:.1f}B]"
+
+        # Per architect: Store repos value in metadata - don't discard
+        metadata = {
+            'secured_funding_repos': repos,
+            'repos_is_nested': repos_is_nested,
+            'archetype': 'hybrid',
+            'raw_stb': stb,
+        }
+
+        if total > 0:
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="ShortTermDebt_GAAP_Hybrid",
+                xbrl_concept=None,
+                value=total,
+                extraction_method=ExtractionMethod.COMPOSITE,
+                notes=notes,
+                metadata=metadata
+            )
+
+        return ExtractedMetric(
+            standard_name="ShortTermDebt",
+            industry_counterpart=None,
+            xbrl_concept=None,
+            value=None,
+            extraction_method=ExtractionMethod.DIRECT,
+            notes=f"Hybrid [{ticker}]: No valid ShortTermDebt found"
+        )
+
+    def _extract_dealer_stb(self, facts_df, cpltd: float, ticker: str, rules: dict) -> ExtractedMetric:
+        """
+        Dealer Banks (GS, MS): Direct UnsecuredSTB.
+
+        Dealers have repos as separate line items (~$274B for GS).
+        Use the clean unsecured STB tag directly.
+        """
+        # Dealer-specific: UnsecuredShortTermBorrowings (explicitly excludes repos)
+        unsecured_stb = self._get_fact_value_fuzzy(facts_df, 'UnsecuredShortTermBorrowings') or 0
+
+        if unsecured_stb == 0:
+            # Fallback to ShortTermBorrowings (dealers usually report clean)
+            unsecured_stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+
+        total = unsecured_stb + cpltd
+
+        # Get repos for metadata (dealers have large repos as separate line items)
+        repos = self._get_repos_value(facts_df) or 0
+
+        # Per architect: Store repos value in metadata - don't discard
+        metadata = {
+            'secured_funding_repos': repos,
+            'unsecured_stb': unsecured_stb,
+            'archetype': 'dealer',
+        }
+
+        if total > 0:
+            return ExtractedMetric(
+                standard_name="ShortTermDebt",
+                industry_counterpart="ShortTermDebt_GAAP_Dealer",
+                xbrl_concept=None,
+                value=total,
+                extraction_method=ExtractionMethod.COMPOSITE,
+                notes=f"Dealer [{ticker}]: UnsecuredSTB({unsecured_stb/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)",
+                metadata=metadata
+            )
+
+        return ExtractedMetric(
+            standard_name="ShortTermDebt",
+            industry_counterpart=None,
+            xbrl_concept=None,
+            value=None,
+            extraction_method=ExtractionMethod.DIRECT,
+            notes=f"Dealer [{ticker}]: No valid ShortTermDebt found",
+            metadata=metadata
         )
     
     def extract_street_debt(self, xbrl, facts_df, ticker: str = None) -> ExtractedMetric:

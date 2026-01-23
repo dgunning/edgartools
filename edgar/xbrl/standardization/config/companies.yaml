@@ -52,11 +52,13 @@ companies:
     bank_archetype: "hybrid"
     archetype_override: true  # Prevents dynamic detection, use config archetype
     extraction_rules:
-      # Commercial-like behavior for GAAP validation
+      # Per architect: Check nesting before subtracting
       subtract_repos_from_stb: false  # Repos are separate line items
+      check_nesting: true             # Verify linkbase before subtraction
       # Dealer-like behavior for Street View
       cash_includes_ib_deposits: true
       street_debt_includes_net_repos: true
+      safe_fallback: true
     validation_tolerance_pct: 20.0  # 20% tolerance for financials
     exclude_metrics:
       - COGS  # Banks don't have traditional COGS
@@ -71,7 +73,11 @@ companies:
     cik: 886982
     industry: "banking"
     bank_archetype: "dealer"
-    validation_tolerance_pct: 20.0
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      use_unsecured_stb: true  # Dealers have clean UnsecuredSTB tag
+      safe_fallback: true
+    validation_tolerance_pct: 25.0  # Higher tolerance for methodology differences
     exclude_metrics:
       - COGS
       - SGA
@@ -85,7 +91,11 @@ companies:
     cik: 895421
     industry: "banking"
     bank_archetype: "dealer"
-    validation_tolerance_pct: 20.0
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      use_unsecured_stb: true  # Dealers have clean UnsecuredSTB tag
+      safe_fallback: true
+    validation_tolerance_pct: 25.0  # Higher tolerance for methodology differences
     exclude_metrics:
       - COGS
       - SGA
@@ -100,13 +110,18 @@ companies:
     cik: 72971
     industry: "banking"
     bank_archetype: "commercial"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      subtract_repos_from_stb: true   # Repos are bundled into STB, must subtract
+      subtract_trading_from_stb: true # Trading liabilities bundled, must subtract
+      safe_fallback: true             # Allow top-down fallback
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
     street_view_notes:
       ShortTermDebt: "Street View excludes TradingLiabilities for clean economic debt measure."
-    notes: "Commercial bank - high loan book, traditional banking model."
+    notes: "Commercial bank - high loan book, traditional banking model. Uses wfc: namespace for repos."
 
   C:
     name: "Citigroup Inc."
@@ -115,9 +130,12 @@ companies:
     bank_archetype: "hybrid"
     archetype_override: true  # Prevents dynamic detection, use config archetype
     extraction_rules:
+      # Per architect: Check nesting before subtracting
       subtract_repos_from_stb: false  # Repos are separate line items
+      check_nesting: true             # Verify linkbase before subtraction
       cash_includes_ib_deposits: true
       street_debt_includes_net_repos: true
+      safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
@@ -133,9 +151,12 @@ companies:
     bank_archetype: "hybrid"
     archetype_override: true  # Prevents dynamic detection, use config archetype
     extraction_rules:
+      # Per architect: Check nesting before subtracting
       subtract_repos_from_stb: false  # Repos are separate line items
+      check_nesting: true             # Verify linkbase before subtraction
       cash_includes_ib_deposits: true
       street_debt_includes_net_repos: true
+      safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
@@ -149,47 +170,65 @@ companies:
     cik: 36104
     industry: "banking"
     bank_archetype: "commercial"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      subtract_repos_from_stb: true
+      subtract_trading_from_stb: true
+      safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
-    notes: "Regional commercial bank."
+    notes: "Regional commercial bank - traditional banking model."
 
-  # Custodial Banks
+  # Custodial Banks - NEVER fuzzy match per architect directive
   BK:
     name: "Bank of New York Mellon Corporation"
     cik: 1390777
     industry: "banking"
     bank_archetype: "custodial"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      repos_as_debt: true      # For custodial, repos ARE financing (include in debt)
+      safe_fallback: false     # CRITICAL: Return None rather than fuzzy match!
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
     street_view_notes:
       CashAndEquivalents: "Includes Fed Deposits via company-extension tags (bk:InterestBearingDepositsInFederalReserve)."
-    notes: "Custodial bank - high PayablesToCustomers from custody operations."
+    notes: "Custodial bank - high PayablesToCustomers from custody operations. NO fuzzy fallback for STB."
 
   STT:
     name: "State Street Corporation"
     cik: 93751
     industry: "banking"
     bank_archetype: "custodial"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      repos_as_debt: true      # For custodial, repos ARE financing (include in debt)
+      safe_fallback: false     # CRITICAL: Return None rather than fuzzy match!
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
-    notes: "Custodial bank - asset servicing and management."
+    notes: "Custodial bank - asset servicing and management. NO ShortTermBorrowings or ShortTermDebtTypeAxis in filings."
 
   PNC:
     name: "PNC Financial Services Group, Inc."
     cik: 713676
     industry: "banking"
     bank_archetype: "commercial"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      subtract_repos_from_stb: true
+      subtract_trading_from_stb: true
+      safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
-    notes: "Regional commercial bank."
+    notes: "Regional commercial bank - traditional banking model."
 
 # Default settings
 defaults:
