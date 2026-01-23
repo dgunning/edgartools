@@ -143,11 +143,11 @@ class ReferenceValidator:
     def _try_industry_extraction(self, ticker: str, metric: str, xbrl) -> Optional[float]:
         """
         Try industry-specific extraction for special metrics.
-        
+
         Uses industry_logic module for:
         - ShortTermDebt (banks): Excludes Repos/FedFunds
         - OperatingIncome: Calculated fallback if tag missing
-        
+
         Returns None if industry extraction doesn't apply or fails.
         """
         try:
@@ -155,7 +155,24 @@ class ReferenceValidator:
             from edgar.entity.mappings_loader import get_industry_for_sic
             from .extraction_rules import get_extraction_rule
             from edgar import Company
-            
+            import logging
+
+            logger = logging.getLogger(__name__)
+
+            # DATA INTEGRITY GATE (P0)
+            # Check for zero-fact or low-fact filings before proceeding
+            MIN_FACTS_THRESHOLD = 100  # Typical 10-K has 1000+ facts
+            facts_df = None
+            if xbrl and xbrl.facts:
+                facts_df = xbrl.facts.to_dataframe()
+
+            if facts_df is None or len(facts_df) == 0:
+                logger.warning(f"DATA INTEGRITY FAILURE: {ticker} filing has 0 facts - corrupt or unsupported format")
+                return None
+
+            if len(facts_df) < MIN_FACTS_THRESHOLD:
+                logger.warning(f"DATA INTEGRITY WARNING: {ticker} filing has only {len(facts_df)} facts (expected > {MIN_FACTS_THRESHOLD})")
+
             # Get industry for this company
             c = Company(ticker)
             sic = c.data.sic
@@ -173,11 +190,8 @@ class ReferenceValidator:
                     if val is not None:
                         return val
             
-            # Get facts dataframe
-            facts_df = None
-            if xbrl and xbrl.facts:
-                facts_df = xbrl.facts.to_dataframe()
-            
+            # facts_df already extracted in DATA INTEGRITY GATE above
+
             # Check for explicitly disabled tree fallback (Safety Guardrail)
             # If industry logic returns None (extraction failed) and fallback_to_tree is False,
             # we return a SENTINEL that prevents the Tree Mapper from taking over.

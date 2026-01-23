@@ -44,16 +44,26 @@ companies:
         notes: "Primary revenue is advertising"
 
   # Financial Services Companies - require higher validation tolerance
+  # Hybrid banks have characteristics of both commercial AND dealer banks
   JPM:
     name: "JPMorgan Chase & Co."
     cik: 19617
     industry: "banking"
-    bank_archetype: "commercial"
+    bank_archetype: "hybrid"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      # Commercial-like behavior for GAAP validation
+      subtract_repos_from_stb: false  # Repos are separate line items
+      # Dealer-like behavior for Street View
+      cash_includes_ib_deposits: true
+      street_debt_includes_net_repos: true
     validation_tolerance_pct: 20.0  # 20% tolerance for financials
     exclude_metrics:
       - COGS  # Banks don't have traditional COGS
       - SGA   # Banks use different expense categories
-    notes: "Financial company - uses dimensional XBRL reporting (VIEs)"
+    street_view_notes:
+      ShortTermDebt: "Hybrid: Commercial GAAP + Dealer Street View"
+    notes: "Hybrid bank - commercial + significant dealer/trading operations"
 
   # Investment Banks (Dealer Archetype)
   GS:
@@ -102,25 +112,37 @@ companies:
     name: "Citigroup Inc."
     cik: 831001
     industry: "banking"
-    bank_archetype: "commercial"
+    bank_archetype: "hybrid"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      subtract_repos_from_stb: false  # Repos are separate line items
+      cash_includes_ib_deposits: true
+      street_debt_includes_net_repos: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
     street_view_notes:
-      ShortTermDebt: "Street View excludes TradingLiabilities for clean economic debt measure."
-    notes: "Commercial bank with significant global presence."
+      ShortTermDebt: "Hybrid: Commercial GAAP + Dealer Street View"
+    notes: "Hybrid bank - global commercial + investment banking operations."
 
   BAC:
     name: "Bank of America Corporation"
     cik: 70858
     industry: "banking"
-    bank_archetype: "commercial"
+    bank_archetype: "hybrid"
+    archetype_override: true  # Prevents dynamic detection, use config archetype
+    extraction_rules:
+      subtract_repos_from_stb: false  # Repos are separate line items
+      cash_includes_ib_deposits: true
+      street_debt_includes_net_repos: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
-    notes: "Commercial bank - one of the Big Four."
+    street_view_notes:
+      ShortTermDebt: "Hybrid: Commercial GAAP + Dealer Street View"
+    notes: "Hybrid bank - one of the Big Four with Merrill Lynch operations."
 
   USB:
     name: "U.S. Bancorp"

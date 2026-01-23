@@ -455,7 +455,287 @@ class BankingExtractor(IndustryExtractor):
 
     industry_name = "banking"
 
-    def extract_short_term_debt(self, xbrl, facts_df, mode: str = 'street') -> ExtractedMetric:
+    def _get_company_config(self, ticker: str) -> Optional[Dict]:
+        """
+        Get company-specific configuration from companies.yaml.
+
+        Returns the full company config dict if found, None otherwise.
+        """
+        try:
+            import yaml
+            from pathlib import Path
+
+            config_path = Path(__file__).parent.parent / 'config' / 'companies.yaml'
+            if config_path.exists():
+                with open(config_path) as f:
+                    config = yaml.safe_load(f)
+                    companies = config.get('companies', {})
+                    return companies.get(ticker.upper())
+        except Exception:
+            pass
+        return None
+
+    def _get_archetype(self, facts_df, ticker: str = None) -> str:
+        """
+        Get bank archetype from config (preferred) or dynamic detection (fallback).
+
+        Archetype hierarchy (per Principal Architect Directive #3):
+        1. Config override (archetype_override: true) - deterministic
+        2. Dynamic detection based on balance sheet ratios - probabilistic
+
+        Returns:
+            str: 'commercial', 'dealer', 'custodial', or 'hybrid'
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        if ticker:
+            config = self._get_company_config(ticker)
+            if config and config.get('archetype_override', False):
+                archetype = config.get('bank_archetype', 'commercial')
+                logger.debug(f"{ticker} archetype from config: {archetype}")
+                return archetype
+
+        # Fallback to dynamic detection
+        return self._detect_bank_archetype(facts_df)
+
+    def _get_extraction_rules(self, ticker: str) -> Dict:
+        """
+        Get company-specific extraction rules from config.
+
+        Returns dict of rules like:
+        - subtract_repos_from_stb: bool
+        - cash_includes_ib_deposits: bool
+        - street_debt_includes_net_repos: bool
+        """
+        config = self._get_company_config(ticker)
+        if config:
+            return config.get('extraction_rules', {})
+        return {}
+
+    def _is_concept_nested_in_stb(self, xbrl, concept: str) -> bool:
+        """
+        Dual-Check Strategy: Determine if a concept is nested inside ShortTermBorrowings.
+
+        Per Principal Architect directive, this replaces the fragile 1.5x magnitude
+        heuristic with structural linkbase verification.
+
+        Check Order:
+        1. Calculation Linkbase - definitive parent/child with weight
+        2. Presentation Linkbase - visual indentation implies summation
+        3. Default: Assume SIBLING (Do Not Subtract)
+
+        Returns True if concept is a CHILD of STB (should be subtracted).
+        Returns False if concept is a SIBLING (should NOT be subtracted).
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        stb_concepts = ['ShortTermBorrowings', 'us-gaap_ShortTermBorrowings',
+                        'us-gaap:ShortTermBorrowings']
+
+        # Normalize concept name
+        concept_normalized = concept.replace('us-gaap_', '').replace('us-gaap:', '')
+
+        # --- CHECK 1: Calculation Linkbase ---
+        try:
+            if hasattr(xbrl, 'calculation_trees') and xbrl.calculation_trees:
+                calc_trees = xbrl.calculation_trees
+                for role, tree in calc_trees.items():
+                    # Only check balance sheet roles
+                    if 'BalanceSheet' not in role and 'Position' not in role:
+                        continue
+
+                    for stb_name in stb_concepts:
+                        # Handle tree node lookup with various name formats
+                        stb_node = None
+                        for node_key in tree.keys() if hasattr(tree, 'keys') else []:
+                            if stb_name in str(node_key) or str(node_key).endswith('ShortTermBorrowings'):
+                                stb_node = tree.get(node_key)
+                                break
+
+                        if stb_node and hasattr(stb_node, 'children'):
+                            # Check if concept is in STB's children
+                            for child_id in stb_node.children:
+                                child_str = str(child_id)
+                                if concept_normalized in child_str or child_str.endswith(concept_normalized):
+                                    logger.debug(f"CALC LINKBASE: {concept} IS child of STB -> SUBTRACT")
+                                    return True
+
+                            # Check if concept is sibling (both under same parent)
+                            if hasattr(stb_node, 'parent') and stb_node.parent:
+                                parent_node = tree.get(stb_node.parent)
+                                if parent_node and hasattr(parent_node, 'children'):
+                                    for sibling_id in parent_node.children:
+                                        sibling_str = str(sibling_id)
+                                        if concept_normalized in sibling_str or sibling_str.endswith(concept_normalized):
+                                            logger.debug(f"CALC LINKBASE: {concept} IS sibling of STB -> DO NOT SUBTRACT")
+                                            return False
+        except Exception as e:
+            logger.debug(f"Calculation linkbase check failed: {e}")
+
+        # --- CHECK 2: Presentation Linkbase ---
+        try:
+            if hasattr(xbrl, 'presentation_trees') and xbrl.presentation_trees:
+                pres_trees = xbrl.presentation_trees
+                for role, tree in pres_trees.items():
+                    # Only check balance sheet/position roles
+                    if 'BalanceSheet' not in role and 'Position' not in role:
+                        continue
+
+                    for stb_name in stb_concepts:
+                        # Handle tree node lookup
+                        stb_node = None
+                        for node_key in tree.keys() if hasattr(tree, 'keys') else []:
+                            if stb_name in str(node_key) or str(node_key).endswith('ShortTermBorrowings'):
+                                stb_node = tree.get(node_key)
+                                break
+
+                        if stb_node and hasattr(stb_node, 'children'):
+                            # Check if concept appears indented under STB
+                            for child_id in stb_node.children:
+                                child_str = str(child_id)
+                                if concept_normalized in child_str or child_str.endswith(concept_normalized):
+                                    logger.debug(f"PRES LINKBASE: {concept} IS indented under STB -> SUBTRACT")
+                                    return True
+        except Exception as e:
+            logger.debug(f"Presentation linkbase check failed: {e}")
+
+        # --- DEFAULT: Assume SIBLING ---
+        logger.debug(f"DEFAULT: {concept} not found nested in STB linkbases -> DO NOT SUBTRACT")
+        return False
+
+    def _get_dimensional_sum(self, facts_df, concept: str, axis: str = None) -> Optional[float]:
+        """
+        Sum dimensional facts for a concept when consolidated value is missing or suspect.
+
+        Per Principal Architect Directive #4, this handles cases like STT where
+        ShortTermBorrowings is only reported with dimensional breakdown (ShortTermDebtTypeAxis).
+
+        Constraints:
+        - Only use if consolidated value is missing OR < 50% of dimensional sum
+        - Filter to balance sheet period only
+        - Log full dimension breakdown for audit
+
+        Args:
+            facts_df: Facts dataframe
+            concept: The concept to sum (e.g., 'ShortTermBorrowings')
+            axis: Optional axis to filter by (e.g., 'ShortTermDebtTypeAxis')
+
+        Returns:
+            Sum of dimensional values, or None if not available
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        try:
+            if facts_df is None or len(facts_df) == 0:
+                return None
+
+            # Normalize concept name for matching
+            concept_lower = concept.lower()
+
+            # Find dimensional facts for concept
+            concept_facts = facts_df[
+                facts_df['concept'].str.replace('us-gaap:', '', regex=False).str.lower() == concept_lower
+            ].copy()
+
+            if len(concept_facts) == 0:
+                # Try with namespace
+                concept_facts = facts_df[
+                    facts_df['concept'].str.lower() == f'us-gaap:{concept_lower}'
+                ].copy()
+
+            if len(concept_facts) == 0:
+                return None
+
+            # Filter to dimensional facts only
+            if 'full_dimension_label' not in concept_facts.columns:
+                return None
+
+            dim_facts = concept_facts[concept_facts['full_dimension_label'].notna()]
+
+            if len(dim_facts) == 0:
+                return None
+
+            # Filter by axis if specified
+            if axis:
+                # Look for the axis in dimension columns or labels
+                axis_lower = axis.lower()
+                has_axis = dim_facts['full_dimension_label'].str.lower().str.contains(axis_lower, na=False)
+                if has_axis.any():
+                    dim_facts = dim_facts[has_axis]
+
+            # Filter to latest period (balance sheet point-in-time)
+            if 'period_key' in dim_facts.columns:
+                # Prefer instant periods for balance sheet items
+                instant_facts = dim_facts[dim_facts['period_key'].str.startswith('instant_')]
+                if len(instant_facts) > 0:
+                    latest_period = instant_facts['period_key'].max()
+                    dim_facts = dim_facts[dim_facts['period_key'] == latest_period]
+                else:
+                    # Fall back to latest period overall
+                    latest_period = dim_facts['period_key'].max()
+                    dim_facts = dim_facts[dim_facts['period_key'] == latest_period]
+
+            # Get numeric values
+            if 'numeric_value' not in dim_facts.columns:
+                return None
+
+            dim_facts = dim_facts[dim_facts['numeric_value'].notna()]
+
+            if len(dim_facts) == 0:
+                return None
+
+            # Sum numeric values
+            dim_sum = dim_facts['numeric_value'].sum()
+
+            # Log breakdown for audit
+            logger.debug(f"Dimensional sum for {concept}: ${dim_sum/1e9:.2f}B")
+            for _, row in dim_facts.iterrows():
+                dim_label = row.get('full_dimension_label', 'unknown')
+                val = row['numeric_value']
+                logger.debug(f"  {dim_label}: ${val/1e9:.2f}B")
+
+            return float(dim_sum) if dim_sum > 0 else None
+
+        except Exception as e:
+            logger.debug(f"Dimensional fallback failed for {concept}: {e}")
+            return None
+
+    def _should_use_dimensional_fallback(self, consolidated: Optional[float], dim_sum: Optional[float]) -> bool:
+        """
+        Determine if dimensional sum should override consolidated value.
+
+        Per Principal Architect Directive #4, use dimensional if:
+        - Consolidated is None/0, OR
+        - Consolidated < 50% of dimensional sum (indicates missing components)
+
+        Args:
+            consolidated: The consolidated (non-dimensional) value
+            dim_sum: The sum of dimensional values
+
+        Returns:
+            True if dimensional sum should be used instead
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        if consolidated is None or consolidated == 0:
+            if dim_sum is not None and dim_sum > 0:
+                logger.debug(f"Dimensional override: consolidated is None/0, using dim_sum ${dim_sum/1e9:.2f}B")
+                return True
+            return False
+
+        if dim_sum is not None and dim_sum > 0:
+            # If consolidated is less than 50% of dimensional sum, something is missing
+            if consolidated < (dim_sum * 0.5):
+                logger.debug(f"Dimensional override: consolidated ${consolidated/1e9:.2f}B < 50% of dim ${dim_sum/1e9:.2f}B")
+                return True
+
+        return False
+
+    def extract_short_term_debt(self, xbrl, facts_df, mode: str = 'street', ticker: str = None) -> ExtractedMetric:
         """
         Bank ShortTermDebt extraction with mode selection.
 
@@ -467,16 +747,17 @@ class BankingExtractor(IndustryExtractor):
             xbrl: XBRL object
             facts_df: DataFrame of XBRL facts
             mode: 'gaap' for yfinance validation, 'street' for database (default)
+            ticker: Optional ticker for config-based archetype lookup
 
         Returns:
             ExtractedMetric with appropriate extraction method
         """
         if mode == 'gaap':
-            return self.extract_short_term_debt_gaap(xbrl, facts_df)
+            return self.extract_short_term_debt_gaap(xbrl, facts_df, ticker=ticker)
         else:
-            return self.extract_street_debt(xbrl, facts_df)
+            return self.extract_street_debt(xbrl, facts_df, ticker=ticker)
 
-    def extract_short_term_debt_gaap(self, xbrl, facts_df) -> ExtractedMetric:
+    def extract_short_term_debt_gaap(self, xbrl, facts_df, ticker: str = None) -> ExtractedMetric:
         """
         GAAP-aligned ShortTermDebt extraction (matches yfinance 'Current Debt').
 
@@ -507,8 +788,9 @@ class BankingExtractor(IndustryExtractor):
         # 2. Get ShortTermBorrowings aggregate (may be contaminated)
         stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
 
-        # 2.5 Get archetype to determine contamination subtraction strategy
-        archetype = self._detect_bank_archetype(facts_df)
+        # 2.5 Get archetype and extraction rules (config-based or dynamic)
+        archetype = self._get_archetype(facts_df, ticker)
+        rules = self._get_extraction_rules(ticker) if ticker else {}
 
         # 3. Get contaminants to SUBTRACT
         # Repos - often bundled into STB for banks
@@ -531,33 +813,60 @@ class BankingExtractor(IndustryExtractor):
         # REMOVED: LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths fallback
         # This was causing 82-996% over-extraction for WFC and BK
 
-        # 5. Calculate clean debt
-        # CRITICAL FIX: For dealers (GS, MS), repos are SEPARATE line items, not nested in STB
-        # Only subtract contaminants for commercial banks where repos ARE nested
-        contamination = repos + trading_liab
+        # 5. Calculate clean debt using STRUCTURAL LINKBASE CHECK (Principal Architect Directive #2)
+        # Replaces fragile 1.5x magnitude heuristic with calculation/presentation linkbase verification
+        # Check if repos and trading liabilities are structurally NESTED inside STB (children)
+        # or if they are SIBLINGS (separate line items) in the balance sheet
 
-        # Determine if we should subtract contamination
-        # For dealers: repos are usually massive separate line items (GS: $274B repos vs $69.7B STB)
-        # For commercial: repos may be nested inside STB
+        # Check if repos should be subtracted (rule-based override takes precedence)
+        subtract_repos_rule = rules.get('subtract_repos_from_stb', None)
+
+        if subtract_repos_rule is not None:
+            # Explicit rule from config - use it directly
+            repos_nested = subtract_repos_rule
+            trading_nested = subtract_repos_rule  # Apply same rule to both
+        else:
+            # No explicit rule - use structural linkbase check
+            repos_nested = self._is_concept_nested_in_stb(xbrl, 'SecuritiesSoldUnderAgreementsToRepurchase')
+            trading_nested = self._is_concept_nested_in_stb(xbrl, 'TradingLiabilities')
+
+        # Only subtract components that are structurally nested
+        contamination_to_subtract = 0
+        nested_components = []
+        if repos_nested and repos > 0:
+            contamination_to_subtract += repos
+            nested_components.append(f"Repos({repos/1e9:.1f}B)")
+        if trading_nested and trading_liab > 0:
+            contamination_to_subtract += trading_liab
+            nested_components.append(f"TradingLiab({trading_liab/1e9:.1f}B)")
+
+        # Sanity check: never subtract more than 90% of STB (prevents going negative)
+        max_subtraction = stb * 0.9
+        contamination_to_subtract = min(contamination_to_subtract, max_subtraction)
+
+        # Determine if we should subtract based on archetype and rule
+        # Hybrid and dealer archetypes have separate repos line items by definition
         should_subtract = (
-            archetype != 'dealer' and  # Commercial banks: subtract contamination
-            stb > 0 and
-            contamination > stb * 0.1 and  # Contamination is significant
-            contamination < stb * 1.5  # Sanity check: can't subtract more than exists
+            archetype not in ['dealer', 'hybrid'] and  # Dealers/hybrids have separate repos
+            contamination_to_subtract > 0
         )
 
         if should_subtract:
-            clean_stb = max(0, stb - contamination)
+            clean_stb = max(0, stb - contamination_to_subtract)
+            notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B) - {' - '.join(nested_components)} [linkbase verified] + CPLTD({cpltd/1e9:.1f}B)"
         else:
-            clean_stb = stb  # For dealers, use STB directly (repos are separate)
+            clean_stb = stb
+            sibling_info = []
+            if repos > 0 and not repos_nested:
+                sibling_info.append(f"Repos({repos/1e9:.1f}B)=sibling")
+            if trading_liab > 0 and not trading_nested:
+                sibling_info.append(f"TradingLiab({trading_liab/1e9:.1f}B)=sibling")
+            sibling_str = f" [{', '.join(sibling_info)}]" if sibling_info else ""
+            notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B){sibling_str} + CPLTD({cpltd/1e9:.1f}B)"
 
         total = clean_stb + cpltd
 
         if total > 0:
-            if should_subtract:
-                notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - TradingLiab({trading_liab/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
-            else:
-                notes = f"Bank GAAP [{archetype}]: STB({stb/1e9:.1f}B) [no subtraction - repos/trading separate] + CPLTD({cpltd/1e9:.1f}B)"
             return ExtractedMetric(
                 standard_name="ShortTermDebt",
                 industry_counterpart="CurrentDebt_GAAP",
@@ -566,6 +875,23 @@ class BankingExtractor(IndustryExtractor):
                 extraction_method=ExtractionMethod.COMPOSITE,
                 notes=notes
             )
+
+        # 5.5. DIMENSIONAL FALLBACK (Principal Architect Directive #4)
+        # Check for dimensional breakdown (e.g., STT reports ShortTermBorrowings by ShortTermDebtTypeAxis)
+        dim_sum = self._get_dimensional_sum(facts_df, 'ShortTermBorrowings', 'ShortTermDebtTypeAxis')
+
+        # Use dimensional sum if consolidated is missing or suspect
+        if self._should_use_dimensional_fallback(stb, dim_sum):
+            total = dim_sum + cpltd
+            if total > 0:
+                return ExtractedMetric(
+                    standard_name="ShortTermDebt",
+                    industry_counterpart="ShortTermDebt_GAAP_Dimensional",
+                    xbrl_concept=None,
+                    value=total,
+                    extraction_method=ExtractionMethod.COMPOSITE,
+                    notes=f"Bank GAAP [{archetype}]: STB({dim_sum/1e9:.1f}B) via dimensional fallback (ShortTermDebtTypeAxis) + CPLTD({cpltd/1e9:.1f}B)"
+                )
 
         # 6. Component fallback: CP + CPLTD + Other
         cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
@@ -593,7 +919,7 @@ class BankingExtractor(IndustryExtractor):
             notes="Bank GAAP: No valid ShortTermDebt found"
         )
     
-    def extract_street_debt(self, xbrl, facts_df) -> ExtractedMetric:
+    def extract_street_debt(self, xbrl, facts_df, ticker: str = None) -> ExtractedMetric:
         """
         Street Debt: Wholesale Funding via Strict Component Summation.
 
