@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.12.0] - 2026-01-23
+
+### Added
+
+- **8-K Earnings Parser**
+  - New `edgar/earnings.py` module for extracting financial tables from 8-K earnings releases
+  - Uses Document parser to handle complex HTML table structures with colspan/rowspan patterns
+  - Automatic statement type classification (income statement, balance sheet, cash flow)
+  - Scale detection (units, thousands, millions, billions)
+  - Multiple output formats: `to_context()`, `to_html()`, `to_json()`, `to_markdown()`
+  - Token-efficient context generation with minimal/standard/full detail levels for AI analysis
+  - EightK integration: `has_earnings`, `earnings` property, statement shortcuts
+  - Safe accessors: `get_income_statement()`, `get_balance_sheet()`, `get_cash_flow_statement()`
+  - **Files**: `edgar/earnings.py`, `edgar/company_reports/current_report.py`
+
+- **Business Development Company (BDC) Support**
+  - Comprehensive BDC module for analyzing closed-end investment companies
+  - `BDCEntity` class for individual BDC analysis with filings and SOI access
+  - `BDCEntities` collection with `get_by_cik()` and `get_by_ticker()` methods
+  - `PortfolioInvestment` model for individual holdings with PIK rate support
+  - Facts-based extraction for portfolio investments
+  - Cross-BDC portfolio company search to find which BDCs hold a specific company
+  - SEC DERA BDC Data Sets integration
+  - Fuzzy search for BDCs by name or ticker
+  - `is_active` property and visual status indicators
+  - `DataQuality` metrics and data availability checks
+  - **Files**: `edgar/bdc/` module
+
+### Fixed
+
+- **Financials Dimension Parameter**
+  - Fixed the default for the dimension parameter when passed from the financials object
+  - **Files**: `edgar/financials.py`
+
+- **HTTP Error Handling**
+  - Improved `TooManyRequestsError` with actionable guidance for users
+  - Added `RemoteProtocolError` to retryable exceptions for bulk downloads
+  - **Files**: `edgar/httprequests.py`
+
 ### Changed
 
 - **Dependencies**
@@ -15,6 +54,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - httpxthrottlecache v0.3.0 uses FileCache as default backend instead of Hishel
   - Better suited for Edgar's large immutable file downloads
   - **Files**: `pyproject.toml`, `docs/configuration.md`
+
+- **Performance Improvements**
+  - Improved HTTP connection reuse and bulk download timeouts
+  - Increased maximum document size when streaming HTML
+  - **Files**: `edgar/httprequests.py`
+
+- **Reference Data**
+  - Updated CUSIP-Ticker mappings for December 2025
+  - **Files**: `edgar/reference/data/`
 
 ## [5.11.2] - 2026-01-22
 
