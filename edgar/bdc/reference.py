@@ -20,7 +20,7 @@ from rich.text import Text
 import httpx
 import pandas as pd
 
-from edgar.formatting import cik_text
+from edgar.display.formatting import cik_text
 from edgar.httprequests import get_with_retry
 
 __all__ = [
