@@ -348,15 +348,22 @@ class CurrentReport(CompanyReport):
     @property
     def has_earnings(self) -> bool:
         """
-        Check if this 8-K contains earnings data (Item 2.02).
+        Check if this 8-K contains parseable earnings data.
 
-        Item 2.02 reports "Results of Operations and Financial Condition",
-        which typically includes quarterly/annual earnings with financial tables.
+        Returns True only if both conditions are met:
+        1. Item 2.02 (Results of Operations and Financial Condition) is present
+        2. An EX-99.1 press release exhibit exists with financial tables
+
+        This ensures consistency with the `earnings` property - if `has_earnings`
+        is True, then `earnings` will return a valid EarningsRelease object.
+
+        For semantic "is this an earnings announcement" check, use:
+            '2.02' in eight_k.items
 
         Returns:
-            True if this filing contains Item 2.02
+            True if this filing has both Item 2.02 and a parseable EX-99.1 exhibit
         """
-        return any('2.02' in item for item in self.items)
+        return any('2.02' in item for item in self.items) and self.earnings is not None
 
     @cached_property
     def earnings(self):
