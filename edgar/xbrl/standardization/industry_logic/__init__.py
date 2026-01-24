@@ -296,7 +296,77 @@ class IndustryExtractor(ABC):
         # Return first value (most recent period, non-dimensional)
         val = numeric_df.iloc[0]['numeric_value']
         return float(val) if val is not None else None
-    
+
+    def _get_fact_value_non_dimensional(self, df, concept: str) -> Optional[float]:
+        """
+        Get ONLY non-dimensional (consolidated total) value for a concept.
+
+        Unlike _get_fact_value(), this method returns None if only dimensional
+        values exist. This is important for concepts like TradingLiabilities
+        where dimensional values are breakdowns, NOT bundled totals.
+
+        Phase 4 Fix:
+        - WFC has TradingLiabilities with TradingActivityByTypeAxis dimension only
+        - These are breakdowns, NOT bundled in ShortTermBorrowings
+        - Should NOT subtract dimensional trading values from STB
+
+        Args:
+            df: DataFrame of facts
+            concept: XBRL concept name
+
+        Returns:
+            Consolidated value if exists, None if only dimensional values exist
+        """
+        if df is None or len(df) == 0:
+            return None
+
+        # Match exact concept (case-insensitive, handle namespace prefix)
+        concept_lower = concept.lower()
+        matches = df[
+            df['concept'].str.replace('us-gaap:', '', regex=False).str.lower() == concept_lower
+        ]
+
+        if len(matches) == 0:
+            # Try with namespace
+            matches = df[df['concept'].str.lower() == f'us-gaap:{concept_lower}']
+
+        if len(matches) == 0:
+            return None
+
+        # Filter for STRICTLY non-dimensional values only
+        non_dim = matches.copy()
+
+        # Filter by dimension column (most reliable indicator)
+        if 'dimension' in non_dim.columns:
+            non_dim = non_dim[non_dim['dimension'].isna() | (non_dim['dimension'] == '')]
+
+        # Filter by full_dimension_label
+        if 'full_dimension_label' in non_dim.columns and len(non_dim) > 0:
+            non_dim = non_dim[non_dim['full_dimension_label'].isna() | (non_dim['full_dimension_label'] == '')]
+
+        # STRICT: If no non-dimensional values, return None (don't fall back)
+        if len(non_dim) == 0:
+            return None
+
+        # Get numeric values only
+        if 'numeric_value' not in non_dim.columns:
+            return None
+
+        numeric_df = non_dim[non_dim['numeric_value'].notna()]
+        if len(numeric_df) == 0:
+            return None
+
+        # Prefer instant (balance sheet) values
+        if 'period_key' in numeric_df.columns:
+            instant_mask = numeric_df['period_key'].str.startswith('instant_')
+            if instant_mask.any():
+                numeric_df = numeric_df[instant_mask]
+            numeric_df = numeric_df.sort_values('period_key', ascending=False)
+
+        # Return first value (most recent period, non-dimensional)
+        val = numeric_df.iloc[0]['numeric_value']
+        return float(val) if val is not None else None
+
     def _calculate_period_days(self, period_key: str) -> int:
         """Calculate days in a period from period_key like 'duration_2024-01-01_2024-12-31'."""
         try:
@@ -704,7 +774,7 @@ class BankingExtractor(IndustryExtractor):
         logger.debug(f"DEFAULT: {concept} not found nested in STB linkbases -> DO NOT SUBTRACT")
         return False
 
-    def _get_repos_value(self, facts_df) -> Optional[float]:
+    def _get_repos_value(self, facts_df, prefer_net_in_bs: bool = False) -> Optional[float]:
         """
         Get repos value using suffix matching (namespace-resilient).
 
@@ -716,11 +786,49 @@ class BankingExtractor(IndustryExtractor):
         - Added broader repos detection patterns for 10-Q filings
         - Includes alternative concept names used by different banks
 
+        Phase 4 Fix (WFC 10-Q):
+        - Added prefer_net_in_bs parameter for commercial banks (WFC)
+        - WFC reports repos+sec loaned combined in STB, need PURE REPOS for subtraction
+        - Combined NET = $202.3B, but SecuritiesLoaned = $8.0B
+        - Pure Repos = Combined - SecLoaned = $194.3B (matches yfinance $36.4B expectation)
+
+        Args:
+            facts_df: Facts dataframe
+            prefer_net_in_bs: If True, calculate pure repos by subtracting securities loaned
+                             from combined repos+sec loaned for banks like WFC
+
         Returns:
             Repos value if found, None otherwise
         """
         import logging
         logger = logging.getLogger(__name__)
+
+        # PHASE 4 FIX: For commercial banks (WFC), calculate PURE REPOS
+        # WFC reports repos+securities loaned combined in STB
+        # yfinance expects STB - pure repos, NOT STB - (repos + sec loaned)
+        if prefer_net_in_bs:
+            # Try to get combined repos+sec loaned NET in balance sheet
+            combined_net = self._get_fact_value_fuzzy(
+                facts_df,
+                'SecuritiesSoldUnderAgreementsToRepurchaseAndSecuritiesLoanedNetAmountInConsolidatedBalanceSheet'
+            )
+
+            if combined_net is not None and combined_net > 0:
+                # Get securities loaned separately to calculate pure repos
+                sec_loaned = self._get_fact_value_fuzzy(
+                    facts_df,
+                    'SecuritiesLoanedIncludingNotSubjectToMasterNettingArrangementAndAssetsOtherThanSecuritiesTransferred'
+                ) or 0
+
+                # Pure repos = combined - sec loaned
+                pure_repos = combined_net - sec_loaned
+                if pure_repos > 0:
+                    logger.debug(f"Pure Repos calculated: ${pure_repos/1e9:.1f}B = Combined(${combined_net/1e9:.1f}B) - SecLoaned(${sec_loaned/1e9:.1f}B)")
+                    return pure_repos
+                else:
+                    # Fallback to combined if sec_loaned > combined (shouldn't happen)
+                    logger.debug(f"Repos (combined) found: ${combined_net/1e9:.1f}B")
+                    return combined_net
 
         # EXPANDED REPOS DETECTION PATTERNS (ordered by specificity)
         repos_concepts = [
@@ -1109,11 +1217,17 @@ class BankingExtractor(IndustryExtractor):
                 logger.debug(f"Commercial [{ticker}]: STB fallback to fuzzy match = ${stb/1e9:.1f}B")
 
         if stb > 0:
-            # Get contaminants using SUFFIX MATCHING (namespace-resilient)
-            repos = self._get_repos_value(facts_df) or 0
-            trading = self._get_fact_value(facts_df, 'TradingLiabilities') or 0
+            # PHASE 4 FIX: For commercial banks (WFC), prefer PURE REPOS
+            # WFC reports repos+securities loaned combined in STB aggregate
+            # Pure repos = Combined - SecLoaned, matching yfinance expectation
+            repos = self._get_repos_value(facts_df, prefer_net_in_bs=True) or 0
+
+            # PHASE 4 FIX: Only subtract trading if it's a consolidated (non-dimensional) value
+            # WFC has TradingLiabilities as dimensional breakdown only (by TradingActivityByTypeAxis)
+            # Dimensional values are NOT bundled in STB - they're just breakdowns
+            trading = self._get_fact_value_non_dimensional(facts_df, 'TradingLiabilities') or 0
             if trading == 0:
-                trading = self._get_fact_value_fuzzy(facts_df, 'TradingAccountLiabilities') or 0
+                trading = self._get_fact_value_non_dimensional(facts_df, 'TradingAccountLiabilities') or 0
 
             # PHASE 3 FIX: CONFIG-DRIVEN + BALANCE GUARD
             # 1. Check config for subtract_repos_from_stb (default: True for backwards compat)
@@ -1129,7 +1243,10 @@ class BankingExtractor(IndustryExtractor):
             # Subtract for commercial only if config says to AND balance guard passes
             if repos_is_bundled:
                 clean_stb = max(0, stb - repos - trading)
-                notes = f"Commercial [{ticker}]: Top-Down = STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - Trading({trading/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
+                if trading > 0:
+                    notes = f"Commercial [{ticker}]: Top-Down = STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - Trading({trading/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
+                else:
+                    notes = f"Commercial [{ticker}]: Top-Down = STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
             else:
                 # Config or balance guard says don't subtract repos
                 clean_stb = max(0, stb - trading)
