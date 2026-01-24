@@ -220,8 +220,9 @@ class ReferenceValidator:
                 # But to follow the plan, we should read the config.
                 
                 # Quick access to industry config
+                # Note: Banking config has metrics directly under industry (no concept_mapping layer)
                 industry_conf = conf.data.get('industry_metrics', {}).get('banking', {})
-                metric_conf = industry_conf.get('concept_mapping', {}).get('ShortTermDebt', {})
+                metric_conf = industry_conf.get('ShortTermDebt', {})
                 if metric_conf.get('fallback_to_tree') is False:
                      # Return a special indicator that validation failed/missing (e.g. -1.0 or raise)
                      # But _try_industry_extraction signature is Optional[float].
@@ -272,8 +273,9 @@ class ReferenceValidator:
                     return result.value
                 
                 # Fallback Check
+                # Note: Banking config has metrics directly under industry (no concept_mapping layer)
                 industry_conf = conf.data.get('industry_metrics', {}).get('banking', {})
-                metric_conf = industry_conf.get('concept_mapping', {}).get('CashAndEquivalents', {})
+                metric_conf = industry_conf.get('CashAndEquivalents', {})
                 if metric_conf.get('fallback_to_tree') is False:
                      return float('nan') # Sentinel to kill Tree Result
             
