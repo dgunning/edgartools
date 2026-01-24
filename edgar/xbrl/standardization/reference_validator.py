@@ -208,7 +208,8 @@ class ReferenceValidator:
                 extractor = BankingExtractor()
                 # CRITICAL: Use mode='gaap' for yfinance validation
                 # Street View (mode='street') is for database, not validation
-                result = extractor.extract_short_term_debt(xbrl, facts_df, mode='gaap')
+                # PHASE 3 FIX: Pass ticker for config-based archetype lookup
+                result = extractor.extract_short_term_debt(xbrl, facts_df, mode='gaap', ticker=ticker)
                 if result.value is not None:
                     return result.value
                 

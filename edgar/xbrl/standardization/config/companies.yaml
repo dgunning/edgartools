@@ -172,14 +172,14 @@ companies:
     bank_archetype: "commercial"
     archetype_override: true  # Prevents dynamic detection, use config archetype
     extraction_rules:
-      subtract_repos_from_stb: true
+      subtract_repos_from_stb: false  # Phase 3 fix: USB STB is already clean (repos not bundled)
       subtract_trading_from_stb: true
       safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
       - COGS
       - SGA
-    notes: "Regional commercial bank - traditional banking model."
+    notes: "Regional commercial bank - traditional banking model. STB already excludes repos."
 
   # Custodial Banks - NEVER fuzzy match per architect directive
   BK:
@@ -189,7 +189,7 @@ companies:
     bank_archetype: "custodial"
     archetype_override: true  # Prevents dynamic detection, use config archetype
     extraction_rules:
-      repos_as_debt: true      # For custodial, repos ARE financing (include in debt)
+      repos_as_debt: false     # Phase 3 fix: For GAAP validation, repos NOT included in Current Debt
       safe_fallback: false     # CRITICAL: Return None rather than fuzzy match!
     validation_tolerance_pct: 20.0
     exclude_metrics:
@@ -197,7 +197,7 @@ companies:
       - SGA
     street_view_notes:
       CashAndEquivalents: "Includes Fed Deposits via company-extension tags (bk:InterestBearingDepositsInFederalReserve)."
-    notes: "Custodial bank - high PayablesToCustomers from custody operations. NO fuzzy fallback for STB."
+    notes: "Custodial bank - repos not in yfinance Current Debt. NO fuzzy fallback for STB."
 
   STT:
     name: "State Street Corporation"

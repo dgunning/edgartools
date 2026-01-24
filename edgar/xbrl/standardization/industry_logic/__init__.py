@@ -167,71 +167,105 @@ class IndustryExtractor(ABC):
         # Base implementation is weak - rely on subclasses for robust checks
         return None
 
-    def _get_fact_value(self, df, concept: str, target_period_days: int = None) -> Optional[float]:
+    def _get_fact_value(self, df, concept: str, target_period_days: int = None,
+                        prefer_balance_sheet_instant: bool = True) -> Optional[float]:
         """
         Get the consolidated (non-dimensional) value for a concept from the appropriate period.
-        
+
         Key logic:
         1. Match exact concept name (handle namespace prefix)
         2. Filter out dimensional values (keep only totals)
-        3. Filter by target period duration if specified
-        4. Select the most recent period
-        5. For same period, prefer single value without dimensions
-        
+        3. For BALANCE SHEET concepts: prefer latest instant value (point-in-time)
+        4. Filter by target period duration if specified
+        5. Select the most recent period
+        6. For same period, prefer single value without dimensions
+
         Args:
             df: DataFrame of facts
             concept: XBRL concept name
             target_period_days: Optional. Target period duration (90 for quarterly, 365 for annual).
                                If None, uses most recent period without duration filtering.
+            prefer_balance_sheet_instant: If True and concept is a balance sheet item,
+                                         prefer latest instant value regardless of period.
+
+        Phase 3 Regression Fix:
+        - Added balance sheet concept handling (prefer latest instant value)
+        - This fixes 10-Q extraction where balance sheet items have no target_period_days
         """
         if df is None or len(df) == 0:
             return None
-        
+
+        # Balance sheet concepts (point-in-time values, not period-dependent)
+        BALANCE_SHEET_CONCEPTS = [
+            'shorttermborrowings', 'debtcurrent', 'longtermdebtcurrent',
+            'othershorttermborrowings', 'commercialpaper', 'assets',
+            'liabilities', 'stockholdersequity', 'cashandcashequivalents',
+            'cashandcashequivalentsatcarryingvalue', 'cashduefrombanks',
+            'interestbearingdepositsinbanks', 'restrictedcash',
+            'federalhomeloanbankadvances', 'federalfundspurchased',
+            'tradingliabilities', 'unsecuredshorttermborrowings',
+        ]
+
         # Match exact concept (case-insensitive, handle namespace prefix)
         concept_lower = concept.lower()
         matches = df[
             df['concept'].str.replace('us-gaap:', '', regex=False).str.lower() == concept_lower
         ]
-        
+
         if len(matches) == 0:
             # Try with namespace
             matches = df[df['concept'].str.lower() == f'us-gaap:{concept_lower}']
-            
+
         if len(matches) == 0:
             return None
-        
+
         # Filter for non-dimensional (total) values only
         # Check multiple dimension indicator columns
         non_dim = matches.copy()
-        
+
         # Filter by full_dimension_label
         if 'full_dimension_label' in non_dim.columns:
             non_dim = non_dim[non_dim['full_dimension_label'].isna() | (non_dim['full_dimension_label'] == '')]
-        
-        # Filter by dimension_label  
+
+        # Filter by dimension_label
         if 'dimension_label' in non_dim.columns and len(non_dim) > 1:
             subset = non_dim[non_dim['dimension_label'].isna() | (non_dim['dimension_label'] == '')]
             if len(subset) > 0:
                 non_dim = subset
-        
+
         # Filter by segment_label
         if 'segment_label' in non_dim.columns and len(non_dim) > 1:
             subset = non_dim[non_dim['segment_label'].isna() | (non_dim['segment_label'] == '')]
             if len(subset) > 0:
                 non_dim = subset
-        
+
         if len(non_dim) == 0:
             # If all values have dimensions, fall back to original matches
             non_dim = matches
-        
+
         # Get numeric values only
         if 'numeric_value' not in non_dim.columns:
             return None
-        
+
         numeric_df = non_dim[non_dim['numeric_value'].notna()]
         if len(numeric_df) == 0:
             return None
-        
+
+        # BALANCE SHEET HANDLING: For balance sheet concepts, prefer latest instant value
+        # Balance sheet items are point-in-time, not period-dependent
+        is_balance_sheet = concept_lower in BALANCE_SHEET_CONCEPTS
+
+        if is_balance_sheet and prefer_balance_sheet_instant and 'period_key' in numeric_df.columns:
+            # Filter for instant periods (point-in-time values)
+            instant_mask = numeric_df['period_key'].str.startswith('instant_')
+            if instant_mask.any():
+                instant_df = numeric_df[instant_mask].copy()
+                # Sort by date and get latest
+                instant_df = instant_df.sort_values('period_key', ascending=False)
+                if len(instant_df) > 0:
+                    val = instant_df.iloc[0]['numeric_value']
+                    return float(val) if val is not None else None
+
         # PERIOD FILTERING: Filter by target duration if specified
         if target_period_days and 'period_key' in numeric_df.columns:
             duration_mask = numeric_df['period_key'].str.startswith('duration_')
@@ -242,20 +276,23 @@ class IndustryExtractor(ABC):
                 )
                 # 30-day tolerance band for period matching
                 filtered = duration_rows[
-                    (duration_rows['period_days'] >= target_period_days - 30) & 
+                    (duration_rows['period_days'] >= target_period_days - 30) &
                     (duration_rows['period_days'] <= target_period_days + 30)
                 ]
                 if len(filtered) > 0:
                     numeric_df = filtered
                 else:
-                    # Strict filtering: If target days specified but no match, return None
-                    # This prevents 10-Q failing back to YTD (9mo) when we wanted Q (3mo)
-                    return None
-        
+                    # For balance sheet items without duration match, don't return None
+                    # Try to get any available value
+                    if not is_balance_sheet:
+                        # Strict filtering: If target days specified but no match, return None
+                        # This prevents 10-Q failing back to YTD (9mo) when we wanted Q (3mo)
+                        return None
+
         # Sort by period to get most recent
         if 'period_key' in numeric_df.columns:
             numeric_df = numeric_df.sort_values('period_key', ascending=False)
-        
+
         # Return first value (most recent period, non-dimensional)
         val = numeric_df.iloc[0]['numeric_value']
         return float(val) if val is not None else None
@@ -675,22 +712,47 @@ class BankingExtractor(IndustryExtractor):
         - Catches: us-gaap:, wfc:, jpm:, bac:, gs: prefixed repos concepts
         - Uses fuzzy matching to handle company-extension namespaces
 
+        Phase 3 Regression Fix:
+        - Added broader repos detection patterns for 10-Q filings
+        - Includes alternative concept names used by different banks
+
         Returns:
             Repos value if found, None otherwise
         """
-        # Primary: Suffix match on SecuritiesSoldUnderAgreementsToRepurchase
-        val = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase')
-        if val is not None and val > 0:
-            return val
+        import logging
+        logger = logging.getLogger(__name__)
+
+        # EXPANDED REPOS DETECTION PATTERNS (ordered by specificity)
+        repos_concepts = [
+            # Primary patterns (most specific)
+            'SecuritiesSoldUnderAgreementsToRepurchase',
+            'SecuritiesSoldUnderRepurchaseAgreements',
+            # Alternative patterns
+            'RepurchaseAgreements',
+            'SecuritiesSoldUnderRepoAgreements',
+            # Broader patterns (less specific, use last)
+            'SecuritiesSoldNotYetPurchased',
+        ]
+
+        for concept in repos_concepts:
+            val = self._get_fact_value_fuzzy(facts_df, concept)
+            if val is not None and val > 0:
+                logger.debug(f"Repos found via {concept}: ${val/1e9:.1f}B")
+                return val
 
         # Fallback: Combined FedFunds + Repos concept
         val = self._get_fact_value_fuzzy(facts_df, 'FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase')
         if val is not None and val > 0:
+            logger.debug(f"Repos found via FedFunds+Repos combined: ${val/1e9:.1f}B")
             return val
 
         # Fallback: Try exact us-gaap match
         val = self._get_fact_value(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase')
-        return val
+        if val is not None and val > 0:
+            logger.debug(f"Repos found via exact match: ${val/1e9:.1f}B")
+            return val
+
+        return None
 
     def _get_dimensional_sum(self, facts_df, concept: str, axis: str = None) -> Optional[float]:
         """
@@ -877,7 +939,12 @@ class BankingExtractor(IndustryExtractor):
 
         # Get archetype and rules
         archetype = self._get_archetype(facts_df, ticker)
-        rules = ARCHETYPE_EXTRACTION_RULES.get(archetype, ARCHETYPE_EXTRACTION_RULES['commercial'])
+        archetype_rules = ARCHETYPE_EXTRACTION_RULES.get(archetype, ARCHETYPE_EXTRACTION_RULES['commercial'])
+
+        # PHASE 3 FIX: Merge company-specific rules with archetype rules
+        # Company config takes precedence over archetype defaults
+        company_rules = self._get_extraction_rules(ticker) if ticker else {}
+        rules = {**archetype_rules, **company_rules}  # Company rules override archetype
 
         # Get CPLTD (always needed across all archetypes)
         # STRICT: Only use balance sheet classification, NOT maturity schedule
@@ -904,13 +971,34 @@ class BankingExtractor(IndustryExtractor):
         - If components missing, return None
         - NEVER fall back to fuzzy ShortTermBorrowings match
         - Custodial banks have repos as financing, not contamination
+
+        Phase 3 Regression Fix:
+        - Added DebtCurrent as a fallback for 10-Q filings
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         # Specific components for custodial banks
         other_stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings')
         fed_funds = self._get_fact_value(facts_df, 'FederalFundsPurchased')
+        commercial_paper = self._get_fact_value(facts_df, 'CommercialPaper')  # Phase 3 fix: BK uses CP
+
+        # 10-Q FALLBACK: Try DebtCurrent if no components found
+        if (other_stb is None or other_stb == 0) and (fed_funds is None or fed_funds == 0) and (commercial_paper is None or commercial_paper == 0):
+            debt_current = self._get_fact_value(facts_df, 'DebtCurrent')
+            if debt_current is not None and debt_current > 0:
+                logger.debug(f"Custodial [{ticker}]: Using DebtCurrent fallback = ${debt_current/1e9:.1f}B")
+                return ExtractedMetric(
+                    standard_name="ShortTermDebt",
+                    industry_counterpart="ShortTermDebt_GAAP_Custodial",
+                    xbrl_concept="us-gaap:DebtCurrent",
+                    value=debt_current + cpltd,
+                    extraction_method=ExtractionMethod.DIRECT,
+                    notes=f"Custodial [{ticker}]: DebtCurrent({debt_current/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B) [10-Q fallback]"
+                )
 
         # Check for company-specific repos (STT uses stt: prefix)
-        # For custodial, repos ARE debt (unlike commercial)
+        # For custodial, repos are financing but may NOT be included in GAAP "Current Debt"
         repos_liability = self._get_fact_value_fuzzy(facts_df, 'SecuritiesSoldUnderAgreementsToRepurchase') or 0
 
         components = []
@@ -924,8 +1012,15 @@ class BankingExtractor(IndustryExtractor):
             total += fed_funds
             components.append(f"FedFunds({fed_funds/1e9:.1f}B)")
 
-        # Add repos for custodial (it's financing, not contamination)
-        if repos_liability > 0:
+        # PHASE 3 FIX: Add CommercialPaper for custodial banks (e.g., BK)
+        if commercial_paper is not None and commercial_paper > 0:
+            total += commercial_paper
+            components.append(f"CP({commercial_paper/1e9:.1f}B)")
+
+        # PHASE 3 FIX: Check config for repos_as_debt
+        # For GAAP validation, repos typically NOT included in yfinance "Current Debt"
+        include_repos = rules.get('repos_as_debt', False)  # Default: don't include for GAAP
+        if include_repos and repos_liability > 0:
             total += repos_liability
             components.append(f"Repos({repos_liability/1e9:.1f}B)")
 
@@ -963,7 +1058,13 @@ class BankingExtractor(IndustryExtractor):
         2. IF Bottom-Up yields $0: Top-Down subtraction (STB - Repos - Trading)
 
         Per architect: Commercial banks bundle repos into STB, so we must subtract.
+
+        Phase 3 Regression Fix:
+        - Added 10-Q fallback logic when primary concepts return $0
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         # === ATTEMPT 1: Bottom-Up Aggregation ===
         cp = self._get_fact_value(facts_df, 'CommercialPaper') or 0
         fhlb = self._get_fact_value_fuzzy(facts_df, 'FederalHomeLoanBankAdvances') or 0
@@ -994,6 +1095,19 @@ class BankingExtractor(IndustryExtractor):
         # === ATTEMPT 2: Top-Down Subtraction ===
         stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
 
+        # 10-Q FALLBACK: If STB is 0, try alternative concepts
+        if stb == 0:
+            # Try DebtCurrent (often available in quarterly)
+            stb = self._get_fact_value(facts_df, 'DebtCurrent') or 0
+            if stb > 0:
+                logger.debug(f"Commercial [{ticker}]: STB fallback to DebtCurrent = ${stb/1e9:.1f}B")
+
+        if stb == 0:
+            # Try fuzzy matching with broader search
+            stb = self._get_fact_value_fuzzy(facts_df, 'ShortTermBorrowings') or 0
+            if stb > 0:
+                logger.debug(f"Commercial [{ticker}]: STB fallback to fuzzy match = ${stb/1e9:.1f}B")
+
         if stb > 0:
             # Get contaminants using SUFFIX MATCHING (namespace-resilient)
             repos = self._get_repos_value(facts_df) or 0
@@ -1001,14 +1115,33 @@ class BankingExtractor(IndustryExtractor):
             if trading == 0:
                 trading = self._get_fact_value_fuzzy(facts_df, 'TradingAccountLiabilities') or 0
 
-            # Always subtract for commercial (per architect rules)
-            clean_stb = max(0, stb - repos - trading)
+            # PHASE 3 FIX: CONFIG-DRIVEN + BALANCE GUARD
+            # 1. Check config for subtract_repos_from_stb (default: True for backwards compat)
+            # 2. Apply balance guard as override when repos > STB
+            subtract_repos_config = rules.get('subtract_repos_from_stb', True)
+
+            repos_is_bundled = subtract_repos_config
+            if repos > 0 and repos > stb:
+                # Balance guard: If repos > STB, repos cannot be bundled inside STB
+                logger.debug(f"BALANCE GUARD: Repos ({repos/1e9:.1f}B) > STB ({stb/1e9:.1f}B) -> repos NOT bundled")
+                repos_is_bundled = False
+
+            # Subtract for commercial only if config says to AND balance guard passes
+            if repos_is_bundled:
+                clean_stb = max(0, stb - repos - trading)
+                notes = f"Commercial [{ticker}]: Top-Down = STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - Trading({trading/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)"
+            else:
+                # Config or balance guard says don't subtract repos
+                clean_stb = max(0, stb - trading)
+                notes = f"Commercial [{ticker}]: Top-Down = STB({stb/1e9:.1f}B) - Trading({trading/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B) [repos separate: {repos/1e9:.1f}B]"
+
             total = clean_stb + cpltd
 
             # Per architect: Store repos value in metadata - don't discard
             metadata = {
                 'secured_funding_repos': repos,
                 'trading_liabilities': trading,
+                'repos_is_bundled': repos_is_bundled,
                 'archetype': 'commercial',
                 'raw_stb': stb,
             }
@@ -1019,7 +1152,7 @@ class BankingExtractor(IndustryExtractor):
                 xbrl_concept=None,
                 value=total,
                 extraction_method=ExtractionMethod.COMPOSITE,
-                notes=f"Commercial [{ticker}]: Top-Down = STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) - Trading({trading/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B)",
+                notes=notes,
                 metadata=metadata
             )
 
@@ -1040,23 +1173,64 @@ class BankingExtractor(IndustryExtractor):
         Per Senior Architect directive:
         - Ensure we don't double-subtract if filer already reports Repos separately
         - Check calculation/presentation linkbase for nesting relationship
+
+        Phase 3 Regression Fix:
+        - Added BALANCE GUARD: If repos > STB, repos cannot be nested inside STB
+        - Added config override: subtract_repos_from_stb (default False)
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+
+        # 10-Q FALLBACK: If STB is 0, try alternative concepts
+        if stb == 0:
+            # Try DebtCurrent (often available in quarterly)
+            stb = self._get_fact_value(facts_df, 'DebtCurrent') or 0
+            if stb > 0:
+                logger.debug(f"Hybrid [{ticker}]: STB fallback to DebtCurrent = ${stb/1e9:.1f}B")
+
+        if stb == 0:
+            # Try fuzzy matching with broader search
+            stb = self._get_fact_value_fuzzy(facts_df, 'ShortTermBorrowings') or 0
+            if stb > 0:
+                logger.debug(f"Hybrid [{ticker}]: STB fallback to fuzzy match = ${stb/1e9:.1f}B")
+
+        if stb == 0:
+            # Try OtherShortTermBorrowings as final fallback
+            stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings') or 0
+            if stb > 0:
+                logger.debug(f"Hybrid [{ticker}]: STB fallback to OtherSTB = ${stb/1e9:.1f}B")
 
         # Get repos value (using suffix matching)
         repos = self._get_repos_value(facts_df) or 0
 
+        # PHASE 3 FIX: Config-driven subtraction (default: DO NOT subtract)
+        # Per debugging: Hybrid banks (JPM, BAC, C) report repos SEPARATELY
+        subtract_repos_config = rules.get('subtract_repos_from_stb', False)
+
+        # BALANCE GUARD: If repos > STB, repos CANNOT be nested inside STB
+        # This catches cases where linkbase structure is misleading
+        balance_guard_passed = True
+        if repos > 0 and stb > 0 and repos > stb:
+            logger.debug(f"BALANCE GUARD: Repos ({repos/1e9:.1f}B) > STB ({stb/1e9:.1f}B) -> repos NOT nested")
+            balance_guard_passed = False
+
         # CHECK: Is repos nested inside STB, or is it a separate line item?
-        # For hybrid banks, check the calculation linkbase relationship
-        repos_is_nested = self._is_concept_nested_in_stb(xbrl, 'SecuritiesSoldUnderAgreementsToRepurchase')
+        repos_is_nested = False
+        if subtract_repos_config:
+            # Only check nesting if explicitly configured to subtract
+            repos_is_nested = self._is_concept_nested_in_stb(xbrl, 'SecuritiesSoldUnderAgreementsToRepurchase')
+            # Apply balance guard as additional check
+            repos_is_nested = repos_is_nested and balance_guard_passed
 
         if repos_is_nested and repos > 0:
-            # Repos IS nested - we need to subtract
+            # Repos IS nested AND balance guard passed - we need to subtract
             clean_stb = max(0, stb - repos)
             total = clean_stb + cpltd
             notes = f"Hybrid [{ticker}]: STB({stb/1e9:.1f}B) - Repos({repos/1e9:.1f}B) [nested] + CPLTD({cpltd/1e9:.1f}B)"
         else:
-            # Repos is separate line item - do NOT subtract (would double-count)
+            # Default: Do NOT subtract (repos is separate line item or balance guard failed)
             total = stb + cpltd
             notes = f"Hybrid [{ticker}]: STB({stb/1e9:.1f}B) + CPLTD({cpltd/1e9:.1f}B) [repos separate: {repos/1e9:.1f}B]"
 
@@ -1064,6 +1238,8 @@ class BankingExtractor(IndustryExtractor):
         metadata = {
             'secured_funding_repos': repos,
             'repos_is_nested': repos_is_nested,
+            'balance_guard_passed': balance_guard_passed,
+            'subtract_repos_config': subtract_repos_config,
             'archetype': 'hybrid',
             'raw_stb': stb,
         }
@@ -1094,13 +1270,32 @@ class BankingExtractor(IndustryExtractor):
 
         Dealers have repos as separate line items (~$274B for GS).
         Use the clean unsecured STB tag directly.
+
+        Phase 3 Regression Fix:
+        - Added 10-Q fallback logic when primary concepts return $0
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         # Dealer-specific: UnsecuredShortTermBorrowings (explicitly excludes repos)
         unsecured_stb = self._get_fact_value_fuzzy(facts_df, 'UnsecuredShortTermBorrowings') or 0
 
         if unsecured_stb == 0:
             # Fallback to ShortTermBorrowings (dealers usually report clean)
             unsecured_stb = self._get_fact_value(facts_df, 'ShortTermBorrowings') or 0
+
+        # 10-Q FALLBACK: If still 0, try additional concepts
+        if unsecured_stb == 0:
+            # Try DebtCurrent (often available in quarterly)
+            unsecured_stb = self._get_fact_value(facts_df, 'DebtCurrent') or 0
+            if unsecured_stb > 0:
+                logger.debug(f"Dealer [{ticker}]: UnsecuredSTB fallback to DebtCurrent = ${unsecured_stb/1e9:.1f}B")
+
+        if unsecured_stb == 0:
+            # Try OtherShortTermBorrowings as final fallback
+            unsecured_stb = self._get_fact_value(facts_df, 'OtherShortTermBorrowings') or 0
+            if unsecured_stb > 0:
+                logger.debug(f"Dealer [{ticker}]: UnsecuredSTB fallback to OtherSTB = ${unsecured_stb/1e9:.1f}B")
 
         total = unsecured_stb + cpltd
 
