@@ -970,15 +970,26 @@ def _extract_header_columns(table_node) -> List[_CleanColumn]:
     if not table_node.headers:
         return columns
 
-    parent_headers = {}
-    if len(table_node.headers) >= 1:
-        col_pos = 0
+    # For single header row, extract date columns directly
+    if len(table_node.headers) == 1:
         for cell in table_node.headers[0]:
             content = cell.content.strip()
-            if content:
-                for i in range(cell.colspan):
-                    parent_headers[col_pos + i] = content
-            col_pos += cell.colspan
+            # Skip scale/unit descriptions and empty cells
+            if content and not content.startswith("(In ") and not content.startswith("(Dollars"):
+                # Check if it looks like a date (contains year pattern)
+                if _YEAR_PATTERN.search(content):
+                    columns.append(_CleanColumn(header=content))
+        return columns
+
+    # For multi-row headers, use parent/child logic
+    parent_headers = {}
+    col_pos = 0
+    for cell in table_node.headers[0]:
+        content = cell.content.strip()
+        if content:
+            for i in range(cell.colspan):
+                parent_headers[col_pos + i] = content
+        col_pos += cell.colspan
 
     if len(table_node.headers) >= 2:
         col_pos = 0
