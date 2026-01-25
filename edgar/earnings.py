@@ -892,6 +892,49 @@ def _extract_title(table_node) -> Optional[str]:
     return None
 
 
+def _extract_date_headers_from_rows(table_node) -> List[str]:
+    """
+    Extract date column headers from early data rows.
+
+    Some tables don't use <thead> - dates appear in regular rows.
+    This scans the first several rows looking for date patterns without
+    numeric data values. Extended range (8 rows) handles tables with
+    title/subtitle rows before the actual headers.
+    """
+    date_headers = []
+
+    for row in table_node.rows[:8]:
+        cells = row.cells
+        non_empty = [c.content.strip() for c in cells if c.content.strip()]
+
+        if not non_empty:
+            continue
+
+        # Check if this row contains dates but no numeric values
+        dates_found = []
+        has_numeric = False
+
+        for content in non_empty:
+            # Skip scale descriptions
+            if content.startswith("(In ") or content.startswith("(Dollars"):
+                continue
+
+            # Check for date pattern (contains year)
+            if _YEAR_PATTERN.search(content):
+                dates_found.append(content)
+            # Check for numeric values (actual data, not headers)
+            elif _is_numeric_or_currency(content) and content not in ('$', '—', '-', '–'):
+                has_numeric = True
+                break
+
+        # If we found dates without numeric data, these are likely headers
+        if dates_found and not has_numeric:
+            date_headers = dates_found
+            break
+
+    return date_headers
+
+
 def _extract_clean_dataframe(table_node) -> pd.DataFrame:
     """
     Extract a clean DataFrame from a TableNode using Cell metadata.
@@ -900,17 +943,37 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
     - Collapsing empty spacer cells (colspan=3 patterns)
     - Merging $ symbols with adjacent numbers
     - Building proper column headers from multi-row headers
+    - Detecting date headers from early data rows (no <thead>)
     """
     header_cols = _extract_header_columns(table_node)
 
+    # Fallback: try to extract date headers from early data rows
+    date_headers_from_rows = []
+    if not header_cols:
+        date_headers_from_rows = _extract_date_headers_from_rows(table_node)
+
     row_labels = []
     row_data = []
+
+    # Track if we should skip date-header rows from data
+    skip_date_rows = bool(date_headers_from_rows)
 
     for row in table_node.rows:
         cells = row.cells
         non_empty = [c for c in cells if c.content.strip()]
         if not non_empty:
             continue
+
+        # Skip rows that only contain dates (already used as headers)
+        if skip_date_rows:
+            non_empty_contents = [c.content.strip() for c in cells if c.content.strip()]
+            is_date_only_row = (
+                all(_YEAR_PATTERN.search(c) or c.startswith("(In ") or c.startswith("(Dollars")
+                    for c in non_empty_contents)
+                and any(_YEAR_PATTERN.search(c) for c in non_empty_contents)
+            )
+            if is_date_only_row:
+                continue
 
         label_cell = None
         data_cells = []
@@ -945,6 +1008,12 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
 
     if header_cols:
         columns = [c.full_header for c in header_cols][:num_cols]
+    elif date_headers_from_rows:
+        # Use dates extracted from early data rows
+        columns = date_headers_from_rows[:num_cols]
+        # Pad with Col_N if we need more columns
+        while len(columns) < num_cols:
+            columns.append(f"Col_{len(columns)}")
     else:
         columns = [f"Col_{i}" for i in range(num_cols)]
 
@@ -957,8 +1026,9 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
         df.index = row_labels[:len(df)]
         df.index.name = "Item"
 
-    for col in df.columns:
-        df[col] = df[col].apply(_parse_numeric)
+    # Convert numeric columns (using positional indexing to handle duplicate column names)
+    for i, col in enumerate(df.columns):
+        df.iloc[:, i] = df.iloc[:, i].apply(_parse_numeric)
 
     return df
 
