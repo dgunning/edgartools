@@ -61,17 +61,33 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
 
     skill_output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Get markdown files from skill content directory
+    # Get files from skill content directory
     content_dir = skill.content_dir
-    markdown_files = list(content_dir.glob("*.md"))
-
-    if not markdown_files:
-        raise ValueError(f"No markdown files found in {content_dir}")
 
     # Copy and validate each markdown file
     # Claude Desktop requires SKILL.md (uppercase) at root
-    for md_file in markdown_files:
+    for md_file in content_dir.glob("*.md"):
         _copy_and_validate_markdown(md_file, skill_output_dir)
+
+    # Copy YAML files from content directory
+    for yaml_file in content_dir.glob("*.yaml"):
+        shutil.copy2(yaml_file, skill_output_dir / yaml_file.name)
+
+    # Copy skill subdirectories (financials/, holdings/, etc.)
+    skills_parent = content_dir.parent  # edgar/ai/skills/
+    skill_subdirs = ['financials', 'holdings', 'ownership', 'reports', 'xbrl']
+    for subdir_name in skill_subdirs:
+        subdir = skills_parent / subdir_name
+        if subdir.exists() and subdir.is_dir():
+            dest_subdir = skill_output_dir / subdir_name
+            dest_subdir.mkdir(exist_ok=True)
+            for yaml_file in subdir.glob("*.yaml"):
+                shutil.copy2(yaml_file, dest_subdir / yaml_file.name)
+
+    # Copy forms.yaml from parent directory
+    forms_yaml = skills_parent / "forms.yaml"
+    if forms_yaml.exists():
+        shutil.copy2(forms_yaml, skill_output_dir / "forms.yaml")
 
     # Copy centralized object documentation (API reference)
     object_docs = skill.get_object_docs()

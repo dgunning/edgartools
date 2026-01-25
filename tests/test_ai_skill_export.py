@@ -24,8 +24,8 @@ def test_edgartools_skill_exists():
 
 
 @pytest.mark.fast
-def test_skill_has_markdown_files():
-    """Test that skill content directory contains required markdown files."""
+def test_skill_has_required_files():
+    """Test that skill content directory contains required files."""
     from edgar.ai.skills.core import edgartools_skill
 
     content_dir = edgartools_skill.content_dir
@@ -34,13 +34,13 @@ def test_skill_has_markdown_files():
     skill_md = content_dir / "SKILL.md"
     assert skill_md.exists(), "SKILL.md should exist"
 
-    # Check for supporting files
-    readme = content_dir / "readme.md"
-    objects_md = content_dir / "objects.md"
-    workflows_md = content_dir / "workflows.md"
+    # Check for YAML skill files
+    skill_yaml = content_dir / "skill.yaml"
+    assert skill_yaml.exists(), "skill.yaml should exist"
 
-    # At least SKILL.md should exist
-    assert skill_md.exists()
+    # Check for readme
+    readme = content_dir / "readme.md"
+    assert readme.exists(), "readme.md should exist"
 
 
 @pytest.mark.fast
@@ -329,9 +329,13 @@ def test_export_claude_skills_custom_location():
         assert len(skill_variants) == 1, f"Should have exactly 1 skill file, found: {skill_variants}"
         assert skill_variants[0] == "SKILL.md", f"Skill file should be SKILL.md, not {skill_variants[0]}"
 
-        # Verify supporting markdown files exist
-        assert (skill_dir / "workflows.md").exists()
-        assert (skill_dir / "objects.md").exists()
+        # Verify YAML skill files exist
+        assert (skill_dir / "skill.yaml").exists(), "skill.yaml should exist"
+        assert (skill_dir / "forms.yaml").exists(), "forms.yaml should exist"
+
+        # Verify skill subdirectories exist with their yaml files
+        assert (skill_dir / "financials" / "skill.yaml").exists(), "financials/skill.yaml should exist"
+        assert (skill_dir / "holdings" / "skill.yaml").exists(), "holdings/skill.yaml should exist"
 
         # Verify API reference directory exists
         api_ref_dir = skill_dir / "api-reference"
@@ -376,8 +380,8 @@ def test_claude_skills_skill_md_content():
 
 
 @pytest.mark.fast
-def test_claude_skills_includes_all_markdown():
-    """Test that all supporting markdown files are exported."""
+def test_claude_skills_includes_all_files():
+    """Test that all skill files are exported (YAML-based architecture)."""
     from edgar.ai import edgartools_skill, export_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -390,20 +394,25 @@ def test_claude_skills_includes_all_markdown():
             install=False
         )
 
-        # Expected markdown files
-        expected_files = [
-            "SKILL.md",  # Main skill file (renamed from skill.md)
-            "workflows.md",
-            "objects.md",
-            "data-objects.md",
-            "quickstart-by-task.md",
-            "form-types-reference.md",
+        # Expected core files
+        expected_core_files = [
+            "SKILL.md",  # Main skill file (entrypoint)
             "readme.md",
+            "skill.yaml",
+            "sharp-edges.yaml",
+            "forms.yaml",  # Copied from parent
         ]
 
-        for filename in expected_files:
+        for filename in expected_core_files:
             file_path = skill_dir / filename
             assert file_path.exists(), f"{filename} should exist"
+
+        # Expected skill subdirectories with skill.yaml
+        expected_subdirs = ["financials", "holdings", "ownership", "reports", "xbrl"]
+        for subdir in expected_subdirs:
+            subdir_path = skill_dir / subdir
+            assert subdir_path.exists(), f"{subdir}/ directory should exist"
+            assert (subdir_path / "skill.yaml").exists(), f"{subdir}/skill.yaml should exist"
 
 
 @pytest.mark.fast
