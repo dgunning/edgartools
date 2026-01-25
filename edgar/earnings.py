@@ -900,10 +900,19 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
     This scans the first several rows looking for date patterns without
     numeric data values. Extended range (8 rows) handles tables with
     title/subtitle rows before the actual headers.
-    """
-    date_headers = []
 
-    for row in table_node.rows[:8]:
+    Also handles split date rows where month/day is on one row and
+    year is on the next (e.g., Nvidia's "October 26," + "2025").
+    """
+    # Month pattern for detecting partial dates (month + day, no year)
+    month_pattern = re.compile(
+        r'^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d+',
+        re.IGNORECASE
+    )
+
+    rows = table_node.rows[:10]  # Scan first 10 rows
+
+    for i, row in enumerate(rows):
         cells = row.cells
         non_empty = [c.content.strip() for c in cells if c.content.strip()]
 
@@ -912,6 +921,7 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
 
         # Check if this row contains dates but no numeric values
         dates_found = []
+        partial_dates = []
         has_numeric = False
 
         for content in non_empty:
@@ -919,20 +929,35 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
             if content.startswith("(In ") or content.startswith("(Dollars"):
                 continue
 
-            # Check for date pattern (contains year)
+            # Check for complete date pattern (contains year)
             if _YEAR_PATTERN.search(content):
                 dates_found.append(content)
+            # Check for partial date pattern (month + day, no year)
+            elif month_pattern.match(content):
+                partial_dates.append(content)
             # Check for numeric values (actual data, not headers)
             elif _is_numeric_or_currency(content) and content not in ('$', '—', '-', '–'):
                 has_numeric = True
                 break
 
-        # If we found dates without numeric data, these are likely headers
+        # If we found complete dates without numeric data, use them
         if dates_found and not has_numeric:
-            date_headers = dates_found
-            break
+            return dates_found
 
-    return date_headers
+        # If we found partial dates, check if next row has years to combine
+        if partial_dates and not has_numeric and i + 1 < len(rows):
+            next_row = rows[i + 1]
+            next_non_empty = [c.content.strip() for c in next_row.cells if c.content.strip()]
+
+            # Check if next row contains only years (4-digit numbers starting with 19 or 20)
+            years = [c for c in next_non_empty if re.match(r'^(19|20)\d{2}$', c)]
+
+            if years and len(years) == len(partial_dates):
+                # Combine partial dates with years
+                combined = [f"{date} {year}" for date, year in zip(partial_dates, years)]
+                return combined
+
+    return []
 
 
 def _extract_clean_dataframe(table_node) -> pd.DataFrame:
@@ -967,10 +992,28 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
         # Skip rows that only contain dates (already used as headers)
         if skip_date_rows:
             non_empty_contents = [c.content.strip() for c in cells if c.content.strip()]
+
+            # Pattern for partial dates (month + day)
+            month_pattern = re.compile(
+                r'^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d+',
+                re.IGNORECASE
+            )
+            # Pattern for year-only cells
+            year_only_pattern = re.compile(r'^(19|20)\d{2}$')
+
             is_date_only_row = (
-                all(_YEAR_PATTERN.search(c) or c.startswith("(In ") or c.startswith("(Dollars")
-                    for c in non_empty_contents)
-                and any(_YEAR_PATTERN.search(c) for c in non_empty_contents)
+                all(
+                    _YEAR_PATTERN.search(c) or
+                    month_pattern.match(c) or
+                    year_only_pattern.match(c) or
+                    c.startswith("(In ") or
+                    c.startswith("(Dollars")
+                    for c in non_empty_contents
+                )
+                and any(
+                    _YEAR_PATTERN.search(c) or month_pattern.match(c) or year_only_pattern.match(c)
+                    for c in non_empty_contents
+                )
             )
             if is_date_only_row:
                 continue
