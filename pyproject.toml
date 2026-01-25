@@ -111,6 +111,8 @@ include = [
   "edgar/**/*.py",
   "edgar/**/templates/*.html",
   "edgar/**/docs/*.md",
+  "edgar/ai/skills/**/*.yaml",
+  "edgar/ai/skills/*.yaml",
   "edgar/ai/skills/core/*.md",
   "edgar/reference/data/*",
   "edgar/entity/data/*",
