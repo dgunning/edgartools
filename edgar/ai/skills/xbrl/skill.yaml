@@ -1,6 +1,8 @@
 id: edgartools-xbrl
 name: EdgarTools XBRL
-version: "1.0"
+version: "1.1"
+
+# See also: sharp-edges.yaml for production gotchas
 
 identity: XBRL specialist. Low-level access to facts, concepts, and taxonomy. Use Financials skill for simpler needs.
 
@@ -44,6 +46,16 @@ patterns:
       all_facts = xbrl.facts.get_facts()  # List of enriched dicts
       # Each fact: concept, value, unit, decimals, period_start, period_end,
       # dimensions (if any), context_ref
+
+when_to_use:
+  appropriate:
+    - Segment/dimensional breakdowns
+    - Company-specific concept names
+    - Full fact metadata (units, decimals)
+    - Concepts not in Financials API
+  inappropriate:
+    - Simple metrics (revenue, net income) → use get_financials()
+    - Report sections → use reports skill
 
 avoid:
   - pattern: "xbrl.statements.balance_sheet()"

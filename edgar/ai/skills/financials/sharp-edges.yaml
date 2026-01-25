@@ -1,0 +1,43 @@
+# Sharp Edges - Production gotchas for Financial Analysis
+
+sharp_edges:
+  - id: detailed-view-for-single-metric
+    summary: Don't use detailed statement view when you need one metric
+    severity: medium
+    solution: |
+      revenue = financials.get_revenue()         # Single value
+      income = financials.income_statement()     # Full table
+    detection_pattern: 'income_statement\(.*detailed.*\).*get|balance_sheet.*\[.*Revenue'
+
+  - id: period-offset-confusion
+    summary: period_offset=0 is current, not prior year
+    severity: medium
+    solution: |
+      this_year = financials.get_revenue()                   # period_offset=0
+      last_year = financials.get_revenue(period_offset=1)
+      two_years_ago = financials.get_revenue(period_offset=2)
+
+  - id: quarterly-vs-annual-mix
+    summary: Don't mix quarterly and annual financials
+    severity: high
+    solution: |
+      annual = company.get_financials()              # 10-K (full year)
+      quarterly = company.get_quarterly_financials() # 10-Q (quarter)
+      # Compare same period types only
+
+  - id: none-return-values
+    summary: Quick getters can return None if data missing
+    severity: medium
+    solution: |
+      revenue = financials.get_revenue()
+      net_income = financials.get_net_income()
+      if revenue and net_income:
+          margin = net_income / revenue
+    detection_pattern: 'get_revenue\(\)\s*/|get_net_income\(\)\s*/'
+
+  - id: value-scale-assumptions
+    summary: Financial values are in actual dollars, not thousands/millions
+    severity: low
+    solution: |
+      revenue = financials.get_revenue()  # Already in dollars
+      print(f"${revenue/1e9:.1f}B")       # Format for display

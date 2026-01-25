@@ -1,0 +1,49 @@
+# Sharp Edges - Production gotchas for Ownership (Form 4) Analysis
+
+sharp_edges:
+  - id: raw-dataframe-vs-summary
+    summary: Use get_ownership_summary() not raw transaction DataFrames
+    severity: high
+    solution: |
+      summary = form4.get_ownership_summary()
+      print(f"Activity: {summary.primary_activity}")  # "Purchase", "Sale", "Mixed"
+      print(f"Net shares: {summary.net_change:,}")    # positive=buy, negative=sell
+      print(f"Net value: ${summary.net_value:,.0f}")
+    detection_pattern: 'common_stock_sales\.iterrows|derivative_transactions\.iterrows'
+
+  - id: transaction-code-confusion
+    summary: Transaction codes have specific meanings (P=Buy, S=Sell, A=Grant, M=Exercise, F=Tax)
+    severity: medium
+    solution: |
+      summary = form4.get_ownership_summary()
+      # primary_activity interprets codes correctly:
+      # - "Purchase" = actual open market buying (P)
+      # - "Sale" = actual selling (S)
+      # - "Grant/Award" = compensation (A), not a purchase
+      # - "Exercise" = converting options (M), not buying
+      # - "Tax" = shares sold for taxes (F)
+
+  - id: shares-with-footnotes
+    summary: Use shares_numeric to handle footnoted values
+    severity: medium
+    solution: |
+      for trans in summary.transactions:
+          shares = trans.shares_numeric    # Handles footnotes like "(1)"
+          price = trans.price_numeric
+          value = trans.value_numeric
+
+  - id: remaining-shares-interpretation
+    summary: remaining_shares is post-transaction ownership
+    severity: low
+    solution: |
+      summary = form4.get_ownership_summary()
+      traded = summary.net_change         # Transaction amount
+      owned = summary.remaining_shares    # Total ownership after
+
+  - id: form3-vs-form4
+    summary: Form 3 is initial ownership, Form 4 is changes
+    severity: low
+    solution: |
+      form3 = company.get_filings(form="3")[0].obj()   # Initial ownership
+      form4 = company.get_filings(form="4")[0].obj()   # Changes
+      form5 = company.get_filings(form="5")[0].obj()   # Annual summary

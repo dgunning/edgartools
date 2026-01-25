@@ -1,6 +1,11 @@
 id: edgartools-core
 name: EdgarTools
-version: "1.0"
+version: "1.1"
+
+# 4-File Skill Architecture (see also):
+#   sharp-edges.yaml   - Production gotchas and anti-patterns
+#   validations.yaml   - Automated code quality checks
+#   collaboration.yaml - Handoffs and skill teamwork
 
 identity: Practical SEC analyst. Use str() to browse data, to_context() to discover actions. Avoid fetching thousands when ten suffice.
 
@@ -19,7 +24,9 @@ patterns:
       find(320193)                    # CIK → Entity
       find("0000320193-25-000079")    # Accession number → Filing
       find("Apple")                   # Company name → CompanySearchResults
-    note: find() auto-detects identifier type and returns the right object.
+    note: |
+      ALWAYS use find() as the entry point for any identifier.
+      Never manually construct Filing objects - find() handles all lookups.
 
 
   - name: Company-First Lookup
@@ -43,7 +50,10 @@ patterns:
       results = filing.search("executive compensation")  # BM25 ranked matches
       for match in results[:5]:
           print(match.score, str(match)[:200])
-    note: filing.search() searches content. filing.docs.search() searches API docs (different!).
+    note: |
+      ALWAYS use filing.search() for content search - returns ranked results.
+      Never use doc.text() + regex - filing.search() is faster and ranked.
+      filing.search() searches content; filing.docs.search() searches API docs.
 
   - name: Filing Discovery
     when: Search filings across companies (market-wide)
@@ -71,17 +81,24 @@ patterns:
   - name: Financial Statements
     when: User asks about revenue, balance sheet, cash flow, metrics
     code: |
-      financials = company.get_financials()              # Annual (10-K)
-      quarterly = company.get_quarterly_financials()     # Quarterly (10-Q)
+      # QUICK METRICS - for calculations like ratios, margins
+      financials = company.get_financials()
+      revenue = financials.get_revenue()                 # Current revenue
+      net_income = financials.get_net_income()           # Current net income
+      margin = net_income / revenue                      # Example calculation
 
-      # Quick metrics
-      revenue = financials.get_revenue()
-      net_income = financials.get_net_income()
+      # FULL STATEMENTS - for viewing multi-year tables
+      income = financials.income_statement()             # 3-year income table
+      balance = financials.balance_sheet()               # 2-year balance table
+      cashflow = financials.cashflow_statement()         # 3-year cash flow table
 
-      # Full statements (view: standard|detailed|summary)
-      income = financials.income_statement()                    # standard view
-      balance = financials.balance_sheet(view="detailed")       # all line items
-      cashflow = financials.cashflow_statement(view="summary")  # key totals only
+      # HISTORICAL DATA - for 4+ year trends (Financials stops at 3)
+      facts = company.get_facts()
+      income = facts.income_statement(periods=5, annual=True)
+    note: |
+      For calculations (ratios, margins): use get_revenue(), get_net_income()
+      For viewing statements: use income_statement(), balance_sheet() - up to 3 years
+      For 4+ year history: use get_facts().income_statement(periods=N)
 
   - name: Output Methods
     when: Displaying EdgarTools objects
