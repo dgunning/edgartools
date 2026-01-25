@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.12.1] - 2026-01-25
+
+### Fixed
+
+- **Pandas Compatibility**
+  - Added pandas 3.0 compatibility while maintaining Python 3.10 support
+  - Fixed regex compatibility for pandas 2.1+ in date validation
+  - **Files**: `edgar/`, test files
+
+- **Date Handling**
+  - Fixed date comparison with NaN in pivot_by_period operations
+  - Prevents errors when handling missing date values in financial data
+  - **Files**: `edgar/` (pivot operations)
+
+- **Table Parsing**
+  - Improved column header extraction for tables without `<thead>` elements
+  - Fixed column header extraction for single-row table headers
+  - Handle split date rows in earnings table headers correctly
+  - **Files**: `edgar/earnings.py`, `edgar/documents/`
+
+- **Earnings Detection**
+  - Made `has_earnings` property consistent with `earnings` property behavior
+  - **Files**: `edgar/company_reports/current_report.py`
+
+- **Testing**
+  - Fixed mock attachments in issue 332 regression test
+  - Improved test mocks for pandas compatibility
+  - **Files**: test files
+
+### Changed
+
+- **Documentation**
+  - Removed website fields from docs (SEC API no longer provides this data)
+  - Fixed PeriodType documentation for clarity
+  - Improvements to README.md for better onboarding
+  - **Files**: `README.md`, `docs/`, docstrings
+
 ## [5.12.0] - 2026-01-23
 
 ### Added
