@@ -77,7 +77,8 @@ def test_current_report_financial_properties_callable():
     # Create a mock filing with minimal required methods
     mock_filing = Mock()
     mock_filing.form = "6-K"
-    
+    mock_filing.attachments = []  # Must be iterable for earnings extraction
+
     # Mock the Financials.extract method to return None (no financial data available)
     from unittest.mock import patch
     with patch('edgar.company_reports.Financials.extract', return_value=None):

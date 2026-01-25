@@ -106,8 +106,10 @@ def chunk(html: str):
     return list(document.generate_chunks())
 
 
-int_item_pattern = r"^(Item\s{1,3}[0-9]{1,2}[A-Z]?)\.?"
-decimal_item_pattern = r"^(Item\s{1,3}[0-9]{1,2}\.[0-9]{2})\.?"
+# Using inline flags (?im) for case-insensitive and multiline matching
+# This is required for pandas 2.1+ compatibility
+int_item_pattern = r"(?im)^(Item\s{1,3}[0-9]{1,2}[A-Z]?)\.?"
+decimal_item_pattern = r"(?im)^(Item\s{1,3}[0-9]{1,2}\.[0-9]{2})\.?"
 
 
 def detect_table_of_contents(text: str):
@@ -125,7 +127,7 @@ def detect_signature(text: str) -> bool:
 
 
 def detect_int_items(text: pd.Series):
-    return text.str.extract(int_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
+    return text.str.extract(int_item_pattern, expand=False)
 
 def detect_part(text: pd.Series) -> pd.Series:
     """
@@ -141,14 +143,15 @@ def detect_part(text: pd.Series) -> pd.Series:
         pd.Series: A series containing the extracted 'Part X' values (uppercase), or NaN if not found.
     """
     # Match patterns like 'PART I', 'Part II', 'PART III.', etc.
-    part_pattern = r'^\b(PART\s+[IVXLC]+)\b'
+    # Using inline flags (?im) for case-insensitive and multiline matching (pandas 2.1+ compatibility)
+    part_pattern = r'(?im)^\b(PART\s+[IVXLC]+)\b'
     # Extract using case-insensitive matching and convert result to uppercase
-    extracted = text.str.extract(part_pattern, flags=re.IGNORECASE | re.MULTILINE, expand=False)
+    extracted = text.str.extract(part_pattern, expand=False)
     # Normalize to uppercase for consistency (e.g., 'Part I' → 'PART I')
     return extracted.str.upper().str.replace(r'\s+', ' ', regex=True)
 
 def detect_decimal_items(text: pd.Series):
-    return text.str.extract(decimal_item_pattern, expand=False, flags=re.IGNORECASE | re.MULTILINE)
+    return text.str.extract(decimal_item_pattern, expand=False)
 
 
 def find_next_item(index, normalized_items):
@@ -281,8 +284,7 @@ def chunks2df(chunks: List[List[Block]],
                              for blocks in chunks]
                             ).assign(Chars=lambda df: df.Text.apply(len),
                                      Signature=lambda df: df.Text.apply(detect_signature).fillna(""),
-                                     TocLink=lambda df: df.Text.str.match('^Table of Contents$',
-                                                                          flags=re.IGNORECASE | re.MULTILINE),
+                                     TocLink=lambda df: df.Text.str.match('(?im)^Table of Contents$'),
                                      Toc=lambda df: df.Text.head(100).apply(detect_table_of_contents),
                                      Empty=lambda df: df.Text.str.contains('^$', na=True),
                                      Part=lambda df: detect_part(df.Text),
