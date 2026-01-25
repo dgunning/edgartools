@@ -10,6 +10,7 @@ Defaults: 2 years, 2 quarters
 import argparse
 import json
 import os
+import yaml
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -17,6 +18,45 @@ from typing import Dict, List, Any, Optional
 
 # Hardcoded Bank List
 BANKS = ['BK', 'C', 'GS', 'JPM', 'MS', 'PNC', 'STT', 'USB', 'WFC']
+
+
+def load_known_divergences() -> Dict[str, Dict]:
+    """Load known_divergences from companies.yaml config."""
+    config_path = Path(__file__).resolve().parents[4] / "edgar/xbrl/standardization/config/companies.yaml"
+    if not config_path.exists():
+        return {}
+
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    divergences = {}
+    companies = config.get("companies", {})
+    for ticker, company_config in companies.items():
+        known_div = company_config.get("known_divergences", {})
+        if known_div:
+            divergences[ticker] = known_div
+    return divergences
+
+
+def should_skip_validation(ticker: str, metric: str, form_type: str, known_divergences: Dict) -> tuple:
+    """
+    Check if validation should be skipped for this (ticker, metric, form_type).
+    Returns (skip: bool, reason: str or None).
+    """
+    ticker_divs = known_divergences.get(ticker, {})
+    metric_div = ticker_divs.get(metric, {})
+
+    if not metric_div:
+        return False, None
+
+    form_types = metric_div.get("form_types", [])
+    skip_validation = metric_div.get("skip_validation", False)
+
+    if form_type in form_types and skip_validation:
+        reason = metric_div.get("reason", "Known divergence documented in companies.yaml")
+        return True, reason
+
+    return False, None
 
 # Suggested action patterns
 SUGGESTED_ACTIONS = {
@@ -64,20 +104,22 @@ def process_company(args: tuple) -> Dict[str, Any]:
     worker_config = args  # rename for clarity
     ticker = worker_config["ticker"]
     target_metrics = worker_config.get("metrics")
-    
+    known_divergences = worker_config.get("known_divergences", {})
+
     # Import here to avoid multiprocessing pickle issues
     from edgar import set_identity, use_local_storage, Company
     from edgar.xbrl.standardization.orchestrator import Orchestrator
     from edgar.entity.mappings_loader import get_industry_for_sic
-    
+
     set_identity("E2E Test Runner e2e@test.local")
     use_local_storage(True)
-    
+
     result = {
         "ticker": ticker,
-        "10k_stats": {"total": 0, "passed": 0, "failed": 0, "no_ref": 0},
-        "10q_stats": {"total": 0, "passed": 0, "failed": 0, "no_ref": 0},
-        "failures": []
+        "10k_stats": {"total": 0, "passed": 0, "failed": 0, "no_ref": 0, "skipped": 0},
+        "10q_stats": {"total": 0, "passed": 0, "failed": 0, "no_ref": 0, "skipped": 0},
+        "failures": [],
+        "skipped": []
     }
     
     try:
@@ -118,14 +160,28 @@ def process_company(args: tuple) -> Dict[str, Any]:
                     # Filter by target metrics if specified
                     if target_metrics and metric not in target_metrics:
                         continue
-                        
+
                     if v.status == 'match':
                         result["10k_stats"]["passed"] += 1
                         result["10k_stats"]["total"] += 1
                     elif v.status == 'mismatch':
+                        # Check if this is a known divergence that should be skipped
+                        skip, skip_reason = should_skip_validation(ticker, metric, "10-K", known_divergences)
+                        if skip:
+                            result["10k_stats"]["skipped"] += 1
+                            result["skipped"].append({
+                                "ticker": ticker,
+                                "form": "10-K",
+                                "metric": metric,
+                                "variance_pct": round(v.variance_pct, 1) if v.variance_pct else None,
+                                "reason": skip_reason
+                            })
+                            print(f"SKIPPED {ticker} 10-K {metric}: Known divergence - {skip_reason[:50]}...")
+                            continue
+
                         result["10k_stats"]["failed"] += 1
                         result["10k_stats"]["total"] += 1
-                        
+
                         # Build detailed failure record
                         mapping_result = results.get(metric)
                         failure = {
@@ -196,9 +252,23 @@ def process_company(args: tuple) -> Dict[str, Any]:
                         result["10q_stats"]["passed"] += 1
                         result["10q_stats"]["total"] += 1
                     elif v.status == 'mismatch':
+                        # Check if this is a known divergence that should be skipped
+                        skip, skip_reason = should_skip_validation(ticker, metric, "10-Q", known_divergences)
+                        if skip:
+                            result["10q_stats"]["skipped"] += 1
+                            result["skipped"].append({
+                                "ticker": ticker,
+                                "form": "10-Q",
+                                "metric": metric,
+                                "variance_pct": round(v.variance_pct, 1) if v.variance_pct else None,
+                                "reason": skip_reason
+                            })
+                            print(f"SKIPPED {ticker} 10-Q {metric}: Known divergence")
+                            continue
+
                         result["10q_stats"]["failed"] += 1
                         result["10q_stats"]["total"] += 1
-                        
+
                         mapping_result = results.get(metric)
                         failure = {
                             "ticker": ticker,
@@ -237,40 +307,52 @@ def process_company(args: tuple) -> Dict[str, Any]:
 def write_json_report(results: List[Dict], output_path: Path, config: Dict):
     """Write detailed JSON report."""
     all_failures = []
+    all_skipped = []
     all_errors = []
     summary = {
-        "custom": {"10k_total": 0, "10k_passed": 0, "10q_total": 0, "10q_passed": 0}
+        "custom": {
+            "10k_total": 0, "10k_passed": 0, "10k_skipped": 0,
+            "10q_total": 0, "10q_passed": 0, "10q_skipped": 0
+        }
     }
-    
+
     for r in results:
         all_failures.extend(r["failures"])
+        all_skipped.extend(r.get("skipped", []))
         if "error" in r:
             all_errors.append({"ticker": r["ticker"], "error": r["error"]})
-        
+
         # Aggregate stats (all custom for this script)
         summary["custom"]["10k_total"] += r["10k_stats"]["total"]
         summary["custom"]["10k_passed"] += r["10k_stats"]["passed"]
+        summary["custom"]["10k_skipped"] += r["10k_stats"].get("skipped", 0)
         summary["custom"]["10q_total"] += r["10q_stats"]["total"]
         summary["custom"]["10q_passed"] += r["10q_stats"]["passed"]
+        summary["custom"]["10q_skipped"] += r["10q_stats"].get("skipped", 0)
+
+    # Remove known_divergences from config before serializing (too verbose)
+    config_for_report = {k: v for k, v in config.items() if k != "known_divergences"}
 
     report = {
         "run_id": f"e2e_banks_{datetime.now().isoformat()}",
         "timestamp": datetime.now().isoformat(),
-        "config": config,
+        "config": config_for_report,
         "summary": summary,
         "failure_count": len(all_failures),
+        "skipped_count": len(all_skipped),
         "error_count": len(all_errors),
         "failures": all_failures,
+        "skipped": all_skipped,
         "errors": all_errors
     }
-    
+
     with open(output_path, 'w') as f:
         json.dump(report, f, indent=2, default=str)
-    
-    return summary
+
+    return summary, all_skipped
 
 
-def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path, config: Dict):
+def write_markdown_report(summary: Dict, failures: List[Dict], skipped: List[Dict], output_path: Path, config: Dict):
     """Write markdown summary report."""
     lines = [
         f"# Bank Sector E2E Test - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
@@ -278,11 +360,11 @@ def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path
         f"**Config:** Group=Banking, Workers={config['workers']}, "
         f"Years={config['years']}, Quarters={config['quarters']}",
     ]
-    
+
     if config.get("tickers"):
         lines.append("")
         lines.append(f"**Includes:** {', '.join(sorted(config['tickers']))}")
-        
+
     lines.extend([
         "",
         "## Pass Rates",
@@ -290,12 +372,27 @@ def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path
         "| Group | 10-K | 10-Q |",
         "|-------|------|------|",
     ])
-    
+
     s = summary["custom"]
     if s['10k_total'] > 0 or s['10q_total'] > 0:
         k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
         q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
-        lines.append(f"| **Banking** | {k_rate} ({s['10k_passed']}/{s['10k_total']}) | {q_rate} ({s['10q_passed']}/{s['10q_total']}) |")
+        k_skip = f" (+{s.get('10k_skipped', 0)} skipped)" if s.get('10k_skipped', 0) > 0 else ""
+        q_skip = f" (+{s.get('10q_skipped', 0)} skipped)" if s.get('10q_skipped', 0) > 0 else ""
+        lines.append(f"| **Banking** | {k_rate} ({s['10k_passed']}/{s['10k_total']}){k_skip} | {q_rate} ({s['10q_passed']}/{s['10q_total']}){q_skip} |")
+
+    # Known divergences section (if any were skipped)
+    if skipped:
+        lines.extend([
+            "",
+            "## Known Divergences (Skipped)",
+            "",
+            "| Ticker | Form | Metric | Variance | Reason |",
+            "|--------|------|--------|----------|--------|",
+        ])
+        for sk in skipped:
+            reason = sk.get("reason", "")[:50] + "..." if len(sk.get("reason", "")) > 50 else sk.get("reason", "")
+            lines.append(f"| {sk['ticker']} | {sk['form']} | {sk['metric']} | {sk.get('variance_pct', 'N/A')}% | {reason} |")
     
     # Top failing metrics
     from collections import Counter
@@ -342,6 +439,9 @@ def main():
     # Cap workers
     max_workers = min(args.workers, cpu_count(), 8)
     
+    # Load known divergences from companies.yaml
+    known_divergences = load_known_divergences()
+
     config = {
         "group": "banking",
         "workers": max_workers,
@@ -350,20 +450,30 @@ def main():
         "metrics": [m.strip() for m in args.metrics.split(',')] if args.metrics else None,
         "tickers": BANKS
     }
-    
+
     print(f"="*60)
     print(f"E2E TEST: BANKING SECTOR ({len(BANKS)} companies)")
     print(f"Includes: {', '.join(BANKS)}")
     if config["metrics"]:
         print(f"Metrics: {config['metrics']}")
     print(f"Workers: {max_workers}, Years: 2, Quarters: 2")
+
+    # Report known divergences that will be skipped
+    skip_count = sum(
+        1 for t in BANKS if t in known_divergences
+        for m in known_divergences.get(t, {})
+        if known_divergences[t][m].get("skip_validation", False)
+    )
+    if skip_count > 0:
+        print(f"Known divergences to skip: {skip_count}")
     print(f"="*60)
-    
+
     # Run parallel processing
     work_items = []
     for ticker in BANKS:
         item = config.copy()
         item["ticker"] = ticker
+        item["known_divergences"] = known_divergences
         work_items.append(item)
     
     print(f"\nProcessing {len(BANKS)} companies with {max_workers} workers...")
@@ -389,20 +499,24 @@ def main():
     json_path = script_dir / f"{filename_base}.json"
     md_path = script_dir / f"{filename_base}.md"
     
-    summary = write_json_report(results, json_path, config)
-    write_markdown_report(summary, all_failures, md_path, config)
+    summary, all_skipped = write_json_report(results, json_path, config)
+    write_markdown_report(summary, all_failures, all_skipped, md_path, config)
     
     # Print summary
     print(f"\n{'='*60}")
     print("RESULTS")
     print(f"{'='*60}")
-    
+
     s = summary["custom"]
     k_rate = f"{s['10k_passed']/s['10k_total']*100:.1f}%" if s['10k_total'] > 0 else "N/A"
     q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
-    print(f"BANKING: 10-K {k_rate} ({s['10k_passed']}/{s['10k_total']}), 10-Q {q_rate} ({s['10q_passed']}/{s['10q_total']})")
+    k_skip = f" (+{s.get('10k_skipped', 0)} skipped)" if s.get('10k_skipped', 0) > 0 else ""
+    q_skip = f" (+{s.get('10q_skipped', 0)} skipped)" if s.get('10q_skipped', 0) > 0 else ""
+    print(f"BANKING: 10-K {k_rate} ({s['10k_passed']}/{s['10k_total']}){k_skip}, 10-Q {q_rate} ({s['10q_passed']}/{s['10q_total']}){q_skip}")
 
     print(f"\nTotal failures: {len(all_failures)}")
+    if all_skipped:
+        print(f"Known divergences skipped: {len(all_skipped)}")
     print(f"Reports written to: {script_dir}")
     print(f"  - {json_path.name}")
     print(f"  - {md_path.name}")
