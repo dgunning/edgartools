@@ -540,3 +540,75 @@ def test_package_skill_custom_output():
         assert zip_path.exists()
         assert zip_path.parent == custom_output
         assert zip_path.name == "edgartools.zip"
+
+
+# ============================================================================
+# Symlink Installation Tests
+# ============================================================================
+
+
+@pytest.mark.fast
+def test_install_skill_uses_symlinks():
+    """Test that install_skill() uses symlinks for auto-sync."""
+    from edgar.ai import install_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir)
+
+        # Install with symlinks (default)
+        skill_dir = install_skill(to=output_dir, quiet=True, use_symlinks=True)
+
+        # Check that skill files are symlinks
+        skill_md = skill_dir / "SKILL.md"
+        assert skill_md.exists(), "SKILL.md should exist"
+        assert skill_md.is_symlink(), "SKILL.md should be a symlink"
+
+        # Check that subdirectories are symlinks
+        financials_dir = skill_dir / "financials"
+        assert financials_dir.exists(), "financials/ should exist"
+        assert financials_dir.is_symlink(), "financials/ should be a symlink"
+
+        # Check that api-reference is NOT a symlink (it's copied)
+        api_ref_dir = skill_dir / "api-reference"
+        assert api_ref_dir.exists(), "api-reference/ should exist"
+        assert not api_ref_dir.is_symlink(), "api-reference/ should be a copy, not symlink"
+
+
+@pytest.mark.fast
+def test_install_skill_symlinks_are_valid():
+    """Test that symlinks point to actual files."""
+    from edgar.ai import install_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir)
+        skill_dir = install_skill(to=output_dir, quiet=True, use_symlinks=True)
+
+        # Symlinked files should be readable
+        skill_md = skill_dir / "SKILL.md"
+        content = skill_md.read_text()
+        assert "---" in content, "SKILL.md should have YAML frontmatter"
+
+        # Symlinked directories should have contents
+        financials_skill = skill_dir / "financials" / "skill.yaml"
+        assert financials_skill.exists(), "financials/skill.yaml should exist"
+
+
+@pytest.mark.fast
+def test_install_skill_fallback_to_copy():
+    """Test that install_skill() falls back to copy when use_symlinks=False."""
+    from edgar.ai import install_skill
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir)
+
+        # Install without symlinks
+        skill_dir = install_skill(to=output_dir, quiet=True, use_symlinks=False)
+
+        # Files should NOT be symlinks
+        skill_md = skill_dir / "SKILL.md"
+        assert skill_md.exists(), "SKILL.md should exist"
+        assert not skill_md.is_symlink(), "SKILL.md should be a copy, not symlink"
+
+        # But content should still be there
+        content = skill_md.read_text()
+        assert "---" in content, "SKILL.md should have YAML frontmatter"
