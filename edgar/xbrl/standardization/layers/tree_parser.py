@@ -296,15 +296,32 @@ class TreeParser:
         Match against known concepts from config.
 
         Returns (concept, confidence) if found, None otherwise.
+
+        Respects exclude_patterns to avoid matching wrong concepts
+        (e.g., AccumulatedDepreciation when looking for Depreciation).
         """
+        exclude = metric_config.exclude_patterns or []
+
+        # Helper to check if concept should be excluded
+        def should_exclude(concept_name: str) -> bool:
+            concept_lower = concept_name.lower()
+            return any(ex.lower() in concept_lower for ex in exclude)
+
+        # Exact match against known concepts (highest confidence)
         for known in metric_config.known_concepts:
             if known in all_concepts:
+                # Check exclusion patterns
+                if should_exclude(known):
+                    continue
                 # High confidence for exact match
                 return (f"us-gaap:{known}", self._thresholds.get("tree_high", 0.95))
 
         # Try partial matching (concept might have different prefix)
         for known in metric_config.known_concepts:
             for concept in all_concepts:
+                # Check exclusion patterns first
+                if should_exclude(concept):
+                    continue
                 if known in concept or concept in known:
                     return (f"us-gaap:{concept}", self._thresholds.get("tree_medium", 0.80))
 
@@ -322,6 +339,8 @@ class TreeParser:
         This handles balance sheet items, standalone disclosures (e.g., weighted
         average shares), and cash flow items (e.g., stock-based compensation,
         dividends paid).
+
+        Respects exclude_patterns to avoid matching wrong concepts.
 
         Returns (concept, confidence) if found, None otherwise.
         """
@@ -341,8 +360,19 @@ class TreeParser:
                     clean = c.split(':')[-1] if ':' in c else c
                     available_concepts.add(clean)
 
+            # Get exclusion patterns
+            exclude = metric_config.exclude_patterns or []
+
+            def should_exclude(concept_name: str) -> bool:
+                concept_lower = concept_name.lower()
+                return any(ex.lower() in concept_lower for ex in exclude)
+
             # Try each known concept from config (in priority order)
             for known in metric_config.known_concepts:
+                # Check exclusion patterns
+                if should_exclude(known):
+                    continue
+
                 # Direct match in facts
                 if known in available_concepts:
                     return (f"us-gaap:{known}", 0.85)  # Slightly lower confidence
@@ -350,6 +380,9 @@ class TreeParser:
                 # Case-insensitive match
                 known_lower = known.lower()
                 for concept in available_concepts:
+                    # Check exclusion for matched concept
+                    if should_exclude(concept):
+                        continue
                     if concept.lower() == known_lower:
                         return (f"us-gaap:{concept}", 0.80)
 

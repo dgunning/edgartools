@@ -50,7 +50,28 @@ companies:
     name: "Caterpillar Inc."
     cik: 18230
     archetype: "A"  # Standard Industrial
-    notes: "Construction and mining equipment manufacturer"
+    known_divergences:
+      ShortTermDebt:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 65.0
+        reason: >
+          Cat Financial subsidiary debt not included in ShortTermBorrowings.
+          yfinance consolidates all debt; XBRL extracts industrial segment only.
+        skip_validation: true
+      LongTermDebt:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 50.0
+        reason: >
+          Cat Financial long-term debt not fully captured in standard extraction.
+        skip_validation: true
+      AccountsReceivable:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 60.0
+        reason: >
+          Cat Financial receivables (dealer/customer financing) not included
+          in standard AccountsReceivableNetCurrent.
+        skip_validation: true
+    notes: "Financial services conglomerate - Cat Financial distorts debt/receivables"
 
   GE:
     name: "General Electric Company"

@@ -268,7 +268,11 @@ metrics:
     description: "Trade accounts payable (current)"
     known_concepts:
       - AccountsPayableCurrent
+      - AccountsPayableTradeCurrent
+      - TradeAndOtherPayablesCurrent
       - AccountsPayableAndAccruedLiabilitiesCurrent
+    exclude_patterns:
+      - Liabilities  # Prevent fallback to total Liabilities or LiabilitiesCurrent
     tree_hints:
       statements: [BALANCE]
       section: liabilities_current
@@ -281,6 +285,8 @@ metrics:
       - DepreciationDepletionAndAmortization
       - DepreciationAndAmortization
       - Depreciation
+    exclude_patterns:
+      - Accumulated  # Prevent matching AccumulatedDepreciation (balance sheet cumulative)
     tree_hints:
       statements: [CASHFLOW]
       section: operating

@@ -167,7 +167,8 @@ class MetricConfig:
     universal: bool = False
     notes: Optional[str] = None
     dimensional_handling: Optional[Dict[str, Any]] = None  # Config for dimensional value handling
-    
+    exclude_patterns: List[str] = field(default_factory=list)  # Patterns to exclude from matching
+
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""
         # Strip namespace prefix

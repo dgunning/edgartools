@@ -25,6 +25,17 @@ from .layers.dimensional_aggregator import DimensionalAggregator
 from edgar import Company
 
 
+# Cash flow metrics that need quarterly derivation for 10-Q validation
+# 10-Q filings report YTD cumulative values, but yfinance expects quarterly period values
+QUARTERLY_DERIVABLE_METRICS = [
+    'OperatingCashFlow',
+    'Capex',
+    'StockBasedCompensation',
+    'DividendsPaid',
+    'DepreciationAmortization',
+]
+
+
 @dataclass
 class ValidationResult:
     """Result of validating a mapping against reference data."""
@@ -712,7 +723,7 @@ class ReferenceValidator:
                         xbrl_value = self._extract_composite_value(xbrl, metric)
                 else:
                     # Specialized Logic for 10-Q Flow Metrics (Derivation)
-                    if form_type == '10-Q' and metric in ['OperatingCashFlow', 'Capex']:
+                    if form_type == '10-Q' and metric in QUARTERLY_DERIVABLE_METRICS:
                         # Force strict quarterly extraction (90 days)
                         strict_val = self._extract_xbrl_value(xbrl, result.concept, target_days=90)
                         
@@ -780,7 +791,13 @@ class ReferenceValidator:
             if metric == 'Capex' and xbrl_value is not None and ref_value is not None:
                 if xbrl_value > 0 and ref_value < 0:
                     xbrl_value = -xbrl_value
-            
+
+            # SIGN CONVENTION: DividendsPaid is positive in XBRL but negative in yfinance
+            # Cash dividends paid are cash outflows, reported as positive in XBRL but negative in yfinance
+            if metric == 'DividendsPaid' and xbrl_value is not None and ref_value is not None:
+                if xbrl_value > 0 and ref_value < 0:
+                    xbrl_value = -xbrl_value
+
             # Validate
             validation = self._compare_values(
                 metric, ticker, xbrl_value, ref_value, result

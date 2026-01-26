@@ -119,7 +119,8 @@ class ConfigLoader:
                 tree_hints=data.get("tree_hints", {}),
                 universal=data.get("universal", False),
                 notes=data.get("notes"),
-                dimensional_handling=data.get("dimensional_handling")
+                dimensional_handling=data.get("dimensional_handling"),
+                exclude_patterns=data.get("exclude_patterns", [])
             )
         
         # Parse companies
