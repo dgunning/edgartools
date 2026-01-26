@@ -206,15 +206,15 @@ class IndustryExtractor(ABC):
             'tradingliabilities', 'unsecuredshorttermborrowings',
         ]
 
-        # Match exact concept (case-insensitive, handle namespace prefix)
+        # Match concept (case-insensitive, handle any namespace prefix)
+        # Supports: us-gaap:Concept, xom:Concept, cvx:Concept, etc.
         concept_lower = concept.lower()
-        matches = df[
-            df['concept'].str.replace('us-gaap:', '', regex=False).str.lower() == concept_lower
-        ]
 
-        if len(matches) == 0:
-            # Try with namespace
-            matches = df[df['concept'].str.lower() == f'us-gaap:{concept_lower}']
+        # Strip namespace from query if present
+        query_concept = concept_lower.split(':')[-1] if ':' in concept_lower else concept_lower
+
+        # Match any concept where the local name (after :) matches
+        matches = df[df['concept'].str.split(':').str[-1].str.lower() == query_concept]
 
         if len(matches) == 0:
             return None
@@ -320,15 +320,15 @@ class IndustryExtractor(ABC):
         if df is None or len(df) == 0:
             return None
 
-        # Match exact concept (case-insensitive, handle namespace prefix)
+        # Match concept (case-insensitive, handle any namespace prefix)
+        # Supports: us-gaap:Concept, xom:Concept, cvx:Concept, etc.
         concept_lower = concept.lower()
-        matches = df[
-            df['concept'].str.replace('us-gaap:', '', regex=False).str.lower() == concept_lower
-        ]
 
-        if len(matches) == 0:
-            # Try with namespace
-            matches = df[df['concept'].str.lower() == f'us-gaap:{concept_lower}']
+        # Strip namespace from query if present
+        query_concept = concept_lower.split(':')[-1] if ':' in concept_lower else concept_lower
+
+        # Match any concept where the local name (after :) matches
+        matches = df[df['concept'].str.split(':').str[-1].str.lower() == query_concept]
 
         if len(matches) == 0:
             return None
@@ -2240,15 +2240,17 @@ class EnergyExtractor(IndustryExtractor):
     
     def extract_operating_income(self, xbrl, facts_df) -> ExtractedMetric:
         """
-        Energy OperatingIncome: Revenue - CostsAndExpenses approach.
-        
-        Energy companies often use:
-        - Revenues aggregate
-        - CostsAndExpenses aggregate (includes production, exploration, D&D)
-        - OperatingCostsAndExpenses for production costs
-        
-        Formula: Revenue - CostsAndExpenses (if available)
-        OR: Revenue - ProductionCosts - Exploration - D&D - SGA
+        Energy OperatingIncome: Industry-specific calculation.
+
+        IMPORTANT: Do NOT use Revenue - CostsAndExpenses because CostsAndExpenses
+        in energy filings includes non-operating items (taxes, interest, etc.).
+
+        Energy companies like XOM/CVX use specific concepts:
+        - COGS = CrudeOilAndProductPurchases + ProductionAndManufacturingExpenses
+        - Operating Expenses = SG&A + Depreciation + Exploration (exclude taxes/interest)
+
+        yfinance formula: GrossProfit - OperatingExpenses
+        Example XOM 2024: (339.25B - 262.50B) - 37.1B = 39.65B (matches yfinance)
         """
         # Try direct tag first
         val = self._get_fact_value(facts_df, 'OperatingIncomeLoss')
@@ -2260,52 +2262,55 @@ class EnergyExtractor(IndustryExtractor):
                 value=val,
                 extraction_method=ExtractionMethod.DIRECT
             )
-        
-        # Get revenue - IMPORTANT: Energy sector often has gross vs net revenue difference
-        # Prioritize net revenue (excludes assessed taxes, equity earnings) to match market data
-        revenue = (
-            self._get_fact_value(facts_df, 'RevenueFromContractWithCustomerExcludingAssessedTax') or  # Net (193.41B for CVX)
-            self._get_fact_value(facts_df, 'SalesRevenueNet') or
-            self._get_fact_value(facts_df, 'Revenues')  # Gross fallback (202.79B for CVX) - includes excise taxes
-        )
-        
-        if revenue is None:
-            return DefaultExtractor().extract_operating_income(xbrl, facts_df)
-        
-        # Energy Approach 1: Revenue - CostsAndExpenses (most complete)
-        costs_and_expenses = self._get_fact_value(facts_df, 'CostsAndExpenses')
-        if costs_and_expenses is not None:
-            calculated = revenue - abs(costs_and_expenses)
-            return ExtractedMetric(
-                standard_name="OperatingIncome",
-                industry_counterpart="EnergyOperatingIncome",
-                xbrl_concept=None,
-                value=calculated,
-                extraction_method=ExtractionMethod.CALCULATED,
-                notes=f"Energy: Revenue({revenue/1e9:.2f}B) - CostsAndExpenses({costs_and_expenses/1e9:.2f}B)"
+
+        # Try standard GrossProfit tag first (some energy companies have it)
+        gross_profit = self._get_fact_value(facts_df, 'GrossProfit')
+
+        if gross_profit is None:
+            # Energy-specific COGS calculation
+            # Get Revenue (prefer sales/operating revenue over total which includes equity income)
+            revenue = (
+                self._get_fact_value(facts_df, 'SalesRevenueNet') or
+                self._get_fact_value(facts_df, 'RevenueFromContractWithCustomerExcludingAssessedTax') or
+                self._get_fact_value(facts_df, 'Revenues')
             )
-        
-        # Energy Approach 2: Itemized costs
-        cogs = self._get_fact_value(facts_df, 'CostOfGoodsAndServicesSold') or 0
-        operating_costs = self._get_fact_value(facts_df, 'OperatingCostsAndExpenses') or 0
-        exploration = self._get_fact_value(facts_df, 'ExplorationExpense') or 0
-        sga = self._get_fact_value(facts_df, 'SellingGeneralAndAdministrativeExpense') or 0
-        dda = self._get_fact_value(facts_df, 'DepreciationDepletionAndAmortization') or 0
-        
-        # Use the largest expense bucket + other items
-        if operating_costs > 0:
-            total_costs = operating_costs + exploration + sga
+
+            if revenue is None:
+                return DefaultExtractor().extract_operating_income(xbrl, facts_df)
+
+            # Energy COGS: CrudeOilPurchases + ProductionExpenses
+            crude_oil_purchases = self._get_fact_value(facts_df, 'CrudeOilAndProductPurchases') or 0
+            production_expenses = self._get_fact_value(facts_df, 'ProductionAndManufacturingExpenses') or 0
+
+            # If energy-specific concepts found, calculate GrossProfit
+            if crude_oil_purchases > 0 or production_expenses > 0:
+                cogs = abs(crude_oil_purchases) + abs(production_expenses)
+                gross_profit = revenue - cogs
+
+        if gross_profit is None:
+            return DefaultExtractor().extract_operating_income(xbrl, facts_df)
+
+        # Operating Expenses: SG&A + D&A + Exploration (exclude taxes/interest for OpIncome)
+        sga = abs(self._get_fact_value(facts_df, 'SellingGeneralAndAdministrativeExpense') or 0)
+        dda = abs(self._get_fact_value(facts_df, 'DepreciationDepletionAndAmortization') or 0)
+        exploration = abs(self._get_fact_value(facts_df, 'ExplorationExpense') or 0)
+
+        # Try direct OperatingExpenses tag first
+        op_expenses = self._get_fact_value(facts_df, 'OperatingExpenses')
+        if op_expenses is not None:
+            op_exp_val = abs(op_expenses)
         else:
-            total_costs = abs(cogs) + exploration + sga + dda
-        
-        calculated = revenue - total_costs
+            op_exp_val = sga + dda + exploration
+
+        calculated = gross_profit - op_exp_val
+
         return ExtractedMetric(
             standard_name="OperatingIncome",
             industry_counterpart="EnergyOperatingIncome",
             xbrl_concept=None,
             value=calculated,
             extraction_method=ExtractionMethod.CALCULATED,
-            notes=f"Energy: Revenue - ItemizedCosts"
+            notes=f"Energy: GrossProfit({gross_profit/1e9:.2f}B) - OpExp({op_exp_val/1e9:.2f}B)"
         )
 
 
