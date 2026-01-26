@@ -201,6 +201,92 @@ metrics:
       section: assets_current
     universal: true
 
+  # === UNIVERSAL ADDITIONS ===
+
+  WeightedAverageSharesDiluted:
+    description: "Weighted average diluted shares outstanding for EPS calculation"
+    known_concepts:
+      - WeightedAverageNumberOfDilutedSharesOutstanding
+      - WeightedAverageNumberOfSharesOutstandingDiluted
+    tree_hints:
+      statements: [INCOME]
+    universal: true
+    notes: "Essential for per-share valuation metrics"
+
+  StockBasedCompensation:
+    description: "Stock-based compensation expense (non-cash)"
+    known_concepts:
+      - ShareBasedCompensation
+      - AllocatedShareBasedCompensationExpense
+      - StockCompensationExpense
+    tree_hints:
+      statements: [CASHFLOW]
+      section: operating
+    universal: false
+    notes: "Critical for calculating 'Real' Free Cash Flow"
+
+  DividendsPaid:
+    description: "Cash dividends paid to shareholders"
+    known_concepts:
+      - PaymentsOfDividends
+      - PaymentsOfDividendsCommonStock
+      - DividendsPaidCommonStock
+    tree_hints:
+      statements: [CASHFLOW]
+      section: financing
+      weight: -1.0
+    universal: false
+    notes: "For total shareholder return and payout ratio analysis"
+
+  # === ARCHETYPE A: WORKING CAPITAL ===
+
+  Inventory:
+    description: "Current inventory on hand"
+    known_concepts:
+      - InventoryNet
+      - Inventories
+      - InventoryFinishedGoods
+    tree_hints:
+      statements: [BALANCE]
+      section: assets_current
+    universal: false
+    notes: "Not applicable to service companies"
+
+  AccountsReceivable:
+    description: "Trade accounts receivable (current)"
+    known_concepts:
+      - AccountsReceivableNetCurrent
+      - ReceivablesNetCurrent
+      - TradeAccountsReceivable
+    tree_hints:
+      statements: [BALANCE]
+      section: assets_current
+    universal: false
+    notes: "Rising AR faster than revenue may signal quality issues"
+
+  AccountsPayable:
+    description: "Trade accounts payable (current)"
+    known_concepts:
+      - AccountsPayableCurrent
+      - AccountsPayableAndAccruedLiabilitiesCurrent
+    tree_hints:
+      statements: [BALANCE]
+      section: liabilities_current
+    universal: false
+    notes: "High AP indicates supplier leverage"
+
+  DepreciationAmortization:
+    description: "Depreciation and amortization expense"
+    known_concepts:
+      - DepreciationDepletionAndAmortization
+      - DepreciationAndAmortization
+      - Depreciation
+    tree_hints:
+      statements: [CASHFLOW]
+      section: operating
+    universal: true
+    notes: "Required for EBITDA calculation and maintenance capex analysis"
+
 # Derived metrics (calculated from above)
 derived_metrics:
   FreeCashFlow:

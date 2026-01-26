@@ -83,6 +83,15 @@ class ReferenceValidator:
         'ShortTermDebt': ('balance_sheet', 'Current Debt'),
         'LongTermDebt': ('balance_sheet', 'Long Term Debt'),
         'CashAndEquivalents': ('balance_sheet', 'Cash And Cash Equivalents'),
+        # Universal additions
+        'WeightedAverageSharesDiluted': ('financials', 'Diluted Average Shares'),
+        'StockBasedCompensation': ('cashflow', 'Stock Based Compensation'),
+        'DividendsPaid': ('cashflow', 'Cash Dividends Paid'),
+        # Archetype A: Working capital
+        'Inventory': ('balance_sheet', 'Inventory'),
+        'AccountsReceivable': ('balance_sheet', 'Accounts Receivable'),
+        'AccountsPayable': ('balance_sheet', 'Accounts Payable'),
+        'DepreciationAmortization': ('cashflow', 'Depreciation And Amortization'),
     }
     
     # Fallback fields when GAAP "As Reported" field is not available
@@ -586,8 +595,9 @@ class ReferenceValidator:
         bs_metrics = {
             'TotalAssets', 'limit_stock', 'StockholdersEquity',
             'CashAndEquivalents', 'ShortTermDebt', 'LongTermDebt',
-            'Goodwill', 'IntangibleAssets', 'Inventory', 'Receivables',
-            'RestrictedCash'
+            'Goodwill', 'IntangibleAssets', 'RestrictedCash',
+            # Working capital metrics
+            'Inventory', 'AccountsReceivable', 'AccountsPayable'
         }
         return metric in bs_metrics
 

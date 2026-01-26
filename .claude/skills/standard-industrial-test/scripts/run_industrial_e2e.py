@@ -51,9 +51,17 @@ TICKER_TO_SECTOR = {
 
 # Target metrics to validate
 TARGET_METRICS = [
+    # Income Statement
     'Revenue', 'COGS', 'SGA', 'OperatingIncome', 'PretaxIncome', 'NetIncome',
-    'OperatingCashFlow', 'Capex', 'TotalAssets', 'Goodwill', 'IntangibleAssets',
+    # Cash Flow
+    'OperatingCashFlow', 'Capex', 'DepreciationAmortization',
+    'StockBasedCompensation', 'DividendsPaid',
+    # Balance Sheet
+    'TotalAssets', 'Goodwill', 'IntangibleAssets',
     'ShortTermDebt', 'LongTermDebt', 'CashAndEquivalents',
+    'Inventory', 'AccountsReceivable', 'AccountsPayable',
+    # Per-Share
+    'WeightedAverageSharesDiluted',
     # Derived
     'FreeCashFlow', 'TangibleAssets', 'NetDebt'
 ]
