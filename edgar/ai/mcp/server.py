@@ -3,7 +3,20 @@
 EdgarTools MCP Server
 
 MCP (Model Context Protocol) server providing AI agents access to SEC filing data.
-This module provides the main entry point for the MCP server.
+
+Design principles:
+1. Intent-based tools (match user goals, not API structure)
+2. Flexible identifiers (ticker, CIK, name all work)
+3. Structured JSON responses (AI-friendly)
+4. Smart defaults, explicit overrides
+5. Helpful error messages with suggestions
+
+Tools:
+- edgar_company: Get company info, financials, filings, ownership in one call
+- edgar_search: Search companies and/or filings
+- edgar_filing: Read SEC filing content and sections
+- edgar_compare: Compare multiple companies or analyze industry
+- edgar_ownership: Insider transactions, institutional holders, fund portfolios
 
 Usage:
     python -m edgar.ai.mcp        # Via module
@@ -30,11 +43,11 @@ logger = logging.getLogger("edgartools-mcp")
 
 
 def setup_edgar_identity():
-    """Configure SEC identity from environment variable.
+    """
+    Configure SEC identity from environment variable.
 
     The SEC requires proper identification for API requests. This function
     checks for the EDGAR_IDENTITY environment variable and configures it.
-    If not set, logs a warning but continues (API errors will guide user).
     """
     try:
         from edgar import set_identity
@@ -56,178 +69,70 @@ def setup_edgar_identity():
     except Exception as e:
         logger.error(f"Error setting up EDGAR identity: {e}")
 
+
+def _import_tools():
+    """
+    Import all tool modules to register them.
+
+    Each tool module uses the @tool decorator which registers
+    the tool in the TOOLS registry when imported.
+    """
+    # Import tool modules - this triggers registration via @tool decorators
+    from edgar.ai.mcp.tools import company  # noqa: F401
+    from edgar.ai.mcp.tools import search  # noqa: F401
+    from edgar.ai.mcp.tools import filing  # noqa: F401
+    from edgar.ai.mcp.tools import compare  # noqa: F401
+    from edgar.ai.mcp.tools import ownership  # noqa: F401
+
+
 # Create the server
 app = Server("edgartools")
 
 
 @app.list_tools()
 async def list_tools() -> list[Tool]:
-    """List available tools."""
+    """List available tools from the registry."""
+    from edgar.ai.mcp.tools.base import TOOLS
+
+    # Ensure tools are imported
+    _import_tools()
+
     return [
         Tool(
-            name="edgar_company_research",
-            description="Get company overview and background. Returns profile, 3-year financial trends, and recent filing activity. Use this for initial company research or to get a snapshot of recent performance.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "identifier": {
-                        "type": "string",
-                        "description": "Company ticker (AAPL), CIK (0000320193), or name (Apple Inc)"
-                    },
-                    "include_financials": {
-                        "type": "boolean",
-                        "description": "Include 3-year income statement showing revenue and profit trends",
-                        "default": True
-                    },
-                    "include_filings": {
-                        "type": "boolean",
-                        "description": "Include summary of last 5 SEC filings",
-                        "default": True
-                    },
-                    "include_ownership": {
-                        "type": "boolean",
-                        "description": "Include insider and institutional ownership data (currently not implemented)",
-                        "default": False
-                    },
-                    "detail_level": {
-                        "type": "string",
-                        "enum": ["minimal", "standard", "detailed"],
-                        "description": "Response detail: 'minimal' (key metrics only), 'standard' (balanced), 'detailed' (comprehensive data)",
-                        "default": "standard"
-                    }
-                },
-                "required": ["identifier"]
-            }
-        ),
-        Tool(
-            name="edgar_analyze_financials",
-            description="Detailed financial statement analysis across multiple periods. Use this for trend analysis, growth calculations, or comparing financial performance over time.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "company": {
-                        "type": "string",
-                        "description": "Company ticker (TSLA), CIK (0001318605), or name (Tesla Inc)"
-                    },
-                    "periods": {
-                        "type": "integer",
-                        "description": "Number of periods: 4-5 for trends, 8-10 for patterns (max 10)",
-                        "default": 4
-                    },
-                    "annual": {
-                        "type": "boolean",
-                        "description": "Use annual periods (true) for long-term trends and year-over-year comparisons, or quarterly periods (false) for recent performance and current earnings. Quarterly provides more recent data but may show seasonal volatility.",
-                        "default": True
-                    },
-                    "statement_types": {
-                        "type": "array",
-                        "items": {"type": "string", "enum": ["income", "balance", "cash_flow"]},
-                        "description": "Statements to include: 'income' (revenue, profit, growth), 'balance' (assets, liabilities, equity), 'cash_flow' (operating, investing, financing cash flows)",
-                        "default": ["income"]
-                    }
-                },
-                "required": ["company"]
-            }
-        ),
-        Tool(
-            name="edgar_industry_overview",
-            description="Get overview of an industry sector including company count, major players, and aggregate metrics. Use this to understand industry landscape before diving into specific companies.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "industry": {
-                        "type": "string",
-                        "enum": [
-                            "pharmaceuticals", "biotechnology", "software",
-                            "semiconductors", "banking", "investment",
-                            "insurance", "real_estate", "oil_gas", "retail"
-                        ],
-                        "description": "Industry sector to analyze"
-                    },
-                    "include_top_companies": {
-                        "type": "boolean",
-                        "description": "Include list of major companies in the sector",
-                        "default": True
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "description": "Number of top companies to show (by filing activity)",
-                        "default": 10
-                    }
-                },
-                "required": ["industry"]
-            }
-        ),
-        Tool(
-            name="edgar_compare_industry_companies",
-            description="Compare financial performance of companies within an industry sector. Automatically selects top companies or accepts custom company list for side-by-side financial comparison.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "industry": {
-                        "type": "string",
-                        "enum": [
-                            "pharmaceuticals", "biotechnology", "software",
-                            "semiconductors", "banking", "investment",
-                            "insurance", "real_estate", "oil_gas", "retail"
-                        ],
-                        "description": "Industry sector to analyze"
-                    },
-                    "companies": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "Optional: Specific tickers to compare (e.g., ['AAPL', 'MSFT', 'GOOGL']). If omitted, uses top companies by market presence.",
-                        "default": None
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "description": "Number of companies to compare if not specified (default 5, max 10)",
-                        "default": 5
-                    },
-                    "periods": {
-                        "type": "integer",
-                        "description": "Number of periods for comparison (default 3)",
-                        "default": 3
-                    },
-                    "annual": {
-                        "type": "boolean",
-                        "description": "Annual (true) or quarterly (false) comparison",
-                        "default": True
-                    }
-                },
-                "required": ["industry"]
-            }
+            name=info["name"],
+            description=info["description"],
+            inputSchema=info["schema"]
         )
+        for info in TOOLS.values()
     ]
 
 
 @app.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextContent]:
-    """Handle tool calls."""
+    """Handle tool calls by routing to registered handlers."""
+    from edgar.ai.mcp.tools.base import TOOLS, call_tool_handler
+
+    # Ensure tools are imported
+    _import_tools()
+
     if arguments is None:
         arguments = {}
 
     try:
-        if name == "edgar_company_research":
-            from edgar.ai.mcp.tools.company_research import handle_company_research
-            return await handle_company_research(arguments)
-        elif name == "edgar_analyze_financials":
-            from edgar.ai.mcp.tools.financial_analysis import handle_analyze_financials
-            return await handle_analyze_financials(arguments)
-        elif name == "edgar_industry_overview":
-            from edgar.ai.mcp.tools.industry_analysis import handle_industry_overview
-            return await handle_industry_overview(arguments)
-        elif name == "edgar_compare_industry_companies":
-            from edgar.ai.mcp.tools.industry_analysis import handle_compare_industry_companies
-            return await handle_compare_industry_companies(arguments)
-        else:
-            raise ValueError(f"Unknown tool: {name}")
+        # Route to handler
+        result = await call_tool_handler(name, arguments)
 
-    except Exception as e:
-        logger.error("Error in tool %s: %s", name, e)
+        # Convert response to TextContent
         return [TextContent(
             type="text",
-            text=f"Error: {str(e)}"
+            text=result.to_json()
+        )]
+
+    except Exception as e:
+        logger.error("Error in tool %s: %s", name, e, exc_info=True)
+        return [TextContent(
+            type="text",
+            text=f'{{"success": false, "error": "{str(e)}"}}'
         )]
 
 
@@ -238,7 +143,13 @@ async def list_resources() -> list[Resource]:
         Resource(
             uri="edgartools://docs/quickstart",
             name="EdgarTools Quickstart Guide",
-            description="Quick start guide for using EdgarTools",
+            description="Quick start guide for using EdgarTools MCP",
+            mimeType="text/markdown"
+        ),
+        Resource(
+            uri="edgartools://docs/tools",
+            name="Tool Reference",
+            description="Detailed reference for all available tools",
             mimeType="text/markdown"
         )
     ]
@@ -248,41 +159,89 @@ async def list_resources() -> list[Resource]:
 async def read_resource(uri: str) -> str:
     """Read a resource."""
     if uri == "edgartools://docs/quickstart":
-        return """# EdgarTools Quickstart
+        return _get_quickstart_doc()
+    elif uri == "edgartools://docs/tools":
+        return _get_tools_doc()
+    else:
+        raise ValueError(f"Unknown resource: {uri}")
 
-## Basic Usage
 
-```python
-from edgar import Company, get_current_filings
-
-# Get company information
-company = Company("AAPL")
-print(f"{company.name} - CIK: {company.cik}")
-
-# Get filings
-filings = company.get_filings(form="10-K", limit=5)
-for filing in filings:
-    print(f"{filing.form} - {filing.filing_date}")
-
-# Get current filings across all companies
-current = get_current_filings(limit=20)
-for filing in current.data.to_pylist():
-    print(f"{filing['company']} - {filing['form']}")
-```
+def _get_quickstart_doc() -> str:
+    """Get quickstart documentation."""
+    return """# EdgarTools MCP Quickstart
 
 ## Available Tools
 
-- **edgar_get_company**: Get detailed company information
-- **edgar_current_filings**: Get the latest SEC filings
+### edgar_company
+Get comprehensive company information in one call.
 
-## Example Queries
+```json
+{"identifier": "AAPL"}
+{"identifier": "AAPL", "include": ["profile", "financials"]}
+{"identifier": "MSFT", "periods": 8, "annual": false}
+```
 
-- "Get information about Apple Inc including recent financials"
-- "Show me the 20 most recent SEC filings"
-- "Find current 8-K filings"
+### edgar_search
+Search for companies or filings.
+
+```json
+{"query": "artificial intelligence", "search_type": "companies"}
+{"form": "10-K", "identifier": "AAPL", "search_type": "filings"}
+```
+
+### edgar_filing
+Read SEC filing content.
+
+```json
+{"identifier": "AAPL", "form": "10-K", "sections": ["business", "risk_factors"]}
+{"accession_number": "0000320193-23-000077", "sections": ["mda"]}
+```
+
+### edgar_compare
+Compare multiple companies.
+
+```json
+{"identifiers": ["AAPL", "MSFT", "GOOGL"]}
+{"industry": "software", "limit": 5}
+```
+
+### edgar_ownership
+Get ownership information.
+
+```json
+{"identifier": "AAPL", "analysis_type": "insiders"}
+{"identifier": "1067983", "analysis_type": "fund_portfolio"}
+```
+
+## Tips
+
+1. **Flexible identifiers**: Use ticker (AAPL), CIK (320193), or company name
+2. **Control output**: Use 'include' parameter to get only what you need
+3. **Follow next_steps**: Each response suggests logical next actions
 """
-    else:
-        raise ValueError(f"Unknown resource: {uri}")
+
+
+def _get_tools_doc() -> str:
+    """Get detailed tools documentation."""
+    from edgar.ai.mcp.tools.base import TOOLS
+    _import_tools()
+
+    doc_parts = ["# EdgarTools MCP Tools Reference\n"]
+
+    for name, info in TOOLS.items():
+        doc_parts.append(f"## {name}\n")
+        doc_parts.append(f"{info['description']}\n")
+        doc_parts.append("\n**Parameters:**\n")
+
+        for param, details in info['schema'].get('properties', {}).items():
+            required = param in info['schema'].get('required', [])
+            req_str = " (required)" if required else ""
+            desc = details.get('description', 'No description')
+            doc_parts.append(f"- `{param}`{req_str}: {desc}\n")
+
+        doc_parts.append("\n")
+
+    return "".join(doc_parts)
 
 
 def main():
@@ -305,7 +264,7 @@ def main():
                     write_stream,
                     InitializationOptions(
                         server_name="edgartools",
-                        server_version=__version__,  # Sync with package version
+                        server_version=__version__,
                         capabilities=app.get_capabilities(
                             notification_options=NotificationOptions(),
                             experimental_capabilities={}
@@ -323,12 +282,12 @@ def main():
 
 
 def test_server():
-    """Test that MCP server is properly configured and ready to run.
+    """
+    Test that MCP server is properly configured and ready to run.
 
     Returns:
         bool: True if all checks pass, False otherwise
     """
-
     print("Testing EdgarTools MCP Server Configuration...\n")
 
     all_passed = True
@@ -352,7 +311,17 @@ def test_server():
         print('  Install with: pip install "edgartools[ai]"')
         all_passed = False
 
-    # Test 3: Identity configuration check
+    # Test 3: Tool registration check
+    try:
+        from edgar.ai.mcp.tools.base import TOOLS
+        _import_tools()
+        tool_count = len(TOOLS)
+        print(f"✓ {tool_count} tools registered: {', '.join(TOOLS.keys())}")
+    except Exception as e:
+        print(f"✗ Tool registration failed: {e}")
+        all_passed = False
+
+    # Test 4: Identity configuration check
     identity = os.environ.get('EDGAR_IDENTITY')
     if identity:
         print(f"✓ EDGAR_IDENTITY configured: {identity}")
@@ -361,19 +330,12 @@ def test_server():
         print("  Set with: export EDGAR_IDENTITY=\"Your Name your@email.com\"")
         print("  Or configure in MCP client's env settings")
 
-    # Test 4: Quick functionality test
-    try:
-        print("✓ Core EdgarTools functionality available")
-    except Exception as e:
-        print(f"✗ EdgarTools functionality check failed: {e}")
-        all_passed = False
-
     # Summary
     print()
     if all_passed:
         print("✓ All checks passed - MCP server is ready to run")
         print("\nTo start the server:")
-        print("  python -m edgar.ai")
+        print("  python -m edgar.ai.mcp")
         print("  or")
         print("  edgartools-mcp")
         return True
