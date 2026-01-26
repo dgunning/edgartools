@@ -58,6 +58,16 @@ TARGET_METRICS = [
     'FreeCashFlow', 'TangibleAssets', 'NetDebt'
 ]
 
+# Test mode presets
+# Note: yfinance provides ~4 years annual and ~4-7 quarters of reference data
+# Older periods will have XBRL extraction but no yfinance validation (missing_ref)
+MODE_CONFIG = {
+    'quick': {'years': 1, 'quarters': 1, 'description': '1 year + 1 quarter'},
+    'standard': {'years': 2, 'quarters': 2, 'description': '2 years + 2 quarters (default)'},
+    'extended': {'years': 5, 'quarters': 4, 'description': '5 years + 4 quarters'},
+    'full': {'years': 10, 'quarters': 4, 'description': '10 years + 4 quarters (max coverage)'},
+}
+
 
 def load_known_divergences() -> Dict[str, Dict]:
     """Load known_divergences from companies.yaml config."""
@@ -553,11 +563,25 @@ def main():
                         help="Run only for specific sector (MAG7, Industrial_Manufacturing, etc.)")
     parser.add_argument("--tickers", type=str, metavar="TICKERS",
                         help="Comma-separated list of specific tickers to test")
-    parser.add_argument("--years", type=int, default=2,
-                        help="Number of 10-K years to test (default: 2)")
-    parser.add_argument("--quarters", type=int, default=2,
-                        help="Number of 10-Q quarters to test (default: 2)")
+    parser.add_argument("--mode", type=str, choices=['quick', 'standard', 'extended', 'full'],
+                        default=None,
+                        help="Test mode preset: quick (1yr/1qtr), standard (2yr/2qtr), "
+                             "extended (5yr/4qtr), full (10yr/4qtr)")
+    parser.add_argument("--years", type=int, default=None,
+                        help="Number of 10-K years to test (overrides --mode)")
+    parser.add_argument("--quarters", type=int, default=None,
+                        help="Number of 10-Q quarters to test (overrides --mode)")
     args = parser.parse_args()
+
+    # Resolve years/quarters from mode or explicit args
+    if args.mode:
+        mode_cfg = MODE_CONFIG[args.mode]
+        years = args.years if args.years is not None else mode_cfg['years']
+        quarters = args.quarters if args.quarters is not None else mode_cfg['quarters']
+    else:
+        # Default to 'standard' mode values if no mode specified
+        years = args.years if args.years is not None else MODE_CONFIG['standard']['years']
+        quarters = args.quarters if args.quarters is not None else MODE_CONFIG['standard']['quarters']
 
     # Determine which tickers to test
     if args.tickers:
@@ -583,8 +607,9 @@ def main():
     config = {
         "group": "industrial_33",
         "workers": max_workers,
-        "years": args.years,
-        "quarters": args.quarters,
+        "years": years,
+        "quarters": quarters,
+        "mode": args.mode,
         "metrics": metrics_to_test,
         "sector": args.sector,
         "tickers": tickers
@@ -592,6 +617,8 @@ def main():
 
     print(f"="*60)
     print(f"E2E TEST: STANDARD INDUSTRIAL ({len(tickers)} companies)")
+    if args.mode:
+        print(f"Mode: {args.mode} ({MODE_CONFIG[args.mode]['description']})")
     if args.sector:
         print(f"Sector: {args.sector}")
     print(f"Includes: {', '.join(tickers[:10])}{'...' if len(tickers) > 10 else ''}")
@@ -599,7 +626,7 @@ def main():
         print(f"Metrics (custom): {metrics_to_test}")
     else:
         print(f"Metrics ({len(TARGET_METRICS)} target): {', '.join(TARGET_METRICS[:5])}...")
-    print(f"Workers: {max_workers}, Years: {args.years}, Quarters: {args.quarters}")
+    print(f"Workers: {max_workers}, Years: {years}, Quarters: {quarters}")
 
     # Report known divergences that will be skipped
     skip_count = sum(
