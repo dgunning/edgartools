@@ -1093,13 +1093,13 @@ class ReferenceValidator:
 
                 # Filter for expected concept name to be safe
                 if 'concept' in df.columns:
-                    # Normalized compare
+                    # Normalized compare (case-insensitive)
                     expected_concepts = [
-                        concept.lower(), 
+                        concept.lower(),
                         f"us-gaap:{concept.lower()}",
                         f"ifrs-full:{concept.lower()}"
                     ]
-                    df = df[df['concept'].isin(expected_concepts)]
+                    df = df[df['concept'].str.lower().isin(expected_concepts)]
 
                 if len(df) == 0:
                     return None

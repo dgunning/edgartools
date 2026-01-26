@@ -104,11 +104,12 @@ class TreeParser:
     ) -> MappingResult:
         """
         Map a single metric for a company.
-        
-        Strategy:
-        1. First try direct match against known concepts
+
+        Strategy (ENE Layered Approach):
+        1. First try direct match against known concepts in calculation trees
         2. Then try tree structure hints
-        3. Return with appropriate confidence
+        3. Fall back to facts-based search (concepts may exist in facts but not calc trees)
+        4. Return with appropriate confidence
         """
         metric_config = self.config.get_metric(metric_name)
         if metric_config is None:
@@ -154,14 +155,31 @@ class TreeParser:
                     reasoning=reasoning,
                     tree_context=self._get_tree_context(xbrl, concept)
                 )
-        
+
+        # Strategy 3: Facts-based fallback (ENE enhancement)
+        # Handles concepts that exist in XBRL facts but not in calculation trees
+        # (e.g., standalone disclosures, cash flow items)
+        matched = self._match_from_facts(xbrl, metric_config)
+        if matched:
+            concept, confidence = matched
+            return MappingResult(
+                metric=metric_name,
+                company=ticker,
+                fiscal_period=fiscal_period,
+                concept=concept,
+                confidence=confidence,
+                confidence_level=self._get_confidence_level(confidence),
+                source=MappingSource.TREE,  # Still TREE source (Layer 1)
+                reasoning=f"Facts fallback: {concept} found in XBRL facts"
+            )
+
         # No match found
         return MappingResult(
             metric=metric_name,
             company=ticker,
             fiscal_period=fiscal_period,
             source=MappingSource.UNKNOWN,
-            reasoning="No match in calculation trees"
+            reasoning="No match in calculation trees or facts"
         )
     
     def _get_all_concepts(self, xbrl: XBRL) -> Dict[str, Dict]:
@@ -276,21 +294,69 @@ class TreeParser:
     ) -> Optional[Tuple[str, float]]:
         """
         Match against known concepts from config.
-        
+
         Returns (concept, confidence) if found, None otherwise.
         """
         for known in metric_config.known_concepts:
             if known in all_concepts:
                 # High confidence for exact match
                 return (f"us-gaap:{known}", self._thresholds.get("tree_high", 0.95))
-        
+
         # Try partial matching (concept might have different prefix)
         for known in metric_config.known_concepts:
             for concept in all_concepts:
                 if known in concept or concept in known:
                     return (f"us-gaap:{concept}", self._thresholds.get("tree_medium", 0.80))
-        
+
         return None
+
+    def _match_from_facts(
+        self,
+        xbrl: XBRL,
+        metric_config: MetricConfig,
+    ) -> Optional[Tuple[str, float]]:
+        """
+        Fallback: Match against XBRL facts when calculation tree search fails.
+
+        ENE Spirit: Concepts may exist in facts but not in calculation trees.
+        This handles balance sheet items, standalone disclosures (e.g., weighted
+        average shares), and cash flow items (e.g., stock-based compensation,
+        dividends paid).
+
+        Returns (concept, confidence) if found, None otherwise.
+        """
+        if not xbrl or not hasattr(xbrl, 'facts') or xbrl.facts is None:
+            return None
+
+        try:
+            facts_df = xbrl.facts.to_dataframe()
+            if facts_df is None or len(facts_df) == 0:
+                return None
+
+            # Get available concepts from facts
+            available_concepts = set()
+            if 'concept' in facts_df.columns:
+                for c in facts_df['concept'].dropna().unique():
+                    # Normalize: remove namespace prefix
+                    clean = c.split(':')[-1] if ':' in c else c
+                    available_concepts.add(clean)
+
+            # Try each known concept from config (in priority order)
+            for known in metric_config.known_concepts:
+                # Direct match in facts
+                if known in available_concepts:
+                    return (f"us-gaap:{known}", 0.85)  # Slightly lower confidence
+
+                # Case-insensitive match
+                known_lower = known.lower()
+                for concept in available_concepts:
+                    if concept.lower() == known_lower:
+                        return (f"us-gaap:{concept}", 0.80)
+
+            return None
+
+        except Exception:
+            return None
     
     def _match_by_tree_hints(
         self,
