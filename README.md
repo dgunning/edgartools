@@ -280,6 +280,15 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 }
 ```
 
+### Option 3: sk (Universal Skills Manager)
+
+Install via [sk](https://github.com/803/skills-supply), the universal package manager for AI agent skills (supports Claude, Codex, OpenCode, Amp, and other compatible agents).
+
+```bash
+sk pkg add github dgunning/edgartools --path edgar/ai/skills
+sk sync
+```
+
 See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 </details>

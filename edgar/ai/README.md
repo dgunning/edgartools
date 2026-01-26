@@ -56,6 +56,15 @@ cp -r edgar/ai/skills/core ~/.claude/skills/edgartools/
 # Restart Claude Desktop - skill automatically discovered
 ```
 
+**Install with `sk`:**
+
+Install via [sk](https://github.com/803/skills-supply), the universal package manager for AI agent skills (supports Claude, Codex, OpenCode, Amp, and other compatible agents).
+
+```bash
+sk pkg add github dgunning/edgartools --path edgar/ai/skills
+sk sync
+```
+
 ### Usage Example
 
 Once installed, agents can read documentation and write code:
