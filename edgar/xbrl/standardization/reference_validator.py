@@ -1294,7 +1294,7 @@ class ReferenceValidator:
              # Fetch 10-Q/10-K prior to current date
              # Filter is string "YYYY-MM-DD"
              date_str = str(current_filing_date).split(' ')[0]
-             filings = company.get_filings(form=['10-Q', '10-K']).filter(date=f"<{date_str}")
+             filings = company.get_filings(form=['10-Q', '10-K']).filter(date=f":{date_str}")
              
              if not filings:
                  return None
