@@ -95,6 +95,32 @@ def load_known_divergences() -> Dict[str, Dict]:
     return divergences
 
 
+def get_divergence_stats(known_divergences: Dict, tickers: List[str]) -> Dict:
+    """Compute divergence statistics for the tested tickers."""
+    from collections import defaultdict
+    stats = {
+        "total": 0,
+        "by_status": defaultdict(int),
+        "by_metric": defaultdict(int),
+        "active_skips": 0,
+        "companies_with_divergences": 0,
+    }
+
+    for ticker in tickers:
+        ticker_divs = known_divergences.get(ticker, {})
+        if ticker_divs:
+            stats["companies_with_divergences"] += 1
+        for metric, div_data in ticker_divs.items():
+            stats["total"] += 1
+            status = div_data.get("remediation_status", "none")
+            stats["by_status"][status] += 1
+            stats["by_metric"][metric] += 1
+            if div_data.get("skip_validation", False):
+                stats["active_skips"] += 1
+
+    return stats
+
+
 def should_skip_validation(ticker: str, metric: str, form_type: str, known_divergences: Dict) -> tuple:
     """
     Check if validation should be skipped for this (ticker, metric, form_type).
@@ -448,7 +474,7 @@ def write_json_report(results: List[Dict], output_path: Path, config: Dict):
 
 
 def write_markdown_report(overall_summary: Dict, sector_summary: Dict, failures: List[Dict],
-                          skipped: List[Dict], output_path: Path, config: Dict):
+                          skipped: List[Dict], output_path: Path, config: Dict, div_stats: Dict = None):
     """Write markdown summary report with sector breakdowns."""
     lines = [
         f"# Standard Industrial E2E Test - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
@@ -482,6 +508,28 @@ def write_markdown_report(overall_summary: Dict, sector_summary: Dict, failures:
         f"- **10-K**: {k_rate} ({s['10k_passed']}/{s['10k_total']}){k_skip}",
         f"- **10-Q**: {q_rate} ({s['10q_passed']}/{s['10q_total']}){q_skip}",
     ])
+
+    # Divergence context section
+    if div_stats and div_stats["total"] > 0:
+        status_desc = {
+            "investigating": "Actively researching fix",
+            "deferred": "Known issue, deprioritized",
+            "wont_fix": "Structural limitation",
+            "none": "Not yet triaged",
+        }
+        lines.extend([
+            "",
+            "## Divergence Context",
+            "",
+            "| Status | Count | Description |",
+            "|--------|-------|-------------|",
+        ])
+        for status in ["investigating", "deferred", "wont_fix", "none"]:
+            count = div_stats["by_status"].get(status, 0)
+            if count > 0:
+                lines.append(f"| {status} | {count} | {status_desc[status]} |")
+        lines.append(f"| **Total** | **{div_stats['total']}** | |")
+        lines.append(f"\nActive skips affecting this test: {div_stats['active_skips']}")
 
     # Sector-level pass rates
     lines.extend([
@@ -636,14 +684,17 @@ def main():
         print(f"Metrics ({len(TARGET_METRICS)} target): {', '.join(TARGET_METRICS[:5])}...")
     print(f"Workers: {max_workers}, Years: {years}, Quarters: {quarters}")
 
-    # Report known divergences that will be skipped
-    skip_count = sum(
-        1 for t in tickers if t in known_divergences
-        for m in known_divergences.get(t, {})
-        if known_divergences[t][m].get("skip_validation", False)
-    )
-    if skip_count > 0:
-        print(f"Known divergences to skip: {skip_count}")
+    # Compute and display divergence statistics
+    div_stats = get_divergence_stats(known_divergences, tickers)
+    if div_stats["total"] > 0:
+        print(f"\nDIVERGENCE CONTEXT")
+        print(f"-"*60)
+        print(f"Total known divergences: {div_stats['total']} (for {div_stats['companies_with_divergences']} companies)")
+        for status in ["investigating", "deferred", "wont_fix", "none"]:
+            count = div_stats["by_status"].get(status, 0)
+            if count > 0:
+                print(f"  - {status}: {count}")
+        print(f"Active skips (skip_validation=true): {div_stats['active_skips']}")
     print(f"="*60)
 
     # Run parallel processing
@@ -676,7 +727,7 @@ def main():
     md_path = script_dir / f"{filename_base}.md"
 
     overall_summary, sector_summary, all_skipped = write_json_report(results, json_path, config)
-    write_markdown_report(overall_summary, sector_summary, all_failures, all_skipped, md_path, config)
+    write_markdown_report(overall_summary, sector_summary, all_failures, all_skipped, md_path, config, div_stats)
 
     # Print summary
     print(f"\n{'='*60}")

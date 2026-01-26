@@ -13,6 +13,7 @@ Usage:
 import argparse
 import json
 import os
+import yaml
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -30,6 +31,51 @@ SP50 = SP25 + [
     "XOM", "CVX", "CAT", "GE", "RTX", "HON", "UPS", "BA",
     "CRM", "ORCL", "ADBE", "NFLX", "CSCO", "ACN", "IBM"
 ]
+
+
+def load_known_divergences() -> Dict[str, Dict]:
+    """Load known_divergences from companies.yaml config."""
+    config_path = Path(__file__).resolve().parents[4] / "edgar/xbrl/standardization/config/companies.yaml"
+    if not config_path.exists():
+        return {}
+
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    divergences = {}
+    companies = config.get("companies", {})
+    for ticker, company_config in companies.items():
+        known_div = company_config.get("known_divergences", {})
+        if known_div:
+            divergences[ticker] = known_div
+    return divergences
+
+
+def get_divergence_stats(known_divergences: Dict, tickers: List[str]) -> Dict:
+    """Compute divergence statistics for the tested tickers."""
+    from collections import defaultdict
+    stats = {
+        "total": 0,
+        "by_status": defaultdict(int),
+        "by_metric": defaultdict(int),
+        "active_skips": 0,
+        "companies_with_divergences": 0,
+    }
+
+    for ticker in tickers:
+        ticker_divs = known_divergences.get(ticker, {})
+        if ticker_divs:
+            stats["companies_with_divergences"] += 1
+        for metric, div_data in ticker_divs.items():
+            stats["total"] += 1
+            status = div_data.get("remediation_status", "none")
+            stats["by_status"][status] += 1
+            stats["by_metric"][metric] += 1
+            if div_data.get("skip_validation", False):
+                stats["active_skips"] += 1
+
+    return stats
+
 
 # Suggested action patterns
 SUGGESTED_ACTIONS = {
@@ -305,7 +351,8 @@ def write_json_report(results: List[Dict], output_path: Path, config: Dict):
     return summary
 
 
-def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path, config: Dict):
+def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path,
+                          config: Dict, div_stats: Dict = None):
     """Write markdown summary report."""
     lines = [
         f"# E2E Test Results - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
@@ -338,6 +385,28 @@ def write_markdown_report(summary: Dict, failures: List[Dict], output_path: Path
             q_rate = f"{s['10q_passed']/s['10q_total']*100:.1f}%" if s['10q_total'] > 0 else "N/A"
             label = "Custom/Selected" if key == "custom" else ("SP25" if key == "sp25" else "SP50")
             lines.append(f"| **{label}** | {k_rate} ({s['10k_passed']}/{s['10k_total']}) | {q_rate} ({s['10q_passed']}/{s['10q_total']}) |")
+
+    # Divergence context section
+    if div_stats and div_stats["total"] > 0:
+        status_desc = {
+            "investigating": "Actively researching fix",
+            "deferred": "Known issue, deprioritized",
+            "wont_fix": "Structural limitation",
+            "none": "Not yet triaged",
+        }
+        lines.extend([
+            "",
+            "## Divergence Context",
+            "",
+            "| Status | Count | Description |",
+            "|--------|-------|-------------|",
+        ])
+        for status in ["investigating", "deferred", "wont_fix", "none"]:
+            count = div_stats["by_status"].get(status, 0)
+            if count > 0:
+                lines.append(f"| {status} | {count} | {status_desc[status]} |")
+        lines.append(f"| **Total** | **{div_stats['total']}** | |")
+        lines.append(f"\nActive skips affecting this test: {div_stats['active_skips']}")
 
     # Top failing metrics
     from collections import Counter
@@ -399,6 +468,9 @@ def main():
     # Cap workers
     max_workers = min(args.workers, cpu_count(), 8)
 
+    # Load known divergences from companies.yaml
+    known_divergences = load_known_divergences()
+
     config = {
         "group": group_name,
         "workers": max_workers,
@@ -413,6 +485,18 @@ def main():
     if config["metrics"]:
         print(f"Metrics: {config['metrics']}")
     print(f"Workers: {max_workers}, Years: {args.years}, Quarters: {args.quarters}")
+
+    # Compute and display divergence statistics
+    div_stats = get_divergence_stats(known_divergences, tickers)
+    if div_stats["total"] > 0:
+        print(f"\nDIVERGENCE CONTEXT")
+        print(f"-"*60)
+        print(f"Total known divergences: {div_stats['total']} (for {div_stats['companies_with_divergences']} companies)")
+        for status in ["investigating", "deferred", "wont_fix", "none"]:
+            count = div_stats["by_status"].get(status, 0)
+            if count > 0:
+                print(f"  - {status}: {count}")
+        print(f"Active skips (skip_validation=true): {div_stats['active_skips']}")
     print(f"="*60)
 
     # Run parallel processing
@@ -448,7 +532,7 @@ def main():
     md_path = reports_dir / f"{filename_base}.md"
 
     summary = write_json_report(results, json_path, config)
-    write_markdown_report(summary, all_failures, md_path, config)
+    write_markdown_report(summary, all_failures, md_path, config, div_stats)
 
     # Print summary
     print(f"\n{'='*60}")
