@@ -94,12 +94,13 @@ def infotable_summary(thirteen_f):
     return None
 
 
-def render_rich(thirteen_f):
+def render_rich(thirteen_f, display_limit: int = DEFAULT_DISPLAY_LIMIT):
     """
     Create Rich Panel display for a 13F filing.
 
     Args:
         thirteen_f: ThirteenF instance
+        display_limit: Max holdings rows to display (default 200)
 
     Returns:
         Panel: Rich Panel containing filing summary and holdings table
@@ -151,10 +152,12 @@ def render_rich(thirteen_f):
     # info table
     infotable_summary_df = infotable_summary(thirteen_f)
     if infotable_summary_df is not None:
+        total = len(infotable_summary_df)
+        display_df = infotable_summary_df.head(display_limit)
         table = Table("", "Issuer", "Class", "Cusip", "Ticker", "Value", "Type", "Shares", "Put/Call",
                       row_styles=["bold", ""],
                       box=box.SIMPLE)
-        for index, row in enumerate(infotable_summary_df.itertuples()):
+        for index, row in enumerate(display_df.itertuples()):
             table.add_row(str(index),
                           row.Issuer,
                           row.Class,
@@ -166,6 +169,8 @@ def render_rich(thirteen_f):
                           row.PutCall
                           )
         content.append(table)
+        if total > display_limit:
+            content.append(Text(f"  … and {total - display_limit} more (use .holdings for full DataFrame)", style="dim italic"))
 
     return Panel(
         Group(*content), title=title, subtitle=title

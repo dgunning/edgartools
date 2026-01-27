@@ -108,7 +108,7 @@ class HoldingsHistory:
     """Multi-quarter share history for 13F holdings with sparkline trends."""
 
     def __init__(self, data, periods: list, manager_name: str,
-                 display_limit: int = 200):
+                 display_limit: int = 100):
         self.data = data
         self.periods = periods
         self.manager_name = manager_name
@@ -724,7 +724,7 @@ class ThirteenF:
             display_limit=display_limit,
         )
 
-    def holding_history(self, periods: int = 4, display_limit: int = 200) -> Optional['HoldingsHistory']:
+    def holding_history(self, periods: int = 4, display_limit: int = 100) -> Optional['HoldingsHistory']:
         """Track share counts across multiple quarters.
 
         Walks backward through previous holding reports and builds a
