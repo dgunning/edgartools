@@ -724,12 +724,41 @@ class ThirteenF:
             display_limit=display_limit,
         )
 
+    def _collect_prior_filings(self, periods: int):
+        """Collect up to `periods` Filing objects (newest first) from _related_filings.
+
+        Walks backward from the current filing's index in _related_filings,
+        deduplicating by report_period (keeps latest filing date per period).
+        Returns a list of Filing objects, newest first.
+        """
+        try:
+            idx = pc.equal(self._related_filings.data['accession_number'],
+                           self.accession_number).index(True).as_py()
+        except ValueError:
+            return [self.filing]
+
+        filings = []
+        seen_periods = set()
+        for i in range(idx, -1, -1):
+            f = self._related_filings[i]
+            # Use period_of_report for deduplication
+            period = getattr(f, 'period_of_report', None)
+            period_key = str(period) if period else f.accession_no
+            if period_key not in seen_periods:
+                seen_periods.add(period_key)
+                filings.append(f)
+            if len(filings) >= periods:
+                break
+        return filings
+
     def holding_history(self, periods: int = 4, display_limit: int = 200) -> Optional['HoldingsHistory']:
         """Track share counts across multiple quarters.
 
         Walks backward through previous holding reports and builds a
         DataFrame with one column per quarter (oldest→newest, left→right)
         plus a Unicode sparkline trend.
+
+        Uses parallel fetches to load all quarters concurrently.
 
         Args:
             periods: Number of quarters to include (default 4)
@@ -739,27 +768,49 @@ class ThirteenF:
         Returns:
             HoldingsHistory or None if current holdings are unavailable
         """
+        from concurrent.futures import ThreadPoolExecutor
+
         import pandas as pd
 
-        reports = [self]
-        current = self
-        for _ in range(periods - 1):
-            prev = current.previous_holding_report()
-            if prev is None:
-                break
-            reports.append(prev)
-            current = prev
+        # Identify filing objects upfront (one _related_filings call)
+        prior_filings = self._collect_prior_filings(periods)
+        if not prior_filings:
+            return None
+
+        # Reverse to oldest-first
+        prior_filings = list(reversed(prior_filings))
+
+        def _load_report(filing):
+            """Create ThirteenF and eagerly fetch holdings (IO-bound)."""
+            report = ThirteenF(filing, use_latest_period_of_report=False)
+            # Trigger the holdings download inside the thread
+            _ = report.holdings
+            return report
+
+        # The first report (self) is already loaded; fetch the rest in parallel
+        reports = []
+        other_filings = [f for f in prior_filings if f.accession_no != self.filing.accession_no]
+
+        with ThreadPoolExecutor(max_workers=min(4, len(other_filings) or 1)) as pool:
+            futures = {f.accession_no: pool.submit(_load_report, f) for f in other_filings}
+
+        # Build the ordered list: use self for the current filing, futures for the rest
+        for filing in prior_filings:
+            if filing.accession_no == self.filing.accession_no:
+                reports.append(self)
+            elif filing.accession_no in futures:
+                try:
+                    reports.append(futures[filing.accession_no].result())
+                except Exception:
+                    continue  # skip failed fetches
 
         if not reports:
             return None
 
-        # Reverse so oldest is first
-        reports = list(reversed(reports))
-
         # Deduplicate by report_period — keep the latest filing for each period
         seen = {}
         for r in reports:
-            seen[r.report_period] = r  # later entry (newer filing) overwrites
+            seen[r.report_period] = r
         reports = [seen[k] for k in dict.fromkeys(r.report_period for r in reports)]
         period_labels = [r.report_period for r in reports]
 
