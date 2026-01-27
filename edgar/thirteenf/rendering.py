@@ -10,6 +10,8 @@ from rich.text import Text
 
 __all__ = ['render_rich', 'infotable_summary', 'render_holdings_comparison', 'render_holdings_history', 'sparkline']
 
+DEFAULT_DISPLAY_LIMIT = 200
+
 SPARK_CHARS = "▁▂▃▅▇"
 
 
@@ -199,12 +201,13 @@ def _fmt_change(value, is_pct=False) -> Text:
     return Text(label, style="dim")
 
 
-def render_holdings_comparison(comparison) -> Panel:
+def render_holdings_comparison(comparison, display_limit: int = DEFAULT_DISPLAY_LIMIT) -> Panel:
     """Render a HoldingsComparison as a Rich Panel."""
     title = f"Holdings Comparison: {comparison.manager_name}  {comparison.current_period} vs {comparison.previous_period}"
     df = comparison.data
+    total = len(df)
 
-    # Summary counts
+    # Summary counts (always from full data)
     status_counts = df['Status'].value_counts()
     summary_parts = []
     for status, style in [("NEW", "bold green"), ("CLOSED", "bold red"),
@@ -235,7 +238,8 @@ def render_holdings_comparison(comparison) -> Panel:
         row_styles=["", "dim"],
     )
 
-    for row in df.itertuples():
+    display_df = df.head(display_limit)
+    for row in display_df.itertuples():
         shares = f"{int(row.Shares):,}" if not math.isnan(row.Shares) else "-"
         prev_shares = f"{int(row.PrevShares):,}" if not math.isnan(row.PrevShares) else "-"
         value = f"${int(row.Value):,}" if not math.isnan(row.Value) else "-"
@@ -254,14 +258,18 @@ def render_holdings_comparison(comparison) -> Panel:
             _status_text(row.Status),
         )
 
+    content = [summary_line, table]
+    if total > display_limit:
+        content.append(Text(f"  … and {total - display_limit} more (use .data for full DataFrame)", style="dim italic"))
+
     return Panel(
-        Group(summary_line, table),
+        Group(*content),
         title=title,
         subtitle=title,
     )
 
 
-def render_holdings_history(history) -> Panel:
+def render_holdings_history(history, display_limit: int = DEFAULT_DISPLAY_LIMIT) -> Panel:
     """Render a HoldingsHistory as a Rich Panel."""
     n = len(history.periods)
     title = f"Holdings History: {history.manager_name} ({n} quarters)"
@@ -278,8 +286,10 @@ def render_holdings_history(history) -> Panel:
 
     table = Table(*columns, box=box.SIMPLE, row_styles=["", "dim"])
     df = history.data
+    total = len(df)
+    display_df = df.head(display_limit)
 
-    for _, row in df.iterrows():
+    for _, row in display_df.iterrows():
         cells = [row.get('Issuer') or "", row.get('Ticker') or ""]
         values_for_spark = []
         for period in history.periods:
@@ -302,8 +312,12 @@ def render_holdings_history(history) -> Panel:
 
         table.add_row(*cells)
 
+    content = [table]
+    if total > display_limit:
+        content.append(Text(f"  … and {total - display_limit} more (use .data for full DataFrame)", style="dim italic"))
+
     return Panel(
-        Group(table),
+        Group(*content),
         title=title,
         subtitle=title,
     )

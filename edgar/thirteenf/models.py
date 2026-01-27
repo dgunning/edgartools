@@ -84,15 +84,17 @@ class PrimaryDocument13F:
 class HoldingsComparison:
     """Comparison of 13F holdings between two consecutive quarters."""
 
-    def __init__(self, data, current_period: str, previous_period: str, manager_name: str):
+    def __init__(self, data, current_period: str, previous_period: str, manager_name: str,
+                 display_limit: int = 200):
         self.data = data
         self.current_period = current_period
         self.previous_period = previous_period
         self.manager_name = manager_name
+        self.display_limit = display_limit
 
     def __rich__(self):
         from edgar.thirteenf.rendering import render_holdings_comparison
-        return render_holdings_comparison(self)
+        return render_holdings_comparison(self, display_limit=self.display_limit)
 
     def __repr__(self):
         from edgar.richtools import repr_rich
@@ -105,14 +107,16 @@ class HoldingsComparison:
 class HoldingsHistory:
     """Multi-quarter share history for 13F holdings with sparkline trends."""
 
-    def __init__(self, data, periods: list, manager_name: str):
+    def __init__(self, data, periods: list, manager_name: str,
+                 display_limit: int = 200):
         self.data = data
         self.periods = periods
         self.manager_name = manager_name
+        self.display_limit = display_limit
 
     def __rich__(self):
         from edgar.thirteenf.rendering import render_holdings_history
-        return render_holdings_history(self)
+        return render_holdings_history(self, display_limit=self.display_limit)
 
     def __repr__(self):
         from edgar.richtools import repr_rich
@@ -639,12 +643,16 @@ class ThirteenF:
         previous_filing = self._related_filings[idx - 1]
         return ThirteenF(previous_filing, use_latest_period_of_report=False)
 
-    def compare_holdings(self) -> Optional['HoldingsComparison']:
+    def compare_holdings(self, display_limit: int = 200) -> Optional['HoldingsComparison']:
         """Compare current holdings with the previous quarter.
 
         Returns a HoldingsComparison with per-security changes including
         share and value deltas, percentage changes, and status labels
         (NEW, CLOSED, INCREASED, DECREASED, UNCHANGED).
+
+        Args:
+            display_limit: Max rows to show in Rich display (default 200).
+                           The .data DataFrame always contains all rows.
 
         Returns:
             HoldingsComparison or None if previous holdings are unavailable
@@ -713,9 +721,10 @@ class ThirteenF:
             current_period=self.report_period,
             previous_period=prev_report.report_period,
             manager_name=self.management_company_name,
+            display_limit=display_limit,
         )
 
-    def holding_history(self, periods: int = 4) -> Optional['HoldingsHistory']:
+    def holding_history(self, periods: int = 4, display_limit: int = 200) -> Optional['HoldingsHistory']:
         """Track share counts across multiple quarters.
 
         Walks backward through previous holding reports and builds a
@@ -724,6 +733,8 @@ class ThirteenF:
 
         Args:
             periods: Number of quarters to include (default 4)
+            display_limit: Max rows to show in Rich display (default 200).
+                           The .data DataFrame always contains all rows.
 
         Returns:
             HoldingsHistory or None if current holdings are unavailable
@@ -790,6 +801,7 @@ class ThirteenF:
             data=merged,
             periods=period_labels,
             manager_name=self.management_company_name,
+            display_limit=display_limit,
         )
 
     def __rich__(self):
