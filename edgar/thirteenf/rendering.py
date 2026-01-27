@@ -8,7 +8,7 @@ from rich.panel import Panel
 from rich.table import Column, Table
 from rich.text import Text
 
-__all__ = ['render_rich', 'infotable_summary', 'render_holdings_comparison', 'render_holdings_history', 'sparkline']
+__all__ = ['render_rich', 'render_holdings_view', 'infotable_summary', 'render_holdings_comparison', 'render_holdings_history', 'sparkline']
 
 DEFAULT_DISPLAY_LIMIT = 200
 
@@ -175,6 +175,28 @@ def render_rich(thirteen_f, display_limit: int = DEFAULT_DISPLAY_LIMIT):
     return Panel(
         Group(*content), title=title, subtitle=title
     )
+
+
+def render_holdings_view(view, display_limit: int = DEFAULT_DISPLAY_LIMIT) -> Panel:
+    """Render a HoldingsView as a Rich Panel (holdings table only)."""
+    tf = view._thirteen_f
+    title = f"Holdings: {tf.management_company_name} ({tf.report_period})"
+
+    df = view.data
+    total = len(df)
+    display_df = df.head(display_limit)
+
+    table = Table("", "Issuer", "Class", "Cusip", "Ticker", "Value", "Type", "Shares", "Put/Call",
+                  row_styles=["bold", ""], box=box.SIMPLE)
+    for index, row in enumerate(display_df.itertuples()):
+        table.add_row(str(index), row.Issuer, row.Class, row.Cusip, row.Ticker,
+                      f"${row.Value:,.0f}", row.Type, f"{int(row.Shares):,.0f}", row.PutCall)
+
+    content = [table]
+    if total > display_limit:
+        content.append(Text(f"  … and {total - display_limit} more (use .data for full DataFrame)", style="dim italic"))
+
+    return Panel(Group(*content), title=title, subtitle=title)
 
 
 def _status_text(status: str) -> Text:

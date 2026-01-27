@@ -16,6 +16,7 @@ __all__ = [
     'Signature',
     'PrimaryDocument13F',
     'ThirteenF',
+    'HoldingsView',
     'HoldingsComparison',
     'HoldingsHistory',
     'THIRTEENF_FORMS',
@@ -81,6 +82,37 @@ class PrimaryDocument13F:
     additional_information: str
 
 
+class HoldingsView:
+    """View of 13F holdings as a Rich-renderable, iterable object."""
+
+    def __init__(self, data, thirteen_f, display_limit: int = 200):
+        self.data = data              # The summary DataFrame
+        self._thirteen_f = thirteen_f  # For title/metadata in rendering
+        self.display_limit = display_limit
+
+    def __rich__(self):
+        from edgar.thirteenf.rendering import render_holdings_view
+        return render_holdings_view(self, display_limit=self.display_limit)
+
+    def __repr__(self):
+        from edgar.richtools import repr_rich
+        return repr_rich(self.__rich__())
+
+    def __len__(self):
+        return len(self.data)
+
+    def __iter__(self):
+        """Iterate over rows as dicts."""
+        for _, row in self.data.iterrows():
+            yield row.to_dict()
+
+    def __getitem__(self, index):
+        """Slice the underlying DataFrame."""
+        if isinstance(index, int):
+            return self.data.iloc[index].to_dict()
+        return self.data.iloc[index]
+
+
 class HoldingsComparison:
     """Comparison of 13F holdings between two consecutive quarters."""
 
@@ -103,6 +135,17 @@ class HoldingsComparison:
     def __len__(self):
         return len(self.data)
 
+    def __iter__(self):
+        """Iterate over rows as dicts."""
+        for _, row in self.data.iterrows():
+            yield row.to_dict()
+
+    def __getitem__(self, index):
+        """Slice the underlying DataFrame."""
+        if isinstance(index, int):
+            return self.data.iloc[index].to_dict()
+        return self.data.iloc[index]
+
 
 class HoldingsHistory:
     """Multi-quarter share history for 13F holdings with sparkline trends."""
@@ -124,6 +167,17 @@ class HoldingsHistory:
 
     def __len__(self):
         return len(self.data)
+
+    def __iter__(self):
+        """Iterate over rows as dicts."""
+        for _, row in self.data.iterrows():
+            yield row.to_dict()
+
+    def __getitem__(self, index):
+        """Slice the underlying DataFrame."""
+        if isinstance(index, int):
+            return self.data.iloc[index].to_dict()
+        return self.data.iloc[index]
 
 
 class ThirteenF:
@@ -642,6 +696,18 @@ class ThirteenF:
             return None
         previous_filing = self._related_filings[idx - 1]
         return ThirteenF(previous_filing, use_latest_period_of_report=False)
+
+    def holdings_view(self, display_limit: int = 200) -> Optional['HoldingsView']:
+        """Return a view of current holdings as a renderable, iterable object.
+
+        Unlike .holdings (a raw DataFrame), this returns a HoldingsView with
+        __rich__(), __iter__(), and __getitem__() for display and downstream use.
+        """
+        from edgar.thirteenf.rendering import infotable_summary
+        summary = infotable_summary(self)
+        if summary is None:
+            return None
+        return HoldingsView(data=summary, thirteen_f=self, display_limit=display_limit)
 
     def compare_holdings(self, display_limit: int = 200) -> Optional['HoldingsComparison']:
         """Compare current holdings with the previous quarter.
