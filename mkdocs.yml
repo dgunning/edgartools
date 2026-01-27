@@ -33,6 +33,7 @@ nav:
     - Company Subsets: company-subsets.md
     - Track Insiders: guides/company-insiders.md
     - Entity API: guides/entity-api-guide.md
+    - Business Development Companies: guides/bdc-guide.md
 
   # ==========================================
   # FILINGS - Access SEC filings
