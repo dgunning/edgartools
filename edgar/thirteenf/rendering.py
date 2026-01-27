@@ -261,12 +261,13 @@ def render_holdings_history(history) -> Panel:
     columns.append(Column("Trend", justify="center"))
 
     table = Table(*columns, box=box.SIMPLE, row_styles=["", "dim"])
+    df = history.data
 
-    for row in history.data.itertuples():
-        cells = [row.Issuer or "", row.Ticker or ""]
+    for _, row in df.iterrows():
+        cells = [row.get('Issuer') or "", row.get('Ticker') or ""]
         values_for_spark = []
         for period in history.periods:
-            val = getattr(row, str(period), None)
+            val = row.get(period)
             if val is not None and not (isinstance(val, float) and math.isnan(val)):
                 cells.append(f"{int(val):,}")
                 values_for_spark.append(val)

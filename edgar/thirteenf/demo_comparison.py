@@ -74,16 +74,16 @@ def demo_holding_history(thirteen_f, periods=4):
     most_recent = hist.periods[-1]
     top5 = df.nlargest(5, most_recent, keep="first")
     console.print(f"[bold]Top 5 holdings as of {most_recent}:[/bold]")
-    for row in top5.itertuples():
-        shares = getattr(row, str(most_recent), 0)
+    for _, row in top5.iterrows():
+        shares = row.get(most_recent, 0)
         if shares and shares == shares:  # not NaN
-            console.print(f"  {row.Issuer:30s}  {row.Ticker or '':6s}  {int(shares):>14,} shares")
+            console.print(f"  {row['Issuer']:30s}  {row.get('Ticker') or '':6s}  {int(shares):>14,} shares")
     console.print()
 
 
 def main():
     parser = argparse.ArgumentParser(description="Demo: ThirteenF Holdings Comparison & History")
-    parser.add_argument("--ticker", default="BERKSHIRE HATHAWAY",
+    parser.add_argument("--ticker", default="BRK",
                         help="Company name or ticker to look up (default: BERKSHIRE HATHAWAY)")
     parser.add_argument("--periods", type=int, default=4,
                         help="Number of quarters for holding_history (default: 4)")

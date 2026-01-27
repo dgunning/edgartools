@@ -135,12 +135,13 @@ class ThirteenF:
 
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
         self._actual_filing = filing  # The filing passed in
-        self.__related_filings = None  # Lazy-loaded on first access
+        self.__related_filings = None  # Lazy-loaded: all related filings
+        self.__same_day_filings = None  # Lazy-loaded: same-date + same-form subset
 
         if use_latest_period_of_report:
-            # Use the last related filing.
+            # Use the last related filing filed on the same date.
             # It should also be the one that has the CONFORMED_PERIOD_OF_REPORT closest to filing_date
-            self.filing = self._related_filings[-1]
+            self.filing = self._same_day_filings[-1]
         else:
             # Use the exact filing that was passed in
             self.filing = self._actual_filing
@@ -152,13 +153,20 @@ class ThirteenF:
 
     @property
     def _related_filings(self):
-        """Lazy-load related filings (avoids network call unless needed)."""
+        """Lazy-load all related filings (used by previous_holding_report)."""
         if self.__related_filings is None:
-            self.__related_filings = self._actual_filing.related_filings().filter(
+            self.__related_filings = self._actual_filing.related_filings()
+        return self.__related_filings
+
+    @property
+    def _same_day_filings(self):
+        """Lazy-load related filings filed on the same date with the same form."""
+        if self.__same_day_filings is None:
+            self.__same_day_filings = self._related_filings.filter(
                 filing_date=self._actual_filing.filing_date,
                 form=self._actual_filing.form
             )
-        return self.__related_filings
+        return self.__same_day_filings
 
     def has_infotable(self):
         return self.filing.form in ['13F-HR', "13F-HR/A"]
@@ -734,6 +742,12 @@ class ThirteenF:
 
         # Reverse so oldest is first
         reports = list(reversed(reports))
+
+        # Deduplicate by report_period — keep the latest filing for each period
+        seen = {}
+        for r in reports:
+            seen[r.report_period] = r  # later entry (newer filing) overwrites
+        reports = [seen[k] for k in dict.fromkeys(r.report_period for r in reports)]
         period_labels = [r.report_period for r in reports]
 
         merged = None
