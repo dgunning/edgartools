@@ -15,6 +15,14 @@ DEFAULT_DISPLAY_LIMIT = 200
 SPARK_CHARS = "▁▂▃▅▇"
 
 
+def _is_number(value) -> bool:
+    """Return True if value is a finite number (not None, NaN, or non-numeric)."""
+    try:
+        return value is not None and not math.isnan(float(value))
+    except (TypeError, ValueError):
+        return False
+
+
 def sparkline(values) -> str:
     """Map a sequence of numeric values to a Unicode sparkline string.
 
@@ -84,13 +92,21 @@ def infotable_summary(thirteen_f):
                            'Type', 'PutCall', 'SoleVoting', 'SharedVoting', 'NonVoting']
             available_cols = [col for col in display_cols if col in holdings.columns]
 
-            return (holdings[available_cols]
-                    .rename(columns={'SharesPrnAmount': 'Shares'} if 'SharesPrnAmount' in available_cols else {})
-                    .assign(Value=lambda df: df.Value if 'Value' in df.columns else 0,
-                            Type=lambda df: df.Type.fillna('-') if 'Type' in df.columns else '-',
-                            Ticker=lambda df: df.Ticker.fillna('') if 'Ticker' in df.columns else '')
-                    .sort_values(['Value'], ascending=False)
-                    )
+            result = (holdings[available_cols]
+                      .rename(columns={'SharesPrnAmount': 'Shares'} if 'SharesPrnAmount' in available_cols else {})
+                      .assign(Value=lambda df: df.Value if 'Value' in df.columns else 0,
+                              Type=lambda df: df.Type.fillna('-') if 'Type' in df.columns else '-',
+                              Ticker=lambda df: df.Ticker.fillna('') if 'Ticker' in df.columns else '',
+                              PutCall=lambda df: df.PutCall.fillna('') if 'PutCall' in df.columns else '')
+                      .sort_values(['Value'], ascending=False)
+                      )
+            # Guarantee all columns that renderers expect
+            for col, default in [('Issuer', ''), ('Class', ''), ('Cusip', ''),
+                                 ('Ticker', ''), ('Value', 0), ('Type', '-'),
+                                 ('Shares', 0), ('PutCall', '')]:
+                if col not in result.columns:
+                    result[col] = default
+            return result
     return None
 
 
@@ -158,15 +174,17 @@ def render_rich(thirteen_f, display_limit: int = DEFAULT_DISPLAY_LIMIT):
                       row_styles=["bold", ""],
                       box=box.SIMPLE)
         for index, row in enumerate(display_df.itertuples()):
+            value_str = f"${row.Value:,.0f}" if _is_number(row.Value) else "-"
+            shares_str = f"{int(row.Shares):,.0f}" if _is_number(row.Shares) else "-"
             table.add_row(str(index),
-                          row.Issuer,
-                          row.Class,
-                          row.Cusip,
-                          row.Ticker,
-                          f"${row.Value:,.0f}",
-                          row.Type,
-                          f"{int(row.Shares):,.0f}",
-                          row.PutCall
+                          str(row.Issuer) if row.Issuer else "",
+                          str(row.Class) if row.Class else "",
+                          str(row.Cusip) if row.Cusip else "",
+                          str(row.Ticker) if row.Ticker else "",
+                          value_str,
+                          str(row.Type) if row.Type else "-",
+                          shares_str,
+                          str(row.PutCall) if row.PutCall else ""
                           )
         content.append(table)
         if total > display_limit:
@@ -189,8 +207,17 @@ def render_holdings_view(view, display_limit: int = DEFAULT_DISPLAY_LIMIT) -> Pa
     table = Table("", "Issuer", "Class", "Cusip", "Ticker", "Value", "Type", "Shares", "Put/Call",
                   row_styles=["bold", ""], box=box.SIMPLE)
     for index, row in enumerate(display_df.itertuples()):
-        table.add_row(str(index), row.Issuer, row.Class, row.Cusip, row.Ticker,
-                      f"${row.Value:,.0f}", row.Type, f"{int(row.Shares):,.0f}", row.PutCall)
+        value_str = f"${row.Value:,.0f}" if _is_number(row.Value) else "-"
+        shares_str = f"{int(row.Shares):,.0f}" if _is_number(row.Shares) else "-"
+        table.add_row(str(index),
+                      str(row.Issuer) if row.Issuer else "",
+                      str(row.Class) if row.Class else "",
+                      str(row.Cusip) if row.Cusip else "",
+                      str(row.Ticker) if row.Ticker else "",
+                      value_str,
+                      str(row.Type) if row.Type else "-",
+                      shares_str,
+                      str(row.PutCall) if row.PutCall else "")
 
     content = [table]
     if total > display_limit:
@@ -267,10 +294,10 @@ def render_holdings_comparison(comparison, display_limit: int = DEFAULT_DISPLAY_
 
     display_df = df.head(display_limit)
     for row in display_df.itertuples():
-        shares = f"{int(row.Shares):,}" if not math.isnan(row.Shares) else "-"
-        prev_shares = f"{int(row.PrevShares):,}" if not math.isnan(row.PrevShares) else "-"
-        value = f"${int(row.Value):,}" if not math.isnan(row.Value) else "-"
-        prev_value = f"${int(row.PrevValue):,}" if not math.isnan(row.PrevValue) else "-"
+        shares = f"{int(row.Shares):,}" if _is_number(row.Shares) else "-"
+        prev_shares = f"{int(row.PrevShares):,}" if _is_number(row.PrevShares) else "-"
+        value = f"${int(row.Value):,}" if _is_number(row.Value) else "-"
+        prev_value = f"${int(row.PrevValue):,}" if _is_number(row.PrevValue) else "-"
 
         table.add_row(
             row.Issuer or "",
