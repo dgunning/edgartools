@@ -153,9 +153,11 @@ class ThirteenF:
 
     @property
     def _related_filings(self):
-        """Lazy-load all related filings (used by previous_holding_report)."""
+        """Lazy-load related 13F filings (used by previous_holding_report)."""
         if self.__related_filings is None:
-            self.__related_filings = self._actual_filing.related_filings()
+            self.__related_filings = self._actual_filing.related_filings().filter(
+                form=self._actual_filing.form
+            )
         return self.__related_filings
 
     @property
