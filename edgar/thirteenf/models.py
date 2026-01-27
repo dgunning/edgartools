@@ -16,6 +16,8 @@ __all__ = [
     'Signature',
     'PrimaryDocument13F',
     'ThirteenF',
+    'HoldingsComparison',
+    'HoldingsHistory',
     'THIRTEENF_FORMS',
     'format_date',
 ]
@@ -79,6 +81,47 @@ class PrimaryDocument13F:
     additional_information: str
 
 
+class HoldingsComparison:
+    """Comparison of 13F holdings between two consecutive quarters."""
+
+    def __init__(self, data, current_period: str, previous_period: str, manager_name: str):
+        self.data = data
+        self.current_period = current_period
+        self.previous_period = previous_period
+        self.manager_name = manager_name
+
+    def __rich__(self):
+        from edgar.thirteenf.rendering import render_holdings_comparison
+        return render_holdings_comparison(self)
+
+    def __repr__(self):
+        from edgar.richtools import repr_rich
+        return repr_rich(self.__rich__())
+
+    def __len__(self):
+        return len(self.data)
+
+
+class HoldingsHistory:
+    """Multi-quarter share history for 13F holdings with sparkline trends."""
+
+    def __init__(self, data, periods: list, manager_name: str):
+        self.data = data
+        self.periods = periods
+        self.manager_name = manager_name
+
+    def __rich__(self):
+        from edgar.thirteenf.rendering import render_holdings_history
+        return render_holdings_history(self)
+
+    def __repr__(self):
+        from edgar.richtools import repr_rich
+        return repr_rich(self.__rich__())
+
+    def __len__(self):
+        return len(self.data)
+
+
 class ThirteenF:
     """
     A 13F-HR is a quarterly report filed by institutional investment managers that have over $100 million in qualifying
@@ -91,10 +134,9 @@ class ThirteenF:
         from edgar.thirteenf.parsers.primary_xml import parse_primary_document_xml
 
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
-        # The filing might not be the filing for the current period. We need to use the related filing filed on the same
-        # date as the current filing that has the latest period of report
-        self._related_filings = filing.related_filings().filter(filing_date=filing.filing_date, form=filing.form)
         self._actual_filing = filing  # The filing passed in
+        self.__related_filings = None  # Lazy-loaded on first access
+
         if use_latest_period_of_report:
             # Use the last related filing.
             # It should also be the one that has the CONFORMED_PERIOD_OF_REPORT closest to filing_date
@@ -107,6 +149,16 @@ class ThirteenF:
         # For older TXT-only filings (2012 and earlier), primary_form_information will be None
         primary_xml = self.filing.xml()
         self.primary_form_information = parse_primary_document_xml(primary_xml) if primary_xml else None
+
+    @property
+    def _related_filings(self):
+        """Lazy-load related filings (avoids network call unless needed)."""
+        if self.__related_filings is None:
+            self.__related_filings = self._actual_filing.related_filings().filter(
+                filing_date=self._actual_filing.filing_date,
+                form=self._actual_filing.form
+            )
+        return self.__related_filings
 
     def has_infotable(self):
         return self.filing.form in ['13F-HR', "13F-HR/A"]
@@ -576,6 +628,153 @@ class ThirteenF:
             return None
         previous_filing = self._related_filings[idx - 1]
         return ThirteenF(previous_filing, use_latest_period_of_report=False)
+
+    def compare_holdings(self) -> Optional['HoldingsComparison']:
+        """Compare current holdings with the previous quarter.
+
+        Returns a HoldingsComparison with per-security changes including
+        share and value deltas, percentage changes, and status labels
+        (NEW, CLOSED, INCREASED, DECREASED, UNCHANGED).
+
+        Returns:
+            HoldingsComparison or None if previous holdings are unavailable
+        """
+        import numpy as np
+        import pandas as pd
+
+        current = self.holdings
+        if current is None or len(current) == 0:
+            return None
+
+        prev_report = self.previous_holding_report()
+        if prev_report is None:
+            return None
+        previous = prev_report.holdings
+        if previous is None or len(previous) == 0:
+            return None
+
+        cur = current[['Cusip', 'Ticker', 'Issuer', 'SharesPrnAmount', 'Value']].copy()
+        cur.columns = ['Cusip', 'Ticker', 'Issuer', 'Shares', 'Value']
+
+        prev = previous[['Cusip', 'Ticker', 'Issuer', 'SharesPrnAmount', 'Value']].copy()
+        prev.columns = ['Cusip', 'Ticker_prev', 'Issuer_prev', 'PrevShares', 'PrevValue']
+
+        merged = cur.merge(prev, on='Cusip', how='outer')
+
+        # Coalesce Ticker / Issuer
+        merged['Ticker'] = merged['Ticker'].fillna(merged['Ticker_prev'])
+        merged['Issuer'] = merged['Issuer'].fillna(merged['Issuer_prev'])
+        merged.drop(columns=['Ticker_prev', 'Issuer_prev'], inplace=True)
+
+        # Fill missing numeric values with NaN (they stay NaN for NEW/CLOSED)
+        for col in ['Shares', 'PrevShares', 'Value', 'PrevValue']:
+            merged[col] = pd.to_numeric(merged[col], errors='coerce')
+
+        merged['ShareChange'] = merged['Shares'] - merged['PrevShares']
+        merged['ShareChangePct'] = np.where(
+            merged['PrevShares'].notna() & (merged['PrevShares'] != 0),
+            (merged['ShareChange'] / merged['PrevShares']) * 100,
+            np.nan,
+        )
+        merged['ValueChange'] = merged['Value'] - merged['PrevValue']
+        merged['ValueChangePct'] = np.where(
+            merged['PrevValue'].notna() & (merged['PrevValue'] != 0),
+            (merged['ValueChange'] / merged['PrevValue']) * 100,
+            np.nan,
+        )
+
+        def _status(row):
+            if pd.isna(row['PrevShares']):
+                return 'NEW'
+            if pd.isna(row['Shares']):
+                return 'CLOSED'
+            if row['ShareChange'] > 0:
+                return 'INCREASED'
+            if row['ShareChange'] < 0:
+                return 'DECREASED'
+            return 'UNCHANGED'
+
+        merged['Status'] = merged.apply(_status, axis=1)
+        merged.sort_values('ValueChange', key=lambda s: s.abs(), ascending=False, inplace=True, na_position='last')
+        merged.reset_index(drop=True, inplace=True)
+
+        return HoldingsComparison(
+            data=merged,
+            current_period=self.report_period,
+            previous_period=prev_report.report_period,
+            manager_name=self.management_company_name,
+        )
+
+    def holding_history(self, periods: int = 4) -> Optional['HoldingsHistory']:
+        """Track share counts across multiple quarters.
+
+        Walks backward through previous holding reports and builds a
+        DataFrame with one column per quarter (oldest→newest, left→right)
+        plus a Unicode sparkline trend.
+
+        Args:
+            periods: Number of quarters to include (default 4)
+
+        Returns:
+            HoldingsHistory or None if current holdings are unavailable
+        """
+        import pandas as pd
+
+        reports = [self]
+        current = self
+        for _ in range(periods - 1):
+            prev = current.previous_holding_report()
+            if prev is None:
+                break
+            reports.append(prev)
+            current = prev
+
+        if not reports:
+            return None
+
+        # Reverse so oldest is first
+        reports = list(reversed(reports))
+        period_labels = [r.report_period for r in reports]
+
+        merged = None
+        for report in reports:
+            h = report.holdings
+            if h is None or len(h) == 0:
+                continue
+            col_name = report.report_period
+            subset = h[['Cusip', 'Ticker', 'Issuer', 'SharesPrnAmount']].copy()
+            subset.rename(columns={'SharesPrnAmount': col_name}, inplace=True)
+
+            if merged is None:
+                merged = subset
+            else:
+                # Merge on Cusip; coalesce Ticker/Issuer from newer data
+                merged = merged.merge(
+                    subset[['Cusip', col_name]],
+                    on='Cusip',
+                    how='outer',
+                )
+                # Update Ticker/Issuer from this (newer) report where missing
+                new_ids = subset[['Cusip', 'Ticker', 'Issuer']].drop_duplicates('Cusip')
+                for id_col in ['Ticker', 'Issuer']:
+                    mapping = new_ids.set_index('Cusip')[id_col]
+                    mask = merged[id_col].isna()
+                    merged.loc[mask, id_col] = merged.loc[mask, 'Cusip'].map(mapping)
+
+        if merged is None:
+            return None
+
+        # Sort by most recent period's shares descending
+        most_recent = period_labels[-1]
+        if most_recent in merged.columns:
+            merged.sort_values(most_recent, ascending=False, na_position='last', inplace=True)
+        merged.reset_index(drop=True, inplace=True)
+
+        return HoldingsHistory(
+            data=merged,
+            periods=period_labels,
+            manager_name=self.management_company_name,
+        )
 
     def __rich__(self):
         from edgar.thirteenf.rendering import render_rich
