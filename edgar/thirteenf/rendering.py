@@ -16,8 +16,12 @@ SPARK_CHARS = "▁▂▃▅▇"
 def sparkline(values) -> str:
     """Map a sequence of numeric values to a Unicode sparkline string.
 
+    Uses mean-centred ±50% scaling so that small percentage changes
+    appear proportionally small rather than filling the entire range.
+    A 6% decline occupies ~6% of the visual range, not 100%.
+
     NaN / None values render as a space.
-    If all values are the same (or all missing), returns a flat line.
+    If all values are the same (or all missing), returns a flat mid-bar.
     """
     nums = []
     for v in values:
@@ -31,17 +35,28 @@ def sparkline(values) -> str:
     if not valid:
         return " " * len(nums)
 
-    lo, hi = min(valid), max(valid)
-    span = hi - lo
+    mid = len(SPARK_CHARS) // 2
+    mean = sum(valid) / len(valid)
+
+    if mean == 0:
+        # All zeros — flat line
+        return "".join(" " if n is None else SPARK_CHARS[mid] for n in nums)
+
+    # Range covers mean ± 50%, so the full visual width represents
+    # a 100-percentage-point swing.  Real changes (typically single-
+    # digit %) use a proportionally small slice of the bar range.
+    lo = mean * 0.5
+    hi = mean * 1.5
+    span = hi - lo  # always mean * 1.0
 
     chars = []
     for n in nums:
         if n is None:
             chars.append(" ")
-        elif span == 0:
-            chars.append(SPARK_CHARS[len(SPARK_CHARS) // 2])
         else:
-            idx = int((n - lo) / span * (len(SPARK_CHARS) - 1))
+            # Clamp to [lo, hi] so outliers don't break the index
+            clamped = max(lo, min(hi, n))
+            idx = int((clamped - lo) / span * (len(SPARK_CHARS) - 1))
             chars.append(SPARK_CHARS[idx])
     return "".join(chars)
 
@@ -259,6 +274,7 @@ def render_holdings_history(history) -> Panel:
     for period in history.periods:
         columns.append(Column(str(period), justify="right"))
     columns.append(Column("Trend", justify="center"))
+    columns.append(Column("Chg%", justify="right"))
 
     table = Table(*columns, box=box.SIMPLE, row_styles=["", "dim"])
     df = history.data
@@ -275,6 +291,15 @@ def render_holdings_history(history) -> Panel:
                 cells.append("-")
                 values_for_spark.append(None)
         cells.append(sparkline(values_for_spark))
+
+        # First-to-last percentage change
+        valid_vals = [v for v in values_for_spark if v is not None]
+        if len(valid_vals) >= 2 and valid_vals[0] != 0:
+            pct = (valid_vals[-1] - valid_vals[0]) / valid_vals[0] * 100
+            cells.append(_fmt_change(pct, is_pct=True))
+        else:
+            cells.append(Text("-", style="dim"))
+
         table.add_row(*cells)
 
     return Panel(
