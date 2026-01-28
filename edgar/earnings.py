@@ -1069,6 +1069,10 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
         df.index = row_labels[:len(df)]
         df.index.name = "Item"
 
+    # Ensure object dtype so mixed types (str, float, None) can coexist after conversion.
+    # Without this, pandas StringDtype columns reject non-string values on assignment.
+    df = df.astype(object)
+
     # Convert numeric columns (using positional indexing to handle duplicate column names)
     for i, col in enumerate(df.columns):
         df.iloc[:, i] = df.iloc[:, i].apply(_parse_numeric)
