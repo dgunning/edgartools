@@ -209,9 +209,9 @@ class FinancialTable:
 
         html = df.to_html(classes=classes, na_rep="-", float_format=format_float)
 
-        # Insert caption after <table> tag
+        # Insert caption after opening <table ...> tag
         if caption:
-            html = html.replace("<table", f"<table>{caption}", 1).replace(f">{caption}", f">\n{caption}", 1)
+            html = re.sub(r'(<table[^>]*>)', rf'\1\n{caption}', html, count=1)
 
         return html
 
@@ -830,7 +830,7 @@ def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
     labels = []
     for row in table_node.rows[:10]:
         for cell in row.cells:
-            content = cell.content.strip()
+            content = (cell.content or "").strip()
             if content and len(content) > 3:
                 labels.append(content.lower())
                 break
@@ -1186,7 +1186,8 @@ def _parse_numeric(val) -> Union[float, str, None]:
     if s in ('—', '-', '–', '', '*'):
         return None
 
-    negative = '(' in s and ')' in s
+    s_no_currency = s.lstrip('$€£¥')
+    negative = s_no_currency.startswith('(') and s_no_currency.endswith(')')
     cleaned = s.replace(',', '').replace('$', '').replace('(', '').replace(')', '').replace('%', '').replace('*', '')
 
     try:
