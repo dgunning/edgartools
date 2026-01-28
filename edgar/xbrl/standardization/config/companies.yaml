@@ -27,6 +27,23 @@ companies:
     name: "NVIDIA Corporation"
     cik: 1045810
     fiscal_year_end: "January"  # Non-calendar fiscal year
+    stock_splits:
+      - date: "2024-06-10"
+        ratio: 10  # 10-for-1 split
+    known_divergences:
+      WeightedAverageSharesDiluted:
+        form_types: ["10-K", "10-Q"]
+        reason: >
+          10-for-1 stock split June 10, 2024. XBRL filings before split report
+          pre-split share counts (~2.5B), yfinance reports post-split adjusted
+          values (~25B). Expected variance: 900%+. Structural data mismatch.
+        skip_validation: true
+        # Tracking fields
+        added_date: "2026-01-26"
+        remediation_status: "wont_fix"
+        remediation_notes: >
+          Would require split adjustment infrastructure in reference_validator.
+          Long-term: add _apply_split_adjustment() method using stock_splits config.
 
   TSLA:
     name: "Tesla, Inc."
@@ -58,12 +75,24 @@ companies:
           Cat Financial subsidiary debt not included in ShortTermBorrowings.
           yfinance consolidates all debt; XBRL extracts industrial segment only.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Would require subsidiary-aware extraction or consolidated statement
+          detection. Consider adding segment reconciliation logic.
+        review_date: "2026-04-26"
       LongTermDebt:
         form_types: ["10-K", "10-Q"]
         variance_pct: 50.0
         reason: >
           Cat Financial long-term debt not fully captured in standard extraction.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same root cause as ShortTermDebt - Cat Financial subsidiary structure.
+          Fix should address both debt metrics together.
+        review_date: "2026-04-26"
       AccountsReceivable:
         form_types: ["10-K", "10-Q"]
         variance_pct: 60.0
@@ -71,6 +100,12 @@ companies:
           Cat Financial receivables (dealer/customer financing) not included
           in standard AccountsReceivableNetCurrent.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same root cause as debt metrics - Cat Financial subsidiary structure.
+          Would need segment-aware receivables extraction.
+        review_date: "2026-04-26"
     notes: "Financial services conglomerate - Cat Financial distorts debt/receivables"
 
   GE:
@@ -86,13 +121,63 @@ companies:
           extraction issues. Industry logic returns negative values due to
           incorrect component selection from complex income statement.
         skip_validation: true
-    notes: "Diversified industrial conglomerate - aviation, power, renewable energy"
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Post-Vernova spin-off, GE is now Aerospace-only. Re-evaluate in 2027
+          when filings reflect simpler structure.
+        review_date: "2026-04-26"
+      Revenue:
+        form_types: ["10-K"]
+        fiscal_years: [2023]
+        variance_pct: 100.0
+        reason: >
+          2024 Vernova spin-off (Jan 2024): 2024 10-K restates FY2023 as Aerospace-only,
+          while yfinance holds consolidated (pre-spin) history. Structural mismatch,
+          not extraction failure.
+        skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "wont_fix"
+        remediation_notes: "Apples-to-oranges comparison. Would need spin-off detection to compare restated vs original."
+      COGS:
+        form_types: ["10-K"]
+        fiscal_years: [2023]
+        variance_pct: 100.0
+        reason: >
+          2024 Vernova spin-off restatement: FY2023 COGS restated as Aerospace-only
+          in 2024 10-K, yfinance holds consolidated pre-spin values.
+        skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "wont_fix"
+        remediation_notes: "Same as Revenue - spin-off restatement issue."
+    notes: "Diversified industrial conglomerate - aviation (post-2024 Vernova spin-off)"
 
   HON:
     name: "Honeywell International Inc."
     cik: 773840
     archetype: "A"
-    notes: "Diversified technology and manufacturing company"
+    metric_overrides:
+      DepreciationAmortization:
+        preferred_concept: DepreciationDepletionAndAmortization
+        notes: "HON splits D&A on cash flow; DDA is the combined total ($1,334M)"
+    known_divergences:
+      DepreciationAmortization:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 49.7
+        reason: >
+          INVESTIGATED 2026-01-27: HON has Depreciation ($671M) in calc tree
+          and DepreciationDepletionAndAmortization ($1,334M) in facts only.
+          Tree parser was matching Depreciation (sub-component) over DDA (combined total).
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Added preferred_concept override for HON
+          DepreciationAmortization pointing to DepreciationDepletionAndAmortization.
+          Strategy 0 in tree parser now checks preferred_concept before other strategies,
+          using facts-based verification to find DDA ($1,334M) which matches yfinance.
+        resolved_date: "2026-01-27"
+    notes: "Diversified technology and manufacturing. D&A split: Depreciation ($671M) + Amortization ($663M) on cash flow."
 
   DE:
     name: "Deere & Company"
@@ -108,6 +193,12 @@ companies:
           complicates OperatingIncome extraction. Equipment vs Financial
           segment reporting creates aggregation challenges.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Similar to CAT - financial services subsidiary complicates extraction.
+          Would need segment-aware income aggregation.
+        review_date: "2026-04-26"
     notes: "Agricultural and construction equipment manufacturer"
 
   MMM:
@@ -130,6 +221,12 @@ companies:
           component selection. Non-calendar fiscal year and segment
           structure complicate extraction.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "investigating"
+        remediation_notes: >
+          Negative value suggests calculation bug rather than structural issue.
+          Investigate tree parser concept selection for EMR's income statement.
+        review_date: "2026-02-26"
     notes: "Technology and engineering company - automation solutions"
 
   RTX:
@@ -207,6 +304,12 @@ companies:
           yfinance calculates OperatingIncome using proprietary normalization.
           XBRL extraction cannot reliably reproduce yfinance's calculation.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Energy sector needs dedicated archetype or extraction strategy.
+          Consider adding "Energy" archetype (F?) with industry-specific P&L handling.
+        review_date: "2026-04-26"
     notes: "Integrated oil and gas company"
 
   CVX:
@@ -226,6 +329,12 @@ companies:
           GrossProfit/OperatingExpenses. yfinance uses proprietary normalization.
           XBRL extraction cannot reliably reproduce yfinance's calculation.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same as XOM - energy sector needs dedicated extraction strategy.
+          Group with XOM, COP, SLB for future Energy archetype implementation.
+        review_date: "2026-04-26"
     notes: "Integrated oil and gas company"
 
   COP:
@@ -234,8 +343,8 @@ companies:
     archetype: "A"
     metric_overrides:
       Capex:
-        preferred_concept: PaymentsToAcquireProductiveAssets
-        notes: "Energy sector uses ProductiveAssets for Capex including exploration"
+        preferred_concept: "cop:PaymentToAcquireProductiveAssetsAndInvestments"
+        notes: "COP uses company-extension concept for combined capex+investments"
     known_divergences:
       OperatingIncome:
         form_types: ["10-K", "10-Q"]
@@ -245,7 +354,30 @@ companies:
           that include items yfinance excludes from OperatingIncome.
           Energy sector has non-standard income statement format.
         skip_validation: true
-    notes: "Exploration and production company"
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same as XOM/CVX - energy sector needs dedicated extraction strategy.
+          E&P companies have unique cost structure (exploration, DD&A).
+        review_date: "2026-04-26"
+      Capex:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 913.0
+        reason: >
+          INVESTIGATED 2026-01-27: COP uses company-extension concept
+          cop:PaymentToAcquireProductiveAssetsAndInvestments ($12,118M) for capex.
+          Tree parser was matching 'Assets' ($122.8B) via loose partial matching.
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Three fixes applied: (1) Added preferred_concept
+          override pointing to cop:PaymentToAcquireProductiveAssetsAndInvestments,
+          (2) Implemented Strategy 0 in tree parser to check preferred_concept with
+          facts-based verification for company-extension namespaces, (3) Tightened
+          partial matching to require len >= 15 for reverse substring matches.
+        resolved_date: "2026-01-27"
+    notes: "Exploration and production company. Uses cop: namespace for capex concept."
 
   SLB:
     name: "Schlumberger Limited"
@@ -260,6 +392,12 @@ companies:
           aggregate cleanly to a consolidated OperatingIncome. Tree parser
           selects incorrect concept for total operating income.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same as XOM/CVX/COP - energy sector needs dedicated extraction strategy.
+          Oilfield services segment reporting adds complexity.
+        review_date: "2026-04-26"
     notes: "Oilfield services company"
 
   PBF:
@@ -270,6 +408,29 @@ companies:
       Capex:
         preferred_concept: PaymentsToAcquireProductiveAssets
         notes: "Energy sector uses ProductiveAssets for Capex"
+      DepreciationAmortization:
+        preferred_concept:
+          - DepreciationDepletionAndAmortization     # 10-K: cash flow D&A total
+          - DepreciationAmortizationAndAccretionNet  # 10-Q: cash flow D&A (different concept name)
+        notes: "PBF DepreciationAndAmortization is SG&A fragment ($3.6M); cash flow D&A uses DDA (10-K) or DAANet (10-Q)"
+    known_divergences:
+      DepreciationAmortization:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 97.9
+        reason: >
+          INVESTIGATED 2026-01-27: PBF DepreciationAndAmortization is dimensional-only
+          (per-segment). Min(axis_sums) picks up SG&A fragment ($13M 10-K, $3.6M 10-Q)
+          instead of consolidated D&A ($643M 10-K, $167M 10-Q). Cash flow statement uses
+          DepreciationDepletionAndAmortization (10-K) and DepreciationAmortizationAndAccretionNet (10-Q).
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Added preferred_concept list override in companies.yaml
+          [DepreciationDepletionAndAmortization, DepreciationAmortizationAndAccretionNet].
+          Modified tree_parser.py Strategy 0 to support list-based fallback concepts.
+          10-K uses DDA ($643M), 10-Q uses DAANet ($167M). Both match yfinance.
+        resolved_date: "2026-01-27"
     notes: "Petroleum refining company"
 
   # =============================================================================
@@ -289,18 +450,81 @@ companies:
           variance. Tree parser selects concepts that don't match
           yfinance's normalized calculation.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Multi-segment healthcare conglomerate. Post-Kenvue spin-off may
+          simplify structure. Re-evaluate after 2025 filings are available.
+        review_date: "2026-04-26"
     notes: "Healthcare conglomerate - pharmaceuticals, medical devices, consumer health"
 
   UNH:
     name: "UnitedHealth Group Incorporated"
     cik: 731766
     archetype: "A"
-    notes: "Healthcare company - insurance and health services"
+    known_divergences:
+      Revenue:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 78.4
+        reason: >
+          INVESTIGATED 2026-01-27: UNH 10-K has us-gaap:Revenues = $400,278M
+          as parent concept. Tree parser was selecting sub-component
+          RevenueFromContractWithCustomerExcludingAssessedTax (~$86B) instead
+          of parent Revenues ($400B).
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Reordered metrics.yaml Revenue known_concepts to
+          put Revenues before RevenueFromContractWithCustomerExcludingAssessedTax.
+          Tree parser now matches parent total first. Same fix as PFE.
+        resolved_date: "2026-01-27"
+      DividendsPaid:
+        form_types: ["10-Q"]
+        variance_pct: 99.9
+        reason: >
+          INVESTIGATED 2026-01-27: UNH 10-Q DividendsPaid extracted $2M instead of $2B.
+          Two root causes: (1) Zero-day duration facts (dividend declaration dates like
+          duration_2025-09-23_2025-09-23 with value $2,002M) were treated as period flows.
+          (2) _derive_quarterly_value compared filing to itself because date filter included
+          current filing date, yielding zero derivation.
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Two fixes in reference_validator.py: (1) Exclude period_days==0
+          facts from duration extraction (0-day "point-in-time" facts are declarations, not flows).
+          (2) Use day_before date in _derive_quarterly_value to prevent self-comparison.
+          UNH DividendsPaid now extracts ~$2B matching yfinance.
+        resolved_date: "2026-01-27"
+    notes: "Healthcare/insurance company. Revenue structure: Premiums ($309B) + Contract ($86B) + Investment ($5B) = $400B total."
 
   LLY:
     name: "Eli Lilly and Company"
     cik: 59478
     archetype: "A"
+    metric_overrides:
+      Capex:
+        preferred_concept: PaymentsToAcquireOtherPropertyPlantAndEquipment
+        notes: "LLY uses OtherPP&E concept; industry_logic composite over/under-counts"
+    known_divergences:
+      Capex:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 40.0
+        reason: >
+          INVESTIGATED 2026-01-27: LLY tree parser fails to find Capex in calc tree,
+          falling back to industry_logic DefaultExtractor.extract_capex() which sums
+          PP&E + Intangibles + Software. This composite over/under-counts vs yfinance
+          (39.8% under on 10-K, 88.5% over on 10-Q).
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Added preferred_concept override for LLY Capex pointing
+          to PaymentsToAcquireOtherPropertyPlantAndEquipment ($5.06B). Bypasses broken
+          industry_logic composite. Note: yfinance reference data was unavailable during
+          validation; manual verification confirms correct XBRL concept extraction.
+        resolved_date: "2026-01-27"
     notes: "Pharmaceutical company"
 
   PFE:
@@ -317,7 +541,30 @@ companies:
           Industry logic calculation returns negative values due to
           incorrect expense aggregation.
         skip_validation: true
-    notes: "Pharmaceutical and biotechnology company"
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          COVID-related one-time charges distort comparisons. May normalize
+          in future filings as pandemic impact fades. Also investigate
+          negative value bug in calculation.
+        review_date: "2026-04-26"
+      Revenue:
+        form_types: ["10-K"]
+        variance_pct: 99.3
+        reason: >
+          INVESTIGATED 2026-01-27: Tree parser concept priority issue.
+          PFE 2024 10-K has us-gaap:Revenues = $63,627M as parent concept.
+          Tree parser was selecting RevenueFromContractWithCustomerExcludingAssessedTax
+          (sub-component ~$55B) instead of parent Revenues ($63.6B).
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Reordered metrics.yaml Revenue known_concepts to
+          put Revenues before RevenueFromContractWithCustomerExcludingAssessedTax.
+          Tree parser now matches parent total first.
+        resolved_date: "2026-01-27"
+    notes: "Pharmaceutical and biotechnology company. Revenue split: ASC 606 contract + collaborative arrangement."
 
   # =============================================================================
   # TRANSPORTATION COMPANIES
@@ -326,6 +573,24 @@ companies:
     name: "United Parcel Service, Inc."
     cik: 1090727
     archetype: "A"
+    known_divergences:
+      NetIncome:
+        form_types: ["10-Q"]
+        variance_pct: 188.4
+        reason: >
+          INVESTIGATED 2026-01-27: UPS 10-Q NetIncome extracted $3.8B (YTD 9-month)
+          instead of $1.3B (single quarter). NetIncome was not in QUARTERLY_DERIVABLE_METRICS,
+          so no quarterly derivation was attempted. Period filter fell through to YTD value.
+        skip_validation: false
+        added_date: "2026-01-27"
+        remediation_status: "resolved"
+        remediation_notes: >
+          RESOLVED 2026-01-27: Added NetIncome (and other income statement metrics:
+          Revenue, COGS, SGA, OperatingIncome, PretaxIncome) to QUARTERLY_DERIVABLE_METRICS
+          in reference_validator.py. Quarterly derivation now attempts strict 90-day extraction
+          first, then YTD derivation (current_YTD - prior_YTD). UPS NetIncome 10-Q now
+          extracts ~$1.3B matching yfinance.
+        resolved_date: "2026-01-27"
     notes: "Package delivery and supply chain management"
 
   FDX:
@@ -333,7 +598,25 @@ companies:
     cik: 1048911
     archetype: "A"
     fiscal_year_end: "May"  # Non-calendar fiscal year
-    notes: "Courier delivery services"
+    exclude_metrics:
+      - COGS  # FDX uses expense-by-nature format (no gross profit line); no COGS concept in XBRL
+    known_divergences:
+      COGS:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 20.0
+        reason: >
+          INVESTIGATED 2026-01-27: FDX uses expense-by-nature presentation
+          (PurchasedTransportation, Labor, Fuel, etc.) with no CostOfRevenue or
+          CostOfGoodsAndServicesSold concept. Only CostsAndExpenses (total opex
+          $70.4B) exists. Tree parser was matching CostsAndExpenses ($82.7B
+          including segment duplication) as COGS.
+        skip_validation: true
+        added_date: "2026-01-27"
+        remediation_status: "wont_fix"
+        remediation_notes: >
+          FDX structurally has no COGS — expense-by-nature format typical of
+          transportation companies. Excluded COGS from FDX validation.
+    notes: "Courier delivery services. Expense-by-nature income statement (no gross profit line)."
 
   BA:
     name: "The Boeing Company"
@@ -348,6 +631,13 @@ companies:
           distort operating income comparisons. These charges create large swings
           that don't reflect normal operating performance.
         skip_validation: true
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Program charges are ongoing operational reality for BA. yfinance may
+          exclude/include differently. Consider normalizing for special items
+          or accepting divergence as structural.
+        review_date: "2026-04-26"
     notes: "Aerospace company - commercial airplanes, defense, space"
 
   # =============================================================================
@@ -443,6 +733,12 @@ companies:
           Methodological difference, not extraction bug.
           10-Q passes perfectly (-0.9% variance).
         skip_validation: true  # Skip validation due to methodology difference
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Methodological difference between GAAP (with CPLTD) and yfinance.
+          10-Q passes, only 10-K fails. May need form-specific extraction logic.
+        review_date: "2026-04-26"
     notes: "Commercial bank - high loan book, traditional banking model. Uses wfc: namespace for repos."
 
   C:
@@ -510,6 +806,12 @@ companies:
           Our 10-K extraction is consistent with quarterly. This is a yfinance data
           quality issue - their annual aggregation doesn't match their quarterly reports.
         skip_validation: true  # Skip validation for 10-K due to yfinance data quality
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Likely yfinance data quality issue. Our extraction is internally consistent
+          (10-K matches 10-Q). Consider adding secondary reference source validation.
+        review_date: "2026-04-26"
     notes: "Regional commercial bank - traditional banking model. STB already excludes repos."
 
   # Custodial Banks - NEVER fuzzy match per architect directive
@@ -553,6 +855,13 @@ companies:
           10-Q: DebtCurrent fallback ($12.2B) vs yfinance's narrower definition (~$9.8B).
           Both are extraction/definition issues, not bugs.
         skip_validation: true  # Skip validation due to methodology issues
+        added_date: "2026-01-26"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Custodial banks have unique liability structure. STT has no clean
+          ShortTermBorrowings concept. Need custodial-specific extraction or
+          accept as structural N/A for this sub-archetype.
+        review_date: "2026-04-26"
     notes: "Custodial bank - asset servicing and management. NO ShortTermBorrowings or ShortTermDebtTypeAxis in filings."
 
   PNC:

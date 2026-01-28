@@ -106,6 +106,7 @@ class TreeParser:
         Map a single metric for a company.
 
         Strategy (ENE Layered Approach):
+        0. Check company-specific preferred_concept override
         1. First try direct match against known concepts in calculation trees
         2. Then try tree structure hints
         3. Fall back to facts-based search (concepts may exist in facts but not calc trees)
@@ -119,25 +120,68 @@ class TreeParser:
                 fiscal_period=fiscal_period,
                 reasoning=f"Unknown metric: {metric_name}"
             )
-        
+
         # Collect all concepts from calculation trees
         all_concepts = self._get_all_concepts(xbrl)
-        
+
+        # === Strategy 0: Company-specific preferred concept override ===
+        company_config = self.config.get_company(ticker)
+        if company_config and metric_name in company_config.metric_overrides:
+            override = company_config.metric_overrides[metric_name]
+            preferred = override.get('preferred_concept')
+            if preferred:
+                # Support both single string and list of fallback concepts
+                preferred_list = preferred if isinstance(preferred, list) else [preferred]
+                for pref in preferred_list:
+                    # Strip namespace for calc tree lookup
+                    pref_clean = pref.split(':')[-1] if ':' in pref else pref
+                    # Check if concept exists in calculation trees
+                    if pref_clean in all_concepts:
+                        concept_ref = pref if ':' in pref else f"us-gaap:{pref}"
+                        return MappingResult(
+                            metric=metric_name,
+                            company=ticker,
+                            fiscal_period=fiscal_period,
+                            concept=concept_ref,
+                            confidence=0.98,
+                            confidence_level=ConfidenceLevel.HIGH,
+                            source=MappingSource.CONFIG,
+                            reasoning=f"Company override: preferred_concept={pref}",
+                            tree_context=self._get_tree_context(xbrl, pref_clean)
+                        )
+                    # Also check facts (concept may not be in calc trees)
+                    matched = self._verify_concept_in_facts(xbrl, pref)
+                    if matched:
+                        return MappingResult(
+                            metric=metric_name,
+                            company=ticker,
+                            fiscal_period=fiscal_period,
+                            concept=matched,
+                            confidence=0.95,
+                            confidence_level=ConfidenceLevel.HIGH,
+                            source=MappingSource.CONFIG,
+                            reasoning=f"Company override (facts-verified): preferred_concept={pref}"
+                        )
+
         # Strategy 1: Direct match against known concepts
-        matched = self._match_known_concepts(metric_config, all_concepts)
-        if matched:
-            concept, confidence = matched
-            return MappingResult(
-                metric=metric_name,
-                company=ticker,
-                fiscal_period=fiscal_period,
-                concept=concept,
-                confidence=confidence,
-                confidence_level=self._get_confidence_level(confidence),
-                source=MappingSource.TREE,
-                reasoning=f"Direct match: {concept} in known_concepts",
-                tree_context=self._get_tree_context(xbrl, concept)
-            )
+        # IMPORTANT: Skip direct matching for composite metrics - they require aggregation
+        # of multiple components (e.g., ShortTermDebt = LongTermDebtCurrent + CommercialPaper + ShortTermBorrowings)
+        # Matching a single component would return incomplete data
+        if not metric_config.is_composite:
+            matched = self._match_known_concepts(metric_config, all_concepts)
+            if matched:
+                concept, confidence = matched
+                return MappingResult(
+                    metric=metric_name,
+                    company=ticker,
+                    fiscal_period=fiscal_period,
+                    concept=concept,
+                    confidence=confidence,
+                    confidence_level=self._get_confidence_level(confidence),
+                    source=MappingSource.TREE,
+                    reasoning=f"Direct match: {concept} in known_concepts",
+                    tree_context=self._get_tree_context(xbrl, concept)
+                )
         
         # Strategy 2: Use tree structure hints
         if metric_config.tree_hints:
@@ -322,7 +366,12 @@ class TreeParser:
                 # Check exclusion patterns first
                 if should_exclude(concept):
                     continue
-                if known in concept or concept in known:
+                # Forward: known is substring of concept (e.g., "Revenue" in "RevenueNet") — safe
+                if known in concept:
+                    return (f"us-gaap:{concept}", self._thresholds.get("tree_medium", 0.80))
+                # Reverse: concept is substring of known — only if concept is specific enough
+                # Prevents short concepts like "Assets" matching "PaymentsToAcquirePropertyPlantAndEquipment"
+                if concept in known and len(concept) >= 15:
                     return (f"us-gaap:{concept}", self._thresholds.get("tree_medium", 0.80))
 
         return None
@@ -391,6 +440,43 @@ class TreeParser:
         except Exception:
             return None
     
+    def _verify_concept_in_facts(
+        self,
+        xbrl: XBRL,
+        concept_name: str,
+    ) -> Optional[str]:
+        """
+        Verify a specific concept exists in XBRL facts.
+
+        Checks both us-gaap: and company-extension namespaces.
+        Returns the full namespaced concept string if found, None otherwise.
+        """
+        if not xbrl or not hasattr(xbrl, 'facts') or xbrl.facts is None:
+            return None
+
+        try:
+            facts_df = xbrl.facts.to_dataframe()
+            if facts_df is None or len(facts_df) == 0:
+                return None
+
+            if 'concept' not in facts_df.columns:
+                return None
+
+            # Get all unique concepts from facts
+            fact_concepts = facts_df['concept'].dropna().unique()
+
+            # Check for exact match (with or without namespace)
+            for fc in fact_concepts:
+                clean = fc.split(':')[-1] if ':' in fc else fc
+                target_clean = concept_name.split(':')[-1] if ':' in concept_name else concept_name
+                if clean == target_clean:
+                    return fc  # Return with original namespace (e.g., "cop:PaymentTo...")
+
+            return None
+
+        except Exception:
+            return None
+
     def _match_by_tree_hints(
         self,
         xbrl: XBRL,

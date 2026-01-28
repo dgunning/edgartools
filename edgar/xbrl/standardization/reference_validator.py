@@ -25,14 +25,23 @@ from .layers.dimensional_aggregator import DimensionalAggregator
 from edgar import Company
 
 
-# Cash flow metrics that need quarterly derivation for 10-Q validation
+# Flow metrics that need quarterly derivation for 10-Q validation
 # 10-Q filings report YTD cumulative values, but yfinance expects quarterly period values
+# Includes both cash flow and income statement metrics (both can be YTD in XBRL)
 QUARTERLY_DERIVABLE_METRICS = [
+    # Cash flow metrics
     'OperatingCashFlow',
     'Capex',
     'StockBasedCompensation',
     'DividendsPaid',
     'DepreciationAmortization',
+    # Income statement flow metrics (can be YTD in 10-Q XBRL)
+    'NetIncome',
+    'Revenue',
+    'COGS',
+    'SGA',
+    'OperatingIncome',
+    'PretaxIncome',
 ]
 
 
@@ -1193,7 +1202,13 @@ class ReferenceValidator:
                         duration_rows['period_days'] = duration_rows['period_key'].apply(
                             self._calculate_period_days
                         )
-                        
+
+                        # Exclude zero-day "point-in-time" facts (e.g. dividend declaration dates)
+                        # These are tagged as duration but represent a single event, not a period flow
+                        non_zero_rows = duration_rows[duration_rows['period_days'] > 0]
+                        if len(non_zero_rows) > 0:
+                            duration_rows = non_zero_rows
+
                         # PERIOD-AWARE EXTRACTION: Filter by form type or override
                         if target_days is not None:
                              target_period_days = target_days
@@ -1212,11 +1227,11 @@ class ReferenceValidator:
                                  return None
                         else:
                             form_type = getattr(self, '_current_form_type', None)
-                            
+
                             if form_type == '10-Q':
                                 # For 10-Q filings: filter for quarterly periods (~90 days)
                                 quarterly_rows = duration_rows[
-                                    (duration_rows['period_days'] >= 60) & 
+                                    (duration_rows['period_days'] >= 60) &
                                     (duration_rows['period_days'] <= 100)
                                 ]
                                 if len(quarterly_rows) > 0:
@@ -1290,15 +1305,17 @@ class ReferenceValidator:
         try:
              # Need Company to fetch filings
              company = Company(ticker)
-             
-             # Fetch 10-Q/10-K prior to current date
-             # Filter is string "YYYY-MM-DD"
+
+             # Fetch 10-Q/10-K filed BEFORE current filing date
+             # Use day before current date to exclude the current filing itself
              date_str = str(current_filing_date).split(' ')[0]
-             filings = company.get_filings(form=['10-Q', '10-K']).filter(date=f":{date_str}")
-             
+             from datetime import datetime as _dt, timedelta as _td
+             day_before = (_dt.strptime(date_str, '%Y-%m-%d') - _td(days=1)).strftime('%Y-%m-%d')
+             filings = company.get_filings(form=['10-Q', '10-K']).filter(date=f":{day_before}")
+
              if not filings:
                  return None
-                 
+
              # Get immediate prior filing
              prior_filing = filings.latest(1)
              if not prior_filing:

@@ -8,12 +8,19 @@ metrics:
   Revenue:
     description: "Total revenue from operations"
     known_concepts:
-      - RevenueFromContractWithCustomerExcludingAssessedTax
+      # Parent total first — tree parser uses first-match-wins
       - Revenues
+      # ASC 606 - Standard revenue recognition (fallback for companies without Revenues)
+      - RevenueFromContractWithCustomerExcludingAssessedTax
       - SalesRevenueNet
       - Revenue
       - TotalRevenues
       - NetSales
+      # ASC 944 - Insurance revenue (Archetype E)
+      - PremiumsEarnedNet       # Primary insurance revenue concept
+      - NetPremiumsEarned       # Alternative naming
+      - PremiumsEarned          # Basic premiums concept
+      - InsuranceServiceRevenue # IFRS 17 terminology
     tree_hints:
       statements: [INCOME, OPERATIONS]
       parent_pattern: OperatingIncome
@@ -27,12 +34,13 @@ metrics:
       - CostOfRevenue
       - CostOfGoodsSold
       - CostOfSales
+      - CostOfServices  # Service companies (consulting, healthcare)
     tree_hints:
       statements: [INCOME, OPERATIONS]
       parent_pattern: OperatingIncome
       weight: -1.0
     universal: false
-    notes: "Services companies (META) may not have traditional COGS"
+    notes: "Services companies (META, FDX) may not have traditional COGS"
 
   SGA:
     description: "Selling, general, and administrative expenses"
@@ -102,13 +110,18 @@ metrics:
       - PaymentsToDevelopSoftware
       - PaymentsToAcquireOilAndGasPropertyAndEquipment  # Energy sector
       - PaymentsToAcquireOtherPropertyPlantAndEquipment # LLY uses this ($5.06B vs 5.34B yfinance)
-      - PaymentsToAcquireBusinessesNetOfCashAcquired  # Last resort - M&A, not pure Capex
+      # Note: PaymentsToAcquireBusinessesNetOfCashAcquired removed - M&A acquisitions, not capital expenditures
+    exclude_patterns:
+      - Businesses          # Exclude M&A acquisitions (PaymentsToAcquireBusinesses*)
+      - Acquisitions        # Exclude acquisition-related concepts
+      - NetOfCash           # Exclude cash-netted M&A concepts
+      - InvestmentsInAffiliates  # Exclude equity method investments
     tree_hints:
       statements: [CASHFLOW]
       section: investing
       weight: -1.0
     universal: false
-    notes: "Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets."
+    notes: "Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets. Excludes M&A acquisitions."
 
   TotalAssets:
     description: "Total assets"
