@@ -1587,7 +1587,7 @@ class Company(Entity):
         subtitle_parts = [cik_text(self.cik)]
 
         # Add exchange if available
-        if hasattr(self.data, 'exchanges') and self.data.exchanges:
+        if hasattr(self.data, 'exchanges') and self.data.exchanges and self.data.exchanges[0]:
             subtitle_parts.append(Text(self.data.exchanges[0], style=get_style("value")))
 
         # Add simplified category

@@ -48,10 +48,25 @@ def load_company_tickers_from_package() -> Optional[pd.DataFrame]:
     The bundled data is updated with each release.
 
     Returns:
-        DataFrame with columns [cik, ticker, company] or None if not available
+        DataFrame with columns [cik, ticker, company, exchange] or None if not available
+        Note: The 'exchange' column is available but optional for backward compatibility
     """
     try:
-        return read_parquet_from_package('company_tickers.pq')
+        df = read_parquet_from_package('company_tickers.parquet')
+
+        # Transform schema from edgar-storage format to edgartools format
+        # edgar-storage schema: [cik (string), ticker, exchange, name]
+        # edgartools schema: [cik (int64), ticker, company, exchange]
+
+        # Rename 'name' to 'company' for backward compatibility
+        if 'name' in df.columns:
+            df = df.rename(columns={'name': 'company'})
+
+        # Convert CIK from zero-padded string to int64
+        if df['cik'].dtype == 'object':
+            df['cik'] = df['cik'].astype(str).str.lstrip('0').replace('', '0').astype('int64')
+
+        return df
     except Exception:
         return None
 
@@ -88,7 +103,8 @@ def get_company_tickers(
         clean_suffix (bool): If True, removes common company suffixes
 
     Returns:
-        Union[pd.DataFrame, pa.Table]: Processed company data with columns [cik, ticker, company]
+        Union[pd.DataFrame, pa.Table]: Processed company data with columns [cik, ticker, company, exchange]
+        Note: exchange column is available when loaded from bundled parquet (may be None for some entries)
     """
     # Get raw data (cached internally)
     df = _get_company_tickers_raw()
@@ -127,12 +143,13 @@ def _get_company_tickers_raw() -> pd.DataFrame:
     Internal function to get raw company ticker data with caching.
 
     Tries sources in order:
-    1. Bundled parquet file (instant, offline)
+    1. Bundled parquet file (instant, offline) - includes exchange column
     2. Local downloaded data (if EDGAR_USE_LOCAL_DATA is set)
     3. Live SEC API (network call)
 
     Returns:
-        pd.DataFrame: Raw company data with columns [cik, ticker, company]
+        pd.DataFrame: Raw company data with columns [cik, ticker, company, exchange]
+        Note: exchange column may not be present for non-parquet sources
     """
     # Priority 1: Try bundled parquet data (instant, offline)
     df = load_company_tickers_from_package()
