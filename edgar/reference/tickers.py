@@ -63,7 +63,8 @@ def load_company_tickers_from_package() -> Optional[pd.DataFrame]:
             df = df.rename(columns={'name': 'company'})
 
         # Convert CIK from zero-padded string to int64
-        if df['cik'].dtype == 'object':
+        # Check if CIK is not already int64 (handles 'object', 'string', etc.)
+        if df['cik'].dtype != 'int64':
             df['cik'] = df['cik'].astype(str).str.lstrip('0').replace('', '0').astype('int64')
 
         return df
