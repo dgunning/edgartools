@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.12.3] - 2026-01-29
+
+### Fixed
+
+- **Ticker/CIK Lookup Compatibility**
+  - Fixed CIK type conversion to work across different pandas/PyArrow versions
+  - Resolves `find_cik()` returning string CIKs instead of integers in some environments
+  - Fixes PyArrow conversion errors in GitHub Actions and other environments
+  - **Files**: `edgar/reference/tickers.py`
+  - **Issues**: #620, #621
+
+- **Data Staleness Warnings**
+  - Reduced false positive warnings when querying recent filings
+  - Refined warning threshold from 6 months to 5 days
+  - Simplified warning messages for clarity
+  - **Files**: `edgar/_filings.py`
+  - **Issues**: #620
+
+### Changed
+
+- **Reference Data Update**
+  - Updated company tickers from 10,196 to 10,532 companies (+336 new companies)
+  - Added recently public companies including DCX (CIK 1957413) and VTIX (CIK 1606242)
+  - Data is now 50 days fresher than previous version
+  - **Files**: `edgar/reference/data/company_tickers.parquet`
+  - **Issues**: #621
+
+## [5.12.2] - 2026-01-26
+
+### Fixed
+
+- **8-K Earnings Table Parsing**
+  - Fixed three bugs in earnings table dtype handling
+  - Handle pandas StringDtype columns correctly in earnings parser
+  - Prevent dtype errors when processing financial statement tables
+  - **Files**: `edgar/earnings.py`
+
 ## [5.12.1] - 2026-01-25
 
 ### Fixed
