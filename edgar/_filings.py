@@ -2283,8 +2283,11 @@ def get_filing_by_accession(accession_number: str, year: int):
     """Cache-friendly version that takes year as parameter instead of using datetime.now()"""
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number)
 
-    # Static logic that doesn't depend on current time
-    for quarter in range(1, 5):
+    # Only search quarters that exist - for current year, limit to current quarter
+    current_year, current_quarter = current_year_and_quarter()
+    max_quarter = current_quarter if year == current_year else 4
+
+    for quarter in range(1, max_quarter + 1):
         filings = _get_cached_filings(year=year, quarter=quarter)
         if filings and (filing := filings.get(accession_number)):
             return filing
@@ -2296,9 +2299,13 @@ def get_by_accession_number_enriched(accession_number: str):
     """Get filing with all related entities populated using PyArrow"""
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
 
+    # Only search quarters that exist - for current year, limit to current quarter
+    current_year, current_quarter = current_year_and_quarter()
+    max_quarter = current_quarter if year == current_year else 4
+
     # Find all entities with this accession number
     all_entities = []
-    for quarter in range(1, 5):
+    for quarter in range(1, max_quarter + 1):
         filings = _get_cached_filings(year=year, quarter=quarter)
         if filings:
             # Use PyArrow filtering (same pattern as Filings.get())
