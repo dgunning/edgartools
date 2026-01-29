@@ -189,7 +189,7 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
     from edgar.dates import extract_dates
 
     today = date.today()
-    six_months_ago = today - timedelta(days=180)
+    recent_days = today - timedelta(days=5)
 
     try:
         start_date, end_date, is_range = extract_dates(filing_date_param)
@@ -198,14 +198,14 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
         if not is_range and start_date.date() == today:
             return True
 
-        # For date ranges: warn if start is within past 6 months AND range includes today
+        # For date ranges: warn if start is within past 5 days AND range includes today
         if is_range:
             start = start_date.date() if start_date else date.min
             end = end_date.date() if end_date else date.max
 
-            # Only warn if range starts within past 6 months AND includes today
-            # This catches cases like "2025-10-02:" which likely expects current data
-            if start >= six_months_ago and start <= today <= end:
+            # Only warn if range starts within past 5 days AND includes today
+            # This catches recent date ranges like "2026-01-24:" that likely expect current data
+            if start >= recent_days and start <= today <= end:
                 return True
 
     except Exception:
@@ -223,17 +223,14 @@ def _warn_use_current_filings(reason: str, latest_date: Optional[Union[datetime,
         reason: Brief explanation of why current_filings is needed
         latest_date: Optional latest date in the dataset for context
     """
-    date_info = ""
     if latest_date:
         if isinstance(latest_date, datetime):
             latest_date = latest_date.date()
-        days_old = _get_data_staleness_days(latest_date)
-        date_info = f" (latest: {latest_date}, {days_old} day{'s' if days_old != 1 else ''} ago)"
+        message = f"Data through {latest_date}."
+    else:
+        message = reason
 
-    print_warning(
-        f"{reason}{date_info}",
-        "For today's filings use get_current_filings(). Quarterly indexes lag by ~1 business day."
-    )
+    print_warning(message, "For today's filings: get_current_filings()")
 
 
 def get_previous_quarter(year, quarter) -> Tuple[int, int]:
@@ -648,10 +645,7 @@ class Filings:
             latest_date = filings.date_range[1]
             days_old = _get_data_staleness_days(latest_date)
             if days_old >= 2:
-                _warn_use_current_filings(
-                    "This dataset's latest filing is from recent days",
-                    latest_date
-                )
+                _warn_use_current_filings("", latest_date)
 
         if len(filings) == 1:
             return filings[0]
@@ -719,9 +713,7 @@ class Filings:
                 if _is_requesting_current_filings(filing_date):
                     latest_date = self.date_range[1]
                     if latest_date is not None and _get_data_staleness_days(latest_date) >= 1:
-                        _warn_use_current_filings(
-                            f"Filtering for current-day filings, but data only includes filings through {latest_date.date() if isinstance(latest_date, datetime) else latest_date}"
-                        )
+                        _warn_use_current_filings("", latest_date)
             except InvalidDateException as e:
                 log.error(e)
                 return Filings(_empty_filing_index())
@@ -1283,10 +1275,7 @@ def get_filings(year: Optional[Years] = None,
         latest_date = filings.date_range[1]
         days_old = _get_data_staleness_days(latest_date)
         if days_old >= 2:
-            _warn_use_current_filings(
-                "The current quarter's filings are from recent days",
-                latest_date
-            )
+            _warn_use_current_filings("", latest_date)
 
     if not filings:
         if defaults_used:
