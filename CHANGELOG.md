@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.13.0] - 2026-01-29
+
+### Added
+
+- **13F Holdings Comparison**
+  - New `compare_holdings()` method for quarter-over-quarter analysis
+  - Returns `HoldingsComparison` view object with share and value deltas
+  - Status labels: NEW, CLOSED, INCREASED, DECREASED, UNCHANGED
+  - Includes percentage changes for both shares and values
+  - **Files**: `edgar/thirteenf/models.py`
+
+- **13F Holdings History**
+  - New `holding_history(periods=4)` method for multi-quarter trends
+  - Returns `HoldingsHistory` view object with up to 12 quarters of data
+  - Unicode sparkline visualization for trend analysis
+  - Automatic deduplication by report period
+  - **Files**: `edgar/thirteenf/models.py`, `edgar/thirteenf/rendering.py`
+
+- **13F View Objects**
+  - New `holdings_view()` method returns `HoldingsView` object
+  - All view objects are iterable (yield dicts), sliceable, and Rich-renderable
+  - View objects have `.data` property for underlying DataFrame access
+  - Configurable `display_limit` parameter for Rich rendering
+  - **Files**: `edgar/thirteenf/models.py`
+
+### Performance
+
+- **13F XML Parsing Optimization**
+  - Implemented lxml-based XML parser for 8x performance improvement
+  - Reduces parsing time from ~0.8s to ~0.1s for large filings
+  - Maintains backward compatibility with existing API
+  - **Files**: `edgar/thirteenf/parsers/infotable_xml.py`
+
+### Fixed
+
+- **13F Related Filings**
+  - Fixed `_related_filings` to filter only 13F forms
+  - Improved related filings scope and deduplication
+  - Updated test assertions for related filings behavior
+  - **Files**: `edgar/thirteenf/models.py`, `tests/test_thirteenf.py`
+
+- **13F Holdings Rendering**
+  - Fixed NaN handling in holdings display
+  - Fixed missing column handling in rendering logic
+  - Improved sparkline scaling with mean-centered ±50% range
+  - **Files**: `edgar/thirteenf/rendering.py`
+
 ## [5.12.3] - 2026-01-29
 
 ### Fixed
