@@ -67,7 +67,8 @@ def load_company_tickers_from_package() -> Optional[pd.DataFrame]:
             df['cik'] = df['cik'].astype(str).str.lstrip('0').replace('', '0').astype('int64')
 
         return df
-    except Exception:
+    except Exception as e:
+        log.warning(f"Failed to load company_tickers.parquet from package: {e}")
         return None
 
 
