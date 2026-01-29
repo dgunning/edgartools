@@ -67,7 +67,8 @@ def load_company_facts_from_local(cik: int) -> Optional[Dict[str, Any]]:
     company_facts_dir = get_edgar_data_directory() / "companyfacts"
     if not company_facts_dir.exists():
         return None
-    company_facts_file = company_facts_dir / f"CIK{cik:010}.json"
+    cik_int = int(cik) if isinstance(cik, str) else cik
+    company_facts_file = company_facts_dir / f"CIK{cik_int:010}.json"
     if not company_facts_file.exists():
         raise NoCompanyFactsFound(cik=cik)
 
