@@ -1,0 +1,1412 @@
+{
+  "StatementOfFinancialPositionAbstract": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8469387755102041,
+    "label": "Statement of Financial Position [Abstract]",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 0.020833333333333332,
+    "occurrence_rate": 0.8469387755102041
+  },
+  "StatementTable": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.826530612244898,
+    "label": "Statement [Table]",
+    "parent": "StatementOfStockholdersEquityAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 0.9787234042553191,
+    "occurrence_rate": 0.826530612244898,
+    "also_appears_in": [
+      {
+        "statement_type": "IncomeStatement",
+        "occurrence_rate": 0.5918367346938775,
+        "company_count": 58
+      },
+      {
+        "statement_type": "BalanceSheet",
+        "occurrence_rate": 0.4897959183673469,
+        "company_count": 48
+      },
+      {
+        "statement_type": "CashFlowStatement",
+        "occurrence_rate": 0.35714285714285715,
+        "company_count": 35
+      }
+    ],
+    "is_multi_statement": true
+  },
+  "StatementLineItems": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.826530612244898,
+    "label": "Statement [Line Items]",
+    "parent": "StatementTable",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 1.9787234042553192,
+    "occurrence_rate": 0.826530612244898,
+    "also_appears_in": [
+      {
+        "statement_type": "IncomeStatement",
+        "occurrence_rate": 0.5918367346938775,
+        "company_count": 58
+      },
+      {
+        "statement_type": "BalanceSheet",
+        "occurrence_rate": 0.4897959183673469,
+        "company_count": 48
+      },
+      {
+        "statement_type": "CashFlowStatement",
+        "occurrence_rate": 0.35714285714285715,
+        "company_count": 35
+      }
+    ],
+    "is_multi_statement": true
+  },
+  "AssetsAbstract": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.7040816326530612,
+    "label": "ASSETS",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.049382716049383,
+    "occurrence_rate": 0.7040816326530612
+  },
+  "AssetsCurrentAbstract": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8163265306122449,
+    "label": "Current assets:",
+    "parent": "AssetsAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.935483870967742,
+    "occurrence_rate": 0.8163265306122449
+  },
+  "CashAndCashEquivalentsAtCarryingValue": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.7755102040816326,
+    "label": "Cash and Cash Equivalents",
+    "parent": "AssetsCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.705673758865248,
+    "occurrence_rate": 0.7755102040816326
+  },
+  "AccountsReceivableNetCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.6122448979591837,
+    "label": "Accounts Receivable",
+    "parent": "AssetsCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.855140186915888,
+    "occurrence_rate": 0.6122448979591837
+  },
+  "AssetsCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8367346938775511,
+    "label": "Total Current Assets",
+    "parent": "AssetsCurrentAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.510135135135135,
+    "occurrence_rate": 0.8367346938775511
+  },
+  "PropertyPlantAndEquipmentNet": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.5102040816326531,
+    "label": "Property, Plant and Equipment",
+    "parent": "AssetsAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.50251256281407,
+    "occurrence_rate": 0.5102040816326531
+  },
+  "Goodwill": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.5510204081632653,
+    "label": "Goodwill",
+    "parent": "AssetsNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.2730263157894735,
+    "occurrence_rate": 0.5510204081632653,
+    "parent_in_mappings": false
+  },
+  "OperatingLeaseRightOfUseAsset": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.37755102040816324,
+    "label": "Operating lease right-of-use assets",
+    "parent": "AssetsNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.176470588235294,
+    "occurrence_rate": 0.37755102040816324,
+    "parent_in_mappings": false
+  },
+  "OtherAssetsNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.7551020408163265,
+    "label": "Other Non Current Assets",
+    "parent": "AssetsNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.662207357859532,
+    "occurrence_rate": 0.7551020408163265,
+    "parent_in_mappings": false
+  },
+  "Assets": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8469387755102041,
+    "label": "Total Assets",
+    "parent": "AssetsAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.798780487804878,
+    "occurrence_rate": 0.8469387755102041
+  },
+  "LiabilitiesAndStockholdersEquityAbstract": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.6530612244897959,
+    "label": "LIABILITIES AND EQUITY",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.039473684210526,
+    "occurrence_rate": 0.6530612244897959
+  },
+  "LiabilitiesCurrentAbstract": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8061224489795918,
+    "label": "Current liabilities:",
+    "parent": "LiabilitiesAndStockholdersEquityAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.9456521739130435,
+    "occurrence_rate": 0.8061224489795918
+  },
+  "LongTermDebtCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.42857142857142855,
+    "label": "Short Term Debt",
+    "parent": "LiabilitiesCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.834782608695652,
+    "occurrence_rate": 0.42857142857142855
+  },
+  "LiabilitiesCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8367346938775511,
+    "label": "Total Current Liabilities",
+    "parent": "LiabilitiesCurrentAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.515151515151516,
+    "occurrence_rate": 0.8367346938775511
+  },
+  "LongTermDebtNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.5204081632653061,
+    "label": "Long Term Debt",
+    "parent": "LiabilitiesAndStockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.3734177215189876,
+    "occurrence_rate": 0.5204081632653061
+  },
+  "DeferredIncomeTaxLiabilitiesNet": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.5612244897959183,
+    "label": "Deferred income taxes",
+    "parent": "LiabilitiesNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.0394736842105265,
+    "occurrence_rate": 0.5612244897959183
+  },
+  "OperatingLeaseLiabilityNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.3469387755102041,
+    "label": "Operating lease liabilities",
+    "parent": "LiabilitiesNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.8666666666666667,
+    "occurrence_rate": 0.3469387755102041
+  },
+  "OtherLiabilitiesNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.6938775510204082,
+    "label": "Other Non Current Liabilities",
+    "parent": "LiabilitiesNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.401709401709402,
+    "occurrence_rate": 0.6938775510204082
+  },
+  "Liabilities": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.3979591836734694,
+    "label": "Total Liabilities",
+    "parent": "LiabilitiesAndStockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.5584415584415585,
+    "occurrence_rate": 0.3979591836734694
+  },
+  "CommitmentsAndContingencies": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.7857142857142857,
+    "label": "Commitments and Contingencies",
+    "parent": "LiabilitiesAndStockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.5042735042735043,
+    "occurrence_rate": 0.7857142857142857
+  },
+  "StockholdersEquityAbstract": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.40816326530612246,
+    "label": "Common stockholders\u2019 equity",
+    "parent": "LiabilitiesAndStockholdersEquityAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.302325581395349,
+    "occurrence_rate": 0.40816326530612246
+  },
+  "PreferredStockValue": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.30612244897959184,
+    "label": "Preferred Stock",
+    "parent": "StockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.849056603773585,
+    "occurrence_rate": 0.30612244897959184
+  },
+  "CommonStockValue": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.7244897959183674,
+    "label": "Common Stock",
+    "parent": "StockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.726415094339623,
+    "occurrence_rate": 0.7244897959183674
+  },
+  "AdditionalPaidInCapital": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.3469387755102041,
+    "label": "Additional paid-in capital",
+    "parent": "StockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.171875,
+    "occurrence_rate": 0.3469387755102041
+  },
+  "RetainedEarningsAccumulatedDeficit": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8163265306122449,
+    "label": "Retained Earnings",
+    "parent": "StockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.486363636363636,
+    "occurrence_rate": 0.8163265306122449
+  },
+  "StockholdersEquity": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.7244897959183674,
+    "label": "Total Stockholders' Equity",
+    "parent": "StockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.601503759398496,
+    "occurrence_rate": 0.7244897959183674,
+    "also_appears_in": [
+      {
+        "statement_type": "StatementOfEquity",
+        "occurrence_rate": 0.3469387755102041,
+        "company_count": 34
+      }
+    ],
+    "is_multi_statement": true
+  },
+  "MinorityInterest": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.40816326530612246,
+    "label": "Minority Interest",
+    "parent": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.548387096774194,
+    "occurrence_rate": 0.40816326530612246,
+    "parent_in_mappings": false
+  },
+  "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.5306122448979592,
+    "label": "Total Stockholders' Equity",
+    "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.701065246338215,
+    "occurrence_rate": 0.5306122448979592,
+    "also_appears_in": [
+      {
+        "statement_type": "BalanceSheet",
+        "occurrence_rate": 0.46938775510204084,
+        "company_count": 46
+      }
+    ],
+    "is_multi_statement": true
+  },
+  "LiabilitiesAndStockholdersEquity": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.8469387755102041,
+    "label": "Total Liabilities and Stockholders' Equity",
+    "parent": "LiabilitiesAndStockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.482638888888889,
+    "occurrence_rate": 0.8469387755102041
+  },
+  "IncomeStatementAbstract": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.8367346938775511,
+    "label": "Income Statement [Abstract]",
+    "parent": null,
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 0.0,
+    "occurrence_rate": 0.8367346938775511
+  },
+  "Revenues": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.5102040816326531,
+    "label": "Revenue",
+    "parent": "RevenuesAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.432034632034632,
+    "occurrence_rate": 0.5102040816326531
+  },
+  "OperatingIncomeLoss": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.8163265306122449,
+    "label": "Operating Income",
+    "parent": "StatementLineItems",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.455026455026455,
+    "occurrence_rate": 0.8163265306122449
+  },
+  "NonoperatingIncomeExpenseAbstract": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.32653061224489793,
+    "label": "Other Income and (Expense):",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.3157894736842106,
+    "occurrence_rate": 0.32653061224489793
+  },
+  "InterestExpenseNonoperating": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.3979591836734694,
+    "label": "Interest Expense (non-operating)",
+    "parent": "NonoperatingIncomeExpenseAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.127090301003345,
+    "occurrence_rate": 0.3979591836734694
+  },
+  "OtherNonoperatingIncomeExpense": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.673469387755102,
+    "label": "Other income (expense), net",
+    "parent": "NonoperatingIncomeExpenseAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.153846153846154,
+    "occurrence_rate": 0.673469387755102
+  },
+  "NonoperatingIncomeExpense": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.42857142857142855,
+    "label": "Nonoperating Income/Expense",
+    "parent": "NonoperatingIncomeExpenseAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.110266159695818,
+    "occurrence_rate": 0.42857142857142855
+  },
+  "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.6428571428571429,
+    "label": "Income Before Tax from Continuing Operations",
+    "parent": "StatementLineItems",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.438775510204082,
+    "occurrence_rate": 0.6428571428571429
+  },
+  "IncomeTaxExpenseBenefit": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.7653061224489796,
+    "label": "Income Tax Expense",
+    "parent": "StatementLineItems",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.5250338294993235,
+    "occurrence_rate": 0.7653061224489796
+  },
+  "NetIncomeLoss": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.673469387755102,
+    "label": "Net Income",
+    "parent": "StatementLineItems",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.24234693877551,
+    "occurrence_rate": 0.673469387755102,
+    "also_appears_in": [
+      {
+        "statement_type": "StatementOfEquity",
+        "occurrence_rate": 0.3673469387755102,
+        "company_count": 36
+      },
+      {
+        "statement_type": "CashFlowStatement",
+        "occurrence_rate": 0.3469387755102041,
+        "company_count": 34
+      }
+    ],
+    "is_multi_statement": true
+  },
+  "EarningsPerShareBasic": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.8163265306122449,
+    "label": "Earnings Per Share (Basic)",
+    "parent": "EarningsPerShareAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.3873873873873874,
+    "occurrence_rate": 0.8163265306122449
+  },
+  "EarningsPerShareDiluted": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.8061224489795918,
+    "label": "Earnings Per Share (Diluted)",
+    "parent": "EarningsPerShareAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.43859649122807,
+    "occurrence_rate": 0.8061224489795918
+  },
+  "WeightedAverageNumberOfSharesOutstandingBasic": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.7551020408163265,
+    "label": "Shares Outstanding (Basic)",
+    "parent": "WeightedAverageNumberOfSharesOutstandingAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.2244897959183674,
+    "occurrence_rate": 0.7551020408163265,
+    "parent_in_mappings": false
+  },
+  "WeightedAverageNumberOfDilutedSharesOutstanding": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.7448979591836735,
+    "label": "Shares Outstanding (Diluted)",
+    "parent": "WeightedAverageNumberOfSharesOutstandingAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.3461538461538463,
+    "occurrence_rate": 0.7448979591836735,
+    "parent_in_mappings": false
+  },
+  "StatementOfCashFlowsAbstract": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.8469387755102041,
+    "label": "Statement of Cash Flows [Abstract]",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 0.041666666666666664,
+    "occurrence_rate": 0.8469387755102041
+  },
+  "NetCashProvidedByUsedInOperatingActivitiesAbstract": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.7448979591836735,
+    "label": "Operating Activities:",
+    "parent": "StatementOfCashFlowsAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 1.802325581395349,
+    "occurrence_rate": 0.7448979591836735
+  },
+  "ProfitLoss": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5102040816326531,
+    "label": "Profit or Loss",
+    "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.863157894736842,
+    "occurrence_rate": 0.5102040816326531,
+    "also_appears_in": [
+      {
+        "statement_type": "IncomeStatement",
+        "occurrence_rate": 0.45918367346938777,
+        "company_count": 45
+      },
+      {
+        "statement_type": "ComprehensiveIncome",
+        "occurrence_rate": 0.40816326530612246,
+        "company_count": 40
+      },
+      {
+        "statement_type": "StatementOfEquity",
+        "occurrence_rate": 0.35714285714285715,
+        "company_count": 35
+      }
+    ],
+    "is_multi_statement": true
+  },
+  "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.7346938775510204,
+    "label": "Adjustments to reconcile net income to net cash provided by operating activities:",
+    "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.6904761904761907,
+    "occurrence_rate": 0.7346938775510204
+  },
+  "DepreciationDepletionAndAmortization": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.3673469387755102,
+    "label": "Depreciation and amortization",
+    "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.453900709219858,
+    "occurrence_rate": 0.3673469387755102
+  },
+  "DeferredIncomeTaxExpenseBenefit": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.3673469387755102,
+    "label": "Deferred income taxes",
+    "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.9903846153846154,
+    "occurrence_rate": 0.3673469387755102
+  },
+  "ShareBasedCompensation": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.45918367346938777,
+    "label": "Stock-based compensation",
+    "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.925373134328358,
+    "occurrence_rate": 0.45918367346938777
+  },
+  "IncreaseDecreaseInInventories": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.47959183673469385,
+    "label": "Inventories",
+    "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.956896551724138,
+    "occurrence_rate": 0.47959183673469385
+  },
+  "NetCashProvidedByUsedInOperatingActivities": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.8469387755102041,
+    "label": "Net Cash from Operating Activities",
+    "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.602189781021898,
+    "occurrence_rate": 0.8469387755102041
+  },
+  "NetCashProvidedByUsedInInvestingActivitiesAbstract": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.7551020408163265,
+    "label": "Investing Activities:",
+    "parent": "StatementOfCashFlowsAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 1.793103448275862,
+    "occurrence_rate": 0.7551020408163265
+  },
+  "PaymentsToAcquirePropertyPlantAndEquipment": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5918367346938775,
+    "label": "Payments for Property, Plant and Equipment",
+    "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.754385964912281,
+    "occurrence_rate": 0.5918367346938775
+  },
+  "NetCashProvidedByUsedInInvestingActivities": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.8469387755102041,
+    "label": "Net Cash from Investing Activities",
+    "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.5255474452554743,
+    "occurrence_rate": 0.8469387755102041
+  },
+  "NetCashProvidedByUsedInFinancingActivitiesAbstract": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.7448979591836735,
+    "label": "Financing Activities:",
+    "parent": "StatementOfCashFlowsAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 1.7790697674418605,
+    "occurrence_rate": 0.7448979591836735
+  },
+  "PaymentsOfDividendsCommonStock": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.4897959183673469,
+    "label": "Parent Company",
+    "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.511764705882353,
+    "occurrence_rate": 0.4897959183673469
+  },
+  "RepaymentsOfLongTermDebt": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5408163265306123,
+    "label": "Retirement of long-term debt",
+    "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.663793103448276,
+    "occurrence_rate": 0.5408163265306123
+  },
+  "NetCashProvidedByUsedInFinancingActivities": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.8367346938775511,
+    "label": "Net Cash from Financing Activities",
+    "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.531135531135531,
+    "occurrence_rate": 0.8367346938775511
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.7346938775510204,
+    "label": "Parent Company",
+    "parent": "StatementOfCashFlowsAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.510460251046025,
+    "occurrence_rate": 0.7346938775510204
+  },
+  "StatementOfStockholdersEquityAbstract": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.8163265306122449,
+    "label": "Statement of Stockholders' Equity [Abstract]",
+    "parent": null,
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 0.0,
+    "occurrence_rate": 0.8163265306122449
+  },
+  "StatementEquityComponentsAxis": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.8367346938775511,
+    "label": "Equity Components [Axis]",
+    "parent": "StatementTable",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 1.9789473684210526,
+    "occurrence_rate": 0.8367346938775511
+  },
+  "CommonStockMember": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.7959183673469388,
+    "label": "Common Stock",
+    "parent": "EquityComponentDomain",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.923076923076923,
+    "occurrence_rate": 0.7959183673469388
+  },
+  "AdditionalPaidInCapitalMember": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.6122448979591837,
+    "label": "Additional Paid-in Capital [Member]",
+    "parent": "EquityComponentDomain",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.927536231884058,
+    "occurrence_rate": 0.6122448979591837
+  },
+  "RetainedEarningsMember": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.8163265306122449,
+    "label": "Retained Earnings",
+    "parent": "EquityComponentDomain",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.946236559139785,
+    "occurrence_rate": 0.8163265306122449
+  },
+  "NoncontrollingInterestMember": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.45918367346938777,
+    "label": "Noncontrolling Interests",
+    "parent": "EquityComponentDomain",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.9655172413793105,
+    "occurrence_rate": 0.45918367346938777
+  },
+  "EquityComponentDomain": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.8367346938775511,
+    "label": "Equity Component [Domain]",
+    "parent": "StatementEquityComponentsAxis",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.9789473684210526,
+    "occurrence_rate": 0.8367346938775511
+  },
+  "StockIssuedDuringPeriodValueNewIssues": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.5918367346938775,
+    "label": "Common Stock",
+    "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.337398373983739,
+    "occurrence_rate": 0.5918367346938775
+  },
+  "StockIssuedDuringPeriodSharesNewIssues": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.46938775510204084,
+    "label": "Common Stock",
+    "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.321428571428571,
+    "occurrence_rate": 0.46938775510204084
+  },
+  "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.32653061224489793,
+    "label": "Additional Paid-in Capital",
+    "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.445454545454545,
+    "occurrence_rate": 0.32653061224489793
+  },
+  "PublicUtilitiesPropertyPlantAndEquipmentNet": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.336734693877551,
+    "label": "Total property, plant, and equipment",
+    "parent": "PropertyPlantAndEquipmentNetAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.491803278688525,
+    "occurrence_rate": 0.336734693877551,
+    "parent_in_mappings": false
+  },
+  "RegulatoryAssetsNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.5510204081632653,
+    "label": "Regulatory assets",
+    "parent": "AssetsNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 5.148987854251012,
+    "occurrence_rate": 0.5510204081632653,
+    "parent_in_mappings": false
+  },
+  "AccountsPayableCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.7040816326530612,
+    "label": "Accounts Payable",
+    "parent": "LiabilitiesCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.807799442896936,
+    "occurrence_rate": 0.7040816326530612
+  },
+  "LiabilitiesNoncurrentAbstract": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.3469387755102041,
+    "label": "Liabilities, Noncurrent [Abstract]",
+    "parent": "LiabilitiesAndStockholdersEquityAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.0526315789473686,
+    "occurrence_rate": 0.3469387755102041
+  },
+  "RegulatoryLiabilityNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.5510204081632653,
+    "label": "Regulatory liabilities",
+    "parent": "LiabilitiesNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.712814645308924,
+    "occurrence_rate": 0.5510204081632653
+  },
+  "srt_ProductOrServiceAxis": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.30612244897959184,
+    "label": "Product and Service [Axis]",
+    "parent": "StatementTable",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.0,
+    "occurrence_rate": 0.30612244897959184
+  },
+  "srt_ProductsAndServicesDomain": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.30612244897959184,
+    "label": "Product and Service [Domain]",
+    "parent": "srt_ProductOrServiceAxis",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.0,
+    "occurrence_rate": 0.30612244897959184
+  },
+  "RevenuesAbstract": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.4387755102040816,
+    "label": "Operating Revenues",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.5961538461538463,
+    "occurrence_rate": 0.4387755102040816
+  },
+  "OperatingExpensesAbstract": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.41836734693877553,
+    "label": "Operating Expenses",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.2916666666666665,
+    "occurrence_rate": 0.41836734693877553
+  },
+  "IncreaseDecreaseInOperatingCapitalAbstract": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.673469387755102,
+    "label": "Changes in assets and liabilities:",
+    "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.2837837837837838,
+    "occurrence_rate": 0.673469387755102
+  },
+  "PaymentsForProceedsFromOtherInvestingActivities": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5408163265306123,
+    "label": "Other",
+    "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.5598086124401913,
+    "occurrence_rate": 0.5408163265306123
+  },
+  "ProceedsFromIssuanceOfCommonStock": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.6224489795918368,
+    "label": "Proceeds from Issuance of Common Stock",
+    "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.51006711409396,
+    "occurrence_rate": 0.6224489795918368
+  },
+  "ProceedsFromPaymentsForOtherFinancingActivities": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5510204081632653,
+    "label": "Other",
+    "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.483720930232558,
+    "occurrence_rate": 0.5510204081632653
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.6530612244897959,
+    "label": "Net Change in Cash",
+    "parent": "StatementOfCashFlowsAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 2.9326424870466323,
+    "occurrence_rate": 0.6530612244897959
+  },
+  "SupplementalCashFlowInformationAbstract": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5612244897959183,
+    "label": "Supplemental Cash Flow Information:",
+    "parent": "StatementOfCashFlowsAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 1.6923076923076923,
+    "occurrence_rate": 0.5612244897959183
+  },
+  "IncreaseDecreaseInStockholdersEquityRollForward": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.5510204081632653,
+    "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.9696969696969697,
+    "occurrence_rate": 0.5510204081632653
+  },
+  "DividendsCommonStock": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.30612244897959184,
+    "label": "Retained Earnings",
+    "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.5625,
+    "occurrence_rate": 0.30612244897959184
+  },
+  "OtherAssetsCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.5,
+    "label": "Other Current Assets",
+    "parent": "AssetsCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.508474576271187,
+    "occurrence_rate": 0.5
+  },
+  "OtherLiabilitiesCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.6428571428571429,
+    "label": "Other Current Liabilities",
+    "parent": "LiabilitiesCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.670103092783505,
+    "occurrence_rate": 0.6428571428571429
+  },
+  "AccumulatedOtherComprehensiveIncomeLossNetOfTax": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.6530612244897959,
+    "label": "Accumulated Other Comprehensive Income/Loss",
+    "parent": "StockholdersEquityAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.512315270935961,
+    "occurrence_rate": 0.6530612244897959
+  },
+  "NetIncomeLossAttributableToNoncontrollingInterest": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.3979591836734694,
+    "label": "Net Income Attributable to Noncontrolling Interest",
+    "parent": "StatementLineItems",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.0949367088607596,
+    "occurrence_rate": 0.3979591836734694
+  },
+  "EarningsPerShareAbstract": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.4387755102040816,
+    "label": "Earnings Per Share",
+    "parent": "StatementLineItems",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 2.3877551020408165,
+    "occurrence_rate": 0.4387755102040816
+  },
+  "IncreaseDecreaseInAccountsReceivable": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.30612244897959184,
+    "label": "Accounts receivable",
+    "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 5.0,
+    "occurrence_rate": 0.30612244897959184
+  },
+  "IncreaseDecreaseInAccountsPayable": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.4897959183673469,
+    "label": "Accounts payable",
+    "parent": "IncreaseDecreaseInOperatingCapitalAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 5.427027027027027,
+    "occurrence_rate": 0.4897959183673469
+  },
+  "InterestPaidNet": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5816326530612245,
+    "label": "Interest, net of amounts capitalized",
+    "parent": "SupplementalCashFlowInformationAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.8594594594594596,
+    "occurrence_rate": 0.5816326530612245
+  },
+  "IncomeTaxesPaidNet": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.45918367346938777,
+    "label": "Income Tax Expense",
+    "parent": "SupplementalCashFlowInformationAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.929411764705882,
+    "occurrence_rate": 0.45918367346938777
+  },
+  "AccumulatedOtherComprehensiveIncomeMember": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.6632653061224489,
+    "label": "Accumulated Other Comprehensive Income (Loss)",
+    "parent": "EquityComponentDomain",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.025974025974026,
+    "occurrence_rate": 0.6632653061224489
+  },
+  "StatementOfIncomeAndComprehensiveIncomeAbstract": {
+    "statement_type": "ComprehensiveIncome",
+    "confidence": 0.5510204081632653,
+    "label": "Statement of Comprehensive Income [Abstract]",
+    "parent": null,
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 0.0,
+    "occurrence_rate": 0.5510204081632653
+  },
+  "OtherComprehensiveIncomeLossNetOfTax": {
+    "statement_type": "ComprehensiveIncome",
+    "confidence": 0.3877551020408163,
+    "label": "Accumulated Other Comprehensive Income (Loss)",
+    "parent": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.2863741339491916,
+    "occurrence_rate": 0.3877551020408163,
+    "also_appears_in": [
+      {
+        "statement_type": "StatementOfEquity",
+        "occurrence_rate": 0.336734693877551,
+        "company_count": 33
+      }
+    ],
+    "is_multi_statement": true
+  },
+  "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest": {
+    "statement_type": "ComprehensiveIncome",
+    "confidence": 0.3979591836734694,
+    "label": "Comprehensive income",
+    "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 2.5405405405405403,
+    "occurrence_rate": 0.3979591836734694
+  },
+  "ComprehensiveIncomeNetOfTax": {
+    "statement_type": "ComprehensiveIncome",
+    "confidence": 0.5510204081632653,
+    "label": "Comprehensive Income",
+    "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 2.4578313253012047,
+    "occurrence_rate": 0.5510204081632653
+  },
+  "ShortTermBorrowings": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.41836734693877553,
+    "label": "Short Term Debt",
+    "parent": "LiabilitiesCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.1855203619909505,
+    "occurrence_rate": 0.41836734693877553
+  },
+  "InterestPayableCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.40816326530612246,
+    "label": "Accrued interest",
+    "parent": "LiabilitiesCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.337349397590361,
+    "occurrence_rate": 0.40816326530612246
+  },
+  "PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.37755102040816324,
+    "label": "Other Postretirement Benefits Plan",
+    "parent": "LiabilitiesNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.7301204819277105,
+    "occurrence_rate": 0.37755102040816324
+  },
+  "AssetRetirementObligationsNoncurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.37755102040816324,
+    "label": "Asset retirement obligations",
+    "parent": "LiabilitiesNoncurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.672839506172839,
+    "occurrence_rate": 0.37755102040816324
+  },
+  "CostsAndExpenses": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.3979591836734694,
+    "label": "Costs and Expenses",
+    "parent": "CostsAndExpensesAbstract",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 4.417218543046357,
+    "occurrence_rate": 0.3979591836734694,
+    "parent_in_mappings": false
+  },
+  "NetIncomeLossAvailableToCommonStockholdersBasic": {
+    "statement_type": "IncomeStatement",
+    "confidence": 0.3163265306122449,
+    "label": "Basic Net Income Available to Common Shareholders",
+    "parent": "StatementLineItems",
+    "is_abstract": false,
+    "is_total": true,
+    "section": null,
+    "avg_depth": 3.6375404530744335,
+    "occurrence_rate": 0.3163265306122449
+  },
+  "OtherNoncashIncomeExpense": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.32653061224489793,
+    "label": "Other",
+    "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.381818181818182,
+    "occurrence_rate": 0.32653061224489793
+  },
+  "CapitalExpendituresIncurredButNotYetPaid": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.37755102040816324,
+    "label": "Capital Expenditures Incurred but Not yet Paid",
+    "parent": "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.109677419354838,
+    "occurrence_rate": 0.37755102040816324,
+    "parent_in_mappings": false
+  },
+  "DividendsCommonStockCash": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.3673469387755102,
+    "label": "Retained Earnings",
+    "parent": "IncreaseDecreaseInStockholdersEquityRollForward",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.58893280632411,
+    "occurrence_rate": 0.3673469387755102
+  },
+  "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract": {
+    "statement_type": "ComprehensiveIncome",
+    "confidence": 0.37755102040816324,
+    "label": "Other comprehensive income (loss):",
+    "parent": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+    "is_abstract": true,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 1.7872340425531914,
+    "occurrence_rate": 0.37755102040816324
+  },
+  "ProceedsFromIssuanceOfLongTermDebt": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.5204081632653061,
+    "label": "Proceeds from Issuance of Long-Term Debt",
+    "parent": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 3.9760765550239237,
+    "occurrence_rate": 0.5204081632653061
+  },
+  "RegulatoryAssetsCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.3979591836734694,
+    "label": "Regulatory assets",
+    "parent": "AssetsCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 5.141993957703927,
+    "occurrence_rate": 0.3979591836734694
+  },
+  "RegulatoryLiabilityCurrent": {
+    "statement_type": "BalanceSheet",
+    "confidence": 0.3673469387755102,
+    "label": "Regulatory liabilities",
+    "parent": "LiabilitiesCurrentAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 5.127906976744186,
+    "occurrence_rate": 0.3673469387755102
+  },
+  "DeferredIncomeTaxesAndTaxCredits": {
+    "statement_type": "CashFlowStatement",
+    "confidence": 0.3163265306122449,
+    "label": "Deferred income taxes and investment tax credits",
+    "parent": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 5.144736842105263,
+    "occurrence_rate": 0.3163265306122449
+  },
+  "StockIssuedDuringPeriodValueShareBasedCompensation": {
+    "statement_type": "StatementOfEquity",
+    "confidence": 0.30612244897959184,
+    "label": "Additional Paid-in Capital",
+    "parent": "StatementLineItems",
+    "is_abstract": false,
+    "is_total": false,
+    "section": null,
+    "avg_depth": 4.232323232323233,
+    "occurrence_rate": 0.30612244897959184
+  }
+}

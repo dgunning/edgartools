@@ -40,6 +40,12 @@ If starting fresh:
   - Accurate financials
   - Joyful UX with rich output
 
+### Soft Fork Protocol (Required)
+- `edgar/` is read-only; do not modify core files.
+- Implement new behavior in `quant/` (e.g., `quant/core.py`, `quant/utils.py`).
+- Extend core classes via inheritance (e.g., `class QuantCompany(Company)`) and use `super()`.
+- Use relative imports inside `quant/` (e.g., `from .utils import TTMCalculator`).
+
 ### 3. **Design Solution**
 Break down the implementation into logical phases:
 - Each phase should be independently testable
@@ -87,7 +93,7 @@ Structure:
 **Goal**: [What this phase accomplishes]
 
 **Changes**:
-1. `edgar/module.py`:
+1. `quant/module.py`:
    - [ ] Add method `new_functionality()`
    - [ ] Update class initialization
    ```python
@@ -97,7 +103,7 @@ Structure:
        pass
    ```
 
-2. `tests/test_module.py`:
+2. `quant/tests/test_module.py`:
    - [ ] Add test for new functionality
    - [ ] Update existing tests
 
