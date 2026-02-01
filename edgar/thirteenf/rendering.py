@@ -310,9 +310,11 @@ def render_holdings_comparison(comparison, display_limit: int = DEFAULT_DISPLAY_
         value = f"${int(row.Value):,}" if _is_number(row.Value) else "-"
         prev_value = f"${int(row.PrevValue):,}" if _is_number(row.PrevValue) else "-"
 
+        issuer = row.Issuer
+        ticker = row.Ticker
         table.add_row(
-            row.Issuer or "",
-            row.Ticker or "",
+            "" if issuer is None or (isinstance(issuer, float) and math.isnan(issuer)) else str(issuer),
+            "" if ticker is None or (isinstance(ticker, float) and math.isnan(ticker)) else str(ticker),
             shares,
             prev_shares,
             _fmt_change(row.ShareChange),
