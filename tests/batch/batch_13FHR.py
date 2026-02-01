@@ -14,9 +14,8 @@ if __name__ == '__main__':
         try:
             thirteenf:ThirteenF = filing.obj()
             print(thirteenf)
-            if not thirteenf.total_holdings or thirteenf.total_holdings == 0:
-                index = index + 1
-                print(thirteenf)
+            print(thirteenf.compare_holdings())
+            print(thirteenf.holding_history())
         except AttributeError as e:
             print(f"Error processing filing {filing.accession_number}: {e}")
             raise
