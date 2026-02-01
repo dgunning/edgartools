@@ -27,8 +27,9 @@ from edgar.urls import build_company_tickers_exchange_url, build_company_tickers
 @lru_cache(maxsize=1)
 def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
     """
-    Download the Cusip to Ticker mapping data from the SEC website.
-    This provides a Dataframe with Cusip as the index and Ticker as the column.
+    Get the Cusip to Ticker mapping as a DataFrame with Cusip as the index.
+
+    Used by 13F parsers for vectorized DataFrame.map() operations.
 
     CUSIP can be duplicate to get non duplicate Cusips set allow_duplicate_cusips to False.
     This will return only the first occurrence of the Cusip.
@@ -38,6 +39,20 @@ def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
     if not allow_duplicate_cusips:
         df = df[~df.index.duplicated(keep='first')]
     return df
+
+
+@lru_cache(maxsize=1)
+def _cusip_ticker_dict() -> dict:
+    """
+    Build a CUSIP -> Ticker dict for fast single-key lookups.
+
+    Deduplicates by keeping the first occurrence (most likely to be
+    mapped to a ticker linked to a CIK). Used by get_ticker_from_cusip().
+    """
+    df = read_parquet_from_package('ct.pq')
+    # Keep first occurrence per CUSIP (same semantics as allow_duplicate_cusips=False)
+    dedup = df[~df['Cusip'].duplicated(keep='first')]
+    return dict(zip(dedup['Cusip'], dedup['Ticker']))
 
 
 def load_company_tickers_from_package() -> Optional[pd.DataFrame]:
@@ -447,17 +462,16 @@ def find_cik(ticker):
     return find_mutual_fund_cik(ticker)
 
 
-@lru_cache(maxsize=128)
-def get_ticker_from_cusip(cusip: str):
+def get_ticker_from_cusip(cusip: str) -> Optional[str]:
     """
-    Get the ticker symbol for a given Cusip.
+    Get the ticker symbol for a given CUSIP.
+
+    Returns the ticker string or None if not found.
+    Uses a dict lookup internally for O(1) performance.
     """
-    data = cusip_ticker_mapping()
-    results = data.loc[cusip]
-    if len(results) == 1:
-        return results.iloc[0]
-    elif len(results) > 1:
-        return results.iloc[0].Ticker
+    if not cusip:
+        return None
+    return _cusip_ticker_dict().get(cusip)
 
 
 def clean_company_name(name: str) -> str:
