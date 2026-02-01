@@ -765,6 +765,9 @@ class InstanceParser(BaseParser):
             # Sort periods by date (most recent first)
             self.reporting_periods.sort(key=lambda p: p['date_obj'] if p['type'] == 'instant' else p['end_obj'], reverse=True)
 
+            # Enrich periods with fiscal year and fiscal period info
+            self._enrich_periods_with_fiscal_info()
+
             # Debug printout to verify periods are extracted
             if len(self.reporting_periods) > 0:
                 log.debug(f"Found {len(self.reporting_periods)} reporting periods.")
@@ -779,3 +782,65 @@ class InstanceParser(BaseParser):
             # Log error but don't fail
             log.debug(f"Warning: Error building reporting periods: {str(e)}")
             self.reporting_periods.clear()
+
+    def _enrich_periods_with_fiscal_info(self):
+        """Add fiscal_year and fiscal_period fields to reporting periods.
+
+        Derives fiscal year and period (FY, Q1-Q4) from period dates
+        and the entity's fiscal year end information.
+        """
+        fy_end_month = self.entity_info.get('fiscal_year_end_month')
+        fy_end_day = self.entity_info.get('fiscal_year_end_day')
+
+        if fy_end_month is None or fy_end_day is None:
+            # Default to calendar year (Dec 31) if not available
+            fy_end_month = 12
+            fy_end_day = 31
+
+        for period in self.reporting_periods:
+            if period['type'] == 'duration':
+                end_obj = period['end_obj']
+                days = period['days']
+
+                period['fiscal_year'] = _fiscal_year_for_date(end_obj, fy_end_month, fy_end_day)
+
+                # Classify fiscal period from duration length
+                if 350 <= days <= 380:
+                    period['fiscal_period'] = 'FY'
+                elif 85 <= days <= 95:
+                    period['fiscal_period'] = _quarter_for_date(end_obj, fy_end_month)
+
+            elif period['type'] == 'instant':
+                date_obj = period['date_obj']
+                period['fiscal_year'] = _fiscal_year_for_date(date_obj, fy_end_month, fy_end_day)
+
+
+def _fiscal_year_for_date(d, fy_end_month: int, fy_end_day: int) -> int:
+    """Determine the fiscal year a date belongs to.
+
+    The fiscal year is named by the calendar year in which it ends.
+    For example, AAPL's fiscal year ending Sep 2024 is FY2024.
+    A date in Dec 2024 (after Sep end) belongs to FY2025.
+    """
+    import calendar
+    # Build the fiscal year end date for the same calendar year as d
+    # Clamp the day to the max valid day for that month
+    max_day = calendar.monthrange(d.year, fy_end_month)[1]
+    fy_end_date = d.replace(month=fy_end_month, day=min(fy_end_day, max_day))
+
+    if d > fy_end_date:
+        return d.year + 1
+    return d.year
+
+
+def _quarter_for_date(end_date, fy_end_month: int) -> str:
+    """Determine the fiscal quarter (Q1-Q4) for a quarterly period end date.
+
+    Quarters are counted from the start of the fiscal year.
+    For AAPL (FY end Sep): Q1=Oct-Dec, Q2=Jan-Mar, Q3=Apr-Jun, Q4=Jul-Sep.
+    """
+    # Months after fiscal year end determines the quarter
+    # Month offset: how many months past the FY end month
+    month_offset = (end_date.month - fy_end_month - 1) % 12
+    quarter = (month_offset // 3) + 1
+    return f"Q{quarter}"
