@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.13.1] - 2026-02-01
+
+### Fixed
+
+- **XBRL Fiscal Period Queries** — `get_facts_by_fiscal_period()` and `get_facts_by_fiscal_year()` now return data instead of empty DataFrames. Reporting periods were missing the `fiscal_year` and `fiscal_period` fields needed for these queries. ([#622](https://github.com/dgunning/edgartools/issues/622))
+
+- **13F Holdings Rendering** — Fixed crashes when issuer or ticker values contain NaN in holdings comparison and holdings history views.
+
+- **Entity Classification** — SC 13D filings no longer incorrectly classify an entity as a company.
+
+### Performance
+
+- **N-PORT Parsing 10x Faster** — Rewrote N-PORT fund report XML parsing from BeautifulSoup to lxml. Parse times drop from 2.4s to 245ms for large funds (3,800+ holdings). Memory usage reduced by 6x.
+
+- **CUSIP Ticker Resolution 10x Faster** — Replaced DataFrame lookups with dict-based resolution for CUSIP-to-ticker mapping. Eliminates noisy log warnings for placeholder CUSIPs used by foreign-domiciled securities.
+
 ## [5.13.0] - 2026-01-29
 
 ### Added
