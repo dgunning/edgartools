@@ -16,6 +16,10 @@ This command adapts to different research contexts:
 - ONLY describe what exists, where it exists, how it works, and how components interact
 - You are creating a technical map/documentation of the existing system
 
+## Soft Fork Context (Read-Only Core)
+- `edgar/` is read-only; document it but do not propose edits.
+- Extension work in this environment is implemented in `quant/`.
+
 ## Initial Setup:
 
 When this command is invoked, respond with:
