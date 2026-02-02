@@ -1,6 +1,10 @@
-# 13F Holdings
+---
+description: Parse SEC 13F institutional holdings filings with Python. Extract hedge fund portfolios, compare quarter-over-quarter changes, and track position trends using edgartools.
+---
 
-See what the big funds are buying. 13F filings disclose the equity holdings of institutional managers with over $100M in assets -- every quarter, publicly available.
+# 13F Holdings: Parse SEC Institutional Portfolio Filings with Python
+
+See what the big funds are buying. SEC 13F filings disclose the equity holdings of institutional managers with over $100M in assets -- every quarter, publicly available. EdgarTools parses these filings into structured Python objects so you can analyze portfolios in a few lines of code.
 
 ```python
 from edgar import get_filings
@@ -10,13 +14,13 @@ report = filings[0].obj()
 report
 ```
 
-![13F Holdings Report](../images/thirteenf.webp)
+![13F holdings report parsed with Python edgartools](../images/thirteenf.webp)
 
 Three lines to get a fully parsed holdings report with management company, total portfolio value, and every position.
 
 ---
 
-## See the Holdings
+## Access Holdings Data
 
 The `.holdings` property returns a DataFrame with one row per security, aggregated across managers, sorted by value:
 
@@ -38,7 +42,7 @@ Values are in thousands -- the SEC's reporting unit. `Value` of 135,364 means $1
 
 ---
 
-## Compare to Last Quarter
+## Compare 13F Holdings Quarter-over-Quarter
 
 One call to see what changed:
 
@@ -46,7 +50,7 @@ One call to see what changed:
 report.compare_holdings()
 ```
 
-![13F Holdings Comparison](../images/thirteenf_compare.webp)
+![Python 13F holdings quarter-over-quarter comparison](../images/thirteenf_compare.webp)
 
 Every position gets a status: **NEW**, **CLOSED**, **INCREASED**, **DECREASED**, or **UNCHANGED**. Results are sorted by absolute value change so the biggest moves appear first.
 
@@ -63,7 +67,7 @@ The comparison DataFrame includes `Shares`, `PrevShares`, `ShareChange`, `ShareC
 
 ---
 
-## Track Trends Over Time
+## Track Holdings Trends Across Quarters
 
 See how positions evolve across quarters with sparkline visualizations:
 
@@ -71,7 +75,7 @@ See how positions evolve across quarters with sparkline visualizations:
 report.holding_history(periods=4)
 ```
 
-![13F Holdings History](../images/thirteenf_history.webp)
+![13F holdings history with sparkline trends in Python](../images/thirteenf_history.webp)
 
 Each row shows share counts per quarter and a Unicode sparkline (`▁▂▃▅▇`) so you can spot trends at a glance.
 
