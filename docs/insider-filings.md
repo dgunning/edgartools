@@ -1,172 +1,288 @@
-# Insider Filings
+---
+description: Parse SEC Form 4 insider trading filings with Python. Track insider buys and sells, detect 10b5-1 plans, and analyze transaction patterns using edgartools.
+---
 
-Insider filings are reports filed by company insiders (such as officers, directors, and employees) when they buy or sell shares in their own companies. 
+# Insider Trades: Track SEC Form 4 Insider Buying and Selling with Python
 
-There are several types of insider filings that investors should be aware of:
-
-1. **Form 3**: Filed by insiders to report their initial ownership of company stock - typically filed when an insider joins a company or becomes an officer or director.
-2. **Form 4**: Filed to report any changes in ownership of company stock - typically filed when an insider buys or sells company stock.
-3. **Form 5**: Includes any transactions that were not reported on Form 4 - typically filed at the end of the fiscal year.
-
-## Getting Insider Filings
-
-You can access insider filings using the `get_filings` method of the `Company` class.
+Know when insiders buy or sell their own company's stock. SEC Forms 3, 4, and 5 disclose every transaction by officers, directors, and major shareholders. EdgarTools parses these filings into structured Python objects with computed insights like net position change and trading plan detection.
 
 ```python
-c = Company("VRTX")
-filings = c.get_filings(form=[3,4,5])
+from edgar import Company
+
+snow = Company("SNOW")
+filing = snow.get_filings(form=4).latest(1)
+form4 = filing.obj()
+form4
 ```
 
-You can use either the string or numeric value for the form e.g. "3" or 3.
+![Form 4 insider trade parsed with Python edgartools showing Snowflake director sale](images/snow-form4.webp)
+
+Three lines to see who traded, what they traded, and the net impact on their position.
+
+---
+
+## Get the Transaction Summary
+
+The `get_ownership_summary()` method returns a `TransactionSummary` with computed properties that answer the questions you actually care about.
 
 ```python
-filings = c.get_filings(form=4)
+summary = form4.get_ownership_summary()
+
+summary.insider_name          # "Bruce I. Sachs"
+summary.position              # "Director"
+summary.primary_activity      # "Purchase", "Sale", "Option Exercise", etc.
+summary.net_change            # 15000 (positive = bought, negative = sold)
+summary.net_value             # 3260400.0 (net dollar value of trades)
+summary.remaining_shares      # 36599
 ```
 
-If you are more interested in insider filings non-specific to a particular company, you can use the `get_insider_filings` method of the `Filing` class.
+| Property | What it tells you |
+|----------|-------------------|
+| `primary_activity` | One-word categorization: Purchase, Sale, Tax Withholding, Grant/Award, Option Exercise, Mixed |
+| `net_change` | Net shares bought minus sold -- the single most important number |
+| `net_value` | Net dollar value of all transactions |
+| `remaining_shares` | Insider's position after all transactions |
+| `transaction_types` | List of unique activity types in this filing |
+| `has_non_derivatives` | Whether any common stock was traded |
 
-```python   
-filings = get_filings(form=[3,4,5])
-```
+<!-- IMAGE: Rich console output of TransactionSummary showing the color-coded transaction table with NET CHANGE and AVG PRICE rows. Capture new WebP showing a filing with both buys and sells if possible. -->
 
-## The Ownership data object
-The `Ownership` object is a data object that represents the basic information contained in an insider filing. It is created by parsing the 
-XML attachment with the data about the insider transactions in the filing. 
+---
 
-The `Ownership` is subclassed into `Form3`, `Form4`, and `Form5` objects that contain additional information specific to the type of filing.
-So if you have a **Form 3** filing you can convert the `Ownership` object to a `Form3` object to get the additional information.
+## Detect Automated Trading Plans
+
+The `has_10b5_1_plan` property tells you whether trades were pre-scheduled under a Rule 10b5-1 plan. This matters because pre-scheduled sales are less informative than discretionary ones.
 
 ```python
-form3 = filing.obj()
+summary.has_10b5_1_plan       # True, False, or None
+
+# True  = trade executed under a 10b5-1 plan (automated, less signal)
+# False = footnotes exist but no plan mentioned (discretionary)
+# None  = no footnotes available
 ```
 
-### Converting Ownership to a dataframe
+EdgarTools detects this by scanning transaction footnotes for 10b5-1 references -- something that would require manual XML parsing otherwise.
 
-You can convert the `Ownership` object to a pandas dataframe using the `to_dataframe()` method.
+---
+
+## Access Individual Transactions
+
+For transaction-level detail, use the filtered DataFrame properties on the `Form4` object itself.
+
+```python
+form4.market_trades              # All open-market buys and sells
+form4.common_stock_purchases     # Just the buys
+form4.common_stock_sales         # Just the sells
+form4.shares_traded              # Total shares across all market trades
+```
+
+The `market_trades` DataFrame includes these columns:
+
+| Column | What it is |
+|--------|-----------|
+| `Date` | Transaction date |
+| `Security` | Security title |
+| `Shares` | Number of shares |
+| `Price` | Price per share |
+| `Remaining` | Shares owned after this transaction |
+| `AcquiredDisposed` | `"A"` (acquired) or `"D"` (disposed) |
+| `Code` | Transaction code (`P` = purchase, `S` = sale) |
+
+<!-- IMAGE: DataFrame output of market_trades showing a few rows with Date, Security, Shares, Price columns. Use form4-dataframe.png or capture new WebP. -->
+
+---
+
+## Track Option Exercises and Derivatives
+
+Insider filings often include option exercises, RSU conversions, and other derivative transactions.
+
+```python
+form4.option_exercises           # Transactions with exercise code
+form4.derivative_trades          # All derivative transactions
+```
+
+The derivative table includes exercise price, expiration date, and underlying security information.
+
+<!-- IMAGE: Derivative transaction table if a good example exists. Use derivative_transaction.png or capture new WebP. -->
+
+---
+
+## Convert to DataFrame
+
+The `to_dataframe()` method gives you full control over output format.
+
+### Detailed view (one row per transaction)
 
 ```python
 df = form4.to_dataframe()
 ```
-![Form3 Filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form4-dataframe.png)
 
-By default this will show each of the trades made in that filing. If you want to see the aggregated summary of the trades you can set `detailed=False`
+<!-- IMAGE: form4-dataframe.png showing detailed DataFrame output -->
+
+### Summary view (one row per filing)
 
 ```python
 df = form4.to_dataframe(detailed=False)
 ```
 
-![Form3 Filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form4-dataframe-summary.png)
+This aggregates everything into a single row with computed columns like `Net Change`, `Net Value`, `Primary Activity`, and per-type breakdowns (`Purchase Shares`, `Avg Purchase Price`, `Sale Shares`, etc.). Useful for building datasets across thousands of filings.
 
-By default the dataframe will include metadata about the filing. If you want to exclude the metadata you can set `include_metadata=False`
+<!-- IMAGE: form4-dataframe-summary.png showing summary DataFrame output -->
+
+### Strip metadata
 
 ```python
 df = form4.to_dataframe(include_metadata=False)
 ```
-![Form3 Filing No metadata ](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form4-dataframe-nometadata.png)
 
-The specifics of the data in the dataframe will depend on the type of filing and the information contained in the filing.
+Removes the filing-level columns (`Date`, `Form`, `Issuer`, `Ticker`, `Insider`, `Position`) when you only need transaction data.
 
-## Form 3 - Initial Beneficial Ownership
+<!-- IMAGE: form4-dataframe-nometadata.png showing DataFrame without metadata columns -->
 
-The `Form3` data object is created from a form 3 filing as follows
+---
+
+## Initial Ownership (Form 3)
+
+When an insider first joins a company, they file a Form 3 disclosing what they already own. EdgarTools parses these into the same object hierarchy.
 
 ```python
+filing = Company("HROW").get_filings(form=3).latest(1)
 form3 = filing.obj()
+summary = form3.get_ownership_summary()    # Returns InitialOwnershipSummary
+
+summary.total_shares          # Total non-derivative shares owned
+summary.has_derivatives       # True if they hold options/warrants
+summary.holdings              # List of SecurityHolding objects
 ```
 
-![Form3 Filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/form3.png)
+![Form 3 initial beneficial ownership parsed with Python edgartools showing Harrow insider holdings](images/hrow-form3.webp)
 
+Each `SecurityHolding` in the list has:
 
-## Form 4 - Changes in Beneficial Ownership
+| Property | What it is |
+|----------|-----------|
+| `security_title` | Name of the security |
+| `shares` | Number of shares or units |
+| `direct_ownership` | `True` if directly owned |
+| `ownership_description` | "Direct" or "Indirect (reason)" |
+| `is_derivative` | Whether this is a derivative holding |
+| `exercise_price` | Exercise price (derivatives only) |
+| `expiration_date` | Expiration date (derivatives only) |
 
-In November 2020 Bruce Sachs, an independent director of Vertex Pharmaceuticals, filed a Form 4 to report the purchase of **15,000** shares of Vertex Pharmaceuticals (VRTX) at an average price of **$217.36** per share.
+---
 
-![Vertex Form4 Filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/vertex-form4-filing.png)
-
-The filing object shows basic information but none of the details of the transaction.
-To get the details of the transaction you can use the `obj()` method to convert the filing to a `Form4` object.
+## Look Up a Specific Insider
 
 ```python
-form4 = filing.obj()
+from edgar import Company
+
+apple = Company("AAPL")
+
+# All insider filings (Forms 3, 4, 5)
+filings = apple.get_filings(form=[3, 4, 5])
+
+# Just Form 4s
+form4_filings = apple.get_filings(form=4)
+
+# Latest transaction
+latest = form4_filings.latest(1).obj()
+print(f"{latest.insider_name} ({latest.position}): {latest.get_ownership_summary().primary_activity}")
 ```
-![Vertex Form4 Filing](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/vertex-form4.png)
 
-The form 4 shows the individual transactions that make up the total transaction. In this case, the total transaction was the purchase of 15,000 shares of Vertex Pharmaceuticals.
+---
 
-Additional information about the transaction can be found in the `TransactionSummary` object.
+## Common Analysis Patterns
+
+### Find large purchases
 
 ```python
-ownership_summary = form4.get_ownership_summary()
+from edgar import get_filings
+
+filings = get_filings(form=4)
+for f in filings[:20]:
+    form4 = f.obj()
+    if form4:
+        summary = form4.get_ownership_summary()
+        if summary.net_change > 10000:
+            print(f"{summary.insider_name} bought {summary.net_change:,} shares of {summary.issuer}")
 ```
 
-![Vertex Ownership Summary](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/ownership_summary.png)
-
-
-## Form 5 - Annual Changes in Beneficial Ownership
-
-Form 5 filings are essentially the same as Form 4 filings but are filed at the end of the fiscal year to report any transactions that were not reported on Form 4.
-So the data in a Form 5 filing will be similar to that in a Form 4 filing.
-
-## Ownership Summary
-
-The `Ownership` object has a `get_ownership_summary()` method that returns either an `InitialOwnershipSummary` for Form 3 filings or a `TransactionSummary` object for Forms 4 and 5. These object contain more specific details about the ownership filing.
+### Filter out automated sales
 
 ```python
-ownership_summary = form4.get_ownership_summary()
+summary = form4.get_ownership_summary()
+if summary.has_10b5_1_plan is False:
+    # Discretionary trade -- potentially more informative
+    print(f"{summary.primary_activity}: {summary.net_change:,} shares")
 ```
 
-#### Initial Ownership Summary
-
-The `InitialOwnershipSummary` object contains the following fields:
-
-- `total_shares` - the total number of shares owned by the insider
-- `has_derivatives` - a boolean indicating whether the insider owns any derivatives
-- `no_securities` - a boolean indicating whether the insider owns any securities
-- `holdings`: List[SecurityHolding] - a list of SecurityHolding objects representing the insider's holdings
-
-The `SecurityHolding` object is defined as follows:
+### Build a dataset across filings
 
 ```python
-@dataclass
-class SecurityHolding:
-    """Represents a security holding (for Form 3)"""
-    security_type: str  # "non-derivative" or "derivative"
-    security_title: str
-    shares: int
-    direct_ownership: bool
-    ownership_nature: str = ""
-    underlying_security: str = ""
-    underlying_shares: int = 0
-    exercise_price: Optional[float] = None
-    exercise_date: str = ""
-    expiration_date: str = ""
+import pandas as pd
+
+filings = Company("AAPL").get_filings(form=4)
+rows = []
+for f in filings[:50]:
+    form4 = f.obj()
+    if form4:
+        rows.append(form4.to_dataframe(detailed=False))
+
+df = pd.concat(rows, ignore_index=True)
 ```
 
-`SecurityHolding` also has these properties
+---
 
-- `ownership_description` - a human-readable description of the type of ownership "Direct/Indirect"
-- `is_derivative` - a boolean indicating whether the holding is a derivative
+## Metadata Quick Reference
 
+| Property | Returns | Example |
+|----------|---------|---------|
+| `form` | Form type | `"4"` |
+| `reporting_period` | Transaction date | `"2024-01-18"` |
+| `insider_name` | Reporting insider | `"Bruce I. Sachs"` |
+| `position` | Role at company | `"Director"` |
+| `issuer.name` | Company name | `"VERTEX PHARMACEUTICALS INC"` |
+| `issuer.ticker` | Ticker symbol | `"VRTX"` |
+| `issuer.cik` | Company CIK | `"875320"` |
+| `no_securities` | No securities owned | `False` |
+| `remarks` | Filing remarks | `""` |
+| `shares_traded` | Total shares in market trades | `15000` |
 
+---
 
-### Transaction Summary
+## Methods Quick Reference
 
-The `TransactionSummary` object is defined as follows:
+| Call | Returns | What it does |
+|------|---------|-------------|
+| `form4.get_ownership_summary()` | `TransactionSummary` or `InitialOwnershipSummary` | Computed summary with net change, activity type, 10b5-1 detection |
+| `form4.get_transaction_activities()` | `list[TransactionActivity]` | All transactions as structured objects |
+| `form4.to_dataframe()` | `DataFrame` | Full transaction data, one row per trade |
+| `form4.to_dataframe(detailed=False)` | `DataFrame` | Single summary row with aggregated metrics |
+| `form4.market_trades` | `DataFrame` | Open-market buys and sells only |
+| `form4.common_stock_purchases` | `DataFrame` | Filtered to acquisitions |
+| `form4.common_stock_sales` | `DataFrame` | Filtered to dispositions |
+| `form4.option_exercises` | `DataFrame` | Option exercise transactions |
+| `form4.derivative_trades` | `DataHolder` | All derivative transactions |
+| `form4.extract_form3_holdings()` | `list[SecurityHolding]` | Holdings from Form 3 filings |
+| `form4.to_html()` | `str` | HTML representation |
 
-```python
-@dataclass
-class TransactionActivity:
-    """Represents a specific transaction activity type"""
-    transaction_type: str
-    code: str
-    shares: Any = 0  # Handle footnote references
-    value: Any = 0
-    price_per_share: Any = None  # Add explicit price per share field
-    description: str = ""
-```
+---
 
-It also has these properties as a convenience in case any of the expected numeric values are not in fact numeric.
+## Things to Know
 
-- `shares_numeric` - the number of shares involved in the transaction
-- `value_numeric` - the value of the transaction
-- `price_numeric` - the price per share of the transaction
+**Form 3 vs 4 vs 5.** Form 3 is initial ownership (when someone becomes an insider). Form 4 is changes (buys, sells, grants). Form 5 is an annual catch-up for anything not reported on Form 4. Most analysis focuses on Form 4.
+
+**Transaction codes.** `P` = open-market purchase, `S` = open-market sale, `M` = option exercise, `A` = grant/award, `F` = tax withholding, `G` = gift, `C` = conversion. The `primary_activity` property translates these for you.
+
+**Footnotes contain critical context.** Prices, share counts, and 10b5-1 plan disclosures often live in footnotes, not the transaction table. EdgarTools resolves footnote references automatically.
+
+**Derivative transactions are complex.** Option exercises often pair with a same-day sale. The `derivative_trades` property keeps these separate from common stock transactions.
+
+**Amended filings (3/A, 4/A, 5/A).** EdgarTools handles amendments transparently -- they parse identically to the original form types.
+
+---
+
+## Related
+
+- [Track Company Insiders](guides/company-insiders.md) -- monitor insider activity for a specific company
+- [Working with Filings](guides/working-with-filing.md) -- general filing access patterns
