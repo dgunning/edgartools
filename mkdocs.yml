@@ -43,18 +43,22 @@ nav:
     - Search & Filter: guides/searching-filings.md
     - Current Filings: guides/current-filings.md
     - Attachments: guides/filing-attachments.md
-    - Filing Types:
-      - Overview: data-objects.md
-      - "10-K / 10-Q": concepts/data-objects.md
-      - "8-K Current Reports": guides/eightk-data-object-guide.md
-      - "Form 4 Insider Trading": insider-filings.md
-      - "13F Holdings": guides/thirteenf-data-object-guide.md
-      - "DEF 14A Proxy": guides/proxystatement-data-object-guide.md
-      - "Form D Offerings": guides/formd-data-object-guide.md
-      - "Form 144 Sales": guides/form144-data-object-guide.md
-      - "N-PX Fund Voting": guides/npx-data-object-guide.md
-      - "MA-I Municipal": guides/mai-data-object-guide.md
     - Examples: examples.md
+
+  # ==========================================
+  # FILING TYPES - Parsed filing data objects
+  # ==========================================
+  - Filing Types:
+    - Overview: data-objects.md
+    - "Annual & Quarterly Reports": concepts/data-objects.md
+    - "Current Events (8-K)": guides/eightk-data-object-guide.md
+    - "Insider Trades (Form 4)": insider-filings.md
+    - "Institutional Portfolios (13F)": guides/thirteenf-data-object-guide.md
+    - "Proxy & Governance (DEF 14A)": guides/proxystatement-data-object-guide.md
+    - "Private Offerings (Form D)": guides/formd-data-object-guide.md
+    - "Insider Sale Notices (Form 144)": guides/form144-data-object-guide.md
+    - "Fund Voting Records (N-PX)": guides/npx-data-object-guide.md
+    - "Municipal Advisors (MA-I)": guides/mai-data-object-guide.md
 
   # ==========================================
   # FINANCIALS - Financial statements & data
