@@ -16,6 +16,12 @@ from edgar.display.formatting import datefmt, reverse_name
 from edgar.reference import describe_form, states
 from edgar.richtools import repr_rich
 
+# Pre-compiled regex patterns
+_SGML_TAG_RE = re.compile(r'^[A-Z0-9\-]+$')
+_DATE_14_RE = re.compile(r'^(20|19)\d{12}$')
+_DATE_8_RE = re.compile(r'^(20|19)\d{6}$')
+_ACCEPTANCE_RE = re.compile(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})')
+
 # Title text
 mailing_address_title = "\U0001F4EC Mailing Address"
 business_address_title = "\U0001F4EC Business Address"
@@ -75,10 +81,9 @@ class FilingMetadata:
     def get(self, key: str):
         value = self.metadata.get(key)
         if value:
-            # Adjusted regular expressions to match correct date formats
-            if re.match(r"^(20|19)\d{12}$", value):  # YYYY-MM-DD HH:MM:SS
+            if _DATE_14_RE.match(value):
                 value = datefmt(value, "%Y-%m-%d %H:%M:%S")
-            elif re.match(r"^(20|19)\d{6}$", value):  # YYYY-MM-DD
+            elif _DATE_8_RE.match(value):
                 value = datefmt(value, "%Y-%m-%d")
         return value
 
@@ -665,9 +670,7 @@ class FilingHeader:
         if tag != tag.upper():
             return False
 
-        # Additional check: Should contain only letters, numbers, and hyphens
-        import re
-        if not re.match(r'^[A-Z0-9\-]+$', tag):
+        if not _SGML_TAG_RE.match(tag):
             return False
 
         return True
@@ -846,9 +849,8 @@ class FilingHeader:
                     name = reporting_owner_values['COMPANY DATA'].get('COMPANY CONFORMED NAME')
                     cik = reporting_owner_values['COMPANY DATA'].get('CENTRAL INDEX KEY')
                 if cik:
-                    from edgar.entity import Entity
-                    entity: Entity = Entity(cik)
-                    if entity and not entity.data.is_company:
+                    # Reporting owners are individuals - reverse "Last First" to "First Last"
+                    if name:
                         name = reverse_name(name)
                     owner = Owner(name=name, cik=cik)
 
@@ -979,8 +981,8 @@ class FilingHeader:
                            if isinstance(value, str) and value}
 
         # The header text contains <ACCEPTANCE-DATETIME>20230612172243. Replace with the formatted date
-        header_text = re.sub(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})',
-                             r'ACCEPTANCE-DATETIME:            \1-\2-\3 \4:\5:\6', header_text)
+        header_text = _ACCEPTANCE_RE.sub(
+            r'ACCEPTANCE-DATETIME:            \1-\2-\3 \4:\5:\6', header_text)
 
         # Remove empty lines from header_text
         header_text = '\n'.join([line for line in header_text.split('\n') if line.strip()])
