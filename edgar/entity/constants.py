@@ -106,27 +106,32 @@ ALL_FORM_TYPES = COMPANY_FORMS | FUND_FORMS | INDIVIDUAL_FORMS
 
 # Name-based heuristic constants for company detection
 # Loose keywords: substring match (keyword appears anywhere in uppercased name)
-# Only include words that are long enough or distinctive enough to avoid
-# matching inside common personal names (e.g. "LP" in "ALPINE").
+# Only keywords long enough (>=7 chars) or with distinctive punctuation to avoid
+# matching inside common personal names (e.g. "CORP" in "CORPUZ", "BANK" in "BANKS").
 COMPANY_NAME_KEYWORDS = {
-    # Corporate structure
-    "CORP", "CORPORATION", "LLC", "L.L.C.", "LTD", "LIMITED",
-    "L.P.", "COMPANY", "GROUP", "HOLDINGS",
+    # Corporate structure (long or punctuated - safe as substring)
+    "CORPORATION", "L.L.C.", "LIMITED",
+    "L.P.", "COMPANY", "HOLDINGS",
     "PARTNERS", "PARTNERSHIP",
     # Investment entities
-    "TRUST", "FUND", "FUNDS", "CAPITAL", "VENTURES",
+    "CAPITAL", "VENTURES",
     "MANAGEMENT", "ADVISORS", "ADVISERS", "SECURITIES",
     "INVESTMENT", "INVESTMENTS", "PORTFOLIO",
     # Industries
     "TECHNOLOGIES", "SERVICES", "INTERNATIONAL", "GLOBAL",
-    "FINANCIAL", "BANK", "INDUSTRIES", "SYSTEMS", "ENTERPRISES",
+    "FINANCIAL", "INDUSTRIES", "SYSTEMS", "ENTERPRISES",
     # Organizations
     "FOUNDATION", "ASSOCIATION", "AUTHORITY",
 }
 
 # Strict keywords: whole-word match only (to avoid false positives like
-# "INC" in "LINCOLN", "LP" in "ALPINE", "CO" in "SCOTT")
-COMPANY_NAME_KEYWORDS_STRICT = {"CO", "NA", "PLC", "SA", "INC", "LP"}
+# "INC" in "LINCOLN", "LP" in "ALPINE", "CO" in "SCOTT", "CORP" in "CORPUZ",
+# "BANK" in "BANKS", "FUND" in "FUNDBERG", "TRUST" in "TRUSTER")
+COMPANY_NAME_KEYWORDS_STRICT = {
+    "CO", "NA", "PLC", "SA",
+    "INC", "CORP", "LLC", "LTD", "LP",
+    "BANK", "FUND", "FUNDS", "TRUST", "GROUP",
+}
 
 # Pre-compiled regex for SEC filing suffixes like /ADR/, /BD/, /TA/
 _SEC_SUFFIX_RE = re.compile(r"/[A-Z0-9-]{2,}(?:/|\s|$)")

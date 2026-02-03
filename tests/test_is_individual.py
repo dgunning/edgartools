@@ -239,21 +239,9 @@ CLASSIFICATION_TESTS = [
     # Signal 7: Name-based heuristics (fallback -> company)
     # =========================================================================
 
-    # Loose keyword matches (substring)
-    ("name_corp",
-     dict(name="GENERAL ELECTRIC CORP"),
-     False),
-
+    # Loose keyword matches (substring - long/distinctive keywords)
     ("name_corporation",
      dict(name="MICROSOFT CORPORATION"),
-     False),
-
-    ("name_llc",
-     dict(name="SMITH CAPITAL LLC"),
-     False),
-
-    ("name_ltd",
-     dict(name="BARCLAYS LTD"),
      False),
 
     ("name_limited",
@@ -262,10 +250,6 @@ CLASSIFICATION_TESTS = [
 
     ("name_company",
      dict(name="FORD MOTOR COMPANY"),
-     False),
-
-    ("name_group",
-     dict(name="GOLDMAN SACHS GROUP"),
      False),
 
     ("name_holdings",
@@ -278,14 +262,6 @@ CLASSIFICATION_TESTS = [
 
     ("name_partnership",
      dict(name="CARLYLE PARTNERSHIP"),
-     False),
-
-    ("name_trust",
-     dict(name="VANGUARD TRUST"),
-     False),
-
-    ("name_fund",
-     dict(name="FIDELITY GROWTH FUND"),
      False),
 
     ("name_capital",
@@ -353,6 +329,34 @@ CLASSIFICATION_TESTS = [
      dict(name="SCOTT JOHNSON"),
      True),
 
+    ("name_corp_whole_word",
+     dict(name="GENERAL ELECTRIC CORP"),
+     False),
+
+    ("name_llc_whole_word",
+     dict(name="SMITH CAPITAL LLC"),
+     False),
+
+    ("name_ltd_whole_word",
+     dict(name="BARCLAYS LTD"),
+     False),
+
+    ("name_group_whole_word",
+     dict(name="GOLDMAN SACHS GROUP"),
+     False),
+
+    ("name_trust_whole_word",
+     dict(name="VANGUARD TRUST"),
+     False),
+
+    ("name_fund_whole_word",
+     dict(name="FIDELITY GROWTH FUND"),
+     False),
+
+    ("name_bank_whole_word",
+     dict(name="JPMORGAN CHASE BANK"),
+     False),
+
     ("name_inc_whole_word",
      dict(name="ACME INC"),
      False),
@@ -375,6 +379,26 @@ CLASSIFICATION_TESTS = [
 
     ("name_lp_not_in_help",
      dict(name="HELP ANDERSON"),
+     True),
+
+    ("name_corp_not_substring",
+     dict(name="CORPUZ MARIA"),
+     True),
+
+    ("name_bank_not_substring",
+     dict(name="BANKS ROBERT"),
+     True),
+
+    ("name_fund_not_substring",
+     dict(name="FUNDBERG OLAF"),
+     True),
+
+    ("name_trust_not_substring",
+     dict(name="TRUSTER JANE"),
+     True),
+
+    ("name_group_not_substring",
+     dict(name="GROUPER JAMES"),
      True),
 
     ("name_na_whole_word",
