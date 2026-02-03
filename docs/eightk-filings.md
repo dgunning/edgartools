@@ -1,99 +1,264 @@
-# Eight-K Filings
+---
+description: Parse SEC 8-K current reports and extract earnings data with Python. Access corporate events, press releases, and financial statements using edgartools.
+---
 
-Imagine having instant access to a company's most critical corporate updates the moment they happen!
+# 8-K Current Reports: Parse SEC Corporate Events and Earnings with Python
 
-8-K filings are real-time windows into significant corporate events, revealing everything from 
-leadership changes to major business transformations.
-
-With **edgartools**, you can effortlessly retrieve and analyze these crucial SEC documents in just a few lines of Python code. 
-
-
-## Getting 8-K filings for a company
-
-The easiest way to get **8-K** filings is to get access to a company object and use the `latest` function.
-You can restrict to the latest 5 filings by passing `n` as a parameter.
-
-This returns a `Filings` object with multiple filings so to get a single filing use the bracket `[]` operator e.g. `filings[1]`.
+Companies file 8-K current reports within four business days of material events -- acquisitions, executive changes, earnings releases, bankruptcy. EdgarTools parses these filings into structured Python objects so you can access the event items, press releases, and financial tables.
 
 ```python
-c = Company("AAPL")
+from edgar import *
 
-filings = filings.latest("8-K", 5)
+filing = get_filings(form="8-K").latest()
+eight_k = filing.obj()
+eight_k
 ```
 
-![Latest 5 8-K Filings](images/aapl-8k-latest-5.png)
+![8-K current report parsed with Python edgartools](images/eightk.webp)
 
-To get the last filing use `latest` without `n`. This returns a single `Filing` object.
+Three lines to get a parsed 8-K with company info, filing date, items disclosed, and exhibits.
+
+---
+
+## Read Item Content
+
+Every 8-K discloses one or more numbered items (1.01 through 9.01). The `items` property lists what was disclosed:
 
 ```python
-filing = filings.latest("8-K")
+eight_k.items  # ['Item 2.02', 'Item 9.01']
 ```
 
-![Latest 5 8-K Filings](images/aapl-8k-latest.png)
-
-### Getting all 8-K filings
-
-Another way to get 8-K filings is to use `get_filings(form="8-K")`. This gets all the filings for a company, but also allow for filtering by date
+Access the text of any item by number:
 
 ```python
-filings = c.get_filings(form='8-K')
+# Works with or without "Item" prefix
+content = eight_k['2.02']
+content = eight_k['Item 2.02']
+
+print(content)
 ```
 
-### Filtering by date
+Common items:
 
-You can also filter the filings by date using a range 'YYYY-MM-DD:YYYY-MM-DD' or from a specific date 'YYYY-MM-DD:' or before a specific date ':YYYY-MM-DD'.
+| Item | What it reports |
+|------|----------------|
+| **1.01** | Material agreements |
+| **2.02** | Earnings and financial condition |
+| **5.02** | Director or officer changes |
+| **8.01** | Other events |
+| **9.01** | Financial statements and exhibits |
+
+The complete mapping is in `eight_k.structure`.
+
+---
+
+## Access Press Releases
+
+Most 8-Ks attach press releases as EX-99 exhibits:
 
 ```python
-filings = c.get_filings(form='8-K', date='2022-01-01:')
+if eight_k.has_press_release:
+    releases = eight_k.press_releases
+    pr = releases[0]
+
+    # Get content in different formats
+    pr.text()         # Plain text
+    pr.html()         # HTML
+    pr.to_markdown()  # Markdown
+    pr.open()         # Open in browser
 ```
 
-![8-K Filings after a specific date](images/aapl-8k-after-date.png)
+Press releases are indexed by position. `press_releases[0]` is the first release, `press_releases[1]` is the second.
 
-## Viewing the 8-K filing
+---
 
-Once you have the 8-K filing you can view it in the browser using `filing.open()`
+## Extract Earnings Data from 8-K Filings
+
+When an 8-K includes Item 2.02 (earnings) with an EX-99.1 press release, EdgarTools parses the financial tables automatically:
 
 ```python
-filing.open()
+# Check if earnings data is available
+if eight_k.has_earnings:
+    earnings = eight_k.earnings  # EarningsRelease object
+
+    # Get specific statements
+    income = eight_k.income_statement       # FinancialTable or None
+    balance = eight_k.balance_sheet         # FinancialTable or None
+    cash_flow = eight_k.cash_flow_statement # FinancialTable or None
+
+    # Safe access - always returns a DataFrame
+    df = eight_k.get_income_statement()
+    df = eight_k.get_balance_sheet()
+    df = eight_k.get_cash_flow_statement()
 ```
 
-You can also view it in the console using `filing.view()`
+The `EarningsRelease` object provides additional tables:
 
 ```python
-filing.view()
+earnings.financial_tables   # All parsed financial tables
+earnings.segment_data       # Segment breakdown (if present)
+earnings.eps_reconciliation # GAAP to Non-GAAP EPS reconciliation
+earnings.guidance           # Forward guidance table
+earnings.detected_scale     # Scale factor (thousands, millions, etc.)
 ```
 
-![8-K View Latest](images/aapl-8k-latest-view.png)
-
-### Viewing the filing exhibits
-
-**8-K** filings often gave attached exhibits which contain the informnation the company is releasing in the filing. 
-You can view the list of exhibits using `filing.exhibits`
+Each `FinancialTable` has:
 
 ```python
-filing.exhibits 
-``` 
+table = eight_k.income_statement
 
-![8-K View Latest](images/aapl-8k-exhibits.png)
-
-### Viewing a specific exhibit
-
-To select a specific exhibit use the bracket `[]` operator e.g. `filing.exhibits[0]`. This selects the first exhibit, so `filing.exhibits[1]` selects the second exhibit.
-
-To view the exhibit `filing.exhibits[1].view()`
-
-```python
-filing.exhibits[1].view()
+table.dataframe         # Parsed data as DataFrame
+table.scaled_dataframe  # Values multiplied by detected scale
+table.scale             # Scale enum (UNITS, THOUSANDS, MILLIONS, BILLIONS)
+table.title             # Table title if detected
+table.statement_type    # StatementType enum
+table.to_html()         # HTML export for web apps
+table.to_json()         # JSON export for APIs
 ```
 
-![8-K View Latest](images/aapl-8k-exhibit-99-1.png)
-
-
-### Downloading the exhibit
-
-To download the exhibit use `filing.exhibits[1].download()`. Note that this downloads the file into memory, while you may want to download to a path.
-To download to a path use `filing.exhibits[1].download(path="path/to/save")`
+Example workflow:
 
 ```python
-filing.exhibits[1].download()
+from edgar import Company
+
+aapl = Company("AAPL")
+filing = aapl.get_filings(form="8-K").latest()
+eight_k = filing.obj()
+
+if eight_k.has_earnings:
+    # Get income statement with scale applied
+    income = eight_k.income_statement
+    df = income.scaled_dataframe
+
+    # Access specific metrics
+    revenue = df.loc['Net revenue']
+    print(f"Scale: {income.scale.name}")  # "MILLIONS"
+    print(f"Revenue: ${revenue.iloc[0]:,.0f}")
 ```
+
+---
+
+## Access Financial Statements
+
+Some 8-Ks include XBRL-tagged financial statements (less common than EX-99 tables):
+
+```python
+# Check if XBRL financials are available
+if eight_k.financials:
+    statements = eight_k.financials.get_statement()
+    print(statements)
+```
+
+This uses the same XBRL parsing as 10-K/10-Q filings. For earnings announcements, the EX-99 table parsing (previous section) is more common and reliable.
+
+---
+
+## Work with Exhibits
+
+All 8-K attachments (press releases, financial statements, material agreements):
+
+```python
+exhibits = filing.exhibits
+
+for ex in exhibits:
+    print(f"{ex.document_type}: {ex.description}")
+
+# Access specific exhibit
+ex_99 = exhibits[0]
+content = ex_99.download()
+```
+
+Exhibits are indexed by position. The `document_type` shows what kind of exhibit it is (EX-99.1, EX-10.1, etc.).
+
+---
+
+## Common Analysis Patterns
+
+### Find all earnings releases in a quarter
+
+```python
+from edgar import get_filings
+
+filings = get_filings(
+    form="8-K",
+    date="2024-01-01:2024-03-31"
+)
+
+for filing in filings[:20]:
+    eight_k = filing.obj()
+    if eight_k.has_earnings:
+        print(f"{filing.company}: {filing.filing_date}")
+```
+
+### Extract all financial tables
+
+```python
+if eight_k.has_earnings:
+    for table in eight_k.earnings.financial_tables:
+        print(f"{table.statement_type.value}: {table.dataframe.shape}")
+```
+
+### Check for specific events
+
+```python
+# Director changes
+if 'Item 5.02' in eight_k.items:
+    print(eight_k['5.02'])
+
+# Material agreements
+if 'Item 1.01' in eight_k.items:
+    print(eight_k['1.01'])
+```
+
+---
+
+## Metadata Quick Reference
+
+| Property | Returns | Example |
+|----------|---------|---------|
+| `company` | Company name | `"Apple Inc."` |
+| `form` | Form type | `"8-K"` |
+| `filing_date` | Date filed with SEC | `"2024-02-01"` |
+| `period_of_report` | Report date | `"2024-01-31"` |
+| `date_of_report` | Formatted report date | `"January 31, 2024"` |
+| `items` | List of disclosed items | `['Item 2.02', 'Item 9.01']` |
+| `has_press_release` | Has EX-99 press release? | `True` |
+| `has_earnings` | Has parseable earnings data? | `True` |
+
+---
+
+## Methods Quick Reference
+
+| Call | Returns | What it does |
+|------|---------|--------------|
+| `eight_k['2.02']` | `str` | Get item content by number |
+| `eight_k.press_releases` | `PressReleases` | Collection of press release exhibits |
+| `eight_k.earnings` | `EarningsRelease` | Parsed earnings tables from EX-99.1 |
+| `eight_k.income_statement` | `FinancialTable` | Income statement or None |
+| `eight_k.balance_sheet` | `FinancialTable` | Balance sheet or None |
+| `eight_k.cash_flow_statement` | `FinancialTable` | Cash flow statement or None |
+| `eight_k.get_income_statement()` | `DataFrame` | Income statement (empty DataFrame if missing) |
+| `eight_k.get_balance_sheet()` | `DataFrame` | Balance sheet (empty DataFrame if missing) |
+| `eight_k.get_cash_flow_statement()` | `DataFrame` | Cash flow (empty DataFrame if missing) |
+
+---
+
+## Things to Know
+
+**Item detection is multi-tier.** EdgarTools uses document parser first (95% accuracy), falls back to text extraction for legacy SGML filings (1999-2001).
+
+**Earnings parsing requires EX-99.1.** The `has_earnings` property returns True only if Item 2.02 is present AND an EX-99.1 exhibit contains parseable tables. Some earnings 8-Ks only have narrative text.
+
+**Scale matters.** Financial tables include scale detection (thousands, millions, billions). Use `scaled_dataframe` to get values with scale applied, or check `table.scale` to apply manually.
+
+**Not all 8-Ks have XBRL.** 8-K filings typically contain only DEI (Document and Entity Information) XBRL metadata. Actual financial data is in HTML tables within EX-99 exhibits.
+
+**Press releases use pattern matching.** EdgarTools looks for EX-99, EX-99.1, EX-99.01 exhibits or exhibits with "RELEASE" in the description. Some companies use non-standard exhibit numbering.
+
+---
+
+## Related
+
+- [Working with Filings](guides/working-with-filing.md) -- general filing access patterns
+- [10-K Annual Reports](tenk-filings.md) -- annual report parsing
+- [10-Q Quarterly Reports](tenq-filings.md) -- quarterly report parsing

@@ -51,7 +51,7 @@ nav:
   - Filing Types:
     - Overview: data-objects.md
     - "Annual & Quarterly Reports": concepts/data-objects.md
-    - "Current Events (8-K)": guides/eightk-data-object-guide.md
+    - "Current Events (8-K)": eightk-filings.md
     - "Insider Trades (Form 4)": insider-filings.md
     - "Institutional Portfolios (13F)": guides/thirteenf-data-object-guide.md
     - "Proxy & Governance (DEF 14A)": guides/proxystatement-data-object-guide.md
