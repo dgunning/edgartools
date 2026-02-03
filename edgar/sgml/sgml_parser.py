@@ -12,8 +12,9 @@ from edgar.vendored import uu
 
 log = logging.getLogger(__name__)
 
-# Maximum content size (200MB). Larger inputs are rejected to prevent OOM.
-_MAX_CONTENT_SIZE = 200 * 1024 * 1024
+# Maximum content size (500MB). Larger inputs are rejected to prevent OOM.
+# Some real SEC filings (e.g., 10-Ks with embedded images) can exceed 300MB.
+_MAX_CONTENT_SIZE = 500 * 1024 * 1024
 
 __all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError', 'SECFilingNotFoundError', 'SECHTMLResponseError']
 
