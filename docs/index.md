@@ -103,7 +103,7 @@ set_identity("your.name@email.com")
 ```python
 company = Company("TSLA")
 latest_10k = company.get_filings(form="10-K").latest()
-financials = latest_10k.obj().financials()
+financials = latest_10k.obj().financials
 ```
 
 ## Popular Use Cases
