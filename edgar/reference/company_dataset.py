@@ -71,13 +71,8 @@ def is_individual_from_json(data: dict) -> bool:
     """
     Determine if entity is an individual filer vs a company.
 
-    Uses the same logic as edgar.entity.data:478 (is_individual property).
-
-    Companies typically have:
-    - Tickers or exchanges
-    - State of incorporation
-    - Entity type other than '' or 'other'
-    - Company-specific filings (10-K, 10-Q, 8-K, etc.)
+    Uses the shared classification logic from edgar.entity.constants,
+    which implements a 9-signal priority chain.
 
     Args:
         data: Parsed JSON submission data
@@ -94,34 +89,35 @@ def is_individual_from_json(data: dict) -> bool:
         >>> is_individual_from_json(data)
         True
     """
-    # Has ticker or exchange → company
-    if data.get('tickers') or data.get('exchanges'):
-        return False
+    from edgar.entity.constants import _classify_is_individual
 
-    # Has state of incorporation → company (with exceptions)
-    state = data.get('stateOfIncorporation', '')
-    if state and state != '':
-        # Reed Hastings exception (individual with state of incorporation)
-        if data.get('cik') == '0001033331':
-            return True
-        return False
-
-    # Has entity type (not '' or 'other') → company
-    entity_type = data.get('entityType', '')
-    if entity_type and entity_type not in ['', 'other']:
-        return False
-
-    # Files company forms (10-K, 10-Q, etc.) → company
+    # Extract forms from filing history (first 50 for performance)
+    forms = []
     filings = data.get('filings', {})
     if filings:
         recent = filings.get('recent', {})
-        forms = recent.get('form', [])
-        company_forms = {'10-K', '10-Q', '8-K', '10-K/A', '10-Q/A', '20-F', 'S-1'}
-        if any(form in company_forms for form in forms):
-            return False
+        all_forms = recent.get('form', [])
+        forms = all_forms[:50]
 
-    # Default: individual
-    return True
+    # Parse CIK as integer for exception matching
+    cik_str = data.get('cik', '')
+    try:
+        cik = int(cik_str) if cik_str and cik_str.lstrip('0') else None
+    except (ValueError, TypeError):
+        cik = None
+
+    return _classify_is_individual(
+        name=data.get('name'),
+        tickers=data.get('tickers'),
+        exchanges=data.get('exchanges'),
+        state_of_incorporation=data.get('stateOfIncorporation', ''),
+        entity_type=data.get('entityType', ''),
+        forms=forms,
+        ein=data.get('ein'),
+        cik=cik,
+        insider_transaction_for_issuer_exists=data.get('insiderTransactionForIssuerExists'),
+        insider_transaction_for_owner_exists=data.get('insiderTransactionForOwnerExists'),
+    )
 
 
 def build_company_dataset_parquet(
