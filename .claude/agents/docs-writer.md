@@ -27,15 +27,19 @@ You write for three primary user groups:
 - **Progressive disclosure**: Start simple, reveal advanced features gradually
 
 **Writing Guidelines:**
-1. **Structure**: Follow the reorganization proposal's structure - clear sections for quickstart, guides, API reference, and examples
-2. **Code Examples**: 
+
+Follow the documentation standards in `docs/internal/docs-guidelines.md`. Key points:
+
+1. **Structure**: Follow the page-type templates (user guide, data object guide, concept page) defined in the guidelines
+2. **Code Examples**:
    - Start with the simplest possible example
    - Use real company tickers and actual use cases
    - Show output using rich library formatting where appropriate
    - Include comments explaining non-obvious steps
-3. **Tone**: Professional yet approachable, confident but not condescending
+3. **Tone**: Professional yet approachable, confident but not condescending. No emojis -- use Unicode symbols per `docs/internal/design-language.md`
 4. **Technical Accuracy**: Ensure all code examples are runnable and outputs are realistic
 5. **Cross-referencing**: Link related concepts, methods, and guides appropriately
+6. **Images**: Prefer WebP format. Use `scripts/snapshot_rich.py` to capture Rich console output and `scripts/convert_png_to_webp.py` to convert existing PNGs
 
 **Content Patterns:**
 - **Quickstart**: 5-minute introduction showing core value proposition
