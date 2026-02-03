@@ -602,6 +602,16 @@ class FactQuery:
         self._filters.append(text_filter)
         return self
 
+    def with_dimensions(self) -> 'FactQuery':
+        """
+        Include dimension axis and member columns in results.
+
+        Returns:
+            Self for method chaining
+        """
+        self._include_dimensions = True
+        return self
+
     def exclude_dimensions(self) -> FactQuery:
         """
         Exclude dimension columns from results.
@@ -809,7 +819,8 @@ class FactQuery:
             dimension_cols = {'dimension', 'member', 'dimension_label', 'member_label', 'full_dimension_label',
                               'dimension_axis', 'dimension_member', 'dimension_member_label'}
             df = df.loc[:, [col for col in df.columns
-                            if not col.startswith('dim_') and col not in dimension_cols]]
+                            if (not col.startswith('dim_') and col not in dimension_cols)
+                            or col == 'is_dimensioned']]
 
         if not self._include_contexts:
             context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',
@@ -843,7 +854,7 @@ class FactQuery:
         first_columns = [col for col in
                          ['concept', 'label', 'balance', 'preferred_sign', 'weight', 'value', 'numeric_value',
                           'period_key', 'period_start', 'period_end', 'period_instant',
-                          'decimals', 'statement_type', 'statement_name']
+                          'is_dimensioned', 'decimals', 'statement_type', 'statement_name']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
                                    if col not in first_columns
@@ -1082,6 +1093,9 @@ class FactsView:
                             full_labels = [f"{d['dimension_label']}: {d['member_label']}" for d in dimension_metadata]
                             fact_dict['full_dimension_label'] = ", ".join(full_labels)
 
+                        # GH-612: Mark fact as dimensioned
+                        fact_dict['is_dimensioned'] = True
+
                 # Get period key from context_period_map if available
                 period_key = self.xbrl.context_period_map.get(fact.context_ref)
                 if period_key:
@@ -1089,6 +1103,10 @@ class FactsView:
                     # Add fiscal info if available
                     if period_key in period_to_fiscal_info:
                         fact_dict.update(period_to_fiscal_info[period_key])
+
+            # GH-612: Ensure is_dimensioned is always set (even for facts without matched contexts)
+            if 'is_dimensioned' not in fact_dict:
+                fact_dict['is_dimensioned'] = False
 
             # Add element information and statement type
             # Normalize element_id to match catalog keys (replace ':' with '_')
