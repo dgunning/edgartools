@@ -83,7 +83,7 @@ class SGMLDocument:
     # Lazy content: store reference + offsets instead of copying
     _content_ref: str = field(default="", repr=False)
     _content_start: int = field(default=0, repr=False)
-    _content_end: int = field(default=-1, repr=False)
+    _content_end: Optional[int] = field(default=None, repr=False)
 
     @classmethod
     def from_content_ref(cls, metadata: dict, content_ref: str, start: int, end: int) -> 'SGMLDocument':
@@ -115,7 +115,7 @@ class SGMLDocument:
     @property
     def raw_content(self) -> str:
         """Content materialized from reference on access."""
-        if self._content_end < 0:
+        if self._content_end is None:
             return self._content_ref
         return self._content_ref[self._content_start:self._content_end]
 

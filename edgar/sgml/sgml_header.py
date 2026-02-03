@@ -21,6 +21,19 @@ _SGML_TAG_RE = re.compile(r'^[A-Z0-9\-]+$')
 _DATE_14_RE = re.compile(r'^(20|19)\d{12}$')
 _DATE_8_RE = re.compile(r'^(20|19)\d{6}$')
 _ACCEPTANCE_RE = re.compile(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})')
+_CORPORATE_SUFFIXES_RE = re.compile(
+    r'\b(INC|CORP|LLC|LP|LTD|CO|FUND|TRUST|GROUP|HOLDINGS|PARTNERS|CAPITAL|'
+    r'ADVISORS|MANAGEMENT|INVESTMENTS|ENTERPRISES|INTERNATIONAL|ASSOCIATION|'
+    r'BANCORP|BANK|FINANCIAL|INSURANCE|REIT|ETF)\b',
+    re.IGNORECASE
+)
+
+
+def _looks_like_company_name(name: str) -> bool:
+    """Detect if a SEC conformed name is a company rather than an individual."""
+    if not name:
+        return False
+    return bool(_CORPORATE_SUFFIXES_RE.search(name))
 
 # Title text
 mailing_address_title = "\U0001F4EC Mailing Address"
@@ -849,8 +862,9 @@ class FilingHeader:
                     name = reporting_owner_values['COMPANY DATA'].get('COMPANY CONFORMED NAME')
                     cik = reporting_owner_values['COMPANY DATA'].get('CENTRAL INDEX KEY')
                 if cik:
-                    # Reporting owners are individuals - reverse "Last First" to "First Last"
-                    if name:
+                    # Reverse "Last First" to "First Last" for individuals
+                    # but not for corporate entities (trusts, LLCs, funds, etc.)
+                    if name and not _looks_like_company_name(name):
                         name = reverse_name(name)
                     owner = Owner(name=name, cik=cik)
 
