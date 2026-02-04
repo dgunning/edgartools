@@ -110,8 +110,8 @@ ALL_FORM_TYPES = COMPANY_FORMS | FUND_FORMS | INDIVIDUAL_FORMS
 # matching inside common personal names (e.g. "CORP" in "CORPUZ", "BANK" in "BANKS").
 COMPANY_NAME_KEYWORDS = {
     # Corporate structure (long or punctuated - safe as substring)
-    "CORPORATION", "L.L.C.", "LIMITED",
-    "L.P.", "COMPANY", "HOLDINGS",
+    "CORPORATION", "L.L.C.", "L L C", "LIMITED",
+    "L.P.", "L P", "COMPANY", "HOLDINGS",
     "PARTNERS", "PARTNERSHIP",
     # Investment entities
     "CAPITAL", "VENTURES",
@@ -136,6 +136,10 @@ COMPANY_NAME_KEYWORDS_STRICT = {
 # Pre-compiled regex for SEC filing suffixes like /ADR/, /BD/, /TA/
 _SEC_SUFFIX_RE = re.compile(r"/[A-Z0-9-]{2,}(?:/|\s|$)")
 
+# Pre-compiled regex for joint filer detection (same first word on both sides of &)
+# Matches SEC-format names like "SMITH JOHN & SMITH JANE" where the surname repeats
+_JOINT_FILER_RE = re.compile(r"\b(\w+)\s+\w+.*&.*\b\1\b")
+
 
 def _name_suggests_company(name: str) -> bool:
     """Check if entity name contains company keywords."""
@@ -155,6 +159,17 @@ def _name_suggests_company(name: str) -> bool:
     # SEC filing suffixes like /ADR/, /BD/, /TA/ indicate companies
     if _SEC_SUFFIX_RE.search(name):
         return True
+
+    # Ampersand (&) usually indicates partnerships, law firms, or companies.
+    # Exclude joint individual filers: "MR & MRS SMITH", same-surname couples.
+    if "&" in name:
+        is_joint_filer = (
+            "MR & MRS" in upper
+            or "MRS & MR" in upper
+            or bool(_JOINT_FILER_RE.search(upper))
+        )
+        if not is_joint_filer:
+            return True
 
     return False
 

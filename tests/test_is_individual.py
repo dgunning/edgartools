@@ -426,6 +426,37 @@ CLASSIFICATION_TESTS = [
      dict(name="COMPUTERSHARE /TA/"),
      False),
 
+    # Space-separated variants (loose substring)
+    ("name_l_l_c_spaced",
+     dict(name="ACME HOLDINGS L L C"),
+     False),
+
+    ("name_l_p_spaced",
+     dict(name="BLACKSTONE L P"),
+     False),
+
+    # Ampersand patterns — & usually indicates a company/partnership
+    ("name_ampersand_company",
+     dict(name="JOHNSON & JOHNSON"),
+     False),
+
+    ("name_ampersand_law_firm",
+     dict(name="SKADDEN ARPS SLATE MEAGHER & FLOM"),
+     False),
+
+    ("name_ampersand_partnership",
+     dict(name="PROCTER & GAMBLE"),
+     False),
+
+    # Ampersand exclusions — joint individual filers
+    ("name_ampersand_mr_mrs_excluded",
+     dict(name="MR & MRS JOHN SMITH"),
+     True),
+
+    ("name_ampersand_joint_filer_excluded",
+     dict(name="SMITH JOHN & SMITH JANE"),
+     True),
+
     # Plain individual names - no keywords
     ("name_plain_individual",
      dict(name="JOHN SMITH"),
