@@ -576,7 +576,7 @@ def test_insider_transaction_buy():
                     accession_no='0000950170-24-005448')
     form4: Ownership = filing.obj()
     insider_transaction = form4.get_ownership_summary()
-    assert insider_transaction.insider_name == 'Phillip Frost MD ET AL / Gamma Investments Trust Frost'
+    assert insider_transaction.insider_name == 'Phillip Frost MD ET AL / Frost Gamma Investments Trust'
     assert insider_transaction.position == 'CEO & Chairman'
     print()
     print(form4)

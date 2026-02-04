@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.13.2] - 2026-02-03
+
+### Improved
+
+- **Entity Classification** — `is_individual` / `is_company` now uses a 9-signal priority chain for more accurate classification of SEC entities. Catches holding companies, old/inactive companies, and institutional investors that were previously misclassified as individuals. ([#624](https://github.com/dgunning/edgartools/issues/624))
+  - Insider transaction flags (`insiderTransactionForIssuerExists`) used as the strongest company signal
+  - Name-based heuristics detect company keywords (INC, CORP, LLC, FUND, etc.) with word-boundary matching to avoid false positives on personal names
+  - Ampersand (`&`) in entity names detected as a company/partnership signal
+  - Expanded recognized company forms from ~50 to 94 (adds small business, amendments, investment company, and proxy forms)
+
+### Fixed
+
+- **XBRL API Docs** — Corrected financials API examples in StatementType quick reference and quickstart docs. ([#580](https://github.com/dgunning/edgartools/issues/580), [#619](https://github.com/dgunning/edgartools/issues/619))
+
+- **Facts Query** — Added `is_dimensioned` column to facts query DataFrame output. ([#612](https://github.com/dgunning/edgartools/issues/612))
+
 ## [5.13.1] - 2026-02-01
 
 ### Fixed
