@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [5.13.2] - 2026-02-03
+## [5.14.0] - 2026-02-03
+
+### Performance
+
+- **SGML Parser 10x Faster** — Rewrote SGML parser from line-by-line to offset scanning with lazy content references. Parse times drop from 52ms to 5.5ms for large filings (Apple 10-K, 9.3MB). Peak memory reduced 275x (23.4MB to 0.1MB). Form 4 parsing is 71x faster (96ms to 1.3ms) by removing a network call from header parsing.
+
+- **SGML Max File Size** — Raised max content size from 200MB to 500MB to handle large filings with embedded images.
 
 ### Improved
 
