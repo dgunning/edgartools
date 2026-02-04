@@ -89,34 +89,58 @@ After all structured signals are exhausted, check the entity name for company ke
 
 #### Proposed keyword sets
 
-**Loose keywords** (substring match — keyword appears anywhere in name):
+**Important**: Short keywords (<=5 chars) like `INC`, `LP`, `CORP`, `BANK`, `FUND`, `TRUST` must use **whole-word matching**, not substring matching. Otherwise they produce false positives on common names:
+
+| Keyword | False positive names |
+|---------|---------------------|
+| `LP` | ALPINE, RALPH, PHILIP, HELP, TULIP |
+| `INC` | LINCOLN, PRINCE, PRINCETON, VINCE |
+| `CORP` | CORPUZ, SCORPIO |
+| `BANK` | BANKS, BANKSTON |
+| `FUND` | FUNDBERG |
+| `TRUST` | TRUSTER, ENTRUST |
+| `GROUP` | GROUPER |
+
+**Loose keywords** (substring match — only keywords >= 7 chars or with distinctive punctuation):
 
 ```python
 COMPANY_NAME_KEYWORDS = {
-    # Corporate structure
-    "INC", "CORP", "CORPORATION", "LLC", "L.L.C.", "LTD", "LIMITED",
-    "LP", "L.P.", "COMPANY", "GROUP", "HOLDINGS",
-    "PARTNERS", "PARTNERSHIP",
+    # Corporate structure (long or punctuated — safe as substring)
+    "CORPORATION", "L.L.C.", "L L C", "LIMITED", "L.P.", "L P",
+    "COMPANY", "HOLDINGS", "PARTNERS", "PARTNERSHIP",
     # Investment entities
-    "TRUST", "FUND", "FUNDS", "CAPITAL", "VENTURES",
-    "MANAGEMENT", "ADVISORS", "ADVISERS", "SECURITIES",
-    "INVESTMENT", "INVESTMENTS", "PORTFOLIO",
+    "CAPITAL", "VENTURES", "MANAGEMENT", "ADVISORS", "ADVISERS",
+    "SECURITIES", "INVESTMENT", "INVESTMENTS", "PORTFOLIO",
     # Industries
     "TECHNOLOGIES", "SERVICES", "INTERNATIONAL", "GLOBAL",
-    "FINANCIAL", "BANK", "INDUSTRIES", "SYSTEMS", "ENTERPRISES",
+    "FINANCIAL", "INDUSTRIES", "SYSTEMS", "ENTERPRISES",
     # Organizations
     "FOUNDATION", "ASSOCIATION", "AUTHORITY",
 }
 ```
 
-**Strict keywords** (whole-word match only, to avoid false positives like "SCOTT" matching "CO"):
+**Strict keywords** (whole-word match only — short keywords that could be substrings of names):
 
 ```python
 COMPANY_NAME_KEYWORDS_STRICT = {
+    # Already strict
     "CO",   # Company — but not "SCOTT" or "COHEN"
     "NA",   # National Association (banks)
     "PLC",  # Public Limited Company
     "SA",   # Sociedad Anonima
+    "ADR",  # American Depositary Receipt
+    # Moved from loose to avoid substring false positives
+    "INC",   # Incorporated (not "LINCOLN", "PRINCE")
+    "CORP",  # Corporation (not "CORPUZ", "SCORPIO")
+    "LLC",   # Limited Liability Company
+    "LTD",   # Limited
+    "LP",    # Limited Partnership (not "ALPINE", "RALPH")
+    "BANK",  # (not "BANKS", "BANKSTON")
+    "FUND",  # (not "FUNDBERG")
+    "FUNDS",
+    "TRUST", # (not "TRUSTER", "ENTRUST")
+    "GROUP", # (not "GROUPER")
+    "CLUB",  # (not "CLUBB")
 }
 ```
 
@@ -131,11 +155,13 @@ def _name_suggests_company(name: str) -> bool:
         return False
     upper = name.upper()
 
-    # Loose keyword match (substring)
+    # Loose keyword match (substring) — only long/punctuated keywords safe
+    # for substring matching (CORPORATION, LIMITED, MANAGEMENT, etc.)
     if any(kw in upper for kw in COMPANY_NAME_KEYWORDS):
         return True
 
-    # Strict keyword match (whole word only)
+    # Strict keyword match (whole word only) — short keywords that would
+    # cause false positives as substrings (INC, LP, CORP, BANK, FUND, etc.)
     words = set(re.split(r"\W+", upper))
     if words & COMPANY_NAME_KEYWORDS_STRICT:
         return True
@@ -143,6 +169,17 @@ def _name_suggests_company(name: str) -> bool:
     # SEC filing suffixes like /ADR/, /BD/, /TA/ indicate companies
     if re.search(r"/[A-Z0-9-]{2,}(?:/|\s|$)", name):
         return True
+
+    # Ampersand (&) usually indicates partnerships, law firms, or companies
+    # Exclude joint filers: "MR & MRS SMITH", same-lastname couples
+    if "&" in name:
+        is_joint_filer = (
+            "MR & MRS" in upper
+            or "MRS & MR" in upper
+            or bool(re.search(r"\b(\w+)\s+\w+.*&.*\b\1\b", upper))
+        )
+        if not is_joint_filer:
+            return True
 
     return False
 ```
@@ -404,3 +441,663 @@ COMPANY_FORMS = {
 - The name heuristic function and keyword constants can live in `edgar/entity/constants.py` alongside `COMPANY_FORMS`.
 - The `is_individual_from_json` function in `company_dataset.py` should be updated to match the new logic and share the same constants.
 - These changes are backward-compatible at the API level — `is_individual` remains a `bool` property. Some entities will change classification, which downstream consumers should be aware of.
+
+---
+
+## Test Data
+
+The test cases below use `pytest.mark.parametrize` for compact, comprehensive coverage. Each case is a dict of keyword arguments to `is_individual()` plus the expected result. This format works for both the property-based implementation (by extracting fields from the entity) and the standalone function.
+
+### Test harness
+
+```python
+import pytest
+
+# Each test case: (test_id, kwargs_dict, expected_is_individual)
+# The test_id is a readable label for pytest output.
+
+CLASSIFICATION_TESTS = [
+
+    # =========================================================================
+    # Signal 1: insiderTransactionForIssuerExists (strongest → company)
+    # =========================================================================
+    ("issuer_flag_true",
+     dict(insider_transaction_for_issuer_exists=True),
+     False),
+
+    ("issuer_flag_overrides_owner",
+     dict(insider_transaction_for_issuer_exists=True,
+          insider_transaction_for_owner_exists=True,
+          entity_type="other"),
+     False),
+
+    ("issuer_flag_overrides_all_individual_signals",
+     dict(insider_transaction_for_issuer_exists=True,
+          insider_transaction_for_owner_exists=True,
+          entity_type="other",
+          name="JOHN SMITH"),
+     False),
+
+    # =========================================================================
+    # Signal 2: Tickers / exchanges (strong → company)
+    # =========================================================================
+    ("single_ticker",
+     dict(tickers=["AAPL"]),
+     False),
+
+    ("multiple_tickers",
+     dict(tickers=["AAPL", "APPL"]),
+     False),
+
+    ("single_exchange",
+     dict(exchanges=["Nasdaq"]),
+     False),
+
+    ("ticker_overrides_owner_flag",
+     dict(tickers=["TSLA"],
+          insider_transaction_for_owner_exists=True),
+     False),
+
+    ("empty_tickers_falls_through",
+     dict(tickers=[]),
+     True),
+
+    ("none_tickers_falls_through",
+     dict(tickers=None),
+     True),
+
+    # =========================================================================
+    # Signal 3: State of incorporation (strong → company, with exceptions)
+    # =========================================================================
+    ("state_de",
+     dict(state_of_incorporation="DE"),
+     False),
+
+    ("state_foreign",
+     dict(state_of_incorporation="X2"),
+     False),
+
+    ("state_overrides_owner_flag",
+     dict(state_of_incorporation="DE",
+          insider_transaction_for_owner_exists=True),
+     False),
+
+    ("reed_hastings_exception",
+     dict(state_of_incorporation="CA", cik=1033331),
+     True),
+
+    ("state_empty_falls_through",
+     dict(state_of_incorporation=""),
+     True),
+
+    ("state_whitespace_falls_through",
+     dict(state_of_incorporation="   "),
+     True),
+
+    ("state_none_falls_through",
+     dict(state_of_incorporation=None),
+     True),
+
+    # =========================================================================
+    # Signal 4: Entity type (strong → company)
+    # =========================================================================
+    ("entity_type_operating",
+     dict(entity_type="operating"),
+     False),
+
+    ("entity_type_investment",
+     dict(entity_type="investment"),
+     False),
+
+    ("entity_type_fund",
+     dict(entity_type="fund"),
+     False),
+
+    ("entity_type_asset_backed",
+     dict(entity_type="asset_backed"),
+     False),
+
+    ("entity_type_case_insensitive",
+     dict(entity_type="OPERATING"),
+     False),
+
+    ("entity_type_other_falls_through",
+     dict(entity_type="other"),
+     True),
+
+    ("entity_type_empty_falls_through",
+     dict(entity_type=""),
+     True),
+
+    ("entity_type_none_falls_through",
+     dict(entity_type=None),
+     True),
+
+    # =========================================================================
+    # Signal 5: Company forms in filing history (strong → company)
+    # =========================================================================
+    ("form_10k",
+     dict(forms=["10-K"]),
+     False),
+
+    ("form_10q",
+     dict(forms=["10-Q"]),
+     False),
+
+    ("form_8k",
+     dict(forms=["8-K"]),
+     False),
+
+    ("form_8k_amendment",
+     dict(forms=["8-K/A"]),
+     False),
+
+    ("form_def14a",
+     dict(forms=["DEF 14A"]),
+     False),
+
+    ("form_s1",
+     dict(forms=["S-1"]),
+     False),
+
+    ("form_ncsr",
+     dict(forms=["N-CSR"]),
+     False),
+
+    ("form_n1a",
+     dict(forms=["N-1A"]),
+     False),
+
+    ("form_20f",
+     dict(forms=["20-F"]),
+     False),
+
+    ("form_20f_amendment",
+     dict(forms=["20-F/A"]),
+     False),
+
+    ("form_10ksb_small_business",
+     dict(forms=["10-KSB"]),
+     False),
+
+    ("form_10qsb_small_business",
+     dict(forms=["10-QSB"]),
+     False),
+
+    ("form_485bpos_fund_prospectus",
+     dict(forms=["485BPOS"]),
+     False),
+
+    ("form_497k_summary_prospectus",
+     dict(forms=["497K"]),
+     False),
+
+    ("form_npx_proxy_voting",
+     dict(forms=["N-PX"]),
+     False),
+
+    ("form_345_ambiguous_falls_through",
+     dict(forms=["3", "4", "5"]),
+     True),
+
+    ("form_345_with_company_form",
+     dict(forms=["3", "4", "10-K"]),
+     False),
+
+    ("forms_empty_falls_through",
+     dict(forms=[]),
+     True),
+
+    ("warren_buffett_exception_on_forms",
+     dict(forms=["10-K", "10-Q"], cik=315090),
+     True),
+
+    # =========================================================================
+    # Signal 6: EIN (weak → company, with exceptions)
+    # =========================================================================
+    ("valid_ein",
+     dict(ein="123456789"),
+     False),
+
+    ("ein_placeholder_falls_through",
+     dict(ein="000000000"),
+     True),
+
+    ("ein_empty_falls_through",
+     dict(ein=""),
+     True),
+
+    ("ein_none_falls_through",
+     dict(ein=None),
+     True),
+
+    ("warren_buffett_exception_on_ein",
+     dict(ein="470539396", cik=315090),
+     True),
+
+    ("ein_overrides_owner_flag",
+     dict(ein="123456789",
+          insider_transaction_for_owner_exists=True),
+     False),
+
+    # =========================================================================
+    # Signal 7: Name-based heuristics (fallback → company)
+    # =========================================================================
+
+    # Loose keyword matches (substring — only long/punctuated keywords)
+    ("name_corporation",
+     dict(name="MICROSOFT CORPORATION"),
+     False),
+
+    ("name_limited",
+     dict(name="HSBC HOLDINGS LIMITED"),
+     False),
+
+    ("name_lp_punctuated",
+     dict(name="BLACKSTONE GROUP L.P."),
+     False),
+
+    ("name_company",
+     dict(name="FORD MOTOR COMPANY"),
+     False),
+
+    ("name_holdings",
+     dict(name="BERKSHIRE HATHAWAY HOLDINGS"),
+     False),
+
+    ("name_partners",
+     dict(name="KKR PARTNERS"),
+     False),
+
+    ("name_partnership",
+     dict(name="CARLYLE PARTNERSHIP"),
+     False),
+
+    ("name_capital",
+     dict(name="SEQUOIA CAPITAL"),
+     False),
+
+    ("name_ventures",
+     dict(name="ANDREESSEN HOROWITZ VENTURES"),
+     False),
+
+    ("name_management",
+     dict(name="BRIDGEWATER MANAGEMENT"),
+     False),
+
+    ("name_advisors",
+     dict(name="WELLINGTON ADVISORS"),
+     False),
+
+    ("name_securities",
+     dict(name="MERRILL LYNCH SECURITIES"),
+     False),
+
+    ("name_investment",
+     dict(name="T ROWE PRICE INVESTMENT"),
+     False),
+
+    ("name_foundation",
+     dict(name="BILL AND MELINDA GATES FOUNDATION"),
+     False),
+
+    ("name_association",
+     dict(name="NATIONAL FOOTBALL LEAGUE ASSOCIATION"),
+     False),
+
+    ("name_technologies",
+     dict(name="PALANTIR TECHNOLOGIES"),
+     False),
+
+    ("name_services",
+     dict(name="FISERV FINANCIAL SERVICES"),
+     False),
+
+    ("name_international",
+     dict(name="CATERPILLAR INTERNATIONAL"),
+     False),
+
+    ("name_industries",
+     dict(name="DOVER INDUSTRIES"),
+     False),
+
+    ("name_enterprises",
+     dict(name="ENTERPRISE PRODUCTS ENTERPRISES"),
+     False),
+
+    # Strict keyword matches (whole word only — short keywords)
+    ("name_inc_whole_word",
+     dict(name="ACME INC"),
+     False),
+
+    ("name_corp_whole_word",
+     dict(name="GENERAL ELECTRIC CORP"),
+     False),
+
+    ("name_llc_whole_word",
+     dict(name="SMITH CAPITAL LLC"),
+     False),
+
+    ("name_ltd_whole_word",
+     dict(name="BARCLAYS LTD"),
+     False),
+
+    ("name_lp_whole_word",
+     dict(name="BLACKSTONE GROUP LP"),
+     False),
+
+    ("name_bank_whole_word",
+     dict(name="JPMORGAN CHASE BANK"),
+     False),
+
+    ("name_fund_whole_word",
+     dict(name="FIDELITY GROWTH FUND"),
+     False),
+
+    ("name_trust_whole_word",
+     dict(name="VANGUARD TRUST"),
+     False),
+
+    ("name_group_whole_word",
+     dict(name="GOLDMAN SACHS GROUP"),
+     False),
+
+    ("name_co_whole_word",
+     dict(name="STANDARD OIL CO"),
+     False),
+
+    ("name_na_whole_word",
+     dict(name="FIRST NATIONAL BANK NA"),
+     False),
+
+    ("name_plc_whole_word",
+     dict(name="VODAFONE PLC"),
+     False),
+
+    ("name_sa_whole_word",
+     dict(name="PETROBRAS SA"),
+     False),
+
+    # Substring false positive regression tests — these are INDIVIDUALS
+    # Short keywords must NOT match inside common names
+    ("name_no_fp_alpine",
+     dict(name="ALPINE JOHN"),
+     True),  # LP inside ALPINE
+
+    ("name_no_fp_lincoln",
+     dict(name="LINCOLN SMITH"),
+     True),  # INC inside LINCOLN
+
+    ("name_no_fp_ralph",
+     dict(name="RALPH JONES"),
+     True),  # LP inside RALPH
+
+    ("name_no_fp_prince",
+     dict(name="PRINCE HARRY"),
+     True),  # INC inside PRINCE
+
+    ("name_no_fp_corpuz",
+     dict(name="CORPUZ MARIA"),
+     True),  # CORP inside CORPUZ
+
+    ("name_no_fp_banks",
+     dict(name="BANKS ROBERT"),
+     True),  # BANK inside BANKS
+
+    ("name_no_fp_vince",
+     dict(name="VINCE CARTER"),
+     True),  # INC inside VINCE
+
+    ("name_no_fp_fundberg",
+     dict(name="FUNDBERG OLAF"),
+     True),  # FUND inside FUNDBERG
+
+    ("name_no_fp_truster",
+     dict(name="TRUSTER JANE"),
+     True),  # TRUST inside TRUSTER
+
+    ("name_no_fp_scott",
+     dict(name="SCOTT JOHNSON"),
+     True),  # CO inside SCOTT
+
+    # SEC filing suffixes
+    ("name_adr_suffix",
+     dict(name="TOYOTA MOTOR CORP /ADR/"),
+     False),
+
+    ("name_bd_suffix",
+     dict(name="SMITH BARNEY /BD/"),
+     False),
+
+    ("name_ta_suffix",
+     dict(name="COMPUTERSHARE /TA/"),
+     False),
+
+    # Ampersand patterns
+    ("name_ampersand_company",
+     dict(name="JOHNSON & JOHNSON"),
+     False),
+
+    ("name_ampersand_law_firm",
+     dict(name="SKADDEN ARPS SLATE MEAGHER & FLOM"),
+     False),
+
+    ("name_ampersand_mr_mrs_excluded",
+     dict(name="MR & MRS JOHN SMITH"),
+     True),
+
+    ("name_ampersand_joint_filer_excluded",
+     dict(name="SMITH JOHN & SMITH JANE"),
+     True),
+
+    # Plain individual names — no keywords
+    ("name_plain_individual",
+     dict(name="JOHN SMITH"),
+     True),
+
+    ("name_plain_individual_2",
+     dict(name="MARY JANE WATSON"),
+     True),
+
+    ("name_none",
+     dict(name=None),
+     True),
+
+    # =========================================================================
+    # Signal 8: insiderTransactionForOwnerExists (weak → individual)
+    # =========================================================================
+    ("owner_flag_alone",
+     dict(insider_transaction_for_owner_exists=True),
+     True),
+
+    ("owner_flag_with_issuer_none",
+     dict(insider_transaction_for_owner_exists=True,
+          insider_transaction_for_issuer_exists=None),
+     True),
+
+    ("owner_flag_false_falls_through",
+     dict(insider_transaction_for_owner_exists=False),
+     True),
+
+    # =========================================================================
+    # Signal 9: Default (no signals → individual)
+    # =========================================================================
+    ("no_signals_at_all",
+     dict(),
+     True),
+
+    ("all_none",
+     dict(name=None, entity_type=None, tickers=None, exchanges=None,
+          state_of_incorporation=None, ein=None,
+          insider_transaction_for_owner_exists=None,
+          insider_transaction_for_issuer_exists=None,
+          forms=None, cik=None),
+     True),
+
+    ("all_empty",
+     dict(name="", entity_type="", tickers=[], exchanges=[],
+          state_of_incorporation="", ein="",
+          insider_transaction_for_owner_exists=False,
+          insider_transaction_for_issuer_exists=False,
+          forms=[], cik=None),
+     True),
+
+    # =========================================================================
+    # Realistic entity profiles
+    # =========================================================================
+
+    # Public operating company
+    ("real_apple",
+     dict(name="APPLE INC", entity_type="operating",
+          tickers=["AAPL"], exchanges=["Nasdaq"],
+          state_of_incorporation="CA", ein="942404110",
+          insider_transaction_for_issuer_exists=True,
+          forms=["10-K", "10-Q", "8-K", "DEF 14A"],
+          cik=320193),
+     False),
+
+    # Foreign private issuer
+    ("real_toyota",
+     dict(name="TOYOTA MOTOR CORP /ADR/", entity_type="operating",
+          tickers=["TM"], exchanges=["NYSE"],
+          state_of_incorporation="M0",
+          insider_transaction_for_issuer_exists=True,
+          forms=["20-F", "6-K"],
+          cik=1094517),
+     False),
+
+    # Mutual fund
+    ("real_vanguard_fund",
+     dict(name="VANGUARD INDEX FUNDS", entity_type="fund",
+          forms=["N-CSR", "N-CEN", "485BPOS", "497K"],
+          cik=36405),
+     False),
+
+    # ETF
+    ("real_spdr_etf",
+     dict(name="SPDR S&P 500 ETF TRUST", entity_type="fund",
+          tickers=["SPY"], exchanges=["NYSE Arca"],
+          forms=["N-CSR", "497K"],
+          cik=884394),
+     False),
+
+    # Insider individual — plain filer
+    ("real_insider_individual",
+     dict(name="COOK TIMOTHY D", entity_type="other",
+          insider_transaction_for_owner_exists=True,
+          insider_transaction_for_issuer_exists=False,
+          forms=["3", "4"],
+          cik=1214156),
+     True),
+
+    # Warren Buffett — has EIN + company forms but is individual
+    ("real_warren_buffett",
+     dict(name="BUFFETT WARREN E", entity_type="other",
+          ein="470539396",
+          insider_transaction_for_owner_exists=True,
+          forms=["3", "4", "SC 13D", "SC 13D/A"],
+          cik=315090),
+     True),
+
+    # Reed Hastings — has state of incorporation but is individual
+    ("real_reed_hastings",
+     dict(name="HASTINGS REED", entity_type="other",
+          state_of_incorporation="CA",
+          insider_transaction_for_owner_exists=True,
+          forms=["3", "4"],
+          cik=1033331),
+     True),
+
+    # Private company (no tickers, no forms, just state + EIN)
+    ("real_private_company",
+     dict(name="ACME HOLDINGS LLC", entity_type="operating",
+          state_of_incorporation="DE", ein="831234567"),
+     False),
+
+    # Holding company filing as owner (SC 13D filer)
+    ("real_holding_company_owner",
+     dict(name="BLACKROCK CAPITAL MANAGEMENT",
+          entity_type="other",
+          insider_transaction_for_owner_exists=True,
+          forms=["SC 13D", "SC 13G"]),
+     False),
+
+    # Old inactive company — no tickers, no state, entity_type=""
+    # Only the name reveals it's a company
+    ("real_old_inactive_company",
+     dict(name="CONSOLIDATED MINING CORP",
+          entity_type="",
+          forms=["3"]),
+     False),
+
+    # Broker-dealer
+    ("real_broker_dealer",
+     dict(name="MORGAN STANLEY /BD/",
+          entity_type="other",
+          forms=["X-17A-5"]),
+     False),
+
+    # Pre-2008 small business
+    ("real_small_business",
+     dict(name="HOMETOWN SAVINGS BANK",
+          entity_type="",
+          forms=["10-KSB", "10-QSB"]),
+     False),
+
+    # Foreign institutional investor filing as owner
+    ("real_foreign_institution_owner",
+     dict(name="NORGES BANK INVESTMENT MANAGEMENT",
+          entity_type="other",
+          insider_transaction_for_owner_exists=True,
+          forms=["SC 13G", "SC 13G/A"]),
+     False),
+
+    # Individual with no flags at all — just entity_type "other"
+    ("real_minimal_individual",
+     dict(name="GARCIA MARIA", entity_type="other"),
+     True),
+
+    # Foundation
+    ("real_foundation",
+     dict(name="BILL & MELINDA GATES FOUNDATION",
+          entity_type="other"),
+     False),
+
+    # Transfer agent
+    ("real_transfer_agent",
+     dict(name="COMPUTERSHARE TRUST COMPANY NA",
+          entity_type="other",
+          forms=["TA-1", "TA-2"]),
+     False),
+]
+
+
+@pytest.mark.parametrize(
+    "test_id, kwargs, expected",
+    CLASSIFICATION_TESTS,
+    ids=[t[0] for t in CLASSIFICATION_TESTS],
+)
+def test_is_individual(test_id, kwargs, expected):
+    """Parametrized entity classification test."""
+    result = is_individual(**kwargs)
+    assert result is expected, (
+        f"{test_id}: expected is_individual={expected}, got {result} "
+        f"with inputs {kwargs}"
+    )
+```
+
+### Running a subset
+
+```bash
+# All tests
+pytest test_entity_classification.py -v
+
+# Just the realistic entity profiles
+pytest test_entity_classification.py -v -k "real_"
+
+# Just name heuristics
+pytest test_entity_classification.py -v -k "name_"
+
+# Just a specific signal
+pytest test_entity_classification.py -v -k "issuer_flag"
+```
