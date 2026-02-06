@@ -324,6 +324,7 @@ print(xbrl.reporting_periods)
 
 ## Next Steps
 
+- **[Stock Splits & EPS Normalization](stock-splits-eps-normalization.md)** – Detect splits and normalize per-share metrics
 - **[Multi-Period Analysis](../xbrl/guides/multi-period-analysis.md)** – Build custom time series
 - **[Standardization](../xbrl/concepts/standardization.md)** – How cross-company comparison works
 - **[XBRL Documentation](../xbrl/index.md)** – Complete XBRL reference

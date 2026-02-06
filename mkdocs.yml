@@ -68,6 +68,7 @@ nav:
     - Extract Statements: guides/extract-statements.md
     - Company Facts: guides/company-facts.md
     - Multi-Period Analysis: guides/multi-year-financial-data-api.md
+    - Stock Splits & EPS Normalization: guides/stock-splits-eps-normalization.md
     - XBRL Deep Dive:
       - Overview: xbrl/index.md
       - Query Facts: xbrl-querying.md

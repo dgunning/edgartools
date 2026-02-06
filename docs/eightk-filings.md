@@ -191,6 +191,12 @@ if 'Item 5.02' in eight_k.items:
 # Material agreements
 if 'Item 1.01' in eight_k.items:
     print(eight_k['1.01'])
+
+# Stock split announcements (Item 8.01 or 5.03)
+if 'Item 8.01' in eight_k.items or 'Item 5.03' in eight_k.items:
+    content = eight_k.get('8.01') or eight_k.get('5.03') or ''
+    if 'split' in content.lower():
+        print(f"Stock split announced: {filing.filing_date}")
 ```
 
 ---
@@ -242,6 +248,7 @@ if 'Item 1.01' in eight_k.items:
 
 ## Related
 
+- [Stock Splits & EPS Normalization](guides/stock-splits-eps-normalization.md) -- detect split announcements and normalize metrics
 - [Working with Filings](guides/working-with-filing.md) -- general filing access patterns
 - [10-K Annual Reports](tenk-filings.md) -- annual report parsing
 - [10-Q Quarterly Reports](tenq-filings.md) -- quarterly report parsing
