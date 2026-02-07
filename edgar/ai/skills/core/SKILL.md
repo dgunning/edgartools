@@ -11,15 +11,15 @@ Analyze SEC filings and financial statements.
 
 | Skill | Purpose |
 |-------|---------|
-| [core/](./core/) | Company lookup, filings, search |
+| core (this directory) | Company lookup, filings, search |
 | [financials/](./financials/) | Financial statements and metrics |
 | [reports/](./reports/) | 10-K/10-Q/8-K section extraction |
 | [holdings/](./holdings/) | 13F institutional holdings |
 | [ownership/](./ownership/) | Form 3/4/5 insider transactions |
 | [xbrl/](./xbrl/) | Low-level XBRL facts and concepts |
-| [forms.yaml](../forms.yaml) | SEC form type mappings |
+| [forms.yaml](./forms.yaml) | SEC form type mappings |
 
-Each skill directory has 4 files: `skill.yaml`, `sharp-edges.yaml`, `validations.yaml`, `collaboration.yaml`
+Each skill directory has `skill.yaml` (patterns and examples) and `sharp-edges.yaml` (common mistakes to avoid).
 
 ## Quick Setup
 
