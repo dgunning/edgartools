@@ -1,7 +1,9 @@
 """
-Tests for MCP workflow-oriented tools.
+Tests for MCP workflow-oriented tools (LEGACY).
 
-Tests the new tool handlers in edgar.ai.tools module.
+Tests the old tool handlers in edgar.ai.mcp.tools module.
+These are deprecated in favor of the intent-based tools tested in
+test_mcp_intent_tools.py.
 """
 
 import pytest
@@ -9,9 +11,9 @@ import pytest
 from edgar import set_identity
 
 
-
+@pytest.mark.legacy
 class TestCompanyResearchTool:
-    """Test edgar_company_research tool handler."""
+    """Test edgar_company_research tool handler (deprecated)."""
 
     @pytest.mark.asyncio
     async def test_company_research_minimal(self):
@@ -88,8 +90,9 @@ class TestCompanyResearchTool:
         assert "identifier" in result[0].text.lower()
 
 
+@pytest.mark.legacy
 class TestFinancialAnalysisTool:
-    """Test edgar_analyze_financials tool handler."""
+    """Test edgar_analyze_financials tool handler (deprecated)."""
 
     @pytest.mark.asyncio
     async def test_financial_analysis_income_statement(self):
@@ -161,8 +164,9 @@ class TestFinancialAnalysisTool:
         assert "company" in result[0].text.lower()
 
 
+@pytest.mark.legacy
 class TestUtilityFunctions:
-    """Test utility functions in edgar.ai.tools.utils."""
+    """Test utility functions in edgar.ai.tools.utils (deprecated)."""
 
     def test_check_output_size_under_limit(self):
         """Test output size check when under token limit."""

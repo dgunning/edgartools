@@ -88,8 +88,8 @@ async def _get_insider_transactions(identifier: str, days: int, limit: int) -> A
     try:
         company = resolve_company(identifier)
 
-        # Get Form 4 filings (convert to list to enable slicing)
-        form4_filings = list(company.get_filings(form="4"))[:limit * 2]  # Get extra in case some fail
+        # Get Form 4 filings
+        form4_filings = company.get_filings(form="4").head(limit * 2)  # Get extra in case some fail
 
         transactions = []
         for filing in form4_filings:
@@ -169,35 +169,27 @@ async def _get_insider_transactions(identifier: str, days: int, limit: int) -> A
 
 
 async def _get_institutional_holders(identifier: str, limit: int) -> Any:
-    """Get institutional holders from 13F filings that mention this company."""
+    """Get institutional holders information for a company."""
     try:
         company = resolve_company(identifier)
-
-        # Note: Getting all 13F filers that hold a specific stock is complex
-        # and requires cross-referencing many 13F filings.
-        # For now, we provide guidance on how to approach this.
 
         result = {
             "company": company.name,
             "cik": str(company.cik),
             "analysis": "institutional_holders",
-            "note": (
-                "To find institutional holders, you would need to analyze 13F filings "
-                "from major institutions. Consider using edgar_search with form='13F-HR' "
-                "to find recent 13F filings, then use edgar_ownership with "
-                "analysis_type='fund_portfolio' to see each fund's holdings."
+            "limitation": (
+                "SEC EDGAR does not provide a direct API to list all institutional holders "
+                "of a specific stock. Institutional holdings are reported in 13F filings "
+                "filed by each institution separately. To find who holds this stock, you "
+                "would need to cross-reference thousands of 13F filings."
             ),
-            "suggested_institutions": [
-                {"name": "Berkshire Hathaway", "cik": "1067983"},
-                {"name": "BlackRock", "cik": "1364742"},
-                {"name": "Vanguard", "cik": "102909"},
-                {"name": "State Street", "cik": "93751"},
-            ]
         }
 
         next_steps = [
-            "Use edgar_ownership with a fund CIK and analysis_type='fund_portfolio'",
-            "Use edgar_search with form='13F-HR' to find institutional filings"
+            "To check if a specific fund holds this stock: use edgar_ownership with "
+            "the fund's CIK and analysis_type='fund_portfolio'",
+            "To browse recent institutional filings: use edgar_search with form='13F-HR'",
+            "To see insider trading instead: use edgar_ownership with analysis_type='insiders'",
         ]
 
         return success(result, next_steps=next_steps)

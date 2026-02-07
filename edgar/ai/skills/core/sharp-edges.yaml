@@ -37,13 +37,17 @@ sharp_edges:
     detection_pattern: 'xbrl\(\)\.statements|filing\.xbrl\(\).*income_statement'
 
   - id: get-revenue-for-trends
-    summary: get_revenue() returns single value, not multi-year
+    summary: Use get_financials() for up to 3 years, get_facts() only for 4+
     severity: medium
     solution: |
-      revenue = financials.get_revenue()              # Single value
-      income = financials.income_statement()          # Up to 3 years
+      # Up to 3 years (PREFERRED):
+      financials = company.get_financials()
+      income = financials.income_statement()          # 3-year table
+      revenue = financials.get_revenue()              # Current year
+
+      # 4+ years only:
       facts = company.get_facts()
-      income = facts.income_statement(periods=5)      # 4+ years
+      income = facts.income_statement(periods=5)      # 5-year table
 
   - id: unbounded-filing-iteration
     summary: Always limit filings before iterating

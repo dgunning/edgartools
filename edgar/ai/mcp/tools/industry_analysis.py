@@ -1,11 +1,23 @@
 """
-Industry Analysis Tool Handlers
+Industry Analysis Tool Handlers (DEPRECATED)
 
 Provides industry sector analysis and competitive benchmarking capabilities.
+
+.. deprecated::
+    Use edgar.ai.mcp.tools.compare (edgar_compare tool with industry parameter) instead.
+    This handler will be removed in a future version.
 """
 
 import logging
+import warnings
 from typing import Any
+
+warnings.warn(
+    "edgar.ai.mcp.tools.industry_analysis is deprecated. "
+    "Use edgar.ai.mcp.tools.compare (edgar_compare tool with industry parameter) instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from mcp.types import TextContent
 

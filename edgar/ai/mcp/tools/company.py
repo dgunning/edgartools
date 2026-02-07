@@ -183,8 +183,7 @@ def _build_financials(company, periods: int, annual: bool) -> dict:
 def _build_filings(company, limit: int = 10) -> list[dict]:
     """Build recent filings section."""
     try:
-        # Convert to list to enable slicing (EntityFilings doesn't support direct slicing)
-        filings = list(company.get_filings())[:limit]
+        filings = company.get_filings().head(limit)
         return [format_filing_summary(f) for f in filings]
     except Exception as e:
         logger.debug(f"Could not get filings: {e}")
@@ -197,7 +196,7 @@ def _build_ownership(company) -> dict:
 
     # Insider transactions (Form 4)
     try:
-        form4_filings = list(company.get_filings(form="4"))[:20]
+        form4_filings = company.get_filings(form="4").head(20)
         insider_txns = []
 
         for filing in form4_filings[:10]:
@@ -213,8 +212,8 @@ def _build_ownership(company) -> dict:
                         txn["insider"] = str(obj.reporting_owner)
                     if hasattr(obj, 'transactions'):
                         txn["transaction_count"] = len(obj.transactions)
-                except:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Could not parse Form 4 details: {e}")
                 insider_txns.append(txn)
             except Exception as e:
                 logger.debug(f"Could not parse Form 4: {e}")

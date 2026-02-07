@@ -50,6 +50,32 @@ from edgar.ai.evaluation.runner import (
     extract_code_from_response,
     load_skill_context,
 )
+from edgar.ai.evaluation.constitution import (
+    Constitution,
+    ConstitutionGoal,
+    load_constitution,
+)
+from edgar.ai.evaluation.diagnostics import (
+    ConstitutionDiagnostic,
+    ConstitutionReport,
+    generate_skill_edit_suggestions,
+    run_constitution_diagnostics,
+)
+from edgar.ai.evaluation.agent import (
+    AgentScore,
+    AgentTestResult,
+    AgentTestRunner,
+    AgentTrace,
+)
+from edgar.ai.evaluation.judge import (
+    JudgeComparison,
+    JudgeScore,
+    build_judge_comparison,
+    build_judge_prompt,
+    format_judge_report,
+    parse_judge_response,
+)
+from edgar.ai.evaluation.cc_runner import ClaudeCodeRunner
 
 __all__ = [
     # Test cases
@@ -68,9 +94,31 @@ __all__ = [
     "evaluate_code_execution",
     "evaluate_pattern_compliance",
     "evaluate_token_efficiency",
-    # Runner
+    # Runner (code-gen)
     "GenerationResult",
     "SkillTestRunner",
     "extract_code_from_response",
     "load_skill_context",
+    # Constitution & diagnostics
+    "Constitution",
+    "ConstitutionGoal",
+    "load_constitution",
+    "ConstitutionDiagnostic",
+    "ConstitutionReport",
+    "run_constitution_diagnostics",
+    "generate_skill_edit_suggestions",
+    # Agent-based evaluation
+    "AgentScore",
+    "AgentTestResult",
+    "AgentTestRunner",
+    "AgentTrace",
+    # LLM Judge
+    "JudgeScore",
+    "JudgeComparison",
+    "build_judge_prompt",
+    "parse_judge_response",
+    "build_judge_comparison",
+    "format_judge_report",
+    # Claude Code runner
+    "ClaudeCodeRunner",
 ]

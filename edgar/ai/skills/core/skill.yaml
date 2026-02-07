@@ -81,24 +81,22 @@ patterns:
   - name: Financial Statements
     when: User asks about revenue, balance sheet, cash flow, metrics
     code: |
-      # QUICK METRICS - for calculations like ratios, margins
+      # PREFERRED: get_financials() for up to 3 years of data
       financials = company.get_financials()
       revenue = financials.get_revenue()                 # Current revenue
       net_income = financials.get_net_income()           # Current net income
       margin = net_income / revenue                      # Example calculation
-
-      # FULL STATEMENTS - for viewing multi-year tables
       income = financials.income_statement()             # 3-year income table
       balance = financials.balance_sheet()               # 2-year balance table
       cashflow = financials.cashflow_statement()         # 3-year cash flow table
 
-      # HISTORICAL DATA - for 4+ year trends (Financials stops at 3)
+      # ONLY for 4+ year history (slower, more data):
       facts = company.get_facts()
       income = facts.income_statement(periods=5, annual=True)
     note: |
-      For calculations (ratios, margins): use get_revenue(), get_net_income()
-      For viewing statements: use income_statement(), balance_sheet() - up to 3 years
-      For 4+ year history: use get_facts().income_statement(periods=N)
+      ALWAYS start with get_financials() - it covers 95% of use cases.
+      Only use get_facts() when you need 4+ years of history.
+      For multi-company comparison: loop get_financials(), don't build manual DataFrames.
 
   - name: Output Methods
     when: Displaying EdgarTools objects

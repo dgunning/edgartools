@@ -1,11 +1,23 @@
 """
-Financial Analysis Tool Handler
+Financial Analysis Tool Handler (DEPRECATED)
 
 Provides multi-period financial statement analysis.
+
+.. deprecated::
+    Use edgar.ai.mcp.tools.company (edgar_company tool with include=["financials"]) instead.
+    This handler will be removed in a future version.
 """
 
 import logging
+import warnings
 from typing import Any
+
+warnings.warn(
+    "edgar.ai.mcp.tools.financial_analysis is deprecated. "
+    "Use edgar.ai.mcp.tools.company (edgar_company tool with include=['financials']) instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from mcp.types import TextContent
 

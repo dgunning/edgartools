@@ -162,8 +162,7 @@ async def _search_filings(
             else:
                 filings = get_filings()
 
-        # Convert to list to enable slicing (some filing types don't support direct slicing)
-        filings_list = list(filings)[:limit]
+        filings_list = filings.head(limit)
         return [format_filing_summary(f) for f in filings_list]
 
     except Exception as e:

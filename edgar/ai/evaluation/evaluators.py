@@ -401,8 +401,14 @@ def evaluate_code(
         >>> result = evaluate_code(code, test, execute=False)
         >>> print(f"Overall score: {result.overall_score}")
     """
-    default_weights = {"execution": 0.4, "pattern": 0.4, "efficiency": 0.2}
-    weights = weights or default_weights
+    if weights is not None:
+        effective_weights = weights
+    elif execute:
+        # When executing: execution matters
+        effective_weights = {"execution": 0.4, "pattern": 0.4, "efficiency": 0.2}
+    else:
+        # When not executing: redistribute execution weight to pattern/efficiency
+        effective_weights = {"execution": 0.0, "pattern": 0.7, "efficiency": 0.3}
 
     # Pattern evaluation (always run)
     pattern_result = evaluate_pattern_compliance(code, test_case)
@@ -423,9 +429,9 @@ def evaluate_code(
     efficiency_score = efficiency_result.efficiency_score
 
     overall = (
-        weights["execution"] * execution_score
-        + weights["pattern"] * pattern_score
-        + weights["efficiency"] * efficiency_score
+        effective_weights["execution"] * execution_score
+        + effective_weights["pattern"] * pattern_score
+        + effective_weights["efficiency"] * efficiency_score
     )
 
     return CombinedEvaluation(

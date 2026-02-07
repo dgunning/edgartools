@@ -1,12 +1,24 @@
 """
-Company Research Tool Handler
+Company Research Tool Handler (DEPRECATED)
 
 Provides comprehensive company intelligence including profile,
 financials, recent activity, and ownership information.
+
+.. deprecated::
+    Use edgar.ai.mcp.tools.company (edgar_company) instead.
+    This handler will be removed in a future version.
 """
 
 import logging
+import warnings
 from typing import Any
+
+warnings.warn(
+    "edgar.ai.mcp.tools.company_research is deprecated. "
+    "Use edgar.ai.mcp.tools.company (edgar_company tool) instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from mcp.types import TextContent
 

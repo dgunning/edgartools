@@ -54,7 +54,11 @@ from edgar.ai.evaluation.test_cases import (
 
 def load_skill_context() -> str:
     """
-    Load the EdgarTools skill context from skill.yaml files.
+    Load the EdgarTools skill context from all skill.yaml files.
+
+    Loads core skill first, then all specialized skills (financials,
+    holdings, ownership, reports, xbrl) so the "with skills" condition
+    has access to the full skill library.
 
     Returns:
         Combined skill context as a string
@@ -62,25 +66,49 @@ def load_skill_context() -> str:
     from pathlib import Path
 
     skill_dir = Path(__file__).parent.parent / "skills"
+    parts = []
 
     # Load core skill first
     core_skill = skill_dir / "core" / "skill.yaml"
     if core_skill.exists():
-        context = core_skill.read_text()
-    else:
-        context = ""
+        parts.append(core_skill.read_text())
 
-    return context
+    # Load all other skill subdirectories
+    for subdir in sorted(skill_dir.iterdir()):
+        if subdir.is_dir() and subdir.name != "core":
+            skill_file = subdir / "skill.yaml"
+            if skill_file.exists():
+                parts.append(skill_file.read_text())
+
+    return "\n\n".join(parts)
 
 
 def get_minimal_context() -> str:
     """
-    Get minimal context (imports only) for without-skills condition.
+    Get realistic minimal context for the without-skills baseline.
+
+    Provides basic object descriptions so the baseline measures the marginal
+    value of full skill patterns, not "skills vs nothing."
 
     Returns:
-        Minimal import statement
+        Minimal but realistic EdgarTools context
     """
-    return "from edgar import Company, get_filings, get_current_filings, find"
+    return """EdgarTools is a Python library for SEC filing analysis.
+
+Key objects:
+- Company(ticker_or_cik): Look up a company. Properties: .cik, .name, .tickers, .sic
+- company.get_filings(form=...) -> Filings: Get filings, filterable by form type.
+  Use [0] for most recent. Use .head(n) for first n.
+- company.get_facts() -> EntityFacts: Get XBRL facts.
+  .income_statement(periods=N, annual=True/False)
+  .balance_sheet(periods=N, annual=True/False)
+  .cash_flow(periods=N, annual=True/False)
+- filing.obj() -> typed object (TenK, TenQ, EightK, etc.)
+- get_filings(form=...) -> recent filings across all companies
+- get_current_filings() -> today's filings, use .filter(form=...)
+- find(search_id=accession_number) -> Filing
+
+Imports: from edgar import Company, get_filings, get_current_filings, find"""
 
 
 # =============================================================================
@@ -388,6 +416,7 @@ class SkillTestRunner:
         self,
         test_ids: Optional[List[str]] = None,
         runs_per_condition: int = 1,
+        diagnose: bool = False,
     ) -> ABComparison:
         """
         Run A/B comparison between with-skills and without-skills.
@@ -395,6 +424,7 @@ class SkillTestRunner:
         Args:
             test_ids: List of test IDs to test (uses all if None)
             runs_per_condition: Number of runs per condition (for variance)
+            diagnose: Whether to run constitution diagnostics after evaluation
 
         Returns:
             ABComparison with detailed results
@@ -438,6 +468,19 @@ class SkillTestRunner:
         }
 
         print("\n" + comparison.summary())
+
+        # Run constitution diagnostics if requested
+        if diagnose:
+            from edgar.ai.evaluation.diagnostics import run_constitution_diagnostics
+
+            print("\n[Running constitution diagnostics...]")
+            diag_report = run_constitution_diagnostics(comparison)
+            diag_report.print_report()
+
+            # Attach to comparison metadata
+            if not hasattr(comparison, 'metadata') or comparison.metadata is None:
+                comparison.metadata = {}
+            comparison.metadata["constitution_diagnostics"] = diag_report.to_dict()
 
         return comparison
 
@@ -559,6 +602,12 @@ class SkillTestRunner:
             "suggestions": self.analyze_for_improvements(comparison),
         }
 
+        # Include constitution diagnostics if present
+        if hasattr(comparison, 'metadata') and comparison.metadata:
+            diag = comparison.metadata.get("constitution_diagnostics")
+            if diag:
+                data["constitution_diagnostics"] = diag
+
         filepath.write_text(json.dumps(data, indent=2))
         print(f"\nResults saved to: {filepath}")
 
@@ -593,6 +642,11 @@ def main():
         help="Directory to save results",
     )
     parser.add_argument(
+        "--diagnose",
+        action="store_true",
+        help="Run constitution diagnostics after evaluation",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Show what would be run without calling API",
@@ -611,7 +665,10 @@ def main():
         return
 
     runner = SkillTestRunner(model=args.model)
-    comparison = runner.run_ab_comparison(test_ids=args.test_ids)
+    comparison = runner.run_ab_comparison(
+        test_ids=args.test_ids,
+        diagnose=args.diagnose,
+    )
 
     # Show improvement suggestions
     print("\n" + "=" * 60)

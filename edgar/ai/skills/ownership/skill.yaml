@@ -12,7 +12,7 @@ patterns:
     code: |
       filing = company.get_filings(form="4")[0]
       form4 = filing.obj()
-      summary = form4.get_ownership_summary()
+      summary = form4.get_ownership_summary()  # Returns ONE TransactionSummary object
 
       summary.insider_name              # "Tim Cook"
       summary.position                  # "CEO"
@@ -21,6 +21,10 @@ patterns:
       summary.net_value                 # Net dollar value
       summary.primary_activity          # "Purchase", "Sale", "Mixed", "Grant/Award"
       summary.remaining_shares          # Shares owned after transaction
+    note: |
+      get_ownership_summary() returns a SINGLE TransactionSummary object, NOT a list.
+      Do NOT iterate over it. Access properties directly: summary.insider_name, summary.net_value, etc.
+      For individual transactions within a filing, use summary.transactions (see below).
 
   - name: Individual Transactions
     when: Need transaction-level details

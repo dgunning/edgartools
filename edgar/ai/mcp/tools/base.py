@@ -207,15 +207,15 @@ def resolve_company(identifier: str):
         if cleaned.upper() != cleaned:
             try:
                 return Company(cleaned.upper())
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"Uppercase lookup failed for '{cleaned}': {e}")
 
         # Try removing leading zeros for CIK
         if cleaned.isdigit():
             try:
                 return Company(str(int(cleaned)))
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"CIK lookup failed for '{cleaned}': {e}")
 
         raise ValueError(
             f"Could not find company: '{identifier}'. "

@@ -146,13 +146,9 @@ async def _get_filing(
     if accession_number:
         # Direct lookup by accession number
         try:
-            # Handle both formats: with and without dashes
-            clean_accession = accession_number.replace("-", "")
-            # Try the Filing constructor
             return find(search_id=accession_number)
-        except Exception:
-            # Try fetching from company filings if direct lookup fails
-            pass
+        except Exception as e:
+            logger.debug(f"Direct accession lookup failed for '{accession_number}': {e}")
 
     if identifier and form:
         # Get most recent filing of this type for company
@@ -193,8 +189,8 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
         try:
             if hasattr(filing, 'text'):
                 extracted["raw_text_preview"] = truncate_text(filing.text(), max_chars=4000)
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Could not get raw text fallback: {e}")
 
     return extracted
 
