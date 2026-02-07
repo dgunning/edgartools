@@ -20,12 +20,6 @@ from edgar.ai.mcp.tools.base import (
     call_tool_handler,
 )
 
-# Keep legacy utilities for backwards compatibility
-from edgar.ai.mcp.tools.utils import (
-    check_output_size,
-    format_error_with_suggestions,
-)
-
 __all__ = [
     # Registry
     "TOOLS",
@@ -39,7 +33,4 @@ __all__ = [
     "tool",
     # Utilities
     "resolve_company",
-    # Legacy
-    "check_output_size",
-    "format_error_with_suggestions",
 ]
