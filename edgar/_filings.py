@@ -1691,6 +1691,10 @@ class Filing:
 
             Otherwise, save to the file passed in
         """
+        # Ensure SGML content is loaded before pickling so the saved file
+        # is self-contained and doesn't require network access on load
+        self.sgml()
+
         filing_path = Path(directory_or_file)
         if filing_path.is_dir():
             filing_path = filing_path / f"{self.accession_no}.pkl"
@@ -1699,7 +1703,7 @@ class Filing:
 
     @classmethod
     def load(cls, path: PathLike):
-        """Load a filing from a json file"""
+        """Load a filing from a pickle file"""
         path = Path(path)
         with path.open("rb") as file:
             return pickle.load(file)

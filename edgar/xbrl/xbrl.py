@@ -58,7 +58,7 @@ class XBRLAttachments:
                 if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(
                         ('.xml', '.XML')):
                     content = attachment.content
-                    if '<xbrl' in content[:2000]:
+                    if content and '<xbrl' in content[:2000]:
                         self._documents['instance'] = attachment
                 elif attachment.document_type == 'EX-101.SCH':
                     self._documents['schema'] = attachment
