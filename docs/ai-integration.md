@@ -1,412 +1,34 @@
-# AI Integration Guide
+# AI Integration
 
-EdgarTools is designed from the ground up to work seamlessly with AI agents and Large Language Models (LLMs). This guide covers all AI-native features and best practices for integrating EdgarTools with your AI applications.
+EdgarTools provides two AI integration features:
 
-## Table of Contents
+1. **MCP Server** -- Gives Claude Desktop (and other MCP clients) direct access to SEC filing data through five specialized tools
+2. **Skills** -- Teaches Claude how to write better EdgarTools code by providing structured patterns and best practices
 
-- [Overview](#overview)
-- [Interactive Documentation (.docs Property)](#interactive-documentation-docs-property)
-- [AI-Optimized Text Output (.text() Methods)](#ai-optimized-text-output-text-methods)
-- [AI Skills System](#ai-skills-system)
-- [Model Context Protocol (MCP) Server](#model-context-protocol-mcp-server)
-- [Helper Functions](#helper-functions)
-- [Best Practices](#best-practices)
-- [Token Optimization](#token-optimization)
-
-## Overview
-
-EdgarTools provides three levels of AI integration:
-
-1. **Interactive Documentation**: Rich, searchable docs via `.docs` property
-2. **Token-Efficient Text Export**: AI-optimized context via `.text()` methods
-3. **Specialized Skills**: Curated workflows for AI agents via Skills system
-4. **MCP Integration**: Native support for Claude Desktop and MCP clients
-
-All AI features are **optional dependencies**:
-
-```bash
-# Install with AI features
-pip install "edgartools[ai]"
-
-# Core EdgarTools works without AI dependencies
-pip install edgartools
-```
-
-## Interactive Documentation (.docs Property)
-
-Every major EdgarTools object includes comprehensive API documentation accessible via the `.docs` property.
-
-### Basic Usage
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-
-# Display rich documentation in terminal
-company.docs
-```
-
-This displays beautifully formatted documentation with:
-- Complete API reference (methods, parameters, return types)
-- Usage examples
-- Best practices
-- Related concepts
-
-### Searching Documentation
-
-Use BM25 semantic search to find relevant information instantly:
-
-```python
-# Search for specific functionality
-results = company.docs.search("get financials")
-
-# Search returns ranked results
-for result in results:
-    print(result)
-```
-
-### Available Documentation
-
-Documentation is available on these objects:
-
-| Object | Documentation Size | Coverage |
-|--------|-------------------|----------|
-| `Company` | ~1,070 lines | Complete class reference |
-| `EntityFiling` | ~557 lines | Filing access methods |
-| `EntityFilings` | ~671 lines | Collection operations |
-| `XBRL` | ~587 lines | XBRL parsing and statements |
-| `Statement` | ~567 lines | Financial statement operations |
-
-**Total: 3,450+ lines of comprehensive API documentation**
-
-### Documentation Structure
-
-Each documentation file includes:
-
-```markdown
-# Class Overview
-Brief description and purpose
-
-## Key Concepts
-Important concepts and terminology
-
-## Basic Usage
-Quick start examples
-
-## Methods
-### method_name(param1, param2)
-Description, parameters, returns, examples
-
-## Properties
-### property_name
-Description, return type, examples
-
-## Advanced Usage
-Complex scenarios and patterns
-
-## Common Patterns
-Frequently used workflows
-
-## Examples
-Real-world usage examples
-```
-
-## AI-Optimized Text Output (.text() Methods)
-
-The `.text()` method provides token-efficient context optimized for LLM consumption.
-
-### Basic Usage
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-
-# Get AI-optimized context output
-context = company.to_context()
-print(context)
-```
-
-> **Note**: The older `company.text()` method is deprecated. Use `company.to_context()` for consistent naming across all EdgarTools classes.
-
-### Token Control
-
-Control output size for LLM context windows:
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-
-# Default output (~2000 tokens max)
-context = company.to_context()
-
-# Limit to specific token count
-context = company.to_context(max_tokens=500)
-
-# Smaller context for constrained windows
-minimal_context = company.to_context(max_tokens=200)
-```
-
-### Detail Levels
-
-Most objects support progressive disclosure via the `detail` parameter:
-
-```python
-from edgar import Company
-
-company = Company("AAPL")
-
-# Minimal - Just the essentials (~100-150 tokens)
-minimal = company.to_context(detail='minimal')
-
-# Standard - Adds industry, actions (~250-350 tokens) [default]
-standard = company.to_context(detail='standard')
-
-# Full - Adds addresses, contact info (~500+ tokens)
-full = company.to_context(detail='full')
-
-# Optional: Override with max_tokens limit
-limited = company.to_context(detail='full', max_tokens=200)
-```
-
-**Objects supporting `detail` parameter:**
-- `Company.to_context(detail='standard')`
-- `Filing.to_context(detail='standard')`
-- `Filings.to_context(detail='standard')`
-- `EntityFilings.to_context(detail='standard')`
-
-**Objects using `max_tokens` only:**
-- `XBRL.to_context(max_tokens=2000)`
-- `Statement.text(max_tokens=...)`
-
-### Output Format: Markdown-KV
-
-EdgarTools uses **markdown-kv format** (research-backed as optimal for LLM comprehension):
-
-```markdown
-## Company Information
-name: Apple Inc.
-ticker: AAPL
-cik: 0000320193
-sic: 3571 - Electronic Computers
-
-## Recent Financials
-revenue_fy2023: $383,285,000,000
-net_income_fy2023: $96,995,000,000
-```
-
-**Why markdown-kv?**
-- Research shows it's most effective for LLM understanding
-- Combines human readability with machine parseability
-- Preserves hierarchical structure
-- Token-efficient compared to JSON or prose
-
-### Available Text Methods
-
-```python
-# Company context (supports detail parameter)
-company_text = company.to_context(detail='standard')
-
-# Filing context (supports detail parameter)
-filing = company.get_filings(form="10-K").latest()
-filing_text = filing.to_context(detail='standard')
-
-# XBRL context (uses max_tokens)
-xbrl = filing.xbrl()
-xbrl_text = xbrl.to_context(max_tokens=1000)
-
-# Statement context
-income = xbrl.statements.income_statement()
-statement_text = income.text()
-```
-
-## AI Skills System
-
-Skills package documentation and helper functions for specialized SEC analysis.
-
-### Listing Available Skills
-
-```python
-from edgar.ai import list_skills
-
-# Get all available skills
-skills = list_skills()
-print(skills)
-# [EdgarToolsSkill(name='EdgarTools')]
-```
-
-### Getting a Specific Skill
-
-```python
-from edgar.ai import get_skill
-
-skill = get_skill("EdgarTools")
-print(skill)
-# Skill: EdgarTools
-# Description: Query and analyze SEC filings and financial statements...
-# Documents: 4
-# Helper Functions: 5
-```
-
-### Using Helper Functions
-
-Skills provide pre-built workflow wrappers:
-
-```python
-# Get helper functions from skill
-helpers = skill.get_helpers()
-
-# Use helper function for common workflow
-get_revenue_trend = helpers['get_revenue_trend']
-income = get_revenue_trend("AAPL", periods=3)
-print(income)
-```
-
-### Available Helper Functions
-
-The EdgarTools skill includes:
-
-```python
-from edgar.ai.helpers import (
-    get_filings_by_period,      # Get published filings for specific quarter
-    get_today_filings,           # Get recent filings (last ~24 hours)
-    get_revenue_trend,           # Get multi-period income statement
-    get_filing_statement,        # Get statement from specific filing
-    compare_companies_revenue,   # Compare revenue across companies
-)
-
-# Get filings for Q1 2023
-filings = get_filings_by_period(2023, 1, form="10-K")
-
-# Get today's filings
-current = get_today_filings()
-
-# Get 3-year revenue trend
-income = get_revenue_trend("AAPL", periods=3)
-
-# Get specific statement
-balance = get_filing_statement("AAPL", 2023, "10-K", "balance")
-
-# Compare companies
-comparison = compare_companies_revenue(["AAPL", "MSFT", "GOOGL"], periods=3)
-```
-
-### Skill Documentation
-
-Access skill documentation:
-
-```python
-# List available documents
-docs = skill.get_documents()
-print(docs)
-# ['skill', 'objects', 'workflows', 'readme']
-
-# Get specific document content
-skill_content = skill.get_document_content("skill")
-print(skill_content)
-```
-
-### Exporting Skills
-
-Export skills for use with AI tools like Claude Desktop and Claude Code.
-
-#### Simple API (Recommended)
-
-```python
-from edgar.ai import install_skill, package_skill
-
-# Install to ~/.claude/skills/ for automatic discovery
-install_skill()
-# Output: /Users/username/.claude/skills/edgartools
-
-# Create ZIP for Claude Desktop upload
-package_skill()
-# Output: edgartools.zip (ready to upload)
-
-# Custom locations
-install_skill(to="~/my-skills")
-package_skill(output="~/Desktop")
-```
-
-#### Advanced API
-
-```python
-from edgar.ai import export_skill, edgartools_skill
-
-# Official Claude Skills format (installs to ~/.claude/skills/)
-path = export_skill(
-    edgartools_skill,
-    format="claude-skills"  # Default format
-)
-
-# Claude Desktop upload format (creates ZIP with SKILL.md)
-zip_path = export_skill(
-    edgartools_skill,
-    format="claude-desktop"
-)
-
-# Export to custom location
-path = export_skill(
-    edgartools_skill,
-    format="claude-skills",
-    output_dir="~/my-skills",
-    install=False
-)
-```
-
-#### Export Formats
-
-**claude-skills** (Official Anthropic Format):
-- Installs to `~/.claude/skills/` by default
-- Main file: `SKILL.md` (uppercase, per Anthropic spec)
-- Includes all supporting markdown files
-- Includes API reference documentation in `api-reference/` directory
-- YAML frontmatter with name and description
-- Ready for Claude Desktop and Claude Code
-
-**claude-desktop** (Claude Desktop Upload Format):
-- Creates ZIP file by default (required by Claude Desktop upload UI)
-- Main file: `SKILL.md` (uppercase, per Anthropic spec)
-- All supporting files and API reference included
-- Ready for upload via Claude Desktop's skill upload interface
-- Can export as directory with `create_zip=False`
-
-Exported skills include:
-- Tutorial documentation (skill.md/SKILL.md, workflows.md, objects.md)
-- API reference documentation (api-reference/ directory)
-- YAML frontmatter for tool integration
-- Helper function documentation
-
-## Model Context Protocol (MCP) Server
-
-Run EdgarTools as an MCP server for Claude Desktop and other MCP clients.
-
-### Installation
+Both are optional. Install with:
 
 ```bash
 pip install "edgartools[ai]"
 ```
 
-### Starting the Server
+## MCP Server
 
-```bash
-# Start MCP server
-python -m edgar.ai
+The [Model Context Protocol](https://modelcontextprotocol.io/) server allows Claude Desktop to query SEC filing data directly -- no code required.
 
-# The server will start and wait for MCP client connections
-```
+### Setup
 
-### Claude Desktop Configuration
+**1. Configure Claude Desktop**
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Add to your Claude Desktop config file:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python",
+      "command": "python3",
       "args": ["-m", "edgar.ai"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
@@ -416,406 +38,246 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-**Important**: The `EDGAR_IDENTITY` environment variable is required by SEC regulations.
+Replace `Your Name your.email@example.com` with your actual name and email. The SEC requires this to identify API users.
 
-### Available MCP Tools
+On Windows, use `python` instead of `python3`.
 
-Once configured, Claude Desktop can use these tools:
+**2. Verify**
 
-1. **edgar_company_research** - Get comprehensive company intelligence
-   - Company profile and metadata
-   - 3-year financial trends
-   - Last 5 filings
-   - Recent activity summary
-
-2. **edgar_analyze_financials** - Detailed financial statement analysis
-   - Income statement, balance sheet, or cash flow
-   - Annual or quarterly periods
-   - Multi-period trend analysis
-
-### Example Prompts
-
-After configuring the MCP server, try these prompts in Claude Desktop:
-
+```bash
+python -m edgar.ai --test
 ```
-"Research Apple Inc with financials"
 
-"Analyze Tesla's revenue trends over the last 4 quarters"
+**3. Restart Claude Desktop.** You should see the MCP tools icon in the chat input.
 
-"Compare Microsoft and Google's cash flow statements"
+### Available Tools
 
-"Get Nvidia's balance sheet trends for the past 3 years"
+#### edgar_company
 
-"Show me today's 10-K filings"
-```
+Get company profile, financials, recent filings, and ownership in one call.
+
+| Parameter | Description |
+|-----------|-------------|
+| `identifier` | Ticker, CIK, or company name (required) |
+| `include` | Sections to return: `profile`, `financials`, `filings`, `ownership` |
+| `periods` | Number of financial periods (default: 4) |
+| `annual` | Annual vs quarterly data (default: true) |
+
+**Try asking Claude:**
+
+- "Show me Apple's profile and latest financials"
+- "Get Microsoft's recent filings and ownership data"
+
+#### edgar_search
+
+Search for companies or filings.
+
+| Parameter | Description |
+|-----------|-------------|
+| `query` | Search keywords (required) |
+| `search_type` | `companies`, `filings`, or `all` |
+| `identifier` | Limit to a specific company |
+| `form` | Filter by form type (e.g., `10-K`, `8-K`) |
+| `limit` | Max results (default: 10) |
+
+**Try asking Claude:**
+
+- "Search for semiconductor companies"
+- "Find Apple's 10-K filings"
+
+#### edgar_filing
+
+Read filing content or specific sections.
+
+| Parameter | Description |
+|-----------|-------------|
+| `accession_number` | SEC accession number |
+| `identifier` + `form` | Alternative: company + form type |
+| `sections` | `summary`, `business`, `risk_factors`, `mda`, `financials`, or `all` |
+
+**Try asking Claude:**
+
+- "Show me the risk factors from Apple's latest 10-K"
+- "Get the MD&A section from Tesla's most recent annual report"
+
+#### edgar_compare
+
+Compare companies side-by-side or analyze an industry.
+
+| Parameter | Description |
+|-----------|-------------|
+| `identifiers` | List of tickers/CIKs to compare |
+| `industry` | Alternative: industry name |
+| `metrics` | Metrics to compare (e.g., `revenue`, `net_income`) |
+| `periods` | Number of periods (default: 4) |
+
+**Try asking Claude:**
+
+- "Compare Apple, Microsoft, and Google on revenue and net income"
+- "How do the top semiconductor companies compare?"
+
+#### edgar_ownership
+
+Insider transactions, institutional holders, or fund portfolios.
+
+| Parameter | Description |
+|-----------|-------------|
+| `identifier` | Ticker, CIK, or fund CIK (required) |
+| `analysis_type` | `insiders`, `institutions`, or `fund_portfolio` |
+| `days` | Lookback period for insider trades (default: 90) |
+| `limit` | Max results (default: 20) |
+
+**Try asking Claude:**
+
+- "Show me recent insider transactions at Apple"
+- "Who are Tesla's largest institutional holders?"
+- "What stocks does Berkshire Hathaway hold?"
 
 ### Other MCP Clients
 
-EdgarTools MCP server works with any MCP-compatible client:
+The server works with any MCP-compatible client. Use the same configuration format:
 
-- **Claude Desktop** (MacOS/Windows)
-- **Cline** (VS Code extension)
-- **Continue.dev** (IDE integration)
-- Any other MCP v1.0 compatible client
+**Cline (VS Code)**: Add to your Cline MCP settings
 
-See [MCP Quickstart](../edgar/ai/mcp/docs/MCP_QUICKSTART.md) for complete setup instructions.
+**Continue.dev**: Add to `~/.continue/config.json`
 
-## Helper Functions
-
-Pre-built functions for common SEC analysis workflows.
-
-### Filing Access Helpers
-
-```python
-from edgar.ai.helpers import get_filings_by_period, get_today_filings
-
-# Get published filings for specific period
-filings = get_filings_by_period(
-    year=2023,
-    quarter=1,
-    form="10-K",
-    filing_date=None  # Optional: filter by specific date
-)
-
-# Get current filings (last ~24 hours)
-current = get_today_filings()
-print(f"Found {len(current)} recent filings")
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python3",
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
 ```
 
-### Financial Analysis Helpers
+## Skills
+
+Skills are structured documentation packages that teach Claude how to write better EdgarTools code. They guide Claude to use the right APIs, avoid common mistakes, and follow best practices.
+
+### What Do Skills Do?
+
+Without skills, Claude might write verbose code using low-level APIs:
 
 ```python
-from edgar.ai.helpers import (
-    get_revenue_trend,
-    get_filing_statement,
-    compare_companies_revenue
-)
-
-# Get revenue trend analysis
-income = get_revenue_trend(
-    ticker="AAPL",
-    periods=3,
-    quarterly=False  # Set True for quarterly data
-)
-
-# Get specific statement from filing
-balance = get_filing_statement(
-    ticker="AAPL",
-    year=2023,
-    form="10-K",
-    statement_type="balance"  # or "income", "cash_flow"
-)
-
-# Compare companies
-comparison = compare_companies_revenue(
-    tickers=["AAPL", "MSFT", "GOOGL"],
-    periods=3
-)
-for ticker, income in comparison.items():
-    print(f"\n{ticker} Revenue Trend:")
-    print(income)
+# Without skills -- verbose, fragile
+facts = company.get_facts()
+income = facts.income_statement(periods=1, annual=True)
+if income is not None and not income.empty:
+    if 'Revenue' in income.columns:
+        revenue = income['Revenue'].iloc[0]
 ```
 
-## Best Practices
-
-### 1. Choose the Right Tool for the Job
+With skills, Claude writes idiomatic code:
 
 ```python
-# For interactive learning -> Use .docs
-company.docs.search("get filings")
-
-# For AI context -> Use .text()
-context = company.to_context(detail='standard')
-
-# For specialized workflows -> Use helpers
-from edgar.ai.helpers import get_revenue_trend
-income = get_revenue_trend("AAPL", periods=3)
-
-# For AI agents -> Use MCP server or Skills
+# With skills -- clean, correct
+financials = company.get_financials()
+revenue = financials.get_revenue()
 ```
 
-### 2. Use Progressive Disclosure
+Skills cover patterns, sharp edges (common mistakes), and API routing decisions across six domains.
+
+### Installing Skills
+
+**For Claude Code** (auto-discovered):
 
 ```python
-# Use detail parameter to control output level
-overview = company.to_context(detail='minimal')   # Quick overview (~100-150 tokens)
-standard = company.to_context(detail='standard')  # Balanced view (~250-350 tokens)
-detailed = company.to_context(detail='full')      # Comprehensive (~500+ tokens)
-
-# Same pattern works for filings
-filing = company.get_filings(form="10-K").latest()
-minimal = filing.to_context(detail='minimal')   # Just the essentials
-standard = filing.to_context(detail='standard') # Balanced view
-full = filing.to_context(detail='full')         # Everything
-
-# Optional: combine with max_tokens for hard limit
-limited = company.to_context(detail='full', max_tokens=200)
+from edgar.ai import install_skill
+install_skill()  # Installs to ~/.claude/skills/edgartools/
 ```
 
-### 3. Respect Token Limits
+**For Claude Desktop** (upload as project knowledge):
 
 ```python
-# Always specify max_tokens for LLM context
-context = company.to_context(max_tokens=500)
-
-# For multiple objects, budget tokens:
-company_context = company.to_context(max_tokens=300)
-filing_context = filing.text(max_tokens=200)
-total_context = company_context + "\n\n" + filing_context
-# Total: ~500 tokens
+from edgar.ai import package_skill
+package_skill()  # Creates edgartools.zip
 ```
 
-### 4. Cache Expensive Operations
+Upload the ZIP to a Claude Desktop Project.
 
-```python
-# Cache company objects
-from functools import lru_cache
+### Skill Domains
 
-@lru_cache(maxsize=100)
-def get_company(ticker: str):
-    return Company(ticker)
+| Domain | What It Covers |
+|--------|---------------|
+| **core** | Company lookup, filing search, API routing, quick reference |
+| **financials** | Financial statements, metrics, multi-company comparison |
+| **holdings** | 13F filings, institutional portfolios |
+| **ownership** | Insider transactions (Form 4), ownership summaries |
+| **reports** | 10-K, 10-Q, 8-K document sections |
+| **xbrl** | XBRL fact extraction, statement rendering |
 
-# Reuse cached company
-apple = get_company("AAPL")
-```
+### When to Use Which
 
-### 5. Use Entity Facts API for Multi-Period Data
+| I want to... | Use |
+|-------------|-----|
+| Ask Claude questions about companies/filings | MCP Server |
+| Have Claude write EdgarTools code for me | Skills |
+| Both | Install both -- they complement each other |
 
-```python
-# More efficient than fetching multiple filings
-company = Company("AAPL")
-income = company.income_statement(periods=3)
-# Single API call, ~500 tokens
+## Built-in AI Features
 
-# Less efficient:
-# filing1 = company.get_filings(form="10-K")[0]
-# filing2 = company.get_filings(form="10-K")[1]
-# filing3 = company.get_filings(form="10-K")[2]
-# 3 API calls, ~3,750 tokens
-```
+These work without the `[ai]` extra.
 
-## Token Optimization
+### .docs Property
 
-### Understanding Token Costs
-
-Approximate token sizes for common operations:
-
-| Operation | Tokens (approx) |
-|-----------|----------------|
-| `Company.to_context(detail='minimal')` | 100-150 |
-| `Company.to_context(detail='standard')` | 250-350 |
-| `Company.to_context(detail='full')` | 500+ |
-| `Filing.to_context(detail='minimal')` | 100-200 |
-| `Filing.to_context(detail='standard')` | 200-400 |
-| `Filing.to_context(detail='full')` | 400-800 |
-| `Statement.to_dataframe()` (3 periods) | 500-1000 |
-| `XBRL.to_context(max_tokens=500)` | ~500 |
-
-### Optimization Strategies
-
-**1. Use .head() to limit collections:**
-
-```python
-# Limit filing output
-filings = company.get_filings(form="10-K")
-print(filings.head(5))  # Only show 5 filings
-```
-
-**2. Prefer Entity Facts API:**
-
-```python
-# Efficient: Single API call
-income = company.income_statement(periods=3)  # ~500 tokens
-
-# Less efficient: Multiple filing accesses
-# ~3,750 tokens for 3 separate filings
-```
-
-**3. Filter before displaying:**
-
-```python
-# Filter first
-tech_companies = filings.filter(ticker=["AAPL", "MSFT", "GOOGL"])
-print(tech_companies)  # Much smaller output
-```
-
-**4. Use specific statements vs full XBRL:**
-
-```python
-# Efficient
-income = xbrl.statements.income_statement()  # ~1,250 tokens
-
-# Less efficient
-print(xbrl)  # Full XBRL object, ~2,500 tokens
-```
-
-**5. Control output size:**
-
-```python
-# Use detail parameter for progressive disclosure
-overview = company.to_context(detail='minimal')   # Quick overview
-analysis = company.to_context(detail='full')      # Complete details
-
-# Same pattern for filings
-filing_overview = filing.to_context(detail='minimal')
-filing_full = filing.to_context(detail='full')
-
-# Optional: hard limit with max_tokens
-limited = company.to_context(detail='full', max_tokens=200)
-```
-
-### Token Counting
-
-```python
-from edgar.ai.core import TokenOptimizer
-
-# Estimate tokens before sending to LLM
-content = company.to_context()
-token_count = TokenOptimizer.estimate_tokens(content)
-print(f"Estimated tokens: {token_count}")
-
-# Optimize for specific token limit
-optimized = TokenOptimizer.optimize_for_tokens(
-    content,
-    max_tokens=1000
-)
-```
-
-## Examples
-
-### Example 1: Building LLM Context
-
-```python
-from edgar import Company
-
-# Get company
-company = Company("AAPL")
-
-# Build multi-level context
-context_parts = []
-
-# 1. Company overview
-context_parts.append("# Company Overview")
-context_parts.append(company.to_context(detail='minimal'))
-
-# 2. Latest filing
-filing = company.get_filings(form="10-K").latest()
-context_parts.append("\n# Latest 10-K Filing")
-context_parts.append(filing.text(detail='standard', max_tokens=300))
-
-# 3. Financial statements
-xbrl = filing.xbrl()
-income = xbrl.statements.income_statement()
-context_parts.append("\n# Income Statement")
-context_parts.append(income.text(max_tokens=500))
-
-# Combine for LLM
-llm_context = "\n".join(context_parts)
-print(f"Total context: ~{len(llm_context.split())*1.3:.0f} tokens")
-```
-
-### Example 2: Interactive Documentation Assistant
+Every major EdgarTools object has a `.docs` property with searchable API documentation:
 
 ```python
 from edgar import Company
 
 company = Company("AAPL")
-
-# Search for relevant documentation
-query = "how do I get historical financials"
-results = company.docs.search(query)
-
-# Display top results
-print(f"Search results for: {query}\n")
-for i, result in enumerate(results[:3], 1):
-    print(f"{i}. {result}")
+company.docs                       # Full API reference
+company.docs.search("financials")  # Search for specific topics
 ```
 
-### Example 3: Batch Processing with Token Budget
+Available on: `Company`, `Filing`, `Filings`, `XBRL`, `Statement`
+
+### .to_context() Method
+
+Token-efficient output optimized for LLM context windows:
 
 ```python
-from edgar import get_filings
+company = Company("AAPL")
 
-# Get filings
-filings = get_filings(2023, 1, form="10-K")
+# Control detail level
+company.to_context(detail='minimal')    # ~100 tokens
+company.to_context(detail='standard')   # ~300 tokens (default)
+company.to_context(detail='full')       # ~500 tokens
 
-# Process with token budget
-token_budget = 5000
-tokens_used = 0
-
-results = []
-for filing in filings:
-    # Check token budget
-    filing_text = filing.text(detail='minimal')
-    estimated_tokens = len(filing_text.split()) * 1.3
-
-    if tokens_used + estimated_tokens > token_budget:
-        break
-
-    results.append(filing_text)
-    tokens_used += estimated_tokens
-
-print(f"Processed {len(results)} filings using ~{tokens_used:.0f} tokens")
+# Hard token limit
+company.to_context(max_tokens=200)
 ```
+
+Available on: `Company`, `Filing`, `Filings`, `XBRL`, `Statement`, and most data objects.
 
 ## Troubleshooting
 
-### Issue: "AI features not available"
+**"EDGAR_IDENTITY environment variable is required"**
 
-**Solution**: Install AI dependencies:
-```bash
-pip install "edgartools[ai]"
-```
+Add your name and email to the `env` section of your MCP config. The SEC requires identification for API access.
 
-### Issue: MCP server won't start
+**"Module edgar.ai not found"**
 
-**Solution**: Check that EDGAR_IDENTITY is set:
-```bash
-export EDGAR_IDENTITY="Your Name your.email@example.com"
-python -m edgar.ai
-```
+Install with AI extras: `pip install "edgartools[ai]"`
 
-### Issue: Documentation not displaying
+**"python3: command not found" (Windows)**
 
-**Solution**: Documentation requires optional AI dependencies. Install with:
-```bash
-pip install "edgartools[ai]"
-```
+Use `python` instead of `python3` in your MCP config.
 
-### Issue: Token counts seem high
+**MCP server not appearing in Claude Desktop**
 
-**Solution**: Use lower detail levels:
-```python
-# Instead of full detail:
-text = company.to_context(detail='full')
+1. Check the config file location is correct for your OS
+2. Validate JSON syntax
+3. Restart Claude Desktop completely (quit and relaunch)
+4. Run `python -m edgar.ai --test` to verify
 
-# Use minimal or standard:
-text = company.to_context(detail='minimal')   # ~100-150 tokens
-text = company.to_context(detail='standard')  # ~250-350 tokens
+**Skills not being picked up**
 
-# Or combine with max_tokens for hard limit:
-text = company.to_context(detail='full', max_tokens=200)
-```
-
-## Additional Resources
-
-- [EdgarTools Documentation](https://edgartools.readthedocs.io/)
-- [MCP Quickstart Guide](../edgar/ai/mcp/docs/MCP_QUICKSTART.md)
-- [AI Skills README](../edgar/ai/skills/core/readme.md)
-- [GitHub Issues](https://github.com/dgunning/edgartools/issues)
-- [GitHub Discussions](https://github.com/dgunning/edgartools/discussions)
-
-## Contributing
-
-We welcome contributions to improve AI integration:
-
-- Suggest new helper functions
-- Create specialized skills for external packages
-- Improve documentation
-- Report integration issues
-
-See [Contributing Guide](../CONTRIBUTING.md) for details.
-
----
-
-**Need Help?** Open an issue on [GitHub](https://github.com/dgunning/edgartools/issues) or start a [discussion](https://github.com/dgunning/edgartools/discussions).
+1. Verify installation: `ls ~/.claude/skills/edgartools/`
+2. For Claude Desktop, upload as ZIP to a Project instead
+3. Skills only affect code generation, not conversational responses
