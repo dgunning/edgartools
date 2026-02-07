@@ -1169,6 +1169,8 @@ class StatementResolver:
 
         # Issue #518: Special fallback for IncomeStatement -> ComprehensiveIncome
         # Many filings have ComprehensiveIncome instead of separate IncomeStatement
+        # Issue #608: Must validate that ComprehensiveIncome contains actual P&L data (Revenue)
+        # Some filings have two roles: one with P&L, one with pure OCI items
         if statement_type == 'IncomeStatement':
             # Try to find ComprehensiveIncome as a valid substitute
             comp_match = self._match_by_standard_name('ComprehensiveIncome')
@@ -1181,13 +1183,33 @@ class StatementResolver:
 
             if comp_match[0] and comp_match[2] > 0.6:
                 statements, role, conf = comp_match
-                # Issue #518: Return actual type (ComprehensiveIncome) for transparency and accuracy
-                # Users can check if they received a fallback by comparing requested vs actual type
-                if VERBOSE_EXCEPTIONS:
-                    log.info(f"IncomeStatement not found, using ComprehensiveIncome as fallback (confidence: {conf:.2f})")
-                result = (statements, role, 'ComprehensiveIncome', conf)
-                self._cache[cache_key] = result
-                return result
+
+                # Issue #608: Re-sort candidates by IncomeStatement criteria to prefer
+                # statements with P&L data (Revenue, Operating Income) over pure OCI statements
+                # This is critical when a filing has multiple ComprehensiveIncome roles
+                if len(statements) > 1:
+                    statements = sorted(
+                        statements,
+                        key=lambda s: self._score_statement_quality(s, 'IncomeStatement'),
+                        reverse=True
+                    )
+                    role = statements[0]['role']
+
+                # Issue #608: Validate the selected statement has P&L data before using as fallback
+                is_valid, validation_conf, reason = self._validate_statement(statements[0], 'IncomeStatement')
+                if not is_valid:
+                    # This ComprehensiveIncome statement doesn't have P&L data (e.g., pure OCI)
+                    # Continue to error handling - don't use it as a substitute
+                    if VERBOSE_EXCEPTIONS:
+                        log.debug(f"ComprehensiveIncome fallback rejected: {reason}")
+                else:
+                    # Issue #518: Return actual type (ComprehensiveIncome) for transparency and accuracy
+                    # Users can check if they received a fallback by comparing requested vs actual type
+                    if VERBOSE_EXCEPTIONS:
+                        log.info(f"IncomeStatement not found, using ComprehensiveIncome as fallback (confidence: {conf:.2f})")
+                    result = (statements, role, 'ComprehensiveIncome', conf)
+                    self._cache[cache_key] = result
+                    return result
 
         # No good match found, return best guess with low confidence
         statements, role, conf = self._get_best_guess(statement_type)

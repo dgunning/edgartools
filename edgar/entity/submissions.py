@@ -30,7 +30,8 @@ def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
     submissions_dir = get_edgar_data_directory() / "submissions"
     if not submissions_dir.exists():
         return None
-    submissions_file = submissions_dir / f"CIK{cik:010}.json"
+    cik_int = int(cik) if isinstance(cik, str) else cik
+    submissions_file = submissions_dir / f"CIK{cik_int:010}.json"
 
     # If file doesn't exist, download it
     if not submissions_file.exists():

@@ -5,6 +5,333 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [5.14.0] - 2026-02-03
+
+### Performance
+
+- **SGML Parser 10x Faster** — Rewrote SGML parser from line-by-line to offset scanning with lazy content references. Parse times drop from 52ms to 5.5ms for large filings (Apple 10-K, 9.3MB). Peak memory reduced 275x (23.4MB to 0.1MB). Form 4 parsing is 71x faster (96ms to 1.3ms) by removing a network call from header parsing.
+
+- **SGML Max File Size** — Raised max content size from 200MB to 500MB to handle large filings with embedded images.
+
+### Improved
+
+- **Entity Classification** — `is_individual` / `is_company` now uses a 9-signal priority chain for more accurate classification of SEC entities. Catches holding companies, old/inactive companies, and institutional investors that were previously misclassified as individuals. ([#624](https://github.com/dgunning/edgartools/issues/624))
+  - Insider transaction flags (`insiderTransactionForIssuerExists`) used as the strongest company signal
+  - Name-based heuristics detect company keywords (INC, CORP, LLC, FUND, etc.) with word-boundary matching to avoid false positives on personal names
+  - Ampersand (`&`) in entity names detected as a company/partnership signal
+  - Expanded recognized company forms from ~50 to 94 (adds small business, amendments, investment company, and proxy forms)
+
+### Fixed
+
+- **XBRL API Docs** — Corrected financials API examples in StatementType quick reference and quickstart docs. ([#580](https://github.com/dgunning/edgartools/issues/580), [#619](https://github.com/dgunning/edgartools/issues/619))
+
+- **Facts Query** — Added `is_dimensioned` column to facts query DataFrame output. ([#612](https://github.com/dgunning/edgartools/issues/612))
+
+## [5.13.1] - 2026-02-01
+
+### Fixed
+
+- **XBRL Fiscal Period Queries** — `get_facts_by_fiscal_period()` and `get_facts_by_fiscal_year()` now return data instead of empty DataFrames. Reporting periods were missing the `fiscal_year` and `fiscal_period` fields needed for these queries. ([#622](https://github.com/dgunning/edgartools/issues/622))
+
+- **13F Holdings Rendering** — Fixed crashes when issuer or ticker values contain NaN in holdings comparison and holdings history views.
+
+- **Entity Classification** — SC 13D filings no longer incorrectly classify an entity as a company.
+
+### Performance
+
+- **N-PORT Parsing 10x Faster** — Rewrote N-PORT fund report XML parsing from BeautifulSoup to lxml. Parse times drop from 2.4s to 245ms for large funds (3,800+ holdings). Memory usage reduced by 6x.
+
+- **CUSIP Ticker Resolution 10x Faster** — Replaced DataFrame lookups with dict-based resolution for CUSIP-to-ticker mapping. Eliminates noisy log warnings for placeholder CUSIPs used by foreign-domiciled securities.
+
+## [5.13.0] - 2026-01-29
+
+### Added
+
+- **13F Holdings Comparison**
+  - New `compare_holdings()` method for quarter-over-quarter analysis
+  - Returns `HoldingsComparison` view object with share and value deltas
+  - Status labels: NEW, CLOSED, INCREASED, DECREASED, UNCHANGED
+  - Includes percentage changes for both shares and values
+  - **Files**: `edgar/thirteenf/models.py`
+
+- **13F Holdings History**
+  - New `holding_history(periods=4)` method for multi-quarter trends
+  - Returns `HoldingsHistory` view object with up to 12 quarters of data
+  - Unicode sparkline visualization for trend analysis
+  - Automatic deduplication by report period
+  - **Files**: `edgar/thirteenf/models.py`, `edgar/thirteenf/rendering.py`
+
+- **13F View Objects**
+  - New `holdings_view()` method returns `HoldingsView` object
+  - All view objects are iterable (yield dicts), sliceable, and Rich-renderable
+  - View objects have `.data` property for underlying DataFrame access
+  - Configurable `display_limit` parameter for Rich rendering
+  - **Files**: `edgar/thirteenf/models.py`
+
+### Performance
+
+- **13F XML Parsing Optimization**
+  - Implemented lxml-based XML parser for 8x performance improvement
+  - Reduces parsing time from ~0.8s to ~0.1s for large filings
+  - Maintains backward compatibility with existing API
+  - **Files**: `edgar/thirteenf/parsers/infotable_xml.py`
+
+### Fixed
+
+- **13F Related Filings**
+  - Fixed `_related_filings` to filter only 13F forms
+  - Improved related filings scope and deduplication
+  - Updated test assertions for related filings behavior
+  - **Files**: `edgar/thirteenf/models.py`, `tests/test_thirteenf.py`
+
+- **13F Holdings Rendering**
+  - Fixed NaN handling in holdings display
+  - Fixed missing column handling in rendering logic
+  - Improved sparkline scaling with mean-centered ±50% range
+  - **Files**: `edgar/thirteenf/rendering.py`
+
+## [5.12.3] - 2026-01-29
+
+### Fixed
+
+- **Ticker/CIK Lookup Compatibility**
+  - Fixed CIK type conversion to work across different pandas/PyArrow versions
+  - Resolves `find_cik()` returning string CIKs instead of integers in some environments
+  - Fixes PyArrow conversion errors in GitHub Actions and other environments
+  - **Files**: `edgar/reference/tickers.py`
+  - **Issues**: #620, #621
+
+- **Data Staleness Warnings**
+  - Reduced false positive warnings when querying recent filings
+  - Refined warning threshold from 6 months to 5 days
+  - Simplified warning messages for clarity
+  - **Files**: `edgar/_filings.py`
+  - **Issues**: #620
+
+### Changed
+
+- **Reference Data Update**
+  - Updated company tickers from 10,196 to 10,532 companies (+336 new companies)
+  - Added recently public companies including DCX (CIK 1957413) and VTIX (CIK 1606242)
+  - Data is now 50 days fresher than previous version
+  - **Files**: `edgar/reference/data/company_tickers.parquet`
+  - **Issues**: #621
+
+## [5.12.2] - 2026-01-26
+
+### Fixed
+
+- **8-K Earnings Table Parsing**
+  - Fixed three bugs in earnings table dtype handling
+  - Handle pandas StringDtype columns correctly in earnings parser
+  - Prevent dtype errors when processing financial statement tables
+  - **Files**: `edgar/earnings.py`
+
+## [5.12.1] - 2026-01-25
+
+### Fixed
+
+- **Pandas Compatibility**
+  - Added pandas 3.0 compatibility while maintaining Python 3.10 support
+  - Fixed regex compatibility for pandas 2.1+ in date validation
+  - **Files**: `edgar/`, test files
+
+- **Date Handling**
+  - Fixed date comparison with NaN in pivot_by_period operations
+  - Prevents errors when handling missing date values in financial data
+  - **Files**: `edgar/` (pivot operations)
+
+- **Table Parsing**
+  - Improved column header extraction for tables without `<thead>` elements
+  - Fixed column header extraction for single-row table headers
+  - Handle split date rows in earnings table headers correctly
+  - **Files**: `edgar/earnings.py`, `edgar/documents/`
+
+- **Earnings Detection**
+  - Made `has_earnings` property consistent with `earnings` property behavior
+  - **Files**: `edgar/company_reports/current_report.py`
+
+- **Testing**
+  - Fixed mock attachments in issue 332 regression test
+  - Improved test mocks for pandas compatibility
+  - **Files**: test files
+
+### Changed
+
+- **Documentation**
+  - Removed website fields from docs (SEC API no longer provides this data)
+  - Fixed PeriodType documentation for clarity
+  - Improvements to README.md for better onboarding
+  - **Files**: `README.md`, `docs/`, docstrings
+
+## [5.12.0] - 2026-01-23
+
+### Added
+
+- **8-K Earnings Parser**
+  - New `edgar/earnings.py` module for extracting financial tables from 8-K earnings releases
+  - Uses Document parser to handle complex HTML table structures with colspan/rowspan patterns
+  - Automatic statement type classification (income statement, balance sheet, cash flow)
+  - Scale detection (units, thousands, millions, billions)
+  - Multiple output formats: `to_context()`, `to_html()`, `to_json()`, `to_markdown()`
+  - Token-efficient context generation with minimal/standard/full detail levels for AI analysis
+  - EightK integration: `has_earnings`, `earnings` property, statement shortcuts
+  - Safe accessors: `get_income_statement()`, `get_balance_sheet()`, `get_cash_flow_statement()`
+  - **Files**: `edgar/earnings.py`, `edgar/company_reports/current_report.py`
+
+- **Business Development Company (BDC) Support**
+  - Comprehensive BDC module for analyzing closed-end investment companies
+  - `BDCEntity` class for individual BDC analysis with filings and SOI access
+  - `BDCEntities` collection with `get_by_cik()` and `get_by_ticker()` methods
+  - `PortfolioInvestment` model for individual holdings with PIK rate support
+  - Facts-based extraction for portfolio investments
+  - Cross-BDC portfolio company search to find which BDCs hold a specific company
+  - SEC DERA BDC Data Sets integration
+  - Fuzzy search for BDCs by name or ticker
+  - `is_active` property and visual status indicators
+  - `DataQuality` metrics and data availability checks
+  - **Files**: `edgar/bdc/` module
+
+### Fixed
+
+- **Financials Dimension Parameter**
+  - Fixed the default for the dimension parameter when passed from the financials object
+  - **Files**: `edgar/financials.py`
+
+- **HTTP Error Handling**
+  - Improved `TooManyRequestsError` with actionable guidance for users
+  - Added `RemoteProtocolError` to retryable exceptions for bulk downloads
+  - **Files**: `edgar/httprequests.py`
+
+### Changed
+
+- **Dependencies**
+  - Upgraded `httpxthrottlecache` from >=0.1.6 to >=0.3.0
+  - Removed `hishel` dependency (no longer needed in httpxthrottlecache v0.3.0)
+  - httpxthrottlecache v0.3.0 uses FileCache as default backend instead of Hishel
+  - Better suited for Edgar's large immutable file downloads
+  - **Files**: `pyproject.toml`, `docs/configuration.md`
+
+- **Performance Improvements**
+  - Improved HTTP connection reuse and bulk download timeouts
+  - Increased maximum document size when streaming HTML
+  - **Files**: `edgar/httprequests.py`
+
+- **Reference Data**
+  - Updated CUSIP-Ticker mappings for December 2025
+  - **Files**: `edgar/reference/data/`
+
+## [5.11.2] - 2026-01-22
+
+### Fixed
+
+- **EntityFacts Revenue Extraction**
+  - Fixed `get_revenue()` and other financial methods returning None for companies like TSLA
+  - Root cause: Abstract header rows matched label patterns before actual data rows
+  - Solution: Added concept-based search using standardization mappings, filters abstract rows
+  - Now uses XBRL concept names (e.g., `us-gaap_RevenueFromContractWithCustomer...`) instead of fragile label matching
+  - Falls back to label-based search for edge cases
+  - **Files**: `edgar/financials.py`
+
+- **Amended Filing Handling**
+  - Fixed `latest_tenk` and `latest_tenq` returning amended filings (10-K/A, 10-Q/A) which often lack complete XBRL data
+  - Solution: Added `amendments=False` filter to exclude amended filings
+  - **Files**: `edgar/entity/core.py`
+
+### Changed
+
+- **⚠️ BEHAVIORAL CHANGE: EntityFacts Default Period Selection**
+  - **EntityFacts financial methods now default to annual (FY) periods instead of most recent**
+  - Affected methods: `get_revenue()`, `get_net_income()`, `get_total_assets()`, `get_total_liabilities()`, `get_shareholders_equity()`, `get_operating_income()`, `get_gross_profit()`, and their `_detailed()` variants
+  - **Before**: `facts.get_revenue()` returned most recent fact (could be quarterly Q3 data)
+  - **After**: `facts.get_revenue()` returns most recent annual FY data (falls back to most recent if no annual available)
+  - **Migration**:
+    - To get the old behavior (most recent regardless of period): `facts.get_revenue(annual=False)`
+    - To explicitly request quarterly: `facts.get_revenue(period="2024-Q3")`
+    - To explicitly request annual: `facts.get_revenue(period="2024-FY")` or `facts.get_revenue(annual=True)` (default)
+  - **Rationale**: Annual facts are more meaningful for financial analysis and consistent with `get_financials()` behavior
+  - **Files**: `edgar/entity/entity_facts.py`
+
+- **Dependencies**
+  - Pinned `pyrate-limiter` to version 3.9.0 to avoid API breakage in 4.0
+  - **Files**: `pyproject.toml`
+
+## [5.11.1] - 2026-01-21
+
+### Fixed
+
+- **Timezone Handling**
+  - Replaced pytz with stdlib zoneinfo for timezone handling
+  - Removed undeclared pytz dependency
+  - Uses standard library for better compatibility
+  - **Files**: `edgar/` (various timezone-related files)
+
+- **Pandas 3.0 Compatibility**
+  - Pinned pandas to <3.0 to avoid breaking changes
+  - Fixed NaN handling in balance tests
+  - Ensures stability until pandas 3.0 migration is complete
+  - **Files**: `pyproject.toml`, test files
+
+- **Income Statement Selection** (Issue #608)
+  - Fixed incorrect income statement selection when multiple ComprehensiveIncome roles exist
+  - Resolves issue where OCI (Other Comprehensive Income) items were returned instead of P&L data
+  - Affects companies like STZ (Constellation Brands) with complex financial statement structures
+  - **Files**: `edgar/xbrl/statements.py` or related XBRL parsing files
+
+## [5.11.0] - 2026-01-20
+
+### Added
+
+- **Trailing Twelve Months (TTM) Calculations**
+  - Added comprehensive TTM calculations integrated into Company class
+  - Automatic Q4 derivation from annual and quarterly data
+  - Stock split adjustment support for accurate historical comparisons
+  - Robust input validation and data quality handling
+  - Methods for calculating TTM metrics from EntityFacts
+  - **Files**: `edgar/entity/ttm.py`, `edgar/entity/core.py`
+
+- **XBRL Concept Discovery**
+  - Added `list_concepts()` method to Company class for exploring available XBRL concepts
+  - New `ConceptList` class with rich display formatting for concept browsing
+  - Enables users to discover what financial data is available before querying
+  - **Files**: `edgar/entity/core.py`
+
+- **Currency Conversion for Foreign Filers**
+  - Added `CurrencyConverter` utility class for handling IFRS and foreign currency filings
+  - Supports automatic conversion of foreign currencies to USD
+  - Essential for analyzing international companies and IFRS reporters
+  - **Files**: `edgar/xbrl/currency.py`
+
+- **Rule 10b5-1 Trading Plan Detection**
+  - Added detection of Rule 10b5-1 trading plans in insider transactions
+  - Identifies pre-arranged trading plans vs. discretionary trades
+  - Enhanced transparency for insider trading analysis
+  - **Files**: `edgar/insider_transactions.py`
+
+- **Expanded Industry Classification**
+  - Expanded SIC code ranges for banking, healthcare, and energy industries
+  - Improved industry categorization accuracy
+  - Better support for sector-specific analysis
+  - **Files**: `edgar/reference/data/sic_ranges.py`
+
+### Fixed
+
+- **TTM Calculation Robustness**
+  - Added comprehensive input validation for TTM calculations
+  - Fixed division by zero and None comparison edge cases
+  - Replaced bare Exception catches with specific exception types
+  - Improved error messages and data quality handling
+  - **Files**: `edgar/entity/ttm.py`
+
+### Changed
+
+- **Test Coverage Requirements**
+  - Lowered coverage threshold to 65% to accommodate new experimental features
+  - Allows for faster feature development while maintaining core stability
+  - **Files**: `pyproject.toml`
+
 ## [5.10.1] - 2026-01-17
 
 ### Fixed

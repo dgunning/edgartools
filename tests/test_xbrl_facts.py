@@ -109,7 +109,7 @@ def test_xbrl_query(intc_xbrl: XBRL):
 
     df = (intc_xbrl.query(include_dimensions=False)
           .by_concept("Revenue").to_dataframe())
-    assert not any('dim' in col for col in df.columns)
+    assert not any('dim' in col for col in df.columns if col != 'is_dimensioned')
 
 
 def test_query_by_label_with_standardization():
@@ -286,7 +286,7 @@ def test_query_by_dimension_none(aapl_xbrl):
              .by_dimension(None)
              )
     print(facts.to_dataframe().columns.tolist())
-    assert not any('dim' in col for col in facts.to_dataframe().columns)
+    assert not any('dim' in col for col in facts.to_dataframe().columns if col != 'is_dimensioned')
 
 
 def test_flexible_dimension_matching(aapl_xbrl):

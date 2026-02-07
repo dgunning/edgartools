@@ -757,7 +757,7 @@ class Company(Entity):
 
     @property
     def latest_tenk(self) -> Optional[TenK]:
-        """Get the latest 10-K filing for this company."""
+        """Get the latest unamended 10-K filing for this company."""
         latest_10k = self.get_filings(form='10-K', amendments=False, trigger_full_load=False).latest()
         if latest_10k is not None:
             return latest_10k.obj()
@@ -765,7 +765,7 @@ class Company(Entity):
 
     @property
     def latest_tenq(self) -> Optional[TenQ]:
-        """Get the latest 10-Q filing for this company."""
+        """Get the latest unamended 10-Q filing for this company."""
         latest_10q = self.get_filings(form='10-Q', amendments=False, trigger_full_load=False).latest()
         if latest_10q is not None:
             return latest_10q.obj()
@@ -1598,7 +1598,7 @@ class Company(Entity):
         subtitle_parts = [cik_text(self.cik)]
 
         # Add exchange if available
-        if hasattr(self.data, 'exchanges') and self.data.exchanges:
+        if hasattr(self.data, 'exchanges') and self.data.exchanges and self.data.exchanges[0]:
             subtitle_parts.append(Text(self.data.exchanges[0], style=get_style("value")))
 
         # Add simplified category

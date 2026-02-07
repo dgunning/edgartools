@@ -13,8 +13,13 @@ Design Principles:
 """
 
 from typing import Optional
+from rich.console import Console
+from rich.padding import Padding
 from rich.style import Style
 from rich.text import Text
+
+# Shared console instance for styled output
+_console = Console()
 
 
 # =============================================================================
@@ -305,3 +310,70 @@ def source_text(source: str) -> Text:
         Rich Text object like "Source: EntityFacts" in source style.
     """
     return Text(f"Source: {source}", style=get_style("source"))
+
+
+# =============================================================================
+# STATUS MESSAGE UTILITIES
+# =============================================================================
+
+def print_warning(message: str, details: str = None):
+    """
+    Print a styled warning message with optional details.
+
+    Args:
+        message: The main warning message (displayed with yellow background)
+        details: Optional additional context (displayed in dim style below)
+
+    Example:
+        >>> print_warning("Invalid quarter specified", "Quarter must be 1-4")
+    """
+    warning_text = f"  {SYMBOLS['warning']} {message}  "
+    status = Padding(warning_text, (0, 0), style=PALETTE["badge_warning"], expand=False)
+    _console.print(status)
+    if details:
+        _console.print(f"[dim]{details}[/dim]")
+
+
+def print_error(message: str, details: str = None):
+    """
+    Print a styled error message with optional details.
+
+    Args:
+        message: The main error message (displayed with red background)
+        details: Optional additional context (displayed in dim style below)
+    """
+    error_text = f"  {SYMBOLS['cross']} {message}  "
+    status = Padding(error_text, (0, 0), style=PALETTE["badge_error"], expand=False)
+    _console.print(status)
+    if details:
+        _console.print(f"[dim]{details}[/dim]")
+
+
+def print_info(message: str, details: str = None):
+    """
+    Print a styled info message with optional details.
+
+    Args:
+        message: The main info message (displayed with blue background)
+        details: Optional additional context (displayed in dim style below)
+    """
+    info_text = f"  {SYMBOLS['info']} {message}  "
+    status = Padding(info_text, (0, 0), style=PALETTE["badge_info"], expand=False)
+    _console.print(status)
+    if details:
+        _console.print(f"[dim]{details}[/dim]")
+
+
+def print_success(message: str, details: str = None):
+    """
+    Print a styled success message with optional details.
+
+    Args:
+        message: The main success message (displayed with green background)
+        details: Optional additional context (displayed in dim style below)
+    """
+    success_text = f"  {SYMBOLS['check']} {message}  "
+    status = Padding(success_text, (0, 0), style=PALETTE["badge_success"], expand=False)
+    _console.print(status)
+    if details:
+        _console.print(f"[dim]{details}[/dim]")

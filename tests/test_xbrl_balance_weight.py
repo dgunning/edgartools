@@ -98,11 +98,15 @@ class TestDataFrameMetadataColumns:
         assert 'preferred_sign' in df.columns
 
     def test_balance_values_are_valid(self, apple_xbrl):
-        """Balance values should be 'debit', 'credit', or None."""
+        """Balance values should be 'debit', 'credit', or None/NaN."""
+        import pandas as pd
         df = apple_xbrl.facts.query().limit(100).to_dataframe()
-        valid_values = {'debit', 'credit', None}
+        valid_values = {'debit', 'credit'}
 
         for value in df['balance'].unique():
+            # NaN/None values are acceptable
+            if pd.isna(value):
+                continue
             assert value in valid_values, f"Invalid balance value: {value}"
 
     def test_weight_values_are_numeric(self, apple_xbrl):
@@ -120,11 +124,15 @@ class TestDataFrameMetadataColumns:
         assert unique_weights.issubset({1.0, -1.0, 0.0})
 
     def test_preferred_sign_values_are_valid(self, apple_xbrl):
-        """Preferred_sign values should be -1, 1, or None."""
+        """Preferred_sign values should be -1, 1, or None/NaN."""
+        import pandas as pd
         df = apple_xbrl.facts.query().limit(100).to_dataframe()
-        valid_values = {-1, 1, None}
+        valid_values = {-1, 1}
 
         for value in df['preferred_sign'].unique():
+            # NaN/None values are acceptable
+            if pd.isna(value):
+                continue
             assert value in valid_values, f"Invalid preferred_sign value: {value}"
 
 

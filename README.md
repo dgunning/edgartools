@@ -4,6 +4,7 @@
 </a>
 </p>
 
+<h1 align="center">EdgarTools - Python Library for SEC EDGAR Filings</h1>
 <h3 align="center">The AI Native Python library for SEC EDGAR Data</h3>
 
 <p align="center">
@@ -31,6 +32,8 @@
 <p align="center">
   <sub>Built with AI-assisted development • 3-10x faster velocity • <a href="#-support-ai-powered-development">Support this project</a></sub>
 </p>
+
+**EdgarTools** is a Python library for downloading and analyzing SEC EDGAR filings. Extract 10-K, 10-Q, 8-K reports, parse XBRL financial statements, and access insider trading data (Form 4) with a simple Python API. Free and open-source.
 
 ![EdgarTools SEC filing data extraction demo](docs/images/edgartools-demo.gif)
 
@@ -92,7 +95,7 @@ EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR d
 ## How It Works
 
 <p align="center">
-  <img src="docs/images/how-it-works.svg" alt="EdgarTools transforms SEC EDGAR complexity into clean Python code">
+  <img src="docs/images/how-it-works.svg" alt="How EdgarTools Python library extracts SEC EDGAR filing data">
 </p>
 
 <p align="center">
@@ -104,20 +107,20 @@ EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR d
 </p>
 
 ```python
-# 1. Install
+# Install the SEC EDGAR Python library
 pip install edgartools
 
-# 2. Set your identity (required by SEC regulations)
+# Set your identity (required by SEC regulations)
 from edgar import *
 set_identity("your.name@example.com")
 
-# 3. Get company financials in 1 line
+# Get SEC 10-K, 10-Q filings and XBRL financial statements
 balance_sheet = Company("AAPL").get_financials().balance_sheet()
 
-# 4. Explore with interactive documentation
+# Access any company's SEC filings
 company = Company("MSFT")
 
-# 5. Or explore insider transactions
+# Parse Form 4 insider trading transactions
 filings = company.get_filings(form="4")
 form4_filing = filings[0]
 form4 = form4_filing.obj()
@@ -199,6 +202,8 @@ form4 = form4_filing.obj()
 </td>
 </tr>
 </table>
+
+EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, and **S-1 registration statements**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames.
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">

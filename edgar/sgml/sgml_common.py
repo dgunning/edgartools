@@ -1,4 +1,3 @@
-import re
 import zipfile
 from collections import defaultdict
 from functools import cached_property
@@ -13,29 +12,10 @@ from edgar.attachments import Attachment, Attachments, get_document_type
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
-from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser
+from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, parse_document
 from edgar.sgml.tools import is_xml
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
-
-
-def parse_document(document_str: str) -> SGMLDocument:
-    """
-    Parse a single SGML document section, maintaining raw content.
-    """
-    # Extract individual fields with separate patterns
-    type_match = re.search(r'<TYPE>([^<\n]+)', document_str)
-    sequence_match = re.search(r'<SEQUENCE>([^<\n]+)', document_str)
-    filename_match = re.search(r'<FILENAME>([^<\n]+)', document_str)
-    description_match = re.search(r'<DESCRIPTION>([^<\n]+)', document_str)
-
-    return SGMLDocument(
-        type=type_match.group(1).strip() if type_match else "",
-        sequence=sequence_match.group(1).strip() if sequence_match else "",
-        filename=filename_match.group(1).strip() if filename_match else "",
-        description=description_match.group(1).strip() if description_match else "",
-        raw_content=document_str
-    )
 
 
 def read_content(source: Union[str, Path, 'EdgarPath']) -> Iterator[str]:
@@ -135,15 +115,10 @@ def iter_documents(source: Union[str, Path]) -> Iterator[SGMLDocument]:
         ConnectionError: If URL retrieval fails after retries
         FileNotFoundError: If the file path doesn't exist
     """
+    from edgar.sgml.sgml_parser import iter_documents as _iter_docs
     try:
         content = ''.join(read_content(source))
-        document_pattern = re.compile(r'<DOCUMENT>([\s\S]*?)</DOCUMENT>')
-
-        for match in document_pattern.finditer(content):
-            document = parse_document(match.group(1))
-            if document:
-                yield document
-
+        yield from _iter_docs(content)
     except (ValueError, ConnectionError, FileNotFoundError) as e:
         raise type(e)(f"Error processing source {source}: {str(e)}") from e
 
@@ -207,13 +182,22 @@ def parse_submission_text(content: str) -> Tuple[FilingHeader, DefaultDict[str, 
         # specialized header parser since we need additional processing
         try:
             header = FilingHeader.parse_from_sgml_text(parsed_data['header'])
-        except Exception:
+        except (KeyError, ValueError, IndexError, AttributeError):
             header = FilingHeader.parse_from_sgml_text(parsed_data['header'], preprocess=True)
 
-    # Create document dictionary
+    # Create document dictionary with lazy content references
     documents = defaultdict(list)
     for doc_data in parsed_data['documents']:
-        doc = SGMLDocument.from_parsed_data(doc_data)
+        # Use content reference + offsets when available (new parser)
+        if '_content_start' in doc_data and '_content_end' in doc_data:
+            doc = SGMLDocument.from_content_ref(
+                metadata=doc_data,
+                content_ref=doc_data['content'],
+                start=doc_data['_content_start'],
+                end=doc_data['_content_end'],
+            )
+        else:
+            doc = SGMLDocument.from_parsed_data(doc_data)
         documents[doc.sequence].append(doc)
     return header, documents
 

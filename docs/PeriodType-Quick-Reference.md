@@ -311,8 +311,9 @@ ttm_facts = facts.query().by_period_length(12).get()   # Trailing twelve months
 quarterly_facts = facts.query().by_period_length(3).get() # Quarterly periods
 
 # Individual fact retrieval with period specification
-revenue_2023 = facts.get_fact("Revenue", period="2023-FY")
-revenue_q4 = facts.get_fact("Revenue", period="2023-Q4")
+# Use XBRL concept names or lowercase labels (not simplified names like "Revenue")
+revenue_2024 = facts.get_fact("us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax", period="2024-FY")
+net_income = facts.get_fact("net income (loss) attributable to parent", period="2024-Q1")
 ```
 
 ### From String Parameters

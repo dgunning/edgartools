@@ -51,12 +51,15 @@ from edgar.core import (
     quarters_in_year,
 )
 from edgar.dates import InvalidDateException
+from edgar.display.formatting import accession_number_text, display_size
+from edgar.display.styles import print_info, print_warning
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
-from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, filter_by_form, filter_by_ticker
-from edgar.display.formatting import accession_number_text, display_size
+from edgar.filesystem import EdgarPath
+from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, \
+    filter_by_form, filter_by_ticker
 from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.reference import describe_form
@@ -64,7 +67,6 @@ from edgar.reference.tickers import Exchange, find_ticker, find_ticker_safe
 from edgar.richtools import Docs, print_rich, repr_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingHeader, FilingSGML, Reports, Statements
-from edgar.filesystem import EdgarPath
 from edgar.storage import is_using_local_storage, local_filing_path
 from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
 
@@ -187,7 +189,7 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
     from edgar.dates import extract_dates
 
     today = date.today()
-    six_months_ago = today - timedelta(days=180)
+    recent_days = today - timedelta(days=5)
 
     try:
         start_date, end_date, is_range = extract_dates(filing_date_param)
@@ -196,14 +198,14 @@ def _is_requesting_current_filings(filing_date_param: Optional[str]) -> bool:
         if not is_range and start_date.date() == today:
             return True
 
-        # For date ranges: warn if start is within past 6 months AND range includes today
+        # For date ranges: warn if start is within past 5 days AND range includes today
         if is_range:
             start = start_date.date() if start_date else date.min
             end = end_date.date() if end_date else date.max
 
-            # Only warn if range starts within past 6 months AND includes today
-            # This catches cases like "2025-10-02:" which likely expects current data
-            if start >= six_months_ago and start <= today <= end:
+            # Only warn if range starts within past 5 days AND includes today
+            # This catches recent date ranges like "2026-01-24:" that likely expect current data
+            if start >= recent_days and start <= today <= end:
                 return True
 
     except Exception:
@@ -221,21 +223,14 @@ def _warn_use_current_filings(reason: str, latest_date: Optional[Union[datetime,
         reason: Brief explanation of why current_filings is needed
         latest_date: Optional latest date in the dataset for context
     """
-    date_info = ""
     if latest_date:
         if isinstance(latest_date, datetime):
             latest_date = latest_date.date()
-        days_old = _get_data_staleness_days(latest_date)
-        date_info = f" (latest filing: {latest_date}, {days_old} day{'s' if days_old != 1 else ''} ago)"
+        message = f"Data through {latest_date}."
+    else:
+        message = reason
 
-    log.warning(f"""
-⚠️  {reason}{date_info}
-
-For today's real-time filings, use:
-    get_current_filings(page_size=None)  # Gets all current filings
-
-Note: Quarterly indexes are updated daily but typically lag by 1 business day.
-    """.strip())
+    print_warning(message, "For today's filings: get_current_filings()")
 
 
 def get_previous_quarter(year, quarter) -> Tuple[int, int]:
@@ -365,7 +360,7 @@ def read_fixed_width_index(index_text: str,
 
 def read_index_file(index_text: str,
                     form_column: int = FORM_INDEX_FORM_COLUMN,
-                    filing_date_format:str="%Y-%m-%d") -> pa.Table:
+                    filing_date_format: str = "%Y-%m-%d") -> pa.Table:
     """
     Read the index text using multiple spaces as delimiter
     """
@@ -390,7 +385,7 @@ def read_index_file(index_text: str,
     rows = [re.split(index_field_delimiter_re, line.strip()) for line in data_lines if line.strip()]
 
     # Form names are in a different column depending on the index type.
-    forms = pa.array([row[form_column] for row in rows]) 
+    forms = pa.array([row[form_column] for row in rows])
 
     # CIKs are always the third-to-last field
     ciks = pa.array([int(row[-3]) for row in rows], type=pa.int32())
@@ -474,7 +469,7 @@ def fetch_daily_filing_index(date: str,
 
 def fetch_filing_index_at_url(url: str,
                               index: str,
-                              filing_date_format:str='%Y-%m-%d') -> Optional[pa.Table]:
+                              filing_date_format: str = '%Y-%m-%d') -> Optional[pa.Table]:
     index_text = download_text(url=url)
     assert index_text is not None
     if index == "xbrl":
@@ -482,7 +477,8 @@ def fetch_filing_index_at_url(url: str,
     else:
         # Read as a fixed width index file
         form_column = FORM_INDEX_FORM_COLUMN if index == "form" else COMPANY_INDEX_FORM_COLUMN
-        index_table: pa.Table = read_index_file(index_text, form_column=form_column, filing_date_format=filing_date_format)
+        index_table: pa.Table = read_index_file(index_text, form_column=form_column,
+                                                filing_date_format=filing_date_format)
     return index_table
 
 
@@ -649,10 +645,7 @@ class Filings:
             latest_date = filings.date_range[1]
             days_old = _get_data_staleness_days(latest_date)
             if days_old >= 2:
-                _warn_use_current_filings(
-                    "This dataset's latest filing is from recent days",
-                    latest_date
-                )
+                _warn_use_current_filings("", latest_date)
 
         if len(filings) == 1:
             return filings[0]
@@ -704,7 +697,8 @@ class Filings:
 
         # Filter by form
         if forms:
-            filing_index = filter_by_form(filing_index, form=forms, amendments=amendments if amendments is not None else False)
+            filing_index = filter_by_form(filing_index, form=forms,
+                                          amendments=amendments if amendments is not None else False)
         elif amendments is not None and filing_index.num_rows > 0:
             # Get the unique values of the form as a pylist
             forms = list(set([form.replace("/A", "") for form in pc.unique(filing_index['form']).to_pylist()]))
@@ -719,9 +713,7 @@ class Filings:
                 if _is_requesting_current_filings(filing_date):
                     latest_date = self.date_range[1]
                     if latest_date is not None and _get_data_staleness_days(latest_date) >= 1:
-                        _warn_use_current_filings(
-                            f"Filtering for current-day filings, but data only includes filings through {latest_date.date() if isinstance(latest_date, datetime) else latest_date}"
-                        )
+                        _warn_use_current_filings("", latest_date)
             except InvalidDateException as e:
                 log.error(e)
                 return Filings(_empty_filing_index())
@@ -788,8 +780,8 @@ class Filings:
     def next(self):
         """Show the next page"""
         data_page = self.data_pager.next()
-        if data_page is None:
-            log.warning("End of data .. use previous() \u2190 ")
+        if data_page is None or len(data_page) == 0:
+            print_warning("End of data", "Use previous() ← to go back")
             return None
         start_index, _ = self.data_pager._current_range
         filings_state = PagingState(page_start=start_index, num_records=len(self))
@@ -801,8 +793,8 @@ class Filings:
         :return:
         """
         data_page = self.data_pager.previous()
-        if data_page is None:
-            log.warning(" No previous data .. use next() \u2192 ")
+        if data_page is None or len(data_page) == 0:
+            print_warning("No previous data", "Use next() → to go forward")
             return None
         start_index, _ = self.data_pager._current_range
         filings_state = PagingState(page_start=start_index, num_records=len(self))
@@ -836,9 +828,9 @@ class Filings:
             if idx > -1:
                 return self.get_filing_at(idx)
             if not accession_number_re.match(accession_number):
-                log.warning(
-                    f"Invalid accession number [{accession_number}]"
-                    "\n  valid accession number [0000000000-00-000000]"
+                print_warning(
+                    f"Invalid accession number: {accession_number}",
+                    "Expected format: 0000000000-00-000000"
                 )
 
     def find(self,
@@ -904,7 +896,6 @@ class Filings:
 
         # Compare just accession_number columns
         return self.data['accession_number'].equals(other.data['accession_number'])
-
 
     def __hash__(self):
         if self._hash is None:
@@ -1068,8 +1059,8 @@ class Filings:
             acc_no = accession_numbers[i]
 
             # Check previous and next accession numbers
-            prev_acc = accession_numbers[i-1] if i > 0 else None
-            next_acc = accession_numbers[i+1] if i < len(accession_numbers)-1 else None
+            prev_acc = accession_numbers[i - 1] if i > 0 else None
+            next_acc = accession_numbers[i + 1] if i < len(accession_numbers) - 1 else None
 
             if acc_no != prev_acc and acc_no == next_acc:
                 groups[i] = '┐'  # Start of group
@@ -1078,7 +1069,7 @@ class Filings:
             elif acc_no == prev_acc and acc_no != next_acc:
                 groups[i] = '┘'  # End of group
             else:
-                groups[i] = ' '   # Standalone filing
+                groups[i] = ' '  # Standalone filing
 
         # Iterate through rows in current page
         for i in range(len(current_page)):
@@ -1307,7 +1298,10 @@ def get_filings(year: Optional[Years] = None,
                      priority_sorted_forms is None)
     if filing_date:
         if not is_valid_filing_date(filing_date):
-            log.warning("""Provide a valid filing date in the format YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD""")
+            print_warning(
+                "Invalid filing date format",
+                "Use YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD for date ranges"
+            )
             return None
         year_and_quarters = filing_date_to_year_quarters(filing_date)
     elif not year:
@@ -1322,14 +1316,10 @@ def get_filings(year: Optional[Years] = None,
         year_and_quarters: YearAndQuarters = expand_quarters(year_param, quarter_param)
 
     if len(year_and_quarters) == 0:
-        log.warning(f"""
-    Provide a year between 1994 and {datetime.now().year} and optionally a quarter (1-4) for which the SEC has filings. 
-
-        e.g. filings = get_filings(2023) OR
-             filings = get_filings(2023, 1)
-
-    (You specified the year {year} and quarter {quarter})   
-        """)
+        print_warning(
+            f"No SEC filings available for year {year}" + (f" quarter {quarter}" if quarter else ""),
+            f"Valid range: 1994-{datetime.now().year}, quarters 1-4. Example: get_filings(2023, 1)"
+        )
         return None
     filing_index = get_filings_for_quarters(year_and_quarters, index=index)
 
@@ -1343,10 +1333,7 @@ def get_filings(year: Optional[Years] = None,
         latest_date = filings.date_range[1]
         days_old = _get_data_staleness_days(latest_date)
         if days_old >= 2:
-            _warn_use_current_filings(
-                "The current quarter's filings are from recent days",
-                latest_date
-            )
+            _warn_use_current_filings("", latest_date)
 
     if not filings:
         if defaults_used:
@@ -1363,18 +1350,6 @@ def get_filings(year: Optional[Years] = None,
     sorted_filing_index = sort_filings_by_priority(filings.data, priority_sorted_forms)
 
     return Filings(sorted_filing_index)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @lru_cache(maxsize=8)
@@ -1598,16 +1573,16 @@ class Filing:
         sgml = self.sgml()
         html = sgml.html()
         if not html:
-            document:Attachment = self.homepage.primary_html_document
+            document: Attachment = self.homepage.primary_html_document
             if document.empty or document.is_binary():
                 return None
             return self.homepage.primary_html_document.download()
         if html.endswith("</PDF>"):
             return None
         if html.startswith("<?xml"):
-            if self.form in ['3','3/A', '4', '4/A', '5', '5/A']:
+            if self.form in ['3', '3/A', '4', '4/A', '5', '5/A']:
                 from edgar.ownership import Ownership
-                ownership:Ownership = self.obj()
+                ownership: Ownership = self.obj()
                 html = ownership.to_html()
             else:
                 html = self.homepage.primary_html_document.download()
@@ -1680,7 +1655,8 @@ class Filing:
         if html:
             clean_html = get_clean_html(html)
             if clean_html:
-                markdown_result = to_markdown(clean_html, include_page_breaks=include_page_breaks, start_page_number=start_page_number)
+                markdown_result = to_markdown(clean_html, include_page_breaks=include_page_breaks,
+                                              start_page_number=start_page_number)
                 if markdown_result:
                     return markdown_result
         text_content = self.text()
@@ -1804,15 +1780,15 @@ class Filing:
         filing_sgml = FilingSGML.from_source(source)
         filers = filing_sgml.header.filers
         if filers and len(filers) > 0:
-             company = filers[0].company_information.name if filers[0].company_information else ""
+            company = filers[0].company_information.name if filers[0].company_information else ""
         else:
             company = ""
 
         filing = cls(cik=filing_sgml.cik,
-                   accession_no=filing_sgml.accession_number,
-                   form=filing_sgml.form,
-                   company=company,
-                   filing_date=filing_sgml.filing_date)
+                     accession_no=filing_sgml.accession_number,
+                     form=filing_sgml.form,
+                     company=company,
+                     filing_date=filing_sgml.filing_date)
         filing._sgml = filing_sgml
         return filing
 
@@ -1824,15 +1800,15 @@ class Filing:
         filing_sgml = FilingSGML.from_text(full_text_submission)
         filers = filing_sgml.header.filers
         if filers and len(filers) > 0:
-             company = filers[0].company_information.name if filers[0].company_information else ""
+            company = filers[0].company_information.name if filers[0].company_information else ""
         else:
             company = ""
 
         filing = cls(cik=filing_sgml.cik,
-                   accession_no=filing_sgml.accession_number,
-                   form=filing_sgml.form,
-                   company=company,
-                   filing_date=filing_sgml.filing_date)
+                     accession_no=filing_sgml.accession_number,
+                     form=filing_sgml.form,
+                     company=company,
+                     filing_date=filing_sgml.filing_date)
         filing._sgml = filing_sgml
         return filing
 
@@ -1852,7 +1828,7 @@ class Filing:
         return self._sgml
 
     @cached_property
-    def reports(self)  -> Optional[Reports]:
+    def reports(self) -> Optional[Reports]:
         """
         If the filing has report attachments then return the reports
         """
@@ -1912,7 +1888,6 @@ class Filing:
         """Get the header for the filing"""
         _sgml = self.sgml()
         return _sgml.header
-
 
     def data_object(self):
         """ Get this filing as the data object that it might be"""
@@ -2028,7 +2003,7 @@ class Filing:
         if not filings or filings.empty:
             if is_using_local_storage():
                 # In this case the local storage is missing the filing so we have to download it
-                log.warning(f"Filing {self.accession_no} not found in local storage. Downloading from SEC ...")
+                print_info(f"Filing {self.accession_no} not in local storage", "Downloading from SEC...")
                 from edgar.entity import download_entity_submissions_from_sec, parse_entity_submissions
                 submissions_json = download_entity_submissions_from_sec(self.cik)
                 if submissions_json is None:
@@ -2045,7 +2020,6 @@ class Filing:
         file_number = filings[0].file_number
         return company.get_filings(file_number=file_number,
                                    sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
-
 
     def __hash__(self):
         return hash(self.accession_no)
@@ -2148,7 +2122,8 @@ class Filing:
                 except Exception:
                     pass
 
-            xbrl_hint = "for financial statements" if has_xbrl or self.form in ['10-K', '10-Q', '20-F', '8-K', '6-K'] else "(if available)"
+            xbrl_hint = "for financial statements" if has_xbrl or self.form in ['10-K', '10-Q', '20-F', '8-K',
+                                                                                '6-K'] else "(if available)"
             lines.append(f"  - Use .xbrl() {xbrl_hint}")
 
             lines.append("  - Use .document() for structured text extraction")
@@ -2341,8 +2316,11 @@ def get_filing_by_accession(accession_number: str, year: int):
     """Cache-friendly version that takes year as parameter instead of using datetime.now()"""
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number)
 
-    # Static logic that doesn't depend on current time
-    for quarter in range(1, 5):
+    # Only search quarters that exist - for current year, limit to current quarter
+    current_year, current_quarter = current_year_and_quarter()
+    max_quarter = current_quarter if year == current_year else 4
+
+    for quarter in range(1, max_quarter + 1):
         filings = _get_cached_filings(year=year, quarter=quarter)
         if filings and (filing := filings.get(accession_number)):
             return filing
@@ -2354,9 +2332,13 @@ def get_by_accession_number_enriched(accession_number: str):
     """Get filing with all related entities populated using PyArrow"""
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
 
+    # Only search quarters that exist - for current year, limit to current quarter
+    current_year, current_quarter = current_year_and_quarter()
+    max_quarter = current_quarter if year == current_year else 4
+
     # Find all entities with this accession number
     all_entities = []
-    for quarter in range(1, 5):
+    for quarter in range(1, max_quarter + 1):
         filings = _get_cached_filings(year=year, quarter=quarter)
         if filings:
             # Use PyArrow filtering (same pattern as Filings.get())

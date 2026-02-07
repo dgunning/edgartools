@@ -478,33 +478,55 @@ class EntityData:
     @cached_property
     def is_individual(self) -> bool:
         """
-        Determine if this entity is an individual.
+        Determine if this entity is an individual person rather than a company.
 
-        Tricky logic to detect if a company is an individual or a company.
-        Companies have an ein, individuals do not. Oddly Warren Buffet has an EIN but not a state of incorporation
-        There may be other edge cases.
-        If you have a ticker or exchange you are a company.
+        Uses a priority-based signal system with 9 checks. Stronger signals
+        (insider issuer flag, tickers, entity type) take precedence over
+        weaker ones (name keywords, owner flag).
         """
-        # Import locally using the lazy import cache
-        has_company_filings = lazy_import('edgar.entity.core.has_company_filings')
+        from edgar.entity.constants import _classify_is_individual, COMPANY_FORMS
 
-        if len(self.tickers) > 0 or len(self.exchanges) > 0:
-            return False
-        elif hasattr(self,
-                     'state_of_incorporation') and self.state_of_incorporation is not None and self.state_of_incorporation != '':
-            if self.cik == 1033331: # Reed Hastings exception
+        # Extract forms from filing history for the company-forms check
+        forms = None
+        try:
+            form_array = self.filings.data['form']
+            # Check first 50 forms for performance
+            n = min(50, len(form_array))
+            forms = [form_array[i].as_py() for i in range(n)]
+        except Exception:
+            forms = []
+
+        return _classify_is_individual(
+            name=self.name,
+            tickers=self.tickers,
+            exchanges=self.exchanges,
+            state_of_incorporation=getattr(self, 'state_of_incorporation', None),
+            entity_type=getattr(self, 'entity_type', ''),
+            forms=forms,
+            ein=getattr(self, 'ein', None),
+            cik=self.cik,
+            insider_transaction_for_issuer_exists=getattr(self, 'insider_transaction_for_issuer_exists', None),
+            insider_transaction_for_owner_exists=getattr(self, 'insider_transaction_for_owner_exists', None),
+        )
+
+    @cached_property
+    def is_bdc(self) -> bool:
+        """
+        Check if this entity is a Business Development Company.
+
+        BDCs are identified by having an 814-* file number in their filings.
+        The 814- prefix indicates registration under the Investment Company
+        Act of 1940 as a BDC.
+
+        Returns:
+            True if any filing has an 814-* file number, False otherwise.
+        """
+        file_numbers = self.filings.data['fileNumber']
+        for fn in file_numbers:
+            fn_str = fn.as_py()
+            if fn_str and fn_str.startswith('814-'):
                 return True
-            return False
-        elif hasattr(self, 'entity_type') and self.entity_type not in ['', 'other']:
-            return False
-        elif has_company_filings(self.filings.data['form']):
-            if self.cik == 315090:  # The Warren Buffett exception
-                return True
-            return False
-        elif not hasattr(self, 'ein') or self.ein is None or self.ein == "000000000":
-            return True
-        else:
-            return False
+        return False
 
     def __str__(self):
         return f"EntityData({self.name} [{self.cik}])"

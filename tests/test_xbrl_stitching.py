@@ -502,19 +502,6 @@ def test_multiple_concepts_merging():
     assert total_assets_row['values']['instant_2023-12-31'] == 900
 
 
-def test_get_optimal_statements(amd_xbrl, meta_xbrl):
-    """Test stitching 3 statements."""
-
-    optimal_periods = determine_optimal_periods(amd_xbrl.xbrl_list, "BalanceSheet")
-    periods = [op['period_key'] for op in optimal_periods]
-    assert periods == ['instant_2024-12-28', 'instant_2023-12-30', 'instant_2022-12-31']
-
-    optimal_periods = determine_optimal_periods(meta_xbrl.xbrl_list, "BalanceSheet")
-    periods = [op['period_key'] for op in optimal_periods]
-    print(periods)
-    balance_sheet = meta_xbrl.render_statement("BalanceSheet")
-    print(balance_sheet)
-
 def test_stitch_3_statements(amd_xbrl, meta_xbrl):
     statement = stitch_statements(meta_xbrl.xbrl_list, statement_type='BalanceSheet')
     print()

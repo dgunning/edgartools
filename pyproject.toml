@@ -4,11 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "edgartools"
-description = 'Navigate Edgar filings with ease'
+description = 'Python library to access and analyze SEC Edgar filings, XBRL financial statements, 10-K, 10-Q, and 8-K reports'
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-keywords = ["sec", "edgar", "filings", "company", "python", "finance", "financial", "reports"]
+keywords = [
+    "sec", "edgar", "filings", "sec filings", "edgar filings",
+    "10-K", "10-Q", "8-K", "xbrl", "financial statements",
+    "sec api", "edgar api", "python", "finance", "financial data",
+    "stock filings", "company filings", "annual report", "quarterly report",
+    "institutional holdings", "13F", "insider trading", "form 4"
+]
 authors = [
   { name = "Dwight Gunning", email = "dgunning@gmail.com" },
 ]
@@ -23,6 +29,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Office/Business :: Financial :: Investment",
+  "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
   "httpx>=0.25.0",
@@ -43,8 +55,8 @@ dependencies = [
   "tqdm>=4.62.0",
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
-  "hishel==0.1.3",
-  "httpxthrottlecache>=0.1.6",
+  "pyrate-limiter==3.9.0",
+  "httpxthrottlecache>=0.3.0",
 ]
 dynamic = ["version"]
 
@@ -95,9 +107,11 @@ all-cloud = [
 ]
 
 [project.urls]
+Homepage = "https://github.com/dgunning/edgartools"
 Documentation = "https://dgunning.github.io/edgartools/"
 Issues = "https://github.com/dgunning/edgartools/issues"
 Source = "https://github.com/dgunning/edgartools"
+Changelog = "https://github.com/dgunning/edgartools/releases"
 
 [project.scripts]
 edgartools-mcp = "edgar.ai.mcp_server:main"

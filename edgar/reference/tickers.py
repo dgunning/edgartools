@@ -27,8 +27,9 @@ from edgar.urls import build_company_tickers_exchange_url, build_company_tickers
 @lru_cache(maxsize=1)
 def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
     """
-    Download the Cusip to Ticker mapping data from the SEC website.
-    This provides a Dataframe with Cusip as the index and Ticker as the column.
+    Get the Cusip to Ticker mapping as a DataFrame with Cusip as the index.
+
+    Used by 13F parsers for vectorized DataFrame.map() operations.
 
     CUSIP can be duplicate to get non duplicate Cusips set allow_duplicate_cusips to False.
     This will return only the first occurrence of the Cusip.
@@ -40,6 +41,20 @@ def cusip_ticker_mapping(allow_duplicate_cusips: bool = True) -> pd.DataFrame:
     return df
 
 
+@lru_cache(maxsize=1)
+def _cusip_ticker_dict() -> dict:
+    """
+    Build a CUSIP -> Ticker dict for fast single-key lookups.
+
+    Deduplicates by keeping the first occurrence (most likely to be
+    mapped to a ticker linked to a CIK). Used by get_ticker_from_cusip().
+    """
+    df = read_parquet_from_package('ct.pq')
+    # Keep first occurrence per CUSIP (same semantics as allow_duplicate_cusips=False)
+    dedup = df[~df['Cusip'].duplicated(keep='first')]
+    return dict(zip(dedup['Cusip'], dedup['Ticker']))
+
+
 def load_company_tickers_from_package() -> Optional[pd.DataFrame]:
     """
     Load company tickers from the bundled parquet file.
@@ -48,11 +63,28 @@ def load_company_tickers_from_package() -> Optional[pd.DataFrame]:
     The bundled data is updated with each release.
 
     Returns:
-        DataFrame with columns [cik, ticker, company] or None if not available
+        DataFrame with columns [cik, ticker, company, exchange] or None if not available
+        Note: The 'exchange' column is available but optional for backward compatibility
     """
     try:
-        return read_parquet_from_package('company_tickers.pq')
-    except Exception:
+        df = read_parquet_from_package('company_tickers.parquet')
+
+        # Transform schema from edgar-storage format to edgartools format
+        # edgar-storage schema: [cik (string), ticker, exchange, name]
+        # edgartools schema: [cik (int64), ticker, company, exchange]
+
+        # Rename 'name' to 'company' for backward compatibility
+        if 'name' in df.columns:
+            df = df.rename(columns={'name': 'company'})
+
+        # Convert CIK from zero-padded string to int64
+        # Check if CIK is not already int64 (handles 'object', 'string', etc.)
+        if df['cik'].dtype != 'int64':
+            df['cik'] = df['cik'].astype(str).str.lstrip('0').replace('', '0').astype('int64')
+
+        return df
+    except Exception as e:
+        log.warning(f"Failed to load company_tickers.parquet from package: {e}")
         return None
 
 
@@ -88,7 +120,8 @@ def get_company_tickers(
         clean_suffix (bool): If True, removes common company suffixes
 
     Returns:
-        Union[pd.DataFrame, pa.Table]: Processed company data with columns [cik, ticker, company]
+        Union[pd.DataFrame, pa.Table]: Processed company data with columns [cik, ticker, company, exchange]
+        Note: exchange column is available when loaded from bundled parquet (may be None for some entries)
     """
     # Get raw data (cached internally)
     df = _get_company_tickers_raw()
@@ -127,12 +160,13 @@ def _get_company_tickers_raw() -> pd.DataFrame:
     Internal function to get raw company ticker data with caching.
 
     Tries sources in order:
-    1. Bundled parquet file (instant, offline)
+    1. Bundled parquet file (instant, offline) - includes exchange column
     2. Local downloaded data (if EDGAR_USE_LOCAL_DATA is set)
     3. Live SEC API (network call)
 
     Returns:
-        pd.DataFrame: Raw company data with columns [cik, ticker, company]
+        pd.DataFrame: Raw company data with columns [cik, ticker, company, exchange]
+        Note: exchange column may not be present for non-parquet sources
     """
     # Priority 1: Try bundled parquet data (instant, offline)
     df = load_company_tickers_from_package()
@@ -428,17 +462,16 @@ def find_cik(ticker):
     return find_mutual_fund_cik(ticker)
 
 
-@lru_cache(maxsize=128)
-def get_ticker_from_cusip(cusip: str):
+def get_ticker_from_cusip(cusip: str) -> Optional[str]:
     """
-    Get the ticker symbol for a given Cusip.
+    Get the ticker symbol for a given CUSIP.
+
+    Returns the ticker string or None if not found.
+    Uses a dict lookup internally for O(1) performance.
     """
-    data = cusip_ticker_mapping()
-    results = data.loc[cusip]
-    if len(results) == 1:
-        return results.iloc[0]
-    elif len(results) > 1:
-        return results.iloc[0].Ticker
+    if not cusip:
+        return None
+    return _cusip_ticker_dict().get(cusip)
 
 
 def clean_company_name(name: str) -> str:

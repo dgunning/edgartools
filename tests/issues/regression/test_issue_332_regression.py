@@ -76,7 +76,8 @@ class TestIssue332Regression:
         """Regression: Accessing financial properties should not raise AttributeError"""
         mock_filing = Mock()
         mock_filing.form = "6-K"
-        
+        mock_filing.attachments = []  # Must be iterable for earnings extraction
+
         # Mock Financials.extract to return None (simulating no financial data)
         with patch('edgar.company_reports.Financials.extract', return_value=None):
             report = CurrentReport(mock_filing)

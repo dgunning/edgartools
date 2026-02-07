@@ -138,6 +138,9 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
         cache_rules = CACHE_RULES
     )
     http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
+    # Increase keepalive from default 5s to 30s for better connection reuse
+    # This reduces TCP+TLS handshake overhead (~100ms) for interactive use
+    http_mgr.httpx_params["limits"] = httpx.Limits(keepalive_expiry=30)
     return http_mgr
 
 

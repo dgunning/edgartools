@@ -39,8 +39,6 @@ company = Company("AAPL")
 | Fiscal Year End | `company.fiscal_year_end` | "0928" (Sep 28) |
 | State of Incorporation | `company.data.state_of_incorporation` | "CA" |
 | Phone | `company.data.phone` | "408-996-1010" |
-| Website | `company.data.website` | "https://apple.com" |
-| Investor Website | `company.data.investor_website` | "https://investor.apple.com" |
 | Business Address | `company.business_address()` | Address object |
 | Mailing Address | `company.mailing_address()` | Address object |
 | Former Names | `company.data.former_names` | List of historical names |
@@ -60,7 +58,6 @@ def get_company_header(ticker: str) -> dict:
         "exchanges": company.get_exchanges(),
         "fiscal_year_end": company.fiscal_year_end,
         "state_incorporation": company.data.state_of_incorporation,
-        "website": company.data.website,
         "phone": company.data.phone,
     }
 ```

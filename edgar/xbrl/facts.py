@@ -53,6 +53,7 @@ class FactQuery:
         self._sort_ascending = True
         self._limit = None
         self._statement_type = None
+        self._requested_dimension = None  # GH-607: Track requested dimension for accurate member_label
 
     def by_concept(self, pattern: str, exact: bool = False) -> FactQuery:
         """
@@ -275,6 +276,9 @@ class FactQuery:
         # since the user is explicitly working with dimensional data
         self._include_dimensions = True
 
+        # GH-607: Store the requested dimension for accurate member_label selection in to_dataframe()
+        self._requested_dimension = dimension
+
         # Normalize the input dimension to match stored format
         normalized_dim = self._normalize_dimension_key(dimension)
 
@@ -390,6 +394,108 @@ class FactQuery:
 
         return False
 
+    def _get_member_label(self, member_value: str) -> str:
+        """
+        Look up human-readable label for a dimension member value.
+
+        GH-607: Extracted as helper to reduce duplication between get_facts() and
+        _update_dimension_fields_for_requested_dimension().
+
+        Args:
+            member_value: The dimension member value (e.g., 'us-gaap:BuildingMember')
+
+        Returns:
+            Human-readable label, or the original value if not found
+        """
+        if not member_value:
+            return member_value
+
+        # Normalize to match element catalog key format (colons -> underscores)
+        member_normalized = member_value.replace(':', '_')
+
+        if member_normalized in self._facts_view.xbrl.element_catalog:
+            mem_element = self._facts_view.xbrl.element_catalog[member_normalized]
+            # Try labels in order of preference
+            for role in ['http://www.xbrl.org/2003/role/verboseLabel',
+                         'http://www.xbrl.org/2003/role/terseLabel',
+                         'http://www.xbrl.org/2003/role/label']:
+                if role in mem_element.labels:
+                    label = mem_element.labels[role]
+                    # Clean up label (remove [Member], etc.)
+                    return label.replace('[Member]', '').strip()
+
+        return member_value
+
+    def _update_dimension_fields_for_requested_dimension(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Update dimension fields to reflect the specifically requested dimension.
+
+        GH-607: When by_dimension() is called with a specific dimension (e.g., "PropertyPlantAndEquipmentByTypeAxis"),
+        the dimension_member_label should show the member of THAT dimension, not an arbitrary first one.
+
+        For example, if a fact has both srt:RangeAxis=Minimum and us-gaap:PropertyPlantAndEquipmentByTypeAxis=Building,
+        and the user queries by PropertyPlantAndEquipmentByTypeAxis, they should see "Building" not "Minimum".
+
+        Note: This assumes dimension local names don't contain underscores (standard XBRL taxonomies use camelCase).
+
+        Args:
+            df: DataFrame with fact results
+
+        Returns:
+            DataFrame with updated dimension fields
+        """
+        if not self._requested_dimension or df.empty:
+            return df
+
+        # Find the dim_* column that matches the requested dimension
+        dim_cols = [col for col in df.columns if col.startswith('dim_')]
+        matching_col = None
+        for col in dim_cols:
+            if self._dimension_key_matches(col, self._requested_dimension):
+                matching_col = col
+                break
+
+        if not matching_col:
+            return df
+
+        # Extract the dimension name from the column
+        # e.g., 'dim_us-gaap_StatementBusinessSegmentsAxis' -> 'us-gaap:StatementBusinessSegmentsAxis'
+        # Note: We only replace the first underscore after removing 'dim_' prefix,
+        # since that's the namespace:localName separator. Standard XBRL uses camelCase for local names.
+        dim_col_name = matching_col[4:]  # Remove 'dim_' prefix
+
+        # Find the position of the namespace separator (first underscore after namespace prefix)
+        # Namespace prefixes like 'us-gaap', 'srt', 'dei' don't contain underscores
+        parts = dim_col_name.split('_', 1)  # Split on first underscore only
+        if len(parts) == 2:
+            dim_name = f"{parts[0]}:{parts[1]}"
+        else:
+            dim_name = dim_col_name
+
+        # Create a copy to avoid modifying the original
+        df = df.copy()
+
+        # Vectorized update: Get the member values from the matching dimension column
+        member_values = df[matching_col]
+
+        # Update dimension and member columns
+        df['dimension'] = dim_name
+        df['member'] = member_values
+
+        # Look up labels for each unique member value (more efficient than row-by-row)
+        unique_members = member_values.dropna().unique()
+        label_map = {m: self._get_member_label(m) for m in unique_members}
+
+        # Apply the label mapping
+        df['dimension_member_label'] = member_values.map(label_map)
+
+        # Also update the 'label' column to match (GH-597 behavior for dimensional data)
+        # Only update where we have a valid dimension_member_label
+        mask = df['dimension_member_label'].notna()
+        df.loc[mask, 'label'] = df.loc[mask, 'dimension_member_label']
+
+        return df
+
     def by_statement_type(self, statement_type: str) -> FactQuery:
         """
         Filter facts by statement type.
@@ -494,6 +600,16 @@ class FactQuery:
             return False
 
         self._filters.append(text_filter)
+        return self
+
+    def with_dimensions(self) -> 'FactQuery':
+        """
+        Include dimension axis and member columns in results.
+
+        Returns:
+            Self for method chaining
+        """
+        self._include_dimensions = True
         return self
 
     def exclude_dimensions(self) -> FactQuery:
@@ -692,13 +808,19 @@ class FactQuery:
 
         df = pd.DataFrame(results)
 
+        # GH-607: When a specific dimension was requested via by_dimension(),
+        # update dimension fields to reflect that dimension's member info
+        if self._requested_dimension and self._include_dimensions:
+            df = self._update_dimension_fields_for_requested_dimension(df)
+
         # Filter columns based on inclusion flags
         if not self._include_dimensions:
             # Exclude both dim_* columns (old style) and structured dimension columns (GH-574)
             dimension_cols = {'dimension', 'member', 'dimension_label', 'member_label', 'full_dimension_label',
                               'dimension_axis', 'dimension_member', 'dimension_member_label'}
             df = df.loc[:, [col for col in df.columns
-                            if not col.startswith('dim_') and col not in dimension_cols]]
+                            if (not col.startswith('dim_') and col not in dimension_cols)
+                            or col == 'is_dimensioned']]
 
         if not self._include_contexts:
             context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',
@@ -732,7 +854,7 @@ class FactQuery:
         first_columns = [col for col in
                          ['concept', 'label', 'balance', 'preferred_sign', 'weight', 'value', 'numeric_value',
                           'period_key', 'period_start', 'period_end', 'period_instant',
-                          'decimals', 'statement_type', 'statement_name']
+                          'is_dimensioned', 'decimals', 'statement_type', 'statement_name']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns
                                    if col not in first_columns
@@ -971,6 +1093,9 @@ class FactsView:
                             full_labels = [f"{d['dimension_label']}: {d['member_label']}" for d in dimension_metadata]
                             fact_dict['full_dimension_label'] = ", ".join(full_labels)
 
+                        # GH-612: Mark fact as dimensioned
+                        fact_dict['is_dimensioned'] = True
+
                 # Get period key from context_period_map if available
                 period_key = self.xbrl.context_period_map.get(fact.context_ref)
                 if period_key:
@@ -978,6 +1103,10 @@ class FactsView:
                     # Add fiscal info if available
                     if period_key in period_to_fiscal_info:
                         fact_dict.update(period_to_fiscal_info[period_key])
+
+            # GH-612: Ensure is_dimensioned is always set (even for facts without matched contexts)
+            if 'is_dimensioned' not in fact_dict:
+                fact_dict['is_dimensioned'] = False
 
             # Add element information and statement type
             # Normalize element_id to match catalog keys (replace ':' with '_')

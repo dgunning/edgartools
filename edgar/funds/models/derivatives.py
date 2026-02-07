@@ -4,28 +4,116 @@ Derivative instrument models for fund portfolio reporting.
 This module contains all the data models for different types of derivative
 instruments found in fund portfolios, including forwards, swaps, futures,
 options, and swaptions.
+
+XML parsing uses lxml for performance (10-20x faster than BeautifulSoup).
 """
 from decimal import Decimal
 from typing import Optional, Union
 
 from pydantic import BaseModel
 
-from edgar.xmltools import child_text, optional_decimal
+
+def _text(parent, tag):
+    """Get text of a direct child element, or None. lxml equivalent of child_text()."""
+    if parent is None:
+        return None
+    el = parent.find(tag)
+    if el is not None and el.text:
+        return el.text.strip()
+    return None
 
 
-def optional_decimal_attr(element, attr_name):
-    """Helper function to parse optional decimal attributes from XML elements"""
+def _opt_decimal(parent, tag):
+    """Get optional Decimal from child element text. lxml equivalent of optional_decimal()."""
+    text = _text(parent, tag)
+    if text:
+        try:
+            return Decimal(text)
+        except (ValueError, TypeError, ArithmeticError):
+            return None
+    return None
+
+
+def _opt_decimal_attr(element, attr_name):
+    """Get optional Decimal from an element attribute."""
     if element is None:
         return None
-
-    attr_value = element.attrs.get(attr_name)
+    attr_value = element.get(attr_name)
     if not attr_value or attr_value == "N/A":
         return None
-
     try:
         return Decimal(attr_value)
     except (ValueError, TypeError):
         return None
+
+
+def _parse_deriv_addl_info(tag):
+    """Parse derivAddlInfo block common to forwards and swaps. Returns dict of fields."""
+    result = {
+        'name': None, 'lei': None, 'title': None, 'cusip': None,
+        'identifier': None, 'identifier_type': None, 'balance': None,
+        'units': None, 'desc_units': None, 'currency': None,
+        'value_usd': None, 'pct_val': None, 'asset_cat': None,
+        'issuer_cat': None, 'inv_country': None,
+    }
+    deriv_addl_info = tag.find("derivAddlInfo")
+    if deriv_addl_info is None:
+        return result
+
+    result['name'] = _text(deriv_addl_info, "name")
+    result['lei'] = _text(deriv_addl_info, "lei")
+    result['title'] = _text(deriv_addl_info, "title")
+    result['cusip'] = _text(deriv_addl_info, "cusip")
+    result['balance'] = _opt_decimal(deriv_addl_info, "balance")
+    result['units'] = _text(deriv_addl_info, "units")
+    result['desc_units'] = _text(deriv_addl_info, "descOthUnits")
+    result['currency'] = _text(deriv_addl_info, "curCd")
+    result['value_usd'] = _opt_decimal(deriv_addl_info, "valUSD")
+    result['pct_val'] = _opt_decimal(deriv_addl_info, "pctVal")
+    result['asset_cat'] = _text(deriv_addl_info, "assetCat")
+    result['inv_country'] = _text(deriv_addl_info, "invCountry")
+
+    issuer_cond = deriv_addl_info.find("issuerConditional")
+    if issuer_cond is not None:
+        result['issuer_cat'] = issuer_cond.get("issuerCat")
+
+    identifiers = deriv_addl_info.find("identifiers")
+    if identifiers is not None:
+        other_tag = identifiers.find("other")
+        if other_tag is not None:
+            result['identifier'] = other_tag.get("value")
+            result['identifier_type'] = other_tag.get("otherDesc")
+
+    return result
+
+
+def _parse_counterparties(tag):
+    """Parse counterparties block. Returns (name, lei) tuple."""
+    counterparties = tag.find("counterparties")
+    if counterparties is None:
+        return None, None
+    return _text(counterparties, "counterpartyName"), _text(counterparties, "counterpartyLei")
+
+
+def _parse_ref_instrument_identifiers(identifiers_el):
+    """Parse identifiers block within a reference instrument. Returns dict."""
+    result = {'cusip': None, 'isin': None, 'ticker': None, 'other_id': None, 'other_id_type': None}
+    if identifiers_el is None:
+        return result
+    cusip_tag = identifiers_el.find("cusip")
+    if cusip_tag is not None:
+        result['cusip'] = cusip_tag.get("value")
+    isin_tag = identifiers_el.find("isin")
+    if isin_tag is not None:
+        result['isin'] = isin_tag.get("value")
+    ticker_tag = identifiers_el.find("ticker")
+    if ticker_tag is not None:
+        result['ticker'] = ticker_tag.get("value")
+    other_tag = identifiers_el.find("other")
+    if other_tag is not None:
+        result['other_id'] = other_tag.get("value")
+        result['other_id_type'] = other_tag.get("otherDesc")
+    return result
 
 
 class ForwardDerivative(BaseModel):
@@ -56,80 +144,35 @@ class ForwardDerivative(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "fwdDeriv":
-            counterparties = tag.find("counterparties")
-            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
-            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+        if tag is None:
+            return None
+        cp_name, cp_lei = _parse_counterparties(tag)
+        addl = _parse_deriv_addl_info(tag)
 
-            # Check for derivAddlInfo (when nested in options)
-            deriv_addl_name = None
-            deriv_addl_lei = None
-            deriv_addl_title = None
-            deriv_addl_cusip = None
-            deriv_addl_identifier = None
-            deriv_addl_identifier_type = None
-            deriv_addl_balance = None
-            deriv_addl_units = None
-            deriv_addl_currency = None
-            deriv_addl_value_usd = None
-            deriv_addl_pct_val = None
-            deriv_addl_asset_cat = None
-            deriv_addl_issuer_cat = None
-            deriv_addl_inv_country = None
-
-            deriv_addl_info = tag.find("derivAddlInfo")
-            if deriv_addl_info:
-                deriv_addl_name = child_text(deriv_addl_info, "name")
-                deriv_addl_lei = child_text(deriv_addl_info, "lei")
-                deriv_addl_title = child_text(deriv_addl_info, "title")
-                deriv_addl_cusip = child_text(deriv_addl_info, "cusip")
-                deriv_addl_balance = optional_decimal(deriv_addl_info, "balance")
-                deriv_addl_units = child_text(deriv_addl_info, "units")
-                deriv_addl_currency = child_text(deriv_addl_info, "curCd")
-                deriv_addl_value_usd = optional_decimal(deriv_addl_info, "valUSD")
-                deriv_addl_pct_val = optional_decimal(deriv_addl_info, "pctVal")
-                deriv_addl_asset_cat = child_text(deriv_addl_info, "assetCat")
-                deriv_addl_inv_country = child_text(deriv_addl_info, "invCountry")
-
-                # Parse issuer conditional
-                issuer_cond = deriv_addl_info.find("issuerConditional")
-                if issuer_cond:
-                    deriv_addl_issuer_cat = issuer_cond.attrs.get("issuerCat")
-
-                # Parse identifiers
-                identifiers = deriv_addl_info.find("identifiers")
-                if identifiers:
-                    other_tag = identifiers.find("other")
-                    if other_tag:
-                        deriv_addl_identifier = other_tag.attrs.get("value")
-                        deriv_addl_identifier_type = other_tag.attrs.get("otherDesc")
-
-            return cls(
-                counterparty_name=counterparty_name,
-                counterparty_lei=counterparty_lei,
-                currency_sold=child_text(tag, "curSold"),
-                amount_sold=optional_decimal(tag, "amtCurSold"),
-                currency_purchased=child_text(tag, "curPur"),
-                amount_purchased=optional_decimal(tag, "amtCurPur"),
-                settlement_date=child_text(tag, "settlementDt"),
-                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
-
-                # Additional info from derivAddlInfo
-                deriv_addl_name=deriv_addl_name,
-                deriv_addl_lei=deriv_addl_lei,
-                deriv_addl_title=deriv_addl_title,
-                deriv_addl_cusip=deriv_addl_cusip,
-                deriv_addl_identifier=deriv_addl_identifier,
-                deriv_addl_identifier_type=deriv_addl_identifier_type,
-                deriv_addl_balance=deriv_addl_balance,
-                deriv_addl_units=deriv_addl_units,
-                deriv_addl_currency=deriv_addl_currency,
-                deriv_addl_value_usd=deriv_addl_value_usd,
-                deriv_addl_pct_val=deriv_addl_pct_val,
-                deriv_addl_asset_cat=deriv_addl_asset_cat,
-                deriv_addl_issuer_cat=deriv_addl_issuer_cat,
-                deriv_addl_inv_country=deriv_addl_inv_country
-            )
+        return cls(
+            counterparty_name=cp_name,
+            counterparty_lei=cp_lei,
+            currency_sold=_text(tag, "curSold"),
+            amount_sold=_opt_decimal(tag, "amtCurSold"),
+            currency_purchased=_text(tag, "curPur"),
+            amount_purchased=_opt_decimal(tag, "amtCurPur"),
+            settlement_date=_text(tag, "settlementDt"),
+            unrealized_appreciation=_opt_decimal(tag, "unrealizedAppr"),
+            deriv_addl_name=addl['name'],
+            deriv_addl_lei=addl['lei'],
+            deriv_addl_title=addl['title'],
+            deriv_addl_cusip=addl['cusip'],
+            deriv_addl_identifier=addl['identifier'],
+            deriv_addl_identifier_type=addl['identifier_type'],
+            deriv_addl_balance=addl['balance'],
+            deriv_addl_units=addl['units'],
+            deriv_addl_currency=addl['currency'],
+            deriv_addl_value_usd=addl['value_usd'],
+            deriv_addl_pct_val=addl['pct_val'],
+            deriv_addl_asset_cat=addl['asset_cat'],
+            deriv_addl_issuer_cat=addl['issuer_cat'],
+            deriv_addl_inv_country=addl['inv_country']
+        )
 
 
 class SwapDerivative(BaseModel):
@@ -205,247 +248,127 @@ class SwapDerivative(BaseModel):
     other_type_pay: Optional[str]  # fixedOrFloating attribute
 
     @classmethod
+    def _parse_floating_leg(cls, floating_desc):
+        """Parse a floating receive or payment leg element."""
+        if floating_desc is None:
+            return {}
+        result = {
+            'index': floating_desc.get("floatingRtIndex"),
+            'spread': _opt_decimal_attr(floating_desc, "floatingRtSpread"),
+            'amount': _opt_decimal_attr(floating_desc, "pmntAmt"),
+            'currency': floating_desc.get("curCd"),
+            'tenor': None, 'tenor_unit': None,
+            'reset_date_tenor': None, 'reset_date_unit': None,
+        }
+        rate_reset_tenors = floating_desc.find("rtResetTenors")
+        if rate_reset_tenors is not None:
+            rate_reset_tenor = rate_reset_tenors.find("rtResetTenor")
+            if rate_reset_tenor is not None:
+                result['tenor'] = rate_reset_tenor.get("rateTenor")
+                result['tenor_unit'] = rate_reset_tenor.get("rateTenorUnit")
+                result['reset_date_tenor'] = rate_reset_tenor.get("resetDt")
+                result['reset_date_unit'] = rate_reset_tenor.get("resetDtUnit")
+        return result
+
+    @classmethod
+    def _parse_other_leg(cls, other_desc):
+        """Parse an other receive or payment leg element."""
+        if other_desc is None:
+            return None, None
+        other_type = other_desc.get("fixedOrFloating")
+        if other_type == "Other":
+            return other_desc.text, other_type
+        return other_type, other_type
+
+    @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "swapDeriv":
-            # Basic counterparty and reference info
-            counterparties = tag.find("counterparties")
-            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
-            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+        if tag is None:
+            return None
+        cp_name, cp_lei = _parse_counterparties(tag)
+        addl = _parse_deriv_addl_info(tag)
 
-            # Check for derivAddlInfo (when nested in swaptions)
-            deriv_addl_name = None
-            deriv_addl_lei = None
-            deriv_addl_title = None
-            deriv_addl_cusip = None
-            deriv_addl_identifier = None
-            deriv_addl_identifier_type = None
-            deriv_addl_balance = None
-            deriv_addl_units = None
-            deriv_addl_desc_units = None
-            deriv_addl_currency = None
-            deriv_addl_value_usd = None
-            deriv_addl_pct_val = None
-            deriv_addl_asset_cat = None
-            deriv_addl_issuer_cat = None
-            deriv_addl_inv_country = None
+        # Reference instrument info (for CDS)
+        ref_name = ref_title = ref_cusip = ref_isin = ref_ticker = None
+        desc_ref = tag.find("descRefInstrmnt")
+        if desc_ref is not None:
+            other_ref = desc_ref.find("otherRefInst")
+            if other_ref is not None:
+                ref_name = _text(other_ref, "issuerName")
+                ref_title = _text(other_ref, "issueTitle")
+                ids = _parse_ref_instrument_identifiers(other_ref.find("identifiers"))
+                ref_cusip, ref_isin, ref_ticker = ids['cusip'], ids['isin'], ids['ticker']
 
-            deriv_addl_info = tag.find("derivAddlInfo")
-            if deriv_addl_info:
-                deriv_addl_name = child_text(deriv_addl_info, "name")
-                deriv_addl_lei = child_text(deriv_addl_info, "lei")
-                deriv_addl_title = child_text(deriv_addl_info, "title")
-                deriv_addl_cusip = child_text(deriv_addl_info, "cusip")
-                deriv_addl_balance = optional_decimal(deriv_addl_info, "balance")
-                deriv_addl_units = child_text(deriv_addl_info, "units")
-                deriv_addl_desc_units = child_text(deriv_addl_info, "descOthUnits")
-                deriv_addl_currency = child_text(deriv_addl_info, "curCd")
-                deriv_addl_value_usd = optional_decimal(deriv_addl_info, "valUSD")
-                deriv_addl_pct_val = optional_decimal(deriv_addl_info, "pctVal")
-                deriv_addl_asset_cat = child_text(deriv_addl_info, "assetCat")
-                deriv_addl_inv_country = child_text(deriv_addl_info, "invCountry")
+        # Receive leg
+        fixed_rec = tag.find("fixedRecDesc")
+        float_rec = cls._parse_floating_leg(tag.find("floatingRecDesc"))
+        other_rec_desc, other_rec_type = cls._parse_other_leg(tag.find("otherRecDesc"))
 
-                # Parse issuer conditional
-                issuer_cond = deriv_addl_info.find("issuerConditional")
-                if issuer_cond:
-                    deriv_addl_issuer_cat = issuer_cond.attrs.get("issuerCat")
+        # Payment leg
+        fixed_pmnt = tag.find("fixedPmntDesc")
+        float_pmnt = cls._parse_floating_leg(tag.find("floatingPmntDesc"))
+        other_pmnt_desc, other_pmnt_type = cls._parse_other_leg(tag.find("otherPmntDesc"))
 
-                # Parse identifiers
-                identifiers = deriv_addl_info.find("identifiers")
-                if identifiers:
-                    other_tag = identifiers.find("other")
-                    if other_tag:
-                        deriv_addl_identifier = other_tag.attrs.get("value")
-                        deriv_addl_identifier_type = other_tag.attrs.get("otherDesc")
-
-            # Get reference instrument info (for CDS)
-            ref_entity_name = None
-            ref_entity_title = None
-            ref_entity_cusip = None
-            ref_entity_isin = None
-            ref_entity_ticker = None
-            desc_ref = tag.find("descRefInstrmnt")
-            if desc_ref:
-                other_ref = desc_ref.find("otherRefInst")
-                if other_ref:
-                    ref_entity_name = child_text(other_ref, "issuerName")
-                    ref_entity_title = child_text(other_ref, "issueTitle")
-                    identifiers = other_ref.find("identifiers")
-                    if identifiers:
-                        cusip_tag = identifiers.find("cusip")
-                        if cusip_tag:
-                            ref_entity_cusip = cusip_tag.attrs.get("value")
-                        isin_tag = identifiers.find("isin")
-                        if isin_tag:
-                            ref_entity_isin = isin_tag.attrs.get("value")
-                        ticker_tag = identifiers.find("ticker")
-                        if ticker_tag:
-                            ref_entity_ticker = ticker_tag.attrs.get("value")
-
-            # DIRECTIONAL RECEIVE LEG PARSING
-            fixed_rec_desc = tag.find("fixedRecDesc")
-            floating_rec_desc = tag.find("floatingRecDesc")
-            other_rec_desc = tag.find("otherRecDesc")
-
-            # Fixed receive leg
-            fixed_rate_receive = None
-            fixed_amount_receive = None
-            fixed_currency_receive = None
-            if fixed_rec_desc:
-                fixed_rate_receive = optional_decimal_attr(fixed_rec_desc, "fixedRt")
-                fixed_amount_receive = optional_decimal_attr(fixed_rec_desc, "amount")
-                fixed_currency_receive = fixed_rec_desc.attrs.get("curCd")
-
-            # Floating receive leg
-            floating_index_receive = None
-            floating_spread_receive = None
-            floating_amount_receive = None
-            floating_currency_receive = None
-            floating_tenor_receive = None
-            floating_tenor_unit_receive = None
-            floating_reset_date_tenor_receive = None
-            floating_reset_date_unit_receive = None
-            if floating_rec_desc:
-                floating_index_receive = floating_rec_desc.attrs.get("floatingRtIndex")
-                floating_spread_receive = optional_decimal_attr(floating_rec_desc, "floatingRtSpread")
-                floating_amount_receive = optional_decimal_attr(floating_rec_desc, "pmntAmt")
-                floating_currency_receive = floating_rec_desc.attrs.get("curCd")
-
-                # Rate reset tenors for receive leg
-                rate_reset_tenors = floating_rec_desc.find("rtResetTenors")
-                if rate_reset_tenors:
-                    rate_reset_tenor = rate_reset_tenors.find("rtResetTenor")
-                    if rate_reset_tenor:
-                        floating_tenor_receive = rate_reset_tenor.attrs.get("rateTenor")
-                        floating_tenor_unit_receive = rate_reset_tenor.attrs.get("rateTenorUnit")
-                        floating_reset_date_tenor_receive = rate_reset_tenor.attrs.get("resetDt")
-                        floating_reset_date_unit_receive = rate_reset_tenor.attrs.get("resetDtUnit")
-
-            # Other receive leg
-            other_description_receive = None
-            other_type_receive = None
-            if other_rec_desc:
-                other_type_receive = other_rec_desc.attrs.get("fixedOrFloating")
-                if other_type_receive == "Other":
-                    other_description_receive = other_rec_desc.text
-                else:
-                    other_description_receive = other_type_receive
-
-            # DIRECTIONAL PAYMENT LEG PARSING
-            fixed_pmnt_desc = tag.find("fixedPmntDesc")
-            floating_pmnt_desc = tag.find("floatingPmntDesc")
-            other_pmnt_desc = tag.find("otherPmntDesc")
-
-            # Fixed payment leg
-            fixed_rate_pay = None
-            fixed_amount_pay = None
-            fixed_currency_pay = None
-            if fixed_pmnt_desc:
-                fixed_rate_pay = optional_decimal_attr(fixed_pmnt_desc, "fixedRt")
-                fixed_amount_pay = optional_decimal_attr(fixed_pmnt_desc, "amount")
-                fixed_currency_pay = fixed_pmnt_desc.attrs.get("curCd")
-
-            # Floating payment leg
-            floating_index_pay = None
-            floating_spread_pay = None
-            floating_amount_pay = None
-            floating_currency_pay = None
-            floating_tenor_pay = None
-            floating_tenor_unit_pay = None
-            floating_reset_date_tenor_pay = None
-            floating_reset_date_unit_pay = None
-            if floating_pmnt_desc:
-                floating_index_pay = floating_pmnt_desc.attrs.get("floatingRtIndex")
-                floating_spread_pay = optional_decimal_attr(floating_pmnt_desc, "floatingRtSpread")
-                floating_amount_pay = optional_decimal_attr(floating_pmnt_desc, "pmntAmt")
-                floating_currency_pay = floating_pmnt_desc.attrs.get("curCd")
-
-                # Rate reset tenors for payment leg
-                rate_reset_tenors = floating_pmnt_desc.find("rtResetTenors")
-                if rate_reset_tenors:
-                    rate_reset_tenor = rate_reset_tenors.find("rtResetTenor")
-                    if rate_reset_tenor:
-                        floating_tenor_pay = rate_reset_tenor.attrs.get("rateTenor")
-                        floating_tenor_unit_pay = rate_reset_tenor.attrs.get("rateTenorUnit")
-                        floating_reset_date_tenor_pay = rate_reset_tenor.attrs.get("resetDt")
-                        floating_reset_date_unit_pay = rate_reset_tenor.attrs.get("resetDtUnit")
-
-            # Other payment leg
-            other_description_pay = None
-            other_type_pay = None
-            if other_pmnt_desc:
-                other_type_pay = other_pmnt_desc.attrs.get("fixedOrFloating")
-                if other_type_pay == "Other":
-                    other_description_pay = other_pmnt_desc.text
-                else:
-                    other_description_pay = other_type_pay
-
-            return cls(
-                # Basic info
-                counterparty_name=counterparty_name,
-                counterparty_lei=counterparty_lei,
-                notional_amount=optional_decimal(tag, "notionalAmt"),
-                currency=child_text(tag, "curCd"),
-                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
-                termination_date=child_text(tag, "terminationDt"),
-                # Upfront payment/receipt info
-                upfront_payment=optional_decimal(tag, "upfrontPmnt"),
-                payment_currency=child_text(tag, "pmntCurCd"),
-                upfront_receipt=optional_decimal(tag, "upfrontRcpt"),
-                receipt_currency=child_text(tag, "rcptCurCd"),
-                reference_entity_name=ref_entity_name,
-                reference_entity_title=ref_entity_title,
-                reference_entity_cusip=ref_entity_cusip,
-                reference_entity_isin=ref_entity_isin,
-                reference_entity_ticker=ref_entity_ticker,
-                swap_flag=child_text(tag, "swapFlag"),
-
-                # Additional info from derivAddlInfo
-                deriv_addl_name=deriv_addl_name,
-                deriv_addl_lei=deriv_addl_lei,
-                deriv_addl_title=deriv_addl_title,
-                deriv_addl_cusip=deriv_addl_cusip,
-                deriv_addl_identifier=deriv_addl_identifier,
-                deriv_addl_identifier_type=deriv_addl_identifier_type,
-                deriv_addl_balance=deriv_addl_balance,
-                deriv_addl_units=deriv_addl_units,
-                deriv_addl_desc_units=deriv_addl_desc_units,
-                deriv_addl_currency=deriv_addl_currency,
-                deriv_addl_value_usd=deriv_addl_value_usd,
-                deriv_addl_pct_val=deriv_addl_pct_val,
-                deriv_addl_asset_cat=deriv_addl_asset_cat,
-                deriv_addl_issuer_cat=deriv_addl_issuer_cat,
-                deriv_addl_inv_country=deriv_addl_inv_country,
-
-                # RECEIVE LEG
-                fixed_rate_receive=fixed_rate_receive,
-                fixed_amount_receive=fixed_amount_receive,
-                fixed_currency_receive=fixed_currency_receive,
-                floating_index_receive=floating_index_receive,
-                floating_spread_receive=floating_spread_receive,
-                floating_amount_receive=floating_amount_receive,
-                floating_currency_receive=floating_currency_receive,
-                floating_tenor_receive=floating_tenor_receive,
-                floating_tenor_unit_receive=floating_tenor_unit_receive,
-                floating_reset_date_tenor_receive=floating_reset_date_tenor_receive,
-                floating_reset_date_unit_receive=floating_reset_date_unit_receive,
-                other_description_receive=other_description_receive,
-                other_type_receive=other_type_receive,
-
-                # PAYMENT LEG
-                fixed_rate_pay=fixed_rate_pay,
-                fixed_amount_pay=fixed_amount_pay,
-                fixed_currency_pay=fixed_currency_pay,
-                floating_index_pay=floating_index_pay,
-                floating_spread_pay=floating_spread_pay,
-                floating_amount_pay=floating_amount_pay,
-                floating_currency_pay=floating_currency_pay,
-                floating_tenor_pay=floating_tenor_pay,
-                floating_tenor_unit_pay=floating_tenor_unit_pay,
-                floating_reset_date_tenor_pay=floating_reset_date_tenor_pay,
-                floating_reset_date_unit_pay=floating_reset_date_unit_pay,
-                other_description_pay=other_description_pay,
-                other_type_pay=other_type_pay
-            )
+        return cls(
+            counterparty_name=cp_name,
+            counterparty_lei=cp_lei,
+            notional_amount=_opt_decimal(tag, "notionalAmt"),
+            currency=_text(tag, "curCd"),
+            unrealized_appreciation=_opt_decimal(tag, "unrealizedAppr"),
+            termination_date=_text(tag, "terminationDt"),
+            upfront_payment=_opt_decimal(tag, "upfrontPmnt"),
+            payment_currency=_text(tag, "pmntCurCd"),
+            upfront_receipt=_opt_decimal(tag, "upfrontRcpt"),
+            receipt_currency=_text(tag, "rcptCurCd"),
+            reference_entity_name=ref_name,
+            reference_entity_title=ref_title,
+            reference_entity_cusip=ref_cusip,
+            reference_entity_isin=ref_isin,
+            reference_entity_ticker=ref_ticker,
+            swap_flag=_text(tag, "swapFlag"),
+            deriv_addl_name=addl['name'],
+            deriv_addl_lei=addl['lei'],
+            deriv_addl_title=addl['title'],
+            deriv_addl_cusip=addl['cusip'],
+            deriv_addl_identifier=addl['identifier'],
+            deriv_addl_identifier_type=addl['identifier_type'],
+            deriv_addl_balance=addl['balance'],
+            deriv_addl_units=addl['units'],
+            deriv_addl_desc_units=addl.get('desc_units'),
+            deriv_addl_currency=addl['currency'],
+            deriv_addl_value_usd=addl['value_usd'],
+            deriv_addl_pct_val=addl['pct_val'],
+            deriv_addl_asset_cat=addl['asset_cat'],
+            deriv_addl_issuer_cat=addl['issuer_cat'],
+            deriv_addl_inv_country=addl['inv_country'],
+            # Receive leg
+            fixed_rate_receive=_opt_decimal_attr(fixed_rec, "fixedRt") if fixed_rec is not None else None,
+            fixed_amount_receive=_opt_decimal_attr(fixed_rec, "amount") if fixed_rec is not None else None,
+            fixed_currency_receive=fixed_rec.get("curCd") if fixed_rec is not None else None,
+            floating_index_receive=float_rec.get('index'),
+            floating_spread_receive=float_rec.get('spread'),
+            floating_amount_receive=float_rec.get('amount'),
+            floating_currency_receive=float_rec.get('currency'),
+            floating_tenor_receive=float_rec.get('tenor'),
+            floating_tenor_unit_receive=float_rec.get('tenor_unit'),
+            floating_reset_date_tenor_receive=float_rec.get('reset_date_tenor'),
+            floating_reset_date_unit_receive=float_rec.get('reset_date_unit'),
+            other_description_receive=other_rec_desc,
+            other_type_receive=other_rec_type,
+            # Payment leg
+            fixed_rate_pay=_opt_decimal_attr(fixed_pmnt, "fixedRt") if fixed_pmnt is not None else None,
+            fixed_amount_pay=_opt_decimal_attr(fixed_pmnt, "amount") if fixed_pmnt is not None else None,
+            fixed_currency_pay=fixed_pmnt.get("curCd") if fixed_pmnt is not None else None,
+            floating_index_pay=float_pmnt.get('index'),
+            floating_spread_pay=float_pmnt.get('spread'),
+            floating_amount_pay=float_pmnt.get('amount'),
+            floating_currency_pay=float_pmnt.get('currency'),
+            floating_tenor_pay=float_pmnt.get('tenor'),
+            floating_tenor_unit_pay=float_pmnt.get('tenor_unit'),
+            floating_reset_date_tenor_pay=float_pmnt.get('reset_date_tenor'),
+            floating_reset_date_unit_pay=float_pmnt.get('reset_date_unit'),
+            other_description_pay=other_pmnt_desc,
+            other_type_pay=other_pmnt_type
+        )
 
 
 class FutureDerivative(BaseModel):
@@ -467,63 +390,36 @@ class FutureDerivative(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "futrDeriv":
-            counterparties = tag.find("counterparties")
-            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
-            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+        if tag is None:
+            return None
+        cp_name, cp_lei = _parse_counterparties(tag)
 
-            # Get reference instrument info
-            ref_entity_name = None
-            ref_entity_title = None
-            ref_entity_cusip = None
-            ref_entity_isin = None
-            ref_entity_ticker = None
-            ref_entity_other_id = None
-            ref_entity_other_id_type = None
+        ref_name = ref_title = None
+        ids = {'cusip': None, 'isin': None, 'ticker': None, 'other_id': None, 'other_id_type': None}
+        desc_ref = tag.find("descRefInstrmnt")
+        if desc_ref is not None:
+            other_ref = desc_ref.find("otherRefInst")
+            if other_ref is not None:
+                ref_name = _text(other_ref, "issuerName")
+                ref_title = _text(other_ref, "issueTitle")
+                ids = _parse_ref_instrument_identifiers(other_ref.find("identifiers"))
 
-            desc_ref = tag.find("descRefInstrmnt")
-            if desc_ref:
-                other_ref = desc_ref.find("otherRefInst")
-                if other_ref:
-                    ref_entity_name = child_text(other_ref, "issuerName")
-                    ref_entity_title = child_text(other_ref, "issueTitle")
-
-                    # Parse identifiers
-                    identifiers = other_ref.find("identifiers")
-                    if identifiers:
-                        cusip_tag = identifiers.find("cusip")
-                        if cusip_tag:
-                            ref_entity_cusip = cusip_tag.attrs.get("value")
-
-                        isin_tag = identifiers.find("isin")
-                        if isin_tag:
-                            ref_entity_isin = isin_tag.attrs.get("value")
-
-                        ticker_tag = identifiers.find("ticker")
-                        if ticker_tag:
-                            ref_entity_ticker = ticker_tag.attrs.get("value")
-
-                        other_tag = identifiers.find("other")
-                        if other_tag:
-                            ref_entity_other_id = other_tag.attrs.get("value")
-                            ref_entity_other_id_type = other_tag.attrs.get("otherDesc")
-
-            return cls(
-                counterparty_name=counterparty_name,
-                counterparty_lei=counterparty_lei,
-                payoff_profile=child_text(tag, "payOffProf"),
-                expiration_date=child_text(tag, "expDate"),
-                notional_amount=optional_decimal(tag, "notionalAmt"),
-                currency=child_text(tag, "curCd"),
-                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
-                reference_entity_name=ref_entity_name,
-                reference_entity_title=ref_entity_title,
-                reference_entity_cusip=ref_entity_cusip,
-                reference_entity_isin=ref_entity_isin,
-                reference_entity_ticker=ref_entity_ticker,
-                reference_entity_other_id=ref_entity_other_id,
-                reference_entity_other_id_type=ref_entity_other_id_type
-            )
+        return cls(
+            counterparty_name=cp_name,
+            counterparty_lei=cp_lei,
+            payoff_profile=_text(tag, "payOffProf"),
+            expiration_date=_text(tag, "expDate"),
+            notional_amount=_opt_decimal(tag, "notionalAmt"),
+            currency=_text(tag, "curCd"),
+            unrealized_appreciation=_opt_decimal(tag, "unrealizedAppr"),
+            reference_entity_name=ref_name,
+            reference_entity_title=ref_title,
+            reference_entity_cusip=ids['cusip'],
+            reference_entity_isin=ids['isin'],
+            reference_entity_ticker=ids['ticker'],
+            reference_entity_other_id=ids['other_id'],
+            reference_entity_other_id_type=ids['other_id_type']
+        )
 
 
 class SwaptionDerivative(BaseModel):
@@ -543,34 +439,32 @@ class SwaptionDerivative(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "optionSwaptionWarrantDeriv":
-            counterparties = tag.find("counterparties")
-            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
-            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+        if tag is None:
+            return None
+        cp_name, cp_lei = _parse_counterparties(tag)
 
-            # Parse nested swap from descRefInstrmnt > nestedDerivInfo
-            nested_swap = None
-            desc_ref = tag.find("descRefInstrmnt")
-            if desc_ref:
-                nested_deriv_info = desc_ref.find("nestedDerivInfo")
-                if nested_deriv_info:
-                    swap_tag = nested_deriv_info.find("swapDeriv")
-                    if swap_tag:
-                        nested_swap = SwapDerivative.from_xml(swap_tag)
+        nested_swap = None
+        desc_ref = tag.find("descRefInstrmnt")
+        if desc_ref is not None:
+            nested_deriv_info = desc_ref.find("nestedDerivInfo")
+            if nested_deriv_info is not None:
+                swap_tag = nested_deriv_info.find("swapDeriv")
+                if swap_tag is not None:
+                    nested_swap = SwapDerivative.from_xml(swap_tag)
 
-            return cls(
-                counterparty_name=counterparty_name,
-                counterparty_lei=counterparty_lei,
-                put_or_call=child_text(tag, "putOrCall"),
-                written_or_purchased=child_text(tag, "writtenOrPur"),
-                share_number=optional_decimal(tag, "shareNo"),
-                exercise_price=optional_decimal(tag, "exercisePrice"),
-                exercise_price_currency=child_text(tag, "exercisePriceCurCd"),
-                expiration_date=child_text(tag, "expDt"),
-                delta=child_text(tag, "delta"),
-                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
-                nested_swap=nested_swap
-            )
+        return cls(
+            counterparty_name=cp_name,
+            counterparty_lei=cp_lei,
+            put_or_call=_text(tag, "putOrCall"),
+            written_or_purchased=_text(tag, "writtenOrPur"),
+            share_number=_opt_decimal(tag, "shareNo"),
+            exercise_price=_opt_decimal(tag, "exercisePrice"),
+            exercise_price_currency=_text(tag, "exercisePriceCurCd"),
+            expiration_date=_text(tag, "expDt"),
+            delta=_text(tag, "delta"),
+            unrealized_appreciation=_opt_decimal(tag, "unrealizedAppr"),
+            nested_swap=nested_swap
+        )
 
 
 class OptionDerivative(BaseModel):
@@ -603,96 +497,64 @@ class OptionDerivative(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "optionSwaptionWarrantDeriv":
-            counterparties = tag.find("counterparties")
-            counterparty_name = child_text(counterparties, "counterpartyName") if counterparties else None
-            counterparty_lei = child_text(counterparties, "counterpartyLei") if counterparties else None
+        if tag is None:
+            return None
+        cp_name, cp_lei = _parse_counterparties(tag)
 
-            # Get reference instrument info
-            ref_entity_name = None
-            ref_entity_title = None
-            ref_entity_cusip = None
-            ref_entity_isin = None
-            ref_entity_ticker = None
-            ref_entity_other_id = None
-            ref_entity_other_id_type = None
-            index_name = None
-            index_identifier = None
-            nested_forward = None
+        ref_name = ref_title = None
+        ids = {'cusip': None, 'isin': None, 'ticker': None, 'other_id': None, 'other_id_type': None}
+        index_name = index_identifier = None
+        nested_forward = nested_future = nested_swap_nested = None
 
-            desc_ref = tag.find("descRefInstrmnt")
-            if desc_ref:
-                # Check for nested derivative info (e.g., option on forward, future, swap)
-                nested_deriv_info = desc_ref.find("nestedDerivInfo")
-                nested_future = None
-                nested_swap_nested = None
-                if nested_deriv_info:
-                    # Parse any type of nested derivative
-                    fwd_tag = nested_deriv_info.find("fwdDeriv")
-                    if fwd_tag:
-                        nested_forward = ForwardDerivative.from_xml(fwd_tag)
+        desc_ref = tag.find("descRefInstrmnt")
+        if desc_ref is not None:
+            nested_deriv_info = desc_ref.find("nestedDerivInfo")
+            if nested_deriv_info is not None:
+                fwd_tag = nested_deriv_info.find("fwdDeriv")
+                if fwd_tag is not None:
+                    nested_forward = ForwardDerivative.from_xml(fwd_tag)
+                fut_tag = nested_deriv_info.find("futrDeriv")
+                if fut_tag is not None:
+                    nested_future = FutureDerivative.from_xml(fut_tag)
+                swap_tag = nested_deriv_info.find("swapDeriv")
+                if swap_tag is not None:
+                    nested_swap_nested = SwapDerivative.from_xml(swap_tag)
+            else:
+                index_basket = desc_ref.find("indexBasketInfo")
+                if index_basket is not None:
+                    index_name = _text(index_basket, "indexName")
+                    index_identifier = _text(index_basket, "indexIdentifier")
 
-                    fut_tag = nested_deriv_info.find("futrDeriv")
-                    if fut_tag:
-                        nested_future = FutureDerivative.from_xml(fut_tag)
+                other_ref = desc_ref.find("otherRefInst")
+                if other_ref is not None:
+                    ref_name = _text(other_ref, "issuerName")
+                    ref_title = _text(other_ref, "issueTitle")
+                    ids = _parse_ref_instrument_identifiers(other_ref.find("identifiers"))
 
-                    swap_tag = nested_deriv_info.find("swapDeriv")
-                    if swap_tag:
-                        nested_swap_nested = SwapDerivative.from_xml(swap_tag)
-                else:
-                    # Regular option - parse reference instrument
-                    # Check for index reference first
-                    index_basket = desc_ref.find("indexBasketInfo")
-                    if index_basket:
-                        index_name = child_text(index_basket, "indexName")
-                        index_identifier = child_text(index_basket, "indexIdentifier")
-
-                    # Then check for other reference instrument
-                    other_ref = desc_ref.find("otherRefInst")
-                    if other_ref:
-                        ref_entity_name = child_text(other_ref, "issuerName")
-                        ref_entity_title = child_text(other_ref, "issueTitle")
-                        identifiers = other_ref.find("identifiers")
-                        if identifiers:
-                            cusip_tag = identifiers.find("cusip")
-                            if cusip_tag:
-                                ref_entity_cusip = cusip_tag.attrs.get("value")
-                            isin_tag = identifiers.find("isin")
-                            if isin_tag:
-                                ref_entity_isin = isin_tag.attrs.get("value")
-                            ticker_tag = identifiers.find("ticker")
-                            if ticker_tag:
-                                ref_entity_ticker = ticker_tag.attrs.get("value")
-
-                            other_tag = identifiers.find("other")
-                            if other_tag:
-                                ref_entity_other_id = other_tag.attrs.get("value")
-                                ref_entity_other_id_type = other_tag.attrs.get("otherDesc")
-
-            return cls(
-                counterparty_name=counterparty_name,
-                counterparty_lei=counterparty_lei,
-                put_or_call=child_text(tag, "putOrCall"),
-                written_or_purchased=child_text(tag, "writtenOrPur"),
-                share_number=optional_decimal(tag, "shareNo"),
-                exercise_price=optional_decimal(tag, "exercisePrice"),
-                exercise_price_currency=child_text(tag, "exercisePriceCurCd"),
-                expiration_date=child_text(tag, "expDt"),
-                delta=child_text(tag, "delta"),
-                unrealized_appreciation=optional_decimal(tag, "unrealizedAppr"),
-                reference_entity_name=ref_entity_name,
-                reference_entity_title=ref_entity_title,
-                reference_entity_cusip=ref_entity_cusip,
-                reference_entity_isin=ref_entity_isin,
-                reference_entity_ticker=ref_entity_ticker,
-                reference_entity_other_id=ref_entity_other_id,
-                reference_entity_other_id_type=ref_entity_other_id_type,
-                index_name=index_name,
-                index_identifier=index_identifier,
-                nested_forward=nested_forward,
-                nested_future=nested_future,
-                nested_swap=nested_swap_nested
-            )
+        return cls(
+            counterparty_name=cp_name,
+            counterparty_lei=cp_lei,
+            put_or_call=_text(tag, "putOrCall"),
+            written_or_purchased=_text(tag, "writtenOrPur"),
+            share_number=_opt_decimal(tag, "shareNo"),
+            exercise_price=_opt_decimal(tag, "exercisePrice"),
+            exercise_price_currency=_text(tag, "exercisePriceCurCd"),
+            expiration_date=_text(tag, "expDt"),
+            delta=_text(tag, "delta"),
+            unrealized_appreciation=_opt_decimal(tag, "unrealizedAppr"),
+            reference_entity_name=ref_name,
+            reference_entity_title=ref_title,
+            reference_entity_cusip=ids['cusip'],
+            reference_entity_isin=ids['isin'],
+            reference_entity_ticker=ids['ticker'],
+            reference_entity_other_id=ids['other_id'],
+            reference_entity_other_id_type=ids['other_id_type'],
+            index_name=index_name,
+            index_identifier=index_identifier,
+            nested_forward=nested_forward,
+            nested_future=nested_future,
+            nested_swap=nested_swap_nested
+        )
 
 
 class DerivativeInfo(BaseModel):
@@ -705,36 +567,36 @@ class DerivativeInfo(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "derivativeInfo":
-            # Use direct children only to avoid finding nested derivatives
-            fwd_tag = tag.find("fwdDeriv", recursive=False)
-            swap_tag = tag.find("swapDeriv", recursive=False)
-            future_tag = tag.find("futrDeriv", recursive=False)
-            option_tag = tag.find("optionSwaptionWarrantDeriv", recursive=False)
+        if tag is None:
+            return None
+        # lxml .find() already searches only direct children
+        fwd_tag = tag.find("fwdDeriv")
+        swap_tag = tag.find("swapDeriv")
+        future_tag = tag.find("futrDeriv")
+        option_tag = tag.find("optionSwaptionWarrantDeriv")
 
-            deriv_cat = None
-            option_deriv = None
-            swaption_deriv = None
+        deriv_cat = None
+        option_deriv = None
+        swaption_deriv = None
 
-            if fwd_tag:
-                deriv_cat = fwd_tag.attrs.get("derivCat")
-            elif swap_tag:
-                deriv_cat = swap_tag.attrs.get("derivCat")
-            elif future_tag:
-                deriv_cat = future_tag.attrs.get("derivCat")
-            elif option_tag:
-                deriv_cat = option_tag.attrs.get("derivCat")
-                # Determine if it's a swaption (SWO) or regular option (OPT/WAR)
-                if deriv_cat == "SWO":
-                    swaption_deriv = SwaptionDerivative.from_xml(option_tag)
-                else:
-                    option_deriv = OptionDerivative.from_xml(option_tag)
+        if fwd_tag is not None:
+            deriv_cat = fwd_tag.get("derivCat")
+        elif swap_tag is not None:
+            deriv_cat = swap_tag.get("derivCat")
+        elif future_tag is not None:
+            deriv_cat = future_tag.get("derivCat")
+        elif option_tag is not None:
+            deriv_cat = option_tag.get("derivCat")
+            if deriv_cat == "SWO":
+                swaption_deriv = SwaptionDerivative.from_xml(option_tag)
+            else:
+                option_deriv = OptionDerivative.from_xml(option_tag)
 
-            return cls(
-                derivative_category=deriv_cat,
-                forward_derivative=ForwardDerivative.from_xml(fwd_tag) if fwd_tag else None,
-                swap_derivative=SwapDerivative.from_xml(swap_tag) if swap_tag else None,
-                future_derivative=FutureDerivative.from_xml(future_tag) if future_tag else None,
-                option_derivative=option_deriv,
-                swaption_derivative=swaption_deriv
-            )
+        return cls(
+            derivative_category=deriv_cat,
+            forward_derivative=ForwardDerivative.from_xml(fwd_tag) if fwd_tag is not None else None,
+            swap_derivative=SwapDerivative.from_xml(swap_tag) if swap_tag is not None else None,
+            future_derivative=FutureDerivative.from_xml(future_tag) if future_tag is not None else None,
+            option_derivative=option_deriv,
+            swaption_derivative=swaption_deriv
+        )

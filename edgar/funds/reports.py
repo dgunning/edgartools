@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from edgar.funds.ticker_resolution import TickerResolutionResult
 
 import pandas as pd
-from bs4 import Tag
+from lxml import etree
 from pydantic import BaseModel
 from rich import box
 from rich.console import Group, Text
@@ -24,7 +24,6 @@ from edgar.core import get_bool
 from edgar.display.formatting import moneyfmt
 from edgar.funds import FundCompany, FundSeries
 from edgar.richtools import df_to_rich_table, repr_rich
-from edgar.xmltools import child_text, find_element, optional_decimal
 
 log = logging.getLogger(__name__)
 
@@ -36,19 +35,52 @@ __all__ = [
     'get_fund_portfolio_from_filing',
 ]
 
-def optional_decimal_attr(element, attr_name):
-    """Helper function to parse optional decimal attributes from XML elements"""
+def _text(parent, tag):
+    """Get text of a direct child element, or None. lxml replacement for child_text()."""
+    if parent is None:
+        return None
+    el = parent.find(tag)
+    if el is not None and el.text:
+        return el.text.strip()
+    return None
+
+
+def _opt_decimal(parent, tag):
+    """Get optional Decimal from child element text. lxml replacement for optional_decimal()."""
+    text = _text(parent, tag)
+    if text:
+        try:
+            return Decimal(text)
+        except (ValueError, TypeError, ArithmeticError):
+            return None
+    return None
+
+
+def _opt_decimal_attr(element, attr_name):
+    """Get optional Decimal from an element attribute."""
     if element is None:
         return None
-
-    attr_value = element.attrs.get(attr_name)
+    attr_value = element.get(attr_name)
     if not attr_value or attr_value == "N/A":
         return None
-
     try:
         return Decimal(attr_value)
     except (ValueError, TypeError):
         return None
+
+
+def _strip_namespaces(root):
+    """Remove namespace prefixes from all element tags for simpler lookups."""
+    for el in root.iter():
+        tag = el.tag
+        if isinstance(tag, str) and '}' in tag:
+            el.tag = tag.split('}', 1)[1]
+        # Also strip namespace from attribute keys
+        attrib = el.attrib
+        keys_to_fix = [k for k in attrib if '}' in k]
+        for k in keys_to_fix:
+            new_key = k.split('}', 1)[1]
+            attrib[new_key] = attrib.pop(k)
 
 # Define constants
 NPORT_FORMS = ["NPORT-P", "NPORT-EX", "N-PORT", "N-PORT/A"]
@@ -65,9 +97,9 @@ class SeriesClassInfo(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "seriesClassInfo":
-            return cls(series_id=child_text(tag, "seriesId") or "",
-                       class_id=child_text(tag, "classId") or "")
+        if tag is not None:
+            return cls(series_id=_text(tag, "seriesId") or "",
+                       class_id=_text(tag, "classId") or "")
 
 
 class FilerInfo(BaseModel):
@@ -117,13 +149,13 @@ class PeriodType(BaseModel):
     period30Yr: Decimal
 
     @classmethod
-    def from_xml(cls, tag: Optional[Tag] = None):
-        if tag:
-            return cls(period1Yr=Decimal(str(tag.attrs.get("period1Yr", "0"))),
-                       period3Mon=Decimal(str(tag.attrs.get("period3Mon", "0"))),
-                       period5Yr=Decimal(str(tag.attrs.get("period5Yr", "0"))),
-                       period10Yr=Decimal(str(tag.attrs.get("period10Yr", "0"))),
-                       period30Yr=Decimal(str(tag.attrs.get("period30Yr", "0")))
+    def from_xml(cls, tag=None):
+        if tag is not None:
+            return cls(period1Yr=Decimal(tag.get("period1Yr", "0")),
+                       period3Mon=Decimal(tag.get("period3Mon", "0")),
+                       period5Yr=Decimal(tag.get("period5Yr", "0")),
+                       period10Yr=Decimal(tag.get("period10Yr", "0")),
+                       period30Yr=Decimal(tag.get("period30Yr", "0"))
                        )
 
 
@@ -158,12 +190,12 @@ class MonthlyTotalReturn(BaseModel):
     return3: Optional[Union[Decimal, str]]
 
     @classmethod
-    def from_xml(cls, tag: Tag):
+    def from_xml(cls, tag):
         return cls(
-            class_id=str(tag.attrs.get("classId", "")),
-            return1=decimal_or_na(str(tag.attrs.get("rtn1", "N/A"))),
-            return2=decimal_or_na(str(tag.attrs.get("rtn2", "N/A"))),
-            return3=decimal_or_na(str(tag.attrs.get("rtn3", "N/A")))
+            class_id=tag.get("classId", ""),
+            return1=decimal_or_na(tag.get("rtn1", "N/A")),
+            return2=decimal_or_na(tag.get("rtn2", "N/A")),
+            return3=decimal_or_na(tag.get("rtn3", "N/A"))
         )
 
 
@@ -173,10 +205,10 @@ class RealizedChange(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag:
+        if tag is not None:
             return cls(
-                net_realized_gain=decimal_or_na(tag.attrs.get("netRealizedGain")),
-                net_unrealized_appreciation=decimal_or_na(tag.attrs.get("netUnrealizedAppr"))
+                net_realized_gain=decimal_or_na(tag.get("netRealizedGain")),
+                net_unrealized_appreciation=decimal_or_na(tag.get("netUnrealizedAppr"))
             )
 
 
@@ -187,11 +219,11 @@ class MonthlyFlow(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag:
+        if tag is not None:
             return cls(
-                redemption=decimal_or_na(tag.attrs.get("redemption")),
-                reinvestment=decimal_or_na(tag.attrs.get("reinvestment")),
-                sales=decimal_or_na(tag.attrs.get("sales"))
+                redemption=decimal_or_na(tag.get("redemption")),
+                reinvestment=decimal_or_na(tag.get("reinvestment")),
+                sales=decimal_or_na(tag.get("sales"))
             )
 
 
@@ -241,17 +273,17 @@ class DebtSecurity(BaseModel):
     is_continuing_convertible: bool
 
     @classmethod
-    def from_xml(cls, tag: Tag):
-        if tag and tag.name == "debtSec":
+    def from_xml(cls, tag):
+        if tag is not None:
             return cls(
-                maturity_date=datetime_or_na(child_text(tag, "maturityDt")),
-                coupon_kind=child_text(tag, "couponKind") or "",
-                annualized_rate=optional_decimal(tag, "annualizedRt"),
-                is_default=child_text(tag, "isDefault") == "Y",
-                are_instrument_payents_in_arrears=child_text(tag, "areIntrstPmntsInArrs") == "Y",
-                is_paid_kind=child_text(tag, "isPaidKind") == "Y",
-                is_mandatory_convertible=child_text(tag, "isMandatoryConvrtbl") == "Y",
-                is_continuing_convertible=child_text(tag, "isContngtConvrtbl") == "Y"
+                maturity_date=datetime_or_na(_text(tag, "maturityDt")),
+                coupon_kind=_text(tag, "couponKind") or "",
+                annualized_rate=_opt_decimal(tag, "annualizedRt"),
+                is_default=_text(tag, "isDefault") == "Y",
+                are_instrument_payents_in_arrears=_text(tag, "areIntrstPmntsInArrs") == "Y",
+                is_paid_kind=_text(tag, "isPaidKind") == "Y",
+                is_mandatory_convertible=_text(tag, "isMandatoryConvrtbl") == "Y",
+                is_continuing_convertible=_text(tag, "isContngtConvrtbl") == "Y"
             )
 
 
@@ -262,11 +294,11 @@ class SecurityLending(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "securityLending":
+        if tag is not None:
             return cls(
-                is_cash_collateral=child_text(tag, "isCashCollateral"),
-                is_non_cash_collateral=child_text(tag, "isNonCashCollateral"),
-                is_loan_by_fund=child_text(tag, "isLoanByFund")
+                is_cash_collateral=_text(tag, "isCashCollateral"),
+                is_non_cash_collateral=_text(tag, "isNonCashCollateral"),
+                is_loan_by_fund=_text(tag, "isLoanByFund")
             )
 
 
@@ -277,15 +309,15 @@ class Identifiers(BaseModel):
 
     @classmethod
     def from_xml(cls, tag):
-        if tag and tag.name == "identifiers":
+        if tag is not None:
             ticker_tag = tag.find("ticker")
-            ticker = ticker_tag.attrs.get("value") if ticker_tag else None
+            ticker = ticker_tag.get("value") if ticker_tag is not None else None
 
             isin_tag = tag.find("isin")
-            isin = isin_tag.attrs.get("value") if isin_tag else None
+            isin = isin_tag.get("value") if isin_tag is not None else None
 
             other_tag = tag.find("other")
-            other = {other_tag.attrs.get("otherDesc"): other_tag.attrs.get("value")} if other_tag else {}
+            other = {other_tag.get("otherDesc"): other_tag.get("value")} if other_tag is not None else {}
 
             return cls(ticker=ticker, isin=isin, other=other)
 
@@ -1150,26 +1182,48 @@ class FundReport:
         return cls(**fund_report_dict)
 
     @classmethod
-    def parse_fund_xml(cls, xml: Union[str, Tag]) -> Dict[str, Any]:
-        root = find_element(xml, "edgarSubmission")
+    def parse_fund_xml(cls, xml: Union[str, Any]) -> Dict[str, Any]:
+        """Parse N-PORT XML using lxml for maximum performance.
+
+        Performance: lxml direct parsing is 10-20x faster than BeautifulSoup.
+        """
+        # Parse XML with lxml
+        if isinstance(xml, str):
+            xml_bytes = xml.encode('utf-8') if isinstance(xml, str) else xml
+        else:
+            xml_bytes = xml
+
+        try:
+            root = etree.fromstring(xml_bytes)
+        except etree.XMLSyntaxError:
+            parser = etree.XMLParser(recover=True)
+            root = etree.fromstring(xml_bytes, parser=parser)
+
+        # Strip namespaces for simpler element lookups
+        _strip_namespaces(root)
+
+        # Navigate to edgarSubmission if root isn't it already
+        if root.tag != "edgarSubmission":
+            found = root.find(".//edgarSubmission")
+            if found is not None:
+                root = found
 
         # Get the header
         header_el = root.find("headerData")
-
         filer_info_tag = header_el.find("filerInfo")
-
-        # Filer Info
-        issuer_credentials_tag = header_el.find("issuerCredentials")
+        # issuerCredentials and seriesClassInfo may be nested under a filer element
+        issuer_credentials_tag = filer_info_tag.find(".//issuerCredentials")
+        series_class_info_tag = filer_info_tag.find(".//seriesClassInfo")
 
         header = Header(
-            submission_type=child_text(header_el, "submissionType"),
-            is_confidential=child_text(header_el, "isConfidential") == "true",
+            submission_type=_text(header_el, "submissionType"),
+            is_confidential=_text(header_el, "isConfidential") == "true",
             filer_info=FilerInfo(
                 issuer_credentials=IssuerCredentials(
-                    cik=child_text(issuer_credentials_tag, "cik"),
-                    ccc=child_text(issuer_credentials_tag, "ccc")
+                    cik=_text(issuer_credentials_tag, "cik"),
+                    ccc=_text(issuer_credentials_tag, "ccc")
                 ),
-                series_class_info=SeriesClassInfo.from_xml(filer_info_tag.find("seriesClassInfo"))
+                series_class_info=SeriesClassInfo.from_xml(series_class_info_tag)
             )
         )
 
@@ -1179,41 +1233,41 @@ class FundReport:
         # General info
         general_info_tag = form_data_tag.find("genInfo")
         reg_state_conditional_tag = general_info_tag.find("regStateConditional")
-        if reg_state_conditional_tag:
-            state = reg_state_conditional_tag.attrs.get("regState")
-            country = reg_state_conditional_tag.attrs.get("regCountry")
+        if reg_state_conditional_tag is not None:
+            state = reg_state_conditional_tag.get("regState")
+            country = reg_state_conditional_tag.get("regCountry")
         else:
             state = None
-            country = child_text(general_info_tag, "regCountry")
+            country = _text(general_info_tag, "regCountry")
 
         general_info = GeneralInfo(
-            name=child_text(general_info_tag, "regName"),
-            cik=child_text(general_info_tag, "regCik"),
-            file_number=child_text(general_info_tag, "regFileNumber"),
-            reg_lei=child_text(general_info_tag, "regLei"),
-            street1=child_text(general_info_tag, "regStreet1"),
-            street2=child_text(general_info_tag, "regStreet2"),
-            city=child_text(general_info_tag, "regCity"),
-            zip_or_postal_code=child_text(general_info_tag, "regZipOrPostalCode"),
-            phone=child_text(general_info_tag, "regPhone"),
+            name=_text(general_info_tag, "regName"),
+            cik=_text(general_info_tag, "regCik"),
+            file_number=_text(general_info_tag, "regFileNumber"),
+            reg_lei=_text(general_info_tag, "regLei"),
+            street1=_text(general_info_tag, "regStreet1"),
+            street2=_text(general_info_tag, "regStreet2"),
+            city=_text(general_info_tag, "regCity"),
+            zip_or_postal_code=_text(general_info_tag, "regZipOrPostalCode"),
+            phone=_text(general_info_tag, "regPhone"),
             state=state,
             country=country,
-            series_name=child_text(general_info_tag, "seriesName"),
-            series_id=child_text(general_info_tag, "seriesId"),
-            series_lei=child_text(general_info_tag, "seriesLei"),
-            fiscal_year_end=child_text(general_info_tag, "repPdEnd"),
-            rep_period_date=child_text(general_info_tag, "repPdDate"),
-            is_final_filing=get_bool(child_text(general_info_tag, "isFinalFiling"))
+            series_name=_text(general_info_tag, "seriesName"),
+            series_id=_text(general_info_tag, "seriesId"),
+            series_lei=_text(general_info_tag, "seriesLei"),
+            fiscal_year_end=_text(general_info_tag, "repPdEnd"),
+            rep_period_date=_text(general_info_tag, "repPdDate"),
+            is_final_filing=get_bool(_text(general_info_tag, "isFinalFiling"))
         )
 
-        # Fund info
-        fund_info_tag = root.find("fundInfo")
+        # Fund info — fundInfo is a child of formData, not root
+        fund_info_tag = form_data_tag.find("fundInfo")
         # Current metrics
         current_metrics_tag = fund_info_tag.find("curMetrics")
         current_metrics = {}
-        if current_metrics_tag:
-            for curr_metric_tag in current_metrics_tag.find_all("curMetric"):
-                currency = child_text(curr_metric_tag, "curCd")
+        if current_metrics_tag is not None:
+            for curr_metric_tag in current_metrics_tag.findall("curMetric"):
+                currency = _text(curr_metric_tag, "curCd")
                 current_metrics[currency] = CurrentMetric(
                     currency=currency,
                     intrstRtRiskdv01=PeriodType.from_xml(curr_metric_tag.find("intrstRtRiskdv01")),
@@ -1227,7 +1281,7 @@ class FundReport:
             monthly_total_returns=[
                 MonthlyTotalReturn.from_xml(monthly_return_tag)
                 for monthly_return_tag
-                in monthly_returns_tag.find_all("monthlyTotReturn")
+                in monthly_returns_tag.findall("monthlyTotReturn")
             ],
             other_mon1=RealizedChange.from_xml(return_info_tag.find("othMon1")),
             other_mon2=RealizedChange.from_xml(return_info_tag.find("othMon2")),
@@ -1235,28 +1289,28 @@ class FundReport:
         )
 
         fund_info = FundInfo(
-            total_assets=Decimal(child_text(fund_info_tag, "totAssets")),
-            total_liabilities=Decimal(child_text(fund_info_tag, "totLiabs")),
-            net_assets=Decimal(child_text(fund_info_tag, "netAssets")),
-            assets_attr_misc_sec=Decimal(child_text(fund_info_tag, "assetsAttrMiscSec")),
-            assets_invested=Decimal(child_text(fund_info_tag, "assetsInvested")),
-            amt_pay_one_yr_banks_borr=Decimal(child_text(fund_info_tag, "amtPayOneYrBanksBorr")),
-            amt_pay_one_yr_ctrld_comp=Decimal(child_text(fund_info_tag, "amtPayOneYrCtrldComp")),
-            amt_pay_one_yr_oth_affil=Decimal(child_text(fund_info_tag, "amtPayOneYrOthAffil")),
-            amt_pay_one_yr_other=Decimal(child_text(fund_info_tag, "amtPayOneYrOther")),
-            amt_pay_aft_one_yr_banks_borr=optional_decimal(fund_info_tag, "amtPayAftOneYrBanksBorr"),
-            amt_pay_aft_one_yr_ctrld_comp=optional_decimal(fund_info_tag, "amtPayAftOneYrCtrldComp"),
-            amt_pay_aft_one_yr_oth_affil=optional_decimal(fund_info_tag, "amtPayAftOneYrOthAffil"),
-            amt_pay_aft_one_yr_other=optional_decimal(fund_info_tag, "amtPayAftOneYrOther"),
-            delay_deliv=optional_decimal(fund_info_tag, "delayDeliv"),
-            stand_by_commit=optional_decimal(fund_info_tag, "standByCommit"),
-            liquidity_pref=optional_decimal(fund_info_tag, "liquidPref"),
-            cash_not_report_in_cor_d=optional_decimal(fund_info_tag, "cshNotRptdInCorD"),
+            total_assets=Decimal(_text(fund_info_tag, "totAssets")),
+            total_liabilities=Decimal(_text(fund_info_tag, "totLiabs")),
+            net_assets=Decimal(_text(fund_info_tag, "netAssets")),
+            assets_attr_misc_sec=Decimal(_text(fund_info_tag, "assetsAttrMiscSec")),
+            assets_invested=Decimal(_text(fund_info_tag, "assetsInvested")),
+            amt_pay_one_yr_banks_borr=Decimal(_text(fund_info_tag, "amtPayOneYrBanksBorr")),
+            amt_pay_one_yr_ctrld_comp=Decimal(_text(fund_info_tag, "amtPayOneYrCtrldComp")),
+            amt_pay_one_yr_oth_affil=Decimal(_text(fund_info_tag, "amtPayOneYrOthAffil")),
+            amt_pay_one_yr_other=Decimal(_text(fund_info_tag, "amtPayOneYrOther")),
+            amt_pay_aft_one_yr_banks_borr=_opt_decimal(fund_info_tag, "amtPayAftOneYrBanksBorr"),
+            amt_pay_aft_one_yr_ctrld_comp=_opt_decimal(fund_info_tag, "amtPayAftOneYrCtrldComp"),
+            amt_pay_aft_one_yr_oth_affil=_opt_decimal(fund_info_tag, "amtPayAftOneYrOthAffil"),
+            amt_pay_aft_one_yr_other=_opt_decimal(fund_info_tag, "amtPayAftOneYrOther"),
+            delay_deliv=_opt_decimal(fund_info_tag, "delayDeliv"),
+            stand_by_commit=_opt_decimal(fund_info_tag, "standByCommit"),
+            liquidity_pref=_opt_decimal(fund_info_tag, "liquidPref"),
+            cash_not_report_in_cor_d=_opt_decimal(fund_info_tag, "cshNotRptdInCorD"),
             current_metrics=current_metrics,
             credit_spread_risk_investment_grade=PeriodType.from_xml(fund_info_tag.find("creditSprdRiskInvstGrade")),
             credit_spread_risk_non_investment_grade=PeriodType.from_xml(
                 fund_info_tag.find("creditSprdRiskNonInvstGrade")),
-            is_non_cash_collateral=child_text(fund_info_tag, "isNonCashCollateral") == "Y",
+            is_non_cash_collateral=_text(fund_info_tag, "isNonCashCollateral") == "Y",
             return_info=return_info,
             monthly_flow1=MonthlyFlow.from_xml(fund_info_tag.find("mon1Flow")),
             monthly_flow2=MonthlyFlow.from_xml(fund_info_tag.find("mon2Flow")),
@@ -1266,59 +1320,56 @@ class FundReport:
         # Investments or securities
         investments_or_securities = []
         investment_or_secs_tag = form_data_tag.find("invstOrSecs")
-        if investment_or_secs_tag:
-            investments_or_securities = []
-            for investment_tag in investment_or_secs_tag.find_all("invstOrSec"):
-                # issuer conditional
+        if investment_or_secs_tag is not None:
+            for investment_tag in investment_or_secs_tag.findall("invstOrSec"):
+                # asset conditional
                 asset_conditional_tag = investment_tag.find("assetConditional")
-                if asset_conditional_tag:
-                    asset_category = asset_conditional_tag.attrs.get("assetCat")
+                if asset_conditional_tag is not None:
+                    asset_category = asset_conditional_tag.get("assetCat")
                 else:
-                    asset_category = child_text(investment_tag, "assetCat")
+                    asset_category = _text(investment_tag, "assetCat")
 
                 # issuer conditional
                 issuer_conditional_tag = investment_tag.find("issuerConditional")
-                if issuer_conditional_tag:
-                    issuer_category = issuer_conditional_tag.attrs.get("issuerCat")
+                if issuer_conditional_tag is not None:
+                    issuer_category = issuer_conditional_tag.get("issuerCat")
                 else:
-                    issuer_category = child_text(investment_tag, "issuerCat")
+                    issuer_category = _text(investment_tag, "issuerCat")
 
                 # currency conditional
                 currency_conditional_code = None
                 exchange_rate = None
                 currency_conditional_tag = investment_tag.find("currencyConditional")
-                if currency_conditional_tag:
-                    currency_conditional_code = currency_conditional_tag.attrs.get("curCd")
-                    exchange_rate = optional_decimal_attr(currency_conditional_tag, "exchangeRt")
+                if currency_conditional_tag is not None:
+                    currency_conditional_code = currency_conditional_tag.get("curCd")
+                    exchange_rate = _opt_decimal_attr(currency_conditional_tag, "exchangeRt")
 
                 investments_or_security = InvestmentOrSecurity(
-                    name=child_text(investment_tag, "name"),
-                    lei=child_text(investment_tag, "lei"),
-                    title=child_text(investment_tag, "title"),
-                    cusip=child_text(investment_tag, "cusip"),
+                    name=_text(investment_tag, "name"),
+                    lei=_text(investment_tag, "lei"),
+                    title=_text(investment_tag, "title"),
+                    cusip=_text(investment_tag, "cusip"),
                     identifiers=Identifiers.from_xml(investment_tag.find("identifiers")),
-                    balance=optional_decimal(investment_tag, "balance"),
-                    units=child_text(investment_tag, "units"),
-                    desc_other_units=child_text(investment_tag, "descOthUnits"),
-                    currency_code=child_text(investment_tag, "curCd"),
+                    balance=_opt_decimal(investment_tag, "balance"),
+                    units=_text(investment_tag, "units"),
+                    desc_other_units=_text(investment_tag, "descOthUnits"),
+                    currency_code=_text(investment_tag, "curCd"),
                     currency_conditional_code=currency_conditional_code,
                     exchange_rate=exchange_rate,
-                    value_usd=optional_decimal(investment_tag, "valUSD"),
-                    pct_value=optional_decimal(investment_tag, "pctVal"),
-                    payoff_profile=child_text(investment_tag, "payoffProfile"),
+                    value_usd=_opt_decimal(investment_tag, "valUSD"),
+                    pct_value=_opt_decimal(investment_tag, "pctVal"),
+                    payoff_profile=_text(investment_tag, "payoffProfile"),
                     asset_category=asset_category,
                     issuer_category=issuer_category,
-                    investment_country=child_text(investment_tag, "invCountry"),
-                    is_restricted_security=child_text(investment_tag, "isRestrictedSec") == "Y",
-                    fair_value_level=child_text(investment_tag, "fairValLevel"),
+                    investment_country=_text(investment_tag, "invCountry"),
+                    is_restricted_security=_text(investment_tag, "isRestrictedSec") == "Y",
+                    fair_value_level=_text(investment_tag, "fairValLevel"),
                     debt_security=DebtSecurity.from_xml(investment_tag.find("debtSec")),
                     security_lending=SecurityLending.from_xml(investment_tag.find("securityLending")),
-                    derivative_info=DerivativeInfo.from_xml(investment_tag.find("derivativeInfo"))  # Parse derivatives
+                    derivative_info=DerivativeInfo.from_xml(investment_tag.find("derivativeInfo"))
                 )
 
                 investments_or_securities.append(investments_or_security)
-
-        # Get the fund Information from the filing header
 
         return {'header': header,
                 'general_info': general_info,

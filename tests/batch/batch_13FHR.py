@@ -4,7 +4,7 @@ from tqdm.auto import tqdm
 
 
 if __name__ == '__main__':
-    filings = get_filings(form='13F-HR', year=[2024]).sample(500)
+    filings = get_filings(form='13F-HR', year=[2025]).sample(500)
     #thirteenf = filing.obj()
     #Error processing filing 0000902664-12-001664: 'NoneType' object has no attribute 'filter'
 
@@ -13,9 +13,9 @@ if __name__ == '__main__':
         print(index)
         try:
             thirteenf:ThirteenF = filing.obj()
-            if not thirteenf.total_holdings or thirteenf.total_holdings == 0:
-                index = index + 1
-                print(thirteenf)
+            print(thirteenf)
+            print(thirteenf.compare_holdings())
+            print(thirteenf.holding_history())
         except AttributeError as e:
             print(f"Error processing filing {filing.accession_number}: {e}")
             raise
