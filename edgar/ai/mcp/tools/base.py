@@ -174,6 +174,11 @@ async def call_tool_handler(name: str, arguments: dict[str, Any]) -> ToolRespons
 # COMPANY RESOLUTION
 # =============================================================================
 
+def _is_valid_company(company) -> bool:
+    """Check if a Company object represents a real entity (not a placeholder)."""
+    return company.cik != -999999999
+
+
 def resolve_company(identifier: str):
     """
     Resolve flexible identifier to Company object.
@@ -197,30 +202,29 @@ def resolve_company(identifier: str):
     if not identifier or not identifier.strip():
         raise ValueError("Company identifier cannot be empty")
 
-    # Clean the identifier
     cleaned = identifier.strip()
 
-    try:
-        return Company(cleaned)
-    except Exception as original_error:
-        # Try uppercase for tickers
-        if cleaned.upper() != cleaned:
-            try:
-                return Company(cleaned.upper())
-            except Exception as e:
-                logger.debug(f"Uppercase lookup failed for '{cleaned}': {e}")
+    # Try as given
+    company = Company(cleaned)
+    if _is_valid_company(company):
+        return company
 
-        # Try removing leading zeros for CIK
-        if cleaned.isdigit():
-            try:
-                return Company(str(int(cleaned)))
-            except Exception as e:
-                logger.debug(f"CIK lookup failed for '{cleaned}': {e}")
+    # Try uppercase (for tickers like "aapl" → "AAPL")
+    if cleaned.upper() != cleaned:
+        company = Company(cleaned.upper())
+        if _is_valid_company(company):
+            return company
 
-        raise ValueError(
-            f"Could not find company: '{identifier}'. "
-            "Try a ticker (AAPL), CIK (320193), or exact company name."
-        ) from original_error
+    # Try stripping leading zeros (for CIKs like "0000320193" → "320193")
+    if cleaned.isdigit():
+        company = Company(str(int(cleaned)))
+        if _is_valid_company(company):
+            return company
+
+    raise ValueError(
+        f"Could not find company: '{identifier}'. "
+        "Try a ticker (AAPL), CIK (320193), or exact company name."
+    )
 
 
 # =============================================================================
