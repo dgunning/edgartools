@@ -1479,6 +1479,102 @@ class TestStockSplitsEdgeCases:
 
         splits = detect_splits([split1, split2])
         assert len(splits) == 1
+        # 8-K instant fact (split1) should be preferred over 10-Q (split2)
+        assert splits[0]['date'] == date(2024, 6, 7)
+
+    def test_detect_splits_prefers_8k_instant_over_10q_duration(self):
+        """Test that 8-K instant facts are preferred for the split date.
+
+        An 8-K instant fact's period_end is the actual event date,
+        while a 10-Q duration fact's period_end is the reporting period end.
+        """
+        # 8-K instant fact — period_end is the actual split effective date
+        eight_k_fact = FinancialFact(
+            concept="us-gaap:StockSplitConversionRatio",
+            taxonomy="us-gaap",
+            label="Stock Split",
+            value=4,
+            numeric_value=4,
+            unit="ratio",
+            period_start=None,
+            period_end=date(2020, 8, 28),  # Actual effective date
+            period_type="instant",
+            fiscal_year=2020,
+            fiscal_period="Q3",
+            filing_date=date(2020, 8, 31),
+            form_type="8-K",
+            accession="0000000000-00-000001",
+            statement_type=None,
+        )
+        # 10-Q short-duration fact — period_end is the month end, not split date
+        ten_q_fact = FinancialFact(
+            concept="us-gaap:StockSplitConversionRatio",
+            taxonomy="us-gaap",
+            label="Stock Split",
+            value=4,
+            numeric_value=4,
+            unit="ratio",
+            period_start=date(2020, 8, 1),
+            period_end=date(2020, 8, 31),  # End of month, not exact date
+            period_type="duration",
+            fiscal_year=2020,
+            fiscal_period="Q3",
+            filing_date=date(2020, 10, 30),
+            form_type="10-Q",
+            accession="0000000000-00-000002",
+            statement_type=None,
+        )
+
+        # Even if 10-Q fact comes first, 8-K should be preferred
+        splits = detect_splits([ten_q_fact, eight_k_fact])
+        assert len(splits) == 1
+        assert splits[0]['date'] == date(2020, 8, 28), (
+            "Should use 8-K instant date (actual event date), not 10-Q period end"
+        )
+        assert splits[0]['ratio'] == 4
+
+    def test_detect_splits_prefers_instant_over_duration(self):
+        """Test that instant facts are preferred over duration facts even without 8-K."""
+        instant_fact = FinancialFact(
+            concept="us-gaap:StockSplitConversionRatio",
+            taxonomy="us-gaap",
+            label="Stock Split",
+            value=10,
+            numeric_value=10,
+            unit="ratio",
+            period_start=None,
+            period_end=date(2024, 6, 7),
+            period_type="instant",
+            fiscal_year=2024,
+            fiscal_period="Q2",
+            filing_date=date(2024, 7, 30),
+            form_type="10-Q",
+            accession="0000000000-00-000001",
+            statement_type=None,
+        )
+        duration_fact = FinancialFact(
+            concept="us-gaap:StockSplitConversionRatio",
+            taxonomy="us-gaap",
+            label="Stock Split",
+            value=10,
+            numeric_value=10,
+            unit="ratio",
+            period_start=date(2024, 6, 1),
+            period_end=date(2024, 6, 30),
+            period_type="duration",
+            fiscal_year=2024,
+            fiscal_period="Q2",
+            filing_date=date(2024, 7, 30),
+            form_type="10-Q",
+            accession="0000000000-00-000002",
+            statement_type=None,
+        )
+
+        splits = detect_splits([duration_fact, instant_fact])
+        assert len(splits) == 1
+        assert splits[0]['date'] == date(2024, 6, 7), (
+            "Should use instant fact date over duration fact date"
+        )
 
     def test_apply_split_adjustments_no_unit(self):
         """Test that facts with no unit are passed through unchanged."""

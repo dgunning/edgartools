@@ -10,22 +10,40 @@ from edgar.entity.models import FinancialFact
 from edgar.ttm.calculator import MAX_SPLIT_DURATION_DAYS, MAX_SPLIT_LAG_DAYS
 
 
+def _split_fact_priority(f: FinancialFact) -> int:
+    """Return priority score for a split fact (lower is better).
+
+    Prefers 8-K instant facts (most accurate effective date) over
+    other instant facts, and instant facts over short-duration facts.
+    """
+    is_instant = f.period_start is None
+    is_8k = f.form_type and f.form_type.startswith('8-K')
+    if is_instant and is_8k:
+        return 0  # Best: 8-K instant fact — period_end is the event date
+    if is_instant:
+        return 1  # Good: instant fact from 10-Q/10-K
+    return 2      # Acceptable: short-duration fact
+
+
 def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
     """Detect stock splits from facts.
 
     Identifies 'StockSplitConversionRatio' facts and filters for valid
     split events (rejecting filing lags and long-duration aggregations).
+
+    When multiple facts report the same split, prefers 8-K instant facts
+    whose period_end reflects the actual effective date, over 10-Q/10-K
+    facts whose period_end is the reporting period end.
     """
     split_facts = [f for f in facts if 'StockSplitConversionRatio' in f.concept]
-    splits = []
-    seen_splits = set()
+
+    # Collect all valid facts grouped by (year, ratio) to pick the best date
+    from collections import defaultdict
+    candidates: Dict[tuple, List[FinancialFact]] = defaultdict(list)
 
     for f in split_facts:
         # Normalize: Ratio > 1 implies forward split (e.g. 10). Adjust by dividing older values.
         if f.numeric_value is not None and f.numeric_value > 0 and f.period_end:
-            # Deduplicate based on Year and Ratio to avoid applying the same split multiple times
-            split_key = (f.period_end.year, f.numeric_value)
-
             # Filter out "historical echo" facts (e.g. 2023 10-K reporting a 2020 split)
             if f.filing_date:
                 lag = (f.filing_date - f.period_end).days
@@ -41,14 +59,18 @@ def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
                 if duration_days > MAX_SPLIT_DURATION_DAYS:
                     continue
 
-            if split_key in seen_splits:
-                continue
-            seen_splits.add(split_key)
+            # Group by year and ratio to deduplicate
+            split_key = (f.period_end.year, f.numeric_value)
+            candidates[split_key].append(f)
 
-            splits.append({
-                'date': f.period_end,
-                'ratio': f.numeric_value
-            })
+    # For each split event, pick the fact with the best date
+    splits = []
+    for (_year, ratio), fact_group in candidates.items():
+        best = min(fact_group, key=_split_fact_priority)
+        splits.append({
+            'date': best.period_end,
+            'ratio': ratio
+        })
     splits.sort(key=lambda s: s['date'])
     return splits
 
