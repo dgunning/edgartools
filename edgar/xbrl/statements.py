@@ -2114,20 +2114,17 @@ class Statements:
             stmt_table.add_column("#", style="dim", justify="right", width=4)
             stmt_table.add_column("Statement", no_wrap=True)
             stmt_table.add_column("Accessor", no_wrap=True)
-            stmt_table.add_column("Name", style=get_style("metadata"), no_wrap=True)
 
             for stmt in core_stmts:
                 idx = str(stmt['index'])
                 stmt_type = stmt.get('type', '') or ''
                 friendly = type_labels.get(stmt_type, stmt_type)
                 accessor = type_accessors.get(stmt_type, f'[{stmt.get("index", "")}]')
-                definition = stmt.get('definition', '')
 
                 stmt_table.add_row(
                     idx,
                     Text(friendly, style=get_style("value_highlight")),
                     Text(accessor, style=get_style("hint")),
-                    definition,
                 )
 
             components.append(stmt_table)
