@@ -1763,8 +1763,8 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
     subtitle = Text.assemble(
         ("XBRL Data", get_style("metadata")),
         f" {SYMBOLS['bullet']} ",
-        ("xbrl.docs", get_style("hint")),
-        (" for usage guide", get_style("metadata"))
+        ("xbrl.statements", get_style("hint")),
+        (" to browse", get_style("metadata")),
     )
 
     # === Section 1: Filing metadata ===
@@ -1853,11 +1853,16 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
     # === Section 3: Statements summary ===
     all_statements = xbrl.get_all_statements()
     if all_statements:
-        # Count by category
-        category_counts = {}
+        from edgar.xbrl.statements import _extract_topic_summary
+
+        # Group by category
+        statements_by_category = {
+            'statement': [], 'note': [], 'disclosure': [],
+            'document': [], 'other': []
+        }
         for stmt in all_statements:
             cat = Statements.classify_statement(stmt)
-            category_counts[cat] = category_counts.get(cat, 0) + 1
+            statements_by_category[cat].append(stmt)
 
         total = len(all_statements)
 
@@ -1873,36 +1878,37 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
             ('other', 'Other'),
         ]
 
+        # For core statements, list all available types
+        core_names = {
+            'IncomeStatement': 'Income',
+            'BalanceSheet': 'Balance Sheet',
+            'CashFlowStatement': 'Cash Flow',
+            'StatementOfEquity': 'Equity',
+            'ComprehensiveIncome': 'Compr. Income',
+        }
+
         stmt_table = RichTable(box=None, show_header=False, padding=(0, 2), expand=False)
         stmt_table.add_column("Label", style=get_style("label"), width=16)
         stmt_table.add_column("Count", style=get_style("value_highlight"), width=5, justify="right")
         stmt_table.add_column("Detail", style=get_style("metadata"), no_wrap=True)
 
         for cat_key, cat_label in category_display:
-            count = category_counts.get(cat_key, 0)
+            cat_stmts = statements_by_category[cat_key]
+            count = len(cat_stmts)
             if count == 0:
                 continue
 
-            # For financial statements, list the available core types
-            detail = ""
             if cat_key == 'statement':
-                core_names = {
-                    'IncomeStatement': 'Income',
-                    'BalanceSheet': 'Balance Sheet',
-                    'CashFlowStatement': 'Cash Flow',
-                    'StatementOfEquity': 'Equity',
-                    'ComprehensiveIncome': 'Compr. Income',
-                }
+                # List all unique core statement types found
                 found = []
-                for stmt in all_statements:
+                for stmt in cat_stmts:
                     stmt_type = stmt.get('type', '')
                     if stmt_type in core_names and core_names[stmt_type] not in found:
                         found.append(core_names[stmt_type])
-                if found:
-                    shown = found[:3]
-                    detail = ", ".join(shown)
-                    if len(found) > 3:
-                        detail += f" +{len(found) - 3}"
+                detail = ", ".join(found) if found else ""
+            else:
+                # Use topic extraction for notes/disclosures/other
+                detail = _extract_topic_summary(cat_stmts, max_shown=4)
 
             stmt_table.add_row(cat_label, str(count), detail)
 
