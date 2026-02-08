@@ -27,7 +27,7 @@ print(f"Public Float: ${company.public_float:,.0f}")
 # Get enhanced multi-period financial statements
 income_stmt = company.income_statement()  # Shows multiple periods with hierarchy
 balance_sheet = company.balance_sheet()  
-cash_flow = company.cash_flow()
+cash_flow = company.cashflow_statement()
 
 print(income_stmt)  # Rich multi-period display
 
@@ -126,14 +126,14 @@ Analyze hierarchical cash flow patterns across periods:
 
 ```python
 # Enhanced annual cash flow with operating/investing/financing sections
-cash_flow = company.cash_flow(periods=5, annual=True)
+cash_flow = company.cashflow_statement(periods=5, annual=True)
 print(cash_flow)  # Rich display with cash flow categories
 
 # Quarterly cash flow analysis with full formatting
-quarterly_cf = company.cash_flow(periods=8, annual=False)
+quarterly_cf = company.cashflow_statement(periods=8, annual=False)
 
 # Executive dashboard format
-exec_cf = company.cash_flow(concise_format=True)
+exec_cf = company.cashflow_statement(concise_format=True)
 
 # Generate analysis context for AI
 ai_context = cash_flow.to_llm_context(include_metadata=True)
@@ -944,7 +944,7 @@ if company.facts:
     # Get multiple statements efficiently
     income = company.income_statement()
     balance = company.balance_sheet()
-    cash = company.cash_flow()
+    cash = company.cashflow_statement()
     
     # Cache LLM context for AI applications
     llm_context = income.to_llm_context()

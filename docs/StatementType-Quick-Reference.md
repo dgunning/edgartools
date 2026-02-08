@@ -65,7 +65,7 @@ company = Company("AAPL")
 # Direct convenience methods (recommended for beginners)
 income = company.income_statement(periods=4, annual=True)
 balance = company.balance_sheet(periods=4, annual=True)
-cash = company.cash_flow(periods=4, annual=True)
+cash = company.cashflow_statement(periods=4, annual=True)
 
 # These return MultiPeriodStatement objects with rich display
 print(income)  # Beautiful table output
@@ -229,7 +229,7 @@ def trend_analysis(ticker: str, periods: int = 5) -> dict:
     return {
         "income": company.income_statement(periods=periods, annual=True),
         "balance": company.balance_sheet(periods=periods, annual=True),
-        "cash_flow": company.cash_flow(periods=periods, annual=True)
+        "cash_flow": company.cashflow_statement(periods=periods, annual=True)
     }
 
 # Usage - returns MultiPeriodStatement objects

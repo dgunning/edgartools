@@ -166,7 +166,7 @@ def _build_financials(company, periods: int, annual: bool) -> dict:
 
     # Cash Flow
     try:
-        cash_flow = facts.cash_flow(periods=periods, annual=annual)
+        cash_flow = facts.cashflow_statement(periods=periods, annual=annual)
         if hasattr(cash_flow, 'to_llm_string'):
             financials["cash_flow"] = cash_flow.to_llm_string()
         elif hasattr(cash_flow, 'to_dict'):

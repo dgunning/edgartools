@@ -543,7 +543,7 @@ print(balance)  # Shows 2-year balance sheet
 from edgar import Company
 company = Company("MSFT")
 facts = company.get_facts()
-cash_flow = facts.cash_flow(periods=4, annual=False)
+cash_flow = facts.cashflow_statement(periods=4, annual=False)
 print(cash_flow)
 """,
         tags=["financial", "cash-flow", "quarterly"],

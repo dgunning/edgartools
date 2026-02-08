@@ -5,6 +5,7 @@ This module provides the main EntityFacts class with investment-focused
 analytics and AI-ready interfaces.
 """
 
+import warnings
 from collections import defaultdict
 from datetime import date
 from functools import lru_cache
@@ -1319,8 +1320,8 @@ class EntityFacts:
 
             return result
 
-    def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+    def cashflow_statement(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
+                           annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """
         Get cash flow statement facts.
 
@@ -1336,14 +1337,14 @@ class EntityFacts:
 
         Example:
             # Get hierarchical multi-period statement (default)
-            stmt = facts.cash_flow(periods=4, annual=True)
+            stmt = facts.cashflow_statement(periods=4, annual=True)
             print(stmt)  # Rich display with hierarchy
 
             # Get DataFrame for analysis
-            df = facts.cash_flow(periods=4, as_dataframe=True)
+            df = facts.cashflow_statement(periods=4, as_dataframe=True)
 
             # Convert statement to DataFrame later
-            stmt = facts.cash_flow(periods=4)
+            stmt = facts.cashflow_statement(periods=4)
             df = stmt.to_dataframe()
         """
         # Always build the enhanced multi-period statement
@@ -1365,6 +1366,19 @@ class EntityFacts:
             return enhanced_stmt.to_dataframe()
 
         return enhanced_stmt
+
+    def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
+                  annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+        """Deprecated: Use cashflow_statement() instead."""
+        warnings.warn(
+            "cash_flow() is deprecated and will be removed in v6.0. "
+            "Use cashflow_statement() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.cashflow_statement(periods=periods, period_length=period_length,
+                                       as_dataframe=as_dataframe, annual=annual,
+                                       concise_format=concise_format)
 
     # Investment analytics
     def calculate_ratios(self) -> Dict[str, Any]:

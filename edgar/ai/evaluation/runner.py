@@ -102,7 +102,7 @@ Key objects:
 - company.get_facts() -> EntityFacts: Get XBRL facts.
   .income_statement(periods=N, annual=True/False)
   .balance_sheet(periods=N, annual=True/False)
-  .cash_flow(periods=N, annual=True/False)
+  .cashflow_statement(periods=N, annual=True/False)
 - filing.obj() -> typed object (TenK, TenQ, EightK, etc.)
 - get_filings(form=...) -> recent filings across all companies
 - get_current_filings() -> today's filings, use .filter(form=...)

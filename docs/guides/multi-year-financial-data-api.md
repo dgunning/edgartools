@@ -26,7 +26,7 @@ income_stmt = company.income_statement(periods=5, annual=True)
 balance_sheet = company.balance_sheet(periods=5, annual=True)
 
 # Cash flow - 5 years of annual data
-cash_flow = company.cash_flow(periods=5, annual=True)
+cash_flow = company.cashflow_statement(periods=5, annual=True)
 
 print(f"Retrieved {len(income_stmt.periods)} periods of data")
 ```
@@ -53,7 +53,7 @@ def get_multi_year_financials(ticker: str, years: int = 5):
         },
         'income_statement': company.income_statement(periods=years, annual=True),
         'balance_sheet': company.balance_sheet(periods=years, annual=True),
-        'cash_flow': company.cash_flow(periods=years, annual=True)
+        'cash_flow': company.cashflow_statement(periods=years, annual=True)
     }
     
     return financial_data
@@ -77,12 +77,12 @@ def get_comprehensive_data(ticker: str):
         'annual': {
             'income': company.income_statement(periods=5, annual=True),
             'balance': company.balance_sheet(periods=5, annual=True),
-            'cashflow': company.cash_flow(periods=5, annual=True)
+            'cashflow': company.cashflow_statement(periods=5, annual=True)
         },
         'quarterly': {
             'income': company.income_statement(periods=12, annual=False),
             'balance': company.balance_sheet(periods=12, annual=False), 
-            'cashflow': company.cash_flow(periods=12, annual=False)
+            'cashflow': company.cashflow_statement(periods=12, annual=False)
         }
     }
 
@@ -209,7 +209,7 @@ async def get_cash_flow(
         if not company.facts:
             raise HTTPException(status_code=404, detail=f"No financial data available for {ticker}")
         
-        stmt = company.cash_flow(periods=periods, annual=annual, concise_format=concise_format)
+        stmt = company.cashflow_statement(periods=periods, annual=annual, concise_format=concise_format)
         
         if not stmt:
             raise HTTPException(status_code=404, detail=f"No cash flow data for {ticker}")
@@ -293,7 +293,7 @@ async def get_comprehensive_financials(
         # Get all three statements
         income_stmt = company.income_statement(periods=periods, annual=annual, concise_format=concise_format)
         balance_sheet = company.balance_sheet(periods=periods, annual=annual, concise_format=concise_format)
-        cash_flow = company.cash_flow(periods=periods, annual=annual, concise_format=concise_format)
+        cash_flow = company.cashflow_statement(periods=periods, annual=annual, concise_format=concise_format)
         
         # Get periods from the first available statement
         available_periods = []
@@ -410,7 +410,7 @@ async def get_financial_trends(
         elif metric.lower() in ['assets', 'liabilities', 'equity']:
             stmt = company.balance_sheet(periods=years, annual=True)
         elif metric.lower() in ['operating_cash_flow', 'free_cash_flow']:
-            stmt = company.cash_flow(periods=years, annual=True)
+            stmt = company.cashflow_statement(periods=years, annual=True)
         else:
             raise HTTPException(status_code=400, detail=f"Unknown metric: {metric}")
         
@@ -847,7 +847,7 @@ class CachedFinancialAPI:
         elif statement_type == 'balance':
             data = company.balance_sheet(periods=periods, annual=annual)
         elif statement_type == 'cashflow':
-            data = company.cash_flow(periods=periods, annual=annual)
+            data = company.cashflow_statement(periods=periods, annual=annual)
         
         # Cache the result
         self._cache[cache_key] = (data, time.time())
@@ -883,7 +883,7 @@ async def process_companies_batch(tickers: List[str], periods: int = 5):
                     'ticker': ticker,
                     'income': company.income_statement(periods=periods, annual=True),
                     'balance': company.balance_sheet(periods=periods, annual=True),
-                    'cashflow': company.cash_flow(periods=periods, annual=True)
+                    'cashflow': company.cashflow_statement(periods=periods, annual=True)
                 }
         except Exception as e:
             print(f"Error processing {ticker}: {e}")
