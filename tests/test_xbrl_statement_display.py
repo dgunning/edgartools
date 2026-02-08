@@ -34,22 +34,20 @@ def test_rich_display(nflx_xbrl, capsys):
 def test_str_representation(nflx_xbrl, capsys):
     """Test the string representation of statements with categories."""
     statements = nflx_xbrl.statements
-    
+
     # Get string representation
     str_repr = str(statements)
     assert str_repr is not None
-    
+
     # Print for manual inspection during test runs
     print("\nString representation of Statements:")
     print(str_repr)
-    
-    # Verify that the string contains category headings
-    assert "Financial Statements:" in str_repr
-    # Other categories might not exist in all test data
-    for category in ["Notes to Financial Statements:", "Disclosures:", "Document Sections:"]:
-        if category in str_repr:
-            print(f"Found category: {category}")
-    
+
+    # Verify the rich panel output contains key elements
+    assert "Statements" in str_repr
+    assert "Statement" in str_repr  # Column header
+    assert ".search()" in str_repr  # Subtitle hint
+
     # Capture and print the output for visibility in test logs
     captured = capsys.readouterr()
     print(captured.out)
