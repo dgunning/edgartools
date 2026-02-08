@@ -664,3 +664,80 @@ def test_periods_property_consistency_with_rendered_statement(aapl_xbrl):
         assert stmt_period.label == rendered_period.label, "Period labels should match"
 
     print(f"\nPeriod consistency verified: {len(statement_periods)} periods match")
+
+
+class TestStatementsDiscovery:
+    """Tests for the statement discovery and access methods on the Statements class."""
+
+    def test_list_available_returns_dataframe(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        df = statements.list_available()
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == ['index', 'category', 'name', 'role_name', 'element_count']
+        assert len(df) == len(statements.statements)
+
+    def test_list_available_category_filter(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        df_all = statements.list_available()
+        df_statements = statements.list_available(category='statement')
+        assert len(df_statements) > 0
+        assert len(df_statements) < len(df_all)
+        assert all(df_statements['category'] == 'statement')
+
+    def test_search_finds_income(self, aapl_xbrl):
+        results = aapl_xbrl.statements.search('income')
+        assert len(results) > 0
+        assert all(isinstance(s, Statement) for s in results)
+
+    def test_search_multi_word(self, aapl_xbrl):
+        results_broad = aapl_xbrl.statements.search('income')
+        results_narrow = aapl_xbrl.statements.search('income statement')
+        assert len(results_narrow) <= len(results_broad)
+
+    def test_search_empty(self, aapl_xbrl):
+        assert aapl_xbrl.statements.search('') == []
+        assert aapl_xbrl.statements.search('   ') == []
+
+    def test_search_no_match(self, aapl_xbrl):
+        assert aapl_xbrl.statements.search('xyznonexistent') == []
+
+    def test_get_exact_type(self, aapl_xbrl):
+        result = aapl_xbrl.statements.get('IncomeStatement')
+        assert result is not None
+        assert isinstance(result, Statement)
+
+    def test_get_by_role_name(self, aapl_xbrl):
+        result = aapl_xbrl.statements.get('CASHFLOWS')
+        assert result is not None
+        assert isinstance(result, Statement)
+
+    def test_get_no_match(self, aapl_xbrl):
+        assert aapl_xbrl.statements.get('xyznonexistent') is None
+
+    def test_all_returns_all(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        all_stmts = statements.all()
+        assert len(all_stmts) == len(statements.statements)
+        assert all(isinstance(s, Statement) for s in all_stmts)
+
+    def test_all_category_filter(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        stmt_only = statements.all(category='statement')
+        assert len(stmt_only) > 0
+        assert len(stmt_only) < len(statements.all())
+
+    def test_get_by_category_fix(self, aapl_xbrl):
+        """Regression test: get_by_category('statement') should return non-empty results."""
+        results = aapl_xbrl.statements.get_by_category('statement')
+        assert len(results) > 0
+        assert all(isinstance(s, Statement) for s in results)
+
+    def test_len(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        assert len(statements) == len(statements.statements)
+
+    def test_iter(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        iterated = list(statements)
+        assert len(iterated) == len(statements)
+        assert all(isinstance(s, Statement) for s in iterated)

@@ -1770,6 +1770,12 @@ class Statements:
                     break
             return Statement(self.xbrl, item, canonical_type=canonical_type)
 
+    def __len__(self):
+        return len(self.statements)
+
+    def __iter__(self):
+        return iter(self.all())
+
     def __rich__(self) -> Any:
         """
         Rich console representation.
@@ -2186,7 +2192,7 @@ class Statements:
 
         # Find all statements with matching category
         for stmt in self.statements:
-            if stmt.get('category') == category:
+            if self.classify_statement(stmt) == category:
                 result.append(Statement(self.xbrl, stmt['role']))
 
         return result
@@ -2208,6 +2214,112 @@ class Statements:
             List of Statement objects for disclosures
         """
         return self.get_by_category('disclosure')
+
+    def _make_statement(self, stmt: dict) -> Statement:
+        """Create a Statement from a statement dict, resolving canonical type."""
+        canonical_type = stmt.get('type') if stmt.get('type') in statement_to_concepts else None
+        return Statement(self.xbrl, stmt['role'], canonical_type=canonical_type)
+
+    def all(self, category: str = None) -> List[Statement]:
+        """
+        Get all statements as Statement objects, optionally filtered by category.
+
+        Args:
+            category: Optional category filter ('statement', 'note', 'disclosure', 'document', or 'other')
+
+        Returns:
+            List of Statement objects
+        """
+        results = []
+        for stmt in self.statements:
+            if category and self.classify_statement(stmt) != category:
+                continue
+            results.append(self._make_statement(stmt))
+        return results
+
+    def list_available(self, category: str = None) -> pd.DataFrame:
+        """
+        List all available statements as a DataFrame for browsing.
+
+        Args:
+            category: Optional category filter ('statement', 'note', 'disclosure', 'document', or 'other')
+
+        Returns:
+            DataFrame with columns: index, category, name, role_name, element_count
+        """
+        rows = []
+        for index, stmt in enumerate(self.statements):
+            stmt_category = self.classify_statement(stmt)
+            if category and stmt_category != category:
+                continue
+            rows.append({
+                'index': index,
+                'category': stmt_category,
+                'name': stmt.get('definition', ''),
+                'role_name': stmt.get('role_name', ''),
+                'element_count': stmt.get('element_count', 0),
+            })
+        return pd.DataFrame(rows)
+
+    def search(self, keyword: str) -> List[Statement]:
+        """
+        Search for statements by keyword across definition, role_name, and type.
+
+        Space-separated words use AND logic, case-insensitive.
+
+        Args:
+            keyword: Search keyword(s), e.g. 'debt', 'long term debt', 'revenue'
+
+        Returns:
+            List of matching Statement objects
+        """
+        if not keyword or not keyword.strip():
+            return []
+        words = keyword.lower().split()
+        results = []
+        for stmt in self.statements:
+            searchable = ' '.join([
+                stmt.get('definition') or '',
+                stmt.get('role_name') or '',
+                stmt.get('type') or '',
+            ]).lower()
+            if all(word in searchable for word in words):
+                results.append(self._make_statement(stmt))
+        return results
+
+    def get(self, name: str) -> Optional[Statement]:
+        """
+        Get a statement by name with smart resolution.
+
+        Searches in order: exact type match, role_name contains, definition contains.
+        Returns the first match or None.
+
+        Args:
+            name: Statement name to search for (e.g. 'IncomeStatement', 'cash flow', 'debt')
+
+        Returns:
+            Statement if found, None otherwise
+        """
+        if not name or not name.strip():
+            return None
+        name_lower = name.lower()
+
+        # Tier 1: Exact type match
+        for stmt in self.statements:
+            if (stmt.get('type') or '').lower() == name_lower:
+                return self._make_statement(stmt)
+
+        # Tier 2: role_name contains (case-insensitive)
+        for stmt in self.statements:
+            if name_lower in (stmt.get('role_name') or '').lower():
+                return self._make_statement(stmt)
+
+        # Tier 3: definition contains (case-insensitive)
+        for stmt in self.statements:
+            if name_lower in (stmt.get('definition') or '').lower():
+                return self._make_statement(stmt)
+
+        return None
 
     def to_dataframe(self,
                      statement_type: str,
