@@ -55,6 +55,13 @@ Follow the documentation standards in `docs/internal/docs-guidelines.md`. Key po
 - Is the progression from simple to complex smooth?
 - Does it follow the project's goal of removing frustrations?
 
+**Verification Constitution Compliance:**
+- **Every code example in documentation is a verifiable claim** (Constitution Principle I)
+- When writing new code examples, note that they should eventually be verified in a test. If `tests/test_documented_examples.py` exists, add them there. If it doesn't exist yet, document the examples clearly so they can be added later — this infrastructure is being built per `docs/verification-roadmap.md`
+- Documentation and verification are two expressions of the same truth — if we can't verify it, we don't promise it
+- Code examples should use diverse companies (not just AAPL) to support the breadth principle
+- Reference: `docs/verification-constitution.md`
+
 **Special Considerations:**
 - Emphasize the library's strengths: simplicity, accuracy, beautiful output
 - Show how edgartools makes complex SEC data accessible

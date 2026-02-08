@@ -251,11 +251,15 @@ python tools/quick_debug.py --empty-periods PREVIOUSLY_BROKEN_FILING
 python tools/quick_debug.py --compare FIXED_FILING WORKING_BASELINE
 ```
 
-### Automated Testing
-1. **Regression Tests**: Create `test_issue_N_regression.py` based on reproduction script
+### Automated Verification (follows Verification Constitution)
+1. **Regression Tests**: Create `tests/issues/regression/test_issue_N_description.py`
+   - Must include **ground truth assertion** — a specific value from a real filing, not just `is not None`
+   - Must include **silence check** — verify error paths produce useful messages, not silent `None`
+   - Reference the GitHub issue number in a docstring
 2. **Cross-Platform Testing**: Validate on Windows/macOS/Linux when relevant
-3. **Performance Impact**: Use `tests/perf/` to ensure no performance degradation
-4. **Integration Tests**: Run `tests/batch/` for broader impact assessment
+3. **Performance Impact**: Ensure no performance degradation
+4. **Company Diversity**: Use a non-AAPL company when possible (JPM, JNJ, XOM, NVO)
+5. **VCR Cassette**: Record a cassette for any network-dependent regression test
 
 **Phase 5: Knowledge Capture & Communication**
 

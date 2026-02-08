@@ -66,21 +66,49 @@ bd create --title "..." --type bug --priority P1  # Create issue
 
 | Task | Reference |
 |------|-----------|
-| Testing | `docs/testing-guide.md` |
+| Verification | `docs/verification-guide.md` |
+| Constitution | `docs/verification-constitution.md` |
+| Roadmap | `docs/verification-roadmap.md` |
 | API examples | `edgar/ai/skills/core/quickstart-by-task.md` |
 | Data objects | `edgar/ai/skills/core/data-objects.md` |
 | Workflows | `edgar/ai/skills/core/workflows.md` |
 
-## Test Commands
+## Verification
+
+We use "verification" not "testing". Verification is outward-facing — does this library deliver what we promised?
+
+**Governing principle**: The [Verification Constitution](docs/verification-constitution.md) defines 11 principles. The three most important for daily work:
+
+1. **Documentation is the specification** — every documented example must be verifiable
+2. **Data correctness is existential** — assert specific values, not just `is not None`
+3. **The API must be solvable** — users and agents can navigate to answers
+
+### Definition of Done for New Features
+
+Every new user-facing feature must include:
+- **One ground-truth assertion** — a specific value from a real SEC filing, verified by hand
+- **One verified documented example** — a code example that is itself a runnable test
+- **One silence check** — verify that bad/missing input produces a useful error, not `None`
+- **Solvability** — update skill YAML files so agents can discover and use the feature
+
+### Verification Commands
 
 ```bash
-hatch run test-fast          # Fast tests (no network)
-hatch run test-network       # Network tests
+hatch run test-fast          # Fast tests (no network) — run often
+hatch run test-network       # Network tests (sequential, rate-limited)
 hatch run test-regression    # Regression tests
 hatch run cov                # With coverage
 ```
 
 Only parallelize fast tests to avoid SEC rate limits.
+
+### Writing Verification
+
+- **Assert values, not existence**: `assert revenue == 394328000000` not `assert revenue is not None`
+- **Use VCR cassettes** for network tests to enable speed and determinism
+- **Diversify companies**: Don't default to AAPL — use companies from different industries
+- **Test error paths**: Verify that failures produce useful messages, not silent `None`
+- **Place regression tests** in `tests/issues/regression/test_issue_NNN.py`
 
 ## Version
 

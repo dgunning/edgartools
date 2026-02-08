@@ -230,6 +230,15 @@ Given this is a financial data library:
 - Check API rate limiting and retry logic
 - Validate financial calculation accuracy
 
+**Verification Constitution Awareness (IMPORTANT):**
+
+The EdgarTools Verification Constitution (`docs/verification-constitution.md`) identifies specific bug categories to watch for:
+
+- **Silent failures (Principle VI)**: The WORST failure mode. Methods returning `None` where users expected data. Always flag when **production code** can silently return `None` or empty results without signaling. Note: many existing tests use `assert result is not None` — this is known debt being addressed incrementally per the verification roadmap, not a bug to flag in existing tests.
+- **Data correctness (Principle II)**: Wrong numbers are worse than crashes. Check that financial values match real SEC filing data. When investigating a data bug, verify the ground truth against the actual SEC filing.
+- **Upstream vs our bug (Principle IV)**: When investigating failures, determine whether the issue is in our code or caused by SEC data changes. Document which it is.
+- **Breadth blind spots (Principle VII)**: Be aware that ~70% of tests use tech companies (mostly AAPL). Bugs in handling of financial, healthcare, energy, or international company filings are likely undertested.
+
 **Quality Principles:**
 
 - Be specific, not vague - point to exact lines or patterns
