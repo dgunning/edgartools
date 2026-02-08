@@ -59,7 +59,7 @@ COMPANY_FORMS = {
     "ATS-N",
     # Corporate disclosures
     "EFFECT", "FWP", "425", "CB",
-    "POS AM", "CORRESP", "UPLOAD",
+    "POS AM", "UPLOAD",
     "NO ACT",                  # No-action letter
 }
 
