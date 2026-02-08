@@ -63,15 +63,13 @@ def test_issue_472_underwriter_in_section_tags():
 
     This is a simple unit test to prevent regression.
     """
-    from edgar.sgml.sgml_parser import SubmissionFormatParser
-
-    parser = SubmissionFormatParser()
+    from edgar.sgml.sgml_parser import _SECTION_TAGS, _REPEATABLE_TAGS
 
     # Verify UNDERWRITER is in SECTION_TAGS
-    assert 'UNDERWRITER' in parser.SECTION_TAGS
+    assert 'UNDERWRITER' in _SECTION_TAGS
 
     # Verify UNDERWRITER is in REPEATABLE_TAGS (for multiple underwriters)
-    assert 'UNDERWRITER' in parser.REPEATABLE_TAGS
+    assert 'UNDERWRITER' in _REPEATABLE_TAGS
 
 
 @pytest.mark.fast

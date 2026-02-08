@@ -65,16 +65,14 @@ def test_issue_477_item_rule_in_section_tags():
 
     This is a simple unit test to prevent regression.
     """
-    from edgar.sgml.sgml_parser import SubmissionFormatParser
-
-    parser = SubmissionFormatParser()
+    from edgar.sgml.sgml_parser import _SECTION_TAGS, _REPEATABLE_TAGS
 
     # Verify ITEM and RULE are in SECTION_TAGS
-    assert 'ITEM' in parser.SECTION_TAGS
-    assert 'RULE' in parser.SECTION_TAGS
+    assert 'ITEM' in _SECTION_TAGS
+    assert 'RULE' in _SECTION_TAGS
 
     # Verify ITEM is in REPEATABLE_TAGS (for multiple items)
-    assert 'ITEM' in parser.REPEATABLE_TAGS
+    assert 'ITEM' in _REPEATABLE_TAGS
 
 
 @pytest.mark.fast
