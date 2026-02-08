@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.15.0] - 2026-02-08
+
+### Added
+
+- **AI Skills Architecture** — Complete redesign of AI agent skills system with modular YAML-based architecture
+  - New skill evaluation framework with LLM-as-judge for A/B testing
+  - Intent-based MCP tools: `edgar_company`, `edgar_search`, `edgar_filing`, `edgar_compare`, `edgar_ownership`
+  - 82% reduction in skill file size through consolidation to lean YAML format
+  - 5 specialized skills: core, financials, holdings, ownership, reports, xbrl
+  - Symlink-based skill installation for auto-sync with package updates
+  - `.docs` API discovery pattern for agent learning
+  - **Files**: `edgar/ai/skills/`, `edgar/ai/mcp/`, `edgar/ai/evaluation/`
+
+- **XBRL Statement Discovery** — New methods for accessing XBRL financial statements
+  - Added `income_statement()`, `balance_sheet()`, `cashflow_statement()`, `equity_statement()`
+  - Redesigned XBRL and Statements rich display to match design language
+  - New `to_context()` method on Statements for LLM-optimized text representation
+  - Enhanced XBRL statement summaries with improved topic extraction
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/statements.py`
+
+- **LLM-Friendly String Representations** — Added `__str__()` and `to_context()` methods for AI agent integration
+  - `Company.__str__()` provides concise company overview
+  - `Financials.__str__()` and `to_context()` for financial data
+  - `Filings.__str__()` and `EntityFilings.__str__()` for filing lists
+  - Optimized for LLM context windows and agent workflows
+  - **Files**: `edgar/entity/core.py`, `edgar/xbrl/financials.py`, `edgar/_filings.py`
+
+### Fixed
+
+- **Entity Classification** — Fixed entity misclassification issues
+  - Elon Musk and other individuals no longer misclassified as companies due to CORRESP filings ([#624](https://github.com/dgunning/edgartools/issues/624))
+  - `resolve_company()` now rejects invalid company identifiers
+
+- **XBRL Statements** — Fixed XBRL statement classification and rendering issues
+  - Fixed OperatingExpenses mislabeled as 'Other' with flat hierarchy
+  - Fixed ALL-CAPS topic splitting in statement classification
+  - Removed redundant Name column from Statements rich display
+
+- **Filing Serialization** — Fixed `Filing.save()`/`load()` to serialize SGML content before pickling ([#631](https://github.com/dgunning/edgartools/issues/631))
+
+### Changed
+
+- **API Consistency** — Renamed `cash_flow()` to `cashflow_statement()` for consistency with other statement methods
+
+- **Document Size Limit** — Increased max document size from 500MB to 160MB for large filings with embedded content
+
+- **Stock Split Detection** — Prefer 8-K instant facts for stock split date detection ([Discussion #613](https://github.com/dgunning/edgartools/discussions/613))
+
+### Removed
+
+- **Legacy MCP Handlers** — Removed deprecated legacy MCP handlers and utilities
+  - Cleaned up `company_research.py`, `financial_analysis.py`, `industry_analysis.py`
+  - All functionality moved to intent-based tools in redesigned architecture
+
+### Documentation
+
+- **AI Integration** — Updated AI integration documentation with current tool names and promoted in navigation
+- **Stock Splits** — Added comprehensive stock split detection and EPS normalization documentation
+- **Skills** — Rewrote skills README for YAML architecture with improved clarity and completeness
+
 ## [5.14.0] - 2026-02-03
 
 ### Performance
