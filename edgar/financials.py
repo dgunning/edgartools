@@ -700,6 +700,79 @@ class Financials:
 
         return metrics
 
+    def __str__(self):
+        """Concise string representation for LLMs and logging."""
+        if self.xb is None:
+            return "Financials(No data)"
+
+        info = self.xb.entity_info
+        name = info.get('entity_name', 'Unknown')
+        ticker = info.get('ticker', '')
+        doc_type = info.get('document_type', '')
+        fiscal_year = info.get('fiscal_year', '')
+        fiscal_period = info.get('fiscal_period', '')
+
+        # Build period string (e.g., "FY2025" or "Q3 2025")
+        period_str = f"{fiscal_period}{fiscal_year}" if fiscal_period and fiscal_year else ""
+
+        # Fact count
+        fact_count = len(self.xb.facts) if self.xb.facts else 0
+
+        parts = [name]
+        if ticker:
+            parts.append(f"[{ticker}]")
+        if doc_type:
+            parts.append(doc_type)
+        if period_str:
+            parts.append(period_str)
+        parts.append(f"• {fact_count:,} facts")
+
+        return f"Financials({' '.join(parts)})"
+
+    def to_context(self) -> str:
+        """
+        Return context string for LLMs with available actions.
+
+        This guides AI agents on what they can do with this Financials object,
+        focusing on the high-level Financials API rather than raw XBRL access.
+        """
+        if self.xb is None:
+            return "Financials: No data available"
+
+        info = self.xb.entity_info
+        name = info.get('entity_name', 'Unknown')
+        ticker = info.get('ticker', '')
+        doc_type = info.get('document_type', '')
+        fiscal_year = info.get('fiscal_year', '')
+        fiscal_period = info.get('fiscal_period', '')
+
+        ticker_part = f" [{ticker}]" if ticker else ""
+        period_str = f"{fiscal_period}{fiscal_year}" if fiscal_period and fiscal_year else ""
+
+        lines = [
+            f"Financials: {name}{ticker_part} {doc_type} {period_str}".strip(),
+            "",
+            "AVAILABLE STATEMENTS:",
+            "  financials.income_statement()",
+            "  financials.balance_sheet()",
+            "  financials.cashflow_statement()",
+            "  financials.statement_of_equity()",
+            "  financials.comprehensive_income()",
+            "",
+            "QUICK METRICS (returns value or None):",
+            "  financials.get_revenue()",
+            "  financials.get_net_income()",
+            "  financials.get_total_assets()",
+            "  financials.get_stockholders_equity()",
+            "  financials.get_operating_cash_flow()",
+            "  financials.get_free_cash_flow()",
+            "",
+            "ALL METRICS:",
+            "  financials.get_financial_metrics()  # Dict with 14 metrics + ratios",
+        ]
+
+        return "\n".join(lines)
+
     def __rich__(self):
         if self.xb is None:
             return "No XBRL data available"

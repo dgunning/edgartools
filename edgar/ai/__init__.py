@@ -78,16 +78,20 @@ from edgar.ai.skills.core import edgartools_skill
 
 
 # Convenience functions for common workflows
-def install_skill(skill=None, to=None, quiet=False):
+def install_skill(skill=None, to=None, quiet=False, use_symlinks=True):
     """
     Install a skill to ~/.claude/skills/ for automatic discovery.
 
-    Simple, delightful API for installing skills to Claude.
+    Uses symlinks by default so skills stay in sync with package updates.
+    When you upgrade edgartools, skills are automatically current.
 
     Args:
         skill: Skill to install (defaults to edgartools_skill)
         to: Custom installation directory (defaults to ~/.claude/skills/)
         quiet: If True, suppress output messages (default: False)
+        use_symlinks: If True (default), use symlinks to keep skills in sync
+                     with package. Falls back to copy on Windows without
+                     symlink permissions.
 
     Returns:
         Path: Path to installed skill directory
@@ -95,16 +99,21 @@ def install_skill(skill=None, to=None, quiet=False):
     Examples:
         >>> from edgar.ai import install_skill
         >>>
-        >>> # Install EdgarTools skill (default)
+        >>> # Install EdgarTools skill (default - uses symlinks)
         >>> install_skill()
         ✨ Installing EdgarTools skill...
         📁 Installed to: /Users/username/.claude/skills/edgartools
+        🔗 Using symlinks (auto-updates with package)
         ✅ Ready to use in Claude Desktop and Claude Code!
         >>>
         >>> # Install to custom location
         >>> install_skill(to="~/my-skills")
         PosixPath('/Users/username/my-skills/edgartools')
     """
+    import shutil
+    from pathlib import Path
+    from edgar.paths import get_claude_skills_directory
+
     if skill is None:
         skill = edgartools_skill
 
@@ -122,19 +131,110 @@ def install_skill(skill=None, to=None, quiet=False):
         print(f"✨ Installing {skill.name} skill...")
         print()
 
-    result = export_skill(
-        skill,
-        format="claude-skills",
-        output_dir=to,
-        install=(to is None)  # Only use install flag if no custom dir
-    )
+    # Determine output directory
+    if to is None:
+        output_dir = get_claude_skills_directory(create=True)
+    else:
+        output_dir = Path(to).expanduser()
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+    skill_dir_name = skill.name.lower().replace(' ', '-')
+    skill_output_dir = output_dir / skill_dir_name
+
+    # Remove existing installation
+    if skill_output_dir.exists() or skill_output_dir.is_symlink():
+        if skill_output_dir.is_symlink():
+            skill_output_dir.unlink()
+        else:
+            shutil.rmtree(skill_output_dir)
+
+    # Try symlink approach
+    symlink_success = False
+    if use_symlinks:
+        try:
+            symlink_success = _install_skill_symlinks(skill, skill_output_dir)
+        except OSError:
+            # Symlinks not supported (Windows without permissions)
+            symlink_success = False
+
+    # Fall back to copy if symlinks failed
+    if not symlink_success:
+        result = export_skill(
+            skill,
+            format="claude-skills",
+            output_dir=output_dir,
+            install=False
+        )
+        if not quiet:
+            print(f"📁 Installed to: {result}")
+            print("📋 Using file copy (upgrade edgartools to update skills)")
+    else:
+        result = skill_output_dir
+        if not quiet:
+            print(f"📁 Installed to: {result}")
+            print("🔗 Using symlinks (auto-updates with package)")
 
     if not quiet:
-        print(f"📁 Installed to: {result}")
         print("✅ Ready to use in Claude Desktop and Claude Code!")
         print("="*60 + "\n")
 
     return result
+
+
+def _install_skill_symlinks(skill, target_dir: 'Path') -> bool:
+    """
+    Install skill using symlinks for auto-sync with package updates.
+
+    Creates a directory with symlinks pointing back to the installed package.
+    When the package is upgraded, skills automatically reflect the new version.
+
+    Args:
+        skill: The skill to install
+        target_dir: Where to create the skill directory
+
+    Returns:
+        True if successful, False if symlinks not supported
+    """
+    import shutil
+    from pathlib import Path
+
+    content_dir = skill.content_dir  # edgar/ai/skills/core/
+    skills_parent = content_dir.parent  # edgar/ai/skills/
+
+    # Create the target directory
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Symlink skill files from content_dir (core/)
+    # Skip Python module files and cache directories
+    skip_patterns = {'__init__.py', '__pycache__', '.pyc'}
+    for item in content_dir.iterdir():
+        if item.name in skip_patterns or item.name.endswith('.pyc'):
+            continue
+        if item.is_file():
+            (target_dir / item.name).symlink_to(item)
+
+    # Symlink skill subdirectories
+    skill_subdirs = ['financials', 'holdings', 'ownership', 'reports', 'xbrl']
+    for subdir_name in skill_subdirs:
+        subdir = skills_parent / subdir_name
+        if subdir.exists() and subdir.is_dir():
+            (target_dir / subdir_name).symlink_to(subdir)
+
+    # Symlink forms.yaml
+    forms_yaml = skills_parent / "forms.yaml"
+    if forms_yaml.exists():
+        (target_dir / "forms.yaml").symlink_to(forms_yaml)
+
+    # Copy api-reference (can't symlink - assembled from multiple locations)
+    object_docs = skill.get_object_docs()
+    if object_docs:
+        api_ref_dir = target_dir / "api-reference"
+        api_ref_dir.mkdir(exist_ok=True)
+        for doc_path in object_docs:
+            if doc_path.exists():
+                shutil.copy2(doc_path, api_ref_dir / doc_path.name)
+
+    return True
 
 
 def package_skill(skill=None, output=None, quiet=False):

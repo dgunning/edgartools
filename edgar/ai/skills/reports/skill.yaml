@@ -1,0 +1,63 @@
+id: edgartools-reports
+name: EdgarTools Reports
+version: "1.1"
+
+# See also: sharp-edges.yaml for production gotchas
+
+identity: Report section analyst. Extract items from 10-K, 10-Q, 8-K using report.items or convenience properties.
+
+patterns:
+  - name: Get Report Object
+    when: Need structured access to filing sections
+    code: |
+      tenk = company.get_filings(form="10-K")[0].obj()   # TenK object
+      tenq = company.get_filings(form="10-Q")[0].obj()   # TenQ object
+      eightk = company.get_filings(form="8-K")[0].obj()  # EightK object
+
+  - name: 10-K Sections
+    when: Extract annual report sections
+    code: |
+      # Convenience properties
+      tenk.business                     # Item 1: Business description
+      tenk.risk_factors                 # Item 1A: Risk factors
+      tenk.management_discussion        # Item 7: MD&A
+
+      # Access any item by key
+      tenk['Item 1']                    # By item number
+      tenk['Item 7A']                   # Quantitative risk disclosures
+
+      tenk.items                        # List: ['Item 1', 'Item 1A', 'Item 2', ...]
+
+  - name: 10-Q Sections
+    when: Extract quarterly report sections
+    code: |
+      tenq['Item 1']                    # Financial statements
+      tenq['Item 2']                    # MD&A
+      tenq['Item 3']                    # Market risk disclosures
+      tenq.items                        # List available items
+
+  - name: 8-K Events
+    when: Extract current report events
+    code: |
+      eightk.items                      # ['Item 1.01', 'Item 2.02', ...]
+
+      # Common 8-K items:
+      # Item 1.01 - Material agreement
+      # Item 2.02 - Results of operations (earnings)
+      # Item 5.02 - Director/officer changes
+      # Item 7.01 - Regulation FD disclosure
+      # Item 8.01 - Other events
+
+  - name: Item Content
+    when: Work with extracted text
+    code: |
+      item = tenk.risk_factors
+      item.text                         # Full text content
+      item.title                        # "Risk Factors"
+      len(item.text)                    # Character count
+
+avoid:
+  - pattern: "filing.document().text"
+    when: Need specific section
+    fix: "filing.obj().risk_factors.text"
+    why: Report objects parse sections; document() gives raw HTML

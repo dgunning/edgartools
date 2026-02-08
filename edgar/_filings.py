@@ -1124,6 +1124,64 @@ class Filings:
             expand=False
         )
 
+    def __str__(self):
+        """Compact string representation optimized for LLMs (~400 tokens vs ~1200 for repr)."""
+        if self.empty:
+            return "Filings: empty"
+
+        # Get metadata
+        total = len(self)
+        start_date, end_date = self.date_range
+
+        # Show filings: all if ≤100 total, otherwise 50 (matches pager page size for seamless next())
+        current_page = self.data_pager.current()
+        start_idx = self._original_state.page_start if self._original_state else self.data_pager.start_index
+        if total <= 100:
+            show_count = len(current_page)  # Show all
+        else:
+            show_count = min(50, len(current_page))  # Match pager page size
+
+        # Check if all displayed filings have the same date
+        displayed_dates = [current_page['filing_date'][i].as_py() for i in range(show_count)]
+        all_same_date = len(set(str(d) for d in displayed_dates)) == 1
+
+        # Header line - simplified
+        if all_same_date and show_count > 0:
+            lines = [f"Filings: {total:,} | {displayed_dates[0]}"]
+        else:
+            lines = [f"Filings: {total:,} | {start_date} to {end_date}"]
+
+        # Column header (Form at end avoids alignment issues with variable-length form names)
+        if all_same_date:
+            lines.append("   #  Company                                  Form")
+        else:
+            lines.append("   #  Company                                  Filed       Form")
+
+        for i in range(show_count):
+            idx = start_idx + i
+            form = current_page['form'][i].as_py()
+            company = current_page['company'][i].as_py()
+
+            # Truncate company name for compact display
+            if len(company) > 40:
+                company = company[:37] + "..."
+
+            if all_same_date:
+                lines.append(f"  {idx:>2}. {company:<40} {form}")
+            else:
+                filing_date = current_page['filing_date'][i].as_py()
+                lines.append(f"  {idx:>2}. {company:<40} {filing_date}  {form}")
+
+        # Footer with navigation hints
+        if total > show_count:
+            remaining = total - show_count
+            lines.append(f"  ... ({remaining:,} more)")
+            lines.append("[filings[n] to select | .filter() to narrow | .next() for more]")
+        else:
+            lines.append("[filings[n] to select | .filter() to narrow]")
+
+        return "\n".join(lines)
+
     def __repr__(self):
         return repr_rich(self.__rich__())
 

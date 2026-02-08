@@ -1381,11 +1381,22 @@ class Company(Entity):
         raise ValueError(f"Invalid date format: '{as_of}'. Use 'YYYY-MM-DD' or 'YYYY-QN'")
 
     def __str__(self):
-        ticker = self.get_ticker()
-        ticker_str = f" - {ticker}" if ticker else ""
-        if hasattr(self, 'data'):
-            return f"Company({self.data.name} [{self.cik}]{ticker_str})"
-        return f"Company(CIK={self.cik}{ticker_str})"
+        if hasattr(self, 'data') and self.data.name:
+            # Handle individuals (persons)
+            if self.data.is_individual:
+                return f"{self.display_name} (Person) CIK:{self.cik}"
+
+            # Company format
+            ticker = self.get_ticker()
+            parts = [self.data.name]
+            if ticker:
+                parts.append(f"[{ticker}]")
+            parts.append(f"CIK:{self.cik}")
+            if self.industry:
+                parts.append(f"• {self.industry}")
+            return " ".join(parts)
+        # Fallback for minimal data
+        return f"Company(CIK={self.cik})"
 
     def __repr__(self):
         # Delegate to the rich representation for consistency with the old implementation

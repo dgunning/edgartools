@@ -133,10 +133,11 @@ python -m edgar.ai
 
 ### Available Tools
 
-- **edgar_company_research**: Company profile + financials + recent filings
-- **edgar_analyze_financials**: Multi-period financial statement analysis
-- **edgar_industry_overview**: Industry sector analysis
-- **edgar_compare_industry_companies**: Compare companies in sector
+- **edgar_company**: Company profile, financials, filings, and ownership in one call
+- **edgar_search**: Search companies, filings, or both
+- **edgar_filing**: Read filing content or specific sections
+- **edgar_compare**: Compare multiple companies or analyze an industry
+- **edgar_ownership**: Insider transactions, institutional holders, fund portfolios
 
 **See:** [MCP Quickstart Guide](mcp/docs/MCP_QUICKSTART.md) for details
 

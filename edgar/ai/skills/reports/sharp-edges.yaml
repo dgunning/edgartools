@@ -1,0 +1,53 @@
+# Sharp Edges - Production gotchas for Reports (10-K/10-Q/8-K)
+
+sharp_edges:
+  - id: document-vs-obj
+    summary: Use filing.obj() for sections, not filing.document()
+    severity: high
+    solution: |
+      tenk = filing.obj()
+      risk_factors = tenk.risk_factors       # Convenience property
+      risk_factors = tenk['Item 1A']         # By item key
+    detection_pattern: 'document\(\)\.text.*Item|filing\.document\(\).*search'
+
+  - id: item-key-format
+    summary: Use correct item key format for each report type
+    severity: medium
+    solution: |
+      # 10-K/10-Q: "Item 1", "Item 1A", "Item 7"
+      tenk['Item 1A']      # Risk Factors
+
+      # 8-K: "Item 1.01", "Item 5.02"
+      eightk['Item 5.02']  # Personnel Changes
+
+      print(tenk.items)    # Check available items
+
+  - id: item-may-be-none
+    summary: Not all items exist in every filing
+    severity: medium
+    solution: |
+      risk_factors = tenk.risk_factors
+      if risk_factors:
+          print(risk_factors.text[:1000])
+
+      if 'Item 1A' in tenk.items:
+          risk = tenk['Item 1A']
+
+  - id: text-vs-html
+    summary: Item.text is plain text, tables lose structure
+    severity: low
+    solution: |
+      plain = item.text                     # Plain text
+      # For tabular data, use financials skill (XBRL structured)
+
+  - id: eightk-items-different
+    summary: 8-K items indicate events, detail often in exhibits
+    severity: low
+    solution: |
+      eightk = filing.obj()
+      print(eightk.items)  # ['Item 2.02', ...]
+
+      # Check exhibits for full press release
+      for attachment in filing.attachments:
+          if 'press release' in attachment.description.lower():
+              print(attachment)

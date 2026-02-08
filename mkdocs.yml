@@ -78,6 +78,12 @@ nav:
       - Footnotes: guides/xbrl-footnotes.md
 
   # ==========================================
+  # AI - MCP server & skills for AI agents
+  # ==========================================
+  - AI Integration:
+    - "MCP Server & Skills": ai-integration.md
+
+  # ==========================================
   # ADVANCED - Power users & customization
   # ==========================================
   - Advanced:
@@ -85,7 +91,6 @@ nav:
       - Local Storage: guides/local-storage.md
       - Cloud Storage (S3): guides/cloud-storage.md
     - Advanced Search: advanced-search.md
-    - AI Integration: ai-integration.md
     - SEC Compliance: resources/sec-compliance.md
     - Troubleshooting: resources/troubleshooting.md
     - Performance: resources/performance.md
