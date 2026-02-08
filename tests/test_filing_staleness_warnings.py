@@ -18,6 +18,7 @@ from edgar._filings import (
 )
 
 
+@pytest.mark.fast
 class TestHelperFunctions:
     """Test the helper functions for staleness detection"""
 
@@ -66,6 +67,7 @@ class TestHelperFunctions:
         assert _is_requesting_current_filings(None) is False
 
 
+@pytest.mark.fast
 class TestWarningMessages:
     """Test that warning messages are formatted correctly"""
 

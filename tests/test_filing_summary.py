@@ -10,6 +10,7 @@ def aapl_summary():
     content = Path('data/sgml/AAPL-FilingSummary.xml').read_text()
     return FilingSummary.parse(content)
 
+@pytest.mark.fast
 def test_parse_filing_summary():
     content = Path('data/sgml/AAPL-FilingSummary.xml').read_text()
     result = FilingSummary.parse(content)
