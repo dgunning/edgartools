@@ -47,7 +47,7 @@ class ParserConfig:
     """
 
     # Performance settings
-    max_document_size: int = 130 * 1024 * 1024  # 110MB (handles large filings like NPORT-P)
+    max_document_size: int = 160 * 1024 * 1024  # 160MB (handles large filings like NPORT-P)
     streaming_threshold: int = 10 * 1024 * 1024  # 10MB
     cache_size: int = 1000
     enable_parallel: bool = True
