@@ -63,6 +63,69 @@ def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
     return False
 
 
+_FINANCIAL_WORDS = [
+    # 14-letter words
+    'POSTRETIREMENT',
+    # 13-letter words
+    'COMPREHENSIVE', 'CONTINGENCIES', 'ESTABLISHMENT', 'EXTRAORDINARY', 'RESTRUCTURING',
+    'STOCKHOLDERS',
+    # 12-letter words
+    'ACQUISITIONS', 'ARRANGEMENTS', 'COMPENSATION', 'CONSOLIDATED', 'DIVESTITURES',
+    'INSTRUMENTS', 'MEASUREMENTS', 'SHAREHOLDERS', 'SHAREOWNERS',
+    # 11-letter words
+    'COMMITMENTS', 'INFORMATION', 'INVESTMENTS', 'RECEIVABLES', 'SIGNIFICANT',
+    # 10-letter words
+    'ACCOUNTING', 'BORROWING', 'DEPRECIATION', 'INTANGIBLE', 'STATEMENTS',
+    # 9-letter words
+    'DOCUMENT', 'EARNINGS', 'ENTITY', 'EXPENSES', 'FINANCIAL', 'GOODWILL',
+    'OPERATING', 'PROVISION', 'REPORTING', 'REVENUES', 'SEGMENTS',
+    # 8-letter words
+    'ACCRUED', 'BALANCES', 'BUSINESS', 'PAYABLE', 'POLICIES', 'PROPERTY',
+    # 7-letter words
+    'BALANCE', 'HEDGING', 'REVENUE', 'SUMMARY', 'SUPPLY',
+    # 6-letter words
+    'ASSETS', 'EQUITY', 'INCOME', 'LEASES', 'SHARES', 'STOCK',
+    # 5-letter words
+    'BASED', 'CHAIN', 'MONEY', 'OTHER', 'PLANS', 'TAXES', 'VALUE',
+    # 4-letter words
+    'CASH', 'DEBT', 'FAIR', 'FLOW', 'ITEM', 'LINE', 'LONG', 'LOSS', 'TERM',
+    # 3-letter words
+    'AND', 'FOR', 'NET', 'NON', 'PER', 'THE',
+    # 2-letter words
+    'OF',
+]
+
+
+def _split_allcaps(text: str) -> str:
+    """
+    Split an ALL-CAPS string into title-cased words using a greedy dictionary approach.
+
+    Uses a dictionary of common financial terms to split strings like
+    'INCOMETAXES' → 'Income Taxes' and 'DEBTANDBORROWINGARRANGEMENTS' → 'Debt And Borrowing Arrangements'.
+
+    Non-ALL-CAPS strings are returned unchanged.
+    """
+    if not text or not text.isupper() or len(text) <= 1:
+        return text
+
+    remaining = text
+    words = []
+    while remaining:
+        matched = False
+        for word in _FINANCIAL_WORDS:
+            if remaining.startswith(word):
+                words.append(word.title())
+                remaining = remaining[len(word):]
+                matched = True
+                break
+        if not matched:
+            # Take the next character as its own fragment
+            words.append(remaining[0])
+            remaining = remaining[1:]
+
+    return ' '.join(words)
+
+
 def _extract_topic_summary(stmts_in_category: List[Dict], max_shown: int = 4) -> str:
     """
     Extract unique root topic names from a list of statement dicts.
@@ -97,15 +160,18 @@ def _extract_topic_summary(stmts_in_category: List[Dict], max_shown: int = 4) ->
             if len(roots) >= max_shown:
                 break
 
-    # Insert spaces into CamelCase for readability
+    # Insert spaces for readability (ALL-CAPS or CamelCase)
     result = []
     for r in roots:
-        spaced = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', r)
-        spaced = re.sub(r'(?<=[A-Z])(?=[A-Z][a-z])', ' ', spaced)
-        # Fix common lowercase joiners: "Summaryof" -> "Summary of"
-        spaced = re.sub(r'(?<=[a-z])(of|and|for|to|the|in|by|or|on)(?=[A-Z ])', r' \1 ', spaced)
-        # Collapse any double spaces
-        spaced = re.sub(r'  +', ' ', spaced)
+        if r.isupper() and len(r) > 1:
+            spaced = _split_allcaps(r)
+        else:
+            spaced = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', r)
+            spaced = re.sub(r'(?<=[A-Z])(?=[A-Z][a-z])', ' ', spaced)
+            # Fix common lowercase joiners: "Summaryof" -> "Summary of"
+            spaced = re.sub(r'(?<=[a-z])(of|and|for|to|the|in|by|or|on)(?=[A-Z ])', r' \1 ', spaced)
+            # Collapse any double spaces
+            spaced = re.sub(r'  +', ' ', spaced)
         result.append(spaced.strip())
 
     shown = result[:max_shown]
@@ -1598,7 +1664,13 @@ class Statements:
     @staticmethod
     def classify_statement(stmt: dict) -> str:
         """
-        Classify a statement into a category based on its type.
+        Classify a statement into a category based on its type, primary_concept, and definition.
+
+        Uses a tiered approach:
+        - Tier 0: Explicit category field
+        - Tier 1: Infer from type (works when type is set)
+        - Tier 2: Infer from primary_concept (reliable for type=None statements)
+        - Tier 3: Infer from definition suffix
 
         Categories:
         - 'statement': Core financial statements (Income Statement, Balance Sheet, etc.)
@@ -1608,7 +1680,8 @@ class Statements:
         - 'other': Everything else
 
         Args:
-            stmt: Statement dictionary with 'type' and optional 'category' fields
+            stmt: Statement dictionary with 'type', 'primary_concept', 'definition',
+                  and optional 'category' fields
 
         Returns:
             str: Category name ('statement', 'note', 'disclosure', 'document', or 'other')
@@ -1618,31 +1691,41 @@ class Statements:
             >>> Statements.classify_statement(stmt)
             'statement'
 
-            >>> stmt = {'type': 'DebtDisclosure', 'title': 'Debt Disclosure'}
+            >>> stmt = {'type': None, 'primary_concept': 'DebtDisclosureAbstract'}
             >>> Statements.classify_statement(stmt)
             'disclosure'
         """
-        # Use explicit category if provided
+        # Tier 0: Use explicit category if provided
         category = stmt.get('category')
         if category:
             return category
 
-        # Infer from type
-        stmt_type = stmt.get('type', '')
-        if not stmt_type:
-            return 'other'
+        # Tier 1: Infer from type (existing logic, works when type is set)
+        stmt_type = stmt.get('type', '') or ''
+        if stmt_type:
+            if 'Note' in stmt_type:
+                return 'note'
+            elif 'Disclosure' in stmt_type:
+                return 'disclosure'
+            elif stmt_type == 'CoverPage':
+                return 'document'
+            elif stmt_type in ('BalanceSheet', 'IncomeStatement', 'CashFlowStatement',
+                               'StatementOfEquity', 'ComprehensiveIncome') or 'Statement' in stmt_type:
+                return 'statement'
 
-        if 'Note' in stmt_type:
-            return 'note'
-        elif 'Disclosure' in stmt_type:
+        # Tier 2: Infer from primary_concept (reliable for type=None statements)
+        pc = stmt.get('primary_concept', '') or ''
+        if 'Disclosure' in pc:
             return 'disclosure'
-        elif stmt_type == 'CoverPage':
-            return 'document'
-        elif stmt_type in ('BalanceSheet', 'IncomeStatement', 'CashFlowStatement',
-                           'StatementOfEquity', 'ComprehensiveIncome') or 'Statement' in stmt_type:
+        if 'AccountingPolicies' in pc:
+            return 'note'
+
+        # Tier 3: Infer from definition suffix
+        defn = stmt.get('definition', '') or ''
+        if 'Parenthetical' in defn:
             return 'statement'
-        else:
-            return 'other'
+
+        return 'other'
 
     def get_statements_by_category(self) -> dict:
         """

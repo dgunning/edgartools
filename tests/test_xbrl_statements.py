@@ -6,7 +6,7 @@ from rich import print
 
 from edgar import *
 from edgar.xbrl.rendering import RenderedStatement
-from edgar.xbrl.statements import Statement, Statements
+from edgar.xbrl.statements import Statement, Statements, _split_allcaps
 from edgar.xbrl import XBRL, XBRLS
 import pandas as pd
 pd.options.display.max_colwidth = 200
@@ -775,3 +775,91 @@ class TestStatementsDiscovery:
 
     def test_to_context_default_is_standard(self, aapl_xbrl):
         assert aapl_xbrl.statements.to_context() == aapl_xbrl.statements.to_context('standard')
+
+
+@pytest.fixture
+def ko_xbrl():
+    data_dir = Path("tests/fixtures/xbrl/ko/10k_2024")
+    return XBRL.from_directory(data_dir)
+
+
+class TestSplitAllcaps:
+    """Tests for the _split_allcaps helper function."""
+
+    def test_split_allcaps_income_taxes(self):
+        assert _split_allcaps('INCOMETAXES') == 'Income Taxes'
+
+    def test_split_allcaps_debt_and_borrowing(self):
+        assert _split_allcaps('DEBTANDBORROWINGARRANGEMENTS') == 'Debt And Borrowing Arrangements'
+
+    def test_split_allcaps_passthrough_camelcase(self):
+        """CamelCase strings should be returned unchanged (not ALL-CAPS)."""
+        assert _split_allcaps('IncomeTaxes') == 'IncomeTaxes'
+
+    def test_split_allcaps_passthrough_empty(self):
+        assert _split_allcaps('') == ''
+
+    def test_split_allcaps_single_char(self):
+        assert _split_allcaps('A') == 'A'
+
+    def test_split_allcaps_equity(self):
+        assert _split_allcaps('EQUITY') == 'Equity'
+
+    def test_split_allcaps_fair_value(self):
+        assert _split_allcaps('FAIRVALUE') == 'Fair Value'
+
+    def test_extract_topic_summary_allcaps(self, ko_xbrl):
+        """KO's category summary should show readable topics, not ALL-CAPS blobs."""
+        stmts = ko_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        # Check that at least one category has a readable topic summary
+        for cat, items in cats.items():
+            from edgar.xbrl.statements import _extract_topic_summary
+            summary = _extract_topic_summary([s for s in stmts.statements if Statements.classify_statement(s) == cat])
+            if summary:
+                # Should not contain ALL-CAPS blobs longer than 5 chars
+                for word in summary.split(', '):
+                    # Each topic fragment should have spaces or be short
+                    assert not (word.isupper() and len(word) > 5), \
+                        f"ALL-CAPS blob found in summary: '{word}'"
+
+
+class TestClassifyStatement:
+    """Tests for Statements.classify_statement() with primary_concept and definition fallbacks."""
+
+    def test_classify_disclosure_via_primary_concept(self):
+        stmt = {'type': None, 'primary_concept': 'DebtDisclosureAbstract', 'definition': 'Debt'}
+        assert Statements.classify_statement(stmt) == 'disclosure'
+
+    def test_classify_note_via_primary_concept(self):
+        stmt = {'type': None, 'primary_concept': 'AccountingPoliciesAbstract', 'definition': 'SummaryOfSignificantAccountingPolicies'}
+        assert Statements.classify_statement(stmt) == 'note'
+
+    def test_classify_parenthetical_via_definition(self):
+        stmt = {'type': None, 'primary_concept': '', 'definition': 'BalanceSheetParenthetical'}
+        assert Statements.classify_statement(stmt) == 'statement'
+
+    def test_classify_core_statements_unchanged(self, aapl_xbrl):
+        """Core financial statements should still be classified correctly."""
+        stmts = aapl_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        assert 'statement' in cats
+        assert len(cats['statement']) >= 3  # At least income, balance, cash flow
+
+    def test_classify_reduces_other_count(self, aapl_xbrl):
+        """The 'other' count should be less than 50% of total statements."""
+        stmts = aapl_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        total = len(stmts.statements)
+        other_count = len(cats.get('other', []))
+        assert other_count < total * 0.50, \
+            f"'other' is {other_count}/{total} ({other_count/total:.0%}) — should be <50%"
+
+    def test_classify_disclosure_count_increased(self, aapl_xbrl):
+        """With primary_concept fallback, disclosure count should increase."""
+        stmts = aapl_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        disclosure_count = len(cats.get('disclosure', []))
+        # Before the fix, AAPL had 0 disclosures (all were 'other')
+        # With primary_concept fallback, we should have several
+        assert disclosure_count > 0, "Expected some disclosures to be classified via primary_concept"
