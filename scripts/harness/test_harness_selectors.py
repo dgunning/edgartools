@@ -3,7 +3,7 @@
 import pytest
 from datetime import datetime
 
-from tests.harness import FilingSelector
+from scripts.harness import FilingSelector
 
 
 class TestFilingSelector:

@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import os
 
-from tests.harness import (
+from scripts.harness import (
     HarnessStorage,
     Session,
     TestRun,

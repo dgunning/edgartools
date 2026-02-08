@@ -5,7 +5,7 @@ functionality across live SEC filings. It supports multiple test types, flexible
 filing selection, SQLite-based result storage, and rich reporting capabilities.
 
 Basic usage:
-    >>> from tests.harness import HarnessStorage, FilingSelector
+    >>> from scripts.harness import HarnessStorage, FilingSelector
     >>> storage = HarnessStorage()
     >>> session = storage.create_session("My Test Session")
     >>> # More functionality coming in subsequent phases

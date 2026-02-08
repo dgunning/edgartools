@@ -4,7 +4,7 @@ import pytest
 import time
 from unittest.mock import Mock, MagicMock
 
-from tests.harness import (
+from scripts.harness import (
     HarnessStorage,
     TestRunner,
     ComparisonTestRunner,
@@ -58,7 +58,7 @@ class TestBaseRunner:
 
         # Define a simple test function
         def test_func(filing):
-            from tests.harness.models import TestResult
+            from scripts.harness.models import TestResult
             return TestResult(
                 run_id=run.id,
                 filing_accession=filing.accession_no,
@@ -107,7 +107,7 @@ class TestBaseRunner:
             current_results = storage.get_results(run.id)
             save_count[0] = len(current_results)
 
-            from tests.harness.models import TestResult
+            from scripts.harness.models import TestResult
             return TestResult(
                 run_id=run.id,
                 filing_accession=filing.accession_no,
