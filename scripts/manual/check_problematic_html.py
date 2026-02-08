@@ -2,7 +2,7 @@
 Focused tests for problematic HTML files.
 
 Tests specific edge cases and known issues.
-Run with: python tests/manual/test_problematic_html.py
+Run with: python scripts/manual/test_problematic_html.py
 """
 
 import os

@@ -2,7 +2,7 @@
 Comparison test between old and new HTML parsers.
 
 Shows improvements and differences in parsing results.
-Run with: python tests/manual/test_parser_comparison.py
+Run with: python scripts/manual/test_parser_comparison.py
 """
 
 import os

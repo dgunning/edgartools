@@ -5,9 +5,9 @@ Tests section detection on a large sample of 8-K filings from multiple years
 to validate the regex pattern and confidence score fixes (Issue edgartools-1ho).
 
 Run with:
-    python tests/batch/batch_8k_section_detection.py
-    python tests/batch/batch_8k_section_detection.py --sample-size 50
-    python tests/batch/batch_8k_section_detection.py --years 2020 2021 2022 2023 2024
+    python scripts/batch/batch_8k_section_detection.py
+    python scripts/batch/batch_8k_section_detection.py --sample-size 50
+    python scripts/batch/batch_8k_section_detection.py --years 2020 2021 2022 2023 2024
 """
 import argparse
 from typing import Dict, List, Any

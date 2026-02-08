@@ -2,7 +2,7 @@
 Manual test for HTML parser using real SEC filing HTML files.
 
 Tests the new parser against various HTML files including problematic ones.
-Run with: python tests/manual/test_html_parser_real_files.py
+Run with: python scripts/manual/test_html_parser_real_files.py
 """
 
 import os

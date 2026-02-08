@@ -366,7 +366,7 @@ if 'Item 7 - MD&A' in sections:
 1. **Validate Item Detection** 🎯 **TOP PRIORITY**
    ```bash
    # Run on diverse corpus
-   python tests/manual/compare_parsers.py --all
+   python scripts/manual/compare_parsers.py --all
 
    # Test specific sections
    python -c "

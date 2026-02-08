@@ -170,19 +170,19 @@ features = [
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
-smoke-filings = "python tests/batch/batch_filings.py {args}"
+smoke-filings = "python scripts/batch/batch_filings.py {args}"
 # Test categorization commands (sequential execution)
 test-fast = "pytest -m 'fast' {args}"
 test-slow = "pytest -m 'slow' {args}"
 test-network = "pytest -m 'network' {args}"
-test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 
 # Parallel test commands (selective parallelization for SEC rate limit safety)
 # - Fast tests: Full parallelization (no network calls)
 # - Network/slow: Sequential (respects SEC rate limits)
 # - Core: Limited parallelization (mixed tests)
 test-fast-parallel = "pytest -n auto -m 'fast' {args}"
-test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 
 # Parallel CI test strategy (skip regression tests for faster feedback)
@@ -199,15 +199,15 @@ test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
 test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
-test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
+test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/perf --ignore=tests/issues/regression {args}"
 
 # Regression tests (run separately/on-demand for comprehensive bug prevention)
 test-regression = "pytest --cov --cov-report=xml -m regression {args}"
 
 # Other test categories  
-test-batch = "pytest tests/batch/ -m 'batch' {args}"
+test-batch = "pytest scripts/batch/ -m 'batch' {args}"
 test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}"
-test-full = "pytest --ignore=tests/manual --ignore=tests/perf {args}"
+test-full = "pytest --ignore=tests/perf {args}"
 
 [tool.hatch.envs.test]
 dependencies = [

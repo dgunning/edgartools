@@ -34,4 +34,4 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         export EDGAR_IDENTITY="S Robinson Robinson@edgar.tools"
         # Smoke test recent filings (direct Python execution instead of hatch)
-        python tests/batch/batch_filings.py -y 2024 -s 40
+        python scripts/batch/batch_filings.py -y 2024 -s 40

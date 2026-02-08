@@ -6,16 +6,16 @@ Quick reference for testing the HTML parser rewrite during quality improvement.
 
 ```bash
 # Use shortcuts (easy!)
-python tests/manual/compare_parsers.py aapl              # Apple 10-K
-python tests/manual/compare_parsers.py nvda --tables     # Nvidia tables
-python tests/manual/compare_parsers.py 'aapl 10-q'       # Apple 10-Q
-python tests/manual/compare_parsers.py orcl --table 5    # Oracle table #5
+python scripts/manual/compare_parsers.py aapl              # Apple 10-K
+python scripts/manual/compare_parsers.py nvda --tables     # Nvidia tables
+python scripts/manual/compare_parsers.py 'aapl 10-q'       # Apple 10-Q
+python scripts/manual/compare_parsers.py orcl --table 5    # Oracle table #5
 
 # Or use full paths
-python tests/manual/compare_parsers.py data/html/Apple.10-K.html
+python scripts/manual/compare_parsers.py data/html/Apple.10-K.html
 
 # Run all test files
-python tests/manual/compare_parsers.py --all
+python scripts/manual/compare_parsers.py --all
 ```
 
 **Available shortcuts:**
@@ -29,7 +29,7 @@ python tests/manual/compare_parsers.py --all
 
 ```bash
 # Get overview: speed, table count, sections
-python tests/manual/compare_parsers.py orcl
+python scripts/manual/compare_parsers.py orcl
 ```
 
 **Shows**:
@@ -43,13 +43,13 @@ python tests/manual/compare_parsers.py orcl
 
 ```bash
 # List all tables with dimensions (shows first 20 tables)
-python tests/manual/compare_parsers.py aapl --tables
+python scripts/manual/compare_parsers.py aapl --tables
 
 # Compare specific table side-by-side (FULL table, no truncation)
-python tests/manual/compare_parsers.py aapl --table 7
+python scripts/manual/compare_parsers.py aapl --table 7
 
 # Compare a range of tables
-python tests/manual/compare_parsers.py aapl --range 5:10
+python scripts/manual/compare_parsers.py aapl --range 5:10
 ```
 
 **Look for**:
@@ -64,13 +64,13 @@ python tests/manual/compare_parsers.py aapl --range 5:10
 
 ```bash
 # See first 50 lines side-by-side (default limit)
-python tests/manual/compare_parsers.py msft --text
+python scripts/manual/compare_parsers.py msft --text
 
 # Show more lines (configurable)
-python tests/manual/compare_parsers.py msft --text --lines 100
+python scripts/manual/compare_parsers.py msft --text --lines 100
 
 # Show first 200 lines
-python tests/manual/compare_parsers.py msft --text --lines 200
+python scripts/manual/compare_parsers.py msft --text --lines 200
 ```
 
 **Check**:
@@ -83,7 +83,7 @@ python tests/manual/compare_parsers.py msft --text --lines 200
 ### 4. Check Section Detection
 
 ```bash
-python tests/manual/compare_parsers.py aapl --sections
+python scripts/manual/compare_parsers.py aapl --sections
 ```
 
 **Verify**:
@@ -95,7 +95,7 @@ python tests/manual/compare_parsers.py aapl --sections
 
 ```bash
 # Test all files in corpus
-python tests/manual/compare_parsers.py --all
+python scripts/manual/compare_parsers.py --all
 ```
 
 **Results**:
@@ -116,7 +116,7 @@ Available in `data/html/`:
 ## Command Reference
 
 ```
-python tests/manual/compare_parsers.py [FILE] [OPTIONS]
+python scripts/manual/compare_parsers.py [FILE] [OPTIONS]
 
 Options:
   --all           Run on all test files
@@ -203,7 +203,7 @@ New Parser:
 ```bash
 # Clear cached modules
 find . -type d -name __pycache__ -exec rm -rf {} +
-python tests/manual/compare_parsers.py data/html/Apple.10-K.html
+python scripts/manual/compare_parsers.py data/html/Apple.10-K.html
 ```
 
 ### File not found
@@ -213,7 +213,7 @@ python tests/manual/compare_parsers.py data/html/Apple.10-K.html
 ls -lh data/html/*.html
 
 # Use full path
-python tests/manual/compare_parsers.py /full/path/to/file.html
+python scripts/manual/compare_parsers.py /full/path/to/file.html
 ```
 
 ### Old parser shows 0 text

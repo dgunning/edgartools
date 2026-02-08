@@ -4,27 +4,27 @@ Simple parser comparison tool for quality improvement loop.
 
 Usage:
     # Use shortcuts (easy!)
-    python tests/manual/compare_parsers.py aapl
-    python tests/manual/compare_parsers.py nvda --tables
-    python tests/manual/compare_parsers.py 'tsla 10-q' --table 5
+    python scripts/manual/compare_parsers.py aapl
+    python scripts/manual/compare_parsers.py nvda --tables
+    python scripts/manual/compare_parsers.py 'tsla 10-q' --table 5
 
     # Or use full paths
-    python tests/manual/compare_parsers.py data/html/Apple.10-K.html
+    python scripts/manual/compare_parsers.py data/html/Apple.10-K.html
 
     # Show only tables
-    python tests/manual/compare_parsers.py aapl --tables
+    python scripts/manual/compare_parsers.py aapl --tables
 
     # Show specific table
-    python tests/manual/compare_parsers.py aapl --table 5
+    python scripts/manual/compare_parsers.py aapl --table 5
 
     # Show text comparison
-    python tests/manual/compare_parsers.py msft --text
+    python scripts/manual/compare_parsers.py msft --text
 
     # Show sections
-    python tests/manual/compare_parsers.py orcl --sections
+    python scripts/manual/compare_parsers.py orcl --sections
 
     # Run all test files
-    python tests/manual/compare_parsers.py --all
+    python scripts/manual/compare_parsers.py --all
 
 Available shortcuts:
     Companies: aapl, msft, tsla, nvda, orcl
@@ -399,10 +399,10 @@ def run_single_file(file_arg: str, args):
         console.print("  Companies: aapl, msft, tsla, nvda, orcl")
         console.print("  Filing types: 10-K, 10-Q, 8-K")
         console.print("\n[yellow]Examples:[/yellow]")
-        console.print("  python tests/manual/compare_parsers.py aapl")
-        console.print("  python tests/manual/compare_parsers.py 'aapl 10-q'")
-        console.print("  python tests/manual/compare_parsers.py nvda")
-        console.print("  python tests/manual/compare_parsers.py data/html/Apple.10-K.html")
+        console.print("  python scripts/manual/compare_parsers.py aapl")
+        console.print("  python scripts/manual/compare_parsers.py 'aapl 10-q'")
+        console.print("  python scripts/manual/compare_parsers.py nvda")
+        console.print("  python scripts/manual/compare_parsers.py data/html/Apple.10-K.html")
         return
 
     comparator = ParserComparator(file_path)
@@ -488,24 +488,24 @@ def main():
         epilog="""
 Examples:
   # Use shortcuts (ticker symbols)
-  python tests/manual/compare_parsers.py aapl
-  python tests/manual/compare_parsers.py nvda --tables
-  python tests/manual/compare_parsers.py 'tsla 10-q' --table 5
+  python scripts/manual/compare_parsers.py aapl
+  python scripts/manual/compare_parsers.py nvda --tables
+  python scripts/manual/compare_parsers.py 'tsla 10-q' --table 5
 
   # Or use full paths
-  python tests/manual/compare_parsers.py data/html/Apple.10-K.html
+  python scripts/manual/compare_parsers.py data/html/Apple.10-K.html
 
   # Show all tables
-  python tests/manual/compare_parsers.py aapl --tables
+  python scripts/manual/compare_parsers.py aapl --tables
 
   # Show specific table
-  python tests/manual/compare_parsers.py aapl --table 5
+  python scripts/manual/compare_parsers.py aapl --table 5
 
   # Show text comparison
-  python tests/manual/compare_parsers.py msft --text
+  python scripts/manual/compare_parsers.py msft --text
 
   # Run all test files
-  python tests/manual/compare_parsers.py --all
+  python scripts/manual/compare_parsers.py --all
 
 Available shortcuts:
   Companies: aapl, msft, tsla, nvda, orcl (or full names)

@@ -26,7 +26,7 @@ You are an expert GitHub issue handler specializing in the EdgarTools project - 
 
 3. **EdgarTools Architecture**:
    - Core library structure (`edgar/` packages and modules)
-   - Test infrastructure (1000+ tests in `tests/batch/`, `tests/perf/`, `tests/manual/`)
+   - Test infrastructure (1000+ tests in `tests/`, `tests/perf/`, with scripts in `scripts/batch/`, `scripts/manual/`)
    - Data processing pipelines for financial statements
    - Caching strategies and performance optimizations
    - Integration patterns with pandas, pyarrow, and rich libraries

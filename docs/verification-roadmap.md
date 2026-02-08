@@ -45,8 +45,8 @@ Audit tests auto-marked as `network` that don't actually make network calls. Rec
 
 ### 0.3 Organizational Cleanup
 
-- Move `tests/batch/` scripts (28 files) → `scripts/batch/`
-- Move `tests/manual/` scripts (62 files) → `scripts/manual/`
+- ~~Move `tests/batch/` scripts (28 files) → `scripts/batch/`~~ (Done)
+- ~~Move `tests/manual/` scripts (62 files) → `scripts/manual/`~~ (Done)
 - Resolve skipped tests: fix, delete, or document why each is skipped
 - Establish naming convention: all regression tests in `tests/issues/regression/`
 
