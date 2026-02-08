@@ -4,6 +4,7 @@ Financial statement processing for XBRL data.
 This module provides functions for working with financial statements.
 """
 
+import re
 import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -70,23 +71,31 @@ def _extract_topic_summary(stmts_in_category: List[Dict], max_shown: int = 4) ->
     (e.g. 'Debt' is a root because 'DebtTables' and 'DebtDetails' also exist).
     Inserts spaces into CamelCase names for readability.
     """
-    import re
     defs = [s.get('definition', '') for s in stmts_in_category if s.get('definition')]
     if not defs:
         return ''
 
     # Find root topics: short definitions that are prefixes of longer ones
     roots = []
+    seen = set()
     for d in sorted(defs, key=len):
+        if d in seen:
+            continue
         is_prefix = any(other.startswith(d) and other != d for other in defs)
         if is_prefix:
             # Skip if already a sub-topic of a found root
             if not any(d.startswith(r) and d != r for r in roots):
                 roots.append(d)
+                seen.add(d)
 
-    # Fallback: use shortest definitions as topics
+    # Fallback: use shortest unique definitions as topics
     if not roots:
-        roots = sorted(defs, key=len)[:max_shown]
+        for d in sorted(defs, key=len):
+            if d not in seen:
+                roots.append(d)
+                seen.add(d)
+            if len(roots) >= max_shown:
+                break
 
     # Insert spaces into CamelCase for readability
     result = []
