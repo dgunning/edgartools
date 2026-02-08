@@ -239,6 +239,10 @@ omit = [
   "edgar/**/__main__.py",
   # MCP server (optional external integration, requires MCP runtime)
   "edgar/ai/mcp/*",
+  # AI evaluation framework (dev tooling: LLM-as-judge, A/B skill testing)
+  "edgar/ai/evaluation/*",
+  # AI exporters (CLI tooling for skill packaging)
+  "edgar/ai/exporters/*",
   # Experimental AI features
   "edgar/ai/formats.py",
   "edgar/ai/helpers.py",
