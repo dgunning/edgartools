@@ -1821,6 +1821,114 @@ class Statements:
     def __iter__(self):
         return iter(self.all())
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        Returns AI-optimized text representation for language models.
+
+        Provides structured information about available statements in Markdown-KV
+        format optimized for LLM consumption and navigation.
+
+        Args:
+            detail: Level of detail to include:
+                - 'minimal': Entity + count + core statement accessors (~150 tokens)
+                - 'standard': Adds category breakdown and discovery methods (~300 tokens)
+                - 'full': Adds all non-core statement names by category (~500+ tokens)
+
+        Returns:
+            Markdown-KV formatted context string optimized for LLMs
+        """
+        lines = []
+
+        # Header with entity info
+        entity_name = ''
+        ticker = ''
+        doc_type = ''
+        if hasattr(self.xbrl, 'entity_info') and self.xbrl.entity_info:
+            entity_name = self.xbrl.entity_info.get('entity_name', '')
+            ticker = self.xbrl.entity_info.get('ticker', '')
+            doc_type = self.xbrl.entity_info.get('document_type', '')
+
+        header = "STATEMENTS"
+        if entity_name:
+            header += f": {entity_name}"
+            if ticker:
+                header += f" ({ticker})"
+        if doc_type:
+            header += f" {doc_type}"
+        lines.append(header)
+        lines.append("")
+        lines.append(f"Total: {len(self.statements)} statements")
+
+        # Core financial statements with accessor methods
+        type_accessors = {
+            'IncomeStatement': '.income_statement()',
+            'BalanceSheet': '.balance_sheet()',
+            'CashFlowStatement': '.cashflow_statement()',
+            'StatementOfEquity': '.statement_of_equity()',
+            'ComprehensiveIncome': '.comprehensive_income()',
+            'CoverPage': '.cover_page()',
+        }
+
+        statements_by_category = self.get_statements_by_category()
+        core_stmts = statements_by_category.get('statement', [])
+
+        if core_stmts:
+            lines.append("")
+            lines.append("CORE STATEMENTS:")
+            for stmt in core_stmts:
+                stmt_type = stmt.get('type', '')
+                accessor = type_accessors.get(stmt_type, '')
+                definition = stmt.get('definition', '')
+                if accessor:
+                    lines.append(f"  {accessor:<40s} {definition}")
+                else:
+                    lines.append(f"  [{stmt.get('index', '')}] {definition}")
+
+        if detail == 'minimal':
+            return '\n'.join(lines)
+
+        # Category breakdown
+        category_display = [
+            ('note', 'Notes'),
+            ('disclosure', 'Disclosures'),
+            ('document', 'Document'),
+            ('other', 'Other'),
+        ]
+
+        category_parts = []
+        for cat_key, cat_label in category_display:
+            count = len(statements_by_category.get(cat_key, []))
+            if count > 0:
+                category_parts.append(f"{cat_label}: {count}")
+
+        if category_parts:
+            lines.append("")
+            lines.append(f"OTHER: {' | '.join(category_parts)}")
+
+        # Discovery methods
+        lines.append("")
+        lines.append("DISCOVERY:")
+        lines.append("  .search('keyword')       Find statements by keyword")
+        lines.append("  .get('name')             Get statement by type or name")
+        lines.append("  .list_available()        Browse all as DataFrame")
+        lines.append("  .all(category='note')    Filter by category")
+
+        if detail == 'standard':
+            return '\n'.join(lines)
+
+        # Full: list statements in each non-core category
+        for cat_key, cat_label in category_display:
+            cat_stmts = statements_by_category.get(cat_key, [])
+            if not cat_stmts:
+                continue
+            lines.append("")
+            lines.append(f"{cat_label.upper()} ({len(cat_stmts)}):")
+            for stmt in cat_stmts:
+                definition = stmt.get('definition', stmt.get('role_name', ''))
+                lines.append(f"  [{stmt.get('index', '')}] {definition}")
+
+        return '\n'.join(lines)
+
     def __rich__(self) -> Any:
         """
         Rich console representation following the EdgarTools design language.

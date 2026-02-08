@@ -741,3 +741,37 @@ class TestStatementsDiscovery:
         iterated = list(statements)
         assert len(iterated) == len(statements)
         assert all(isinstance(s, Statement) for s in iterated)
+
+    def test_to_context_minimal(self, aapl_xbrl):
+        ctx = aapl_xbrl.statements.to_context('minimal')
+        assert 'STATEMENTS' in ctx
+        assert 'Apple Inc.' in ctx
+        assert 'CORE STATEMENTS:' in ctx
+        assert '.income_statement()' in ctx
+        assert '.balance_sheet()' in ctx
+        # Minimal should not include discovery section
+        assert 'DISCOVERY:' not in ctx
+
+    def test_to_context_standard(self, aapl_xbrl):
+        ctx = aapl_xbrl.statements.to_context('standard')
+        assert 'CORE STATEMENTS:' in ctx
+        assert 'OTHER:' in ctx
+        assert 'DISCOVERY:' in ctx
+        assert '.search(' in ctx
+        assert '.get(' in ctx
+        assert '.list_available()' in ctx
+        # Standard should not include full listing
+        assert 'NOTES (' not in ctx
+
+    def test_to_context_full(self, aapl_xbrl):
+        ctx = aapl_xbrl.statements.to_context('full')
+        assert 'DISCOVERY:' in ctx
+        # Full includes per-category listings
+        assert 'OTHER (' in ctx
+        assert 'DOCUMENT (' in ctx
+        # Full is longer than standard
+        standard = aapl_xbrl.statements.to_context('standard')
+        assert len(ctx) > len(standard)
+
+    def test_to_context_default_is_standard(self, aapl_xbrl):
+        assert aapl_xbrl.statements.to_context() == aapl_xbrl.statements.to_context('standard')
