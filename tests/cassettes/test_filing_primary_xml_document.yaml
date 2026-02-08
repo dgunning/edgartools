@@ -1,0 +1,138 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1609804/0000950142-22-003095-index.html
+  response:
+    body:
+      string: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html
+        xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\"
+        content=\"text/html; charset=utf-8\" />\n<meta http-equiv=\"Last-Modified\"
+        content=\"Sat, 05 Nov 2022 01:03:43 GMT\" />\n<title>EDGAR Filing Documents
+        for 0000950142-22-003095</title>\n<link  rel=\"stylesheet\" href=\"/edgar/search/global/css/bootstrap/bootstrap.min.css\"
+        type=\"text/css\" />\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/include/interactive2.css\"
+        />\n</head>\n<body style=\"margin: 0; font-size: 16px; \">\n<!-- SEC Web Analytics
+        - For information please visit: https://www.sec.gov/privacy.htm#collectedinfo
+        -->\n<noscript><iframe src=\"//www.googletagmanager.com/ns.html?id=GTM-TD3BKV\"\nheight=\"0\"
+        width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':\nnew
+        Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],\nj=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=\n'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);\n})(window,document,'script','dataLayer','GTM-TD3BKV');</script>\n<!--
+        End SEC Web Analytics -->\n<noscript><div style=\"color:red; font-weight:bold;
+        text-align:center;\">This page uses Javascript. Your browser either doesn't
+        support Javascript or you have it turned off. To see this page as it is meant
+        to appear please use a Javascript enabled browser.</div></noscript>\n<!--
+        BEGIN BANNER -->\n<div  id=\"header\" style=\"text-align: center;\">\n   <nav
+        id=\"main-navbar\" class=\"navbar navbar-expand\">\n      <ul class=\"navbar-nav\">\n
+        \        <li class=\"nav-item\">\n            <a class=\"nav__sec_link\" href=\"https://www.sec.gov\">\n
+        \              <img src=\"/edgar/search/images/edgar-logo-2x.png\" alt=\"\"
+        style=\"height:6.25rem\">\n            </a>\n         </li>\n         <li
+        class=\"nav-item\">\n            <a class=\"nav__sec_link\" href=\"https://www.sec.gov\">\n
+        \              <span class=\"link-text d-inline\">SEC.gov</span>\n            </a>\n
+        \        </li>\n         <li class=\"nav-item\">\n            <a class=\"nav__link\"
+        href=\"//www.sec.gov/submit-filings/about-edgar\" id=\"edgar-short-form\"><span
+        class=\"link-text\">EDGAR</span></a>\n         </li>\n      </ul>\n\n      <ul
+        class=\"navbar-nav ml-auto\">\n         <li class=\"nav-item\">\n\t\t\t<a
+        href=\"/cgi-bin/browse-edgar?action=getcurrent\" class=\"nav__link\">Latest
+        Filings</a> \n         </li>\n         <li class=\"nav-item\">\n            <a
+        href=\"https://www.sec.gov/edgar/search-and-access\" class=\"nav__link\">Filings
+        search tools</a>\n         </li>\n      </ul>\n   </nav>\n   <div style=\"position:
+        absolute;width: 100%;\"> <h1 style=\"position: relative;top: -60px;\">Filing
+        Detail</h1></div>\n</div>\n<!-- END BANNER -->\n\n\n<!-- BEGIN BREADCRUMBS
+        -->\n<div id=\"breadCrumbs\">\n   <ul>\n      <li><a href=\"/index.htm\">SEC
+        Home</a> &#187;</li>\n      <li><a href=\"/edgar/searchedgar/companysearch.html\">Company
+        Search</a> &#187;</li>\n      <li class=\"last\">Current Page</li>\n   </ul>\n</div>\n<!--
+        END BREADCRUMBS -->\n\n<div id=\"contentDiv\">\n<!-- START FILING DIV -->\n<div
+        class=\"formDiv\">\n   <div id=\"formHeader\">\n      <div id=\"formName\">\n
+        \        <strong>Form 4</strong> - Statement of changes in beneficial ownership
+        of securities: \n      </div>\n      <div id=\"secNum\">\n         <strong><acronym
+        title=\"Securities and Exchange Commission\">SEC</acronym> Accession <acronym
+        title=\"Number\">No.</acronym></strong> 0000950142-22-003095\n      </div>\n
+        \  </div>\n   <div class=\"formContent\">\n   \n      <div class=\"formGrouping\">\n
+        \        <div class=\"infoHead\">Filing Date</div>\n         <div class=\"info\">2022-11-04</div>\n
+        \        <div class=\"infoHead\">Accepted</div>\n         <div class=\"info\">2022-11-04
+        21:03:43</div>\n         <div class=\"infoHead\">Documents</div>\n         <div
+        class=\"info\">1</div>\n      </div>\n      <div class=\"formGrouping\">\n
+        \        <div class=\"infoHead\">Period of Report</div>\n         <div class=\"info\">2022-09-28</div>\n
+        \     </div>\n      <div style=\"clear:both\"></div>\n<!-- END FILING DIV
+        -->\n<!-- START DOCUMENT DIV -->\n  </div>\n    </div>\n<div class=\"formDiv\">\n
+        \  <div style=\"padding: 0px 0px 4px 0px; font-size: 12px; margin: 0px 2px
+        0px 5px; width: 100%; overflow:hidden\">\n      <p>Document Format Files</p>\n
+        \     <table class=\"tableFile\" summary=\"Document Format Files\">\n         <tr>\n
+        \           <th scope=\"col\" style=\"width: 5%;\"><acronym title=\"Sequence
+        Number\">Seq</acronym></th>\n            <th scope=\"col\" style=\"width:
+        40%;\">Description</th>\n            <th scope=\"col\" style=\"width: 20%;\">Document</th>\n
+        \           <th scope=\"col\" style=\"width: 10%;\">Type</th>\n            <th
+        scope=\"col\">Size</th>\n         </tr>\n         <tr>\n            <td scope=\"row\">1</td>\n
+        \           <td scope=\"row\">OWNERSHIP DOCUMENT</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1300650/000095014222003095/xslF345X03/es220296680_4-davis.xml\">es220296680_4-davis.html</a></td>\n
+        \           <td scope=\"row\">4</td>\n            <td scope=\"row\">&nbsp;</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">1</td>\n
+        \           <td scope=\"row\">OWNERSHIP DOCUMENT</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1300650/000095014222003095/es220296680_4-davis.xml\">es220296680_4-davis.xml</a></td>\n
+        \           <td scope=\"row\">4</td>\n            <td scope=\"row\">8693</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">&nbsp;</td>\n
+        \           <td scope=\"row\">Complete submission text file</td>\n            <td
+        scope=\"row\"><a href=\"/Archives/edgar/data/1300650/000095014222003095/0000950142-22-003095.txt\">0000950142-22-003095.txt</a></td>\n
+        \           <td scope=\"row\">&nbsp;</td>\n            <td scope=\"row\">10146</td>\n
+        \        </tr>\n      </table>\t\n   </div>\n</div>\n<!-- END DOCUMENT DIV
+        -->\n<!-- START FILER DIV -->\n<div class=\"filerDiv\">\n   <div class=\"mailer\">Mailing
+        Address\n      <span class=\"mailerAddress\">530 FIFTH AVENUE</span>\n      <span
+        class=\"mailerAddress\">SUITE 702</span>\n      <span class=\"mailerAddress\">\nNEW
+        YORK       <span class=\"mailerAddress\">NY</span>\n10036      </span>\n   </div>\n
+        \  <div class=\"mailer\">Business Address\n   </div>\n<div class=\"companyInfo\">\n
+        \ <span class=\"companyName\">Davis Anthony Lynn (<a href=\"/cgi-bin/own-disp?CIK=0001300650&amp;action=getowner\">Reporting</a>)\n
+        <acronym title=\"Central Index Key\">CIK</acronym>: <a href=\"/cgi-bin/browse-edgar?CIK=0001300650&amp;action=getcompany\">0001300650
+        (see all company filings)</a></span>\n<p class=\"identInfo\">Type: <strong>4</strong>
+        | Act: <strong>34</strong> | File No.: <a href=\"/cgi-bin/browse-edgar?filenum=001-36563&amp;action=getcompany\"><strong>001-36563</strong></a>
+        | Film No.: <strong>221363500</strong></p>\n</div>\n<div class=\"clear\"></div>\n</div>\n<div
+        class=\"filerDiv\">\n   <div class=\"mailer\">Mailing Address\n      <span
+        class=\"mailerAddress\">1700 CITY PLAZA DRIVE, SUITE 300</span>\n      <span
+        class=\"mailerAddress\">\nSPRING       <span class=\"mailerAddress\">TX</span>\n77389
+        \     </span>\n   </div>\n   <div class=\"mailer\">Business Address\n      <span
+        class=\"mailerAddress\">1700 CITY PLAZA DRIVE, SUITE 300</span>\n      <span
+        class=\"mailerAddress\">\nSPRING       <span class=\"mailerAddress\">TX</span>\n77389
+        \     </span>\n      <span class=\"mailerAddress\">(281) 381-2959</span>\n
+        \  </div>\n<div class=\"companyInfo\">\n  <span class=\"companyName\">Orion
+        Engineered Carbons S.A. (<a href=\"/cgi-bin/own-disp?CIK=0001609804&amp;action=getissuer\">Issuer</a>)\n
+        <acronym title=\"Central Index Key\">CIK</acronym>: <a href=\"/cgi-bin/browse-edgar?CIK=0001609804&amp;action=getcompany\">0001609804
+        (see all company filings)</a></span>\n<p class=\"identInfo\"><acronym title=\"Internal
+        Revenue Service Number\">EIN.</acronym>: <strong>000000000</strong> | Fiscal
+        Year End: <strong>1231</strong><br /><acronym title=\"Standard Industrial
+        Code\">SIC</acronym>: <b><a href=\"/cgi-bin/browse-edgar?action=getcompany&amp;SIC=2890&amp;owner=include\">2890</a></b>
+        Miscellaneous Chemical Products</p>\n</div>\n<div class=\"clear\"></div>\n</div>\n<!--
+        END FILER DIV -->\n</div>\n"
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/html
+      Date:
+      - Sun, 08 Feb 2026 21:35:35 GMT
+      Last-Modified:
+      - Sat, 05 Nov 2022 01:03:43 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '8040'
+    status:
+      code: 200
+      message: OK
+version: 1

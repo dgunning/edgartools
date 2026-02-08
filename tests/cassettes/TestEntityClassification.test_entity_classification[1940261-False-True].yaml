@@ -1,0 +1,54 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001940261.json
+  response:
+    body:
+      string: '{"cik":"0001940261","entityType":"other","sic":"","sicDescription":"","ownerOrg":"","insiderTransactionForOwnerExists":1,"insiderTransactionForIssuerExists":0,"name":"NVC
+        Holdings, LLC","tickers":[],"exchanges":[],"ein":"000000000","lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":"1231","stateOfIncorporation":"WY","stateOfIncorporationDescription":"WY","addresses":{"mailing":{"street1":"780
+        RESERVOIR AVENUE, #123","street2":null,"city":"CRANSTON","stateOrCountry":"RI","zipCode":"02910","stateOrCountryDescription":"RI","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":"780
+        RESERVOIR AVENUE, #123","street2":null,"city":"CRANSTON","stateOrCountry":"RI","zipCode":"02910","stateOrCountryDescription":"RI","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":"7742502456","flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0001599916-24-000023","0001599916-24-000004","0001599916-22-000238","0001599916-22-000213","0001599916-22-000207"],"filingDate":["2024-01-03","2024-01-02","2022-09-06","2022-08-10","2022-08-04"],"reportDate":["","2023-12-29","","","2021-09-17"],"acceptanceDateTime":["2024-01-03T15:52:05.000Z","2024-01-02T13:10:57.000Z","2022-09-02T18:35:51.000Z","2022-08-09T18:33:24.000Z","2022-08-04T16:18:08.000Z"],"act":["","34","","","34"],"form":["SC
+        13D/A","4","SC 13D/A","SC 13D","3"],"fileNumber":["","000-56315","","","000-56315"],"filmNumber":["","24501643","","","221136854"],"items":["","","","",""],"core_type":["SC
+        13D/A","4","SC 13D/A","SC 13D","3"],"size":[171819,4465,92625,89544,4091],"isXBRL":[0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0],"primaryDocument":["shgi_13da2.htm","xslF345X05/ownership.xml","prtm_13da1.htm","prtm_13d.htm","xslF345X02/ownership.xml"],"primaryDocDescription":["SC
+        13D/A","","SC 13D/A","SC 13D",""]},"files":[]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 20:20:42 GMT
+      Expires:
+      - Sun, 08 Feb 2026 20:20:42 GMT
+      Pragma:
+      - no-cache
+      Strict-Transport-Security:
+      - max-age=31536000 ; preload
+      Vary:
+      - Accept-Encoding
+      X-Amzn-Trace-Id:
+      - Root=1-6988f019-22ac451a32eee24d5586862d
+      content-length:
+      - '1929'
+      x-amz-apigw-id:
+      - Yep0HFr4IAMETDw=
+      x-amzn-RequestId:
+      - f3b92e5e-034d-4b57-bf8f-148745ed8c6b
+    status:
+      code: 200
+      message: OK
+version: 1

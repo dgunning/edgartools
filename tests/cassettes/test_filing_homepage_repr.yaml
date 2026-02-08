@@ -1,0 +1,197 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1009672/0001564590-18-004771-index.html
+  response:
+    body:
+      string: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html
+        xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\"
+        content=\"text/html; charset=utf-8\" />\n<meta http-equiv=\"Last-Modified\"
+        content=\"Wed, 07 Mar 2018 23:03:42 GMT\" />\n<title>EDGAR Filing Documents
+        for 0001564590-18-004771</title>\n<link  rel=\"stylesheet\" href=\"/edgar/search/global/css/bootstrap/bootstrap.min.css\"
+        type=\"text/css\" />\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/include/interactive2.css\"
+        />\n</head>\n<body style=\"margin: 0; font-size: 16px; \">\n<!-- SEC Web Analytics
+        - For information please visit: https://www.sec.gov/privacy.htm#collectedinfo
+        -->\n<noscript><iframe src=\"//www.googletagmanager.com/ns.html?id=GTM-TD3BKV\"\nheight=\"0\"
+        width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':\nnew
+        Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],\nj=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=\n'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);\n})(window,document,'script','dataLayer','GTM-TD3BKV');</script>\n<!--
+        End SEC Web Analytics -->\n<noscript><div style=\"color:red; font-weight:bold;
+        text-align:center;\">This page uses Javascript. Your browser either doesn't
+        support Javascript or you have it turned off. To see this page as it is meant
+        to appear please use a Javascript enabled browser.</div></noscript>\n<!--
+        BEGIN BANNER -->\n<div  id=\"header\" style=\"text-align: center;\">\n   <nav
+        id=\"main-navbar\" class=\"navbar navbar-expand\">\n      <ul class=\"navbar-nav\">\n
+        \        <li class=\"nav-item\">\n            <a class=\"nav__sec_link\" href=\"https://www.sec.gov\">\n
+        \              <img src=\"/edgar/search/images/edgar-logo-2x.png\" alt=\"\"
+        style=\"height:6.25rem\">\n            </a>\n         </li>\n         <li
+        class=\"nav-item\">\n            <a class=\"nav__sec_link\" href=\"https://www.sec.gov\">\n
+        \              <span class=\"link-text d-inline\">SEC.gov</span>\n            </a>\n
+        \        </li>\n         <li class=\"nav-item\">\n            <a class=\"nav__link\"
+        href=\"//www.sec.gov/submit-filings/about-edgar\" id=\"edgar-short-form\"><span
+        class=\"link-text\">EDGAR</span></a>\n         </li>\n      </ul>\n\n      <ul
+        class=\"navbar-nav ml-auto\">\n         <li class=\"nav-item\">\n\t\t\t<a
+        href=\"/cgi-bin/browse-edgar?action=getcurrent\" class=\"nav__link\">Latest
+        Filings</a> \n         </li>\n         <li class=\"nav-item\">\n            <a
+        href=\"https://www.sec.gov/edgar/search-and-access\" class=\"nav__link\">Filings
+        search tools</a>\n         </li>\n      </ul>\n   </nav>\n   <div style=\"position:
+        absolute;width: 100%;\"> <h1 style=\"position: relative;top: -60px;\">Filing
+        Detail</h1></div>\n</div>\n<!-- END BANNER -->\n\n\n<!-- BEGIN BREADCRUMBS
+        -->\n<div id=\"breadCrumbs\">\n   <ul>\n      <li><a href=\"/index.htm\">SEC
+        Home</a> &#187;</li>\n      <li><a href=\"/edgar/searchedgar/companysearch.html\">Company
+        Search</a> &#187;</li>\n      <li class=\"last\">Current Page</li>\n   </ul>\n</div>\n<!--
+        END BREADCRUMBS -->\n\n<div id=\"contentDiv\">\n<!-- START FILING DIV -->\n<div
+        class=\"formDiv\">\n   <div id=\"formHeader\">\n      <div id=\"formName\">\n
+        \        <strong>Form 10-K</strong> - Annual report [Section 13 and 15(d),
+        not S-K Item 405]: \n      </div>\n      <div id=\"secNum\">\n         <strong><acronym
+        title=\"Securities and Exchange Commission\">SEC</acronym> Accession <acronym
+        title=\"Number\">No.</acronym></strong> 0001564590-18-004771\n      </div>\n
+        \  </div>\n   <div class=\"formContent\">\n   \n      <div class=\"formGrouping\">\n
+        \        <div class=\"infoHead\">Filing Date</div>\n         <div class=\"info\">2018-03-08</div>\n
+        \        <div class=\"infoHead\">Accepted</div>\n         <div class=\"info\">2018-03-07
+        18:03:42</div>\n         <div class=\"infoHead\">Documents</div>\n         <div
+        class=\"info\">93</div>\n      </div>\n      <div class=\"formGrouping\">\n
+        \        <div class=\"infoHead\">Period of Report</div>\n         <div class=\"info\">2017-12-31</div>\n
+        \     </div>\n      <div style=\"clear:both\"></div>\n<!-- END FILING DIV
+        -->\n<!-- START DOCUMENT DIV -->\n   <div style=\"padding: 4px 0px 4px 0px;
+        font-size: 12px; margin: 0px 2px 0px 5px; width: 100%; overflow:hidden\" id=\"seriesDiv\">\n
+        \     <a href=\"/cgi-bin/viewer?action=view&amp;cik=1009672&amp;accession_number=0001564590-18-004771&amp;xbrl_type=v\"
+        id=\"interactiveDataBtn\">&nbsp;<button type=\"button\" class=\"btn btn-primary\">Interactive
+        Data</button></a>\n   </div>\n  </div>\n    </div>\n<div class=\"formDiv\">\n
+        \  <div style=\"padding: 0px 0px 4px 0px; font-size: 12px; margin: 0px 2px
+        0px 5px; width: 100%; overflow:hidden\">\n      <p>Document Format Files</p>\n
+        \     <table class=\"tableFile\" summary=\"Document Format Files\">\n         <tr>\n
+        \           <th scope=\"col\" style=\"width: 5%;\"><acronym title=\"Sequence
+        Number\">Seq</acronym></th>\n            <th scope=\"col\" style=\"width:
+        40%;\">Description</th>\n            <th scope=\"col\" style=\"width: 20%;\">Document</th>\n
+        \           <th scope=\"col\" style=\"width: 10%;\">Type</th>\n            <th
+        scope=\"col\">Size</th>\n         </tr>\n         <tr>\n            <td scope=\"row\">1</td>\n
+        \           <td scope=\"row\">10-K</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm\">crr-10k_20171231.htm</a></td>\n
+        \           <td scope=\"row\">10-K</td>\n            <td scope=\"row\">3043884</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">2</td>\n
+        \           <td scope=\"row\">EX-10.16</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex1016_258.htm\">crr-ex1016_258.htm</a></td>\n
+        \           <td scope=\"row\">EX-10.16</td>\n            <td scope=\"row\">33917</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">3</td>\n            <td
+        scope=\"row\">EX-10.17</td>\n            <td scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex1017_257.htm\">crr-ex1017_257.htm</a></td>\n
+        \           <td scope=\"row\">EX-10.17</td>\n            <td scope=\"row\">35340</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">4</td>\n
+        \           <td scope=\"row\">EX-10.18</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex1018_256.htm\">crr-ex1018_256.htm</a></td>\n
+        \           <td scope=\"row\">EX-10.18</td>\n            <td scope=\"row\">24696</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">5</td>\n            <td
+        scope=\"row\">EX-21</td>\n            <td scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex21_12.htm\">crr-ex21_12.htm</a></td>\n
+        \           <td scope=\"row\">EX-21</td>\n            <td scope=\"row\">11728</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">6</td>\n
+        \           <td scope=\"row\">EX-23</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex23_6.htm\">crr-ex23_6.htm</a></td>\n
+        \           <td scope=\"row\">EX-23</td>\n            <td scope=\"row\">3254</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">7</td>\n            <td
+        scope=\"row\">EX-31.1</td>\n            <td scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex311_7.htm\">crr-ex311_7.htm</a></td>\n
+        \           <td scope=\"row\">EX-31.1</td>\n            <td scope=\"row\">10342</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">8</td>\n
+        \           <td scope=\"row\">EX-31.2</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex312_10.htm\">crr-ex312_10.htm</a></td>\n
+        \           <td scope=\"row\">EX-31.2</td>\n            <td scope=\"row\">10377</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">9</td>\n            <td
+        scope=\"row\">EX-32</td>\n            <td scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex32_9.htm\">crr-ex32_9.htm</a></td>\n
+        \           <td scope=\"row\">EX-32</td>\n            <td scope=\"row\">10500</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">10</td>\n
+        \           <td scope=\"row\">EX-95</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1009672/000156459018004771/crr-ex95_11.htm\">crr-ex95_11.htm</a></td>\n
+        \           <td scope=\"row\">EX-95</td>\n            <td scope=\"row\">243962</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">11</td>\n            <td
+        scope=\"row\">GRAPHIC</td>\n            <td scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/g2018030722515813044057.jpg\">g2018030722515813044057.jpg</a></td>\n
+        \           <td scope=\"row\">GRAPHIC</td>\n            <td scope=\"row\">41252</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">&nbsp;</td>\n
+        \           <td scope=\"row\">Complete submission text file</td>\n            <td
+        scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771.txt\">0001564590-18-004771.txt</a></td>\n
+        \           <td scope=\"row\">&nbsp;</td>\n            <td scope=\"row\">11123673</td>\n
+        \        </tr>\n      </table>\t\n   </div>\n</div>\n<div class=\"formDiv\">\n
+        \  <div style=\"padding: 0px 0px 4px 0px; font-size: 12px; margin: 0px 2px
+        0px 5px; width: 100%; overflow:hidden\">\n      <p>Data Files</p>\n      <table
+        class=\"tableFile\" summary=\"Data Files\">\n         <tr>\n            <th
+        scope=\"col\" style=\"width: 5%;\"><acronym title=\"Sequence Number\">Seq</acronym></th>\n
+        \           <th scope=\"col\" style=\"width: 40%;\">Description</th>\n            <th
+        scope=\"col\" style=\"width: 20%;\">Document</th>\n            <th scope=\"col\"
+        style=\"width: 10%;\">Type</th>\n            <th scope=\"col\">Size</th>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">12</td>\n            <td
+        scope=\"row\">XBRL INSTANCE DOCUMENT</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1009672/000156459018004771/crr-20171231.xml\">crr-20171231.xml</a></td>\n
+        \           <td scope=\"row\">EX-101.INS</td>\n            <td scope=\"row\">2271110</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">13</td>\n
+        \           <td scope=\"row\">XBRL TAXONOMY EXTENSION SCHEMA</td>\n            <td
+        scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-20171231.xsd\">crr-20171231.xsd</a></td>\n
+        \           <td scope=\"row\">EX-101.SCH</td>\n            <td scope=\"row\">76272</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">14</td>\n            <td
+        scope=\"row\">XBRL TAXONOMY EXTENSION CALCULATION LINKBASE</td>\n            <td
+        scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-20171231_cal.xml\">crr-20171231_cal.xml</a></td>\n
+        \           <td scope=\"row\">EX-101.CAL</td>\n            <td scope=\"row\">84570</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">15</td>\n
+        \           <td scope=\"row\">XBRL TAXONOMY EXTENSION DEFINITION LINKBASE</td>\n
+        \           <td scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-20171231_def.xml\">crr-20171231_def.xml</a></td>\n
+        \           <td scope=\"row\">EX-101.DEF</td>\n            <td scope=\"row\">308650</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">16</td>\n            <td
+        scope=\"row\">XBRL TAXONOMY EXTENSION LABEL LINKBASE</td>\n            <td
+        scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-20171231_lab.xml\">crr-20171231_lab.xml</a></td>\n
+        \           <td scope=\"row\">EX-101.LAB</td>\n            <td scope=\"row\">608003</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">17</td>\n
+        \           <td scope=\"row\">XBRL TAXONOMY EXTENSION PRESENTATION LINKBASE</td>\n
+        \           <td scope=\"row\"><a href=\"/Archives/edgar/data/1009672/000156459018004771/crr-20171231_pre.xml\">crr-20171231_pre.xml</a></td>\n
+        \           <td scope=\"row\">EX-101.PRE</td>\n            <td scope=\"row\">478266</td>\n
+        \        </tr>\n      </table>\t\n   </div>\n</div>\n<!-- END DOCUMENT DIV
+        -->\n<!-- START FILER DIV -->\n<div class=\"filerDiv\">\n   <div class=\"mailer\">Mailing
+        Address\n      <span class=\"mailerAddress\">575 NORTH DAIRY ASHFORD</span>\n
+        \     <span class=\"mailerAddress\">SUITE 300</span>\n      <span class=\"mailerAddress\">\nHOUSTON
+        \      <span class=\"mailerAddress\">TX</span>\n77079      </span>\n   </div>\n
+        \  <div class=\"mailer\">Business Address\n      <span class=\"mailerAddress\">575
+        NORTH DAIRY ASHFORD</span>\n      <span class=\"mailerAddress\">SUITE 300</span>\n
+        \     <span class=\"mailerAddress\">\nHOUSTON       <span class=\"mailerAddress\">TX</span>\n77079
+        \     </span>\n      <span class=\"mailerAddress\">2819216400</span>\n   </div>\n<div
+        class=\"companyInfo\">\n  <span class=\"companyName\">CARBO CERAMICS INC (Filer)\n
+        <acronym title=\"Central Index Key\">CIK</acronym>: <a href=\"/cgi-bin/browse-edgar?CIK=0001009672&amp;action=getcompany\">0001009672
+        (see all company filings)</a></span>\n<p class=\"identInfo\"><acronym title=\"Internal
+        Revenue Service Number\">EIN.</acronym>: <strong>721100013</strong> | State
+        of Incorp.: <strong>DE</strong> | Fiscal Year End: <strong>1231</strong><br
+        />Type: <strong>10-K</strong> | Act: <strong>34</strong> | File No.: <a href=\"/cgi-bin/browse-edgar?filenum=001-15903&amp;action=getcompany\"><strong>001-15903</strong></a>
+        | Film No.: <strong>18674418</strong><br /><acronym title=\"Standard Industrial
+        Code\">SIC</acronym>: <b><a href=\"/cgi-bin/browse-edgar?action=getcompany&amp;SIC=3290&amp;owner=include\">3290</a></b>
+        Abrasive, Asbestos &amp; Misc Nonmetallic Mineral Prods</p>\n</div>\n<div
+        class=\"clear\"></div>\n</div>\n<!-- END FILER DIV -->\n</div>\n"
+    headers:
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/html
+      Date:
+      - Sun, 08 Feb 2026 21:35:34 GMT
+      Last-Modified:
+      - Wed, 07 Mar 2018 23:03:42 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '13398'
+    status:
+      code: 200
+      message: OK
+version: 1

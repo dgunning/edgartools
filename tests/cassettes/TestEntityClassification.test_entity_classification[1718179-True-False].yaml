@@ -1,0 +1,52 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001718179.json
+  response:
+    body:
+      string: '{"cik":"0001718179","entityType":"other","sic":"","sicDescription":"","ownerOrg":"","insiderTransactionForOwnerExists":1,"insiderTransactionForIssuerExists":0,"name":"Sievert
+        Stephanie A","tickers":[],"exchanges":[],"ein":null,"lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":null,"stateOfIncorporation":"","stateOfIncorporationDescription":"","addresses":{"mailing":{"street1":"1200
+        WEST CENTURY AVENUE","street2":null,"city":"BISMARCK","stateOrCountry":"ND","zipCode":"58503","stateOrCountryDescription":"ND","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":null,"street2":null,"city":null,"stateOrCountry":"","zipCode":null,"stateOrCountryDescription":"","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":null,"flags":"","formerNames":[{"name":"Barth
+        Stephanie A","from":"2017-10-02T00:00:00.000Z","to":"2023-06-01T00:00:00.000Z"}],"filings":{"recent":{"accessionNumber":["0001225208-25-001759","0001225208-24-002327","0001225208-23-006383","0001225208-23-002404","0001225208-22-003579","0001225208-22-002960","0001225208-21-002553","0001225208-20-007882","0001225208-20-002583","0001127602-18-011365","0001127602-17-028578"],"filingDate":["2025-02-14","2024-02-16","2023-06-01","2023-02-21","2022-02-28","2022-02-22","2021-02-16","2020-05-18","2020-02-18","2018-03-13","2017-10-02"],"reportDate":["2025-02-12","2024-02-15","2023-05-31","2023-02-16","2021-02-11","2022-02-17","2021-02-11","2020-05-12","2020-02-13","2018-03-13","2017-09-30"],"acceptanceDateTime":["2025-02-14T16:50:52.000Z","2024-02-16T17:20:24.000Z","2023-06-01T12:54:51.000Z","2023-02-21T16:40:28.000Z","2022-02-28T17:34:35.000Z","2022-02-22T17:16:59.000Z","2021-02-16T17:53:37.000Z","2020-05-18T14:45:01.000Z","2020-02-18T15:37:32.000Z","2018-03-13T15:34:34.000Z","2017-10-02T15:04:09.000Z"],"act":["34","34","34","34","34","34","34","34","34","34","34"],"form":["4","4","4","4","4","4","4","4","4","4","3"],"fileNumber":["001-03480","001-03480","001-03480","001-03480","001-03480","001-03480","001-03480","001-03480","001-03480","001-03480","001-03480"],"filmNumber":["25630318","24649600","23983873","23648813","22691880","22659390","21641427","20888946","20625066","18686352","171114252"],"items":["","","","","","","","","","",""],"core_type":["4","4","4","4","4","4","4","4","4","4","3"],"size":[8533,7982,8338,8892,7860,7172,7207,5780,7207,5863,5039],"isXBRL":[0,0,0,0,0,0,0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0,0,0,0,0,0,0],"primaryDocument":["xslF345X05/doc4.xml","xslF345X05/doc4.xml","xslF345X04/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/form4.xml","xslF345X02/form3.xml"],"primaryDocDescription":["","","","","","","","","","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT"]},"files":[]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Expires:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Pragma:
+      - no-cache
+      Strict-Transport-Security:
+      - max-age=31536000 ; preload
+      Vary:
+      - Accept-Encoding
+      X-Amzn-Trace-Id:
+      - Root=1-6988f019-2e985f6d6747eccf72920b9f
+      content-length:
+      - '2923'
+      x-amz-apigw-id:
+      - Yep0DFv6oAMEhtw=
+      x-amzn-RequestId:
+      - b998a399-0bb5-42c1-a301-ef5aa3c19ce6
+    status:
+      code: 200
+      message: OK
+version: 1

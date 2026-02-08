@@ -1,0 +1,51 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001800903.json
+  response:
+    body:
+      string: '{"cik":"0001800903","entityType":"other","sic":"","sicDescription":"","ownerOrg":null,"insiderTransactionForOwnerExists":0,"insiderTransactionForIssuerExists":0,"name":"&VEST
+        Domestic Fund II LP","tickers":[],"exchanges":[],"ein":"000000000","lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":"1231","stateOfIncorporation":"DE","stateOfIncorporationDescription":"DE","addresses":{"mailing":{"street1":"3
+        MINETTA STREET","street2":null,"city":"NEW YORK","stateOrCountry":"NY","zipCode":"10012","stateOrCountryDescription":"NY","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":"3
+        MINETTA STREET","street2":null,"city":"NEW YORK","stateOrCountry":"NY","zipCode":"10012","stateOrCountryDescription":"NY","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":"201-956-1969","flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0001800903-20-000001"],"filingDate":["2020-01-27"],"reportDate":[""],"acceptanceDateTime":["2020-01-27T13:45:37.000Z"],"act":["33"],"form":["D"],"fileNumber":["021-359000"],"filmNumber":["20548646"],"items":["06b,3C,3C.7"],"core_type":["D"],"size":[6237],"isXBRL":[0],"isInlineXBRL":[0],"primaryDocument":["xslFormDX01/primary_doc.xml"],"primaryDocDescription":[""]},"files":[]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 20:20:40 GMT
+      Expires:
+      - Sun, 08 Feb 2026 20:20:40 GMT
+      Pragma:
+      - no-cache
+      Strict-Transport-Security:
+      - max-age=31536000 ; preload
+      Vary:
+      - Accept-Encoding
+      X-Amzn-Trace-Id:
+      - Root=1-6988f018-0d6eec0063fdd62a080d50af
+      content-length:
+      - '1364'
+      x-amz-apigw-id:
+      - Yepz5FekIAMEROw=
+      x-amzn-RequestId:
+      - d6de6a57-a4bb-4387-b3b8-b5a37eae848b
+    status:
+      code: 200
+      message: OK
+version: 1

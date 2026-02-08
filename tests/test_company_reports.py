@@ -45,7 +45,7 @@ def test_tenq_filing():
     print()
     print(tenq)
 
-@pytest.mark.network
+@pytest.mark.fast
 def test_is_valid_item_for_filing():
     assert TenK.structure.is_valid_item('Item 1')
     assert TenK.structure.is_valid_item('Item 9A')
@@ -66,7 +66,8 @@ def test_is_valid_item_for_filing():
     # Part is ignored for 8-K
     assert EightK.structure.is_valid_item('Item 1.01', "PART IV")
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_chunk_items_for_company_reports():
     filing = Filing(form='10-K', filing_date='2023-03-31', company='7GC & Co. Holdings Inc.',
 cik=1826011, accession_no='0001193125-23-086073')

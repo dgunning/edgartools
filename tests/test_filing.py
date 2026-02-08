@@ -214,7 +214,8 @@ def test_iterate_filings(filings_2021_q1_xbrl):
 
 # Global filing objects (some tests converted to use fixtures)
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_homepage_url(carbo_10k_filing):
     assert carbo_10k_filing.homepage_url == "https://www.sec.gov/Archives/edgar/data/1009672/0001564590-18-004771-index.html"
     r = httpx.get(carbo_10k_filing.homepage_url, headers={'User-Agent': 'Mike Banton mb@yahoo.com'})
@@ -238,7 +239,8 @@ def test_filing_primary_document():
     assert filing
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_homepage_for_filing(carbo_10k_filing):
     filing_homepage: FilingHomepage = carbo_10k_filing.homepage
     assert 'Description'
@@ -246,7 +248,8 @@ def test_filing_homepage_for_filing(carbo_10k_filing):
     assert carbo_10k_filing.home == carbo_10k_filing.homepage
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_homepage_for_filing_multiple_instruments():
     filing = Filing(form='DEF 14A', filing_date='2023-06-16', company='T. Rowe Price All-Cap Opportunities Fund, Inc.',
                     cik=773485, accession_no='0001741773-23-002051')
@@ -255,7 +258,8 @@ def test_filing_homepage_for_filing_multiple_instruments():
     assert homepage
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_homepage_documents_and_datafiles(carbo_10k_filing):
     filing_homepage: FilingHomepage = carbo_10k_filing.homepage
     assert 'Description'
@@ -264,20 +268,23 @@ def test_filing_homepage_documents_and_datafiles(carbo_10k_filing):
     assert filing_homepage.url == carbo_10k_filing.url
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_document(carbo_10k_filing):
     assert carbo_10k_filing.homepage.primary_html_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-10k_20171231.htm'
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_xbrl_document(carbo_10k_filing):
     xbrl_document = carbo_10k_filing.homepage.xbrl_document
     assert xbrl_document.url == \
            'https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/crr-20171231.xml'
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_homepage_get_file(carbo_10k_filing):
     filing_document = carbo_10k_filing.homepage.attachments.get_by_sequence(1)
     assert filing_document
@@ -288,7 +295,8 @@ def test_filing_homepage_get_file(carbo_10k_filing):
     assert filing_document.document == 'crr-10k_20171231.htm'
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_download_filing_document(carbo_10k_filing):
     filing_document = carbo_10k_filing.homepage.primary_html_document
     contents = filing_document.download()
@@ -321,7 +329,8 @@ def test_company_specs():
     assert company_specs.schema.names[:2] == ['company', 'form']
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_primary_document_for_def14a_filing():
     filing = Filing(form='DEF 14A', company='180 DEGREE CAPITAL CORP. /NY/', cik=893739, filing_date='2020-03-25',
                     accession_no='0000893739-20-000019')
@@ -333,7 +342,8 @@ def test_filing_primary_document_for_def14a_filing():
 
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_html():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -344,7 +354,8 @@ def test_filing_html():
     assert "10x Genomics, Inc." in html
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_markdown():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -379,7 +390,8 @@ def test_filing_html_for_ixbrl_filing():
                     accession_no='0001037038-23-000009')
     assert "RALPH LAUREN" in filing.html()
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_text():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -393,7 +405,8 @@ def test_filing_text():
     assert text
     assert "ACCESSION NUMBER:		0001193125-20-052640" in text
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_primary_xml_for_10k():
     filing = Filing(form='10-K', company='10x Genomics, Inc.',
                     cik=1770787, filing_date='2020-02-27',
@@ -413,7 +426,8 @@ def test_filing_html_for_pdf_only_filing():
     html = filing.html()
     assert not html
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_homepage_primary_documents(orion_form4_filing):
     filing = orion_form4_filing
     print()
@@ -435,7 +449,8 @@ def test_filing_homepage_primary_documents(orion_form4_filing):
     assert primary_xml.display_extension == '.xml'
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_primary_xml_document(orion_form4_filing):
     xml_document = orion_form4_filing.homepage.primary_xml_document
     print(xml_document)
@@ -454,12 +469,14 @@ def test_filing_xml_downoads_xml_if_filing_has_xml(carbo_10k_filing, orion_form4
     assert carbo_10k_filing.xml() is None
     assert orion_form4_filing.xml()
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_get_entity(carbo_10k_filing):
     company = carbo_10k_filing.get_entity()
     assert company.cik == carbo_10k_filing.cik
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_get_related_filings(carbo_10k_filing):
     related_filings = carbo_10k_filing.related_filings()
     assert len(related_filings) > 200
@@ -492,7 +509,7 @@ def test_create_filings_with_empty_table():
     assert len(filings_copy) == 0
     assert filings_copy.empty
 
-@pytest.mark.network
+@pytest.mark.fast
 def test_filing_str(carbo_10k_filing):
     filing_str = str(carbo_10k_filing)
     assert str(carbo_10k_filing.cik) in filing_str
@@ -501,14 +518,15 @@ def test_filing_str(carbo_10k_filing):
     assert str(carbo_10k_filing.filing_date) in filing_str
     print(filing_str)
 
-@pytest.mark.network
+@pytest.mark.fast
 def test_filing_repr(carbo_10k_filing):
     filing_repr = carbo_10k_filing.__repr__()
     assert str(carbo_10k_filing.company) in filing_repr
     assert str(carbo_10k_filing.form) in filing_repr
     assert str(carbo_10k_filing.filing_date) in filing_repr
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_homepage_repr(carbo_10k_filing):
     homepage = carbo_10k_filing.homepage
     print(homepage.__repr__())
@@ -662,7 +680,8 @@ def test_filing_sections(carbo_10k_filing):
     sections = carbo_10k_filing.sections()
     assert len(sections) > 20
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_filing_with_complex_sections():
     filing = Filing(form='8-K', filing_date='2023-03-15', company='ADOBE INC.', cik=796343,
                     accession_no='0000796343-23-000044')
@@ -680,7 +699,8 @@ def test_search_for_text_in_filing_with_bm25(carbo_10k_filing):
     assert len(results) > 10
     print(results)
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_search_for_text_with_regex():
     print()
 
@@ -726,12 +746,14 @@ def test_find_old_filing():
     assert filing
 
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_as_company_filing(carbo_10k_filing):
     company_filing = carbo_10k_filing.as_company_filing()
     assert company_filing.cik == carbo_10k_filing.cik
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_10K_filing_with_no_financial_data():
     filing = Filing(form='10-K', filing_date='2023-05-26', company='CarMax Auto Owner Trust 2019-3', cik=1779026,
                     accession_no='0001779026-23-000027')
@@ -751,7 +773,7 @@ def test_text_url_for_filing(carbo_10k_filing):
 def test_filings_get_by_invalid_accession_number(capsys):
     assert cached_filings(2022, 1).get('INVALID-ACCESS-NUMBER') is None
 
-@pytest.mark.network
+@pytest.mark.fast
 def test_filing_to_dict():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
@@ -769,7 +791,8 @@ def test_filing_to_dict():
     assert filing.cik == 66740
     assert filing.accession_number == '0000066740-24-000023'
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_save_filing_to_file():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
@@ -781,7 +804,8 @@ def test_save_filing_to_file():
     filing = Filing.load(Path(filing_path.name))
     assert filing.filing_date == '2024-03-08'
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_save_filing_to_directory():
     filing = Filing(form='8-K', filing_date='2024-03-08', company='3M CO', cik=66740,
                     accession_no='0000066740-24-000023')
@@ -857,7 +881,8 @@ def test_get_filings_by_filing_date(filing_date, year, expected_start, expected_
     else:
         assert filings is None
 
-@pytest.mark.network
+@pytest.mark.fast
+@pytest.mark.vcr
 def test_get_text_from_old_filing():
     filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193,
                     accession_no='0000912057-00-023442')

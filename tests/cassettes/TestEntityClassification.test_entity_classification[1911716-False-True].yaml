@@ -1,0 +1,54 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001911716.json
+  response:
+    body:
+      string: '{"cik":"0001911716","entityType":"other","sic":"","sicDescription":"","ownerOrg":null,"insiderTransactionForOwnerExists":0,"insiderTransactionForIssuerExists":0,"name":"Cool
+        Japan Fund Inc.","tickers":[],"exchanges":[],"ein":"000000000","lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":"0331","stateOfIncorporation":"M0","stateOfIncorporationDescription":"Japan","addresses":{"mailing":{"street1":"17F
+        ROPPONGI HILLS MORI TOWER","street2":"6-10-1 ROPPONGI, MINATO-KU","city":"TOKYO","stateOrCountry":"M0","zipCode":"106-6117","stateOrCountryDescription":"Japan","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":"17F
+        ROPPONGI HILLS MORI TOWER","street2":"6-10-1 ROPPONGI, MINATO-KU","city":"TOKYO","stateOrCountry":"M0","zipCode":"106-6117","stateOrCountryDescription":"Japan","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":"81364067500","flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0001489000-23-000002","0001437749-22-003539"],"filingDate":["2023-01-20","2022-02-16"],"reportDate":["",""],"acceptanceDateTime":["2023-01-20T16:17:07.000Z","2022-02-16T15:30:09.000Z"],"act":["34",""],"form":["SC
+        13G/A","SC 13G"],"fileNumber":["005-93869",""],"filmNumber":["23541193",""],"items":["",""],"core_type":["SC
+        13G/A","SC 13G"],"size":[11680,93975],"isXBRL":[0,0],"isInlineXBRL":[0,0],"primaryDocument":["coolJapan_Sc13G_01132023.txt","cjfi20220214_sc13g.htm"],"primaryDocDescription":["","SCHEDULE
+        13G"]},"files":[]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Expires:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Pragma:
+      - no-cache
+      Strict-Transport-Security:
+      - max-age=31536000 ; preload
+      Vary:
+      - Accept-Encoding
+      X-Amzn-Trace-Id:
+      - Root=1-6988f019-386ceb3866e5b1c343860ccc
+      content-length:
+      - '1591'
+      x-amz-apigw-id:
+      - Yep0FG1UoAMEXTA=
+      x-amzn-RequestId:
+      - 06634008-8450-41dc-8da3-0e4162a38996
+    status:
+      code: 200
+      message: OK
+version: 1
