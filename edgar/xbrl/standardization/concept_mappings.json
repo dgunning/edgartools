@@ -46,7 +46,9 @@
     "us-gaap_GrossProfit"
   ],
   "Operating Expenses": [
-    "us-gaap_NoninterestExpense",
+    "us-gaap_NoninterestExpense"
+  ],
+  "Total Operating Expenses": [
     "us-gaap_OperatingCostsAndExpenses",
     "us-gaap_OperatingExpenses"
   ],

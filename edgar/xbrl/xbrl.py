@@ -872,6 +872,9 @@ class XBRL:
         if actual_statement_type == 'BalanceSheet':
             line_items = self._reorder_by_calculation_parent(line_items)
 
+        # Issue edgartools-os99: Adjust levels when calculation tree reveals flat subtotal patterns
+        line_items = self._adjust_levels_by_calculation_parent(line_items)
+
         return line_items
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
@@ -1333,6 +1336,40 @@ class XBRL:
                 result.append(item)
 
         return result
+
+    @staticmethod
+    def _adjust_levels_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Adjust levels so children indent under their calculation parent totals.
+
+        When the presentation tree puts components at the same level as their
+        subtotal, use the calculation tree to indent the components.
+        Only fires when all 4 conditions are met (very conservative).
+        """
+        if not line_items:
+            return line_items
+
+        from edgar.xbrl.models import TOTAL_LABEL
+
+        # Build concept -> index map
+        concept_to_index = {item['concept']: i for i, item in enumerate(line_items)}
+
+        for item in line_items:
+            calc_parent = item.get('calculation_parent')
+            if not calc_parent or calc_parent not in concept_to_index:
+                continue
+
+            parent_idx = concept_to_index[calc_parent]
+            item_idx = concept_to_index[item['concept']]
+            parent_item = line_items[parent_idx]
+
+            # All 4 conditions must be true
+            if (parent_idx > item_idx                                    # parent appears after (subtotal pattern)
+                    and parent_item['level'] == item['level']            # same level
+                    and parent_item.get('preferred_label') == TOTAL_LABEL):  # parent has total label
+                item['level'] += 1
+
+        return line_items
 
     @staticmethod
     def _get_fact_precision(fact) -> int:

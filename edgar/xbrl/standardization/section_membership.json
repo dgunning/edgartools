@@ -83,6 +83,7 @@
       "DepreciationExpense",
       "AmortizationOfIntangibles",
       "OtherOperatingExpense",
+      "TotalOperatingExpenses",
       "RestructuringExpenseBenefit",
       "GoodwillWriteoffs",
       "CostsSubtotal"

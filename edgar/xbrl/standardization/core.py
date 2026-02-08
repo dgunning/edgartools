@@ -88,6 +88,7 @@ class StandardConcept(str, Enum):
     DIRECT_OPERATING_COSTS = "Direct Operating Costs"
     GROSS_PROFIT = "Gross Profit"
     OPERATING_EXPENSES = "Operating Expenses"
+    TOTAL_OPERATING_EXPENSES = "Total Operating Expenses"
     RESEARCH_AND_DEVELOPMENT = "Research and Development Expense"
 
     # Enhanced Expense Hierarchy

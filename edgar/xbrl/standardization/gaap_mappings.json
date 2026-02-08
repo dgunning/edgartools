@@ -8398,12 +8398,12 @@
   },
   "OperatingCostsAndExpenses": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "TotalOperatingExpenses"
     ]
   },
   "OperatingExpenses": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "TotalOperatingExpenses"
     ]
   },
   "OperatingIncomeLoss": {
