@@ -11,8 +11,10 @@ import pytest
 
 from edgar.earnings import (
     FinancialTable,
+    RowType,
     Scale,
     StatementType,
+    _classify_row_type,
     _classify_statement,
     _detect_table_scale,
     _parse_numeric,
@@ -348,3 +350,129 @@ class TestClassifyStatement:
             "Some random text", "Another random row",
         ])
         assert _classify_statement(node, df) == StatementType.UNKNOWN
+
+
+# ── _classify_row_type ────────────────────────────────────────────────────
+
+
+class TestClassifyRowType:
+    """Bug 4: Row-type metadata for distinguishing EPS, shares, and amounts."""
+
+    def test_per_share_detection(self):
+        """'Diluted earnings per share' → PER_SHARE."""
+        assert _classify_row_type("Diluted earnings per share") == RowType.PER_SHARE
+
+    def test_shares_detection(self):
+        """'Weighted average diluted shares outstanding' → SHARES."""
+        assert _classify_row_type("Weighted average diluted shares outstanding") == RowType.SHARES
+
+    def test_percentage_detection(self):
+        """'Operating margin' → PERCENTAGE."""
+        assert _classify_row_type("Operating margin") == RowType.PERCENTAGE
+
+    def test_amount_default(self):
+        """'Total revenue' → AMOUNT (default)."""
+        assert _classify_row_type("Total revenue") == RowType.AMOUNT
+
+    def test_per_ads_variant(self):
+        """'Net income per ADS' → PER_SHARE."""
+        assert _classify_row_type("Net income per ADS") == RowType.PER_SHARE
+
+    def test_per_adr_variant(self):
+        """'Earnings per ADR' → PER_SHARE."""
+        assert _classify_row_type("Earnings per ADR") == RowType.PER_SHARE
+
+    def test_basic_shares(self):
+        """'Basic shares' → SHARES."""
+        assert _classify_row_type("Basic shares") == RowType.SHARES
+
+    def test_effective_tax_rate(self):
+        """'Effective tax rate' → PERCENTAGE."""
+        assert _classify_row_type("Effective tax rate") == RowType.PERCENTAGE
+
+
+# ── FinancialTable row_types integration ──────────────────────────────────
+
+
+class TestFinancialTableRowTypes:
+    """Bug 4: FinancialTable convenience methods for row-type metadata."""
+
+    def _make_table(self, index, values=None, scale=Scale.MILLIONS):
+        """Helper to create a FinancialTable with row_types populated."""
+        if values is None:
+            values = [100.0] * len(index)
+        df = pd.DataFrame(
+            {"Q1 2025": values},
+            index=index,
+        ).astype(object)
+        row_types = {label: _classify_row_type(label) for label in index}
+        return FinancialTable(
+            dataframe=df,
+            scale=scale,
+            statement_type=StatementType.INCOME_STATEMENT,
+            row_types=row_types,
+        )
+
+    def test_get_row_type(self):
+        """get_row_type returns correct type or AMOUNT default."""
+        table = self._make_table(["Revenue", "Diluted earnings per share"])
+        assert table.get_row_type("Revenue") == RowType.AMOUNT
+        assert table.get_row_type("Diluted earnings per share") == RowType.PER_SHARE
+        # Unknown label defaults to AMOUNT
+        assert table.get_row_type("Something unknown") == RowType.AMOUNT
+
+    def test_per_share_rows_accessor(self):
+        """per_share_rows returns only EPS rows from a mixed table."""
+        table = self._make_table(
+            ["Total revenue", "Diluted earnings per share",
+             "Weighted average diluted shares outstanding", "Operating margin"],
+            values=[100.0, 0.46, 50_780_325, 15.5],
+        )
+        eps_rows = table.per_share_rows
+        assert len(eps_rows) == 1
+        assert "Diluted earnings per share" in eps_rows.index
+
+    def test_scaled_dataframe_skips_per_share(self):
+        """EPS row unchanged, revenue row scaled."""
+        table = self._make_table(
+            ["Total revenue", "Diluted earnings per share"],
+            values=[100.0, 0.46],
+        )
+        scaled = table.scaled_dataframe
+        # Revenue should be scaled
+        assert scaled.loc["Total revenue", "Q1 2025"] == 100.0 * 1_000_000
+        # EPS should NOT be scaled
+        assert scaled.loc["Diluted earnings per share", "Q1 2025"] == 0.46
+
+    def test_scaled_dataframe_skips_shares(self):
+        """Share count row unchanged after scaling."""
+        table = self._make_table(
+            ["Total revenue", "Weighted average diluted shares outstanding"],
+            values=[100.0, 50_780_325],
+        )
+        scaled = table.scaled_dataframe
+        # Revenue scaled
+        assert scaled.loc["Total revenue", "Q1 2025"] == 100.0 * 1_000_000
+        # Shares NOT scaled
+        assert scaled.loc["Weighted average diluted shares outstanding", "Q1 2025"] == 50_780_325
+
+    def test_scaled_dataframe_skips_percentage(self):
+        """Percentage rows unchanged after scaling."""
+        table = self._make_table(
+            ["Total revenue", "Operating margin"],
+            values=[100.0, 15.5],
+        )
+        scaled = table.scaled_dataframe
+        assert scaled.loc["Total revenue", "Q1 2025"] == 100.0 * 1_000_000
+        assert scaled.loc["Operating margin", "Q1 2025"] == 15.5
+
+    def test_scaled_dataframe_units_unchanged(self):
+        """Scale.UNITS returns copy without changes, regardless of row types."""
+        table = self._make_table(
+            ["Total revenue", "Diluted earnings per share"],
+            values=[100.0, 0.46],
+            scale=Scale.UNITS,
+        )
+        scaled = table.scaled_dataframe
+        assert scaled.loc["Total revenue", "Q1 2025"] == 100.0
+        assert scaled.loc["Diluted earnings per share", "Q1 2025"] == 0.46

@@ -46,6 +46,7 @@ if TYPE_CHECKING:
 __all__ = [
     'EarningsRelease',
     'FinancialTable',
+    'RowType',
     'Scale',
     'StatementType',
     'get_earnings_tables',
@@ -92,6 +93,15 @@ class StatementType(Enum):
     GUIDANCE = "guidance"
     DEFINITIONS = "definitions"
     UNKNOWN = "unknown"
+
+
+class RowType(Enum):
+    """Classification of individual rows in a financial table."""
+    AMOUNT = "amount"           # Dollar amounts (revenue, expenses, income)
+    PER_SHARE = "per_share"     # Per-share values (EPS, dividends per share)
+    SHARES = "shares"           # Share counts (outstanding, weighted average)
+    PERCENTAGE = "percentage"   # Ratios and percentages (margins, rates)
+    OTHER = "other"             # Labels, headers, or unclassifiable rows
 
 
 # Keywords for statement classification
@@ -151,6 +161,33 @@ _TITLE_PATTERNS = {
     ],
 }
 
+_ROW_TYPE_PATTERNS = {
+    RowType.PER_SHARE: [
+        'per share', 'per common share', 'per diluted share', 'per basic share',
+        'earnings per share', 'loss per share', 'income per share',
+        'per ads', 'per ordinary share', 'per adr',
+    ],
+    RowType.SHARES: [
+        'shares outstanding', 'shares used', 'weighted average',
+        'weighted-average', 'share count', 'number of shares',
+        'diluted shares', 'basic shares', 'common shares',
+    ],
+    RowType.PERCENTAGE: [
+        'margin', 'as a percentage', 'as a % of', 'effective tax rate',
+        'growth rate', 'yield',
+    ],
+}
+
+
+def _classify_row_type(label: str) -> RowType:
+    """Classify a row's type based on its label text."""
+    label_lower = label.lower()
+    for row_type, patterns in _ROW_TYPE_PATTERNS.items():
+        for pattern in patterns:
+            if pattern in label_lower:
+                return row_type
+    return RowType.AMOUNT
+
 
 @dataclass
 class FinancialTable:
@@ -174,20 +211,46 @@ class FinancialTable:
     raw_index: int = 0
     """Original index in document (for debugging)."""
 
+    row_types: dict = field(default_factory=dict)
+    """Mapping of row label → RowType for each row."""
+
     def __bool__(self) -> bool:
         """FinancialTable is truthy if it has data."""
         return not self.dataframe.empty
 
+    def get_row_type(self, label: str) -> RowType:
+        """Get the RowType for a given row label."""
+        return self.row_types.get(label, RowType.AMOUNT)
+
+    @property
+    def per_share_rows(self) -> pd.DataFrame:
+        """Return only per-share rows (EPS, dividends per share, etc.)."""
+        mask = [self.get_row_type(str(idx)) == RowType.PER_SHARE for idx in self.dataframe.index]
+        return self.dataframe.loc[mask]
+
     @property
     def scaled_dataframe(self) -> pd.DataFrame:
-        """Return DataFrame with numeric values scaled by the detected scale factor."""
+        """Return DataFrame with numeric values scaled by the detected scale factor.
+
+        Only AMOUNT rows are scaled. PER_SHARE, SHARES, and PERCENTAGE rows
+        are left unchanged since they should not be multiplied by the table's
+        scale factor.
+        """
         if self.scale == Scale.UNITS:
             return self.dataframe.copy()
 
         df = self.dataframe.copy()
+        # Only scale AMOUNT rows — skip PER_SHARE, SHARES, PERCENTAGE
+        skip_labels = {str(idx) for idx in df.index
+                       if self.get_row_type(str(idx)) != RowType.AMOUNT}
+
         for col in df.columns:
             numeric = pd.to_numeric(df[col], errors='coerce')
             mask = numeric.notna()
+            # Zero out mask for non-amount rows
+            for label in skip_labels:
+                if label in df.index:
+                    mask[label] = False
             df.loc[mask, col] = numeric[mask] * self.scale.value
         return df
 
@@ -690,13 +753,17 @@ class EarningsRelease:
             periods = [c for c in df.columns
                       if c and str(c).strip() and _YEAR_PATTERN.search(str(c))]
 
+            row_types = {str(idx_label): _classify_row_type(str(idx_label))
+                         for idx_label in df.index}
+
             table = FinancialTable(
                 dataframe=df,
                 scale=scale,
                 title=title,
                 statement_type=statement_type,
                 periods=periods,
-                raw_index=idx
+                raw_index=idx,
+                row_types=row_types,
             )
             tables.append(table)
 
