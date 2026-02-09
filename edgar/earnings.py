@@ -98,17 +98,23 @@ class StatementType(Enum):
 _STATEMENT_KEYWORDS = {
     StatementType.INCOME_STATEMENT: [
         'net revenue', 'gross profit', 'operating income', 'cost of sales',
-        'operating expenses', 'income before taxes', 'provision for taxes'
+        'operating expenses', 'income before taxes', 'provision for taxes',
+        'net sales', 'total revenues', 'total revenue', 'cost of revenue',
+        'cost of goods sold', 'income from operations', 'net income',
+        'net interest income', 'total interest income', 'income tax expense',
+        'selling, general',
     ],
     StatementType.BALANCE_SHEET: [
         'total assets', 'total liabilities', 'stockholders', 'current assets',
         'current liabilities', 'property, plant', 'accounts receivable',
-        'accounts payable', 'long-term debt'
+        'accounts payable', 'long-term debt', 'total equity',
+        "shareholders' equity",
     ],
     StatementType.CASH_FLOW: [
         'cash flows', 'operating activities', 'investing activities',
         'financing activities', 'cash and cash equivalents, beginning',
-        'cash and cash equivalents, end', 'depreciation and amortization'
+        'cash and cash equivalents, end', 'depreciation and amortization',
+        'capital expenditures',
     ],
     StatementType.SEGMENT_DATA: [
         'client computing', 'data center', 'foundry', 'segment revenue',
@@ -127,6 +133,21 @@ _STATEMENT_KEYWORDS = {
     ],
     StatementType.DEFINITIONS: [
         'definition', 'usefulness to management', 'non-gaap adjustment or measure'
+    ],
+}
+
+# Title/header patterns for high-confidence classification
+_TITLE_PATTERNS = {
+    StatementType.INCOME_STATEMENT: [
+        'statement of operations', 'statement of income', 'statement of earnings',
+        'results of operations', 'statements of operations', 'statements of income',
+        'statements of earnings', 'income statement', 'profit and loss',
+    ],
+    StatementType.BALANCE_SHEET: [
+        'balance sheet', 'financial position', 'financial condition',
+    ],
+    StatementType.CASH_FLOW: [
+        'cash flow', 'cash flows',
     ],
 }
 
@@ -827,9 +848,24 @@ def find_earnings_exhibit(attachments: 'Attachments') -> Optional['Attachment']:
 # =============================================================================
 
 def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
-    """Classify the statement type based on row labels and content."""
+    """Classify the statement type based on title, row labels, and content."""
+    # 1. Check table title/headers for explicit statement names
+    header_text = ''
+    if table_node.caption:
+        header_text += table_node.caption.lower() + ' '
+    if table_node.headers:
+        for header_row in table_node.headers:
+            for cell in header_row:
+                header_text += (cell.content or '').lower() + ' '
+
+    for stmt_type, patterns in _TITLE_PATTERNS.items():
+        for pattern in patterns:
+            if pattern in header_text:
+                return stmt_type
+
+    # 2. Keyword matching on row labels (expanded range)
     labels = []
-    for row in table_node.rows[:10]:
+    for row in table_node.rows[:15]:
         for cell in row.cells:
             content = (cell.content or "").strip()
             if content and len(content) > 3:
@@ -837,7 +873,7 @@ def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
                 break
 
     if hasattr(df, 'index'):
-        labels.extend([str(x).lower() for x in df.index[:10]])
+        labels.extend([str(x).lower() for x in df.index[:15]])
 
     labels_text = ' '.join(labels)
 

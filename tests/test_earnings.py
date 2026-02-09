@@ -13,6 +13,7 @@ from edgar.earnings import (
     FinancialTable,
     Scale,
     StatementType,
+    _classify_statement,
     _detect_table_scale,
     _parse_numeric,
 )
@@ -262,3 +263,88 @@ class TestDetectTableScale:
         node = _MockTableNode(caption="(In millions)")
         df = pd.DataFrame({"A": [1]})
         assert _detect_table_scale(node, df, Scale.BILLIONS) == Scale.MILLIONS
+
+
+# ── _classify_statement ──────────────────────────────────────────────────
+
+
+class TestClassifyStatement:
+    """Bug 3: Improved income statement classification via titles and expanded keywords."""
+
+    def test_title_income_statement(self):
+        """Header 'Consolidated Statements of Operations' → INCOME_STATEMENT."""
+        node = _MockTableNode(
+            headers=[[_MockCell("Consolidated Statements of Operations")]],
+            rows=[_MockRow(cells=[_MockCell("Revenue")])],
+        )
+        df = pd.DataFrame({"A": [1]}, index=["Revenue"])
+        assert _classify_statement(node, df) == StatementType.INCOME_STATEMENT
+
+    def test_title_condensed_balance_sheet(self):
+        """Header 'Condensed Consolidated Balance Sheets' → BALANCE_SHEET."""
+        node = _MockTableNode(
+            headers=[[_MockCell("Condensed Consolidated Balance Sheets")]],
+            rows=[_MockRow(cells=[_MockCell("Total assets")])],
+        )
+        df = pd.DataFrame({"A": [1]}, index=["Total assets"])
+        assert _classify_statement(node, df) == StatementType.BALANCE_SHEET
+
+    def test_title_cash_flow(self):
+        """Header 'Consolidated Statements of Cash Flows' → CASH_FLOW."""
+        node = _MockTableNode(
+            headers=[[_MockCell("Consolidated Statements of Cash Flows")]],
+            rows=[_MockRow(cells=[_MockCell("Net income")])],
+        )
+        df = pd.DataFrame({"A": [1]}, index=["Net income"])
+        assert _classify_statement(node, df) == StatementType.CASH_FLOW
+
+    def test_caption_based_title(self):
+        """Caption 'Statements of Income' → INCOME_STATEMENT."""
+        node = _MockTableNode(
+            caption="Consolidated Statements of Income",
+            rows=[_MockRow(cells=[_MockCell("Revenue")])],
+        )
+        df = pd.DataFrame({"A": [1]}, index=["Revenue"])
+        assert _classify_statement(node, df) == StatementType.INCOME_STATEMENT
+
+    def test_keyword_net_sales(self):
+        """Expanded keywords: 'net sales' + 'cost of goods sold' → INCOME_STATEMENT."""
+        node = _MockTableNode(
+            rows=[
+                _MockRow(cells=[_MockCell("Net sales")]),
+                _MockRow(cells=[_MockCell("Cost of goods sold")]),
+                _MockRow(cells=[_MockCell("Gross profit")]),
+            ],
+        )
+        df = pd.DataFrame({"A": [1, 2, 3]}, index=[
+            "Net sales", "Cost of goods sold", "Gross profit",
+        ])
+        assert _classify_statement(node, df) == StatementType.INCOME_STATEMENT
+
+    def test_banking_keywords(self):
+        """Banking keywords: 'net interest income' + 'total interest income' → INCOME_STATEMENT."""
+        node = _MockTableNode(
+            rows=[
+                _MockRow(cells=[_MockCell("Net interest income")]),
+                _MockRow(cells=[_MockCell("Total interest income")]),
+                _MockRow(cells=[_MockCell("Provision for credit losses")]),
+            ],
+        )
+        df = pd.DataFrame({"A": [1, 2, 3]}, index=[
+            "Net interest income", "Total interest income",
+            "Provision for credit losses",
+        ])
+        assert _classify_statement(node, df) == StatementType.INCOME_STATEMENT
+
+    def test_unknown_fallback(self):
+        """Table with no matching content → UNKNOWN."""
+        node = _MockTableNode(
+            rows=[
+                _MockRow(cells=[_MockCell("Some random text")]),
+                _MockRow(cells=[_MockCell("Another random row")]),
+            ],
+        )
+        df = pd.DataFrame({"A": [1, 2]}, index=[
+            "Some random text", "Another random row",
+        ])
+        assert _classify_statement(node, df) == StatementType.UNKNOWN
