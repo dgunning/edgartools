@@ -165,8 +165,9 @@ class FinancialTable:
 
         df = self.dataframe.copy()
         for col in df.columns:
-            if df[col].dtype in ['float64', 'int64']:
-                df[col] = df[col] * self.scale.value
+            numeric = pd.to_numeric(df[col], errors='coerce')
+            mask = numeric.notna()
+            df.loc[mask, col] = numeric[mask] * self.scale.value
         return df
 
     def __repr__(self) -> str:
@@ -651,7 +652,7 @@ class EarningsRelease:
     def _extract_tables(self) -> List[FinancialTable]:
         """Extract and classify all tables from the document."""
         tables = []
-        doc_scale = self.detected_scale
+        doc_scale = Scale.UNITS  # Safe default — per-table detection is primary
 
         for idx, table_node in enumerate(self.document.tables):
             df = _extract_clean_dataframe(table_node)
@@ -853,7 +854,14 @@ def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
 
 
 def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> Scale:
-    """Detect scale from table headers or content."""
+    """Detect scale from table caption, headers, early content, footer, or index labels."""
+    # 1. Check caption
+    if table_node.caption:
+        scale = Scale.detect(table_node.caption)
+        if scale != Scale.UNITS:
+            return scale
+
+    # 2. Check headers
     if table_node.headers:
         for header_row in table_node.headers:
             for cell in header_row:
@@ -865,6 +873,7 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
                 elif 'billion' in content:
                     return Scale.BILLIONS
 
+    # 3. Check first 3 data rows
     for row in table_node.rows[:3]:
         for cell in row.cells:
             content = cell.content.lower()
@@ -873,6 +882,29 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
             elif 'in thousands' in content or '(thousands)' in content:
                 return Scale.THOUSANDS
             elif 'in billions' in content or '(billions)' in content:
+                return Scale.BILLIONS
+
+    # 4. Check footer rows
+    if table_node.footer:
+        for row in table_node.footer:
+            for cell in row.cells:
+                content = cell.content.lower()
+                if 'million' in content:
+                    return Scale.MILLIONS
+                elif 'thousand' in content:
+                    return Scale.THOUSANDS
+                elif 'billion' in content:
+                    return Scale.BILLIONS
+
+    # 5. Check DataFrame index labels (e.g. "(In millions, except per share data)")
+    if hasattr(df, 'index'):
+        for label in df.index[:5]:
+            label_lower = str(label).lower()
+            if 'in millions' in label_lower or '(millions)' in label_lower:
+                return Scale.MILLIONS
+            elif 'in thousands' in label_lower or '(thousands)' in label_lower:
+                return Scale.THOUSANDS
+            elif 'in billions' in label_lower or '(billions)' in label_lower:
                 return Scale.BILLIONS
 
     return default_scale
@@ -1186,9 +1218,9 @@ def _parse_numeric(val) -> Union[float, str, None]:
     if s in ('—', '-', '–', '', '*'):
         return None
 
-    s_no_currency = s.lstrip('$€£¥')
-    negative = s_no_currency.startswith('(') and s_no_currency.endswith(')')
-    cleaned = s.replace(',', '').replace('$', '').replace('(', '').replace(')', '').replace('%', '').replace('*', '')
+    s_for_sign_check = s.replace('$', '').replace('€', '').replace('£', '').replace('¥', '').strip()
+    negative = s_for_sign_check.startswith('(') and s_for_sign_check.endswith(')')
+    cleaned = s.replace(',', '').replace('$', '').replace('€', '').replace('£', '').replace('¥', '').replace('(', '').replace(')', '').replace('%', '').replace('*', '').strip()
 
     try:
         num = float(cleaned)
