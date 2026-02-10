@@ -675,52 +675,36 @@ class CurrentPeriodView:
             # Use processed concept name
             return item.get('concept', '')
 
-    def notes(self, section_name: Optional[str] = None) -> List[Dict[str, Any]]:
+    def notes(self, section_name: Optional[str] = None) -> List:
         """
-        Get notes to financial statements for the current period.
+        Get notes to financial statements.
 
         Args:
             section_name: Optional specific note section to retrieve
                          (e.g., "inventory", "revenue recognition")
 
         Returns:
-            List of note sections with their content
-
-        Note:
-            This is a placeholder implementation. Full notes access would require
-            additional development to parse and structure note content.
+            List of Statement objects for note/disclosure sections
         """
-        # Get all statements and filter for notes
+        from edgar.xbrl.statements import Statement
+
         all_statements = self.xbrl.get_all_statements()
-        note_statements = []
+        result = []
 
         for stmt in all_statements:
             stmt_type = (stmt.get('type') or '').lower()
             definition = (stmt.get('definition') or '').lower()
 
-            # Check if this looks like a note section
-            if ('note' in stmt_type or 'note' in definition or 
-                'disclosure' in stmt_type or 'disclosure' in definition):
+            if not ('note' in stmt_type or 'note' in definition or
+                    'disclosure' in stmt_type or 'disclosure' in definition):
+                continue
 
-                # If specific section requested, filter by name
-                if section_name:
-                    if section_name.lower() in definition or section_name.lower() in stmt_type:
-                        note_statements.append({
-                            'section_name': stmt.get('definition', 'Untitled Note'),
-                            'type': stmt.get('type', ''),
-                            'role': stmt.get('role', ''),
-                            'element_count': stmt.get('element_count', 0)
-                        })
-                else:
-                    # Return all note sections
-                    note_statements.append({
-                        'section_name': stmt.get('definition', 'Untitled Note'),
-                        'type': stmt.get('type', ''),
-                        'role': stmt.get('role', ''),
-                        'element_count': stmt.get('element_count', 0)
-                    })
+            if section_name and section_name.lower() not in definition and section_name.lower() not in stmt_type:
+                continue
 
-        return note_statements
+            result.append(Statement(self.xbrl, stmt['role']))
+
+        return result
 
     def get_fact(self, concept: str, raw_concept: bool = False) -> Any:
         """

@@ -1608,6 +1608,46 @@ class Statement:
             raise StatementValidationError(f"Failed to retrieve data for statement {statement_id}")
         return data
 
+    def text(self, raw_html: bool = False) -> Optional[str]:
+        """Get narrative text content from a note/disclosure statement."""
+        from edgar.xbrl.abstract_detection import is_textblock_concept
+        from edgar.xbrl.rendering import _is_html, html_to_text
+
+        try:
+            data = self.get_raw_data()
+        except Exception:
+            return None
+
+        text_parts = []
+        for item in data:
+            concept = item.get('concept', '').replace(':', '_')
+            if not is_textblock_concept(concept):
+                continue
+            for value in item.get('values', {}).values():
+                if value and isinstance(value, str) and value.strip():
+                    if raw_html:
+                        text_parts.append(value)
+                    elif _is_html(value):
+                        text_parts.append(html_to_text(value))
+                    else:
+                        text_parts.append(value)
+                    break  # One value per TextBlock (same across periods)
+
+        return "\n\n".join(text_parts) if text_parts else None
+
+    @property
+    def is_note(self) -> bool:
+        """Check if this statement contains narrative TextBlock content."""
+        from edgar.xbrl.abstract_detection import is_textblock_concept
+        try:
+            data = self.get_raw_data()
+        except Exception:
+            return False
+        return any(
+            is_textblock_concept(item.get('concept', '').replace(':', '_'))
+            for item in data
+        )
+
 
 class Statements:
     """

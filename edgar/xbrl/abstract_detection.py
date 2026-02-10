@@ -52,7 +52,6 @@ KNOWN_ABSTRACT_CONCEPTS: Set[str] = {
 
     # Accounting policies
     'us-gaap_AccountingPoliciesAbstract',
-    'us-gaap_SignificantAccountingPoliciesTextBlock',
 
     # Disclosure abstracts
     'us-gaap_DisclosureTextBlockAbstract',
@@ -72,7 +71,6 @@ ABSTRACT_CONCEPT_PATTERNS: List[str] = [
     r'.*Axis$',               # Ends with "Axis" (dimensional axes)
     r'.*Domain$',             # Ends with "Domain" (dimension domains)
     r'.*LineItems$',          # Ends with "LineItems" (line item tables)
-    r'.*TextBlock$',          # Ends with "TextBlock" (disclosure text blocks)
 ]
 
 
@@ -178,3 +176,9 @@ def get_abstract_patterns() -> List[str]:
         List of regex patterns used to identify abstract concepts
     """
     return ABSTRACT_CONCEPT_PATTERNS.copy()
+
+
+def is_textblock_concept(concept_name: str) -> bool:
+    """Check if a concept is a TextBlock (narrative text) content element."""
+    normalized = concept_name.replace(':', '_')
+    return normalized.endswith('TextBlock') and not normalized.endswith('TextBlockAbstract')

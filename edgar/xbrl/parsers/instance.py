@@ -416,12 +416,10 @@ class InstanceParser(BaseParser):
                 # Get value - optimize string handling
                 value = element.text
                 if not value or not value.strip():
-                    # Only check children if text is empty - use direct iteration for speed
-                    for sub_elem in element:
-                        sub_text = sub_elem.text
-                        if sub_text and sub_text.strip():
-                            value = sub_text
-                            break
+                    # Collect all nested text (handles HTML content in TextBlock elements)
+                    all_text = "".join(element.itertext()).strip()
+                    if all_text:
+                        value = all_text
 
                 # Optimize string handling - inline conditional
                 value = value.strip() if value else ""
