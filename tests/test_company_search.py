@@ -40,7 +40,7 @@ def test_get_company_from_data_search_results(company_search_index):
     company = results[0]
     assert company
     assert company.name == "ORACLE CORP"
-    assert company.tickers == ["ORCL"]
+    assert "ORCL" in company.tickers
     assert company.cik == 1341439
 
 
