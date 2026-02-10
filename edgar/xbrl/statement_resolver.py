@@ -386,6 +386,19 @@ statement_registry = {
     )
 }
 
+# Mapping from StatementType enum snake_case values to PascalCase registry keys
+# This allows xbrl.get_statement(StatementType.INCOME_STATEMENT) to work
+_ENUM_TO_REGISTRY: Dict[str, str] = {
+    "income_statement": "IncomeStatement",
+    "balance_sheet": "BalanceSheet",
+    "cash_flow_statement": "CashFlowStatement",
+    "changes_in_equity": "StatementOfEquity",
+    "comprehensive_income": "ComprehensiveIncome",
+    "segment_reporting": "SegmentDisclosure",
+    "footnotes": "Notes",
+    "accounting_policies": "AccountingPolicies",
+}
+
 
 # Essential concepts that should be present in each statement type for validation
 # These are used to verify that the resolved statement is actually the correct type
@@ -1075,6 +1088,9 @@ class StatementResolver:
             canonical_statement_type will be the input statement_type, allowing downstream
             code to still recognize and apply type-specific logic.
         """
+        # Normalize snake_case enum values to PascalCase registry keys
+        statement_type = _ENUM_TO_REGISTRY.get(statement_type, statement_type)
+
         # Check cache first
         category_key = str(category_filter.value) if category_filter else "None"
         cache_key = f"{statement_type}_{is_parenthetical}_{category_key}"
