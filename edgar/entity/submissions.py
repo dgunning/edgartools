@@ -21,11 +21,54 @@ __all__ = [
 ]
 
 
+def _merge_additional_local_filings(submissions_json: Dict[str, Any], submissions_dir) -> None:
+    """
+    Merge additional pagination files into the main submissions JSON.
+
+    The SEC bulk submissions download includes pagination files (e.g.,
+    CIK0000034088-submissions-001.json) alongside the main file. This function
+    reads those local files and merges their filing data into filings.recent,
+    so all filings are available without needing network requests.
+
+    Modifies submissions_json in place. Clears the files array after merging.
+    """
+    files = submissions_json.get('filings', {}).get('files', [])
+    if not files:
+        return
+
+    recent = submissions_json['filings']['recent']
+    merged_count = 0
+
+    for file_ref in files:
+        additional_file = submissions_dir / file_ref['name']
+        if not additional_file.exists():
+            continue
+        try:
+            additional_data = json.loads(additional_file.read_text())
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            log.warning(f"Skipping corrupted local file: {additional_file}")
+            continue
+
+        # Merge each field by extending the recent arrays
+        for key in recent:
+            if key in additional_data:
+                recent[key].extend(additional_data[key])
+
+        merged_count += len(additional_data.get('accessionNumber', []))
+
+    if merged_count > 0:
+        # Clear files array since all data is now in recent
+        submissions_json['filings']['files'] = []
+        log.debug(f"Merged {merged_count} additional filings from local storage")
+
+
 def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
     """
     Load company submissions from local data.
 
     If the cached file is corrupted or empty, it will be re-downloaded automatically.
+    Also merges any additional pagination files (e.g., -submissions-001.json) that
+    exist locally from the bulk submissions download.
     """
     submissions_dir = get_edgar_data_directory() / "submissions"
     if not submissions_dir.exists():
@@ -43,7 +86,7 @@ def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
 
     # File exists, try to parse it
     try:
-        return json.loads(submissions_file.read_text())
+        submissions_json = json.loads(submissions_file.read_text())
     except (json.JSONDecodeError, UnicodeDecodeError) as e:
         # File is corrupted, log warning and re-download
         log.warning(f"Corrupted submissions cache file for CIK {cik}: {e}. Re-downloading...")
@@ -63,6 +106,10 @@ def load_company_submissions_from_local(cik: int) -> Optional[Dict[str, Any]]:
             # Remove the corrupted file so it can be retried later
             submissions_file.unlink(missing_ok=True)
             return None
+
+    # Merge additional pagination files from local storage
+    _merge_additional_local_filings(submissions_json, submissions_dir)
+    return submissions_json
 
 
 def download_entity_submissions_from_sec(cik: int) -> Optional[Dict[str, Any]]:
