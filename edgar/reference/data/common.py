@@ -1,14 +1,8 @@
-import sys
 from functools import lru_cache
+from importlib import resources
 
 import pandas as pd
 import pyarrow.parquet as pq
-
-# Dynamic import based on Python version
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
 
 __all__ = ['read_parquet_from_package', 'read_pyarrow_from_package', 'read_csv_from_package']
 
@@ -17,7 +11,8 @@ __all__ = ['read_parquet_from_package', 'read_pyarrow_from_package', 'read_csv_f
 def read_parquet_from_package(parquet_filename: str):
     package_name = 'edgar.reference.data'
 
-    with resources.path(package_name, parquet_filename) as parquet_path:
+    ref = resources.files(package_name).joinpath(parquet_filename)
+    with resources.as_file(ref) as parquet_path:
         df = pd.read_parquet(parquet_path)
 
     return df
@@ -26,7 +21,8 @@ def read_parquet_from_package(parquet_filename: str):
 def read_pyarrow_from_package(parquet_filename: str):
     package_name = 'edgar.reference.data'
 
-    with resources.path(package_name, parquet_filename) as parquet_path:
+    ref = resources.files(package_name).joinpath(parquet_filename)
+    with resources.as_file(ref) as parquet_path:
         # Read a pyarrow table from a parquet file
         table = pq.read_table(parquet_path)
     return table
@@ -35,7 +31,8 @@ def read_pyarrow_from_package(parquet_filename: str):
 def read_csv_from_package(csv_filename: str, **pandas_kwargs):
     package_name = 'edgar.reference.data'
 
-    with resources.path(package_name, csv_filename) as csv_path:
+    ref = resources.files(package_name).joinpath(csv_filename)
+    with resources.as_file(ref) as csv_path:
         df = pd.read_csv(csv_path, **pandas_kwargs)
 
     return df

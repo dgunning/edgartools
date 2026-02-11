@@ -309,7 +309,7 @@ def get_resource(file: str):
     import importlib
 
     import edgar
-    return importlib.resources.path(edgar, file)
+    return importlib.resources.as_file(importlib.resources.files(edgar).joinpath(file))
 
 
 def get_edgar_data_directory() -> Path:
