@@ -236,5 +236,5 @@ for mgr in report.other_managers:
 
 ## Related
 
-- [13F Holdings User Guide](../13f-filings.md) -- step-by-step walkthrough for getting and filtering 13F filings
+- [Institutional Holdings Guide](../13f-filings.md) -- workflow-oriented guide for finding, analyzing, and comparing 13F holdings
 - [Working with Filings](working-with-filing.md) -- general filing access patterns
