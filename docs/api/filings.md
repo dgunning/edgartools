@@ -1,143 +1,146 @@
-# Filings API Reference
+# Filings API Reference — Filter and Navigate SEC Filing Collections
 
-The `Filings` class represents a collection of SEC filings with powerful filtering, navigation, and data manipulation capabilities. It serves as the primary interface for working with multiple filings in EdgarTools.
+The `Filings` class represents a collection of SEC filings with powerful filtering, navigation, and batch processing capabilities.
 
-## Class Overview
-
-```python
-from edgar import Filings, get_filings
-
-class Filings:
-    """Collection of SEC filings with filtering and pagination capabilities."""
-```
-
-**Backend:** Uses PyArrow tables for efficient data handling
-
-## Constructor
-
-### Filings(filing_index, original_state=None)
-
-Create a Filings collection from a PyArrow table.
-
-```python
-Filings(
-    filing_index: pa.Table,
-    original_state: Optional[PagingState] = None)
-```
-
-**Parameters:**
-- `filing_index` (pa.Table): PyArrow table containing filing data
-- `original_state` (Optional[PagingState]): Pagination state for navigation
-
-**Note:** Typically created via `get_filings()` function rather than direct instantiation.
-
-**Example:**
+**Quick example:**
 ```python
 from edgar import get_filings
 
-# Get filings collection
-filings = get_filings(year=2023, quarter=1)
-print(type(filings))  # <class 'edgar._filings.Filings'>
+# Get Q1 2024 10-K filings
+filings = get_filings(2024, 1, form="10-K")
+print(f"Found {len(filings)} filings")
+
+# Filter to NASDAQ companies
+nasdaq = filings.filter(exchange="NASDAQ")
+
+# Get latest 10
+latest = nasdaq.latest(10)
+
+# Export to DataFrame
+df = latest.to_pandas()
+```
+
+## Getting Filings
+
+### get_filings()
+
+```python
+def get_filings(
+    year: int | List[int] = None,
+    quarter: int | List[int] = None,
+    form: str | List[str] = None,
+    amendments: bool = True,
+    filing_date: str = None
+) -> Filings
+```
+
+**Parameters:**
+- `year` (int | List[int]): Calendar year(s) — NOT fiscal year
+- `quarter` (int | List[int]): Calendar quarter(s) 1-4
+- `form` (str | List[str]): Form type(s)
+- `amendments` (bool): Include amendments (default: True)
+- `filing_date` (str): Date filter (YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD)
+
+**Returns:** `Filings` collection
+
+**Important:** There is **no `limit` parameter**. Use `.head(n)` or `.latest(n)` on the result to limit.
+
+**Examples:**
+```python
+from edgar import get_filings
+
+# Q1 2024 filings
+filings = get_filings(2024, 1)
+
+# All 2023 10-K filings
+filings = get_filings(2023, form="10-K")
+
+# Multiple years
+filings = get_filings([2022, 2023, 2024])
+
+# Multiple quarters
+filings = get_filings(2024, [1, 2], form="10-Q")
+
+# Date range
+filings = get_filings(2024, 1, filing_date="2024-01-01:2024-01-31")
+
+# Multiple forms
+filings = get_filings(2024, 1, form=["10-K", "10-Q"])
+
+# Exclude amendments
+filings = get_filings(2024, 1, form="10-K", amendments=False)
 ```
 
 ## Core Properties
 
 ### Collection Information
 
-#### empty
-```python
-@property
-def empty(self) -> bool:
-```
-Whether the collection contains any filings.
+| Property | Type | Description |
+|----------|------|-------------|
+| `empty` | bool | Whether collection contains any filings |
+| `date_range` | Tuple[str, str] | (start_date, end_date) |
+| `start_date` | str | Earliest filing date |
+| `end_date` | str | Latest filing date |
+| `summary` | str | Summary description of collection |
 
+**Example:**
 ```python
-filings = get_filings(form="INVALID")
 if filings.empty:
     print("No filings found")
-```
-
-#### date_range
-```python
-@property
-def date_range(self) -> Tuple[str, str]:
-```
-Start and end dates for filings in the collection.
-
-```python
-start_date, end_date = filings.date_range
-print(f"Filings from {start_date} to {end_date}")
-```
-
-#### start_date / end_date
-```python
-@property
-def start_date(self) -> str:
-    ...
-
-@property  
-def end_date(self) -> str:
-    ...
-```
-Individual start and end dates.
-
-```python
-print(f"Collection spans from {filings.start_date} to {filings.end_date}")
-```
-
-#### summary
-```python
-@property
-def summary(self) -> str:
-```
-Summary string describing the current page/collection.
-
-```python
-print(filings.summary)
-# "Page 1 of 10 filings from 2023-01-01 to 2023-03-31"
+else:
+    start, end = filings.date_range
+    print(f"Filings from {start} to {end}")
+    print(f"Total: {len(filings)}")
 ```
 
 ## Collection Operations
 
 ### Size and Access
 
-#### len() / count
+#### len()
 ```python
-def __len__(self) -> int:
+len(filings) -> int
 ```
-Number of filings in the current collection/page.
+Number of filings in collection.
 
+**Example:**
 ```python
 print(f"Collection contains {len(filings)} filings")
 ```
 
-#### Indexing and Iteration
+#### Indexing
 ```python
-def __getitem__(self, item: int) -> Filing:
-    ...
-def __iter__(self) -> Iterator[Filing]:
+filings[index] -> Filing
+```
+Access individual filings by index.
+
+**Example:**
+```python
+first = filings[0]
+last = filings[-1]
+
+# Slicing works but returns list, not Filings
+first_five = filings[:5]  # List of Filing objects
+```
+
+#### Iteration
+```python
+for filing in filings:
     ...
 ```
-Access individual filings by index or iterate through collection.
+Iterate through collection.
 
+**Example:**
 ```python
-# Index access
-first_filing = filings[0]
-last_filing = filings[-1]
-
-# Iteration
 for filing in filings:
     print(f"{filing.form}: {filing.company} ({filing.filing_date})")
-
-# Slicing
-first_five = filings[:5]
 ```
 
 #### get()
 ```python
 def get(self, index_or_accession_number: Union[int, str]) -> Filing
 ```
-Get a filing by index or accession number.
+Get filing by index or accession number.
 
 **Parameters:**
 - `index_or_accession_number`: Integer index or accession number string
@@ -146,23 +149,23 @@ Get a filing by index or accession number.
 
 **Example:**
 ```python
-# Get by index
+# By index
 filing = filings.get(0)
 
-# Get by accession number
-filing = filings.get("0001234567-23-000001")
+# By accession number
+filing = filings.get("0001234567-24-000001")
 ```
 
 ### Subset Operations
 
 #### latest()
 ```python
-def latest(self, n: int = 1) -> Union[Filing, 'Filings']
+def latest(self, n: int = 1) -> Union[Filing, Filings]
 ```
-Get the most recent filing(s).
+Get most recent filing(s).
 
 **Parameters:**
-- `n` (int): Number of latest filings to return (default: 1)
+- `n` (int): Number of filings (default: 1)
 
 **Returns:**
 - Single `Filing` if n=1
@@ -170,63 +173,44 @@ Get the most recent filing(s).
 
 **Example:**
 ```python
-# Get latest single filing
+# Single latest filing
 latest_filing = filings.latest()
 
-# Get latest 5 filings
-latest_five = filings.latest(5)
-print(f"Latest 5 filings: {len(latest_five)}")
+# Latest 10 filings
+latest_10 = filings.latest(10)
 ```
 
 #### head()
 ```python
-def head(self, n: int) -> 'Filings'
+def head(self, n: int) -> Filings
 ```
-Get the first n filings from the collection.
-
-**Parameters:**
-- `n` (int): Number of filings to return
-
-**Returns:** `Filings` collection
+Get first n filings.
 
 **Example:**
 ```python
-first_ten = filings.head(10)
-print(f"First 10 filings: {len(first_ten)}")
+first_20 = filings.head(20)
 ```
 
 #### tail()
 ```python
-def tail(self, n: int) -> 'Filings'
+def tail(self, n: int) -> Filings
 ```
-Get the last n filings from the collection.
-
-**Parameters:**
-- `n` (int): Number of filings to return
-
-**Returns:** `Filings` collection
+Get last n filings.
 
 **Example:**
 ```python
-last_ten = filings.tail(10)
-print(f"Last 10 filings: {len(last_ten)}")
+last_20 = filings.tail(20)
 ```
 
 #### sample()
 ```python
-def sample(self, n: int) -> 'Filings'
+def sample(self, n: int) -> Filings
 ```
-Get a random sample of n filings.
-
-**Parameters:**
-- `n` (int): Number of filings to sample
-
-**Returns:** `Filings` collection
+Get random sample of n filings.
 
 **Example:**
 ```python
-random_sample = filings.sample(5)
-print(f"Random sample: {len(random_sample)} filings")
+random_sample = filings.sample(10)
 ```
 
 ## Filtering and Search
@@ -244,114 +228,140 @@ def filter(
     exchange: Union[str, List[str]] = None,
     ticker: Union[str, List[str]] = None,
     accession_number: Union[str, List[str]] = None
-) -> 'Filings'
+) -> Filings
 ```
 
-Filter the collection by various criteria.
+Filter collection by multiple criteria.
 
 **Parameters:**
-- `form`: SEC form type(s) - e.g., "10-K", ["10-K", "10-Q"]
-- `amendments`: Include/exclude amendments (default: include)
-- `filing_date` / `date`: Date filter (YYYY-MM-DD or YYYY-MM-DD:YYYY-MM-DD)
+- `form`: Form type(s) — e.g., "10-K", ["10-K", "10-Q"]
+- `amendments`: Include/exclude amendments
+- `filing_date` / `date`: Date filter (YYYY-MM-DD or range)
 - `cik`: Central Index Key(s)
-- `exchange`: Stock exchange(s) - "NASDAQ", "NYSE", "CBOE", "OTC"
-- `ticker`: Stock ticker symbol(s)
-- `accession_number`: SEC accession number(s)
+- `exchange`: Exchange(s) — "NASDAQ", "NYSE", "CBOE", "OTC"
+- `ticker`: Stock ticker(s)
+- `accession_number`: Accession number(s)
 
 **Returns:** Filtered `Filings` collection
 
 **Examples:**
+
+#### Filter by form
 ```python
-# Filter by form type
-annual_reports = filings.filter(form="10-K")
-financial_reports = filings.filter(form=["10-K", "10-Q"])
+# Single form
+annual = filings.filter(form="10-K")
 
-# Filter by date range
-q1_filings = filings.filter(date="2023-01-01:2023-03-31")
-recent_filings = filings.filter(date="2023-01-01:")
-
-# Filter by company
-apple_filings = filings.filter(ticker="AAPL")
-apple_by_cik = filings.filter(cik=320193)
-
-# Filter by exchange
-nasdaq_filings = filings.filter(exchange="NASDAQ")
-major_exchanges = filings.filter(exchange=["NASDAQ", "NYSE"])
+# Multiple forms
+financial = filings.filter(form=["10-K", "10-Q"])
 
 # Exclude amendments
-original_only = filings.filter(amendments=False)
+original_only = filings.filter(form="10-K", amendments=False)
+```
 
-# Chain filters
-filtered = filings.filter(form="10-K").filter(exchange="NASDAQ").filter(date="2023-01-01:")
+#### Filter by date
+```python
+# Specific date
+jan_1 = filings.filter(date="2024-01-01")
+
+# Date range
+q1 = filings.filter(date="2024-01-01:2024-03-31")
+
+# From date onwards
+recent = filings.filter(date="2024-01-01:")
+
+# Up to date
+older = filings.filter(date=":2023-12-31")
+```
+
+#### Filter by company
+```python
+# By ticker
+apple = filings.filter(ticker="AAPL")
+
+# By CIK
+apple = filings.filter(cik=320193)
+apple = filings.filter(cik="0000320193")
+
+# Multiple companies
+faang = filings.filter(ticker=["AAPL", "MSFT", "GOOGL"])
+```
+
+#### Filter by exchange
+```python
+# Single exchange
+nasdaq = filings.filter(exchange="NASDAQ")
+
+# Multiple exchanges
+major = filings.filter(exchange=["NASDAQ", "NYSE"])
+```
+
+#### Chain filters
+```python
+result = (filings
+    .filter(form="10-K")
+    .filter(exchange="NASDAQ")
+    .filter(date="2024-01-01:")
+    .latest(50))
 ```
 
 ### find()
 ```python
-def find(self, company_search_str: str) -> 'Filings'
+def find(self, company_search_str: str) -> Filings
 ```
 Search for filings by company name.
 
 **Parameters:**
 - `company_search_str` (str): Company name search string
 
-**Returns:** `Filings` collection matching the search
+**Returns:** Matching `Filings` collection
 
 **Example:**
 ```python
-# Search for companies with "Apple" in name
-apple_filings = filings.find("Apple")
+# Find technology companies
+tech = filings.find("Technology")
 
-# Search for technology companies
-tech_filings = filings.find("Technology")
+# Find specific company
+apple = filings.find("Apple")
 ```
 
 ## Navigation and Pagination
 
 ### current()
 ```python
-def current(self) -> 'Filings'
+def current(self) -> Filings
 ```
-Get the current page of filings.
+Get current page of filings.
 
 **Returns:** Current `Filings` page
 
 ### next()
 ```python
-def next(self) -> Optional['Filings']
+def next(self) -> Optional[Filings]
 ```
-Navigate to the next page of filings.
+Navigate to next page.
 
-**Returns:** Next page `Filings` or None if no more pages
+**Returns:** Next page `Filings` or None
 
 **Example:**
 ```python
-# Navigate through pages
-current_page = filings.current()
 next_page = filings.next()
-
 if next_page:
     print(f"Next page has {len(next_page)} filings")
-else:
-    print("No more pages available")
 ```
 
 ### previous()
 ```python
-def previous(self) -> Optional['Filings']
+def previous(self) -> Optional[Filings]
 ```
-Navigate to the previous page of filings.
+Navigate to previous page.
 
-**Returns:** Previous page `Filings` or None if on first page
+**Returns:** Previous page `Filings` or None
 
 **Example:**
 ```python
-# Go back to previous page
 prev_page = filings.previous()
-
 if prev_page:
     print(f"Previous page has {len(prev_page)} filings")
-else:
-    print("Already on first page")
 ```
 
 ## Data Export and Persistence
@@ -360,22 +370,22 @@ else:
 ```python
 def to_pandas(self, *columns: str) -> pd.DataFrame
 ```
-Convert the collection to a pandas DataFrame.
+Convert to pandas DataFrame.
 
 **Parameters:**
 - `*columns`: Specific columns to include (optional)
 
-**Returns:** `pd.DataFrame` with filing data
+**Returns:** DataFrame with filing data
 
 **Example:**
 ```python
-# Convert all data
+# All columns
 df = filings.to_pandas()
 print(df.columns.tolist())
 
-# Convert specific columns only
-summary_df = filings.to_pandas('form', 'company', 'filing_date')
-print(summary_df.head())
+# Specific columns
+df = filings.to_pandas('form', 'company', 'filing_date', 'cik')
+print(df.head())
 ```
 
 ### save_parquet() / save()
@@ -383,17 +393,16 @@ print(summary_df.head())
 def save_parquet(self, location: str)
 def save(self, location: str)  # Alias
 ```
-Save the collection as a Parquet file.
+Save collection as Parquet file.
 
 **Parameters:**
-- `location` (str): File path to save to
+- `location` (str): File path
 
 **Example:**
 ```python
-# Save collection
 filings.save_parquet("my_filings.parquet")
 
-# Load back later
+# Load later
 import pandas as pd
 df = pd.read_parquet("my_filings.parquet")
 ```
@@ -402,42 +411,252 @@ df = pd.read_parquet("my_filings.parquet")
 ```python
 def to_dict(self, max_rows: int = 1000) -> Dict[str, Any]
 ```
-Convert to dictionary representation.
+Convert to dictionary.
 
 **Parameters:**
-- `max_rows` (int): Maximum number of rows to include (default: 1000)
+- `max_rows` (int): Maximum rows (default: 1000)
 
-**Returns:** Dictionary with filing data
+**Returns:** Dictionary representation
 
-**Example:**
+### to_context()
 ```python
-filings_dict = filings.to_dict(max_rows=100)
-print(filings_dict.keys())
+def to_context(self, detail: str) -> str
 ```
+Generate context string for LLM/AI use.
+
+**Parameters:**
+- `detail` (str): Level of detail
+
+**Returns:** Context string
 
 ### download()
 ```python
-def download(self, data_directory: Optional[str] = None)
+def download(
+    self,
+    data_directory: Optional[str] = None,
+    compress: bool = True,
+    compression_level: int = 6,
+    upload_to_cloud: bool = False,
+    disable_progress: bool = False
+)
 ```
-Download all filings in the collection to local storage.
+Download all filings in collection to local storage.
 
 **Parameters:**
-- `data_directory` (Optional[str]): Directory to save files (optional)
+- `data_directory`: Download directory (defaults to Edgar data directory)
+- `compress`: Compress files (default: True)
+- `compression_level`: gzip level 1-9 (default: 6)
+- `upload_to_cloud`: Upload to cloud after download
+- `disable_progress`: Disable progress display
 
 **Example:**
 ```python
-# Download to current directory
+# Download with defaults
 filings.download()
 
-# Download to specific directory
-filings.download("./edgar_data/")
+# Custom directory
+filings.download(data_directory="./raw_data/", compress=False)
 ```
 
-## Specialized Filing Collections
+## Common Recipes
+
+### Get latest 10-K filings from major exchanges
+
+```python
+from edgar import get_filings
+
+filings = get_filings(2024, 1, form="10-K")
+
+major_exchange = filings.filter(exchange=["NASDAQ", "NYSE"])
+latest_20 = major_exchange.latest(20)
+
+print(f"Found {len(latest_20)} recent 10-K filings")
+
+for filing in latest_20:
+    print(f"{filing.company}: {filing.filing_date}")
+```
+
+### Analyze filing trends
+
+```python
+from edgar import get_filings
+import pandas as pd
+
+filings = get_filings(2023, form=["10-K", "10-Q"])
+df = filings.to_pandas()
+
+# Form distribution
+form_counts = df.groupby('form').size().sort_values(ascending=False)
+print("Form distribution:")
+print(form_counts)
+
+# Monthly trends
+df['filing_date'] = pd.to_datetime(df['filing_date'])
+monthly = df.groupby(df['filing_date'].dt.to_period('M')).size()
+print("\nMonthly filing counts:")
+print(monthly)
+```
+
+### Batch process filings
+
+```python
+from edgar import get_filings
+
+filings = get_filings(2024, 1, form="8-K")
+
+# Process in batches using pagination
+current_page = filings
+total_processed = 0
+
+while current_page and not current_page.empty:
+    for filing in current_page:
+        # Process each filing
+        text = filing.text()
+        # ... analysis logic
+
+    total_processed += len(current_page)
+    print(f"Processed {total_processed} filings")
+
+    # Move to next page
+    current_page = current_page.next()
+
+print(f"Total processed: {total_processed}")
+```
+
+### Filter and export for analysis
+
+```python
+from edgar import get_filings
+
+# Get filings
+filings = get_filings(2023, form="10-K")
+
+# Filter to tech companies on NASDAQ
+nasdaq_tech = filings.filter(exchange="NASDAQ")
+
+# Export to DataFrame
+df = nasdaq_tech.to_pandas('company', 'filing_date', 'cik', 'accession_no')
+
+# Save for later analysis
+nasdaq_tech.save_parquet("nasdaq_tech_10k_2023.parquet")
+```
+
+### Extract financial data from multiple filings
+
+```python
+from edgar import get_filings
+
+filings = get_filings(2024, 1, form="10-K").head(50)
+
+results = []
+
+for filing in filings:
+    try:
+        tenk = filing.obj()
+        if tenk and tenk.financials:
+            income = tenk.financials.income_statement
+            # Extract data
+            results.append({
+                'company': filing.company,
+                'filing_date': filing.filing_date,
+                'has_financials': True
+            })
+    except Exception as e:
+        print(f"Error processing {filing.company}: {e}")
+
+print(f"Successfully processed {len(results)} filings")
+```
+
+## Advanced Patterns
+
+### Chaining filters
+
+```python
+# Build complex filters
+result = (get_filings(2024, 1)
+    .filter(form=["10-K", "10-Q"])
+    .filter(exchange="NASDAQ")
+    .filter(date="2024-01-01:2024-01-31")
+    .latest(100))
+```
+
+### Processing with pagination
+
+```python
+def process_all_pages(filings):
+    """Process all pages in a filings collection"""
+    current = filings
+    all_results = []
+
+    while current and not current.empty:
+        # Process current page
+        for filing in current:
+            # Extract data
+            all_results.append(filing.to_dict())
+
+        print(f"Processed page with {len(current)} filings")
+
+        # Move to next page
+        current = current.next()
+
+    return all_results
+
+# Use it
+filings = get_filings(2023, form="10-K")
+results = process_all_pages(filings)
+```
+
+## Performance Tips
+
+1. **Filter early** - Use `get_filings()` parameters instead of filtering later
+2. **Limit results** - Use `.head(n)` or `.latest(n)` to avoid processing unnecessary filings
+3. **Use pagination** - Process large datasets in pages with `.next()`
+4. **Convert once** - Call `.to_pandas()` once and work with DataFrame
+
+**Efficient:**
+```python
+filings = get_filings(2024, 1, form="10-K").head(100)
+```
+
+**Less efficient:**
+```python
+filings = get_filings(2024, 1).filter(form="10-K").head(100)
+```
+
+## Error Handling
+
+```python
+from edgar import get_filings
+
+try:
+    filings = get_filings(2024, 1, form="10-K")
+
+    if filings.empty:
+        print("No filings found")
+    else:
+        # Filter
+        filtered = filings.filter(exchange="NASDAQ")
+
+        if filtered.empty:
+            print("No NASDAQ filings")
+        else:
+            # Process
+            for filing in filtered:
+                try:
+                    text = filing.text()
+                except Exception as e:
+                    print(f"Error processing {filing.accession_no}: {e}")
+                    continue
+
+except Exception as e:
+    print(f"Error: {e}")
+```
+
+## Specialized Collections
 
 ### EntityFilings
 
-Enhanced filings collection for company-specific filings:
+Company-specific filings with additional properties:
 
 ```python
 from edgar import Company
@@ -445,15 +664,14 @@ from edgar import Company
 company = Company("AAPL")
 entity_filings = company.get_filings()
 
-print(type(entity_filings))  # <class 'edgar.entity.filings.EntityFilings'>
+print(type(entity_filings))  # edgar.entity.filings.EntityFilings
 
 # Additional properties
-print(entity_filings.cik)          # Company CIK
-print(entity_filings.company_name) # Company name
+print(entity_filings.cik)
+print(entity_filings.company_name)
 
-# Enhanced methods return EntityFilings
-filtered = entity_filings.filter(form="10-K")  # Returns EntityFilings
-latest = entity_filings.latest(3)              # Returns EntityFilings
+# Methods return EntityFilings
+filtered = entity_filings.filter(form="10-K")  # EntityFilings
 ```
 
 ### CurrentFilings
@@ -464,203 +682,19 @@ Real-time filings with enhanced pagination:
 from edgar import get_current_filings
 
 current = get_current_filings()
-print(type(current))  # <class 'edgar._filings.CurrentFilings'>
+print(type(current))  # edgar._filings.CurrentFilings
 
-# Additional properties
-print(current.form)   # Form filter
-print(current.owner)  # Owner filter
+# Filter
+eightk = current.filter(form="8-K")
 
-# Real-time pagination
+# Navigate
 next_page = current.next()
-```
-
-## Advanced Usage Patterns
-
-### Chaining Operations
-
-```python
-# Complex filtering and processing pipeline
-result = (filings
-    .filter(form=["10-K", "10-Q"])
-    .filter(exchange="NASDAQ") 
-    .filter(date="2023-01-01:")
-    .latest(50)
-)
-
-print(f"Final result: {len(result)} filings")
-```
-
-### Batch Processing
-
-```python
-# Process filings in batches
-batch_size = 100
-total_processed = 0
-
-while not filings.empty:
-    batch = filings.head(batch_size)
-    
-    # Process each filing in batch
-    for filing in batch:
-        # Extract data, analyze, etc.
-        text = filing.text()
-        # ... processing logic
-        
-    total_processed += len(batch)
-    
-    # Move to next batch
-    filings = filings.tail(len(filings) - batch_size)
-    
-print(f"Processed {total_processed} filings")
-```
-
-### Data Analysis
-
-```python
-# Convert to DataFrame for analysis
-df = filings.to_pandas()
-
-# Analyze filing patterns
-form_counts = df.groupby('form').size().sort_values(ascending=False)
-print("Most common forms:")
-print(form_counts.head())
-
-# Monthly filing trends
-df['filing_date'] = pd.to_datetime(df['filing_date'])
-monthly_filings = df.groupby(df['filing_date'].dt.to_period('M')).size()
-print("Monthly filing counts:")
-print(monthly_filings)
-
-# Company analysis
-top_filers = df.groupby('company').size().sort_values(ascending=False)
-print("Top 10 filing companies:")
-print(top_filers.head(10))
-```
-
-## Performance Optimization
-
-### Efficient Filtering
-
-```python
-# More efficient: specific filtering upfront
-efficient = get_filings(
-    year=2023,
-    form="10-K",
-    limit=100
-)
-
-# Less efficient: get all then filter
-inefficient = get_filings(year=2023, limit=10000).filter(form="10-K")
-```
-
-### Pagination Strategies
-
-```python
-# Process large datasets with pagination
-def process_all_filings(filings):
-    current_page = filings
-    total_processed = 0
-    
-    while current_page and not current_page.empty:
-        # Process current page
-        for filing in current_page:
-            # Process individual filing
-            pass
-            
-        total_processed += len(current_page)
-        print(f"Processed {total_processed} filings so far...")
-        
-        # Move to next page
-        current_page = current_page.next()
-    
-    return total_processed
-
-# Usage
-filings = get_filings(year=2023)
-total = process_all_filings(filings)
-```
-
-## Error Handling
-
-```python
-try:
-    # Filter operations
-    filtered = filings.filter(form="10-K", date="2023-01-01:")
-    
-    if filtered.empty:
-        print("No filings match the criteria")
-    else:
-        # Process results
-        for filing in filtered:
-            try:
-                text = filing.text()
-                # Process text
-            except Exception as e:
-                print(f"Error processing filing {filing.accession_no}: {e}")
-                continue
-                
-except Exception as e:
-    print(f"Error filtering filings: {e}")
-
-# Navigation error handling
-next_page = filings.next()
-if next_page is None:
-    print("No more pages available")
-```
-
-## Complete Example
-
-```python
-from edgar import get_filings
-import pandas as pd
-
-# Get filings for analysis
-filings = get_filings(year=2023, quarter=1)
-print(f"Initial collection: {len(filings)} filings")
-
-# Filter to focus on annual reports from major exchanges
-annual_reports = filings.filter(
-    form="10-K",
-    exchange=["NASDAQ", "NYSE"]
-)
-print(f"Annual reports from major exchanges: {len(annual_reports)}")
-
-# Get latest 20 for detailed analysis
-latest_reports = annual_reports.latest(20)
-
-# Convert to DataFrame for analysis
-df = latest_reports.to_pandas()
-
-# Analyze companies and dates
-print("\nCompanies with recent 10-K filings:")
-for _, row in df.iterrows():
-    print(f"  {row['company']}: {row['filing_date']}")
-
-# Export for further analysis
-latest_reports.save_parquet("annual_reports_q1_2023.parquet")
-
-# Process individual filings
-for filing in latest_reports:
-    try:
-        # Extract structured data
-        tenk = filing.obj()
-        if tenk and tenk.financials:
-            financials = tenk.financials
-            revenue = financials.income.loc['Revenue'].iloc[0] if 'Revenue' in financials.income.index else None
-            if revenue:
-                print(f"{filing.company}: Revenue ${revenue/1e9:.1f}B")
-    except Exception as e:
-        print(f"Error processing {filing.company}: {e}")
-
-# Navigate through additional pages if needed
-next_page = filings.next()
-if next_page:
-    print(f"\nNext page available with {len(next_page)} more filings")
 ```
 
 ## See Also
 
-- **[Filing API Reference](filing.md)** - Working with individual filings
-- **[Company API Reference](company.md)** - Company-specific filing collections
+- **[Filing API Reference](filing.md)** - Individual filing operations
+- **[Company API Reference](company.md)** - Company-specific filing access
 - **[Filtering Filings Guide](../guides/filtering-filings.md)** - Advanced filtering techniques
+- **[Current Filings Guide](../guides/current-filings.md)** - Real-time filing access
 - **[Search Filings Guide](../guides/searching-filings.md)** - Finding specific filings

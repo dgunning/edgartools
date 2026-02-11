@@ -1,163 +1,456 @@
-# Filtering filings
+# Filter SEC Filings — By Form Type, Date, Ticker, Exchange, and CIK
 
-Filings can be filtered in many different ways like by `form`, `date`, `CIK`, `ticker`, and **accession number**.
-You also filter while getting filings using the `get_filings` function or after getting filings using the `filter` method.
+Learn how to filter SEC filings by multiple criteria to find exactly what you need.
 
-For the most part these approaches will give identical results, except that with get_filings you are filtering from all available filings in the SEC, while with `filter` you are reducing the nu,ber of filings in a `Filings` object.
+## Two Ways to Filter
 
+You can filter filings in two ways:
 
-## Filtering using parameters of `get_filings`
-You can filter using parameters of the `get_filings` function. 
+1. **Filter while getting** - Use `get_filings()` parameters to filter from all SEC filings
+2. **Filter after getting** - Use `.filter()` method to refine an existing `Filings` collection
 
-### Get filings by form
+Both approaches work similarly, but filtering while getting is more efficient when you know the criteria upfront.
 
-To get filings of a specific form type like 10-K, you can use the `form` parameter. For example:
-```python
-filings = get_filings(form='10-K')
-```
+## Filter While Getting Filings
 
-The `form` can also be a list of forms. For example:
-```python
-filings = get_filings(form=['10-K', '10-Q'])
-```
+### Filter by Form Type
 
-By default the `amendments` parameter is set to `True` so that amended filings are included. You can set it to `False` to exclude amended filings. For example:
-```python
-filings = get_filings(form='10-K', amendments=False)
-```
-
-
-### Filtering by date
-
-You can filter filings by date using the `filing_date` parameter. For example:
-```python
-filings = get_filings(filing_date='2022-01-01')
-```
-
-You can also filter by a range of dates. For example:
-```python
-filings = get_filings(filing_date='2022-01-01:2022-01-10')
-```
-
-You can filter up to a date. For example:
-```python
-filings = get_filings(filing_date=':2022-01-10')
-```
-
-as well as after a date. For example:
-```python
-filings = get_filings(filing_date='2022-01-10:')
-```
-
-#### More filtering examples
+Get filings of a specific SEC form:
 
 ```python
-
 from edgar import get_filings
 
-# Get filings for 2021
-filings_ = get_filings(2021) 
+# Single form type
+tenk = get_filings(2024, 1, form="10-K")
 
-# Get filings for 2021 Q4
-filings_ = get_filings(2021, 4) 
+# Multiple form types
+financial = get_filings(2024, 1, form=["10-K", "10-Q"])
 
-# Get filings for 2021 Q3 and Q4
-filings_ = get_filings(2021, [3,4]) 
-
-# Get filings for 2020 and 2021
-filings_ = get_filings([2020, 2021]) 
-
-# Get filings for Q4 of 2020 and 2021
-filings_ = get_filings([2020, 2021], 4) 
-
-# Get filings between 2010 and 2021 - does not include 2021
-filings_ = get_filings(range(2010, 2021)) 
-
-# Get filings for 2021 Q4 for form D
-filings_ = get_filings(2021, 4, form="D") 
-
-# Get filings for 2021 Q4 on "2021-10-01"
-filings_ = get_filings(2021, 4, filing_date="2021-10-01") 
-
-# Get filings for 2021 Q4 between "2021-10-01" and "2021-10-10"
-filings_ = get_filings(2021, 4, filing_date="2021-10-01:2021-10-10") 
-                                                                       
+# Proxy statements
+proxies = get_filings(2024, 1, form="DEF 14A")
 ```
 
+### Include or Exclude Amendments
 
-## Filtering using `Filings.filter`
-
-You can filter filings using the `filter` method after getting filings. This work mostly identically to filtering using `get_filings`.
-The difference is that `filter` reduces from an existing `Filings` object rather that the entire SEC.
-
-Example:
-```python
-filings().filter(form='10-K')
-```
+By default, amendments are included. Exclude them with `amendments=False`:
 
 ```python
-def filter(self, *,
-    form: Optional[Union[str, List[IntString]]] = None,
-    amendments: bool = None,
-    filing_date: Optional[str] = None,
-    date: Optional[str] = None,
-    cik: Union[IntString, List[IntString]] = None,
-    exchange: Union[str, List[str], Exchange, List[Exchange]] = None,
-    ticker: Union[str, List[str]] = None,
-    accession_number: Union[str, List[str]] = None) -> Optional['Filings']:
+# Include amendments (default)
+all_10k = get_filings(2024, 1, form="10-K", amendments=True)
 
-    :param form: The form or list of forms to filter by
-    :param amendments: Whether to include amendments to the forms e.g. include "10-K/A"
-    :param filing_date: The filing date
-    :param date: An alias for the filing date
-    :param cik: The CIK or list of CIKs to filter by
-    :param exchange: The exchange or list of exchanges to filter by
-    :param ticker: The ticker or list of tickers to filter by
-    :param accession_number: The accession number or list of accession numbers to filter by
+# Exclude amendments
+original_only = get_filings(2024, 1, form="10-K", amendments=False)
 ```
 
+### Filter by Date
 
-### Filtering by CIK
-
-You can filter filings by CIK by using the `filter` function with the `cik` parameter to get all filings for a company. For example:
-```python 
-filings = get_filings.filter(cik='0000320193')
-```
-
-### Filtering by ticker
-
-You can filter filings by ticker  by using the `filter` function with the `ticker` parameter. For example:
-```python
-filings = get_filings.filter(ticker='AAPL')
-```
-Note that this first does a lookup of the CIK for the ticker and then gets filings for the CIK.
-So if you know the CIK, it is better to use that directly.
-
-Note that you can also get use `Company(<ticker>)` OR  `Company(<cik>)` and then use the `get_filings` method to get filings for the company. For example:
-
-### Filtering by exchange
-
-You can filter filings by `exchange`. 
+#### Specific Date
 
 ```python
-filings = get_filings().filter(exchange='NASDAQ')
+# Filings on a specific date
+jan_15 = get_filings(2024, 1, filing_date="2024-01-15")
 ```
-There are the following exchanges available:
 
-| Exchange |
-|----------|
-| Nasdaq   | 
-| NYSE     | 
-| CBOE     | 
-| OTC      | 
-
-
-## Using `head`, `tail`, and `sample`
-You can subset filings using the `head` and `tail` and `sample` methods. For example:
+#### Date Range
 
 ```python
-filings = get_filings()
-filings.head(10)
-filings.tail(10)
-filings.sample(10)
+# Filings between two dates
+jan_filings = get_filings(2024, 1, filing_date="2024-01-01:2024-01-31")
+
+# Q1 2024
+q1 = get_filings(2024, filing_date="2024-01-01:2024-03-31")
 ```
+
+#### Open-Ended Ranges
+
+```python
+# From date onwards
+recent = get_filings(2024, 1, filing_date="2024-01-15:")
+
+# Up to a date
+older = get_filings(2024, 1, filing_date=":2024-01-15")
+```
+
+### Combine Filters
+
+```python
+# 10-K filings from January 2024, no amendments
+filings = get_filings(
+    year=2024,
+    quarter=1,
+    form="10-K",
+    filing_date="2024-01-01:2024-01-31",
+    amendments=False
+)
+```
+
+## Filter After Getting Filings
+
+Use the `.filter()` method to refine an existing collection:
+
+### Filter by Form
+
+```python
+filings = get_filings(2024, 1)
+
+# Filter to 10-K only
+tenk = filings.filter(form="10-K")
+
+# Multiple forms
+financial = filings.filter(form=["10-K", "10-Q"])
+```
+
+### Filter by Date
+
+```python
+filings = get_filings(2024, 1)
+
+# Specific date
+jan_1 = filings.filter(date="2024-01-01")
+
+# Date range
+jan_range = filings.filter(date="2024-01-01:2024-01-31")
+
+# From date onwards
+recent = filings.filter(date="2024-01-15:")
+```
+
+### Filter by Company (CIK)
+
+```python
+filings = get_filings(2024, 1)
+
+# Filter by CIK (integer)
+apple = filings.filter(cik=320193)
+
+# Filter by CIK (string)
+apple = filings.filter(cik="0000320193")
+
+# Multiple companies
+faang = filings.filter(cik=[320193, 1318605, 1652044])
+```
+
+### Filter by Ticker
+
+```python
+filings = get_filings(2024, 1)
+
+# Single ticker
+apple = filings.filter(ticker="AAPL")
+
+# Multiple tickers
+tech = filings.filter(ticker=["AAPL", "MSFT", "GOOGL", "AMZN"])
+```
+
+**Note:** Ticker filtering performs a CIK lookup first. If you know the CIK, use it directly for better performance.
+
+### Filter by Exchange
+
+```python
+filings = get_filings(2024, 1)
+
+# Single exchange
+nasdaq = filings.filter(exchange="NASDAQ")
+
+# Multiple exchanges
+major = filings.filter(exchange=["NASDAQ", "NYSE"])
+```
+
+**Available exchanges:**
+- NASDAQ
+- NYSE
+- CBOE
+- OTC
+
+### Filter by Accession Number
+
+```python
+filings = get_filings(2024, 1)
+
+# Single accession number
+filing = filings.filter(accession_number="0000320193-24-000001")
+
+# Multiple accession numbers
+specific = filings.filter(accession_number=[
+    "0000320193-24-000001",
+    "0001318605-24-000001"
+])
+```
+
+### Filter Amendments
+
+```python
+filings = get_filings(2024, 1, form="10-K")
+
+# Exclude amendments
+original_only = filings.filter(amendments=False)
+
+# Only amendments
+amendments_only = filings.filter(amendments=True)
+```
+
+## Chain Filters
+
+Build complex queries by chaining multiple filters:
+
+```python
+from edgar import get_filings
+
+# Start with all Q1 2024 filings
+filings = get_filings(2024, 1)
+
+# Chain filters for specificity
+result = (filings
+    .filter(form="10-K")
+    .filter(exchange="NASDAQ")
+    .filter(date="2024-01-01:2024-01-31")
+    .filter(amendments=False))
+
+print(f"Found {len(result)} filings matching all criteria")
+```
+
+Alternatively, combine multiple criteria in one filter:
+
+```python
+result = filings.filter(
+    form="10-K",
+    exchange="NASDAQ",
+    date="2024-01-01:2024-01-31",
+    amendments=False
+)
+```
+
+## Use head, tail, and sample
+
+Limit results after filtering:
+
+### head()
+
+Get the first n filings:
+
+```python
+filings = get_filings(2024, 1, form="10-K")
+
+# Get first 10
+first_10 = filings.head(10)
+```
+
+### tail()
+
+Get the last n filings:
+
+```python
+# Get last 10
+last_10 = filings.tail(10)
+```
+
+### sample()
+
+Get a random sample:
+
+```python
+# Get random sample of 10
+random_10 = filings.sample(10)
+```
+
+### latest()
+
+Get most recent filings:
+
+```python
+# Get latest single filing
+latest = filings.latest()
+
+# Get latest 20 filings
+latest_20 = filings.latest(20)
+```
+
+## Search by Company Name
+
+Use `.find()` to search by company name:
+
+```python
+filings = get_filings(2024, 1)
+
+# Find companies with "Technology" in name
+tech = filings.find("Technology")
+
+# Find specific company
+apple = filings.find("Apple")
+
+# Case-insensitive partial match
+results = filings.find("tesla")
+```
+
+## Common Filtering Patterns
+
+### Get Latest 10-K for NASDAQ Companies
+
+```python
+from edgar import get_filings
+
+filings = get_filings(2024, 1, form="10-K")
+nasdaq = filings.filter(exchange="NASDAQ")
+latest_20 = nasdaq.latest(20)
+
+for filing in latest_20:
+    print(f"{filing.company}: {filing.filing_date}")
+```
+
+### Get All 8-K Filings for Specific Companies
+
+```python
+filings = get_filings(2024, 1, form="8-K")
+
+# Filter to FAANG companies
+faang = filings.filter(ticker=["AAPL", "AMZN", "NFLX", "GOOGL", "META"])
+
+print(f"Found {len(faang)} 8-K filings from FAANG")
+```
+
+### Get Financial Reports from Tech Companies in January
+
+```python
+# Get all Q1 filings
+filings = get_filings(2024, 1)
+
+# Filter to financial reports
+financial = filings.filter(form=["10-K", "10-Q"])
+
+# Filter to NASDAQ (proxy for tech-heavy)
+nasdaq = financial.filter(exchange="NASDAQ")
+
+# Filter to January only
+jan = nasdaq.filter(date="2024-01-01:2024-01-31")
+
+print(f"Found {len(jan)} NASDAQ financial reports in January")
+```
+
+### Get Original 10-K Filings (No Amendments)
+
+```python
+filings = get_filings(2024, 1, form="10-K", amendments=False)
+
+# Or filter an existing collection
+all_10k = get_filings(2024, 1, form="10-K")
+original = all_10k.filter(amendments=False)
+```
+
+### Get Filings by Year and Quarter Combinations
+
+```python
+# Single year, single quarter
+q1_2024 = get_filings(2024, 1)
+
+# Single year, multiple quarters
+h1_2024 = get_filings(2024, [1, 2])
+
+# Multiple years, single quarter
+q4_multi_year = get_filings([2022, 2023, 2024], 4)
+
+# Multiple years, all quarters
+multi_year = get_filings([2022, 2023, 2024])
+
+# Year range
+range_2020_2024 = get_filings(range(2020, 2025))  # 2020-2024
+```
+
+## Export Filtered Results
+
+### To DataFrame
+
+```python
+filings = get_filings(2024, 1, form="10-K")
+nasdaq = filings.filter(exchange="NASDAQ")
+
+# Convert to DataFrame
+df = nasdaq.to_pandas()
+
+# Or select specific columns
+df = nasdaq.to_pandas('company', 'filing_date', 'cik', 'accession_no')
+
+print(df.head())
+```
+
+### To Parquet
+
+```python
+filings = get_filings(2024, 1, form="10-K")
+nasdaq = filings.filter(exchange="NASDAQ")
+
+# Save as parquet
+nasdaq.save_parquet("nasdaq_10k_q1_2024.parquet")
+```
+
+## Performance Tips
+
+### Filter Early
+
+**Efficient:**
+```python
+# Filter using get_filings parameters
+filings = get_filings(2024, 1, form="10-K")
+```
+
+**Less Efficient:**
+```python
+# Get everything then filter
+filings = get_filings(2024, 1).filter(form="10-K")
+```
+
+### Use CIK Instead of Ticker
+
+**Efficient:**
+```python
+# Filter by CIK (direct lookup)
+filings = filings.filter(cik=320193)
+```
+
+**Less Efficient:**
+```python
+# Filter by ticker (requires CIK lookup first)
+filings = filings.filter(ticker="AAPL")
+```
+
+### Limit Results Early
+
+```python
+# Get only what you need
+filings = get_filings(2024, 1, form="10-K").head(50)
+
+# Better than processing all then limiting
+all_filings = get_filings(2024, 1, form="10-K")
+# ... process all ...
+limited = all_filings.head(50)
+```
+
+## Error Handling
+
+```python
+from edgar import get_filings
+
+try:
+    filings = get_filings(2024, 1, form="10-K")
+
+    if filings.empty:
+        print("No filings found")
+    else:
+        # Filter
+        nasdaq = filings.filter(exchange="NASDAQ")
+
+        if nasdaq.empty:
+            print("No NASDAQ filings")
+        else:
+            print(f"Found {len(nasdaq)} NASDAQ 10-K filings")
+
+except Exception as e:
+    print(f"Error: {e}")
+```
+
+## See Also
+
+- **[Filings API Reference](../api/filings.md)** - Complete Filings class documentation
+- **[Filing API Reference](../api/filing.md)** - Individual filing operations
+- **[Search Filings Guide](searching-filings.md)** - Finding specific filings
+- **[Current Filings Guide](current-filings.md)** - Access today's filings
+- **[Working with Filings](working-with-filing.md)** - Extract data from filings
