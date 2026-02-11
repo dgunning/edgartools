@@ -61,13 +61,13 @@ def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
             raise
 
 
-def load_company_facts_from_local(cik: int) -> Optional[Dict[str, Any]]:
+def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     """
     Load company facts from local data
     """
     company_facts_dir = get_edgar_data_directory() / "companyfacts"
     if not company_facts_dir.exists():
-        return None
+        raise NoCompanyFactsFound(cik=cik)
     cik_int = int(cik) if isinstance(cik, str) else cik
     company_facts_file = company_facts_dir / f"CIK{cik_int:010}.json"
     if not company_facts_file.exists():
@@ -94,6 +94,8 @@ def get_company_facts(cik: int):
         company_facts_json = load_company_facts_from_local(cik)
     else:
         company_facts_json = download_company_facts_from_sec(cik)
+    if not company_facts_json:
+        raise NoCompanyFactsFound(cik=cik)
     from edgar.entity.parser import EntityFactsParser
     return EntityFactsParser.parse_company_facts(company_facts_json)
 

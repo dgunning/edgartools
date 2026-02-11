@@ -43,6 +43,10 @@ class EntityFactsParser:
         Returns:
             EntityFacts object or None if parsing fails
         """
+        if not json_data:
+            log.error("No company facts data to parse (received %s)", type(json_data).__name__)
+            return None
+
         try:
             cik = int(json_data.get('cik', 0))
             entity_name = json_data.get('entityName', 'Unknown')
