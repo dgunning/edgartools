@@ -1,11 +1,31 @@
 site_name: EdgarTools - Python Library for SEC Data Analysis
 site_description: Access and analyze SEC filings, financial statements, insider trading, and investment fund data
+repo_url: https://github.com/dgunning/edgartools
+repo_name: dgunning/edgartools
+
+extra_css:
+  - stylesheets/extra.css
+
 theme:
   name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
   features:
     - navigation.tabs
     - navigation.sections
-    - navigation.expand
+    #- navigation.expand
     - navigation.indexes
     - navigation.top
     - search.suggest
@@ -50,16 +70,16 @@ nav:
   # ==========================================
   - Filing Types:
     - Overview: data-objects.md
-    - "Annual & Quarterly Reports": concepts/data-objects.md
-    - "Current Events - <strong>8-K</strong>": eightk-filings.md
-    - "Insider Trades - <strong>Form 4</strong>": insider-filings.md
-    - "Institutional Portfolios - <strong>13F-HR</strong>": guides/thirteenf-data-object-guide.md
-    - "Fund Portfolios - <strong>N-PORT</strong>": guides/nport-data-object-guide.md
-    - "Proxy Statements - <strong>DEF 14A</strong>": guides/proxystatement-data-object-guide.md
-    - "Private Offerings - <strong>Form D</strong>": guides/formd-data-object-guide.md
-    - "Insider Sale Notices - <strong>Form 144</strong>": guides/form144-data-object-guide.md
-    - "Fund Voting Records - <strong>N-PX</strong>": guides/npx-data-object-guide.md
-    - "Municipal Advisors - <strong>MA-I</strong>": guides/mai-data-object-guide.md
+    - Annual & Quarterly: concepts/data-objects.md
+    - Current Events (8-K): eightk-filings.md
+    - Insider Trades (Form 4): insider-filings.md
+    - Institutional Holdings (13F): guides/thirteenf-data-object-guide.md
+    - Fund Portfolios (N-PORT): guides/nport-data-object-guide.md
+    - Proxy Statements (DEF 14A): guides/proxystatement-data-object-guide.md
+    - Private Offerings (Form D): guides/formd-data-object-guide.md
+    - Sale Notices (Form 144): guides/form144-data-object-guide.md
+    - Fund Voting (N-PX): guides/npx-data-object-guide.md
+    - Municipal Advisors (MA-I): guides/mai-data-object-guide.md
 
   # ==========================================
   # FINANCIALS - Financial statements & data

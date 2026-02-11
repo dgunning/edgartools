@@ -1,0 +1,80 @@
+/* EdgarTools -- Premium theme */
+
+/* ── Tabs bar ── */
+.md-tabs__link {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* ── Sidebar navigation ── */
+
+/* Wider sidebar to prevent text wrapping */
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary {
+    width: 14rem;
+  }
+  .md-sidebar--primary .md-sidebar__inner {
+    width: 14rem;
+  }
+}
+
+/* All nav links */
+.md-nav__link {
+  font-size: 0.72rem;
+}
+
+/* Section group labels (e.g. "XBRL Deep Dive", "Storage") */
+.md-nav__item--section > .md-nav__link {
+  font-weight: 700;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-default-fg-color--light);
+  margin-top: 0.6rem;
+}
+
+/* Active nav item */
+.md-nav__item .md-nav__link--active {
+  font-weight: 600;
+  color: var(--md-accent-fg-color);
+  border-left: 2px solid var(--md-accent-fg-color);
+  padding-left: calc(0.6rem - 2px);
+}
+
+/* Hover */
+.md-nav__link:focus,
+.md-nav__link:hover {
+  color: var(--md-accent-fg-color);
+}
+
+/* ── Content images (screenshots) ── */
+.md-content img {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.1), 0 1px 3px rgb(0 0 0 / 0.06);
+}
+
+/* ── Headings ── */
+.md-content h2 {
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+/* ── Tables ── */
+.md-typeset table:not([class]) {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+}
+
+.md-typeset table:not([class]) th {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Dark mode adjustments ── */
+[data-md-color-scheme="slate"] .md-content img {
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.3), 0 1px 3px rgb(0 0 0 / 0.2);
+}
