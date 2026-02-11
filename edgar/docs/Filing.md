@@ -1,263 +1,537 @@
-# Filing Class Documentation
+# Filing
 
-## Overview
+Access individual SEC filing content, documents, and financial data.
 
-The `Filing` class is the core object in edgartools for working with individual SEC filings. It provides comprehensive access to filing content, metadata, documents, and related functionality, making it easy to analyze and extract data from SEC filings.
+## Quick Start
 
-## Common Actions
-
-Quick reference for the most frequently used Filing methods:
-
-### Access Filing Content
 ```python
-# Get HTML content
-html = filing.html()
+from edgar import Company
 
-# Get plain text
+# Get a filing
+company = Company("AAPL")
+filing = company.get_filings(form="10-K").latest()
+
+# Access content
 text = filing.text()
-
-# Get markdown formatted content
+html = filing.html()
 markdown = filing.markdown()
-```
 
-### Get Structured Data
-```python
-# Get form-specific object (10-K, 10-Q, 8-K, etc.)
-report = filing.obj()
-
-# Get XBRL financial data
+# Get structured data
 xbrl = filing.xbrl()
+statements = xbrl.statements
+income = statements.income_statement()
+
+# Parse as typed object
+tenk = filing.obj()
+print(tenk.business)
 ```
 
-### View in Browser
-```python
-# Open filing in web browser
-filing.open()
-```
+## Creating a Filing
 
-### Get Attachments
-```python
-# Access all filing attachments
-attachments = filing.attachments
-```
-
-## Constructor
+### From Company Filings
 
 ```python
-Filing(cik: int, company: str, form: str, filing_date: str, accession_no: str)
+company = Company("AAPL")
+filings = company.get_filings(form="10-K")
+filing = filings.latest()
 ```
 
-**Parameters:**
-- `cik`: Company's Central Index Key (integer)
-- `company`: Company name (string) 
-- `form`: SEC form type (e.g., "10-K", "8-K", "DEF 14A")
-- `filing_date`: Date of filing (YYYY-MM-DD format)
-- `accession_no`: Unique SEC accession number
+### From Global Search
 
-## Core Properties
+```python
+from edgar import get_filings
+
+filings = get_filings(2024, 1, form="10-K")
+filing = filings[0]
+```
+
+### From Accession Number
+
+```python
+from edgar import get_by_accession_number
+
+filing = get_by_accession_number("0000320193-23-000106")
+```
+
+### From SGML Source
+
+```python
+# From file path
+filing = Filing.from_sgml("/path/to/filing.txt")
+
+# From SGML text
+filing = Filing.from_sgml_text(full_text_submission)
+```
+
+### From Dictionary
+
+```python
+data = {
+    'cik': 320193,
+    'company': 'Apple Inc.',
+    'form': '10-K',
+    'filing_date': '2023-11-03',
+    'accession_number': '0000320193-23-000106'
+}
+filing = Filing.from_dict(data)
+```
+
+## Properties
+
+### Basic Information
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `cik` | int | Company's Central Index Key |
+| `cik` | int | Central Index Key |
 | `company` | str | Company name |
-| `form` | str | SEC form type |
-| `filing_date` | str | Filing date |
+| `form` | str | Form type (e.g., "10-K") |
+| `filing_date` | str | Filing date (YYYY-MM-DD) |
 | `accession_no` | str | SEC accession number |
 | `accession_number` | str | Alias for accession_no |
+| `period_of_report` | str | Reporting period |
 
-## Document Access
+### Filing Header
 
-### Primary Documents
-- **`document`** - The primary display document (HTML/XHTML)
-- **`primary_documents`** - List of all primary documents
-- **`attachments`** - All filing attachments
-- **`exhibits`** - Filing exhibits
+| Property | Type | Description |
+|----------|------|-------------|
+| `header` | FilingHeader | SGML filing header |
 
-### Content Formats
-- **`html()`** - HTML content of the primary document
-- **`xml()`** - XML content of the primary document  
-- **`text()`** - Plain text version of the document
-- **`markdown()`** - Markdown formatted version
+### Documents & Content
 
-## Financial Data Access
+| Property | Type | Description |
+|----------|------|-------------|
+| `document` | Attachment | Primary display document |
+| `primary_documents` | List[Attachment] | All primary documents |
+| `attachments` | Attachments | All filing attachments |
+| `exhibits` | Attachments | Filing exhibits |
 
-### XBRL Data
+### Financial Data
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `reports` | Reports | Report structure from filing summary |
+| `statements` | Statements | Statement structure |
+
+### Multi-Entity Filings
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `is_multi_entity` | bool | True if multiple entities |
+| `all_ciks` | List[int] | All CIKs in filing |
+| `all_entities` | List[Dict] | All entity information |
+
+### URLs
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `homepage_url` | str | Filing homepage URL |
+| `filing_url` | str | Main document URL |
+| `text_url` | str | Text submission URL |
+| `base_dir` | str | Base directory URL |
+
+## Methods
+
+### Content Access
+
+#### html()
+
+Get HTML content of primary document.
+
 ```python
-# Access structured financial data
-filing.xbrl()  # Returns XBRLInstance with financial statements
-filing.statements  # Direct access to financial statements
+html = filing.html()
 ```
 
-### SGML Data
+Returns HTML string or None if not available.
+
+#### text()
+
+Convert filing to plain text.
+
 ```python
-# Access SGML filing data
-filing.sgml()  # Returns SGMLFiling object
+text = filing.text()
 ```
 
-## Navigation & URLs
+Returns formatted text suitable for reading or analysis.
 
-| Property/Method | Description |
-|----------------|-------------|
-| `homepage` | Filing homepage information |
-| `homepage_url` | URL to the filing homepage |
-| `filing_url` | URL to the main filing document |
-| `text_url` | URL to the text version |
-| `base_dir` | Base directory URL for the filing |
+#### markdown(include_page_breaks=False, start_page_number=0)
 
-## Search & Analysis
+Convert filing to markdown format.
 
-### Content Search
 ```python
-# Search filing content
-results = filing.search("revenue recognition", regex=False)
+# Basic conversion
+md = filing.markdown()
 
-# Search with regex
+# With page breaks
+md = filing.markdown(include_page_breaks=True, start_page_number=1)
+```
+
+**Parameters:**
+- `include_page_breaks` - Include page break markers
+- `start_page_number` - Starting page number for breaks
+
+#### full_text_submission()
+
+Get complete SGML text submission.
+
+```python
+full_text = filing.full_text_submission()
+```
+
+Returns the entire submission file including headers and documents.
+
+#### xml()
+
+Get XML content if primary document is XML.
+
+```python
+xml = filing.xml()
+```
+
+Returns XML string or None.
+
+### Structured Data
+
+#### xbrl()
+
+Get XBRL financial data.
+
+```python
+xbrl = filing.xbrl()
+if xbrl:
+    statements = xbrl.statements
+    income = statements.income_statement()
+    balance = statements.balance_sheet()
+```
+
+Returns XBRL object or None if not available.
+
+**Note:** For 10-K/10-Q filings, this is the primary way to access financial statements.
+
+#### obj()
+
+Parse filing as typed object based on form type.
+
+```python
+# Form-specific objects
+tenk = filing.obj()        # TenK for 10-K filings
+tenq = filing.obj()        # TenQ for 10-Q filings
+eightk = filing.obj()      # EightK for 8-K filings
+form4 = filing.obj()       # Form4 for insider trading
+proxy = filing.obj()       # ProxyStatement for DEF 14A
+```
+
+**Returns by form type:**
+- `10-K` → `TenK`
+- `10-Q` → `TenQ`
+- `8-K` → `EightK`
+- `4` → `Form4`
+- `DEF 14A` → `ProxyStatement`
+- `13F-HR` → `ThirteenF`
+- `SC 13D/G` → `Schedule13`
+- And more...
+
+#### parse()
+
+Parse HTML into structured Document for advanced search.
+
+```python
+document = filing.parse()
+
+# Use for advanced operations
+from edgar.documents.search import DocumentSearch
+searcher = DocumentSearch(document)
+results = searcher.ranked_search("revenue growth", top_k=5)
+```
+
+Returns parsed Document object or None. Use this for:
+- Advanced search and extraction
+- Section-level analysis
+- Structured navigation
+
+**Note:** For simple text, use `text()`. For XBRL data, use `xbrl()`.
+
+### Search & Analysis
+
+#### search(query, regex=False)
+
+Search filing content.
+
+```python
+# Text search
+results = filing.search("revenue recognition")
+
+# Regex search
 results = filing.search(r"\b\d+\.\d+%", regex=True)
 ```
 
-### Document Structure
-- **`sections()`** - Get HTML sections for advanced search
-- **`period_of_report`** - Get the reporting period
+**Parameters:**
+- `query` - Search string or regex pattern
+- `regex` - Use regex instead of text search
 
-## Entity Relationships
+#### sections()
 
-### Company Integration
+Get HTML sections for analysis.
+
 ```python
-# Get the associated Company object
-company = filing.get_entity()
-
-# Convert to company filing with additional data
-company_filing = filing.as_company_filing()
-
-# Find related filings
-related = filing.related_filings()
+sections = filing.sections()
+for section in sections:
+    print(section[:100])
 ```
 
-## Display & Interaction
+### Display & Browser
 
-### Console Display
+#### view()
+
+Display filing in terminal with Rich formatting.
+
 ```python
-# Rich console display
-filing.view()  # Display in console with rich formatting
-
-# String representations
-str(filing)    # Concise string representation
-repr(filing)   # Detailed representation
+filing.view()
 ```
 
-### Browser Integration
+#### open()
+
+Open filing document in web browser.
+
 ```python
-# Open filing in web browser
-filing.open()           # Open main document
-filing.open_homepage()  # Open filing homepage
-
-# Serve filing locally
-filing.serve(port=8000)  # Serve on localhost:8000
-```
-
-## Data Export & Persistence
-
-### Export Formats
-```python
-# Convert to different formats
-filing_dict = filing.to_dict()      # Dictionary
-filing_df = filing.to_pandas()      # DataFrame
-summary_df = filing.summary()       # Summary DataFrame
-```
-
-### Save & Load
-```python
-# Save filing for later use
-filing.save("my_filing.pkl")        # Save to file
-filing.save("/path/to/directory/")  # Save to directory
-
-# Load saved filing
-loaded_filing = Filing.load("my_filing.pkl")
-```
-
-## Class Methods
-
-### Alternative Constructors
-```python
-# Create from dictionary
-filing = Filing.from_dict(data_dict)
-
-# Create from JSON file
-filing = Filing.from_json("filing_data.json")
-
-# Create from SGML data
-filing = Filing.from_sgml(sgml_source)
-```
-
-## Common Usage Patterns
-
-### Basic Filing Analysis
-```python
-# Get a filing and explore its content
-filing = company.get_filings(form="10-K").latest(1)[0]
-
-# Access financial statements
-statements = filing.xbrl()
-income_statement = statements.income_statement
-
-# Search for specific content
-results = filing.search("risk factors")
-
-# View in browser
 filing.open()
 ```
 
-### Working with Attachments
+#### open_homepage()
+
+Open filing homepage in browser.
+
 ```python
-# Get all attachments
-attachments = filing.attachments
-
-# Find specific exhibits
-exhibits = filing.exhibits
-exhibit_99_1 = [ex for ex in exhibits if "99.1" in ex.description]
-
-# Access exhibit content
-if exhibit_99_1:
-    content = exhibit_99_1[0].html()
+filing.open_homepage()
 ```
 
-### Financial Data Extraction
+#### serve(port=8000)
+
+Serve filing on local HTTP server.
+
 ```python
-# Get financial statements
+server = filing.serve(port=8000)
+# Filing accessible at http://localhost:8000
+```
+
+### Persistence
+
+#### save(directory_or_file)
+
+Save filing to disk using pickle.
+
+```python
+# Save to directory (creates accession_number.pkl)
+filing.save("/path/to/directory/")
+
+# Save to specific file
+filing.save("/path/to/filing.pkl")
+```
+
+**Note:** Automatically loads SGML content before saving for offline access.
+
+#### Filing.load(path)
+
+Load saved filing from pickle file.
+
+```python
+filing = Filing.load("/path/to/filing.pkl")
+```
+
+### Company Integration
+
+#### get_entity()
+
+Get Company object for this filing.
+
+```python
+company = filing.get_entity()
+print(company.name)
+```
+
+#### as_company_filing()
+
+Convert to EntityFiling with additional metadata.
+
+```python
+company_filing = filing.as_company_filing()
+```
+
+#### related_filings()
+
+Get all filings related by file number.
+
+```python
+related = filing.related_filings()
+```
+
+### Export
+
+#### to_dict()
+
+Convert to dictionary.
+
+```python
+data = filing.to_dict()
+# {'accession_number': '...', 'cik': 320193, ...}
+```
+
+#### summary()
+
+Get summary as DataFrame.
+
+```python
+df = filing.summary()
+```
+
+#### to_context(detail='standard')
+
+Get AI-optimized text representation.
+
+```python
+# For LLM consumption
+context = filing.to_context('standard')
+print(context)
+```
+
+**Detail levels:**
+- `'minimal'` - Basic info (~100 tokens)
+- `'standard'` - Adds actions and methods (~250 tokens)
+- `'full'` - Adds documents and XBRL status (~500 tokens)
+
+## Common Workflows
+
+### Extract Financial Data
+
+```python
+filing = company.get_filings(form="10-K").latest()
+
+# Via XBRL (recommended)
 xbrl = filing.xbrl()
+income = xbrl.statements.income_statement()
+print(income)
 
-# Access different statement types
-balance_sheet = xbrl.balance_sheet
-income_statement = xbrl.income_statement  
-cash_flow = xbrl.cash_flow_statement
+# Via typed object
+tenk = filing.obj()
+financials = tenk.financials
+if financials:
+    print(financials.income_statement)
+```
 
-# Get specific facts
-revenue = xbrl.get_facts("Revenues")
+### Search Filing Content
+
+```python
+# Parse for structured search
+document = filing.parse()
+from edgar.documents.search import DocumentSearch
+searcher = DocumentSearch(document)
+
+# Find relevant sections
+results = searcher.ranked_search("risk factors", top_k=3)
+for result in results:
+    print(result.text[:200])
+```
+
+### Access Exhibits
+
+```python
+# Get all exhibits
+exhibits = filing.exhibits
+
+# Find specific exhibit
+ex_21 = [ex for ex in exhibits if "21" in ex.description]
+if ex_21:
+    content = ex_21[0].download()
+```
+
+### Multi-Entity Analysis
+
+```python
+# Check if multiple entities
+if filing.is_multi_entity:
+    print(f"Entities: {len(filing.all_entities)}")
+    for entity in filing.all_entities:
+        print(f"  {entity['company']} (CIK {entity['cik']})")
+```
+
+### Compare to Previous Filing
+
+```python
+# Get all filings in series
+related = filing.related_filings()
+
+# Compare to previous
+if len(related) >= 2:
+    current = related[-1]
+    previous = related[-2]
+    print(f"Current: {current.filing_date}")
+    print(f"Previous: {previous.filing_date}")
 ```
 
 ## Error Handling
 
-The Filing class handles various edge cases gracefully:
+### No XBRL Data
 
-- **Missing documents**: Returns None or empty collections
-- **Network errors**: Raises appropriate HTTP exceptions
-- **Malformed data**: Provides informative error messages
-- **File access**: Handles permissions and missing files
+```python
+xbrl = filing.xbrl()
+if xbrl is None:
+    print("No XBRL data available")
+    # Try typed object instead
+    obj = filing.obj()
+```
 
-## Integration with Other Classes
+### Document Not Available
 
-The Filing class works seamlessly with other edgartools components:
+```python
+html = filing.html()
+if html is None:
+    # Try text version
+    text = filing.text()
+```
 
-- **Company**: Get filings from companies, convert back to company context
-- **Filings**: Part of filing collections with filtering and search
-- **XBRLInstance**: Access structured financial data
-- **Attachments**: Work with filing documents and exhibits
+### Network Errors
 
-## Performance Considerations
+```python
+try:
+    filing = get_by_accession_number("0000320193-23-000106")
+except Exception as e:
+    print(f"Could not retrieve filing: {e}")
+```
 
-- **Lazy loading**: Documents and data are loaded only when accessed
-- **Caching**: Network requests are cached to improve performance  
-- **Streaming**: Large documents can be processed in chunks
-- **Async support**: Some operations support asynchronous execution
+## Performance Tips
 
-This comprehensive API makes the Filing class the primary interface for working with SEC filing data in edgartools.
+### Cache Parsed Documents
+
+```python
+# parse() is cached - reuse the same filing
+document = filing.parse()
+# Second call returns cached result
+document_again = filing.parse()
+```
+
+### Use SGML for Offline Access
+
+```python
+# Load SGML once
+sgml = filing.sgml()
+
+# Access documents from SGML (no network)
+html = sgml.html()
+attachments = sgml.attachments
+```
+
+### Save for Later
+
+```python
+# Save filing with all data
+filing.save("filing.pkl")
+
+# Load instantly later (no network)
+filing = Filing.load("filing.pkl")
+```
+
+## See Also
+
+- `filing.docs` - Display this documentation in terminal
+- [Filings](Filings.md) - Working with filing collections
+- [Company](../entity/docs/Company.md) - Company-level filing access
+- [XBRL](../xbrl/docs/XBRL.md) - XBRL financial data
