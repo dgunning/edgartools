@@ -51,14 +51,15 @@ nav:
   - Filing Types:
     - Overview: data-objects.md
     - "Annual & Quarterly Reports": concepts/data-objects.md
-    - "Current Events (8-K)": eightk-filings.md
-    - "Insider Trades (Form 4)": insider-filings.md
-    - "Institutional Portfolios (13F)": guides/thirteenf-data-object-guide.md
-    - "Proxy Statements (DEF 14A)": guides/proxystatement-data-object-guide.md
-    - "Private Offerings (Form D)": guides/formd-data-object-guide.md
-    - "Insider Sale Notices (Form 144)": guides/form144-data-object-guide.md
-    - "Fund Voting Records (N-PX)": guides/npx-data-object-guide.md
-    - "Municipal Advisors (MA-I)": guides/mai-data-object-guide.md
+    - "Current Events - <strong>8-K</strong>": eightk-filings.md
+    - "Insider Trades - <strong>Form 4</strong>": insider-filings.md
+    - "Institutional Portfolios - <strong>13F-HR</strong>": guides/thirteenf-data-object-guide.md
+    - "Fund Portfolios - <strong>N-PORT</strong>": guides/nport-data-object-guide.md
+    - "Proxy Statements - <strong>DEF 14A</strong>": guides/proxystatement-data-object-guide.md
+    - "Private Offerings - <strong>Form D</strong>": guides/formd-data-object-guide.md
+    - "Insider Sale Notices - <strong>Form 144</strong>": guides/form144-data-object-guide.md
+    - "Fund Voting Records - <strong>N-PX</strong>": guides/npx-data-object-guide.md
+    - "Municipal Advisors - <strong>MA-I</strong>": guides/mai-data-object-guide.md
 
   # ==========================================
   # FINANCIALS - Financial statements & data
