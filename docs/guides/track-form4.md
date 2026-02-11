@@ -1,15 +1,15 @@
 ---
-title: "Tracking Insider Trading with Form 4"
-description: "A comprehensive guide to analyzing insider trading activity using Form 4 filings with edgartools"
+title: "Track Insider Trading: Analyze SEC Form 4 Buy and Sell Transactions"
+description: "Monitor insider trading activity from SEC Form 4 filings. Track purchases, sales, and option exercises by company officers and directors."
 category: "guides"
 difficulty: "intermediate"
 time_required: "20 minutes"
 prerequisites: ["installation", "concepts/sec-filings"]
 related: ["insider-filings", "data-objects"]
-keywords: ["Form 4", "insider trading", "ownership", "transactions", "SEC filings", "directors", "officers"]
+keywords: ["Form 4", "insider trading", "ownership", "transactions", "SEC filings", "directors", "officers", "buy", "sell"]
 ---
 
-# Tracking Insider Trading with Form 4
+# Track Insider Trading: Analyze SEC Form 4 Buy and Sell Transactions
 
 ## Introduction
 

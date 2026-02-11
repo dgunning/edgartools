@@ -1,4 +1,8 @@
-# Find Companies by Name/Ticker
+---
+description: Look up any SEC-registered company by ticker symbol, CIK number, or company name using edgartools.
+---
+
+# Find SEC Companies by Ticker, CIK, or Name
 
 Learn how to locate companies in the SEC database using tickers, CIKs, or company names.
 

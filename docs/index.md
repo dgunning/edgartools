@@ -1,5 +1,8 @@
+---
+description: Python library for SEC EDGAR filings. Extract financial statements, track insider trading, analyze 13F holdings, and parse XBRL data.
+---
 
-# EdgarTools
+# EdgarTools: The Python Library for SEC EDGAR Data
 
 **Powerful Python library for SEC data analysis and financial research**
 

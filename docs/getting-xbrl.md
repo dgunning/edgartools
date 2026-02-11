@@ -1,3 +1,9 @@
+---
+description: Parse XBRL financial data from SEC EDGAR filings. Access structured financial statements and individual facts.
+---
+
+# Getting XBRL Data from SEC Filings
+
 ## Overview
 
 The `edgar.xbrl` module provides a powerful yet user-friendly API for processing **XBRL (eXtensible Business Reporting Language)** financial data from SEC filings. 

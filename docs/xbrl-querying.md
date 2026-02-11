@@ -1,4 +1,8 @@
-# XBRL Query Functionality
+---
+description: Query and filter XBRL financial facts from SEC filings. Access specific line items, dimensions, and time periods.
+---
+
+# Query XBRL Financial Facts from SEC Filings
 
 You can query the facts inside an XBRL instance using the XBRL query API. This allows you to get access to specific financial data, filter results and perform analysis on the financial facts contained within a single XBRL filing.
 

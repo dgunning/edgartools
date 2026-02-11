@@ -1,4 +1,8 @@
-# Company Facts API
+---
+description: Access historical financial data from SEC XBRL filings. Query revenue, earnings, assets, and any XBRL concept over time.
+---
+
+# Company Facts: Query Historical SEC Financial Data with Python
 
 The Company Facts API provides comprehensive access to SEC financial data through an intuitive, AI-ready interface. Get financial statements, key metrics, and detailed company information with just a few lines of code.
 

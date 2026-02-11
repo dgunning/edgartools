@@ -54,7 +54,7 @@ nav:
     - "Current Events (8-K)": eightk-filings.md
     - "Insider Trades (Form 4)": insider-filings.md
     - "Institutional Portfolios (13F)": guides/thirteenf-data-object-guide.md
-    - "Proxy & Governance (DEF 14A)": guides/proxystatement-data-object-guide.md
+    - "Proxy Statements (DEF 14A)": guides/proxystatement-data-object-guide.md
     - "Private Offerings (Form D)": guides/formd-data-object-guide.md
     - "Insider Sale Notices (Form 144)": guides/form144-data-object-guide.md
     - "Fund Voting Records (N-PX)": guides/npx-data-object-guide.md
@@ -65,14 +65,14 @@ nav:
   # ==========================================
   - Financials:
     - Overview: guides/financial-data.md
-    - Extract Statements: guides/extract-statements.md
+    - Extract Financial Statements: guides/extract-statements.md
     - Company Facts: guides/company-facts.md
     - Multi-Period Analysis: guides/multi-year-financial-data-api.md
     - Stock Splits & EPS Normalization: guides/stock-splits-eps-normalization.md
     - XBRL Deep Dive:
       - Overview: xbrl/index.md
-      - Query Facts: xbrl-querying.md
-      - Getting XBRL: getting-xbrl.md
+      - Query XBRL Facts: xbrl-querying.md
+      - Getting XBRL Data: getting-xbrl.md
       - Dimensions: xbrl/concepts/dimension-handling.md
       - Standardization: xbrl/concepts/standardization.md
       - Footnotes: guides/xbrl-footnotes.md

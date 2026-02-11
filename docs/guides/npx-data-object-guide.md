@@ -1,4 +1,8 @@
-# NPX Data Object Guide
+---
+description: Access mutual fund proxy voting data from SEC N-PX filings. See how funds voted on shareholder proposals.
+---
+
+# N-PX: Parse Mutual Fund Proxy Voting Records
 
 Form N-PX is an annual proxy voting record filed by registered investment companies (mutual funds) to report how they voted on proxy matters for securities they held during the 12-month period ending June 30. This guide details all data available from the `NPX` class for building views.
 

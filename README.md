@@ -132,6 +132,60 @@ form4 = form4_filing.obj()
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
+## Use Cases
+
+### Analyze 13F Institutional Holdings & Hedge Fund Portfolios
+
+Track what hedge funds and institutional investors own by parsing SEC 13F filings. EdgarTools extracts complete portfolio holdings with position sizes, values, and quarter-over-quarter changes.
+
+```python
+from edgar import get_filings
+thirteenf = get_filings(form="13F-HR")[0].obj()
+thirteenf.holdings  # DataFrame of all portfolio positions
+```
+
+### Track Insider Trading with SEC Form 4
+
+Monitor insider buying and selling activity from SEC Form 4 filings. See which executives are purchasing or selling shares, option exercises, and net position changes.
+
+```python
+company = Company("TSLA")
+form4 = company.get_filings(form="4")[0].obj()
+form4.transactions  # Insider buy/sell transactions
+```
+
+### Extract Financial Statements from 10-K and 10-Q Filings
+
+Get income statements, balance sheets, and cash flow statements from SEC annual and quarterly reports. Data is parsed from XBRL with standardized labels for cross-company comparison.
+
+```python
+financials = Company("MSFT").get_financials()
+financials.balance_sheet()   # Balance sheet with all line items
+financials.income_statement()  # Revenue, net income, EPS
+```
+
+### Parse 8-K Current Reports for Corporate Events
+
+Access material corporate events as they happen -- earnings releases, acquisitions, executive changes, and more. EdgarTools parses 8-K filings into structured items with full text extraction.
+
+```python
+eightk = get_filings(form="8-K")[0].obj()
+eightk.items  # List of reported event items
+```
+
+### Query XBRL Financial Data Across Companies
+
+Access structured XBRL financial facts for any SEC filer. Query specific line items like revenue or total assets over time, and compare across companies using standardized concepts.
+
+```python
+facts = Company("AAPL").get_facts()
+facts.to_pandas("us-gaap:Revenues")  # Revenue history as DataFrame
+```
+
+<p align="center">
+  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+</p>
+
 <p align="center">
   <img src="docs/images/sections/section-features.svg" alt="Key Features">
 </p>

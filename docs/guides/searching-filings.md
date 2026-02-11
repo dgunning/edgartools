@@ -1,4 +1,8 @@
-# Search for Specific Filings
+---
+description: Search SEC EDGAR filings by form type, date range, company, and keywords.
+---
+
+# Search and Filter SEC Filings by Form, Date, and Company
 
 Learn how to find the exact SEC filings you need using various search criteria and filtering methods.
 

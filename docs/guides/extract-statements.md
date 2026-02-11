@@ -1,4 +1,8 @@
-# Extract Financial Statements
+---
+description: Extract income statements, balance sheets, and cash flow from SEC 10-K and 10-Q filings using Python and XBRL.
+---
+
+# Extract Financial Statements from SEC Filings with Python
 
 Learn how to extract and work with financial statements from SEC filings using EdgarTools' powerful XBRL processing capabilities.
 

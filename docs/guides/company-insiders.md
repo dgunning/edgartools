@@ -1,4 +1,8 @@
-# Getting a list of company insiders
+---
+description: Get a list of company insiders from SEC filings including officers, directors, and 10%+ beneficial owners.
+---
+
+# Company Insiders: Find Officers, Directors, and Major Shareholders
 
 This guide shows how to get a list of insiders for a company by writing a simple script to loop through their Form 4 filings and getting the **name** and **position**.
 

@@ -1,4 +1,8 @@
-# ProxyStatement Data Object Guide
+---
+description: Extract executive compensation, board composition, and shareholder proposals from SEC proxy statement filings.
+---
+
+# Proxy Statements (DEF 14A): Parse Executive Compensation and Governance Data
 
 Form DEF 14A is a definitive proxy statement filed by public companies before annual shareholder meetings. It contains critical information about executive compensation, board composition, shareholder voting matters, and corporate governance. This guide details all data available from the `ProxyStatement` class for building views.
 

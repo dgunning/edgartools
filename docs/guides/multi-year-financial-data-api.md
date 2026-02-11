@@ -1,4 +1,8 @@
-# Multi-Year Financial Data API Guide
+---
+description: Compare financial performance across multiple years using SEC filing data. Track revenue, margins, and growth trends.
+---
+
+# Multi-Year Financial Analysis: Compare SEC Data Across Periods
 
 Learn how to access multiple years of financial statements and serve them through FastAPI endpoints for web applications and data analysis.
 

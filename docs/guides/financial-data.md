@@ -1,4 +1,8 @@
-# Financial Data
+---
+description: Get financial statements from SEC filings in Python. Extract income statements, balance sheets, and cash flow with edgartools.
+---
+
+# Financial Statements: Income, Balance Sheet, and Cash Flow from SEC Filings
 
 **Get financial statements from SEC filings in Python**
 

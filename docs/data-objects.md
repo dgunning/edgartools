@@ -1,4 +1,8 @@
-# Filing Types
+---
+description: Convert any SEC filing into a structured Python object. Supported forms include 10-K, 10-Q, 8-K, 13F, Form 4, DEF 14A, and more.
+---
+
+# SEC Filing Data Objects: Parsed Python Objects for Every Form Type
 
 Every SEC filing can be parsed into a structured Python object with one call:
 
