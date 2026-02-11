@@ -8,7 +8,6 @@ analytics and AI-ready interfaces.
 import warnings
 from collections import defaultdict
 from datetime import date
-from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
 if TYPE_CHECKING:
@@ -76,7 +75,9 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     return json.loads(company_facts_file.read_text())
 
 
-@lru_cache(maxsize=32)
+_company_facts_cache: Dict[int, 'EntityFacts'] = {}
+
+
 def get_company_facts(cik: int):
     """
     Get company facts for a given CIK.
@@ -90,14 +91,26 @@ def get_company_facts(cik: int):
     Raises:
         NoCompanyFactsFound: If no facts are found for the given CIK
     """
+    cached = _company_facts_cache.get(cik)
+    if cached is not None:
+        return cached
+
     if is_using_local_storage():
         company_facts_json = load_company_facts_from_local(cik)
     else:
         company_facts_json = download_company_facts_from_sec(cik)
     if not company_facts_json:
-        raise NoCompanyFactsFound(cik=cik)
+        warnings.warn(
+            f"Could not retrieve company facts for CIK {cik}. "
+            "This is likely a network issue — check your connection to data.sec.gov and try again.",
+            stacklevel=2,
+        )
+        return None
     from edgar.entity.parser import EntityFactsParser
-    return EntityFactsParser.parse_company_facts(company_facts_json)
+    result = EntityFactsParser.parse_company_facts(company_facts_json)
+    if result is not None:
+        _company_facts_cache[cik] = result
+    return result
 
 
 class EntityFacts:
