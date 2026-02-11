@@ -75,6 +75,39 @@ class UnitNormalizer:
         'CHF': ['CHF', 'SWISS FRANC', 'SWISS FRANCS', 'chf'],
         'AUD': ['AUD', 'AUSTRALIAN DOLLAR', 'AUSTRALIAN DOLLARS', 'aud'],
         'CNY': ['CNY', 'YUAN', 'CHINESE YUAN', 'cny', '¥'],
+        # Common IFRS filer currencies
+        'TWD': ['TWD'],
+        'KRW': ['KRW'],
+        'BRL': ['BRL'],
+        'INR': ['INR'],
+        'ARS': ['ARS'],
+        'MXN': ['MXN'],
+        'ZAR': ['ZAR'],
+        'SEK': ['SEK'],
+        'NOK': ['NOK'],
+        'DKK': ['DKK'],
+        'HKD': ['HKD'],
+        'SGD': ['SGD'],
+        'NZD': ['NZD'],
+        'ILS': ['ILS'],
+        'CLP': ['CLP'],
+        'COP': ['COP'],
+        'PEN': ['PEN'],
+        'PHP': ['PHP'],
+        'THB': ['THB'],
+        'IDR': ['IDR'],
+        'MYR': ['MYR'],
+        'PLN': ['PLN'],
+        'CZK': ['CZK'],
+        'HUF': ['HUF'],
+        'TRY': ['TRY'],
+        'RUB': ['RUB'],
+        'SAR': ['SAR'],
+        'AED': ['AED'],
+        'NGN': ['NGN'],
+        'EGP': ['EGP'],
+        'KES': ['KES'],
+        'VND': ['VND'],
     }
 
     # Share unit mappings
@@ -201,6 +234,9 @@ class UnitNormalizer:
             return UnitType.TIME
         elif normalized in cls.AREA_MAPPINGS:
             return UnitType.AREA
+        elif len(normalized) == 3 and normalized.isalpha() and normalized.isupper():
+            # Treat any 3-letter uppercase code as a currency (ISO 4217 convention)
+            return UnitType.CURRENCY
         else:
             return UnitType.OTHER
 

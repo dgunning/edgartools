@@ -744,7 +744,7 @@ class EntityFacts:
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
-            strict_unit_match=True,
+            strict_unit_match=False,
             annual=annual
         )
 
@@ -997,8 +997,8 @@ class EntityFacts:
 
         for concept in group.synonyms:
             synonyms_tried.append(concept)
-            # Try both with and without namespace prefix
-            for concept_variant in [concept, f'us-gaap:{concept}']:
+            # Try with all known taxonomy prefixes
+            for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
                 fact = self.get_fact(concept_variant, period)
                 if fact and fact.numeric_value is not None:
                     unit_result = UnitNormalizer.get_normalized_value(
@@ -1051,8 +1051,8 @@ class EntityFacts:
 
         found_tags = []
         for tag in group.synonyms:
-            # Check if tag exists in facts
-            for variant in [tag, f'us-gaap:{tag}']:
+            # Check if tag exists in facts (try all known taxonomy prefixes)
+            for variant in [tag, f'us-gaap:{tag}', f'ifrs-full:{tag}']:
                 fact = self.get_fact(variant)
                 if fact is not None:
                     found_tags.append(tag)
@@ -1689,8 +1689,8 @@ class EntityFacts:
 
         # Try each concept variant in priority order
         for concept in concept_variants:
-            # Try both with and without namespace prefix
-            for concept_variant in [concept, f'us-gaap:{concept}']:
+            # Try with all known taxonomy prefixes
+            for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
                 # Use annual fact if requested and no specific period provided
                 if annual and period is None:
                     fact = self.get_annual_fact(concept_variant)

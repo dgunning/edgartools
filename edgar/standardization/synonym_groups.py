@@ -294,6 +294,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
                 'OperatingIncomeLoss',
                 'OperatingIncome',
                 'IncomeLossFromContinuingOperationsBeforeInterestAndTaxes',
+                # IFRS variant
+                'ProfitLossFromOperatingActivities',
             ],
             description='Operating income/loss',
             category='income_statement'
@@ -326,6 +328,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
                 'IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest',
                 'IncomeLossFromContinuingOperationsBeforeIncomeTaxes',
                 'IncomeLossBeforeIncomeTaxes',
+                # IFRS variant
+                'ProfitLossBeforeTax',
             ],
             description='Income before income taxes',
             category='income_statement'
@@ -335,6 +339,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             synonyms=[
                 'IncomeTaxExpenseBenefit',
                 'IncomeTaxesPaidNet',
+                # IFRS variant
+                'IncomeTaxExpenseContinuingOperations',
             ],
             description='Income tax expense/benefit',
             category='income_statement'
@@ -348,6 +354,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
                 'NetEarnings',
                 'NetIncomeLossAttributableToParent',
                 'IncomeLossFromContinuingOperations',
+                # IFRS variants
+                'ProfitLossAttributableToOwnersOfParent',
             ],
             description='Net income/loss',
             category='income_statement'
@@ -356,6 +364,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='earnings_per_share_basic',
             synonyms=[
                 'EarningsPerShareBasic',
+                # IFRS variant
+                'BasicEarningsLossPerShare',
             ],
             description='Basic earnings per share',
             category='income_statement'
@@ -364,6 +374,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='earnings_per_share_diluted',
             synonyms=[
                 'EarningsPerShareDiluted',
+                # IFRS variant
+                'DilutedEarningsLossPerShare',
             ],
             description='Diluted earnings per share',
             category='income_statement'
@@ -656,6 +668,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
                 'TotalEquity',
                 'PartnersCapital',
                 'MembersEquity',
+                # IFRS variant
+                'EquityAttributableToOwnersOfParent',
             ],
             description='Total stockholders equity',
             category='balance_sheet'
@@ -665,6 +679,8 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             synonyms=[
                 'CommonStockSharesOutstanding',
                 'WeightedAverageNumberOfSharesOutstandingBasic',
+                # IFRS variant
+                'NumberOfSharesOutstanding',
             ],
             description='Common shares outstanding',
             category='balance_sheet'
