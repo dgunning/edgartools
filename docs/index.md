@@ -12,6 +12,16 @@ EdgarTools makes it simple to access, analyze, and extract insights from SEC fil
 
 ## What You Can Do
 
+**Get Key Company Data**
+
+Access shares outstanding, public float, and other key data points with simple properties.
+
+```python
+company = Company("AAPL")
+company.shares_outstanding   # 15115785000.0
+company.public_float          # 2899948348000.0
+```
+
 **Analyze Company Financials**
 
 Extract financial statements, calculate ratios, and track performance over time.

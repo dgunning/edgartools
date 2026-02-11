@@ -60,7 +60,27 @@ c = Company("AAPL")  # Apple Inc.
 
 ![AAPL](images/AAPL.png)
 
-## Step 6: Getting filings for a Company
+## Step 6: Key Company Data
+
+Once you have a company, you can access key data points as simple properties:
+
+```python
+c = Company("AAPL")
+
+# Shares outstanding
+c.shares_outstanding
+# 15115785000.0
+
+# Public float
+c.public_float
+# 2899948348000.0
+
+# Industry
+c.industry
+# 'ELECTRONIC COMPUTERS'
+```
+
+## Step 7: Getting filings for a Company
 You can retrieve all filings for a company using the `company.get_filings` method:
 
 ```python
@@ -70,7 +90,7 @@ aapl_filings = c.get_filings()
 
 ![AAPL Filings](images/aapl-filings.png)
 
-## Step 7: Insider Filings for Apple Inc.
+## Step 8: Insider Filings for Apple Inc.
 
 To analyze insider trading activity for Apple Inc., filter the filings for Form 4:
 
@@ -93,9 +113,10 @@ In 5 minutes, you:
 2. ✅ **Retrieved and filtered** SEC filings
 3. ✅ **Focused on insider trading** with Form 4
 4. ✅ **Analyzed a specific company** (Apple Inc.)
-5. ✅ **Extracted structured data** from filings
-6. ✅ **Converted filings to data objects** for easy analysis
-7. ✅ **Explored company filings** and insider activity
+5. ✅ **Accessed key company data** like shares outstanding and public float
+6. ✅ **Extracted structured data** from filings
+7. ✅ **Converted filings to data objects** for easy analysis
+8. ✅ **Explored company filings** and insider activity
 
 ## Next Steps
 

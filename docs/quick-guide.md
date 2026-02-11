@@ -98,6 +98,8 @@
 |------------------------------------------|---------------------------------------------------------------|
 | Get a company by ticker                  | `company = Company("AAPL")`                                   |
 | Get a company by CIK                     | `company = Company("0000320193")`                             |
+| Get shares outstanding                   | `company.shares_outstanding`                                  |
+| Get public float                         | `company.public_float`                                        |
 | Get company facts                        | `company.get_facts()`                                         |
 | Get company facts as a pandas dataframe  | `company.get_facts().to_pandas()`                             |
 | Get company filings                      | `company.get_filings()`                                       |

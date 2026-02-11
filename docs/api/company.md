@@ -153,6 +153,34 @@ Whether the company data was found in SEC database.
 print(company.not_found)  # False if found, True if not
 ```
 
+### Key Metrics
+
+#### shares_outstanding
+```python
+@property
+def shares_outstanding(self) -> Optional[float]
+```
+Number of common shares outstanding, sourced from SEC company facts.
+
+```python
+company = Company("AAPL")
+print(company.shares_outstanding)
+# 15115785000.0
+```
+
+#### public_float
+```python
+@property
+def public_float(self) -> Optional[float]
+```
+Public float value in dollars, sourced from SEC company facts.
+
+```python
+company = Company("AAPL")
+print(company.public_float)
+# 2899948348000.0
+```
+
 ## Filing Access
 
 ### get_filings()
@@ -571,9 +599,13 @@ print(f"CIK: {company.cik}")
 print(f"Industry: {company.industry}")
 print(f"Fiscal Year End: {company.fiscal_year_end}")
 
+# Key metrics — simple property access
+print(f"Shares Outstanding: {company.shares_outstanding:,.0f}")
+print(f"Public Float: ${company.public_float:,.0f}")
+
 # Get recent filings
 recent_filings = company.get_filings(
-    form=["10-K", "10-Q"], 
+    form=["10-K", "10-Q"],
     filing_date="2023-01-01:",
     limit=5
 )
