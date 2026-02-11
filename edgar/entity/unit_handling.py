@@ -234,9 +234,6 @@ class UnitNormalizer:
             return UnitType.TIME
         elif normalized in cls.AREA_MAPPINGS:
             return UnitType.AREA
-        elif len(normalized) == 3 and normalized.isalpha() and normalized.isupper():
-            # Treat any 3-letter uppercase code as a currency (ISO 4217 convention)
-            return UnitType.CURRENCY
         else:
             return UnitType.OTHER
 

@@ -1200,9 +1200,10 @@ class Company(Entity):
             for name in concepts:
                 if name in concept_facts:
                     collected.extend(concept_facts[name])
-                prefixed = f"us-gaap:{name}"
-                if prefixed in concept_facts:
-                    collected.extend(concept_facts[prefixed])
+                for prefix in ['us-gaap', 'ifrs-full']:
+                    prefixed = f"{prefix}:{name}"
+                    if prefixed in concept_facts:
+                        collected.extend(concept_facts[prefixed])
             return collected
 
         net_income_facts = _collect_facts([
@@ -1225,6 +1226,7 @@ class Company(Entity):
                 candidates.append(concept_name.split(":", 1)[1])
             else:
                 candidates.append(f"us-gaap:{concept_name}")
+                candidates.append(f"ifrs-full:{concept_name}")
 
             for name in candidates:
                 for fact in concept_facts.get(name, []):
@@ -1280,7 +1282,7 @@ class Company(Entity):
 
         # Handle concept name normalization
         if ':' not in concept:
-            concept_candidates = [concept, f'us-gaap:{concept}']
+            concept_candidates = [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']
         else:
             concept_candidates = [concept]
 
