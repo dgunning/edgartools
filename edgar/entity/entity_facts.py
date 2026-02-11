@@ -744,7 +744,6 @@ class EntityFacts:
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
-            strict_unit_match=False,
             annual=annual
         )
 
@@ -1005,7 +1004,7 @@ class EntityFacts:
                         fact=fact,
                         target_unit=target_unit,
                         apply_scale=True,
-                        strict_unit_match=False
+                        strict_unit_match=unit is not None  # Strict when user explicitly specifies unit
                     )
 
                     if unit_result.success:
@@ -1664,7 +1663,7 @@ class EntityFacts:
                                       unit: Optional[str] = None,
                                       fallback_calculation: Optional[Callable] = None,
                                       return_detailed: bool = False,
-                                      strict_unit_match: bool = False,
+                                      strict_unit_match: Optional[bool] = None,
                                       annual: bool = True) -> Optional[float]:
         """
         Core method for retrieving standardized concept values with enhanced unit handling.
@@ -1676,6 +1675,7 @@ class EntityFacts:
             fallback_calculation: Optional function to calculate value from components
             return_detailed: If True, return UnitResult instead of just value
             strict_unit_match: If True, require exact unit match. If False, allow compatible units.
+                              If None (default), uses strict matching when unit is explicitly provided.
             annual: If True and period is None, prefer annual (FY) facts. Falls back to most
                    recent if no annual facts available. Default: True
 
@@ -1686,6 +1686,10 @@ class EntityFacts:
 
         # Default to USD if no unit specified
         target_unit = unit or 'USD'
+
+        # Use strict matching when the caller explicitly specified a unit
+        if strict_unit_match is None:
+            strict_unit_match = unit is not None
 
         # Try each concept variant in priority order
         for concept in concept_variants:
