@@ -28,6 +28,7 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 
 ### Financial Statements (XBRL)
 - **extract-revenue-earnings-python.ipynb** - Extract revenue and earnings from SEC filings
+- **compare-company-financials-python.ipynb** - Compare company financials with Python
 - **Viewing-Financial-Statements.ipynb** - Extract financial statements from SEC filings
 - **Reading-Data-From-XBRL.ipynb** - Parse XBRL financial data from SEC EDGAR
 - **XBRL2-Cashflow-Statements.ipynb** - Analyze cash flow statements
