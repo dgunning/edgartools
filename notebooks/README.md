@@ -43,7 +43,8 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
 
 ### Insider Trading
-- **Initial-Insider-Transactions.ipynb** - Analyze insider trading from Form 3/4/5
+- **insider-trading-sec-form4-python.ipynb** - Track insider trading from SEC Form 4 with Python
+- **Initial-Insider-Transactions.ipynb** - Deep analysis of initial insider ownership (Form 3)
 
 ## Running on Google Colab
 
