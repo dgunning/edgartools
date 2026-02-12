@@ -153,6 +153,21 @@ npx.votes                                  # vote records by proposal
 
 ---
 
+## ABS Distribution Reports (Form 10-D)
+
+Extract structured CMBS loan and property data from asset-backed securities distribution reports.
+
+```python
+ten_d = filing.obj()                       # TenD (CMBS only)
+ten_d.loans                                # loan-level DataFrame
+ten_d.properties                           # property-level DataFrame
+ten_d.asset_data.summary()                 # pool statistics
+```
+
+[:octicons-arrow-right-24: ABS Distribution Reports guide](guides/tend-data-object-guide.md)
+
+---
+
 ## Municipal Advisors (MA-I)
 
 Look up municipal advisor registrations and disciplinary history.
