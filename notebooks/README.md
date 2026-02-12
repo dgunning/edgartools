@@ -57,6 +57,9 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **Fund-Filings.ipynb** - Overview of fund filing types
 - **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
 
+### Beneficial Ownership
+- **beneficial-ownership-sec-python.ipynb** - Track beneficial ownership from SEC Schedule 13D/G with Python
+
 ### Executive Compensation
 - **executive-compensation-sec-python.ipynb** - Extract executive compensation from SEC proxy statements with Python
 
