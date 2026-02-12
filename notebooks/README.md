@@ -1,66 +1,59 @@
 # EdgarTools Notebooks
 
-Interactive Jupyter notebooks demonstrating EdgarTools functionality.
+Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- free, no API key required.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/01_getting_started.ipynb)
 
 ## How to Use
 
-1. Install EdgarTools: `pip install edgartools`
-2. Open any notebook in Jupyter Lab, VS Code, or Google Colab
-3. Run cells to see examples in action
+1. Click any "Open in Colab" badge to run instantly in your browser
+2. Or install locally: `pip install edgartools`
+3. Open any notebook in Jupyter Lab, VS Code, or Google Colab
 
-## Notebook Categories
+## Notebooks
 
-### 📚 Beginner (`beginner/`)
-Start here if you're new to EdgarTools or SEC filings:
+### Getting Started
+- **01_getting_started.ipynb** - Get started with SEC filings in Python
 - **Beginners-Guide.ipynb** - Complete introduction to EdgarTools
 - **Beginners-filings-attachments.ipynb** - Working with filing attachments
-- **Ticker-Search-with-edgartools.ipynb** - Finding companies by ticker
+- **Ticker-Search-with-edgartools.ipynb** - Search SEC filings by ticker symbol
+- **02_troubleshooting_ssl.ipynb** - Troubleshooting SSL connection issues
 
-### 📁 Filings (`filings/`)
-Working with SEC filings and filtering:
-- **Paging-Through-Filings.ipynb** - Navigating large filing collections
-- **Filtering-by-industry.ipynb** - Filter companies by industry/SIC code
-- **Extract-Earnings-Releases.ipynb** - Extract earnings releases from 8-Ks
+### Filings
+- **Paging-Through-Filings.ipynb** - Browse and navigate SEC filing collections
+- **Filtering-by-industry.ipynb** - Filter SEC filings by industry/SIC code
+- **Extract-Earnings-Releases.ipynb** - Extract earnings releases from 8-K filings
 
-### 📊 XBRL Financial Data (`xbrl/`)
-Comprehensive XBRL parsing and financial statement analysis:
-- **Reading-Data-From-XBRL.ipynb** - Introduction to XBRL data extraction
-- **Viewing-Financial-Statements.ipynb** - Display financial statements
-- **XBRL2-** series - Deep dives into XBRL features (13 notebooks)
-  - Cashflow, Income, Balance Sheet statements
-  - Fact queries and custom tags
-  - Financial ratios and fraud analysis
-  - Period views and quarterly statements
-  - Statement stitching across filings
+### Financial Statements (XBRL)
+- **Viewing-Financial-Statements.ipynb** - Extract financial statements from SEC filings
+- **Reading-Data-From-XBRL.ipynb** - Parse XBRL financial data from SEC EDGAR
+- **XBRL2-Cashflow-Statements.ipynb** - Analyze cash flow statements
+- **XBRL2-StandardizedStatements.ipynb** - Standardized financial statements
+- **XBRL2-FactQueries.ipynb** - Query XBRL facts with the enhanced API
+- **XBRL2-PeriodViews.ipynb** - Multi-period financial statement views
+- **XBRL2-QuarterlyStatements.ipynb** - Quarterly financial statement analysis
+- **XBRL2-StitchingStatements.ipynb** - Stitch statements across multiple filings
+- **XBRL2-CustomTags.ipynb** - Handle custom company XBRL tags
+- **XBRL2-NonFinancialStatements.ipynb** - Non-financial disclosures and segments
+- **XBRL2-Instance-Only-XBRL.ipynb** - Parse instance-only XBRL documents
+- **XBRLConcepts.ipynb** - Explore XBRL taxonomy concepts
 
-### 💼 Investment Funds (`funds/`)
-Working with fund filings (N-CSR, NPORT, etc.):
+### Investment Funds
 - **Fund-Filings.ipynb** - Overview of fund filing types
-- **Fund-Derivatives.ipynb** - Analyzing fund derivative holdings
-- **Funds.ipynb** - Fund company data access
+- **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
 
-### 👥 Insider Trading (`insiders/`)
-Tracking insider transactions (Form 3, 4, 5):
-- **Initial-Insider-Transactions.ipynb** - Parse and analyze insider trades
-
-### 🔍 Other (`other/`)
-Additional features and utilities:
-- **ConceptSearch.ipynb** - Search for XBRL concepts
+### Insider Trading
+- **Initial-Insider-Transactions.ipynb** - Analyze insider trading from Form 3/4/5
 
 ## Running on Google Colab
 
-Click the "Open in Colab" badge (if present) or:
+Click the "Open in Colab" badge at the top of any notebook, or:
 1. Go to https://colab.research.google.com/
-2. File → Upload notebook
-3. Select any `.ipynb` file from this directory
+2. File > Open notebook > GitHub tab
+3. Enter `dgunning/edgartools` and select a notebook
 
-## Contributing
+## Resources
 
-Found an issue or have an improvement? Open an issue or PR at:
-https://github.com/dgunning/edgartools
-
-## See Also
-
-- **[../scripts/](../scripts/)** - Python scripts for quick reference
-- **[../../docs/](../../docs/)** - Full documentation
 - [EdgarTools Documentation](https://edgartools.readthedocs.io/)
+- [GitHub Repository](https://github.com/dgunning/edgartools)
+- [PyPI Package](https://pypi.org/project/edgartools/)
