@@ -20,6 +20,7 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **02_troubleshooting_ssl.ipynb** - Troubleshooting SSL connection issues
 
 ### Filings
+- **sec-filings-today-python.ipynb** - Get today's SEC filings with Python
 - **download-10k-annual-report-python.ipynb** - Download and parse 10-K annual reports
 - **Paging-Through-Filings.ipynb** - Browse and navigate SEC filing collections
 - **Filtering-by-industry.ipynb** - Filter SEC filings by industry/SIC code
