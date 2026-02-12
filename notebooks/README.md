@@ -25,6 +25,7 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **sec-filings-today-python.ipynb** - Get today's SEC filings with Python
 - **download-10k-annual-report-python.ipynb** - Download and parse 10-K annual reports
 - **analyze-10k-annual-report-python.ipynb** - Analyze 10-K annual reports with Python
+- **10q-quarterly-earnings-python.ipynb** - Parse 10-Q quarterly earnings with Python
 - **Paging-Through-Filings.ipynb** - Browse and navigate SEC filing collections
 - **Filtering-by-industry.ipynb** - Filter SEC filings by industry/SIC code
 - **Extract-Earnings-Releases.ipynb** - Extract 8-K earnings releases with Python
