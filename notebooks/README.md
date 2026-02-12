@@ -52,6 +52,9 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **Fund-Filings.ipynb** - Overview of fund filing types
 - **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
 
+### Executive Compensation
+- **executive-compensation-sec-python.ipynb** - Extract executive compensation from SEC proxy statements with Python
+
 ### Insider Trading
 - **insider-trading-sec-form4-python.ipynb** - Track insider trading from SEC Form 4 with Python
 - **Initial-Insider-Transactions.ipynb** - Deep analysis of initial insider ownership (Form 3)
