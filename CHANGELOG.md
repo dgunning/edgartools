@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.15.3] - 2026-02-12
+
+### Fixed
+
+- **pyrate-limiter 4.0 Compatibility** — Fixed import failure with pyrate-limiter 4.0+ ([#640](https://github.com/dgunning/edgartools/issues/640))
+  - pyrate-limiter 4.0 removed `max_delay`, `raise_when_fail`, and `retry_until_max_delay` parameters from `Limiter.__init__()`
+  - Created compatibility shim that handles both pyrate-limiter 3.x and 4.x APIs
+  - Relaxed dependency constraint from `pyrate-limiter==3.9.0` to `pyrate-limiter>=3.0.0`
+
 ## [5.15.0] - 2026-02-08
 
 ### Added
