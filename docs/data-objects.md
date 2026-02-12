@@ -56,6 +56,20 @@ form4.transactions                         # buy/sell details with prices
 
 ---
 
+## Beneficial Ownership (Schedule 13D/G)
+
+Track activist investors and large institutional holders who own 5%+ of a company.
+
+```python
+schedule = filing.obj()                    # Schedule13D or Schedule13G
+schedule.total_shares                      # aggregate beneficial ownership
+schedule.items.item4_purpose_of_transaction  # activist intent (13D only)
+```
+
+[:octicons-arrow-right-24: Beneficial Ownership guide](guides/schedule13dg-data-object-guide.md)
+
+---
+
 ## Institutional Portfolios (13F)
 
 Explore hedge fund and institutional investor holdings.

@@ -73,6 +73,7 @@ nav:
     - Annual & Quarterly: concepts/data-objects.md
     - Current Events (8-K): eightk-filings.md
     - Insider Trades (Form 4): insider-filings.md
+    - Beneficial Ownership (13D/G): guides/schedule13dg-data-object-guide.md
     - Institutional Holdings (13F): guides/thirteenf-data-object-guide.md
     - Fund Portfolios (N-PORT): guides/nport-data-object-guide.md
     - Proxy Statements (DEF 14A): guides/proxystatement-data-object-guide.md
