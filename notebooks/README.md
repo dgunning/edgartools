@@ -40,6 +40,9 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **XBRL2-Instance-Only-XBRL.ipynb** - Parse instance-only XBRL documents
 - **XBRLConcepts.ipynb** - Explore XBRL taxonomy concepts
 
+### Institutional Holdings
+- **13f-institutional-holdings-python.ipynb** - Analyze 13F institutional holdings with Python
+
 ### Investment Funds
 - **Fund-Filings.ipynb** - Overview of fund filing types
 - **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
