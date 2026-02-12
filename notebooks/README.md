@@ -32,6 +32,7 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **8k-earnings-release-python.ipynb** - Extract 8-K earnings releases with Python
 - **Extract-Earnings-Releases.ipynb** - Extract 8-K earnings releases with Python (legacy)
 - **sec-filing-text-nlp-python.ipynb** - Extract SEC filing text for NLP with Python
+- **sec-filing-exhibits-python.ipynb** - Access SEC filing exhibits and attachments with Python
 - **download-sec-filings-bulk-python.ipynb** - Download SEC filings in bulk with Python
 
 ### Financial Statements (XBRL)
