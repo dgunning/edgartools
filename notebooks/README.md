@@ -13,6 +13,7 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 ## Notebooks
 
 ### Getting Started
+- **sec-edgar-api-python.ipynb** - SEC EDGAR API in Python (comprehensive overview)
 - **01_getting_started.ipynb** - Get started with SEC filings in Python
 - **Beginners-Guide.ipynb** - Complete introduction to EdgarTools
 - **Beginners-filings-attachments.ipynb** - Working with filing attachments
