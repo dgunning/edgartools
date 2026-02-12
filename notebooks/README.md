@@ -56,6 +56,7 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **13f-institutional-holdings-python.ipynb** - Analyze 13F institutional holdings with Python
 
 ### Investment Funds
+- **mutual-fund-holdings-nport-python.ipynb** - Analyze mutual fund and ETF holdings from SEC N-PORT filings
 - **etf-fund-holdings-python.ipynb** - Analyze ETF and fund holdings with Python
 - **Fund-Filings.ipynb** - Overview of fund filing types
 - **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
