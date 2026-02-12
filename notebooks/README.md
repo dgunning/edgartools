@@ -63,7 +63,8 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 ### Beneficial Ownership
 - **beneficial-ownership-sec-python.ipynb** - Track beneficial ownership from SEC Schedule 13D/G with Python
 
-### Executive Compensation
+### Executive Compensation & Proxy Statements
+- **proxy-statement-def14a-python.ipynb** - Parse SEC proxy statements (DEF 14A) with Python
 - **executive-compensation-sec-python.ipynb** - Extract executive compensation from SEC proxy statements with Python
 
 ### Insider Trading
