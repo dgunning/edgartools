@@ -112,6 +112,20 @@ formd.recipients                           # related persons
 
 ---
 
+## Crowdfunding Offerings (Form C)
+
+Monitor crowdfunding campaigns under Regulation CF, including offering terms and issuer financials.
+
+```python
+formc = filing.obj()                       # FormC
+formc.offering_information                 # target amount, deadline, securities
+formc.annual_report_disclosure             # issuer financials (if C-AR)
+```
+
+[:octicons-arrow-right-24: Crowdfunding guide](guides/formc-data-object-guide.md)
+
+---
+
 ## Insider Sale Notices (Form 144)
 
 Monitor planned insider sales before they happen.

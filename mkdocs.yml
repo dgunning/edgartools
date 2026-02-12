@@ -78,6 +78,7 @@ nav:
     - Fund Portfolios (N-PORT): guides/nport-data-object-guide.md
     - Proxy Statements (DEF 14A): guides/proxystatement-data-object-guide.md
     - Private Offerings (Form D): guides/formd-data-object-guide.md
+    - Crowdfunding (Form C): guides/formc-data-object-guide.md
     - Sale Notices (Form 144): guides/form144-data-object-guide.md
     - Fund Voting (N-PX): guides/npx-data-object-guide.md
     - Municipal Advisors (MA-I): guides/mai-data-object-guide.md
