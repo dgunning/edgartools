@@ -37,6 +37,7 @@ from edgar.funds.core import (
     get_fund_series,
 )
 from edgar.funds.data import FundData, get_fund_information, is_fund_ticker, parse_fund_data, resolve_fund_identifier
+from edgar.funds.ncen import NCEN_FORMS, FundCensus
 from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
 from edgar.funds.reports import NPORT_FORMS, CurrentMetric, FundReport, get_fund_portfolio_from_filing
 
@@ -130,6 +131,10 @@ __all__ = [
     'NMFP2_FORMS',
     'NMFP3_FORMS',
     'MONEY_MARKET_FORMS',
+
+    # Fund census (N-CEN)
+    'FundCensus',
+    'NCEN_FORMS',
 
     # Legacy compatibility
     'get_fund_with_filings',
