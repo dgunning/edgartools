@@ -261,9 +261,9 @@ def test_ssl_error_message_enhancement(monkeypatch):
 
         # Verify helpful message is present
         error_msg = str(exc_info.value)
-        assert "EDGAR_VERIFY_SSL" in error_msg
-        assert "configure_http" in error_msg  # New: recommends configure_http()
-        assert "Only disable SSL verification" in error_msg  # Warning text
+        assert "use_system_certs" in error_msg  # Recommends system certs first
+        assert "configure_http" in error_msg
+        assert "last resort" in error_msg  # Warns that disabling SSL is last resort
         assert "https://www.sec.gov" in error_msg
         assert "SELF-SIGNED" in error_msg or "SSL" in error_msg  # Category detection
 
@@ -283,8 +283,8 @@ def test_post_with_retry_ssl_error():
             post_with_retry("https://www.sec.gov", data={"key": "value"})
 
         error_msg = str(exc_info.value)
-        assert "EDGAR_VERIFY_SSL" in error_msg
-        assert "Only disable SSL verification" in error_msg  # Warning text
+        assert "use_system_certs" in error_msg
+        assert "last resort" in error_msg
 
 
 @pytest.mark.asyncio
@@ -304,8 +304,8 @@ async def test_post_with_retry_async_ssl_error():
                 await post_with_retry_async(client=client, url="https://www.sec.gov", data={"key": "value"})
 
             error_msg = str(exc_info.value)
-            assert "EDGAR_VERIFY_SSL" in error_msg
-            assert "Only disable SSL verification" in error_msg  # Warning text
+            assert "use_system_certs" in error_msg
+            assert "last resort" in error_msg
 
 
 def test_httpcore_network_error_ssl_detection():
