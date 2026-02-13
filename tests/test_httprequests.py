@@ -724,3 +724,72 @@ def test_configure_http_recreates_client_for_system_certs():
     finally:
         HTTP_MGR.httpx_params["verify"] = original_verify
         HTTP_MGR._client = original_client
+
+
+@pytest.mark.fast
+def test_system_certs_false_preserves_verify_ssl_false():
+    """use_system_certs=False should not re-enable SSL if user previously disabled it"""
+    from edgar.httpclient import configure_http, HTTP_MGR
+
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+    try:
+        # User disables SSL verification
+        configure_http(verify_ssl=False)
+        assert HTTP_MGR.httpx_params["verify"] is False
+
+        # User disables system certs — should NOT reset verify to True
+        configure_http(use_system_certs=False)
+        assert HTTP_MGR.httpx_params["verify"] is False
+    finally:
+        HTTP_MGR.httpx_params["verify"] = original_verify
+
+
+@pytest.mark.fast
+def test_system_certs_false_with_verify_ssl_false():
+    """use_system_certs=False + verify_ssl=False in one call should disable verification"""
+    from edgar.httpclient import configure_http, HTTP_MGR
+
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+    try:
+        configure_http(use_system_certs=False, verify_ssl=False)
+        assert HTTP_MGR.httpx_params["verify"] is False
+    finally:
+        HTTP_MGR.httpx_params["verify"] = original_verify
+
+
+@pytest.mark.fast
+def test_system_certs_false_resets_sslcontext_to_default():
+    """use_system_certs=False should reset SSLContext to env var default (True)"""
+    from edgar.httpclient import configure_http, HTTP_MGR
+    import truststore
+
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+    try:
+        # Enable system certs
+        configure_http(use_system_certs=True)
+        assert isinstance(HTTP_MGR.httpx_params["verify"], truststore.SSLContext)
+
+        # Disable system certs without specifying verify_ssl
+        configure_http(use_system_certs=False)
+        # Should reset to default (True), not stay as SSLContext
+        assert HTTP_MGR.httpx_params["verify"] is True
+    finally:
+        HTTP_MGR.httpx_params["verify"] = original_verify
+
+
+@pytest.mark.fast
+def test_sequential_system_certs_then_verify_ssl():
+    """Calling configure_http(verify_ssl=False) after system certs should disable verification"""
+    from edgar.httpclient import configure_http, HTTP_MGR
+    import truststore
+
+    original_verify = HTTP_MGR.httpx_params.get("verify", True)
+    try:
+        configure_http(use_system_certs=True)
+        assert isinstance(HTTP_MGR.httpx_params["verify"], truststore.SSLContext)
+
+        # User falls back to disabling SSL
+        configure_http(verify_ssl=False)
+        assert HTTP_MGR.httpx_params["verify"] is False
+    finally:
+        HTTP_MGR.httpx_params["verify"] = original_verify

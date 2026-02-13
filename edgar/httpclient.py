@@ -126,15 +126,11 @@ def get_edgar_use_system_certs() -> bool:
 def get_truststore_context():
     """
     Get a truststore SSLContext that uses the OS native certificate store.
-    Returns the SSLContext if truststore is available, else None.
     """
-    try:
-        import ssl
+    import ssl
 
-        import truststore
-        return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    except ImportError:
-        return None
+    import truststore
+    return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
 def get_edgar_rate_limit_per_sec():
@@ -182,17 +178,7 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
     # Determine SSL verification setting
     # Priority: system certs (truststore) > verify_ssl env var
     if get_edgar_use_system_certs():
-        ctx = get_truststore_context()
-        if ctx:
-            http_mgr.httpx_params["verify"] = ctx
-        else:
-            import warnings
-            warnings.warn(
-                "EDGAR_USE_SYSTEM_CERTS is set but truststore is not installed. "
-                "Install with: pip install truststore. Falling back to default SSL.",
-                stacklevel=2,
-            )
-            http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
+        http_mgr.httpx_params["verify"] = get_truststore_context()
     else:
         http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
 
@@ -236,12 +222,11 @@ def configure_http(
 
     Args:
         verify_ssl: Enable/disable SSL certificate verification.
-                   Set to False for corporate networks with SSL inspection.
+                   Set to False if use_system_certs doesn't resolve your SSL issues.
                    WARNING: Disabling SSL verification reduces security.
         use_system_certs: Use the OS native certificate store via the truststore library.
                          This is the recommended approach for corporate networks with
                          SSL inspection, as it uses certificates managed by your OS.
-                         Requires: pip install truststore
         proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
                Supports authentication: "http://user:pass@proxy.company.com:8080"
         timeout: Request timeout in seconds (default: 30.0)
@@ -251,14 +236,14 @@ def configure_http(
         from edgar import configure_http
         configure_http(use_system_certs=True)
 
-        # Disable SSL verification for corporate VPN
+        # Disable SSL verification (fallback if system certs don't work)
         configure_http(verify_ssl=False)
+
+        # Disable system certs and SSL verification
+        configure_http(use_system_certs=False, verify_ssl=False)
 
         # Configure proxy
         configure_http(proxy="http://proxy.company.com:8080")
-
-        # Multiple settings at once
-        configure_http(verify_ssl=False, proxy="http://proxy:8080", timeout=60.0)
 
     Note:
         Changes take effect immediately for new requests.
@@ -271,21 +256,19 @@ def configure_http(
 
     if use_system_certs is not None:
         if use_system_certs:
-            ctx = get_truststore_context()
-            if ctx:
-                HTTP_MGR.httpx_params["verify"] = ctx
-            else:
-                raise ImportError(
-                    "truststore package is not installed. "
-                    "Install with: pip install truststore"
-                )
+            HTTP_MGR.httpx_params["verify"] = get_truststore_context()
+            settings_changed = True
         else:
-            # Explicitly disable system certs — fall back to default SSL behavior
-            HTTP_MGR.httpx_params["verify"] = True
-        settings_changed = True
-
-    if verify_ssl is not None and not settings_changed:
-        # Only apply verify_ssl if use_system_certs wasn't set (it takes precedence)
+            # Disable system certs. If verify_ssl is also provided, use that.
+            # Otherwise, only reset if currently using an SSLContext.
+            import truststore
+            current = HTTP_MGR.httpx_params.get("verify", True)
+            if verify_ssl is not None:
+                HTTP_MGR.httpx_params["verify"] = verify_ssl
+            elif isinstance(current, truststore.SSLContext):
+                HTTP_MGR.httpx_params["verify"] = get_edgar_verify_ssl()
+            settings_changed = True
+    elif verify_ssl is not None:
         HTTP_MGR.httpx_params["verify"] = verify_ssl
         settings_changed = True
 
