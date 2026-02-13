@@ -1,12 +1,14 @@
 """
 Tests for the datamule storage adapter.
 
-All tests use synthetic tar fixtures — no network, no datamule package required.
+Tests use both synthetic tar fixtures (backward compat) and the real
+000143774924000106.tar fixture (1-800-Flowers 8-K filing).
 """
 
 import json
 import tarfile
 from io import BytesIO
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -27,9 +29,12 @@ from edgar.storage.datamule.reader import load_filing_from_tar, _infer_doc_type,
 
 
 # ---------------------------------------------------------------------------
-# Fixtures
+# Constants
 # ---------------------------------------------------------------------------
 
+REAL_TAR_PATH = Path(__file__).parent / 'fixtures' / 'datamule_tars' / '000143774924000106.tar'
+
+# Flat snake_case metadata (original synthetic format for backward-compat tests)
 SAMPLE_METADATA = {
     "accession_number": "0001193125-24-012345",
     "form_type": "10-K",
@@ -45,6 +50,53 @@ SAMPLE_METADATA = {
     "document_count": 3,
 }
 
+# Real datamule kebab-case nested metadata (matches 000143774924000106.tar)
+REAL_METADATA = {
+    "accession-number": "0001437749-24-000106",
+    "type": "8-K",
+    "public-document-count": "14",
+    "period": "20231231",
+    "items": ["5.02", "9.01"],
+    "filing-date": "20240102",
+    "date-of-filing-date-change": "20240102",
+    "filer": {
+        "company-data": {
+            "conformed-name": "1 800 FLOWERS COM INC",
+            "cik": "0001084869",
+            "assigned-sic": "5990",
+            "organization-name": "07 Trade & Services",
+            "irs-number": "113117311",
+            "state-of-incorporation": "DE",
+            "fiscal-year-end": "0702",
+        },
+        "filing-values": {
+            "form-type": "8-K",
+            "act": "34",
+            "file-number": "000-26841",
+            "film-number": "24500526",
+        },
+        "business-address": {
+            "street1": "TWO JERICHO PLAZA",
+            "street2": "SUITE 200",
+            "city": "JERICHO",
+            "state": "NY",
+            "zip": "11753",
+            "phone": "5162376000",
+        },
+        "mail-address": {
+            "street1": "TWO JERICHO PLAZA",
+            "street2": "SUITE 200",
+            "city": "JERICHO",
+            "state": "NY",
+            "zip": "11753",
+        },
+    },
+    "documents": [
+        {"type": "8-K", "sequence": "1", "filename": "flws20231228_8k.htm", "description": "FORM 8-K"},
+        {"type": "EX-99.1", "sequence": "2", "filename": "ex_610719.htm", "description": "EXHIBIT 99.1"},
+    ],
+}
+
 SAMPLE_HTML = """<!DOCTYPE html>
 <html><head><title>10-K Filing</title></head>
 <body><h1>Annual Report</h1><p>Revenue was $394.3 billion.</p></body></html>"""
@@ -53,24 +105,19 @@ SAMPLE_XML = """<?xml version="1.0"?>
 <xbrl><context id="FY2023"><period><startDate>2023-01-01</startDate></period></context></xbrl>"""
 
 
-def _make_tar_bytes(metadata: dict, files: dict[str, str], prefix: str = '') -> bytes:
-    """
-    Create an in-memory tar archive.
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-    Args:
-        metadata: Contents for metadata.json
-        files: Mapping of filename -> content
-        prefix: Optional directory prefix for batch tars
-    """
+def _make_tar_bytes(metadata: dict, files: dict[str, str], prefix: str = '') -> bytes:
+    """Create an in-memory tar archive."""
     buf = BytesIO()
     with tarfile.open(fileobj=buf, mode='w') as tf:
-        # Add metadata.json
         meta_bytes = json.dumps(metadata).encode('utf-8')
         meta_info = tarfile.TarInfo(name=f'{prefix}metadata.json')
         meta_info.size = len(meta_bytes)
         tf.addfile(meta_info, BytesIO(meta_bytes))
 
-        # Add document files
         for name, content in files.items():
             content_bytes = content.encode('utf-8')
             info = tarfile.TarInfo(name=f'{prefix}{name}')
@@ -80,9 +127,13 @@ def _make_tar_bytes(metadata: dict, files: dict[str, str], prefix: str = '') -> 
     return buf.getvalue()
 
 
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
+
 @pytest.fixture
 def single_tar(tmp_path):
-    """Create a single-filing tar in a temp directory."""
+    """Create a single-filing tar with flat metadata."""
     tar_bytes = _make_tar_bytes(
         SAMPLE_METADATA,
         {'primary-document.htm': SAMPLE_HTML, 'Financial_Report.xml': SAMPLE_XML},
@@ -127,7 +178,7 @@ def _reset_datamule_state():
 
 
 # ---------------------------------------------------------------------------
-# TestStorage
+# TestStorage (backward compat — flat metadata)
 # ---------------------------------------------------------------------------
 
 class TestStorage:
@@ -178,7 +229,7 @@ class TestStorage:
 
 
 # ---------------------------------------------------------------------------
-# TestMetadataMapping
+# TestMetadataMapping — flat format backward compat
 # ---------------------------------------------------------------------------
 
 class TestMetadataMapping:
@@ -233,6 +284,99 @@ class TestMetadataMapping:
 
 
 # ---------------------------------------------------------------------------
+# TestRealMetadataMapping — real kebab-case nested format
+# ---------------------------------------------------------------------------
+
+class TestRealMetadataMapping:
+
+    def test_accession_number(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        assert header.accession_number == '0001437749-24-000106'
+
+    def test_form_type(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        assert header.form == '8-K'
+
+    def test_filing_date(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        assert header.filing_date == '2024-01-02'
+
+    def test_period_of_report(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        assert header.period_of_report == '2023-12-31'
+
+    def test_document_count(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        assert header.document_count == 14
+
+    def test_company_name(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        filer = header.filers[0]
+        assert filer.company_information.name == '1 800 FLOWERS COM INC'
+
+    def test_cik(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        filer = header.filers[0]
+        assert filer.company_information.cik == '0001084869'
+
+    def test_sic(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        filer = header.filers[0]
+        assert filer.company_information.sic == '5990'
+
+    def test_irs_number(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        filer = header.filers[0]
+        assert filer.company_information.irs_number == '113117311'
+
+    def test_state_of_incorporation(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        filer = header.filers[0]
+        assert filer.company_information.state_of_incorporation == 'DE'
+
+    def test_fiscal_year_end(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        filer = header.filers[0]
+        assert filer.company_information.fiscal_year_end == '0702'
+
+    def test_filing_information(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        fi = header.filers[0].filing_information
+        assert fi.form == '8-K'
+        assert fi.sec_act == '34'
+        assert fi.file_number == '000-26841'
+        assert fi.film_number == '24500526'
+
+    def test_business_address(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        addr = header.filers[0].business_address
+        assert addr.street1 == 'TWO JERICHO PLAZA'
+        assert addr.street2 == 'SUITE 200'
+        assert addr.city == 'JERICHO'
+        assert addr.state_or_country == 'NY'
+        assert addr.zipcode == '11753'
+
+    def test_mailing_address(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        addr = header.filers[0].mailing_address
+        assert addr.street1 == 'TWO JERICHO PLAZA'
+        assert addr.city == 'JERICHO'
+        assert addr.state_or_country == 'NY'
+
+    def test_filing_args_real_format(self):
+        args = filing_args_from_metadata(REAL_METADATA)
+        assert args['accession_no'] == '0001437749-24-000106'
+        assert args['form'] == '8-K'
+        assert args['filing_date'] == '2024-01-02'
+        assert args['cik'] == '0001084869'
+        assert args['company'] == '1 800 FLOWERS COM INC'
+
+    def test_date_as_of_change(self):
+        header = filing_header_from_metadata(REAL_METADATA)
+        assert header.date_as_of_change == '2024-01-02'
+
+
+# ---------------------------------------------------------------------------
 # TestTarSGMLDocument
 # ---------------------------------------------------------------------------
 
@@ -275,7 +419,7 @@ class TestTarSGMLDocument:
 
 
 # ---------------------------------------------------------------------------
-# TestReader
+# TestReader — flat metadata backward compat
 # ---------------------------------------------------------------------------
 
 class TestReader:
@@ -312,6 +456,138 @@ class TestReader:
 
 
 # ---------------------------------------------------------------------------
+# TestRealTarFixture — loads the real 000143774924000106.tar
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not REAL_TAR_PATH.exists(), reason="Real tar fixture not available")
+class TestRealTarFixture:
+
+    def test_accession_number(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        assert filing is not None
+        assert filing.accession_number == '0001437749-24-000106'
+
+    def test_form_type(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        assert filing.form == '8-K'
+
+    def test_company_name(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        filer = filing.header.filers[0]
+        assert filer.company_information.name == '1 800 FLOWERS COM INC'
+
+    def test_cik(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        filer = filing.header.filers[0]
+        assert filer.company_information.cik == '0001084869'
+
+    def test_filing_date(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        assert filing.filing_date == '2024-01-02'
+
+    def test_period_of_report(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        assert filing.header.period_of_report == '2023-12-31'
+
+    def test_sic(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        assert filing.header.filers[0].company_information.sic == '5990'
+
+    def test_document_count(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        assert filing.header.document_count == 14
+
+    def test_filer_business_address(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        addr = filing.header.filers[0].business_address
+        assert addr.street1 == 'TWO JERICHO PLAZA'
+        assert addr.street2 == 'SUITE 200'
+        assert addr.city == 'JERICHO'
+        assert addr.state_or_country == 'NY'
+        assert addr.zipcode == '11753'
+
+    def test_documents_have_correct_metadata(self):
+        """Documents should have type/sequence/description from metadata array."""
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        # Find the primary document by name
+        primary = filing.get_document_by_name('flws20231228_8k.htm')
+        assert primary is not None
+        assert primary.type == '8-K'
+        assert primary.sequence == '1'
+        assert primary.description == 'FORM 8-K'
+
+    def test_exhibit_document_metadata(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        exhibit = filing.get_document_by_name('ex_610719.htm')
+        assert exhibit is not None
+        assert exhibit.type == 'EX-99.1'
+        assert exhibit.sequence == '2'
+        assert exhibit.description == 'EXHIBIT 99.1'
+
+    def test_primary_document_contains_html(self):
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        primary = filing.get_document_by_name('flws20231228_8k.htm')
+        assert primary is not None
+        assert '<html' in primary.content.lower() or '<HTML' in primary.content
+
+    def test_total_document_count(self):
+        """Tar has 14 non-metadata files."""
+        filing = load_filing_from_tar(REAL_TAR_PATH)
+        total_docs = sum(len(v) for v in filing._documents_by_sequence.values())
+        assert total_docs == 14
+
+    def test_load_by_accession(self):
+        """Load specific accession from the real tar."""
+        filing = load_filing_from_tar(REAL_TAR_PATH, accession_no='0001437749-24-000106')
+        assert filing is not None
+        assert filing.accession_number == '0001437749-24-000106'
+
+    def test_index_real_tar(self):
+        """use_datamule_storage should index the real tar correctly."""
+        use_datamule_storage(REAL_TAR_PATH.parent)
+        assert '0001437749-24-000106' in _storage_mod._accession_index
+
+    def test_get_datamule_filing_real(self):
+        """get_datamule_filing should load the real tar correctly."""
+        use_datamule_storage(REAL_TAR_PATH.parent)
+        filing = get_datamule_filing('0001437749-24-000106')
+        assert filing is not None
+        assert filing.accession_number == '0001437749-24-000106'
+        assert filing.form == '8-K'
+
+
+# ---------------------------------------------------------------------------
+# TestFilingSgmlIntegration
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not REAL_TAR_PATH.exists(), reason="Real tar fixture not available")
+class TestFilingSgmlIntegration:
+
+    def test_filing_object_resolves_from_datamule(self):
+        """A Filing object should be able to load from datamule without network."""
+        from edgar._filings import Filing
+
+        use_datamule_storage(REAL_TAR_PATH.parent)
+
+        # Create a Filing that matches the real tar
+        filing = Filing(
+            cik=1084869,
+            company='1 800 FLOWERS COM INC',
+            form='8-K',
+            filing_date='2024-01-02',
+            accession_no='0001437749-24-000106',
+        )
+
+        # Load via datamule
+        sgml = get_datamule_filing('0001437749-24-000106')
+        assert sgml is not None
+        assert sgml.accession_number == '0001437749-24-000106'
+        assert sgml.form == '8-K'
+        assert sgml.filing_date == '2024-01-02'
+        assert sgml.get_document_count() == 14
+
+
+# ---------------------------------------------------------------------------
 # TestFilingSgmlResolution
 # ---------------------------------------------------------------------------
 
@@ -323,7 +599,6 @@ class TestFilingSgmlResolution:
 
         use_datamule_storage(single_tar.parent)
 
-        # Create a minimal Filing object
         filing = Filing(
             cik=320193,
             company='Apple Inc.',
@@ -332,12 +607,9 @@ class TestFilingSgmlResolution:
             accession_no='0001193125-24-012345',
         )
 
-        # Mock the network fallback so it doesn't actually call SEC
-        with patch.object(type(filing), 'sgml', wraps=filing.sgml):
-            # The sgml() method should find this via datamule
-            sgml = get_datamule_filing('0001193125-24-012345')
-            assert sgml is not None
-            assert sgml.accession_number == '0001193125-24-012345'
+        sgml = get_datamule_filing('0001193125-24-012345')
+        assert sgml is not None
+        assert sgml.accession_number == '0001193125-24-012345'
 
 
 # ---------------------------------------------------------------------------
@@ -366,6 +638,53 @@ class TestHelpers:
     def test_get_prefix(self):
         assert _get_prefix('metadata.json') == ''
         assert _get_prefix('0001193125-24-012345/metadata.json') == '0001193125-24-012345/'
+
+
+# ---------------------------------------------------------------------------
+# TestDocumentsArrayUsage
+# ---------------------------------------------------------------------------
+
+class TestDocumentsArrayUsage:
+    """Test that the documents array from metadata is used for type/seq/description."""
+
+    def test_documents_array_used_for_type(self, tmp_path):
+        """When metadata has a documents array, type should come from it."""
+        meta = {
+            **REAL_METADATA,
+            "documents": [
+                {"type": "8-K", "sequence": "1", "filename": "filing.htm", "description": "FORM 8-K"},
+                {"type": "EX-99.1", "sequence": "2", "filename": "exhibit.htm", "description": "EXHIBIT 99.1"},
+            ],
+        }
+        tar_bytes = _make_tar_bytes(
+            meta,
+            {'filing.htm': '<html>filing</html>', 'exhibit.htm': '<html>exhibit</html>'},
+        )
+        tar_path = tmp_path / 'with_docs.tar'
+        tar_path.write_bytes(tar_bytes)
+
+        filing = load_filing_from_tar(tar_path)
+        assert filing is not None
+
+        filing_doc = filing.get_document_by_name('filing.htm')
+        assert filing_doc is not None
+        assert filing_doc.type == '8-K'
+        assert filing_doc.sequence == '1'
+        assert filing_doc.description == 'FORM 8-K'
+
+        exhibit_doc = filing.get_document_by_name('exhibit.htm')
+        assert exhibit_doc is not None
+        assert exhibit_doc.type == 'EX-99.1'
+        assert exhibit_doc.sequence == '2'
+        assert exhibit_doc.description == 'EXHIBIT 99.1'
+
+    def test_fallback_to_inference_without_documents_array(self, single_tar):
+        """When no documents array, should infer type from extension."""
+        filing = load_filing_from_tar(single_tar)
+        assert filing is not None
+        htm_doc = filing.get_document_by_name('primary-document.htm')
+        assert htm_doc is not None
+        assert htm_doc.type == 'HTML'
 
 
 # ---------------------------------------------------------------------------
@@ -415,17 +734,13 @@ class TestErrorHandling:
 
     def test_scan_skips_bad_tars(self, tmp_path):
         """use_datamule_storage should skip corrupt tars without crashing."""
-        # Create a good tar
         good_bytes = _make_tar_bytes(
             SAMPLE_METADATA,
             {'filing.htm': '<html>test</html>'},
         )
         (tmp_path / 'good.tar').write_bytes(good_bytes)
-
-        # Create a corrupt file named .tar
         (tmp_path / 'bad.tar').write_bytes(b'not a tar file at all')
 
-        # Should still index the good tar
         use_datamule_storage(tmp_path)
         assert is_using_datamule_storage()
         assert '0001193125-24-012345' in _storage_mod._accession_index

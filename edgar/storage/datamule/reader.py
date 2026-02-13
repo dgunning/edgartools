@@ -83,7 +83,7 @@ def _load_from_open_tar(tf: tarfile.TarFile, accession_no: Optional[str]) -> Opt
             if meta_f is None:
                 continue
             metadata = json.loads(meta_f.read().decode('utf-8'))
-            found_accession = metadata.get('accession_number') or metadata.get('accessionNumber') or ''
+            found_accession = metadata.get('accession-number') or metadata.get('accession_number') or metadata.get('accessionNumber') or ''
             found_accession = _normalize_accession(found_accession)
             if found_accession == accession_no:
                 target_meta = m
@@ -116,6 +116,13 @@ def _build_filing_sgml(
     """Construct a FilingSGML from tar contents."""
     header = filing_header_from_metadata(metadata)
 
+    # Build a filename→doc_info map from the documents array if available
+    doc_info_map: Dict[str, Dict] = {}
+    if isinstance(metadata.get('documents'), list):
+        for doc_info in metadata['documents']:
+            if isinstance(doc_info, dict) and 'filename' in doc_info:
+                doc_info_map[doc_info['filename']] = doc_info
+
     # Build documents from tar members
     documents_by_sequence = defaultdict(list)
     seq = 1
@@ -136,6 +143,9 @@ def _build_filing_sgml(
         filename = _strip_prefix(member.name, prefix)
         raw_content = f.read()
 
+        # Decompress zstd-compressed content (datamule uses zstandard)
+        raw_content = _maybe_decompress_zstd(raw_content)
+
         # Try to decode as text; keep as bytes for binary files
         try:
             content_str = raw_content.decode('utf-8')
@@ -145,17 +155,25 @@ def _build_filing_sgml(
             except UnicodeDecodeError:
                 content_str = raw_content.decode('utf-8', errors='replace')
 
-        # Determine document type from filename
-        doc_type = _infer_doc_type(filename)
+        # Use metadata documents array for type/sequence/description if available
+        info = doc_info_map.get(filename)
+        if info:
+            doc_seq = info.get('sequence', str(seq))
+            doc_type = info.get('type', _infer_doc_type(filename))
+            doc_desc = info.get('description', '')
+        else:
+            doc_seq = str(seq)
+            doc_type = _infer_doc_type(filename)
+            doc_desc = ''
 
         doc = TarSGMLDocument.create(
-            sequence=str(seq),
+            sequence=doc_seq,
             type=doc_type,
             filename=filename,
-            description='',
+            description=doc_desc,
             raw_content=content_str,
         )
-        documents_by_sequence[str(seq)].append(doc)
+        documents_by_sequence[doc_seq].append(doc)
         seq += 1
 
     return FilingSGML(header=header, documents=documents_by_sequence)
@@ -192,6 +210,25 @@ def _normalize_accession(accession_no: str) -> str:
     if len(accession_no) == 18 and accession_no.isdigit():
         return f"{accession_no[:10]}-{accession_no[10:12]}-{accession_no[12:]}"
     return accession_no
+
+
+_ZSTD_MAGIC = b'\x28\xb5\x2f\xfd'
+
+
+def _maybe_decompress_zstd(data: bytes) -> bytes:
+    """Decompress zstd-compressed data if detected, otherwise return as-is."""
+    if not data or not data[:4] == _ZSTD_MAGIC:
+        return data
+    try:
+        import zstandard
+        dctx = zstandard.ZstdDecompressor()
+        return dctx.decompress(data)
+    except ImportError:
+        log.warning("zstandard package not installed; cannot decompress zstd content")
+        return data
+    except Exception as e:
+        log.warning("Failed to decompress zstd content: %s", e)
+        return data
 
 
 def _infer_doc_type(filename: str) -> str:

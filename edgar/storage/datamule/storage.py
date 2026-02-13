@@ -127,7 +127,7 @@ def _index_tar(tar_path: Path):
                 if f is None:
                     continue
                 metadata = json.loads(f.read().decode('utf-8'))
-                accession_no = metadata.get('accession_number') or metadata.get('accessionNumber')
+                accession_no = metadata.get('accession-number') or metadata.get('accession_number') or metadata.get('accessionNumber')
                 if accession_no:
                     # Normalize to dashed format (0001193125-24-012345)
                     accession_no = _normalize_accession(accession_no)
