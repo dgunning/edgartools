@@ -63,6 +63,7 @@ from edgar.paths import (
 )
 from edgar.proxy import PROXY_FORMS, ProxyStatement
 from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
+from edgar.storage.datamule import is_using_datamule_storage, use_datamule_storage
 from edgar.storage_management import (
     StorageAnalysis,
     StorageInfo,

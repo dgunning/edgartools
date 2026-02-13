@@ -31,7 +31,14 @@ __all__ = ['download_edgar_data',
            'compress_filing',
            'decompress_filing',
            'compress_all_filings',
-           'is_compressed_file']
+           'is_compressed_file',
+           'DirectoryBrowsingNotAllowed',
+           'list_filing_feed_files',
+           'list_filing_feed_files_for_quarter',
+           'is_feed_file_in_date_range',
+           'get_sec_file_listing',
+           'parse_file_size',
+           'latest_filing_date']
 
 class DirectoryBrowsingNotAllowed(Exception):
 

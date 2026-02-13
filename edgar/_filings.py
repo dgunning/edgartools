@@ -1828,6 +1828,11 @@ class Filing:
                 self._sgml = FilingSGML.from_source(local_path)
 
         if self._sgml is None:
+            from edgar.storage.datamule import is_using_datamule_storage, get_datamule_filing
+            if is_using_datamule_storage():
+                self._sgml = get_datamule_filing(self.accession_no)
+
+        if self._sgml is None:
             self._sgml = FilingSGML.from_filing(self)
         return self._sgml
 
