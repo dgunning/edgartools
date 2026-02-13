@@ -16,7 +16,6 @@ from edgar.dates import InvalidDateException
 from edgar.entity.filings import EntityFilings
 from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
 from edgar.display.formatting import reverse_name
-from edgar.storage import is_using_local_storage
 
 # Module-level import cache for lazy imports
 _IMPORT_CACHE = {}
@@ -418,7 +417,11 @@ class EntityData:
         """
 
         # Lazy loading behavior
-        if not self._loaded_all_filings and not is_using_local_storage() and trigger_full_load:
+        # Note: we don't gate on is_using_local_storage() here because when bulk
+        # submissions were downloaded, _merge_additional_local_filings() already
+        # cleared self._files — so _load_older_filings() is a no-op.  When the
+        # pagination files are *not* present locally, we still need to fetch them.
+        if not self._loaded_all_filings and trigger_full_load:
             self._load_older_filings()
             self._loaded_all_filings = True
 
