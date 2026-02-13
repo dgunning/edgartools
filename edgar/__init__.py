@@ -62,9 +62,7 @@ from edgar.paths import (
     set_test_directory,
 )
 from edgar.proxy import PROXY_FORMS, ProxyStatement
-from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
-from edgar.storage.datamule import is_using_datamule_storage, use_datamule_storage
-from edgar.storage_management import (
+from edgar.storage import (
     StorageAnalysis,
     StorageInfo,
     analyze_storage,
@@ -73,8 +71,15 @@ from edgar.storage_management import (
     check_filings_batch,
     cleanup_storage,
     clear_cache,
+    download_edgar_data,
+    download_filings,
+    is_using_datamule_storage,
+    is_using_local_storage,
     optimize_storage,
+    set_local_storage_path,
     storage_info,
+    use_datamule_storage,
+    use_local_storage,
 )
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
