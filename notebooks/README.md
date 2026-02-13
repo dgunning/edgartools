@@ -24,8 +24,10 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 ### Filings
 - **search-sec-filings-python.ipynb** - Search and filter SEC filings with Python
 - **sec-filings-today-python.ipynb** - Get today's SEC filings with Python
+- **monitor-sec-filings-python.ipynb** - Monitor SEC filings for multiple companies with Python
 - **download-10k-annual-report-python.ipynb** - Download and parse 10-K annual reports
 - **analyze-10k-annual-report-python.ipynb** - Analyze 10-K annual reports with Python
+- **10k-business-description-python.ipynb** - Extract business description from 10-K Item 1 with Python
 - **10q-quarterly-earnings-python.ipynb** - Parse 10-Q quarterly earnings with Python
 - **Paging-Through-Filings.ipynb** - Browse and navigate SEC filing collections
 - **sec-industry-sic-code-python.ipynb** - Filter SEC companies by industry and SIC code
@@ -34,6 +36,7 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **Extract-Earnings-Releases.ipynb** - Extract 8-K earnings releases with Python (legacy)
 - **sec-filing-text-nlp-python.ipynb** - Extract SEC filing text for NLP with Python
 - **sec-filing-exhibits-python.ipynb** - Access SEC filing exhibits and attachments with Python
+- **sec-comment-letters-python.ipynb** - Analyze SEC comment letters (CORRESP) with Python
 - **download-sec-filings-bulk-python.ipynb** - Download SEC filings in bulk with Python
 
 ### Financial Statements (XBRL)
@@ -62,6 +65,9 @@ Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- fr
 - **etf-fund-holdings-python.ipynb** - Analyze ETF and fund holdings with Python
 - **Fund-Filings.ipynb** - Overview of fund filing types
 - **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
+
+### Business Development Companies (BDCs)
+- **bdc-business-development-company-python.ipynb** - Analyze BDC SEC filings and portfolio investments with Python
 
 ### Beneficial Ownership
 - **beneficial-ownership-sec-python.ipynb** - Track beneficial ownership from SEC Schedule 13D/G with Python
