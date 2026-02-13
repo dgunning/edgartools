@@ -988,6 +988,14 @@ class Statement:
                         instant_key = f"instant_{end_date}"
                         value = values_dict.get(instant_key)
 
+                # General fallback: handle period type mismatch for disclosure notes (#635)
+                # Notes/disclosures default to duration period selection, but balance-sheet-type
+                # notes (PPE, Accrued Liabilities) have instant facts.
+                # Try the instant key at the duration's end date.
+                if value is None and period_key.startswith('duration_') and end_date:
+                    instant_key = f"instant_{end_date}"
+                    value = values_dict.get(instant_key)
+
                 # Issue #582: Don't overwrite a valid value with None
                 # Multiple periods can map to the same column (e.g., transition periods for
                 # accounting standard changes). If we already have a value, don't overwrite with None.
