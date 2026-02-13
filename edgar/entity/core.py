@@ -507,7 +507,11 @@ class Entity(SecFiler):
 
     def latest(self, form: str, n=1):
         """Get the latest filing(s) for a given form."""
-        return self.get_filings(form=form, trigger_full_load=False).latest(n)
+        filings = self.get_filings(form=form, trigger_full_load=False)
+        # If initial load doesn't have enough results, try full load
+        if len(filings) < n:
+            filings = self.get_filings(form=form, trigger_full_load=True)
+        return filings.latest(n)
 
     def __str__(self):
         if hasattr(self, 'data'):
