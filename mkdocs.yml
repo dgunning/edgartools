@@ -108,6 +108,11 @@ nav:
     - "MCP Server & Skills": ai-integration.md
 
   # ==========================================
+  # NOTEBOOKS - Interactive Colab tutorials
+  # ==========================================
+  - Notebooks: notebooks.md
+
+  # ==========================================
   # ADVANCED - Power users & customization
   # ==========================================
   - Advanced:
