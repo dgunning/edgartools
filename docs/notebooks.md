@@ -8,8 +8,7 @@ description: Free Python tutorials for SEC EDGAR filings — run instantly in Go
 Access SEC EDGAR data with Python — completely **free**, no API key or paid subscription required.
 Every notebook runs instantly in **Google Colab** with one click. Install locally with `pip install edgartools`.
 
-[Get Started :material-rocket-launch:](#getting-started){ .md-button .md-button--primary }
-[View on GitHub :material-github:](https://github.com/dgunning/edgartools/tree/main/notebooks){ .md-button }
+[**Get Started**](#getting-started) | [View on GitHub](https://github.com/dgunning/edgartools/tree/main/notebooks)
 
 ---
 
@@ -155,62 +154,62 @@ Parse proxy statements for executive pay, board composition, and shareholder pro
 
 ## Why EdgarTools?
 
-Both edgartools and [sec-api.io](https://sec-api.io) provide access to SEC EDGAR data. Here's how they compare:
+**sec-api.io** is a data access API -- it gives you JSON from REST endpoints, and you build the analysis yourself. **EdgarTools** is a data analysis library -- it parses filings into structured Python objects with built-in methods for the analysis you actually want to do. And it's free.
 
-### Pricing and Access
+### The Core Difference
+
+With sec-api, getting 13F institutional holdings means calling an endpoint, receiving JSON, then writing code to compare quarters, calculate position changes, and format results. With edgartools, that analysis is built in:
+
+```python
+from edgar import *
+
+# Parse a 13F filing into a structured object
+thirteenf = Company("BERKSHIRE HATHAWAY").get_filings(form="13F-HR")[0].obj()
+
+# Built-in quarter-over-quarter comparison
+thirteenf.compare_holdings()    # NEW, CLOSED, INCREASED, DECREASED positions
+
+# Multi-quarter trend analysis with sparklines
+thirteenf.holding_history(periods=4)
+
+# All holdings as a pandas DataFrame, ready for analysis
+thirteenf.holdings_data()
+```
+
+sec-api returns the raw holdings data as JSON. The comparison logic, trend analysis, and DataFrame conversion are left to you.
+
+### What You Get Out of the Box
+
+EdgarTools doesn't just fetch data -- it structures it into objects with properties, methods, and DataFrames designed for the analysis Python developers actually do:
+
+| Filing Type | What edgartools gives you | What a JSON API gives you |
+|---|---|---|
+| **10-K / 10-Q** | `TenK` / `TenQ` objects with `.financials`, section extraction, multi-period statements | Raw XBRL JSON -- you build the statement structure |
+| **8-K** | `EightK` with item-level parsing, earnings extraction | Section text or structured fields for a few items |
+| **13F** | `ThirteenF` with `compare_holdings()`, `holding_history()`, sparklines | Holdings array -- you write the diff logic |
+| **N-PORT** | `FundReport` with `investment_data()`, asset allocation, country exposure | Holdings array -- you aggregate and categorize |
+| **N-MFP** | `MoneyMarketFund` with yield/NAV/liquidity time series, category breakdowns | -- |
+| **N-CEN** | `FundCensus` with series, providers, broker commissions, board composition | -- |
+| **DEF 14A** | `ProxyStatement` with executive compensation tables, board data | Separate exec comp and board endpoints |
+| **13D/G** | `Schedule13DG` with ownership parsing | Structured JSON |
+| **Form 4** | `Ownership` with transaction details | Structured JSON |
+
+### Pricing
 
 | | EdgarTools | sec-api.io |
 |---|:---:|:---:|
 | **Price** | Free forever | Free trial (100 calls), then $49-$239/mo |
-| **API key required** | No | Yes |
+| **API key** | Not required | Required |
 | **Open source** | Yes (MIT license) | No |
 | **Works offline** | Yes (with local storage) | No |
 
-### Data Coverage
+### Where sec-api Wins
 
-Both tools cover a wide range of SEC filing types. The main differences:
+sec-api has capabilities edgartools doesn't: real-time WebSocket filing streams, full-text boolean search across filings, PDF generation, Form ADV investment adviser data, and an SEC enforcement actions database. If you need those, sec-api is the right choice. It also works with any language, not just Python.
 
-| | EdgarTools | sec-api.io |
-|---|:---:|:---:|
-| **Financial statements (XBRL)** | Python objects + DataFrames | JSON via XBRL-to-JSON API |
-| **Insider trading (Form 3/4/5)** | Parsed data objects | Structured JSON API |
-| **13F institutional holdings** | Data objects + quarter comparison | Structured JSON API |
-| **Fund holdings (N-PORT)** | Data objects + DataFrames | Structured JSON API |
-| **Beneficial ownership (13D/G)** | Parsed data objects | Structured JSON API |
-| **8-K current events** | Item-level parsing | Section extractor + structured items |
-| **Proxy / exec compensation** | DEF 14A data objects | Executive comp + board data |
-| **Money market funds (N-MFP)** | Data objects + time series | -- |
-| **Fund census (N-CEN)** | Data objects + DataFrames | -- |
-| **Form 144 (sale notices)** | Data objects | -- |
-| **BDC filings** | Data objects | -- |
-| **Real-time filing stream** | -- | WebSocket stream API |
-| **Full-text search** | -- | Boolean keyword search API |
-| **PDF generation** | -- | Filing-to-PDF converter |
-| **Investment advisers (ADV)** | -- | Form ADV API |
-| **SEC enforcement actions** | -- | Enforcement database |
+### Where EdgarTools Wins
 
-### Developer Experience
-
-| | EdgarTools | sec-api.io |
-|---|:---:|:---:|
-| **Language** | Python library (`pip install`) | REST API (any language) |
-| **Return format** | Python objects + pandas DataFrames | JSON |
-| **Terminal display** | Rich tables, panels, formatting | -- |
-| **Runs in notebooks** | Native (Jupyter, Colab) | Via HTTP requests |
-
-### The 3-Line Wow
-
-Get Apple's income statement from their latest 10-K:
-
-```python
-from edgar import *
-filing = Company("AAPL").get_filings(form="10-K")[0]
-filing.obj().financials.income_statement
-```
-
-The same task with sec-api requires an API key, an HTTP request to find the filing, a second call to the XBRL-to-JSON converter, and manual processing of the JSON response.
-
-**EdgarTools is purpose-built for Python developers who want SEC data as native objects and DataFrames -- free, no key, no HTTP plumbing.**
+If you're a Python developer who wants to analyze SEC data, edgartools skips the HTTP-request-and-parse-JSON development cycle entirely. You get structured objects with built-in analysis methods, pandas DataFrames, Rich terminal display, and Jupyter/Colab integration -- all free, with no API key and no rate-limit billing surprises.
 
 ---
 
