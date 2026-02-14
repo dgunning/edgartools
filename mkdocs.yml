@@ -42,7 +42,7 @@ nav:
     - Overview: index.md
     - Installation: installation.md
     - Quick Start: quickstart.md
-    - Quick Guide: quick-guide.md
+    - Cheat Sheet: quick-guide.md
     - Configuration: configuration.md
     - Key Concepts: concepts/sec-filings.md
 

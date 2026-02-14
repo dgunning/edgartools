@@ -1,6 +1,6 @@
-# Quick Guide
+# Cheat Sheet
 
-A cheat sheet for common EdgarTools operations. For a step-by-step introduction, see the [Quick Start](quickstart.md).
+Common EdgarTools operations at a glance. For a step-by-step introduction, see the [Quick Start](quickstart.md).
 
 ### Setup
 

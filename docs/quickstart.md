@@ -142,7 +142,7 @@ You just learned how to install EdgarTools, look up a company, get financial sta
 
 **Reference**
 
-- [Quick Guide](quick-guide.md) — Cheat sheet of common operations
+- [Cheat Sheet](quick-guide.md) — Common operations at a glance
 - [Notebooks](notebooks.md) — Interactive Colab tutorials you can run in your browser
 
 ## Getting Help
