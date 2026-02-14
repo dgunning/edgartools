@@ -39,7 +39,16 @@ Follow the documentation standards in `docs/internal/docs-guidelines.md`. Key po
 3. **Tone**: Professional yet approachable, confident but not condescending. No emojis -- use Unicode symbols per `docs/internal/design-language.md`
 4. **Technical Accuracy**: Ensure all code examples are runnable and outputs are realistic
 5. **Cross-referencing**: Link related concepts, methods, and guides appropriately
-6. **Images**: Prefer WebP format. Use `scripts/snapshot_rich.py` to capture Rich console output and `scripts/convert_png_to_webp.py` to convert existing PNGs
+6. **Images**: Prefer WebP format. Generate Rich console screenshots using the SVG+Inkscape pipeline:
+   - Use `Rich Console(record=True)` to capture output, then `console.export_svg()` to get SVG
+   - Convert SVG→PNG via Inkscape: `/Applications/Inkscape.app/Contents/MacOS/inkscape input.svg --export-type=png --export-filename=output.png`
+   - Convert PNG→WebP via Pillow: `Image.open("output.png").save("output.webp", format="WEBP", quality=90)`
+   - Auto-crop whitespace with `img.getbbox()` before saving
+   - See `scripts/capture_finding_companies.py` for a complete working example of this pipeline
+   - **Do NOT use cairosvg** — the cairo library is not installed on this system
+   - For DataFrames and tabular data, render as `rich.table.Table` objects (not plain `print(df)`) for proper formatting
+   - Use `width=100-120` for the Rich Console to get appropriately sized output
+   - Store all doc images in `docs/images/` with descriptive kebab-case names
 
 **Content Patterns:**
 - **Quickstart**: 5-minute introduction showing core value proposition
