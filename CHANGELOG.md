@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.16.0] - 2026-02-14
+
+### Added
+
+- **MoneyMarketFund Data Object** — New data object for N-MFP2 and N-MFP3 money market fund filings. Supports both N-MFP3 (June 2024+, daily time series) and N-MFP2 (2010–mid 2024, weekly Friday snapshots). Includes portfolio securities, repo collateral, share class data, and yield/NAV/liquidity time series.
+  - **Files**: `edgar/funds/nmfp3.py`
+
+- **FundCensus Data Object** — New data object for N-CEN annual fund census filings. Parses 280+ XML elements into 12 Pydantic models covering fund series, service providers, governance, ETF mechanics, broker commissions, and securities lending.
+  - **Files**: `edgar/funds/ncen.py`
+
+- **Truststore SSL Support** — Corporate VPN users can now use their OS native certificate store instead of disabling SSL verification. Enable via `configure_http(use_system_certs=True)` or `EDGAR_USE_SYSTEM_CERTS=true` environment variable. Truststore added as a core dependency.
+  - **Files**: `edgar/httpclient.py`, `edgar/diagnose_ssl/`
+
+- **Datamule Storage Backend** — Optional alternative filing source using datamule for faster SEC filing retrieval. Includes document/metadata readers and SGML fallback integration.
+  - **Files**: `edgar/storage/datamule/`
+
+- **Exhibit Type Descriptions** — Filing attachments now include human-readable descriptions based on standard SEC exhibit type codes (EX-10.1, EX-21, etc.).
+  - **Files**: `edgar/attachments.py`
+
+### Fixed
+
+- **CompanyNotFoundError** — `Company("INVALID")` now raises `CompanyNotFoundError` with fuzzy-match suggestions instead of silently returning a placeholder entity with CIK -999999999 ([#c418a7d](https://github.com/dgunning/edgartools/commit/c418a7d9))
+
+- **Disclosure Notes NaN Values** — Fixed balance-sheet-type disclosure notes (PPE, Accrued Liabilities) returning NaN by adding instant-period fallback for duration lookups ([#635](https://github.com/dgunning/edgartools/issues/635))
+
+- **Local Storage Pagination** — Fixed `get_filings()` returning only the most recent page when local storage was enabled but pagination files weren't present ([#639](https://github.com/dgunning/edgartools/issues/639))
+
+- **Entity.latest() Incomplete Results** — Fixed `Entity.latest(form, n)` returning fewer results than requested for large `n` values by falling back to full filing load when the fast path is insufficient
+
 ## [5.15.3] - 2026-02-12
 
 ### Fixed
