@@ -155,27 +155,52 @@ Parse proxy statements for executive pay, board composition, and shareholder pro
 
 ## Why EdgarTools?
 
-### Feature Comparison
+Both edgartools and [sec-api.io](https://sec-api.io) provide access to SEC EDGAR data. Here's how they compare:
+
+### Pricing and Access
 
 | | EdgarTools | sec-api.io |
 |---|:---:|:---:|
-| **Price** | Free forever | $55-$239/mo |
-| **API Key** | Not required | Required |
+| **Price** | Free forever | Free trial (100 calls), then $49-$239/mo |
+| **API key required** | No | Yes |
 | **Open source** | Yes (MIT license) | No |
-| **Financial statements** | Built-in XBRL parsing | Separate add-on |
-| **Insider trading** | Form 3, 4, 5 parsing | Limited |
-| **Institutional holdings** | 13F with quarter-over-quarter comparison | Basic |
-| **Fund holdings** | N-PORT, N-MFP, N-CEN | Not available |
-| **Proxy statements** | DEF 14A with executive compensation | Not available |
-| **Beneficial ownership** | Schedule 13D/G parsing | Not available |
-| **8-K current events** | Item-level parsing with earnings extraction | Filing access only |
-| **Bulk downloads** | Built-in batch operations | Separate endpoint |
-| **Rich display** | Terminal tables, panels, formatting | JSON only |
-| **Pandas integration** | DataFrames from every data object | Manual conversion |
+| **Works offline** | Yes (with local storage) | No |
+
+### Data Coverage
+
+Both tools cover a wide range of SEC filing types. The main differences:
+
+| | EdgarTools | sec-api.io |
+|---|:---:|:---:|
+| **Financial statements (XBRL)** | Python objects + DataFrames | JSON via XBRL-to-JSON API |
+| **Insider trading (Form 3/4/5)** | Parsed data objects | Structured JSON API |
+| **13F institutional holdings** | Data objects + quarter comparison | Structured JSON API |
+| **Fund holdings (N-PORT)** | Data objects + DataFrames | Structured JSON API |
+| **Beneficial ownership (13D/G)** | Parsed data objects | Structured JSON API |
+| **8-K current events** | Item-level parsing | Section extractor + structured items |
+| **Proxy / exec compensation** | DEF 14A data objects | Executive comp + board data |
+| **Money market funds (N-MFP)** | Data objects + time series | -- |
+| **Fund census (N-CEN)** | Data objects + DataFrames | -- |
+| **Form 144 (sale notices)** | Data objects | -- |
+| **BDC filings** | Data objects | -- |
+| **Real-time filing stream** | -- | WebSocket stream API |
+| **Full-text search** | -- | Boolean keyword search API |
+| **PDF generation** | -- | Filing-to-PDF converter |
+| **Investment advisers (ADV)** | -- | Form ADV API |
+| **SEC enforcement actions** | -- | Enforcement database |
+
+### Developer Experience
+
+| | EdgarTools | sec-api.io |
+|---|:---:|:---:|
+| **Language** | Python library (`pip install`) | REST API (any language) |
+| **Return format** | Python objects + pandas DataFrames | JSON |
+| **Terminal display** | Rich tables, panels, formatting | -- |
+| **Runs in notebooks** | Native (Jupyter, Colab) | Via HTTP requests |
 
 ### The 3-Line Wow
 
-Get Apple's income statement from their latest 10-K -- in 3 lines:
+Get Apple's income statement from their latest 10-K:
 
 ```python
 from edgar import *
@@ -183,31 +208,9 @@ filing = Company("AAPL").get_filings(form="10-K")[0]
 filing.obj().financials.income_statement
 ```
 
-Compare that to the typical approach with sec-api:
+The same task with sec-api requires an API key, an HTTP request to find the filing, a second call to the XBRL-to-JSON converter, and manual processing of the JSON response.
 
-```python
-import requests
-
-# Step 1: Look up company CIK ($55/mo API key required)
-API_KEY = "your-paid-api-key"
-resp = requests.get(f"https://efts.sec.gov/LATEST/search-index?q=AAPL&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K", headers={"Authorization": f"Bearer {API_KEY}"})
-filing_url = resp.json()["hits"]["hits"][0]["_source"]["file_url"]
-
-# Step 2: Download the filing
-filing_resp = requests.get(filing_url)
-
-# Step 3: Find the XBRL instance document in the filing
-# ... parse SGML index, locate the XML file ...
-
-# Step 4: Parse XBRL
-from lxml import etree
-# ... strip namespaces, resolve taxonomy, build statement ...
-
-# Step 5: Build the income statement
-# ... map concepts, handle custom tags, align periods ...
-```
-
-**3 lines vs 30+. Free vs $55/mo. That's the difference.**
+**EdgarTools is purpose-built for Python developers who want SEC data as native objects and DataFrames -- free, no key, no HTTP plumbing.**
 
 ---
 
