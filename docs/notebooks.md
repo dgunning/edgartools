@@ -155,14 +155,59 @@ Parse proxy statements for executive pay, board composition, and shareholder pro
 
 ## Why EdgarTools?
 
+### Feature Comparison
+
 | | EdgarTools | sec-api.io |
 |---|:---:|:---:|
-| **Price** | Free | $55-$239/mo |
+| **Price** | Free forever | $55-$239/mo |
 | **API Key** | Not required | Required |
+| **Open source** | Yes (MIT license) | No |
 | **Financial statements** | Built-in XBRL parsing | Separate add-on |
 | **Insider trading** | Form 3, 4, 5 parsing | Limited |
-| **Fund holdings** | N-PORT, 13F | Not available |
-| **Open source** | Yes (GitHub) | No |
+| **Institutional holdings** | 13F with quarter-over-quarter comparison | Basic |
+| **Fund holdings** | N-PORT, N-MFP, N-CEN | Not available |
+| **Proxy statements** | DEF 14A with executive compensation | Not available |
+| **Beneficial ownership** | Schedule 13D/G parsing | Not available |
+| **8-K current events** | Item-level parsing with earnings extraction | Filing access only |
+| **Bulk downloads** | Built-in batch operations | Separate endpoint |
+| **Rich display** | Terminal tables, panels, formatting | JSON only |
+| **Pandas integration** | DataFrames from every data object | Manual conversion |
+
+### The 3-Line Wow
+
+Get Apple's income statement from their latest 10-K -- in 3 lines:
+
+```python
+from edgar import *
+filing = Company("AAPL").get_filings(form="10-K")[0]
+filing.obj().financials.income_statement
+```
+
+Compare that to the typical approach with sec-api:
+
+```python
+import requests
+
+# Step 1: Look up company CIK ($55/mo API key required)
+API_KEY = "your-paid-api-key"
+resp = requests.get(f"https://efts.sec.gov/LATEST/search-index?q=AAPL&dateRange=custom&startdt=2024-01-01&enddt=2024-12-31&forms=10-K", headers={"Authorization": f"Bearer {API_KEY}"})
+filing_url = resp.json()["hits"]["hits"][0]["_source"]["file_url"]
+
+# Step 2: Download the filing
+filing_resp = requests.get(filing_url)
+
+# Step 3: Find the XBRL instance document in the filing
+# ... parse SGML index, locate the XML file ...
+
+# Step 4: Parse XBRL
+from lxml import etree
+# ... strip namespaces, resolve taxonomy, build statement ...
+
+# Step 5: Build the income statement
+# ... map concepts, handle custom tags, align periods ...
+```
+
+**3 lines vs 30+. Free vs $55/mo. That's the difference.**
 
 ---
 
