@@ -111,3 +111,15 @@
 | Get the company's balance sheet          | `company.financials.balance_sheet()`                          |
 | Get the company's income statement       | `company.financials.income_statement()`                       |
 | Get the company's cash flow statement    | `company.financials.cashflow_statement()`                     |
+
+### Working with proxy statements (executive compensation)
+
+|                                          | Code                                                          |
+|------------------------------------------|---------------------------------------------------------------|
+| Get latest proxy statement               | `proxy = company.get_filings(form="DEF 14A").latest().obj()`  |
+| Get CEO name                             | `proxy.peo_name`                                              |
+| Get CEO total compensation               | `proxy.peo_total_comp`                                        |
+| Get 5-year exec compensation DataFrame   | `proxy.executive_compensation`                                |
+| Get pay vs performance DataFrame         | `proxy.pay_vs_performance`                                    |
+| Get company TSR                          | `proxy.total_shareholder_return`                              |
+| Get peer group TSR                       | `proxy.peer_group_tsr`                                        |

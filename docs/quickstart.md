@@ -137,6 +137,7 @@ Now that you've seen the basics, explore by what you want to do:
 - [8-K Current Reports](guides/eightk-data-object-guide.md) - Material events
 - [13F Holdings](guides/thirteenf-data-object-guide.md) - Institutional portfolios
 - [Form 4 Transactions](guides/track-form4.md) - Insider trading details
+- [Proxy Statements](guides/proxystatement-data-object-guide.md) - Executive compensation & governance
 
 ## Getting Help
 

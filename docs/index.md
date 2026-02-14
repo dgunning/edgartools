@@ -44,6 +44,17 @@ transactions = pd.concat([f.obj()
                 for f in filings])
 ```
 
+**Analyze Executive Compensation**
+
+Get CEO pay, pay-vs-performance, and 5-year compensation trends from proxy statements.
+
+```python
+proxy = company.get_filings(form="DEF 14A").latest().obj()
+proxy.peo_name                # "Mr. Cook"
+proxy.peo_total_comp          # 74609802
+proxy.executive_compensation  # 5-year DataFrame
+```
+
 **Research Investment Funds**
 
 Analyze 13F holdings, track portfolio changes, and compare fund strategies.
