@@ -57,6 +57,7 @@ __all__ = [
     'SecFiler',
     'Entity',
     'Company',
+    'CompanyNotFoundError',
     'EntityData',
     'CompanyData',
     'ConceptList',
@@ -66,6 +67,38 @@ __all__ = [
     'has_company_filings',
     'COMPANY_FORMS',
 ]
+
+
+class CompanyNotFoundError(Exception):
+    """Raised when a company cannot be found by ticker, CIK, or name."""
+
+    def __init__(self, identifier, suggestions=None):
+        self.identifier = identifier
+        self.suggestions = suggestions or []
+        super().__init__(str(self))
+
+    def __str__(self):
+        msg = f"Company not found: '{self.identifier}'"
+        if self.suggestions:
+            suggestions_str = ", ".join(
+                f"'{s['ticker']}' ({s['company']})" for s in self.suggestions[:3]
+            )
+            msg += f"\n  Similar: {suggestions_str}"
+        msg += "\n  Tip: Search by name with find_company(\"...\") or pass a CIK directly."
+        return msg
+
+
+def _get_suggestions(identifier: str, max_suggestions: int = 3):
+    """Get fuzzy-match suggestions for a failed company lookup."""
+    try:
+        from edgar.entity.search import _get_company_search_index
+        results = _get_company_search_index().search(identifier, top_n=max_suggestions, threshold=40)
+        if not results.empty:
+            return [{'ticker': row.ticker, 'company': row.company}
+                    for _, row in results.results.iterrows()]
+    except Exception:
+        pass
+    return []
 
 
 class ConceptList:
@@ -213,9 +246,11 @@ class Entity(SecFiler):
         if isinstance(cik_or_identifier, str) and not cik_or_identifier.isdigit():
             cik = find_cik(cik_or_identifier)
             if cik is None:
-                self._cik = -999999999
-            else:
-                self._cik = cik
+                raise CompanyNotFoundError(
+                    cik_or_identifier,
+                    suggestions=_get_suggestions(cik_or_identifier)
+                )
+            self._cik = cik
         else:
             self._cik = normalize_cik(cik_or_identifier)
 
@@ -528,11 +563,10 @@ class Entity(SecFiler):
         """
         Allow truthiness check for entities.
 
-        Returns False if the entity doesn't exist (has a sentinel CIK value or not_found is True).
+        Returns False if the entity was not found via the SEC API (valid CIK but no data).
         This enables code patterns like: `if company: do_something()`
         """
-        # Check for sentinel CIK value (-999999999) or not_found flag
-        return self.cik != -999999999 and not self.not_found
+        return not self.not_found
 
 
 class Company(Entity):

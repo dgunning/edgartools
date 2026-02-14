@@ -26,6 +26,7 @@ from edgar.entity import (
     CompanyData,
     CompanyFiling,
     CompanyFilings,
+    CompanyNotFoundError,
     CompanySearchResults,
     Entity,
     EntityData,
@@ -132,7 +133,10 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
     elif re.match(r"\d{4,10}$", search_id):
         return Entity(search_id)
     elif re.match(r"^[A-WYZ]{1,5}([.-][A-Z])?$", search_id):  # Ticker (including dot or hyphenated)
-        return Entity(search_id)
+        try:
+            return Entity(search_id)
+        except CompanyNotFoundError:
+            return find_company(search_id)
     elif re.match(r"^[A-Z]{4}X$", search_id):  # Mutual Fund Ticker
         return find_fund(search_id)
     elif re.match(r"^[CS]\d+$", search_id):
