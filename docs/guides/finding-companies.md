@@ -19,14 +19,7 @@ apple = Company("AAPL")
 print(apple)
 ```
 
-**Output:**
-```plaintext
-Company(AAPL - Apple Inc.)
-  CIK: 0000320193
-  Industry: ELECTRONIC COMPUTERS
-  Website: https://www.apple.com
-  Location: Cupertino, CA
-```
+![Company lookup output](../images/company-lookup.webp)
 
 **Key points:**
 - Tickers are case-insensitive: `Company("aapl")` works the same as `Company("AAPL")`
@@ -165,8 +158,8 @@ For analyzing multiple companies efficiently:
 
 ```python
 from edgar import Company
+import pandas as pd
 
-# List of tickers to analyze
 tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "META"]
 companies = []
 
@@ -178,61 +171,140 @@ for ticker in tickers:
             'name': company.name,
             'cik': company.cik,
             'industry': company.industry,
-            'market_cap': company.market_cap  # If available
         })
-        print(f"✓ Found {ticker}: {company.name}")
+        print(f"Found {ticker}: {company.name}")
     except Exception as e:
-        print(f"✗ Error with {ticker}: {e}")
+        print(f"Error with {ticker}: {e}")
 
-# Convert to DataFrame for analysis
-import pandas as pd
 df = pd.DataFrame(companies)
 print(df)
+```
+
+![Batch company lookup DataFrame](../images/company-batch-lookup.webp)
+
+## Company Screening with Shares Outstanding & Public Float
+
+Every public company reports **shares outstanding** and **public float** to the SEC. EdgarTools gives you direct access to these as simple properties:
+
+```python
+company = Company("AAPL")
+
+# Shares outstanding — total common shares issued
+print(f"Shares Outstanding: {company.shares_outstanding:,.0f}")
+# 15,115,785,000
+
+# Public float — dollar value of shares available for public trading
+print(f"Public Float: ${company.public_float:,.0f}")
+# $2,899,948,348,000
+```
+
+### Screen Multiple Companies
+
+Build a screening table across any set of companies:
+
+```python
+import pandas as pd
+from edgar import Company
+
+tickers = ["AAPL", "MSFT", "NVDA", "AMZN", "META", "TSLA"]
+rows = []
+
+for ticker in tickers:
+    company = Company(ticker)
+    rows.append({
+        'ticker': ticker,
+        'name': company.name,
+        'industry': company.industry,
+        'shares_outstanding': company.shares_outstanding,
+        'public_float': company.public_float,
+    })
+
+df = pd.DataFrame(rows)
+
+# Sort by public float (largest first)
+df = df.sort_values('public_float', ascending=False)
+print(df.to_string(index=False))
+```
+
+![Company screening with shares outstanding and public float](../images/company-screening.webp)
+
+### Filter by Float Size
+
+```python
+# Find mega-cap companies (float > $1 trillion)
+mega_caps = df[df['public_float'] > 1e12]
+print(f"Mega-cap companies: {list(mega_caps['ticker'])}")
+
+# Find companies with low share count (< 1 billion shares)
+low_share_count = df[df['shares_outstanding'] < 1e9]
+print(f"Low share count: {list(low_share_count['ticker'])}")
 ```
 
 ## Advanced Search Techniques
 
 ### Search by Industry
+
+Use the reference module to find companies by SIC industry code:
+
 ```python
-from edgar import get_filings
+from edgar.reference import get_companies_by_industry
 
-# Get recent filings and filter by industry keywords
-filings = get_filings()
-tech_companies = []
+# Get all software companies (SIC 7372)
+software = get_companies_by_industry(sic=7372)
+print(f"Found {len(software)} software companies")
+print(software.head())
+```
 
-for filing in filings:
-    if filing.company_name and any(keyword in filing.company_name.lower() 
-                                  for keyword in ['tech', 'software', 'computer']):
-        try:
-            company = Company(filing.cik)
-            tech_companies.append(company)
-        except:
-            continue
+![Search companies by industry (SIC code)](../images/company-search-by-industry.webp)
 
-# Remove duplicates
-unique_companies = {c.cik: c for c in tech_companies}
-print(f"Found {len(unique_companies)} unique tech companies")
+### Search by Exchange
+
+```python
+from edgar.reference import get_companies_by_exchanges
+
+# Get all NYSE-listed companies
+nyse = get_companies_by_exchanges("NYSE")
+print(f"NYSE companies: {len(nyse)}")
+print(nyse.head())
+
+# Get Nasdaq companies
+nasdaq = get_companies_by_exchanges("Nasdaq")
+print(f"Nasdaq companies: {len(nasdaq)}")
+```
+
+![Search companies by exchange](../images/company-search-by-exchange.webp)
+
+### Search by State
+
+```python
+from edgar.reference import get_companies_by_state
+
+# Get all companies incorporated in Delaware
+delaware = get_companies_by_state("DE")
+print(f"Delaware companies: {len(delaware)}")
 ```
 
 ### Search by Filing Activity
 ```python
+from edgar import get_filings, Company
+import pandas as pd
+
 # Find companies that filed 8-K forms recently
-recent_8k_filings = get_filings(form="8-K", limit=100)
+recent_8k_filings = get_filings(form="8-K")
 
 active_companies = []
-for filing in recent_8k_filings:
+for filing in recent_8k_filings.head(50):
     try:
         company = Company(filing.cik)
         active_companies.append({
             'ticker': company.ticker,
             'name': company.name,
             'filing_date': filing.filing_date,
-            'cik': company.cik
+            'cik': company.cik,
         })
-    except:
+    except Exception:
         continue
 
-# Show most recently active companies
 df = pd.DataFrame(active_companies)
 recent_activity = df.sort_values('filing_date', ascending=False).head(10)
 print(recent_activity)
@@ -279,8 +351,9 @@ except:
 
 ## Next Steps
 
-Now that you can find companies, learn how to:
+Now that you can find and screen companies, learn how to:
 
+- **[Company Facts & Financial Data](company-facts.md)** - Shares outstanding, public float, and financial statements
 - **[Search for Specific Filings](searching-filings.md)** - Find the documents you need
 - **[Extract Financial Statements](extract-statements.md)** - Get financial data
 - **[Filter Filings by Date/Type](filtering-filings.md)** - Narrow down your search
@@ -288,4 +361,4 @@ Now that you can find companies, learn how to:
 ## Related Documentation
 
 - **[Company API Reference](../api/company.md)** - Complete Company class documentation
-- **[Working with Companies](../company.md)** - Original company documentation
+- **[Business Overview Data Sources](business-overview-data-sources-guide.md)** - Build company overview pages
