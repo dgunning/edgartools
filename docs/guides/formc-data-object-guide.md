@@ -539,4 +539,4 @@ This is useful when passing Form C data to language models or building AI-powere
 - **User Guide:** Working with Form C Filings (coming soon)
 - **API Reference:** `edgar.offerings.formc` module
 - **Related Filings:** [Form D: Private Placements](formd-data-object-guide.md)
-- **Company Data:** [Working with Companies](../quickstart.md#working-with-companies)
+- **Company Data:** [Find a Company](finding-companies.md)

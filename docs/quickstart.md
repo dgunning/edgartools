@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running with EdgarTools in 5 minutes. This guide will take you from installation to your first meaningful analysis.
+Get up and running with EdgarTools in 5 minutes. By the end, you'll have a company's financial statements in Python.
 
 ## Prerequisites
 
@@ -14,6 +14,12 @@ Get up and running with EdgarTools in 5 minutes. This guide will take you from i
 pip install edgartools
 ```
 
+!!! warning "Trouble importing?"
+    If you see `ImportError: cannot import name 'get_filings' from 'edgar'`, you may have installed the wrong package. There is an unrelated package called `edgar` on PyPI. Fix it with:
+    ```bash
+    pip uninstall edgar && pip install edgartools
+    ```
+
 ## Step 2: Set Your Identity
 
 The SEC requires all API users to identify themselves. Set your identity once:
@@ -25,125 +31,125 @@ from edgar import set_identity
 set_identity("John Doe john.doe@company.com")
 ```
 
-**💡 Tip:** You can also set the `EDGAR_IDENTITY` environment variable to avoid doing this in every script.
+**Tip:** You can also set the `EDGAR_IDENTITY` environment variable to avoid doing this in every script.
 
-## Step 3: Your first filings
+## Step 3: Get a Company
 
-Let's see available filings on the SEC Edgar
-
-```python
-from edgar import *
-
-filings = get_filings()
-```
-
-![Filings](images/filings.png)
-
-
-## Step 4: Filtering for insider trading filings
-
-To focus on insider trading activity, filter for Form 4 filings:
+Look up any public company by ticker symbol or CIK number:
 
 ```python
-insider_filings = filings.filter(form="4")
-```
+from edgar import Company
 
-![Form 4 Filings](images/form4filings.png)
-
-## Step 5: Getting a Company
-
-If you would like to focus on a specific company, you can use the `Company` class. For example, to analyze Apple Inc. (AAPL):
-
-```python
-c = Company("AAPL")  # Apple Inc.
+company = Company("AAPL")  # Apple Inc.
 ```
 
 ![AAPL](images/AAPL.png)
 
-## Step 6: Key Company Data
-
-Once you have a company, you can access key data points as simple properties:
+You can access basic company data as properties:
 
 ```python
-c = Company("AAPL")
-
-# Shares outstanding
-c.shares_outstanding
-# 15115785000.0
-
-# Public float
-c.public_float
-# 2899948348000.0
-
-# Industry
-c.industry
-# 'ELECTRONIC COMPUTERS'
+company.industry        # 'ELECTRONIC COMPUTERS'
+company.shares_outstanding  # 15115785000.0
+company.public_float    # 2899948348000.0
 ```
 
-## Step 7: Getting filings for a Company
-You can retrieve all filings for a company using the `company.get_filings` method:
+## Step 4: Get Financial Statements
+
+This is the most common task — getting a company's financial statements:
 
 ```python
-# Get Apple's recent SEC filings
-aapl_filings = c.get_filings()
+financials = company.get_financials()
+
+# The three financial statements
+income    = financials.income_statement()
+balance   = financials.balance_sheet()
+cashflow  = financials.cashflow_statement()
+```
+
+![AAPL Income Statement](images/aapl-income-xbrl.webp)
+
+That's it — three lines to get any company's income statement, balance sheet, or cash flow.
+
+!!! note "Common gotcha"
+    The method is `cashflow_statement()`, not `cash_flow()`. All three methods use the full name: `income_statement()`, `balance_sheet()`, `cashflow_statement()`.
+
+## Step 5: Get Specific Values
+
+Need just one number instead of the full statement?
+
+```python
+financials.get_revenue()
+# 391035000000
+
+financials.get_net_income()
+# 93736000000
+```
+
+## Step 6: Export to DataFrame
+
+Every financial statement converts to a pandas DataFrame for further analysis:
+
+```python
+df = financials.income_statement().to_dataframe()
+```
+
+You can also export company filings:
+
+```python
+filings = company.get_filings()
+df = filings.to_pandas()
+```
+
+## Step 7: Browse Company Filings
+
+Retrieve and filter a company's SEC filings:
+
+```python
+# Get all filings
+filings = company.get_filings()
+
+# Filter by form type
+tenk_filings = company.get_filings(form="10-K")
+
+# Get the latest 10-K as a data object
+tenk = company.latest("10-K")
 ```
 
 ![AAPL Filings](images/aapl-filings.png)
 
-## Step 8: Insider Filings for Apple Inc.
+## Step 8: Next Steps
 
-To analyze insider trading activity for Apple Inc., filter the filings for Form 4:
+You just learned how to install EdgarTools, look up a company, get financial statements, and browse filings. Here's where to go next:
 
-```python
-insider_filings = c.get_filings(form="4")
-# Get the first insider filing
-f = insider_filings[0]
+**Financial Data**
 
-# Convert to a Form4 object
-form4 = f.obj()
-```
+- [Financial Statements Guide](guides/financial-data.md) — Income statements, balance sheets, cash flow in depth
+- [Extract Statements from Filings](guides/extract-statements.md) — XBRL data extraction
+- [Company Facts](guides/company-facts.md) — Historical financial data across all filings
 
-![Apple Insider Filing](images/aapl-form4.png)
+**Companies & Filings**
 
-## What You Just Learned
-
-In 5 minutes, you:
-
-1. ✅ **Installed and configured** EdgarTools
-2. ✅ **Retrieved and filtered** SEC filings
-3. ✅ **Focused on insider trading** with Form 4
-4. ✅ **Analyzed a specific company** (Apple Inc.)
-5. ✅ **Accessed key company data** like shares outstanding and public float
-6. ✅ **Extracted structured data** from filings
-7. ✅ **Converted filings to data objects** for easy analysis
-8. ✅ **Explored company filings** and insider activity
-
-## Next Steps
-
-Now that you've seen the basics, explore by what you want to do:
-
-**Working with Companies**
-
-- [Get Company Financials](guides/company-facts.md) - Balance sheets, income statements
-- [Track Insiders](guides/company-insiders.md) - Monitor insider transactions
-
-**Analyzing Filings**
-
-- [Extract Financial Statements](guides/extract-statements.md) - XBRL data extraction
-- [Query XBRL Facts](xbrl-querying.md) - Custom financial metrics
+- [Find a Company](guides/finding-companies.md) — Search by name, ticker, CIK, industry, or exchange
+- [Working with Filings](guides/working-with-filing.md) — Open, view, and parse any SEC filing
+- [Search & Filter Filings](guides/searching-filings.md) — Find exactly the filings you need
 
 **Filing Types**
 
-- [8-K Current Reports](guides/eightk-data-object-guide.md) - Material events
-- [13F Holdings](guides/thirteenf-data-object-guide.md) - Institutional portfolios
-- [Form 4 Transactions](guides/track-form4.md) - Insider trading details
-- [Proxy Statements](guides/proxystatement-data-object-guide.md) - Executive compensation & governance
+- [Annual & Quarterly Reports](concepts/data-objects.md) — 10-K and 10-Q data objects
+- [Current Events (8-K)](eightk-filings.md) — Material events and press releases
+- [Insider Trades (Form 4)](insider-filings.md) — Monitor insider transactions
+- [Institutional Holdings (13F)](guides/thirteenf-data-object-guide.md) — Who owns what
+
+**Reference**
+
+- [Quick Guide](quick-guide.md) — Cheat sheet of common operations
+- [Notebooks](notebooks.md) — Interactive Colab tutorials you can run in your browser
 
 ## Getting Help
 
-- **📖 [Documentation](https://edgartools.readthedocs.io/en/latest/)**: Browse our comprehensive guides
-- **💬 [GitHub Discussions](https://github.com/dgunning/edgartools/discussions)**: Ask questions and share insights  
-- **🐛 [Issues](https://github.com/dgunning/edgartools/issues)**: Report bugs or request features
+- **[Documentation](https://edgartools.readthedocs.io/en/latest/)**: Browse our comprehensive guides
+- **[GitHub Discussions](https://github.com/dgunning/edgartools/discussions)**: Ask questions and share insights
+- **[Issues](https://github.com/dgunning/edgartools/issues)**: Report bugs or request features
 
 ## Support EdgarTools
 
@@ -152,11 +158,3 @@ If you found this quickstart helpful, consider supporting EdgarTools development
 <a href="https://www.buymeacoffee.com/edgartools" target="_blank">
   <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 144px !important;" >
 </a>
-
-Your support helps us maintain and improve EdgarTools!
-
----
-
-**🎉 Congratulations!** You're now ready to analyze SEC data with EdgarTools. 
-
-**What's your next analysis goal?** Choose a path above and dive deeper into the world of financial data analysis.
