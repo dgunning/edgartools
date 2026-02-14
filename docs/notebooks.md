@@ -203,13 +203,13 @@ EdgarTools doesn't just fetch data -- it structures it into objects with propert
 | **Open source** | Yes (MIT license) | No |
 | **Works offline** | Yes (with local storage) | No |
 
-### Where sec-api Wins
+### Use sec-api if you need...
 
-sec-api has capabilities edgartools doesn't: real-time WebSocket filing streams, full-text boolean search across filings, PDF generation, Form ADV investment adviser data, and an SEC enforcement actions database. If you need those, sec-api is the right choice. It also works with any language, not just Python.
+sec-api is a hosted platform backed by databases and infrastructure, so it can offer things a client-side library can't: real-time WebSocket filing streams, full-text boolean search across all filings, filing-to-PDF conversion, and prebuilt datasets like SEC enforcement actions and Form ADV investment adviser data. It also works with any programming language via REST, not just Python.
 
-### Where EdgarTools Wins
+### Use EdgarTools if you need...
 
-If you're a Python developer who wants to analyze SEC data, edgartools skips the HTTP-request-and-parse-JSON development cycle entirely. You get structured objects with built-in analysis methods, pandas DataFrames, Rich terminal display, and Jupyter/Colab integration -- all free, with no API key and no rate-limit billing surprises.
+EdgarTools is for Python developers who want to go straight from a filing to analysis. No API key, no HTTP plumbing, no JSON wrangling -- just `pip install edgartools` and you get structured objects with built-in analysis methods, pandas DataFrames, Rich terminal display, and native Jupyter/Colab support. Free forever, open source, and works offline.
 
 ---
 
