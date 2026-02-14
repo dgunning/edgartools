@@ -67,36 +67,32 @@ for filing in filings:
 - Corporate proxy server
 - Self-signed certificates in development environments
 
-**Solutions**:
+**Solutions** (in order of preference):
 
-1. **Use `configure_http()` (Recommended)**:
+1. **Use OS certificate store (Recommended)**:
 ```python
 from edgar import configure_http
 
-# Disable SSL verification
-configure_http(verify_ssl=False)
+# Uses your OS's trusted certificates — secure and works on corporate networks
+configure_http(use_system_certs=True)
 
-# Then use edgartools normally
 from edgar import Company
 company = Company("AAPL")
 ```
 
-2. **Set environment variable before import**:
+2. **Disable SSL verification (Last resort)**:
 ```python
-import os
-os.environ['EDGAR_VERIFY_SSL'] = 'false'
+from edgar import configure_http
 
-# MUST be set BEFORE importing edgar!
-from edgar import Company
+# WARNING: Reduces security. Only use on trusted networks.
+configure_http(verify_ssl=False)
 ```
 
 3. **Configure a proxy** if your network requires it:
 ```python
 from edgar import configure_http
-configure_http(proxy="http://proxy.company.com:8080")
+configure_http(use_system_certs=True, proxy="http://proxy.company.com:8080")
 ```
-
-**Important**: If you set `EDGAR_VERIFY_SSL` *after* importing edgar, it won't work because the HTTP client initializes at import time. Use `configure_http()` instead.
 
 See the [SSL Configuration Guide](../guides/ssl_verification.md) for detailed instructions.
 
@@ -419,8 +415,8 @@ If you're still experiencing issues:
 | `HTTPError 403` | SEC has blocked your requests | Set proper identity and respect rate limits |
 | `HTTPError 429` | Too many requests in a short time | Implement rate limiting and backoff |
 | `ConnectionError` | Network issues | Check your internet connection |
-| `SSLVerificationError` | Corporate VPN/proxy with SSL inspection | Use `configure_http(verify_ssl=False)` |
-| `CERTIFICATE_VERIFY_FAILED` | SSL certificate issues | Use `configure_http(verify_ssl=False)` |
+| `SSLVerificationError` | Corporate VPN/proxy with SSL inspection | Use `configure_http(use_system_certs=True)` |
+| `CERTIFICATE_VERIFY_FAILED` | SSL certificate issues | Use `configure_http(use_system_certs=True)` |
 | `UnsupportedFilingTypeError` | Data Object not available for this filing type | Use generic access methods |
 
 Remember that SEC filings can vary significantly in structure and content, especially across different years and companies. Always implement robust error handling in your code to deal with these variations.

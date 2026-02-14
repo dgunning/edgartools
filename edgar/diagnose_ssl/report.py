@@ -42,6 +42,7 @@ class EnvironmentInfo:
     httpx_version: str
     certifi_version: Optional[str] = None
     cryptography_version: Optional[str] = None  # None means not installed
+    truststore_version: Optional[str] = None  # None means not installed
 
 
 @dataclass
@@ -70,6 +71,7 @@ class HttpClientState:
     client_created: bool = False
     client_verify: Optional[bool] = None
     configured_verify: bool = True
+    use_system_certs: bool = False
     settings_match: bool = True
     rate_limit_per_sec: int = 9
 
@@ -201,6 +203,9 @@ class DiagnosticResult:
             env_table.add_row("certifi:", self.environment.certifi_version)
         crypto = self.environment.cryptography_version or "[yellow]Not installed[/yellow]"
         env_table.add_row("cryptography:", crypto)
+        if self.environment.truststore_version:
+            active = " [green](active)[/green]" if self.http_client_state.use_system_certs else ""
+            env_table.add_row("truststore:", f"{self.environment.truststore_version}{active}")
 
         sections.append(Panel(env_table, title="[bold]Environment[/bold]", border_style="dim", padding=(0, 1)))
 

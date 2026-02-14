@@ -115,6 +115,24 @@ def get_edgar_verify_ssl():
     return strtobool(os.environ.get("EDGAR_VERIFY_SSL", "true"))
 
 
+def get_edgar_use_system_certs() -> bool:
+    """
+    Returns True if using system certificate store via truststore.
+    Set EDGAR_USE_SYSTEM_CERTS=true to enable.
+    """
+    return strtobool(os.environ.get("EDGAR_USE_SYSTEM_CERTS", "false"))
+
+
+def get_truststore_context():
+    """
+    Get a truststore SSLContext that uses the OS native certificate store.
+    """
+    import ssl
+
+    import truststore
+    return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+
+
 def get_edgar_rate_limit_per_sec():
     """
     Returns the rate limit in requests per second.
@@ -157,7 +175,13 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
         rate_limiter=_create_rate_limiter(request_per_sec_limit),
         cache_rules = CACHE_RULES
     )
-    http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
+    # Determine SSL verification setting
+    # Priority: system certs (truststore) > verify_ssl env var
+    if get_edgar_use_system_certs():
+        http_mgr.httpx_params["verify"] = get_truststore_context()
+    else:
+        http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
+
     # Increase keepalive from default 5s to 30s for better connection reuse
     # This reduces TCP+TLS handshake overhead (~100ms) for interactive use
     http_mgr.httpx_params["limits"] = httpx.Limits(keepalive_expiry=30)
@@ -186,6 +210,7 @@ def close_clients():
 
 def configure_http(
     verify_ssl: Optional[bool] = None,
+    use_system_certs: Optional[bool] = None,
     proxy: Optional[str] = None,
     timeout: Optional[float] = None,
 ) -> None:
@@ -197,32 +222,53 @@ def configure_http(
 
     Args:
         verify_ssl: Enable/disable SSL certificate verification.
-                   Set to False for corporate networks with SSL inspection.
+                   Set to False if use_system_certs doesn't resolve your SSL issues.
                    WARNING: Disabling SSL verification reduces security.
+        use_system_certs: Use the OS native certificate store via the truststore library.
+                         This is the recommended approach for corporate networks with
+                         SSL inspection, as it uses certificates managed by your OS.
         proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
                Supports authentication: "http://user:pass@proxy.company.com:8080"
         timeout: Request timeout in seconds (default: 30.0)
 
     Examples:
-        # Disable SSL verification for corporate VPN
+        # Use OS certificate store (recommended for corporate networks)
         from edgar import configure_http
+        configure_http(use_system_certs=True)
+
+        # Disable SSL verification (fallback if system certs don't work)
         configure_http(verify_ssl=False)
+
+        # Disable system certs and SSL verification
+        configure_http(use_system_certs=False, verify_ssl=False)
 
         # Configure proxy
         configure_http(proxy="http://proxy.company.com:8080")
 
-        # Multiple settings at once
-        configure_http(verify_ssl=False, proxy="http://proxy:8080", timeout=60.0)
-
     Note:
         Changes take effect immediately for new requests.
         If an HTTP client was already created, it will be recreated with the new settings.
+        use_system_certs=True takes precedence over verify_ssl when both are set.
     """
     global HTTP_MGR
 
     settings_changed = False
 
-    if verify_ssl is not None:
+    if use_system_certs is not None:
+        if use_system_certs:
+            HTTP_MGR.httpx_params["verify"] = get_truststore_context()
+            settings_changed = True
+        else:
+            # Disable system certs. If verify_ssl is also provided, use that.
+            # Otherwise, only reset if currently using an SSLContext.
+            import truststore
+            current = HTTP_MGR.httpx_params.get("verify", True)
+            if verify_ssl is not None:
+                HTTP_MGR.httpx_params["verify"] = verify_ssl
+            elif isinstance(current, truststore.SSLContext):
+                HTTP_MGR.httpx_params["verify"] = get_edgar_verify_ssl()
+            settings_changed = True
+    elif verify_ssl is not None:
         HTTP_MGR.httpx_params["verify"] = verify_ssl
         settings_changed = True
 
@@ -256,8 +302,19 @@ def get_http_config() -> dict:
         >>> print(f"SSL verification: {config['verify_ssl']}")
     """
     params = HTTP_MGR.httpx_params
+    verify = params.get("verify", True)
+
+    # Detect if truststore SSLContext is in use
+    using_system_certs = False
+    try:
+        import truststore
+        using_system_certs = isinstance(verify, truststore.SSLContext)
+    except ImportError:
+        pass
+
     return {
-        "verify_ssl": params.get("verify", True),
+        "verify_ssl": verify if not using_system_certs else True,
+        "use_system_certs": using_system_certs,
         "proxy": params.get("proxy"),
         "timeout": params.get("timeout"),
     }

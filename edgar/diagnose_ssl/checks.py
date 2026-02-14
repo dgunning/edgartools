@@ -50,6 +50,14 @@ def get_environment_info() -> EnvironmentInfo:
     except ImportError:
         pass
 
+    # Get truststore version if available
+    truststore_version = None
+    try:
+        import truststore
+        truststore_version = getattr(truststore, "__version__", "unknown")
+    except ImportError:
+        pass
+
     # Format platform info
     platform_info = f"{platform.system()} {platform.release()}"
     if platform.system() == "Darwin":
@@ -64,6 +72,7 @@ def get_environment_info() -> EnvironmentInfo:
         httpx_version=httpx.__version__,
         certifi_version=certifi_version,
         cryptography_version=cryptography_version,
+        truststore_version=truststore_version,
     )
 
 
@@ -116,7 +125,17 @@ def get_http_client_state() -> HttpClientState:
     state = HttpClientState()
 
     # Get configured settings
-    state.configured_verify = HTTP_MGR.httpx_params.get("verify", True)
+    verify_param = HTTP_MGR.httpx_params.get("verify", True)
+
+    # Detect if truststore SSLContext is in use
+    try:
+        import truststore
+        state.use_system_certs = isinstance(verify_param, truststore.SSLContext)
+    except ImportError:
+        pass
+
+    # configured_verify is True when using system certs (they do verify, just with OS store)
+    state.configured_verify = True if state.use_system_certs else verify_param
     state.rate_limit_per_sec = get_edgar_rate_limit_per_sec()
 
     # Check if client exists
@@ -441,6 +460,22 @@ def generate_checks(
             details="Certificate details unavailable. Install with: pip install cryptography",
         ))
 
+    # Truststore library check
+    if env.truststore_version:
+        if client_state.use_system_certs:
+            checks.append(CheckResult(
+                name="System Certificates",
+                status=CheckStatus.PASS,
+                message=f"truststore {env.truststore_version} active (using OS certificate store)",
+            ))
+        else:
+            checks.append(CheckResult(
+                name="System Certificates",
+                status=CheckStatus.PASS,
+                message=f"truststore {env.truststore_version} available (not active)",
+                details="Enable with: configure_http(use_system_certs=True) or EDGAR_USE_SYSTEM_CERTS=true",
+            ))
+
     # Certificate bundle check
     if cert_config.bundle_exists:
         checks.append(CheckResult(
@@ -606,16 +641,29 @@ company = Company("AAPL")""",
     # SSL handshake failure recommendations
     if network.ssl_handshake and not network.ssl_handshake.success:
         if network.ssl_handshake.is_corporate_proxy:
-            # Corporate proxy detected
+            # Corporate proxy detected — recommend truststore first
+            recommendations.append(Recommendation(
+                title="Recommended: Use OS certificate store",
+                description=(
+                    "Your network uses SSL inspection. The truststore library lets Python "
+                    "use your OS's certificates, which include your organization's CA."
+                ),
+                code_snippet="""pip install truststore
+
+from edgar import configure_http
+configure_http(use_system_certs=True)""",
+                priority=1,
+            ))
+
             recommendations.append(Recommendation(
                 title="Quick Fix: Disable SSL verification",
                 description=(
-                    "Your network uses SSL inspection which replaces SEC.gov's certificate "
-                    "with your organization's certificate. This is common in corporate networks."
+                    "If truststore doesn't work, you can disable SSL verification. "
+                    "WARNING: This reduces security."
                 ),
                 code_snippet="""from edgar import configure_http
 configure_http(verify_ssl=False)""",
-                priority=1,
+                priority=2,
             ))
 
             recommendations.append(Recommendation(
@@ -633,17 +681,30 @@ os.environ["REQUESTS_CA_BUNDLE"] = "/path/to/corporate-ca.pem"
 
 # Then import edgar
 from edgar import Company""",
-                priority=2,
+                priority=3,
             ))
 
         else:
-            # Generic SSL failure
+            # Generic SSL failure — still recommend truststore first
+            recommendations.append(Recommendation(
+                title="Try using OS certificate store",
+                description=(
+                    "The truststore library uses your OS's native certificates, "
+                    "which may resolve SSL issues."
+                ),
+                code_snippet="""pip install truststore
+
+from edgar import configure_http
+configure_http(use_system_certs=True)""",
+                priority=1,
+            ))
+
             recommendations.append(Recommendation(
                 title="Disable SSL verification",
-                description="Try disabling SSL verification to see if that resolves the issue.",
+                description="If truststore doesn't help, try disabling SSL verification.",
                 code_snippet="""from edgar import configure_http
 configure_http(verify_ssl=False)""",
-                priority=1,
+                priority=2,
             ))
 
     # DNS failure

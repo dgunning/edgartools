@@ -477,10 +477,10 @@ Custom CA bundle is configured but verification still failed. Check:
 Solutions:
 ----------
 
-1. QUICK FIX - Disable SSL verification:
+1. RECOMMENDED - Use your OS certificate store:
 
    from edgar import configure_http
-   configure_http(verify_ssl=False)
+   configure_http(use_system_certs=True)
 
    # Then your code
    from edgar import Company
@@ -492,13 +492,12 @@ Solutions:
 
    export REQUESTS_CA_BUNDLE="/path/to/corporate-ca-bundle.pem"
 
-   Or create a combined bundle:
+3. LAST RESORT - Disable SSL verification:
 
-   cat "{certifi_path}" \\
-       /path/to/corporate-ca.crt > ~/combined-bundle.pem
-   export REQUESTS_CA_BUNDLE="$HOME/combined-bundle.pem"
+   from edgar import configure_http
+   configure_http(verify_ssl=False)
 
-3. ASK IT - Request SEC.gov be added to SSL inspection bypass list"""
+4. ASK IT - Request SEC.gov be added to SSL inspection bypass list"""
 
     elif category == SSLErrorCategory.EXPIRED:
         return """
@@ -509,7 +508,12 @@ Solutions:
 
 2. If the issue persists, this may be a temporary SEC.gov issue
 
-3. Temporary workaround:
+3. Try using your OS certificate store:
+
+   from edgar import configure_http
+   configure_http(use_system_certs=True)
+
+4. Last resort - disable SSL verification:
 
    from edgar import configure_http
    configure_http(verify_ssl=False)"""
@@ -519,16 +523,15 @@ Solutions:
         return """
 Solution:
 ---------
-Disable SSL verification:
+Use your OS certificate store:
 
   from edgar import configure_http
-  configure_http(verify_ssl=False)
+  configure_http(use_system_certs=True)
 
-Or via environment variable (set before importing edgar):
+If that doesn't work, disable SSL verification (last resort):
 
-  import os
-  os.environ['EDGAR_VERIFY_SSL'] = 'false'
-  from edgar import Company"""
+  from edgar import configure_http
+  configure_http(verify_ssl=False)"""
 
 
 class SSLVerificationError(Exception):
@@ -564,8 +567,8 @@ Error: {str(self.original_error)}"""
         solution = _build_solution_section(self.category, self.diagnostic)
 
         footer = """
-⚠️  Only disable SSL verification in trusted network environments.
-   You can also set EDGAR_VERIFY_SSL=false before importing edgar.
+💡 Recommended: configure_http(use_system_certs=True) uses your OS certificates securely.
+⚠️  Only disable SSL verification (verify_ssl=False) as a last resort.
 
 Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verification.md"""
 
