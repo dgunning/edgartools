@@ -74,6 +74,7 @@ ai-dev = [
 
 data = [
     "duckdb>=1.0.0",            # SQL interface for company datasets
+    "zstandard>=0.20.0",        # Decompress datamule tar content
 ]
 
 test-harness = [
