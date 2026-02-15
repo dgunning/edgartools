@@ -158,7 +158,7 @@ def matches_form(sec_filing: Filing,
                  form: Union[str, List[str]]) -> bool:
     """Check if the filing matches the forms"""
     form_list = listify(form)
-    if sec_filing.form in form_list + [f"{f}/A" for f in form_list]:
+    if sec_filing.form in form_list + [f"{f}/A" for f in form_list if not f.endswith("/A")]:
         return True
     return False
 
