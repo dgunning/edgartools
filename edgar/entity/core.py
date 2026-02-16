@@ -904,7 +904,7 @@ class Company(Entity):
                 # TTMEntityFacts removed - using EntityFacts directly
                 ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
                 builder = TTMStatementBuilder(ttm_facts)
-                stmt = builder.build_income_statement()
+                stmt = builder.build_income_statement(max_periods=periods)
 
                 if as_dataframe:
                     return stmt.to_dataframe()
@@ -1016,7 +1016,7 @@ class Company(Entity):
                 # TTMEntityFacts removed - using EntityFacts directly
                 ttm_facts = EntityFacts(self.cik, self.name, adjusted_facts, self.sic)
                 builder = TTMStatementBuilder(ttm_facts)
-                stmt = builder.build_cashflow_statement()
+                stmt = builder.build_cashflow_statement(max_periods=periods)
 
                 if as_dataframe:
                     return stmt.to_dataframe()
