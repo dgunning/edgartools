@@ -244,14 +244,15 @@ class FinancialTable:
         skip_labels = {str(idx) for idx in df.index
                        if self.get_row_type(str(idx)) != RowType.AMOUNT}
 
-        for col in df.columns:
-            numeric = pd.to_numeric(df[col], errors='coerce')
+        for col_idx in range(len(df.columns)):
+            col_series = df.iloc[:, col_idx]
+            numeric = pd.to_numeric(col_series, errors='coerce')
             mask = numeric.notna()
             # Zero out mask for non-amount rows
             for label in skip_labels:
                 if label in df.index:
                     mask[label] = False
-            df.loc[mask, col] = numeric[mask] * self.scale.value
+            df.iloc[mask.values, col_idx] = numeric[mask] * self.scale.value
         return df
 
     def __repr__(self) -> str:
@@ -1322,7 +1323,7 @@ def _parse_numeric(val) -> Union[float, str, None]:
         return None
 
     s_for_sign_check = s.replace('$', '').replace('€', '').replace('£', '').replace('¥', '').strip()
-    negative = s_for_sign_check.startswith('(') and s_for_sign_check.endswith(')')
+    negative = s_for_sign_check.startswith('(') or s_for_sign_check.endswith(')')
     cleaned = s.replace(',', '').replace('$', '').replace('€', '').replace('£', '').replace('¥', '').replace('(', '').replace(')', '').replace('%', '').replace('*', '').strip()
 
     try:

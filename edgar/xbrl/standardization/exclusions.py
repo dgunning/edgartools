@@ -157,7 +157,6 @@ EXCLUDED_TAGS: Set[str] = {
     "ImpairmentEffectOnEarningsPerSharePretax",
     "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",
     "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign",
-    "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
     "IncomeLossFromContinuingOperationsBeforeInterestExpenseInterestIncomeIncomeTaxesExtraordinaryItemsNoncontrollingInterestsNet",
     "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
     "IncomeLossFromContinuingOperationsPerBasicAndDilutedShare",

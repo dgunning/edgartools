@@ -346,6 +346,19 @@ class ReverseIndex:
                         )
                         return candidate
 
+            # Phase 3+: Use tag name hints for current/noncurrent disambiguation
+            tag_lower = xbrl_tag.lower()
+            if any(hint in tag_lower for hint in ('noncurrent', 'longterm', 'long_term')):
+                for candidate in candidates:
+                    cl = candidate.lower()
+                    if 'noncurrent' in cl or 'nonoperating' in cl or 'longterm' in cl:
+                        return candidate
+            elif 'current' in tag_lower and 'noncurrent' not in tag_lower:
+                for candidate in candidates:
+                    cl = candidate.lower()
+                    if 'current' in cl and 'noncurrent' not in cl:
+                        return candidate
+
             if not section:
                 return None
 

@@ -134,6 +134,9 @@ class StatementStitcher:
             # Store data for each item
             self._integrate_statement_data(processed_data, statement['periods'], relevant_periods)
 
+        # Merge duplicate rows that map to the same standard_concept
+        self._merge_duplicate_standard_concepts()
+
         # Format the stitched data
         return self._format_output_with_ordering(statements)
 
@@ -401,7 +404,8 @@ class StatementStitcher:
                     'is_abstract': item.get('is_abstract', False),
                     'is_total': item.get('is_total', False) or 'total' in label.lower(),
                     'original_concept': concept,
-                    'latest_label': label  # Store the original label too
+                    'latest_label': label,  # Store the original label too
+                    'standard_concept': item.get('standard_concept'),
                 }
             else:
                 # For existing concepts, update the label to use the most recent one
@@ -434,6 +438,10 @@ class StatementStitcher:
                                 # Update metadata
                                 self.concept_metadata[new_concept_key] = self.concept_metadata[concept_key].copy()
                                 self.concept_metadata[new_concept_key]['latest_label'] = label
+                                # Propagate standard_concept from newer filing if available
+                                new_standard = item.get('standard_concept')
+                                if new_standard and not self.concept_metadata[new_concept_key].get('standard_concept'):
+                                    self.concept_metadata[new_concept_key]['standard_concept'] = new_standard
 
                                 # Update the concept mapping
                                 self.concept_to_label_map[concept] = new_concept_key
@@ -441,6 +449,10 @@ class StatementStitcher:
                             else:
                                 # Just update the latest label
                                 self.concept_metadata[concept_key]['latest_label'] = label
+                                # Propagate standard_concept from newer filing if available
+                                new_standard = item.get('standard_concept')
+                                if new_standard and not self.concept_metadata[concept_key].get('standard_concept'):
+                                    self.concept_metadata[concept_key]['standard_concept'] = new_standard
 
             # Store values for relevant periods
             for period_id in relevant_periods:
@@ -451,6 +463,35 @@ class StatementStitcher:
                             'value': value,
                             'decimals': item.get('decimals', {}).get(period_id, 0)
                         }
+
+    def _merge_duplicate_standard_concepts(self):
+        """Merge concept entries that map to the same standard_concept."""
+        standard_to_keys = defaultdict(list)
+        for concept_key, metadata in self.concept_metadata.items():
+            sc = metadata.get('standard_concept')
+            if sc:
+                standard_to_keys[sc].append(concept_key)
+
+        for standard_concept, keys in standard_to_keys.items():
+            if len(keys) <= 1:
+                continue
+            # Keep the key with the most data points; use key name as tiebreaker for determinism
+            primary_key = max(keys, key=lambda k: (len(self.data.get(k, {})), k))
+            for secondary_key in keys:
+                if secondary_key == primary_key:
+                    continue
+                # Only merge if no period overlap (same concept across filings, not two different breakdowns)
+                overlap = set(self.data.get(primary_key, {}).keys()) & set(self.data.get(secondary_key, {}).keys())
+                if overlap:
+                    continue  # Skip - these are genuinely different line items
+                # Merge data from secondary into primary
+                for period_id, value_data in self.data.get(secondary_key, {}).items():
+                    self.data[primary_key][period_id] = value_data
+                # Remove the secondary entry
+                if secondary_key in self.data:
+                    del self.data[secondary_key]
+                if secondary_key in self.concept_metadata:
+                    del self.concept_metadata[secondary_key]
 
     def _format_output_with_ordering(self, statements: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -493,6 +534,7 @@ class StatementStitcher:
                 'is_abstract': metadata['is_abstract'],
                 'is_total': metadata['is_total'],
                 'concept': metadata['original_concept'],
+                'standard_concept': metadata.get('standard_concept'),
                 'values': {},
                 'decimals': {}
             }

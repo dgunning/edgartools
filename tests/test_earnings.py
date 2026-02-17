@@ -476,3 +476,66 @@ class TestFinancialTableRowTypes:
         scaled = table.scaled_dataframe
         assert scaled.loc["Total revenue", "Q1 2025"] == 100.0
         assert scaled.loc["Diluted earnings per share", "Q1 2025"] == 0.46
+
+    def test_scaled_dataframe_duplicate_columns(self):
+        """Bug 6: scaled_dataframe should not crash on duplicate column names."""
+        df = pd.DataFrame(
+            {"Q1 2025": [100.0, 0.46], "Q1 2025": [200.0, 0.55]},
+        )
+        # Manually create duplicate columns (pandas deduplicates in constructor)
+        df = pd.DataFrame(
+            [[100.0, 200.0], [0.46, 0.55]],
+            index=["Total revenue", "Diluted earnings per share"],
+            columns=["Q1 2025", "Q1 2025"],
+        ).astype(object)
+
+        row_types = {
+            "Total revenue": RowType.AMOUNT,
+            "Diluted earnings per share": RowType.PER_SHARE,
+        }
+        table = FinancialTable(
+            dataframe=df,
+            scale=Scale.MILLIONS,
+            statement_type=StatementType.INCOME_STATEMENT,
+            row_types=row_types,
+        )
+
+        # Should not raise an error
+        scaled = table.scaled_dataframe
+        # Both duplicate columns should be scaled for the AMOUNT row
+        assert scaled.iloc[0, 0] == 100.0 * 1_000_000
+        assert scaled.iloc[0, 1] == 200.0 * 1_000_000
+        # PER_SHARE row should not be scaled
+        assert scaled.iloc[1, 0] == 0.46
+        assert scaled.iloc[1, 1] == 0.55
+
+
+# ── Bug 5: Split-cell negative sign detection ─────────────────────────────
+
+
+class TestParseNumericSplitCell:
+    """Bug 5: Negative detection for split-cell scenarios (unmatched parentheses)."""
+
+    def test_opening_paren_only(self):
+        """(1,234 → -1234.0 (opening paren from prior cell, closing missing)."""
+        assert _parse_numeric("(1,234") == -1234.0
+
+    def test_closing_paren_only(self):
+        """1,234) → -1234.0 (closing paren, opening was in prior cell)."""
+        assert _parse_numeric("1,234)") == -1234.0
+
+    def test_dollar_opening_paren_only(self):
+        """$(0.09 → -0.09 (split-cell with currency)."""
+        assert _parse_numeric("$(0.09") == -0.09
+
+    def test_dollar_closing_paren_only(self):
+        """$0.09) → -0.09 (split-cell with currency)."""
+        assert _parse_numeric("$0.09)") == -0.09
+
+    def test_both_parens_still_works(self):
+        """(1,234) → -1234.0 (complete parens still negative)."""
+        assert _parse_numeric("(1,234)") == -1234.0
+
+    def test_no_parens_still_positive(self):
+        """1,234 → 1234.0 (no parens = positive)."""
+        assert _parse_numeric("1,234") == 1234.0

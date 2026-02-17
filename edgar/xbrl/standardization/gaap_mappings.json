@@ -6169,6 +6169,11 @@
       "PretaxIncomeLoss"
     ]
   },
+  "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments": {
+    "standard_tags": [
+      "PretaxIncomeLoss"
+    ]
+  },
   "IncomeLossFromDiscontinuedOperationsNetOfTax": {
     "standard_tags": [
       "ExtraordinaryItemsIncomeExpense(PostTax)"
