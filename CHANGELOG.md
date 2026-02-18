@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.16.1] - 2026-02-18
+
+### Fixed
+
+- **Stitching: standard_concept propagation** — Stitched statements now correctly propagate `standard_concept` metadata through the pipeline, fixing missing column in DataFrames ([#649](https://github.com/dgunning/edgartools/issues/649))
+
+- **Stitching: duplicate row merging** — When multiple filings map different tags to the same `standard_concept`, rows are now merged instead of duplicated (e.g., BRO equity showing two lines) ([#643](https://github.com/dgunning/edgartools/issues/643))
+
+- **Stitching: current/noncurrent debt disambiguation** — Added tag-name hints so long-term debt is no longer incorrectly reclassified as current debt during stitching (e.g., FOX) ([#644](https://github.com/dgunning/edgartools/issues/644))
+
+- **DECK Income Before Tax mapping** — Removed incorrect exclusion and added GAAP mapping for DECK's income-before-tax tag ([#648](https://github.com/dgunning/edgartools/issues/648))
+
+- **EarningsRelease: split-cell negative signs** — Fixed parenthesized negative notation not being detected when split across table cells ([#633](https://github.com/dgunning/edgartools/issues/633))
+
+- **EarningsRelease: duplicate column names** — Fixed crash in `scaled_dataframe` when earnings tables contain duplicate column headers
+
+- **matches_form: double /A appending** — Fixed `matches_form()` incorrectly appending `/A` twice for amendment matching
+
 ## [5.16.0] - 2026-02-14
 
 ### Added
