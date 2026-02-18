@@ -172,7 +172,7 @@ def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     assert balance_sheet.periods == ['2023-09-30', '2022-09-24']
     df = balance_sheet.to_dataframe()
     columns = df.columns.tolist()
-    assert columns == ['label', 'concept', '2023-09-30', '2022-09-24']
+    assert columns == ['label', 'concept', 'standard_concept', '2023-09-30', '2022-09-24']
     labels = df.label.tolist()
     print(labels)
     # Check using concept filter instead of label since labels are now original company labels
