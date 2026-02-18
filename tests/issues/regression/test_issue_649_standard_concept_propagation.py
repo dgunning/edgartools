@@ -49,9 +49,9 @@ class TestIssue649StandardConceptPropagation:
 
         stitcher._integrate_statement_data(statement_data, period_map, relevant_periods)
 
-        # standard_concept should be in concept_metadata
-        assert "Revenue" in stitcher.concept_metadata
-        assert stitcher.concept_metadata["Revenue"]["standard_concept"] == "TotalRevenue"
+        # standard_concept should be in concept_metadata (keyed by concept, not label)
+        assert "us-gaap_Revenue" in stitcher.concept_metadata
+        assert stitcher.concept_metadata["us-gaap_Revenue"]["standard_concept"] == "TotalRevenue"
 
     def test_standard_concept_in_output(self):
         """standard_concept should appear in _format_output_with_ordering output."""
@@ -59,8 +59,8 @@ class TestIssue649StandardConceptPropagation:
         stitcher.periods = ["duration_2024-01-01_2024-12-31"]
         stitcher.period_dates = {"duration_2024-01-01_2024-12-31": "FY 2024"}
 
-        # Manually set up data as if integration already happened
-        stitcher.concept_metadata["Revenue"] = {
+        # Manually set up data as if integration already happened (keyed by concept)
+        stitcher.concept_metadata["us-gaap_Revenue"] = {
             "level": 0,
             "is_abstract": False,
             "is_total": False,
@@ -68,11 +68,11 @@ class TestIssue649StandardConceptPropagation:
             "latest_label": "Revenue",
             "standard_concept": "TotalRevenue",
         }
-        stitcher.data["Revenue"]["duration_2024-01-01_2024-12-31"] = {
+        stitcher.data["us-gaap_Revenue"]["duration_2024-01-01_2024-12-31"] = {
             "value": 100000,
             "decimals": -3,
         }
-        stitcher.original_statement_order = ["us-gaap_Revenue", "Revenue"]
+        stitcher.original_statement_order = ["us-gaap_Revenue"]
 
         result = stitcher._format_output_with_ordering([])
         assert len(result["statement_data"]) == 1
@@ -100,7 +100,7 @@ class TestIssue649StandardConceptPropagation:
         relevant_periods = {"duration_2024-01-01_2024-12-31"}
 
         stitcher._integrate_statement_data(statement_data, period_map, relevant_periods)
-        assert stitcher.concept_metadata["My Revenue"]["standard_concept"] is None
+        assert stitcher.concept_metadata["custom_MyRevenue"]["standard_concept"] is None
 
     def test_standard_concept_in_to_pandas(self):
         """to_pandas() should include a standard_concept column."""
@@ -156,7 +156,7 @@ class TestIssue649StandardConceptPropagation:
             {"duration_2023-01-01_2023-12-31": {"label": "FY 2023"}},
             {"duration_2023-01-01_2023-12-31"},
         )
-        assert stitcher.concept_metadata["Revenue"]["standard_concept"] is None
+        assert stitcher.concept_metadata["us-gaap_Revenue"]["standard_concept"] is None
 
         # Second: newer filing with standard_concept
         new_data = [
@@ -176,4 +176,4 @@ class TestIssue649StandardConceptPropagation:
             {"duration_2024-01-01_2024-12-31": {"label": "FY 2024"}},
             {"duration_2024-01-01_2024-12-31"},
         )
-        assert stitcher.concept_metadata["Revenue"]["standard_concept"] == "TotalRevenue"
+        assert stitcher.concept_metadata["us-gaap_Revenue"]["standard_concept"] == "TotalRevenue"

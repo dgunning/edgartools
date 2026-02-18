@@ -100,11 +100,8 @@ class StatementStitcher:
             self.original_statement_order = []
             for item in reference_statement.get('data', []):
                 concept = item.get('concept')
-                label = item.get('label')
-                if concept:
+                if concept and concept not in self.original_statement_order:
                     self.original_statement_order.append(concept)
-                if label and label not in self.original_statement_order:
-                    self.original_statement_order.append(label)
 
         # Extract and sort all periods
         all_periods = self._extract_periods(statements)
@@ -385,13 +382,14 @@ class StatementStitcher:
             # Use concept as the primary key for identifying the same financial line item
             # This is more reliable than labels which may vary across filings
 
-            # If we've already seen this concept, use the existing label as the key
+            # If we've already seen this concept, use the existing key
             # This ensures we merge rows that represent the same concept
             if concept in self.concept_to_label_map:
                 concept_key = self.concept_to_label_map[concept]
             else:
-                # For a new concept, use the current label as the key
-                concept_key = label
+                # Use concept as key to avoid collisions when different concepts share labels
+                # (e.g. "Other, net" used by both operating and financing activities)
+                concept_key = concept
                 # Remember this mapping for future occurrences
                 self.concept_to_label_map[concept] = concept_key
 
@@ -412,47 +410,24 @@ class StatementStitcher:
                 # We determine which periods are most recent based on position in self.periods
                 # (earlier indices are more recent periods)
 
-                # Find the periods in this statement
+                # Update label to the most recent filing's label for display
                 statement_periods = [p for p in relevant_periods if p in self.periods]
                 if statement_periods:
-                    # Get the most recent period in this statement
                     most_recent_period = min(statement_periods, key=lambda p: self.periods.index(p))
                     most_recent_idx = self.periods.index(most_recent_period)
 
-                    # Find the earliest period where we have data for this concept
                     existing_periods = [p for p in self.data[concept_key].keys() if p in self.periods]
                     if existing_periods:
                         earliest_existing_idx = min(self.periods.index(p) for p in existing_periods)
 
-                        # If this statement has more recent data, update the label
+                        # If this statement has more recent data, update the display label
                         if most_recent_idx < earliest_existing_idx:
-                            # Update the concept key label for display
-                            new_concept_key = label
+                            self.concept_metadata[concept_key]['latest_label'] = label
 
-                            # If we're changing the label, we need to migrate existing data
-                            if new_concept_key != concept_key:
-                                # Copy existing data to the new key
-                                if new_concept_key not in self.data:
-                                    self.data[new_concept_key] = self.data[concept_key].copy()
-
-                                # Update metadata
-                                self.concept_metadata[new_concept_key] = self.concept_metadata[concept_key].copy()
-                                self.concept_metadata[new_concept_key]['latest_label'] = label
-                                # Propagate standard_concept from newer filing if available
-                                new_standard = item.get('standard_concept')
-                                if new_standard and not self.concept_metadata[new_concept_key].get('standard_concept'):
-                                    self.concept_metadata[new_concept_key]['standard_concept'] = new_standard
-
-                                # Update the concept mapping
-                                self.concept_to_label_map[concept] = new_concept_key
-                                concept_key = new_concept_key
-                            else:
-                                # Just update the latest label
-                                self.concept_metadata[concept_key]['latest_label'] = label
-                                # Propagate standard_concept from newer filing if available
-                                new_standard = item.get('standard_concept')
-                                if new_standard and not self.concept_metadata[concept_key].get('standard_concept'):
-                                    self.concept_metadata[concept_key]['standard_concept'] = new_standard
+                    # Propagate standard_concept from newer filing if available
+                    new_standard = item.get('standard_concept')
+                    if new_standard and not self.concept_metadata[concept_key].get('standard_concept'):
+                        self.concept_metadata[concept_key]['standard_concept'] = new_standard
 
             # Store values for relevant periods
             for period_id in relevant_periods:
