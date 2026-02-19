@@ -143,10 +143,12 @@ def test_integrate_statement_data(stitcher):
     stitcher._integrate_statement_data(statement_data, period_map, relevant_periods)
 
     assert len(stitcher.concept_metadata) == 2
-    assert 'Total Assets' in stitcher.concept_metadata
-    assert 'Total Liabilities' in stitcher.concept_metadata
-    assert stitcher.data['Total Assets']['instant_20241231']['value'] == 1000
-    assert stitcher.data['Total Liabilities']['instant_20231231']['value'] == 550
+    assert 'us-gaap_Assets' in stitcher.concept_metadata
+    assert 'us-gaap_Liabilities' in stitcher.concept_metadata
+    assert stitcher.concept_metadata['us-gaap_Assets']['latest_label'] == 'Total Assets'
+    assert stitcher.concept_metadata['us-gaap_Liabilities']['latest_label'] == 'Total Liabilities'
+    assert stitcher.data['us-gaap_Assets']['instant_20241231']['value'] == 1000
+    assert stitcher.data['us-gaap_Liabilities']['instant_20231231']['value'] == 550
 
 
 def test_format_output(stitcher):
@@ -157,12 +159,12 @@ def test_format_output(stitcher):
         'instant_20231231': 'Dec 31, 2023'
     }
     stitcher.concept_metadata = {
-        'Total Assets': {'level': 0, 'is_abstract': False, 'is_total': True, 'original_concept': 'us-gaap_Assets'},
-        'Total Liabilities': {'level': 0, 'is_abstract': False, 'is_total': True, 'original_concept': 'us-gaap_Liabilities'}
+        'us-gaap_Assets': {'level': 0, 'is_abstract': False, 'is_total': True, 'original_concept': 'us-gaap_Assets', 'latest_label': 'Total Assets'},
+        'us-gaap_Liabilities': {'level': 0, 'is_abstract': False, 'is_total': True, 'original_concept': 'us-gaap_Liabilities', 'latest_label': 'Total Liabilities'}
     }
     stitcher.data = {
-        'Total Assets': {'instant_20241231': {'value': 1000, 'decimals': 0}, 'instant_20231231': {'value': 900, 'decimals': 0}},
-        'Total Liabilities': {'instant_20241231': {'value': 600, 'decimals': 0}, 'instant_20231231': {'value': 550, 'decimals': 0}}
+        'us-gaap_Assets': {'instant_20241231': {'value': 1000, 'decimals': 0}, 'instant_20231231': {'value': 900, 'decimals': 0}},
+        'us-gaap_Liabilities': {'instant_20241231': {'value': 600, 'decimals': 0}, 'instant_20231231': {'value': 550, 'decimals': 0}}
     }
 
     result = stitcher._format_output()
