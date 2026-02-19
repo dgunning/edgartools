@@ -63,6 +63,7 @@ nav:
   - Filings:
     - Working with Filings: guides/working-with-filing.md
     - Search & Filter: guides/searching-filings.md
+    - Filter by Criteria: guides/filtering-filings.md
     - Current Filings: guides/current-filings.md
     - Attachments: guides/filing-attachments.md
     - Examples: examples.md
@@ -75,6 +76,7 @@ nav:
     - Annual & Quarterly: concepts/data-objects.md
     - Current Events (8-K): eightk-filings.md
     - Insider Trades (Form 4): insider-filings.md
+    - Track Insider Activity: guides/track-form4.md
     - Beneficial Ownership (13D/G): guides/schedule13dg-data-object-guide.md
     - Institutional Holdings (13F): guides/thirteenf-data-object-guide.md
     - Fund Portfolios (N-PORT): guides/nport-data-object-guide.md
@@ -101,6 +103,7 @@ nav:
       - Overview: xbrl/index.md
       - Query XBRL Facts: xbrl-querying.md
       - Getting XBRL Data: getting-xbrl.md
+      - Multi-Period Analysis: xbrl/guides/multi-period-analysis.md
       - Dimensions: xbrl/concepts/dimension-handling.md
       - Standardization: xbrl/concepts/standardization.md
       - Footnotes: guides/xbrl-footnotes.md
@@ -135,6 +138,11 @@ nav:
       - Local Storage: guides/local-storage.md
       - Cloud Storage (S3): guides/cloud-storage.md
     - Advanced Search: advanced-search.md
+    - Customizing Standardization: advanced/customizing-standardization.md
+    - Reference:
+      - Form Types: FormType-Quick-Reference.md
+      - Period Types: PeriodType-Quick-Reference.md
+      - Statement Types: StatementType-Quick-Reference.md
     - SEC Compliance: resources/sec-compliance.md
     - Troubleshooting: resources/troubleshooting.md
     - Performance: resources/performance.md

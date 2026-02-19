@@ -1,96 +1,177 @@
 # EdgarTools Notebooks
 
-Interactive Jupyter notebooks for working with SEC EDGAR filings in Python -- free, no API key required.
+Interactive Jupyter notebooks for working with SEC EDGAR filings in Python — free, no API key required.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/01_getting_started.ipynb)
+Run any notebook instantly in your browser with Google Colab — no local setup needed.
 
-## How to Use
+---
 
-1. Click any "Open in Colab" badge to run instantly in your browser
-2. Or install locally: `pip install edgartools`
-3. Open any notebook in Jupyter Lab, VS Code, or Google Colab
+## Start Here: Learning Path
 
-## Notebooks
+**New to EdgarTools?** Follow this path in order:
 
-### Getting Started
-- **sec-company-data-python.ipynb** - Look up SEC company data with Python
-- **sec-edgar-api-python.ipynb** - SEC EDGAR API in Python (comprehensive overview)
-- **01_getting_started.ipynb** - Get started with SEC filings in Python
-- **Beginners-Guide.ipynb** - Complete introduction to EdgarTools
-- **Beginners-filings-attachments.ipynb** - Working with filing attachments
-- **Ticker-Search-with-edgartools.ipynb** - Search SEC filings by ticker symbol
-- **02_troubleshooting_ssl.ipynb** - Troubleshooting SSL connection issues
+| Step | Notebook | What You'll Learn |
+|------|----------|-------------------|
+| 1 | [First Steps](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/00_first_steps.ipynb) | Company lookup → financials → export to CSV (15 min) |
+| 2 | [Getting Started](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/01_getting_started.ipynb) | Filing history, date filtering, company data |
+| 3 | [Financial Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/financial-statements-sec-python.ipynb) | Income statement, balance sheet, cash flow |
+| 4 | [Search Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/search-sec-filings-python.ipynb) | Find exactly the filings you need |
+| 5+ | **Pick a topic below** | Based on your goals |
 
-### Filings
-- **search-sec-filings-python.ipynb** - Search and filter SEC filings with Python
-- **sec-filings-today-python.ipynb** - Get today's SEC filings with Python
-- **monitor-sec-filings-python.ipynb** - Monitor SEC filings for multiple companies with Python
-- **download-10k-annual-report-python.ipynb** - Download and parse 10-K annual reports
-- **analyze-10k-annual-report-python.ipynb** - Analyze 10-K annual reports with Python
-- **10k-business-description-python.ipynb** - Extract business description from 10-K Item 1 with Python
-- **10q-quarterly-earnings-python.ipynb** - Parse 10-Q quarterly earnings with Python
-- **Paging-Through-Filings.ipynb** - Browse and navigate SEC filing collections
-- **sec-industry-sic-code-python.ipynb** - Filter SEC companies by industry and SIC code
-- **Filtering-by-industry.ipynb** - Filter SEC filings by industry/SIC code (legacy)
-- **8k-earnings-release-python.ipynb** - Extract 8-K earnings releases with Python
-- **Extract-Earnings-Releases.ipynb** - Extract 8-K earnings releases with Python (legacy)
-- **sec-filing-text-nlp-python.ipynb** - Extract SEC filing text for NLP with Python
-- **sec-filing-exhibits-python.ipynb** - Access SEC filing exhibits and attachments with Python
-- **sec-comment-letters-python.ipynb** - Analyze SEC comment letters (CORRESP) with Python
-- **download-sec-filings-bulk-python.ipynb** - Download SEC filings in bulk with Python
+---
 
-### Financial Statements (XBRL)
-- **financial-statements-sec-python.ipynb** - Extract financial statements from SEC filings with Python
-- **extract-revenue-earnings-python.ipynb** - Extract revenue and earnings from SEC filings
-- **compare-company-financials-python.ipynb** - Compare company financials with Python
-- **Viewing-Financial-Statements.ipynb** - Extract financial statements from SEC filings
-- **xbrl-financial-data-python.ipynb** - Parse XBRL financial data from SEC filings with Python
-- **Reading-Data-From-XBRL.ipynb** - Parse XBRL financial data from SEC EDGAR
-- **XBRL2-Cashflow-Statements.ipynb** - Analyze cash flow statements
-- **XBRL2-StandardizedStatements.ipynb** - Standardized financial statements
-- **XBRL2-FactQueries.ipynb** - Query XBRL facts with the enhanced API
-- **XBRL2-PeriodViews.ipynb** - Multi-period financial statement views
-- **XBRL2-QuarterlyStatements.ipynb** - Quarterly financial statement analysis
-- **XBRL2-StitchingStatements.ipynb** - Stitch statements across multiple filings
-- **XBRL2-CustomTags.ipynb** - Handle custom company XBRL tags
-- **XBRL2-NonFinancialStatements.ipynb** - Non-financial disclosures and segments
-- **XBRL2-Instance-Only-XBRL.ipynb** - Parse instance-only XBRL documents
-- **XBRLConcepts.ipynb** - Explore XBRL taxonomy concepts
+## Quick Setup
 
-### Institutional Holdings
-- **13f-institutional-holdings-python.ipynb** - Analyze 13F institutional holdings with Python
+Every notebook starts with the same two lines:
 
-### Investment Funds
-- **mutual-fund-holdings-nport-python.ipynb** - Analyze mutual fund and ETF holdings from SEC N-PORT filings
-- **money-market-fund-nmfp-python.ipynb** - Analyze money market fund holdings from SEC N-MFP filings
-- **fund-census-ncen-python.ipynb** - Analyze fund census data from SEC N-CEN filings
-- **etf-fund-holdings-python.ipynb** - Analyze ETF and fund holdings with Python
-- **Fund-Filings.ipynb** - Overview of fund filing types
-- **Fund-Derivatives.ipynb** - Analyze fund derivative holdings
+```python
+!pip install edgartools
 
-### Business Development Companies (BDCs)
-- **bdc-business-development-company-python.ipynb** - Analyze BDC SEC filings and portfolio investments with Python
+from edgar import set_identity
+set_identity("Your Name your@email.com")  # Required by SEC
+```
 
-### Beneficial Ownership
-- **beneficial-ownership-sec-python.ipynb** - Track beneficial ownership from SEC Schedule 13D/G with Python
+---
 
-### Executive Compensation & Proxy Statements
-- **proxy-statement-def14a-python.ipynb** - Parse SEC proxy statements (DEF 14A) with Python
-- **executive-compensation-sec-python.ipynb** - Extract executive compensation from SEC proxy statements with Python
+## Difficulty Levels
 
-### Insider Trading
-- **insider-trading-sec-form4-python.ipynb** - Track insider trading from SEC Form 4 with Python
-- **Initial-Insider-Transactions.ipynb** - Deep analysis of initial insider ownership (Form 3)
+| Icon | Level | Who It's For |
+|------|-------|--------------|
+| 🟢 | Beginner | Anyone — no Python experience needed |
+| 🟡 | Intermediate | Comfortable with Python basics (`for` loops, variables, lists) |
+| 🔴 | Advanced | Experienced Python users comfortable with pandas and financial data |
+
+---
+
+## Notebooks by Topic
+
+### Getting Started 🟢
+
+| Notebook | What You'll Learn |
+|----------|-------------------|
+| [First Steps](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/00_first_steps.ipynb) | Company lookup, get revenue, browse filings, export to CSV |
+| [Getting Started](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/01_getting_started.ipynb) | Companies, filings, date filtering |
+| [Troubleshooting SSL](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/02_troubleshooting_ssl.ipynb) | Fix SSL/certificate errors on corporate networks |
+| [Beginner's Guide](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Beginners-Guide.ipynb) | Complete introduction to EdgarTools |
+
+---
+
+### Financial Statements 🟡
+
+| Notebook | What You'll Learn |
+|----------|-------------------|
+| [Financial Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/financial-statements-sec-python.ipynb) | Income statement, balance sheet, cash flow from 10-K |
+| [Viewing Financial Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Viewing-Financial-Statements.ipynb) | Deep dive into `get_financials()` |
+| [Extract Revenue & Earnings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/extract-revenue-earnings-python.ipynb) | Pull specific metrics (revenue, EPS, margins) |
+| [Compare Company Financials](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/compare-company-financials-python.ipynb) | Side-by-side multi-company analysis |
+| [Statements to DataFrame](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/financial-statements-to-dataframe.ipynb) | Export to pandas, CSV, or Excel |
+| [10-Q Quarterly Earnings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/10q-quarterly-earnings-python.ipynb) | Quarterly (10-Q) financial reports |
+
+---
+
+### Company Research 🟡
+
+| Notebook | What You'll Learn |
+|----------|-------------------|
+| [SEC EDGAR API Overview](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-edgar-api-python.ipynb) | Comprehensive library overview |
+| [Company Data](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-company-data-python.ipynb) | Company metadata, CIK lookup, filing history |
+| [Ticker Search](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Ticker-Search-with-edgartools.ipynb) | Find companies by ticker, name, or keyword |
+| [Industry & SIC Codes](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-industry-sic-code-python.ipynb) | Filter companies by SIC industry code |
+| [Filter by Industry](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Filtering-by-industry.ipynb) | Screen companies by industry and exchange |
+
+---
+
+### Working with Filings 🟡
+
+| Notebook | What You'll Learn |
+|----------|-------------------|
+| [Search & Filter Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/search-sec-filings-python.ipynb) | Find filings by form type, date, company |
+| [Today's Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-filings-today-python.ipynb) | Monitor what was filed today |
+| [Analyze 10-K Reports](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/analyze-10k-annual-report-python.ipynb) | Business description, risk factors, MD&A |
+| [Download 10-K Reports](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/download-10k-annual-report-python.ipynb) | Download and parse 10-K documents |
+| [10-K Business Description](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/10k-business-description-python.ipynb) | Extract business overview text from 10-Ks |
+| [8-K Earnings Releases](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/8k-earnings-release-python.ipynb) | Current event (8-K) reports |
+| [Extract Earnings Releases](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Extract-Earnings-Releases.ipynb) | Parse press releases and tables from 8-Ks |
+| [Filing Exhibits](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-filing-exhibits-python.ipynb) | Access filing attachments and exhibits |
+| [Filing Text & NLP](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-filing-text-nlp-python.ipynb) | Extract text for NLP and sentiment analysis |
+| [Filing Attachments](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Beginners-filings-attachments.ipynb) | Work with filing attachments (beginner) |
+| [Paging Through Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Paging-Through-Filings.ipynb) | Navigate large filing collections |
+| [Bulk Download](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/download-sec-filings-bulk-python.ipynb) | Download many filings at once |
+| [Monitor Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/monitor-sec-filings-python.ipynb) | Watch for new filings from specific companies |
+| [SEC Comment Letters](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-comment-letters-python.ipynb) | SEC review letters and company responses |
+
+---
+
+### Insider Trading & Ownership 🟡
+
+| Notebook | What You'll Learn |
+|----------|-------------------|
+| [Insider Trading (Form 4)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/insider-trading-sec-form4-python.ipynb) | Track insider buys, sells, and option exercises |
+| [Initial Insider Transactions](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Initial-Insider-Transactions.ipynb) | Initial ownership reports (Form 3) |
+| [13F Institutional Holdings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/13f-institutional-holdings-python.ipynb) | Analyze hedge fund portfolios |
+| [Beneficial Ownership](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/beneficial-ownership-sec-python.ipynb) | Schedule 13D/G activist positions |
+| [Executive Compensation](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/executive-compensation-sec-python.ipynb) | CEO and executive pay from proxy statements |
+| [Proxy Statements (DEF 14A)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/proxy-statement-def14a-python.ipynb) | Board members, votes, shareholder proposals |
+
+---
+
+### Investment Funds 🟡
+
+| Notebook | What You'll Learn |
+|----------|-------------------|
+| [ETF & Fund Holdings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/etf-fund-holdings-python.ipynb) | ETF portfolio holdings |
+| [Mutual Fund Holdings (N-PORT)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/mutual-fund-holdings-nport-python.ipynb) | Mutual fund portfolios from N-PORT filings |
+| [Money Market Funds (N-MFP)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/money-market-fund-nmfp-python.ipynb) | Money market fund data |
+| [Fund Census (N-CEN)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/fund-census-ncen-python.ipynb) | Fund registration and census data |
+| [BDCs](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/bdc-business-development-company-python.ipynb) | Business Development Companies |
+| [Fund Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Fund-Filings.ipynb) | Overview of all fund filing types |
+| [Fund Derivatives](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Fund-Derivatives.ipynb) | Derivatives in fund portfolios |
+
+---
+
+### XBRL & Raw Data 🔴 Advanced
+
+For developers who need direct access to XBRL facts and concepts.
+
+> **Tip:** Most users should start with `get_financials()` (🟡 notebooks above). These notebooks are for advanced use cases where you need raw fact-level access.
+
+| Notebook | What You'll Learn |
+|----------|-------------------|
+| [XBRL Financial Data](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/xbrl-financial-data-python.ipynb) | Low-level XBRL data access |
+| [Reading Data from XBRL](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Reading-Data-From-XBRL.ipynb) | Read raw facts from XBRL instance documents |
+| [XBRL Concepts](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRLConcepts.ipynb) | Understand XBRL taxonomy concepts |
+| [Standardized Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-StandardizedStatements.ipynb) | Cross-company standardized financials |
+| [Quarterly XBRL Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-QuarterlyStatements.ipynb) | Quarterly statements via XBRL |
+| [Stitching Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-StitchingStatements.ipynb) | Combine multiple filings for time-series analysis |
+| [XBRL Fact Queries](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-FactQueries.ipynb) | Query individual XBRL facts with filters |
+| [Period Views](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-PeriodViews.ipynb) | Control which time periods are shown |
+| [Cash Flow Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-Cashflow-Statements.ipynb) | Cash flow extraction and analysis |
+| [Custom XBRL Tags](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-CustomTags.ipynb) | Handle company-specific XBRL tags |
+| [Non-Financial Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-NonFinancialStatements.ipynb) | Non-financial XBRL disclosures and segments |
+| [Instance-Only XBRL](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-Instance-Only-XBRL.ipynb) | Parse instance-only XBRL documents |
+
+---
 
 ## Running on Google Colab
 
-Click the "Open in Colab" badge at the top of any notebook, or:
-1. Go to https://colab.research.google.com/
-2. File > Open notebook > GitHub tab
+Click any link in the tables above, or:
+1. Go to [colab.research.google.com](https://colab.research.google.com/)
+2. **File → Open notebook → GitHub tab**
 3. Enter `dgunning/edgartools` and select a notebook
 
-## Resources
+## Running Locally
 
-- [EdgarTools Documentation](https://edgartools.readthedocs.io/)
-- [GitHub Repository](https://github.com/dgunning/edgartools)
-- [PyPI Package](https://pypi.org/project/edgartools/)
+```bash
+pip install edgartools
+jupyter lab notebooks/00_first_steps.ipynb
+```
+
+---
+
+## More Resources
+
+- [Documentation](https://edgartools.readthedocs.io)
+- [Quick Start Guide](https://edgartools.readthedocs.io/en/latest/quickstart/)
+- [Common Pitfalls](https://edgartools.readthedocs.io/en/latest/common-pitfalls/)
+- [GitHub](https://github.com/dgunning/edgartools)
+- [PyPI](https://pypi.org/project/edgartools/)

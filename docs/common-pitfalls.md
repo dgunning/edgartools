@@ -251,6 +251,54 @@ else:
 
 ---
 
+## Exporting Data
+
+### Export statements, not the financials object
+
+```python
+financials = company.get_financials()
+
+# WRONG: financials object has no to_dataframe()
+df = financials.to_dataframe()   # AttributeError
+
+# RIGHT: call to_dataframe() on the individual statement
+df = financials.income_statement().to_dataframe()
+df = financials.balance_sheet().to_dataframe()
+df = financials.cashflow_statement().to_dataframe()
+```
+
+### Export to CSV or Excel
+
+```python
+income = company.get_financials().income_statement()
+
+# CSV
+income.to_dataframe().to_csv("income.csv")
+
+# Excel
+income.to_dataframe().to_excel("income.xlsx")
+```
+
+### Export filings list (not financial data)
+
+```python
+# Export a list of filings to a DataFrame
+filings = company.get_filings(form="10-K")
+df = filings.to_pandas()   # One row per filing
+df.to_csv("10k_filings.csv")
+```
+
+### Financial values are raw numbers (not formatted)
+
+`get_revenue()` returns an integer like `391035000000`, not `"$391B"`. Format it yourself:
+
+```python
+revenue = financials.get_revenue()
+print(f"${revenue / 1e9:.1f}B")   # "$391.0B"
+```
+
+---
+
 ## XBRL
 
 ### `filing.xbrl()` can return `None`

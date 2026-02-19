@@ -308,4 +308,6 @@ Whether you're analyzing financial statements, tracking insider trading, or rese
 ## Additional Resources
 
 - [Working with Financial Statements](../guides/extract-statements.md)
+- [Current Events (8-K)](../eightk-filings.md)
 - [Analyzing Insider Trading](../guides/track-form4.md)
+- [Institutional Holdings (13F)](../guides/thirteenf-data-object-guide.md)
