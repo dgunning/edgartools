@@ -224,6 +224,145 @@ class RenderedStatement:
     def periods(self):
         return self.header.periods
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to a JSON-safe dict.
+
+        Pre-applies cell formatters so the resulting dict contains only
+        plain Python types (strings, numbers, lists, dicts) and can be
+        passed directly to ``json.dumps``.
+
+        ``comparison_data`` is excluded from statement-level metadata
+        because each cell already carries its own ``comparison`` field.
+        """
+        from datetime import date as _date
+
+        def _json_safe(obj):
+            """Recursively convert non-JSON-safe types to primitives."""
+            if isinstance(obj, dict):
+                return {k: _json_safe(v) for k, v in obj.items()}
+            if isinstance(obj, (list, tuple)):
+                return [_json_safe(v) for v in obj]
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            if isinstance(obj, _date):
+                return obj.isoformat()
+            return obj
+
+        def _period_to_dict(p: PeriodData) -> Dict[str, Any]:
+            return {
+                'key': p.key,
+                'label': p.label,
+                'end_date': p.end_date,
+                'start_date': p.start_date,
+                'is_duration': p.is_duration,
+                'quarter': p.quarter,
+            }
+
+        def _cell_to_dict(c: StatementCell) -> Dict[str, Any]:
+            return {
+                'value': c.value,
+                'formatted_value': c.get_formatted_value(),
+                'style': c.style,
+                'comparison': _json_safe(c.comparison),
+            }
+
+        def _row_to_dict(r: StatementRow) -> Dict[str, Any]:
+            return {
+                'label': r.label,
+                'level': r.level,
+                'cells': [_cell_to_dict(c) for c in r.cells],
+                'metadata': _json_safe(r.metadata),
+                'is_abstract': r.is_abstract,
+                'is_dimension': r.is_dimension,
+                'is_breakdown': r.is_breakdown,
+                'has_dimension_children': r.has_dimension_children,
+            }
+
+        def _header_to_dict(h: StatementHeader) -> Dict[str, Any]:
+            return {
+                'columns': h.columns,
+                'period_keys': h.period_keys,
+                'periods': [_period_to_dict(p) for p in h.periods],
+                'metadata': _json_safe(h.metadata),
+            }
+
+        # Filter comparison_data out of metadata — it's redundant
+        filtered_metadata = _json_safe({
+            k: v for k, v in self.metadata.items()
+            if k != 'comparison_data'
+        })
+
+        return {
+            'title': self.title,
+            'header': _header_to_dict(self.header),
+            'rows': [_row_to_dict(r) for r in self.rows],
+            'metadata': filtered_metadata,
+            'statement_type': self.statement_type,
+            'fiscal_period_indicator': self.fiscal_period_indicator,
+            'units_note': self.units_note,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'RenderedStatement':
+        """Reconstruct a ``RenderedStatement`` from a dict produced by :meth:`to_dict`.
+
+        Cell formatters are replaced with passthrough lambdas that return
+        the pre-computed ``formatted_value`` stored during serialization.
+        """
+        periods = [
+            PeriodData(
+                key=p['key'],
+                label=p['label'],
+                end_date=p.get('end_date'),
+                start_date=p.get('start_date'),
+                is_duration=p.get('is_duration', False),
+                quarter=p.get('quarter'),
+            )
+            for p in data['header'].get('periods', [])
+        ]
+
+        header = StatementHeader(
+            columns=data['header'].get('columns', []),
+            period_keys=data['header'].get('period_keys', []),
+            periods=periods,
+            metadata=data['header'].get('metadata', {}),
+        )
+
+        rows = []
+        for rd in data.get('rows', []):
+            cells = []
+            for cd in rd.get('cells', []):
+                fmt_val = cd.get('formatted_value', str(cd.get('value', '')))
+                cell = StatementCell(
+                    value=cd.get('value'),
+                    style=cd.get('style', {}),
+                    comparison=cd.get('comparison'),
+                    formatter=lambda v, fv=fmt_val: fv,
+                )
+                cells.append(cell)
+
+            row = StatementRow(
+                label=rd.get('label', ''),
+                level=rd.get('level', 0),
+                cells=cells,
+                metadata=rd.get('metadata', {}),
+                is_abstract=rd.get('is_abstract', False),
+                is_dimension=rd.get('is_dimension', False),
+                is_breakdown=rd.get('is_breakdown', False),
+                has_dimension_children=rd.get('has_dimension_children', False),
+            )
+            rows.append(row)
+
+        return cls(
+            title=data.get('title', ''),
+            header=header,
+            rows=rows,
+            metadata=data.get('metadata', {}),
+            statement_type=data.get('statement_type', ''),
+            fiscal_period_indicator=data.get('fiscal_period_indicator'),
+            units_note=data.get('units_note'),
+        )
+
     def __rich__(self) -> Panel:
         """Render as a rich panel with design language styling."""
         # Use unified design language styles
