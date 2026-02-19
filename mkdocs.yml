@@ -43,6 +43,7 @@ nav:
     - Installation: installation.md
     - Quick Start: quickstart.md
     - Choosing the Right API: xbrl/getting-started/choosing-the-right-api.md
+    - Common Pitfalls: common-pitfalls.md
     - Cheat Sheet: quick-guide.md
     - Key Concepts: concepts/sec-filings.md
 
@@ -118,6 +119,16 @@ nav:
   # ==========================================
   # ADVANCED - Power users & customization
   # ==========================================
+  # ==========================================
+  # API REFERENCE - Detailed class documentation
+  # ==========================================
+  - API Reference:
+    - Company: api/company.md
+    - Filing: api/filing.md
+    - Filings: api/filings.md
+    - XBRL: api/xbrl.md
+    - Entity Facts: api/entity-facts-reference.md
+
   - Advanced:
     - Configuration: configuration.md
     - Storage:

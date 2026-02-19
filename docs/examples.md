@@ -1,120 +1,125 @@
-# Solve Real Problems with EdgarTools
+# Examples
 
-This document showcases common workflows and tasks that financial professionals, developers, and researchers can accomplish using EdgarTools. Each journey addresses a specific problem and provides a concise code example.
+Learn by doing. These examples show how to solve real problems with EdgarTools.
 
-## Example Resources
+## Interactive Notebooks
 
-All examples are in the [`examples/`](../examples/) directory:
+Run these in your browser with Google Colab -- no setup required.
 
-### 📓 Interactive Notebooks
-Explore **28 Jupyter notebooks** organized by topic in [`examples/notebooks/`](../examples/notebooks/):
-- **[Beginner](../examples/notebooks/beginner/)** - Getting started guides
-- **[XBRL](../examples/notebooks/xbrl/)** - Financial statement analysis (18 notebooks)
-- **[Filings](../examples/notebooks/filings/)** - Working with SEC filings
-- **[Funds](../examples/notebooks/funds/)** - Investment fund analysis
-- **[Insiders](../examples/notebooks/insiders/)** - Insider trading data
-- **[See all notebooks](../examples/notebooks/README.md)**
+### Getting Started
 
-### 💻 Python Scripts
-Browse **8 ready-to-use Python scripts** in [`examples/scripts/`](../examples/scripts/):
-- **[Basic](../examples/scripts/basic/)** - Simple examples for common tasks
-- **[Advanced](../examples/scripts/advanced/)** - Complex use cases
-- **[AI Integration](../examples/scripts/ai/)** - AI/LLM workflows
-- **[See all scripts](../examples/README.md)**
+| Notebook | Description |
+|----------|-------------|
+| [First Steps](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/00_first_steps.ipynb) | Look up a company, get financials, export data |
+| [Getting Started](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/01_getting_started.ipynb) | Company lookup, filings, date filtering |
+| [Troubleshooting SSL](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/02_troubleshooting_ssl.ipynb) | Fix SSL/connection issues |
+
+### Financial Statements
+
+| Notebook | Description |
+|----------|-------------|
+| [Financial Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/financial-statements-sec-python.ipynb) | Income, balance sheet, cash flow from SEC filings |
+| [Viewing Financial Statements](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Viewing-Financial-Statements.ipynb) | get_financials() deep dive |
+| [Extract Revenue & Earnings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/extract-revenue-earnings-python.ipynb) | Pull specific financial metrics |
+| [Compare Company Financials](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/compare-company-financials-python.ipynb) | Side-by-side multi-company analysis |
+| [Statements to DataFrame](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/financial-statements-to-dataframe.ipynb) | Export to pandas for analysis |
+| [XBRL Financial Data](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/xbrl-financial-data-python.ipynb) | Low-level XBRL data access |
+
+### Company Research
+
+| Notebook | Description |
+|----------|-------------|
+| [SEC EDGAR API Overview](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-edgar-api-python.ipynb) | Comprehensive library overview |
+| [Company Data](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-company-data-python.ipynb) | Company metadata, CIK lookup, filing history |
+| [Ticker Search](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Ticker-Search-with-edgartools.ipynb) | Find companies by ticker, name, or keyword |
+| [Industry & SIC Codes](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-industry-sic-code-python.ipynb) | Filter companies by industry |
+
+### Filings
+
+| Notebook | Description |
+|----------|-------------|
+| [Search & Filter Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/search-sec-filings-python.ipynb) | Find filings by date, form type, company |
+| [Today's Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-filings-today-python.ipynb) | Monitor current SEC filings |
+| [Download 10-K Reports](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/download-10k-annual-report-python.ipynb) | Parse and extract 10-K sections |
+| [Analyze 10-K Reports](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/analyze-10k-annual-report-python.ipynb) | Business description, risk factors, MD&A |
+| [10-Q Quarterly Earnings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/10q-quarterly-earnings-python.ipynb) | Quarterly report analysis |
+| [8-K Earnings Releases](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/8k-earnings-release-python.ipynb) | Current event reports |
+| [Extract Earnings Releases](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Extract-Earnings-Releases.ipynb) | Press releases and financial tables from 8-Ks |
+| [Filing Text & NLP](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-filing-text-nlp-python.ipynb) | Text extraction for NLP analysis |
+| [Filing Exhibits](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/sec-filing-exhibits-python.ipynb) | Work with filing attachments and exhibits |
+| [Bulk Download](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/download-sec-filings-bulk-python.ipynb) | Download filings in bulk |
+| [10-K Business Description](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/10k-business-description-python.ipynb) | Extract business overview text |
+| [Monitor Filings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/monitor-sec-filings-python.ipynb) | Watch for new filings |
+
+### Insider Trading & Ownership
+
+| Notebook | Description |
+|----------|-------------|
+| [Insider Trading (Form 4)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/insider-trading-sec-form4-python.ipynb) | Track insider buys and sells |
+| [13F Institutional Holdings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/13f-institutional-holdings-python.ipynb) | Fund portfolio analysis |
+| [Beneficial Ownership](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/beneficial-ownership-sec-python.ipynb) | 13D/G activist positions |
+| [Executive Compensation](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/executive-compensation-sec-python.ipynb) | Proxy statement compensation data |
+| [Proxy Statements (DEF 14A)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/proxy-statement-def14a-python.ipynb) | Board members, shareholder proposals |
+
+### Funds
+
+| Notebook | Description |
+|----------|-------------|
+| [ETF & Fund Holdings](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/etf-fund-holdings-python.ipynb) | ETF portfolio data |
+| [Mutual Fund Holdings (N-PORT)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/mutual-fund-holdings-nport-python.ipynb) | Mutual fund portfolio reports |
+| [Money Market Funds (N-MFP)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/money-market-fund-nmfp-python.ipynb) | Money market fund data |
+| [Fund Census (N-CEN)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/fund-census-ncen-python.ipynb) | Fund census reports |
+| [BDCs](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/bdc-business-development-company-python.ipynb) | Business Development Companies |
 
 ---
 
-## Use Case Examples
+## Code Examples
 
-## 1. Company Financial Analysis
-
-**Problem:** Need to analyze a company's financial health across multiple periods.
-
-![Microsoft Revenue Trend](images/MSFT_financial_complex.png)
+### Get a company's revenue in 3 lines
 
 ```python
+from edgar import Company
 
-def get_income_dataframe(ticker:str):
-    c = Company(ticker)
-    filings = c.get_filings(form="10-K").latest(5)
-    xbs = XBRLS.from_filings(filings)
-    income_statement = xbs.statements.income_statement()
-    income_df = income_statement.to_dataframe()
-    return income_df
-    
-
-def plot_revenue(ticker:str):
-    income_df = get_income_dataframe(ticker)
-    
-    # Extract financial metrics
-    net_income = income_df[income_df.concept == "us-gaap_NetIncomeLoss"][income_statement.periods].iloc[0]
-    gross_profit = income_df[income_df.concept == "us-gaap_GrossProfit"][income_statement.periods].iloc[0]
-    revenue = income_df[income_df.label == "Revenue"][income_statement.periods].iloc[0]
-    
-    # Convert periods to fiscal years for better readability
-    periods = [pd.to_datetime(period).strftime('FY%y') for period in income_statement.periods]
-    
-    # Reverse the order so most recent years are last (oldest to newest)
-    periods = periods[::-1]
-    revenue_values = revenue.values[::-1]
-    gross_profit_values = gross_profit.values[::-1]
-    net_income_values = net_income.values[::-1]
-    
-    # Create a DataFrame for plotting
-    plot_data = pd.DataFrame({
-        'Revenue': revenue_values,
-        'Gross Profit': gross_profit_values,
-        'Net Income': net_income_values
-    }, index=periods)
-    
-    # Convert to billions for better readability
-    plot_data = plot_data / 1e9
-    
-    # Create the figure
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    # Plot the data as lines with markers
-    plot_data.plot(kind='line', marker='o', ax=ax, linewidth=2.5)
-    
-    # Format the y-axis to show billions with 1 decimal place
-    ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda x, _: f'${x:.1f}B'))
-    
-    # Add labels and title
-    ax.set_xlabel('Fiscal Year')
-    ax.set_ylabel('Billions USD')
-    ax.set_title(f'{c.name} ({ticker}) Financial Performance')
-    
-    # Add a grid for better readability
-    ax.grid(True, linestyle='--', alpha=0.7)
-    
-    # Add a source note
-    plt.figtext(0.5, 0.01, 'Source: SEC EDGAR via edgartools', ha='center', fontsize=9)
-    
-    # Improve layout
-    plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-    
-    return fig
+financials = Company("AAPL").get_financials()
+print(f"Revenue: ${financials.get_revenue():,.0f}")
 ```
 
-
-## 2. Investment Fund Research
-
-**Problem:** Need to analyze fund holdings and compare share classes.
+### Compare two companies
 
 ```python
-from edgar import find
+from edgar import Company
 
-# Find a fund by ticker
-fund = find("VFIAX")  # Vanguard 500 Index Fund
+for ticker in ["AAPL", "MSFT"]:
+    f = Company(ticker).get_financials()
+    print(f"{ticker}: Revenue ${f.get_revenue():,.0f}, Net Income ${f.get_net_income():,.0f}")
+```
 
-# Get the fund's structure
-classes = fund.get_classes()
-print(f"Fund has {len(classes)} share classes")
+### Get the latest 10-K business description
 
-# Get the latest portfolio holdings
-portfolio = fund.get_portfolio()
+```python
+from edgar import Company
 
-# Show top 10 holdings by value
-top_holdings = portfolio.sort_values('value', ascending=False).head(10)
-top_holdings
+tenk = Company("NVDA").latest("10-K")
+print(tenk['Item 1'].text[:2000])
+```
+
+### Track insider buying
+
+```python
+from edgar import Company
+
+for filing in Company("AAPL").get_filings(form=4).head(10):
+    summary = filing.obj().get_ownership_summary()
+    if summary.primary_activity == "Purchase":
+        print(f"{summary.insider_name}: bought {summary.net_change:,} shares")
+```
+
+### Export financials to CSV
+
+```python
+from edgar import Company
+
+financials = Company("AAPL").get_financials()
+df = financials.income_statement().to_dataframe()
+df.to_csv("apple_income.csv")
 ```

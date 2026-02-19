@@ -117,6 +117,29 @@ tenk = company.latest("10-K")
 
 ![AAPL Filings](images/aapl-filings.png)
 
+## How EdgarTools Is Organized
+
+Here's a map of the main objects. Use it as a reference when you want to try something new:
+
+```
+Company("AAPL")                     # Start here — look up a company
+  ├── .get_financials()                # Financial data (RECOMMENDED for most tasks)
+  │     ├── .income_statement()        #   Revenue, expenses, profit
+  │     ├── .balance_sheet()           #   Assets, liabilities, equity
+  │     ├── .cashflow_statement()      #   Cash in and out
+  │     ├── .get_revenue()             #   Quick: just the revenue number
+  │     └── .get_net_income()          #   Quick: just net income
+  │
+  ├── .get_filings(form="10-K")        # Browse SEC filings
+  │     ├── .head(5)                   #   See the first 5
+  │     ├── .latest()                  #   Get the most recent one
+  │     └── [0].obj()                  #   Parse into a data object (TenK, etc.)
+  │
+  └── .get_facts()                     # Historical data (for 4+ years of trends)
+        ├── .income_statement()        #   Multi-year income data
+        └── .balance_sheet()           #   Multi-year balance sheet
+```
+
 ## Step 8: Next Steps
 
 You just learned how to install EdgarTools, look up a company, get financial statements, and browse filings. Here's where to go next:

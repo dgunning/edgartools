@@ -73,6 +73,9 @@ comprehensive = financials.comprehensive_income()
 | Statement of Equity | `statement_of_equity()` |
 | Comprehensive Income | `comprehensive_income()` |
 
+!!! tip "Cash flow naming"
+    The method is `cashflow_statement()` (no underscore between "cash" and "flow"). The `Company` object also accepts `company.cash_flow()` as an alias, but on the `Financials` object always use `cashflow_statement()`.
+
 ---
 
 ## Export to DataFrame
