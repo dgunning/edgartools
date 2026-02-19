@@ -86,6 +86,10 @@ async def edgar_company(
     if not annual and period == "annual":
         period = "quarterly"
 
+    # Enforce period enum values gracefully
+    if period not in ["annual", "quarterly", "ttm"]:
+        period = "annual"
+
     try:
         company = resolve_company(identifier)
 
@@ -142,14 +146,10 @@ def _build_profile(company) -> dict:
     return profile
 
 
-def _format_statement(stmt) -> Any:
+def _format_statement(stmt) -> str | dict | list:
     """Format a statement object to its best string/dict representation."""
     if hasattr(stmt, 'to_llm_string'):
         return stmt.to_llm_string()
-    elif hasattr(stmt, 'to_dataframe'):
-        # TTM statements have to_dataframe but not to_llm_string
-        df = stmt.to_dataframe()
-        return df.to_dict(orient='records')
     elif hasattr(stmt, 'to_dict'):
         return stmt.to_dict()
     else:

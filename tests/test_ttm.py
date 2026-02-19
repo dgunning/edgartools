@@ -1666,3 +1666,18 @@ class TestCreateDerivedQuarter:
         assert derived.fiscal_period == "Q4"
         assert derived.calculation_context == "derived_q4_fy_minus_ytd9"
         assert derived.period_start == date(2024, 10, 1)
+
+
+class TestCompanyTTMIntegration:
+    """Tests for Company TTM integration."""
+
+    def test_company_income_statement_ttm_periods(self):
+        """Test that company.income_statement(period='ttm', periods=2) correctly limits periods."""
+        from edgar import Company
+        company = Company("AAPL")
+        
+        stmt = company.income_statement(period='ttm', periods=2)
+        
+        assert stmt is not None
+        assert stmt.statement_type == 'IncomeStatement'
+        assert len(stmt.periods) == 2
