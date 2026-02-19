@@ -42,8 +42,8 @@ nav:
     - Overview: index.md
     - Installation: installation.md
     - Quick Start: quickstart.md
+    - Choosing the Right API: xbrl/getting-started/choosing-the-right-api.md
     - Cheat Sheet: quick-guide.md
-    - Configuration: configuration.md
     - Key Concepts: concepts/sec-filings.md
 
   # ==========================================
@@ -119,6 +119,7 @@ nav:
   # ADVANCED - Power users & customization
   # ==========================================
   - Advanced:
+    - Configuration: configuration.md
     - Storage:
       - Local Storage: guides/local-storage.md
       - Cloud Storage (S3): guides/cloud-storage.md

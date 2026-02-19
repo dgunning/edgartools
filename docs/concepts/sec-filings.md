@@ -122,45 +122,39 @@ Form 4 discloses transactions by company insiders (directors, officers, 10%+ sha
 ### Accessing Filings
 
 ```python
-from edgar import Company, Filings
+from edgar import Company
 
 # Get all filings for a specific company
 apple = Company("AAPL")
 filings = apple.get_filings()
 
 # Filter by form type
-annual_reports = filings.filter(form="10-K")
-quarterly_reports = filings.filter(form="10-Q")
-current_reports = filings.filter(form="8-K")
+annual_reports = apple.get_filings(form="10-K")
+quarterly_reports = apple.get_filings(form="10-Q")
+current_reports = apple.get_filings(form="8-K")
 
 # Get the most recent annual report
 latest_10k = annual_reports.latest()
-
-# Search across multiple companies
-tech_filings = Filings.search(
-    companies=["AAPL", "MSFT", "GOOGL"],
-    form="8-K",
-    start_date="2023-01-01",
-    end_date="2023-12-31"
-)
 ```
 
 ### Extracting Financial Data
 
+The simplest way to get financial statements is through the `get_financials()` method on a Company:
+
 ```python
-# Get financial statements from a 10-K
-filing = annual_reports.latest()
-financials = filing.get_financials()
+# Get financial statements (recommended approach)
+company = Company("AAPL")
+financials = company.get_financials()
 
 # Access specific statements
-balance_sheet = financials.get_balance_sheet()
-income_stmt = financials.get_income_statement()
-cash_flow = financials.get_cash_flow_statement()
+balance_sheet = financials.balance_sheet()
+income_stmt = financials.income_statement()
+cash_flow = financials.cashflow_statement()
 
-# Query specific financial items
-revenue = income_stmt.get_value("Revenues")
-net_income = income_stmt.get_value("NetIncomeLoss")
-total_assets = balance_sheet.get_value("Assets")
+# Get specific values directly
+revenue = financials.get_revenue()
+net_income = financials.get_net_income()
+total_assets = financials.get_total_assets()
 ```
 
 ### Analyzing Insider Trading
@@ -168,35 +162,35 @@ total_assets = balance_sheet.get_value("Assets")
 ```python
 from edgar import Company
 
-# Get insider transactions
+# Get Form 4 filings for a company
 tesla = Company("TSLA")
-insider_filings = tesla.get_insider_transactions(start_date="2023-01-01")
+form4_filings = tesla.get_filings(form=4)
 
-# Analyze transactions by insider
-for filing in insider_filings:
-    print(f"Insider: {filing.reporting_owner}")
-    print(f"Transaction: {filing.transaction_type}")
-    print(f"Shares: {filing.shares}")
-    print(f"Value: ${filing.value:,.2f}")
-    print(f"Date: {filing.transaction_date}")
+# Parse the most recent filing
+form4 = form4_filings.latest(1).obj()
+
+# Get the transaction summary
+summary = form4.get_ownership_summary()
+print(f"Insider: {summary.insider_name}")
+print(f"Position: {summary.position}")
+print(f"Activity: {summary.primary_activity}")
+print(f"Net shares changed: {summary.net_change}")
 ```
 
-### Researching Investment Funds
+### Researching Investment Fund Holdings
 
 ```python
-from edgar import Fund
+from edgar import get_filings
 
-# Get fund holdings
-blackrock = Fund("BlackRock")
-holdings = blackrock.get_holdings()
+# Get 13F filings (institutional holdings reports)
+thirteenf_filings = get_filings(form="13F-HR")
 
-# Analyze portfolio
-for holding in holdings.top(10):
-    print(f"Company: {holding.company_name}")
-    print(f"Ticker: {holding.ticker}")
-    print(f"Shares: {holding.shares:,}")
-    print(f"Value: ${holding.value:,.2f}")
-    print(f"% of Portfolio: {holding.portfolio_percent:.2f}%")
+# Parse a specific fund's holdings
+filing = thirteenf_filings[0]
+thirteenf = filing.obj()
+
+# View top holdings
+print(thirteenf.holdings)
 ```
 
 ## Best Practices for Working with SEC Filings
@@ -234,11 +228,10 @@ The SEC has rate limits for EDGAR access:
 - Consider using local caching for repeated access
 
 ```python
-from edgar import set_identity, enable_cache
+from edgar import set_identity
 
 # Set your identity for SEC access
-set_identity("your.email@example.com")
-
+set_identity("Your Name your.email@example.com")
 ```
 
 

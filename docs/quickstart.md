@@ -123,6 +123,7 @@ You just learned how to install EdgarTools, look up a company, get financial sta
 
 **Financial Data**
 
+- [Choosing the Right API](xbrl/getting-started/choosing-the-right-api.md) — Which method to use for your task (start here!)
 - [Financial Statements Guide](guides/financial-data.md) — Income statements, balance sheets, cash flow in depth
 - [Extract Statements from Filings](guides/extract-statements.md) — XBRL data extraction
 - [Company Facts](guides/company-facts.md) — Historical financial data across all filings
