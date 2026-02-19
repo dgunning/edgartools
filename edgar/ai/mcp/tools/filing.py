@@ -22,21 +22,27 @@ from edgar.ai.mcp.tools.base import (
 
 logger = logging.getLogger(__name__)
 
-# Section mapping for different form types
+# Section mapping for different form types.
+# For 10-K: maps MCP section names to the friendly-name keys accepted by TenK.__getitem__
+# (which supports 'business', 'risk_factors', 'mda', 'Item 1', 'Item 7', etc.)
 SECTION_MAP_10K = {
-    "business": "item1",
-    "risk_factors": "item1a",
-    "mda": "item7",
-    "financials": "item8",
-    "controls": "item9a",
-    "legal": "item3",
+    "business": "business",
+    "risk_factors": "risk_factors",
+    "mda": "mda",
+    "financials": "financials",
+    "controls": "controls_procedures_9a",
+    "legal": "legal_proceedings",
 }
 
+# For 10-Q: maps MCP section names to the Part/Item keys accepted by TenQ.__getitem__
+# ('Part I, Item 2', 'Part II, Item 1A', etc. are the canonical formats TenQ supports)
 SECTION_MAP_10Q = {
-    "financials": "part1item1",
-    "mda": "part1item2",
-    "risk_factors": "part2item1a",
-    "legal": "part2item1",
+    "financials": "Part I, Item 1",
+    "mda": "Part I, Item 2",
+    "risk_factors": "Part II, Item 1A",
+    "legal": "Part II, Item 1",
+    "controls": "Part I, Item 4",
+    "market_risk": "Part I, Item 3",
 }
 
 
@@ -206,44 +212,72 @@ def _get_section_list(form_type: str) -> list[str]:
 
 
 def _extract_section(obj, form_type: str, section: str) -> Optional[str]:
-    """Extract a specific section from a filing object."""
+    """Extract a specific section from a filing object.
 
-    # Try direct attribute access first
-    section_attrs = [
-        section,
-        section.replace("_", ""),
-        f"item_{section}",
-    ]
+    Uses __getitem__ (item/key access) rather than attribute access because
+    TenQ and TenK expose content via __getitem__ with Part/Item keys or friendly
+    names, not as object attributes.  Attribute access on these objects raises
+    AttributeError for narrative sections and therefore always returns None.
 
-    for attr in section_attrs:
-        if hasattr(obj, attr):
-            value = getattr(obj, attr)
-            if value is not None:
-                return str(value)
+    Special case: 'financials' returns the structured XBRL representation via
+    the obj.financials cached property, which is a Financials object.
+    """
+    # Special handling for financials: use the Financials object's structured repr
+    if section == "financials":
+        try:
+            fin = obj.financials
+            if fin is not None:
+                # Return a human-readable summary of the financial statements
+                parts = []
+                try:
+                    income = fin.income_statement()
+                    if income is not None:
+                        parts.append(f"=== Income Statement ===\n{income}")
+                except Exception:
+                    pass
+                try:
+                    balance = fin.balance_sheet()
+                    if balance is not None:
+                        parts.append(f"=== Balance Sheet ===\n{balance}")
+                except Exception:
+                    pass
+                try:
+                    cashflow = fin.cashflow_statement()
+                    if cashflow is not None:
+                        parts.append(f"=== Cash Flow Statement ===\n{cashflow}")
+                except Exception:
+                    pass
+                if parts:
+                    return "\n\n".join(parts)
+                # Fall back to str() representation if no structured data
+                return str(fin)
+        except Exception:
+            pass
+        return None
 
-    # Try mapped section names
+    # For narrative sections, look up the canonical key for this form type
     if form_type in ["10-K", "10-K/A"]:
-        mapped = SECTION_MAP_10K.get(section)
-        if mapped and hasattr(obj, mapped):
-            return str(getattr(obj, mapped))
-
+        section_key = SECTION_MAP_10K.get(section)
     elif form_type in ["10-Q", "10-Q/A"]:
-        mapped = SECTION_MAP_10Q.get(section)
-        if mapped and hasattr(obj, mapped):
-            return str(getattr(obj, mapped))
+        section_key = SECTION_MAP_10Q.get(section)
+    else:
+        section_key = None
 
-    # Try common patterns
-    common_attrs = {
-        "business": ["business", "business_description", "item1"],
-        "risk_factors": ["risk_factors", "risks", "item1a"],
-        "mda": ["mda", "management_discussion", "item7"],
-        "financials": ["financial_statements", "financials", "item8"],
-    }
+    if section_key:
+        try:
+            content = obj[section_key]
+            if content:
+                return str(content)
+        except (KeyError, TypeError, AttributeError):
+            pass
 
-    for attr in common_attrs.get(section, []):
-        if hasattr(obj, attr):
-            value = getattr(obj, attr)
-            if value is not None:
-                return str(value)
+    # Last-resort fallback: try the section name directly as a __getitem__ key
+    # This handles edge cases and future form types
+    try:
+        content = obj[section]
+        if content:
+            return str(content)
+    except (KeyError, TypeError, AttributeError):
+        pass
 
     return None
