@@ -271,6 +271,49 @@ class TestEdgarCompanyTool:
         assert "financials" in result.data
         assert "recent_filings" in result.data
 
+    @pytest.mark.asyncio
+    async def test_company_ttm_financials(self):
+        """Get company with ttm financials."""
+        from edgar.ai.mcp.tools.company import edgar_company
+
+        result = await edgar_company(
+            identifier="MSFT",
+            include=["financials"],
+            period="ttm",
+            periods=2,
+        )
+        assert result.success is True
+        assert "financials" in result.data
+        assert result.data["financials"]["period_type"] == "ttm"
+        assert result.data["financials"]["periods"] == 2
+
+    @pytest.mark.asyncio
+    async def test_company_legacy_annual_false(self):
+        """Legacy annual=False maps to quarterly period."""
+        from edgar.ai.mcp.tools.company import edgar_company
+
+        result = await edgar_company(
+            identifier="MSFT",
+            include=["financials"],
+            annual=False,
+            periods=1
+        )
+        assert result.success is True
+        assert result.data["financials"]["period_type"] == "quarterly"
+
+    @pytest.mark.asyncio
+    async def test_company_invalid_period_fallback(self):
+        """Invalid period falls back to annual."""
+        from edgar.ai.mcp.tools.company import edgar_company
+
+        result = await edgar_company(
+            identifier="MSFT",
+            include=["financials"],
+            period="invalid_mode"
+        )
+        assert result.success is True
+        assert result.data["financials"]["period_type"] == "annual"
+
 
 # =============================================================================
 # edgar_search Tool Tests (network required)

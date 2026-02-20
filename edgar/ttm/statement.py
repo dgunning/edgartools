@@ -59,6 +59,15 @@ class TTMStatement:
             rows.append(row)
         return pd.DataFrame(rows)
 
+    def to_dict(self) -> list[dict]:
+        """Convert statement to a list of row dictionaries."""
+        return self.to_dataframe().to_dict(orient='records')
+
+    def to_llm_string(self) -> str:
+        """Convert statement to a markdown string for LLMs."""
+        df = self.to_dataframe()
+        return df.to_markdown(index=False) if not df.empty else ""
+
     def __rich__(self):
         """Rich console representation styled like core statements."""
         import shutil
@@ -205,7 +214,8 @@ class TTMStatementBuilder:
         self,
         statement_method: Callable,
         statement_type: str,
-        as_of: Optional[date] = None
+        as_of: Optional[date] = None,
+        max_periods: int = 8
     ) -> TTMStatement:
         """Internal helper to build shared TTM statement logic.
         
@@ -219,7 +229,9 @@ class TTMStatementBuilder:
 
         """
         # Get multi-period statement to get structure
-        multi_period = statement_method(periods=8, annual=False)
+        # We always fetch at least 8 periods to ensure enough quarters are available 
+        # to calculate a trailing 4-quarter rolling sum for TTM calculation.
+        multi_period = statement_method(periods=max(max_periods, 8), annual=False)
 
         # Calculate rolling TTM for each concept
         ttm_items = []
@@ -243,7 +255,7 @@ class TTMStatementBuilder:
         def _is_eps_concept(concept: str) -> bool:
             return "earningspershare" in concept.lower()
 
-        def _trend_for_eps(eps_concept: str, max_periods: int = 8) -> Optional[pd.DataFrame]:
+        def _trend_for_eps(eps_concept: str, max_periods: int) -> Optional[pd.DataFrame]:
             net_income_concepts = [
                 "NetIncomeLoss",
                 "NetIncomeLossAvailableToCommonStockholdersBasic",
@@ -357,7 +369,7 @@ class TTMStatementBuilder:
             )
             return trend.head(max_periods)
 
-        def _trend_for_concept(concept: str, max_periods: int = 8) -> Optional[pd.DataFrame]:
+        def _trend_for_concept(concept: str, max_periods: int) -> Optional[pd.DataFrame]:
             if _is_eps_concept(concept):
                 return _trend_for_eps(concept, max_periods=max_periods)
             concept_facts = _get_concept_facts(concept)
@@ -383,7 +395,7 @@ class TTMStatementBuilder:
 
         base_trend = None
         for concept in preferred_concepts:
-            trend = _trend_for_concept(concept)
+            trend = _trend_for_concept(concept, max_periods=max_periods)
             if trend is None:
                 continue
             candidate_periods = [
@@ -396,7 +408,7 @@ class TTMStatementBuilder:
 
         if base_trend is None:
             for item, _, _ in multi_period.iter_hierarchy():
-                trend = _trend_for_concept(item.concept)
+                trend = _trend_for_concept(item.concept, max_periods=max_periods)
                 if trend is None:
                     continue
                 candidate_periods = [
@@ -419,7 +431,7 @@ class TTMStatementBuilder:
             label = item.label
 
             try:
-                trend = _trend_for_concept(concept)
+                trend = _trend_for_concept(concept, max_periods=max_periods)
                 if trend is None:
                     continue
 
@@ -465,7 +477,8 @@ class TTMStatementBuilder:
 
     def build_income_statement(
         self,
-        as_of: Optional[date] = None
+        as_of: Optional[date] = None,
+        max_periods: int = 8
     ) -> TTMStatement:
         """Build TTM income statement.
 
@@ -482,12 +495,14 @@ class TTMStatementBuilder:
         return self._build_statement(
             self.facts.income_statement,
             'IncomeStatement',
-            as_of
+            as_of,
+            max_periods=max_periods
         )
 
     def build_cashflow_statement(
         self,
-        as_of: Optional[date] = None
+        as_of: Optional[date] = None,
+        max_periods: int = 8
     ) -> TTMStatement:
         """Build TTM cash flow statement.
 
@@ -501,5 +516,6 @@ class TTMStatementBuilder:
         return self._build_statement(
             self.facts.cash_flow,
             'CashFlowStatement',
-            as_of
+            as_of,
+            max_periods=max_periods
         )
