@@ -131,6 +131,9 @@ class XBRL:
         # Standardization cache for this XBRL instance (lazy-initialized)
         self._standardization_cache = None
 
+        # Reverse index: element_name -> list of context_ids with facts (lazy-initialized)
+        self._element_context_index = None
+
     def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
         """
         Determine if a statement should display dimensioned line items.
@@ -393,6 +396,23 @@ class XBRL:
     @property
     def context_period_map(self):
         return self.parser.context_period_map
+
+    @property
+    def element_context_index(self) -> Dict[str, List[str]]:
+        """Reverse index: element_name -> list of context_ids with facts.
+
+        Built lazily on first access by scanning all parsed facts.
+        Used by _find_facts_for_element() to avoid iterating all contexts.
+        """
+        if self._element_context_index is None:
+            index: Dict[str, List[str]] = {}
+            for fact in self.parser.facts.values():
+                elem = fact.element_id.replace(':', '_')
+                if elem not in index:
+                    index[elem] = []
+                index[elem].append(fact.context_ref)
+            self._element_context_index = index
+        return self._element_context_index
 
     @classmethod
     def from_directory(cls, directory_path: Union[str, Path]) -> 'XBRL':
@@ -1443,8 +1463,9 @@ class XBRL:
 
         relevant_facts = {}
 
-        # Check each context
-        for context_id in self.contexts:
+        # Use reverse index to only check contexts that actually have facts for this element
+        context_ids = self.element_context_index.get(element_name, [])
+        for context_id in context_ids:
             # Issue #564: Get ALL facts for this element/context and select the most precise
             facts_list = self.parser.get_facts_by_key(element_name, context_id)
             fact = self._select_most_precise_fact(facts_list)

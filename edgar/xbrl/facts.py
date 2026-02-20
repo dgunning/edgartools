@@ -1114,16 +1114,23 @@ class FactsView:
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
 
-                # First look up preferred_label from presentation trees
-                # to ensure label consistency between rendering and facts
+                # Combined: Find preferred_label AND statement_type in one tree scan
+                # Previously these were two separate loops over presentation_trees
                 preferred_label = None
-                for _role, tree in self.xbrl.presentation_trees.items():
+                statement_type_found = None
+                statement_role_found = None
+                for role, tree in self.xbrl.presentation_trees.items():
                     if element_id in tree.all_nodes:
-                        # Get presentation node to find preferred_label
                         pres_node = tree.all_nodes[element_id]
-                        if pres_node.preferred_label:
+                        # Grab preferred_label from first tree that has it
+                        if preferred_label is None and pres_node.preferred_label:
                             preferred_label = pres_node.preferred_label
-                            break  # Use the first preferred_label found
+                        # Grab statement_type from first matching role
+                        if statement_type_found is None and role in role_to_statement_type:
+                            statement_type_found, statement_role_found = role_to_statement_type[role]
+                        # Break early if we have both
+                        if preferred_label is not None and statement_type_found is not None:
+                            break
 
                 # Add label using the same selection logic as display_label
                 # but including the preferred_label we found above
@@ -1176,13 +1183,10 @@ class FactsView:
                 else:
                     fact_dict['preferred_sign'] = None
 
-                # Determine statement type by checking presentation trees using our precomputed mapping
-                for role, tree in self.xbrl.presentation_trees.items():
-                    if element_id in tree.all_nodes and role in role_to_statement_type:
-                        statement_type, statement_role = role_to_statement_type[role]
-                        fact_dict['statement_type'] = statement_type
-                        fact_dict['statement_role'] = statement_role
-                        break
+                # Use statement_type from the combined tree scan above
+                if statement_type_found is not None:
+                    fact_dict['statement_type'] = statement_type_found
+                    fact_dict['statement_role'] = statement_role_found
 
             # Add weight from calculation tree (Issue #463)
             # Weight indicates calculation role (1.0 = add, -1.0 = subtract)

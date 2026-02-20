@@ -1171,7 +1171,7 @@ def _format_value_for_display_as_string(
     dominant_scale: int,
     shares_scale: Optional[int],
     comparison_info: Optional[Dict[str, Any]] = None,
-    xbrl_instance: Optional[Any] = None
+    currency_symbol: Optional[str] = None
 ) -> str:
     """
     Format a value for display in a financial statement, returning a string.
@@ -1184,6 +1184,7 @@ def _format_value_for_display_as_string(
         dominant_scale: The dominant scale for monetary values
         shares_scale: The scale for share values, if present
         comparison_info: Optional comparison information for showing trends
+        currency_symbol: Pre-resolved currency symbol (e.g., "$", "EUR")
 
     Returns:
         str: Formatted value as a string
@@ -1275,17 +1276,7 @@ def _format_value_for_display_as_string(
                 return f"{value:,.0f}"
         else:
             # Use cached format_value function for other values
-            # Get currency symbol for this period using on-demand resolution
-            currency_symbol = None
-            if is_monetary and period_key and xbrl_instance:
-                from edgar.xbrl.core import get_currency_symbol
-                # Get element name from item
-                element_name = item.get('name') or item.get('concept', '')
-                if element_name:
-                    currency_measure = xbrl_instance.get_currency_for_fact(element_name, period_key)
-                    if currency_measure:
-                        currency_symbol = get_currency_symbol(currency_measure)
-
+            # currency_symbol is pre-resolved at closure-creation time
             return format_value(value, is_monetary, dominant_scale, fact_decimals, currency_symbol)
     else:
         # String values - only check HTML if it might contain tags
@@ -1302,7 +1293,7 @@ def _format_value_for_display(
     dominant_scale: int,
     shares_scale: Optional[int],
     comparison_info: Optional[Dict[str, Any]] = None,
-    xbrl_instance: Optional[Any] = None
+    currency_symbol: Optional[str] = None
 ) -> Text:
     """
     Format a value for display in a financial statement, returning a Rich Text object.
@@ -1315,13 +1306,14 @@ def _format_value_for_display(
         dominant_scale: The dominant scale for monetary values
         shares_scale: The scale for share values, if present
         comparison_info: Optional comparison information for showing trends
+        currency_symbol: Pre-resolved currency symbol (e.g., "$", "EUR")
 
     Returns:
         Text: Formatted value as a Rich Text object
     """
     # Get the formatted string value
     formatted_str = _format_value_for_display_as_string(
-        value, item, period_key, is_monetary_statement, dominant_scale, shares_scale, comparison_info, xbrl_instance
+        value, item, period_key, is_monetary_statement, dominant_scale, shares_scale, comparison_info, currency_symbol
     )
 
     # Convert to Rich Text object with right justification
@@ -1824,11 +1816,22 @@ def render_statement(
             current_item = dict(item)
             current_period_key = period_key
 
-            def format_func(value, item=current_item, pk=current_period_key):
+            # Pre-resolve currency to avoid capturing xbrl_instance in the closure
+            cell_currency_symbol = None
+            if is_monetary_statement and period_key and xbrl_instance:
+                from edgar.xbrl.core import get_currency_symbol
+                element_name = current_item.get('name') or current_item.get('concept', '')
+                if element_name:
+                    currency_measure = xbrl_instance.get_currency_for_fact(element_name, period_key)
+                    if currency_measure:
+                        cell_currency_symbol = get_currency_symbol(currency_measure)
+
+            def format_func(value, item=current_item, pk=current_period_key,
+                            _currency=cell_currency_symbol):
                 return _format_value_for_display_as_string(
                     value, item, pk,
                     is_monetary_statement, dominant_scale, shares_scale,
-                    comparison_info, xbrl_instance
+                    comparison_info, _currency
                 )
 
             # Create a cell and add it to the row
