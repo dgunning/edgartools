@@ -794,14 +794,14 @@ class MultiFinancials:
     def extract(cls, filings) -> "MultiFinancials":
         return cls(XBRLS.from_filings(filings))
 
-    def balance_sheet(self) -> Optional[StitchedStatement]:
-        return self.xbs.statements.balance_sheet()
+    def balance_sheet(self, view: ViewType = None) -> Optional[StitchedStatement]:
+        return self.xbs.statements.balance_sheet(view=view)
 
-    def income_statement(self) -> Optional[StitchedStatement]:
-        return self.xbs.statements.income_statement()
+    def income_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
+        return self.xbs.statements.income_statement(view=view)
 
-    def cashflow_statement(self) -> Optional[StitchedStatement]:
-        return self.xbs.statements.cashflow_statement()
+    def cashflow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
+        return self.xbs.statements.cashflow_statement(view=view)
 
     def __rich__(self):
         return self.xbs.__rich__()
