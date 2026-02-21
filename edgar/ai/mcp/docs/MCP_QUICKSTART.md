@@ -1,6 +1,6 @@
 # EdgarTools MCP Quickstart Guide
 
-This guide helps you get started with EdgarTools MCP server in under 5 minutes.
+This guide helps you get the EdgarTools MCP server running in under 5 minutes -- whether you're setting up Claude Desktop on your laptop, deploying a shared server for your team, or running a containerized instance in production.
 
 ## Installation
 
@@ -11,19 +11,41 @@ pip install "edgartools[ai]"
 
 ## Starting the Server
 
-EdgarTools provides two ways to start the MCP server:
+EdgarTools provides several ways to start the MCP server:
 
-### Option 1: Python Module (Recommended)
+### Option 1: uvx (No installation required)
+```bash
+uvx --from "edgartools[ai]" edgartools-mcp
+```
+This runs the server in an isolated environment without needing to install edgartools globally. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/). Ideal for individual use or scripted deployment.
+
+### Option 2: Python Module
 ```bash
 python -m edgar.ai
 ```
 
-### Option 2: Console Script
+### Option 3: Console Script
 ```bash
 edgartools-mcp
 ```
 
-Both methods work identically and will start the MCP server listening on stdin/stdout.
+### Option 4: Docker
+```bash
+docker run -i hackerdogs/edgartools-mcp
+```
+
+Or build your own:
+
+```dockerfile
+FROM python:3.12-slim
+RUN pip install "edgartools[ai]"
+ENV EDGAR_IDENTITY="Your Name your.email@example.com"
+ENTRYPOINT ["python", "-m", "edgar.ai"]
+```
+
+Docker is ideal for server deployments, CI/CD pipelines, and teams that want a consistent, isolated runtime.
+
+All methods start the MCP server listening on stdin/stdout. The server is stateless -- it makes SEC API calls on demand and holds no persistent data, which makes it straightforward to run centrally for a team.
 
 ## Client Configuration
 
@@ -49,7 +71,27 @@ Configuration file location:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-**Configuration (macOS):**
+**Configuration with uvx (Recommended — no Python setup needed):**
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
+
+> **Note:** On macOS, Claude Desktop may not find `uvx` in your PATH. If you get a "spawn uvx ENOENT" error, use the full path (find it with `which uvx`):
+> ```json
+> "command": "/Users/yourname/.local/bin/uvx"
+> ```
+
+**Configuration with Python (macOS):**
 ```json
 {
   "mcpServers": {
@@ -64,7 +106,7 @@ Configuration file location:
 }
 ```
 
-**Configuration (Windows):**
+**Configuration with Python (Windows):**
 ```json
 {
   "mcpServers": {
@@ -131,6 +173,16 @@ Configuration file location:
 ```
 
 **Note:** Use `python3` on macOS/Linux, or `python` on Windows.
+
+### Deploying for a Team
+
+The EdgarTools MCP server is stateless -- it queries the SEC API on each request and holds no session data. This makes it straightforward to deploy centrally:
+
+- **Docker**: Run the container on a shared server and point team members' MCP clients to it
+- **Multiple instances**: Safe to run multiple instances behind a load balancer since there's no shared state
+- **Configuration templates**: Create per-client config files with the appropriate `EDGAR_IDENTITY` for your organization
+
+See [hackerdogs/edgartools-mcp](https://hub.docker.com/r/hackerdogs/edgartools-mcp) on Docker Hub for a community-maintained container with config templates for multiple clients.
 
 ## Available Tools
 

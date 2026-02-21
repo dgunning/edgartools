@@ -311,12 +311,7 @@ This adds SEC analysis capabilities to Claude, including 3,450+ lines of API doc
 
 ### Option 2: MCP Server
 
-Run EdgarTools as an MCP server for Claude Code or Claude Desktop:
-
-```bash
-pip install "edgartools[ai]"
-python -m edgar.ai
-```
+Run EdgarTools as an MCP server for any AI client -- Claude Desktop, Cline, or your own containerized deployment.
 
 Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
@@ -324,8 +319,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python",
-      "args": ["-m", "edgar.ai"],
+      "command": "uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
       }
@@ -333,6 +328,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
   }
 }
 ```
+
+Requires [uv](https://docs.astral.sh/uv/). Alternatively, `pip install "edgartools[ai]"` and use `python -m edgar.ai`.
 
 See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 

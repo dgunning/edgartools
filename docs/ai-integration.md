@@ -2,7 +2,7 @@
 
 EdgarTools provides two AI integration features:
 
-1. **MCP Server** -- Gives Claude Desktop (and other MCP clients) direct access to SEC filing data through five specialized tools
+1. **MCP Server** -- Gives any MCP-compatible AI client direct access to SEC filing data through five specialized tools
 2. **Skills** -- Teaches Claude how to write better EdgarTools code by providing structured patterns and best practices
 
 Both are optional. Install with:
@@ -13,16 +13,35 @@ pip install "edgartools[ai]"
 
 ## MCP Server
 
-The [Model Context Protocol](https://modelcontextprotocol.io/) server allows Claude Desktop to query SEC filing data directly -- no code required.
+The [Model Context Protocol](https://modelcontextprotocol.io/) server gives any MCP-compatible AI client access to SEC filing data -- whether that's a developer's Claude Desktop, a team's shared server, or a containerized deployment. No code required.
 
 ### Setup
 
-**1. Configure Claude Desktop**
+Choose the deployment method that fits your use case:
 
-Add to your Claude Desktop config file:
+#### uvx (recommended -- zero install)
 
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+Ideal for individual use or scripted deployment. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
+
+If you get a "spawn uvx ENOENT" error on macOS, use the full path to uvx (find it with `which uvx`).
+
+#### Python
+
+When edgartools is already installed in your environment:
 
 ```json
 {
@@ -38,17 +57,37 @@ Add to your Claude Desktop config file:
 }
 ```
 
-Replace `Your Name your.email@example.com` with your actual name and email. The SEC requires this to identify API users.
-
 On Windows, use `python` instead of `python3`.
 
-**2. Verify**
+#### Docker
+
+For server or production deployments where you want isolation and reproducibility:
+
+```dockerfile
+FROM python:3.12-slim
+RUN pip install "edgartools[ai]"
+ENV EDGAR_IDENTITY="Your Name your.email@example.com"
+ENTRYPOINT ["python", "-m", "edgar.ai"]
+```
+
+Build and run:
+
+```bash
+docker build -t edgartools-mcp .
+docker run -i edgartools-mcp
+```
+
+The community also maintains Docker images -- see [hackerdogs/edgartools-mcp](https://hub.docker.com/r/hackerdogs/edgartools-mcp) on Docker Hub for a ready-to-use container with config templates for multiple MCP clients.
+
+Replace `Your Name your.email@example.com` with your actual name and email. The SEC requires this to identify API users.
+
+**Verify**
 
 ```bash
 python -m edgar.ai --test
 ```
 
-**3. Restart Claude Desktop.** You should see the MCP tools icon in the chat input.
+**For Claude Desktop**, add the config above to your config file (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows) and restart. You should see the MCP tools icon in the chat input.
 
 ### Available Tools
 
@@ -133,20 +172,16 @@ Insider transactions, institutional holders, or fund portfolios.
 - "Who are Tesla's largest institutional holders?"
 - "What stocks does Berkshire Hathaway hold?"
 
-### Other MCP Clients
+### Any MCP Client
 
-The server works with any MCP-compatible client. Use the same configuration format:
-
-**Cline (VS Code)**: Add to your Cline MCP settings
-
-**Continue.dev**: Add to `~/.continue/config.json`
+The server works with any MCP-compatible client -- Claude Desktop, Cline, Continue.dev, or your own tooling. The configuration is the same `mcpServers` block regardless of client:
 
 ```json
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python3",
-      "args": ["-m", "edgar.ai"],
+      "command": "uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
       }
@@ -154,6 +189,8 @@ The server works with any MCP-compatible client. Use the same configuration form
   }
 }
 ```
+
+Where it goes depends on the client: Claude Desktop config file, Cline MCP settings, `~/.continue/config.json`, etc.
 
 ## Skills
 
