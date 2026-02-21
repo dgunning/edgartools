@@ -1000,6 +1000,17 @@ class StatementResolver:
             if statements:
                 # Issue #506: Sort by statement quality to prefer correct statement type
                 statements = sorted(statements, key=lambda s: self._score_statement_quality(s, statement_type), reverse=True)
+                # Issue #659: Filter out candidates that fail essential-concept validation.
+                # This prevents mislabeled roles (e.g., a supplemental schedule with
+                # us-gaap_StatementOfFinancialPositionAbstract as root) from blocking
+                # the cascade to concept-pattern or content-based matchers.
+                if statement_type in ESSENTIAL_CONCEPTS:
+                    valid = [s for s in statements
+                             if self._validate_statement(s, statement_type)[0]]
+                    if valid:
+                        return valid, valid[0]['role'], 0.95
+                    # All candidates failed validation — fall through to cascade
+                    return [], None, 0.0
                 return statements, statements[0]['role'], 0.95
 
         return [], None, 0.0
