@@ -42,6 +42,7 @@ nav:
     - Overview: index.md
     - Installation: installation.md
     - Quick Start: quickstart.md
+    - Complete Guide: complete-guide.md
     - Choosing the Right API: xbrl/getting-started/choosing-the-right-api.md
     - Common Pitfalls: common-pitfalls.md
     - Cheat Sheet: quick-guide.md
