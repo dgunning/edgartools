@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.16.3] - 2026-02-21
+
+### Added
+
+- **RenderedStatement serialization** — `RenderedStatement` now supports `to_dict()` / `from_dict()` for JSON-safe serialization of rendered financial statements. Cell formatters are pre-applied on serialize; passthrough lambdas are used on deserialize, enabling round-trip transport of rendered statements without requiring XBRL context.
+
+- **TTM period control in MCP tool** — The `edgar_company` MCP tool now accepts `period='ttm'` to request trailing-twelve-month income and cash flow statements directly from the tool interface.
+
+### Fixed
+
+- **TTM `max_periods` threading** — `Company.income_statement()` and `Company.cashflow_statement()` now correctly forward the `periods` parameter through to the TTM statement builder. Previously, `max_periods` was ignored when `period='ttm'`, always returning the default number of periods ([PR #650](https://github.com/dgunning/edgartools/pull/650), contributor: [@baqamisaif](https://github.com/baqamisaif))
+
+### Performance
+
+- **XBRL pipeline optimizations** — Significant speed and memory improvements to the XBRL statement rendering pipeline:
+  - Reverse index in `xbrl.py` reduces `_find_facts_for_element()` from O(nodes * contexts) to O(nodes)
+  - Two presentation-tree loops in `facts.py` merged into one with early exit
+  - Currency resolved at closure-creation time so formatter closures no longer retain a reference to the entire XBRL object
+  - Net savings: ~15-25 ms per statement pipeline; ~4-11 MB per `RenderedStatement`
+
 ## [5.16.1] - 2026-02-18
 
 ### Fixed
