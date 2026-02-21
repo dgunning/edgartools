@@ -67,6 +67,18 @@ sharp_edges:
       print(financials.balance_sheet())
     detection_pattern: '\.iloc\[.*\]\.get|statement\(\)\[|balance_sheet\(\)\['
 
+  - id: include-dimensions-vs-view
+    summary: Use view= instead of include_dimensions= for dimensional control
+    severity: low
+    solution: |
+      # PREFERRED: view parameter (works on single and stitched statements)
+      income = financials.income_statement(view="detailed")
+      income = multi_financials.income_statement(view="detailed")
+
+      # LEGACY: include_dimensions boolean (still works but less expressive)
+      income = financials.income_statement(include_dimensions=True)
+    detection_pattern: 'include_dimensions\s*=\s*True'
+
   - id: value-scale-assumptions
     summary: Financial values are in actual dollars, not thousands/millions
     severity: low

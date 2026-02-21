@@ -35,6 +35,17 @@ patterns:
       facts.get_facts_with_dimensions()               # Segment breakdowns
       facts.get_facts_by_fiscal_period(2024, "FY")    # Specific period
 
+  - name: Multi-Period Stitched Statements
+    when: Compare statements across multiple filings
+    code: |
+      from edgar.xbrl import XBRLS
+      filings = company.get_filings(form="10-K").head(3)
+      xbrls = XBRLS.from_filings(filings)
+
+      income = xbrls.statements.income_statement()                 # standard view
+      income = xbrls.statements.income_statement(view="detailed")  # with dimensional breakdowns
+      df = income.to_dataframe()
+
   - name: Concept History
     when: Track a value over time
     code: |

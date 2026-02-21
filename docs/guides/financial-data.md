@@ -211,8 +211,12 @@ xbrls = XBRLS.from_filings(filings)
 
 # Get income statement across all periods
 income = xbrls.statements.income_statement()
+
+# Use view="detailed" for dimensional breakdowns across periods
+income_detailed = xbrls.statements.income_statement(view="detailed")
 ```
 
+The `view` parameter works the same as on single-period statements (`"standard"`, `"detailed"`, `"summary"`).
 This aligns the periods and concepts across filings for easy comparison.
 
 **Learn more:** [Multi-Period Analysis Guide](../xbrl/guides/multi-period-analysis.md)

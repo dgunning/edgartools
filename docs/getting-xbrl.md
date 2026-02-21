@@ -69,6 +69,9 @@ stitched_statements = xbrls.statements
 income_trend = stitched_statements.income_statement()
 balance_sheet_trend = stitched_statements.balance_sheet()
 cashflow_trend = stitched_statements.cashflow_statement()
+
+# Use view="detailed" to include dimensional breakdowns across periods
+income_detailed = stitched_statements.income_statement(view="detailed")
 ```
 
 ## User-Friendly Features
@@ -196,14 +199,17 @@ The rendering engine automatically handles:
 - Fiscal period indicators in statement titles
 - Unit notes (e.g., "In millions, except per share data")
 
-For stitched multi-period statements, you can control the number of periods and date formatting:
+For stitched multi-period statements, you can control periods, date formatting, and dimensional detail:
 
 ```python
 # Get 3-year comparison with full date ranges
 annual_trend = stitched_statements.income_statement(
-    max_periods=3, 
+    max_periods=3,
     show_date_range=True
 )
+
+# Include dimensional breakdowns (e.g., cost by segment across years)
+detailed_trend = stitched_statements.income_statement(view="detailed")
 ```
 
 ## Advanced Features
