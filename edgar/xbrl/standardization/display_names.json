@@ -94,5 +94,10 @@
   "ForecastedIntangibleAmortizationYear3": "Forecasted Amortization, Year 3",
   "ForecastedIntangibleAmortizationYear4": "Forecasted Amortization, Year 4",
   "ForecastedIntangibleAmortizationYear5": "Forecasted Amortization, Year 5",
-  "ForecastedIntangibleAmortizationAfterYear5": "Forecasted Amortization, Thereafter"
+  "ForecastedIntangibleAmortizationAfterYear5": "Forecasted Amortization, Thereafter",
+  "NetCashFromOperatingActivities": "Net Cash from Operating Activities",
+  "NetCashFromInvestingActivities": "Net Cash from Investing Activities",
+  "NetCashFromFinancingActivities": "Net Cash from Financing Activities",
+  "NetChangeInCash": "Net Change in Cash",
+  "CashAndCashEquivalents": "Cash and Cash Equivalents"
 }

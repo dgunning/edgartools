@@ -28,7 +28,8 @@ EXCLUDED_TAGS: Set[str] = {
     "BusinessCombinationSeparatelyRecognizedTransactionsAdditionalDisclosuresAcquisitionCostExpensed",
     "CapitalizedContractCostAmortization",
     "CashAndCashEquivalentsPeriodIncreaseDecrease",
-    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+    # CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents
+    # removed from exclusions: needed for cash flow stitching (ending cash balance)
     "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
     "ChangeInReportingEntityEarningsPerShareBasic",
     "ChangeInReportingEntityEarningsPerShareDiluted",
@@ -158,7 +159,8 @@ EXCLUDED_TAGS: Set[str] = {
     "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",
     "IncomeLossFromContinuingOperationsBeforeIncomeTaxesForeign",
     "IncomeLossFromContinuingOperationsBeforeInterestExpenseInterestIncomeIncomeTaxesExtraordinaryItemsNoncontrollingInterestsNet",
-    "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
+    # IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest
+    # removed from exclusions: needed for cash flow stitching (net income starting line)
     "IncomeLossFromContinuingOperationsPerBasicAndDilutedShare",
     "IncomeLossFromContinuingOperationsPerBasicShare",
     "IncomeLossFromContinuingOperationsPerDilutedShare",
@@ -201,9 +203,9 @@ EXCLUDED_TAGS: Set[str] = {
     "LineOfCreditFacilityRemainingBorrowingCapacity",
     "MembersCapital",
     "NetAssetValuePerShare",
-    "NetCashProvidedByUsedInFinancingActivities",
-    "NetCashProvidedByUsedInInvestingActivities",
-    "NetCashProvidedByUsedInOperatingActivities",
+    # NetCashProvidedByUsedIn*Activities removed from exclusions:
+    # These are cash flow subtotals needed for stitching across filings
+    # where companies switch between aggregate and continuing-operations variants
     "NetIncomeLossAvailableToCommonStockholdersDiluted",
     "NetIncomeLossFromDiscontinuedOperationsAvailableToCommonShareholdersBasic",
     "NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",

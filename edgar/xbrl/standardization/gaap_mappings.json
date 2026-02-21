@@ -11396,5 +11396,50 @@
     "standard_tags": [
       "InterestExpense"
     ]
+  },
+  "NetCashProvidedByUsedInOperatingActivities": {
+    "standard_tags": [
+      "NetCashFromOperatingActivities"
+    ]
+  },
+  "NetCashProvidedByUsedInOperatingActivitiesContinuingOperations": {
+    "standard_tags": [
+      "NetCashFromOperatingActivities"
+    ]
+  },
+  "NetCashProvidedByUsedInInvestingActivities": {
+    "standard_tags": [
+      "NetCashFromInvestingActivities"
+    ]
+  },
+  "NetCashProvidedByUsedInInvestingActivitiesContinuingOperations": {
+    "standard_tags": [
+      "NetCashFromInvestingActivities"
+    ]
+  },
+  "NetCashProvidedByUsedInFinancingActivities": {
+    "standard_tags": [
+      "NetCashFromFinancingActivities"
+    ]
+  },
+  "NetCashProvidedByUsedInFinancingActivitiesContinuingOperations": {
+    "standard_tags": [
+      "NetCashFromFinancingActivities"
+    ]
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": {
+    "standard_tags": [
+      "NetChangeInCash"
+    ]
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect": {
+    "standard_tags": [
+      "NetChangeInCash"
+    ]
+  },
+  "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest": {
+    "standard_tags": [
+      "ProfitLoss"
+    ]
   }
 }

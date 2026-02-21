@@ -604,11 +604,11 @@ def stitch_statements(
 
                     # Update the period label to include information from entity_info
                     display_date = period_metadata['display_date']
-                    period_type = period_metadata['period_type']
+                    meta_period_type = period_metadata['period_type']
                     fiscal_period = period_metadata.get('fiscal_period')
 
                     # Create a more informative label
-                    if period_type == 'instant':
+                    if meta_period_type == 'instant':
                         if fiscal_period == 'FY':
                             period_label = f"FY {display_date}"
                         else:
