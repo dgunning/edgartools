@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/dgunning-edgartools-badge.png)](https://mseep.ai/app/dgunning-edgartools)
+
 <p align="center">
 <a href="https://github.com/dgunning/edgartools">
     <img src="docs/images/edgartools-logo.png" alt="EdgarTools Python SEC EDGAR library logo" height="80">
