@@ -183,6 +183,51 @@ class StatementCell:
     def get_formatted_value(self) -> str:
         return self.formatter(self.value)
 
+
+class CellFormatter:
+    """Picklable callable that replaces the format_func closure in render_statement().
+
+    Stores all parameters needed by ``_format_value_for_display_as_string``
+    as instance attributes so pickle can serialize it.
+    """
+    __slots__ = ('item', 'period_key', 'is_monetary_statement',
+                 'dominant_scale', 'shares_scale', 'comparison_info',
+                 'currency_symbol')
+
+    def __init__(self, item, period_key, is_monetary_statement,
+                 dominant_scale, shares_scale, comparison_info,
+                 currency_symbol):
+        self.item = item
+        self.period_key = period_key
+        self.is_monetary_statement = is_monetary_statement
+        self.dominant_scale = dominant_scale
+        self.shares_scale = shares_scale
+        self.comparison_info = comparison_info
+        self.currency_symbol = currency_symbol
+
+    def __call__(self, value):
+        return _format_value_for_display_as_string(
+            value, self.item, self.period_key,
+            self.is_monetary_statement, self.dominant_scale,
+            self.shares_scale, self.comparison_info, self.currency_symbol
+        )
+
+
+class PreformattedValue:
+    """Picklable callable that returns a pre-computed formatted string.
+
+    Used by ``RenderedStatement.from_dict()`` to replace the unpicklable
+    lambda that was previously used.
+    """
+    __slots__ = ('formatted',)
+
+    def __init__(self, formatted):
+        self.formatted = formatted
+
+    def __call__(self, value):
+        return self.formatted
+
+
 @dataclass
 class StatementRow:
     """A row in a financial statement."""
@@ -236,6 +281,8 @@ class RenderedStatement:
         """
         from datetime import date as _date
 
+        from edgar.xbrl.models import ElementCatalog
+
         def _json_safe(obj):
             """Recursively convert non-JSON-safe types to primitives."""
             if isinstance(obj, dict):
@@ -246,6 +293,8 @@ class RenderedStatement:
                 return obj.isoformat()
             if isinstance(obj, _date):
                 return obj.isoformat()
+            if isinstance(obj, ElementCatalog):
+                return {"name": obj.name, "labels": obj.labels}
             return obj
 
         def _period_to_dict(p: PeriodData) -> Dict[str, Any]:
@@ -337,7 +386,7 @@ class RenderedStatement:
                     value=cd.get('value'),
                     style=cd.get('style', {}),
                     comparison=cd.get('comparison'),
-                    formatter=lambda v, fv=fmt_val: fv,
+                    formatter=PreformattedValue(fmt_val),
                 )
                 cells.append(cell)
 
@@ -1826,13 +1875,11 @@ def render_statement(
                     if currency_measure:
                         cell_currency_symbol = get_currency_symbol(currency_measure)
 
-            def format_func(value, item=current_item, pk=current_period_key,
-                            _currency=cell_currency_symbol):
-                return _format_value_for_display_as_string(
-                    value, item, pk,
-                    is_monetary_statement, dominant_scale, shares_scale,
-                    comparison_info, _currency
-                )
+            format_func = CellFormatter(
+                current_item, current_period_key,
+                is_monetary_statement, dominant_scale, shares_scale,
+                comparison_info, cell_currency_symbol
+            )
 
             # Create a cell and add it to the row
             cell = StatementCell(

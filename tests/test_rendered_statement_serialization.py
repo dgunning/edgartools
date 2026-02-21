@@ -2,6 +2,7 @@
 Tests for RenderedStatement.to_dict() / from_dict() serialization.
 """
 import json
+import pickle
 
 import pytest
 
@@ -434,3 +435,73 @@ class TestConsolidatedRoundTrip:
                 assert rest_cell.style == orig_cell.style
                 # Compare via JSON normalization (tuples become lists in JSON)
                 assert json.loads(json.dumps(rest_cell.comparison)) == json.loads(json.dumps(orig_cell.comparison))
+
+
+class TestPickleSerialization:
+    """Tests for pickle round-trip of RenderedStatement."""
+
+    def test_pickle_balance_sheet(self):
+        """Balance sheet survives pickle round-trip with correct formatted values."""
+        rendered = _render_balance_sheet()
+        data = pickle.dumps(rendered)
+        restored = pickle.loads(data)
+
+        assert restored.title == rendered.title
+        assert len(restored.rows) == len(rendered.rows)
+        for orig_row, rest_row in zip(rendered.rows, restored.rows):
+            for orig_cell, rest_cell in zip(orig_row.cells, rest_row.cells):
+                assert rest_cell.get_formatted_value() == orig_cell.get_formatted_value()
+
+    def test_pickle_income_statement(self):
+        """Income statement survives pickle round-trip."""
+        rendered = _render_income_statement()
+        data = pickle.dumps(rendered)
+        restored = pickle.loads(data)
+
+        assert restored.title == rendered.title
+        assert restored.statement_type == rendered.statement_type
+        for orig_row, rest_row in zip(rendered.rows, restored.rows):
+            for orig_cell, rest_cell in zip(orig_row.cells, rest_row.cells):
+                assert rest_cell.value == orig_cell.value
+                assert rest_cell.get_formatted_value() == orig_cell.get_formatted_value()
+
+    def test_pickle_from_dict_round_trip(self):
+        """RenderedStatement restored via from_dict() is also picklable."""
+        rendered = _render_balance_sheet()
+        restored_from_dict = RenderedStatement.from_dict(rendered.to_dict())
+        data = pickle.dumps(restored_from_dict)
+        restored = pickle.loads(data)
+
+        for orig_row, rest_row in zip(restored_from_dict.rows, restored.rows):
+            for orig_cell, rest_cell in zip(orig_row.cells, rest_row.cells):
+                assert rest_cell.get_formatted_value() == orig_cell.get_formatted_value()
+
+
+class TestElementCatalogSerialization:
+    """Tests for to_dict() when metadata contains ElementCatalog objects."""
+
+    def test_element_catalog_in_metadata(self):
+        """ElementCatalog objects in row metadata are converted to JSON-safe dicts."""
+        from edgar.xbrl.models import ElementCatalog
+
+        rendered = _render_balance_sheet()
+        # Inject an ElementCatalog into row metadata (simulates dimension_metadata)
+        elem = ElementCatalog(
+            name="us-gaap_ProductMember",
+            data_type="domainItemType",
+            period_type="duration",
+            labels={"standard": "Product"},
+        )
+        rendered.rows[0].metadata["dimension_metadata"] = [
+            {"member_element": elem, "dimension_element": elem}
+        ]
+
+        d = rendered.to_dict()
+        # Must be JSON-serializable
+        serialized = json.dumps(d)
+        assert isinstance(serialized, str)
+
+        # Verify the ElementCatalog was converted to a dict with name and labels
+        dim_meta = d["rows"][0]["metadata"]["dimension_metadata"][0]
+        assert dim_meta["member_element"] == {"name": "us-gaap_ProductMember", "labels": {"standard": "Product"}}
+        assert dim_meta["dimension_element"] == {"name": "us-gaap_ProductMember", "labels": {"standard": "Product"}}
