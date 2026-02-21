@@ -80,9 +80,13 @@ print(income_stmt)
 df_enhanced = income_stmt.to_dataframe()  # 48 rows for Microsoft
 print(f"Enhanced view: {len(df_enhanced)} rows")
 
-# Traditional view - excludes dimensional data
-df_traditional = income_stmt.to_dataframe(include_dimensions=False)  # 21 rows
-print(f"Traditional view: {len(df_traditional)} rows")
+# Standard view - face presentation only
+df_standard = income_stmt.to_dataframe(view="standard")  # 21 rows
+print(f"Standard view: {len(df_standard)} rows")
+
+# Summary view - non-dimensional totals only
+df_summary = income_stmt.to_dataframe(view="summary")
+print(f"Summary view: {len(df_summary)} rows")
 ```
 
 **What Gets Enhanced:**
@@ -251,6 +255,9 @@ balance_sheet = multi_financials.balance_sheet()
 income_statement = multi_financials.income_statement()
 cash_flow = multi_financials.cashflow_statement()
 
+# Use view="detailed" to include dimensional breakdowns (e.g., cost by segment)
+income_detailed = multi_financials.income_statement(view="detailed")
+
 print("Multi-Year Income Statement:")
 print(income_statement)
 ```
@@ -286,20 +293,25 @@ print(revenue_row)
 
 **Dimensional Data in Stitching:**
 
-By default, stitching uses traditional statement structures for performance and compatibility:
+By default, stitching uses traditional statement structures for performance and compatibility.
+Use the `view` parameter to control dimensional data:
 
 ```python
-# Default stitching - traditional structure for multi-period consistency
-income_stmt = xbrls.render_statement("IncomeStatement")  # Clean, focused view
+# Default stitching - standard face presentation for multi-period consistency
+income_stmt = stitched_statements.income_statement()  # Clean, focused view
 
-# Enable dimensional data in stitching if desired (advanced usage)
-income_stmt_detailed = xbrls.render_statement("IncomeStatement", include_dimensions=True)
-# Note: May result in missing data if not all periods have consistent dimensional coverage
+# Include dimensional breakdowns (e.g., cost of operations by segment)
+income_stmt_detailed = stitched_statements.income_statement(view="detailed")
+
+# Summary view - non-dimensional totals only
+income_stmt_summary = stitched_statements.income_statement(view="summary")
 ```
 
-**When to Use Each:**
-- **Traditional stitching** (default): Best for trend analysis, ratios, and cross-period comparisons
-- **Dimensional stitching**: Use when you specifically need segment data across periods and know the data is consistent
+**When to Use Each View:**
+
+- **`"standard"`** (default): Best for trend analysis, ratios, and cross-period comparisons
+- **`"detailed"`**: Use when you need segment data across periods (e.g., cost breakdowns by product line)
+- **`"summary"`**: Quick overview of main line items only
 
 ## Working with Individual Statements
 

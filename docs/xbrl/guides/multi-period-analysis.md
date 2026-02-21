@@ -187,28 +187,31 @@ print(revenue_trend)
 
 ### Working with Dimensions
 
-By default, XBRLS excludes dimensional (segment) data for cleaner consolidated statements. To include segments:
+By default, XBRLS excludes dimensional (segment) data for cleaner consolidated statements. Use the `view` parameter to control this:
 
 ```python
 # Include dimensional breakdown (e.g., by product line)
-income = xbrls.statements.income_statement(include_dimensions=True)
+income = xbrls.statements.income_statement(view="detailed")
 df = income.to_dataframe()
 
 # Now you'll see rows like:
 # Revenue [Americas]
 # Revenue [Europe]
 # Revenue [Asia]
+
+# Summary view — non-dimensional totals only
+income_summary = xbrls.statements.income_statement(view="summary")
 ```
 
-**When to use `include_dimensions=True`**:
-- Analyzing segment performance
-- Geographic breakdown
-- Product line analysis
+The `view` parameter accepts three values:
 
-**When to use default (`include_dimensions=False`)**:
-- Consolidated company-level analysis
-- Trend analysis
-- Comparative analysis across companies
+| View | Description | Use When |
+|------|-------------|----------|
+| `"standard"` | Face presentation (default) | Consolidated company-level analysis, trend analysis |
+| `"detailed"` | All dimensional data included | Segment performance, geographic breakdown, product line analysis |
+| `"summary"` | Non-dimensional totals only | Quick overview of main line items |
+
+The legacy `include_dimensions` boolean is still supported (`include_dimensions=True` is equivalent to `view="detailed"`), but `view` is the preferred API.
 
 ## Period Selection
 

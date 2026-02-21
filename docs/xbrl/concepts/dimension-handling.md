@@ -20,7 +20,7 @@ income = xbrl.statements.income_statement()
 print(income)
 
 # Full data: Shows everything for custom analysis
-df = income.to_dataframe(include_dimensions=True)
+df = income.to_dataframe(view="detailed")
 ```
 
 ## Why Dimensions Matter
@@ -138,8 +138,8 @@ Cost of Goods and Services Sold:
 Get all data including breakdowns for custom analysis:
 
 ```python
-# All dimensional data included
-df = income.to_dataframe(include_dimensions=True)
+# All dimensional data included — use view="detailed"
+df = income.to_dataframe(view="detailed")
 
 # Filter as needed for your analysis
 geographic_breakdown = df[df['dimension_label'].str.contains('Geographic', na=False)]
@@ -150,7 +150,7 @@ geographic_breakdown = df[df['dimension_label'].str.contains('Geographic', na=Fa
 The dataframe includes helpful columns for understanding dimensions:
 
 ```python
-df = income.to_dataframe(include_dimensions=True)
+df = income.to_dataframe(view="detailed")
 
 # Key columns:
 # - 'dimension': True/False - is this a dimensional row?
@@ -169,7 +169,7 @@ breakdowns = df[df['is_breakdown'] == True]
 When a concept has dimensional values but no non-dimensional total, you may need to sum:
 
 ```python
-df = income.to_dataframe(include_dimensions=False)
+df = income.to_dataframe(view="standard")
 
 # COGS may have individual values but NaN for total
 cogs_rows = df[df['concept'] == 'us-gaap_CostOfGoodsAndServicesSold']
@@ -233,7 +233,7 @@ Some axes behave differently based on statement type:
 **Solution:**
 ```python
 # Check what's in the full data
-df = statement.to_dataframe(include_dimensions=True)
+df = statement.to_dataframe(view="detailed")
 concept_rows = df[df['concept'].str.contains('YourConcept')]
 print(concept_rows[['label', 'dimension', 'dimension_label', value_column]])
 ```
@@ -242,7 +242,7 @@ print(concept_rows[['label', 'dimension', 'dimension_label', value_column]])
 
 **Check the dimensional data:**
 ```python
-df = income.to_dataframe(include_dimensions=True)
+df = income.to_dataframe(view="detailed")
 
 # Look for missing values that might be dimensional
 missing = df[df[value_column].isna() & (df['abstract'] == False)]
@@ -253,7 +253,7 @@ print(missing[['concept', 'label', 'dimension']])
 
 ```python
 # Get all data first
-df = statement.to_dataframe(include_dimensions=True)
+df = statement.to_dataframe(view="detailed")
 
 # Filter to specific dimension
 geographic = df[df['dimension_label'].str.contains('Geographic', na=False)]
@@ -267,16 +267,18 @@ geographic = df[df['dimension_label'].str.contains('Geographic', na=False)]
 # Get statement with default handling (face values preserved)
 statement = xbrl.statements.income_statement()
 
-# Convert to dataframe
-df = statement.to_dataframe(
-    include_dimensions=False,  # Default: filter breakdowns
-    include_concept=True,      # Include concept column
-)
+# Control dimensional data with the view parameter
+df = statement.to_dataframe(view="standard")   # Face presentation (default for display)
+df = statement.to_dataframe(view="detailed")   # All dimensional data included
+df = statement.to_dataframe(view="summary")    # Non-dimensional totals only
 
-df = statement.to_dataframe(
-    include_dimensions=True,   # Include all dimensional data
-)
+# The view parameter also works on stitched (multi-period) statements
+income = xbrls.statements.income_statement(view="detailed")
+df = income.to_dataframe()
 ```
+
+The `view` parameter accepts `"standard"`, `"detailed"`, or `"summary"` (or the `StatementView` enum).
+The legacy `include_dimensions` boolean is still supported but `view` is preferred.
 
 ### Dimension Classification API
 

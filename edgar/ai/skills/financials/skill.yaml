@@ -54,6 +54,12 @@ patterns:
       balance = financials.balance_sheet(view="summary")        # key totals only
       cashflow = financials.cashflow_statement()
 
+      # view also works on multi-period stitched statements (MultiFinancials / XBRLS)
+      from edgar import MultiFinancials
+      filings = company.get_filings(form="10-K").head(3)
+      multi = MultiFinancials.extract(filings)
+      income_detailed = multi.income_statement(view="detailed")  # dimensional breakdowns across years
+
   - name: All Metrics at Once
     when: Comprehensive snapshot
     code: |
