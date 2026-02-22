@@ -45,18 +45,38 @@ SECTION_MAP_10Q = {
     "market_risk": "Part I, Item 3",
 }
 
+# For 20-F: maps MCP section names to keys accepted by TwentyF.__getitem__
+SECTION_MAP_20F = {
+    "business": "Item 4",           # Information on the Company
+    "risk_factors": "Item 3",       # Key Information (includes risk factors)
+    "mda": "Item 5",                # Operating and Financial Review (MD&A equivalent)
+    "financials": "financials",     # XBRL data via CompanyReport.financials
+    "directors": "Item 6",          # Directors, Senior Management and Employees
+    "shareholders": "Item 7",       # Major Shareholders and Related Party Transactions
+    "financial_info": "Item 8",     # Financial Information section
+    "controls": "Item 15",          # Controls and Procedures
+}
+
+# For 6-K: Current reports for foreign private issuers (unstructured)
+SECTION_MAP_6K = {
+    "financials": "financials",     # Financial statements via XBRL if available
+    "full_text": "full_text",       # Full document text
+}
+
 
 @tool(
     name="edgar_filing",
     description="""Read SEC filing content. Get full filing metadata or specific sections.
 
 For 10-K/10-Q: extracts business description, risk factors, MD&A, financials.
-For 8-K: extracts event items.
+For 20-F: extracts business, risk factors, operating review (MD&A), financials for foreign private issuers.
+For 6-K/8-K: extracts event items and financials.
 For proxy (DEF 14A): extracts compensation, governance info.
 
 Examples:
 - Get filing: accession_number="0000320193-23-000077"
 - Latest 10-K sections: identifier="AAPL", form="10-K", sections=["business", "risk_factors"]
+- Foreign issuer 20-F: identifier="BNTX", form="20-F", sections=["business", "mda"]
 - Full content: accession_number="...", sections=["all"]""",
     params={
         "accession_number": {
@@ -75,7 +95,7 @@ Examples:
             "type": "array",
             "items": {
                 "type": "string",
-                "enum": ["summary", "business", "risk_factors", "mda", "financials", "all"]
+                "enum": ["summary", "business", "risk_factors", "mda", "financials", "directors", "shareholders", "financial_info", "all"]
             },
             "description": "Sections to extract. 'summary' (default) gives metadata only. 'all' extracts everything.",
             "default": ["summary"]
@@ -120,6 +140,10 @@ async def edgar_filing(
             result["available_sections"] = list(SECTION_MAP_10K.keys())
         elif filing.form in ["10-Q", "10-Q/A"]:
             result["available_sections"] = list(SECTION_MAP_10Q.keys())
+        elif filing.form in ["20-F", "20-F/A"]:
+            result["available_sections"] = list(SECTION_MAP_20F.keys())
+        elif filing.form in ["6-K", "6-K/A"]:
+            result["available_sections"] = list(SECTION_MAP_6K.keys())
         else:
             result["available_sections"] = ["full_text"]
 
@@ -207,6 +231,10 @@ def _get_section_list(form_type: str) -> list[str]:
         return list(SECTION_MAP_10K.keys())
     elif form_type in ["10-Q", "10-Q/A"]:
         return list(SECTION_MAP_10Q.keys())
+    elif form_type in ["20-F", "20-F/A"]:
+        return list(SECTION_MAP_20F.keys())
+    elif form_type in ["6-K", "6-K/A"]:
+        return list(SECTION_MAP_6K.keys())
     else:
         return ["full_text"]
 
@@ -260,6 +288,10 @@ def _extract_section(obj, form_type: str, section: str) -> Optional[str]:
         section_key = SECTION_MAP_10K.get(section)
     elif form_type in ["10-Q", "10-Q/A"]:
         section_key = SECTION_MAP_10Q.get(section)
+    elif form_type in ["20-F", "20-F/A"]:
+        section_key = SECTION_MAP_20F.get(section)
+    elif form_type in ["6-K", "6-K/A"]:
+        section_key = SECTION_MAP_6K.get(section)
     else:
         section_key = None
 
