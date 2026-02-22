@@ -12,8 +12,12 @@ The core library already supports 20-F and 6-K - the gap was only in the MCP lay
 - Missing: Section maps in MCP edgar_filing tool
 """
 
+import logging
+
 import pytest
 from unittest.mock import MagicMock
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -311,8 +315,8 @@ class TestFPIIntegration:
             # Just verify we can access without exception
             try:
                 _ = fin.income_statement()
-            except Exception:
-                pass  # Some filings may not have XBRL data
+            except Exception as e:
+                logger.debug("Filing has no XBRL data or income_statement failed: %s", e)
 
     def test_company_financials_for_fpi(self):
         """edgar_company should return financials for FPI companies."""
