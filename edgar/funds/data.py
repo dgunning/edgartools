@@ -559,7 +559,7 @@ def _resolve_from_mf_tickers(identifier: str) -> Optional[Dict]:
 def _build_hierarchy_from_mf_tickers(cik: str, identifier_type: str, identifier: str) -> Optional[Union[FundCompany, FundSeries, FundClass]]:
     """
     Build FundCompany/FundSeries/FundClass hierarchy from cached mf_tickers data.
-    Names are IDs only — full names are available from FundReferenceData or HTML if needed.
+    Enriches names from FundReferenceData when available, falls back to IDs.
     """
     from edgar.reference.tickers import get_mutual_fund_tickers
     try:
@@ -572,6 +572,14 @@ def _build_hierarchy_from_mf_tickers(cik: str, identifier_type: str, identifier:
     if cik_rows.empty:
         return None
 
+    # Try to load reference data for name enrichment (0 extra HTTP calls — cached)
+    ref_data = None
+    try:
+        from edgar.funds.reference import get_fund_reference_data
+        ref_data = get_fund_reference_data()
+    except Exception:
+        pass
+
     # Build hierarchy
     all_series = []
     fund_company = FundCompany(cik_or_identifier=cik, fund_name=None, all_series=all_series)
@@ -581,14 +589,24 @@ def _build_hierarchy_from_mf_tickers(cik: str, identifier_type: str, identifier:
 
     # Group by seriesId
     for series_id, group in cik_rows.groupby('seriesId'):
-        series_name = str(series_id)  # Name is just the ID from this data source
+        # Enrich series name from reference data
+        series_name = str(series_id)
+        if ref_data:
+            ref_series = ref_data.get_series(series_id)
+            if ref_series:
+                series_name = ref_series.name
         current_series = FundSeries(series_id=series_id, name=series_name, fund_company=fund_company)
         fund_company.all_series.append(current_series)
 
         for _, row in group.iterrows():
             class_id = row.get('classId', '')
             ticker = row.get('ticker', '') or None
+            # Enrich class name from reference data
             class_name = str(class_id)
+            if ref_data:
+                ref_class = ref_data.get_class(class_id)
+                if ref_class:
+                    class_name = ref_class.name
             current_class = FundClass(class_id=class_id, name=class_name, ticker=ticker)
             current_class.series = current_series
             current_series.fund_classes.append(current_class)

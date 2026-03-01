@@ -17,8 +17,10 @@ pd.options.display.max_columns = None
 snow_form3 = Ownership.from_xml(Path('data/ownership/form3.snow.xml').read_text())
 snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
 snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
-aapl_form4: Ownership = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
-                               accession_no='0000320193-23-000089').obj()
+@pytest.fixture(scope="module")
+def aapl_form4():
+    return Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
+                  accession_no='0000320193-23-000089').obj()
 
 @pytest.fixture
 def dayone_filing():
@@ -370,7 +372,7 @@ def test_correct_number_of_transactions_for_form4(dayone_form4, capsys):
     with capsys.disabled():
         assert "Day One Biopharmaceuticals" in out
 
-def test_form4_common_trades(dayone_form4):
+def test_form4_common_trades(dayone_form4, aapl_form4):
     form4: Form4 = dayone_form4
     print()
 
@@ -438,7 +440,7 @@ def test_form5_common_transactions():
 
 
 
-def test_form4_derivative_trades():
+def test_form4_derivative_trades(aapl_form4):
     # Get exercised trades from the non derivative table
     exercised_trades = aapl_form4.non_derivative_table.exercised_trades
     assert not exercised_trades.empty
