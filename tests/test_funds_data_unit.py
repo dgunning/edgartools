@@ -137,7 +137,8 @@ class TestIsFundTicker:
         assert is_fund_ticker("VFINX") is True
 
     def test_valid_fund_ticker_2(self):
-        assert is_fund_ticker("ACMEX") is True
+        # FXAIX is a real fund ticker (Fidelity 500 Index Fund)
+        assert is_fund_ticker("FXAIX") is True
 
     def test_not_fund_ticker_too_short(self):
         assert is_fund_ticker("AAPL") is False
@@ -145,8 +146,9 @@ class TestIsFundTicker:
     def test_not_fund_ticker_no_x(self):
         assert is_fund_ticker("ABCDE") is False
 
-    def test_not_fund_ticker_lowercase(self):
-        assert is_fund_ticker("vfinx") is False
+    def test_fund_ticker_lowercase(self):
+        # Case-insensitive: lowercase real ticker should still match
+        assert is_fund_ticker("vfinx") is True
 
     def test_not_fund_ticker_empty(self):
         assert is_fund_ticker("") is False

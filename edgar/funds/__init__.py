@@ -32,6 +32,7 @@ from edgar.funds.core import (
     FundCompany,
     FundSeries,
     find_fund,
+    find_funds,
     get_fund_class,
     get_fund_company,
     get_fund_series,
@@ -107,6 +108,7 @@ __all__ = [
 
     # Access functions
     'find_fund',
+    'find_funds',
     'get_fund_company',
     'get_fund_series',
     'get_fund_class',

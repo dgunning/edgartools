@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
-from functools import lru_cache
 from typing import Any, List, Optional, Union
 
 import pandas as pd
@@ -177,9 +176,32 @@ class MoneyMarketFund:
         self.series_info = series_info
         self.share_classes = share_classes
         self.securities = securities
+        self._filing = None
+        self._portfolio_data = None
+        self._share_class_data = None
+        self._yield_history = None
+        self._nav_history = None
+        self._liquidity_history = None
+        self._collateral_data = None
+        self._holdings_by_category = None
 
     def __str__(self):
         return f"MoneyMarketFund({self.name}, {self.report_date}, {self.num_securities} securities)"
+
+    @property
+    def filing(self):
+        """The source Filing object, if this report was created via from_filing()."""
+        return self._filing
+
+    @property
+    def cik(self) -> str:
+        """CIK of the fund company."""
+        return self.general_info.cik
+
+    @property
+    def series_id(self) -> str:
+        """Series ID for this report."""
+        return self.general_info.series_id
 
     @property
     def name(self) -> str:
@@ -219,9 +241,10 @@ class MoneyMarketFund:
     # DataFrame methods
     # -------------------------------------------------------------------
 
-    @lru_cache(maxsize=1)
     def portfolio_data(self) -> pd.DataFrame:
         """Portfolio securities sorted by market value descending."""
+        if self._portfolio_data is not None:
+            return self._portfolio_data
         data = []
         for sec in self.securities:
             data.append({
@@ -243,11 +266,13 @@ class MoneyMarketFund:
         df = pd.DataFrame(data)
         if not df.empty:
             df = df.sort_values("market_value", ascending=False, na_position="last").reset_index(drop=True)
-        return df
+        self._portfolio_data = df
+        return self._portfolio_data
 
-    @lru_cache(maxsize=1)
     def share_class_data(self) -> pd.DataFrame:
         """Share class summary."""
+        if self._share_class_data is not None:
+            return self._share_class_data
         data = []
         for sc in self.share_classes:
             data.append({
@@ -257,26 +282,34 @@ class MoneyMarketFund:
                 "net_assets": sc.net_assets,
                 "shares_outstanding": sc.shares_outstanding,
             })
-        return pd.DataFrame(data)
+        self._share_class_data = pd.DataFrame(data)
+        return self._share_class_data
 
-    @lru_cache(maxsize=1)
     def yield_history(self) -> pd.DataFrame:
         """Series-level 7-day gross yield time series."""
-        return pd.DataFrame(self.series_info.seven_day_gross_yields)
+        if self._yield_history is not None:
+            return self._yield_history
+        self._yield_history = pd.DataFrame(self.series_info.seven_day_gross_yields)
+        return self._yield_history
 
-    @lru_cache(maxsize=1)
     def nav_history(self) -> pd.DataFrame:
         """Series-level daily NAV per share time series."""
-        return pd.DataFrame(self.series_info.daily_nav_per_share)
+        if self._nav_history is not None:
+            return self._nav_history
+        self._nav_history = pd.DataFrame(self.series_info.daily_nav_per_share)
+        return self._nav_history
 
-    @lru_cache(maxsize=1)
     def liquidity_history(self) -> pd.DataFrame:
         """Daily and weekly liquid asset percentages time series."""
-        return pd.DataFrame(self.series_info.liquidity_details)
+        if self._liquidity_history is not None:
+            return self._liquidity_history
+        self._liquidity_history = pd.DataFrame(self.series_info.liquidity_details)
+        return self._liquidity_history
 
-    @lru_cache(maxsize=1)
     def collateral_data(self) -> pd.DataFrame:
         """All repo collateral flattened into one DataFrame."""
+        if self._collateral_data is not None:
+            return self._collateral_data
         data = []
         for sec in self.securities:
             if sec.repo_agreement:
@@ -293,20 +326,24 @@ class MoneyMarketFund:
                         "collateral_value": coll.collateral_value,
                         "collateral_category": coll.collateral_category,
                     })
-        return pd.DataFrame(data)
+        self._collateral_data = pd.DataFrame(data)
+        return self._collateral_data
 
-    @lru_cache(maxsize=1)
     def holdings_by_category(self) -> pd.DataFrame:
         """Holdings grouped by investment category."""
+        if self._holdings_by_category is not None:
+            return self._holdings_by_category
         pdf = self.portfolio_data()
         if pdf.empty:
-            return pd.DataFrame()
+            self._holdings_by_category = pd.DataFrame()
+            return self._holdings_by_category
         grouped = pdf.groupby("category", dropna=False).agg(
             count=("cusip", "count"),
             total_market_value=("market_value", "sum"),
             total_pct=("pct_of_nav", "sum"),
         ).sort_values("total_market_value", ascending=False).reset_index()
-        return grouped
+        self._holdings_by_category = grouped
+        return self._holdings_by_category
 
     # -------------------------------------------------------------------
     # Rich display
@@ -404,7 +441,10 @@ class MoneyMarketFund:
         xml = filing.xml()
         if not xml:
             return None
-        return cls._parse_xml(xml)
+        report = cls._parse_xml(xml)
+        if report is not None:
+            report._filing = filing
+        return report
 
     @classmethod
     def parse_nmfp3_xml(cls, xml: Union[str, Any]) -> 'MoneyMarketFund':

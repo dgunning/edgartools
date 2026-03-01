@@ -156,7 +156,6 @@ class _FundCompanyInfo:
     def state_of_incorporation(self):
         return self.ident_info.get("State of Inc.", None)
 
-    @lru_cache(maxsize=1)
     def id_and_name(self, contract_or_series: str) -> Optional[Tuple[str, str]]:
         class_contract_str = self.ident_info.get(contract_or_series, None)
         if not class_contract_str:
@@ -265,9 +264,12 @@ class _FundClassOrSeries:
     Not part of the public API - use the FundClass and FundSeries classes 
     from edgar.funds.core instead.
     """
+    _SENTINEL = object()
+
     def __init__(self, company_info: '_FundCompanyInfo', contract_or_series: str):
         self.fund = company_info
         self._contract_or_series = contract_or_series
+        self._cached_id_and_name = _FundClassOrSeries._SENTINEL
 
     @property
     def fund_cik(self):
@@ -277,17 +279,20 @@ class _FundClassOrSeries:
     def fund_name(self):
         return self.fund.name
 
-    @lru_cache(maxsize=1)
     def _id_and_name(self) -> Optional[Tuple[str, str]]:
+        if self._cached_id_and_name is not _FundClassOrSeries._SENTINEL:
+            return self._cached_id_and_name
         class_contract_str = self.fund.ident_info.get(self._contract_or_series, None)
         if not class_contract_str:
+            self._cached_id_and_name = None
             return None
         match = re.match(r'([CS]\d+)(?:\s(.*))?', class_contract_str)
 
         # Storing the results in variables if matched, with a default for description if not present
         cik = match.group(1) if match else ""
         cik_description = match.group(2) if match and match.group(2) else ""
-        return cik, cik_description
+        self._cached_id_and_name = (cik, cik_description)
+        return self._cached_id_and_name
 
     @property
     def id(self):
@@ -496,10 +501,123 @@ def _parse_series_table(html: str) -> tuple:
     return company_cik, company_name, series_list
 
 
+def _resolve_from_mf_tickers(identifier: str) -> Optional[Dict]:
+    """
+    Fast-path resolver using the cached mutual fund tickers DataFrame.
+
+    Returns dict with keys: id_type, cik, series_id, class_id, ticker — or None.
+    """
+    from edgar.reference.tickers import get_mutual_fund_tickers
+    try:
+        mf_data = get_mutual_fund_tickers()
+    except Exception:
+        return None
+
+    upper_id = identifier.upper()
+
+    # Try ticker match
+    matches = mf_data[mf_data['ticker'].str.upper() == upper_id]
+    if not matches.empty:
+        row = matches.iloc[0]
+        return {
+            'id_type': 'Class',
+            'cik': str(row['cik']),
+            'series_id': row.get('seriesId', ''),
+            'class_id': row.get('classId', ''),
+            'ticker': row['ticker'],
+        }
+
+    # Try series ID match (SEC IDs are case-insensitive, normalize to uppercase)
+    if upper_id.startswith('S') and upper_id[1:].isdigit():
+        matches = mf_data[mf_data['seriesId'].str.upper() == upper_id]
+        if not matches.empty:
+            row = matches.iloc[0]
+            return {
+                'id_type': 'Series',
+                'cik': str(row['cik']),
+                'series_id': row['seriesId'],
+                'class_id': '',
+                'ticker': '',
+            }
+
+    # Try class ID match (SEC IDs are case-insensitive, normalize to uppercase)
+    if upper_id.startswith('C') and upper_id[1:].isdigit():
+        matches = mf_data[mf_data['classId'].str.upper() == upper_id]
+        if not matches.empty:
+            row = matches.iloc[0]
+            return {
+                'id_type': 'Class',
+                'cik': str(row['cik']),
+                'series_id': row.get('seriesId', ''),
+                'class_id': row['classId'],
+                'ticker': row.get('ticker', ''),
+            }
+
+    return None
+
+
+def _build_hierarchy_from_mf_tickers(cik: str, identifier_type: str, identifier: str) -> Optional[Union[FundCompany, FundSeries, FundClass]]:
+    """
+    Build FundCompany/FundSeries/FundClass hierarchy from cached mf_tickers data.
+    Names are IDs only — full names are available from FundReferenceData or HTML if needed.
+    """
+    from edgar.reference.tickers import get_mutual_fund_tickers
+    try:
+        mf_data = get_mutual_fund_tickers()
+    except Exception:
+        return None
+
+    # Get all rows for this CIK
+    cik_rows = mf_data[mf_data['cik'].astype(str) == str(cik)]
+    if cik_rows.empty:
+        return None
+
+    # Build hierarchy
+    all_series = []
+    fund_company = FundCompany(cik_or_identifier=cik, fund_name=None, all_series=all_series)
+
+    target_series = None
+    target_class = None
+
+    # Group by seriesId
+    for series_id, group in cik_rows.groupby('seriesId'):
+        series_name = str(series_id)  # Name is just the ID from this data source
+        current_series = FundSeries(series_id=series_id, name=series_name, fund_company=fund_company)
+        fund_company.all_series.append(current_series)
+
+        for _, row in group.iterrows():
+            class_id = row.get('classId', '')
+            ticker = row.get('ticker', '') or None
+            class_name = str(class_id)
+            current_class = FundClass(class_id=class_id, name=class_name, ticker=ticker)
+            current_class.series = current_series
+            current_series.fund_classes.append(current_class)
+
+            if identifier_type == 'Class':
+                if identifier.startswith('C') and current_class.class_id == identifier:
+                    target_class = current_class
+                elif not identifier.startswith('C') and current_class.ticker and current_class.ticker.upper() == identifier.upper():
+                    target_class = current_class
+
+        if identifier_type == 'Series' and current_series.series_id == identifier:
+            target_series = current_series
+
+    if identifier_type == 'FundCompany':
+        return fund_company
+    elif identifier_type == 'Series':
+        return target_series
+    elif identifier_type == 'Class':
+        return target_class
+    return None
+
+
 @lru_cache(maxsize=16)
 def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, FundClass]]:
     """
     Get a Fund related object by its identifier.
+
+    Tries the cached mutual fund tickers first (0 HTTP calls), then falls back
+    to SEC browse-edgar (2 HTTP calls).
 
     Args:
         identifier: A CIK, a series id (e.g. 'S000001234') or class id or Fund ticker (e.g. 'VFINX')
@@ -507,10 +625,10 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
     Returns:
         A FundCompany or FundSeries or FundClass
     """
-
+    # Determine identifier type
     if re.match(r'^[CS]\d+$', identifier):
         identifier_type = 'Series' if identifier.startswith('S') else 'Class'
-    elif re.match(r"^[A-Z]{4}X$", identifier):
+    elif is_fund_ticker(identifier):
         identifier_type = 'Class'
     elif re.match(r"^0\d{9}$", identifier):
         identifier_type = 'FundCompany'
@@ -518,7 +636,18 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
         log.warning("Invalid fund identifier %s", identifier)
         return None
 
-    # Step 1: Resolve identifier to company CIK
+    # Fast path: try cached mf_tickers data (0 HTTP calls)
+    resolved = _resolve_from_mf_tickers(identifier)
+    if resolved:
+        result = _build_hierarchy_from_mf_tickers(
+            cik=resolved['cik'],
+            identifier_type=identifier_type,
+            identifier=identifier,
+        )
+        if result is not None:
+            return result
+
+    # Slow path: fall back to SEC browse-edgar (2 HTTP calls)
     if identifier_type == 'FundCompany':
         company_cik = identifier
         company_name = None
@@ -529,7 +658,6 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
             return None
         company_cik, company_name = result
 
-    # Step 2: Fetch and parse the series listing page
     series_url = fund_series_direct_url.format(company_cik)
     try:
         series_html = download_text(series_url)
@@ -541,7 +669,6 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
     if company_name is None:
         company_name = parsed_name
 
-    # Step 3: Build the object hierarchy
     all_series = []
     fund_company = FundCompany(cik_or_identifier=company_cik, fund_name=company_name, all_series=all_series)
 
@@ -558,24 +685,29 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
             current_class.series = current_series
             current_series.fund_classes.append(current_class)
 
-            # Track the target class for class/ticker lookups
             if identifier_type == 'Class':
                 if identifier.startswith('C') and current_class.class_id == identifier:
                     target_class = current_class
-                elif not identifier.startswith('C') and current_class.ticker == identifier:
+                elif not identifier.startswith('C') and current_class.ticker and current_class.ticker.upper() == identifier.upper():
                     target_class = current_class
 
-        # Track the target series
         if identifier_type == 'Series' and current_series.series_id == identifier:
             target_series = current_series
 
-    # Step 4: Return the appropriate object
     if identifier_type == "FundCompany":
         return fund_company
     elif identifier_type == "Series":
         return target_series
     elif identifier_type == "Class":
         return target_class
+
+
+@lru_cache(maxsize=1)
+def _fund_ticker_set() -> frozenset:
+    """Cached set of all known mutual fund tickers for O(1) lookup."""
+    from edgar.reference.tickers import get_mutual_fund_tickers
+    mf_data = get_mutual_fund_tickers()
+    return frozenset(t.upper() for t in mf_data['ticker'].dropna())
 
 
 def is_fund_ticker(identifier: str) -> bool:
@@ -588,10 +720,12 @@ def is_fund_ticker(identifier: str) -> bool:
     Returns:
         True if it's a fund ticker, False otherwise
     """
-    # Use our own implementation
-    if identifier and isinstance(identifier, str):
-        return bool(re.match(r"^[A-Z]{4}X$", identifier))
-    return False
+    if not identifier or not isinstance(identifier, str):
+        return False
+    try:
+        return identifier.upper() in _fund_ticker_set()
+    except Exception:
+        return False
 
 
 class FundData(EntityData):
@@ -616,42 +750,48 @@ def resolve_fund_identifier(identifier):
     """
     Convert fund tickers or series IDs to CIK.
 
+    Tries the cached mutual fund tickers first (0 HTTP calls), then falls back
+    to direct SEC lookup.
+
     Args:
         identifier: Fund ticker, Series ID, or CIK
 
     Returns:
         CIK as integer or original identifier if conversion not possible
     """
+    # Short-circuit for integers or numeric strings (already a CIK)
+    if isinstance(identifier, int):
+        return identifier
     if isinstance(identifier, str):
-        # Handle Series ID (S000XXXXX)
+        # If it's purely numeric, it's already a CIK — skip resolution
+        stripped = identifier.lstrip('0')
+        if stripped.isdigit() or (not stripped and identifier):
+            return identifier
+
+        # Fast path: try cached mf_tickers for all identifier types
+        resolved = _resolve_from_mf_tickers(identifier)
+        if resolved:
+            try:
+                return int(resolved['cik'])
+            except (ValueError, TypeError):
+                pass
+
+        # Slow path: fall back to direct SEC lookup for Series ID / Class ID
         if identifier.startswith('S') and identifier[1:].isdigit():
             try:
-                # Try our direct implementation
                 fund_info = direct_get_fund_with_filings(identifier)
                 if fund_info and hasattr(fund_info, 'fund_cik'):
                     return int(fund_info.fund_cik)
             except Exception as e:
                 log.warning("Error resolving series ID %s: %s", identifier, e)
 
-        # Handle Class ID (C000XXXXX)
         if identifier.startswith('C') and identifier[1:].isdigit():
             try:
-                # Try our direct implementation
                 fund_info = direct_get_fund_with_filings(identifier)
                 if fund_info and hasattr(fund_info, 'fund_cik'):
                     return int(fund_info.fund_cik)
             except Exception as e:
                 log.warning("Error resolving class ID %s: %s", identifier, e)
-
-        # Handle fund ticker
-        if is_fund_ticker(identifier):
-            try:
-                # Use our direct implementation for tickers
-                fund_info = (identifier)
-                if fund_info and hasattr(fund_info, 'company_cik'):
-                    return int(fund_info.company_cik)
-            except Exception as e:
-                log.warning("Error resolving fund ticker %s: %s", identifier, e)
 
     return identifier
 

@@ -6,7 +6,6 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from decimal import Decimal
-from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
@@ -26,6 +25,9 @@ from edgar.funds import FundCompany, FundSeries
 from edgar.richtools import df_to_rich_table, repr_rich
 
 log = logging.getLogger(__name__)
+
+# Sentinel for "not yet computed" (distinguishes from None/empty DataFrame results)
+_SENTINEL = object()
 
 # Functions for export
 __all__ = [
@@ -468,33 +470,53 @@ class FundReport:
         self.fund_info: FundInfo = fund_info
         self.investments: List[InvestmentOrSecurity] = investments
         self.fund_company = FundCompany(cik_or_identifier=self.general_info.cik, fund_name=self.general_info.name)
+        self._filing = None
+        self._investment_data_cache = {}
+        self._derivatives_data_cache = _SENTINEL
+        self._investments_table_cache = _SENTINEL
+        self._derivatives_table_cache = _SENTINEL
 
     def __str__(self):
         return (f"{self.name} {self.general_info.rep_period_date} - {self.general_info.fiscal_year_end}"
                 )
+
+    @property
+    def filing(self):
+        """The source Filing object, if this report was created via from_filing()."""
+        return self._filing
 
     def get_fund_series(self) -> FundSeries:
         return FundSeries(series_id=self.general_info.series_id or "",
                           name=self.general_info.series_name or "",
                           fund_company=self.fund_company)
 
-    def get_ticker_for_series(self) -> Optional[str]:
-        """Get the ticker that corresponds to this report's series."""
+    def get_tickers_for_series(self) -> List[str]:
+        """All tickers for this report's series."""
         if not self.general_info.series_id:
-            return None
-
+            return []
         from edgar.reference.tickers import get_mutual_fund_tickers
         mf_data = get_mutual_fund_tickers()
         matches = mf_data[mf_data['seriesId'] == self.general_info.series_id]
+        return [t for t in matches['ticker'].tolist() if t]
 
-        if len(matches) == 1:
-            return matches.iloc[0]['ticker']
-        return None
+    def get_ticker_for_series(self) -> Optional[str]:
+        """Primary ticker for this report's series."""
+        tickers = self.get_tickers_for_series()
+        return tickers[0] if tickers else None
 
     def matches_ticker(self, ticker: str) -> bool:
         """Check if this report's series matches the given ticker."""
-        series_ticker = self.get_ticker_for_series()
-        return bool(series_ticker and series_ticker.upper() == ticker.upper())
+        return ticker.upper() in [t.upper() for t in self.get_tickers_for_series()]
+
+    @property
+    def cik(self) -> str:
+        """CIK of the fund company."""
+        return self.general_info.cik
+
+    @property
+    def series_id(self) -> Optional[str]:
+        """Series ID for this report."""
+        return self.general_info.series_id
 
     @property
     def reporting_period(self):
@@ -518,7 +540,6 @@ class FundReport:
         """Return only non-derivative investments"""
         return [inv for inv in self.investments if not inv.is_derivative]
 
-    @lru_cache(maxsize=2)
     def investment_data(self, include_derivatives=True, include_ticker_metadata=False) -> pd.DataFrame:
         """
         Enhanced to optionally include ticker resolution information
@@ -530,6 +551,9 @@ class FundReport:
         Returns:
             DataFrame with investment data, optionally including ticker resolution metadata
         """
+        cache_key = (include_derivatives, include_ticker_metadata)
+        if cache_key in self._investment_data_cache:
+            return self._investment_data_cache[cache_key]
         if len(self.investments) == 0:
             return pd.DataFrame(columns=['name', 'title', 'cusip', 'ticker', 'balance', 'units'])
 
@@ -595,6 +619,7 @@ class FundReport:
         investment_df = investment_df.drop(columns=['_sort_value'])
 
 
+        self._investment_data_cache[cache_key] = investment_df
         return investment_df
 
     def securities_data(self) -> pd.DataFrame:
@@ -749,15 +774,17 @@ class FundReport:
             return derivative.forward_derivative.counterparty_lei
         return None
 
-    @lru_cache(maxsize=2)
     def derivatives_data(self) -> pd.DataFrame:
         """
         :return: Only derivative positions as a pandas dataframe
         """
+        if self._derivatives_data_cache is not _SENTINEL:
+            return self._derivatives_data_cache
         derivatives = [inv for inv in self.investments if inv.is_derivative]
 
         if len(derivatives) == 0:
-            return pd.DataFrame()
+            self._derivatives_data_cache = pd.DataFrame()
+            return self._derivatives_data_cache
 
         deriv_data = []
         for d in derivatives:
@@ -777,7 +804,8 @@ class FundReport:
         deriv_df['abs_pnl'] = deriv_df['unrealized_pnl'].abs()
         deriv_df = deriv_df.sort_values('abs_pnl', ascending=False).drop('abs_pnl', axis=1)
 
-        return deriv_df.reset_index(drop=True)
+        self._derivatives_data_cache = deriv_df.reset_index(drop=True)
+        return self._derivatives_data_cache
 
     def swaps_data(self) -> pd.DataFrame:
         """Return detailed swap derivatives data with directional receive/pay fields"""
@@ -1178,8 +1206,9 @@ class FundReport:
         if not xml:
             return None
         fund_report_dict = FundReport.parse_fund_xml(xml)
-
-        return cls(**fund_report_dict)
+        report = cls(**fund_report_dict)
+        report._filing = filing
+        return report
 
     @classmethod
     def parse_fund_xml(cls, xml: Union[str, Any]) -> Dict[str, Any]:
@@ -1451,8 +1480,9 @@ class FundReport:
         return table
 
     @property
-    @lru_cache(maxsize=2)
     def investments_table(self):
+        if self._investments_table_cache is not _SENTINEL:
+            return self._investments_table_cache
         investments = self.investment_data(include_derivatives=False)
         if not investments.empty:
             investments = (investments
@@ -1464,11 +1494,14 @@ class FundReport:
                                    Pct=lambda df: df.pct_value.apply(moneyfmt, curr='', places=1),
                                    Category=lambda df: df.issuer_category + " " + df.asset_category)
                            ).filter(['Name', 'Title', 'Cusip', 'Ticker', 'Category', 'Value', 'Pct'])
-        return df_to_rich_table(investments, title="Non-Derivative Investments", title_style="bold deep_sky_blue1", max_rows=2000)
+        self._investments_table_cache = df_to_rich_table(investments, title="Non-Derivative Investments", title_style="bold deep_sky_blue1", max_rows=2000)
+        return self._investments_table_cache
 
     @property
-    @lru_cache(maxsize=2)
     def derivatives_table(self):
+        if self._derivatives_table_cache is not _SENTINEL:
+            return self._derivatives_table_cache
+
         def safe_moneyfmt(value, **kwargs):
             """Apply moneyfmt safely, handling NaN/NA values"""
             if pd.isna(value):
@@ -1489,7 +1522,8 @@ class FundReport:
                     'Term/Exp Date': lambda df: df.termination_date
                 }
             ).filter(['Title', 'Subtype', 'Reference', 'Counterparty', 'Notional', 'Unrealized P&L', '% NAV', 'Term/Exp Date'])
-        return df_to_rich_table(derivatives, title="Derivative Positions", title_style="bold deep_sky_blue1", max_rows=2000)
+        self._derivatives_table_cache = df_to_rich_table(derivatives, title="Derivative Positions", title_style="bold deep_sky_blue1", max_rows=2000)
+        return self._derivatives_table_cache
 
     def __rich__(self):
         title = f"{self.general_info.name} - {self.general_info.series_name} {self.general_info.rep_period_date}"

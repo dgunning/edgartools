@@ -847,6 +847,13 @@ class Filings:
         return cast(Dict[str, Any], self.to_pandas().head(max_rows).to_dict(orient="records"))
 
     def __getitem__(self, item):
+        if isinstance(item, slice):
+            start, stop, step = item.indices(len(self.data))
+            if step != 1:
+                return [self.get_filing_at(i) for i in range(start, stop, step)]
+            length = max(0, stop - start)
+            sliced_data = self.data.slice(start, length)
+            return Filings(sliced_data)
         return self.get_filing_at(item)
 
     def __len__(self):

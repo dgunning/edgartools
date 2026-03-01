@@ -195,6 +195,13 @@ class EntityFilings(Filings):
         return Docs(self)
 
     def __getitem__(self, item):
+        if isinstance(item, slice):
+            start, stop, step = item.indices(len(self.data))
+            if step != 1:
+                return [self.get_filing_at(i) for i in range(start, stop, step)]
+            length = max(0, stop - start)
+            sliced_data = self.data.slice(start, length)
+            return EntityFilings(data=sliced_data, cik=self.cik, company_name=self.company_name)
         return self.get_filing_at(item)
 
     @property

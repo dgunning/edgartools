@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
-from functools import lru_cache
 from typing import Dict, List, Optional
 
 import pandas as pd
@@ -95,6 +94,12 @@ class FundShareholderReport:
         self._net_assets = net_assets
         self._portfolio_turnover = portfolio_turnover
         self.share_classes = share_classes or []
+        self._filing = None
+        self._cik = None
+        self._series_id = None
+        self._performance_data = None
+        self._expense_data = None
+        self._holdings_data = None
 
     def __str__(self):
         n_classes = len(self.share_classes)
@@ -103,6 +108,21 @@ class FundShareholderReport:
     # -------------------------------------------------------------------
     # Properties
     # -------------------------------------------------------------------
+
+    @property
+    def filing(self):
+        """The source Filing object, if this report was created via from_filing()."""
+        return self._filing
+
+    @property
+    def cik(self) -> Optional[str]:
+        """CIK of the fund company, extracted from the source filing."""
+        return self._cik
+
+    @property
+    def series_id(self) -> Optional[str]:
+        """Series ID, extracted from the source filing header."""
+        return self._series_id
 
     @property
     def fund_name(self) -> str:
@@ -132,9 +152,10 @@ class FundShareholderReport:
     # DataFrame methods
     # -------------------------------------------------------------------
 
-    @lru_cache(maxsize=1)
     def performance_data(self) -> pd.DataFrame:
         """Annual returns for all share classes."""
+        if self._performance_data is not None:
+            return self._performance_data
         rows: list[dict] = []
         for sc in self.share_classes:
             for ar in sc.annual_returns:
@@ -145,11 +166,13 @@ class FundShareholderReport:
                     "return_pct": float(ar.return_pct) if ar.return_pct is not None else None,
                     "inception_date": ar.inception_date,
                 })
-        return pd.DataFrame(rows)
+        self._performance_data = pd.DataFrame(rows)
+        return self._performance_data
 
-    @lru_cache(maxsize=1)
     def expense_data(self) -> pd.DataFrame:
         """Expense ratios and fees for all share classes."""
+        if self._expense_data is not None:
+            return self._expense_data
         rows: list[dict] = []
         for sc in self.share_classes:
             rows.append({
@@ -159,11 +182,13 @@ class FundShareholderReport:
                 "expenses_paid": float(sc.expenses_paid_amt) if sc.expenses_paid_amt is not None else None,
                 "advisory_fees_paid": float(sc.advisory_fees_paid) if sc.advisory_fees_paid is not None else None,
             })
-        return pd.DataFrame(rows)
+        self._expense_data = pd.DataFrame(rows)
+        return self._expense_data
 
-    @lru_cache(maxsize=1)
     def holdings_data(self) -> pd.DataFrame:
         """Top holdings for all share classes."""
+        if self._holdings_data is not None:
+            return self._holdings_data
         rows: list[dict] = []
         for sc in self.share_classes:
             for h in sc.holdings:
@@ -173,7 +198,8 @@ class FundShareholderReport:
                     "pct_of_nav": float(h.pct_of_nav) if h.pct_of_nav is not None else None,
                     "pct_of_total_inv": float(h.pct_of_total_inv) if h.pct_of_total_inv is not None else None,
                 })
-        return pd.DataFrame(rows)
+        self._holdings_data = pd.DataFrame(rows)
+        return self._holdings_data
 
     # -------------------------------------------------------------------
     # Rich display
@@ -263,7 +289,17 @@ class FundShareholderReport:
         if not xbrl:
             return None
         report_type = "Semi-Annual" if "CSRS" in (filing.form or "") else "Annual"
-        return cls._parse_xbrl(xbrl, report_type)
+        report = cls._parse_xbrl(xbrl, report_type)
+        if report is not None:
+            report._filing = filing
+            report._cik = str(filing.cik) if hasattr(filing, 'cik') else None
+            # Extract series_id from filing header if available
+            header = getattr(filing, 'header', None)
+            if header:
+                series_id = getattr(header, 'series_id', None)
+                if series_id:
+                    report._series_id = series_id
+        return report
 
     @classmethod
     def _parse_xbrl(cls, xbrl, report_type: str = "Annual") -> 'FundShareholderReport':
