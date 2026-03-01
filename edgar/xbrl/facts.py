@@ -968,6 +968,7 @@ class FactsView:
             # Create a dict with only necessary fields instead of full model_dump
             fact_dict = {
                 'fact_key': fact_key,
+                'fact_id': fact.fact_id,
                 'concept': fact.element_id,
                 'context_ref': fact.context_ref,
                 'value': fact.value,
