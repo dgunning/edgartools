@@ -59,8 +59,8 @@ def test_skill_yaml_ids_are_unique():
 
 @pytest.mark.fast
 def test_all_skill_domains_present():
-    """EdgarTools ships skill domains: content, core, financials, holdings, ownership, reports, xbrl."""
-    expected_domains = {"content", "core", "financials", "holdings", "ownership", "reports", "xbrl"}
+    """EdgarTools ships skill domains: content, core, financials, funds, holdings, ownership, reports, xbrl."""
+    expected_domains = {"content", "core", "financials", "funds", "holdings", "ownership", "reports", "xbrl"}
     actual_domains = {p.parent.name for p in SKILL_YAML_FILES}
     assert expected_domains == actual_domains, f"Missing domains: {expected_domains - actual_domains}"
 
