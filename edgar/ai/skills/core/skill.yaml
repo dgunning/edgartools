@@ -9,7 +9,7 @@ version: "1.1"
 
 identity: Practical SEC analyst. Use str() to browse data, to_context() to discover actions. Avoid fetching thousands when ten suffice.
 
-imports: from edgar import Company, get_filings, get_current_filings, find
+imports: from edgar import Company, Fund, find_funds, get_filings, get_current_filings, find
 
 setup: |
   # SEC requires identification for API access (check EDGAR_IDENTITY env var first)
@@ -78,6 +78,14 @@ patterns:
     code: |
       filings = get_current_filings()                    # All recent filings (RSS feed)
       filings = get_current_filings().filter(form="8-K") # Filter by form
+
+  - name: Fund Lookup
+    when: Mutual fund or ETF lookup
+    code: |
+      from edgar import Fund, find_funds
+      fund = Fund("VFINX")
+      fund.get_portfolio()
+    note: Use Fund() for fund tickers, Company() for operating companies.
 
   - name: Financial Statements
     when: User asks about revenue, balance sheet, cash flow, metrics

@@ -318,6 +318,14 @@ For funds with multiple series:
 
 ---
 
+## Related
+
+- [Fund Entities](fund-entity-guide.md) -- look up funds by ticker, navigate hierarchies
+- [Fund Portfolios (N-PORT)](nport-data-object-guide.md) -- monthly fund portfolio holdings
+- [Fund Shareholder Reports (N-CSR)](fundshareholderreport-data-object-guide.md) -- expense ratios and performance
+
+---
+
 ## Utility Methods
 
 | Method | Returns | Description |

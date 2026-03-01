@@ -43,7 +43,7 @@ from edgar.files import detect_page_breaks, mark_page_breaks
 from edgar.files.html import Document
 from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
 from edgar.financials import Financials, MultiFinancials
-from edgar.funds import FundClass, FundCompany, FundSeries, find_fund, find_funds
+from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, find_funds
 from edgar.funds.ncen import NCEN_FORMS, FundCensus
 from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
 from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund

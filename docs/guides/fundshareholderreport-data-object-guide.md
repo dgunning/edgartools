@@ -215,6 +215,9 @@ for holding in sc.holdings:
 | `portfolio_turnover` | Turnover rate as decimal fraction (or `None`) | `Decimal("0.7567")` |
 | `num_share_classes` | Number of share classes parsed | `3` |
 | `share_classes` | `List[ShareClassInfo]` for all share classes | Full per-class data |
+| `filing` | Source Filing object | `Filing` or `None` |
+| `cik` | CIK of the filer | `"0000102909"` |
+| `series_id` | SEC series ID | `"S000002277"` or `None` |
 
 ---
 
@@ -252,6 +255,7 @@ for holding in sc.holdings:
 
 ## Related
 
+- [Fund Entities](fund-entity-guide.md) -- look up funds by ticker, navigate hierarchies
 - [Working with Filings](working-with-filing.md) -- general filing access patterns
 - [Fund Portfolios (N-PORT)](nport-data-object-guide.md) -- monthly fund portfolio holdings
 - [Money Market Funds (N-MFP)](moneymarketfund-data-object-guide.md) -- money market fund holdings and yields

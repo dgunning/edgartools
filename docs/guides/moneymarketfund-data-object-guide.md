@@ -161,6 +161,15 @@ print(mmf.report_date)           # Reporting period end date
 print(f"${mmf.net_assets:,.0f}") # Net assets
 ```
 
+Or use the `Fund` class for a simpler path:
+
+```python
+from edgar import Fund
+
+fund = Fund("VMFXX")
+mmf = fund.get_latest_report(form="N-MFP3")
+```
+
 The `name` property returns the full series name (e.g., "Vanguard Prime Money Market Fund"), and `report_date` shows the period end date.
 
 ---
@@ -230,6 +239,9 @@ SEC rules require money market funds to maintain minimum liquidity levels. Daily
 | `num_share_classes` | Number of share classes | `4` |
 | `average_maturity_wam` | WAM in days | `45` |
 | `average_maturity_wal` | WAL in days | `52` |
+| `filing` | Source Filing object | `Filing` or `None` |
+| `cik` | CIK of the filer | `"0000102909"` |
+| `series_id` | SEC series ID | `"S000004104"` or `None` |
 
 ---
 
@@ -267,5 +279,6 @@ SEC rules require money market funds to maintain minimum liquidity levels. Daily
 
 ## Related
 
+- [Fund Entities](fund-entity-guide.md) -- look up funds by ticker, navigate hierarchies
 - [Working with Filings](working-with-filing.md) -- general filing access patterns
 - [Fund Portfolios (N-PORT)](nport-data-object-guide.md) -- mutual fund and ETF portfolio holdings

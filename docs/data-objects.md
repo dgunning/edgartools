@@ -14,6 +14,20 @@ Browse the filing types below to find what you need.
 
 ---
 
+## Fund Entities
+
+Look up mutual funds and ETFs by ticker, series ID, or CIK. Navigate fund hierarchies and access portfolio reports.
+
+```python
+from edgar import Fund, find_funds
+fund = Fund("VFINX")                          # Ticker, series ID, or CIK
+fund.get_portfolio()                           # Latest portfolio holdings
+```
+
+[:octicons-arrow-right-24: Fund Entities guide](guides/fund-entity-guide.md)
+
+---
+
 ## Annual & Quarterly Reports (10-K / 10-Q)
 
 Read a company's financials, risk factors, and business description.
@@ -154,6 +168,45 @@ report.performance_data()                  # annual returns per share class
 ```
 
 [:octicons-arrow-right-24: Fund Shareholder Reports guide](guides/fundshareholderreport-data-object-guide.md)
+
+---
+
+## Fund Portfolio Holdings (NPORT-P)
+
+Parse monthly mutual fund and ETF portfolio holdings -- every stock, bond, and derivative position.
+
+```python
+report = filing.obj()                          # FundReport
+report.investment_data()                       # All portfolio positions as DataFrame
+```
+
+[:octicons-arrow-right-24: Fund Portfolio Holdings guide](guides/nport-data-object-guide.md)
+
+---
+
+## Money Market Funds (N-MFP)
+
+Parse money market fund filings with portfolio holdings, yields, NAV, and liquidity metrics.
+
+```python
+mmf = filing.obj()                             # MoneyMarketFund
+mmf.portfolio_data()                           # Securities sorted by market value
+```
+
+[:octicons-arrow-right-24: Money Market Funds guide](guides/moneymarketfund-data-object-guide.md)
+
+---
+
+## Fund Census (N-CEN)
+
+Parse annual fund census filings with series data, service providers, and ETF details.
+
+```python
+census = filing.obj()                          # FundCensus
+census.series_data()                           # Fund series summary
+```
+
+[:octicons-arrow-right-24: Fund Census guide](guides/fundcensus-data-object-guide.md)
 
 ---
 

@@ -295,6 +295,7 @@ for sl in series.securities_lending:
 | `is_etf_company` | Has any ETF series | `True` or `False` |
 | `registrant` | RegistrantInfo object | Full registrant details |
 | `series` | List of FundSeriesInfo | All series with full details |
+| `filing` | Source Filing object | `Filing` or `None` |
 
 ---
 
@@ -336,6 +337,7 @@ for sl in series.securities_lending:
 
 ## Related
 
+- [Fund Entities](fund-entity-guide.md) -- look up funds by ticker, navigate hierarchies
 - [Working with Filings](working-with-filing.md) -- general filing access patterns
 - [Fund Portfolios (N-PORT)](nport-data-object-guide.md) -- monthly fund portfolio holdings
 - [Money Market Funds (N-MFP)](moneymarketfund-data-object-guide.md) -- money market fund holdings and yields

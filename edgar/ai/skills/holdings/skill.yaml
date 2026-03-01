@@ -35,6 +35,14 @@ patterns:
       top5 = holdings.nlargest(5, 'Value')          # Top holdings by value
       apple = holdings[holdings['Ticker'] == 'AAPL'] # Filter by ticker
 
+  - name: Fund Holdings (NPORT)
+    when: Mutual fund or ETF portfolio (not institutional 13F)
+    code: |
+      from edgar import Fund
+      fund = Fund("VFINX")
+      df = fund.get_portfolio()
+    note: 13F = institutional holdings. NPORT = fund portfolios. Use Fund class for funds.
+
 avoid:
   - pattern: "for f in get_filings(form='13F-HR'): f.obj().holdings"
     when: Searching all 13Fs for a stock

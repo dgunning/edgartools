@@ -147,6 +147,16 @@ print(report.general_info.series_name)  # Specific fund/series
 print(report.reporting_period)          # Report date
 ```
 
+Or use the `Fund` class for a simpler path:
+
+```python
+from edgar import Fund
+
+fund = Fund("VFINX")
+report = fund.get_latest_report()       # Latest NPORT-P report
+df = fund.get_portfolio()               # Portfolio as DataFrame
+```
+
 ---
 
 ## Common Analysis Patterns
@@ -195,6 +205,9 @@ if not deriv.empty:
 | `name` | Company - Series | `"VANGUARD CHESTER FUNDS - Vanguard Target..."` |
 | `has_investments` | Has any positions? | `True` |
 | `header.submission_type` | Form type filed | `"NPORT-P"` |
+| `filing` | Source Filing object | `Filing` or `None` |
+| `cik` | CIK of the filer | `"0000102909"` |
+| `series_id` | SEC series ID | `"S000004104"` or `None` |
 
 ---
 
@@ -214,6 +227,8 @@ if not deriv.empty:
 | `report.non_derivatives` | `list` | Raw non-derivative investment objects |
 | `report.get_fund_series()` | `FundSeries` | Fund series object |
 | `report.get_ticker_for_series()` | `str` | Ticker for this series |
+| `report.get_tickers_for_series()` | `list[str]` | All tickers for this series |
+| `report.matches_ticker(ticker)` | `bool` | Whether report matches a ticker |
 
 ---
 
@@ -235,4 +250,5 @@ if not deriv.empty:
 
 ## Related
 
+- [Fund Entities](fund-entity-guide.md) -- look up funds by ticker, navigate hierarchies
 - [Working with Filings](working-with-filing.md) -- general filing access patterns
