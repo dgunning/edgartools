@@ -267,16 +267,19 @@ EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q
 
 ## Comparison with Alternatives
 
-| Feature | EdgarTools | sec-api (paid) | Manual |
-|---------|------------|----------------|--------|
-| **Cost** | Free | $150+/mo | Free |
-| **Filing types parsed** | 20+ typed objects | ~5 | DIY |
-| **XBRL Support** | <img src="docs/images/icons/compare-check.svg" width="20"> Full | <img src="docs/images/icons/compare-partial.svg" width="20"> Partial | <img src="docs/images/icons/compare-cross.svg" width="20"> None |
-| **Financial Statements** | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed + standardized | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed | DIY |
-| **Fund Data (13F, N-PORT, N-MFP)** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **Insider Trades (Form 4)** | <img src="docs/images/icons/compare-check.svg" width="20"> Structured | <img src="docs/images/icons/compare-check.svg" width="20"> | DIY |
-| **AI/MCP Integration** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **Open Source** | <img src="docs/images/icons/compare-check.svg" width="20"> MIT | <img src="docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
+EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is a **hosted API service** that returns JSON. Both parse SEC filings — the difference is how you work with the data.
+
+| | EdgarTools | sec-api | Raw EDGAR |
+|---|------------|---------|-----------|
+| **What it is** | Python library | REST API service | DIY |
+| **Cost** | Free (MIT) | $49+/mo | Free |
+| **Data format** | Typed Python objects | JSON | Raw XML/HTML |
+| **Parsed filing types** | 24 (10-K, 8-K, 13F, N-PORT, proxy, etc.) | 15+ structured APIs | — |
+| **Financials** | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed + standardized | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed (XBRL-to-JSON) | <img src="docs/images/icons/compare-cross.svg" width="20"> |
+| **Full-text search** | <img src="docs/images/icons/compare-check.svg" width="20"> via EFTS | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
+| **AI/MCP integration** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
+| **Language** | Python | Any | Any |
+| **Open source** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
