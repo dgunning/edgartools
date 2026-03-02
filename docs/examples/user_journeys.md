@@ -12,7 +12,7 @@ from edgar import find
 
 # Get Microsoft's financial data for the last 3 years
 company = find("MSFT")
-financials = company.financials()
+financials = company.get_financials()
 
 # Compare key metrics across years
 revenue = financials.extract("Revenues")

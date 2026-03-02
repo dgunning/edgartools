@@ -43,7 +43,9 @@ class TestIssue571EquityNaNValues:
         # Get value columns (date columns)
         meta_cols = ['concept', 'label', 'level', 'abstract', 'dimension',
                      'dimension_label', 'balance', 'weight', 'preferred_sign',
-                     'parent_concept', 'parent_abstract_concept']
+                     'parent_concept', 'parent_abstract_concept', 'is_breakdown',
+                     'dimension_axis', 'dimension_member', 'dimension_member_label',
+                     'unit', 'point_in_time', 'standard_concept']
         value_cols = [c for c in df.columns if c not in meta_cols]
 
         assert len(value_cols) > 0, "Should have at least one value column"

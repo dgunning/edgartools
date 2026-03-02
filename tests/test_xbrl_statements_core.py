@@ -158,8 +158,8 @@ def test_statement_rendering(balance_sheets):
         assert len(rendered.periods) > 0
         
         # Check rendering content
-        # Find row containing "Assets" or similar
-        asset_row = next((row for row in rendered.rows if "Asset" in row.label), None)
+        # Find row containing "Assets" or similar (case-insensitive)
+        asset_row = next((row for row in rendered.rows if "asset" in row.label.lower()), None)
         assert asset_row is not None, f"{ticker} rendered balance sheet missing asset row"
         
         # Check row structure

@@ -8,6 +8,12 @@ filing.attachments
 
 ![attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/attachments.png)
 
+### Auto-Parsed Exhibits
+
+Some exhibit types are automatically parsed when accessed through a data object:
+
+- **EX-21** (Subsidiaries): `tenk.subsidiaries` returns a `SubsidiaryList` with name, jurisdiction, and ownership percentage for each subsidiary.
+
 ### Get an attachment by index
 You can get an attachment by index using the `[]` operator and using the `Seq` number of the attachment.
 The primary filing document is always at index **1**, and is usually HTML or XML.

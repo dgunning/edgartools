@@ -9,10 +9,12 @@ This module provides the main classes used to interact with investment funds:
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+import pandas as pd
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
+from rich.text import Text
 
 from edgar.entity.core import Entity
 from edgar.richtools import repr_rich
@@ -23,7 +25,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-__all__ = ['Fund', 'FundCompany', 'FundClass', 'FundSeries', 'get_fund_company', 'get_fund_class', 'get_fund_series', 'find_fund']
+__all__ = ['Fund', 'FundCompany', 'FundClass', 'FundSeries', 'get_fund_company', 'get_fund_class', 'get_fund_series', 'find_fund', 'find_funds']
 
 
 class FundCompany(Entity):
@@ -133,8 +135,8 @@ class FundClass:
 
         table.add_row(
                 self.name,
-                self.class_id, 
-                self.series.series_id or "Unknown",
+                self.class_id,
+                self.series.series_id if self.series else "Unknown",
                 self.ticker or ""
         )
 
@@ -314,6 +316,22 @@ def is_fund_class_ticker(identifier: str) -> bool:
     return is_fund_ticker(identifier)
 
 
+def find_funds(name: str, search_type: str = 'series') -> list:
+    """Search for funds by name fragment.
+
+    Uses FundReferenceData to search across fund companies, series, or classes.
+
+    Args:
+        name: Case-insensitive name fragment to search for
+        search_type: 'company', 'series', or 'class'
+
+    Returns:
+        List of matching records
+    """
+    from edgar.funds.reference import get_fund_reference_data
+    return get_fund_reference_data().find_by_name(name, search_type=search_type)
+
+
 class Fund:
     """
     Unified wrapper for fund entities that provides a consistent interface
@@ -423,30 +441,41 @@ class Fund:
         This delegates to the appropriate entity's get_filings method.
 
         Args:
-            series_only: If True and we have target series context, filter to only relevant series
+            series_only: If True and we have target series context, use EFTS
+                         full-text search to find filings mentioning this series ID.
+                         Note: EFTS returns at most 100 results per request.
             **kwargs: Filtering parameters passed to get_filings
 
         Returns:
             Filings object with filtered filings
         """
-        # Get base filings
+        # Series-aware path via EFTS
+        if series_only and self._target_series_id and not self._target_series_id.startswith("ETF_"):
+            try:
+                from edgar.search.efts import search_filings as efts_search
+                forms_filter = [kwargs['form']] if kwargs.get('form') else None
+                results = efts_search(
+                    query=f'"{self._target_series_id}"',
+                    forms=forms_filter,
+                    limit=100,
+                )
+                if results and hasattr(results, 'filings') and results.filings is not None:
+                    return results.filings
+            except Exception as e:
+                log.debug("EFTS series search failed for %s: %s", self._target_series_id, e)
+
+        # Default path: delegate to entity
         filings = None
         if hasattr(self._entity, 'get_filings'):
-            filings = self._entity.get_filings(series_only=series_only, **kwargs)
+            filings = self._entity.get_filings(**kwargs)
         elif self._series and hasattr(self._series, 'get_filings'):
-            filings = self._series.get_filings(series_only=series_only, **kwargs)
+            filings = self._series.get_filings(**kwargs)
         elif self._company and hasattr(self._company, 'get_filings'):
-            filings = self._company.get_filings(series_only=series_only, **kwargs)
+            filings = self._company.get_filings(**kwargs)
 
         if not filings:
             from edgar._filings import Filings
             return Filings([])
-
-        # Apply series filtering if requested and we have target series context
-        if series_only and self._target_series_id and kwargs.get('form') in ['NPORT-P', 'NPORT-EX', 'N-PORT', 'N-PORT/A']:
-            # For now, return the original filings as we'd need to parse each filing
-            # to determine series match. This could be enhanced in the future.
-            pass
 
         return filings
 
@@ -532,6 +561,28 @@ class Fund:
             'suggestion': "Verify ticker spelling or try with CIK/series ID directly"
         }
 
+    def get_latest_report(self, form: str = 'NPORT-P') -> Optional[Any]:
+        """Get the latest fund report of the specified type.
+
+        Args:
+            form: SEC form type (default 'NPORT-P'). Common values:
+                  'NPORT-P', 'N-MFP3', 'N-CEN', 'N-CSR', 'N-CSRS'
+        """
+        filings = self.get_filings(form=form)
+        if filings and len(filings) > 0:
+            return filings[0].obj()
+        return None
+
+    def get_portfolio(self) -> Optional[pd.DataFrame]:
+        """Latest portfolio holdings as a DataFrame.
+
+        Chains: latest NPORT-P -> FundReport -> investment_data().
+        """
+        report = self.get_latest_report(form='NPORT-P')
+        if report and hasattr(report, 'investment_data'):
+            return report.investment_data()
+        return None
+
     def list_series(self) -> List[FundSeries]:
         """
         List all fund series associated with this fund.
@@ -574,10 +625,52 @@ class Fund:
         return str(self._entity)
 
     def __repr__(self) -> str:
-        return repr(self._entity)
+        return repr_rich(self.__rich__())
 
     def __rich__(self):
-        """Creates a rich representation of the fund"""
-        if hasattr(self._entity, '__rich__'):
-            return self._entity.__rich__()
-        return str(self)
+        """Creates a rich representation of the fund."""
+        # Summary info table
+        info_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 2))
+        info_table.add_column("Field", style="bold")
+        info_table.add_column("Value")
+
+        info_table.add_row("Identifier", self._original_identifier)
+
+        if self._company:
+            info_table.add_row("Company CIK", str(self._company.cik))
+            if self._company.name:
+                info_table.add_row("Company", self._company.name)
+
+        if self._series:
+            info_table.add_row("Series ID", self._series.series_id)
+            if self._series.name and self._series.name != self._series.series_id:
+                info_table.add_row("Series", self._series.name)
+
+        if self._class:
+            info_table.add_row("Class ID", self._class.class_id)
+            if self._class.ticker:
+                info_table.add_row("Ticker", self._class.ticker)
+
+        renderables = [info_table]
+
+        # Share classes table
+        classes = self.list_classes()
+        if classes:
+            classes_table = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
+            classes_table.add_column("Class ID")
+            classes_table.add_column("Name")
+            classes_table.add_column("Ticker", style="bold yellow")
+            for c in classes:
+                classes_table.add_row(
+                    c.class_id,
+                    c.name if c.name != c.class_id else "",
+                    c.ticker or "-",
+                )
+            renderables.append(classes_table)
+
+        title = self.name or self._original_identifier
+        return Panel(
+            Group(*renderables),
+            title=title,
+            subtitle="Fund",
+        )

@@ -3,6 +3,7 @@ Tests for Cross Reference Index parser.
 """
 
 import pytest
+from edgar import Filing
 from edgar.documents.cross_reference_index import (
     CrossReferenceIndex,
     PageRange,
@@ -98,10 +99,12 @@ class TestCrossReferenceIndex:
     def ge_full_html(self):
         """Get full GE 10-K HTML (network test)."""
         pytest.importorskip("edgar")
-        from edgar import Company
+        from edgar import Filing
 
-        company = Company('GE')
-        filing = company.get_filings(form='10-K').latest()
+        # Use specific filing to ensure consistent page numbers
+        # GE 10-K filed 2026-01-29 with page ranges: Item 1A at 24-31
+        filing = Filing(form='10-K', filing_date='2026-01-29', company='GENERAL ELECTRIC CO',
+                       cik=40545, accession_no='0000040545-26-000008')
         return filing.html()
 
     def test_has_index_with_sample(self, ge_sample_html):
@@ -140,8 +143,8 @@ class TestCrossReferenceIndex:
             item1a = entries['1A']
             assert item1a.item_title == 'Risk Factors'
             assert len(item1a.pages) > 0
-            # GE has "26-33" for Risk Factors
-            assert any(p.start == 26 and p.end == 33 for p in item1a.pages)
+            # GE has "24-31" for Risk Factors in latest 10-K
+            assert any(p.start == 24 and p.end == 31 for p in item1a.pages)
 
     @pytest.mark.network
     def test_get_item(self, ge_full_html):
@@ -164,7 +167,8 @@ class TestCrossReferenceIndex:
 
         ranges = index.get_page_ranges('1A')
         assert len(ranges) > 0
-        assert any(p.start == 26 and p.end == 33 for p in ranges)
+        # GE has "24-31" for Risk Factors in latest 10-K
+        assert any(p.start == 24 and p.end == 31 for p in ranges)
 
         # Non-existent item
         ranges_empty = index.get_page_ranges('99')
@@ -216,10 +220,10 @@ class TestConvenienceFunctions:
     @pytest.mark.network
     def test_detect_cross_reference_index(self):
         """Test detect_cross_reference_index function."""
-        from edgar import Company
+        from edgar import find
 
-        company = Company('GE')
-        filing = company.get_filings(form='10-K').latest()
+        # Use specific filing to ensure consistent structure
+        filing = Filing(form='10-K', filing_date='2026-01-29', company='GENERAL ELECTRIC CO', cik=40545, accession_no='0000040545-26-000008')
         html = filing.html()
 
         assert detect_cross_reference_index(html) is True
@@ -227,10 +231,11 @@ class TestConvenienceFunctions:
     @pytest.mark.network
     def test_parse_cross_reference_index(self):
         """Test parse_cross_reference_index function."""
-        from edgar import Company
+        from edgar import Filing
 
-        company = Company('GE')
-        filing = company.get_filings(form='10-K').latest()
+        # Use specific filing to ensure consistent structure
+        filing = Filing(form='10-K', filing_date='2026-01-29', company='GENERAL ELECTRIC CO',
+                       cik=40545, accession_no='0000040545-26-000008')
         html = filing.html()
 
         entries = parse_cross_reference_index(html)

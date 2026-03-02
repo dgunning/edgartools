@@ -75,7 +75,7 @@ Structure your findings as:
 
 ### Tests
 - `tests/test_main_module.py` - Unit tests
-- `tests/batch/test_batch_feature.py` - Batch operation tests
+- `scripts/batch/batch_filings.py` - Batch operation scripts
 - `tests/fixtures/sample_data.xml` - Test fixtures
 
 ### Documentation

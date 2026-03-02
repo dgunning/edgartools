@@ -8,7 +8,7 @@ optimized for both traditional analysis and AI consumption.
 from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Sequence, Union
 
 
 class DataQuality(Enum):
@@ -260,3 +260,172 @@ class FactCollection:
             }
             for fact in self.facts
         }
+
+
+# ---------------------------------------------------------------------------
+# Discovery result classes for EntityFacts.search_concepts / available_periods
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ConceptMatch:
+    """A single concept found by search_concepts()."""
+    concept: str
+    label: str
+    fact_count: int
+    fiscal_years: List[int]
+    periods: List[str]
+    units: List[str]
+
+
+class ConceptSearchResults:
+    """Results of EntityFacts.search_concepts() with Rich display and DataFrame export."""
+
+    def __init__(self, matches: Sequence[ConceptMatch], pattern: str):
+        self._matches = list(matches)
+        self._pattern = pattern
+
+    # -- container protocol --------------------------------------------------
+    def __len__(self) -> int:
+        return len(self._matches)
+
+    def __iter__(self):
+        return iter(self._matches)
+
+    def __getitem__(self, index):
+        return self._matches[index]
+
+    def __bool__(self) -> bool:
+        return len(self._matches) > 0
+
+    # -- display -------------------------------------------------------------
+    def __rich__(self):
+        from rich.table import Table
+        from rich.text import Text
+        from rich.box import SIMPLE
+
+        if not self._matches:
+            return Text(f"No concepts matching '{self._pattern}'", style="dim")
+
+        table = Table(
+            title=f"Concepts matching '{self._pattern}'",
+            box=SIMPLE,
+            show_header=True,
+            padding=(0, 1),
+        )
+        table.add_column("Concept", style="bold")
+        table.add_column("Label")
+        table.add_column("Facts", justify="right")
+        table.add_column("Years")
+        table.add_column("Periods")
+
+        for m in self._matches[:30]:
+            years = sorted(m.fiscal_years)
+            if years:
+                year_str = f"{years[0]}-{years[-1]}" if len(years) > 1 else str(years[0])
+            else:
+                year_str = ""
+            table.add_row(
+                m.concept,
+                m.label,
+                str(m.fact_count),
+                year_str,
+                ", ".join(sorted(m.periods)),
+            )
+
+        if len(self._matches) > 30:
+            table.caption = f"Showing 30 of {len(self._matches)} matches"
+
+        return table
+
+    def __repr__(self) -> str:
+        from edgar.richtools import repr_rich
+        return repr_rich(self.__rich__())
+
+    # -- export --------------------------------------------------------------
+    def to_dataframe(self):
+        import pandas as pd
+        records = [
+            {
+                "concept": m.concept,
+                "label": m.label,
+                "fact_count": m.fact_count,
+                "fiscal_years": m.fiscal_years,
+                "periods": m.periods,
+                "units": m.units,
+            }
+            for m in self._matches
+        ]
+        return pd.DataFrame(records)
+
+
+@dataclass
+class PeriodEntry:
+    """A single period entry from available_periods()."""
+    period_key: str
+    fiscal_year: int
+    fiscal_period: str
+    fact_count: int
+    concept_count: int
+
+
+class PeriodSummary:
+    """Results of EntityFacts.available_periods() with Rich display and DataFrame export."""
+
+    def __init__(self, entries: Sequence[PeriodEntry]):
+        self._entries = list(entries)
+
+    # -- container protocol --------------------------------------------------
+    def __len__(self) -> int:
+        return len(self._entries)
+
+    def __iter__(self):
+        return iter(self._entries)
+
+    def __getitem__(self, index):
+        return self._entries[index]
+
+    def __bool__(self) -> bool:
+        return len(self._entries) > 0
+
+    # -- display -------------------------------------------------------------
+    def __rich__(self):
+        from rich.table import Table
+        from rich.text import Text
+        from rich.box import SIMPLE
+
+        if not self._entries:
+            return Text("No periods available", style="dim")
+
+        table = Table(
+            title="Available Periods",
+            box=SIMPLE,
+            show_header=True,
+            padding=(0, 1),
+        )
+        table.add_column("Period", style="bold")
+        table.add_column("Facts", justify="right")
+        table.add_column("Concepts", justify="right")
+
+        for e in self._entries:
+            table.add_row(e.period_key, str(e.fact_count), str(e.concept_count))
+
+        return table
+
+    def __repr__(self) -> str:
+        from edgar.richtools import repr_rich
+        return repr_rich(self.__rich__())
+
+    # -- export --------------------------------------------------------------
+    def to_dataframe(self):
+        import pandas as pd
+        records = [
+            {
+                "period": e.period_key,
+                "fiscal_year": e.fiscal_year,
+                "fiscal_period": e.fiscal_period,
+                "fact_count": e.fact_count,
+                "concept_count": e.concept_count,
+            }
+            for e in self._entries
+        ]
+        return pd.DataFrame(records)

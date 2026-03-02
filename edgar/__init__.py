@@ -26,6 +26,7 @@ from edgar.entity import (
     CompanyData,
     CompanyFiling,
     CompanyFilings,
+    CompanyNotFoundError,
     CompanySearchResults,
     Entity,
     EntityData,
@@ -42,8 +43,12 @@ from edgar.files import detect_page_breaks, mark_page_breaks
 from edgar.files.html import Document
 from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
 from edgar.financials import Financials, MultiFinancials
-from edgar.funds import FundClass, FundCompany, FundSeries, find_fund
+from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, find_funds
+from edgar.funds.ncen import NCEN_FORMS, FundCensus
+from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
+from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
 from edgar.funds.reports import NPORT_FORMS, FundReport
+from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
 
 # HTTP configuration functions for runtime SSL/proxy configuration
 from edgar.httpclient import configure_http, get_http_config
@@ -61,8 +66,7 @@ from edgar.paths import (
     set_test_directory,
 )
 from edgar.proxy import PROXY_FORMS, ProxyStatement
-from edgar.storage import download_edgar_data, download_filings, is_using_local_storage, set_local_storage_path, use_local_storage
-from edgar.storage_management import (
+from edgar.storage import (
     StorageAnalysis,
     StorageInfo,
     analyze_storage,
@@ -71,9 +75,17 @@ from edgar.storage_management import (
     check_filings_batch,
     cleanup_storage,
     clear_cache,
+    download_edgar_data,
+    download_filings,
+    is_using_datamule_storage,
+    is_using_local_storage,
     optimize_storage,
+    set_local_storage_path,
     storage_info,
+    use_datamule_storage,
+    use_local_storage,
 )
+from edgar.search.efts import EFTSResult, EFTSSearch, search_filings
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
 
@@ -93,6 +105,9 @@ current_filings = get_current_filings
 
 # Fund portfolio report filings
 get_fund_portfolio_filings = partial(get_filings, form=NPORT_FORMS)
+
+# Money market fund filings
+get_money_market_filings = partial(get_filings, form=MONEY_MARKET_FORMS)
 
 # Restricted stock sales
 get_restricted_stock_filings = partial(get_filings, form=[144])
@@ -126,7 +141,10 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
     elif re.match(r"\d{4,10}$", search_id):
         return Entity(search_id)
     elif re.match(r"^[A-WYZ]{1,5}([.-][A-Z])?$", search_id):  # Ticker (including dot or hyphenated)
-        return Entity(search_id)
+        try:
+            return Entity(search_id)
+        except CompanyNotFoundError:
+            return find_company(search_id)
     elif re.match(r"^[A-Z]{4}X$", search_id):  # Mutual Fund Ticker
         return find_fund(search_id)
     elif re.match(r"^[CS]\d+$", search_id):
@@ -142,7 +160,7 @@ def matches_form(sec_filing: Filing,
                  form: Union[str, List[str]]) -> bool:
     """Check if the filing matches the forms"""
     form_list = listify(form)
-    if sec_filing.form in form_list + [f"{f}/A" for f in form_list]:
+    if sec_filing.form in form_list + [f"{f}/A" for f in form_list if not f.endswith("/A")]:
         return True
     return False
 
@@ -178,6 +196,7 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '10-K': ('TenK', 'annual report with financials'),
         '10-D': ('TenD', 'ABS distribution report'),
         '20-F': ('TwentyF', 'foreign issuer annual report'),
+        '40-F': ('FortyF', 'Canadian MJDS annual report'),
         '13F-HR': ('ThirteenF', 'institutional holdings'),
         '13F-HR/A': ('ThirteenF', 'institutional holdings'),
         'SCHEDULE 13D': ('Schedule13D', 'beneficial ownership report (5%+ stake, active)'),
@@ -195,6 +214,11 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'C-TR': ('FormC', 'crowdfunding termination'),
         'NPORT-P': ('FundReport', 'fund portfolio holdings'),
         'NPORT-EX': ('FundReport', 'fund portfolio holdings'),
+        'N-MFP2': ('MoneyMarketFund', 'money market fund portfolio holdings'),
+        'N-MFP3': ('MoneyMarketFund', 'money market fund portfolio holdings'),
+        'N-CEN': ('FundCensus', 'registered investment company annual census'),
+        'N-CSR': ('FundShareholderReport', 'fund shareholder report'),
+        'N-CSRS': ('FundShareholderReport', 'fund shareholder report'),
         'N-PX': ('NPX', 'annual proxy voting record'),
         'DEF 14A': ('ProxyStatement', 'proxy statement with executive compensation'),
         'DEFA14A': ('ProxyStatement', 'additional proxy soliciting materials'),
@@ -246,6 +270,9 @@ def obj(sec_filing: Filing) -> Optional[object]:
             return TenD(sec_filing)
     elif matches_form(sec_filing, "20-F"):
         return TwentyF(sec_filing)
+    elif matches_form(sec_filing, "40-F"):
+        from edgar.company_reports import FortyF
+        return FortyF(sec_filing)
     elif matches_form(sec_filing, THIRTEENF_FORMS):
         # ThirteenF can work with either XML (2013+) or TXT (2012 and earlier) format
         return ThirteenF(sec_filing)
@@ -279,6 +306,15 @@ def obj(sec_filing: Filing) -> Optional[object]:
             return FormD.from_xml(xml)
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, NCEN_FORMS):
+        return FundCensus.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, NCSR_FORMS):
+        return FundShareholderReport.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, MONEY_MARKET_FORMS):
+        return MoneyMarketFund.from_filing(sec_filing)
 
     elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
         return FundReport.from_filing(sec_filing)

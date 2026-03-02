@@ -144,6 +144,7 @@ class StitchedFactsView:
                     'concept': concept,
                     'label': label,  # Standardized label
                     'original_label': original_label,  # Original company label
+                    'standard_concept': item.get('standard_concept'),
                     'statement_type': statement_type,
 
                     # Value information

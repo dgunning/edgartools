@@ -22,8 +22,10 @@ from edgar.documents.search import DocumentSearch
 company = Company("AAPL")
 filing = company.get_filings(form="10-K").latest(1)
 
+# Parse HTML into structured Document
+document = filing.parse()
+
 # Create search interface
-document = filing.document
 searcher = DocumentSearch(document)
 
 # Search with ranking
@@ -39,6 +41,18 @@ for result in results:
     print(f"Section: {result.section}")
     print(f"Snippet: {result.snippet}")
 ```
+
+!!! note "About `filing.parse()`"
+    The `parse()` method parses the filing's HTML into a structured `Document` object
+    with a node tree that `DocumentSearch` can index. This is different from
+    `filing.document` which returns an `Attachment` (file metadata).
+
+    Other useful Filing methods:
+
+    - `filing.html()` - Returns raw HTML string
+    - `filing.text()` - Returns plain text extraction
+    - `filing.xbrl()` - Returns parsed XBRL data
+    - `filing.parse()` - Returns structured Document for advanced operations
 
 ## Ranking Algorithms
 

@@ -58,7 +58,7 @@ class XBRLAttachments:
                 if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(
                         ('.xml', '.XML')):
                     content = attachment.content
-                    if '<xbrl' in content[:2000]:
+                    if content and '<xbrl' in content[:2000]:
                         self._documents['instance'] = attachment
                 elif attachment.document_type == 'EX-101.SCH':
                     self._documents['schema'] = attachment
@@ -127,6 +127,12 @@ class XBRL:
         self._sgml_period_of_report: Optional[str] = None
         self._validated_period_of_report_cache: Optional[str] = None
         self._period_of_report_warning_logged: bool = False
+
+        # Standardization cache for this XBRL instance (lazy-initialized)
+        self._standardization_cache = None
+
+        # Reverse index: element_name -> list of context_ids with facts (lazy-initialized)
+        self._element_context_index = None
 
     def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
         """
@@ -200,6 +206,36 @@ class XBRL:
     def footnotes(self):
         """Access to XBRL footnotes."""
         return self.parser.footnotes
+
+    @property
+    def standardization(self):
+        """
+        Access the standardization cache for this XBRL instance.
+
+        The cache provides efficient label standardization by:
+        - Caching concept-to-label mappings
+        - Caching standardized statement data
+        - Using the module-level singleton mapper
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> # Get standardized label for a concept
+            >>> label = xbrl.standardization.get_standard_label(
+            ...     'us-gaap_Revenue', 'Revenues',
+            ...     {'statement_type': 'IncomeStatement'}
+            ... )
+            >>> # Standardize statement data with caching
+            >>> data = xbrl.standardization.standardize_statement_data(
+            ...     raw_data, 'IncomeStatement'
+            ... )
+
+        Returns:
+            StandardizationCache instance for this XBRL
+        """
+        if self._standardization_cache is None:
+            from edgar.xbrl.standardization import StandardizationCache
+            self._standardization_cache = StandardizationCache(self)
+        return self._standardization_cache
 
     @property
     def _facts(self):
@@ -361,6 +397,23 @@ class XBRL:
     def context_period_map(self):
         return self.parser.context_period_map
 
+    @property
+    def element_context_index(self) -> Dict[str, List[str]]:
+        """Reverse index: element_name -> list of context_ids with facts.
+
+        Built lazily on first access by scanning all parsed facts.
+        Used by _find_facts_for_element() to avoid iterating all contexts.
+        """
+        if self._element_context_index is None:
+            index: Dict[str, List[str]] = {}
+            for fact in self.parser.facts.values():
+                elem = fact.element_id.replace(':', '_')
+                if elem not in index:
+                    index[elem] = []
+                index[elem].append(fact.context_ref)
+            self._element_context_index = index
+        return self._element_context_index
+
     @classmethod
     def from_directory(cls, directory_path: Union[str, Path]) -> 'XBRL':
         """
@@ -506,6 +559,92 @@ class XBRL:
         if not hasattr(self, '_fund_statements'):
             self._fund_statements = FundStatements(self)
         return self._fund_statements
+
+    def notes(self) -> List:
+        """
+        Get all note sections from the XBRL filing.
+
+        Returns:
+            List of Statement objects for notes
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> for note in xbrl.notes():
+            ...     print(note.title)
+        """
+        return self.statements.notes()
+
+    def disclosures(self) -> List:
+        """
+        Get all disclosure sections from the XBRL filing.
+
+        Returns:
+            List of Statement objects for disclosures
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> for disc in xbrl.disclosures():
+            ...     print(disc.title)
+        """
+        return self.statements.disclosures()
+
+    def list_tables(self) -> Dict[str, List]:
+        """
+        List all tables in the XBRL filing, organized by category.
+
+        Returns a dict with keys: 'statement', 'note', 'disclosure', 'document', 'other'.
+        Each value is a list of statement dicts with 'index', 'definition', 'role_name', etc.
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> tables = xbrl.list_tables()
+            >>> for note in tables['note']:
+            ...     print(note['definition'])
+        """
+        return self.statements.get_statements_by_category()
+
+    def get_table(self, name: str) -> Optional[Any]:
+        """
+        Get a table (statement, note, or disclosure) by name with smart resolution.
+
+        Searches in order: exact type match, role_name contains, definition contains.
+        Works for any table in the filing — financial statements, notes, or disclosures.
+
+        Args:
+            name: Table name to search for (e.g. 'IncomeStatement', 'debt', 'revenue recognition')
+
+        Returns:
+            Statement if found, None otherwise
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> debt_note = xbrl.get_table("debt")
+            >>> revenue = xbrl.get_table("revenue recognition")
+        """
+        return self.statements.get(name)
+
+    def get_disclosure(self, role_uri: str) -> Optional[Any]:
+        """
+        Get a disclosure or note by its exact role URI.
+
+        For advanced users who know the specific XBRL role URI.
+
+        Args:
+            role_uri: Full role URI (e.g. 'http://company.com/role/DebtDisclosure')
+
+        Returns:
+            Statement if the role exists, None otherwise
+
+        Example:
+            >>> xbrl = filing.xbrl()
+            >>> tables = xbrl.list_tables()
+            >>> role = tables['disclosure'][0]['role']
+            >>> stmt = xbrl.get_disclosure(role)
+        """
+        from edgar.xbrl.statements import Statement
+        if role_uri in self.presentation_trees:
+            return Statement(self, role_uri)
+        return None
 
     @property
     def facts(self):
@@ -780,7 +919,8 @@ class XBRL:
 
     def get_statement(self, role_or_type: str,
                       period_filter: Optional[str] = None,
-                      should_display_dimensions: Optional[bool] = None) -> List[Dict[str, Any]]:
+                      should_display_dimensions: Optional[bool] = None,
+                      view: Optional['StatementView'] = None) -> List[Dict[str, Any]]:
         """
         Get a financial statement by role URI, statement type, or statement short name.
 
@@ -792,10 +932,15 @@ class XBRL:
             period_filter: Optional period key to filter facts
             should_display_dimensions: Whether to display dimensions for this statement.
                 If None, the method will determine based on statement type and role.
+            view: StatementView controlling dimensional filtering:
+                  STANDARD: Strict member filtering per presentation linkbase
+                  DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
+                  SUMMARY: No dimensional facts shown
 
         Returns:
             List of line items with values
         """
+        from edgar.xbrl.presentation import StatementView
         # Use the centralized statement finder to get statement information
         matching_statements, found_role, actual_statement_type = self.find_statement(role_or_type)
 
@@ -820,7 +965,7 @@ class XBRL:
         # Generate line items recursively
         line_items = []
         self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
-                                  should_display_dimensions, valid_dimensional_members)
+                                  should_display_dimensions, valid_dimensional_members, view)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
@@ -833,12 +978,16 @@ class XBRL:
         if actual_statement_type == 'BalanceSheet':
             line_items = self._reorder_by_calculation_parent(line_items)
 
+        # Issue edgartools-os99: Adjust levels when calculation tree reveals flat subtotal patterns
+        line_items = self._adjust_levels_by_calculation_parent(line_items)
+
         return line_items
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
                              path: Optional[List[str]] = None, should_display_dimensions: bool = False,
-                             valid_dimensional_members: Optional[Dict[str, Set[str]]] = None) -> None:
+                             valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
+                             view: Optional['StatementView'] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -851,7 +1000,12 @@ class XBRL:
             should_display_dimensions: Whether to display dimensions for this statement
             valid_dimensional_members: Dict mapping axis names to sets of valid member names
                 from the presentation linkbase. Only facts with members in this set will be shown.
+            view: StatementView controlling dimensional filtering:
+                  STANDARD: Strict member filtering per presentation linkbase
+                  DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
+                  SUMMARY: No dimensional facts shown
         """
+        from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
             return
 
@@ -954,7 +1108,14 @@ class XBRL:
                         # This filters out facts from other disclosures that happen to use the same concept
                         # but with different dimensional members (e.g., revenue members on balance sheet)
                         is_valid_dimension = True
-                        if valid_dimensional_members:
+
+                        # DETAILED view bypasses strict member filtering (GH-574 fix)
+                        # This restores iPhone/iPad/Mac data for companies like AAPL
+                        if view == StatementView.DETAILED:
+                            # Show all dimensional facts regardless of presentation linkbase
+                            is_valid_dimension = True
+                        elif valid_dimensional_members:
+                            # STANDARD view: strict filtering per presentation linkbase
                             for dim_data in dimension_info:
                                 # Get the axis and member from the dimension info
                                 axis = dim_data.get('dimension', '').replace(':', '_')
@@ -1221,7 +1382,7 @@ class XBRL:
         # Process children
         for child_id in node.children:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
-                                      should_display_dimensions, valid_dimensional_members)
+                                      should_display_dimensions, valid_dimensional_members, view)
 
     @staticmethod
     def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -1281,6 +1442,40 @@ class XBRL:
                 result.append(item)
 
         return result
+
+    @staticmethod
+    def _adjust_levels_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Adjust levels so children indent under their calculation parent totals.
+
+        When the presentation tree puts components at the same level as their
+        subtotal, use the calculation tree to indent the components.
+        Only fires when all 4 conditions are met (very conservative).
+        """
+        if not line_items:
+            return line_items
+
+        from edgar.xbrl.models import TOTAL_LABEL
+
+        # Build concept -> index map
+        concept_to_index = {item['concept']: i for i, item in enumerate(line_items)}
+
+        for item in line_items:
+            calc_parent = item.get('calculation_parent')
+            if not calc_parent or calc_parent not in concept_to_index:
+                continue
+
+            parent_idx = concept_to_index[calc_parent]
+            item_idx = concept_to_index[item['concept']]
+            parent_item = line_items[parent_idx]
+
+            # All 4 conditions must be true
+            if (parent_idx > item_idx                                    # parent appears after (subtotal pattern)
+                    and parent_item['level'] == item['level']            # same level
+                    and parent_item.get('preferred_label') == TOTAL_LABEL):  # parent has total label
+                item['level'] += 1
+
+        return line_items
 
     @staticmethod
     def _get_fact_precision(fact) -> int:
@@ -1354,8 +1549,9 @@ class XBRL:
 
         relevant_facts = {}
 
-        # Check each context
-        for context_id in self.contexts:
+        # Use reverse index to only check contexts that actually have facts for this element
+        context_ids = self.element_context_index.get(element_name, [])
+        for context_id in context_ids:
             # Issue #564: Get ALL facts for this element/context and select the most precise
             facts_list = self.parser.get_facts_by_key(element_name, context_id)
             fact = self._select_most_precise_fact(facts_list)
@@ -1602,7 +1798,8 @@ class XBRL:
                          standard: bool = True,
                          show_date_range: bool = False,
                          parenthetical: bool = False,
-                         include_dimensions: bool = False) -> Optional[RenderedStatement]:
+                         include_dimensions: bool = False,
+                         view: Optional['StatementView'] = None) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         Args:
@@ -1614,9 +1811,12 @@ class XBRL:
             show_date_range: Whether to show full date ranges for duration periods (default: False)
             parenthetical: Whether to look for a parenthetical statement (default: False)
             include_dimensions: Whether to include dimensional segment data (default: False)
+            view: StatementView controlling dimensional filtering (STANDARD, DETAILED, SUMMARY)
         Returns:
             RichTable: A formatted table representation of the statement
         """
+        from edgar.xbrl.presentation import StatementView
+
         # Find the statement using the unified statement finder with parenthetical support
         matching_statements, found_role, actual_statement_type = self.find_statement(statement_type, parenthetical)
 
@@ -1630,8 +1830,8 @@ class XBRL:
         # This ensures face-level classification dimensions (PPE type, equity) are shown
         should_display_dimensions = True
 
-        # Get the statement data with all dimensional data
-        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions)
+        # Get the statement data with all dimensional data, passing view for filtering
+        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions, view=view)
         if not statement_data:
             return None
 
@@ -1658,6 +1858,7 @@ class XBRL:
         # Render the statement
         # Issue #569: Pass include_dimensions to filter breakdown dimensions in render
         # Issue #577/cf9o: Pass role_uri for definition linkbase-based filtering
+        # StatementView: Pass view for STANDARD/DETAILED/SUMMARY filtering
         return render_statement(
             statement_data,
             periods_to_display,
@@ -1669,7 +1870,8 @@ class XBRL:
             show_comparisons=True,
             xbrl_instance=self,
             include_dimensions=include_dimensions,
-            role_uri=found_role
+            role_uri=found_role,
+            view=view
         )
 
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
@@ -1803,14 +2005,11 @@ class XBRL:
                                 stmt_type = stmt['type']
                                 break
 
-                    # Add statement type to each item
-                    for item in statement_data:
-                        item['statement_type'] = stmt_type
-
-                    # Apply standardization
-                    from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
-                    mapper = ConceptMapper(initialize_default_mappings(read_only=True))
-                    statement_data = standardize_statement(statement_data, mapper)
+                    # Apply standardization using XBRL instance's cache (disable statement caching
+                    # for consistency with other call sites where input data varies)
+                    statement_data = self.standardization.standardize_statement_data(
+                        statement_data, stmt_type, use_cache=False
+                    )
 
                 # Create rows for the DataFrame
                 rows = []

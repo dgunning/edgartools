@@ -6,7 +6,7 @@ from rich import print
 
 from edgar import *
 from edgar.xbrl.rendering import RenderedStatement
-from edgar.xbrl.statements import Statement, Statements
+from edgar.xbrl.statements import Statement, Statements, _split_allcaps
 from edgar.xbrl import XBRL, XBRLS
 import pandas as pd
 pd.options.display.max_colwidth = 200
@@ -131,7 +131,7 @@ def test_statement_to_dataframe(aapl_xbrl):
     rendered_statement:RenderedStatement = cashflow_statement.render()
     df = rendered_statement.to_dataframe()
     assert df.columns.tolist() ==['concept', 'label', '2023-09-30', '2022-09-24', '2021-09-25',
-                                  'level','abstract', 'dimension']
+                                  'level','abstract', 'dimension', 'is_breakdown']
 
     # Issue #504: Filter for non-dimensional rows to avoid duplicate NetIncomeLoss entries
     net_income_filter = (df.concept == 'us-gaap_NetIncomeLoss') & (df.dimension == False)
@@ -139,11 +139,11 @@ def test_statement_to_dataframe(aapl_xbrl):
     assert df[net_income_filter]['2022-09-24'].item() == 99803000000.0
     assert df[net_income_filter]['2021-09-25'].item() == 94680000000.0
 
-    #Labels
+    # Labels - now using original company labels (not standardized)
     labels = df.label.tolist()
     assert labels[0] == 'Cash, cash equivalents and restricted cash, ending balances'
     assert labels[1] == 'Operating activities:'
-    assert labels[2] == 'Net Income'
+    assert labels[2] == 'Net income'  # Original company label (lowercase)
     print(df[['label', '2023-09-30']])
 
     assert all(col in df.columns for col in ['2023-09-30', '2022-09-24', '2021-09-25'])
@@ -157,9 +157,14 @@ def test_xbrls_cashflow_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     columns = df.columns.tolist()
     print(columns)
     labels = df.label.tolist()
-    assert 'Net Change in Cash' in labels
+    # Original labels are preserved (check case-insensitively for common patterns)
+    # Apple's cash flow has "Cash, cash equivalents and restricted cash" patterns
+    cash_related = [l for l in labels if 'cash' in l.lower()]
+    assert len(cash_related) > 0, "Should have cash-related labels"
     assert df[(df.concept == 'us-gaap_NetIncomeLoss')]['2023-09-30'].item() == 96995000000.0
-    assert df[(df.label == 'Net Income')]['2023-09-30'].item() == 96995000000.0
+    # Use concept filter instead of label since labels are now original (may differ by company)
+    net_income_row = df[df.concept == 'us-gaap_NetIncomeLoss']
+    assert net_income_row['2023-09-30'].item() == 96995000000.0
 
 def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     xbs = XBRLS([aapl_xbrl, aapl_xbrl_2022])
@@ -167,10 +172,14 @@ def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     assert balance_sheet.periods == ['2023-09-30', '2022-09-24']
     df = balance_sheet.to_dataframe()
     columns = df.columns.tolist()
-    assert columns == ['label', 'concept', '2023-09-30', '2022-09-24']
+    assert columns == ['label', 'concept', 'standard_concept', '2023-09-30', '2022-09-24']
     labels = df.label.tolist()
     print(labels)
-    assert 'Total Assets' in labels
+    # Check using concept filter instead of label since labels are now original company labels
+    # Apple uses 'Total assets' (lowercase) not 'Total Assets'
+    assert any('assets' in l.lower() for l in labels), "Should have asset-related labels"
+    # Verify the Assets concept is present
+    assert df[df.concept == 'us-gaap_Assets'].shape[0] > 0, "Should have Assets concept"
 
 
 @pytest.mark.slow
@@ -655,3 +664,202 @@ def test_periods_property_consistency_with_rendered_statement(aapl_xbrl):
         assert stmt_period.label == rendered_period.label, "Period labels should match"
 
     print(f"\nPeriod consistency verified: {len(statement_periods)} periods match")
+
+
+class TestStatementsDiscovery:
+    """Tests for the statement discovery and access methods on the Statements class."""
+
+    def test_list_available_returns_dataframe(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        df = statements.list_available()
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == ['index', 'category', 'name', 'role_name', 'element_count']
+        assert len(df) == len(statements.statements)
+
+    def test_list_available_category_filter(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        df_all = statements.list_available()
+        df_statements = statements.list_available(category='statement')
+        assert len(df_statements) > 0
+        assert len(df_statements) < len(df_all)
+        assert all(df_statements['category'] == 'statement')
+
+    def test_search_finds_income(self, aapl_xbrl):
+        results = aapl_xbrl.statements.search('income')
+        assert len(results) > 0
+        assert all(isinstance(s, Statement) for s in results)
+
+    def test_search_multi_word(self, aapl_xbrl):
+        results_broad = aapl_xbrl.statements.search('income')
+        results_narrow = aapl_xbrl.statements.search('income statement')
+        assert len(results_narrow) <= len(results_broad)
+
+    def test_search_empty(self, aapl_xbrl):
+        assert aapl_xbrl.statements.search('') == []
+        assert aapl_xbrl.statements.search('   ') == []
+
+    def test_search_no_match(self, aapl_xbrl):
+        assert aapl_xbrl.statements.search('xyznonexistent') == []
+
+    def test_get_exact_type(self, aapl_xbrl):
+        result = aapl_xbrl.statements.get('IncomeStatement')
+        assert result is not None
+        assert isinstance(result, Statement)
+
+    def test_get_by_role_name(self, aapl_xbrl):
+        result = aapl_xbrl.statements.get('CASHFLOWS')
+        assert result is not None
+        assert isinstance(result, Statement)
+
+    def test_get_no_match(self, aapl_xbrl):
+        assert aapl_xbrl.statements.get('xyznonexistent') is None
+
+    def test_all_returns_all(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        all_stmts = statements.all()
+        assert len(all_stmts) == len(statements.statements)
+        assert all(isinstance(s, Statement) for s in all_stmts)
+
+    def test_all_category_filter(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        stmt_only = statements.all(category='statement')
+        assert len(stmt_only) > 0
+        assert len(stmt_only) < len(statements.all())
+
+    def test_get_by_category_fix(self, aapl_xbrl):
+        """Regression test: get_by_category('statement') should return non-empty results."""
+        results = aapl_xbrl.statements.get_by_category('statement')
+        assert len(results) > 0
+        assert all(isinstance(s, Statement) for s in results)
+
+    def test_len(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        assert len(statements) == len(statements.statements)
+
+    def test_iter(self, aapl_xbrl):
+        statements = aapl_xbrl.statements
+        iterated = list(statements)
+        assert len(iterated) == len(statements)
+        assert all(isinstance(s, Statement) for s in iterated)
+
+    def test_to_context_minimal(self, aapl_xbrl):
+        ctx = aapl_xbrl.statements.to_context('minimal')
+        assert 'STATEMENTS' in ctx
+        assert 'Apple Inc.' in ctx
+        assert 'CORE STATEMENTS:' in ctx
+        assert '.income_statement()' in ctx
+        assert '.balance_sheet()' in ctx
+        # Minimal should not include discovery section
+        assert 'DISCOVERY:' not in ctx
+
+    def test_to_context_standard(self, aapl_xbrl):
+        ctx = aapl_xbrl.statements.to_context('standard')
+        assert 'CORE STATEMENTS:' in ctx
+        assert 'OTHER:' in ctx
+        assert 'DISCOVERY:' in ctx
+        assert '.search(' in ctx
+        assert '.get(' in ctx
+        assert '.list_available()' in ctx
+        # Standard should not include full listing
+        assert 'NOTES (' not in ctx
+
+    def test_to_context_full(self, aapl_xbrl):
+        ctx = aapl_xbrl.statements.to_context('full')
+        assert 'DISCOVERY:' in ctx
+        # Full includes per-category listings
+        assert 'OTHER (' in ctx
+        assert 'DOCUMENT (' in ctx
+        # Full is longer than standard
+        standard = aapl_xbrl.statements.to_context('standard')
+        assert len(ctx) > len(standard)
+
+    def test_to_context_default_is_standard(self, aapl_xbrl):
+        assert aapl_xbrl.statements.to_context() == aapl_xbrl.statements.to_context('standard')
+
+
+@pytest.fixture
+def ko_xbrl():
+    data_dir = Path("tests/fixtures/xbrl/ko/10k_2024")
+    return XBRL.from_directory(data_dir)
+
+
+class TestSplitAllcaps:
+    """Tests for the _split_allcaps helper function."""
+
+    def test_split_allcaps_income_taxes(self):
+        assert _split_allcaps('INCOMETAXES') == 'Income Taxes'
+
+    def test_split_allcaps_debt_and_borrowing(self):
+        assert _split_allcaps('DEBTANDBORROWINGARRANGEMENTS') == 'Debt And Borrowing Arrangements'
+
+    def test_split_allcaps_passthrough_camelcase(self):
+        """CamelCase strings should be returned unchanged (not ALL-CAPS)."""
+        assert _split_allcaps('IncomeTaxes') == 'IncomeTaxes'
+
+    def test_split_allcaps_passthrough_empty(self):
+        assert _split_allcaps('') == ''
+
+    def test_split_allcaps_single_char(self):
+        assert _split_allcaps('A') == 'A'
+
+    def test_split_allcaps_equity(self):
+        assert _split_allcaps('EQUITY') == 'Equity'
+
+    def test_split_allcaps_fair_value(self):
+        assert _split_allcaps('FAIRVALUE') == 'Fair Value'
+
+    def test_extract_topic_summary_allcaps(self, ko_xbrl):
+        """KO's category summary should show readable topics, not ALL-CAPS blobs."""
+        stmts = ko_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        # Check that at least one category has a readable topic summary
+        for cat, items in cats.items():
+            from edgar.xbrl.statements import _extract_topic_summary
+            summary = _extract_topic_summary([s for s in stmts.statements if Statements.classify_statement(s) == cat])
+            if summary:
+                # Should not contain ALL-CAPS blobs longer than 5 chars
+                for word in summary.split(', '):
+                    # Each topic fragment should have spaces or be short
+                    assert not (word.isupper() and len(word) > 5), \
+                        f"ALL-CAPS blob found in summary: '{word}'"
+
+
+class TestClassifyStatement:
+    """Tests for Statements.classify_statement() with primary_concept and definition fallbacks."""
+
+    def test_classify_disclosure_via_primary_concept(self):
+        stmt = {'type': None, 'primary_concept': 'DebtDisclosureAbstract', 'definition': 'Debt'}
+        assert Statements.classify_statement(stmt) == 'disclosure'
+
+    def test_classify_note_via_primary_concept(self):
+        stmt = {'type': None, 'primary_concept': 'AccountingPoliciesAbstract', 'definition': 'SummaryOfSignificantAccountingPolicies'}
+        assert Statements.classify_statement(stmt) == 'note'
+
+    def test_classify_parenthetical_via_definition(self):
+        stmt = {'type': None, 'primary_concept': '', 'definition': 'BalanceSheetParenthetical'}
+        assert Statements.classify_statement(stmt) == 'statement'
+
+    def test_classify_core_statements_unchanged(self, aapl_xbrl):
+        """Core financial statements should still be classified correctly."""
+        stmts = aapl_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        assert 'statement' in cats
+        assert len(cats['statement']) >= 3  # At least income, balance, cash flow
+
+    def test_classify_reduces_other_count(self, aapl_xbrl):
+        """The 'other' count should be less than 50% of total statements."""
+        stmts = aapl_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        total = len(stmts.statements)
+        other_count = len(cats.get('other', []))
+        assert other_count < total * 0.50, \
+            f"'other' is {other_count}/{total} ({other_count/total:.0%}) — should be <50%"
+
+    def test_classify_disclosure_count_increased(self, aapl_xbrl):
+        """With primary_concept fallback, disclosure count should increase."""
+        stmts = aapl_xbrl.statements
+        cats = stmts.get_statements_by_category()
+        disclosure_count = len(cats.get('disclosure', []))
+        # Before the fix, AAPL had 0 disclosures (all were 'other')
+        # With primary_concept fallback, we should have several
+        assert disclosure_count > 0, "Expected some disclosures to be classified via primary_concept"

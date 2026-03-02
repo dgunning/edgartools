@@ -348,6 +348,7 @@ MAIL ADDRESS:
 """
 
 
+@pytest.mark.fast
 def test_preprocess_old_headers():
     new_text = preprocess_old_headers(old_text)
     print(new_text)
@@ -409,6 +410,7 @@ def test_get_header_for_list_fields_with_multiple_entries():
     assert filing_header.filing_metadata.get("TEST-FIELD") == "foo, bar"
 
 
+@pytest.mark.fast
 def test_header_has_filers():
     # Issue https://gist.github.com/kevinhu/3414663899d139c02a7bb31d8b176416
     sgml : FilingSGML = FilingSGML.from_source('data/sgml/0001193125-24-100942.nc')
@@ -432,6 +434,7 @@ def test_header_has_filers():
     assert mailing_address.zipcode == '94105'
 
 
+@pytest.mark.fast
 def test_header_has_reporting_owner_and_issuers():
     sgml : FilingSGML = FilingSGML.from_source('data/sgml/0001127602-25-004598.nc')
     print()
@@ -476,6 +479,7 @@ def test_header_has_reporting_owner_and_issuers():
     assert issuer.former_company_names[1].name == 'ARROW ELECTRONICS INC'
     assert issuer.former_company_names[1].date_of_change == '19920703'
 
+@pytest.mark.fast
 def test_header_with_subject_company():
     sgml: FilingSGML = FilingSGML.from_source('data/sgml/0001104659-25-002604.nc')
     header = sgml.header

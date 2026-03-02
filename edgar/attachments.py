@@ -89,6 +89,95 @@ FILE_TYPE_SYMBOLS: Dict[str, str] = {
     "INFORMATION TABLE": "📊"  # Chart for tables
 }
 
+# Standard exhibit type descriptions from Regulation S-K, Item 601
+EXHIBIT_DESCRIPTIONS: Dict[str, str] = {
+    # Core corporate documents (1-10)
+    "EX-1": "Underwriting agreement",
+    "EX-1.A": "Underwriting agreement - form of underwriting agreement",
+    "EX-1.B": "Underwriting agreement - form of selected dealer agreement",
+    "EX-2": "Plan of acquisition, reorganization, arrangement, liquidation, or succession",
+    "EX-3": "Articles of incorporation and bylaws",
+    "EX-3.A": "Articles of incorporation",
+    "EX-3.B": "Bylaws",
+    "EX-4": "Instruments defining the rights of security holders",
+    "EX-5": "Opinion re legality",
+    "EX-7": "Correspondence from independent accountant regarding non-reliance",
+    "EX-8": "Opinion re tax matters",
+    "EX-9": "Voting trust agreement",
+    "EX-10": "Material contracts",
+
+    # Financial and compliance (11-20)
+    "EX-11": "Statement re computation of per share earnings",
+    "EX-12": "Statement re computation of ratios",
+    "EX-13": "Annual report to security holders",
+    "EX-14": "Code of ethics",
+    "EX-15": "Letter re unaudited interim financial information",
+    "EX-16": "Letter re change in certifying accountant",
+    "EX-17": "Correspondence on departure of director",
+    "EX-18": "Letter re change in accounting principles",
+    "EX-19": "Insider trading policies and procedures",
+    "EX-20": "Other documents or statements to security holders",
+
+    # Required disclosures (21-32)
+    "EX-21": "Subsidiaries of the registrant",
+    "EX-22": "Subsidiary guarantors and issuers of guaranteed securities",
+    "EX-23": "Consent of experts and counsel",
+    "EX-24": "Power of attorney",
+    "EX-25": "Statement of eligibility of trustee",
+    "EX-26": "Invitation for competitive bids",
+    "EX-27": "Financial data schedule",
+    "EX-28": "Information from reports furnished to state insurance regulatory authorities",
+    "EX-29": "Additional exhibits",
+    "EX-30": "Disclosure regarding foreign jurisdictions that prevent inspections",
+
+    # Certifications (31-32)
+    "EX-31": "Rule 13a-14(a)/15d-14(a) certification (Section 302)",
+    "EX-31.1": "Certification of CEO pursuant to Section 302",
+    "EX-31.2": "Certification of CFO pursuant to Section 302",
+    "EX-32": "Section 1350 certification (Section 906)",
+    "EX-32.1": "Certification of CEO pursuant to Section 906",
+    "EX-32.2": "Certification of CFO pursuant to Section 906",
+
+    # Specialized (33+)
+    "EX-33": "Report on assessment of compliance with servicing criteria",
+    "EX-34": "Attestation report on assessment of compliance with servicing criteria",
+    "EX-35": "Servicer compliance statement",
+    "EX-36": "Static pool information",
+    "EX-95": "Mine safety disclosure",
+    "EX-96": "Technical report summary (mining)",
+    "EX-97": "Compensation recovery (clawback) policy",
+    "EX-99": "Additional exhibits",
+    "EX-99.1": "Additional exhibit",
+    "EX-99.2": "Additional exhibit",
+    "EX-100": "Additional exhibits",
+
+    # XBRL (101)
+    "EX-101": "Interactive data file",
+    "EX-101.INS": "XBRL instance document",
+    "EX-101.SCH": "XBRL taxonomy extension schema",
+    "EX-101.CAL": "XBRL calculation linkbase",
+    "EX-101.DEF": "XBRL definition linkbase",
+    "EX-101.LAB": "XBRL label linkbase",
+    "EX-101.PRE": "XBRL presentation linkbase",
+
+    # Cover page and fees
+    "EX-104": "Cover page interactive data file",
+    "EX-107": "Filing fee table",
+}
+
+
+def _lookup_exhibit_description(document_type: str) -> Optional[str]:
+    """Look up standard description for an exhibit type code."""
+    # Exact match (handles EX-31.1, EX-101.SCH, etc.)
+    if document_type in EXHIBIT_DESCRIPTIONS:
+        return EXHIBIT_DESCRIPTIONS[document_type]
+    # Base type fallback (EX-10.5 -> EX-10)
+    if '.' in document_type:
+        base_type = document_type.split('.')[0]
+        if base_type in EXHIBIT_DESCRIPTIONS:
+            return EXHIBIT_DESCRIPTIONS[base_type]
+    return None
+
 
 def get_extension(filename: str) -> str:
     """Extract the file extension including the dot."""
@@ -220,6 +309,22 @@ class Attachment:
     @content.deleter
     def content(self):
         self._content_override = None
+
+    @property
+    def display_description(self) -> str:
+        """Effective description for display, enhanced with standard exhibit descriptions."""
+        if self.purpose:
+            return self.purpose
+        desc = (self.description or "").strip()
+        doc_type = (self.document_type or "").strip()
+        # If description is meaningful (non-empty and different from the type code), keep it
+        if desc and desc.upper() != doc_type.upper():
+            return desc
+        # Look up standard description for this exhibit type
+        standard = _lookup_exhibit_description(doc_type)
+        if standard:
+            return standard
+        return desc
 
     @property
     def url(self):
@@ -364,7 +469,7 @@ class Attachment:
         text = Text.assemble( (f"{self.sequence_number:<3} ", "dim italic"),
                              " ",
                              (self.document, "bold"),
-                             " ", (self.purpose or self.description, "grey54"),
+                             " ", (self.display_description, "grey54"),
                              " ",
                              (icon, ""),
                               " ",
@@ -678,7 +783,7 @@ class Attachments:
                                  sequence= attachment.sequence_number,
                                  filename=attachment.document)
             sequence_number = f"{attachment.sequence_number}" if attachment.sequence_number == "1" else attachment.sequence_number
-            description = "\n".join(textwrap.wrap(attachment.purpose or attachment.description, 100))
+            description = "\n".join(textwrap.wrap(attachment.display_description, 100))
             document_table.add_row(Text(sequence_number, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else sequence_number,
                                    Text(attachment.document, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else attachment.document,
                                    Text(description, style="bold deep_sky_blue1") if attachment.sequence_number == "1" else description,

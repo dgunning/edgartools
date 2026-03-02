@@ -1,6 +1,6 @@
 # EdgarTools MCP Quickstart Guide
 
-This guide helps you get started with EdgarTools MCP server in under 5 minutes.
+This guide helps you get the EdgarTools MCP server running in under 5 minutes -- whether you're setting up Claude Desktop on your laptop, deploying a shared server for your team, or running a containerized instance in production.
 
 ## Installation
 
@@ -11,19 +11,41 @@ pip install "edgartools[ai]"
 
 ## Starting the Server
 
-EdgarTools provides two ways to start the MCP server:
+EdgarTools provides several ways to start the MCP server:
 
-### Option 1: Python Module (Recommended)
+### Option 1: uvx (No installation required)
+```bash
+uvx --from "edgartools[ai]" edgartools-mcp
+```
+This runs the server in an isolated environment without needing to install edgartools globally. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/). Ideal for individual use or scripted deployment.
+
+### Option 2: Python Module
 ```bash
 python -m edgar.ai
 ```
 
-### Option 2: Console Script
+### Option 3: Console Script
 ```bash
 edgartools-mcp
 ```
 
-Both methods work identically and will start the MCP server listening on stdin/stdout.
+### Option 4: Docker
+```bash
+docker run -i hackerdogs/edgartools-mcp
+```
+
+Or build your own:
+
+```dockerfile
+FROM python:3.12-slim
+RUN pip install "edgartools[ai]"
+ENV EDGAR_IDENTITY="Your Name your.email@example.com"
+ENTRYPOINT ["python", "-m", "edgar.ai"]
+```
+
+Docker is ideal for server deployments, CI/CD pipelines, and teams that want a consistent, isolated runtime.
+
+All methods start the MCP server listening on stdin/stdout. The server is stateless -- it makes SEC API calls on demand and holds no persistent data, which makes it straightforward to run centrally for a team.
 
 ## Client Configuration
 
@@ -49,7 +71,27 @@ Configuration file location:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-**Configuration (macOS):**
+**Configuration with uvx (Recommended — no Python setup needed):**
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
+
+> **Note:** On macOS, Claude Desktop may not find `uvx` in your PATH. If you get a "spawn uvx ENOENT" error, use the full path (find it with `which uvx`):
+> ```json
+> "command": "/Users/yourname/.local/bin/uvx"
+> ```
+
+**Configuration with Python (macOS):**
 ```json
 {
   "mcpServers": {
@@ -64,7 +106,7 @@ Configuration file location:
 }
 ```
 
-**Configuration (Windows):**
+**Configuration with Python (Windows):**
 ```json
 {
   "mcpServers": {
@@ -132,77 +174,86 @@ Configuration file location:
 
 **Note:** Use `python3` on macOS/Linux, or `python` on Windows.
 
+### Deploying for a Team
+
+The EdgarTools MCP server is stateless -- it queries the SEC API on each request and holds no session data. This makes it straightforward to deploy centrally:
+
+- **Docker**: Run the container on a shared server and point team members' MCP clients to it
+- **Multiple instances**: Safe to run multiple instances behind a load balancer since there's no shared state
+- **Configuration templates**: Create per-client config files with the appropriate `EDGAR_IDENTITY` for your organization
+
+See [hackerdogs/edgartools-mcp](https://hub.docker.com/r/hackerdogs/edgartools-mcp) on Docker Hub for a community-maintained container with config templates for multiple clients.
+
 ## Available Tools
 
-Once connected, AI agents have access to workflow-oriented tools designed for real-world research tasks:
+Once connected, AI agents have access to five intent-based tools:
 
-### Workflow Tools (Recommended)
-
-#### 1. edgar_company_research
-Comprehensive company intelligence combining profile, financials, recent activity, and ownership in a single workflow.
+#### 1. edgar_company
+Get company profile, financials, recent filings, and ownership in one call.
 
 **Example prompts:**
-- "Research Tesla including financials and recent filings"
-- "Give me a detailed analysis of Apple Inc"
-- "Show me Microsoft's company profile with ownership data"
+- "Show me Apple's profile and latest financials"
+- "Get Microsoft's recent filings and ownership data"
 
 **Parameters:**
 - `identifier` (required): Company ticker, CIK, or name
-- `include_financials` (default: true): Include latest financial statements
-- `include_filings` (default: true): Include recent filing activity summary
-- `include_ownership` (default: false): Include insider/institutional ownership highlights
-- `detail_level` (default: "standard"): Response detail - "minimal", "standard", or "detailed"
+- `include`: Sections to return: `profile`, `financials`, `filings`, `ownership`
+- `periods` (default: 4): Number of financial periods
+- `annual` (default: true): Annual vs quarterly data
 
-**What it provides:**
-- Company profile (name, CIK, ticker, industry)
-- Latest financial metrics and statements
-- Recent filing activity summary
-- Ownership highlights (when requested)
-
-#### 2. edgar_analyze_financials
-Multi-period financial statement analysis for trend analysis and comparisons.
+#### 2. edgar_search
+Search for companies or filings.
 
 **Example prompts:**
-- "Analyze Apple's income statement for the last 4 years"
-- "Show me Tesla's quarterly cash flow for the last 8 quarters"
-- "Compare Microsoft's income, balance sheet, and cash flow statements"
+- "Search for semiconductor companies"
+- "Find Apple's 10-K filings"
+- "Search for recent 8-K filings"
 
 **Parameters:**
-- `company` (required): Company ticker, CIK, or name
-- `periods` (default: 4): Number of periods to analyze
-- `annual` (default: true): Annual (true) or quarterly (false) periods
-- `statement_types` (default: ["income"]): Statements to include - "income", "balance", "cash_flow"
+- `query` (required): Search keywords
+- `search_type`: `companies`, `filings`, or `all`
+- `identifier`: Limit to a specific company
+- `form`: Filter by form type (e.g., "10-K", "8-K")
+- `limit` (default: 10): Max results
 
-**What it provides:**
-- Multi-period income statements
-- Multi-period balance sheets
-- Multi-period cash flow statements
-- Formatted for AI analysis and comparison
-
-### Basic Tools (Backward Compatibility)
-
-#### 3. edgar_get_company
-Get basic company information from SEC filings.
+#### 3. edgar_filing
+Read filing content or specific sections.
 
 **Example prompts:**
-- "Get information about Tesla"
-- "Show me Apple's company details"
+- "Show me the risk factors from Apple's latest 10-K"
+- "Get the MD&A section from Tesla's most recent annual report"
 
 **Parameters:**
-- `identifier` (required): Company ticker, CIK, or name
-- `include_financials` (optional): Include latest financial statements
+- `accession_number`: SEC accession number
+- OR `identifier` + `form`: Company + form type
+- `sections`: `summary`, `business`, `risk_factors`, `mda`, `financials`, or `all`
 
-#### 4. edgar_current_filings
-Get the most recent SEC filings across all companies.
+#### 4. edgar_compare
+Compare companies side-by-side or analyze an industry.
 
 **Example prompts:**
-- "Show me the latest SEC filings"
-- "What are the most recent 10-K filings?"
-- "Get current 8-K filings"
+- "Compare Apple, Microsoft, and Google on revenue and net income"
+- "How do the top semiconductor companies compare?"
 
 **Parameters:**
-- `limit` (optional): Number of filings to return (default: 20)
-- `form_type` (optional): Filter by form type (e.g., "10-K", "10-Q", "8-K")
+- `identifiers`: List of tickers/CIKs to compare
+- OR `industry`: Industry name
+- `metrics`: Metrics to compare (e.g., `revenue`, `net_income`)
+- `periods` (default: 4): Number of periods
+
+#### 5. edgar_ownership
+Insider transactions, institutional holders, or fund portfolios.
+
+**Example prompts:**
+- "Show me recent insider transactions at Apple"
+- "Who are Tesla's largest institutional holders?"
+- "What stocks does Berkshire Hathaway hold?"
+
+**Parameters:**
+- `identifier` (required): Company ticker, CIK, or fund CIK
+- `analysis_type`: `insiders`, `institutions`, or `fund_portfolio`
+- `days` (default: 90): Lookback for insider trades
+- `limit` (default: 20): Max results
 
 ## Environment Variables
 

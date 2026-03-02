@@ -17,7 +17,7 @@ from typing import Callable, Iterable, List, Optional, Tuple, TypeVar, Union
 import httpx
 import pandas as pd
 import pyarrow as pa
-import pytz
+from zoneinfo import ZoneInfo
 from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 from rich.prompt import Prompt
@@ -309,7 +309,7 @@ def get_resource(file: str):
     import importlib
 
     import edgar
-    return importlib.resources.path(edgar, file)
+    return importlib.resources.as_file(importlib.resources.files(edgar).joinpath(file))
 
 
 def get_edgar_data_directory() -> Path:
@@ -370,7 +370,7 @@ def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
 
 def current_year_and_quarter() -> Tuple[int, int]:
     # Define the Eastern timezone
-    eastern = pytz.timezone('America/New_York')
+    eastern = ZoneInfo('America/New_York')
 
     # Get the current time in Eastern timezone
     now_eastern = datetime.datetime.now(eastern)

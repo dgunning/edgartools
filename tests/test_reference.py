@@ -20,6 +20,14 @@ def test_get_ticker_from_cusip():
     assert get_ticker_from_cusip('59021J679') == 'MNK'
 
 
+def test_get_ticker_from_cusip_missing():
+    """Missing CUSIPs return None instead of raising KeyError."""
+    assert get_ticker_from_cusip('XXXXXXXXX') is None
+    assert get_ticker_from_cusip('000000000') is None
+    assert get_ticker_from_cusip('') is None
+    assert get_ticker_from_cusip(None) is None
+
+
 def test_get_ticker_from_cusip_with_multiple_tickers():
     data = cusip_ticker_mapping()
     tickers = data.loc['000307108']

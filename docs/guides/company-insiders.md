@@ -1,4 +1,8 @@
-# Getting a list of company insiders
+---
+description: Get a list of company insiders from SEC filings including officers, directors, and 10%+ beneficial owners.
+---
+
+# Company Insiders: Find Officers, Directors, and Major Shareholders
 
 This guide shows how to get a list of insiders for a company by writing a simple script to loop through their Form 4 filings and getting the **name** and **position**.
 
@@ -92,3 +96,11 @@ if __name__ == '__main__':
     insiders = get_insiders("NFLX")
     print(insiders)
 ```
+
+!!! tip "See this on edgar.tools"
+    The script above loops through Form 4 filings to build an insider list for one company. **edgar.tools** has this pre-computed across 186K+ insider filings with 802K+ transactions — including net buy/sell sentiment and executive profiles.
+
+    - **[See Netflix's insiders and transactions instantly →](https://app.edgar.tools/companies/NFLX?utm_source=edgartools-docs&utm_medium=see-live&utm_content=company-insiders)**
+    - **[See Apple's insider trading activity →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=company-insiders)**
+
+    No loops, no waiting. Free tier available. [Pricing →](https://app.edgar.tools/pricing?utm_source=edgartools-docs&utm_medium=see-live&utm_content=company-insiders)

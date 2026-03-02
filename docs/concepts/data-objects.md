@@ -1,15 +1,15 @@
 ---
-title: "Understanding Data Objects"
-description: "A comprehensive guide to edgartools' Data Objects system, how it works, and how to leverage it for SEC data analysis"
+title: "Understanding 10-K, 10-Q, and 8-K Report Objects in Python"
+description: "Learn how edgartools converts SEC annual reports (10-K), quarterly reports (10-Q), and current reports (8-K) into Python data objects."
 category: "concepts"
 difficulty: "intermediate"
 time_required: "15 minutes"
 prerequisites: ["installation", "sec-filings"]
 related: ["xbrl-fundamentals", "statement-structure"]
-keywords: ["data objects", "parsing", "structured data", "SEC filings", "XBRL", "object-oriented"]
+keywords: ["data objects", "parsing", "structured data", "SEC filings", "XBRL", "object-oriented", "10-K", "10-Q", "8-K"]
 ---
 
-# Understanding Data Objects
+# Understanding 10-K, 10-Q, and 8-K Report Objects in Python
 
 ## Introduction
 
@@ -100,7 +100,7 @@ These strategies are applied automatically based on the content being accessed.
 
 Across all Data Objects, you'll find these common patterns:
 
-1. **Property Access**: Access filing sections or data through properties (e.g., `tenk.risk_factors`)
+1. **Property Access**: Access filing sections or data through properties (e.g., `tenk.risk_factors`, `tenk.auditor`, `tenk.subsidiaries`, `tenk.reports`)
 2. **Method Calls**: Perform operations on the data (e.g., `form4.get_net_shares_traded()`)
 3. **Dictionary-Like Access**: Access specific items by key (e.g., `eightk["Item 2.01"]`)
 4. **Iteration**: Iterate over collections within the filing (e.g., `for holding in thirteen_f.infotable`)
@@ -260,6 +260,7 @@ for section_name in sections:
 Choose the most specific Data Object for your needs:
 
 - Use `TenK`/`TenQ` for financial statement analysis
+- Use `TenK` for auditor info (`tenk.auditor`), subsidiaries (`tenk.subsidiaries`), and XBRL report pages (`tenk.reports`)
 - Use `EightK` for event monitoring
 - Use `Form4` for insider trading analysis
 - Use `ThirteenF` for fund holdings analysis
@@ -308,4 +309,6 @@ Whether you're analyzing financial statements, tracking insider trading, or rese
 ## Additional Resources
 
 - [Working with Financial Statements](../guides/extract-statements.md)
+- [Current Events (8-K)](../eightk-filings.md)
 - [Analyzing Insider Trading](../guides/track-form4.md)
+- [Institutional Holdings (13F)](../guides/thirteenf-data-object-guide.md)

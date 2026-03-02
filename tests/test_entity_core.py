@@ -95,14 +95,14 @@ class TestEntityCreation:
         # String CIK with leading zeros
         entity1 = Entity("0000320193")
         assert entity1.cik == 320193
-        
+
         # Integer CIK
         entity2 = Entity(320193)
         assert entity2.cik == 320193
-        
+
         # Both should reference same entity
         assert entity1.cik == entity2.cik
-        
+
     @pytest.mark.network
     def test_company_creation_patterns(self):
         """Test Company creation with ticker and CIK"""
@@ -110,16 +110,16 @@ class TestEntityCreation:
         company1 = Company("AAPL")
         assert company1.cik == 320193
         assert company1.get_ticker() == "AAPL"
-        
+
         # By CIK
         company2 = Company(320193)
         assert company2.cik == 320193
         assert company2.get_ticker() == "AAPL"
-        
+
         # Both should be equivalent
         assert company1.cik == company2.cik
 
-    @pytest.mark.network
+    @pytest.mark.fast
     def test_entity_data_validation(self, apple_entity):
         """Test that entity data is properly populated"""
         assert apple_entity.data is not None
@@ -127,7 +127,7 @@ class TestEntityCreation:
         assert apple_entity.data.cik == 320193
         assert "Apple" in apple_entity.data.name
 
-    @pytest.mark.network
+    @pytest.mark.fast
     def test_company_data_validation(self, apple_company):
         """Test that company data is properly populated"""
         assert apple_company.data is not None
@@ -138,7 +138,8 @@ class TestEntityCreation:
 class TestEntityClassification:
     """Test entity type classification logic"""
     
-    @pytest.mark.network
+    @pytest.mark.fast
+    @pytest.mark.vcr
     @pytest.mark.parametrize("cik,is_individual,is_company", [
         (1771340, True, False),   # Taneja Vaibhav at TSLA (individual)
         (1800903, False, True),   # &VEST Domestic Fund II LP (company)
@@ -176,14 +177,14 @@ class TestFactoryFunctions:
         entity = get_entity("0000320193")
         assert entity.cik == 320193
         assert isinstance(entity, Entity)
-        
+
     @pytest.mark.network
     def test_get_company_factory(self):
         """Test the get_company factory function"""
         company = get_company("AAPL")
         assert company.cik == 320193
         assert isinstance(company, Company)
-        
+
     @pytest.mark.network
     def test_company_search_factory(self):
         """Test that company search works"""
@@ -265,7 +266,7 @@ class TestEntityLegacyCompatibility:
         tsla = Company("TSLA")
         assert tsla is not None
         assert tsla.cik == 1318605  # Tesla's CIK
-        
+
     @pytest.mark.network
     def test_no_company_for_invalid_cik(self):
         """Test handling of invalid/non-existent CIK"""

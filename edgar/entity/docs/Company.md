@@ -1,1028 +1,407 @@
-# Company Class Documentation
+# Company
 
-## Overview
+Access company information, filings, and financial data from the SEC.
 
-The `Company` class represents a public company that files with the SEC. It provides comprehensive access to company information, filings, financial data, and metadata. Company extends the `Entity` class with company-specific functionality like financial statements, ticker lookup, and enhanced data access.
+## Quick Start
 
-**Key Features:**
-- Access all company filings via SEC submissions API
-- Retrieve structured financial data (facts)
-- Get financial statements from 10-K and 10-Q filings
-- Access company metadata (tickers, exchanges, addresses, industry)
-- Simplified interface for common company analysis workflows
-
-## Common Actions
-
-Quick reference for the most frequently used Company methods:
-
-### Get a Company
 ```python
-# By ticker (case-insensitive)
-company = Company("AAPL")
-company = Company("aapl")  # Works the same
+from edgar import Company
 
-# By CIK (Central Index Key)
+# Get a company
+company = Company("AAPL")
+
+# Check if found
+if company.not_found:
+    print("Company not found")
+    exit()
+
+# Access basic information
+print(company.name)              # Apple Inc.
+print(company.get_ticker())      # AAPL
+print(company.industry)          # Electronic Computers
+
+# Get filings
+filings = company.get_filings(form="10-K")
+latest = filings.latest()
+
+# Get financial statements
+income = company.income_statement()
+balance = company.balance_sheet()
+cashflow = company.cashflow_statement()
+```
+
+## Creating a Company
+
+### By Ticker
+
+```python
+company = Company("AAPL")    # Case insensitive
+company = Company("aapl")    # Also works
+```
+
+### By CIK
+
+```python
 company = Company(320193)           # Integer
-company = Company("320193")         # String (no padding)
-company = Company("0000320193")     # String (zero-padded)
+company = Company("320193")         # String
+company = Company("0000320193")     # Zero-padded
 ```
 
-### Access Filings
-```python
-# Get all filings
-filings = company.get_filings()
-
-# Filter by form type
-filings_10k = company.get_filings(form="10-K")
-filings_8k = company.get_filings(form="8-K")
-filings_multi = company.get_filings(form=["10-K", "10-Q"])
-
-# Get latest filing
-latest = company.get_filings(form="10-K").latest()
-
-# Quick access to latest reports
-latest_10k = company.latest_tenk  # Latest 10-K as TenK object
-latest_10q = company.latest_tenq  # Latest 10-Q as TenQ object
-```
-
-### Access Financial Data
-```python
-# Get company facts (from SEC Company Facts API)
-facts = company.get_facts()
-
-# Access facts property (cached)
-facts = company.facts
-
-# Get financial statements from latest filings
-financials = company.get_financials()           # From latest 10-K
-quarterly = company.get_quarterly_financials()  # From latest 10-Q
-
-# Direct access to financial statements (recommended)
-income = company.income_statement()      # Income statement
-balance = company.balance_sheet()        # Balance sheet
-cash = company.cash_flow()               # Cash flow statement
-```
-
-### Company Information
-```python
-# Basic information
-print(company.name)              # Company name
-print(company.cik)               # Central Index Key
-print(company.tickers)           # List of ticker symbols
-print(company.get_ticker())      # Primary ticker
-
-# Industry and classification
-print(company.sic)               # SIC code
-print(company.industry)          # Industry description
-print(company.fiscal_year_end)   # Fiscal year end date
-
-# Trading information
-print(company.get_exchanges())   # List of exchanges
-```
-
-## Getting a Company
-
-### By Ticker Symbol
-
-The most common way to get a company is by ticker symbol:
+### Checking if Found
 
 ```python
-from edgar import Company
+company = Company("INVALID")
 
-# Ticker is case-insensitive
-apple = Company("AAPL")
-tesla = Company("TSLA")
-microsoft = Company("msft")  # Lowercase works too
-```
-
-**How it works**: EdgarTools looks up the ticker in SEC reference data to find the CIK, then loads company data using that CIK.
-
-**Note**: Some companies have multiple tickers. The ticker lookup finds the company (CIK) that the ticker belongs to.
-
-### By CIK (Central Index Key)
-
-For direct access, use the CIK:
-
-```python
-# CIK as integer (preferred)
-apple = Company(320193)
-
-# CIK as string (no padding needed)
-apple = Company("320193")
-
-# CIK as zero-padded string (also works)
-apple = Company("0000320193")
-```
-
-**Why use CIK?**
-- Faster (one API call vs. two for ticker lookup)
-- Unique identifier (never changes)
-- Avoids ticker ambiguity
-
-### Company Not Found
-
-```python
-from edgar import Company
-
-try:
-    company = Company("INVALID")
-except Exception as e:
-    print(f"Company not found: {e}")
-
-# Or check after creation
-company = Company("AAPL")
 if company.not_found:
     print("Company not found")
 ```
 
-## Core Properties
+Note: `Company()` does not raise an error for invalid input. It creates a placeholder entity. Always check `not_found` when user input is involved.
 
-### Identity Properties
+## Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | str | Official company name |
-| `cik` | int | Central Index Key (unique identifier) |
-| `tickers` | List[str] | All ticker symbols for the company |
-| `fiscal_year_end` | str | Fiscal year end date (e.g., "12-31") |
-
-### Classification Properties
+### Identity
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `sic` | int | Standard Industrial Classification code |
-| `industry` | str | Industry description from SIC |
-| `is_company` | bool | True if entity is a company (vs. individual) |
-| `is_individual` | bool | True if entity is an individual |
-| `filer_category` | FilerCategory | Parsed filer category with status and qualifications |
+| `name` | str | Company name |
+| `cik` | int | Central Index Key |
+| `tickers` | List[str] | Trading symbols |
+| `fiscal_year_end` | str | Fiscal year end (e.g., "12-31") |
+| `not_found` | bool | True if company doesn't exist |
 
-### Filer Status Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `is_large_accelerated_filer` | bool | True if public float >= $700M |
-| `is_accelerated_filer` | bool | True if public float >= $75M and < $700M |
-| `is_non_accelerated_filer` | bool | True if public float < $75M |
-| `is_smaller_reporting_company` | bool | True if qualifies as Smaller Reporting Company (SRC) |
-| `is_emerging_growth_company` | bool | True if qualifies as Emerging Growth Company (EGC) |
-
-### Financial Data Properties
+### Classification
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `facts` | EntityFacts | Company facts from SEC API (cached) |
-| `latest_tenk` | TenK | Latest 10-K filing object |
-| `latest_tenq` | TenQ | Latest 10-Q filing object |
-| `public_float` | float | Public float value (if available) |
-| `shares_outstanding` | int | Outstanding shares (if available) |
-| `docs` | Docs | Access comprehensive Company API documentation |
+| `sic` | int | SIC code |
+| `industry` | str | Industry description |
+| `business_category` | str | Business category (e.g., "Operating Company", "REIT", "Bank") |
+| `is_foreign` | bool | True if incorporated outside US |
+| `filer_type` | str | "Domestic", "Foreign", or "Canadian" |
 
-### Status Properties
+### Filer Status
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `not_found` | bool | True if company was not found |
+| `filer_category` | FilerCategory | Parsed filer category |
+| `is_large_accelerated_filer` | bool | Public float >= $700M |
+| `is_accelerated_filer` | bool | Public float >= $75M and < $700M |
+| `is_non_accelerated_filer` | bool | Public float < $75M |
+| `is_smaller_reporting_company` | bool | Qualifies as SRC |
+| `is_emerging_growth_company` | bool | Qualifies as EGC |
 
-## Core Methods
+### Financial Data
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `facts` | EntityFacts | Company facts (cached) |
+| `latest_tenk` | TenK | Latest 10-K filing |
+| `latest_tenq` | TenQ | Latest 10-Q filing |
+| `public_float` | float | Public float value |
+| `shares_outstanding` | float | Shares outstanding |
+
+## Methods
 
 ### get_filings()
 
-Get company filings with optional filtering:
+Get company filings with optional filtering.
 
 ```python
 def get_filings(
+    *,
+    year: int | List[int] = None,
+    quarter: int | List[int] = None,
     form: str | List[str] = None,
     accession_number: str | List[str] = None,
     file_number: str | List[str] = None,
+    filing_date: str | Tuple[str, str] = None,
+    amendments: bool = True,
     is_xbrl: bool = None,
-    is_inline_xbrl: bool = None,
-    sort_by: str = "filing_date"
+    is_inline_xbrl: bool = None
 ) -> EntityFilings
 ```
-
-**Parameters:**
-- `form`: Form type(s) to filter (e.g., "10-K", ["10-K", "10-Q"])
-- `accession_number`: Specific accession number(s)
-- `file_number`: SEC file number(s) for tracking related filings
-- `is_xbrl`: Filter for XBRL filings only
-- `is_inline_xbrl`: Filter for inline XBRL filings only
-- `sort_by`: Sort order (default: "filing_date")
-
-**Returns**: `EntityFilings` collection
 
 **Examples:**
 
 ```python
-# Get all filings
-all_filings = company.get_filings()
+# All filings
+filings = company.get_filings()
 
-# Get specific form type
+# Filter by form
 filings_10k = company.get_filings(form="10-K")
-filings_10q = company.get_filings(form="10-Q")
+periodic = company.get_filings(form=["10-K", "10-Q"])
 
-# Multiple form types
-annual_quarterly = company.get_filings(form=["10-K", "10-Q"])
+# Filter by date
+recent = company.get_filings(filing_date="2024-01-01:")
+date_range = company.get_filings(filing_date=("2023-01-01", "2023-12-31"))
 
-# Filter by XBRL availability
-xbrl_filings = company.get_filings(is_xbrl=True)
-inline_xbrl = company.get_filings(is_inline_xbrl=True)
+# Filter by year and quarter
+q4_2023 = company.get_filings(year=2023, quarter=4)
 
-# Get specific filing by accession number
-specific = company.get_filings(
-    accession_number="0000320193-24-000123"
-)
+# Exclude amendments
+originals = company.get_filings(form="10-K", amendments=False)
 
-# Get related filings by file number
-related = company.get_filings(file_number="001-36743")
+# Get latest
+latest = company.get_filings(form="10-K").latest()
 ```
 
 ### get_facts()
 
-Get structured financial data from SEC Company Facts API:
+Get structured financial data from SEC Company Facts API.
 
 ```python
-def get_facts() -> EntityFacts
+def get_facts(
+    period_type: str | PeriodType = None
+) -> Optional[EntityFacts]
 ```
-
-**Returns**: `EntityFacts` object containing company financial data
 
 **Examples:**
 
 ```python
-# Get facts
-facts = company.get_facts()
-
-# Access via property (cached)
-facts = company.facts
-
-# Work with facts
-income_stmt = facts.get_income_statement()
-balance_sheet = facts.get_balance_sheet()
-cash_flow = facts.get_cash_flow_statement()
-```
-
-**Note**: Facts are cached after first access. The `.facts` property provides convenient cached access.
-
-### get_financials()
-
-Get financial statements from latest 10-K:
-
-```python
-def get_financials() -> Optional[Financials]
-```
-
-**Returns**: `Financials` object from latest 10-K, or None if not available
-
-**Examples:**
-
-```python
-# Get annual financials
-financials = company.get_financials()
-
-if financials:
-    print(financials.income_statement)
-    print(financials.balance_sheet)
-    print(financials.cash_flow)
-```
-
-### get_quarterly_financials()
-
-Get financial statements from latest 10-Q:
-
-```python
-def get_quarterly_financials() -> Optional[Financials]
-```
-
-**Returns**: `Financials` object from latest 10-Q, or None if not available
-
-**Examples:**
-
-```python
-# Get quarterly financials
-quarterly = company.get_quarterly_financials()
-
-if quarterly:
-    print(quarterly.income_statement)
-```
-
-### get_ticker()
-
-Get the primary ticker symbol:
-
-```python
-def get_ticker() -> Optional[str]
-```
-
-**Returns**: Primary ticker symbol, or None if no tickers
-
-**Examples:**
-
-```python
-ticker = company.get_ticker()
-if ticker:
-    print(f"Trading as: {ticker}")
-```
-
-### get_exchanges()
-
-Get all exchanges where company is listed:
-
-```python
-def get_exchanges() -> List[str]
-```
-
-**Returns**: List of exchange names
-
-**Examples:**
-
-```python
-exchanges = company.get_exchanges()
-for exchange in exchanges:
-    print(f"Listed on: {exchange}")
-```
-
-### to_context()
-
-Get AI-optimized plain text representation of the company:
-
-```python
-def to_context(
-    detail: str = 'standard',
-    max_tokens: Optional[int] = None
-) -> str
-```
-
-**Parameters:**
-- `detail`: Level of detail to include:
-  - `'minimal'`: Basic company info (~100-150 tokens)
-  - `'standard'`: Adds industry, category, available actions (~250-350 tokens)
-  - `'full'`: Adds addresses, phone, filing stats (~500+ tokens)
-- `max_tokens`: Optional token limit using 4 chars/token heuristic
-
-**Returns**: Markdown-formatted key-value representation optimized for LLMs
-
-**Examples:**
-
-```python
-# Get minimal context for LLM
-context = company.to_context('minimal')
-print(context)
-# COMPANY: Apple Inc.
-# CIK: 0000320193
-# Ticker: AAPL
-
-# Get standard context with available actions
-context = company.to_context('standard')
-
-# Get full context with addresses
-context = company.to_context('full')
-
-# Limit token count
-context = company.to_context('standard', max_tokens=200)
-```
-
-**Note**: Uses Markdown-KV format optimized for LLM consumption (60.7% accuracy, 25% fewer tokens than JSON).
-
-### text() (Deprecated)
-
-**Deprecated**: Use `to_context()` instead.
-
-```python
-def text(max_tokens: int = 2000) -> str
-```
-
-This method is deprecated and will be removed in a future version. Use `to_context()` for consistent naming with other AI-native methods.
-
-## Direct Financial Statement Methods
-
-These methods provide direct access to financial statements without needing to access `facts` first.
-
-### income_statement()
-
-Get income statement data:
-
-```python
-def income_statement(
-    periods: int = 4,
-    annual: bool = True,
-    as_dataframe: bool = False,
-    concise_format: bool = False
-) -> Optional[MultiPeriodStatement]
-```
-
-**Parameters:**
-- `periods`: Number of periods to retrieve (default: 4)
-- `annual`: If True, prefer annual periods; if False, get quarterly
-- `as_dataframe`: If True, return DataFrame; if False, return MultiPeriodStatement
-- `concise_format`: If True, display values as $1.0B; if False, display as $1,000,000,000
-
-**Examples:**
-
-```python
-# Get 4 years of annual income statements
-income = company.income_statement()
-
-# Get quarterly data
-income = company.income_statement(annual=False)
-
-# Get as DataFrame
-df = company.income_statement(as_dataframe=True)
-
-# Concise format for display
-income = company.income_statement(concise_format=True)
-```
-
-### balance_sheet()
-
-Get balance sheet data:
-
-```python
-def balance_sheet(
-    periods: int = 4,
-    annual: bool = True,
-    as_dataframe: bool = False,
-    concise_format: bool = False
-) -> Optional[MultiPeriodStatement]
-```
-
-**Parameters**: Same as `income_statement()`
-
-**Examples:**
-
-```python
-# Get annual balance sheets
-balance = company.balance_sheet()
-
-# Get quarterly balance sheets
-balance = company.balance_sheet(annual=False, periods=8)
-```
-
-### cash_flow()
-
-Get cash flow statement data:
-
-```python
-def cash_flow(
-    periods: int = 4,
-    annual: bool = True,
-    as_dataframe: bool = False,
-    concise_format: bool = False
-) -> Optional[MultiPeriodStatement]
-```
-
-**Parameters**: Same as `income_statement()`
-
-**Examples:**
-
-```python
-# Get annual cash flow statements
-cash = company.cash_flow()
-
-# Get as DataFrame for analysis
-df = company.cash_flow(as_dataframe=True)
-```
-
-### get_structured_statement()
-
-Get a hierarchically structured financial statement using learned canonical structures:
-
-```python
-def get_structured_statement(
-    statement_type: str,
-    fiscal_year: Optional[int] = None,
-    fiscal_period: Optional[str] = None,
-    use_canonical: bool = True,
-    include_missing: bool = False
-) -> Optional[StructuredStatement]
-```
-
-**Parameters:**
-- `statement_type`: Type of statement ('BalanceSheet', 'IncomeStatement', 'CashFlow')
-- `fiscal_year`: Fiscal year to retrieve (defaults to latest)
-- `fiscal_period`: Fiscal period ('FY', 'Q1', 'Q2', 'Q3', 'Q4')
-- `use_canonical`: Use canonical structure for organization (recommended)
-- `include_missing`: Include placeholders for missing canonical concepts
-
-**Returns**: `StructuredStatement` with hierarchical organization or None if no data
-
-**Examples:**
-
-```python
-# Get Q4 2024 income statement
-stmt = company.get_structured_statement('IncomeStatement', 2024, 'Q4')
-
-# Display hierarchically
-print(stmt.get_hierarchical_display())
-
-# Get full year balance sheet
-balance = company.get_structured_statement('BalanceSheet', 2024, 'FY')
-```
-
-## Accessing Filings
-
-### Get All Filings
-
-```python
-company = Company("AAPL")
-
-# Get all filings (returns EntityFilings)
-filings = company.get_filings()
-
-print(f"Total filings: {len(filings)}")
-
-# Iterate through filings
-for filing in filings:
-    print(f"{filing.form}: {filing.filing_date}")
-```
-
-### Filter by Form Type
-
-```python
-# Single form type
-filings_10k = company.get_filings(form="10-K")
-filings_8k = company.get_filings(form="8-K")
-filings_def14a = company.get_filings(form="DEF 14A")
-
-# Multiple form types
-annual_reports = company.get_filings(form=["10-K", "10-K/A"])
-periodic = company.get_filings(form=["10-K", "10-Q"])
-```
-
-### Get Latest Filing
-
-```python
-# Get latest 10-K
-latest_10k = company.get_filings(form="10-K").latest()
-
-# Get latest 8-K
-latest_8k = company.get_filings(form="8-K").latest()
-
-# Get multiple latest filings
-latest_5_10ks = company.get_filings(form="10-K").latest(5)
-```
-
-### Quick Access to Latest Reports
-
-```python
-# Property access to latest reports (as form-specific objects)
-latest_10k = company.latest_tenk  # Returns TenK object
-latest_10q = company.latest_tenq  # Returns TenQ object
-
-# Access financial statements directly
-if latest_10k:
-    print(latest_10k.financials.income_statement)
-```
-
-### Filter by XBRL
-
-```python
-# Get only XBRL filings
-xbrl_filings = company.get_filings(is_xbrl=True)
-
-# Get only inline XBRL filings
-inline_xbrl = company.get_filings(is_inline_xbrl=True)
-
-# Check specific form for XBRL
-xbrl_10ks = company.get_filings(form="10-K", is_xbrl=True)
-```
-
-### Working with Filing Results
-
-```python
-# Get filings
-filings = company.get_filings(form="10-K")
-
-# Access by index
-first_filing = filings[0]
-tenth_filing = filings[9]
-
-# Convert to DataFrame
-df = filings.to_pandas()
-
-# Get subset
-recent_10 = filings.head(10)
-last_10 = filings.tail(10)
-
-# Filter further
-filings_2024 = filings.filter(filing_date="2024-01-01:")
-```
-
-## Accessing Financial Data
-
-### Company Facts API
-
-The SEC provides structured financial data via the Company Facts API:
-
-```python
-company = Company("AAPL")
-
-# Get facts
+# Get all facts
 facts = company.get_facts()
 
 # Or use cached property
 facts = company.facts
 
-# Build financial statements from facts
-income = facts.get_income_statement()
-balance = facts.get_balance_sheet()
-cashflow = facts.get_cash_flow_statement()
+# Filter by period type
+annual_facts = company.get_facts(period_type='annual')
+quarterly_facts = company.get_facts(period_type='quarterly')
 ```
 
-### Financial Statements from Filings
+### Financial Statement Methods
 
-Get financials directly from 10-K or 10-Q filings:
+Get financial statements directly.
+
+```python
+def income_statement(
+    periods: int = 4,
+    period: str = 'annual',
+    as_dataframe: bool = False,
+    concise_format: bool = False
+) -> Optional[MultiPeriodStatement | TTMStatement | DataFrame]
+```
+
+**Parameters:**
+
+- `periods` - Number of periods to retrieve (default: 4)
+- `period` - 'annual', 'quarterly', or 'ttm' (trailing twelve months)
+- `as_dataframe` - Return as DataFrame instead of Statement
+- `concise_format` - Display as $1.0B instead of $1,000,000,000
+
+**Examples:**
+
+```python
+# Annual income statement (last 4 years)
+income = company.income_statement()
+
+# Quarterly statements
+income = company.income_statement(period='quarterly', periods=8)
+
+# Trailing twelve months
+ttm = company.income_statement(period='ttm')
+
+# As DataFrame
+df = company.income_statement(as_dataframe=True)
+
+# Balance sheet and cash flow work the same way
+balance = company.balance_sheet(period='annual')
+cashflow = company.cashflow_statement(period='quarterly')
+```
+
+Note: TTM is not applicable for balance sheet (point-in-time data).
+
+### get_ttm()
+
+Calculate Trailing Twelve Months value for any concept.
+
+```python
+def get_ttm(
+    concept: str,
+    as_of: date | str = None
+) -> TTMMetric
+```
+
+**Parameters:**
+
+- `concept` - XBRL concept name (e.g., 'Revenues', 'us-gaap:NetIncomeLoss')
+- `as_of` - Date, ISO string 'YYYY-MM-DD', or quarter string 'YYYY-QN'
+
+**Examples:**
+
+```python
+# Latest TTM revenue
+ttm_revenue = company.get_ttm("Revenues")
+print(f"TTM Revenue: ${ttm_revenue.value / 1e9:.1f}B")
+
+# TTM as of specific date
+ttm = company.get_ttm("NetIncomeLoss", as_of="2024-06-30")
+ttm = company.get_ttm("NetIncomeLoss", as_of="2024-Q2")
+
+# Access TTM details
+print(f"Value: {ttm.value}")
+print(f"Periods: {ttm.periods}")  # Shows which quarters summed
+print(f"Calculation: {ttm.calculation_context}")
+```
+
+**Common TTM Methods:**
+
+```python
+# Convenience methods for common metrics
+ttm_revenue = company.get_ttm_revenue()
+ttm_income = company.get_ttm_net_income()
+```
+
+### list_concepts()
+
+Discover available XBRL concepts for this company.
+
+```python
+def list_concepts(
+    search: str = None,
+    statement: str = None,
+    limit: int = 20
+) -> ConceptList
+```
+
+**Examples:**
+
+```python
+# Search for revenue-related concepts
+concepts = company.list_concepts(search="revenue")
+
+# Filter by statement
+concepts = company.list_concepts(
+    search="assets",
+    statement="BalanceSheet"
+)
+
+# Iterate over results
+for concept in concepts:
+    print(f"{concept['concept']}: {concept['label']}")
+
+# Convert to DataFrame
+df = concepts.to_dataframe()
+
+# Get as list
+concept_list = concepts.to_list()
+```
+
+### get_ticker() / get_exchanges()
+
+Get ticker and exchange information.
+
+```python
+# Primary ticker
+ticker = company.get_ticker()
+
+# All tickers
+tickers = company.tickers
+
+# All exchanges
+exchanges = company.get_exchanges()
+```
+
+### get_financials() / get_quarterly_financials()
+
+Get financial statements from latest 10-K or 10-Q.
 
 ```python
 # From latest 10-K
-annual_financials = company.get_financials()
-
-if annual_financials:
-    income = annual_financials.income_statement
-    balance = annual_financials.balance_sheet
-    cashflow = annual_financials.cash_flow
+financials = company.get_financials()
+if financials:
+    print(financials.income_statement)
 
 # From latest 10-Q
-quarterly_financials = company.get_quarterly_financials()
-
-if quarterly_financials:
-    income = quarterly_financials.income_statement
+quarterly = company.get_quarterly_financials()
 ```
 
-### XBRL from Filings
+### to_context()
 
-Access raw XBRL data:
+Get AI-optimized text representation.
 
 ```python
-# Get latest 10-K filing
-filing = company.get_filings(form="10-K").latest()
-
-# Parse XBRL
-xbrl = filing.xbrl()
-
-# Access statements
-income = xbrl.statements.income_statement()
-balance = xbrl.statements.balance_sheet()
-
-# Convert to DataFrame
-df = income.to_dataframe()
+def to_context(
+    detail: str = 'standard',
+    max_tokens: int = None
+) -> str
 ```
 
-## Company Metadata
+**Detail levels:**
 
-### Identity and Contact
+- `'minimal'` - Basic info (~100-150 tokens)
+- `'standard'` - Adds industry, category, actions (~250-350 tokens)
+- `'full'` - Adds addresses, phone, filing stats (~500+ tokens)
 
-```python
-company = Company("AAPL")
-
-# Basic identity
-print(f"Name: {company.name}")
-print(f"CIK: {company.cik}")
-
-# Access detailed data
-data = company.data
-
-# Addresses
-if data.business_address:
-    print(f"Business Address: {data.business_address}")
-if data.mailing_address:
-    print(f"Mailing Address: {data.mailing_address}")
-
-# Contact information
-if hasattr(data, 'phone'):
-    print(f"Phone: {data.phone}")
-if hasattr(data, 'website'):
-    print(f"Website: {data.website}")
-```
-
-### Tickers and Exchanges
+**Example:**
 
 ```python
-# Get all tickers
-tickers = company.tickers
-print(f"Tickers: {', '.join(tickers)}")
-
-# Get primary ticker
-primary = company.get_ticker()
-print(f"Primary ticker: {primary}")
-
-# Get exchanges
-exchanges = company.get_exchanges()
-for exchange in exchanges:
-    print(f"Listed on: {exchange}")
-```
-
-### Industry Classification
-
-```python
-# SIC code and description
-print(f"SIC: {company.sic}")
-print(f"Industry: {company.industry}")
-
-# Fiscal year end
-print(f"Fiscal Year End: {company.fiscal_year_end}")
-
-# Entity type and category
-data = company.data
-if hasattr(data, 'entity_type'):
-    print(f"Entity Type: {data.entity_type}")
-if hasattr(data, 'category'):
-    print(f"Category: {data.category}")
-```
-
-### Filer Status and Category
-
-```python
-# Get structured filer category
-category = company.filer_category
-print(f"Status: {category.status}")  # e.g., FilerStatus.LARGE_ACCELERATED
-
-# Check specific filer statuses
-if company.is_large_accelerated_filer:
-    print("Large accelerated filer (public float >= $700M)")
-elif company.is_accelerated_filer:
-    print("Accelerated filer (public float >= $75M)")
-else:
-    print("Non-accelerated filer")
-
-# Check qualifications
-if company.is_smaller_reporting_company:
-    print("Qualifies as Smaller Reporting Company (SRC)")
-if company.is_emerging_growth_company:
-    print("Qualifies as Emerging Growth Company (EGC)")
-
-# Filer status affects filing deadlines and disclosure requirements
-# Large accelerated filers: 10-K due 60 days after fiscal year end
-# Accelerated filers: 10-K due 75 days after fiscal year end
-# Non-accelerated filers: 10-K due 90 days after fiscal year end
-```
-
-### Former Names
-
-```python
-data = company.data
-
-if hasattr(data, 'former_names') and data.former_names:
-    print("Former Names:")
-    for former in data.former_names:
-        print(f"  {former['name']}: {former['from']} to {former['to']}")
+# For LLM consumption
+context = company.to_context('standard')
+print(context)
 ```
 
 ## Common Workflows
 
-### Analyze Annual Reports Over Time
+### Get Latest Annual Report
 
 ```python
 company = Company("AAPL")
 
-# Get all 10-K filings
-filings_10k = company.get_filings(form="10-K")
-
-# Get last 5 years
-last_5_years = filings_10k.latest(5)
-
-# Analyze each year
-for filing in last_5_years:
-    print(f"\n{filing.filing_date} - {filing.report_date}")
-
-    # Get XBRL data
-    xbrl = filing.xbrl()
-
-    # Get income statement
-    income = xbrl.statements.income_statement()
-    df = income.to_dataframe()
-
-    # Show revenue
-    if 'Revenue' in df.index:
-        revenue = df.loc['Revenue'].iloc[0]
-        print(f"  Revenue: ${revenue:,.0f}")
-```
-
-### Track Quarterly Performance
-
-```python
-company = Company("AAPL")
-
-# Get all 10-Q filings
-filings_10q = company.get_filings(form="10-Q")
-
-# Get last 4 quarters
-last_4_quarters = filings_10q.latest(4)
-
-# Analyze each quarter
-quarterly_revenue = []
-
-for filing in last_4_quarters:
-    xbrl = filing.xbrl()
-
-    # Get revenue from current period
-    current = xbrl.current_period
-    income = current.income_statement()
-
-    # Extract revenue
-    df = income.to_dataframe()
-    if 'Revenue' in df.index:
-        revenue = df.loc['Revenue'].iloc[0]
-        quarterly_revenue.append({
-            'period': filing.report_date,
-            'revenue': revenue
-        })
-
-# Show trend
-import pandas as pd
-trend_df = pd.DataFrame(quarterly_revenue)
-print(trend_df)
-```
-
-### Compare Multiple Companies
-
-```python
-companies = {
-    'AAPL': Company("AAPL"),
-    'MSFT': Company("MSFT"),
-    'GOOGL': Company("GOOGL")
-}
-
-results = []
-
-for ticker, company in companies.items():
-    # Get latest 10-K
-    filing = company.get_filings(form="10-K").latest()
-
-    if filing and filing.is_xbrl:
-        xbrl = filing.xbrl()
-        income = xbrl.statements.income_statement()
-        df = income.to_dataframe()
-
-        # Extract key metrics
-        results.append({
-            'ticker': ticker,
-            'company': company.name,
-            'revenue': df.loc['Revenue'].iloc[0] if 'Revenue' in df.index else None,
-            'net_income': df.loc['Net Income'].iloc[0] if 'Net Income' in df.index else None
-        })
-
-# Compare
-import pandas as pd
-comparison_df = pd.DataFrame(results)
-print(comparison_df)
-```
-
-### Find Earnings Announcements
-
-```python
-company = Company("AAPL")
-
-# Get 8-K filings
-filings_8k = company.get_filings(form="8-K")
-
-# Find earnings announcements (Item 2.02)
-earnings_8ks = []
-
-for filing in filings_8k:
-    if filing.items and "2.02" in filing.items:
-        earnings_8ks.append({
-            'filing_date': filing.filing_date,
-            'report_date': filing.report_date,
-            'items': filing.items
-        })
-
-# Show recent earnings dates
-import pandas as pd
-earnings_df = pd.DataFrame(earnings_8ks).head(10)
-print(earnings_df)
-```
-
-### Export Company Data
-
-```python
-company = Company("AAPL")
-
-# Get all filings
-filings = company.get_filings(form=["10-K", "10-Q"])
-
-# Convert to DataFrame
-df = filings.to_pandas()
-
-# Export to CSV
-df.to_csv("apple_filings.csv", index=False)
-
-# Export facts
-facts = company.get_facts()
-facts_df = facts.to_pandas()
-facts_df.to_csv("apple_facts.csv")
-
-# Export specific statement
-income = facts.get_income_statement()
-income.to_csv("apple_income.csv")
-```
-
-### Build Custom Dashboard
-
-```python
-company = Company("AAPL")
-
-# Collect key metrics
-dashboard = {
-    'company': company.name,
-    'ticker': company.get_ticker(),
-    'cik': company.cik,
-    'industry': company.industry,
-    'fiscal_year_end': company.fiscal_year_end
-}
-
-# Add latest filing info
-latest_10k = company.get_filings(form="10-K").latest()
-if latest_10k:
-    dashboard['latest_10k_date'] = latest_10k.filing_date
-    dashboard['latest_10k_period'] = latest_10k.report_date
-
-latest_10q = company.get_filings(form="10-Q").latest()
-if latest_10q:
-    dashboard['latest_10q_date'] = latest_10q.filing_date
-    dashboard['latest_10q_period'] = latest_10q.report_date
-
-# Add financial metrics
-try:
-    facts = company.get_facts()
-    income = facts.get_income_statement(annual=True, periods=1)
-
-    # Extract metrics (adjust based on your needs)
-    dashboard['latest_revenue'] = "See income statement"
-    dashboard['latest_net_income'] = "See income statement"
-except:
-    dashboard['facts_available'] = False
-
-print(dashboard)
-```
-
-## Best Practices
-
-### 1. Use Ticker for Convenience, CIK for Performance
-
-```python
-# Good for interactive use
-company = Company("AAPL")
-
-# Better for production/scripts
-company = Company(320193)
-```
-
-### 2. Cache the Company Object
-
-```python
-# Good - reuse company object
-company = Company("AAPL")
-filings_10k = company.get_filings(form="10-K")
-filings_10q = company.get_filings(form="10-Q")
-facts = company.facts
-
-# Less efficient - creates company multiple times
-filings_10k = Company("AAPL").get_filings(form="10-K")
-filings_10q = Company("AAPL").get_filings(form="10-Q")
-```
-
-### 3. Use Latest Properties for Quick Access
-
-```python
-# Good - uses cached property
-latest_10k = company.latest_tenk
-
-# More verbose
-latest_10k = company.get_filings(form="10-K").latest().obj()
-```
-
-### 4. Check XBRL Availability
-
-```python
-filing = company.get_filings(form="10-K").latest()
-
-if filing.is_xbrl:
-    xbrl = filing.xbrl()
-    # Process XBRL data
-else:
-    # Fall back to text parsing or skip
-    print("No XBRL data available")
-```
-
-### 5. Handle Missing Data Gracefully
-
-```python
-company = Company("AAPL")
-
-# Check if facts are available
-try:
-    facts = company.get_facts()
-    income = facts.get_income_statement()
-except Exception as e:
-    print(f"Facts not available: {e}")
-    income = None
-
-# Check if filings exist
+# Get latest 10-K
 filings = company.get_filings(form="10-K")
-if not filings.empty:
-    latest = filings.latest()
-else:
-    print("No 10-K filings found")
+latest = filings.latest()
+
+# Access XBRL data
+if latest.is_xbrl:
+    xbrl = latest.xbrl()
+    income = xbrl.statements.income_statement()
+```
+
+### Compare Quarterly Performance
+
+```python
+# Get last 4 quarters
+filings = company.get_filings(form="10-Q")
+last_4 = filings.latest(4)
+
+for filing in last_4:
+    print(f"Period: {filing.report_date}")
+    print(f"Filed: {filing.filing_date}")
+```
+
+### Track Insider Trading
+
+```python
+# Get Form 4 filings (insider transactions)
+filings = company.get_filings(form="4")
+
+for filing in filings.head(10):
+    form4 = filing.obj()
+    summary = form4.get_ownership_summary()
+    print(f"{form4.insider_name}: {summary.net_change:,} shares")
+```
+
+## Business Categorization
+
+EdgarTools classifies companies into business categories:
+
+```python
+category = company.business_category
+# Returns one of: 'Operating Company', 'ETF', 'Mutual Fund',
+# 'Closed-End Fund', 'BDC', 'REIT', 'Investment Manager',
+# 'Bank', 'Insurance Company', 'SPAC', 'Holding Company'
+
+# Helper methods
+if company.is_fund():
+    print("Investment fund")
+
+if company.is_financial_institution():
+    print("Financial institution")
+
+if company.is_operating_company():
+    print("Operating company")
 ```
 
 ## Error Handling
@@ -1030,17 +409,10 @@ else:
 ### Company Not Found
 
 ```python
-from edgar import Company
+company = Company("INVALID")
 
-try:
-    company = Company("INVALIDTICKER")
-except Exception as e:
-    print(f"Error: {e}")
-
-# Or check after creation
-company = Company("AAPL")
 if company.not_found:
-    print("Company not found")
+    print("Company does not exist")
     exit()
 ```
 
@@ -1050,7 +422,7 @@ if company.not_found:
 filings = company.get_filings(form="RARE-FORM")
 
 if filings.empty:
-    print("No filings of this type found")
+    print("No filings of this type")
 else:
     latest = filings.latest()
 ```
@@ -1058,234 +430,51 @@ else:
 ### Facts Not Available
 
 ```python
-try:
-    facts = company.get_facts()
-except Exception as e:
-    print(f"Facts not available: {e}")
-    facts = None
+facts = company.get_facts()
 
-# Some companies may not have facts data
 if facts is None:
-    print("Using alternative data source")
+    print("Facts not available for this company")
 ```
 
-### Missing Financial Statements
+## Performance Tips
+
+### Cache the Company Object
 
 ```python
-financials = company.get_financials()
-
-if financials is None:
-    print("No 10-K with financials found")
-    # Try quarterly
-    financials = company.get_quarterly_financials()
-
-if financials:
-    # Process financials
-    pass
-```
-
-## Performance Considerations
-
-### Minimize API Calls
-
-```python
-# Good - one company object, reused
+# Good - reuse company
 company = Company("AAPL")
-filings = company.get_filings()
-facts = company.facts
-latest_10k = company.latest_tenk
-
-# Less efficient - creates company 3 times
-filings = Company("AAPL").get_filings()
-facts = Company("AAPL").facts
-latest_10k = Company("AAPL").latest_tenk
-```
-
-### Use Facts Property (Cached)
-
-```python
-# First call fetches data
-facts = company.facts
-
-# Subsequent calls use cache
-income = company.facts.get_income_statement()
-balance = company.facts.get_balance_sheet()
-```
-
-### Filter Filings Early
-
-```python
-# Good - filter at source
-recent_10ks = company.get_filings(form="10-K", is_xbrl=True)
-
-# Less efficient - get all then filter
-all_filings = company.get_filings()
-recent_10ks = [f for f in all_filings if f.form == "10-K" and f.is_xbrl]
-```
-
-### Use EntityFilings Methods
-
-```python
 filings = company.get_filings(form="10-K")
+facts = company.facts
+income = company.income_statement()
 
-# Good - use built-in methods
-latest = filings.latest()
-recent_5 = filings.latest(5)
-
-# Less efficient - manual slicing
-sorted_filings = sorted(filings, key=lambda f: f.filing_date, reverse=True)
-latest = sorted_filings[0]
+# Less efficient - creates company each time
+Company("AAPL").get_filings(form="10-K")
+Company("AAPL").facts
+Company("AAPL").income_statement()
 ```
 
-## Display and Representation
-
-### Rich Display
-
-Company has a rich display showing comprehensive information:
+### Use CIK for Production
 
 ```python
+# Faster - direct CIK lookup (one API call)
+company = Company(320193)
+
+# Slower - ticker requires lookup (two API calls)
 company = Company("AAPL")
-print(company)
 ```
 
-Shows:
-- Company name and ticker
-- CIK and entity type
-- Category and industry (SIC)
-- Fiscal year end
-- Trading exchanges and symbols
-- Business and mailing addresses
-- Contact information
-- Former names (if any)
-
-### String Representation
+### Use Latest Properties
 
 ```python
-# Simple string representation
-str(company)  # Returns "Company(name='Apple Inc.', cik=320193)"
+# Good - cached property
+tenk = company.latest_tenk
 
-# Display in console
-print(company)  # Shows rich formatted display
+# More verbose
+tenk = company.get_filings(form="10-K").latest().obj()
 ```
 
-## Integration with Other Classes
+## See Also
 
-### Company → EntityFilings → EntityFiling
-
-```python
-company = Company("AAPL")           # Company object
-
-filings = company.get_filings()     # EntityFilings collection
-# Type: EntityFilings (maintains company context)
-
-filing = filings[0]                 # EntityFiling instance
-# Type: EntityFiling (has entity-specific metadata)
-
-# EntityFiling knows its company
-entity = filing.get_entity()        # Returns the Company
-```
-
-### Company → Facts → Statements
-
-```python
-company = Company("AAPL")
-
-facts = company.get_facts()         # EntityFacts object
-
-income = facts.get_income_statement()    # Statement object
-balance = facts.get_balance_sheet()      # Statement object
-```
-
-### Company → Filing → XBRL
-
-```python
-company = Company("AAPL")
-
-filing = company.get_filings(form="10-K").latest()
-
-xbrl = filing.xbrl()                # XBRL object
-
-statements = xbrl.statements        # Statements collection
-income = statements.income_statement()
-```
-
-## Comparison: Company vs Entity
-
-Company extends Entity with company-specific features:
-
-| Feature | Entity | Company |
-|---------|--------|---------|
-| Basic identity (name, CIK) | ✅ | ✅ (inherited) |
-| Get filings | ✅ | ✅ (inherited) |
-| Tickers | ✅ | ✅ (enhanced) |
-| Facts | ❌ | ✅ |
-| Financial statements | ❌ | ✅ |
-| latest_tenk / latest_tenq | ❌ | ✅ |
-| get_financials() | ❌ | ✅ |
-| get_quarterly_financials() | ❌ | ✅ |
-
-**When to use Company**: 95% of use cases (public companies)
-**When to use Entity**: Individual filers or when entity type is unknown
-
-## Troubleshooting
-
-### "Company not found"
-
-**Cause**: Ticker or CIK doesn't exist or is misspelled
-
-**Solution**:
-```python
-# Verify ticker
-from edgar import find_company
-
-results = find_company("APPL")  # Search for similar
-for result in results:
-    print(f"{result.name}: {result.ticker}")
-```
-
-### "No filings found"
-
-**Cause**: Company may be newly registered or form type is wrong
-
-**Solution**:
-```python
-# Check what filings exist
-all_filings = company.get_filings()
-print(f"Total filings: {len(all_filings)}")
-
-# Check form types
-df = all_filings.to_pandas()
-print(df['form'].value_counts())
-```
-
-### "Facts not available"
-
-**Cause**: Company may be investment company, foreign filer, or recently registered
-
-**Solution**:
-```python
-# Check entity type
-print(f"Entity type: {company.data.entity_type}")
-
-# Fall back to XBRL from filings
-filing = company.get_filings(form="10-K").latest()
-if filing and filing.is_xbrl:
-    xbrl = filing.xbrl()
-    # Use XBRL instead of facts
-```
-
-### "Ticker has multiple companies"
-
-**Cause**: Some tickers may have had multiple owners over time
-
-**Solution**:
-```python
-# Use CIK for specific company
-company = Company(320193)  # Specific to Apple Inc.
-
-# Or verify after ticker lookup
-company = Company("AAPL")
-print(f"Got: {company.name} (CIK: {company.cik})")
-```
-
-This comprehensive guide covers everything you need to work with Company objects in edgartools, from basic usage to advanced workflows and integration patterns.
+- `company.docs` - Display this documentation in terminal
+- [EntityFilings](EntityFilings.md) - Working with filing collections
+- [EntityFiling](EntityFiling.md) - Working with individual filings

@@ -63,6 +63,9 @@ QUICK_WAIT_MAX = 16  # max 16s delay
 BULK_RETRY_ATTEMPTS = 8
 BULK_RETRY_TIMEOUT = None  # unlimited
 BULK_WAIT_MAX = 120  # max 2min delay
+# Longer read timeout for bulk downloads - SEC files can be slow on congested connections
+# Connect stays short (10s), but read timeout is generous (5 min per chunk)
+BULK_TIMEOUT = Timeout(300.0, connect=10.0)
 
 # SSL errors - retry once in case of transient issues, then fail with helpful message
 SSL_RETRY_ATTEMPTS = 2  # 1 retry = 2 total attempts
@@ -76,6 +79,9 @@ RETRYABLE_EXCEPTIONS = (
     httpcore.ReadTimeout, httpcore.WriteTimeout, httpcore.ConnectTimeout,
     httpcore.PoolTimeout, httpcore.ConnectError, httpcore.NetworkError,
     httpcore.TimeoutException,
+    # Protocol errors - connection dropped mid-download ("peer closed connection
+    # without sending complete message body")
+    httpcore.RemoteProtocolError,
     # Gzip decompression exceptions - can occur with corrupted downloads
     EOFError, gzip.BadGzipFile
 )
@@ -128,10 +134,65 @@ def should_retry(exc: Exception) -> bool:
 
 
 class TooManyRequestsError(Exception):
-    def __init__(self, url, message="Too Many Requests"):
+    """
+    Raised when SEC returns HTTP 429 (Too Many Requests).
+
+    The SEC limits requests to 10 per second. When exceeded, your IP is blocked
+    for approximately 10 minutes. Continuing to send requests during this period
+    will extend the block duration.
+
+    Important: Do NOT retry immediately - wait for the block to expire.
+    """
+
+    BLOCK_DURATION_MINUTES = 10
+
+    def __init__(self, url, retry_after: int = None):
         self.url = url
-        self.message = message
-        super().__init__(self.message)
+        self.retry_after = retry_after  # From Retry-After header, if present
+
+        # Build informative error message
+        header = f"""
+SEC Rate Limit Exceeded (HTTP 429)
+==================================
+
+URL: {self.url}"""
+
+        if retry_after:
+            wait_info = f"""
+Retry-After: {retry_after} seconds (from SEC response header)"""
+        else:
+            wait_info = f"""
+Estimated Wait: ~{self.BLOCK_DURATION_MINUTES} minutes"""
+
+        cause = """
+
+What happened:
+  Your request rate exceeded the SEC's limit of 10 requests/second.
+  Your IP address has been temporarily blocked."""
+
+        warning = """
+
+{warning} Important: Do NOT retry immediately!
+  Continuing to send requests during the block period will EXTEND it.
+  The SEC penalizes continued requests during timeout.""".format(warning="\u26A0")
+
+        solution = f"""
+
+What to do:
+  1. Wait at least {self.BLOCK_DURATION_MINUTES} minutes before retrying
+  2. Reduce your request rate (edgartools defaults to 9 req/sec)
+  3. Consider using local storage: download_edgar_data()
+
+To adjust rate limit:
+  import os
+  os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = '5'  # More conservative"""
+
+        footer = """
+
+Details: https://www.sec.gov/os/webmaster-faq#developers"""
+
+        message = f"{header}{wait_info}{cause}{warning}{solution}{footer}"
+        super().__init__(message)
 
 
 class IdentityNotSetException(Exception):
@@ -416,10 +477,10 @@ Custom CA bundle is configured but verification still failed. Check:
 Solutions:
 ----------
 
-1. QUICK FIX - Disable SSL verification:
+1. RECOMMENDED - Use your OS certificate store:
 
    from edgar import configure_http
-   configure_http(verify_ssl=False)
+   configure_http(use_system_certs=True)
 
    # Then your code
    from edgar import Company
@@ -431,13 +492,12 @@ Solutions:
 
    export REQUESTS_CA_BUNDLE="/path/to/corporate-ca-bundle.pem"
 
-   Or create a combined bundle:
+3. LAST RESORT - Disable SSL verification:
 
-   cat "{certifi_path}" \\
-       /path/to/corporate-ca.crt > ~/combined-bundle.pem
-   export REQUESTS_CA_BUNDLE="$HOME/combined-bundle.pem"
+   from edgar import configure_http
+   configure_http(verify_ssl=False)
 
-3. ASK IT - Request SEC.gov be added to SSL inspection bypass list"""
+4. ASK IT - Request SEC.gov be added to SSL inspection bypass list"""
 
     elif category == SSLErrorCategory.EXPIRED:
         return """
@@ -448,7 +508,12 @@ Solutions:
 
 2. If the issue persists, this may be a temporary SEC.gov issue
 
-3. Temporary workaround:
+3. Try using your OS certificate store:
+
+   from edgar import configure_http
+   configure_http(use_system_certs=True)
+
+4. Last resort - disable SSL verification:
 
    from edgar import configure_http
    configure_http(verify_ssl=False)"""
@@ -458,16 +523,15 @@ Solutions:
         return """
 Solution:
 ---------
-Disable SSL verification:
+Use your OS certificate store:
 
   from edgar import configure_http
-  configure_http(verify_ssl=False)
+  configure_http(use_system_certs=True)
 
-Or via environment variable (set before importing edgar):
+If that doesn't work, disable SSL verification (last resort):
 
-  import os
-  os.environ['EDGAR_VERIFY_SSL'] = 'false'
-  from edgar import Company"""
+  from edgar import configure_http
+  configure_http(verify_ssl=False)"""
 
 
 class SSLVerificationError(Exception):
@@ -503,8 +567,8 @@ Error: {str(self.original_error)}"""
         solution = _build_solution_section(self.category, self.diagnostic)
 
         footer = """
-⚠️  Only disable SSL verification in trusted network environments.
-   You can also set EDGAR_VERIFY_SSL=false before importing edgar.
+💡 Recommended: configure_http(use_system_certs=True) uses your OS certificates securely.
+⚠️  Only disable SSL verification (verify_ssl=False) as a last resort.
 
 Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verification.md"""
 
@@ -514,6 +578,41 @@ Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verifi
 
 def is_redirect(response):
     return response.status_code in [301, 302]
+
+
+def _get_retry_after(response: Response) -> Optional[int]:
+    """
+    Extract Retry-After header value from response.
+
+    The Retry-After header can be either:
+    - An integer (seconds to wait)
+    - An HTTP date (when to retry)
+
+    Returns:
+        Number of seconds to wait, or None if header not present/parseable.
+    """
+    retry_after = response.headers.get("Retry-After")
+    if not retry_after:
+        return None
+
+    # Try parsing as integer (seconds)
+    try:
+        return int(retry_after)
+    except ValueError:
+        pass
+
+    # Try parsing as HTTP date
+    try:
+        from email.utils import parsedate_to_datetime
+        retry_date = parsedate_to_datetime(retry_after)
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+        delta = retry_date - now
+        return max(0, int(delta.total_seconds()))
+    except (ValueError, TypeError):
+        pass
+
+    return None
 
 
 def with_identity(func):
@@ -586,7 +685,7 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
         with http_client() as client:
             response = client.get(url, **kwargs)
             if response.status_code == 429:
-                raise TooManyRequestsError(url)
+                raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
             elif is_redirect(response):
                 return get_with_retry(url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
             return response
@@ -625,7 +724,7 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
     try:
         response = await client.get(url, **kwargs)
         if response.status_code == 429:
-            raise TooManyRequestsError(url)
+            raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
         elif is_redirect(response):
             return await get_with_retry_async(
                 client=client, url=response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs
@@ -668,7 +767,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
         with http_client() as client:
             with client.stream("GET", url, **kwargs) as response:
                 if response.status_code == 429:
-                    raise TooManyRequestsError(url)
+                    raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
                 elif is_redirect(response):
                     response = stream_with_retry(response.headers["Location"], identity=identity, identity_callable=identity_callable, **kwargs)
                     yield from response
@@ -712,7 +811,7 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
         with http_client() as client:
             response = client.post(url, data=data, json=json, **kwargs)
             if response.status_code == 429:
-                raise TooManyRequestsError(url)
+                raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
             elif is_redirect(response):
                 return post_with_retry(
                     response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
@@ -755,7 +854,7 @@ async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, 
     try:
         response = await client.post(url, data=data, json=json, **kwargs)
         if response.status_code == 429:
-            raise TooManyRequestsError(url)
+            raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
         elif is_redirect(response):
             return await post_with_retry_async(
                 client, response.headers["Location"], data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
@@ -993,7 +1092,7 @@ async def stream_file(
     temp_file = Path(temp_dir) / f"download_{uuid.uuid1()}"
 
     try:
-        async with async_http_client(client, timeout=TIMEOUT, bypass_cache=True) as async_client:
+        async with async_http_client(client, timeout=BULK_TIMEOUT, bypass_cache=True) as async_client:
             async with async_client.stream("GET", url) as response:
                 inspect_response(response)
                 total_size = int(response.headers.get("Content-Length", 0))

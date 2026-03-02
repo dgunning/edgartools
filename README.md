@@ -4,7 +4,8 @@
 </a>
 </p>
 
-<h3 align="center">The AI Native Python library for SEC EDGAR Data</h3>
+<h1 align="center">EdgarTools - Python Library for SEC EDGAR Filings</h1>
+<h3 align="center">The simplest, most complete Python library for SEC EDGAR data</h3>
 
 <p align="center">
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
@@ -25,12 +26,10 @@
 </p>
 
 <p align="center">
-  <b>The only SEC EDGAR library built from the ground up for AI agents and LLMs. Extract financial data in 3 lines of code instead of 100+. Production-ready MCP server included.</b>
+  <b>Get financial statements, insider trades, fund holdings, and 20+ other filing types as structured Python objects — in a few lines of code. Free and open source.</b>
 </p>
 
-<p align="center">
-  <sub>Built with AI-assisted development • 3-10x faster velocity • <a href="#-support-ai-powered-development">Support this project</a></sub>
-</p>
+**EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and dozens of other filing types with a consistent Python API.
 
 ![EdgarTools SEC filing data extraction demo](docs/images/edgartools-demo.gif)
 
@@ -40,27 +39,27 @@
 
 ## Why EdgarTools?
 
-EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR data extraction. Built for financial analysts, data scientists, and AI developers who need reliable, production-ready access to SEC filings.
+EdgarTools turns SEC filings into Python objects. Every supported form type gives you structured data — not raw HTML, not XML, not JSON dumps. Actual Python objects with properties, methods, and DataFrames.
 
 <table align="center">
 <tr>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-speed.svg" width="80" alt="Lightning Fast"><br>
-    <b>Lightning Fast</b><br>
-    10-30x faster than alternatives<br>
-    Optimized with lxml & PyArrow
+    <img src="docs/images/icons/icon-speed.svg" width="80" alt="Fast"><br>
+    <b>Fast</b><br>
+    Optimized with lxml & PyArrow<br>
+    Smart caching, rate-limit aware
   </td>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-ai.svg" width="80" alt="AI Native"><br>
-    <b>AI Native</b><br>
+    <img src="docs/images/icons/icon-ai.svg" width="80" alt="AI Ready"><br>
+    <b>AI Ready</b><br>
     Built-in MCP server for Claude<br>
     LLM-optimized text extraction
   </td>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-quality.svg" width="80" alt="Data Quality"><br>
-    <b>Production Quality</b><br>
-    1000+ tests, type hints<br>
-    Battle-tested by analysts
+    <img src="docs/images/icons/icon-quality.svg" width="80" alt="Well Tested"><br>
+    <b>Well Tested</b><br>
+    1000+ verification tests<br>
+    Type hints throughout
   </td>
 </tr>
 <tr>
@@ -71,16 +70,16 @@ EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR d
     Cross-company comparisons
   </td>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-data.svg" width="80" alt="Rich Data"><br>
-    <b>Rich Data Objects</b><br>
-    Smart parsing for every form<br>
+    <img src="docs/images/icons/icon-data.svg" width="80" alt="20+ Filing Types"><br>
+    <b>20+ Filing Types</b><br>
+    Typed objects for every form<br>
     Pandas-ready DataFrames
   </td>
   <td align="center" width="33%">
     <img src="docs/images/icons/icon-community.svg" width="80" alt="Open Source"><br>
     <b>Open Source</b><br>
-    MIT license, community-driven<br>
-    Transparent & auditable
+    MIT license, free forever<br>
+    No API keys, no rate limits
   </td>
 </tr>
 </table>
@@ -92,7 +91,7 @@ EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR d
 ## How It Works
 
 <p align="center">
-  <img src="docs/images/how-it-works.svg" alt="EdgarTools transforms SEC EDGAR complexity into clean Python code">
+  <img src="docs/images/how-it-works.svg" alt="How EdgarTools Python library extracts SEC EDGAR filing data">
 </p>
 
 <p align="center">
@@ -104,26 +103,87 @@ EdgarTools is the **fastest, most powerful open-source library** for SEC EDGAR d
 </p>
 
 ```python
-# 1. Install
 pip install edgartools
 
-# 2. Set your identity (required by SEC regulations)
 from edgar import *
 set_identity("your.name@example.com")
 
-# 3. Get company financials in 1 line
+# Get a company's balance sheet
 balance_sheet = Company("AAPL").get_financials().balance_sheet()
 
-# 4. Explore with interactive documentation
+# Browse a company's filings
 company = Company("MSFT")
 
-# 5. Or explore insider transactions
+# Parse insider transactions
 filings = company.get_filings(form="4")
-form4_filing = filings[0]
-form4 = form4_filing.obj()
+form4 = filings[0].obj()
 ```
 
 ![Apple SEC Form 4 insider transaction data extraction with Python](docs/images/aapl-insider.png)
+
+<p align="center">
+  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+</p>
+
+## Use Cases
+
+### Analyze 13F Institutional Holdings & Hedge Fund Portfolios
+
+Track what hedge funds and institutional investors own by parsing SEC 13F filings. EdgarTools extracts complete portfolio holdings with position sizes, values, and quarter-over-quarter changes.
+
+```python
+from edgar import get_filings
+thirteenf = get_filings(form="13F-HR")[0].obj()
+thirteenf.holdings  # DataFrame of all portfolio positions
+```
+
+[Institutional Holdings guide →](https://edgartools.readthedocs.io/en/latest/guides/thirteenf-data-object-guide/)
+
+### Track Insider Trading with SEC Form 4
+
+Monitor insider buying and selling activity from SEC Form 4 filings. See which executives are purchasing or selling shares, option exercises, and net position changes.
+
+```python
+company = Company("TSLA")
+form4 = company.get_filings(form="4")[0].obj()
+form4.transactions  # Insider buy/sell transactions
+```
+
+[Insider Trades guide →](https://edgartools.readthedocs.io/en/latest/insider-filings/)
+
+### Extract Financial Statements from 10-K and 10-Q Filings
+
+Get income statements, balance sheets, and cash flow statements from SEC annual and quarterly reports. Data is parsed from XBRL with standardized labels for cross-company comparison.
+
+```python
+financials = Company("MSFT").get_financials()
+financials.balance_sheet()   # Balance sheet with all line items
+financials.income_statement()  # Revenue, net income, EPS
+```
+
+[Financial Statements guide →](https://edgartools.readthedocs.io/en/latest/guides/financial-data/)
+
+### Parse 8-K Current Reports for Corporate Events
+
+Access material corporate events as they happen -- earnings releases, acquisitions, executive changes, and more. EdgarTools parses 8-K filings into structured items with full text extraction.
+
+```python
+eightk = get_filings(form="8-K")[0].obj()
+eightk.items  # List of reported event items
+```
+
+[Current Events guide →](https://edgartools.readthedocs.io/en/latest/guides/eightk-data-object-guide/)
+
+### Query XBRL Financial Data Across Companies
+
+Access structured XBRL financial facts for any SEC filer. Query specific line items like revenue or total assets over time, and compare across companies using standardized concepts.
+
+```python
+facts = Company("AAPL").get_facts()
+facts.to_pandas("us-gaap:Revenues")  # Revenue history as DataFrame
+```
+
+[XBRL Deep Dive →](https://edgartools.readthedocs.io/en/latest/xbrl/)
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
@@ -148,12 +208,12 @@ form4 = form4_filing.obj()
 - Metadata columns (dimensions, members, units)
 - Complete dimensional data support
 
-**Fund Holdings (13F)**
-- Complete 13F filing history
-- Portfolio composition analysis
+**Fund & Investment Data**
+- 13F institutional holdings & portfolio analysis
+- N-PORT fund portfolio data
+- N-MFP money market fund holdings
+- N-CSR/N-CEN fund reports
 - Position tracking over time
-- Ownership percentages
-- Value calculations
 
 **Company Dataset & Reference Data**
 - Industry and state filtering
@@ -175,12 +235,12 @@ form4 = form4_filing.obj()
 **Filing Intelligence**
 - Any form type (10-K, 10-Q, 8-K, S-1, etc.)
 - Complete history since 1994
-- Smart data objects for each form
-- Automatic HTML to clean text
+- Typed data objects for 20+ form types
+- HTML to clean text extraction
 - Section extraction (Risk Factors, MD&A)
+- Subsidiaries (EX-21) and auditor extraction
 
 **Performance & Reliability**
-- 10-30x faster than alternatives
 - Configurable rate limiting (enterprise mirrors supported)
 - Custom SEC data sources (corporate/academic mirrors)
 - Smart caching (30-second fresh filing cache)
@@ -193,12 +253,13 @@ form4 = form4_filing.obj()
 - Intuitive, consistent API
 - Pandas DataFrame integration
 - Rich terminal output
-- Comprehensive documentation
 - 1000+ tests
 
 </td>
 </tr>
 </table>
+
+EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, **S-1 registration statements**, **N-CSR fund reports**, **N-MFP money market data**, **N-PORT fund portfolios**, **Schedule 13D/G ownership**, **Form D offerings**, **Form C crowdfunding**, and **Form 144 restricted stock**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames.
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
@@ -206,17 +267,19 @@ form4 = form4_filing.obj()
 
 ## Comparison with Alternatives
 
-| Feature | EdgarTools | sec-api (paid) | OpenEDGAR | Manual Scraping |
-|---------|------------|----------------|-----------|-----------------|
-| **AI/MCP Integration** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **Cost** | Free | $150+/mo | Free | Free |
-| **Speed** | 10-30x baseline | Fast (API) | Slow | Slow |
-| **XBRL Support** | <img src="docs/images/icons/compare-check.svg" width="20"> Full | <img src="docs/images/icons/compare-partial.svg" width="20"> Partial | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **Financial Statements** | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed | <img src="docs/images/icons/compare-partial.svg" width="20"> Basic | <img src="docs/images/icons/compare-cross.svg" width="20"> DIY |
-| **LLM-Ready Output** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **Type Hints** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-partial.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **Rate Limiting** | <img src="docs/images/icons/compare-check.svg" width="20"> Auto | N/A (API) | <img src="docs/images/icons/compare-cross.svg" width="20"> Manual | <img src="docs/images/icons/compare-cross.svg" width="20"> Manual |
-| **Open Source** | <img src="docs/images/icons/compare-check.svg" width="20"> MIT | <img src="docs/images/icons/compare-cross.svg" width="20"> Proprietary | <img src="docs/images/icons/compare-check.svg" width="20"> Apache | N/A |
+EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is a **hosted API service** that returns JSON. Both parse SEC filings — the difference is how you work with the data.
+
+| | EdgarTools | sec-api | Raw EDGAR |
+|---|------------|---------|-----------|
+| **What it is** | Python library | REST API service | DIY |
+| **Cost** | Free (MIT) | $49+/mo | Free |
+| **Data format** | Typed Python objects | JSON | Raw XML/HTML |
+| **Parsed filing types** | 24 (10-K, 8-K, 13F, N-PORT, proxy, etc.) | 15+ structured APIs | — |
+| **Financials** | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed + standardized | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed (XBRL-to-JSON) | <img src="docs/images/icons/compare-cross.svg" width="20"> |
+| **Full-text search** | <img src="docs/images/icons/compare-check.svg" width="20"> via EFTS | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
+| **AI/MCP integration** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
+| **Language** | Python | Any | Any |
+| **Open source** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
@@ -228,13 +291,10 @@ form4 = form4_filing.obj()
 
 ### Use EdgarTools with Claude Code & Claude Desktop
 
-EdgarTools provides **AI Skills** that enable Claude and other AI assistants to perform sophisticated SEC filing analysis. Once configured, you can ask Claude questions like:
+EdgarTools includes an MCP server and AI skills for Claude Desktop and Claude Code. Ask questions in natural language and get answers backed by real SEC data.
 
 - *"Compare Apple and Microsoft's revenue growth rates over the past 3 years"*
 - *"Which Tesla executives sold more than $1 million in stock in the past 6 months?"*
-- *"Find all technology companies that filed proxy statements with executive compensation changes"*
-
-Claude will write the Python code, execute it, and explain the results - all powered by EdgarTools.
 
 <details>
 <summary><b>Setup Instructions</b></summary>
@@ -252,12 +312,7 @@ This adds SEC analysis capabilities to Claude, including 3,450+ lines of API doc
 
 ### Option 2: MCP Server
 
-Run EdgarTools as an MCP server for Claude Code or Claude Desktop:
-
-```bash
-pip install "edgartools[ai]"
-python -m edgar.ai
-```
+Run EdgarTools as an MCP server for any AI client -- Claude Desktop, Cline, or your own containerized deployment.
 
 Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
@@ -265,8 +320,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python",
-      "args": ["-m", "edgar.ai"],
+      "command": "uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
       }
@@ -274,6 +329,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
   }
 }
 ```
+
+Requires [uv](https://docs.astral.sh/uv/). Alternatively, `pip install "edgartools[ai]"` and use `python -m edgar.ai`.
 
 See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
@@ -283,84 +340,13 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
-## <img src="docs/images/icons/emoji-heart.svg" width="24" height="24"> Support AI Powered Development
+## <img src="docs/images/icons/emoji-heart.svg" width="24" height="24"> Support This Project
 
-**I build and maintain EdgarTools solo using AI-assisted development.** Your support directly funds the Claude Max subscription that makes this extraordinary velocity possible.
+EdgarTools replaces hundreds of hours of SEC parsing work — and it costs nothing to use. No API keys, no subscriptions, no rate limits. Free infrastructure for anyone working with SEC data.
 
-### The Virtuous Cycle
+But it doesn't maintain itself. The SEC updates filing formats every year. XBRL taxonomies change. New form types appear. One maintainer keeps all of it working, and your support makes that sustainable.
 
-<table align="center">
-<tr>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-1.svg" width="24" height="24"><br>
-    <b>You Support</b><br><br>
-    Buy Me A Coffee<br>
-    contributions fund<br>
-    Claude Max
-  </td>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-2.svg" width="24" height="24"><br>
-    <b>AI Acceleration</b><br><br>
-    Specialized agents<br>
-    deliver <b>3-10x faster</b><br>
-    development
-  </td>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-3.svg" width="24" height="24"><br>
-    <b>Rapid Delivery</b><br><br>
-    Features in <b>days</b><br>
-    instead of weeks<br>
-    24 releases / 60 days
-  </td>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-4.svg" width="24" height="24"><br>
-    <b>You Benefit</b><br><br>
-    More features,<br>
-    faster fixes,<br>
-    free forever
-  </td>
-</tr>
-</table>
-
-### Real Impact: Last 60 Days
-
-<table align="center">
-<tr>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-rocket.svg" width="24" height="24"><br>
-    <h3>24</h3>
-    <b>Releases</b><br>
-    <sub>1 every 2.5 days</sub>
-  </td>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-lightning.svg" width="24" height="24"><br>
-    <h3>322</h3>
-    <b>Commits</b><br>
-    <sub>5.4 per day</sub>
-  </td>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-target.svg" width="24" height="24"><br>
-    <h3>3-10x</h3>
-    <b>Velocity</b><br>
-    <sub>vs traditional dev</sub>
-  </td>
-  <td align="center" width="25%" valign="top">
-    <img src="docs/images/icons/emoji-timer.svg" width="24" height="24"><br>
-    <h3>Days</h3>
-    <b>Not Weeks</b><br>
-    <sub>for major features</sub>
-  </td>
-</tr>
-</table>
-
-### Recent Examples
-
-| Feature | Traditional Estimate | With AI | Speedup |
-|---------|---------------------|---------|---------|
-| XBRL Period Selection | 3-4 weeks | 5 days | **7x faster** |
-| MCP Workflow Tools | 2-3 weeks | 2 days | **10x faster** |
-| HTML Parsing Rewrite | 2 weeks | 3 days | **4x faster** |
-| Standardized Concepts API | 2 weeks | 2-3 days | **5x faster** |
+Sponsors aren't just giving back — you're investing in a shared resource and helping shape what gets built next.
 
 <p align="center">
   <a href="https://github.com/sponsors/dgunning" target="_blank">
@@ -373,20 +359,12 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 </p>
 
 **What your support enables:**
-- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Claude Max subscription (AI agents that write, test, and document code)
-- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Continued 3-10x development velocity (features in days, not weeks)
-- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Rapid response to SEC format changes and bug reports
-- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> New features based on community needs
-- <img src="docs/images/icons/emoji-check.svg" width="16" height="16"> Free access for everyone, forever (no API keys, no rate limits)
+- Continued maintenance as SEC formats evolve
+- New filing types and data objects
+- Fast bug fixes and community support
+- Free access for everyone, forever
 
-**Alternative ways to support:**
-- <img src="docs/images/icons/emoji-star.svg" width="16" height="16"> Star the repo on GitHub
-- <img src="docs/images/icons/emoji-bug.svg" width="16" height="16"> Report bugs and contribute fixes
-- <img src="docs/images/icons/emoji-book.svg" width="16" height="16"> Improve documentation
-- <img src="docs/images/icons/emoji-speech.svg" width="16" height="16"> Answer questions in Discussions
-- <img src="docs/images/icons/emoji-link.svg" width="16" height="16"> Share EdgarTools with colleagues
-
-**Corporate users**: If your organization depends on EdgarTools for SEC compliance or regulatory reporting, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers strategic sponsorship options designed for mission-critical dependencies.
+**Corporate sponsors:** If your team depends on EdgarTools for compliance, financial analysis, or data pipelines, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers tiers designed for organizations with mission-critical dependencies.
 
 <p align="center">
   <img src="docs/images/dividers/divider-hexagons.svg" alt="">
@@ -398,9 +376,9 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 ### Documentation & Resources
 
-- [User Journeys / Examples](https://edgartools.readthedocs.io/en/latest/examples/)
+- [Documentation](https://edgartools.readthedocs.io/)
+- [Notebooks / Examples](https://edgartools.readthedocs.io/en/latest/notebooks/)
 - [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/)
-- [Full API Documentation](https://edgartools.readthedocs.io/)
 - [EdgarTools Blog](https://www.edgartools.io)
 
 ### Get Help & Connect
@@ -410,7 +388,7 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 ### Contributing
 
-We welcome contributions from the community! Here's how you can help:
+Contributions welcome:
 
 - **Code**: Fix bugs, add features, improve documentation
 - **Examples**: Share interesting use cases and examples

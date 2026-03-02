@@ -61,6 +61,7 @@ class StatementStitcher:
         self.concept_metadata = {}  # Metadata for each concept (level, etc.)
         self.ordering_manager = None  # Will be initialized during stitching
         self.original_statement_order = []  # Track original order for hierarchy context
+        self.concept_to_label_map = {}  # Maps concept IDs to label keys (persists across statements)
 
     def stitch_statements(
         self, 
@@ -87,6 +88,7 @@ class StatementStitcher:
         self.data = defaultdict(dict)
         self.concept_metadata = {}
         self.original_statement_order = []
+        self.concept_to_label_map = {}  # Reset concept-to-label mapping for each stitch
 
         # Initialize ordering manager for this statement type
         statement_type = statements[0].get('statement_type', 'IncomeStatement') if statements else 'IncomeStatement'
@@ -98,11 +100,8 @@ class StatementStitcher:
             self.original_statement_order = []
             for item in reference_statement.get('data', []):
                 concept = item.get('concept')
-                label = item.get('label')
-                if concept:
+                if concept and concept not in self.original_statement_order:
                     self.original_statement_order.append(concept)
-                if label and label not in self.original_statement_order:
-                    self.original_statement_order.append(label)
 
         # Extract and sort all periods
         all_periods = self._extract_periods(statements)
@@ -131,6 +130,9 @@ class StatementStitcher:
 
             # Store data for each item
             self._integrate_statement_data(processed_data, statement['periods'], relevant_periods)
+
+        # Merge duplicate rows that map to the same standard_concept
+        self._merge_duplicate_standard_concepts()
 
         # Format the stitched data
         return self._format_output_with_ordering(statements)
@@ -345,8 +347,8 @@ class StatementStitcher:
         return standardize_statement(statement_data, self.concept_mapper)
 
     def _integrate_statement_data(
-        self, 
-        statement_data: List[Dict[str, Any]], 
+        self,
+        statement_data: List[Dict[str, Any]],
         period_map: Dict[str, Dict[str, str]],
         relevant_periods: Set[str]
     ) -> None:
@@ -358,9 +360,8 @@ class StatementStitcher:
             period_map: Map of period IDs to period information
             relevant_periods: Set of periods from this statement to include
         """
-        # Map to track concepts by their underlying concept ID, not just label
-        # This helps merge rows that represent the same concept but have different labels
-        concept_to_label_map = {}
+        # Use instance variable concept_to_label_map to track concepts by their underlying concept ID
+        # This helps merge rows that represent the same concept but have different labels across statements
 
         for item in statement_data:
             concept = item.get('concept')
@@ -381,15 +382,16 @@ class StatementStitcher:
             # Use concept as the primary key for identifying the same financial line item
             # This is more reliable than labels which may vary across filings
 
-            # If we've already seen this concept, use the existing label as the key
+            # If we've already seen this concept, use the existing key
             # This ensures we merge rows that represent the same concept
-            if concept in concept_to_label_map:
-                concept_key = concept_to_label_map[concept]
+            if concept in self.concept_to_label_map:
+                concept_key = self.concept_to_label_map[concept]
             else:
-                # For a new concept, use the current label as the key
-                concept_key = label
+                # Use concept as key to avoid collisions when different concepts share labels
+                # (e.g. "Other, net" used by both operating and financing activities)
+                concept_key = concept
                 # Remember this mapping for future occurrences
-                concept_to_label_map[concept] = concept_key
+                self.concept_to_label_map[concept] = concept_key
 
             # Store metadata about the concept (level, abstract status, etc.)
             # If we've already seen this concept, only update metadata if it's from a more recent period
@@ -400,46 +402,32 @@ class StatementStitcher:
                     'is_abstract': item.get('is_abstract', False),
                     'is_total': item.get('is_total', False) or 'total' in label.lower(),
                     'original_concept': concept,
-                    'latest_label': label  # Store the original label too
+                    'latest_label': label,  # Store the original label too
+                    'standard_concept': item.get('standard_concept'),
                 }
             else:
                 # For existing concepts, update the label to use the most recent one
                 # We determine which periods are most recent based on position in self.periods
                 # (earlier indices are more recent periods)
 
-                # Find the periods in this statement
+                # Update label to the most recent filing's label for display
                 statement_periods = [p for p in relevant_periods if p in self.periods]
                 if statement_periods:
-                    # Get the most recent period in this statement
                     most_recent_period = min(statement_periods, key=lambda p: self.periods.index(p))
                     most_recent_idx = self.periods.index(most_recent_period)
 
-                    # Find the earliest period where we have data for this concept
                     existing_periods = [p for p in self.data[concept_key].keys() if p in self.periods]
                     if existing_periods:
                         earliest_existing_idx = min(self.periods.index(p) for p in existing_periods)
 
-                        # If this statement has more recent data, update the label
+                        # If this statement has more recent data, update the display label
                         if most_recent_idx < earliest_existing_idx:
-                            # Update the concept key label for display
-                            new_concept_key = label
+                            self.concept_metadata[concept_key]['latest_label'] = label
 
-                            # If we're changing the label, we need to migrate existing data
-                            if new_concept_key != concept_key:
-                                # Copy existing data to the new key
-                                if new_concept_key not in self.data:
-                                    self.data[new_concept_key] = self.data[concept_key].copy()
-
-                                # Update metadata
-                                self.concept_metadata[new_concept_key] = self.concept_metadata[concept_key].copy()
-                                self.concept_metadata[new_concept_key]['latest_label'] = label
-
-                                # Update the concept mapping
-                                concept_to_label_map[concept] = new_concept_key
-                                concept_key = new_concept_key
-                            else:
-                                # Just update the latest label
-                                self.concept_metadata[concept_key]['latest_label'] = label
+                    # Propagate standard_concept from newer filing if available
+                    new_standard = item.get('standard_concept')
+                    if new_standard and not self.concept_metadata[concept_key].get('standard_concept'):
+                        self.concept_metadata[concept_key]['standard_concept'] = new_standard
 
             # Store values for relevant periods
             for period_id in relevant_periods:
@@ -450,6 +438,35 @@ class StatementStitcher:
                             'value': value,
                             'decimals': item.get('decimals', {}).get(period_id, 0)
                         }
+
+    def _merge_duplicate_standard_concepts(self):
+        """Merge concept entries that map to the same standard_concept."""
+        standard_to_keys = defaultdict(list)
+        for concept_key, metadata in self.concept_metadata.items():
+            sc = metadata.get('standard_concept')
+            if sc:
+                standard_to_keys[sc].append(concept_key)
+
+        for standard_concept, keys in standard_to_keys.items():
+            if len(keys) <= 1:
+                continue
+            # Keep the key with the most data points; use key name as tiebreaker for determinism
+            primary_key = max(keys, key=lambda k: (len(self.data.get(k, {})), k))
+            for secondary_key in keys:
+                if secondary_key == primary_key:
+                    continue
+                # Only merge if no period overlap (same concept across filings, not two different breakdowns)
+                overlap = set(self.data.get(primary_key, {}).keys()) & set(self.data.get(secondary_key, {}).keys())
+                if overlap:
+                    continue  # Skip - these are genuinely different line items
+                # Merge data from secondary into primary
+                for period_id, value_data in self.data.get(secondary_key, {}).items():
+                    self.data[primary_key][period_id] = value_data
+                # Remove the secondary entry
+                if secondary_key in self.data:
+                    del self.data[secondary_key]
+                if secondary_key in self.concept_metadata:
+                    del self.concept_metadata[secondary_key]
 
     def _format_output_with_ordering(self, statements: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -492,6 +509,7 @@ class StatementStitcher:
                 'is_abstract': metadata['is_abstract'],
                 'is_total': metadata['is_total'],
                 'concept': metadata['original_concept'],
+                'standard_concept': metadata.get('standard_concept'),
                 'values': {},
                 'decimals': {}
             }
@@ -586,11 +604,11 @@ def stitch_statements(
 
                     # Update the period label to include information from entity_info
                     display_date = period_metadata['display_date']
-                    period_type = period_metadata['period_type']
+                    meta_period_type = period_metadata['period_type']
                     fiscal_period = period_metadata.get('fiscal_period')
 
                     # Create a more informative label
-                    if period_type == 'instant':
+                    if meta_period_type == 'instant':
                         if fiscal_period == 'FY':
                             period_label = f"FY {display_date}"
                         else:

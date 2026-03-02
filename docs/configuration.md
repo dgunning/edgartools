@@ -507,7 +507,7 @@ The SEC marks all requests as either NO-STORE or NO-CACHE, therefore a custom ca
 See `httpclient_cache` for implementation. 
 
 #### Advanced: Alternative Storage Caches
-- The underlying cache is a FileStorage cache. While not implemented, it's feasible to replace this with a S3Storage cache by overriding get_transport and get_async_storage. See S3Storage and AsyncS3Storage at https://hishel.com/ for details.
+- The underlying cache uses FileCache for local file storage. Alternative storage backends may be available through httpxthrottlecache configuration. See https://github.com/paultiq/httpxthrottlecache for details.
 
 #### EDGAR_USE_RICH_LOGGING
 Enables enhanced console logging with rich formatting.

@@ -1,4 +1,8 @@
-# Extract Financial Statements
+---
+description: Extract income statements, balance sheets, and cash flow from SEC 10-K and 10-Q filings using Python and XBRL.
+---
+
+# Extract Financial Statements from SEC Filings with Python
 
 Learn how to extract and work with financial statements from SEC filings using EdgarTools' powerful XBRL processing capabilities.
 
@@ -76,9 +80,13 @@ print(income_stmt)
 df_enhanced = income_stmt.to_dataframe()  # 48 rows for Microsoft
 print(f"Enhanced view: {len(df_enhanced)} rows")
 
-# Traditional view - excludes dimensional data
-df_traditional = income_stmt.to_dataframe(include_dimensions=False)  # 21 rows
-print(f"Traditional view: {len(df_traditional)} rows")
+# Standard view - face presentation only
+df_standard = income_stmt.to_dataframe(view="standard")  # 21 rows
+print(f"Standard view: {len(df_standard)} rows")
+
+# Summary view - non-dimensional totals only
+df_summary = income_stmt.to_dataframe(view="summary")
+print(f"Summary view: {len(df_summary)} rows")
 ```
 
 **What Gets Enhanced:**
@@ -91,9 +99,18 @@ This enhancement works automatically across companies that provide segment data 
 
 ## Standardized Financial Data Access
 
-### Simple Metric Extraction (New!)
+EdgarTools automatically standardizes XBRL data across companies, mapping ~2,000 different XBRL tags to 95 consistent concepts. This means you can compare Apple's revenue with Tesla's revenue using the same API, even though they use different underlying XBRL concepts.
 
-The easiest way to get key financial metrics is using the new standardized accessor methods:
+**Why this matters:**
+- Companies use different XBRL tags for the same concept (e.g., "Revenues", "RevenueFromContractWithCustomer", "SalesRevenueNet")
+- EdgarTools normalizes these to standard concepts like "Revenue"
+- Cross-company analysis becomes trivial
+
+For the complete list of 95 standard concepts and their mappings, see [Standardization Concepts Reference](../xbrl/concepts/standardization.md).
+
+### Simple Metric Extraction
+
+The easiest way to get key financial metrics is using the standardized accessor methods:
 
 ```python
 from edgar import Company
@@ -238,6 +255,9 @@ balance_sheet = multi_financials.balance_sheet()
 income_statement = multi_financials.income_statement()
 cash_flow = multi_financials.cashflow_statement()
 
+# Use view="detailed" to include dimensional breakdowns (e.g., cost by segment)
+income_detailed = multi_financials.income_statement(view="detailed")
+
 print("Multi-Year Income Statement:")
 print(income_statement)
 ```
@@ -273,20 +293,25 @@ print(revenue_row)
 
 **Dimensional Data in Stitching:**
 
-By default, stitching uses traditional statement structures for performance and compatibility:
+By default, stitching uses traditional statement structures for performance and compatibility.
+Use the `view` parameter to control dimensional data:
 
 ```python
-# Default stitching - traditional structure for multi-period consistency
-income_stmt = xbrls.render_statement("IncomeStatement")  # Clean, focused view
+# Default stitching - standard face presentation for multi-period consistency
+income_stmt = stitched_statements.income_statement()  # Clean, focused view
 
-# Enable dimensional data in stitching if desired (advanced usage)
-income_stmt_detailed = xbrls.render_statement("IncomeStatement", include_dimensions=True)
-# Note: May result in missing data if not all periods have consistent dimensional coverage
+# Include dimensional breakdowns (e.g., cost of operations by segment)
+income_stmt_detailed = stitched_statements.income_statement(view="detailed")
+
+# Summary view - non-dimensional totals only
+income_stmt_summary = stitched_statements.income_statement(view="summary")
 ```
 
-**When to Use Each:**
-- **Traditional stitching** (default): Best for trend analysis, ratios, and cross-period comparisons
-- **Dimensional stitching**: Use when you specifically need segment data across periods and know the data is consistent
+**When to Use Each View:**
+
+- **`"standard"`** (default): Best for trend analysis, ratios, and cross-period comparisons
+- **`"detailed"`**: Use when you need segment data across periods (e.g., cost breakdowns by product line)
+- **`"summary"`**: Quick overview of main line items only
 
 ## Working with Individual Statements
 
@@ -408,20 +433,23 @@ filings = company.get_filings(form="10-K").head(3)
 xbrls = XBRLS.from_filings(filings)
 stitched = xbrls.statements
 
-# Use standardized labels for cross-company comparison (default)
-standardized = stitched.income_statement(standard=True)
+# Get income statement with standard_concept metadata (default)
+income = stitched.income_statement(standard=True)
 
-# Use company-specific labels as reported in filing
-company_specific = stitched.income_statement(standard=False)
+# Labels always show original company presentation
+# Use standard_concept for cross-company analysis
+df = income.to_dataframe()
+print("Labels with Standard Concept Mapping:")
+print(df[['label', 'standard_concept']].head(10))
 
-print("Standardized Labels:")
-print(standardized.to_dataframe()['label'].head(10))
-
-print("\nCompany-Specific Labels:")
-print(company_specific.to_dataframe()['label'].head(10))
+# Aggregate by standard concept for comparison
+standardized = df.groupby('standard_concept')[df.columns[2:4]].sum()
+print("\nAggregated by Standard Concept:")
+print(standardized.head(10))
 ```
 
-Note: The `standard` parameter is available on stitched statements (`XBRLS.statements`), not on single-filing statements (`xbrl.statements`).
+> **Note**: The `standard=True` parameter adds `standard_concept` metadata for cross-company analysis.
+> Labels always preserve the company's original presentation.
 
 ## Cross-Company Analysis
 
@@ -475,6 +503,24 @@ print(comparison_df[['ticker', 'revenue_b', 'net_income_b', 'net_margin', 'roa']
 ```
 
 The new standardized methods make cross-company analysis much more reliable and easier to implement!
+
+## Notes and Disclosures
+
+XBRL filings contain notes and disclosure sections beyond the primary financial statements. Access them with convenience methods:
+
+```python
+xbrl = filing.xbrl()
+
+# Browse all note sections (e.g., accounting policies, segment data)
+for note in xbrl.notes():
+    print(note.title)
+
+# Browse all disclosure sections (e.g., revenue disaggregation, debt details)
+for disc in xbrl.disclosures():
+    print(disc.title)
+```
+
+These return the same statement objects as `xbrl.statements`, filtered to notes and disclosures respectively.
 
 ## Advanced XBRL Features
 
@@ -766,10 +812,15 @@ else:
 
 Now that you can extract financial statements, explore these advanced topics:
 
-- **[Query XBRL Data](../xbrl-querying.md)** - Advanced XBRL fact querying and analysis
-- 
+- **[XBRL Documentation Hub](../xbrl/index.md)** - Central navigation for all XBRL documentation
+- **[Multi-Period Analysis](../xbrl/guides/multi-period-analysis.md)** - Compare financials across multiple years
+- **[Choosing the Right API](../xbrl/getting-started/choosing-the-right-api.md)** - Decision guide for which API to use
+- **[Dimension Handling Guide](../xbrl/concepts/dimension-handling.md)** - Understanding dimensional data (segments, breakdowns)
+- **[Standardization Concepts](../xbrl/concepts/standardization.md)** - 95 standard concepts for cross-company comparison
+
 ## Related Documentation
 
 - **[Getting XBRL from Filings](../getting-xbrl.md)** - Original XBRL documentation
 - **[Company Financials](../company-financials.md)** - Company financials API
 - **[XBRL API Reference](../api/xbrl.md)** - Complete XBRL class documentation
+- **[StatementType Quick Reference](../StatementType-Quick-Reference.md)** - Statement type enums and API comparison

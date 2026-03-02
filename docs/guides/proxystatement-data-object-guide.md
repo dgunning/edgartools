@@ -1,4 +1,8 @@
-# ProxyStatement Data Object Guide
+---
+description: Extract executive compensation, board composition, and shareholder proposals from SEC proxy statement filings.
+---
+
+# Proxy Statements (DEF 14A): Parse Executive Compensation and Governance Data
 
 Form DEF 14A is a definitive proxy statement filed by public companies before annual shareholder meetings. It contains critical information about executive compensation, board composition, shareholder voting matters, and corporate governance. This guide details all data available from the `ProxyStatement` class for building views.
 
@@ -307,6 +311,41 @@ comparison_df = pd.DataFrame(data)
 print(comparison_df.to_string())
 ```
 
+### Example 5: Access Board and Director Information
+
+The `ProxyStatement` class focuses on XBRL-based executive compensation data. Board composition, director details, and shareholder proposals live in the HTML body of the filing and are not yet extracted into structured properties. However, you can access this information today using the `Filing` object's built-in search and HTML capabilities.
+
+```python
+from edgar import Company
+
+# Get a DEF 14A filing
+company = Company("AAPL")
+filing = company.get_filings(form="DEF 14A").latest()
+
+# Search the filing HTML for board-related sections
+results = filing.search("board of directors")
+for section in results[:3]:
+    print(section[:200])  # Preview matching sections
+```
+
+```python
+# Search for specific governance topics
+director_sections = filing.search("director nominees")
+ownership_sections = filing.search("beneficial ownership")
+proposal_sections = filing.search("proposal")
+audit_sections = filing.search("audit fees")
+```
+
+```python
+# Get the full HTML for manual inspection or custom parsing
+html_content = filing.html()
+
+# Or access the filing document directly
+doc = filing.document()
+```
+
+> **Note**: Board composition, director bios, beneficial ownership tables, and shareholder proposals are available in the filing HTML but require custom parsing. Structured `Director` and `Proposal` objects are planned for a future release. See the [HTML-Based Data](#html-based-data-future-features) section below for details on what data is available and extraction patterns.
+
 ---
 
 ## View Design Recommendations
@@ -489,38 +528,51 @@ print(comparison_df.to_string())
 
 ## HTML-Based Data (Future Features)
 
-The following data is available in DEF 14A HTML sections but requires parsing. These are documented for future implementation.
+The following data is available in DEF 14A HTML sections but not yet extracted into structured properties. You can access these sections today using `filing.search()` to find relevant content.
 
 ### Beneficial Ownership
 
-| Section | Reliability | Description |
-|---------|-------------|-------------|
-| Principal Shareholders | Medium | Shareholders owning >5% of shares |
-| Director/Executive Ownership | Medium | Shares owned by insiders |
+| Section | Description |
+|---------|-------------|
+| Principal Shareholders | Shareholders owning >5% of shares |
+| Director/Executive Ownership | Shares owned by insiders |
 
-**Extraction Pattern**: Search for "beneficial ownership" or "security ownership" section headers, then extract embedded tables.
+**How to access today**:
+```python
+results = filing.search("beneficial ownership")
+# or
+results = filing.search("security ownership")
+```
 
 ### Board of Directors
 
-| Data | Reliability | Description |
-|------|-------------|-------------|
-| Director Names | Medium | Full list of board members |
-| Director Ages | Medium | Ages of directors |
-| Director Tenure | Medium | Years on board |
-| Independence Status | Medium | Independent vs non-independent |
-| Committee Memberships | Medium | Audit, Compensation, Governance |
+| Data | Description |
+|------|-------------|
+| Director Names | Full list of board members |
+| Director Ages | Ages of directors |
+| Director Tenure | Years on board |
+| Independence Status | Independent vs non-independent |
+| Committee Memberships | Audit, Compensation, Governance |
 
-**Extraction Pattern**: Search for "board of directors" or "director nominees" sections, parse structured narrative and tables.
+**How to access today**:
+```python
+results = filing.search("board of directors")
+# or
+results = filing.search("director nominees")
+```
 
 ### Director Compensation
 
-| Data | Reliability | Description |
-|------|-------------|-------------|
-| Director Fees | Medium | Annual retainer and meeting fees |
-| Stock Awards | Medium | Equity compensation |
-| Total Compensation | Medium | Sum of all compensation |
+| Data | Description |
+|------|-------------|
+| Director Fees | Annual retainer and meeting fees |
+| Stock Awards | Equity compensation |
+| Total Compensation | Sum of all compensation |
 
-**Extraction Pattern**: Look for "director compensation" section, extract compensation table.
+**How to access today**:
+```python
+results = filing.search("director compensation")
+```
 
 ### Voting Proposals
 
@@ -532,7 +584,10 @@ The following data is available in DEF 14A HTML sections but requires parsing. T
 | Shareholder Proposals | Proposals submitted by shareholders |
 | Equity Plan Amendments | Stock compensation plan changes |
 
-**Extraction Pattern**: Search for "PROPOSAL" headers, extract proposal number, title, and board recommendation.
+**How to access today**:
+```python
+results = filing.search("proposal")
+```
 
 ### Audit Information
 
@@ -543,7 +598,10 @@ The following data is available in DEF 14A HTML sections but requires parsing. T
 | Tax Fees | Fees for tax services |
 | Other Fees | Other professional fees |
 
-**Extraction Pattern**: Search for "audit" or "independent registered" sections, extract fee tables.
+**How to access today**:
+```python
+results = filing.search("audit fees")
+```
 
 ---
 

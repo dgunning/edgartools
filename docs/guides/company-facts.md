@@ -1,4 +1,8 @@
-# Company Facts API
+---
+description: Access historical financial data from SEC XBRL filings. Query revenue, earnings, assets, and any XBRL concept over time.
+---
+
+# Company Facts: Query Historical SEC Financial Data with Python
 
 The Company Facts API provides comprehensive access to SEC financial data through an intuitive, AI-ready interface. Get financial statements, key metrics, and detailed company information with just a few lines of code.
 
@@ -27,7 +31,7 @@ print(f"Public Float: ${company.public_float:,.0f}")
 # Get enhanced multi-period financial statements
 income_stmt = company.income_statement()  # Shows multiple periods with hierarchy
 balance_sheet = company.balance_sheet()  
-cash_flow = company.cash_flow()
+cash_flow = company.cashflow_statement()
 
 print(income_stmt)  # Rich multi-period display
 
@@ -126,14 +130,14 @@ Analyze hierarchical cash flow patterns across periods:
 
 ```python
 # Enhanced annual cash flow with operating/investing/financing sections
-cash_flow = company.cash_flow(periods=5, annual=True)
+cash_flow = company.cashflow_statement(periods=5, annual=True)
 print(cash_flow)  # Rich display with cash flow categories
 
 # Quarterly cash flow analysis with full formatting
-quarterly_cf = company.cash_flow(periods=8, annual=False)
+quarterly_cf = company.cashflow_statement(periods=8, annual=False)
 
 # Executive dashboard format
-exec_cf = company.cash_flow(concise_format=True)
+exec_cf = company.cashflow_statement(concise_format=True)
 
 # Generate analysis context for AI
 ai_context = cash_flow.to_llm_context(include_metadata=True)
@@ -364,6 +368,25 @@ for item in stmt.iter_with_values():
     if hasattr(item, 'confidence') and item.confidence < 0.8:
         print(f"Low confidence: {item.label} ({item.confidence:.2f})")
 ```
+
+## Discovering Available Data
+
+Not sure what a company reports? Use the discovery methods to explore before querying:
+
+```python
+facts = company.get_facts()
+
+# Search for concepts by keyword
+facts.search_concepts("revenue")      # Find all revenue-related concepts
+facts.search_concepts("debt")         # Find debt-related concepts
+
+# See what periods have data for a concept
+facts.available_periods("Revenue")    # List all periods with Revenue data
+```
+
+These methods are especially useful when `get_fact()` returns `None` — the warnings will suggest using `search_concepts()` to find the right concept name and `available_periods()` to find valid periods.
+
+Both period formats work interchangeably: `"2023-FY"` and `"FY 2023"` are equivalent.
 
 ## Advanced Usage
 
@@ -944,7 +967,7 @@ if company.facts:
     # Get multiple statements efficiently
     income = company.income_statement()
     balance = company.balance_sheet()
-    cash = company.cash_flow()
+    cash = company.cashflow_statement()
     
     # Cache LLM context for AI applications
     llm_context = income.to_llm_context()
@@ -1038,6 +1061,15 @@ shares_value = facts.shares_outstanding       # Direct numeric value
 - **Performance**: Optimized caching and data structures
 
 ## Troubleshooting
+
+**Q: `get_fact()` or `get_concept()` returned None — how do I find the right concept?**
+A: These methods now emit a warning when a concept is not found, including suggestions for similar concept names. Use `search_concepts()` to find what the company actually reports, and `available_periods()` to see what periods have data:
+
+```python
+facts = company.get_facts()
+facts.search_concepts("revenue")      # Shows all revenue-related concepts
+facts.available_periods("Revenue")    # Shows periods with Revenue data
+```
 
 **Q: Why do some companies return None for financial statements?**
 A: Not all companies have facts data available through the SEC API. This is normal for some entity types. The enhanced API provides better error handling and fallback strategies.

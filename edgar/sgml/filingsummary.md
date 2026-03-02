@@ -116,7 +116,7 @@ To show a report
   Net sales                                        26,645          23,867         52,985          46,984  
   Cost of sales                                   $ 6,462         $ 6,058       $ 13,040        $ 12,338                                                                                                         
 ```
-`f.reports` shows just the reports
+`f.reports` shows just the reports (also accessible via `tenk.reports`, `tenq.reports`, etc.)
 `f.statements` shows just the statements
 
 

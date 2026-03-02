@@ -756,8 +756,8 @@ class FactQuery:
             fiscal_period = row['fiscal_period']
 
             # Sort by date, with annual periods last
-            # Handle None dates
-            if end_date is None:
+            # Handle None/NaN/NaT dates
+            if end_date is None or pd.isna(end_date):
                 sort_key = (date.min, 0)
             elif fiscal_period == 'FY':
                 sort_key = (end_date, 5)

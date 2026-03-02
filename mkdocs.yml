@@ -1,70 +1,157 @@
 site_name: EdgarTools - Python Library for SEC Data Analysis
 site_description: Access and analyze SEC filings, financial statements, insider trading, and investment fund data
+repo_url: https://github.com/dgunning/edgartools
+repo_name: dgunning/edgartools
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
 theme:
   name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
   features:
     - navigation.tabs
     - navigation.sections
-    - navigation.expand
+    #- navigation.expand
     - navigation.indexes
+    - navigation.top
     - search.suggest
     - search.highlight
     - content.code.annotate
     - content.code.copy
+    - toc.follow
 
 nav:
-  - Home:
+  # ==========================================
+  # GET STARTED - New users, first 10 minutes
+  # ==========================================
+  - Get Started:
     - Overview: index.md
-    - Why EdgarTools: why-edgartools.md
     - Installation: installation.md
-    - Configuration: configuration.md
     - Quick Start: quickstart.md
-    - Quick Reference: quick-guide.md
-  - How to Guides:
-    - Filings:
-      - "Working with a Filing": guides/working-with-filing.md
-      - "Search for Specific Filings": guides/searching-filings.md
-      - "Filter Filings by Date/Type": guides/filtering-filings.md
-      - "Access Filing Attachments": guides/filing-attachments.md
-      - "Finding the most recent filings": guides/current-filings.md
-    - Companies:
-      - "Working with a company": guides/finding-companies.md
-      - Getting company facts: guides/company-facts.md
-      - Creating a Multi Year Financials Data Api: guides/multi-year-financial-data-api.md
-      - Getting a list of company insiders: guides/company-insiders.md
-      - Getting subsets of companies: company-subsets.md
-    - Financial Analysis:
-      - "Extract Financial Statements": guides/extract-statements.md
-    - Advanced:
-        - "Advanced Ranking Search": advanced-search.md
-        - "Using Local Data Storage": guides/local-storage.md
-        - "Using Cloud Storage": guides/cloud-storage.md
-        - SSL Issues and Configuration: guides/ssl_verification.md
-        - Parsing SGML: guides/sgml.md
-  - XBRL and Financials:
-    - Getting XBRL from Filings: getting-xbrl.md
-    - Querying XBRL Facts: xbrl-querying.md
-    - Getting footnotes from XBRL: guides/xbrl-footnotes.md
-  - Data Objects:
-    - Data Objects: data-objects.md
-    - Insider Filings: insider-filings.md
-    - ThirteenF Holding Reports: 13f-filings.md
-  - Concepts:
-    - "Understanding SEC Filings": concepts/sec-filings.md
-    - "Understanding Data Objects": concepts/data-objects.md
+    - Complete Guide: complete-guide.md
+    - Choosing the Right API: xbrl/getting-started/choosing-the-right-api.md
+    - Common Pitfalls: common-pitfalls.md
+    - Cheat Sheet: quick-guide.md
+    - Key Concepts: concepts/sec-filings.md
+
+  # ==========================================
+  # COMPANY - Find and analyze companies
+  # ==========================================
+  - Company:
+    - Find a Company: guides/finding-companies.md
+    - Company Subsets: company-subsets.md
+    - Track Insiders: guides/company-insiders.md
+    - Entity API: guides/entity-api-guide.md
+    - Business Development Companies: guides/bdc-guide.md
+
+  # ==========================================
+  # FILINGS - Access SEC filings
+  # ==========================================
+  - Filings:
+    - Working with Filings: guides/working-with-filing.md
+    - Search & Filter: guides/searching-filings.md
+    - Filter by Criteria: guides/filtering-filings.md
+    - Current Filings: guides/current-filings.md
+    - Attachments: guides/filing-attachments.md
+    - Examples: examples.md
+
+  # ==========================================
+  # FILING TYPES - Parsed filing data objects
+  # ==========================================
+  - Filing Types:
+    - Overview: data-objects.md
+    - Annual & Quarterly: concepts/data-objects.md
+    - Current Events (8-K): eightk-filings.md
+    - Insider Trades (Form 4): insider-filings.md
+    - Track Insider Activity: guides/track-form4.md
+    - Beneficial Ownership (13D/G): guides/schedule13dg-data-object-guide.md
+    - Institutional Holdings (13F): guides/thirteenf-data-object-guide.md
+    - Fund Portfolios (N-PORT): guides/nport-data-object-guide.md
+    - Money Market Funds (N-MFP): guides/moneymarketfund-data-object-guide.md
+    - Fund Census (N-CEN): guides/fundcensus-data-object-guide.md
+    - Fund Shareholder Reports (N-CSR): guides/fundshareholderreport-data-object-guide.md
+    - Proxy Statements (DEF 14A): guides/proxystatement-data-object-guide.md
+    - Private Offerings (Form D): guides/formd-data-object-guide.md
+    - Crowdfunding (Form C): guides/formc-data-object-guide.md
+    - Sale Notices (Form 144): guides/form144-data-object-guide.md
+    - Fund Voting (N-PX): guides/npx-data-object-guide.md
+    - ABS Distribution (10-D): guides/tend-data-object-guide.md
+    - Municipal Advisors (MA-I): guides/mai-data-object-guide.md
+
+  # ==========================================
+  # FINANCIALS - Financial statements & data
+  # ==========================================
+  - Financials:
+    - Overview: guides/financial-data.md
+    - Extract Financial Statements: guides/extract-statements.md
+    - Company Facts: guides/company-facts.md
+    - Multi-Period Analysis: guides/multi-year-financial-data-api.md
+    - Stock Splits & EPS Normalization: guides/stock-splits-eps-normalization.md
+    - XBRL Deep Dive:
+      - Overview: xbrl/index.md
+      - Query XBRL Facts: xbrl-querying.md
+      - Getting XBRL Data: getting-xbrl.md
+      - Multi-Period Analysis: xbrl/guides/multi-period-analysis.md
+      - Dimensions: xbrl/concepts/dimension-handling.md
+      - Standardization: xbrl/concepts/standardization.md
+      - Footnotes: guides/xbrl-footnotes.md
+
+  # ==========================================
+  # AI - MCP server & skills for AI agents
+  # ==========================================
+  - AI Integration:
+    - "MCP Server & Skills": ai-integration.md
+
+  # ==========================================
+  # NOTEBOOKS - Interactive Colab tutorials
+  # ==========================================
+  - Notebooks: notebooks.md
+
+  # ==========================================
+  # ADVANCED - Power users & customization
+  # ==========================================
+  # ==========================================
+  # API REFERENCE - Detailed class documentation
+  # ==========================================
   - API Reference:
-    - Core Objects:
-      - Company: api/company.md
-      - Filing: api/filing.md
-      - Filings: api/filings.md
-      - XBRL: api/xbrl.md
-  - AI Integration: ai-integration.md
+    - Company: api/company.md
+    - Filing: api/filing.md
+    - Filings: api/filings.md
+    - XBRL: api/xbrl.md
+    - Entity Facts: api/entity-facts-reference.md
 
-  - Resources:
-    - "Common Issues & Solutions": resources/troubleshooting.md
-    - "Performance Best Practices": resources/performance.md
-    - "SEC Rate Limits & Compliance": resources/sec-compliance.md
-
-  - Contributing: contributing.md
-
-
+  - Advanced:
+    - Configuration: configuration.md
+    - Storage:
+      - Local Storage: guides/local-storage.md
+      - Cloud Storage (S3): guides/cloud-storage.md
+    - Advanced Search: advanced-search.md
+    - Customizing Standardization: advanced/customizing-standardization.md
+    - Reference:
+      - Form Types: FormType-Quick-Reference.md
+      - Period Types: PeriodType-Quick-Reference.md
+      - Statement Types: StatementType-Quick-Reference.md
+    - SEC Compliance: resources/sec-compliance.md
+    - Troubleshooting: resources/troubleshooting.md
+    - Performance: resources/performance.md
+    - Contributing: contributing.md
+    - About the Creator: about.md

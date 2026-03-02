@@ -124,8 +124,10 @@ def test_previous_holding_report():
     filing = Filing(form='13F-HR', filing_date='2022-12-01', company='Garde Capital, Inc.', cik=1616328,
                     accession_no='0001616328-22-000004')
     thirteenf = ThirteenF(filing)
-    assert len(thirteenf._related_filings) == 1
-    assert thirteenf.previous_holding_report() is None
+    related_filings = thirteenf._related_filings
+    print(related_filings)
+    assert len(thirteenf._related_filings) > 40
+    assert thirteenf.previous_holding_report()
 
 
 def test_parse_thirteenf_primary_xml():

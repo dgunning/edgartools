@@ -612,21 +612,38 @@ class StitchedStatements:
 
 #### Statement Access Methods
 
-Similar to `Statements` but returns `StitchedStatement` objects:
+Similar to `Statements` but returns `StitchedStatement` objects. All methods accept these common parameters:
+
+- `max_periods` (int): Maximum number of periods to include (default: 8)
+- `standard` (bool): Whether to use standardized concept labels (default: True)
+- `use_optimal_periods` (bool): Whether to use entity info for optimal period selection (default: True)
+- `show_date_range` (bool): Whether to show full date ranges for duration periods (default: False)
+- `include_dimensions` (bool): Whether to include dimensional segment data (default: False, True for equity/comprehensive income)
+- `view` (str): Controls dimensional filtering — `"standard"`, `"detailed"`, or `"summary"`. Overrides `include_dimensions` when provided.
 
 #### balance_sheet()
 ```python
-def balance_sheet(self) -> Optional[StitchedStatement]
+def balance_sheet(self, view=None, **kwargs) -> Optional[StitchedStatement]
 ```
 
 #### income_statement()
 ```python
-def income_statement(self) -> Optional[StitchedStatement]
+def income_statement(self, view=None, **kwargs) -> Optional[StitchedStatement]
 ```
 
-#### cash_flow_statement()
+#### cashflow_statement()
 ```python
-def cash_flow_statement(self) -> Optional[StitchedStatement]
+def cashflow_statement(self, view=None, **kwargs) -> Optional[StitchedStatement]
+```
+
+#### statement_of_equity()
+```python
+def statement_of_equity(self, view=None, **kwargs) -> Optional[StitchedStatement]
+```
+
+#### comprehensive_income()
+```python
+def comprehensive_income(self, view=None, **kwargs) -> Optional[StitchedStatement]
 ```
 
 **Example:**
@@ -637,6 +654,10 @@ income_stmt = stitched_statements.income_statement()
 
 # Shows multiple years of data
 print(income_stmt.render())
+
+# Include dimensional breakdowns (e.g., cost by segment)
+income_detailed = stitched_statements.income_statement(view="detailed")
+df = income_detailed.to_dataframe()
 ```
 
 ### StitchedStatement
@@ -648,11 +669,19 @@ class StitchedStatement:
     """Individual stitched statement showing multi-period data."""
 ```
 
+**Constructor Parameters:**
+- `xbrls`: XBRLS object containing stitched data
+- `statement_type` (str): Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
+- `max_periods` (int): Maximum number of periods (default: 8)
+- `standard` (bool): Use standardized labels (default: True)
+- `include_dimensions` (bool): Include dimensional data (default: False)
+- `view` (str): `"standard"`, `"detailed"`, or `"summary"`. Overrides `include_dimensions`.
+
 #### Analysis Methods
 
 #### render()
 ```python
-def render(self, **kwargs) -> RenderedStatement
+def render(self, show_date_range: bool = False) -> Table
 ```
 Render multi-period statement with rich formatting.
 

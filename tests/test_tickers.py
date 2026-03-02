@@ -9,7 +9,8 @@ import pytest
 def test_get_tickers():
     tickers = get_company_tickers()
     assert isinstance(tickers, pd.DataFrame)
-    assert tickers.columns.tolist() == ['cik', 'ticker', 'company']
+    # New schema includes exchange column from edgar-storage format
+    assert tickers.columns.tolist() == ['cik', 'ticker', 'exchange', 'company']
     print(tickers.head())
 
     tickers = get_company_tickers(as_dataframe=False)

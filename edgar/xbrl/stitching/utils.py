@@ -80,6 +80,7 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
     data = {}
     data['label'] = []
     data['concept'] = []
+    data['standard_concept'] = []
 
     # Initialize period columns in the correct order (newest first)
     for col in period_columns:
@@ -92,6 +93,7 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
 
         data['label'].append(item['label'])
         data['concept'].append(item['concept'])
+        data['standard_concept'].append(item.get('standard_concept'))
 
         # Add values for each period in the correct order
         for period_id, _period_label in stitched_data['periods']:
@@ -100,7 +102,7 @@ def to_pandas(stitched_data: Dict[str, Any]) -> pd.DataFrame:
             data[col].append(value)
 
     # Create the DataFrame with columns in the correct order
-    column_order = ['label', 'concept'] + period_columns
+    column_order = ['label', 'concept', 'standard_concept'] + period_columns
     df = pd.DataFrame(data, columns=column_order)
 
     return df

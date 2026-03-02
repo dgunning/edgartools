@@ -1,4 +1,8 @@
-# Form144 Data Object Guide
+---
+description: Extract proposed sale data from SEC Form 144 filings including seller details, share amounts, and sale dates.
+---
+
+# Form 144: Parse Insider Restricted Stock Sale Notices
 
 Form 144 is a notice of proposed sale of restricted securities under SEC Rule 144. Filed by company insiders (officers, directors, 10%+ shareholders) before selling restricted or control securities. This guide details all data available from the `Form144` class for building views.
 
