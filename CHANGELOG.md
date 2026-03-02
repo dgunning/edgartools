@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.20.0] - 2026-03-02
+
+### Added
+
+- **Fund Data Object Improvements** — Performance, cohesion, and memory safety improvements across fund data objects ([0b020c3](https://github.com/dgunning/edgartools/commit/0b020c3))
+
+- **`fact_id` in XBRL Facts DataFrame** — The unique fact identifier is now exposed in the XBRL facts DataFrame for traceability and cross-referencing ([0785b87](https://github.com/dgunning/edgartools/commit/0785b87))
+
+### Fixed
+
+- **SGML Parser Diagnostic Errors** — "Unknown SGML format" errors now include content previews, response length, and pattern-specific messages for rate limiting, empty responses, and SEC error pages ([bf8a58a](https://github.com/dgunning/edgartools/commit/bf8a58a))
+
+- **BDC Test Reliability** — Switched BDC integration tests from ARCC to Blue Owl (CIK 1812554) due to ARCC's latest 10-K returning empty content from SEC ([84c58ee](https://github.com/dgunning/edgartools/commit/84c58ee))
+
+### Documentation
+
+- **Fund Entity Guide** — Added comprehensive fund entity guide, updated data-objects index, and created fund AI skill YAML ([140aaa2](https://github.com/dgunning/edgartools/commit/140aaa2))
+
+## [5.19.1] - 2026-03-01
+
+### Fixed
+
+- **Dead SEC Series Endpoint** — Replaced dead SEC `cgi-bin/series` endpoint with `browse-edgar` ([af86bd2](https://github.com/dgunning/edgartools/commit/af86bd2))
+
 ## [5.19.0] - 2026-02-28
 
 ### Added
