@@ -77,6 +77,16 @@ MODE_CONFIG = {
 }
 
 
+def _format_fiscal_period(period_date, form_type: str) -> str:
+    """Format period_date into 'YYYY-FY' or 'YYYY-QN' format."""
+    year = period_date.year if hasattr(period_date, 'year') else str(period_date)[:4]
+    if form_type == "10-K":
+        return f"{year}-FY"
+    month = period_date.month if hasattr(period_date, 'month') else int(str(period_date)[5:7])
+    quarter = (month - 1) // 3 + 1
+    return f"{year}-Q{quarter}"
+
+
 def load_known_divergences() -> Dict[str, Dict]:
     """Load known_divergences from companies.yaml config."""
     config_path = Path(__file__).resolve().parents[4] / "edgar/xbrl/standardization/config/companies.yaml"
@@ -217,7 +227,8 @@ def process_company(args: tuple) -> Dict[str, Any]:
         "10k_stats": {"total": 0, "passed": 0, "failed": 0, "no_ref": 0, "skipped": 0},
         "10q_stats": {"total": 0, "passed": 0, "failed": 0, "no_ref": 0, "skipped": 0},
         "failures": [],
-        "skipped": []
+        "skipped": [],
+        "ledger_runs": []
     }
 
     try:
@@ -262,6 +273,21 @@ def process_company(args: tuple) -> Dict[str, Any]:
                     if v.status == 'match':
                         result["10k_stats"]["passed"] += 1
                         result["10k_stats"]["total"] += 1
+                        # Collect ledger run data for match
+                        mapping_result = results.get(metric)
+                        result["ledger_runs"].append({
+                            "ticker": ticker, "metric": metric,
+                            "fiscal_period": _format_fiscal_period(period_date, "10-K"),
+                            "form_type": "10-K",
+                            "strategy_name": mapping_result.source.value if mapping_result else "unknown",
+                            "extracted_value": v.xbrl_value,
+                            "reference_value": v.reference_value,
+                            "confidence": mapping_result.confidence if mapping_result else 0.0,
+                            "concept_used": mapping_result.concept if mapping_result else None,
+                            "accession_no": filing.accession_no,
+                            "filing_date": str(period_date),
+                            "sector": sector, "status": v.status,
+                        })
                     elif v.status == 'mismatch':
                         # Check if this is a known divergence that should be skipped
                         skip, skip_reason = should_skip_validation(ticker, metric, "10-K", known_divergences)
@@ -301,6 +327,20 @@ def process_company(args: tuple) -> Dict[str, Any]:
                         }
                         failure["suggested_actions"] = get_suggested_actions(failure)
                         result["failures"].append(failure)
+                        # Collect ledger run data for mismatch
+                        result["ledger_runs"].append({
+                            "ticker": ticker, "metric": metric,
+                            "fiscal_period": _format_fiscal_period(period_date, "10-K"),
+                            "form_type": "10-K",
+                            "strategy_name": mapping_result.source.value if mapping_result else "unknown",
+                            "extracted_value": v.xbrl_value,
+                            "reference_value": v.reference_value,
+                            "confidence": mapping_result.confidence if mapping_result else 0.0,
+                            "concept_used": mapping_result.concept if mapping_result else None,
+                            "accession_no": filing.accession_no,
+                            "filing_date": str(period_date),
+                            "sector": sector, "status": v.status,
+                        })
                     elif v.status == 'missing_ref':
                         result["10k_stats"]["no_ref"] += 1
             except Exception as e:
@@ -351,6 +391,21 @@ def process_company(args: tuple) -> Dict[str, Any]:
                     if v.status == 'match':
                         result["10q_stats"]["passed"] += 1
                         result["10q_stats"]["total"] += 1
+                        # Collect ledger run data for match
+                        mapping_result = results.get(metric)
+                        result["ledger_runs"].append({
+                            "ticker": ticker, "metric": metric,
+                            "fiscal_period": _format_fiscal_period(period_date, "10-Q"),
+                            "form_type": "10-Q",
+                            "strategy_name": mapping_result.source.value if mapping_result else "unknown",
+                            "extracted_value": v.xbrl_value,
+                            "reference_value": v.reference_value,
+                            "confidence": mapping_result.confidence if mapping_result else 0.0,
+                            "concept_used": mapping_result.concept if mapping_result else None,
+                            "accession_no": filing.accession_no,
+                            "filing_date": str(period_date),
+                            "sector": sector, "status": v.status,
+                        })
                     elif v.status == 'mismatch':
                         # Check if this is a known divergence that should be skipped
                         skip, skip_reason = should_skip_validation(ticker, metric, "10-Q", known_divergences)
@@ -389,6 +444,20 @@ def process_company(args: tuple) -> Dict[str, Any]:
                         }
                         failure["suggested_actions"] = get_suggested_actions(failure)
                         result["failures"].append(failure)
+                        # Collect ledger run data for mismatch
+                        result["ledger_runs"].append({
+                            "ticker": ticker, "metric": metric,
+                            "fiscal_period": _format_fiscal_period(period_date, "10-Q"),
+                            "form_type": "10-Q",
+                            "strategy_name": mapping_result.source.value if mapping_result else "unknown",
+                            "extracted_value": v.xbrl_value,
+                            "reference_value": v.reference_value,
+                            "confidence": mapping_result.confidence if mapping_result else 0.0,
+                            "concept_used": mapping_result.concept if mapping_result else None,
+                            "accession_no": filing.accession_no,
+                            "filing_date": str(period_date),
+                            "sector": sector, "status": v.status,
+                        })
                     elif v.status == 'missing_ref':
                         result["10q_stats"]["no_ref"] += 1
             except Exception as e:
@@ -697,6 +766,16 @@ def main():
         print(f"Active skips (skip_validation=true): {div_stats['active_skips']}")
     print(f"="*60)
 
+    # Compute strategy fingerprint for ledger tracking
+    import hashlib, subprocess
+    try:
+        git_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"],
+                                           stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        git_hash = "unknown"
+    strategy_fingerprint = hashlib.sha256(f"industrial_e2e_{git_hash}".encode()).hexdigest()[:12]
+    e2e_run_id = f"e2e_industrial_{datetime.now().isoformat()}"
+
     # Run parallel processing
     work_items = []
     for ticker in tickers:
@@ -713,6 +792,39 @@ def main():
     all_failures = []
     for r in results:
         all_failures.extend(r["failures"])
+
+    # Batch-write ledger runs (after Pool.map to avoid SQLite multiprocessing issues)
+    try:
+        from edgar.xbrl.standardization.ledger import ExperimentLedger, ExtractionRun
+        ledger = ExperimentLedger()
+        ledger_count = 0
+        for r in results:
+            for run_data in r.get("ledger_runs", []):
+                run = ExtractionRun(
+                    ticker=run_data["ticker"],
+                    metric=run_data["metric"],
+                    fiscal_period=run_data["fiscal_period"],
+                    form_type=run_data["form_type"],
+                    archetype="A",  # Standard Industrial
+                    strategy_name=run_data["strategy_name"],
+                    strategy_fingerprint=strategy_fingerprint,
+                    extracted_value=run_data["extracted_value"],
+                    reference_value=run_data["reference_value"],
+                    confidence=run_data["confidence"],
+                    metadata={
+                        "concept_used": run_data.get("concept_used"),
+                        "accession_no": run_data.get("accession_no"),
+                        "filing_date": run_data.get("filing_date"),
+                        "sector": run_data.get("sector"),
+                        "e2e_run_id": e2e_run_id,
+                    }
+                )
+                ledger.record_run(run)
+                ledger_count += 1
+        print(f"\nLedger: recorded {ledger_count} extraction runs (fingerprint={strategy_fingerprint})")
+        print(f"Ledger DB: {ledger.db_path}")
+    except Exception as e:
+        print(f"\nLedger: FAILED to write runs - {e}")
 
     # Write reports to specific directory
     project_root = Path(__file__).resolve().parents[4]
