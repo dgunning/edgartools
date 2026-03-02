@@ -193,6 +193,38 @@ class CohortTestResult:
 
 
 # =============================================================================
+# REGRESSION DETECTION
+# =============================================================================
+
+@dataclass
+class RegressionResult:
+    """Result of checking one golden master against new runs."""
+    ticker: str
+    metric: str
+    golden_variance: float       # Historical avg variance from golden master
+    current_variance: Optional[float]
+    status: str                  # "PASS", "REGRESSION", "NO_DATA"
+
+
+@dataclass
+class RegressionReport:
+    """Aggregate regression report across all golden masters."""
+    total_golden: int            # How many golden masters exist
+    checked: int                 # How many had new runs to compare
+    regressions: List[RegressionResult]
+    passes: List[RegressionResult]
+    no_data: List[RegressionResult]
+
+    @property
+    def has_regressions(self) -> bool:
+        return len(self.regressions) > 0
+
+    @property
+    def exit_code(self) -> int:
+        return 1 if self.has_regressions else 0
+
+
+# =============================================================================
 # EXPERIMENT LEDGER
 # =============================================================================
 
@@ -215,6 +247,7 @@ class ExperimentLedger:
 
         Args:
             db_path: Path to SQLite database. If None, uses default location.
+                     Use ":memory:" for in-memory databases (e.g., testing).
         """
         if db_path is None:
             # Default location in company_mappings directory
@@ -223,11 +256,22 @@ class ExperimentLedger:
             db_path = str(base_dir / 'experiment_ledger.db')
 
         self.db_path = db_path
+        # Keep a persistent connection for in-memory databases (each connect()
+        # to ":memory:" creates a separate empty database otherwise).
+        self._persistent_conn = None
+        if db_path == ":memory:":
+            self._persistent_conn = sqlite3.connect(":memory:")
         self._init_database()
+
+    def _connect(self) -> sqlite3.Connection:
+        """Get a database connection. Reuses persistent connection for :memory: DBs."""
+        if self._persistent_conn is not None:
+            return self._persistent_conn
+        return sqlite3.connect(self.db_path)
 
     def _init_database(self):
         """Initialize database schema."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.cursor()
 
             # Extraction runs table
@@ -322,7 +366,7 @@ class ExperimentLedger:
         Returns:
             The run_id of the recorded run
         """
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT OR REPLACE INTO extraction_runs (
@@ -347,7 +391,7 @@ class ExperimentLedger:
 
     def get_run(self, run_id: str) -> Optional[ExtractionRun]:
         """Get a specific run by ID."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM extraction_runs WHERE run_id = ?', (run_id,))
@@ -363,7 +407,7 @@ class ExperimentLedger:
         limit: int = 100
     ) -> List[ExtractionRun]:
         """Get recent runs for a ticker."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
@@ -390,7 +434,7 @@ class ExperimentLedger:
         limit: int = 100
     ) -> List[ExtractionRun]:
         """Get all runs using a specific strategy version."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute('''
@@ -433,7 +477,7 @@ class ExperimentLedger:
 
     def create_golden_master(self, master: GoldenMaster) -> str:
         """Create or update a golden master."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT OR REPLACE INTO golden_masters (
@@ -456,7 +500,7 @@ class ExperimentLedger:
 
     def get_golden_master(self, ticker: str, metric: str) -> Optional[GoldenMaster]:
         """Get active golden master for ticker/metric."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute('''
@@ -472,7 +516,7 @@ class ExperimentLedger:
 
     def get_all_golden_masters(self, active_only: bool = True) -> List[GoldenMaster]:
         """Get all golden masters."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             if active_only:
@@ -507,7 +551,7 @@ class ExperimentLedger:
 
     def record_cohort_test(self, result: CohortTestResult) -> str:
         """Record a cohort test result."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT INTO cohort_tests (
@@ -530,7 +574,7 @@ class ExperimentLedger:
 
     def get_cohort_tests(self, cohort_name: str, limit: int = 10) -> List[CohortTestResult]:
         """Get recent cohort test results."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute('''
@@ -560,12 +604,209 @@ class ExperimentLedger:
         )
 
     # =========================================================================
+    # GOLDEN MASTER PROMOTION
+    # =========================================================================
+
+    def promote_golden_masters(
+        self,
+        strategy_fingerprint: Optional[str] = None,
+        min_periods: int = 3,
+        max_variance: float = 20.0,
+    ) -> List[GoldenMaster]:
+        """
+        Promote stable extraction configurations to golden masters.
+
+        Scans extraction_runs for (ticker, metric, strategy_name) combos
+        with min_periods distinct valid fiscal periods, then creates/updates
+        golden masters for each qualifying group.
+
+        Args:
+            strategy_fingerprint: If provided, only consider runs with this fingerprint.
+            min_periods: Minimum distinct valid fiscal periods required (default 3).
+            max_variance: Maximum average variance allowed for promotion (default 20%).
+
+        Returns:
+            List of newly promoted GoldenMaster objects.
+        """
+        promoted = []
+
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            # Build query to find qualifying groups
+            where_clause = "WHERE is_valid = 1"
+            params = []
+            if strategy_fingerprint:
+                where_clause += " AND strategy_fingerprint = ?"
+                params.append(strategy_fingerprint)
+
+            cursor.execute(f'''
+                SELECT
+                    ticker,
+                    metric,
+                    strategy_name,
+                    strategy_fingerprint,
+                    archetype,
+                    sub_archetype,
+                    COUNT(DISTINCT fiscal_period) as period_count,
+                    AVG(variance_pct) as avg_variance,
+                    MAX(variance_pct) as max_var,
+                    GROUP_CONCAT(DISTINCT fiscal_period) as periods
+                FROM extraction_runs
+                {where_clause}
+                GROUP BY ticker, metric, strategy_name
+                HAVING COUNT(DISTINCT fiscal_period) >= ?
+                    AND AVG(variance_pct) <= ?
+            ''', params + [min_periods, max_variance])
+
+            rows = cursor.fetchall()
+
+        for row in rows:
+            golden_id = f"gm_{row['ticker']}_{row['metric']}_{row['strategy_name']}"
+            validated_periods = sorted(row['periods'].split(','))
+
+            master = GoldenMaster(
+                golden_id=golden_id,
+                ticker=row['ticker'],
+                metric=row['metric'],
+                archetype=row['archetype'],
+                sub_archetype=row['sub_archetype'],
+                strategy_name=row['strategy_name'],
+                strategy_fingerprint=row['strategy_fingerprint'],
+                strategy_params={},
+                validated_periods=validated_periods,
+                avg_variance_pct=row['avg_variance'] or 0.0,
+                max_variance_pct=row['max_var'] or 0.0,
+            )
+            self.create_golden_master(master)
+            promoted.append(master)
+
+        logger.info(f"Promoted {len(promoted)} golden masters")
+        return promoted
+
+    # =========================================================================
+    # REGRESSION DETECTION
+    # =========================================================================
+
+    def check_regressions(
+        self,
+        strategy_fingerprint: str,
+        variance_threshold: float = 20.0,
+    ) -> RegressionReport:
+        """
+        Check for regressions against golden masters.
+
+        Compares the latest run for each golden master's (ticker, metric)
+        against the golden master's historical validity.
+
+        Args:
+            strategy_fingerprint: Fingerprint of the current strategy to check.
+            variance_threshold: Variance % above which a run is considered failing.
+
+        Returns:
+            RegressionReport with PASS/REGRESSION/NO_DATA per golden master.
+        """
+        golden_masters = self.get_all_golden_masters(active_only=True)
+        regressions = []
+        passes = []
+        no_data = []
+
+        for gm in golden_masters:
+            # Find latest run with this fingerprint for (ticker, metric)
+            latest_run = self._get_latest_run(
+                ticker=gm.ticker,
+                metric=gm.metric,
+                strategy_fingerprint=strategy_fingerprint,
+            )
+
+            if latest_run is None:
+                no_data.append(RegressionResult(
+                    ticker=gm.ticker,
+                    metric=gm.metric,
+                    golden_variance=gm.avg_variance_pct,
+                    current_variance=None,
+                    status="NO_DATA",
+                ))
+            elif not latest_run.is_valid:
+                regressions.append(RegressionResult(
+                    ticker=gm.ticker,
+                    metric=gm.metric,
+                    golden_variance=gm.avg_variance_pct,
+                    current_variance=latest_run.variance_pct,
+                    status="REGRESSION",
+                ))
+            else:
+                passes.append(RegressionResult(
+                    ticker=gm.ticker,
+                    metric=gm.metric,
+                    golden_variance=gm.avg_variance_pct,
+                    current_variance=latest_run.variance_pct,
+                    status="PASS",
+                ))
+
+        return RegressionReport(
+            total_golden=len(golden_masters),
+            checked=len(regressions) + len(passes),
+            regressions=regressions,
+            passes=passes,
+            no_data=no_data,
+        )
+
+    def _get_latest_run(
+        self,
+        ticker: str,
+        metric: str,
+        strategy_fingerprint: str,
+    ) -> Optional[ExtractionRun]:
+        """Get the most recent run for a (ticker, metric, fingerprint) combo."""
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT * FROM extraction_runs
+                WHERE ticker = ? AND metric = ? AND strategy_fingerprint = ?
+                ORDER BY run_timestamp DESC
+                LIMIT 1
+            ''', (ticker, metric, strategy_fingerprint))
+            row = cursor.fetchone()
+            if row:
+                return self._row_to_run(row)
+        return None
+
+    def print_regression_report(self, report: RegressionReport):
+        """Print a formatted regression report to console."""
+        print(f"\n{'='*60}")
+        print("REGRESSION REPORT")
+        print(f"{'='*60}")
+        print(f"Golden masters: {report.total_golden}")
+        print(f"Checked:        {report.checked}")
+        print(f"Passes:         {len(report.passes)}")
+        print(f"Regressions:    {len(report.regressions)}")
+        print(f"No data:        {len(report.no_data)}")
+
+        if report.regressions:
+            print(f"\n{'REGRESSIONS':}")
+            print(f"{'Ticker':<8} {'Metric':<25} {'Golden %':>10} {'Current %':>10}")
+            print("-" * 60)
+            for r in report.regressions:
+                current = f"{r.current_variance:.1f}" if r.current_variance is not None else "N/A"
+                print(f"{r.ticker:<8} {r.metric:<25} {r.golden_variance:>10.1f} {current:>10}")
+
+        if not report.has_regressions:
+            print("\nSTATUS: CLEAN - No regressions detected")
+        else:
+            print(f"\nSTATUS: {len(report.regressions)} REGRESSIONS DETECTED")
+
+        print(f"{'='*60}\n")
+
+    # =========================================================================
     # ANALYTICS
     # =========================================================================
 
     def get_strategy_performance(self, strategy_name: str) -> Dict[str, Any]:
         """Get aggregate performance metrics for a strategy."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 SELECT
@@ -595,7 +836,7 @@ class ExperimentLedger:
 
     def get_ticker_summary(self, ticker: str) -> Dict[str, Any]:
         """Get extraction summary for a ticker."""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 SELECT

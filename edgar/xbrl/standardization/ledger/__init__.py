@@ -39,6 +39,8 @@ from .schema import (
     ExtractionRun,
     GoldenMaster,
     CohortTestResult,
+    RegressionResult,
+    RegressionReport,
     ExperimentLedger,
 )
 
@@ -46,5 +48,7 @@ __all__ = [
     'ExtractionRun',
     'GoldenMaster',
     'CohortTestResult',
+    'RegressionResult',
+    'RegressionReport',
     'ExperimentLedger',
 ]

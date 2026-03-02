@@ -387,6 +387,104 @@ class CohortReactor:
             json.dumps(id_data, sort_keys=True).encode()
         ).hexdigest()[:16]
 
+    def test_from_e2e_results(
+        self,
+        cohort_name: str,
+        e2e_results: List[Dict],
+        strategy_name: str,
+        strategy_fingerprint: str,
+        metrics: Optional[List[str]] = None,
+    ) -> CohortTestSummary:
+        """
+        Test a cohort using pre-computed E2E results from Pool.map().
+
+        Compares current E2E results against baseline runs from the ledger
+        (with a DIFFERENT fingerprint) to classify impact per company/metric.
+
+        Args:
+            cohort_name: Name of the cohort to test.
+            e2e_results: List of dicts from Pool.map(), each with 'ticker' and 'ledger_runs'.
+            strategy_name: Name of the current strategy.
+            strategy_fingerprint: Fingerprint of the current strategy.
+            metrics: Override metrics to test (defaults to cohort definition).
+
+        Returns:
+            CohortTestSummary with results for all member companies.
+        """
+        cohort = self.get_cohort(cohort_name)
+        if not cohort:
+            raise ValueError(f"Unknown cohort: {cohort_name}")
+
+        test_metrics = metrics or cohort.metrics
+        if not test_metrics:
+            test_metrics = ['Revenue', 'OperatingIncome']
+
+        # Build lookup: ticker -> list of ledger_run dicts
+        results_by_ticker = {}
+        for r in e2e_results:
+            ticker = r.get('ticker')
+            if ticker:
+                results_by_ticker[ticker] = r.get('ledger_runs', [])
+
+        # Generate test ID
+        test_id = self._generate_test_id(cohort_name, strategy_name, {'fp': strategy_fingerprint})
+        test_timestamp = datetime.now().isoformat()
+
+        company_results = []
+        for metric in test_metrics:
+            for ticker in cohort.members:
+                ledger_runs = results_by_ticker.get(ticker, [])
+
+                # Find current run for this metric
+                current_run = next(
+                    (lr for lr in ledger_runs if lr.get('metric') == metric),
+                    None,
+                )
+
+                new_value = current_run.get('extracted_value') if current_run else None
+                new_variance = None
+                reference_value = current_run.get('reference_value') if current_run else None
+
+                if new_value is not None and reference_value is not None and reference_value != 0:
+                    new_variance = abs(new_value - reference_value) / abs(reference_value) * 100
+
+                # Get baseline from ledger: most recent run with DIFFERENT fingerprint
+                baseline_value = None
+                baseline_variance = None
+                runs = self.ledger.get_runs_for_ticker(ticker, metric=metric, limit=10)
+                baseline_run = next(
+                    (r for r in runs if r.strategy_fingerprint != strategy_fingerprint),
+                    None,
+                )
+                if baseline_run:
+                    baseline_value = baseline_run.extracted_value
+                    baseline_variance = baseline_run.variance_pct
+
+                impact = self._determine_impact(baseline_variance, new_variance)
+
+                company_results.append(CompanyResult(
+                    ticker=ticker,
+                    metric=metric,
+                    baseline_value=baseline_value,
+                    baseline_variance=baseline_variance,
+                    new_value=new_value,
+                    new_variance=new_variance,
+                    reference_value=reference_value,
+                    impact=impact,
+                ))
+
+        summary = CohortTestSummary(
+            test_id=test_id,
+            cohort_name=cohort_name,
+            strategy_name=strategy_name,
+            strategy_fingerprint=strategy_fingerprint,
+            test_timestamp=test_timestamp,
+            company_results=company_results,
+        )
+
+        self._record_to_ledger(summary)
+        return summary
+
     def _record_to_ledger(self, summary: CohortTestSummary):
         """Record test results to the experiment ledger."""
         # Record cohort test

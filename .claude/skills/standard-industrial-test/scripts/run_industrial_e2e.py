@@ -773,7 +773,7 @@ def main():
                                            stderr=subprocess.DEVNULL).decode().strip()
     except Exception:
         git_hash = "unknown"
-    strategy_fingerprint = hashlib.sha256(f"industrial_e2e_{git_hash}".encode()).hexdigest()[:12]
+    strategy_fingerprint = hashlib.sha256(f"industrial_e2e_{git_hash}".encode()).hexdigest()[:16]
     e2e_run_id = f"e2e_industrial_{datetime.now().isoformat()}"
 
     # Run parallel processing
@@ -825,6 +825,40 @@ def main():
         print(f"Ledger DB: {ledger.db_path}")
     except Exception as e:
         print(f"\nLedger: FAILED to write runs - {e}")
+        ledger = None
+
+    # --- Golden Master Promotion ---
+    if ledger:
+        try:
+            promoted = ledger.promote_golden_masters(strategy_fingerprint=strategy_fingerprint)
+            if promoted:
+                print(f"Golden Masters: promoted {len(promoted)} (ticker, metric) combos")
+            else:
+                print(f"Golden Masters: no new promotions (need 3+ valid periods)")
+
+            # --- Regression Check ---
+            report = ledger.check_regressions(strategy_fingerprint=strategy_fingerprint)
+            ledger.print_regression_report(report)
+            if report.has_regressions:
+                print(f"WARNING: {len(report.regressions)} regressions detected!")
+
+            # --- Cohort Tests ---
+            from edgar.xbrl.standardization.reactor import CohortReactor
+            reactor = CohortReactor(ledger=ledger)
+            for cohort_name in ['MAG7', 'Industrial_Manufacturing', 'Consumer_Staples',
+                                'Energy_Sector', 'Healthcare_Pharma', 'Transportation_Logistics']:
+                cohort = reactor.get_cohort(cohort_name)
+                if cohort:
+                    summary = reactor.test_from_e2e_results(
+                        cohort_name=cohort_name,
+                        e2e_results=results,
+                        strategy_name="tree",
+                        strategy_fingerprint=strategy_fingerprint,
+                    )
+                    if not summary.is_passing:
+                        reactor.print_summary(summary)
+        except Exception as e:
+            print(f"\nRegression/Cohort checks FAILED: {e}")
 
     # Write reports to specific directory
     project_root = Path(__file__).resolve().parents[4]
