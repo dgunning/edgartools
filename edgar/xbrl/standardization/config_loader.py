@@ -120,7 +120,9 @@ class ConfigLoader:
                 universal=data.get("universal", False),
                 notes=data.get("notes"),
                 dimensional_handling=data.get("dimensional_handling"),
-                exclude_patterns=data.get("exclude_patterns", [])
+                exclude_patterns=data.get("exclude_patterns", []),
+                composite=data.get("composite", False),
+                components=data.get("components", [])
             )
         
         # Parse companies

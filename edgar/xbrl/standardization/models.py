@@ -168,12 +168,19 @@ class MetricConfig:
     notes: Optional[str] = None
     dimensional_handling: Optional[Dict[str, Any]] = None  # Config for dimensional value handling
     exclude_patterns: List[str] = field(default_factory=list)  # Patterns to exclude from matching
+    composite: bool = False  # True if metric requires aggregating multiple components
+    components: List[str] = field(default_factory=list)  # Component concepts for composite metrics
 
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""
         # Strip namespace prefix
         clean = concept.replace('us-gaap:', '').replace('us-gaap_', '')
         return clean in self.known_concepts
+
+    @property
+    def is_composite(self) -> bool:
+        """Check if this is a composite metric requiring aggregation."""
+        return self.composite and len(self.components) > 0
 
 
 @dataclass 
