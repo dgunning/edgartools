@@ -144,14 +144,17 @@ class ReferenceValidator:
     def __init__(
         self,
         config: Optional[MappingConfig] = None,
-        tolerance_pct: float = 15.0  # 15% tolerance for matching
+        tolerance_pct: float = 15.0,  # 15% tolerance for matching
+        snapshot_mode: bool = False
     ):
         self.config = config or get_config()
         self.tolerance = tolerance_pct / 100.0
         self._yf_cache = {}  # Cache yfinance Stock objects by ticker
         self._dimensional_aggregator = DimensionalAggregator()  # For dimensional value aggregation
-        
-        if yf is None:
+        self._snapshot_mode = snapshot_mode
+        self._snapshot_cache = {}  # Cache loaded snapshot dicts by ticker
+
+        if yf is None and not snapshot_mode:
             print("Warning: yfinance not installed. Install with: pip install yfinance")
     
     def _get_stock(self, ticker: str):
@@ -654,14 +657,17 @@ class ReferenceValidator:
         Returns:
             Dict of validation results per metric
         """
-        if yf is None:
+        if yf is None and not self._snapshot_mode:
             return {}
-        
-        # Get yfinance data (cached)
-        stock = self._get_stock(ticker)
-        
+
+        # Get yfinance data (cached) — skip when using snapshots
+        stock = None if self._snapshot_mode else self._get_stock(ticker)
+
+        # Set ticker early so snapshot lookup can use it
+        self._current_ticker = ticker
+
         validations = {}
-        
+
         for metric, result in results.items():
             if result.source == MappingSource.CONFIG:
                 # Metric excluded for this company
@@ -990,21 +996,26 @@ class ReferenceValidator:
         target_date: Optional[Union[str, datetime]] = None
     ) -> Optional[float]:
         """Get a value from yfinance for a metric.
-        
+
         Uses GAAP "As Reported" fields when available, falls back to
         calculated fields for companies that don't have the GAAP field.
-        
+        When snapshot_mode is enabled, reads from on-disk JSON instead of live API.
+
         Args:
-            stock: yfinance Ticker object
+            stock: yfinance Ticker object (None when snapshot_mode)
             metric: Metric name
             max_periods: Max periods to search if no target_date
             target_date: Optional specific date to match (within 7 days)
-            
+
         Returns:
             Float value or None
         """
         if metric not in self.YFINANCE_MAP:
             return None
+
+        # Snapshot mode: read from on-disk JSON instead of live yfinance
+        if self._snapshot_mode:
+            return self._get_snapshot_value(metric, max_periods, target_date)
         
         sheet_name, field_name = self.YFINANCE_MAP[metric]
         
@@ -1083,7 +1094,48 @@ class ReferenceValidator:
             pass
         
         return None  # All periods NaN or error
-    
+
+    def _get_snapshot_value(
+        self,
+        metric: str,
+        max_periods: int = 4,
+        target_date: Optional[Union[str, datetime]] = None
+    ) -> Optional[float]:
+        """Look up a reference value from on-disk JSON snapshot.
+
+        Loads the snapshot once per ticker (cached in self._snapshot_cache),
+        then delegates to yf_snapshot.get_snapshot_value for date matching.
+        Handles GAAP fallbacks the same way _get_yfinance_value does.
+        """
+        from .yf_snapshot import load_snapshot, get_snapshot_value
+
+        ticker = getattr(self, "_current_ticker", None)
+        if not ticker:
+            return None
+
+        # Load snapshot with instance-level caching
+        if ticker not in self._snapshot_cache:
+            self._snapshot_cache[ticker] = load_snapshot(ticker)
+        snapshot = self._snapshot_cache[ticker]
+        if snapshot is None:
+            return None
+
+        sheet_name, field_name = self.YFINANCE_MAP[metric]
+
+        # Try primary field
+        val = get_snapshot_value(snapshot, sheet_name, field_name, target_date, max_periods)
+        if val is not None:
+            return val
+
+        # Try GAAP fallback
+        if metric in self.YFINANCE_GAAP_FALLBACKS:
+            fb_sheet, fb_field = self.YFINANCE_GAAP_FALLBACKS[metric]
+            val = get_snapshot_value(snapshot, fb_sheet, fb_field, target_date, max_periods)
+            if val is not None:
+                return val
+
+        return None
+
     def _extract_xbrl_value(
         self,
         xbrl,

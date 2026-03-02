@@ -210,6 +210,7 @@ def process_company(args: tuple) -> Dict[str, Any]:
     ticker = worker_config["ticker"]
     target_metrics = worker_config.get("metrics")
     known_divergences = worker_config.get("known_divergences", {})
+    snapshot_mode = worker_config.get("snapshot_mode", True)
 
     # Import here to avoid multiprocessing pickle issues
     from edgar import set_identity, use_local_storage, Company
@@ -233,7 +234,7 @@ def process_company(args: tuple) -> Dict[str, Any]:
 
     try:
         company = Company(ticker)
-        orchestrator = Orchestrator()
+        orchestrator = Orchestrator(snapshot_mode=snapshot_mode)
 
         # Get industry
         try:
@@ -696,6 +697,10 @@ def main():
                         help="Number of 10-K years to test (overrides --mode)")
     parser.add_argument("--quarters", type=int, default=None,
                         help="Number of 10-Q quarters to test (overrides --mode)")
+    parser.add_argument("--live", action="store_true",
+                        help="Force live yfinance mode (bypass snapshots)")
+    parser.add_argument("--refresh-reference", action="store_true",
+                        help="Re-download yfinance snapshots before running")
     args = parser.parse_args()
 
     # Resolve years/quarters from mode or explicit args
@@ -720,6 +725,21 @@ def main():
     else:
         tickers = INDUSTRIAL_33
 
+    # Determine snapshot mode (default: on, --live disables it)
+    snapshot_mode = not args.live
+
+    # Refresh snapshots if requested
+    if args.refresh_reference:
+        from edgar.xbrl.standardization.yf_snapshot import fetch_and_save_snapshot
+        print(f"Refreshing yfinance snapshots for {len(tickers)} companies...")
+        for i, t in enumerate(tickers, 1):
+            try:
+                fetch_and_save_snapshot(t)
+                print(f"  [{i}/{len(tickers)}] {t} OK")
+            except Exception as e:
+                print(f"  [{i}/{len(tickers)}] {t} FAILED: {e}")
+        print()
+
     # Cap workers
     max_workers = min(args.workers, cpu_count(), 8)
 
@@ -737,15 +757,18 @@ def main():
         "mode": args.mode,
         "metrics": metrics_to_test,
         "sector": args.sector,
-        "tickers": tickers
+        "tickers": tickers,
+        "snapshot_mode": snapshot_mode
     }
 
+    ref_label = "SNAPSHOT" if snapshot_mode else "LIVE yfinance"
     print(f"="*60)
     print(f"E2E TEST: STANDARD INDUSTRIAL ({len(tickers)} companies)")
     if args.mode:
         print(f"Mode: {args.mode} ({MODE_CONFIG[args.mode]['description']})")
     if args.sector:
         print(f"Sector: {args.sector}")
+    print(f"Reference: {ref_label}")
     print(f"Includes: {', '.join(tickers[:10])}{'...' if len(tickers) > 10 else ''}")
     if args.metrics:
         print(f"Metrics (custom): {metrics_to_test}")
