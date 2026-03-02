@@ -72,7 +72,7 @@ class TestETFFeaturesIntegration:
             mock_get_fund_series.assert_called_once_with("S000001234")
 
     def test_fund_get_filings_with_series_only_parameter(self):
-        """Test Fund.get_filings() with series_only parameter"""
+        """Test Fund.get_filings() with series_only parameter uses EFTS search"""
         with patch('edgar.funds.core.find_fund') as mock_find_fund:
             mock_entity = MagicMock()
             mock_filings = MagicMock()
@@ -82,11 +82,14 @@ class TestETFFeaturesIntegration:
             fund = Fund("GRID")
             fund._target_series_id = "S000001234"
 
-            filings = fund.get_filings(series_only=True, form="NPORT-P")
+            # When EFTS fails, series_only is consumed by Fund.get_filings()
+            # and NOT forwarded to entity.get_filings() — only **kwargs are passed
+            with patch('edgar.search.efts.search_filings', side_effect=Exception("EFTS unavailable")):
+                filings = fund.get_filings(series_only=True, form="NPORT-P")
 
-            # Should still return filings (filtering not yet implemented)
             assert filings == mock_filings
-            mock_entity.get_filings.assert_called_once_with(series_only=True, form="NPORT-P")
+            # series_only is intentionally consumed by Fund — only form= is forwarded
+            mock_entity.get_filings.assert_called_once_with(form="NPORT-P")
 
 
 class TestFundReportTickerResolution:
@@ -181,7 +184,7 @@ class TestFundReportTickerResolution:
     def test_fund_report_matches_ticker(self):
         """Test FundReport.matches_ticker() method"""
         fund_report = MagicMock()
-        fund_report.get_ticker_for_series.return_value = "GRID"
+        fund_report.get_tickers_for_series.return_value = ["GRID"]
 
         # Import and test the method
         from edgar.funds.reports import FundReport
