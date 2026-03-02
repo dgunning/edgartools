@@ -244,7 +244,36 @@ class SGMLParser:
         if content_stripped.startswith('<?xml') and '<Error>' in content:
             _raise_sec_html_error(content)
 
-        raise ValueError("Unknown SGML format")
+        # Provide actionable diagnostics instead of a bare "Unknown SGML format"
+        content_lower = content_stripped[:500].lower()
+        content_len = len(content)
+        preview = content_stripped[:200].replace('\n', ' ').strip()
+
+        # Check for rate-limiting / access denied responses
+        if 'request was denied' in content_lower or 'access denied' in content_lower:
+            raise ValueError(
+                f"SEC request was denied (possible rate limiting or IP block). "
+                f"Content length: {content_len}. Preview: {preview!r}"
+            )
+
+        # Check for empty or truncated responses
+        if content_len < 50:
+            raise ValueError(
+                f"SEC returned an empty or truncated response ({content_len} bytes). "
+                f"This may indicate a transient server issue. Content: {preview!r}"
+            )
+
+        # Check for SEC error pages that slipped past HTML detection
+        if ('sec' in content_lower and 'error' in content_lower) or 'denied' in content_lower:
+            raise ValueError(
+                f"SEC returned an error page instead of SGML filing data. "
+                f"Content length: {content_len}. Preview: {preview!r}"
+            )
+
+        raise ValueError(
+            f"Unknown SGML format. Content length: {content_len}. "
+            f"Preview: {preview!r}"
+        )
 
     def parse(self, content: str) -> dict:
         """Main entry point for parsing.
