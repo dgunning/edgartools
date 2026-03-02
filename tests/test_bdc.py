@@ -285,9 +285,9 @@ class TestBDCIntegration:
     @pytest.mark.network
     def test_bdc_has_schedule_of_investments(self):
         """Test that BDC filings have Schedule of Investments."""
-        # Get a BDC 10-K filing
-        arcc = Company(1287750)
-        filings = arcc.get_filings(form="10-K")
+        # Get a BDC 10-K filing (Blue Owl Credit Income Corp)
+        blue_owl = Company(1812554)
+        filings = blue_owl.get_filings(form="10-K")
 
         if len(filings) > 0:
             tenk = filings[0]
@@ -325,11 +325,11 @@ class TestBDCIntegration:
     def test_bdc_entity_schedule_of_investments(self):
         """Test BDCEntity.schedule_of_investments() method."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
 
-        soi = arcc.schedule_of_investments()
-        # ARCC should have a Schedule of Investments
+        soi = blue_owl.schedule_of_investments()
+        # Blue Owl should have a Schedule of Investments
         assert soi is not None
         assert hasattr(soi, 'to_dataframe')
         assert hasattr(soi, 'render')
@@ -536,35 +536,35 @@ class TestPortfolioInvestmentsIntegration:
     def test_bdc_entity_portfolio_investments(self):
         """Test BDCEntity.portfolio_investments() method."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
 
-        investments = arcc.portfolio_investments()
-        # ARCC should have portfolio investments
+        investments = blue_owl.portfolio_investments()
+        # Blue Owl should have portfolio investments
         assert investments is not None
-        assert len(investments) > 100  # ARCC has hundreds of investments
+        assert len(investments) > 100  # Blue Owl has hundreds of investments
 
     @pytest.mark.network
     def test_portfolio_investments_has_fair_values(self):
         """Test that portfolio investments have fair values."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
 
-        investments = arcc.portfolio_investments()
+        investments = blue_owl.portfolio_investments()
         assert investments is not None
 
-        # Total fair value should be significant (billions for ARCC)
+        # Total fair value should be significant (billions for Blue Owl)
         assert investments.total_fair_value > Decimal('1000000000')
 
     @pytest.mark.network
     def test_portfolio_investments_filter_by_type(self):
         """Test filtering portfolio investments by type."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
 
-        investments = arcc.portfolio_investments()
+        investments = blue_owl.portfolio_investments()
         assert investments is not None
 
         # Filter to first lien loans
@@ -687,10 +687,10 @@ class TestPortfolioInvestmentsPeriodAndQuality:
     def test_portfolio_investments_period_from_xbrl(self):
         """Test that period is extracted from XBRL data."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
 
-        investments = arcc.portfolio_investments()
+        investments = blue_owl.portfolio_investments()
         assert investments is not None
         assert investments.period is not None
         # Period should be a date string like '2024-12-31'
@@ -703,10 +703,10 @@ class TestPortfolioInvestmentsPeriodAndQuality:
         from edgar.bdc import DataQuality
 
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
 
-        investments = arcc.portfolio_investments()
+        investments = blue_owl.portfolio_investments()
         assert investments is not None
 
         dq = investments.data_quality
@@ -721,13 +721,13 @@ class TestHasDetailedInvestments:
     """Tests for has_detailed_investments method."""
 
     @pytest.mark.network
-    def test_arcc_has_detailed_investments(self):
-        """Test that ARCC has detailed investment data."""
+    def test_blue_owl_has_detailed_investments_with_quality(self):
+        """Test that Blue Owl has detailed investment data."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        blue_owl = bdcs.get_by_cik(1812554)
+        assert blue_owl is not None
 
-        assert arcc.has_detailed_investments() is True
+        assert blue_owl.has_detailed_investments() is True
 
     @pytest.mark.network
     def test_htgc_has_detailed_investments(self):
