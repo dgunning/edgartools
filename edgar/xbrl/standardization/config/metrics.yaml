@@ -7,6 +7,7 @@ version: "1.0.0"
 metrics:
   Revenue:
     description: "Total revenue from operations"
+    standard_tag: "Revenue"
     known_concepts:
       # Parent total first — tree parser uses first-match-wins
       - Revenues
@@ -29,6 +30,7 @@ metrics:
 
   COGS:
     description: "Cost of goods/services sold"
+    standard_tag: "CostOfGoodsAndServicesSold"
     known_concepts:
       - CostOfGoodsAndServicesSold
       - CostOfRevenue
@@ -44,6 +46,7 @@ metrics:
 
   SGA:
     description: "Selling, general, and administrative expenses"
+    standard_tag: "SellingGeneralAndAdminExpenses"
     known_concepts:
       - SellingGeneralAndAdministrativeExpense
       - SellingAndMarketingExpense
@@ -81,6 +84,7 @@ metrics:
 
   NetIncome:
     description: "Net income/loss"
+    standard_tag: ["NetIncome", "ProfitLoss"]
     known_concepts:
       - NetIncomeLoss
       - ProfitLoss
@@ -92,6 +96,7 @@ metrics:
 
   OperatingCashFlow:
     description: "Cash from operating activities"
+    standard_tag: "NetCashFromOperatingActivities"
     known_concepts:
       - NetCashProvidedByUsedInOperatingActivities
     tree_hints:
@@ -101,6 +106,7 @@ metrics:
 
   Capex:
     description: "Capital expenditures (including intangibles)"
+    standard_tag: "CapitalExpenses"
     known_concepts:
       - PaymentsToAcquirePropertyPlantAndEquipment
       - PaymentsToAcquireProductiveAssets  # CVX uses this (matches yfinance exactly)
@@ -135,8 +141,13 @@ metrics:
 
   Goodwill:
     description: "Goodwill from acquisitions"
+    standard_tag: "Goodwill"
     known_concepts:
       - Goodwill
+    exclude_patterns:
+      - IncludingGoodwill    # Blocks IntangibleAssetsNetIncludingGoodwill
+      - Impaired             # Blocks GoodwillImpairedAccumulatedImpairmentLoss
+      - Gross                # Blocks GoodwillGross
     tree_hints:
       statements: [BALANCE]
       section: assets
@@ -193,6 +204,7 @@ metrics:
 
   LongTermDebt:
     description: "Long-term debt (non-current portion)"
+    standard_tag: "LongTermDebt"
     known_concepts:
       - LongTermDebtNoncurrent
       - LongTermDebt
@@ -205,6 +217,7 @@ metrics:
 
   CashAndEquivalents:
     description: "Cash and cash equivalents"
+    standard_tag: "CashAndCashEquivalents"
     known_concepts:
       - CashAndCashEquivalentsAtCarryingValue
       - CashAndCashEquivalents
@@ -218,6 +231,7 @@ metrics:
 
   WeightedAverageSharesDiluted:
     description: "Weighted average diluted shares outstanding for EPS calculation"
+    standard_tag: "SharesFullyDilutedAverage"
     known_concepts:
       - WeightedAverageNumberOfDilutedSharesOutstanding
       - WeightedAverageNumberOfSharesOutstandingDiluted
@@ -240,6 +254,7 @@ metrics:
 
   DividendsPaid:
     description: "Cash dividends paid to shareholders"
+    standard_tag: "CommonDividendsPaid"
     known_concepts:
       - PaymentsOfDividends
       - PaymentsOfDividendsCommonStock
@@ -255,6 +270,7 @@ metrics:
 
   Inventory:
     description: "Current inventory on hand"
+    standard_tag: "Inventories"
     known_concepts:
       - InventoryNet
       - Inventories
@@ -267,6 +283,7 @@ metrics:
 
   AccountsReceivable:
     description: "Trade accounts receivable (current)"
+    standard_tag: "TradeReceivables"
     known_concepts:
       - AccountsReceivableNetCurrent
       - ReceivablesNetCurrent
@@ -279,6 +296,7 @@ metrics:
 
   AccountsPayable:
     description: "Trade accounts payable (current)"
+    standard_tag: "TradePayables"
     known_concepts:
       - AccountsPayableCurrent
       - AccountsPayableTradeCurrent
@@ -294,6 +312,7 @@ metrics:
 
   DepreciationAmortization:
     description: "Depreciation and amortization expense"
+    standard_tag: "DepreciationExpense"
     known_concepts:
       - DepreciationDepletionAndAmortization
       - DepreciationAndAmortization

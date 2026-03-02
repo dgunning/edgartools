@@ -170,6 +170,7 @@ class MetricConfig:
     exclude_patterns: List[str] = field(default_factory=list)  # Patterns to exclude from matching
     composite: bool = False  # True if metric requires aggregating multiple components
     components: List[str] = field(default_factory=list)  # Component concepts for composite metrics
+    standard_tag: List[str] = field(default_factory=list)  # Upstream GAAP standard_tag(s) for expansion
 
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""

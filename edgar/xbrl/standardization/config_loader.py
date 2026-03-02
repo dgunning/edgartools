@@ -4,10 +4,14 @@ Configuration loader for the concept mapping system.
 Loads and validates metrics.yaml and companies.yaml configurations.
 """
 
+import json
+import logging
 import yaml
 from pathlib import Path
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
+
+log = logging.getLogger(__name__)
 
 from .models import MetricConfig, CompanyConfig
 
@@ -112,6 +116,11 @@ class ConfigLoader:
         # Parse metrics
         metrics = {}
         for name, data in metrics_data.get("metrics", {}).items():
+            # Normalize standard_tag: string -> list, missing -> empty list
+            raw_tag = data.get("standard_tag", [])
+            if isinstance(raw_tag, str):
+                raw_tag = [raw_tag]
+
             metrics[name] = MetricConfig(
                 name=name,
                 description=data.get("description", ""),
@@ -122,9 +131,15 @@ class ConfigLoader:
                 dimensional_handling=data.get("dimensional_handling"),
                 exclude_patterns=data.get("exclude_patterns", []),
                 composite=data.get("composite", False),
-                components=data.get("components", [])
+                components=data.get("components", []),
+                standard_tag=raw_tag,
             )
-        
+
+        # Expand known_concepts using upstream GAAP mappings
+        gaap_index = self._load_gaap_mappings()
+        if gaap_index:
+            self._expand_known_concepts(metrics, gaap_index)
+
         # Parse companies
         companies = {}
         for ticker, data in companies_data.get("companies", {}).items():
@@ -159,6 +174,77 @@ class ConfigLoader:
             defaults=defaults
         )
     
+    def _load_gaap_mappings(self) -> Dict[str, List[str]]:
+        """Load upstream GAAP mappings and build a reverse index: standard_tag -> [gaap_concept, ...].
+
+        Filters out:
+        - Entries flagged as ambiguous
+        - Entries flagged as deprecated
+        - Entries with multiple standard_tags (same as ambiguous in practice)
+        """
+        path = self.config_dir / "upstream_gaap_mappings.json"
+        if not path.exists():
+            log.debug("upstream_gaap_mappings.json not found, skipping expansion")
+            return {}
+
+        with open(path, "r") as f:
+            raw: Dict = json.load(f)
+
+        # Build reverse index: standard_tag -> [gaap_concept_name, ...]
+        index: Dict[str, List[str]] = {}
+        for concept_name, entry in raw.items():
+            tags = entry.get("standard_tags", [])
+            if entry.get("ambiguous"):
+                continue
+            if entry.get("deprecated"):
+                continue
+            if len(tags) != 1:
+                continue
+            tag = tags[0]
+            index.setdefault(tag, []).append(concept_name)
+
+        log.debug("GAAP index: %d standard_tags, %d total concepts",
+                   len(index), sum(len(v) for v in index.values()))
+        return index
+
+    def _expand_known_concepts(
+        self,
+        metrics: Dict[str, 'MetricConfig'],
+        gaap_index: Dict[str, List[str]],
+    ) -> None:
+        """Expand each metric's known_concepts using the GAAP reverse index.
+
+        For each metric that has a standard_tag:
+        1. Look up all GAAP concepts for that tag
+        2. Filter out concepts matching exclude_patterns
+        3. Deduplicate against existing known_concepts
+        4. Append new concepts after originals (preserving priority order)
+        """
+        for name, metric in metrics.items():
+            if not metric.standard_tag:
+                continue
+            # Skip composite metrics — they use component-based extraction
+            if metric.composite:
+                continue
+
+            existing = set(metric.known_concepts)
+            new_concepts: List[str] = []
+
+            for tag in metric.standard_tag:
+                for concept in gaap_index.get(tag, []):
+                    if concept in existing:
+                        continue
+                    # Apply exclude_patterns
+                    if any(pat in concept for pat in metric.exclude_patterns):
+                        continue
+                    existing.add(concept)
+                    new_concepts.append(concept)
+
+            if new_concepts:
+                metric.known_concepts = metric.known_concepts + new_concepts
+                log.debug("%s: expanded by %d concepts (total %d)",
+                          name, len(new_concepts), len(metric.known_concepts))
+
     def _load_yaml(self, filename: str) -> Dict:
         """Load a YAML file."""
         path = self.config_dir / filename
