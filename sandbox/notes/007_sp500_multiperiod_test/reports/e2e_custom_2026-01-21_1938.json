@@ -1,0 +1,121 @@
+{
+  "run_id": "e2e_2026-01-21T19:38:21.626486",
+  "timestamp": "2026-01-21T19:38:21.626494",
+  "config": {
+    "group": "custom",
+    "workers": 8,
+    "years": 5,
+    "quarters": 6,
+    "metrics": null
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 2,
+      "10k_passed": 2,
+      "10q_total": 6,
+      "10q_passed": 5
+    },
+    "sp50": {
+      "10k_total": 2,
+      "10k_passed": 2,
+      "10q_total": 6,
+      "10q_passed": 5
+    },
+    "custom": {
+      "10k_total": 11,
+      "10k_passed": 7,
+      "10q_total": 18,
+      "10q_passed": 17
+    }
+  },
+  "failure_count": 5,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-03-31",
+      "accession_no": "0000886982-25-000009",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 133606000000.0,
+      "ref_value": 89012000000.0,
+      "variance_pct": 50.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000036104-25-000016",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 15518000000.0,
+      "ref_value": 7624000000.0,
+      "variance_pct": 103.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000036104-25-000016",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 65879000000.0,
+      "ref_value": 56502000000.0,
+      "variance_pct": 16.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndDueFromBanks",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000036104-24-000018",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 15279000000.0,
+      "ref_value": 11455000000.0,
+      "variance_pct": 33.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000036104-24-000018",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 72777000000.0,
+      "ref_value": 61192000000.0,
+      "variance_pct": 18.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndDueFromBanks",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "errors": []
+}

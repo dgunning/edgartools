@@ -1,0 +1,66 @@
+# Sharp Edges - Production gotchas discovered through skill testing
+
+sharp_edges:
+  - id: manual-filing-construction
+    summary: Never manually construct Filing objects
+    severity: critical
+    solution: |
+      from edgar import find
+      filing = find("0001193125-24-276418")  # Accession → Filing
+      company = find("AAPL")                  # Ticker → Company
+      entity = find(320193)                   # CIK → Entity
+    detection_pattern: 'Filing\s*\(.*cik|Filing\s*\(.*accession'
+
+  - id: manual-regex-search
+    summary: Use filing.search() not doc.text() + regex
+    severity: high
+    solution: |
+      results = filing.search("artificial intelligence")  # BM25 ranked
+      for match in results[:5]:
+          print(f"Score: {match.score}, Context: {str(match)[:200]}")
+    detection_pattern: 'doc(ument)?\.text\(\).*re\.|re\.(search|findall).*document'
+
+  - id: confusing-search-methods
+    summary: filing.search() vs filing.docs.search() do different things
+    severity: medium
+    solution: |
+      filing.search("compensation")      # Search filing CONTENT
+      filing.docs.search("xbrl")         # Search API DOCS
+
+  - id: xbrl-instead-of-financials
+    summary: Use get_financials() not filing.xbrl() for financial data
+    severity: high
+    solution: |
+      financials = company.get_financials()
+      revenue = financials.get_revenue()
+      margin = net_income / revenue
+    detection_pattern: 'xbrl\(\)\.statements|filing\.xbrl\(\).*income_statement'
+
+  - id: get-revenue-for-trends
+    summary: Use get_financials() for up to 3 years, get_facts() only for 4+
+    severity: medium
+    solution: |
+      # Up to 3 years (PREFERRED):
+      financials = company.get_financials()
+      income = financials.income_statement()          # 3-year table
+      revenue = financials.get_revenue()              # Current year
+
+      # 4+ years only:
+      facts = company.get_facts()
+      income = facts.income_statement(periods=5)      # 5-year table
+
+  - id: unbounded-filing-iteration
+    summary: Always limit filings before iterating
+    severity: critical
+    solution: |
+      filings = company.get_filings(form="10-K").head(10)
+      for filing in filings:
+          process(filing.obj())
+    detection_pattern: 'for\s+\w+\s+in\s+.*get_filings\(\)\s*:'
+
+  - id: repr-instead-of-str
+    summary: Use str() not repr() for LLM output
+    severity: medium
+    solution: |
+      print(str(filings))           # Indexed list, 50 per page
+      print(filing.to_context())    # Shows available methods

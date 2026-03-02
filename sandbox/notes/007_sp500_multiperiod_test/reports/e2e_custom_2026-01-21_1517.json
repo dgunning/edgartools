@@ -1,0 +1,291 @@
+{
+  "run_id": "e2e_2026-01-21T15:17:27.391099",
+  "timestamp": "2026-01-21T15:17:27.391108",
+  "config": {
+    "group": "custom",
+    "workers": 8,
+    "years": 5,
+    "quarters": 6,
+    "metrics": null
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 2,
+      "10k_passed": 2,
+      "10q_total": 6,
+      "10q_passed": 5
+    },
+    "sp50": {
+      "10k_total": 2,
+      "10k_passed": 2,
+      "10q_total": 6,
+      "10q_passed": 5
+    },
+    "custom": {
+      "10k_total": 20,
+      "10k_passed": 9,
+      "10q_total": 30,
+      "10q_passed": 26
+    }
+  },
+  "failure_count": 15,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "BK",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001390777-25-000046",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 13790000000.0,
+      "ref_value": 101937000000.0,
+      "variance_pct": 86.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BK",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0001390777-24-000051",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 17061000000.0,
+      "ref_value": 125191000000.0,
+      "variance_pct": 86.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BK",
+      "form": "10-K",
+      "filing_date": "2022-12-31",
+      "accession_no": "0001390777-23-000033",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 22199000000.0,
+      "ref_value": 107355000000.0,
+      "variance_pct": 79.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BK",
+      "form": "10-K",
+      "filing_date": "2021-12-31",
+      "accession_no": "0001390777-22-000043",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 22691000000.0,
+      "ref_value": 121336000000.0,
+      "variance_pct": 81.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BK",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001390777-25-000118",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 17768000000.0,
+      "ref_value": 150755000000.0,
+      "variance_pct": 88.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BK",
+      "form": "10-Q",
+      "filing_date": "2025-03-31",
+      "accession_no": "0001390777-25-000084",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 17299000000.0,
+      "ref_value": 116545000000.0,
+      "variance_pct": 85.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BK",
+      "form": "10-Q",
+      "filing_date": "2024-09-30",
+      "accession_no": "0001390777-24-000133",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 15588000000.0,
+      "ref_value": 116210000000.0,
+      "variance_pct": 86.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "STT",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000093751-24-000498",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 2660000000.0,
+      "ref_value": 4637000000.0,
+      "variance_pct": 42.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ProceedsFromRepaymentsOfShortTermDebtMaturingInThreeMonthsOrLess",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-03-31",
+      "accession_no": "0000886982-25-000009",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 65018000000.0,
+      "ref_value": 89012000000.0,
+      "variance_pct": 27.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000036104-25-000016",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 15518000000.0,
+      "ref_value": 7624000000.0,
+      "variance_pct": 103.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000036104-25-000016",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 65879000000.0,
+      "ref_value": 56502000000.0,
+      "variance_pct": 16.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndDueFromBanks",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000036104-24-000018",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 15279000000.0,
+      "ref_value": 11455000000.0,
+      "variance_pct": 33.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000036104-24-000018",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 72777000000.0,
+      "ref_value": 61192000000.0,
+      "variance_pct": 18.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndDueFromBanks",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2021-12-31",
+      "accession_no": "0001193125-22-048709",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 11796000000.0,
+      "ref_value": 9593000000.0,
+      "variance_pct": 23.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ProceedsFromRepaymentsOfShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2021-12-31",
+      "accession_no": "0001193125-22-048709",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 37274000000.0,
+      "ref_value": 28905000000.0,
+      "variance_pct": 29.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndDueFromBanks",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "errors": []
+}

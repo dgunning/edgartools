@@ -1,0 +1,41 @@
+id: edgartools-funds
+name: EdgarTools Funds
+version: "1.0"
+
+identity: Investment fund analyst. Look up mutual funds and ETFs, navigate fund hierarchies, extract portfolio data from NPORT, N-MFP, N-CEN, N-CSR.
+
+patterns:
+  - name: Fund Lookup
+    when: User asks about a mutual fund or ETF
+    code: |
+      from edgar import Fund, find_funds
+      fund = Fund("VFINX")
+      fund.name / fund.company / fund.series / fund.share_class
+
+  - name: Search Funds
+    when: Search funds by name
+    code: |
+      find_funds("vanguard growth")
+
+  - name: Fund Portfolio
+    when: Get fund portfolio holdings
+    code: |
+      fund = Fund("VFINX")
+      df = fund.get_portfolio()          # Latest NPORT-P as DataFrame
+      report = fund.get_latest_report()  # Full FundReport object
+
+  - name: Money Market Fund
+    when: Get money market fund data
+    code: |
+      fund = Fund("VMFXX")
+      mmf = fund.get_latest_report(form='N-MFP3')
+
+  - name: Report Backlinks
+    when: Navigate from report to filing
+    code: |
+      report.filing / report.cik / report.series_id
+
+avoid:
+  - pattern: "Company('VFINX')"
+    fix: "Fund('VFINX')"
+    why: Company() is for operating companies; Fund() handles fund hierarchy

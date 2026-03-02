@@ -1,0 +1,53 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001830056.json
+  response:
+    body:
+      string: '{"cik":"0001830056","entityType":"other","sic":"","sicDescription":"","ownerOrg":"International
+        Corp Fin","insiderTransactionForOwnerExists":0,"insiderTransactionForIssuerExists":0,"name":"Siemens
+        Energy AG/ADR","tickers":["SMEGF"],"exchanges":["OTC"],"ein":"000000000","lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":"1231","stateOfIncorporation":"2M","stateOfIncorporationDescription":"Germany","addresses":{"mailing":{"street1":"C/O
+        CITIBANK, N.A.","street2":"388 GREENWICH STREET","city":"NEW YORK","stateOrCountry":"NY","zipCode":"10013","stateOrCountryDescription":"NY","isForeignLocation":0,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":"WERNER-VON-SIEMENS-STRASSE
+        1","street2":null,"city":"MUNICH","stateOrCountry":"2M","zipCode":"80333","stateOrCountryDescription":"Germany","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":"212-816-6638","flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["9999999995-26-000414","0001193805-26-000032","0001019155-21-000037","0001104659-20-131931","0001193805-20-001449","0001193805-20-001318"],"filingDate":["2026-01-30","2026-01-16","2021-02-04","2020-12-03","2020-11-18","2020-10-27"],"reportDate":["","","","","",""],"acceptanceDateTime":["2026-02-02T05:15:11.000Z","2026-01-16T16:19:42.000Z","2021-02-04T18:55:38.000Z","2020-12-03T18:19:37.000Z","2020-11-18T19:56:49.000Z","2020-10-27T20:46:13.000Z"],"act":["33","33","33","33","33","33"],"form":["EFFECT","F-6","F-6EF","F-6EF","F-6EF","F-6EF"],"fileNumber":["333-292774","333-292774","333-252724","333-251100","333-250174","333-249685"],"filmNumber":["26585490","26538176","21590454","201366374","201324532","201264630"],"items":[",,","","","","",""],"core_type":["EFFECT","F-6","F-6EF","F-6EF","F-6EF","F-6EF"],"size":[1676,560871,103388,142956,129436,105576],"isXBRL":[0,0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0,0],"primaryDocument":["xslEFFECTX01/primary_doc.xml","e665092_f6-siemens.htm","siemensf6ef.htm","tm2037542d3_f6ef.htm","e620091_f6ef-siemens.htm","e620022_f6ef-sea.htm"],"primaryDocDescription":["","","F-6EF","FORM
+        F-6EF","",""]},"files":[]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Expires:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Pragma:
+      - no-cache
+      Strict-Transport-Security:
+      - max-age=31536000 ; preload
+      Vary:
+      - Accept-Encoding
+      X-Amzn-Trace-Id:
+      - Root=1-6988f019-24d9381a490cda16005aaf87
+      content-length:
+      - '2201'
+      x-amz-apigw-id:
+      - Yep0AGf4oAMEBiA=
+      x-amzn-RequestId:
+      - 9d300772-1705-4ba1-92c1-84476720356e
+    status:
+      code: 200
+      message: OK
+version: 1

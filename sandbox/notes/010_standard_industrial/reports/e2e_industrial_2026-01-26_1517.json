@@ -1,0 +1,196 @@
+{
+  "run_id": "e2e_industrial_2026-01-26T15:17:38.624343",
+  "timestamp": "2026-01-26T15:17:38.624351",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 17,
+    "10k_passed": 17,
+    "10k_skipped": 0,
+    "10q_total": 17,
+    "10q_passed": 12,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 17,
+      "10k_passed": 17,
+      "10k_skipped": 0,
+      "10q_total": 17,
+      "10q_passed": 12,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 5,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 81754000000.0,
+      "ref_value": 27867000000.0,
+      "variance_pct": 193.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "Capex",
+      "xbrl_value": -9473000000.0,
+      "ref_value": -3462000000.0,
+      "variance_pct": 173.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 9680000000.0,
+      "ref_value": 3168000000.0,
+      "variance_pct": 205.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "DividendsPaid",
+      "xbrl_value": 11559000000.0,
+      "ref_value": -3945000000.0,
+      "variance_pct": 193.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividends",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 8571000000.0,
+      "ref_value": 2830000000.0,
+      "variance_pct": 202.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

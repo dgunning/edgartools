@@ -1,0 +1,461 @@
+{
+  "run_id": "e2e_industrial_2026-01-26T14:28:32.624399",
+  "timestamp": "2026-01-26T14:28:32.624411",
+  "config": {
+    "group": "industrial_33",
+    "workers": 4,
+    "years": 10,
+    "quarters": 0,
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL",
+      "MSFT",
+      "GOOG",
+      "AMZN",
+      "META",
+      "NVDA",
+      "TSLA",
+      "CAT",
+      "GE",
+      "HON",
+      "DE",
+      "MMM",
+      "EMR",
+      "RTX",
+      "ASTE",
+      "PG",
+      "KO",
+      "PEP",
+      "WMT",
+      "COST",
+      "HSY",
+      "XOM",
+      "CVX",
+      "COP",
+      "SLB",
+      "PBF",
+      "JNJ",
+      "UNH",
+      "LLY",
+      "PFE",
+      "UPS",
+      "FDX",
+      "BA"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 97,
+    "10k_passed": 92,
+    "10k_skipped": 30,
+    "10q_total": 0,
+    "10q_passed": 0,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 25,
+      "10k_passed": 24,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 26,
+      "10k_passed": 24,
+      "10k_skipped": 7,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 24,
+      "10k_passed": 23,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 4,
+      "10k_passed": 4,
+      "10k_skipped": 16,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 5,
+      "10k_passed": 5,
+      "10k_skipped": 7,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 13,
+      "10k_passed": 12,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 5,
+  "skipped_count": 30,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-K",
+      "filing_date": "2021-09-25",
+      "accession_no": "0000320193-21-000105",
+      "metric": "OperatingIncome",
+      "xbrl_value": 108949000000.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HON",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2022-12-31",
+      "accession_no": "0000773840-23-000013",
+      "metric": "OperatingIncome",
+      "xbrl_value": 4949000000.0,
+      "ref_value": 6427000000.0,
+      "variance_pct": 23.0,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HON",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2021-12-31",
+      "accession_no": "0000773840-22-000018",
+      "metric": "OperatingIncome",
+      "xbrl_value": 4867000000.0,
+      "ref_value": 6200000000.0,
+      "variance_pct": 21.5,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COST",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2021-08-29",
+      "accession_no": "0000909832-21-000014",
+      "metric": "OperatingIncome",
+      "xbrl_value": 6708000000.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "FDX",
+      "sector": "Transportation",
+      "form": "10-K",
+      "filing_date": "2021-05-31",
+      "accession_no": "0001564590-21-037031",
+      "metric": "OperatingIncome",
+      "xbrl_value": 5857000000.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "transportation",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 128.3,
+      "reason": "GE's conglomerate structure with segment reporting leads to extraction issues. Industry logic returns negative values due to incorrect component selection from complex income statement.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 332.0,
+      "reason": "GE's conglomerate structure with segment reporting leads to extraction issues. Industry logic returns negative values due to incorrect component selection from complex income statement.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 1189.0,
+      "reason": "GE's conglomerate structure with segment reporting leads to extraction issues. Industry logic returns negative values due to incorrect component selection from complex income statement.\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 68.3,
+      "reason": "DE has financial services segment (John Deere Financial) that complicates OperatingIncome extraction. Equipment vs Financial segment reporting creates aggregation challenges.\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 20.9,
+      "reason": "DE has financial services segment (John Deere Financial) that complicates OperatingIncome extraction. Equipment vs Financial segment reporting creates aggregation challenges.\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": NaN,
+      "reason": "DE has financial services segment (John Deere Financial) that complicates OperatingIncome extraction. Equipment vs Financial segment reporting creates aggregation challenges.\n"
+    },
+    {
+      "ticker": "EMR",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 33.2,
+      "reason": "EMR calculation returns negative value due to incorrect component selection. Non-calendar fiscal year and segment structure complicate extraction.\n"
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 29.0,
+      "reason": "XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases, xom:ProductionAndManufacturingExpenses) that don't map to standard GrossProfit. yfinance calculates OperatingIncome using proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 89.3,
+      "reason": "XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases, xom:ProductionAndManufacturingExpenses) that don't map to standard GrossProfit. yfinance calculates OperatingIncome using proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 96.9,
+      "reason": "XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases, xom:ProductionAndManufacturingExpenses) that don't map to standard GrossProfit. yfinance calculates OperatingIncome using proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 125.9,
+      "reason": "XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases, xom:ProductionAndManufacturingExpenses) that don't map to standard GrossProfit. yfinance calculates OperatingIncome using proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "CVX",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 314.4,
+      "reason": "CVX uses energy-specific cost structure that doesn't map to standard GrossProfit/OperatingExpenses. yfinance uses proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "CVX",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 194.7,
+      "reason": "CVX uses energy-specific cost structure that doesn't map to standard GrossProfit/OperatingExpenses. yfinance uses proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "CVX",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 140.9,
+      "reason": "CVX uses energy-specific cost structure that doesn't map to standard GrossProfit/OperatingExpenses. yfinance uses proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "CVX",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 325.3,
+      "reason": "CVX uses energy-specific cost structure that doesn't map to standard GrossProfit/OperatingExpenses. yfinance uses proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 162.0,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 122.1,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 72.1,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 143.6,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 179.7,
+      "reason": "SLB (oilfield services) uses segment-based reporting that doesn't aggregate cleanly to a consolidated OperatingIncome. Tree parser selects incorrect concept for total operating income.\n"
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 18.9,
+      "reason": "SLB (oilfield services) uses segment-based reporting that doesn't aggregate cleanly to a consolidated OperatingIncome. Tree parser selects incorrect concept for total operating income.\n"
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 20.7,
+      "reason": "SLB (oilfield services) uses segment-based reporting that doesn't aggregate cleanly to a consolidated OperatingIncome. Tree parser selects incorrect concept for total operating income.\n"
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 21.7,
+      "reason": "SLB (oilfield services) uses segment-based reporting that doesn't aggregate cleanly to a consolidated OperatingIncome. Tree parser selects incorrect concept for total operating income.\n"
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 72.4,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 66.4,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 16.5,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 86.0,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 21.0,
+      "reason": "PFE has significant COVID vaccine related charges and R&D capitalization that affect OperatingIncome comparability. Industry logic calculation returns negative values due to incorrect expense aggregation.\n"
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 342.0,
+      "reason": "PFE has significant COVID vaccine related charges and R&D capitalization that affect OperatingIncome comparability. Industry logic calculation returns negative values due to incorrect expense aggregation.\n"
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 84.1,
+      "reason": "PFE has significant COVID vaccine related charges and R&D capitalization that affect OperatingIncome comparability. Industry logic calculation returns negative values due to incorrect expense aggregation.\n"
+    }
+  ],
+  "errors": []
+}
