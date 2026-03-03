@@ -133,12 +133,12 @@ def get_composite_components(
     industry: Optional[str] = None
 ) -> Optional[List[str]]:
     """Get composite components for a metric.
-    
+
     Args:
         ticker: Company ticker
         metric: Metric name
         industry: Optional industry
-        
+
     Returns:
         List of component names, or None if not composite.
     """
@@ -146,6 +146,45 @@ def get_composite_components(
     if rule and rule.get("method") == "composite_sum":
         return rule.get("components", [])
     return None
+
+
+def get_total_concepts(
+    ticker: str,
+    metric: str,
+    industry: Optional[str] = None
+) -> List[str]:
+    """Get total concepts to try before component summation.
+
+    Some composite metrics have a single XBRL concept that represents the total
+    (e.g., IntangibleAssetsNetIncludingGoodwill for IntangibleAssets).
+    If such a concept extracts successfully, it can be used directly instead of
+    summing components (which may fail when components are dimensional-only).
+
+    Falls back to default rules if company-specific rules don't define total_concepts.
+
+    Args:
+        ticker: Company ticker
+        metric: Metric name
+        industry: Optional industry
+
+    Returns:
+        List of total concept strings to try, or empty list.
+    """
+    # Check company-specific rule first
+    rule = get_extraction_rule(ticker, metric, industry)
+    if rule:
+        total = rule.get("total_concepts", [])
+        if total:
+            return total
+
+    # Fall back to defaults (company-specific may override components but not total_concepts)
+    defaults = get_defaults()
+    default_rules = defaults.get("extraction_rules", {})
+    default_rule = default_rules.get(metric)
+    if default_rule:
+        return default_rule.get("total_concepts", [])
+
+    return []
 
 
 def get_period_selection_config() -> Dict:

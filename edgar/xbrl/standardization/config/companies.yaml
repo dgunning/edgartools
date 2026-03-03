@@ -48,6 +48,20 @@ companies:
   TSLA:
     name: "Tesla, Inc."
     cik: 1318605
+    known_divergences:
+      ShortTermDebt:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 100.0
+        reason: >
+          TSLA DebtCurrent includes items yfinance classifies differently.
+          Structural divergence in current debt classification between
+          XBRL taxonomy and yfinance normalization.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Investigate DebtCurrent components vs yfinance Current Debt definition.
+        review_date: "2026-06-03"
     notes: "Amended filings (10-K/A) may have missing XBRL data"
 
   META:
@@ -106,7 +120,32 @@ companies:
           Same root cause as debt metrics - Cat Financial subsidiary structure.
           Would need segment-aware receivables extraction.
         review_date: "2026-04-26"
-    notes: "Financial services conglomerate - Cat Financial distorts debt/receivables"
+      Capex:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 40.0
+        reason: >
+          Cat Financial investing activities ($3.2B) included in consolidated
+          capex but not in equipment segment PP&E ($2.0B). Same subsidiary
+          contamination as debt metrics.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same root cause as debt metrics - Cat Financial subsidiary structure.
+        review_date: "2026-06-03"
+      DepreciationAmortization:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 89.0
+        reason: >
+          Cat Financial D&A ($2.15B consolidated) vs equipment-only D&A ($0.23B).
+          Financial subsidiary leased equipment depreciation dominates consolidated.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same root cause - Cat Financial subsidiary structure inflates D&A.
+        review_date: "2026-06-03"
+    notes: "Financial services conglomerate - Cat Financial distorts debt/receivables/capex/D&A"
 
   GE:
     name: "General Electric Company"
@@ -150,6 +189,66 @@ companies:
         added_date: "2026-01-26"
         remediation_status: "wont_fix"
         remediation_notes: "Same as Revenue - spin-off restatement issue."
+      Capex:
+        form_types: ["10-K"]
+        variance_pct: 96.0
+        reason: >
+          Vernova spin-off restated historical capex. XBRL uses
+          PaymentsToAcquireProductiveAssets ($1.6B) vs yfinance ($0.9B).
+          Pre-spin periods show restated aerospace-only values.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same root cause as Revenue/COGS — spin-off restatement.
+        review_date: "2026-06-03"
+      DepreciationAmortization:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 58.0
+        reason: >
+          Post-Vernova spin-off, D&A restated for aerospace-only.
+          GE uses DepreciationAmortizationAndAccretionNet which captures
+          a different scope than yfinance's D&A.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Spin-off restatement and concept scope mismatch.
+        review_date: "2026-06-03"
+      AccountsPayable:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 47.0
+        reason: >
+          GE Aerospace AP ($7.9B) includes items yfinance excludes ($4.6B).
+          Post-spin-off balance sheet structure differences.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Spin-off restatement effect on balance sheet.
+        review_date: "2026-06-03"
+      AccountsReceivable:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 50.0
+        reason: >
+          Post-Vernova spin-off balance sheet restructuring.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same spin-off restatement root cause.
+        review_date: "2026-06-03"
+      Inventory:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 50.0
+        reason: >
+          Post-Vernova spin-off inventory reclassification.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same spin-off restatement root cause.
+        review_date: "2026-06-03"
     notes: "Diversified industrial conglomerate - aviation (post-2024 Vernova spin-off)"
 
   HON:
@@ -160,6 +259,9 @@ companies:
       DepreciationAmortization:
         preferred_concept: DepreciationDepletionAndAmortization
         notes: "HON splits D&A on cash flow; DDA is the combined total ($1,334M)"
+      ShortTermDebt:
+        preferred_concept: DebtCurrent
+        notes: "HON ShortTermBorrowings ($4.3B) misses LongTermDebtCurrent. DebtCurrent is the total."
     known_divergences:
       DepreciationAmortization:
         form_types: ["10-K", "10-Q"]
@@ -199,6 +301,32 @@ companies:
           Similar to CAT - financial services subsidiary complicates extraction.
           Would need segment-aware income aggregation.
         review_date: "2026-04-26"
+      ShortTermDebt:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 76.0
+        reason: >
+          John Deere Financial subsidiary debt inflates consolidated DebtCurrent.
+          XBRL extracts $4.2B (equipment only) vs yfinance $20B+ (consolidated).
+          Same financial subsidiary contamination as CAT.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Same root cause as CAT debt metrics. Would need subsidiary-aware
+          extraction or segment filtering.
+        review_date: "2026-06-03"
+      Capex:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 68.0
+        reason: >
+          John Deere Financial investing activities included in consolidated
+          capex. Equipment segment capex ($1.4B) vs consolidated ($4.2B).
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Financial subsidiary investing cash flows distort capex comparison.
+        review_date: "2026-06-03"
     notes: "Agricultural and construction equipment manufacturer"
 
   MMM:
@@ -335,6 +463,19 @@ companies:
           Same as XOM - energy sector needs dedicated extraction strategy.
           Group with XOM, COP, SLB for future Energy archetype implementation.
         review_date: "2026-04-26"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 1285.0
+        reason: >
+          XBRL DebtCurrent ($12.7B) includes items yfinance excludes ($4.4B).
+          Energy sector complex capital structure with credit facilities and
+          commercial paper that yfinance normalizes differently.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Energy sector capital structure mismatch. Group with energy archetype work.
+        review_date: "2026-06-03"
     notes: "Integrated oil and gas company"
 
   COP:
@@ -360,6 +501,18 @@ companies:
           Same as XOM/CVX - energy sector needs dedicated extraction strategy.
           E&P companies have unique cost structure (exploration, DD&A).
         review_date: "2026-04-26"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 97.0
+        reason: >
+          COP DebtCurrent ($1.03B) vs yfinance ($0.74B). E&P capital
+          structure includes credit facilities that yfinance classifies differently.
+        skip_validation: true
+        added_date: "2026-03-03"
+        remediation_status: "deferred"
+        remediation_notes: >
+          Energy sector capital structure mismatch. Group with energy archetype work.
+        review_date: "2026-06-03"
       Capex:
         form_types: ["10-K", "10-Q"]
         variance_pct: 913.0

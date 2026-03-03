@@ -20,7 +20,7 @@ except ImportError:
 
 from .config_loader import get_config, MappingConfig
 from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern
-from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components
+from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components, get_total_concepts
 from .layers.dimensional_aggregator import DimensionalAggregator
 from edgar import Company
 
@@ -1402,35 +1402,50 @@ class ReferenceValidator:
     ) -> Optional[float]:
         """
         Extract composite metric value by summing component concepts.
-        
+
         Uses extraction_rules.py JSON config with fallback to hardcoded values.
         Priority: company-specific > industry > defaults > hardcoded
-        
+
+        Strategy:
+        1. Try total_concepts first (e.g., IntangibleAssetsNetIncludingGoodwill)
+           — a single concept that gives the total directly
+        2. Fall back to component summation (e.g., Goodwill + IntangibleAssetsNetExcludingGoodwill)
+
         Used for metrics like IntangibleAssets = Goodwill + IntangibleAssetsNetExcludingGoodwill
         """
-        # Try to get components from extraction_rules (JSON config)
         ticker = getattr(self, '_current_ticker', None)
+
+        # Strategy 1: Try total concepts directly (avoids dimensional component issues)
+        if ticker:
+            total_concepts = get_total_concepts(ticker, metric)
+            for total_concept in total_concepts:
+                concept = total_concept if ':' in total_concept else f"us-gaap:{total_concept}"
+                value = self._extract_xbrl_value(xbrl, concept)
+                if value is not None:
+                    return value
+
+        # Strategy 2: Component summation
         components = get_composite_components(ticker, metric) if ticker else None
-        
+
         # Fall back to hardcoded if no config
         if not components:
             if metric not in self.COMPOSITE_METRICS:
                 return None
             components = self.COMPOSITE_METRICS[metric]
-        
+
         total = 0.0
         found_any = False
-        
+
         for component in components:
             value = None
-            
+
             # Get priority from extraction_rules (JSON config)
             if ticker:
                 priority_variants = get_concept_priority(ticker, metric, component)
             else:
                 # Fallback to hardcoded priority
                 priority_variants = self.CONCEPT_PRIORITY.get(component, [component])
-            
+
             # Try each variant in priority order
             for variant in priority_variants:
                 # Add us-gaap prefix if not present
@@ -1438,11 +1453,11 @@ class ReferenceValidator:
                 value = self._extract_xbrl_value(xbrl, concept)
                 if value is not None:
                     break
-            
+
             if value is not None:
                 total += value
                 found_any = True
-        
+
         return total if found_any else None
     
     def _compare_values(

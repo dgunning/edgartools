@@ -366,8 +366,11 @@ class TreeParser:
                 # Check exclusion patterns first
                 if should_exclude(concept):
                     continue
-                # Forward: known is substring of concept (e.g., "Revenue" in "RevenueNet") — safe
-                if known in concept:
+                # Forward: known is substring of concept (e.g., "Revenue" in "RevenueNet")
+                # Guard: known must cover at least 40% of concept length to prevent
+                # short strings matching much longer concepts (e.g., "Revenues" (8 chars)
+                # should NOT match "RevenueFromContractWithCustomerExcludingAssessedTax" (52 chars))
+                if known in concept and len(known) >= len(concept) * 0.4:
                     return (f"us-gaap:{concept}", self._thresholds.get("tree_medium", 0.80))
                 # Reverse: concept is substring of known — only if concept is specific enough
                 # Prevents short concepts like "Assets" matching "PaymentsToAcquirePropertyPlantAndEquipment"

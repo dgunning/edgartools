@@ -316,6 +316,7 @@ metrics:
     known_concepts:
       - DepreciationDepletionAndAmortization
       - DepreciationAndAmortization
+      - DepreciationAmortizationAndAccretionNet  # GE, RTX, WMT use this variant
       - Depreciation
     exclude_patterns:
       - Accumulated  # Prevent matching AccumulatedDepreciation (balance sheet cumulative)

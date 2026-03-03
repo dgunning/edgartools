@@ -4,6 +4,9 @@
     "extraction_rules": {
         "IntangibleAssets": {
             "method": "composite_sum",
+            "total_concepts": [
+                "us-gaap:IntangibleAssetsNetIncludingGoodwill"
+            ],
             "components": [
                 "Goodwill",
                 "IntangibleAssetsNetExcludingGoodwill"
@@ -14,11 +17,13 @@
                 ],
                 "IntangibleAssetsNetExcludingGoodwill": [
                     "us-gaap:IntangibleAssetsNetExcludingGoodwill",
+                    "us-gaap:IndefiniteLivedIntangibleAssetsExcludingGoodwill",
                     "us-gaap:IndefiniteLivedTrademarks",
-                    "us-gaap:FiniteLivedIntangibleAssetsNet"
+                    "us-gaap:FiniteLivedIntangibleAssetsNet",
+                    "us-gaap:OtherIntangibleAssetsNet"
                 ]
             },
-            "notes": "Sum of Goodwill + Other Intangibles. KO uses IndefiniteLivedTrademarks instead of IntangibleAssetsNet."
+            "notes": "Try IntangibleAssetsNetIncludingGoodwill total first; fall back to Goodwill + Other Intangibles."
         },
         "ShortTermDebt": {
             "method": "composite_sum",
