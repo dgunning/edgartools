@@ -381,14 +381,25 @@ def test_filing_html_for_ixbrl_filing():
     ONE_800_FLOWERS_10Q = Filing(form='10-Q', company='1 800 FLOWERS COM INC',
                                 cik=1084869, filing_date='2023-03-09', accession_no='0001437749-23-002992')
     filing = ONE_800_FLOWERS_10Q
-    html = filing.html()
+    try:
+        html = filing.html()
+    except ValueError as e:
+        if "empty or truncated response" in str(e):
+            pytest.skip("SEC returned transient empty response")
+        raise
     assert html
     assert "1-800-FLOWERS.COM" in html
 
     filing = Filing(form='10-Q', company='RALPH LAUREN CORP',
                     cik=1037038, filing_date='2023-02-10',
                     accession_no='0001037038-23-000009')
-    assert "RALPH LAUREN" in filing.html()
+    try:
+        ralph_html = filing.html()
+    except ValueError as e:
+        if "empty or truncated response" in str(e):
+            pytest.skip("SEC returned transient empty response")
+        raise
+    assert "RALPH LAUREN" in ralph_html
 
 @pytest.mark.fast
 @pytest.mark.vcr

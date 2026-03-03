@@ -122,7 +122,12 @@ def test_get_entity_by_ticker_with_stock_class():
 @pytest.mark.network
 def test_getting_company_financials_does_not_load_additional_filings():
     c = Company("KO")
-    f = c.get_financials()
+    try:
+        f = c.get_financials()
+    except ValueError as e:
+        if "empty or truncated response" in str(e):
+            pytest.skip("SEC returned transient empty response")
+        raise
     assert f
     assert not c._data._loaded_all_filings
 
