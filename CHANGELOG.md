@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.20.2] - 2026-03-03
+
+### Fixed
+
+- **Cache Bypass Actually Works Now** — The 5.20.1 retry-with-cache-bypass for empty SGML responses was silently ineffective because `httpxthrottlecache` reuses a single client instance, ignoring `bypass_cache` after initial creation. The retry now uses a direct `httpx` request that completely bypasses the cache layer ([#672](https://github.com/dgunning/edgartools/issues/672))
+
 ## [5.20.1] - 2026-03-03
 
 ### Fixed

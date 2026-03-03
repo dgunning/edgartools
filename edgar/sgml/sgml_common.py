@@ -15,6 +15,24 @@ from edgar.sgml.sgml_header import FilingHeader
 from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, SECHTMLResponseError, parse_document
 from edgar.sgml.tools import is_xml
 
+
+def _fetch_url_directly(url: str) -> str:
+    """
+    Fetch URL content directly with a fresh httpx client, completely bypassing
+    the HTTP cache layer.
+
+    This is used as a retry mechanism when the cached response is empty or invalid.
+    The httpxthrottlecache library reuses a single client instance, so its
+    bypass_cache parameter has no effect after the client is first created.
+    """
+    import httpx
+    from edgar.core import get_identity
+
+    headers = {"User-Agent": get_identity()}
+    with httpx.Client(headers=headers) as client:
+        response = client.get(url)
+        return response.text
+
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
 
@@ -425,7 +443,7 @@ class FilingSGML:
                 logging.getLogger(__name__).info(
                     f"Retrying fetch with cache bypass for {source} due to: {e}"
                 )
-                content = read_content_as_string(source, bypass_cache=True)
+                content = _fetch_url_directly(source)
                 header, documents = parse_submission_text(content)
             else:
                 raise
