@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.20.1] - 2026-03-03
+
+### Fixed
+
+- **Empty SEC Responses Permanently Cached** — Empty or error responses from SEC SGML endpoints were stored in the local cache indefinitely, meaning subsequent requests would silently return empty content rather than retrying against the network. The fetcher now detects empty/error payloads and retries once with cache bypass before giving up ([#672](https://github.com/dgunning/edgartools/issues/672)) ([45574373](https://github.com/dgunning/edgartools/commit/45574373))
+
+- **Automatic Cache Clear on Upgrade** — On first run after upgrading to 5.20.1, the local SGML cache is automatically cleared once to remove any stale empty responses that were cached under prior versions. No manual intervention required ([45574373](https://github.com/dgunning/edgartools/commit/45574373))
+
+- **Graceful Test Skip on Transient SEC Responses** — Network tests that exercise SGML downloads now detect transient empty responses from SEC and skip with an informative message instead of failing the suite ([4fc4a889](https://github.com/dgunning/edgartools/commit/4fc4a889))
+
 ## [5.20.0] - 2026-03-02
 
 ### Added
