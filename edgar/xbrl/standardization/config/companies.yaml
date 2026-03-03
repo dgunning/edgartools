@@ -75,6 +75,48 @@ companies:
         notes: "Primary revenue is advertising"
 
   # =============================================================================
+  # ARCHETYPE C: SAAS / INTANGIBLE DIGITAL COMPANIES
+  # =============================================================================
+  CRM:
+    name: "Salesforce, Inc."
+    cik: 1108524
+    archetype: "C"  # Intangible Digital
+    exclude_metrics:
+      - COGS  # SaaS company, no traditional COGS
+      - Inventory  # No physical inventory
+    notes: "Pure SaaS, heavy intangible assets from acquisitions (Slack, Tableau)"
+
+  ADBE:
+    name: "Adobe Inc."
+    cik: 796343
+    archetype: "C"  # Intangible Digital
+    exclude_metrics:
+      - COGS  # SaaS/subscription company
+      - Inventory  # No physical inventory
+    notes: "SaaS transition complete, subscription-based revenue model"
+
+  SNOW:
+    name: "Snowflake Inc."
+    cik: 1640147
+    archetype: "C"  # Intangible Digital
+    fiscal_year_end: "January"  # Non-calendar fiscal year
+    exclude_metrics:
+      - COGS  # Cloud platform company
+      - Inventory  # No physical inventory
+      - DividendsPaid  # Growth company, no dividends
+      - LongTermDebt  # Minimal debt
+    notes: "Cloud-native data platform, consumption-based revenue recognition"
+
+  NOW:
+    name: "ServiceNow, Inc."
+    cik: 1373715
+    archetype: "C"  # Intangible Digital
+    exclude_metrics:
+      - COGS  # Enterprise SaaS
+      - Inventory  # No physical inventory
+    notes: "Enterprise SaaS, high SBC-to-revenue ratio, subscription revenue"
+
+  # =============================================================================
   # INDUSTRIAL MANUFACTURING COMPANIES
   # =============================================================================
   CAT:
@@ -1209,3 +1251,9 @@ cohorts:
     archetype: "A"
     description: "Transportation and logistics companies"
     metrics: [Revenue, OperatingIncome, Capex, ShortTermDebt]
+
+  SaaS_Digital:
+    members: [CRM, ADBE, SNOW, NOW]
+    archetype: "C"
+    description: "SaaS / Intangible Digital companies - Archetype C validation"
+    metrics: [Revenue, OperatingIncome, NetIncome, TotalAssets, IntangibleAssets, Goodwill, StockBasedCompensation, CashAndEquivalents]
