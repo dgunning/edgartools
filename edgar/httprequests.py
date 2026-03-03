@@ -746,7 +746,7 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
     wait_exp_base=2
 )
 @with_identity
-def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
+def stream_with_retry(url, identity=None, identity_callable=None, bypass_cache=False, **kwargs):
     """
     Sends a streaming GET request with retry functionality and identity handling.
 
@@ -754,6 +754,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
         url (str): The URL to send the streaming GET request to.
         identity (str, optional): The identity to use for the request. Defaults to None.
         identity_callable (callable, optional): A callable that returns the identity. Defaults to None.
+        bypass_cache (bool): If True, bypass the HTTP cache for this request. Defaults to False.
         **kwargs: Additional keyword arguments to pass to the underlying httpx.Client.stream() method.
 
     Yields:
@@ -764,7 +765,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, **kwargs):
         SSLVerificationError: If SSL certificate verification fails.
     """
     try:
-        with http_client() as client:
+        with http_client(bypass_cache=bypass_cache) as client:
             with client.stream("GET", url, **kwargs) as response:
                 if response.status_code == 429:
                     raise TooManyRequestsError(url, retry_after=_get_retry_after(response))

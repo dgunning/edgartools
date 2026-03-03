@@ -323,6 +323,55 @@ def get_http_config() -> dict:
 HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())
 
 
+def clear_empty_cached_responses():
+    """
+    One-time cache clearing function to remove potentially stale empty responses (Issue #672).
+
+    The cache-forever rule for /Archives/edgar/data could permanently cache empty or
+    error responses from transient SEC outages. Since we cannot distinguish good from
+    bad cached entries without inspecting each file, this performs a full cache clear
+    once per installation when upgrading to the version with the fix.
+
+    After clearing, the retry-with-bypass logic in FilingSGML.from_source() prevents
+    future empty responses from being permanently cached.
+
+    Returns:
+        bool: True if cache was cleared, False if already cleared previously
+    """
+    import logging
+    import shutil
+    from pathlib import Path
+
+    try:
+        cache_dir = Path(get_cache_directory())
+        marker_file = cache_dir / ".empty_response_fix_672_applied"
+
+        # If marker exists, cache was already cleared
+        try:
+            if marker_file.exists():
+                return False
+        except (PermissionError, OSError):
+            pass
+
+        # Clear the cache directory if it exists
+        if cache_dir.exists():
+            shutil.rmtree(cache_dir)
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            marker_file.touch()
+            return True
+        else:
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            marker_file.touch()
+            return False
+
+    except Exception as e:
+        logging.getLogger(__name__).warning(
+            f"Failed to clear stale cache entries (Issue #672): {e}. "
+            "You may need to manually delete ~/.edgar/_tcache directory."
+        )
+        return False
+
+
 def clear_locale_corrupted_cache():
     """
     One-time cache clearing function to remove locale-corrupted cache files from Issue #457.

@@ -98,6 +98,14 @@ except Exception:
     # Silently continue if cache clearing fails - it's not critical
     pass
 
+# Fix for Issue #672: Clear potentially stale empty cached responses on first import
+# The cache-forever rule could have permanently cached empty SEC responses from transient outages
+try:
+    from edgar.httpclient import clear_empty_cached_responses
+    clear_empty_cached_responses()
+except Exception:
+    pass
+
 # Another name for get_current_filings
 get_latest_filings = get_current_filings
 latest_filings = get_current_filings

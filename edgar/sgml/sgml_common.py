@@ -12,19 +12,20 @@ from edgar.attachments import Attachment, Attachments, get_document_type
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
-from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, parse_document
+from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, SECHTMLResponseError, parse_document
 from edgar.sgml.tools import is_xml
 
 __all__ = ['iter_documents', 'list_documents', 'FilingSGML', 'FilingHeader']
 
 
-def read_content(source: Union[str, Path, 'EdgarPath']) -> Iterator[str]:
+def read_content(source: Union[str, Path, 'EdgarPath'], bypass_cache: bool = False) -> Iterator[str]:
     """
     Read content from a URL, file path, or EdgarPath, yielding lines as strings.
     Automatically handles gzip-compressed files with .gz extension.
 
     Args:
         source: Either a URL string, a file path, or an EdgarPath (for cloud storage)
+        bypass_cache: If True, bypass the HTTP cache for URL sources. Defaults to False.
 
     Yields:
         str: Lines of content from the source
@@ -39,7 +40,7 @@ def read_content(source: Union[str, Path, 'EdgarPath']) -> Iterator[str]:
 
     if isinstance(source, str) and (source.startswith('http://') or source.startswith('https://')):
         # Handle URL using stream_with_retry
-        for response in stream_with_retry(source):
+        for response in stream_with_retry(source, bypass_cache=bypass_cache):
             # Process each line from the response and decode from bytes
             for line in response.iter_lines():
                 if line is not None:
@@ -73,13 +74,14 @@ def read_content(source: Union[str, Path, 'EdgarPath']) -> Iterator[str]:
                 yield from file
 
 
-def read_content_as_string(source: Union[str, Path]) -> str:
+def read_content_as_string(source: Union[str, Path], bypass_cache: bool = False) -> str:
     """
     Read content from either a URL or file path into a string.
     Uses existing read_content generator function.
 
     Args:
         source: Either a URL string or a file path
+        bypass_cache: If True, bypass the HTTP cache for URL sources. Defaults to False.
 
     Returns:
         str: Full content as string
@@ -90,7 +92,7 @@ def read_content_as_string(source: Union[str, Path]) -> str:
     """
     # Convert lines from read_content to string
     lines = []
-    for line in read_content(source):
+    for line in read_content(source, bypass_cache=bypass_cache):
         # Handle both string and bytes from response
         if isinstance(line, bytes):
             lines.append(line.decode('utf-8', errors='replace'))
@@ -388,6 +390,9 @@ class FilingSGML:
         Create FilingSGML instance from either a URL or file path.
         Parses both header and documents.
 
+        If the initial fetch returns an empty or truncated response (e.g., from a
+        stale cache entry), automatically retries once with cache bypass for URL sources.
+
         Args:
             source: Either a URL string or a file path
 
@@ -401,8 +406,29 @@ class FilingSGML:
         # Read content once
         content = read_content_as_string(source)
 
-        # Parse header and documents
-        header, documents = parse_submission_text(content)
+        try:
+            # Parse header and documents
+            header, documents = parse_submission_text(content)
+        except (ValueError, SECHTMLResponseError) as e:
+            # If the cached response was empty/truncated/error, retry once bypassing cache.
+            # This handles the case where a transient SEC outage returned an empty or error
+            # response that was cached permanently by the cache-forever rule.
+            is_url = isinstance(source, str) and source.startswith("http")
+            is_transient = (
+                isinstance(e, SECHTMLResponseError)
+                or "empty or truncated" in str(e)
+                or "error page" in str(e)
+                or "request was denied" in str(e)
+            )
+            if is_url and is_transient:
+                import logging
+                logging.getLogger(__name__).info(
+                    f"Retrying fetch with cache bypass for {source} due to: {e}"
+                )
+                content = read_content_as_string(source, bypass_cache=True)
+                header, documents = parse_submission_text(content)
+            else:
+                raise
 
         # Create FilingSGML instance
         return cls(header=header, documents=documents)
