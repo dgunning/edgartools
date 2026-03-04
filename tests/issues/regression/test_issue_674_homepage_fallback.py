@@ -79,3 +79,69 @@ class TestHomepageFallback:
 
         assert result.get_document_count() == 0
         assert result.get_content("anything.htm") is None
+
+
+class TestFallbackAPIs:
+    """Test that APIs degrade gracefully when using homepage fallback."""
+
+    def _make_filing_with_homepage_fallback(self):
+        """Create a filing that will use homepage fallback for SGML."""
+        filing = Filing(form='10-K', company='TEST CORP', cik=12345,
+                        filing_date='2024-01-15', accession_no='0000012345-24-000001')
+        return filing
+
+    def test_xml_falls_back_to_homepage_attachment(self):
+        """filing.xml() should download from homepage attachment when SGML has no in-memory docs."""
+        filing = self._make_filing_with_homepage_fallback()
+
+        # Create a mock XML attachment
+        mock_xml_doc = MagicMock(spec=Attachment)
+        mock_xml_doc.is_binary.return_value = False
+        mock_xml_doc.empty = False
+        mock_xml_doc.content = "<XML>test data</XML>"
+
+        mock_homepage = MagicMock()
+        mock_homepage.primary_xml_document = mock_xml_doc
+        mock_homepage.attachments = MagicMock(spec=Attachments)
+
+        # SGML returns None for xml (no in-memory docs), so Filing.xml() should fallback
+        with patch.object(FilingSGML, 'from_filing', side_effect=ValueError("empty")), \
+             patch.object(type(filing), 'homepage', new_callable=lambda: property(lambda self: mock_homepage)):
+            result = filing.xml()
+
+        assert result == "<XML>test data</XML>"
+
+    def test_period_of_report_falls_back_to_homepage(self):
+        """filing.period_of_report should use homepage when SGML header is empty."""
+        filing = self._make_filing_with_homepage_fallback()
+
+        mock_homepage = MagicMock()
+        mock_homepage.period_of_report = "2024-01-15"
+        mock_homepage.attachments = MagicMock(spec=Attachments)
+
+        with patch.object(FilingSGML, 'from_filing', side_effect=ValueError("empty")), \
+             patch.object(type(filing), 'homepage', new_callable=lambda: property(lambda self: mock_homepage)):
+            result = filing.period_of_report
+
+        assert result == "2024-01-15"
+
+    def test_html_falls_back_to_homepage_download(self):
+        """filing.html() already has homepage fallback - verify it works under SGML failure."""
+        filing = self._make_filing_with_homepage_fallback()
+
+        mock_html_doc = MagicMock(spec=Attachment)
+        mock_html_doc.empty = False
+        mock_html_doc.is_binary.return_value = False
+        mock_html_doc.download.return_value = "<html><body>Test</body></html>"
+
+        mock_homepage = MagicMock()
+        mock_homepage.primary_html_document = mock_html_doc
+        mock_homepage.attachments = MagicMock(spec=Attachments)
+        # primary_html_document on attachments returns None so sgml.html() returns None
+        mock_homepage.attachments.primary_html_document = None
+
+        with patch.object(FilingSGML, 'from_filing', side_effect=ValueError("empty")), \
+             patch.object(type(filing), 'homepage', new_callable=lambda: property(lambda self: mock_homepage)):
+            result = filing.html()
+
+        assert result == "<html><body>Test</body></html>"

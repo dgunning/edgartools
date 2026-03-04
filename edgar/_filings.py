@@ -1561,7 +1561,11 @@ class Filing:
         """
         Get the period of report for the filing
         """
-        return self.sgml().period_of_report
+        period = self.sgml().period_of_report
+        if not period:
+            # Fallback: extract from homepage index page
+            period = self.homepage.period_of_report
+        return period
 
     @property
     def attachments(self):
@@ -1608,7 +1612,13 @@ class Filing:
     def xml(self) -> Optional[str]:
         """Returns the xml contents of the primary document if it is xml"""
         sgml = self.sgml()
-        return sgml.xml()
+        xml_content = sgml.xml()
+        if not xml_content:
+            # Fallback: download XML from homepage attachment
+            document = self.homepage.primary_xml_document
+            if document and not document.is_binary() and not document.empty:
+                return document.content
+        return xml_content
 
     @lru_cache(maxsize=4)
     def text(self) -> str:
