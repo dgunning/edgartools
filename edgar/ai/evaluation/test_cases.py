@@ -59,7 +59,7 @@ class SECAnalysisTestCase:
     category: str = "general"
     description: Optional[str] = None
     reference_code: Optional[str] = None
-    network_required: bool = True
+    network_required: bool = False
     tags: List[str] = field(default_factory=list)
 
     # Constitution goal alignment (for diagnostics)
@@ -936,7 +936,7 @@ def get_tests_not_requiring_network() -> List[SECAnalysisTestCase]:
         List of test cases with network_required=False
 
     Note:
-        Currently all tests require network for SEC API.
-        This is useful for future mock-based tests.
+        Pattern+efficiency evaluation (execute=False) never makes network calls,
+        so all test cases are marked network_required=False by default.
     """
     return [test for test in SEC_TEST_SUITE if not test.network_required]

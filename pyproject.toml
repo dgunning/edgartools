@@ -207,6 +207,7 @@ test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/
 test-regression = "pytest --cov --cov-report=xml -m regression {args}"
 
 # Other test categories  
+test-eval = "pytest tests/test_evaluation_offline.py {args}"
 test-batch = "pytest scripts/batch/ -m 'batch' {args}"
 test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}"
 test-full = "pytest --ignore=tests/perf {args}"
