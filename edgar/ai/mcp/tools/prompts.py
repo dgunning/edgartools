@@ -373,11 +373,21 @@ def get_prompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptR
     arguments = arguments or {}
     renderer = PROMPT_RENDERERS[name]
 
-    # Pass arguments to renderer
+    # Pass arguments to renderer, validating required params
     import inspect
     sig = inspect.signature(renderer)
     kwargs = {}
-    for param_name in sig.parameters:
+    missing = []
+    for param_name, param in sig.parameters.items():
         if param_name in arguments:
             kwargs[param_name] = arguments[param_name]
+        elif param.default is inspect.Parameter.empty:
+            missing.append(param_name)
+
+    if missing:
+        raise ValueError(
+            f"Prompt '{name}' requires arguments: {', '.join(missing)}. "
+            f"Example: arguments={{'{missing[0]}': 'AAPL'}}"
+        )
+
     return renderer(**kwargs)

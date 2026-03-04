@@ -222,10 +222,12 @@ def _build_ownership(company) -> dict:
 
     # Insider transactions (Form 4)
     try:
-        form4_filings = company.get_filings(form="4").head(20)
+        all_form4 = company.get_filings(form="4")
+        total_form4_count = len(all_form4)
+        form4_filings = all_form4.head(10)
         insider_txns = []
 
-        for filing in form4_filings[:10]:
+        for filing in form4_filings:
             try:
                 txn = {
                     "date": str(filing.filing_date),
@@ -246,7 +248,7 @@ def _build_ownership(company) -> dict:
                 continue
 
         ownership["insider_transactions"] = insider_txns
-        ownership["insider_filing_count"] = len(form4_filings)
+        ownership["insider_filing_count"] = total_form4_count
 
     except Exception as e:
         logger.debug(f"Could not get insider data: {e}")

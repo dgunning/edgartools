@@ -318,31 +318,45 @@ async def _get_portfolio_diff(identifier: str, limit: int) -> Any:
             }
 
             # Current values
+            def _safe_number(val, as_int=True):
+                """Convert value to int or float, handling None and NaN."""
+                if val is None:
+                    return None
+                if isinstance(val, float) and math.isnan(val):
+                    return None
+                try:
+                    import pandas as pd
+                    if pd.isna(val):
+                        return None
+                except (ValueError, TypeError):
+                    pass
+                return int(val) if as_int else val
+
             shares = row.get("Shares")
-            if shares is not None and not (isinstance(shares, float) and math.isnan(shares)):
-                entry["shares"] = int(shares)
+            if _safe_number(shares) is not None:
+                entry["shares"] = _safe_number(shares)
             value = row.get("Value")
-            if value is not None and not (isinstance(value, float) and math.isnan(value)):
-                entry["value"] = int(value)
+            if _safe_number(value) is not None:
+                entry["value"] = _safe_number(value)
 
             # Previous values
             prev_shares = row.get("PrevShares")
-            if prev_shares is not None and not (isinstance(prev_shares, float) and math.isnan(prev_shares)):
-                entry["prev_shares"] = int(prev_shares)
+            if _safe_number(prev_shares) is not None:
+                entry["prev_shares"] = _safe_number(prev_shares)
             prev_value = row.get("PrevValue")
-            if prev_value is not None and not (isinstance(prev_value, float) and math.isnan(prev_value)):
-                entry["prev_value"] = int(prev_value)
+            if _safe_number(prev_value) is not None:
+                entry["prev_value"] = _safe_number(prev_value)
 
             # Changes
             share_change = row.get("ShareChange")
-            if share_change is not None and not (isinstance(share_change, float) and math.isnan(share_change)):
-                entry["share_change"] = int(share_change)
+            if _safe_number(share_change) is not None:
+                entry["share_change"] = _safe_number(share_change)
             share_pct = row.get("ShareChangePct")
-            if share_pct is not None and not (isinstance(share_pct, float) and math.isnan(share_pct)):
+            if _safe_number(share_pct, as_int=False) is not None:
                 entry["share_change_pct"] = round(share_pct, 1)
             value_change = row.get("ValueChange")
-            if value_change is not None and not (isinstance(value_change, float) and math.isnan(value_change)):
-                entry["value_change"] = int(value_change)
+            if _safe_number(value_change) is not None:
+                entry["value_change"] = _safe_number(value_change)
 
             changes.append(entry)
 
