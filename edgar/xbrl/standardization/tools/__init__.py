@@ -26,3 +26,10 @@ from .resolve_gaps import (
     Resolution,
     ResolutionReport
 )
+from .onboard_company import (
+    onboard_company,
+    onboard_batch,
+    detect_archetype,
+    OnboardingResult,
+    FailureDetail,
+)
