@@ -301,7 +301,7 @@ async def _compare_company(
                     annual_ts = ts[ts['fiscal_period'] == 'FY'] if annual else ts
                     if len(annual_ts) >= 2:
                         values = annual_ts['numeric_value'].tolist()
-                        if len(values) >= 2 and values[1] and values[1] != 0:
+                        if len(values) >= 2 and values[0] is not None and values[1] is not None and values[1] != 0:
                             extracted["revenue_growth_yoy"] = f"{(values[0] - values[1]) / abs(values[1]) * 100:.1f}%"
             except Exception as e:
                 logger.debug(f"Could not compute growth for {identifier}: {e}")

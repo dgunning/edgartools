@@ -80,8 +80,8 @@ async def edgar_search(
             if companies:
                 next_steps.append("Use edgar_company with an identifier for detailed info")
 
-        # Search filings
-        if search_type in ["filings", "all"]:
+        # Search filings (require at least one filter criterion)
+        if search_type in ["filings", "all"] and (identifier or form):
             filings = await _search_filings(
                 identifier=identifier,
                 form=form,

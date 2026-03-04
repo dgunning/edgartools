@@ -98,8 +98,10 @@ async def edgar_screen(
 
         # Apply exchange filter
         if exchange:
-            if df is not None:
+            if df is not None and 'exchange' in df.columns:
                 df = df[df['exchange'] == exchange]
+            elif df is not None:
+                pass  # DataFrame lacks exchange column; skip filter
             else:
                 df = get_companies_by_exchanges(exchange)
 

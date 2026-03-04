@@ -194,6 +194,10 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
         # Get the typed object (TenK, TenQ, EightK, etc.)
         obj = filing.obj()
 
+        if obj is None:
+            extracted["error"] = f"Could not parse {filing.form} filing into a structured object"
+            return extracted
+
         if "all" in sections:
             # Extract all available sections
             sections_to_extract = _get_section_list(filing.form)
