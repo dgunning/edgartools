@@ -1881,6 +1881,434 @@ companies:
       - SGA
     notes: "Regional commercial bank - traditional banking model."
 
+  # =============================================================================
+  # S&P 100 EXPANSION
+  # =============================================================================
+  HD:
+    name: "HOME DEPOT, INC."
+    cik: 354950
+    fiscal_year_end: "February"
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 38.7
+        reason: "Variance: 38.7% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 93.5
+        reason: "Variance: 93.5% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  V:
+    name: "VISA INC."
+    cik: 1403161
+    fiscal_year_end: "September"
+    exclude_metrics:
+      - COGS
+
+  ABBV:
+    name: "AbbVie Inc."
+    cik: 1551152
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      OperatingIncome:
+        form_types: ["10-K"]
+        variance_pct: 39.4
+        reason: "Variance: 39.4% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 100.0
+        reason: "Variance: 100.0% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  # Wave 1 — Standard Industrial
+  LOW:
+    name: "LOWES COMPANIES INC"
+    cik: 60667
+
+  MCD:
+    name: "MCDONALDS CORP"
+    cik: 63908
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 41.1
+        reason: "Variance: 41.1% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 64.0
+        reason: "Variance: 64.0% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  TJX:
+    name: "TJX COMPANIES INC /DE/"
+    cik: 109198
+
+  MDLZ:
+    name: "Mondelez International, Inc."
+    cik: 1103982
+
+  ABT:
+    name: "ABBOTT LABORATORIES"
+    cik: 1800
+    known_divergences:
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 50.5
+        reason: "Variance: 50.5% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  DHR:
+    name: "DANAHER CORP /DE/"
+    cik: 313616
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 69.0
+        reason: "Variance: 69.0% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  LIN:
+    name: "LINDE PLC"
+    cik: 1707925
+    known_divergences:
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 62.4
+        reason: "Variance: 62.4% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  NKE:
+    name: "NIKE, Inc."
+    cik: 320187
+    fiscal_year_end: "May"
+
+  SBUX:
+    name: "STARBUCKS CORP"
+    cik: 829224
+    fiscal_year_end: "September"
+
+  DIS:
+    name: "Walt Disney Co"
+    cik: 1744489
+    fiscal_year_end: "September"
+    known_divergences:
+      OperatingIncome:
+        form_types: ["10-K"]
+        variance_pct: 26.9
+        reason: "Variance: 26.9% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  T:
+    name: "AT&T INC."
+    cik: 732717
+
+  # Wave 2 — Tech/SaaS/Pharma
+  MA:
+    name: "Mastercard Inc"
+    cik: 1141391
+    exclude_metrics:
+      - COGS
+      - ShortTermDebt
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 52.7
+        reason: "Variance: 52.7% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  CSCO:
+    name: "CISCO SYSTEMS, INC."
+    cik: 858877
+    fiscal_year_end: "July"
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 65.5
+        reason: "Variance: 65.5% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 66.6
+        reason: "Variance: 66.6% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  IBM:
+    name: "INTERNATIONAL BUSINESS MACHINES CORP"
+    cik: 51143
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 97.4
+        reason: "Variance: 97.4% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  INTC:
+    name: "INTEL CORP"
+    cik: 50863
+    exclude_metrics:
+      - COGS
+      - OperatingIncome
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 68.9
+        reason: "Variance: 68.9% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 49.2
+        reason: "Variance: 49.2% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  AMD:
+    name: "ADVANCED MICRO DEVICES INC"
+    cik: 2488
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 53.4
+        reason: "Variance: 53.4% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      OperatingIncome:
+        form_types: ["10-K"]
+        variance_pct: 48.6
+        reason: "Variance: 48.6% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  AVGO:
+    name: "Broadcom Inc."
+    cik: 1730168
+    fiscal_year_end: "November"
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 55.2
+        reason: "Variance: 55.2% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  QCOM:
+    name: "QUALCOMM INC/DE"
+    cik: 804328
+    fiscal_year_end: "September"
+    known_divergences:
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 100.0
+        reason: "Variance: 100.0% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  TXN:
+    name: "TEXAS INSTRUMENTS INC"
+    cik: 97476
+    exclude_metrics:
+      - COGS
+
+  NFLX:
+    name: "NETFLIX INC"
+    cik: 1065280
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 62.1
+        reason: "Variance: 62.1% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      OperatingIncome:
+        form_types: ["10-K"]
+        variance_pct: 21.8
+        reason: "Variance: 21.8% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 78.6
+        reason: "Variance: 78.6% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  ORCL:
+    name: "ORACLE CORP"
+    cik: 1341439
+    fiscal_year_end: "May"
+    exclude_metrics:
+      - COGS
+
+  ACN:
+    name: "Accenture plc"
+    cik: 1467373
+    fiscal_year_end: "August"
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 87.1
+        reason: "Variance: 87.1% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+      OperatingIncome:
+        form_types: ["10-K"]
+        variance_pct: 80.0
+        reason: "Variance: 80.0% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  INTU:
+    name: "INTUIT INC."
+    cik: 896878
+    fiscal_year_end: "July"
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 57.6
+        reason: "Variance: 57.6% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  AMGN:
+    name: "AMGEN INC"
+    cik: 318154
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      OperatingIncome:
+        form_types: ["10-K"]
+        variance_pct: 20.1
+        reason: "Variance: 20.1% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  MRK:
+    name: "Merck & Co., Inc."
+    cik: 310158
+    exclude_metrics:
+      - COGS
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 29.0
+        reason: "Variance: 29.0% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  TMO:
+    name: "THERMO FISHER SCIENTIFIC INC."
+    cik: 97745
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 66.9
+        reason: "Variance: 66.9% (tolerance: 15%)"
+        skip_validation: true
+        added_date: "2026-03-04"
+
+  GILD:
+    name: "GILEAD SCIENCES, INC."
+    cik: 882095
+    exclude_metrics:
+      - COGS
+
+  # Wave 3 — Financial/Insurance
+  AXP:
+    name: "AMERICAN EXPRESS CO"
+    cik: 4962
+    exclude_metrics:
+      - COGS
+      - Capex
+      - OperatingIncome
+      - SGA
+
+  BLK:
+    name: "BlackRock, Inc."
+    cik: 2012383
+    exclude_metrics:
+      - COGS
+      - Capex
+      - OperatingIncome
+      - SGA
+
+  SCHW:
+    name: "SCHWAB CHARLES CORP"
+    cik: 316709
+    exclude_metrics:
+      - COGS
+      - Capex
+      - OperatingIncome
+      - SGA
+
+  CB:
+    name: "Chubb Ltd"
+    cik: 896159
+    exclude_metrics:
+      - COGS
+
+  CI:
+    name: "Cigna Group"
+    cik: 1739940
+    exclude_metrics:
+      - COGS
+
+  CME:
+    name: "CME GROUP INC."
+    cik: 1156375
+    exclude_metrics:
+      - COGS
+      - Capex
+      - OperatingIncome
+      - SGA
+
+  # Wave 4 — Stragglers
+  PYPL:
+    name: "PayPal Holdings, Inc."
+    cik: 1633917
+
+  CL:
+    name: "COLGATE PALMOLIVE CO"
+    cik: 21665
+
+  BMY:
+    name: "BRISTOL MYERS SQUIBB CO"
+    cik: 14272
+
+  MDT:
+    name: "Medtronic plc"
+    cik: 1613103
+
 # Default settings
 defaults:
   confidence_thresholds:

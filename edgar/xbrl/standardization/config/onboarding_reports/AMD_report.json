@@ -1,0 +1,132 @@
+{
+  "ticker": "AMD",
+  "cik": 2488,
+  "company_name": "ADVANCED MICRO DEVICES INC",
+  "archetype": "C",
+  "sic_code": "3674",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  AMD:\n    name: \"ADVANCED MICRO DEVICES INC\"\n    cik: 2488\n    exclude_metrics:\n      - COGS\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 53.4\n        reason: \"Variance: 53.4% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 48.6\n        reason: \"Variance: 48.6% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "Revenue",
+    "SGA",
+    "PretaxIncome",
+    "TotalAssets",
+    "ShortTermDebt",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "Goodwill",
+    "IntangibleAssets",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "Inventory",
+    "AccountsPayable"
+  ],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {
+    "COGS": {
+      "metric": "COGS",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 17487000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 48.6% (tolerance: 15%)",
+      "xbrl_value": 1900000000.0,
+      "reference_value": 3694000000.0,
+      "variance_pct": 48.56524093123985,
+      "pattern": "unknown"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 4335000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 7709000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -974000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 25126000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 53.4% (tolerance: 15%)",
+      "xbrl_value": 19507000000.0,
+      "reference_value": 41831000000.0,
+      "variance_pct": 53.36712007841074,
+      "pattern": "unknown"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2348000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 5539000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Inventory": {
+      "metric": "Inventory",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 7920000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "AccountsPayable": {
+      "metric": "AccountsPayable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2929000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:20:35.581845"
+}

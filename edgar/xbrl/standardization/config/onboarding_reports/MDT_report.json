@@ -1,0 +1,194 @@
+{
+  "ticker": "MDT",
+  "cik": 1613103,
+  "company_name": "Medtronic plc",
+  "archetype": "A",
+  "sic_code": "3845",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  MDT:\n    name: \"Medtronic plc\"\n    cik: 1613103",
+  "metrics_passed": [
+    "SGA",
+    "PretaxIncome"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization"
+  ],
+  "metrics_excluded": [],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 33537000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 11632000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 5955000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 4662000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 7044000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -1859000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 91680000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 41737000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 53404000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2868000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 25590000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2218000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "WeightedAverageSharesDiluted": {
+      "metric": "WeightedAverageSharesDiluted",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1289900000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "StockBasedCompensation": {
+      "metric": "StockBasedCompensation",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 429000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendsPaid": {
+      "metric": "DividendsPaid",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -3589000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Inventory": {
+      "metric": "Inventory",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 5476000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "AccountsReceivable": {
+      "metric": "AccountsReceivable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 6515000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "AccountsPayable": {
+      "metric": "AccountsPayable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2449000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2861000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:24:30.242354"
+}

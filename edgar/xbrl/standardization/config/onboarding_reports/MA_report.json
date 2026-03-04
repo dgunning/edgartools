@@ -1,0 +1,123 @@
+{
+  "ticker": "MA",
+  "cik": 1141391,
+  "company_name": "Mastercard Inc",
+  "archetype": "C",
+  "sic_code": "7389",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  MA:\n    name: \"Mastercard Inc\"\n    cik: 1141391\n    exclude_metrics:\n      - COGS\n      - ShortTermDebt\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 52.7\n        reason: \"Variance: 52.7% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "SGA",
+    "PretaxIncome",
+    "NetIncome",
+    "TotalAssets",
+    "LongTermDebt",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsPayable"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "OperatingIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "CashAndEquivalents",
+    "AccountsReceivable",
+    "DepreciationAmortization"
+  ],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 32791000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 17.5% (tolerance: 15%)",
+      "xbrl_value": 15582000000.0,
+      "reference_value": 18897000000.0,
+      "variance_pct": 17.542467058263217,
+      "pattern": "unknown"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 17648000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -1215000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 9560000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 52.7% (tolerance: 15%)",
+      "xbrl_value": 7153000000.0,
+      "reference_value": 15114000000.0,
+      "variance_pct": 52.673018393542414,
+      "pattern": "unknown"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "Structural divergence (3752% variance)",
+      "xbrl_value": 28850000000.0,
+      "reference_value": 749000000.0,
+      "variance_pct": 3751.8024032042727,
+      "pattern": "structural"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 10566000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "AccountsReceivable": {
+      "metric": "AccountsReceivable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 4609000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1143000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "structural",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:19:54.457119"
+}

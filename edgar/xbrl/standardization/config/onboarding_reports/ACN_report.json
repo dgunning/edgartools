@@ -1,0 +1,83 @@
+{
+  "ticker": "ACN",
+  "cik": 1467373,
+  "company_name": "Accenture plc",
+  "archetype": "C",
+  "sic_code": "7389",
+  "fiscal_year_end": "August",
+  "draft_yaml": "  ACN:\n    name: \"Accenture plc\"\n    cik: 1467373\n    fiscal_year_end: \"August\"\n    exclude_metrics:\n      - COGS\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 87.1\n        reason: \"Variance: 87.1% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 80.0\n        reason: \"Variance: 80.0% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "SGA",
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "OperatingIncome",
+    "Goodwill",
+    "IntangibleAssets",
+    "DepreciationAmortization"
+  ],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 69672977000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 80.0% (tolerance: 15%)",
+      "xbrl_value": 2049691000.0,
+      "reference_value": 10225664000.0,
+      "variance_pct": 79.95542392161526,
+      "pattern": "unknown"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 22536416000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 87.1% (tolerance: 15%)",
+      "xbrl_value": 3217626000.0,
+      "reference_value": 24947171000.0,
+      "variance_pct": 87.1022409715314,
+      "pattern": "unknown"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1368385000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:21:24.329968"
+}

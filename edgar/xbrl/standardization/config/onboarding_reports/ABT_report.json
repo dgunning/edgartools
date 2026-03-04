@@ -1,0 +1,98 @@
+{
+  "ticker": "ABT",
+  "cik": 1800,
+  "company_name": "ABBOTT LABORATORIES",
+  "archetype": "C",
+  "sic_code": "2834",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  ABT:\n    name: \"ABBOTT LABORATORIES\"\n    cik: 1800\n    known_divergences:\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 50.5\n        reason: \"Variance: 50.5% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "COGS",
+    "SGA",
+    "PretaxIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "Goodwill",
+    "IntangibleAssets",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "OperatingIncome",
+    "NetIncome",
+    "TotalAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "DepreciationAmortization"
+  ],
+  "metrics_excluded": [],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 44328000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 15.2% (tolerance: 15%)",
+      "xbrl_value": 6825000000.0,
+      "reference_value": 8053000000.0,
+      "variance_pct": 15.248975537066931,
+      "pattern": "unknown"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 6524000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 86713000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "Variance: 50.5% (tolerance: 15%)",
+      "xbrl_value": 1500000000.0,
+      "reference_value": 3033000000.0,
+      "variance_pct": 50.54401582591493,
+      "pattern": "unknown"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 9896000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 3116000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:17:53.607822"
+}

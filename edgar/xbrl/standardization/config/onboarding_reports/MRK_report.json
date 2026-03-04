@@ -1,0 +1,92 @@
+{
+  "ticker": "MRK",
+  "cik": 310158,
+  "company_name": "Merck & Co., Inc.",
+  "archetype": "C",
+  "sic_code": "2834",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  MRK:\n    name: \"Merck & Co., Inc.\"\n    cik: 310158\n    exclude_metrics:\n      - COGS\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 29.0\n        reason: \"Variance: 29.0% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "NetIncome",
+    "TotalAssets",
+    "ShortTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "OperatingCashFlow",
+    "Capex",
+    "Goodwill",
+    "IntangibleAssets",
+    "LongTermDebt"
+  ],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 65011000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 16472000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -4112000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 21579000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 29.0% (tolerance: 15%)",
+      "xbrl_value": 34273000000.0,
+      "reference_value": 48260000000.0,
+      "variance_pct": 28.982594280978034,
+      "pattern": "unknown"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 46750000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:21:52.120533"
+}

@@ -1,0 +1,100 @@
+{
+  "ticker": "IBM",
+  "cik": 51143,
+  "company_name": "INTERNATIONAL BUSINESS MACHINES CORP",
+  "archetype": "C",
+  "sic_code": "3570",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  IBM:\n    name: \"INTERNATIONAL BUSINESS MACHINES CORP\"\n    cik: 51143\n    exclude_metrics:\n      - COGS\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 97.4\n        reason: \"Variance: 97.4% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "COGS",
+    "SGA",
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "OperatingIncome",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "DepreciationAmortization"
+  ],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 62753000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 16.8% (tolerance: 15%)",
+      "xbrl_value": 8384000000.0,
+      "reference_value": 10074000000.0,
+      "variance_pct": 16.775858646019458,
+      "pattern": "unknown"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -1685000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 137175000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 60706000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 97.4% (tolerance: 15%)",
+      "xbrl_value": 1864000000.0,
+      "reference_value": 71367000000.0,
+      "variance_pct": 97.38814858407949,
+      "pattern": "unknown"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 4667000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:20:13.345286"
+}
