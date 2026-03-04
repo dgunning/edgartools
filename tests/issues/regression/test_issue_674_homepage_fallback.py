@@ -58,6 +58,24 @@ class TestHomepageFallback:
             with pytest.raises(SECFilingNotFoundError):
                 filing.sgml()
 
+    def test_sgml_does_not_fallback_on_network_error(self):
+        """Network errors should propagate, not fall back (preserves local-storage error messages)."""
+        import httpx
+        filing = self._make_filing()
+
+        with patch.object(FilingSGML, 'from_filing', side_effect=httpx.ConnectError("connection refused")):
+            with pytest.raises(httpx.ConnectError):
+                filing.sgml()
+
+    def test_sgml_does_not_fallback_on_timeout(self):
+        """Timeout errors should propagate, not fall back."""
+        import httpx
+        filing = self._make_filing()
+
+        with patch.object(FilingSGML, 'from_filing', side_effect=httpx.TimeoutException("timed out")):
+            with pytest.raises(httpx.TimeoutException):
+                filing.sgml()
+
     def test_from_homepage_creates_minimal_filing_sgml(self):
         """FilingSGML.from_homepage() creates instance with homepage attachments."""
         mock_attachments = MagicMock(spec=Attachments)

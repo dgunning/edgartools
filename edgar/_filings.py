@@ -1564,7 +1564,11 @@ class Filing:
         period = self.sgml().period_of_report
         if not period:
             # Fallback: extract from homepage index page
-            period = self.homepage.period_of_report
+            try:
+                period = self.homepage.period_of_report
+            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
+                    httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError):
+                pass  # Offline or network unavailable — return None
         return period
 
     @property
@@ -1615,9 +1619,13 @@ class Filing:
         xml_content = sgml.xml()
         if not xml_content:
             # Fallback: download XML from homepage attachment
-            document = self.homepage.primary_xml_document
-            if document and not document.is_binary() and not document.empty:
-                return document.content
+            try:
+                document = self.homepage.primary_xml_document
+                if document and not document.is_binary() and not document.empty:
+                    return document.content
+            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
+                    httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError):
+                pass  # Offline or network unavailable — return None
         return xml_content
 
     @lru_cache(maxsize=4)
@@ -1858,10 +1866,16 @@ class Filing:
             try:
                 self._sgml = FilingSGML.from_filing(self)
             except (ValueError, Exception) as e:
-                from edgar.sgml.sgml_parser import SECIdentityError, SECFilingNotFoundError
-                # Don't fall back on permanent errors — only transient ones
+                from edgar.sgml.sgml_parser import SECIdentityError, SECFilingNotFoundError, SECHTMLResponseError
+                # Don't fall back on permanent errors — propagate them
                 if isinstance(e, (SECIdentityError, SECFilingNotFoundError)):
                     raise
+                # Don't fall back on network errors — propagate them so callers
+                # (e.g. xbrl()) can show local-storage-aware error messages
+                if isinstance(e, (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
+                                  httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError)):
+                    raise
+                # Transient content errors (empty response, HTML error page) — fall back to homepage
                 log.warning(
                     f"SGML fetch failed for {self.accession_no}, "
                     f"falling back to homepage: {e}"
