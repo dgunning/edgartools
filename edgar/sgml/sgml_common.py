@@ -480,6 +480,29 @@ class FilingSGML:
         return self._documents_by_name.get(filename)
 
     @classmethod
+    def from_homepage(cls, homepage: 'FilingHomepage') -> 'FilingSGML':
+        """
+        Create a minimal FilingSGML from a FilingHomepage as a fallback when the
+        full submission text (.txt) is unavailable.
+
+        The resulting instance has an empty header and no in-memory document content,
+        but its attachments property is overridden with the homepage's attachments,
+        which have valid URLs for downloading individual documents.
+
+        Args:
+            homepage: A FilingHomepage loaded from the filing's -index.html page
+
+        Returns:
+            FilingSGML: Minimal instance with homepage-sourced attachments
+        """
+        from edgar.sgml.sgml_header import FilingHeader
+        header = FilingHeader(text="", filing_metadata={})
+        instance = cls(header=header, documents=defaultdict(list))
+        # Override the cached_property with the homepage's attachments directly
+        instance.__dict__['attachments'] = homepage.attachments
+        return instance
+
+    @classmethod
     def from_filing(cls, filing: 'Filing') -> 'FilingSGML':
         """Create from a Filing object that provides text_url."""
         filing_sgml = cls.from_source(filing.text_url)

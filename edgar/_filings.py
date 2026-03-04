@@ -1825,7 +1825,12 @@ class Filing:
 
     def sgml(self) -> FilingSGML:
         """
-        Read the filing from the local storage path if it exists
+        Read the filing from the local storage path if it exists.
+
+        If the full submission text (.txt) is unavailable due to a transient SEC
+        error, falls back to constructing a minimal FilingSGML from the filing's
+        homepage index page. The fallback provides document attachments with valid
+        URLs but without in-memory content or SGML header metadata.
         """
         if self._sgml:
             return self._sgml
@@ -1840,7 +1845,18 @@ class Filing:
                 self._sgml = get_datamule_filing(self.accession_no)
 
         if self._sgml is None:
-            self._sgml = FilingSGML.from_filing(self)
+            try:
+                self._sgml = FilingSGML.from_filing(self)
+            except (ValueError, Exception) as e:
+                from edgar.sgml.sgml_parser import SECIdentityError, SECFilingNotFoundError
+                # Don't fall back on permanent errors — only transient ones
+                if isinstance(e, (SECIdentityError, SECFilingNotFoundError)):
+                    raise
+                log.warning(
+                    f"SGML fetch failed for {self.accession_no}, "
+                    f"falling back to homepage: {e}"
+                )
+                self._sgml = FilingSGML.from_homepage(self.homepage)
         return self._sgml
 
     @cached_property
