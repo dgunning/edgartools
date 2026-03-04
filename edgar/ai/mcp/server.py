@@ -284,6 +284,26 @@ Full-text search across SEC filing content.
 {"query": "tariff impact", "identifier": "AAPL", "start_date": "2024-01-01"}
 ```
 
+### edgar_fund
+Get fund, ETF, BDC, and money market fund data.
+
+```json
+{"action": "lookup", "identifier": "VFINX"}
+{"action": "search", "query": "Vanguard 500"}
+{"action": "portfolio", "identifier": "SPY"}
+{"action": "money_market", "identifier": "VMFXX"}
+{"action": "bdc_search", "query": "Ares"}
+{"action": "bdc_portfolio", "identifier": "ARCC"}
+```
+
+### edgar_proxy
+Get executive compensation and governance data from DEF 14A proxy statements.
+
+```json
+{"identifier": "AAPL"}
+{"identifier": "MSFT", "filing_index": 1}
+```
+
 ## Prompts
 
 Pre-built analysis workflows:

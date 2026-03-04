@@ -2,7 +2,7 @@
 
 EdgarTools provides two AI integration features:
 
-1. **MCP Server** -- Gives any MCP-compatible AI client direct access to SEC filing data through five specialized tools
+1. **MCP Server** -- Gives any MCP-compatible AI client direct access to SEC filing data through specialized tools
 2. **Skills** -- Teaches Claude how to write better EdgarTools code by providing structured patterns and best practices
 
 Both are optional. Install with:
@@ -159,20 +159,109 @@ Compare companies side-by-side or analyze an industry.
 
 #### edgar_ownership
 
-Insider transactions, institutional holders, or fund portfolios.
+Insider transactions or fund portfolios.
 
 | Parameter | Description |
 |-----------|-------------|
 | `identifier` | Ticker, CIK, or fund CIK (required) |
-| `analysis_type` | `insiders`, `institutions`, or `fund_portfolio` |
-| `days` | Lookback period for insider trades (default: 90) |
+| `analysis_type` | `insiders`, `fund_portfolio`, or `portfolio_diff` |
 | `limit` | Max results (default: 20) |
 
 **Try asking Claude:**
 
 - "Show me recent insider transactions at Apple"
-- "Who are Tesla's largest institutional holders?"
 - "What stocks does Berkshire Hathaway hold?"
+
+#### edgar_monitor
+
+Get the latest SEC filings in real-time.
+
+| Parameter | Description |
+|-----------|-------------|
+| `form` | Filter by form type (e.g., `8-K`, `4`) |
+| `limit` | Max results (default: 20) |
+
+**Try asking Claude:**
+
+- "What SEC filings were just submitted?"
+- "Show me recent 8-K filings"
+
+#### edgar_trends
+
+Get financial time series with growth rates.
+
+| Parameter | Description |
+|-----------|-------------|
+| `identifier` | Ticker, CIK, or company name (required) |
+| `concepts` | Metrics to track (e.g., `revenue`, `net_income`, `eps`) |
+| `periods` | Number of periods (default: 5) |
+
+**Try asking Claude:**
+
+- "Show me Apple's revenue trend over 5 years"
+- "What is Microsoft's EPS growth trajectory?"
+
+#### edgar_screen
+
+Discover companies by industry, exchange, or state.
+
+| Parameter | Description |
+|-----------|-------------|
+| `industry` | Industry keyword |
+| `exchange` | Exchange name (e.g., `NYSE`, `Nasdaq`) |
+| `state` | State of incorporation (2-letter code) |
+| `limit` | Max results (default: 20) |
+
+**Try asking Claude:**
+
+- "Find pharmaceutical companies on NYSE"
+- "What software companies are in Delaware?"
+
+#### edgar_text_search
+
+Full-text search across SEC filing content.
+
+| Parameter | Description |
+|-----------|-------------|
+| `query` | Search text (required) |
+| `identifier` | Limit to a specific company |
+| `forms` | Filter by form types (e.g., `["8-K", "10-K"]`) |
+| `start_date` | Start date filter |
+
+**Try asking Claude:**
+
+- "Search for filings mentioning artificial intelligence"
+- "Find 8-K filings about cybersecurity incidents"
+
+#### edgar_fund
+
+Get fund, ETF, BDC, and money market fund data.
+
+| Parameter | Description |
+|-----------|-------------|
+| `action` | `lookup`, `search`, `portfolio`, `money_market`, `bdc_search`, or `bdc_portfolio` (required) |
+| `identifier` | Fund ticker, series ID, or CIK |
+| `query` | Search text for fund or BDC name |
+| `limit` | Max results (default: 20) |
+
+**Try asking Claude:**
+
+- "Look up the Vanguard 500 Index Fund"
+- "Show me SPY's portfolio holdings"
+
+#### edgar_proxy
+
+Get executive compensation and governance data from DEF 14A proxy statements.
+
+| Parameter | Description |
+|-----------|-------------|
+| `identifier` | Ticker, CIK, or company name (required) |
+| `filing_index` | Which proxy filing, 0=latest (default: 0) |
+
+**Try asking Claude:**
+
+- "What is Apple's CEO compensation?"
+- "Show me Microsoft's pay vs performance data"
 
 ### Any MCP Client
 

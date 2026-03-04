@@ -186,7 +186,7 @@ See [hackerdogs/edgartools-mcp](https://hub.docker.com/r/hackerdogs/edgartools-m
 
 ## Available Tools
 
-Once connected, AI agents have access to five intent-based tools:
+Once connected, AI agents have access to these tools:
 
 #### 1. edgar_company
 Get company profile, financials, recent filings, and ownership in one call.
@@ -242,18 +242,90 @@ Compare companies side-by-side or analyze an industry.
 - `periods` (default: 4): Number of periods
 
 #### 5. edgar_ownership
-Insider transactions, institutional holders, or fund portfolios.
+Insider transactions or fund portfolios.
 
 **Example prompts:**
 - "Show me recent insider transactions at Apple"
-- "Who are Tesla's largest institutional holders?"
 - "What stocks does Berkshire Hathaway hold?"
 
 **Parameters:**
 - `identifier` (required): Company ticker, CIK, or fund CIK
-- `analysis_type`: `insiders`, `institutions`, or `fund_portfolio`
-- `days` (default: 90): Lookback for insider trades
+- `analysis_type`: `insiders`, `fund_portfolio`, or `portfolio_diff`
 - `limit` (default: 20): Max results
+
+#### 6. edgar_monitor
+Get the latest SEC filings in real-time.
+
+**Example prompts:**
+- "What SEC filings were just submitted?"
+- "Show me recent 8-K filings"
+
+**Parameters:**
+- `form`: Filter by form type (e.g., `8-K`, `4`)
+- `limit` (default: 20): Max results
+
+#### 7. edgar_trends
+Get financial time series with growth rates.
+
+**Example prompts:**
+- "Show me Apple's revenue trend over 5 years"
+- "What is Microsoft's EPS growth trajectory?"
+
+**Parameters:**
+- `identifier` (required): Company ticker, CIK, or name
+- `concepts`: Metrics to track (e.g., `revenue`, `net_income`, `eps`)
+- `periods` (default: 5): Number of periods
+
+#### 8. edgar_screen
+Discover companies by industry, exchange, or state.
+
+**Example prompts:**
+- "Find pharmaceutical companies on NYSE"
+- "What software companies are incorporated in Delaware?"
+
+**Parameters:**
+- `industry`: Industry keyword
+- `exchange`: Exchange name (e.g., `NYSE`, `Nasdaq`)
+- `state`: State of incorporation (2-letter code)
+- `limit` (default: 20): Max results
+
+#### 9. edgar_text_search
+Full-text search across SEC filing content.
+
+**Example prompts:**
+- "Search for filings mentioning artificial intelligence"
+- "Find 8-K filings about cybersecurity incidents"
+
+**Parameters:**
+- `query` (required): Search text
+- `identifier`: Limit to a specific company
+- `forms`: Filter by form types (e.g., `["8-K", "10-K"]`)
+- `start_date`: Start date filter
+
+#### 10. edgar_fund
+Get fund, ETF, BDC, and money market fund data.
+
+**Example prompts:**
+- "Look up the Vanguard 500 Index Fund"
+- "Show me SPY's portfolio holdings"
+- "What money market funds does Vanguard offer?"
+
+**Parameters:**
+- `action` (required): `lookup`, `search`, `portfolio`, `money_market`, `bdc_search`, or `bdc_portfolio`
+- `identifier`: Fund ticker, series ID, or CIK
+- `query`: Search text for fund or BDC name
+- `limit` (default: 20): Max results
+
+#### 11. edgar_proxy
+Get executive compensation and governance data from DEF 14A proxy statements.
+
+**Example prompts:**
+- "What is Apple's CEO compensation?"
+- "Show me Microsoft's pay vs performance data"
+
+**Parameters:**
+- `identifier` (required): Company ticker, CIK, or name
+- `filing_index` (default: 0): Which proxy filing (0=latest)
 
 ## Environment Variables
 
