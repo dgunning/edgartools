@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://github.com/dgunning/edgartools">
-    <img src="docs/images/edgartools-logo.png" alt="EdgarTools Python SEC EDGAR library logo" height="80">
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-logo.png" alt="EdgarTools Python SEC EDGAR library logo" height="80">
 </a>
 </p>
 
@@ -17,12 +17,12 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/badges/badge-ai-native.svg" alt="AI Native">
-  <img src="docs/images/badges/badge-10x-faster.svg" alt="10x Faster">
-  <img src="docs/images/badges/badge-zero-cost.svg" alt="Zero Cost">
-  <img src="docs/images/badges/badge-production-ready.svg" alt="Production Ready">
-  <img src="docs/images/badges/badge-open-source.svg" alt="Open Source">
-  <img src="docs/images/badges/badge-financial-data.svg" alt="Financial Data">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-ai-native.svg" alt="AI Native">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-10x-faster.svg" alt="10x Faster">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-zero-cost.svg" alt="Zero Cost">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-production-ready.svg" alt="Production Ready">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-open-source.svg" alt="Open Source">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-financial-data.svg" alt="Financial Data">
 </p>
 
 <p align="center">
@@ -31,10 +31,10 @@
 
 **EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and dozens of other filing types with a consistent Python API.
 
-![EdgarTools SEC filing data extraction demo](docs/images/edgartools-demo.gif)
+![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 ## Why EdgarTools?
@@ -44,19 +44,19 @@ EdgarTools turns SEC filings into Python objects. Every supported form type give
 <table align="center">
 <tr>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-speed.svg" width="80" alt="Fast"><br>
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-speed.svg" width="80" alt="Fast"><br>
     <b>Fast</b><br>
     Optimized with lxml & PyArrow<br>
     Smart caching, rate-limit aware
   </td>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-ai.svg" width="80" alt="AI Ready"><br>
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-ai.svg" width="80" alt="AI Ready"><br>
     <b>AI Ready</b><br>
     Built-in MCP server for Claude<br>
     LLM-optimized text extraction
   </td>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-quality.svg" width="80" alt="Well Tested"><br>
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-quality.svg" width="80" alt="Well Tested"><br>
     <b>Well Tested</b><br>
     1000+ verification tests<br>
     Type hints throughout
@@ -64,19 +64,19 @@ EdgarTools turns SEC filings into Python objects. Every supported form type give
 </tr>
 <tr>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-xbrl.svg" width="80" alt="XBRL Support"><br>
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-xbrl.svg" width="80" alt="XBRL Support"><br>
     <b>XBRL Native</b><br>
     Full XBRL standardization<br>
     Cross-company comparisons
   </td>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-data.svg" width="80" alt="20+ Filing Types"><br>
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-data.svg" width="80" alt="20+ Filing Types"><br>
     <b>20+ Filing Types</b><br>
     Typed objects for every form<br>
     Pandas-ready DataFrames
   </td>
   <td align="center" width="33%">
-    <img src="docs/images/icons/icon-community.svg" width="80" alt="Open Source"><br>
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-community.svg" width="80" alt="Open Source"><br>
     <b>Open Source</b><br>
     MIT license, free forever<br>
     No API keys, no rate limits
@@ -85,21 +85,21 @@ EdgarTools turns SEC filings into Python objects. Every supported form type give
 </table>
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 ## How It Works
 
 <p align="center">
-  <img src="docs/images/how-it-works.svg" alt="How EdgarTools Python library extracts SEC EDGAR filing data">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/how-it-works.svg" alt="How EdgarTools Python library extracts SEC EDGAR filing data">
 </p>
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 <p align="center">
-  <img src="docs/images/sections/section-quick-start.svg" alt="Quick Start">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-quick-start.svg" alt="Quick Start">
 </p>
 
 ```python
@@ -119,10 +119,10 @@ filings = company.get_filings(form="4")
 form4 = filings[0].obj()
 ```
 
-![Apple SEC Form 4 insider transaction data extraction with Python](docs/images/aapl-insider.png)
+![Apple SEC Form 4 insider transaction data extraction with Python](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/aapl-insider.png)
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 ## Use Cases
@@ -186,11 +186,11 @@ facts.to_pandas("us-gaap:Revenues")  # Revenue history as DataFrame
 [XBRL Deep Dive →](https://edgartools.readthedocs.io/en/latest/xbrl/)
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 <p align="center">
-  <img src="docs/images/sections/section-features.svg" alt="Key Features">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-features.svg" alt="Key Features">
 </p>
 
 ### Comprehensive SEC Data Access
@@ -262,7 +262,7 @@ facts.to_pandas("us-gaap:Revenues")  # Revenue history as DataFrame
 EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, **S-1 registration statements**, **N-CSR fund reports**, **N-MFP money market data**, **N-PORT fund portfolios**, **Schedule 13D/G ownership**, **Form D offerings**, **Form C crowdfunding**, and **Form 144 restricted stock**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames.
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 ## Comparison with Alternatives
@@ -275,18 +275,18 @@ EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](h
 | **Cost** | Free (MIT) | $49+/mo | Free |
 | **Data format** | Typed Python objects | JSON | Raw XML/HTML |
 | **Parsed filing types** | 24 (10-K, 8-K, 13F, N-PORT, proxy, etc.) | 15+ structured APIs | — |
-| **Financials** | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed + standardized | <img src="docs/images/icons/compare-check.svg" width="20"> Parsed (XBRL-to-JSON) | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **Full-text search** | <img src="docs/images/icons/compare-check.svg" width="20"> via EFTS | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
-| **AI/MCP integration** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> |
+| **Financials** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Parsed + standardized | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Parsed (XBRL-to-JSON) | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
+| **Full-text search** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> via EFTS | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
+| **AI/MCP integration** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
 | **Language** | Python | Any | Any |
-| **Open source** | <img src="docs/images/icons/compare-check.svg" width="20"> | <img src="docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
+| **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 <p align="center">
-  <img src="docs/images/sections/section-ai-integration.svg" alt="AI Integration">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-ai-integration.svg" alt="AI Integration">
 </p>
 
 ### Use EdgarTools with Claude Code & Claude Desktop
@@ -337,10 +337,10 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 </details>
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
-## <img src="docs/images/icons/emoji-heart.svg" width="24" height="24"> Support This Project
+## <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/emoji-heart.svg" width="24" height="24"> Support This Project
 
 EdgarTools replaces hundreds of hours of SEC parsing work — and it costs nothing to use. No API keys, no subscriptions, no rate limits. Free infrastructure for anyone working with SEC data.
 
@@ -367,11 +367,11 @@ Sponsors aren't just giving back — you're investing in a shared resource and h
 **Corporate sponsors:** If your team depends on EdgarTools for compliance, financial analysis, or data pipelines, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers tiers designed for organizations with mission-critical dependencies.
 
 <p align="center">
-  <img src="docs/images/dividers/divider-hexagons.svg" alt="">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
 </p>
 
 <p align="center">
-  <img src="docs/images/sections/section-community.svg" alt="Community & Support">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-community.svg" alt="Community & Support">
 </p>
 
 ### Documentation & Resources
