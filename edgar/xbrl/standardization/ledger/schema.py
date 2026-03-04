@@ -342,7 +342,29 @@ class ExperimentLedger:
                 )
             ''')
 
+            # Pipeline state table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS pipeline_state (
+                    ticker TEXT PRIMARY KEY,
+                    company_name TEXT,
+                    state TEXT NOT NULL DEFAULT 'PENDING',
+                    retry_count INTEGER DEFAULT 0,
+                    max_retries INTEGER DEFAULT 3,
+                    pass_rate REAL,
+                    gaps_count INTEGER,
+                    golden_masters_count INTEGER,
+                    filings_populated INTEGER,
+                    last_error TEXT,
+                    last_state_change TEXT,
+                    onboarding_report_path TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    metadata TEXT DEFAULT '{}'
+                )
+            ''')
+
             # Create indexes
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_pipeline_state ON pipeline_state(state)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_runs_ticker ON extraction_runs(ticker)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_runs_metric ON extraction_runs(metric)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_runs_period ON extraction_runs(fiscal_period)')
@@ -833,6 +855,230 @@ class ExperimentLedger:
                     'unique_tickers': row[4],
                 }
             return {}
+
+    # =========================================================================
+    # PIPELINE STATE
+    # =========================================================================
+
+    VALID_PIPELINE_STATES = [
+        'PENDING', 'ONBOARDING', 'ANALYZING', 'RESOLVING',
+        'VALIDATING', 'PROMOTING', 'POPULATING', 'COMPLETE', 'FAILED',
+    ]
+
+    # Allowed transitions: from_state -> set of allowed to_states
+    PIPELINE_TRANSITIONS = {
+        'PENDING': {'ONBOARDING'},
+        'ONBOARDING': {'ANALYZING', 'FAILED'},
+        'ANALYZING': {'RESOLVING', 'VALIDATING', 'FAILED'},
+        'RESOLVING': {'ANALYZING', 'VALIDATING', 'FAILED'},
+        'VALIDATING': {'PROMOTING', 'ANALYZING', 'FAILED'},
+        'PROMOTING': {'POPULATING', 'FAILED'},
+        'POPULATING': {'COMPLETE', 'FAILED'},
+        'COMPLETE': set(),
+        'FAILED': set(),
+    }
+
+    def add_pipeline_company(self, ticker: str, company_name: str = '') -> None:
+        """
+        Add a company to the pipeline in PENDING state.
+
+        Args:
+            ticker: Company ticker symbol.
+            company_name: Optional company name.
+        """
+        now = datetime.now().isoformat()
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT OR IGNORE INTO pipeline_state (
+                    ticker, company_name, state, retry_count, max_retries,
+                    created_at, updated_at
+                ) VALUES (?, ?, 'PENDING', 0, 3, ?, ?)
+            ''', (ticker.upper(), company_name, now, now))
+            conn.commit()
+
+    def get_pipeline_state(self, ticker: str) -> Optional[Dict[str, Any]]:
+        """
+        Get current pipeline state for a ticker.
+
+        Returns:
+            Dict with all pipeline_state columns, or None if not found.
+        """
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(
+                'SELECT * FROM pipeline_state WHERE ticker = ?',
+                (ticker.upper(),)
+            )
+            row = cursor.fetchone()
+            if row:
+                d = dict(row)
+                d['metadata'] = json.loads(d.get('metadata') or '{}')
+                return d
+        return None
+
+    def advance_pipeline(
+        self,
+        ticker: str,
+        new_state: str,
+        **kwargs,
+    ) -> None:
+        """
+        Advance a company to a new pipeline state.
+
+        Validates the transition and increments retry_count when
+        moving from RESOLVING back to ANALYZING.
+
+        Args:
+            ticker: Company ticker symbol.
+            new_state: Target state.
+            **kwargs: Additional columns to update (pass_rate, gaps_count,
+                      golden_masters_count, filings_populated, last_error,
+                      onboarding_report_path, metadata).
+
+        Raises:
+            ValueError: If the transition is not allowed or ticker not found.
+        """
+        ticker = ticker.upper()
+        current = self.get_pipeline_state(ticker)
+        if current is None:
+            raise ValueError(f"Ticker {ticker} not in pipeline")
+
+        current_state = current['state']
+        if new_state not in self.PIPELINE_TRANSITIONS.get(current_state, set()):
+            raise ValueError(
+                f"Invalid transition: {current_state} -> {new_state} "
+                f"(allowed: {self.PIPELINE_TRANSITIONS.get(current_state, set())})"
+            )
+
+        now = datetime.now().isoformat()
+
+        # Increment retry_count when looping back to ANALYZING
+        retry_count = current['retry_count']
+        max_retries = current['max_retries']
+        if new_state == 'ANALYZING' and current_state in ('RESOLVING', 'VALIDATING'):
+            retry_count += 1
+            if retry_count > max_retries:
+                new_state = 'FAILED'
+                kwargs.setdefault('last_error', f'Max retries ({max_retries}) exceeded')
+
+        # Build SET clause dynamically from kwargs
+        allowed_fields = {
+            'pass_rate', 'gaps_count', 'golden_masters_count',
+            'filings_populated', 'last_error', 'onboarding_report_path',
+            'metadata', 'company_name',
+        }
+        sets = [
+            'state = ?', 'retry_count = ?',
+            'last_state_change = ?', 'updated_at = ?',
+        ]
+        params: list = [new_state, retry_count, now, now]
+
+        for key, value in kwargs.items():
+            if key not in allowed_fields:
+                continue
+            if key == 'metadata':
+                # Merge metadata
+                merged = current.get('metadata') or {}
+                merged.update(value)
+                value = json.dumps(merged)
+            sets.append(f'{key} = ?')
+            params.append(value)
+
+        params.append(ticker)
+
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                f'UPDATE pipeline_state SET {", ".join(sets)} WHERE ticker = ?',
+                params,
+            )
+            conn.commit()
+
+    def get_pipeline_batch(
+        self, state: str, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get companies in a given pipeline state.
+
+        Args:
+            state: Pipeline state to filter by.
+            limit: Max results.
+
+        Returns:
+            List of pipeline state dicts.
+        """
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(
+                'SELECT * FROM pipeline_state WHERE state = ? ORDER BY updated_at LIMIT ?',
+                (state, limit),
+            )
+            results = []
+            for row in cursor.fetchall():
+                d = dict(row)
+                d['metadata'] = json.loads(d.get('metadata') or '{}')
+                results.append(d)
+            return results
+
+    def get_pipeline_summary(self) -> Dict[str, int]:
+        """
+        Get counts of companies per pipeline state.
+
+        Returns:
+            Dict mapping state name to count, e.g. {'COMPLETE': 82, 'FAILED': 5}.
+        """
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                'SELECT state, COUNT(*) as cnt FROM pipeline_state GROUP BY state'
+            )
+            return {row[0]: row[1] for row in cursor.fetchall()}
+
+    def reset_pipeline(self, ticker: str) -> None:
+        """
+        Reset a company back to PENDING state with retry_count=0.
+
+        Args:
+            ticker: Company ticker symbol.
+        """
+        ticker = ticker.upper()
+        now = datetime.now().isoformat()
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE pipeline_state
+                SET state = 'PENDING', retry_count = 0,
+                    last_error = NULL, last_state_change = ?,
+                    updated_at = ?
+                WHERE ticker = ?
+            ''', (now, now, ticker))
+            conn.commit()
+
+    def get_pipeline_recent_activity(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Get the most recent pipeline state transitions.
+
+        Returns:
+            List of dicts with ticker, state, last_state_change, pass_rate.
+        """
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT ticker, state, last_state_change, pass_rate, last_error
+                FROM pipeline_state
+                WHERE last_state_change IS NOT NULL
+                ORDER BY last_state_change DESC
+                LIMIT ?
+            ''', (limit,))
+            return [dict(row) for row in cursor.fetchall()]
+
+    # =========================================================================
+    # ANALYTICS
+    # =========================================================================
 
     def get_ticker_summary(self, ticker: str) -> Dict[str, Any]:
         """Get extraction summary for a ticker."""
