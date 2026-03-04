@@ -44,6 +44,7 @@ from edgar.files.html import Document
 from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
 from edgar.financials import Financials, MultiFinancials
 from edgar.standardized_financials import StandardizedFinancials, StandardizedMetric
+from edgar.financial_database import FinancialDatabase
 from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, find_funds
 from edgar.funds.ncen import NCEN_FORMS, FundCensus
 from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport

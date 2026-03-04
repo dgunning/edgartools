@@ -39,6 +39,7 @@ __all__ = [
     'get_anchor_cache_directory',
     'get_test_directory',
     'get_test_db_path',
+    'get_financial_db_path',
     'get_claude_skills_directory',
     # Setter functions
     'set_data_directory',
@@ -269,6 +270,16 @@ def get_test_db_path() -> Path:
         Path to the test harness SQLite database.
     """
     return get_test_directory() / 'harness.db'
+
+
+def get_financial_db_path() -> Path:
+    """
+    Get the path to the standardized financial database.
+
+    Returns:
+        Path to the financial database (~/.edgar/financial_data.db).
+    """
+    return get_data_directory(create=True) / 'financial_data.db'
 
 
 # ============================================================================
