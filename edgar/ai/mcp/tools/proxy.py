@@ -122,6 +122,16 @@ async def edgar_proxy(
         filing = filings[filing_index]
         proxy = filing.obj()
 
+        if proxy is None:
+            return error(
+                f"Could not parse proxy statement for '{identifier}' (filing {filing.accession_no})",
+                suggestions=[
+                    "The filing may not be parseable as a proxy statement",
+                    "Use edgar_filing with form='DEF 14A' to read the raw filing text",
+                ],
+                error_code="PARSE_ERROR"
+            )
+
         # Build base result
         result: dict[str, Any] = {
             "company": proxy.company_name or company.name,
@@ -145,7 +155,7 @@ async def edgar_proxy(
             ])
 
         # CEO compensation
-        if proxy.peo_name or proxy.peo_total_comp:
+        if proxy.peo_name is not None or proxy.peo_total_comp is not None:
             result["ceo"] = {
                 "name": proxy.peo_name,
                 "total_comp": _decimal_to_float(proxy.peo_total_comp),
@@ -153,7 +163,7 @@ async def edgar_proxy(
             }
 
         # NEO average compensation
-        if proxy.neo_avg_total_comp or proxy.neo_avg_actually_paid_comp:
+        if proxy.neo_avg_total_comp is not None or proxy.neo_avg_actually_paid_comp is not None:
             result["neo_average"] = {
                 "total_comp": _decimal_to_float(proxy.neo_avg_total_comp),
                 "actually_paid": _decimal_to_float(proxy.neo_avg_actually_paid_comp),
