@@ -291,6 +291,9 @@ Pre-built analysis workflows:
 - **earnings_analysis**: Earnings deep dive (8-K, trends, peer comparison)
 - **industry_overview**: Sector survey (screen, compare, trends)
 - **insider_monitor**: Insider trading activity analysis
+- **fund_analysis**: Mutual fund/ETF deep dive (hierarchy, holdings, performance)
+- **filing_comparison**: Compare filings across periods or companies
+- **activist_tracking**: SC 13D/G activist investor monitoring
 
 ## Tips
 
