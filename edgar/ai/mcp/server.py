@@ -21,6 +21,7 @@ Tools:
 - edgar_trends: Financial time series with growth rates
 - edgar_screen: Company discovery by industry, exchange, state
 - edgar_text_search: Full-text search across SEC filing content
+- edgar_proxy: Proxy statement (DEF 14A) executive compensation and governance
 
 Usage:
     python -m edgar.ai.mcp        # Via module
@@ -92,6 +93,7 @@ def _import_tools():
     from edgar.ai.mcp.tools import screen  # noqa: F401
     from edgar.ai.mcp.tools import text_search  # noqa: F401
     from edgar.ai.mcp.tools import fund  # noqa: F401
+    from edgar.ai.mcp.tools import proxy  # noqa: F401
 
 
 # Create the server

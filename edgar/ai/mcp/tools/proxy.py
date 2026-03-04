@@ -1,0 +1,221 @@
+"""
+Proxy Tool
+
+Get executive compensation, pay vs performance, and governance data from DEF 14A proxy statements.
+"""
+
+from __future__ import annotations
+
+import logging
+import math
+from decimal import Decimal
+from typing import Any, Optional
+
+import pandas as pd
+
+from edgar.ai.mcp.tools.base import (
+    tool,
+    success,
+    error,
+    resolve_company,
+    get_error_suggestions,
+    classify_error,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def _decimal_to_float(value) -> Optional[float]:
+    """Convert Decimal/numeric to float, handling None and NaN."""
+    if value is None:
+        return None
+    if isinstance(value, Decimal):
+        return float(value)
+    if isinstance(value, float) and math.isnan(value):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _df_to_records(df: pd.DataFrame, limit: int, columns: Optional[list[str]] = None) -> list[dict]:
+    """DataFrame to list of dicts. Selects columns, caps rows, converts Decimal→float, NaN→None."""
+    if df is None or df.empty:
+        return []
+
+    if columns:
+        columns = [c for c in columns if c in df.columns]
+        if columns:
+            df = df[columns]
+
+    records = []
+    for _, row in df.head(limit).iterrows():
+        record = {}
+        for k, v in row.items():
+            if isinstance(v, Decimal):
+                record[k] = float(v)
+            elif isinstance(v, float) and math.isnan(v):
+                record[k] = None
+            elif pd.isna(v):
+                record[k] = None
+            else:
+                record[k] = v
+        records.append(record)
+    return records
+
+
+@tool(
+    name="edgar_proxy",
+    description="""Get executive compensation and governance data from DEF 14A proxy statements.
+
+Returns CEO/NEO compensation, pay vs performance metrics, governance indicators,
+and performance measures extracted from XBRL-tagged proxy filings.
+
+Examples:
+- Apple proxy: identifier="AAPL"
+- Microsoft proxy: identifier="MSFT"
+- Older proxy: identifier="AAPL", filing_index=1""",
+    params={
+        "identifier": {
+            "type": "string",
+            "description": "Company ticker, CIK, or name"
+        },
+        "filing_index": {
+            "type": "integer",
+            "description": "Which proxy filing to use (0=latest, 1=previous, etc.)",
+            "default": 0
+        },
+    },
+    required=["identifier"]
+)
+async def edgar_proxy(
+    identifier: str,
+    filing_index: int = 0,
+) -> Any:
+    """Get proxy statement executive compensation and governance data."""
+    try:
+        company = resolve_company(identifier)
+
+        # Get DEF 14A filings
+        filings = company.get_filings(form="DEF 14A")
+        if filings is None or len(filings) == 0:
+            return error(
+                f"No DEF 14A proxy filings found for '{identifier}'",
+                suggestions=[
+                    "This company may not file proxy statements (e.g., foreign private issuers use 20-F)",
+                    "Try edgar_filing with form='DEF 14A' to search more broadly",
+                    "Use edgar_company to verify the company identifier",
+                ],
+                error_code="NO_FILINGS"
+            )
+
+        # Validate filing_index
+        filing_index = max(0, filing_index)
+        if filing_index >= len(filings):
+            return error(
+                f"Only {len(filings)} DEF 14A filings available, but index {filing_index} requested",
+                suggestions=[f"Use filing_index between 0 and {len(filings) - 1}"],
+                error_code="INVALID_ARGUMENTS"
+            )
+
+        filing = filings[filing_index]
+        proxy = filing.obj()
+
+        # Build base result
+        result: dict[str, Any] = {
+            "company": proxy.company_name or company.name,
+            "cik": proxy.cik,
+            "form": proxy.form,
+            "filing_date": proxy.filing_date,
+            "fiscal_year_end": proxy.fiscal_year_end,
+            "has_xbrl": proxy.has_xbrl,
+        }
+
+        # If no XBRL, return partial result with note
+        if not proxy.has_xbrl:
+            result["note"] = (
+                "No XBRL data available. Executive compensation data requires XBRL "
+                "(not available for smaller reporting companies, emerging growth companies, "
+                "SPACs, or registered investment companies)."
+            )
+            return success(result, next_steps=[
+                "Use edgar_filing to read the proxy statement text directly",
+                "Try a different company that is a large accelerated filer",
+            ])
+
+        # CEO compensation
+        if proxy.peo_name or proxy.peo_total_comp:
+            result["ceo"] = {
+                "name": proxy.peo_name,
+                "total_comp": _decimal_to_float(proxy.peo_total_comp),
+                "actually_paid": _decimal_to_float(proxy.peo_actually_paid_comp),
+            }
+
+        # NEO average compensation
+        if proxy.neo_avg_total_comp or proxy.neo_avg_actually_paid_comp:
+            result["neo_average"] = {
+                "total_comp": _decimal_to_float(proxy.neo_avg_total_comp),
+                "actually_paid": _decimal_to_float(proxy.neo_avg_actually_paid_comp),
+            }
+
+        # Pay vs performance metrics
+        pvp: dict[str, Any] = {}
+        if proxy.total_shareholder_return is not None:
+            pvp["company_tsr"] = _decimal_to_float(proxy.total_shareholder_return)
+        if proxy.peer_group_tsr is not None:
+            pvp["peer_tsr"] = _decimal_to_float(proxy.peer_group_tsr)
+        if proxy.net_income is not None:
+            pvp["net_income"] = _decimal_to_float(proxy.net_income)
+        if proxy.company_selected_measure:
+            pvp["company_measure"] = proxy.company_selected_measure
+        if proxy.company_selected_measure_value is not None:
+            pvp["company_measure_value"] = _decimal_to_float(proxy.company_selected_measure_value)
+        if pvp:
+            result["pay_vs_performance"] = pvp
+
+        # Governance
+        if proxy.insider_trading_policy_adopted is not None:
+            result["governance"] = {
+                "insider_trading_policy": proxy.insider_trading_policy_adopted,
+            }
+
+        # Performance measures
+        if proxy.performance_measures:
+            result["performance_measures"] = proxy.performance_measures
+
+        # Compensation history (multi-year DataFrame)
+        comp_df = proxy.executive_compensation
+        if comp_df is not None and not comp_df.empty:
+            result["compensation_history"] = _df_to_records(comp_df, limit=10)
+
+        # Named executives (if dimensional data available)
+        if proxy.has_individual_executive_data:
+            neos = proxy.named_executives
+            if neos:
+                result["named_executives"] = [
+                    {
+                        "name": neo.name,
+                        "role": neo.role,
+                        "member_id": neo.member_id,
+                        "fiscal_year_end": neo.fiscal_year_end,
+                    }
+                    for neo in neos[:20]
+                ]
+
+        next_steps = [
+            "Use edgar_company for full company profile and financials",
+            "Use edgar_filing with form='DEF 14A' to read proxy statement text",
+            "Use edgar_compare to compare executive compensation across companies",
+        ]
+
+        return success(result, next_steps=next_steps)
+
+    except Exception as e:
+        logger.exception("Error in edgar_proxy")
+        classified = classify_error(e)
+        return error(
+            classified["message"],
+            suggestions=classified["suggestions"],
+            error_code=classified["error_code"]
+        )

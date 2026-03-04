@@ -34,6 +34,7 @@ class TestToolRegistry:
         from edgar.ai.mcp.tools import filing  # noqa: F401
         from edgar.ai.mcp.tools import compare  # noqa: F401
         from edgar.ai.mcp.tools import ownership  # noqa: F401
+        from edgar.ai.mcp.tools import proxy  # noqa: F401
 
         expected_tools = {
             "edgar_company",
@@ -41,6 +42,7 @@ class TestToolRegistry:
             "edgar_filing",
             "edgar_compare",
             "edgar_ownership",
+            "edgar_proxy",
         }
         assert expected_tools.issubset(set(TOOLS.keys()))
 
