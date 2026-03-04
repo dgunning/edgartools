@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [5.20.2] - 2026-03-03
+## [5.20.2] - 2026-03-04
 
 ### Fixed
 
+- **Homepage Fallback When SGML Unavailable** — When the SEC returns empty content for a filing's full submission text (.txt), `Filing.sgml()` now falls back to the filing's homepage index page instead of raising an exception. The fallback provides document attachments with valid URLs for `html()`, `xml()`, `xbrl()`, and `text()`. Network errors and permanent errors (identity, not-found) still propagate correctly ([#674](https://github.com/dgunning/edgartools/issues/674))
+
 - **Cache Bypass Actually Works Now** — The 5.20.1 retry-with-cache-bypass for empty SGML responses was silently ineffective because `httpxthrottlecache` reuses a single client instance, ignoring `bypass_cache` after initial creation. The retry now uses a direct `httpx` request that completely bypasses the cache layer ([#672](https://github.com/dgunning/edgartools/issues/672))
+
+- **BDC Pipe-Separated Investment Identifiers** — Recent BDC filings (e.g., Blue Owl) use pipe-separated format (`Company | Type | Issuer Category`) for investment identifiers instead of comma-separated. The parser now handles both formats
 
 ## [5.20.1] - 2026-03-03
 
