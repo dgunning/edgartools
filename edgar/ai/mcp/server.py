@@ -140,10 +140,17 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
         )]
 
     except Exception as e:
+        from edgar.ai.mcp.tools.base import classify_error, error as error_response
         logger.error("Error in tool %s: %s", name, e, exc_info=True)
+        classified = classify_error(e)
+        resp = error_response(
+            classified["message"],
+            suggestions=classified["suggestions"],
+            error_code=classified["error_code"]
+        )
         return [TextContent(
             type="text",
-            text=f'{{"success": false, "error": "{str(e)}"}}'
+            text=resp.to_json()
         )]
 
 
