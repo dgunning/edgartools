@@ -87,6 +87,27 @@ patterns:
       fund.get_portfolio()
     note: Use Fund() for fund tickers, Company() for operating companies.
 
+  - name: Error Recovery Chain
+    when: A lookup or data extraction fails
+    code: |
+      from edgar import Company, find
+      # Progressive fallback for company lookup:
+      company = Company("AAPL")              # 1. Ticker (fastest)
+      company = Company(320193)              # 2. CIK (always works if valid)
+      results = find("Apple Inc")            # 3. Name search (fuzzy)
+      company = results[0]
+
+      # If financials fail, fall back:
+      financials = company.get_financials()  # 1. Structured XBRL
+      if not financials:
+          facts = company.get_facts()        # 2. Entity facts (broader)
+    note: |
+      MCP error_code maps to recovery action:
+      COMPANY_NOT_FOUND → try CIK or find()
+      NO_FACTS_DATA → use filing.obj() instead
+      NO_XBRL_DATA → use filing.document() for text
+      RATE_LIMIT → wait 10+ minutes, never retry immediately
+
   - name: Financial Statements
     when: User asks about revenue, balance sheet, cash flow, metrics
     code: |

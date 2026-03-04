@@ -41,7 +41,11 @@ patterns:
       from edgar import Fund
       fund = Fund("VFINX")
       df = fund.get_portfolio()
-    note: 13F = institutional holdings. NPORT = fund portfolios. Use Fund class for funds.
+    note: |
+      13F = institutional holdings. NPORT = fund portfolios. Use Fund class for funds.
+      NPORT variants: NPORT-P (public quarterly), NPORT-EX (exhibit only).
+      For money market funds → use form='N-MFP3' (see funds skill).
+      For BDC portfolios → use edgar.bdc module (see funds skill, BDC patterns).
 
 avoid:
   - pattern: "for f in get_filings(form='13F-HR'): f.obj().holdings"

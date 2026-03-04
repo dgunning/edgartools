@@ -58,6 +58,54 @@ sharp_edges:
           process(filing.obj())
     detection_pattern: 'for\s+\w+\s+in\s+.*get_filings\(\)\s*:'
 
+  - id: rate-limit-recovery
+    summary: SEC 429 = wait 10+ min, never retry immediately
+    severity: critical
+    solution: |
+      # If you get RATE_LIMIT error_code from MCP or HTTP 429:
+      # 1. Wait at least 10 minutes before retrying
+      # 2. Reduce request frequency (max 10 req/sec)
+      # 3. Ensure EDGAR_IDENTITY is set (anonymous = stricter limits)
+      import time
+      time.sleep(600)  # 10 minutes minimum
+    detection_pattern: '429|rate.?limit|too many requests'
+
+  - id: identity-not-set
+    summary: Set EDGAR_IDENTITY before any SEC requests
+    severity: critical
+    solution: |
+      from edgar import set_identity
+      set_identity("Your Name your@email.com")
+      # Or set env var: EDGAR_IDENTITY="Your Name your@email.com"
+      # Must be set BEFORE any Company(), get_filings(), find() calls
+    detection_pattern: 'IDENTITY_NOT_SET|set_identity|EDGAR_IDENTITY'
+
+  - id: error-code-handling
+    summary: MCP responses include error_code for programmatic branching
+    severity: high
+    solution: |
+      # MCP tool responses include error_code when something fails:
+      # RATE_LIMIT       → wait 10+ min, retry
+      # IDENTITY_NOT_SET → call set_identity() first
+      # COMPANY_NOT_FOUND → try CIK, use find(), or edgar_search
+      # NO_FACTS_DATA    → company may not file XBRL; try filing.obj() instead
+      # NO_XBRL_DATA     → filing has no XBRL; use filing.document()
+      # FILING_NOT_FOUND → check accession number format
+      # NETWORK_TIMEOUT  → retry once after brief wait
+    detection_pattern: 'error_code|RATE_LIMIT|COMPANY_NOT_FOUND|NO_FACTS_DATA'
+
+  - id: company-not-found-recovery
+    summary: Try CIK, use find(), or edgar_search when company lookup fails
+    severity: high
+    solution: |
+      # If Company("NAME") fails, try progressive fallback:
+      from edgar import Company, find
+      company = Company("AAPL")              # 1. Try ticker
+      company = Company(320193)              # 2. Try CIK number
+      results = find("Apple")               # 3. Fuzzy name search
+      company = results[0]                   # Pick best match
+    detection_pattern: 'COMPANY_NOT_FOUND|company.*not found|no.*match'
+
   - id: repr-instead-of-str
     summary: Use str() not repr() for LLM output
     severity: medium

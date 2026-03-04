@@ -16,6 +16,9 @@ delegation_triggers:
   - trigger: "XBRL|facts|concepts|taxonomy|dimensions|us-gaap"
     delegate_to: xbrl
 
+  - trigger: "BDC|business development company|schedule of investments"
+    delegate_to: funds
+
 handoffs:
   - to: financials
     when: Deep financial analysis, multi-period comparison, ratios
@@ -63,6 +66,10 @@ common_combinations:
     skills: [core, reports]
     flow: "get_current_filings(form='8-K') → parse EightK items"
 
+  - name: Fund/BDC Analysis
+    skills: [core, funds]
+    flow: "Fund() or get_bdc_list() → portfolio data → holdings analysis"
+
 boundaries:
   core_handles:
     - Company/entity lookup (find, Company)
@@ -79,3 +86,4 @@ boundaries:
     - 13F holdings analysis → holdings
     - Insider transactions → ownership
     - Raw XBRL access → xbrl
+    - BDC portfolio analysis → funds
