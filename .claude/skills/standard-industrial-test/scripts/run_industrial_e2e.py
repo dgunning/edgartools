@@ -16,7 +16,7 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-# 33-Company Industrial Test List
+# 42-Company Industrial Test List (33 original + 9 new sectors)
 INDUSTRIAL_33 = [
     # MAG7
     'AAPL', 'MSFT', 'GOOG', 'AMZN', 'META', 'NVDA', 'TSLA',
@@ -29,7 +29,13 @@ INDUSTRIAL_33 = [
     # Healthcare/Pharma
     'JNJ', 'UNH', 'LLY', 'PFE',
     # Transportation
-    'UPS', 'FDX', 'BA'
+    'UPS', 'FDX', 'BA',
+    # Insurance
+    'BRK-B', 'MET', 'AIG',
+    # Utilities
+    'NEE', 'DUK', 'SO',
+    # Real Estate
+    'AMT', 'PLD', 'SPG'
 ]
 
 # Sector groupings for reporting
@@ -39,7 +45,10 @@ SECTOR_GROUPS = {
     'Consumer_Staples': ['PG', 'KO', 'PEP', 'WMT', 'COST', 'HSY'],
     'Energy': ['XOM', 'CVX', 'COP', 'SLB', 'PBF'],
     'Healthcare_Pharma': ['JNJ', 'UNH', 'LLY', 'PFE'],
-    'Transportation': ['UPS', 'FDX', 'BA']
+    'Transportation': ['UPS', 'FDX', 'BA'],
+    'Insurance': ['BRK-B', 'MET', 'AIG'],
+    'Utilities': ['NEE', 'DUK', 'SO'],
+    'Real_Estate': ['AMT', 'PLD', 'SPG']
 }
 
 # Reverse lookup: ticker -> sector
