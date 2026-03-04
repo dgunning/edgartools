@@ -335,7 +335,14 @@ Convert statement to pandas DataFrame with optional transformations.
 
 **Returns:** DataFrame with the following columns:
 - **Core columns**: `concept`, `label`, period columns (dates)
-- **Metadata columns** (always included): `balance`, `weight`, `preferred_sign`
+- **Metadata columns** (always included):
+  - `balance` — debit or credit (from XBRL taxonomy)
+  - `weight` — calculation tree weight (+1 or -1)
+  - `preferred_sign` — how the value should be displayed (from presentation linkbase)
+  - `level` — nesting depth in the presentation tree (0=root, 1=section header, 2=line item, etc.)
+  - `abstract` — True if this row is a section header, not a data row
+  - `parent_concept` — calculation tree parent (the metric concept this rolls up to for summation math)
+  - `parent_abstract_concept` — presentation tree parent (the section header this appears under for display hierarchy)
 - **Optional columns**: `dimension`, `unit`, `point_in_time`
 
 **Value Modes:**
@@ -358,9 +365,15 @@ df_presentation = statement.to_dataframe(presentation=True)
 
 # Check metadata
 print(df_raw[['concept', 'balance', 'weight', 'preferred_sign']].head())
+
+# Hierarchy columns — understand parent-child relationships
+print(df_raw[['label', 'level', 'parent_concept', 'parent_abstract_concept']].head(10))
 ```
 
-**See Also:** Issue #463 - XBRL value transformations and metadata columns
+**See Also:**
+- Issue #463 - XBRL value transformations and metadata columns
+- Issue #514 - Parent concept hierarchy columns
+- [Revenue Segment Hierarchy Guide](../guides/extract-statements.md#understanding-statement-hierarchy)
 
 **Returns:** DataFrame with statement data
 

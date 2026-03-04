@@ -97,6 +97,106 @@ print(f"Summary view: {len(df_summary)} rows")
 
 This enhancement works automatically across companies that provide segment data in their XBRL filings, including Microsoft, Apple, Amazon, Google, and many others.
 
+## Understanding Statement Hierarchy
+
+Every financial statement has a tree structure — revenue breaks down into product vs service revenue, operating expenses break down into R&D, SG&A, etc. When you call `to_dataframe()`, EdgarTools includes hierarchy columns that let you navigate these relationships programmatically.
+
+### Hierarchy Columns
+
+The DataFrame returned by `to_dataframe()` includes these columns for understanding structure:
+
+| Column | Description | Example |
+|--------|-------------|---------|
+| `level` | Nesting depth (0=root, 1=section, 2=line item, 3=sub-item) | `2` |
+| `abstract` | True for section headers, False for data rows | `True` |
+| `parent_concept` | Calculation tree parent — the metric this rolls up to | `us-gaap_Revenue` |
+| `parent_abstract_concept` | Presentation tree parent — the section header above | `us-gaap_RevenueAbstract` |
+
+### Example: Apple Revenue Breakdown
+
+```python
+from edgar import Company
+
+company = Company("AAPL")
+filing = company.get_filings(form="10-K").latest()
+xbrl = filing.xbrl()
+
+income = xbrl.statements.income_statement()
+df = income.to_dataframe()
+
+# Show hierarchy for the first 10 rows
+print(df[['label', 'level', 'parent_concept', 'parent_abstract_concept']].head(10))
+```
+
+Output shows the tree structure:
+```
+                              label  level      parent_concept  parent_abstract_concept
+0                Net sales:      1                 None  us-gaap_RevenueFromCont...
+1                  Products        2  us-gaap_Revenue...  us-gaap_RevenueFromCont...
+2                  Services        2  us-gaap_Revenue...  us-gaap_RevenueFromCont...
+3           Total net sales        1                 None  us-gaap_RevenueFromCont...
+4          Cost of sales:          1                 None  us-gaap_CostOfGoodsSold...
+5                  Products        2  us-gaap_CostOf...   us-gaap_CostOfGoodsSold...
+6                  Services        2  us-gaap_CostOf...   us-gaap_CostOfGoodsSold...
+```
+
+### Building a Parent-Child Tree
+
+Use the `level` column to reconstruct the hierarchy:
+
+```python
+# Get all non-abstract rows with their hierarchy info
+data_rows = df[~df['abstract']]
+hierarchy = data_rows[['label', 'level', 'parent_concept', 'parent_abstract_concept']].copy()
+
+# Show indented tree
+for _, row in hierarchy.iterrows():
+    indent = '  ' * row['level']
+    print(f"{indent}{row['label']}")
+```
+
+### Extracting Revenue Segments
+
+To get just the revenue breakdown with parent-child relationships:
+
+```python
+# Find revenue-related rows using parent_concept
+revenue_concept = 'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax'
+
+# All rows whose parent is Revenue (these are the segments)
+segments = df[df['parent_concept'] == revenue_concept]
+print(segments[['label', 'level']].to_string(index=False))
+```
+
+### When to Use `query()` vs `Statement`
+
+| Goal | Use | Why |
+|------|-----|-----|
+| Hierarchical data with parent-child | `statement.to_dataframe()` | Preserves presentation tree structure |
+| Flat fact extraction with filters | `xbrl.query()` | Efficient for specific concept lookups |
+| Revenue segment tree | `statement.to_dataframe()` | Has `level`, `parent_concept` columns |
+| Specific dimensional breakdowns | `statement.to_dataframe(view="detailed")` | Includes all dimensional data |
+| Cross-filing fact comparison | `xbrl.query()` | Works across periods and filings |
+
+### Controlling Detail Level with `view`
+
+The `view` parameter controls how much dimensional data appears:
+
+```python
+# Standard: face presentation only (what you see in SEC Viewer)
+df_standard = income.to_dataframe(view="standard")
+
+# Detailed: includes all dimensional breakdowns (segments, geography, etc.)
+df_detailed = income.to_dataframe(view="detailed")
+
+# Summary: non-dimensional totals only
+df_summary = income.to_dataframe(view="summary")
+```
+
+See the [Dimension Handling Guide](../xbrl/concepts/dimension-handling.md) for more on controlling dimensional data.
+
+---
+
 ## Standardized Financial Data Access
 
 EdgarTools automatically standardizes XBRL data across companies, mapping ~2,000 different XBRL tags to 95 consistent concepts. This means you can compare Apple's revenue with Tesla's revenue using the same API, even though they use different underlying XBRL concepts.
