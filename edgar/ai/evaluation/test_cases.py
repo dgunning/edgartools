@@ -849,6 +849,515 @@ print(str(risk_factors)[:2000])
         expected_in_answer=["Alphabet", "risk"],
         max_tool_calls=4,
     ),
+    # -------------------------------------------------------------------------
+    # FUND CASES (TC026-TC030)
+    # -------------------------------------------------------------------------
+    SECAnalysisTestCase(
+        id="TC026",
+        task="Look up Vanguard 500 Index Fund by its ticker VFINX and get its name.",
+        expected_patterns=[
+            r"Fund\(['\"]VFINX['\"]\)",  # Uses Fund("VFINX")
+            r"\.name|\.ticker",  # Accesses name or ticker
+        ],
+        forbidden_patterns=[
+            r"Company\(",  # Should use Fund, not Company
+        ],
+        max_tokens=300,
+        difficulty="easy",
+        category="lookup",
+        description="Basic fund lookup using Fund class",
+        reference_code="""
+from edgar import Fund
+fund = Fund("VFINX")
+print(f"Name: {fund.name}, Ticker: {fund.ticker}")
+""",
+        tags=["fund", "basic", "lookup"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["Vanguard", "500"],
+        max_tool_calls=2,
+    ),
+    SECAnalysisTestCase(
+        id="TC027",
+        task="Get the portfolio holdings from a Vanguard fund's most recent NPORT filing.",
+        expected_patterns=[
+            r"Fund\(|Company\(",  # Fund or company lookup
+            r"form=['\"]NPORT|N-PORT",  # NPORT filing filter
+            r"\.obj\(\)",  # Parses the filing
+        ],
+        forbidden_patterns=[
+            r"for\s+.*\s+in\s+.*get_filings\(\):",  # No unbounded iteration
+        ],
+        max_tokens=700,
+        difficulty="medium",
+        category="holdings",
+        description="Fund portfolio from NPORT filing",
+        reference_code="""
+from edgar import Fund
+fund = Fund("VFINX")
+filing = fund.get_filings(form="NPORT-P")[0]
+nport = filing.obj()
+print(nport)
+""",
+        tags=["fund", "nport", "portfolio", "holdings"],
+        constitution_goals=["correctness", "routing", "efficiency"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["portfolio"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC028",
+        task="Get portfolio data from a money market fund's N-MFP3 filing.",
+        expected_patterns=[
+            r"form=['\"]N-MFP|N-MFP3",  # N-MFP filing
+            r"\.obj\(\)",  # Parses the filing
+            r"portfolio_data\(\)|portfolio",  # Accesses portfolio
+        ],
+        forbidden_patterns=[],
+        max_tokens=700,
+        difficulty="medium",
+        category="holdings",
+        description="Money market fund portfolio from N-MFP3",
+        reference_code="""
+from edgar import Company
+company = Company("0000036405")  # Vanguard money market fund CIK
+filing = company.get_filings(form="N-MFP3")[0]
+mmf = filing.obj()
+portfolio = mmf.portfolio_data()
+print(portfolio)
+""",
+        tags=["fund", "mmf", "n-mfp3", "portfolio"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["portfolio"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC029",
+        task="Search for funds with 'Vanguard' in the name.",
+        expected_patterns=[
+            r"find_funds\(['\"]Vanguard['\"]\)",  # Uses find_funds
+        ],
+        forbidden_patterns=[
+            r"Company\(",  # Should use find_funds, not Company
+        ],
+        max_tokens=400,
+        difficulty="medium",
+        category="lookup",
+        description="Search funds by name using find_funds",
+        reference_code="""
+from edgar import find_funds
+results = find_funds("Vanguard")
+for fund in results[:10]:
+    print(fund)
+""",
+        tags=["fund", "search", "find_funds"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["Vanguard"],
+        max_tool_calls=2,
+    ),
+    SECAnalysisTestCase(
+        id="TC030",
+        task="Look up a fund by ticker, get its filings, and extract portfolio data from its latest NPORT filing.",
+        expected_patterns=[
+            r"Fund\(",  # Fund lookup
+            r"get_filings\(",  # Get filings
+            r"\.obj\(\)",  # Parse filing
+            r"NPORT|N-PORT",  # NPORT form type
+        ],
+        forbidden_patterns=[
+            r"for\s+.*\s+in\s+.*get_filings\(\):",  # No unbounded iteration
+        ],
+        max_tokens=1200,
+        difficulty="hard",
+        category="multi-step",
+        description="Multi-step fund analysis pipeline",
+        reference_code="""
+from edgar import Fund
+fund = Fund("VFINX")
+print(f"Fund: {fund.name}")
+filing = fund.get_filings(form="NPORT-P")[0]
+nport = filing.obj()
+print(nport)
+""",
+        tags=["fund", "multi-step", "nport", "pipeline"],
+        constitution_goals=["correctness", "routing", "efficiency"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["fund"],
+        max_tool_calls=4,
+    ),
+    # -------------------------------------------------------------------------
+    # REPORT SECTION CASES (TC031-TC035)
+    # -------------------------------------------------------------------------
+    SECAnalysisTestCase(
+        id="TC031",
+        task="Get the items listed in Tesla's most recent 10-Q filing.",
+        expected_patterns=[
+            r"Company\(['\"]TSLA['\"]\)",  # Company lookup
+            r"form=['\"]10-Q['\"]",  # 10-Q filter
+            r"\[0\]|\.latest\(\)|\.head\(",  # Gets first filing
+            r"\.obj\(\)|TenQ",  # Parses 10-Q
+        ],
+        forbidden_patterns=[],
+        max_tokens=500,
+        difficulty="easy",
+        category="reports",
+        description="10-Q items extraction",
+        reference_code="""
+from edgar import Company
+company = Company("TSLA")
+filing = company.get_filings(form="10-Q")[0]
+tenq = filing.obj()
+print(f"Items: {tenq.items}")
+print(tenq)
+""",
+        tags=["reports", "10-Q", "items"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["Tesla", "10-Q"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC032",
+        task="Get Item 2.02 (Results of Operations) from a recent 8-K filing for Microsoft.",
+        expected_patterns=[
+            r"Company\(['\"]MSFT['\"]\)",  # Company lookup
+            r"form=['\"]8-K['\"]",  # 8-K filter
+            r"\.obj\(\)|EightK",  # Parses 8-K
+            r"item_2_02|Item 2\.02|results.*operations",  # Item 2.02 access
+        ],
+        forbidden_patterns=[],
+        max_tokens=700,
+        difficulty="medium",
+        category="reports",
+        description="8-K specific item extraction",
+        reference_code="""
+from edgar import Company
+company = Company("MSFT")
+filings_8k = company.get_filings(form="8-K").head(10)
+for filing in filings_8k:
+    eightk = filing.obj()
+    if hasattr(eightk, 'item_2_02') and eightk.item_2_02:
+        print(f"Item 2.02: {str(eightk.item_2_02)[:500]}")
+        break
+""",
+        tags=["reports", "8-K", "item-2.02", "earnings"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["Microsoft", "8-K"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC033",
+        task="Get auditor information from Apple's latest 10-K filing.",
+        expected_patterns=[
+            r"Company\(['\"]AAPL['\"]\)",  # Company lookup
+            r"form=['\"]10-K['\"]",  # 10-K filter
+            r"\.obj\(\)|TenK",  # Parses 10-K
+            r"\.auditor|auditor",  # Auditor access
+        ],
+        forbidden_patterns=[],
+        max_tokens=600,
+        difficulty="medium",
+        category="reports",
+        description="Auditor information from 10-K",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+filing = company.get_filings(form="10-K")[0]
+tenk = filing.obj()
+auditor = tenk.auditor
+print(f"Auditor: {auditor}")
+""",
+        tags=["reports", "10-K", "auditor"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["Apple", "auditor"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC034",
+        task="Get the list of subsidiaries from Apple's latest 10-K filing.",
+        expected_patterns=[
+            r"Company\(['\"]AAPL['\"]\)",  # Company lookup
+            r"form=['\"]10-K['\"]",  # 10-K filter
+            r"\.obj\(\)|TenK",  # Parses 10-K
+            r"\.subsidiaries|subsidiaries",  # Subsidiaries access
+        ],
+        forbidden_patterns=[],
+        max_tokens=600,
+        difficulty="medium",
+        category="reports",
+        description="Subsidiary list from 10-K",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+filing = company.get_filings(form="10-K")[0]
+tenk = filing.obj()
+subsidiaries = tenk.subsidiaries
+print(subsidiaries)
+""",
+        tags=["reports", "10-K", "subsidiaries", "exhibit-21"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["Apple", "subsidiar"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC035",
+        task="Compare the risk factors sections from Apple's and Microsoft's latest 10-K filings.",
+        expected_patterns=[
+            r"AAPL|Apple",  # Apple
+            r"MSFT|Microsoft",  # Microsoft
+            r"form=['\"]10-K['\"]",  # 10-K filter
+            r"\.obj\(\)|TenK",  # Parses 10-K
+            r"risk_factors|item_1a|Item 1A",  # Risk factors access
+        ],
+        forbidden_patterns=[],
+        max_tokens=1500,
+        difficulty="hard",
+        category="reports",
+        description="Cross-company risk factors comparison",
+        reference_code="""
+from edgar import Company
+
+for ticker in ["AAPL", "MSFT"]:
+    company = Company(ticker)
+    filing = company.get_filings(form="10-K")[0]
+    tenk = filing.obj()
+    risk_factors = tenk.risk_factors
+    print(f"{ticker} Risk Factors:")
+    print(str(risk_factors)[:2000])
+    print()
+""",
+        tags=["comparison", "10-K", "risk-factors", "two-company"],
+        constitution_goals=["correctness", "routing", "token_economy"],
+        expected_tools=["edgar_compare"],
+        expected_in_answer=["Apple", "Microsoft", "risk"],
+        max_tool_calls=4,
+    ),
+    # -------------------------------------------------------------------------
+    # ERROR/EDGE CASE PATTERNS (TC036-TC040)
+    # -------------------------------------------------------------------------
+    SECAnalysisTestCase(
+        id="TC036",
+        task="Safely check if a company has any 10-K filings before accessing the first one.",
+        expected_patterns=[
+            r"Company\(",  # Company lookup
+            r"get_filings\(.*form=['\"]10-K['\"]",  # Filtered by form
+            r"len\(|if\s+.*filings|if\s+len",  # Safety check before access
+        ],
+        forbidden_patterns=[
+            r"get_filings\(\)\s*\[0\]",  # No unguarded access on unfiltered filings
+        ],
+        max_tokens=400,
+        difficulty="easy",
+        category="general",
+        description="Safe filing existence check before access",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+filings = company.get_filings(form="10-K")
+if len(filings) > 0:
+    filing = filings[0]
+    print(f"Latest 10-K: {filing.filing_date}")
+else:
+    print("No 10-K filings found")
+""",
+        tags=["safety", "guard", "edge-case"],
+        constitution_goals=["correctness", "sharp_edges"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["10-K"],
+        max_tool_calls=2,
+    ),
+    SECAnalysisTestCase(
+        id="TC037",
+        task="Get a company's financials with a fallback message if the data is not available.",
+        expected_patterns=[
+            r"Company\(",  # Company lookup
+            r"get_financials\(\)|get_facts\(\)",  # Financials access
+            r"try|except|if\s+.*is\s+None|if\s+.*not\s+None|if\s+\w+:",  # Error handling
+        ],
+        forbidden_patterns=[],
+        max_tokens=600,
+        difficulty="medium",
+        category="general",
+        description="Financials with error fallback",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+try:
+    financials = company.get_financials()
+    income = financials.income_statement()
+    print(income)
+except Exception as e:
+    print(f"Could not retrieve financials: {e}")
+""",
+        tags=["safety", "error-handling", "financials"],
+        constitution_goals=["correctness", "sharp_edges"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["financials"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC038",
+        task="Get the 5 most recent 10-K filings for Apple safely using .head() to limit results.",
+        expected_patterns=[
+            r"Company\(['\"]AAPL['\"]\)",  # Company lookup
+            r"get_filings\(.*form=['\"]10-K['\"]",  # Filtered by form
+            r"\.head\(5\)|\[:5\]",  # Bounded access
+        ],
+        forbidden_patterns=[
+            r"list\(.*get_filings",  # No list() materialization
+            r"for\s+.*\s+in\s+.*get_filings\(\):",  # No unbounded iteration
+        ],
+        max_tokens=500,
+        difficulty="medium",
+        category="general",
+        description="Bounded filing iteration with .head()",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+filings = company.get_filings(form="10-K").head(5)
+for filing in filings:
+    print(f"{filing.filing_date}: {filing.form}")
+""",
+        tags=["safety", "bounded", "head", "efficiency"],
+        constitution_goals=["correctness", "efficiency", "sharp_edges"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["Apple", "10-K"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC039",
+        task="Get the latest 10-K filing date for Apple, Microsoft, and Google, handling errors for each company.",
+        expected_patterns=[
+            r"AAPL|Apple",  # Apple
+            r"MSFT|Microsoft",  # Microsoft
+            r"GOOGL?|Google|Alphabet",  # Google
+            r"try|except",  # Error handling in loop
+            r"for\s+.*\s+in\s+\[",  # Loop over list of tickers
+        ],
+        forbidden_patterns=[],
+        max_tokens=1200,
+        difficulty="hard",
+        category="general",
+        description="Multi-company analysis with per-company error recovery",
+        reference_code="""
+from edgar import Company
+
+for ticker in ["AAPL", "MSFT", "GOOGL"]:
+    try:
+        company = Company(ticker)
+        filing = company.get_filings(form="10-K")[0]
+        print(f"{ticker}: {filing.filing_date}")
+    except Exception as e:
+        print(f"{ticker}: Error - {e}")
+        continue
+""",
+        tags=["safety", "error-recovery", "multi-company", "loop"],
+        constitution_goals=["correctness", "sharp_edges", "token_economy"],
+        expected_tools=["edgar_compare"],
+        expected_in_answer=["Apple", "Microsoft"],
+        max_tool_calls=4,
+    ),
+    SECAnalysisTestCase(
+        id="TC040",
+        task="Check if Apple's latest 10-K filing has XBRL data before parsing it.",
+        expected_patterns=[
+            r"Company\(['\"]AAPL['\"]\)",  # Company lookup
+            r"form=['\"]10-K['\"]",  # 10-K filter
+            r"\.xbrl\(\)",  # XBRL parsing
+            r"if\s+|try|hasattr|is\s+not\s+None",  # Guard check
+        ],
+        forbidden_patterns=[],
+        max_tokens=600,
+        difficulty="medium",
+        category="general",
+        description="XBRL availability check before parsing",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+filing = company.get_filings(form="10-K")[0]
+try:
+    xbrl = filing.xbrl()
+    if xbrl is not None:
+        print(f"XBRL available with {len(xbrl.facts)} facts")
+    else:
+        print("No XBRL data")
+except Exception as e:
+    print(f"XBRL parsing failed: {e}")
+""",
+        tags=["safety", "xbrl", "guard", "validation"],
+        constitution_goals=["correctness", "sharp_edges"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["XBRL"],
+        max_tool_calls=3,
+    ),
+    # -------------------------------------------------------------------------
+    # XBRL & OWNERSHIP (TC041-TC042)
+    # -------------------------------------------------------------------------
+    SECAnalysisTestCase(
+        id="TC041",
+        task="Query specific XBRL facts for revenue from Apple's latest 10-K filing.",
+        expected_patterns=[
+            r"Company\(['\"]AAPL['\"]\)",  # Company lookup
+            r"form=['\"]10-K['\"]",  # 10-K filter
+            r"\.xbrl\(\)",  # XBRL parsing
+            r"\.facts|query\(|by_concept\(",  # Fact querying
+        ],
+        forbidden_patterns=[],
+        max_tokens=800,
+        difficulty="medium",
+        category="financial",
+        description="Low-level XBRL fact query for revenue",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+filing = company.get_filings(form="10-K")[0]
+xbrl = filing.xbrl()
+revenue = xbrl.facts.query().by_concept("Revenue").to_dataframe()
+print(revenue)
+""",
+        tags=["xbrl", "facts", "query", "revenue"],
+        constitution_goals=["correctness", "routing"],
+        expected_tools=["edgar_company"],
+        expected_in_answer=["revenue"],
+        max_tool_calls=3,
+    ),
+    SECAnalysisTestCase(
+        id="TC042",
+        task="Get Schedule 13D beneficial ownership filing data for a company, including reporting persons.",
+        expected_patterns=[
+            r"form=['\"]SC 13D|SCHEDULE 13D|13D",  # Schedule 13D filter
+            r"\.obj\(\)",  # Parses filing
+            r"reporting_persons|beneficial|ownership",  # Reporting persons access
+        ],
+        forbidden_patterns=[
+            r"for\s+.*\s+in\s+.*get_filings\(\):",  # No unbounded iteration
+        ],
+        max_tokens=1200,
+        difficulty="hard",
+        category="ownership",
+        description="Schedule 13D beneficial ownership analysis",
+        reference_code="""
+from edgar import Company
+company = Company("AAPL")
+filings = company.get_filings(form="SC 13D").head(5)
+if len(filings) > 0:
+    filing = filings[0]
+    schedule = filing.obj()
+    print(f"Issuer: {schedule.issuer_info}")
+    for person in schedule.reporting_persons:
+        print(f"  {person.name}: {person.percent_of_class}%")
+""",
+        tags=["ownership", "schedule-13d", "beneficial-ownership"],
+        constitution_goals=["correctness", "routing", "sharp_edges"],
+        expected_tools=["edgar_ownership"],
+        expected_in_answer=["13D"],
+        max_tool_calls=4,
+    ),
 ]
 
 
