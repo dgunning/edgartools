@@ -12,7 +12,7 @@ from edgar.attachments import Attachment, Attachments, get_document_type
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
-from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, SECHTMLResponseError, parse_document
+from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, parse_document
 from edgar.sgml.tools import is_xml
 
 
@@ -424,29 +424,19 @@ class FilingSGML:
         # Read content once
         content = read_content_as_string(source)
 
-        try:
-            # Parse header and documents
-            header, documents = parse_submission_text(content)
-        except (ValueError, SECHTMLResponseError) as e:
-            # If the cached response was empty/truncated/error, retry once bypassing cache.
-            # This handles the case where a transient SEC outage returned an empty or error
-            # response that was cached permanently by the cache-forever rule.
-            is_url = isinstance(source, str) and source.startswith("http")
-            is_transient = (
-                isinstance(e, SECHTMLResponseError)
-                or "empty or truncated" in str(e)
-                or "error page" in str(e)
-                or "request was denied" in str(e)
+        # If content is empty/truncated and source is a URL, the cache may have stored
+        # a bad response from a transient SEC outage. Retry with a direct fetch.
+        is_url = isinstance(source, str) and source.startswith("http")
+        if is_url and len(content.strip()) < 50:
+            import logging
+            logging.getLogger(__name__).info(
+                f"Cached response is empty/truncated ({len(content)} bytes) for {source}, "
+                f"retrying with direct fetch"
             )
-            if is_url and is_transient:
-                import logging
-                logging.getLogger(__name__).info(
-                    f"Retrying fetch with cache bypass for {source} due to: {e}"
-                )
-                content = _fetch_url_directly(source)
-                header, documents = parse_submission_text(content)
-            else:
-                raise
+            content = _fetch_url_directly(source)
+
+        # Parse header and documents
+        header, documents = parse_submission_text(content)
 
         # Create FilingSGML instance
         return cls(header=header, documents=documents)
