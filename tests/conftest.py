@@ -91,6 +91,23 @@ def pytest_configure(config):
         )
 
 
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_call(item):
+    """Skip network tests gracefully when SEC returns transient empty responses."""
+    from edgar.sgml.sgml_parser import SECHTMLResponseError
+    outcome = yield
+    excinfo = outcome.excinfo
+    if excinfo is not None:
+        exc_type, exc_value, _ = excinfo
+        is_network = "network" in {m.name for m in item.iter_markers()}
+        is_transient = (
+            (exc_type is ValueError and "empty or truncated response" in str(exc_value))
+            or exc_type is SECHTMLResponseError
+        )
+        if is_network and is_transient:
+            pytest.skip(f"SEC returned transient empty response: {exc_value}")
+
+
 def pytest_collection_modifyitems(items):
     """
     Automatically add markers to tests based on file patterns.
