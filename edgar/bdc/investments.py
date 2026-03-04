@@ -222,7 +222,16 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     company_name = identifier
     investment_type = "Unknown"
 
-    # Try standard format first (investment type at end)
+    # Try pipe-separated format first (e.g., "Company | Type | Issuer Category")
+    # This format is used by some BDCs like Blue Owl in recent filings
+    if ' | ' in identifier:
+        pipe_parts = [p.strip() for p in identifier.split(' | ')]
+        if len(pipe_parts) >= 2:
+            company_name = pipe_parts[0]
+            investment_type = pipe_parts[1]
+            return identifier, company_name, investment_type
+
+    # Try standard comma-separated format (investment type at end)
     for inv_type in INVESTMENT_TYPES:
         # Look for the investment type at the end, preceded by comma
         # Support optional numeric suffixes like "1", "2", "1.1", "2.1"
