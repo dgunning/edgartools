@@ -653,6 +653,55 @@ class Company(Entity):
             return tenq_filing.financials
         return None
 
+    def get_standardized_financials(self):
+        """
+        Get standardized cross-company comparable metrics from the latest 10-K.
+
+        Uses the deterministic concept mapping pipeline (TreeParser + FactsSearcher)
+        to extract 24 standardized financial metrics from XBRL data.
+
+        Returns:
+            StandardizedFinancials object, or None if no 10-K filing is available
+
+        Example::
+
+            sf = Company("AAPL").get_standardized_financials()
+            sf.revenue              # Revenue as float
+            sf['Revenue']           # StandardizedMetric with provenance
+            sf.to_dataframe()       # DataFrame with all 24 metrics
+        """
+        from edgar.standardized_financials import extract_standardized_financials
+        filing = self.get_filings(form='10-K', amendments=False, trigger_full_load=False).latest()
+        if filing is None:
+            return None
+        ticker = self.get_ticker()
+        if not ticker:
+            return None
+        return extract_standardized_financials(filing, ticker)
+
+    def get_quarterly_standardized_financials(self):
+        """
+        Get standardized cross-company comparable metrics from the latest 10-Q.
+
+        Same interface as get_standardized_financials() but for quarterly data.
+
+        Returns:
+            StandardizedFinancials object, or None if no 10-Q filing is available
+
+        Example::
+
+            sf = Company("AAPL").get_quarterly_standardized_financials()
+            sf.revenue
+        """
+        from edgar.standardized_financials import extract_standardized_financials
+        filing = self.get_filings(form='10-Q', amendments=False, trigger_full_load=False).latest()
+        if filing is None:
+            return None
+        ticker = self.get_ticker()
+        if not ticker:
+            return None
+        return extract_standardized_financials(filing, ticker)
+
     @property
     def fiscal_year_end(self):
         """Get the fiscal year end date for this company."""
