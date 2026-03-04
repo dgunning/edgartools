@@ -91,6 +91,7 @@ def _import_tools():
     from edgar.ai.mcp.tools import trends  # noqa: F401
     from edgar.ai.mcp.tools import screen  # noqa: F401
     from edgar.ai.mcp.tools import text_search  # noqa: F401
+    from edgar.ai.mcp.tools import fund  # noqa: F401
 
 
 # Create the server
