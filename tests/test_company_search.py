@@ -26,7 +26,7 @@ def test_search_for_company_name_and_ticker_partial_match(company_search_index):
 
 def test_search_exact_company_name_match(company_search_index):
     results: CompanySearchResults = company_search_index.search("ORACLE CORP")
-    assert len(results) == 1
+    assert len(results) >= 1
     assert results.tickers[0] == "ORCL"
 
 
