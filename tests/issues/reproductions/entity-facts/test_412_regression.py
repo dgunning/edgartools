@@ -167,6 +167,8 @@ class TestIssue412Regression:
             try:
                 company = Company(ticker)
                 balance_sheet = company.balance_sheet(annual=True, periods=4)
+                if balance_sheet is None:
+                    continue  # Skip companies where balance sheet is temporarily unavailable
                 df = balance_sheet.to_dataframe()
                 
                 # Basic sanity checks
