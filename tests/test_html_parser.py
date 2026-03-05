@@ -168,51 +168,6 @@ class TestSectionDetection:
 class TestTableParsing:
     """Test advanced table parsing."""
 
-    @pytest.mark.skip(reason="Not ready yet")
-    def test_financial_table(self):
-        """Test parsing financial tables."""
-        html = """
-        <table>
-            <caption>Income Statement</caption>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>2023</th>
-                    <th>2022</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Revenue</td>
-                    <td>$100,000</td>
-                    <td>$90,000</td>
-                </tr>
-                <tr>
-                    <td>Expenses</td>
-                    <td>$60,000</td>
-                    <td>$55,000</td>
-                </tr>
-                <tr>
-                    <td>Net Income</td>
-                    <td>$40,000</td>
-                    <td>$35,000</td>
-                </tr>
-            </tbody>
-        </table>
-        """
-        
-        config = ParserConfig(table_extraction=True)
-        doc = parse_html(html, config)
-        
-        table = doc.tables[0]
-        assert table.caption == "Income Statement"
-        assert table.table_type == TableType.FINANCIAL
-        
-        # Test table data extraction
-        df = table.to_dataframe()
-        assert df is not None
-        assert df.shape == (3, 3)
-    
     def test_nested_tables(self):
         """Test parsing nested tables."""
         html = """

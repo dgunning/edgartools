@@ -14,7 +14,7 @@ import pytest
 from edgar import Company
 
 
-@pytest.mark.vcr
+@pytest.mark.vcr("shared_tsm_ifrs_concept_discovery.yaml")
 class TestIFRSConceptDiscovery:
     """Verify that IFRS filers can use the standardization layer."""
 

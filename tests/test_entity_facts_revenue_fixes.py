@@ -127,15 +127,20 @@ class TestFinancialsRevenueExtraction:
             assert revenue is not None, "TSLA financials revenue should not be None"
             assert revenue > 0, "TSLA financials revenue should be positive"
 
-    @pytest.mark.vcr
-    @pytest.mark.parametrize("company_fixture", [
-        "aapl_company",
-        "msft_company",
-    ])
-    def test_financials_concept_based_search(self, company_fixture, request):
-        """Test that concept-based search works for financials"""
-        company = request.getfixturevalue(company_fixture)
-        financials = company.get_financials()
+    @pytest.mark.vcr("shared_aapl_financials.yaml")
+    def test_financials_concept_based_search_aapl(self, aapl_company):
+        """Test that concept-based search works for AAPL financials"""
+        financials = aapl_company.get_financials()
+
+        if financials:
+            revenue = financials.get_revenue()
+            assert revenue is not None
+            assert revenue > 0
+
+    @pytest.mark.vcr("shared_msft_financials.yaml")
+    def test_financials_concept_based_search_msft(self, msft_company):
+        """Test that concept-based search works for MSFT financials"""
+        financials = msft_company.get_financials()
 
         if financials:
             revenue = financials.get_revenue()
@@ -146,30 +151,41 @@ class TestFinancialsRevenueExtraction:
 class TestEntityFactsFinancialsConsistency:
     """Test that EntityFacts and Financials return consistent values."""
 
-    @pytest.mark.vcr
-    @pytest.mark.parametrize("company_fixture", [
-        "aapl_company",
-        "msft_company",
-    ])
-    def test_facts_and_financials_revenue_match(self, company_fixture, request):
+    @pytest.mark.vcr("shared_aapl_financials.yaml")
+    def test_facts_and_financials_revenue_match_aapl(self, aapl_company):
         """
         Test that get_facts().get_revenue() and get_financials().get_revenue()
-        return the same annual value.
+        return the same annual value for AAPL.
         """
-        company = request.getfixturevalue(company_fixture)
-
-        facts_revenue = company.get_facts().get_revenue(annual=True)
-        financials = company.get_financials()
+        facts_revenue = aapl_company.get_facts().get_revenue(annual=True)
+        financials = aapl_company.get_financials()
 
         if financials:
             financials_revenue = financials.get_revenue()
 
-            # Both should return values
             assert facts_revenue is not None
             assert financials_revenue is not None
 
-            # They should be very close (within 1%)
-            # Small differences can occur due to restatements
+            diff_pct = abs(facts_revenue - financials_revenue) / facts_revenue * 100
+            assert diff_pct < 1.0, \
+                f"Facts revenue (${facts_revenue/1e9:.2f}B) and Financials revenue " \
+                f"(${financials_revenue/1e9:.2f}B) differ by {diff_pct:.2f}%"
+
+    @pytest.mark.vcr("shared_msft_financials.yaml")
+    def test_facts_and_financials_revenue_match_msft(self, msft_company):
+        """
+        Test that get_facts().get_revenue() and get_financials().get_revenue()
+        return the same annual value for MSFT.
+        """
+        facts_revenue = msft_company.get_facts().get_revenue(annual=True)
+        financials = msft_company.get_financials()
+
+        if financials:
+            financials_revenue = financials.get_revenue()
+
+            assert facts_revenue is not None
+            assert financials_revenue is not None
+
             diff_pct = abs(facts_revenue - financials_revenue) / facts_revenue * 100
             assert diff_pct < 1.0, \
                 f"Facts revenue (${facts_revenue/1e9:.2f}B) and Financials revenue " \
@@ -190,18 +206,21 @@ class TestAmendedFilingFiltering:
             assert form == "10-K", f"Expected '10-K', got '{form}'"
             assert "/A" not in form, "Should not return amended filing"
 
-    @pytest.mark.vcr
-    @pytest.mark.parametrize("company_fixture", [
-        "aapl_company",
-        "msft_company",
-    ])
-    def test_latest_tenk_has_financials(self, company_fixture, request):
-        """Test that latest_tenk (non-amended) has valid financials"""
-        company = request.getfixturevalue(company_fixture)
-        tenk = company.latest_tenk
+    @pytest.mark.vcr("shared_aapl_financials.yaml")
+    def test_latest_tenk_has_financials_aapl(self, aapl_company):
+        """Test that AAPL latest_tenk (non-amended) has valid financials"""
+        tenk = aapl_company.latest_tenk
 
         if tenk:
-            # Non-amended 10-K should have financials
+            financials = tenk.financials
+            assert financials is not None, "Non-amended 10-K should have financials"
+
+    @pytest.mark.vcr("shared_msft_financials.yaml")
+    def test_latest_tenk_has_financials_msft(self, msft_company):
+        """Test that MSFT latest_tenk (non-amended) has valid financials"""
+        tenk = msft_company.latest_tenk
+
+        if tenk:
             financials = tenk.financials
             assert financials is not None, "Non-amended 10-K should have financials"
 

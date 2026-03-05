@@ -15,7 +15,7 @@ from rich import print
 
 from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_number
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
-    filing_date_to_year_quarters, get_filing_by_accession, fetch_daily_filing_index
+    filing_date_to_year_quarters, get_filing_by_accession
 from edgar.company_reports import TenK
 from edgar.core import default_page_size
 from edgar.entity import Company
@@ -24,11 +24,6 @@ from edgar._filings import read_index_file
 pd.options.display.max_colwidth = 200
 
 
-@pytest.mark.skip('Need to figure why daily indexes are failing')
-@pytest.mark.network
-def test_fetch_daily_filing_index():
-    index_data = fetch_daily_filing_index('2025-11-14')
-    assert index_data
 
 @pytest.mark.fast
 def test_read_fixed_width_index_for_daily_file():
