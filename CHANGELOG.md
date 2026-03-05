@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.21.0] - 2026-03-05
+
+### Added
+
+- **MCP Streamable HTTP Transport** — The MCP server now supports remote deployment via Streamable HTTP transport in addition to stdio. Start with `edgartools-mcp --transport streamable-http --port 8000` for team servers, registry listings, and containerized deployments. Clients connect with a simple URL instead of launching a subprocess. stdio remains the default and is unchanged ([2aa48f71](https://github.com/dgunning/edgartools/commit/2aa48f71))
+
+- **edgar_proxy MCP Tool** — New tool for DEF 14A proxy statement data including executive compensation and pay-vs-performance ([2a39871b](https://github.com/dgunning/edgartools/commit/2a39871b))
+
+- **edgar_fund MCP Tool** — New tool for fund, ETF, BDC, and money market fund data with actions for lookup, search, portfolio, and more ([a531baa8](https://github.com/dgunning/edgartools/commit/a531baa8))
+
+- **MCP Analysis Prompts** — Added fund_analysis, filing_comparison, and activist_tracking pre-built analysis workflows ([6e446997](https://github.com/dgunning/edgartools/commit/6e446997))
+
+- **Structured Error Classification in MCP** — Tool errors are now classified with error codes, user-friendly messages, and actionable suggestions ([3a65e37a](https://github.com/dgunning/edgartools/commit/3a65e37a))
+
+- **AI Skills Expansion** — Added error recovery patterns, BDC/MMF coverage, and statement hierarchy documentation to AI skills ([291f679c](https://github.com/dgunning/edgartools/commit/291f679c))
+
+### Fixed
+
+- **Recent IPO Tickers Not Resolving** — `Company(ticker)` now falls back to the live SEC `company_tickers.json` when a ticker is missing from the bundled parquet data. The live data is fetched at most once per session and cached, so existing tickers still resolve instantly with no network call ([#676](https://github.com/dgunning/edgartools/issues/676)) ([8caca1a3](https://github.com/dgunning/edgartools/commit/8caca1a3))
+
+- **Refreshed Bundled Ticker Data** — Updated `company_tickers.parquet` from 10,532 to 10,652 tickers, adding 302 new tickers including recent IPOs ([e7e2076c](https://github.com/dgunning/edgartools/commit/e7e2076c))
+
+- **MCP Runtime Bugs** — Fixed issues across proxy, ownership, company, and prompts tools including None proxy handling, Decimal(0) falsiness, and missing tool registrations ([78c83d4c](https://github.com/dgunning/edgartools/commit/78c83d4c), [59c1c4f3](https://github.com/dgunning/edgartools/commit/59c1c4f3), [883a4d1a](https://github.com/dgunning/edgartools/commit/883a4d1a))
+
+- **None balance_sheet Guard** — Protected against None balance_sheet in issue 412 regression tests ([e7dde317](https://github.com/dgunning/edgartools/commit/e7dde317))
+
+- **README Images on PyPI** — Switched to absolute URLs so images render correctly on PyPI ([7f1d3eb7](https://github.com/dgunning/edgartools/commit/7f1d3eb7))
+
+### Changed
+
+- **Test Suite Consolidation** — Deleted 18 redundant test files and reduced 6,200 lines. Added VCR cassettes for 17 metadata tests. CI matrix reduced from 12 to 6 jobs ([474179f9](https://github.com/dgunning/edgartools/commit/474179f9), [85cd6db7](https://github.com/dgunning/edgartools/commit/85cd6db7))
+
+- **MCP Documentation** — Updated docs for all 11 tools and 7 prompts, added HTTP transport setup guide ([5cc4fea1](https://github.com/dgunning/edgartools/commit/5cc4fea1))
+
 ## [5.20.2] - 2026-03-04
 
 ### Fixed
