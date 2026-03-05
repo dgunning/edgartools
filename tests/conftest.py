@@ -132,6 +132,19 @@ def pytest_collection_modifyitems(items):
         'test_10q', 'test_10k', 'test_fast', 'test_cross_reference',
         'test_issue', 'test_bug', 'test_revenue', 'test_net_income', 'test_sga',
         'test_has_html', 'test_periodtype', 'test_fund_reference',
+        # Additional fast patterns (no network calls)
+        'test_cost_of_revenue', 'test_datamule', 'test_earnings',
+        'test_is_individual', 'test_ncen', 'test_ncsr', 'test_nmfp',
+        'test_rendered_statement', 'test_skill_diagnostics', 'test_synonym',
+        'test_unit_handling', 'test_unit_compatibility', 'test_tesla_net_income',
+        'test_notes_extraction', 'test_page_breaks', 'test_paths',
+        'test_text', 'test_textsearch', 'test_series_resolution',
+        'test_ix_header', 'test_ix_hidden', 'test_headers',
+        'test_feat004', 'test_feat005', 'test_filter_filings',
+        'test_fund_wrapper', 'test_evaluation_offline',
+        'test_config', 'test_core', 'test_datatools',
+        'test_auditor', 'test_beneficial_ownership', 'test_subsidiaries',
+        'test_enhanced_standardization',
     ]
 
     # Files that need network (fetch from SEC)
@@ -142,10 +155,16 @@ def pytest_collection_modifyitems(items):
         'test_proxy', 'test_effect', 'test_formc', 'test_formd', 'test_form144',
         'test_muni', 'test_npx', 'test_ticker', 'test_datasearch',
         'test_httprequests', 'test_attachments', 'test_local_storage',
-        'test_saving', 'test_ratelimit', 'test_storage', 'test_ai',
+        'test_storage', 'test_ai',
         'test_mcp', 'test_etf', 'test_multi_entity', 'test_paper',
         'test_harness_selectors', 'test_read_filing', 'test_form_upload',
         'test_current', 'test_xbrl_stitching',
+        # Additional network patterns
+        'test_abs_ee', 'test_cc_runner', 'test_constitution',
+        'test_filer_category', 'test_judge', 'test_skill_effectiveness',
+        'test_ten_d', 'test_ttm', 'test_form3', 'test_form4',
+        'test_forty_f', 'test_bdc', 'test_edgar', 'test_include_dimensions',
+        'test_standardized_concepts',
     ]
 
     for item in items:
@@ -173,6 +192,9 @@ def pytest_collection_modifyitems(items):
         elif any(pattern in test_file for pattern in FAST_PATTERNS):
             item.add_marker(pytest.mark.fast)
             logger.debug(f"Auto-marked fast test: {item.nodeid}")
+        else:
+            # Warn about tests that don't match any pattern — they won't run in CI
+            logger.warning(f"Test has no marker and matches no auto-marking pattern: {item.nodeid}")
 
 
 # Session-scoped company fixtures for performance optimization
