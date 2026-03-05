@@ -65,6 +65,8 @@ dynamic = ["version"]
 ai = [
     "mcp>=1.12.3",          # Model Context Protocol
     "tiktoken>=0.10.0",     # Token counting for OpenAI models
+    "starlette>=0.36.0",    # ASGI framework for HTTP transport
+    "uvicorn>=0.27.0",      # ASGI server for HTTP transport
 ]
 
 ai-dev = [

@@ -79,6 +79,44 @@ docker run -i edgartools-mcp
 
 The community also maintains Docker images -- see [hackerdogs/edgartools-mcp](https://hub.docker.com/r/hackerdogs/edgartools-mcp) on Docker Hub for a ready-to-use container with config templates for multiple MCP clients.
 
+#### HTTP transport (remote / team deployment)
+
+For shared servers, remote deployment, or registry-listed instances, run with Streamable HTTP transport instead of stdio:
+
+```bash
+edgartools-mcp --transport streamable-http --port 8000
+```
+
+This starts the server on `http://0.0.0.0:8000/mcp`. Clients connect with a URL instead of launching a subprocess:
+
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "url": "http://your-server:8000/mcp"
+    }
+  }
+}
+```
+
+CLI flags:
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--transport` | `stdio` | `stdio` or `streamable-http` |
+| `--host` | `0.0.0.0` | Bind address for HTTP server |
+| `--port` | `8000` | Listen port for HTTP server |
+
+Docker with HTTP transport:
+
+```dockerfile
+FROM python:3.12-slim
+RUN pip install "edgartools[ai]"
+ENV EDGAR_IDENTITY="Your Name your.email@example.com"
+ENTRYPOINT ["edgartools-mcp", "--transport", "streamable-http"]
+EXPOSE 8000
+```
+
 Replace `Your Name your.email@example.com` with your actual name and email. The SEC requires this to identify API users.
 
 **Verify**

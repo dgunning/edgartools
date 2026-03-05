@@ -45,7 +45,19 @@ ENTRYPOINT ["python", "-m", "edgar.ai"]
 
 Docker is ideal for server deployments, CI/CD pipelines, and teams that want a consistent, isolated runtime.
 
-All methods start the MCP server listening on stdin/stdout. The server is stateless -- it makes SEC API calls on demand and holds no persistent data, which makes it straightforward to run centrally for a team.
+All methods start the MCP server using stdio transport by default. The server is stateless -- it makes SEC API calls on demand and holds no persistent data, which makes it straightforward to run centrally for a team.
+
+### Option 5: HTTP Transport (Remote / Team Deployment)
+```bash
+edgartools-mcp --transport streamable-http --port 8000
+```
+
+This starts the server on `http://0.0.0.0:8000/mcp` using the MCP Streamable HTTP transport. Use this for remote deployments, team servers, or registry-listed instances.
+
+**CLI flags:**
+- `--transport stdio` (default) or `--transport streamable-http`
+- `--host 0.0.0.0` (default) — bind address
+- `--port 8000` (default) — listen port
 
 ## Client Configuration
 
@@ -133,6 +145,21 @@ Configuration file location:
 2. Restart Claude Desktop
 3. Look for the MCP server indicator (🔨) in the bottom-right corner of the chat input
 4. Try asking: "Research Apple Inc with financials"
+
+**Configuration for Remote HTTP Server:**
+
+If the server is running with `--transport streamable-http`:
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+Replace `localhost:8000` with your server's host and port for remote deployments.
 
 ### Cline (VS Code Extension)
 

@@ -24,13 +24,14 @@ Tools:
 - edgar_proxy: Proxy statement (DEF 14A) executive compensation and governance
 
 Usage:
-    python -m edgar.ai.mcp        # Via module
+    python -m edgar.ai            # Via module
     edgartools-mcp                # Via console script
 """
 
 import asyncio
 import logging
 import os
+import sys
 from typing import Any
 
 from mcp import Resource, Tool
@@ -346,41 +347,122 @@ def _get_tools_doc() -> str:
     return "".join(doc_parts)
 
 
-def main():
+def _parse_args(argv: list[str] | None = None):
+    """Parse command-line arguments."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="EdgarTools MCP Server")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http"],
+        default="stdio",
+        help="Transport type (default: stdio)",
+    )
+    parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Host to bind HTTP server (default: 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port for HTTP server (default: 8000)",
+    )
+    parser.add_argument(
+        "--test", "-t",
+        action="store_true",
+        help="Test server configuration and exit",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None):
     """Main entry point for MCP server."""
+    args = _parse_args(argv)
+
+    if args.test:
+        sys.exit(0 if test_server() else 1)
+
     try:
-        # Get package version for server version
         from edgar.__about__ import __version__
 
         # Configure EDGAR identity from environment
         setup_edgar_identity()
 
-        async def run_server():
-            """Run the async MCP server."""
-            logger.info(f"Starting EdgarTools MCP Server v{__version__}")
-
-            # Use stdio transport
-            async with stdio_server() as (read_stream, write_stream):
-                await app.run(
-                    read_stream,
-                    write_stream,
-                    InitializationOptions(
-                        server_name="edgartools",
-                        server_version=__version__,
-                        capabilities=app.get_capabilities(
-                            notification_options=NotificationOptions(),
-                            experimental_capabilities={}
-                        )
-                    )
-                )
-
-        asyncio.run(run_server())
+        if args.transport == "streamable-http":
+            _run_http(args.host, args.port, __version__)
+        else:
+            _run_stdio(__version__)
 
     except KeyboardInterrupt:
         logger.info("Server stopped by user")
     except Exception as e:
         logger.error(f"Server error: {e}", exc_info=True)
         raise
+
+
+def _run_stdio(version: str):
+    """Run the server with stdio transport."""
+
+    async def run_server():
+        logger.info(f"Starting EdgarTools MCP Server v{version} (stdio)")
+        async with stdio_server() as (read_stream, write_stream):
+            await app.run(
+                read_stream,
+                write_stream,
+                InitializationOptions(
+                    server_name="edgartools",
+                    server_version=version,
+                    capabilities=app.get_capabilities(
+                        notification_options=NotificationOptions(),
+                        experimental_capabilities={},
+                    ),
+                ),
+            )
+
+    asyncio.run(run_server())
+
+
+def _run_http(host: str, port: int, version: str):
+    """Run the server with Streamable HTTP transport."""
+    import contextlib
+
+    import uvicorn
+    from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+    from starlette.applications import Starlette
+    from starlette.routing import Route
+
+    # Set version on the Server so StreamableHTTPSessionManager picks it up
+    # when it builds InitializationOptions internally (no app.run() call in HTTP mode)
+    app.version = version
+
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        json_response=True,
+        stateless=True,
+    )
+
+    # Wrap handle_request in an ASGI class so Starlette's Route treats it
+    # as an ASGI app (not a request-response function)
+    class _MCPEndpoint:
+        async def __call__(self, scope, receive, send):
+            await session_manager.handle_request(scope, receive, send)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(_app):
+        async with session_manager.run():
+            logger.info(
+                f"EdgarTools MCP Server v{version} running on http://{host}:{port}/mcp"
+            )
+            yield
+
+    starlette_app = Starlette(
+        routes=[Route("/mcp", endpoint=_MCPEndpoint())],
+        lifespan=lifespan,
+    )
+
+    uvicorn.run(starlette_app, host=host, port=port)
 
 
 def test_server():
@@ -447,10 +529,4 @@ def test_server():
 
 
 if __name__ == "__main__":
-    import sys
-
-    # Check for --test flag
-    if "--test" in sys.argv or "-t" in sys.argv:
-        sys.exit(0 if test_server() else 1)
-    else:
-        main()
+    main()
