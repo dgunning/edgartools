@@ -15,7 +15,6 @@ from edgar import Company
 class TestEntityFactsAnnualParameter:
     """Test the annual parameter behavior in EntityFacts methods."""
 
-    @pytest.mark.vcr
     def test_get_revenue_defaults_to_annual(self, tsla_company):
         """Test that get_revenue() defaults to annual=True"""
         facts = tsla_company.get_facts()
@@ -26,7 +25,6 @@ class TestEntityFactsAnnualParameter:
         assert revenue > 90_000_000_000  # At least $90B
         assert revenue < 110_000_000_000  # Less than $110B
 
-    @pytest.mark.vcr
     def test_get_revenue_with_annual_false(self, tsla_company):
         """Test that get_revenue(annual=False) returns most recent"""
         facts = tsla_company.get_facts()
@@ -39,7 +37,6 @@ class TestEntityFactsAnnualParameter:
         # They might be different if most recent is quarterly
         # Just verify both return valid values
 
-    @pytest.mark.vcr
     def test_get_revenue_with_explicit_period(self, tsla_company):
         """Test that explicit period parameter works"""
         facts = tsla_company.get_facts()
@@ -49,7 +46,6 @@ class TestEntityFactsAnnualParameter:
         assert revenue_fy is not None
         assert revenue_fy > 90_000_000_000
 
-    @pytest.mark.vcr
     def test_annual_parameter_consistency_across_methods(self, aapl_company):
         """Test that annual parameter works consistently across all methods"""
         facts = aapl_company.get_facts()
@@ -80,7 +76,6 @@ class TestEntityFactsAnnualParameter:
 class TestEntityFactsRevenueExtraction:
     """Test concept-based revenue extraction fixes."""
 
-    @pytest.mark.vcr
     def test_tsla_revenue_not_none(self, tsla_company):
         """
         Regression test: TSLA get_revenue() was returning None due to abstract
@@ -92,7 +87,6 @@ class TestEntityFactsRevenueExtraction:
         assert revenue is not None, "TSLA revenue should not be None"
         assert revenue > 0, "TSLA revenue should be positive"
 
-    @pytest.mark.vcr
     @pytest.mark.parametrize("company_fixture,min_revenue_billions", [
         ("aapl_company", 300),  # Apple > $300B
         ("msft_company", 200),  # Microsoft > $200B
@@ -113,7 +107,6 @@ class TestEntityFactsRevenueExtraction:
 class TestFinancialsRevenueExtraction:
     """Test concept-based revenue extraction in Financials class."""
 
-    @pytest.mark.vcr
     def test_tsla_financials_revenue_not_none(self, tsla_company):
         """
         Regression test: TSLA get_financials().get_revenue() was returning None
@@ -127,7 +120,6 @@ class TestFinancialsRevenueExtraction:
             assert revenue is not None, "TSLA financials revenue should not be None"
             assert revenue > 0, "TSLA financials revenue should be positive"
 
-    @pytest.mark.vcr("shared_aapl_financials.yaml")
     def test_financials_concept_based_search_aapl(self, aapl_company):
         """Test that concept-based search works for AAPL financials"""
         financials = aapl_company.get_financials()
@@ -137,7 +129,6 @@ class TestFinancialsRevenueExtraction:
             assert revenue is not None
             assert revenue > 0
 
-    @pytest.mark.vcr("shared_msft_financials.yaml")
     def test_financials_concept_based_search_msft(self, msft_company):
         """Test that concept-based search works for MSFT financials"""
         financials = msft_company.get_financials()
@@ -151,7 +142,6 @@ class TestFinancialsRevenueExtraction:
 class TestEntityFactsFinancialsConsistency:
     """Test that EntityFacts and Financials return consistent values."""
 
-    @pytest.mark.vcr("shared_aapl_financials.yaml")
     def test_facts_and_financials_revenue_match_aapl(self, aapl_company):
         """
         Test that get_facts().get_revenue() and get_financials().get_revenue()
@@ -171,7 +161,6 @@ class TestEntityFactsFinancialsConsistency:
                 f"Facts revenue (${facts_revenue/1e9:.2f}B) and Financials revenue " \
                 f"(${financials_revenue/1e9:.2f}B) differ by {diff_pct:.2f}%"
 
-    @pytest.mark.vcr("shared_msft_financials.yaml")
     def test_facts_and_financials_revenue_match_msft(self, msft_company):
         """
         Test that get_facts().get_revenue() and get_financials().get_revenue()
@@ -195,7 +184,6 @@ class TestEntityFactsFinancialsConsistency:
 class TestAmendedFilingFiltering:
     """Test that amended filings are filtered from latest_tenk/latest_tenq."""
 
-    @pytest.mark.vcr
     def test_latest_tenk_excludes_amendments(self, tsla_company):
         """Test that latest_tenk does not return 10-K/A amended filings"""
         tenk = tsla_company.latest_tenk
@@ -206,7 +194,6 @@ class TestAmendedFilingFiltering:
             assert form == "10-K", f"Expected '10-K', got '{form}'"
             assert "/A" not in form, "Should not return amended filing"
 
-    @pytest.mark.vcr("shared_aapl_financials.yaml")
     def test_latest_tenk_has_financials_aapl(self, aapl_company):
         """Test that AAPL latest_tenk (non-amended) has valid financials"""
         tenk = aapl_company.latest_tenk
@@ -215,7 +202,6 @@ class TestAmendedFilingFiltering:
             financials = tenk.financials
             assert financials is not None, "Non-amended 10-K should have financials"
 
-    @pytest.mark.vcr("shared_msft_financials.yaml")
     def test_latest_tenk_has_financials_msft(self, msft_company):
         """Test that MSFT latest_tenk (non-amended) has valid financials"""
         tenk = msft_company.latest_tenk
@@ -228,7 +214,6 @@ class TestAmendedFilingFiltering:
 class TestGetAnnualFact:
     """Test the new get_annual_fact() helper method."""
 
-    @pytest.mark.vcr
     def test_get_annual_fact_returns_fy_only(self, aapl_company):
         """Test that get_annual_fact() only returns FY (annual) facts"""
         facts = aapl_company.get_facts()
@@ -243,7 +228,6 @@ class TestGetAnnualFact:
             assert annual_fact.numeric_value is not None
             assert annual_fact.numeric_value > 0
 
-    @pytest.mark.vcr
     def test_get_annual_fact_with_specific_year(self, aapl_company):
         """Test that get_annual_fact() can filter by fiscal year"""
         facts = aapl_company.get_facts()

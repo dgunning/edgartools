@@ -1,0 +1,69 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0000350001.json
+  response:
+    body:
+      string: '{"cik":"0000350001","entityType":"other","sic":"6189","sicDescription":"Asset-Backed
+        Securities","ownerOrg":null,"insiderTransactionForOwnerExists":0,"insiderTransactionForIssuerExists":0,"name":"Company
+        Name Three `!#$(),:;=.-;\\|@/{}&''\\WA\\","tickers":[],"exchanges":[],"ein":"111111111","lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":"1231","stateOfIncorporation":"VA","stateOfIncorporationDescription":"VA","addresses":{"mailing":{"street1":"1000
+        KING STREET","street2":"1600 KING STREET","city":"LAKE RIDGE","stateOrCountry":"WA","zipCode":"22191","stateOrCountryDescription":"WA","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":"ABCD
+        LN MARYLAND","street2":"1234567890123456789012345678901234567890","city":"12345678901234567890","stateOrCountry":"VA","zipCode":"12344","stateOrCountryDescription":"VA","isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":"(703)
+        555-1212","flags":"","formerNames":[{"name":"ALLEN TEST CO & REL 8-6 DR INC","from":"2003-10-15T00:00:00.000Z","to":"2003-10-15T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO & REL 8-6 INC","from":"2003-07-28T00:00:00.000Z","to":"2003-09-04T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO & REL 8-5 INC","from":"2003-05-06T00:00:00.000Z","to":"2003-05-22T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO & RELEASE 8-3 INC","from":"2001-07-30T00:00:00.000Z","to":"2003-04-07T00:00:00.000Z"},{"name":"ALLEN
+        TEST & SNOW REMOVAL CO INC","from":"2003-03-13T00:00:00.000Z","to":"2003-03-12T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO & RELEASE 8-2 INC","from":"2002-06-24T00:00:00.000Z","to":"2002-07-01T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC & POINT RELEASE TEST 10/08/01","from":"2001-10-29T00:00:00.000Z","to":"2002-01-22T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC & CUT OVER TEST 9/23/01","from":"2001-10-01T00:00:00.000Z","to":"2001-10-09T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC   CUT OVER TEST 9/23/01","from":"2001-09-24T00:00:00.000Z","to":"2001-09-26T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC  & CUT OVER TEST 8/18/01","from":"2001-09-10T00:00:00.000Z","to":"2001-09-24T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC  & CUT OVER TEST","from":"2001-07-30T00:00:00.000Z","to":"2001-08-06T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC  & CUT OVER TEST 8/4/01","from":"2001-08-10T00:00:00.000Z","to":"2001-08-01T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC TEST TIME PROD","from":"1995-01-01T00:00:00.000Z","to":"2001-07-30T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC/1","from":"1995-06-10T00:00:00.000Z","to":"1999-08-02T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO INC","from":"1997-12-04T00:00:00.000Z","to":"1998-01-26T00:00:00.000Z"},{"name":"ALLEN
+        TEST","from":"1997-08-25T00:00:00.000Z","to":"1997-08-25T00:00:00.000Z"},{"name":"ALLEN
+        TEST CO","from":"1994-12-05T00:00:00.000Z","to":"1997-02-09T00:00:00.000Z"},{"name":"TEST
+        EDGAR NAME CHANGE REL 40","from":"1994-10-11T00:00:00.000Z","to":"1994-10-11T00:00:00.000Z"},{"name":"ALLEN
+        TEST LTD","from":"1994-02-11T00:00:00.000Z","to":"1994-06-13T00:00:00.000Z"}],"filings":{"recent":{"accessionNumber":[],"filingDate":[],"reportDate":[],"acceptanceDateTime":[],"act":[],"form":[],"fileNumber":[],"filmNumber":[],"items":[],"core_type":[],"size":[],"isXBRL":[],"isInlineXBRL":[],"primaryDocument":[],"primaryDocDescription":[]},"files":[]}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=0, no-cache, no-store
+      content-length:
+      - '3376'
+      content-type:
+      - application/json
+      date:
+      - Thu, 05 Mar 2026 11:20:24 GMT
+      expires:
+      - Thu, 05 Mar 2026 11:20:24 GMT
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-apigw-id:
+      - Zv0G0GtkIAMETmw=
+      x-amzn-requestid:
+      - a3745360-a94d-48df-b597-7365f718ff64
+      x-amzn-trace-id:
+      - Root=1-69a966f8-70c08b1a1feccf4937499ce1
+    status:
+      code: 200
+      message: null
+version: 1

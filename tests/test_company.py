@@ -20,6 +20,7 @@ def get_test_company(company_identifier):
 
 
 @pytest.mark.network
+@pytest.mark.vcr
 def test_company_repr():
     company = get_test_company("NVDA")
     print()
@@ -32,6 +33,7 @@ def test_company_repr():
 
 
 @pytest.mark.network
+@pytest.mark.vcr
 def test_company_to_context_detail_levels():
     """Test Company.to_context() with different detail levels (Issue #546)."""
     company = get_test_company("AAPL")
@@ -68,6 +70,7 @@ def test_company_to_context_detail_levels():
 
 
 @pytest.mark.network
+@pytest.mark.vcr
 def test_ticker_display_for_company_with_multiple_tickers():
     company = get_test_company(310522)
     assert "FNMA" in company.tickers
@@ -76,12 +79,14 @@ def test_ticker_display_for_company_with_multiple_tickers():
 
 
 @pytest.mark.network
+@pytest.mark.vcr
 def test_no_company_for_cik():
     company = Company(-1)
     assert company.not_found
 
 
 @pytest.mark.network
+@pytest.mark.vcr
 def test_get_company_with_no_filings():
     company = Company("0000350001")
     assert company.get_filings() is not None
@@ -131,6 +136,7 @@ def test_get_cik_lookup_data():
 
 
 @pytest.mark.network
+@pytest.mark.vcr
 def test_company_filings_filter_by_date(expe_company):
     filings = expe_company.get_filings()
     filtered_filings = filings.filter(filing_date="2023-01-04:")

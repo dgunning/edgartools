@@ -1,0 +1,46 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK-000000001.json
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message><Key>submissions/CIK-000000001.json</Key><RequestId>JD15FR9DF9N2TVGZ</RequestId><HostId>2U/fr+OwCH2kb2vNa+jgy5PCPmA/6YfX7yrMePYuJr+UGQ0Q7Ze+10feacVPVd4pvW86t71RHbQ=</HostId></Error>'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=0, no-cache, no-store
+      content-length:
+      - '301'
+      content-type:
+      - application/xml
+      date:
+      - Thu, 05 Mar 2026 11:20:23 GMT
+      expires:
+      - Thu, 05 Mar 2026 11:20:23 GMT
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      x-amz-apigw-id:
+      - Zv0GyFEcIAMEHQg=
+      x-amzn-requestid:
+      - 6fa28bff-8b26-4a3a-8973-6f1b9d3d6d28
+      x-amzn-trace-id:
+      - Root=1-69a966f7-7fc42af4678802e03ad9eee1
+    status:
+      code: 404
+      message: null
+version: 1
