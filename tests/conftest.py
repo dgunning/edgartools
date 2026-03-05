@@ -149,6 +149,7 @@ def pytest_collection_modifyitems(items):
         'test_fund_wrapper', 'test_evaluation_offline',
         'test_config', 'test_core', 'test_datatools',
         'test_auditor', 'test_beneficial_ownership', 'test_subsidiaries',
+        'test_currency', 'test_thirteenf_rendering', 'test_sections_membership',
         'test_standardization',
     ]
 
