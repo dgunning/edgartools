@@ -402,10 +402,42 @@ def find_mutual_fund_cik(ticker):
     return lookup.get(ticker.upper())
 
 
+@lru_cache(maxsize=1)
+def _get_live_company_cik_lookup() -> Optional[dict]:
+    """
+    Fetch the live company_tickers.json from the SEC and build a ticker→CIK dict.
+
+    Called once per session as a fallback when a ticker is missing from the
+    bundled parquet data (e.g. recent IPOs). Returns None on network failure.
+    """
+    try:
+        tickers_json = download_json(build_company_tickers_url())
+        lookup = {}
+        for item in tickers_json.values():
+            ticker = item['ticker'].upper()
+            cik = int(item['cik_str'])
+            lookup[ticker] = cik
+            base = ticker.split('-')[0]
+            if base not in lookup:
+                lookup[base] = cik
+        return lookup
+    except Exception as e:
+        log.debug(f"Failed to fetch live ticker data from SEC: {e}")
+        return None
+
+
 def find_company_cik(ticker):
     lookup = get_company_cik_lookup()
     ticker = ticker.upper().replace('.', '-')
-    return lookup.get(ticker)
+    cik = lookup.get(ticker)
+    if cik is not None:
+        return cik
+
+    # Fallback: try live SEC data for tickers missing from bundled parquet
+    live_lookup = _get_live_company_cik_lookup()
+    if live_lookup is not None:
+        return live_lookup.get(ticker)
+    return None
 
 def find_company_ticker(cik: Union[int, str]) -> Union[str, List[str], None]:
     """
