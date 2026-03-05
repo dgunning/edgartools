@@ -100,64 +100,73 @@ class Orchestrator:
         except Exception as e:
             return self.tree_parser._empty_results(ticker, f"XBRL error: {e}")
         
+        form_type = getattr(filing, 'form', '10-K')
+        filing_date = getattr(filing, 'period_of_report', None)
         fiscal_period = self.tree_parser._get_fiscal_period(filing)
-        
+
         # Layer 1: Tree Parser (static)
         results = self.tree_parser.map_company(ticker, filing)
         self._log_layer_results(ticker, fiscal_period, results, "tree")
-        
+
         # Validate Layer 1 and get gaps (unmapped OR invalid)
-        gaps = self._validate_layer(ticker, results, xbrl)
+        gaps = self._validate_layer(ticker, results, xbrl,
+                                    filing_date=filing_date, form_type=form_type)
         total = len([m for m in results if results[m].source != MappingSource.CONFIG])
         print(f"  Layer 1 (Tree): {total - len(gaps)}/{total} resolved")
-        
+
         # Layer 2: Facts Search (static) - run BEFORE AI
         if gaps and use_facts:
             results = self.facts_searcher.search_gaps(
                 results, ticker, fiscal_period
             )
             self._log_layer_results(ticker, fiscal_period, results, "tree")
-            
+
             # Validate Layer 2 and get gaps
-            gaps = self._validate_layer(ticker, results, xbrl)
+            gaps = self._validate_layer(ticker, results, xbrl,
+                                        filing_date=filing_date, form_type=form_type)
             print(f"  Layer 2 (Facts): {total - len(gaps)}/{total} resolved")
-        
+
         # Layer 3: AI Semantic (dynamic) - run AFTER static methods
         if gaps and use_ai:
             results = self.ai_mapper.map_gaps(
                 results, xbrl, ticker, fiscal_period
             )
             self._log_layer_results(ticker, fiscal_period, results, "ai")
-            
+
             # Validate Layer 3 and get gaps
-            gaps = self._validate_layer(ticker, results, xbrl)
+            gaps = self._validate_layer(ticker, results, xbrl,
+                                        filing_date=filing_date, form_type=form_type)
             print(f"  Layer 3 (AI): {total - len(gaps)}/{total} resolved")
-        
+
         if gaps:
             print(f"  Remaining gaps: {gaps}")
-        
+
         return results
     
     def _validate_layer(
         self,
         ticker: str,
         results: Dict[str, MappingResult],
-        xbrl
+        xbrl,
+        filing_date=None,
+        form_type=None
     ) -> List[str]:
         """
         Validate after a layer and return updated gaps.
-        
+
         A gap is a metric that is:
         - Not mapped, OR
         - Mapped but validation_status == 'invalid'
-        
+
         Invalid mappings are reset so the next layer can retry.
-        
+
         Returns:
             List of metric names that are gaps
         """
         # Run validation on all mappings
-        self.validator.validate_and_update_mappings(ticker, results, xbrl)
+        self.validator.validate_and_update_mappings(
+            ticker, results, xbrl, filing_date=filing_date, form_type=form_type
+        )
         
         # Recalculate gaps including invalid mappings
         gaps = []
@@ -194,42 +203,47 @@ class Orchestrator:
         """
         filing = self._get_filing(ticker, amendments)
         if filing is None:
-            return self.tree_parser._empty_results(ticker, "No filing found"), None
-        
+            return self.tree_parser._empty_results(ticker, "No filing found"), None, None, None
+
         try:
             xbrl = filing.xbrl()
         except Exception as e:
-            return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None
-        
+            return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
+
+        form_type = getattr(filing, 'form', '10-K')
+        filing_date = getattr(filing, 'period_of_report', None)
         fiscal_period = self.tree_parser._get_fiscal_period(filing)
-        
+
         # Layer 1: Tree Parser (static)
         results = self.tree_parser.map_company(ticker, filing)
         self._log_layer_results(ticker, fiscal_period, results, "tree")
-        
+
         # Validate Layer 1 and get gaps
-        gaps = self._validate_layer(ticker, results, xbrl)
+        gaps = self._validate_layer(ticker, results, xbrl,
+                                    filing_date=filing_date, form_type=form_type)
         total = len([m for m in results if results[m].source != MappingSource.CONFIG])
         print(f"  Layer 1 (Tree): {total - len(gaps)}/{total} resolved")
-        
+
         # Layer 2: Facts Search (static) - run BEFORE AI
         if gaps and use_facts:
             results = self.facts_searcher.search_gaps(results, ticker, fiscal_period)
             self._log_layer_results(ticker, fiscal_period, results, "tree")
-            gaps = self._validate_layer(ticker, results, xbrl)
+            gaps = self._validate_layer(ticker, results, xbrl,
+                                        filing_date=filing_date, form_type=form_type)
             print(f"  Layer 2 (Facts): {total - len(gaps)}/{total} resolved")
-        
+
         # Layer 3: AI Semantic (dynamic) - run AFTER static methods
         if gaps and use_ai:
             results = self.ai_mapper.map_gaps(results, xbrl, ticker, fiscal_period)
             self._log_layer_results(ticker, fiscal_period, results, "ai")
-            gaps = self._validate_layer(ticker, results, xbrl)
+            gaps = self._validate_layer(ticker, results, xbrl,
+                                        filing_date=filing_date, form_type=form_type)
             print(f"  Layer 3 (AI): {total - len(gaps)}/{total} resolved")
-        
+
         if gaps:
             print(f"  Remaining gaps: {gaps}")
-        
-        return results, xbrl
+
+        return results, xbrl, filing_date, form_type
     
     def map_companies(
         self,
@@ -253,13 +267,15 @@ class Orchestrator:
         
         all_results = {}
         xbrl_cache = {}  # Cache XBRL objects for validation
-        
+        filing_context_cache = {}  # Cache filing context for validation
+
         for ticker in tickers:
             print(f"\nProcessing {ticker}...")
-            results, xbrl = self._map_company_with_xbrl(ticker, use_ai=use_ai)
+            results, xbrl, filing_date, form_type = self._map_company_with_xbrl(ticker, use_ai=use_ai)
             all_results[ticker] = results
             if xbrl is not None:
                 xbrl_cache[ticker] = xbrl
+            filing_context_cache[ticker] = (filing_date, form_type)
             
             # Print summary
             mapped = sum(1 for r in results.values() if r.is_mapped)
@@ -272,29 +288,35 @@ class Orchestrator:
             print("\n" + "=" * 60)
             print("VALIDATING AGAINST YFINANCE REFERENCE")
             print("=" * 60)
-            self._validate_all(all_results, xbrl_cache)
+            self._validate_all(all_results, xbrl_cache, filing_context_cache)
         
         return all_results
     
     def _validate_all(
-        self, 
+        self,
         results: Dict[str, Dict[str, MappingResult]],
-        xbrl_cache: Dict[str, any] = None
+        xbrl_cache: Dict[str, any] = None,
+        filing_context_cache: Dict[str, tuple] = None
     ):
         """Validate all mappings against yfinance reference.
-        
+
         Uses validate_and_update_mappings to implement the FEEDBACK LOOP:
         mappings that fail validation are marked as INVALID.
         """
         if xbrl_cache is None:
             xbrl_cache = {}
-            
+        if filing_context_cache is None:
+            filing_context_cache = {}
+
         for ticker, metrics in results.items():
             print(f"\n{ticker}:")
             xbrl = xbrl_cache.get(ticker)
-            
+            filing_date, form_type = filing_context_cache.get(ticker, (None, None))
+
             # Use validate_and_update_mappings to mark INVALID mappings
-            validations = self.validator.validate_and_update_mappings(ticker, metrics, xbrl)
+            validations = self.validator.validate_and_update_mappings(
+                ticker, metrics, xbrl, filing_date=filing_date, form_type=form_type
+            )
             self.validation_results[ticker] = validations
             
             matches = 0

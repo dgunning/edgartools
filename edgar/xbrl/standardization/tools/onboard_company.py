@@ -434,7 +434,7 @@ def onboard_company(
     orchestrator = Orchestrator(config=config, snapshot_mode=snapshot_mode)
 
     try:
-        mapping_results, xbrl = orchestrator._map_company_with_xbrl(
+        mapping_results, xbrl, filing_date, form_type = orchestrator._map_company_with_xbrl(
             ticker,
             use_ai=use_ai,
             use_facts=True,
@@ -450,7 +450,8 @@ def onboard_company(
     # The internal _validate_layer calls don't store results on the orchestrator
     # for single-company map_company calls.
     validation_results = orchestrator.validator.validate_and_update_mappings(
-        ticker, mapping_results, xbrl
+        ticker, mapping_results, xbrl,
+        filing_date=filing_date, form_type=form_type
     ) or {}
 
     for metric, mapping in mapping_results.items():
