@@ -151,6 +151,7 @@ def pytest_collection_modifyitems(items):
         'test_auditor', 'test_beneficial_ownership', 'test_subsidiaries',
         'test_currency', 'test_thirteenf_rendering', 'test_sections_membership',
         'test_standardization', 'test_abstract_detection', 'test_xbrl_validation',
+        'test_urls', 'test_toc_filter', 'test_preprocessing',
     ]
 
     # Files that need network (fetch from SEC)
