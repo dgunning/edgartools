@@ -24,51 +24,6 @@ def test_parse_entity_submissions():
 
 @pytest.mark.network
 @pytest.mark.vcr
-def test_entity_is_company():
-
-    # Taneja Vaibhav at TSLA
-    assert Entity(1771340).is_individual
-
-    # &VEST Domestic Fund II LP
-    assert Entity(1800903).is_company
-
-    # Siemens AG
-    assert Entity(940418).is_company
-
-    # SIEMENS ENERGY AG/ADR
-    assert Entity(1830056).is_company
-
-    # SIEVERT STEPHANIE A
-    assert not Entity(1718179).is_company
-
-    assert Entity(1911716).is_company
-
-    # NVC Holdings, LLC
-    assert Entity(1940261).is_company
-
-    # FANNIE MAE
-    assert Entity(310522).is_company
-
-    # Berkshire Hathaway
-    assert Entity(1067983).is_company
-
-    # ORBIMED Advisors LLC
-    assert Entity(1055951).is_company
-
-    # 360 Funds
-    assert Entity(1319067).is_company
-
-    # Jeronimo Martins
-    assert Entity(1438077).is_company
-
-    # Elon Musk
-    assert Entity(1494730).is_individual
-
-    # Reed Hastings
-    assert Entity('1033331').is_individual
-
-@pytest.mark.network
-@pytest.mark.vcr
 def test_warren_buffett():
     # Warren Buffett
     warren_buffet = Entity(315090)

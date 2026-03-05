@@ -186,9 +186,8 @@ class TestIssue513NFLXRevenueDeduplication:
 
                 # Items with same value but different dimensions/labels should both be kept
                 if len(set(str(d) for d in dimensions)) > 1 or len(set(labels)) > 1:
-                    # These should NOT be deduplicated
-                    # The fix ensures dimensional differences are preserved
-                    assert True, "Items with different dimensions are correctly preserved"
+                    # Items with different dimensions/labels should NOT be deduplicated
+                    assert len(items) > 1, "Items with different dimensions should be preserved"
 
     def test_revenue_fact_count_reasonable(self, nflx_2025_q3_10q_filing):
         """Revenue facts should be present and not over-deduplicated"""

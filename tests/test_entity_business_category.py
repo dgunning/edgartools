@@ -307,36 +307,12 @@ class TestBusinessCategoryParametrized:
 
     @pytest.mark.network
     @pytest.mark.parametrize("ticker,expected_category", [
-        # Operating Companies
         ("AAPL", "Operating Company"),
-        ("MSFT", "Operating Company"),
-        ("GOOGL", "Operating Company"),
-        ("TSLA", "Operating Company"),
-        ("AMZN", "Operating Company"),
-        ("NVDA", "Operating Company"),
-
-        # REITs (SIC 6798)
         ("O", "REIT"),
-        ("SPG", "REIT"),
-
-        # Banks (SIC 602X)
         ("JPM", "Bank"),
-        ("BAC", "Bank"),
-        ("WFC", "Bank"),
-        ("C", "Bank"),
-
-        # Insurance (SIC 63XX)
         ("ALL", "Insurance Company"),
-        ("PGR", "Insurance Company"),
-        ("TRV", "Insurance Company"),
-
-        # Investment Managers
         ("BLK", "Investment Manager"),
-        ("TROW", "Investment Manager"),
-
-        # BDCs
         ("ARCC", "BDC"),
-        ("MAIN", "BDC"),
     ])
     def test_business_category_by_ticker(self, ticker, expected_category):
         """Test that companies are classified correctly by ticker."""

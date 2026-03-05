@@ -52,12 +52,7 @@ class TestFootnoteExtractionRegression:
         )
 
         # Call the private method directly - should not raise UnboundLocalError
-        try:
-            parser._extract_footnotes(root)
-            # If we get here, the bug is fixed
-            assert True
-        except UnboundLocalError as e:
-            pytest.fail(f"UnboundLocalError raised: {e}. Bug #488 not fixed.")
+        parser._extract_footnotes(root)
 
     def test_empty_root_element(self):
         """Test that footnote extraction handles empty root elements"""
@@ -78,11 +73,7 @@ class TestFootnoteExtractionRegression:
         )
 
         # Should not raise UnboundLocalError
-        try:
-            parser._extract_footnotes(root)
-            assert True
-        except UnboundLocalError as e:
-            pytest.fail(f"UnboundLocalError raised with empty root: {e}")
+        parser._extract_footnotes(root)
 
     def test_with_footnotelink_elements(self):
         """Test that footnote extraction still works correctly with footnoteLink elements"""

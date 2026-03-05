@@ -1,4 +1,5 @@
 pytest_plugins = ["tests.fixtures.xbrl2_fixtures"]
+import datetime
 from pathlib import Path
 
 import pytest
@@ -36,6 +37,23 @@ def aapl_xbrl_2022():
 def unp_xbrl():
     data_dir = Path("data/xbrl/datafiles/unp")
     return XBRL.from_directory(data_dir)
+
+def test_xbrl_entity_info_and_dei(aapl_xbrl):
+    """Consolidated from test_xbrl.py: DEI entity data, period_of_report, and report type flags."""
+    # Period of report (exact value)
+    assert aapl_xbrl.period_of_report == '2023-09-30'
+
+    # DEI entity info (5 exact values)
+    assert aapl_xbrl.entity_info.get('entity_name') == 'Apple Inc.'
+    assert aapl_xbrl.entity_info.get('identifier') == '320193'
+    assert aapl_xbrl.entity_info.get('reporting_end_date') == datetime.date(2023, 10, 20)
+    assert aapl_xbrl.entity_info.get('fiscal_year') == '2023'
+    assert aapl_xbrl.entity_info.get('fiscal_period') == 'FY'
+
+    # Report type flags
+    assert aapl_xbrl.entity_info.get('annual_report')
+    assert not aapl_xbrl.entity_info.get('quarterly_report')
+
 
 def test_dimensioned_statement(aapl_xbrl):
     statements = aapl_xbrl.statements

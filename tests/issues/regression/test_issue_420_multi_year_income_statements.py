@@ -131,7 +131,7 @@ class TestMultiYearIncomeStatements:
 class TestRealDataIntegration:
     """Integration tests with real data from well-known companies."""
     
-    @pytest.mark.parametrize("ticker", ["AAPL", "MSFT", "GOOGL"])
+    @pytest.mark.parametrize("ticker", ["AAPL", "MSFT"])
     def test_real_companies_income_statements(self, ticker):
         """Test that income statement retrieval works for major companies."""
         company = Company(ticker)

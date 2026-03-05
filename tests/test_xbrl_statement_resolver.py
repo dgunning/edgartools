@@ -137,13 +137,9 @@ def test_custom_namespace_detection(simple_resolver):
     fake_concept = "unp_CondensedConsolidatedStatementsOfIncomeUnauditedAbstract"
     
     # Check if the pattern matches our fake concept
-    for pattern in statement_registry["IncomeStatement"].concept_patterns:
-        if re.match(pattern, fake_concept):
-            assert True  # Pattern matches as expected
-            return
-    
-    # Fail if none of the patterns match our test concept
-    assert False, f"No pattern matched the custom namespace concept: {fake_concept}"
+    matched = any(re.match(pattern, fake_concept)
+                   for pattern in statement_registry["IncomeStatement"].concept_patterns)
+    assert matched, f"No pattern matched the custom namespace concept: {fake_concept}"
 
 class TestStatementTypeEnumCompatibility:
     """Test that StatementType enum snake_case values resolve correctly (issue edgartools-6ujh)."""

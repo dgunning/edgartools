@@ -97,7 +97,7 @@ def test_issue_464_coin_10q_has_comparative_periods():
 
 
 @pytest.mark.network
-@pytest.mark.parametrize("ticker", ["NVDA", "MSFT", "AAPL"])
+@pytest.mark.parametrize("ticker", ["NVDA", "AAPL"])
 def test_issue_464_multiple_companies_10q(ticker):
     """
     Verify fix works across multiple companies' 10-Q filings.

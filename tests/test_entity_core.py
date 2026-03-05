@@ -32,6 +32,7 @@ from edgar.entity import (
     NoCompanyFactsFound
 )
 from edgar.entity.data import parse_entity_submissions, CompanyData
+from edgar.entity.constants import _classify_is_individual, _name_suggests_company
 
 
 @pytest.fixture
@@ -278,3 +279,97 @@ class TestEntityLegacyCompatibility:
         except (ValueError, NoCompanyFactsFound):
             # These are acceptable exceptions for invalid CIKs
             pass
+
+
+# Representative subset of _classify_is_individual tests (consolidated from test_is_individual.py)
+# 18 cases covering all 9 signal priorities + 4 realistic profiles
+CLASSIFICATION_UNIT_TESTS = [
+    # Signal 1: issuer flag (strongest → company)
+    ("issuer_flag_overrides_owner",
+     dict(insider_transaction_for_issuer_exists=True,
+          insider_transaction_for_owner_exists=True, entity_type="other"),
+     False),
+    # Signal 2: tickers/exchanges → company
+    ("single_ticker", dict(tickers=["AAPL"]), False),
+    # Signal 3: state of incorporation → company
+    ("state_de", dict(state_of_incorporation="DE"), False),
+    # Signal 4: entity_type → company
+    ("entity_type_operating", dict(entity_type="operating"), False),
+    ("entity_type_fund", dict(entity_type="fund"), False),
+    # Signal 5: forms → company
+    ("form_10k", dict(forms=["10-K"]), False),
+    ("form_20f", dict(forms=["20-F"]), False),
+    # Signal 6: EIN → company
+    ("valid_ein", dict(ein="942404110"), False),
+    # Signal 7: name heuristics
+    ("name_corporation", dict(name="MICROSOFT CORPORATION"), False),
+    ("name_co_whole_word", dict(name="STANDARD OIL CO"), False),
+    ("name_co_not_substring", dict(name="SCOTT JOHNSON"), True),
+    ("name_plain_individual", dict(name="JOHN SMITH"), True),
+    # Signal 8: owner flag (weak → individual)
+    ("owner_flag_alone", dict(insider_transaction_for_owner_exists=True), True),
+    # Signal 9: default (no signals → individual)
+    ("no_signals_at_all", dict(), True),
+    # Realistic profiles
+    ("real_apple",
+     dict(name="APPLE INC", entity_type="operating", tickers=["AAPL"],
+          exchanges=["Nasdaq"], state_of_incorporation="CA", ein="942404110",
+          insider_transaction_for_issuer_exists=True,
+          forms=["10-K", "10-Q", "8-K", "DEF 14A"], cik=320193),
+     False),
+    ("real_insider_individual",
+     dict(name="COOK TIMOTHY D", entity_type="other",
+          insider_transaction_for_owner_exists=True,
+          insider_transaction_for_issuer_exists=False,
+          forms=["3", "4"], cik=1214156),
+     True),
+    ("real_warren_buffett",
+     dict(name="BUFFETT WARREN E", entity_type="other", ein="470539396",
+          insider_transaction_for_owner_exists=True,
+          forms=["3", "4", "SC 13D", "SC 13D/A"], cik=315090),
+     True),
+    ("real_holding_company_owner",
+     dict(name="BLACKROCK CAPITAL MANAGEMENT", entity_type="other",
+          insider_transaction_for_owner_exists=True,
+          forms=["SC 13D", "SC 13G"]),
+     False),
+]
+
+
+@pytest.mark.parametrize("test_id, kwargs, expected",
+                         CLASSIFICATION_UNIT_TESTS,
+                         ids=[t[0] for t in CLASSIFICATION_UNIT_TESTS])
+def test_classify_is_individual(test_id, kwargs, expected):
+    """Unit tests for _classify_is_individual covering all 9 signal priorities."""
+    result = _classify_is_individual(**kwargs)
+    assert result is expected, (
+        f"{test_id}: expected is_individual={expected}, got {result} with {kwargs}"
+    )
+
+
+class TestNameSuggestsCompany:
+    """Unit tests for _name_suggests_company helper (consolidated from test_is_individual.py)."""
+
+    def test_none_name(self):
+        assert _name_suggests_company(None) is False
+
+    def test_empty_name(self):
+        assert _name_suggests_company("") is False
+
+    def test_loose_keyword(self):
+        assert _name_suggests_company("ACME CORPORATION") is True
+
+    def test_strict_keyword_co(self):
+        assert _name_suggests_company("STANDARD OIL CO") is True
+
+    def test_strict_keyword_not_substring(self):
+        assert _name_suggests_company("SCOTT JOHNSON") is False
+
+    def test_sec_suffix(self):
+        assert _name_suggests_company("TOYOTA MOTOR CORP /ADR/") is True
+
+    def test_individual_name(self):
+        assert _name_suggests_company("JOHN SMITH") is False
+
+    def test_case_insensitive(self):
+        assert _name_suggests_company("acme inc") is True

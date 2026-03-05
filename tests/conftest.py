@@ -29,11 +29,12 @@ def vcr_config():
     }
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def reset_http_client_state():
     """
     Reset HTTP client state between tests to ensure test isolation.
 
+    Applied automatically to network-marked tests via pytest_runtest_setup hook.
     This is especially important for SSL verification tests which modify
     HTTP_MGR.httpx_params["verify"] and need a clean state.
     """
@@ -46,7 +47,6 @@ def reset_http_client_state():
         httpclient.HTTP_MGR._client = None
 
     # Always reset to default (True) before each test
-    # Don't restore to "original" as that might be False from a leaked previous test
     httpclient.HTTP_MGR.httpx_params["verify"] = True
 
     yield
@@ -59,8 +59,13 @@ def reset_http_client_state():
             pass
         httpclient.HTTP_MGR._client = None
 
-    # Always reset to default (True) to prevent state leaking to next test
     httpclient.HTTP_MGR.httpx_params["verify"] = True
+
+
+def pytest_runtest_setup(item):
+    """Auto-apply reset_http_client_state fixture to network tests."""
+    if "network" in {m.name for m in item.iter_markers()}:
+        item.fixturenames.append("reset_http_client_state")
 # Base paths
 FIXTURE_DIR = Path("tests/fixtures/xbrl")
 DATA_DIR = Path("data/xbrl/datafiles")
@@ -144,7 +149,7 @@ def pytest_collection_modifyitems(items):
         'test_fund_wrapper', 'test_evaluation_offline',
         'test_config', 'test_core', 'test_datatools',
         'test_auditor', 'test_beneficial_ownership', 'test_subsidiaries',
-        'test_enhanced_standardization',
+        'test_standardization',
     ]
 
     # Files that need network (fetch from SEC)
@@ -164,7 +169,7 @@ def pytest_collection_modifyitems(items):
         'test_filer_category', 'test_judge', 'test_skill_effectiveness',
         'test_ten_d', 'test_ttm', 'test_form3', 'test_form4',
         'test_forty_f', 'test_bdc', 'test_edgar', 'test_include_dimensions',
-        'test_standardized_concepts',
+        'test_standardization_integration',
     ]
 
     for item in items:

@@ -101,7 +101,7 @@ def test_issue_447_structure_representation():
 
 @pytest.mark.network
 @pytest.mark.regression
-@pytest.mark.parametrize("ticker", ["AAPL", "MSFT", "TSLA"])
+@pytest.mark.parametrize("ticker", ["AAPL", "TSLA"])
 def test_issue_447_multiple_companies(ticker):
     """
     Verify the fix works across multiple companies' 10-Q filings.

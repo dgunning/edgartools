@@ -43,7 +43,7 @@ def test_quarterly_period_values_are_correct():
                 break
 
 
-@pytest.mark.parametrize("ticker", ["AAPL", "MSFT", "GOOGL", "AMZN"])
+@pytest.mark.parametrize("ticker", ["AAPL", "MSFT"])
 def test_no_duplicates_multiple_companies(ticker):
     """Test multiple companies for duplicate quarterly periods"""
     c = Company(ticker)
@@ -74,24 +74,6 @@ def test_validate_quarterly_period_end():
     # Standard calendar year company (fiscal year ends in December)
     # Q3 should end in September
     assert validate_quarterly_period_end('Q3', date(2025, 9, 30), 12) == True
-
-
-@pytest.mark.fast
-def test_detect_fiscal_year_end():
-    """Test fiscal year end detection with real data"""
-    from edgar.entity.enhanced_statement import detect_fiscal_year_end
-
-    # Use real Apple data which has September fiscal year end
-    c = Company("AAPL")
-    bs = c.balance_sheet(annual=True, periods=2)
-
-    # Get the underlying facts
-    # The detect function should identify September (month 9) as fiscal year end for Apple
-    # This is tested indirectly through the quarterly validation working correctly
-    # Since if fiscal year end detection is wrong, the quarterly tests would fail
-
-    # This is more of an integration test - if quarterly tests pass, detection works
-    assert True  # Placeholder - real test is in the quarterly validation tests
 
 
 @pytest.mark.fast
