@@ -33,11 +33,12 @@ import argparse
 import json
 import logging
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+from edgar.xbrl.standardization.ledger.schema import ExperimentLedger, PipelineRun
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +58,9 @@ class PipelineOrchestrator:
     - FinancialDatabase.populate()
     """
 
-    def __init__(self, ledger: Optional[ExperimentLedger] = None):
+    def __init__(self, ledger: Optional[ExperimentLedger] = None, use_ai: bool = True):
         self.ledger = ledger or ExperimentLedger()
+        self.use_ai = use_ai
 
     # =====================================================================
     # ADD / RESET
@@ -111,7 +113,7 @@ class PipelineOrchestrator:
         )
 
         try:
-            result = onboard_company(ticker, use_ai=True, snapshot_mode=True)
+            result = onboard_company(ticker, use_ai=self.use_ai, snapshot_mode=True)
         except Exception as e:
             self.ledger.advance_pipeline(
                 ticker, 'FAILED', last_error=f'Onboarding error: {e}'
@@ -183,7 +185,7 @@ class PipelineOrchestrator:
         try:
             orchestrator = Orchestrator()
             results = orchestrator.map_companies(
-                tickers=[ticker], use_ai=True, validate=True
+                tickers=[ticker], use_ai=self.use_ai, validate=True
             )
             before = calculate_coverage(results)
             resolutions, updated_results = resolve_all_gaps(results)
@@ -237,7 +239,7 @@ class PipelineOrchestrator:
         from edgar.xbrl.standardization.tools.onboard_company import onboard_company
 
         try:
-            result = onboard_company(ticker, use_ai=True, snapshot_mode=True)
+            result = onboard_company(ticker, use_ai=self.use_ai, snapshot_mode=True)
         except Exception as e:
             self.ledger.advance_pipeline(
                 ticker, 'FAILED', last_error=f'Validation error: {e}'
@@ -359,7 +361,17 @@ class PipelineOrchestrator:
             Batch result dict with per-ticker outcomes.
         """
         batch_id = datetime.now().strftime('%Y-%m-%d_%H%M')
+        started_at = datetime.now().isoformat()
+        t0 = time.monotonic()
         results = {}
+
+        # Snapshot states before processing
+        states_before = {}
+        for ticker in tickers:
+            ticker = ticker.upper()
+            state = self.ledger.get_pipeline_state(ticker)
+            if state:
+                states_before[ticker] = state['state']
 
         for ticker in tickers:
             ticker = ticker.upper()
@@ -386,6 +398,59 @@ class PipelineOrchestrator:
                 result = {'ticker': ticker, 'state': 'FAILED', 'error': str(e)}
 
             results[ticker] = result
+
+        elapsed = time.monotonic() - t0
+
+        # Snapshot states after processing and classify outcomes
+        states_after = {}
+        errors = {}
+        advanced = 0
+        failed = 0
+        skipped = 0
+
+        for ticker in [t.upper() for t in tickers]:
+            r = results.get(ticker, {})
+            if r.get('skipped'):
+                skipped += 1
+                states_after[ticker] = states_before.get(ticker, 'UNKNOWN')
+            elif r.get('error') and r.get('state') == 'FAILED':
+                failed += 1
+                states_after[ticker] = 'FAILED'
+                errors[ticker] = r['error']
+            elif r.get('error') and 'Not in pipeline' in r.get('error', ''):
+                skipped += 1
+            else:
+                advanced += 1
+                after_state = self.ledger.get_pipeline_state(ticker)
+                states_after[ticker] = after_state['state'] if after_state else 'UNKNOWN'
+
+        # Record the batch run (skip for dry_run)
+        if not dry_run:
+            pipeline_run = PipelineRun(
+                run_id=batch_id,
+                started_at=started_at,
+                finished_at=datetime.now().isoformat(),
+                tickers=[t.upper() for t in tickers],
+                tickers_count=len(tickers),
+                tickers_advanced=advanced,
+                tickers_failed=failed,
+                tickers_skipped=skipped,
+                states_before=states_before,
+                states_after=states_after,
+                errors=errors,
+                total_elapsed_seconds=round(elapsed, 1),
+            )
+            try:
+                self.ledger.record_pipeline_run(pipeline_run)
+            except Exception as e:
+                logger.warning(f"Failed to record pipeline run: {e}")
+
+            # Auto-snapshot KPI metrics
+            try:
+                from edgar.xbrl.standardization.tools.kpi_tracker import snapshot_pipeline_kpis
+                snapshot_pipeline_kpis(self.ledger, batch_id, [t.upper() for t in tickers])
+            except Exception as e:
+                logger.warning(f"Failed to snapshot KPI metrics: {e}")
 
         return {
             'batch_id': batch_id,
@@ -560,6 +625,84 @@ def _format_summary(summary: Dict[str, Any]) -> str:
 
 
 # =============================================================================
+# REPORT FORMATTING
+# =============================================================================
+
+def _run_report(report_type: Optional[str] = None):
+    """Generate analytical reports from pipeline tracking data."""
+    ledger = ExperimentLedger()
+    sections = report_type.split(',') if report_type else ['failures', 'trend', 'stuck', 'runs']
+
+    for section in sections:
+        section = section.strip()
+
+        if section == 'failures':
+            print('\nTOP FAILING METRICS')
+            print(f'{"Metric":<30} {"Failures":>8}  {"Companies":>10}  {"FailRate":>8}  {"Pattern"}')
+            print('-' * 80)
+            metrics = ledger.get_failing_metrics_ranked()
+            if metrics:
+                for m in metrics:
+                    print(
+                        f'{m["metric"]:<30} {m["failures"]:>8}  '
+                        f'{m["companies"]:>10}  {m["fail_rate"]:>7}%  '
+                        f'{m["pattern"]}'
+                    )
+            else:
+                print('  No failure data yet.')
+
+        elif section == 'trend':
+            print('\nCOVERAGE TREND')
+            from edgar.xbrl.standardization.tools.kpi_tracker import get_progression
+            runs = get_progression()
+            if runs:
+                print(f'{"Run ID":<40} {"Coverage":>8}  {"Companies":>10}')
+                print('-' * 62)
+                for r in runs[-10:]:
+                    print(
+                        f'{r["run_id"]:<40} '
+                        f'{r["adjusted_coverage_pct"]:>7.1f}%  '
+                        f'{r["company_count"]:>10}'
+                    )
+            else:
+                print('  No KPI snapshots yet.')
+
+        elif section == 'stuck':
+            print('\nSTUCK COMPANIES')
+            stuck = ledger.get_stuck_companies()
+            if stuck:
+                print(f'{"Ticker":<10} {"State":<25} {"Retry":>5}  {"Pass%":>6}  {"Error"}')
+                print('-' * 80)
+                for s in stuck:
+                    pr = f'{s["pass_rate"]:.1f}%' if s.get('pass_rate') else '---'
+                    retry = str(s.get('retry_count', 0))
+                    print(
+                        f'{s["ticker"]:<10} {s["state"]:<25} {retry:>5}  '
+                        f'{pr:>6}  {s["error"]}'
+                    )
+            else:
+                print('  No stuck companies.')
+
+        elif section == 'runs':
+            print('\nRECENT BATCH RUNS')
+            runs = ledger.get_pipeline_runs(limit=10)
+            if runs:
+                print(f'{"Run ID":<25} {"Tickers":>8}  {"Adv":>4}  {"Fail":>4}  {"Skip":>4}  {"Elapsed":>8}')
+                print('-' * 62)
+                for r in runs:
+                    elapsed = f'{r.total_elapsed_seconds:.1f}s'
+                    print(
+                        f'{r.run_id:<25} {r.tickers_count:>8}  '
+                        f'{r.tickers_advanced:>4}  {r.tickers_failed:>4}  '
+                        f'{r.tickers_skipped:>4}  {elapsed:>8}'
+                    )
+            else:
+                print('  No batch runs recorded yet.')
+
+        print()
+
+
+# =============================================================================
 # CLI ENTRY POINT
 # =============================================================================
 
@@ -578,6 +721,7 @@ def main():
     run_parser.add_argument('--batch', required=True, help='Comma-separated tickers')
     run_parser.add_argument('--state', default=None, help='Only process tickers in this state')
     run_parser.add_argument('--dry-run', action='store_true', help='Show what would happen')
+    run_parser.add_argument('--no-ai', action='store_true', help='Skip AI/API calls (Layers 1+2 only)')
 
     # --- status ---
     status_parser = subparsers.add_parser('status', help='Show pipeline status')
@@ -598,13 +742,21 @@ def main():
     pop_parser.add_argument('--n-annual', type=int, default=10)
     pop_parser.add_argument('--n-quarterly', type=int, default=4)
 
+    # --- report ---
+    report_parser = subparsers.add_parser('report', help='Show analytical reports')
+    report_parser.add_argument(
+        '--type', default=None,
+        help='Report sections: failures,trend,stuck,runs (comma-separated or single)'
+    )
+
     args = parser.parse_args()
 
     if args.command is None:
         parser.print_help()
         sys.exit(1)
 
-    pipeline = PipelineOrchestrator()
+    use_ai = not getattr(args, 'no_ai', False)
+    pipeline = PipelineOrchestrator(use_ai=use_ai)
 
     if args.command == 'add':
         tickers = [t.strip().upper() for t in args.tickers.split(',')]
@@ -635,6 +787,9 @@ def main():
             n_quarterly=args.n_quarterly,
         )
         print(json.dumps(result, indent=2, default=str))
+
+    elif args.command == 'report':
+        _run_report(report_type=args.type)
 
 
 if __name__ == '__main__':

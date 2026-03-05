@@ -26,6 +26,29 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 @dataclass
+class PipelineRun:
+    """
+    Record of a single pipeline batch run.
+
+    Captures the full context of a run_batch() call so we can
+    query batch history, success rates, and timing.
+    """
+    run_id: str
+    started_at: str
+    finished_at: Optional[str] = None
+    tickers: List[str] = field(default_factory=list)
+    tickers_count: int = 0
+    tickers_advanced: int = 0
+    tickers_failed: int = 0
+    tickers_skipped: int = 0
+    states_before: Dict[str, str] = field(default_factory=dict)
+    states_after: Dict[str, str] = field(default_factory=dict)
+    errors: Dict[str, str] = field(default_factory=dict)
+    total_elapsed_seconds: float = 0.0
+    notes: str = ""
+
+
+@dataclass
 class ExtractionRun:
     """
     Record of a single extraction attempt.
@@ -360,6 +383,25 @@ class ExperimentLedger:
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
                     metadata TEXT DEFAULT '{}'
+                )
+            ''')
+
+            # Pipeline runs table (batch run history)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS pipeline_runs (
+                    run_id TEXT PRIMARY KEY,
+                    started_at TEXT NOT NULL,
+                    finished_at TEXT,
+                    tickers TEXT NOT NULL,
+                    tickers_count INTEGER,
+                    tickers_advanced INTEGER DEFAULT 0,
+                    tickers_failed INTEGER DEFAULT 0,
+                    tickers_skipped INTEGER DEFAULT 0,
+                    states_before TEXT,
+                    states_after TEXT,
+                    errors TEXT,
+                    total_elapsed_seconds REAL,
+                    notes TEXT
                 )
             ''')
 
@@ -1108,3 +1150,204 @@ class ExperimentLedger:
                 'ticker': ticker,
                 'metrics': metrics,
             }
+
+    # =========================================================================
+    # PIPELINE RUNS (BATCH HISTORY)
+    # =========================================================================
+
+    def record_pipeline_run(self, run: PipelineRun) -> str:
+        """
+        Record a pipeline batch run.
+
+        Args:
+            run: PipelineRun to record.
+
+        Returns:
+            The run_id of the recorded run.
+        """
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT OR REPLACE INTO pipeline_runs (
+                    run_id, started_at, finished_at, tickers, tickers_count,
+                    tickers_advanced, tickers_failed, tickers_skipped,
+                    states_before, states_after, errors,
+                    total_elapsed_seconds, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                run.run_id, run.started_at, run.finished_at,
+                json.dumps(run.tickers), run.tickers_count,
+                run.tickers_advanced, run.tickers_failed, run.tickers_skipped,
+                json.dumps(run.states_before), json.dumps(run.states_after),
+                json.dumps(run.errors), run.total_elapsed_seconds, run.notes,
+            ))
+            conn.commit()
+
+        logger.debug(f"Recorded pipeline run {run.run_id}")
+        return run.run_id
+
+    def get_pipeline_runs(self, limit: int = 20) -> List[PipelineRun]:
+        """
+        Get recent pipeline batch runs, newest first.
+
+        Args:
+            limit: Maximum number of runs to return.
+
+        Returns:
+            List of PipelineRun objects.
+        """
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT * FROM pipeline_runs
+                ORDER BY started_at DESC
+                LIMIT ?
+            ''', (limit,))
+            return [self._row_to_pipeline_run(row) for row in cursor.fetchall()]
+
+    def _row_to_pipeline_run(self, row: sqlite3.Row) -> PipelineRun:
+        """Convert database row to PipelineRun."""
+        return PipelineRun(
+            run_id=row['run_id'],
+            started_at=row['started_at'],
+            finished_at=row['finished_at'],
+            tickers=json.loads(row['tickers'] or '[]'),
+            tickers_count=row['tickers_count'] or 0,
+            tickers_advanced=row['tickers_advanced'] or 0,
+            tickers_failed=row['tickers_failed'] or 0,
+            tickers_skipped=row['tickers_skipped'] or 0,
+            states_before=json.loads(row['states_before'] or '{}'),
+            states_after=json.loads(row['states_after'] or '{}'),
+            errors=json.loads(row['errors'] or '{}'),
+            total_elapsed_seconds=row['total_elapsed_seconds'] or 0.0,
+            notes=row['notes'] or '',
+        )
+
+    # =========================================================================
+    # CROSS-COMPANY ANALYTICS
+    # =========================================================================
+
+    def get_failing_metrics_ranked(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """
+        Get metrics ranked by failure count across all companies.
+
+        Queries extraction_runs GROUP BY metric, ORDER BY failure count.
+        Falls back to aggregating from onboarding JSON reports if
+        extraction_runs is empty.
+
+        Returns:
+            List of dicts with metric, failures, companies, fail_rate, pattern.
+        """
+        # Try extraction_runs first
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT
+                    metric,
+                    COUNT(*) as total,
+                    SUM(CASE WHEN is_valid = 0 THEN 1 ELSE 0 END) as failures,
+                    COUNT(DISTINCT ticker) as companies,
+                    SUM(CASE WHEN is_valid = 1 THEN 1 ELSE 0 END) as successes
+                FROM extraction_runs
+                GROUP BY metric
+                HAVING failures > 0
+                ORDER BY failures DESC
+                LIMIT ?
+            ''', (limit,))
+            rows = cursor.fetchall()
+
+        if rows:
+            results = []
+            for row in rows:
+                total = row[1] or 1
+                failures = row[2] or 0
+                results.append({
+                    'metric': row[0],
+                    'failures': failures,
+                    'companies': row[3],
+                    'fail_rate': round(failures / total * 100),
+                    'pattern': 'extraction_error',
+                })
+            return results
+
+        # Fallback: aggregate from onboarding reports
+        return self._get_failing_metrics_from_reports(limit)
+
+    def _get_failing_metrics_from_reports(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Aggregate failure data from onboarding JSON reports."""
+        report_dir = Path(__file__).parent.parent / 'config' / 'onboarding_reports'
+        if not report_dir.exists():
+            return []
+
+        metric_failures: Dict[str, Dict[str, Any]] = {}
+        total_companies = 0
+
+        for report_path in report_dir.glob('*_report.json'):
+            try:
+                with open(report_path) as f:
+                    report = json.load(f)
+            except Exception:
+                continue
+
+            total_companies += 1
+            failures = report.get('failures', {})
+            for metric, detail in failures.items():
+                if metric not in metric_failures:
+                    metric_failures[metric] = {
+                        'metric': metric,
+                        'failures': 0,
+                        'companies': 0,
+                        'patterns': {},
+                    }
+                metric_failures[metric]['failures'] += 1
+                metric_failures[metric]['companies'] += 1
+                pattern = detail.get('pattern', 'unknown') if isinstance(detail, dict) else 'unknown'
+                metric_failures[metric]['patterns'][pattern] = (
+                    metric_failures[metric]['patterns'].get(pattern, 0) + 1
+                )
+
+        results = []
+        for metric, data in metric_failures.items():
+            # Most common pattern
+            patterns = data['patterns']
+            top_pattern = max(patterns, key=patterns.get) if patterns else 'unknown'
+            results.append({
+                'metric': data['metric'],
+                'failures': data['failures'],
+                'companies': total_companies,
+                'fail_rate': round(data['failures'] / total_companies * 100) if total_companies else 0,
+                'pattern': top_pattern,
+            })
+
+        results.sort(key=lambda x: x['failures'], reverse=True)
+        return results[:limit]
+
+    def get_stuck_companies(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """
+        Get companies that are FAILED or at max retries.
+
+        Returns:
+            List of dicts with ticker, state, retry_count, pass_rate, error.
+        """
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT ticker, state, retry_count, max_retries, pass_rate, last_error
+                FROM pipeline_state
+                WHERE state = 'FAILED'
+                   OR (retry_count >= max_retries AND state NOT IN ('COMPLETE', 'FAILED'))
+                ORDER BY updated_at DESC
+                LIMIT ?
+            ''', (limit,))
+            results = []
+            for row in cursor.fetchall():
+                results.append({
+                    'ticker': row['ticker'],
+                    'state': row['state'],
+                    'retry_count': row['retry_count'],
+                    'pass_rate': row['pass_rate'],
+                    'error': (row['last_error'] or '')[:60],
+                })
+            return results

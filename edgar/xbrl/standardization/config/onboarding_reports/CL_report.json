@@ -187,8 +187,8 @@
     }
   },
   "remediation_complexity": "needs_review",
-  "snapshot_created": true,
+  "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-03-04T19:24:20.159796"
+  "timestamp": "2026-03-04T23:39:28.973603"
 }

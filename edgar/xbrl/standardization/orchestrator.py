@@ -25,11 +25,14 @@ from .layers.facts_search import FactsSearcher
 from .reference_validator import ReferenceValidator, ValidationResult
 
 
+AUDIT_LOG_FILE = Path(__file__).parent / "company_mappings" / "audit_log.jsonl"
+
+
 class Orchestrator:
     """
     Runs all mapping layers in sequence.
     """
-    
+
     def __init__(self, config: Optional[MappingConfig] = None, snapshot_mode: bool = False):
         self.config = config or get_config()
         self.tree_parser = TreeParser(self.config)
@@ -38,6 +41,30 @@ class Orchestrator:
         self.validator = ReferenceValidator(self.config, snapshot_mode=snapshot_mode)
         self.audit_log = []
         self.validation_results = {}
+
+    def flush_audit_log(self, path=None) -> int:
+        """Flush in-memory audit log entries to a JSONL file on disk.
+
+        Args:
+            path: Optional override path. Defaults to AUDIT_LOG_FILE.
+
+        Returns:
+            Number of entries flushed.
+        """
+        if not self.audit_log:
+            return 0
+
+        target = path or AUDIT_LOG_FILE
+        target = Path(target)
+        target.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(target, 'a') as f:
+            for entry in self.audit_log:
+                f.write(entry.to_json() + '\n')
+
+        count = len(self.audit_log)
+        self.audit_log.clear()
+        return count
     
     def map_company(
         self,

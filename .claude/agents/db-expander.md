@@ -31,6 +31,13 @@ python -m edgar.xbrl.standardization.tools.pipeline_orchestrator reset --ticker 
 
 # Populate FinancialDatabase for all COMPLETE companies
 python -m edgar.xbrl.standardization.tools.pipeline_orchestrator populate-all
+
+# View analytical reports
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report                    # All 4 sections
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type failures    # Per-metric failure ranking
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type trend       # KPI trend over time
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type stuck       # Companies stuck in same state
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type runs        # Recent batch run history
 ```
 
 ## State Machine
@@ -58,6 +65,7 @@ When the user says "expand to HD, LOW, MCD":
    - For FAILED companies with pass_rate >= 50%, investigate with concept-mapping-resolver
    - For FAILED companies with pass_rate < 50%, report to user
 7. **Show dashboard**: `pipeline dashboard`
+8. **Review tracking**: `pipeline report --type runs,failures` — confirm batch was recorded and check for per-metric issues
 
 ## Decision Logic
 
@@ -91,9 +99,10 @@ For large ticker lists (e.g., S&P 500):
 
 1. Split into batches of 10
 2. Process batch: add → run (repeat until all COMPLETE or FAILED) → report
-3. Summarize batch results
-4. Ask user before proceeding to next batch
-5. After all batches, run `pipeline dashboard` for full summary
+3. After each batch, run `pipeline report --type runs` to confirm tracking
+4. Summarize batch results
+5. Ask user before proceeding to next batch
+6. After all batches, run `pipeline dashboard` and `pipeline report` for full summary
 
 ## Output Format
 
@@ -109,6 +118,28 @@ Next steps:
   - Run pipeline again for LOW (needs more resolution attempts)
   - MCD needs manual investigation — pass rate too low
 ```
+
+## Tracking Infrastructure
+
+Every pipeline operation is automatically tracked:
+
+| Data | Where | When |
+|------|-------|------|
+| **Batch runs** | `pipeline_runs` table | After each `run --batch` completes |
+| **Per-metric extractions** | `extraction_runs` table | During `onboard_company()` per metric |
+| **KPI snapshots** | `runs_history.json` | Auto-captured with `pipeline:` prefix after each batch |
+| **Mapping decisions** | `audit_log.jsonl` | Flushed after each company onboarding |
+
+### Report Types
+
+| Type | Shows |
+|------|-------|
+| `failures` | Metrics ranked by failure count across companies |
+| `trend` | KPI values over time (total companies, golden masters, pass rate) |
+| `stuck` | Companies that haven't changed state in multiple runs |
+| `runs` | Recent batch run history with tickers and outcomes |
+
+Use `pipeline report` (no `--type`) to see all 4 sections at once.
 
 ## Key Files
 

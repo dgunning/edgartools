@@ -54,6 +54,21 @@ python -m edgar.xbrl.standardization.tools.pipeline_orchestrator dashboard
 python -m edgar.xbrl.standardization.tools.pipeline_orchestrator populate-all
 ```
 
+### 5. View Reports
+
+```bash
+# Full report (all 4 sections)
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report
+
+# Individual sections
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type failures    # Per-metric failure ranking
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type trend       # KPI trend over time
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type stuck       # Companies stuck in same state
+python -m edgar.xbrl.standardization.tools.pipeline_orchestrator report --type runs        # Recent batch run history
+```
+
+Run `report --type runs` after each batch to confirm tracking data was recorded.
+
 ## Batch Processing
 
 For large ticker lists, process in batches of 10:
@@ -62,6 +77,15 @@ For large ticker lists, process in batches of 10:
 2. Add and run each batch
 3. Report results after each batch
 4. Ask user before continuing to next batch
+
+## Tracking Data
+
+Every pipeline operation is automatically tracked — no manual steps needed:
+
+- **`pipeline_runs` table**: Records each `run --batch` with tickers processed, outcomes, and duration
+- **`extraction_runs` table**: Records per-metric results during `onboard_company()` (pass/fail, error details)
+- **`runs_history.json`**: KPI snapshots with `pipeline:` prefix (total companies, golden masters, pass rate)
+- **`audit_log.jsonl`**: Mapping decisions flushed after each company onboarding
 
 ## Pipeline States
 

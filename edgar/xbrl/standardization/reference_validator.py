@@ -1182,10 +1182,13 @@ class ReferenceValidator:
                 if len(df) == 0:
                     return None
 
-                # Filter for non-dimensioned (total) values only
+                # Filter for non-dimensioned (total) values only.
+                # Support two column conventions:
+                #   1. 'full_dimension_label' (older path) — NaN means non-dimensioned
+                #   2. 'is_dimensioned' (newer query path) — False means non-dimensioned
                 if 'full_dimension_label' in df.columns:
                     total_rows = df[df['full_dimension_label'].isna()]
-                    
+
                     # Check if we're filtering out dimensional-only values
                     if len(total_rows) == 0:
                         dim_rows = df[df['full_dimension_label'].notna()]
@@ -1196,13 +1199,13 @@ class ReferenceValidator:
                             else:
                                 form_type = getattr(self, '_current_form_type', None)
                                 target_period_days = 90 if form_type == '10-Q' else None
-                            
+
                             # Use DimensionalAggregator for proper aggregation (with period filtering)
                             aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
                                 xbrl, concept_name, consolidated_value=None,
                                 target_period_days=target_period_days
                             )
-                            
+
                             if aggregation_result.aggregated_value is not None:
                                 # Store aggregation info for transparency
                                 if not hasattr(self, '_dimensional_aggregations'):
@@ -1215,7 +1218,7 @@ class ReferenceValidator:
                                     'notes': aggregation_result.notes
                                 }
                                 return aggregation_result.aggregated_value
-                            
+
                             # Log this dimensional-only case for investigation
                             dim_sum = dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None
                             warning = {
@@ -1229,6 +1232,37 @@ class ReferenceValidator:
                             if not hasattr(self, '_dimensional_warnings'):
                                 self._dimensional_warnings = {}
                             self._dimensional_warnings[concept] = warning
+                        return None
+                elif 'is_dimensioned' in df.columns:
+                    # Newer facts format returned by xbrl.facts.query().to_dataframe()
+                    # and xbrl.facts.get_facts_by_concept() — uses boolean is_dimensioned flag
+                    total_rows = df[df['is_dimensioned'] == False]
+
+                    # If no non-dimensioned rows found, fall through to dimensional aggregation
+                    if len(total_rows) == 0:
+                        dim_rows = df[df['is_dimensioned'] == True]
+                        if len(dim_rows) > 0:
+                            if target_days is not None:
+                                target_period_days = target_days
+                            else:
+                                form_type = getattr(self, '_current_form_type', None)
+                                target_period_days = 90 if form_type == '10-Q' else None
+
+                            aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                                xbrl, concept_name, consolidated_value=None,
+                                target_period_days=target_period_days
+                            )
+                            if aggregation_result.aggregated_value is not None:
+                                if not hasattr(self, '_dimensional_aggregations'):
+                                    self._dimensional_aggregations = {}
+                                self._dimensional_aggregations[concept] = {
+                                    'value': aggregation_result.aggregated_value,
+                                    'dimension_count': aggregation_result.dimension_count,
+                                    'dimensions_used': aggregation_result.dimensions_used,
+                                    'method': aggregation_result.method,
+                                    'notes': aggregation_result.notes
+                                }
+                                return aggregation_result.aggregated_value
                         return None
                 else:
                     total_rows = df

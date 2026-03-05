@@ -5,42 +5,34 @@
   "archetype": "A",
   "sic_code": "7841",
   "fiscal_year_end": "December",
-  "draft_yaml": "  NFLX:\n    name: \"NETFLIX INC\"\n    cik: 1065280\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 62.1\n        reason: \"Variance: 62.1% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 21.8\n        reason: \"Variance: 21.8% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 78.6\n        reason: \"Variance: 78.6% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "draft_yaml": "  NFLX:\n    name: \"NETFLIX INC\"\n    cik: 1065280\n    known_divergences:\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 21.8\n        reason: \"Variance: 21.8% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 78.6\n        reason: \"Variance: 78.6% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
   "metrics_passed": [
+    "Revenue",
     "COGS",
     "SGA",
     "PretaxIncome",
     "TotalAssets",
     "Goodwill",
+    "IntangibleAssets",
     "LongTermDebt",
     "CashAndEquivalents",
     "DividendsPaid",
     "Inventory",
-    "AccountsPayable"
+    "AccountsPayable",
+    "DepreciationAmortization"
   ],
   "metrics_failed": [
-    "Revenue",
     "OperatingIncome",
     "NetIncome",
     "OperatingCashFlow",
     "Capex",
-    "IntangibleAssets",
     "ShortTermDebt",
     "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
-    "AccountsReceivable",
-    "DepreciationAmortization"
+    "AccountsReceivable"
   ],
   "metrics_excluded": [],
   "failures": {
-    "Revenue": {
-      "metric": "Revenue",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 45183036000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
     "OperatingIncome": {
       "metric": "OperatingIncome",
       "reason": "Variance: 21.8% (tolerance: 15%)",
@@ -73,14 +65,6 @@
       "variance_pct": null,
       "pattern": "extraction_error"
     },
-    "IntangibleAssets": {
-      "metric": "IntangibleAssets",
-      "reason": "Variance: 62.1% (tolerance: 15%)",
-      "xbrl_value": 12422309000.0,
-      "reference_value": 32778392000.0,
-      "variance_pct": 62.102140336841416,
-      "pattern": "unknown"
-    },
     "ShortTermDebt": {
       "metric": "ShortTermDebt",
       "reason": "Variance: 78.6% (tolerance: 15%)",
@@ -112,19 +96,11 @@
       "reference_value": 2031476000.0,
       "variance_pct": null,
       "pattern": "extraction_error"
-    },
-    "DepreciationAmortization": {
-      "metric": "DepreciationAmortization",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 16755555000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
     }
   },
   "remediation_complexity": "needs_review",
-  "snapshot_created": true,
+  "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-03-04T19:21:06.255782"
+  "timestamp": "2026-03-04T23:39:23.029576"
 }

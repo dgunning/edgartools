@@ -153,6 +153,87 @@ def create_run_stats(
     )
 
 
+def snapshot_pipeline_kpis(ledger, run_name: str, tickers: List[str]) -> Optional[str]:
+    """Auto-snapshot KPI metrics after a pipeline batch run.
+
+    Reads per-metric success rates from the ledger's extraction_runs table.
+    Falls back to parsing onboarding JSON reports if extraction_runs is empty.
+
+    Args:
+        ledger: ExperimentLedger instance.
+        run_name: Identifier for this run (e.g., batch_id).
+        tickers: List of tickers processed in this batch.
+
+    Returns:
+        The run_id that was logged, or None on failure.
+    """
+    total_metrics = 0
+    mapped_metrics = 0
+    matched_count = 0
+    excluded_count = 0
+
+    # Try extraction_runs first
+    has_runs = False
+    for ticker in tickers:
+        summary = ledger.get_ticker_summary(ticker)
+        metrics = summary.get('metrics', {})
+        if metrics:
+            has_runs = True
+            for metric, data in metrics.items():
+                total_metrics += data['runs']
+                mapped_metrics += data['valid']
+                matched_count += data['valid']
+
+    # Fallback: parse onboarding reports
+    if not has_runs:
+        report_dir = Path(__file__).parent.parent / "config" / "onboarding_reports"
+        if report_dir.exists():
+            for ticker in tickers:
+                report_path = report_dir / f"{ticker}_report.json"
+                if report_path.exists():
+                    try:
+                        with open(report_path) as f:
+                            report = json.load(f)
+                        passed = len(report.get('metrics_passed', []))
+                        failed = len(report.get('metrics_failed', []))
+                        excl = len(report.get('metrics_excluded', []))
+                        total_metrics += passed + failed
+                        mapped_metrics += passed
+                        matched_count += passed
+                        excluded_count += excl
+                    except Exception:
+                        pass
+
+    if total_metrics == 0:
+        return None
+
+    raw_coverage = mapped_metrics / total_metrics * 100 if total_metrics > 0 else 0
+    adjusted_coverage = raw_coverage  # Already excludes CONFIG
+
+    stats = RunStatistics(
+        run_id=f"pipeline-{run_name}",
+        timestamp=datetime.now().isoformat(),
+        companies=tickers,
+        company_count=len(tickers),
+        total_metrics=total_metrics + excluded_count,
+        mapped_metrics=mapped_metrics,
+        excluded_metrics=excluded_count,
+        raw_coverage_pct=round(raw_coverage, 1),
+        adjusted_coverage_pct=round(adjusted_coverage, 1),
+        matched_count=matched_count,
+        trusted_count=0,
+        discrepancy_count=0,
+        universal_concepts=0,
+        industry_rules=0,
+        company_specific_rules=0,
+        documented_discrepancies=0,
+        new_concepts=[],
+        new_discrepancies=[],
+    )
+
+    return log_run(stats)
+
+
 def get_progression() -> List[Dict]:
     """Get progression of metrics over all runs."""
     data = load_runs_history()

@@ -43,6 +43,8 @@ from edgar.xbrl.standardization.yf_snapshot import (
     load_snapshot,
 )
 
+from edgar.xbrl.standardization.ledger.schema import ExperimentLedger, ExtractionRun
+
 REPORT_DIR = Path(__file__).parent.parent / "config" / "onboarding_reports"
 
 
@@ -269,6 +271,57 @@ def classify_failure(
 
 
 # =============================================================================
+# EXTRACTION RUN RECORDING
+# =============================================================================
+
+def _record_extraction_runs(
+    result: OnboardingResult,
+    mapping_results: Dict,
+    validation_results: Dict,
+    ledger: ExperimentLedger,
+) -> int:
+    """Write one ExtractionRun per metric to the ledger.
+
+    Args:
+        result: Completed OnboardingResult.
+        mapping_results: Dict of metric -> MappingResult from orchestrator.
+        validation_results: Dict of metric -> ValidationResult from validator.
+        ledger: ExperimentLedger to record into.
+
+    Returns:
+        Number of runs recorded.
+    """
+    count = 0
+    for metric, mapping in mapping_results.items():
+        if mapping.source == MappingSource.CONFIG:
+            continue
+
+        vr = validation_results.get(metric)
+        extracted_value = getattr(vr, 'xbrl_value', None) if vr else None
+        reference_value = getattr(vr, 'reference_value', None) if vr else None
+
+        run = ExtractionRun(
+            ticker=result.ticker,
+            metric=metric,
+            fiscal_period="latest",
+            form_type="10-K",
+            archetype=result.archetype,
+            strategy_name=mapping.source.value,
+            strategy_fingerprint="",
+            extracted_value=extracted_value,
+            reference_value=reference_value,
+            confidence=mapping.confidence,
+        )
+        try:
+            ledger.record_run(run)
+            count += 1
+        except Exception:
+            pass
+
+    return count
+
+
+# =============================================================================
 # ONBOARDING PIPELINE
 # =============================================================================
 
@@ -432,6 +485,19 @@ def onboard_company(
         result.remediation_complexity = "structural"
     else:
         result.remediation_complexity = "needs_review"
+
+    # Step 6b: Record extraction runs to ledger
+    try:
+        ledger = ExperimentLedger()
+        _record_extraction_runs(result, mapping_results, validation_results, ledger)
+    except Exception as e:
+        print(f"  Warning: Failed to record extraction runs: {e}")
+
+    # Step 6c: Flush audit log to disk
+    try:
+        orchestrator.flush_audit_log()
+    except Exception:
+        pass  # flush_audit_log is best-effort
 
     # Step 7: Generate YAML
     result.draft_yaml = generate_yaml_fragment(result)

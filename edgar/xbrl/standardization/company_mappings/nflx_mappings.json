@@ -1,0 +1,16 @@
+{
+    "ticker": "NFLX",
+    "description": "Netflix, Inc. - Streaming company with content-specific XBRL concepts",
+    "extraction_rules": {
+        "DepreciationAmortization": {
+            "method": "concept_priority",
+            "concept_priority": {
+                "DepreciationAmortization": [
+                    "nflx:CostofServicesAmortizationofStreamingContentAssets",
+                    "us-gaap:DepreciationDepletionAndAmortization"
+                ]
+            },
+            "notes": "NFLX amortizes streaming content library separately from PPE depreciation. nflx:CostofServicesAmortizationofStreamingContentAssets (~16.4B) matches yfinance 'Depreciation And Amortization' (~16.8B) within tolerance. The standard us-gaap:DepreciationDepletionAndAmortization only captures PPE depreciation (~0.3B)."
+        }
+    }
+}
