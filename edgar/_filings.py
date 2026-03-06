@@ -1664,6 +1664,11 @@ class Filing:
 
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
+        if is_using_local_storage():
+            local_path = self._local_path()
+            if local_path.exists():
+                from edgar.sgml.sgml_common import read_content_as_string
+                return read_content_as_string(local_path)
         downloaded = download_file(self.text_url, as_text=True)
         assert downloaded is not None
         return str(downloaded)
