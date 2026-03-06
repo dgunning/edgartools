@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.21.1] - 2026-03-06
+
+### Fixed
+
+- **8-K Table Scale Detection** — The 8-K parser now detects table scale (e.g., "in thousands") from preceding paragraph nodes, not just the table header, producing correct financial values ([#633](https://github.com/dgunning/edgartools/issues/633)) ([9f920af3](https://github.com/dgunning/edgartools/commit/9f920af3))
+
+- **Local Storage Check in full_text_submission()** — `full_text_submission()` now checks local storage before downloading from SEC, avoiding unnecessary network calls when filings are already cached locally ([#681](https://github.com/dgunning/edgartools/issues/681)) ([0cdde2f3](https://github.com/dgunning/edgartools/commit/0cdde2f3))
+
+- **Dimensional Member Hierarchy in to_dataframe()** — Statement `to_dataframe()` now preserves the dimensional member hierarchy, maintaining the correct parent-child relationships for XBRL dimensions ([4f5797d1](https://github.com/dgunning/edgartools/commit/4f5797d1))
+
+### Docs
+
+- **get_fact() Examples Corrected** — Fixed `get_fact()` documentation examples to use valid XBRL concept names ([#618](https://github.com/dgunning/edgartools/issues/618)) ([d768a049](https://github.com/dgunning/edgartools/commit/d768a049))
+
 ## [5.21.0] - 2026-03-05
 
 ### Added
