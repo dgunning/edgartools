@@ -440,6 +440,15 @@ def onboard_company(
             use_facts=True,
         )
         result.extraction_ran = True
+
+        # Detect silent XBRL failures: all results unmapped with XBRL error reasoning
+        if xbrl is None:
+            xbrl_errors = [r.reasoning for r in mapping_results.values()
+                           if r.reasoning and "XBRL error" in r.reasoning]
+            if xbrl_errors:
+                result.error = f"XBRL parsing failed: {xbrl_errors[0]}"
+                result.draft_yaml = generate_yaml_fragment(result)
+                return result
     except Exception as e:
         result.error = f"Extraction failed: {e}"
         result.draft_yaml = generate_yaml_fragment(result)

@@ -16,6 +16,7 @@ from datetime import datetime
 from pathlib import Path
 
 from edgar import Company, set_identity, use_local_storage
+from edgar.storage._local import is_using_local_storage
 
 from .config_loader import get_config, MappingConfig
 from .models import MappingResult, MappingSource, AuditLogEntry
@@ -187,6 +188,35 @@ class Orchestrator:
         
         return gaps
     
+    @staticmethod
+    def _retry_xbrl_with_writable_cache(filing):
+        """Retry filing.xbrl() bypassing the file cache.
+
+        When local storage points to a read-only filesystem, the HTTP cache
+        transport can't write .lock/.meta files. This temporarily switches
+        to a cache-disabled HTTP manager, retries, then restores the original.
+        """
+        import edgar.httpclient as httpclient
+
+        original_mgr = httpclient.HTTP_MGR
+        try:
+            # Create a fresh HTTP manager with cache disabled (no filesystem writes)
+            httpclient.HTTP_MGR = httpclient.get_http_mgr(
+                cache_enabled=False,
+                request_per_sec_limit=httpclient.get_edgar_rate_limit_per_sec()
+            )
+            xbrl = filing.xbrl()
+            return xbrl
+        except Exception:
+            return None
+        finally:
+            # Restore original HTTP manager
+            try:
+                httpclient.HTTP_MGR.close()
+            except Exception:
+                pass
+            httpclient.HTTP_MGR = original_mgr
+
     def _map_company_with_xbrl(
         self,
         ticker: str,
@@ -197,7 +227,7 @@ class Orchestrator:
         """
         Map company and return both results and XBRL object.
         Used internally for validation.
-        
+
         Uses same layer order as map_company:
         Layer 1 (Tree) -> Layer 2 (Facts) -> Layer 3 (AI)
         """
@@ -207,6 +237,15 @@ class Orchestrator:
 
         try:
             xbrl = filing.xbrl()
+        except OSError as e:
+            # Filesystem error (e.g. read-only local cache) - retry with writable cache
+            if is_using_local_storage():
+                print(f"  Local storage error for {ticker}, retrying via network...")
+                xbrl = self._retry_xbrl_with_writable_cache(filing)
+                if xbrl is None:
+                    return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
+            else:
+                return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
         except Exception as e:
             return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
 
