@@ -102,12 +102,16 @@ results = query.by_concept('Revenue').latest(4)
 Get a single fact by concept name.
 
 ```python
-revenue_fact = facts.get_fact('Revenue')
-q1_revenue = facts.get_fact('Revenue', '2024-Q1')
+# Use the full XBRL concept name or the lowercase label
+revenue_fact = facts.get_fact('us-gaap:Revenues')
+q1_revenue = facts.get_fact('us-gaap:Revenues', '2024-Q1')
+
+# Lowercase labels also work
+revenue_fact = facts.get_fact('revenues')
 ```
 
 **Parameters:**
-- `concept` (str): Concept name or label (case-insensitive)
+- `concept` (str): XBRL concept name (e.g. `'us-gaap:Revenues'`) or lowercase label (e.g. `'revenues'`). Use `search_concepts()` to find valid names.
 - `period` (str, optional): Period in format "YYYY-QN" or "YYYY-FY"
 
 **Returns:** Most recent matching fact or None
@@ -787,7 +791,7 @@ Business context description.
 Generate rich context for LLM consumption.
 
 ```python
-fact = facts.get_fact('Revenue')
+fact = facts.get_fact('us-gaap:Revenues')
 context = fact.to_llm_context()
 print(context['concept'])
 print(context['value'])
@@ -801,7 +805,7 @@ print(context['period'])
 Format the numeric value for display.
 
 ```python
-fact = facts.get_fact('Revenue')
+fact = facts.get_fact('us-gaap:Revenues')
 formatted = fact.get_formatted_value()
 print(formatted)  # "365,817,000,000"
 ```
@@ -813,7 +817,7 @@ print(formatted)  # "365,817,000,000"
 Generate display-friendly period key.
 
 ```python
-fact = facts.get_fact('Revenue')
+fact = facts.get_fact('us-gaap:Revenues')
 period = fact.get_display_period_key()
 print(period)  # "Q1 2024"
 ```
