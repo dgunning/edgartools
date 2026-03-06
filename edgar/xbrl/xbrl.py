@@ -1278,6 +1278,8 @@ class XBRL:
 
         # For dimensional statements, add dimensioned facts as child line items
         if should_display_dimensions and dimensioned_facts:
+            # Track dimensional items added for this concept (for hierarchy post-processing)
+            dim_items_added = []
             # Add each dimension as a child line item with increased depth
             for dim_key, facts_list in dimensioned_facts.items():
                 dim_values = {}
@@ -1376,13 +1378,94 @@ class XBRL:
                     'dimension_metadata': dim_metadata  # Store full dimension information
                 }
 
-                # Add to result
-                result.append(dim_line_item)
+                # Collect (don't add to result yet — hierarchy may reorder)
+                dim_items_added.append(dim_line_item)
+
+            # Post-process: apply member hierarchy from definition linkbase
+            if dim_items_added:
+                self._apply_member_hierarchy(dim_items_added)
+            # Now add to result in correct order
+            result.extend(dim_items_added)
 
         # Process children
         for child_id in node.children:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
                                       should_display_dimensions, valid_dimensional_members, view)
+
+    def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
+        """Adjust level of dimensional items based on definition linkbase member hierarchy.
+
+        The definition linkbase defines member-to-member relationships (e.g.,
+        AutomotiveRevenuesMember → AutomotiveSalesMember). This method uses
+        those relationships to set proper nesting depth for dimensional items.
+        """
+        # Collect member IDs from dimensional items
+        member_to_item = {}
+        for item in dim_items:
+            meta = item.get('dimension_metadata')
+            if meta and len(meta) >= 1:
+                member_id = meta[0].get('member')
+                if member_id:
+                    member_to_item[member_id] = item
+
+        if len(member_to_item) <= 1:
+            return
+
+        member_ids = set(member_to_item.keys())
+        domains = self.parser.domains
+
+        # Find members that are parents of other members in our set
+        member_children = {}
+        for member_id in member_ids:
+            if member_id in domains and domains[member_id].members:
+                children_in_set = [m for m in domains[member_id].members if m in member_ids]
+                if children_in_set:
+                    member_children[member_id] = children_in_set
+
+        if not member_children:
+            return
+
+        # Compute depth offset: children get +1 relative to their parent
+        depth_offset = {m: 0 for m in member_ids}
+
+        def set_depth(parent_id, parent_depth):
+            for child_id in member_children.get(parent_id, []):
+                new_depth = parent_depth + 1
+                if new_depth > depth_offset[child_id]:
+                    depth_offset[child_id] = new_depth
+                    set_depth(child_id, new_depth)
+
+        for parent_id in member_children:
+            if depth_offset[parent_id] == 0:
+                set_depth(parent_id, 0)
+
+        # Apply depth offsets to levels
+        for member_id, item in member_to_item.items():
+            item['level'] += depth_offset[member_id]
+
+        # Reorder: parents before children
+        ordered = []
+        processed = set()
+
+        def add_with_children(member_id):
+            if member_id in processed:
+                return
+            processed.add(member_id)
+            ordered.append(member_to_item[member_id])
+            for child_id in member_children.get(member_id, []):
+                add_with_children(child_id)
+
+        # First add items that are top-level (depth 0)
+        for member_id in member_to_item:
+            if depth_offset[member_id] == 0:
+                add_with_children(member_id)
+        # Then any remaining
+        for member_id in member_to_item:
+            if member_id not in processed:
+                add_with_children(member_id)
+
+        # Replace items in-place
+        dim_items[:] = ordered
 
     @staticmethod
     def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
