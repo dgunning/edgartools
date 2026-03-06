@@ -1334,6 +1334,27 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
             elif 'in billions' in label_lower or '(billions)' in label_lower:
                 return Scale.BILLIONS
 
+    # 6. Check preceding sibling nodes (scale text often in a paragraph before the table)
+    if hasattr(table_node, 'parent') and table_node.parent and hasattr(table_node.parent, 'children'):
+        siblings = table_node.parent.children
+        for idx, child in enumerate(siblings):
+            if child is table_node:
+                # Check up to 3 preceding siblings
+                for si in range(max(0, idx - 3), idx):
+                    sib = siblings[si]
+                    sib_text = sib.content or ''
+                    if not sib_text and hasattr(sib, 'text') and callable(sib.text):
+                        sib_text = sib.text() or ''
+                    if sib_text:
+                        sib_lower = sib_text.lower()
+                        if 'in thousands' in sib_lower or '(thousands)' in sib_lower:
+                            return Scale.THOUSANDS
+                        elif 'in millions' in sib_lower or '(millions)' in sib_lower:
+                            return Scale.MILLIONS
+                        elif 'in billions' in sib_lower or '(billions)' in sib_lower:
+                            return Scale.BILLIONS
+                break
+
     return default_scale
 
 
