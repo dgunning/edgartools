@@ -416,3 +416,5 @@ EdgarTools is distributed under the <a href="LICENSE">MIT License</a>
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=dgunning/edgartools&type=Timeline)](https://star-history.com/#dgunning/edgartools&Timeline)
+
+<!-- mcp-name: io.github.dgunning/edgartools -->
