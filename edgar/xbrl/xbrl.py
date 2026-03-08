@@ -1002,6 +1002,10 @@ class XBRL:
             from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
             line_items = RevenueDeduplicator.deduplicate_statement_items(line_items)
 
+        # Issue edgartools-3n9t / gh:572: Merge rows with same label but different concepts
+        # from XBRL concept switches between periods (complementary NaN values)
+        line_items = self._merge_same_label_line_items(line_items)
+
         # Issue #575: Reorder items so components appear before their totals
         # This fixes cases where the presentation linkbase has incorrect ordering
         # (e.g., IESC filing puts Cash at the end instead of with Current Assets)
@@ -1571,6 +1575,111 @@ class XBRL:
 
         # Replace items in-place
         dim_items[:] = ordered
+
+    @staticmethod
+    def _merge_same_label_line_items(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Merge rows with same label but different concepts from XBRL concept switches.
+
+        When a company switches concepts between periods (e.g., aapl:DerivativeInstrument
+        to us-gaap:CashFlowHedge), the presentation tree creates separate rows with the
+        same label but complementary period values. Merge when values agree on overlap.
+
+        Two guards prevent incorrect merges:
+        1. Same label — group non-abstract, non-dimensional items by label
+        2. Value agreement — overlapping period values must match (0.1% tolerance)
+        """
+        from collections import defaultdict
+
+        # Build label -> [indices] map for non-abstract, non-dimensional items
+        label_groups: Dict[str, List[int]] = defaultdict(list)
+        for i, item in enumerate(line_items):
+            if item.get('is_abstract') or item.get('is_dimensional'):
+                continue
+            label = item.get('label', '')
+            if label:
+                label_groups[label].append(i)
+
+        # Only process labels with multiple items
+        indices_to_remove: set = set()
+        for label, indices in label_groups.items():
+            if len(indices) < 2:
+                continue
+
+            # Try pairwise merging (process in order so primary is first occurrence)
+            for a_pos in range(len(indices)):
+                a_idx = indices[a_pos]
+                if a_idx in indices_to_remove:
+                    continue
+                item_a = line_items[a_idx]
+                values_a = item_a.get('values', {})
+
+                for b_pos in range(a_pos + 1, len(indices)):
+                    b_idx = indices[b_pos]
+                    if b_idx in indices_to_remove:
+                        continue
+                    item_b = line_items[b_idx]
+                    values_b = item_b.get('values', {})
+
+                    # Check overlapping period values agree
+                    overlap_keys = set(values_a.keys()) & set(values_b.keys())
+                    values_agree = True
+                    for pk in overlap_keys:
+                        va = values_a[pk]
+                        vb = values_b[pk]
+                        if va is None or vb is None:
+                            continue
+                        if va == vb:
+                            continue
+                        if va != 0 and abs((va - vb) / va) < 0.001:
+                            continue
+                        values_agree = False
+                        break
+
+                    if not values_agree:
+                        continue
+
+                    # Determine primary (more period values) and secondary
+                    if len(values_b) > len(values_a):
+                        primary_idx, secondary_idx = b_idx, a_idx
+                    else:
+                        primary_idx, secondary_idx = a_idx, b_idx
+                    primary = line_items[primary_idx]
+                    secondary = line_items[secondary_idx]
+
+                    # Merge secondary values into primary
+                    for pk, val in secondary.get('values', {}).items():
+                        if pk not in primary['values']:
+                            primary['values'][pk] = val
+
+                    # Propagate metadata from secondary where primary is missing
+                    for meta_key in ('preferred_signs', 'balance', 'weight', 'units', 'decimals', 'period_types'):
+                        primary_meta = primary.get(meta_key, {})
+                        secondary_meta = secondary.get(meta_key, {})
+                        if isinstance(primary_meta, dict) and isinstance(secondary_meta, dict):
+                            for pk, val in secondary_meta.items():
+                                if pk not in primary_meta:
+                                    primary_meta[pk] = val
+                            primary[meta_key] = primary_meta
+
+                    # Merge all_names
+                    primary_names = primary.get('all_names', [])
+                    secondary_names = secondary.get('all_names', [])
+                    for name in secondary_names:
+                        if name not in primary_names:
+                            primary_names.append(name)
+                    primary['all_names'] = primary_names
+
+                    indices_to_remove.add(secondary_idx)
+
+                    # If a was consumed as secondary, stop matching it against further items.
+                    # The primary (b) will be revisited when the outer loop reaches it.
+                    if secondary_idx == a_idx:
+                        break
+
+        if not indices_to_remove:
+            return line_items
+
+        return [item for i, item in enumerate(line_items) if i not in indices_to_remove]
 
     @staticmethod
     def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
