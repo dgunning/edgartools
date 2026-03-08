@@ -149,7 +149,7 @@ class HTMLParser:
 
             # Add XBRL facts to metadata if found
             if xbrl_facts:
-                metadata.xbrl_data = {'facts': xbrl_facts}
+                metadata.xbrl_data = xbrl_facts
 
             # Build document
             document = self._build_document(tree, metadata)
