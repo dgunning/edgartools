@@ -43,17 +43,17 @@ class FinancialMetrics:
         # Initialize dataframes if statements exist
         if self.xbrl.statements.balance_sheet:
             bs = self.xbrl.statements.balance_sheet
-            self._balance_sheet_df = bs.to_dataframe()
+            self._balance_sheet_df = bs.to_dataframe(presentation=False)
             self._bs_period = bs.periods[0].label
 
         if self.xbrl.statements.income_statement:
             is_ = self.xbrl.statements.income_statement
-            self._income_stmt_df = is_.to_dataframe()
+            self._income_stmt_df = is_.to_dataframe(presentation=False)
             self._is_period = is_.periods[0].label
 
         if self.xbrl.statements.cash_flow:
             cf = self.xbrl.statements.cash_flow
-            self._cash_flow_df = cf.to_dataframe()
+            self._cash_flow_df = cf.to_dataframe(presentation=False)
             self._cf_period = cf.periods[0].label
 
     def _get_value(self, label: StandardConcept, statement_type: str = "BalanceSheet", period_offset: int = 0) -> Optional[float]:

@@ -98,12 +98,13 @@ class TestIssue463ValueTransformations:
 
     def test_default_returns_raw_values(self, aapl_2017_filing):
         """
-        Test that default to_dataframe() returns raw instance values.
+        Test that presentation=False returns raw instance values.
 
-        Issue #463: Default should return raw values from XML, not transformed.
+        Issue #463: presentation=False should return raw values from XML, not transformed.
+        (Default changed to presentation=True in Issue #669.)
         """
         xbrl = aapl_2017_filing.xbrl()
-        df = xbrl.statements.cashflow_statement().to_dataframe()
+        df = xbrl.statements.cashflow_statement().to_dataframe(presentation=False)
 
         # Find dividend row
         dividend_row = df[df['concept'].str.contains('PaymentsOfDividends', na=False)]

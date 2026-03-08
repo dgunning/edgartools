@@ -399,6 +399,7 @@ class StatementStitcher:
                     'original_concept': concept,
                     'latest_label': label,  # Store the original label too
                     'standard_concept': item.get('standard_concept'),
+                    'preferred_sign': self._extract_preferred_sign(item),
                 }
             else:
                 # For existing concepts, update the label to use the most recent one
@@ -424,6 +425,12 @@ class StatementStitcher:
                     if new_standard and not self.concept_metadata[concept_key].get('standard_concept'):
                         self.concept_metadata[concept_key]['standard_concept'] = new_standard
 
+                    # Propagate preferred_sign from newer filing if not set
+                    if self.concept_metadata[concept_key].get('preferred_sign') is None:
+                        ps = self._extract_preferred_sign(item)
+                        if ps is not None:
+                            self.concept_metadata[concept_key]['preferred_sign'] = ps
+
             # Store values for relevant periods
             for period_id in relevant_periods:
                 if period_id in self.periods:  # Only include selected periods
@@ -433,6 +440,18 @@ class StatementStitcher:
                             'value': value,
                             'decimals': item.get('decimals', {}).get(period_id, 0)
                         }
+
+    @staticmethod
+    def _extract_preferred_sign(item: Dict[str, Any]) -> Optional[int]:
+        """Extract concept-level preferred_sign from a statement item.
+
+        preferred_signs is a dict of {period_id: sign_value} but the sign is the same
+        for all periods (it's a concept-level attribute), so we just take the first value.
+        """
+        preferred_signs = item.get('preferred_signs', {})
+        if preferred_signs:
+            return next(iter(preferred_signs.values()))
+        return None
 
     def _merge_duplicate_standard_concepts(self):
         """Merge concept entries that map to the same standard_concept."""
@@ -457,6 +476,12 @@ class StatementStitcher:
                 # Merge data from secondary into primary
                 for period_id, value_data in self.data.get(secondary_key, {}).items():
                     self.data[primary_key][period_id] = value_data
+                # Propagate preferred_sign from secondary if primary doesn't have one
+                if secondary_key in self.concept_metadata:
+                    if self.concept_metadata[primary_key].get('preferred_sign') is None:
+                        secondary_ps = self.concept_metadata[secondary_key].get('preferred_sign')
+                        if secondary_ps is not None:
+                            self.concept_metadata[primary_key]['preferred_sign'] = secondary_ps
                 # Remove the secondary entry
                 if secondary_key in self.data:
                     del self.data[secondary_key]
@@ -514,6 +539,13 @@ class StatementStitcher:
                 if period_id in self.data[concept]:
                     item['values'][period_id] = self.data[concept][period_id]['value']
                     item['decimals'][period_id] = self.data[concept][period_id]['decimals']
+
+            # Add preferred_signs for rendering and DataFrame sign application
+            preferred_sign = metadata.get('preferred_sign')
+            if preferred_sign is not None:
+                item['preferred_signs'] = {pid: preferred_sign for pid in item['values']}
+            else:
+                item['preferred_signs'] = {}
 
             # Set has_values flag based on whether there are any values
             item['has_values'] = len(item['values']) > 0

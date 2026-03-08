@@ -414,7 +414,7 @@ class Statement:
         # Collect equity component member labels from DataFrame
         # DataFrame has more complete dimension info than raw_data's dimension_metadata
         try:
-            df = self.to_dataframe()
+            df = self.to_dataframe(presentation=False)
             equity_axis_rows = df[
                 df['dimension_axis'].fillna('').str.contains('StatementEquityComponentsAxis', case=False)
             ]
@@ -685,7 +685,7 @@ class Statement:
                      include_unit: bool = False,
                      include_point_in_time: bool = False,
                      include_standardization: bool = False,
-                     presentation: bool = False,
+                     presentation: bool = True,
                      matrix: bool = False) -> Any:
         """Convert statement to pandas DataFrame.
 
@@ -707,10 +707,10 @@ class Statement:
                                     This is useful for cross-company analysis and filtering.
                                     Note: The 'standard_concept' column is always available in
                                     the DataFrame when standard=True; this parameter is deprecated.
-            presentation: If True, apply HTML-matching presentation logic (Issue #463)
-                         Cash Flow: outflows (balance='credit') shown as negative
-                         Income: apply preferred_sign transformations
-                         Default: False (raw instance values)
+            presentation: If True (default), apply preferred_sign from the XBRL
+                         presentation linkbase so values match SEC HTML display
+                         (e.g., cash outflows shown as negative). If False, return
+                         raw XBRL instance values.
             matrix: If True, return matrix format for Statement of Equity (equity components
                    as columns, activities as rows). Ignored for non-equity statements.
                    Default: False (standard flat format for backwards compatibility).
@@ -1254,8 +1254,9 @@ class Statement:
         # Get statement type
         statement_type = self.canonical_type if self.canonical_type else self.role_or_type
 
-        # For Income Statement and Cash Flow Statement: Use preferred_sign
-        if statement_type in ('IncomeStatement', 'CashFlowStatement'):
+        # For Income Statement, Cash Flow Statement, and Balance Sheet: Use preferred_sign
+        # Balance Sheet included for contra accounts like Treasury Stock (preferred_sign=-1)
+        if statement_type in ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet'):
             if 'preferred_sign' in result.columns:
                 for col in period_cols:
                     if col not in result.columns:
@@ -1270,8 +1271,6 @@ class Statement:
                         # Apply preferred_sign where it's not None and not 0
                         mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
                         result.loc[mask, col] = numeric_col[mask] * result.loc[mask, 'preferred_sign']
-
-        # Balance Sheet: no transformation
 
         return result
 
@@ -2718,16 +2717,21 @@ class StitchedStatement:
             show_date_range=show_date_range
         )
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def to_dataframe(self, presentation: bool = True) -> pd.DataFrame:
         """
         Convert the stitched statement to a pandas DataFrame.
+
+        Args:
+            presentation: If True (default), apply preferred_sign so values match
+                         SEC HTML display (e.g., cash outflows shown as negative).
+                         If False, return raw XBRL instance values.
 
         Returns:
             pandas DataFrame with periods as columns and concepts as rows
         """
         from edgar.xbrl.stitching import to_pandas
 
-        return to_pandas(self.statement_data)
+        return to_pandas(self.statement_data, presentation=presentation)
 
     def __rich__(self):
         """

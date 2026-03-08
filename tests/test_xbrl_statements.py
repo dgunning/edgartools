@@ -171,7 +171,8 @@ def test_xbrls_cashflow_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     xbs = XBRLS([aapl_xbrl, aapl_xbrl_2022])
     cashflow = xbs.statements.cashflow_statement()
     assert cashflow.periods == ['2023-09-30', '2022-09-24']
-    df = cashflow.to_dataframe()
+    # Use presentation=False to assert raw XBRL instance values
+    df = cashflow.to_dataframe(presentation=False)
     columns = df.columns.tolist()
     print(columns)
     labels = df.label.tolist()
@@ -190,7 +191,7 @@ def test_xbrls_balancesheet_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     assert balance_sheet.periods == ['2023-09-30', '2022-09-24']
     df = balance_sheet.to_dataframe()
     columns = df.columns.tolist()
-    assert columns == ['label', 'concept', 'standard_concept', '2023-09-30', '2022-09-24']
+    assert columns == ['label', 'concept', 'standard_concept', '2023-09-30', '2022-09-24', 'preferred_sign']
     labels = df.label.tolist()
     print(labels)
     # Check using concept filter instead of label since labels are now original company labels
