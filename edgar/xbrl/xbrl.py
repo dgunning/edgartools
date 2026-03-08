@@ -530,6 +530,18 @@ class XBRL:
         except Exception:
             pass
 
+        # Try to set industry from filing header SIC for industry-specific standardization
+        try:
+            if hasattr(filing, '_sgml') and filing._sgml is not None:
+                # Only use SIC if header is already loaded (no extra network call)
+                header = filing._sgml.header
+                if header and header.filers:
+                    sic = header.filers[0].company_data.assigned_sic
+                    if sic:
+                        xbrl.standardization.set_industry_from_sic(sic)
+        except Exception:
+            pass
+
         return xbrl
 
     @property

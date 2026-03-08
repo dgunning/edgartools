@@ -107,6 +107,20 @@ class ReverseIndex:
         self._gaap_mappings: Dict[str, dict] = self._load_json(gaap_mappings_path)
         self._display_names: Dict[str, str] = self._load_json(display_names_path)
 
+        # Extract and store metadata from new-format concept_mappings
+        self._metadata: Optional[dict] = self._gaap_mappings.pop("_metadata", None)
+
+        # Build embedded display names from entries (new format has display_name per entry)
+        # Only use non-ambiguous entries or the primary (first) concept in ambiguous ones
+        self._embedded_display_names: Dict[str, str] = {}
+        for tag, entry in self._gaap_mappings.items():
+            if isinstance(entry, dict) and entry.get("display_name"):
+                std_tags = entry.get("standard_tags", [])
+                if not entry.get("ambiguous") and len(std_tags) == 1:
+                    # Non-ambiguous: display_name directly describes this concept
+                    if std_tags[0] not in self._embedded_display_names:
+                        self._embedded_display_names[std_tags[0]] = entry["display_name"]
+
         # Build the reverse index
         self._index: Dict[str, dict] = self._gaap_mappings
 
@@ -117,8 +131,8 @@ class ReverseIndex:
         # Statistics
         self._stats = {
             "total_mappings": len(self._index),
-            "ambiguous_count": sum(1 for v in self._index.values() if v.get("ambiguous", False)),
-            "deprecated_count": sum(1 for v in self._index.values() if v.get("deprecated")),
+            "ambiguous_count": sum(1 for v in self._index.values() if isinstance(v, dict) and v.get("ambiguous", False)),
+            "deprecated_count": sum(1 for v in self._index.values() if isinstance(v, dict) and v.get("deprecated")),
             "excluded_count": len(EXCLUDED_TAGS),
         }
 
@@ -146,7 +160,7 @@ class ReverseIndex:
             self._normalized_cache[tag.lower()] = tag
 
             # Also store with common prefixes stripped
-            for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "dei:"):
+            for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "ifrs:", "dei:"):
                 if tag.lower().startswith(prefix.lower()):
                     stripped = tag[len(prefix):]
                     self._normalized_cache[stripped.lower()] = tag
@@ -171,7 +185,7 @@ class ReverseIndex:
 
         # Strip namespace prefix if present
         normalized = tag
-        for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "dei:"):
+        for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "ifrs:", "dei:"):
             if tag.startswith(prefix):
                 normalized = tag[len(prefix):]
                 break
@@ -187,12 +201,46 @@ class ReverseIndex:
 
         return None
 
-    def lookup(self, xbrl_tag: str) -> Optional[MappingResult]:
+    def _apply_industry_override(self, entry: dict, industry: str) -> dict:
+        """
+        Apply industry-specific overrides to a mapping entry.
+
+        If the entry has an industry_overrides dict with a key matching the
+        given industry code, merge those overrides into the base entry.
+
+        Args:
+            entry: The base mapping entry
+            industry: Fama-French 48 industry code (e.g., "Banks", "Chips")
+
+        Returns:
+            Entry with overrides applied (may be the original if no override)
+        """
+        overrides = entry.get("industry_overrides")
+        if not overrides or industry not in overrides:
+            return entry
+
+        override = overrides[industry]
+        # Merge: override fields take precedence over base entry
+        merged = dict(entry)
+        merged.pop("industry_overrides", None)  # Don't carry overrides into merged
+        for key, value in override.items():
+            merged[key] = value
+
+        # If override narrows standard_tags to a single entry, it's no longer ambiguous
+        std_tags = merged.get("standard_tags", [])
+        if len(std_tags) == 1:
+            merged["ambiguous"] = False
+
+        return merged
+
+    def lookup(self, xbrl_tag: str, industry: Optional[str] = None) -> Optional[MappingResult]:
         """
         Look up an XBRL tag in the reverse index.
 
         Args:
             xbrl_tag: The XBRL tag to look up (with or without namespace prefix)
+            industry: Optional Fama-French 48 industry code (e.g., "Banks") for
+                     industry-specific overrides
 
         Returns:
             MappingResult with standard concepts and display names, or None if not found
@@ -211,17 +259,21 @@ class ReverseIndex:
         if entry is None:
             return None
 
+        # Apply industry overrides if industry is known
+        if industry and isinstance(entry, dict):
+            entry = self._apply_industry_override(entry, industry)
+
         # Extract data from entry
         standard_tags = entry.get("standard_tags", [])
         is_ambiguous = entry.get("ambiguous", False)
         deprecated = entry.get("deprecated")
         comment = entry.get("comment")
 
-        # Resolve display names
-        display_names = [
-            self._display_names.get(tag, tag)  # Fall back to concept name if no display name
-            for tag in standard_tags
-        ]
+        # Resolve display names: prefer embedded display_name, then display_names.json, then concept name
+        display_names = []
+        for tag in standard_tags:
+            dn = self._embedded_display_names.get(tag) or self._display_names.get(tag, tag)
+            display_names.append(dn)
 
         return MappingResult(
             standard_concepts=standard_tags,
@@ -236,7 +288,8 @@ class ReverseIndex:
         self,
         xbrl_tag: str,
         context: Optional[Dict] = None,
-        log_ambiguous: bool = False
+        log_ambiguous: bool = False,
+        industry: Optional[str] = None
     ) -> Optional[str]:
         """
         Get the standard concept for an XBRL tag.
@@ -251,11 +304,13 @@ class ReverseIndex:
                      - balance: Debit/credit balance type
                      - statement_type: Type of statement
             log_ambiguous: If True, log ambiguous resolutions to UnmappedTagLogger
+            industry: Optional Fama-French 48 industry code (e.g., "Banks") for
+                     industry-specific overrides
 
         Returns:
             The standard concept name, or None if not found/excluded
         """
-        result = self.lookup(xbrl_tag)
+        result = self.lookup(xbrl_tag, industry=industry)
         if result is None:
             return None
 
@@ -319,7 +374,8 @@ class ReverseIndex:
         """
         Disambiguate between candidate concepts using context.
 
-        Phase 3/4: Uses section membership and label clues to resolve ambiguous tags.
+        Phase 3/4: Uses section membership, entry metadata, and label clues
+        to resolve ambiguous tags.
 
         Args:
             xbrl_tag: The original XBRL tag
@@ -333,11 +389,18 @@ class ReverseIndex:
         statement_type = context.get('statement_type', 'BalanceSheet')
         is_total = context.get('is_total', False)
 
+        # Get the mapping entry for this tag (may have section/is_total/confidence metadata)
+        normalized = self._normalize_tag(xbrl_tag)
+        entry = self._index.get(normalized, {}) if normalized else {}
+        entry_section = entry.get('section') if isinstance(entry, dict) else None
+        entry_is_total = entry.get('is_total') if isinstance(entry, dict) else None
+        entry_confidence = entry.get('confidence', 0.0) if isinstance(entry, dict) else 0.0
+
         try:
             from .sections import get_section_for_concept
 
-            # Phase 4: Special case - if is_total is True, prefer "Total" concepts
-            if is_total:
+            # Phase 4: Special case - if is_total is True (from context or entry), prefer "Total" concepts
+            if is_total or entry_is_total:
                 for candidate in candidates:
                     if 'total' in candidate.lower():
                         logger.debug(
@@ -359,17 +422,19 @@ class ReverseIndex:
                     if 'current' in cl and 'noncurrent' not in cl:
                         return candidate
 
-            if not section:
+            # Use entry-level section for disambiguation if context section is missing
+            effective_section = section or entry_section
+            if not effective_section:
                 return None
 
             # Find which candidate belongs in this section
             for candidate in candidates:
                 candidate_section = get_section_for_concept(candidate, statement_type)
-                if candidate_section and self._sections_match(section, candidate_section):
+                if candidate_section and self._sections_match(effective_section, candidate_section):
                     return candidate
 
             # Secondary: check if section name is in concept name
-            section_lower = section.lower()
+            section_lower = effective_section.lower()
             for candidate in candidates:
                 candidate_lower = candidate.lower()
                 if 'current' in section_lower and 'noncurrent' not in section_lower:
@@ -440,7 +505,8 @@ class ReverseIndex:
 
         return False
 
-    def get_display_name(self, xbrl_tag: str, context: Optional[Dict] = None) -> Optional[str]:
+    def get_display_name(self, xbrl_tag: str, context: Optional[Dict] = None,
+                         industry: Optional[str] = None) -> Optional[str]:
         """
         Get the user-friendly display name for an XBRL tag.
 
@@ -450,11 +516,12 @@ class ReverseIndex:
                      - section: Balance sheet section (e.g., "Current Assets")
                      - balance: Debit/credit balance type
                      - statement_type: Type of statement
+            industry: Optional Fama-French 48 industry code for overrides
 
         Returns:
             The display name, or None if not found/excluded
         """
-        result = self.lookup(xbrl_tag)
+        result = self.lookup(xbrl_tag, industry=industry)
         if result is None:
             return None
 
@@ -468,8 +535,9 @@ class ReverseIndex:
                 xbrl_tag, result.standard_concepts, context
             )
             if resolved:
-                # Return the display name for the resolved concept
-                return self._display_names.get(resolved, resolved)
+                # Return display name: prefer embedded, then display_names.json
+                return (self._embedded_display_names.get(resolved)
+                        or self._display_names.get(resolved, resolved))
 
         return result.primary_display_name
 
@@ -508,7 +576,13 @@ class ReverseIndex:
         Returns:
             The user-friendly display name, or the concept itself if no mapping
         """
-        return self._display_names.get(standard_concept, standard_concept)
+        return (self._embedded_display_names.get(standard_concept)
+                or self._display_names.get(standard_concept, standard_concept))
+
+    @property
+    def metadata(self) -> Optional[dict]:
+        """Get metadata about the mapping source (version, build date, etc.)."""
+        return self._metadata.copy() if self._metadata else None
 
     @property
     def stats(self) -> Dict[str, int]:
@@ -559,7 +633,8 @@ def lookup(xbrl_tag: str) -> Optional[MappingResult]:
 def get_standard_concept(
     xbrl_tag: str,
     context: Optional[Dict] = None,
-    log_ambiguous: bool = False
+    log_ambiguous: bool = False,
+    industry: Optional[str] = None
 ) -> Optional[str]:
     """
     Convenience function to get standard concept for an XBRL tag.
@@ -568,22 +643,25 @@ def get_standard_concept(
         xbrl_tag: The XBRL tag to look up
         context: Optional context for disambiguation
         log_ambiguous: If True, log ambiguous resolutions to UnmappedTagLogger
+        industry: Optional Fama-French 48 industry code for overrides
 
     Returns:
         Standard concept name or None
     """
-    return get_reverse_index().get_standard_concept(xbrl_tag, context, log_ambiguous)
+    return get_reverse_index().get_standard_concept(xbrl_tag, context, log_ambiguous, industry=industry)
 
 
-def get_display_name(xbrl_tag: str, context: Optional[Dict] = None) -> Optional[str]:
+def get_display_name(xbrl_tag: str, context: Optional[Dict] = None,
+                     industry: Optional[str] = None) -> Optional[str]:
     """
     Convenience function to get display name for an XBRL tag.
 
     Args:
         xbrl_tag: The XBRL tag to look up
         context: Optional context for disambiguation
+        industry: Optional Fama-French 48 industry code for overrides
 
     Returns:
         Display name or None
     """
-    return get_reverse_index().get_display_name(xbrl_tag, context)
+    return get_reverse_index().get_display_name(xbrl_tag, context, industry=industry)

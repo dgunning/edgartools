@@ -301,3 +301,72 @@ def test_bottom_up_noncurrent_liabilities():
 def test_bottom_up_handles_empty_items():
     """Empty input does not raise."""
     _assign_sections_bottom_up([], [])
+
+
+# ── Industry overrides ──────────────────────────────────────────────────────
+
+def test_industry_override_resolves_ambiguous_tag():
+    """Industry override narrows ambiguous tag to single concept."""
+    from edgar.xbrl.standardization.reverse_index import get_reverse_index
+    idx = get_reverse_index()
+
+    # Without industry: ambiguous
+    result = idx.lookup("DeferredIncomeTaxLiabilitiesNet")
+    assert result.is_ambiguous
+    assert len(result.standard_concepts) == 2
+
+    # With Banks industry: resolved to single concept
+    result_banks = idx.lookup("DeferredIncomeTaxLiabilitiesNet", industry="Banks")
+    assert not result_banks.is_ambiguous
+    assert len(result_banks.standard_concepts) == 1
+    assert result_banks.standard_concepts[0] == "DeferredTaxCurrentLiabilities"
+
+
+def test_industry_override_unknown_industry_returns_base():
+    """Unknown industry code falls back to base entry."""
+    from edgar.xbrl.standardization.reverse_index import get_reverse_index
+    idx = get_reverse_index()
+
+    result_base = idx.lookup("DeferredIncomeTaxLiabilitiesNet")
+    result_unknown = idx.lookup("DeferredIncomeTaxLiabilitiesNet", industry="FakeIndustry")
+    assert result_unknown.standard_concepts == result_base.standard_concepts
+    assert result_unknown.is_ambiguous == result_base.is_ambiguous
+
+
+def test_industry_override_via_get_standard_concept():
+    """get_standard_concept passes industry through to lookup."""
+    from edgar.xbrl.standardization.reverse_index import get_reverse_index
+    idx = get_reverse_index()
+
+    # AccountsPayableCurrentAndNoncurrent is ambiguous: TradePayables vs OtherOperatingNonCurrentLiabilities
+    # Banks override resolves to TradePayables
+    concept = idx.get_standard_concept("AccountsPayableCurrentAndNoncurrent", industry="Banks")
+    assert concept == "TradePayables"
+
+
+def test_sic_to_fama_french_mapping():
+    """SIC codes map to correct FF48 industry codes."""
+    from edgar.xbrl.standardization.sic_industry import sic_to_fama_french
+
+    assert sic_to_fama_french(6020) == "Banks"
+    assert sic_to_fama_french(3674) == "Chips"
+    assert sic_to_fama_french(2834) == "Drugs"
+    assert sic_to_fama_french(3711) == "Autos"
+    assert sic_to_fama_french(9999) is None
+
+
+def test_standardization_cache_set_industry():
+    """StandardizationCache.set_industry_from_sic converts SIC to FF48."""
+    from edgar.xbrl.standardization.cache import StandardizationCache
+    from unittest.mock import MagicMock
+
+    cache = StandardizationCache(MagicMock())
+    assert cache.industry is None
+
+    result = cache.set_industry_from_sic("6020")
+    assert result == "Banks"
+    assert cache.industry == "Banks"
+
+    result = cache.set_industry_from_sic(None)
+    assert result is None
+    assert cache.industry is None

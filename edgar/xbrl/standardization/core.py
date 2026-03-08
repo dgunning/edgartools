@@ -981,7 +981,8 @@ def _assign_sections_bottom_up(
             logger.debug("Bottom-up: Assigned section '%s' to '%s'", current_section, label)
 
 
-def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper) -> List[Dict[str, Any]]:
+def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptMapper,
+                          industry: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Add standard concept metadata to statement items without replacing labels.
 
@@ -994,6 +995,8 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     Args:
         statement_data: List of statement line items
         mapper: ConceptMapper instance (used for context building)
+        industry: Optional Fama-French 48 industry code (e.g., "Banks") for
+                 industry-specific overrides
 
     Returns:
         Statement data with standard_concept metadata added where mappings exist
@@ -1063,7 +1066,7 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
         _, concept, label, context = next((x for x in items_to_standardize if x[0] == i), (None, None, None, None))
 
         # Get the standard concept identifier (e.g., "CommonEquity", not "Total Stockholders' Equity")
-        standard_concept = reverse_index.get_standard_concept(concept, context)
+        standard_concept = reverse_index.get_standard_concept(concept, context, industry=industry)
 
         if standard_concept:
             # Add standard_concept as metadata, preserve original label
