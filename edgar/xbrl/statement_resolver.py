@@ -124,9 +124,7 @@ statement_registry = {
         alternative_concepts=[
             "us-gaap_StatementOfIncomeAbstract",
             "ifrs-full_IncomeStatementAbstract",  # IFRS equivalent
-            # IFRS often combines income + comprehensive income into one statement
-            "ifrs-full_StatementOfComprehensiveIncomeAbstract",
-            "ifrs-full_StatementOfProfitOrLossAbstract"
+            "ifrs-full_StatementOfProfitOrLossAbstract"  # IFRS P&L (pure)
         ],
         concept_patterns=[
             r".*_IncomeStatementAbstract$",
@@ -145,7 +143,9 @@ statement_registry = {
             # Issue #581: Make Operations pattern more specific to avoid matching tax disclosures
             # Match "StatementOfOperations" or "StatementsOfOperations" but NOT "ContinuingOperationsDetails"
             r".*[Ss]tatements?[Oo]f[Oo]perations.*",
-            r".*StatementConsolidatedStatementsOfIncome.*"
+            r".*StatementConsolidatedStatementsOfIncome.*",
+            # Issue #673: IFRS P&L role names
+            r".*[Ss]tatement[Oo]f[Pp]rofit[Oo]r[Ll]oss.*"
         ],
         title="Consolidated Statement of Income",
         supports_parenthetical=True,
@@ -778,6 +778,12 @@ class StatementResolver:
                     if indicator in clean_def or indicator in clean_uri:
                         score -= 100  # Strong penalty only for pure comprehensive income
                         break
+
+            # Issue #673: Boost IFRS P&L indicators for IncomeStatement resolution
+            ifrs_pl_indicators = ['profitorloss', 'profitloss', 'statementofprofitorloss']
+            if any(ind in clean_def for ind in ifrs_pl_indicators):
+                if 'comprehensive' not in clean_def and 'other' not in clean_def:
+                    score += 40
 
             # Issue #581: Penalize tax-related disclosures that may accidentally match
             # e.g., IncomeTaxBenefitProvisionFromContinuingOperationsDetails

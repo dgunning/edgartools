@@ -741,6 +741,24 @@ class XBRL:
                     if 'BalanceSheet' not in statement_type:
                         break
 
+            # If we didn't find a match, try IFRS concept → type mapping
+            if not statement_type:
+                _IFRS_CONCEPT_TO_TYPE = {
+                    "ifrs-full_StatementOfProfitOrLossAbstract": "IncomeStatement",
+                    "ifrs-full_IncomeStatementAbstract": "IncomeStatement",
+                    "ifrs-full_StatementOfFinancialPositionAbstract": "BalanceSheet",
+                    "ifrs-full_StatementOfCashFlowsAbstract": "CashFlowStatement",
+                    "ifrs-full_StatementOfChangesInEquityAbstract": "StatementOfEquity",
+                    "ifrs-full_StatementOfComprehensiveIncomeAbstract": "ComprehensiveIncome",
+                    "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract": "ComprehensiveIncome",
+                }
+                matched_type = _IFRS_CONCEPT_TO_TYPE.get(primary_concept)
+                if matched_type:
+                    if 'parenthetical' in role_def:
+                        statement_type = f"{matched_type}Parenthetical"
+                    else:
+                        statement_type = matched_type
+
             # If we didn't find a match, try additional patterns for notes and disclosures
             if not statement_type:
                 if 'us-gaap_NotesToFinancialStatementsAbstract' in primary_concept or 'note' in role_def:
