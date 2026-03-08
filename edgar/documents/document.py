@@ -873,7 +873,7 @@ class Document:
 
     def to_markdown(self) -> str:
         """Convert document to Markdown."""
-        from edgar.documents.renderers.markdown_renderer import MarkdownRenderer
+        from edgar.documents.renderers.markdown import MarkdownRenderer
         renderer = MarkdownRenderer()
         return renderer.render(self)
 
