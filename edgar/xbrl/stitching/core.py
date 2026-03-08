@@ -16,6 +16,21 @@ from edgar.xbrl.stitching.ordering import StatementOrderingManager
 from edgar.xbrl.stitching.periods import determine_optimal_periods
 from edgar.xbrl.stitching.presentation import VirtualPresentationTree
 
+# Standard concepts that represent the same economic item but have different names
+# in the standardization map (e.g., balance sheet vs cash flow variants of "cash").
+# Groups containing concepts from equivalent standards are merged without the
+# variant-name check — value agreement on overlapping periods is still enforced.
+_EQUIVALENT_STANDARD_CONCEPTS = [
+    ('CashAndCashEquivalents', 'CashAndMarketableSecurities'),
+]
+
+# Build a lookup for fast access: standard_concept -> canonical representative
+_EQUIV_MAP: dict[str, str] = {}
+for _group in _EQUIVALENT_STANDARD_CONCEPTS:
+    _canonical = _group[0]
+    for _sc in _group:
+        _EQUIV_MAP[_sc] = _canonical
+
 
 class StatementStitcher:
     """
@@ -542,6 +557,11 @@ class StatementStitcher:
 
         This prevents unrelated sub-items that happen to map to the same standard
         concept from being incorrectly merged (Issue #642).
+
+        Additionally, concepts whose standard concepts are declared equivalent
+        (via _EQUIVALENT_STANDARD_CONCEPTS) are grouped together and merged
+        without the variant-name check — value agreement on overlapping periods
+        is still enforced (Issue #610).
         """
         standard_to_keys = defaultdict(list)
         for concept_key, metadata in self.concept_metadata.items():
@@ -549,9 +569,19 @@ class StatementStitcher:
             if sc:
                 standard_to_keys[sc].append(concept_key)
 
+        # Merge equivalent standard concept groups (e.g., CashAndCashEquivalents
+        # and CashAndMarketableSecurities) into a single group.
+        equivalence_merged: set[str] = set()
+        for sc in list(standard_to_keys.keys()):
+            canonical = _EQUIV_MAP.get(sc)
+            if canonical and canonical != sc:
+                standard_to_keys[canonical].extend(standard_to_keys.pop(sc))
+                equivalence_merged.add(canonical)
+
         for standard_concept, keys in standard_to_keys.items():
             if len(keys) <= 1:
                 continue
+            skip_variant_check = standard_concept in equivalence_merged
             # Pairwise merge: iteratively find compatible pairs until no more merges
             merged = True
             while merged:
@@ -567,8 +597,10 @@ class StatementStitcher:
                         break
                     for j in range(i + 1, len(live_keys)):
                         a_key, b_key = live_keys[i], live_keys[j]
-                        # Only merge concepts whose names are variants of each other
-                        if not self._are_concept_name_variants(a_key, b_key):
+                        # For equivalent-merged groups the equivalence declaration
+                        # is the identity signal; skip the variant name check.
+                        # For regular groups, require name containment (Issue #642).
+                        if not skip_variant_check and not self._are_concept_name_variants(a_key, b_key):
                             continue
                         a_data = self.data.get(a_key, {})
                         b_data = self.data.get(b_key, {})
