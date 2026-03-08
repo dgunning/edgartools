@@ -11,6 +11,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from edgar.xbrl.core import format_date, parse_date
+from edgar.xbrl.exceptions import StatementNotFound
 from edgar.xbrl.standardization import standardize_statement
 from edgar.xbrl.stitching.ordering import StatementOrderingManager
 from edgar.xbrl.stitching.periods import determine_optimal_periods
@@ -745,8 +746,13 @@ def stitch_statements(
             xbrl_index = period_metadata['xbrl_index']
             xbrl = xbrl_list[xbrl_index]
 
-            # Get the statement and period info
-            statement = xbrl.get_statement_by_type(statement_type, include_dimensions=include_dimensions)
+            # Get the statement and period info — skip filings that lack
+            # this statement type (e.g., some VALE 20-F filings have no
+            # cash flow presentation role).  Issue #683.
+            try:
+                statement = xbrl.get_statement_by_type(statement_type, include_dimensions=include_dimensions)
+            except StatementNotFound:
+                continue
             if statement:
                 # Only include the specific period from this statement
                 period_key = period_metadata['period_key']
