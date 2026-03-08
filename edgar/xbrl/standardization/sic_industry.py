@@ -99,7 +99,7 @@ _FF48_SIC_RANGES = [
     # 27 Gold - Precious Metals
     (1040, 1049, "Gold"),
     # 28 Mines - Non-Metallic and Industrial Metal Mining
-    (1000, 1039, "Mines"), (1050, 1099, "Mines"), (1200, 1299, "Mines"),
+    (1000, 1039, "Mines"), (1050, 1099, "Mines"),
     (1400, 1499, "Mines"),
     # 29 Coal - Coal
     (1200, 1299, "Coal"),

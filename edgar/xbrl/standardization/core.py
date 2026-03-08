@@ -23,11 +23,11 @@ _reverse_index = None
 
 
 def _get_reverse_index():
-    """Lazy load the reverse index singleton."""
+    """Lazy load the reverse index singleton (shared with reverse_index module)."""
     global _reverse_index
     if _reverse_index is None:
-        from .reverse_index import ReverseIndex
-        _reverse_index = ReverseIndex()
+        from .reverse_index import get_reverse_index
+        _reverse_index = get_reverse_index()
     return _reverse_index
 
 
@@ -1052,18 +1052,18 @@ def standardize_statement(statement_data: List[Dict[str, Any]], mapper: ConceptM
     # Second pass - add standard_concept metadata without changing labels
     result = []
 
-    # Track which indices need standardization for faster lookup
-    standardize_indices = {i for i, _, _, _ in items_to_standardize}
+    # Build dict for O(1) lookup in second pass (avoids O(n²) scan)
+    items_by_index = {i: (concept, label, context) for i, concept, label, context in items_to_standardize}
 
     # Process all items
     for i, item in enumerate(statement_data):
-        if i not in standardize_indices:
+        if i not in items_by_index:
             # Items that don't need standardization are used as-is
             result.append(item)
             continue
 
         # Get the prepared data for this item
-        _, concept, label, context = next((x for x in items_to_standardize if x[0] == i), (None, None, None, None))
+        concept, label, context = items_by_index[i]
 
         # Get the standard concept identifier (e.g., "CommonEquity", not "Total Stockholders' Equity")
         standard_concept = reverse_index.get_standard_concept(concept, context, industry=industry)

@@ -226,10 +226,12 @@ class ReverseIndex:
         for key, value in override.items():
             merged[key] = value
 
-        # If override narrows standard_tags to a single entry, it's no longer ambiguous
+        # Update ambiguity flag based on override's standard_tags count
         std_tags = merged.get("standard_tags", [])
         if len(std_tags) == 1:
             merged["ambiguous"] = False
+        elif len(std_tags) > 1:
+            merged["ambiguous"] = True
 
         return merged
 

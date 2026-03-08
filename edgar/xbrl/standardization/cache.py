@@ -146,9 +146,10 @@ class StandardizationCache:
         if use_cache and statement_type in self._statement_cache:
             return self._statement_cache[statement_type]
 
-        # Add statement type context to each item
+        # Add statement type context to each item (only if not already set)
         for item in raw_data:
-            item['statement_type'] = statement_type
+            if 'statement_type' not in item:
+                item['statement_type'] = statement_type
 
         # Late import to avoid circular dependency
         from edgar.xbrl.standardization import standardize_statement
