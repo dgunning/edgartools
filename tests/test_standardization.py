@@ -370,3 +370,39 @@ def test_standardization_cache_set_industry():
     result = cache.set_industry_from_sic(None)
     assert result is None
     assert cache.industry is None
+
+
+def test_ifrs_tag_standardization():
+    """IFRS tags (ifrs-full_ prefix) resolve to standard concepts."""
+    from edgar.xbrl.standardization.reverse_index import ReverseIndex
+
+    idx = ReverseIndex()
+
+    # Income statement
+    assert idx.get_standard_concept("ifrs-full_Revenue") == "Revenue"
+    assert idx.get_standard_concept("ifrs-full_CostOfSales") == "CostOfGoodsAndServicesSold"
+    assert idx.get_standard_concept("ifrs-full_GrossProfit") == "GrossProfit"
+    assert idx.get_standard_concept("ifrs-full_ProfitLossBeforeTax") == "PretaxIncomeLoss"
+    assert idx.get_standard_concept("ifrs-full_ProfitLoss") == "ProfitLoss"
+    assert idx.get_standard_concept("ifrs-full_ProfitLossFromOperatingActivities") == "OperatingIncomeLoss"
+    assert idx.get_standard_concept("ifrs-full_ResearchAndDevelopmentExpense") == "ResearchAndDevelopementExpenses"
+
+    # Balance sheet
+    assert idx.get_standard_concept("ifrs-full_Assets") == "Assets"
+    assert idx.get_standard_concept("ifrs-full_CurrentAssets") == "CurrentAssetsTotal"
+    assert idx.get_standard_concept("ifrs-full_NoncurrentAssets") == "NonCurrentAssetsTotal"
+    assert idx.get_standard_concept("ifrs-full_Liabilities") == "Liabilities"
+    assert idx.get_standard_concept("ifrs-full_Equity") == "AllEquityBalanceIncludingMinorityInterest"
+    assert idx.get_standard_concept("ifrs-full_RetainedEarnings") == "RetainedEarnings"
+    assert idx.get_standard_concept("ifrs-full_Goodwill") == "Goodwill"
+    assert idx.get_standard_concept("ifrs-full_PropertyPlantAndEquipment") == "PlantPropertyEquipmentNet"
+
+    # Cash flow
+    assert idx.get_standard_concept("ifrs-full_CashFlowsFromUsedInOperatingActivities") == "NetCashFromOperatingActivities"
+    assert idx.get_standard_concept("ifrs-full_CashFlowsFromUsedInInvestingActivities") == "NetCashFromInvestingActivities"
+    assert idx.get_standard_concept("ifrs-full_CashFlowsFromUsedInFinancingActivities") == "NetCashFromFinancingActivities"
+    assert idx.get_standard_concept("ifrs-full_DividendsPaidClassifiedAsFinancingActivities") == "CommonDividendsPaid"
+
+    # EPS
+    assert idx.get_standard_concept("ifrs-full_BasicEarningsLossPerShare") == "EarningsPerShareBasic"
+    assert idx.get_standard_concept("ifrs-full_DilutedEarningsLossPerShare") == "EarningsPerShareDiluted"

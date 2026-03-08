@@ -160,7 +160,7 @@ class ReverseIndex:
             self._normalized_cache[tag.lower()] = tag
 
             # Also store with common prefixes stripped
-            for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "ifrs:", "dei:"):
+            for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "ifrs-full_", "ifrs:", "dei:"):
                 if tag.lower().startswith(prefix.lower()):
                     stripped = tag[len(prefix):]
                     self._normalized_cache[stripped.lower()] = tag
@@ -185,7 +185,7 @@ class ReverseIndex:
 
         # Strip namespace prefix if present
         normalized = tag
-        for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "ifrs:", "dei:"):
+        for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "ifrs-full_", "ifrs:", "dei:"):
             if tag.startswith(prefix):
                 normalized = tag[len(prefix):]
                 break
