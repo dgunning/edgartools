@@ -1208,43 +1208,118 @@ class XBRL:
                             pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
                             period_types[period_key] = pt
 
+                elif not non_dimensioned_facts_for_period and not values.get(period_key):
+                    # Issue #646: No non-dimensional total — compute from dimensional members
+                    # Use only facts that passed is_valid_dimension filtering
+                    valid_dim_facts = [
+                        (cid, wf) for cid, wf in period_facts
+                        if wf['dimension_info'] and len(wf['dimension_info']) == 1  # Skip multi-axis facts
+                    ]
+                    # Re-apply is_valid_dimension filter (match the logic above)
+                    filtered_dim_facts = []
+                    for cid, wf in valid_dim_facts:
+                        dim_info = wf['dimension_info']
+                        is_valid = True
+                        if view != StatementView.DETAILED and valid_dimensional_members:
+                            for dim_data in dim_info:
+                                axis_key = dim_data.get('dimension', '').replace(':', '_')
+                                member_key = dim_data.get('member', '').replace(':', '_')
+                                if axis_key in valid_dimensional_members:
+                                    if member_key not in valid_dimensional_members[axis_key]:
+                                        is_valid = False
+                                        break
+                        if is_valid:
+                            filtered_dim_facts.append((cid, wf))
+
+                    synthetic = self._compute_synthetic_total(filtered_dim_facts, element_id_normalized)
+                    if synthetic:
+                        values[period_key] = synthetic['total']
+                        fact = synthetic['fact']
+                        context_id = synthetic['context_id']
+
+                        if fact.decimals is not None:
+                            try:
+                                if fact.decimals == 'INF':
+                                    decimals[period_key] = 0
+                                else:
+                                    decimals[period_key] = int(fact.decimals)
+                            except (ValueError, TypeError):
+                                decimals[period_key] = 0
+
+                        units[period_key] = fact.unit_ref
+
+                        if context_id in self.contexts:
+                            context = self.contexts[context_id]
+                            if hasattr(context, 'period') and context.period:
+                                pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                                period_types[period_key] = pt
+
             else:
                 # For standard financial statements, prefer non-dimensioned facts
                 # Issue #564: Select by (1) fewest dimensions, (2) highest precision
-                if len(period_facts) == 1:
-                    context_id, wrapped_fact = period_facts[0]
-                    fact = wrapped_fact['fact']
+                # Issue #646: When only dimensional facts exist, compute total from members
+                non_dim_facts = [(cid, wf) for cid, wf in period_facts if not wf['dimension_info']]
+
+                if non_dim_facts:
+                    # Normal path: select best non-dimensional fact
+                    if len(non_dim_facts) == 1:
+                        context_id, wrapped_fact = non_dim_facts[0]
+                        fact = wrapped_fact['fact']
+                    else:
+                        best = min(non_dim_facts,
+                                   key=lambda x: (len(x[1]['dimension_info']),
+                                                  -self._get_fact_precision(x[1]['fact'])))
+                        context_id, wrapped_fact = best
+                        fact = wrapped_fact['fact']
+
+                    values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+
+                    # Store the decimals info for proper scaling
+                    if fact.decimals is not None:
+                        try:
+                            if fact.decimals == 'INF':
+                                decimals[period_key] = 0
+                            else:
+                                decimals[period_key] = int(fact.decimals)
+                        except (ValueError, TypeError):
+                            decimals[period_key] = 0
+
+                    units[period_key] = fact.unit_ref
+
+                    if context_id in self.contexts:
+                        context = self.contexts[context_id]
+                        if hasattr(context, 'period') and context.period:
+                            pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                            period_types[period_key] = pt
                 else:
-                    # Multiple contexts for same period - select best by dimensions and precision
-                    # min() with tuple key: (dimension_count ASC, -precision DESC)
-                    best = min(period_facts,
-                               key=lambda x: (len(x[1]['dimension_info']),
-                                              -self._get_fact_precision(x[1]['fact'])))
-                    context_id, wrapped_fact = best
-                    fact = wrapped_fact['fact']
+                    # Issue #646: No non-dimensional facts — compute total from dimensional members
+                    # Only use single-axis facts to avoid double-counting cross-dimensioned facts
+                    dim_facts = [
+                        (cid, wf) for cid, wf in period_facts
+                        if wf['dimension_info'] and len(wf['dimension_info']) == 1
+                    ]
+                    synthetic = self._compute_synthetic_total(dim_facts, element_id_normalized)
+                    if synthetic:
+                        values[period_key] = synthetic['total']
+                        fact = synthetic['fact']
+                        context_id = synthetic['context_id']
 
-                # Store the value
-                values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
+                        if fact.decimals is not None:
+                            try:
+                                if fact.decimals == 'INF':
+                                    decimals[period_key] = 0
+                                else:
+                                    decimals[period_key] = int(fact.decimals)
+                            except (ValueError, TypeError):
+                                decimals[period_key] = 0
 
-                # Store the decimals info for proper scaling
-                if fact.decimals is not None:
-                    try:
-                        if fact.decimals == 'INF':
-                            decimals[period_key] = 0  # Infinite precision, no scaling
-                        else:
-                            decimals[period_key] = int(fact.decimals)
-                    except (ValueError, TypeError):
-                        decimals[period_key] = 0  # Default if decimals can't be converted
+                        units[period_key] = fact.unit_ref
 
-                # Store unit_ref for this period
-                units[period_key] = fact.unit_ref
-
-                # Store period_type from context
-                if context_id in self.contexts:
-                    context = self.contexts[context_id]
-                    if hasattr(context, 'period') and context.period:
-                        pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
-                        period_types[period_key] = pt
+                        if context_id in self.contexts:
+                            context = self.contexts[context_id]
+                            if hasattr(context, 'period') and context.period:
+                                pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
+                                period_types[period_key] = pt
 
         # Create preferred_signs dict for all periods (same value for all periods of this concept)
         preferred_signs = {}
@@ -1589,6 +1664,52 @@ class XBRL:
                 item['level'] += 1
 
         return line_items
+
+    def _compute_synthetic_total(self, dim_facts, element_id_normalized):
+        """
+        Issue #646: Compute a synthetic total from single-axis dimensional members.
+
+        When a concept has only dimensional facts (no non-dimensional total),
+        group by axis, pick the axis with the most members, and sum their values.
+
+        Guards:
+        - Skips per-share and ratio concepts (summing them is meaningless)
+        - Expects only single-axis facts (caller must filter multi-axis facts)
+
+        Returns dict with 'total', 'fact', 'context_id' or None if not computable.
+        """
+        if not dim_facts:
+            return None
+
+        # Guard: don't synthesize totals for per-share or ratio concepts
+        element = self.element_catalog.get(element_id_normalized)
+        if element:
+            dt = (element.data_type or '').lower()
+            if 'pershare' in dt or 'pure' in dt:
+                return None
+
+        from collections import defaultdict
+        axis_groups = defaultdict(list)
+        for cid, wf in dim_facts:
+            dim_info = wf['dimension_info']
+            val = wf['fact'].numeric_value
+            if val is not None:
+                axis = dim_info[0].get('dimension', '')
+                axis_groups[axis].append((cid, wf, val))
+
+        if not axis_groups:
+            return None
+
+        # Pick the axis with most members (most complete breakdown)
+        best_axis = max(axis_groups.values(), key=len)
+        total = sum(v for _, _, v in best_axis)
+        first_cid, first_wf, _ = best_axis[0]
+
+        return {
+            'total': total,
+            'fact': first_wf['fact'],
+            'context_id': first_cid,
+        }
 
     @staticmethod
     def _get_fact_precision(fact) -> int:
