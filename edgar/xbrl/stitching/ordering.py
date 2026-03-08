@@ -37,7 +37,7 @@ class FinancialStatementTemplates:
         (0, "revenue_section", [
             # Product/Service Revenue Components
             "us-gaap:SalesRevenueGoodsNet",
-            "us-gaap:ProductSales", 
+            "us-gaap:ProductSales",
             "us-gaap:SalesRevenueServicesNet",
             "us-gaap:SubscriptionRevenue",
             # Contract Revenue
@@ -45,9 +45,12 @@ class FinancialStatementTemplates:
             "us-gaap:RevenueFromContractWithCustomerIncludingAssessedTax",
             # Total Revenue
             "us-gaap:Revenue",
-            "us-gaap:Revenues", 
+            "us-gaap:Revenues",
             "us-gaap:SalesRevenueNet",
-            "us-gaap:OperatingRevenue"
+            "us-gaap:OperatingRevenue",
+            # IFRS Revenue
+            "ifrs-full:Revenue",
+            "ifrs-full:RevenueFromContractsWithCustomers"
         ]),
 
         # Cost Section (100-199)
@@ -58,12 +61,16 @@ class FinancialStatementTemplates:
             "us-gaap:CostOfGoodsAndServicesSold",
             "us-gaap:CostOfSales",
             "us-gaap:DirectOperatingCosts",
-            "us-gaap:CostsAndExpenses"
+            "us-gaap:CostsAndExpenses",
+            # IFRS Cost
+            "ifrs-full:CostOfSales"
         ]),
 
         # Gross Profit (200-299)
         (200, "gross_profit", [
-            "us-gaap:GrossProfit"
+            "us-gaap:GrossProfit",
+            # IFRS Gross Profit
+            "ifrs-full:GrossProfit"
         ]),
 
         # Operating Expenses (300-399)
@@ -73,7 +80,7 @@ class FinancialStatementTemplates:
             "us-gaap:ResearchAndDevelopmentExpense",
             # SG&A Expenses
             "us-gaap:SellingGeneralAndAdministrativeExpense",
-            "us-gaap:GeneralAndAdministrativeExpense", 
+            "us-gaap:GeneralAndAdministrativeExpense",
             "us-gaap:AdministrativeExpense",
             "us-gaap:SellingAndMarketingExpense",
             "us-gaap:SellingExpense",
@@ -82,14 +89,20 @@ class FinancialStatementTemplates:
             # Total Operating Expenses
             "us-gaap:NoninterestExpense",
             "us-gaap:OperatingCostsAndExpenses",
-            "us-gaap:OperatingExpenses"
+            "us-gaap:OperatingExpenses",
+            # IFRS Operating Expenses
+            "ifrs-full:ResearchAndDevelopmentExpense",
+            "ifrs-full:AdministrativeExpense",
+            "ifrs-full:DistributionCosts"
         ]),
 
         # Operating Income (400-499)
         (400, "operating_income", [
             "us-gaap:OperatingIncomeLoss",
             "us-gaap:OperatingIncome",
-            "us-gaap:IncomeLossFromContinuingOperationsBeforeInterestAndTaxes"
+            "us-gaap:IncomeLossFromContinuingOperationsBeforeInterestAndTaxes",
+            # IFRS Operating Income
+            "ifrs-full:ProfitLossFromOperatingActivities"
         ]),
 
         # Non-Operating (500-599)
@@ -102,7 +115,10 @@ class FinancialStatementTemplates:
             "us-gaap:InvestmentIncomeInterest",  # NVIDIA uses this variant
             "us-gaap:OtherNonoperatingIncomeExpense",
             "us-gaap:NonoperatingIncomeExpense",
-            "orcl:NonoperatingIncomeExpenseIncludingEliminationOfNetIncomeLossAttributableToNoncontrollingInterests"
+            "orcl:NonoperatingIncomeExpenseIncludingEliminationOfNetIncomeLossAttributableToNoncontrollingInterests",
+            # IFRS Non-Operating
+            "ifrs-full:FinanceIncome",
+            "ifrs-full:FinanceCosts"
         ]),
 
         # Pre-Tax Income (600-699)
@@ -110,13 +126,17 @@ class FinancialStatementTemplates:
             "us-gaap:IncomeLossBeforeIncomeTaxes",
             "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
             "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
-            "orcl:IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems"
+            "orcl:IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems",
+            # IFRS Pre-Tax
+            "ifrs-full:ProfitLossBeforeTax"
         ]),
 
         # Tax (700-799)
         (700, "tax", [
             "us-gaap:IncomeTaxesPaidNet",
-            "us-gaap:IncomeTaxExpenseBenefit"
+            "us-gaap:IncomeTaxExpenseBenefit",
+            # IFRS Tax
+            "ifrs-full:IncomeTaxExpenseContinuingOperations"
         ]),
 
         # Net Income (800-899)
@@ -127,7 +147,10 @@ class FinancialStatementTemplates:
             "us-gaap:NetIncomeLoss",
             "us-gaap:ProfitLoss",
             "us-gaap:NetIncomeLossAttributableToNonredeemableNoncontrollingInterest",
-            "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest"
+            "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest",
+            # IFRS Net Income
+            "ifrs-full:ProfitLoss",
+            "ifrs-full:ProfitLossAttributableToOwnersOfParent"
         ]),
 
         # Per Share Data (900-999)
@@ -137,7 +160,10 @@ class FinancialStatementTemplates:
             "us-gaap:EarningsPerShareDiluted",
             "us-gaap:WeightedAverageNumberOfSharesOutstandingAbstract",
             "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
-            "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+            "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+            # IFRS EPS
+            "ifrs-full:BasicEarningsLossPerShare",
+            "ifrs-full:DilutedEarningsLossPerShare"
         ])
     ]
 
@@ -151,6 +177,7 @@ class FinancialStatementTemplates:
             "Accounts Receivable",
             "Trade Receivables",
             "Inventory",
+            "Inventories",
             "Prepaid Expenses",
             "Other Current Assets",
             "Total Current Assets"
@@ -163,6 +190,7 @@ class FinancialStatementTemplates:
             "Long-term Investments",
             "Goodwill",
             "Intangible Assets",
+            "Non-current Assets",
             "Other Non-current Assets",
             "Total Non-current Assets",
             "Total Assets"
@@ -185,6 +213,7 @@ class FinancialStatementTemplates:
             "Long-term Debt",
             "Deferred Revenue",
             "Deferred Tax Liabilities",
+            "Non-current Liabilities",
             "Other Non-current Liabilities",
             "Total Non-current Liabilities",
             "Total Liabilities"
@@ -193,10 +222,13 @@ class FinancialStatementTemplates:
         # Equity (800-999)
         (800, "equity", [
             "Common Stock",
+            "Share Capital",
             "Additional Paid-in Capital",
+            "Share Premium",
             "Retained Earnings",
             "Accumulated Other Comprehensive Income",
             "Treasury Stock",
+            "Treasury Shares",
             "Total Stockholders' Equity",
             "Total Shareholders' Equity",
             "Total Equity"
@@ -267,6 +299,9 @@ class FinancialStatementTemplates:
             normalized = 'us-gaap_' + normalized.split('_', 1)[1]
         elif normalized.startswith('gaap_'):
             normalized = 'us-gaap_' + normalized.split('_', 1)[1]
+        # IFRS namespace variations: ifrs-full, ifrs
+        elif normalized.startswith('ifrs-full_') or normalized.startswith('ifrs_'):
+            normalized = 'ifrs-full_' + normalized.split('_', 1)[1]
 
         return normalized
 
@@ -276,7 +311,7 @@ class FinancialStatementTemplates:
             return False
 
         # For XBRL concepts in templates, don't try to match against labels
-        if ':' in label2 or '_gaap_' in label2.lower():
+        if ':' in label2 or '_gaap_' in label2.lower() or 'ifrs' in label2.lower():
             return False
 
         # Use existing normalization logic for label matching

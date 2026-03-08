@@ -44,12 +44,14 @@ def render_stitched_statement(
         statement_title = f"{statement_title}{period_desc}"
 
     # Use the existing rendering function with the new show_date_range parameter
+    # Pass standard=False because stitcher already applied standardization
     return render_statement(
         statement_data=statement_data,
         periods_to_display=periods_to_display,
         statement_title=statement_title,
         statement_type=statement_type,
         entity_info=entity_info,
+        standard=False,
         show_date_range=show_date_range,
         xbrl_instance=xbrl_instance
     )

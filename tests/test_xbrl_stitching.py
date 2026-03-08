@@ -39,10 +39,16 @@ def meta_xbrl():
 
 def test_init(stitcher):
     """Test initialization of StatementStitcher."""
-    assert stitcher.concept_mapper is not None
-    assert stitcher.mapping_store is not None
+    assert stitcher.industry is None
     assert stitcher.periods == []
     assert stitcher.period_dates == {}
+
+
+def test_init_with_industry():
+    """Test initialization of StatementStitcher with industry."""
+    stitcher = StatementStitcher(industry="Banks")
+    assert stitcher.industry == "Banks"
+    assert stitcher.periods == []
 
 
 def test_period_type_enum():
@@ -187,6 +193,24 @@ def test_standardize_statement_data(mock_standardize, stitcher):
     result = stitcher._standardize_statement_data(statement)
 
     mock_standardize.assert_called_once()
+    # Verify industry=None is passed (default stitcher has no industry)
+    call_args = mock_standardize.call_args
+    assert call_args[1].get('industry') is None
+    assert result == [{'label': 'Standardized Label'}]
+
+
+@patch('edgar.xbrl.stitching.core.standardize_statement')
+def test_standardize_statement_data_with_industry(mock_standardize):
+    """Test standardizing statement data passes industry through."""
+    mock_standardize.return_value = [{'label': 'Standardized Label'}]
+    stitcher = StatementStitcher(industry="Banks")
+    statement = {'statement_type': 'BalanceSheet', 'data': [{'label': 'Original Label'}]}
+
+    result = stitcher._standardize_statement_data(statement)
+
+    mock_standardize.assert_called_once()
+    call_args = mock_standardize.call_args
+    assert call_args[1].get('industry') == "Banks"
     assert result == [{'label': 'Standardized Label'}]
 
 

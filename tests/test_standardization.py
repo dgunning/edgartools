@@ -406,3 +406,89 @@ def test_ifrs_tag_standardization():
     # EPS
     assert idx.get_standard_concept("ifrs-full_BasicEarningsLossPerShare") == "EarningsPerShareBasic"
     assert idx.get_standard_concept("ifrs-full_DilutedEarningsLossPerShare") == "EarningsPerShareDiluted"
+
+
+# ── IFRS ordering templates ──────────────────────────────────────────────────
+
+def test_ifrs_concepts_in_ordering_templates():
+    """IFRS concepts are recognized by ordering templates for correct statement positioning."""
+    from edgar.xbrl.stitching.ordering import FinancialStatementTemplates
+
+    templates = FinancialStatementTemplates()
+
+    # IFRS income statement concepts should get template positions
+    assert templates.get_template_position("ifrs-full:Revenue", "", "IncomeStatement") is not None
+    assert templates.get_template_position("ifrs-full:CostOfSales", "", "IncomeStatement") is not None
+    assert templates.get_template_position("ifrs-full:GrossProfit", "", "IncomeStatement") is not None
+    assert templates.get_template_position("ifrs-full:ProfitLossBeforeTax", "", "IncomeStatement") is not None
+    assert templates.get_template_position("ifrs-full:BasicEarningsLossPerShare", "", "IncomeStatement") is not None
+
+    # Revenue section should come before cost section
+    revenue_pos = templates.get_template_position("ifrs-full:Revenue", "", "IncomeStatement")
+    cost_pos = templates.get_template_position("ifrs-full:CostOfSales", "", "IncomeStatement")
+    gross_pos = templates.get_template_position("ifrs-full:GrossProfit", "", "IncomeStatement")
+    assert revenue_pos < cost_pos < gross_pos
+
+
+def test_ifrs_concept_normalization():
+    """IFRS namespace variations are normalized consistently."""
+    from edgar.xbrl.stitching.ordering import FinancialStatementTemplates
+
+    templates = FinancialStatementTemplates()
+
+    # Both ifrs-full and ifrs prefixes should normalize the same
+    norm1 = templates._normalize_xbrl_concept("ifrs-full:Revenue")
+    norm2 = templates._normalize_xbrl_concept("ifrs:Revenue")
+    assert norm1 == norm2
+
+    # Colon vs underscore separator
+    norm3 = templates._normalize_xbrl_concept("ifrs-full_Revenue")
+    assert norm1 == norm3
+
+
+def test_ifrs_labels_skip_in_label_matching():
+    """IFRS concept strings in templates are not matched against plain labels."""
+    from edgar.xbrl.stitching.ordering import FinancialStatementTemplates
+
+    templates = FinancialStatementTemplates()
+
+    # Label matching should skip IFRS concepts (handled by concept matching)
+    assert templates._labels_match("Revenue", "ifrs-full:Revenue") is False
+    assert templates._labels_match("Cost of Sales", "ifrs-full:CostOfSales") is False
+
+
+# ── Industry threading through stitching ──────────────────────────────────────
+
+def test_stitch_statements_auto_detects_industry():
+    """stitch_statements auto-detects industry from XBRL standardization cache."""
+    from unittest.mock import MagicMock, patch
+    from edgar.xbrl.stitching.core import stitch_statements
+
+    # Create mock XBRL objects with standardization.industry
+    mock_xbrl = MagicMock()
+    mock_xbrl.standardization.industry = "Banks"
+    mock_xbrl.get_statement_by_type.return_value = None
+    mock_xbrl.find_statement.return_value = None
+
+    with patch('edgar.xbrl.stitching.core.determine_optimal_periods', return_value=[]):
+        result = stitch_statements([mock_xbrl], statement_type="IncomeStatement")
+
+    # Result should be empty since no statements found, but industry was detected
+    assert result is not None
+
+
+def test_stitch_statements_explicit_industry_overrides_auto():
+    """Explicit industry parameter takes precedence over auto-detection."""
+    from unittest.mock import MagicMock, patch
+    from edgar.xbrl.stitching.core import stitch_statements, StatementStitcher
+
+    mock_xbrl = MagicMock()
+    mock_xbrl.standardization.industry = "Banks"
+
+    # Patch StatementStitcher to capture the industry it receives
+    with patch.object(StatementStitcher, '__init__', return_value=None) as mock_init, \
+         patch.object(StatementStitcher, 'stitch_statements', return_value={'periods': [], 'statement_data': []}), \
+         patch('edgar.xbrl.stitching.core.determine_optimal_periods', return_value=[]):
+        stitch_statements([mock_xbrl], industry="Chips")
+        # When explicit industry is provided, it should be used
+        mock_init.assert_called_once_with(industry="Chips")

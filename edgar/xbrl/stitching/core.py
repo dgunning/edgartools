@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from edgar.xbrl.core import format_date, parse_date
-from edgar.xbrl.standardization import ConceptMapper, initialize_default_mappings, standardize_statement
+from edgar.xbrl.standardization import standardize_statement
 from edgar.xbrl.stitching.ordering import StatementOrderingManager
 from edgar.xbrl.stitching.periods import determine_optimal_periods
 from edgar.xbrl.stitching.presentation import VirtualPresentationTree
@@ -39,20 +39,15 @@ class StatementStitcher:
         QUARTERLY_TREND = "Quarterly Trend"
         ALL_PERIODS = "All Available Periods"
 
-    def __init__(self, concept_mapper: Optional[ConceptMapper] = None):
+    def __init__(self, industry: Optional[str] = None):
         """
         Initialize a StatementStitcher instance.
 
         Args:
-            concept_mapper: Optional ConceptMapper for standardizing concepts.
-                            If None, a default mapper is created.
+            industry: Optional Fama-French 48 industry code (e.g., "Banks")
+                      for industry-specific standardization overrides.
         """
-        if concept_mapper is None:
-            self.mapping_store = initialize_default_mappings()
-            self.concept_mapper = ConceptMapper(self.mapping_store)
-        else:
-            self.concept_mapper = concept_mapper
-            self.mapping_store = concept_mapper.mapping_store
+        self.industry = industry
 
         # Initialize data structures
         self.periods = []  # Ordered list of period identifiers
@@ -343,8 +338,8 @@ class StatementStitcher:
         for item in statement_data:
             item['statement_type'] = statement_type
 
-        # Apply standardization using the concept mapper
-        return standardize_statement(statement_data, self.concept_mapper)
+        # Apply standardization using the reverse index (concept_mapper not needed)
+        return standardize_statement(statement_data, None, industry=self.industry)
 
     def _integrate_statement_data(
         self,
@@ -542,13 +537,14 @@ class StatementStitcher:
 
 
 def stitch_statements(
-    xbrl_list: List[Any], 
+    xbrl_list: List[Any],
     statement_type: str = 'IncomeStatement',
     period_type: Union[StatementStitcher.PeriodType, str] = StatementStitcher.PeriodType.RECENT_PERIODS,
     max_periods: int = 3,
     standard: bool = True,
     use_optimal_periods: bool = True,
-    include_dimensions: bool = False
+    include_dimensions: bool = False,
+    industry: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Stitch together statements from multiple XBRL objects.
@@ -561,12 +557,20 @@ def stitch_statements(
         standard: Whether to use standardized concept labels (default: True)
         use_optimal_periods: Whether to use the entity info to determine optimal periods (default: True)
         include_dimensions: Whether to include dimensional segment data (default: False for stitching)
+        industry: Optional Fama-French 48 industry code (e.g., "Banks").
+                  If None, auto-detected from the first XBRL object's standardization cache.
 
     Returns:
         Stitched statement data
     """
+    # Auto-detect industry from first XBRL if not provided
+    if industry is None and xbrl_list:
+        first_xbrl = xbrl_list[0]
+        if hasattr(first_xbrl, 'standardization'):
+            industry = first_xbrl.standardization.industry
+
     # Initialize the stitcher
-    stitcher = StatementStitcher()
+    stitcher = StatementStitcher(industry=industry)
 
     # Collect statements of the specified type from each XBRL object
     statements = []
