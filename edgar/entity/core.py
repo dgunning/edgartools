@@ -680,7 +680,8 @@ class Company(Entity):
         Check if this company is incorporated outside the United States.
 
         Uses the SEC state of incorporation code to determine if the company
-        is registered in a foreign jurisdiction.
+        is registered in a foreign jurisdiction. Falls back to filer_type
+        when state of incorporation is not available.
 
         Returns:
             True if incorporated in a foreign country, False if US or unknown
@@ -695,18 +696,23 @@ class Company(Entity):
         if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
             from edgar.reference._codes import is_foreign_company
             return is_foreign_company(self.data.state_of_incorporation)
-        return False
+        # Fallback: use filer_type which checks filed forms
+        return self.filer_type in ('Foreign', 'Canadian')
 
-    @property
+    @cached_property
     def filer_type(self) -> Optional[str]:
         """
-        Get the filer type based on state of incorporation.
+        Get the filer type based on state of incorporation, with fallback to filed forms.
+
+        When the state of incorporation is available, uses that for classification.
+        Otherwise, infers filer type from recent filing forms (10-K → Domestic,
+        20-F → Foreign, 40-F → Canadian).
 
         Returns:
-            'Domestic' - Incorporated in US
-            'Canadian' - Incorporated in Canada
-            'Foreign' - Incorporated elsewhere
-            None - Unknown or state of incorporation not available
+            'Domestic' - Incorporated in US or files 10-K
+            'Canadian' - Incorporated in Canada or files 40-F
+            'Foreign' - Incorporated elsewhere or files 20-F
+            None - Unknown
 
         Example:
             >>> Company('AAPL').filer_type
@@ -716,9 +722,20 @@ class Company(Entity):
             >>> Company('CNQ').filer_type  # Canadian Natural Resources
             'Canadian'
         """
+        # Primary: state_of_incorporation (fast, no network call needed)
         if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
             from edgar.reference._codes import get_filer_type
             return get_filer_type(self.data.state_of_incorporation)
+
+        # Fallback: infer from filed form types
+        # Check order matters: 40-F before 6-K since Canadian filers also file 6-K
+        form_types = self._get_form_types(limit=50)
+        if '40-F' in form_types or '40-F/A' in form_types:
+            return 'Canadian'
+        elif '20-F' in form_types or '20-F/A' in form_types or '6-K' in form_types:
+            return 'Foreign'
+        elif '10-K' in form_types or '10-K/A' in form_types or '10-Q' in form_types:
+            return 'Domestic'
         return None
 
     def _get_form_types(self, limit: int = 100) -> set:
