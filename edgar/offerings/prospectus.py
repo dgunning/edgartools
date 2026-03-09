@@ -556,8 +556,141 @@ class Prospectus424B:
 
     @cached_property
     def filing_fees(self) -> FilingFeesData:
-        """Filing fees XBRL data. Returns empty until Phase 4."""
-        return FilingFeesData()
+        """Filing fees from EX-FILING FEES XBRL exhibit.
+        Available for ~43% of 424B2, ~23% of 424B5. Returns empty if no exhibit."""
+        from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+
+        data = extract_filing_fees_xbrl(self._filing)
+        if not data.get('has_exhibit'):
+            return FilingFeesData()
+
+        rows = []
+        for row in data.get('offering_rows', []):
+            rows.append(FilingFeesRow(
+                security_type=row.get('security_type'),
+                security_title=row.get('security_title'),
+                max_aggregate_offering_price=row.get('max_aggregate_offering_price'),
+                fee_rate=row.get('fee_rate'),
+                fee_amount=row.get('fee_amount'),
+                fee_rule=row.get('fee_rule'),
+            ))
+
+        return FilingFeesData(
+            has_exhibit=True,
+            exhibit_url=data.get('exhibit_url'),
+            form_type=data.get('form_type'),
+            registration_file_number=data.get('registration_file_number'),
+            total_offering_amount=data.get('total_offering_amount'),
+            total_fee_amount=data.get('total_fee_amount'),
+            offering_rows=rows,
+            is_final_prospectus=data.get('is_final_prospectus', True),
+        )
+
+    # ------------------------------------------------------------------
+    # Lifecycle navigation (Phase 4)
+    # ------------------------------------------------------------------
+
+    @cached_property
+    def _file_number(self) -> Optional[str]:
+        """The 333-XXXXX Securities Act file number for this filing's shelf."""
+        try:
+            ih = self._filing.index_headers
+            fv = ih.filer.filing_values if ih.filer else None
+            fn = fv.file_number if fv else None
+            if fn and fn.startswith('333-'):
+                return fn
+        except Exception:
+            pass
+        # Fallback to full header
+        try:
+            fns = self._filing.header.file_numbers or []
+            for fn in fns:
+                if fn and fn.startswith('333-'):
+                    return fn
+        except Exception:
+            pass
+        return None
+
+    @cached_property
+    def _base_file_number(self) -> Optional[str]:
+        """Strip suffix from file number: '333-278184-02' -> '333-278184'."""
+        fn = self._file_number
+        if not fn:
+            return None
+        parts = fn.split('-')
+        if len(parts) >= 2:
+            return parts[0] + '-' + parts[1]
+        return fn
+
+    @cached_property
+    def shelf_registration(self) -> Optional['Filing']:
+        """Find the shelf registration (S-3, S-3ASR, F-3, S-1) for this filing."""
+        base_fn = self._base_file_number
+        if not base_fn:
+            return None
+
+        try:
+            from edgar import Company
+            entity = Company(self._filing.cik)
+            filings = entity.get_filings(form=['S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'])
+            for f in filings.head(20):
+                try:
+                    ih = f.index_headers
+                    fv = ih.filer.filing_values if ih.filer else None
+                    f_fn = fv.file_number if fv else None
+                    if f_fn and base_fn in f_fn:
+                        return f
+                except Exception:
+                    continue
+        except Exception:
+            pass
+        return None
+
+    @cached_property
+    def related_filings(self) -> Optional[list]:
+        """All 424B* filings under the same shelf registration file number."""
+        base_fn = self._base_file_number
+        if not base_fn:
+            return None
+
+        try:
+            from edgar import Company
+            entity = Company(self._filing.cik)
+            filings = entity.get_filings(form=PROSPECTUS_FORMS)
+            related = []
+            for f in filings.head(100):
+                if f.accession_no == self._filing.accession_no:
+                    continue
+                try:
+                    ih = f.index_headers
+                    fv = ih.filer.filing_values if ih.filer else None
+                    f_fn = fv.file_number if fv else None
+                    if f_fn and base_fn in f_fn:
+                        related.append(f)
+                except Exception:
+                    continue
+            return related if related else None
+        except Exception:
+            pass
+        return None
+
+    @cached_property
+    def related_8k(self) -> Optional['Filing']:
+        """Find the 8-K filed on the same day (firm commitment offerings).
+        Returns None for ATM/resale filings or if no 8-K found."""
+        if self._offering_type not in (OfferingType.FIRM_COMMITMENT, OfferingType.BEST_EFFORTS):
+            return None
+
+        try:
+            from edgar import Company
+            entity = Company(self._filing.cik)
+            filings = entity.get_filings(form='8-K')
+            for f in filings.head(20):
+                if f.filing_date == self._filing.filing_date:
+                    return f
+        except Exception:
+            pass
+        return None
 
     # ------------------------------------------------------------------
     # Rich display
