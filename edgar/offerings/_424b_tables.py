@@ -506,13 +506,13 @@ def extract_offering_terms(table: 'TableNode'):
         elif 'listing' in key or 'exchange' in key:
             terms['listing_exchange'] = value
         elif 'subscription price' in key:
-            terms['subscription_price'] = value
+            additional['Subscription Price'] = value
         elif 'subscription rights' in key:
-            terms['subscription_rights'] = value
+            additional['Subscription Rights'] = value
         elif 'record date' in key:
-            terms['record_date'] = value
+            additional['Record Date'] = value
         elif 'over-subscription' in key or 'over subscription' in key:
-            terms['over_subscription_privilege'] = value
+            additional['Over-Subscription Privilege'] = value
         else:
             # Store as additional term
             additional[cells[0].rstrip(':')] = value

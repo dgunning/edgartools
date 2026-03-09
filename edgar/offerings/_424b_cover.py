@@ -25,8 +25,11 @@ def extract_cover_page_fields(filing: 'Filing') -> dict:
 
     Returns a dict with 11 fields suitable for CoverPageData(**result).
     """
-    doc = filing.parse()
-    text = doc.text()
+    try:
+        doc = filing.parse()
+        text = doc.text() if doc else ''
+    except Exception:
+        text = ''
     cover = text[:15000]
 
     result: dict = {}
@@ -42,7 +45,7 @@ def extract_cover_page_fields(filing: 'Filing') -> dict:
 
     # === BOOLEAN FIELDS (fast keyword detection) ===
     result['is_supplement'] = bool(re.search(
-        r'PROSPECTUS\s+SUPPLEMENT', cover))
+        r'(?:^|\n)\s*PROSPECTUS\s+SUPPLEMENT', cover, re.IGNORECASE))
 
     result['is_preliminary'] = bool(re.search(
         r'Subject\s+to\s+Completion|not\s+complete\s+and\s+may\s+be\s+changed|PRELIMINARY\s+PROSPECTUS',
@@ -86,7 +89,7 @@ def extract_cover_page_fields(filing: 'Filing') -> dict:
     # exchange_ticker (search wider area)
     for p in [
         r'under\s+the\s+symbol\s+["\u201c\u201d\u2018\u2019"]\s*([A-Z]{1,6})["\u201c\u201d\u2018\u2019".,]',
-        r'under\s+the\s+(?:trading\s+)?symbol\s+.?\s*([A-Z]{2,6})\b',
+        r'under\s+the\s+(?:trading\s+)?symbol\s+["\u201c\u201d\u2018\u2019.]?\s*([A-Z]{2,6})\b',
     ]:
         m = re.search(p, text[:50000], re.IGNORECASE)
         if m:

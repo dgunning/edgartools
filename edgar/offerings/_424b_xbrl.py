@@ -106,7 +106,13 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
 
     # Build offering_rows list
     offering_rows = []
-    for row_key in sorted(rows.keys()):
+    def _row_sort_key(k):
+        try:
+            return (0, int(k))
+        except ValueError:
+            return (1, k)
+
+    for row_key in sorted(rows.keys(), key=_row_sort_key):
         row = rows[row_key]
         offering_rows.append({
             'security_type': row.get('ffd:OfferingSctyTp'),
@@ -119,7 +125,7 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
         })
 
     # Check final prospectus flag
-    is_final = bool(metadata.get('ffd:FnlPrspctsFlg'))
+    is_final = metadata.get('ffd:FnlPrspctsFlg', '').lower() == 'true'
 
     return {
         'has_exhibit': True,

@@ -132,6 +132,10 @@ class CoverPageData(BaseModel):
             return None
         try:
             clean = self.offering_amount.replace("$", "").replace(",", "").strip()
+            multipliers = {'million': 1_000_000, 'billion': 1_000_000_000}
+            for word, mult in multipliers.items():
+                if clean.lower().endswith(word):
+                    return float(clean[:len(clean) - len(word)].strip()) * mult
             return float(clean)
         except (ValueError, AttributeError):
             return None
