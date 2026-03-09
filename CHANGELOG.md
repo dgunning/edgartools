@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.22.0] - 2026-03-08
+
+### Added
+
+- **Data-Driven Concept Mappings** — Replaced hand-maintained `gaap_mappings.json` (2,077 tags, 96 concepts) with a data-driven `concept_mappings.json` built from analysis of 32,240 real SEC filings (2,770 tags, 234 concepts). Each entry carries embedded metadata: display name, section, is_total flag, confidence, company count, temporal consistency, and industry overrides ([bd73e838](https://github.com/dgunning/edgartools/commit/bd73e838))
+
+- **Industry-Aware XBRL Standardization** — Industry overrides (769 entries mapped across Fama-French 48 industries) automatically resolve 42 ambiguous tags and correct 725 is_total signals per industry. SIC codes are now mapped to FF48 industry codes for automatic industry detection when parsing filings ([bd73e838](https://github.com/dgunning/edgartools/commit/bd73e838))
+
+- **150 IFRS Tag Mappings** — Added 150 `ifrs-full_` prefixed tag mappings for international filer standardization, improving coverage for 20-F filers. Verified on Novo Nordisk 20-F: 93% income statement, 78% balance sheet, 76% cash flow coverage ([d643805c](https://github.com/dgunning/edgartools/commit/d643805c))
+
+- **Standardization Integrated into Stitching** — Industry-aware standardization is now threaded through the multi-filing stitching system, giving consistent concept normalization across all historical filing periods ([48b1fa30](https://github.com/dgunning/edgartools/commit/48b1fa30))
+
+### Fixed
+
+- **XBRL Stitching: Same-Label Row Merging** — When companies switch XBRL concepts between fiscal years (e.g., `aapl:DerivativeInstrument` to `us-gaap:CashFlowHedge`), the presentation tree now merges duplicate rows with complementary period values using value-agreement as a safety guard ([#572](https://github.com/dgunning/edgartools/issues/572)) ([031d1042](https://github.com/dgunning/edgartools/commit/031d1042))
+
+- **XBRL Stitching: Concept Alias Merging** — Concept name variant detection now uses pairwise matching with two guards (substring containment + value agreement) to correctly coalesce aliased totals (e.g., Disney's `*ContinuingOperations` → plain variant) without incorrectly merging unrelated sub-items ([#642](https://github.com/dgunning/edgartools/issues/642)) ([fa4f457b](https://github.com/dgunning/edgartools/commit/fa4f457b))
+
+- **XBRL Stitching: Equivalent Standard Concepts** — Introduces `_EQUIVALENT_STANDARD_CONCEPTS` to unify rows where companies changed between economically identical concepts (e.g., `CashAndCashEquivalents` vs `CashAndMarketableSecurities`) that map to different standard concepts ([#610](https://github.com/dgunning/edgartools/issues/610)) ([aec58dca](https://github.com/dgunning/edgartools/commit/aec58dca))
+
+- **XBRL Stitching: Missing Statement Handling** — Stitching no longer aborts when a filing lacks the requested statement type (e.g., VALE 20-F filings without a cash flow presentation role). The period is now skipped gracefully ([#683](https://github.com/dgunning/edgartools/issues/683)) ([d799120a](https://github.com/dgunning/edgartools/commit/d799120a))
+
+- **Dimensional Total Synthesis** — When a concept has only dimensional facts (e.g., DIS `CostOfGoodsAndServicesSold` broken into Service + Product on ProductOrServiceAxis) with no non-dimensional total, the correct aggregate is now computed by summing the dimensional members ([#646](https://github.com/dgunning/edgartools/issues/646)) ([0ba5bc52](https://github.com/dgunning/edgartools/commit/0ba5bc52))
+
+- **IFRS Statement Misclassification** — IFRS filers like SNY had `income_statement()` and `comprehensive_income()` resolving to the same statement. Fixed by adding IFRS concept classification in Phase 1, removing ambiguous overlap, and adding P&L role pattern with IFRS scoring boost ([#673](https://github.com/dgunning/edgartools/issues/673)) ([a2fd8225](https://github.com/dgunning/edgartools/commit/a2fd8225))
+
+- **Preferred Sign Applied in to_dataframe()** — `Statement.to_dataframe()` now defaults to `presentation=True`, matching the sign conventions shown in Rich rendering. `StitchedStatement.to_dataframe()` also preserves and applies `preferred_sign`, including contra accounts like Treasury Stock on the balance sheet ([#669](https://github.com/dgunning/edgartools/issues/669)) ([2d795630](https://github.com/dgunning/edgartools/commit/2d795630))
+
+- **Document.to_markdown() Import Error** — Fixed incorrect import path `markdown_renderer` → `markdown` in `Document.to_markdown()` ([#684](https://github.com/dgunning/edgartools/issues/684)) ([b6107ef8](https://github.com/dgunning/edgartools/commit/b6107ef8))
+
+- **Document.to_json() AttributeError** — `Document.to_json()` no longer raises `AttributeError: 'str' object has no attribute 'to_dict'` when `xbrl_data` is stored as a dict. The parser now assigns the fact list directly ([#685](https://github.com/dgunning/edgartools/issues/685)) ([e8e6e695](https://github.com/dgunning/edgartools/commit/e8e6e695))
+
+- **Standardization Bug Fixes** — Resolved 5 correctness bugs: Coal/Mines SIC range overlap, incorrect ambiguity flag on override, O(n²) linear scan replaced with O(1) dict lookup, dual `ReverseIndex` singleton, and raw data mutation on `statement_type` field ([d681caec](https://github.com/dgunning/edgartools/commit/d681caec))
+
 ## [5.21.1] - 2026-03-06
 
 ### Fixed
