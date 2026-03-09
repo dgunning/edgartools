@@ -231,6 +231,13 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'DEF 14A': ('ProxyStatement', 'proxy statement with executive compensation'),
         'DEFA14A': ('ProxyStatement', 'additional proxy soliciting materials'),
         'DEFM14A': ('ProxyStatement', 'merger-related proxy statement'),
+        '424B1': ('Prospectus424B', 'prospectus (exchange offer / IPO)'),
+        '424B2': ('Prospectus424B', 'prospectus (structured note / debt)'),
+        '424B3': ('Prospectus424B', 'prospectus (resale / rights offering)'),
+        '424B4': ('Prospectus424B', 'prospectus (priced IPO / shelf takedown)'),
+        '424B5': ('Prospectus424B', 'prospectus (shelf takedown / ATM / PIPE)'),
+        '424B7': ('Prospectus424B', 'prospectus (WKSI base update)'),
+        '424B8': ('Prospectus424B', 'prospectus supplement'),
     }
 
     if base_form in form_map:
@@ -314,6 +321,10 @@ def obj(sec_filing: Filing) -> Optional[object]:
             return FormD.from_xml(xml)
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):
+        from edgar.offerings.prospectus import Prospectus424B
+        return Prospectus424B.from_filing(sec_filing)
 
     elif matches_form(sec_filing, NCEN_FORMS):
         return FundCensus.from_filing(sec_filing)
