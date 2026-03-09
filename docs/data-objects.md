@@ -251,6 +251,22 @@ mai.advisor_name                           # advisor details
 
 ---
 
+## Prospectus Supplements (424B)
+
+Extract offering terms, pricing, underwriting, and dilution from shelf takedown prospectuses.
+
+```python
+prospectus = filing.obj()                  # Prospectus424B
+deal = prospectus.deal                     # Deal: normalized deal summary
+deal.price                                 # per-share price (float)
+deal.gross_proceeds                        # total offering amount
+deal.discount_rate                         # underwriting fee as fraction of price
+```
+
+[:octicons-arrow-right-24: Prospectus Supplements guide](guides/prospectus424b-data-object-guide.md)
+
+---
+
 ## How it works
 
 Call `filing.obj()` on any supported filing. EdgarTools detects the form type, parses the raw HTML/XML/XBRL, and returns the right data object. If a filing type isn't supported yet, you'll get an `UnsupportedFilingTypeError`.

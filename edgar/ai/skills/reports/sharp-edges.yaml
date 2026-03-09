@@ -79,6 +79,37 @@ sharp_edges:
       if subs:
           df = subs.to_dataframe()
 
+  - id: deal-none-for-atm
+    summary: Deal price/shares are None for ATM offerings (price is "at-the-market")
+    severity: high
+    solution: |
+      deal = prospectus.deal
+      if deal.is_atm:
+          # price and shares are None — use gross_proceeds from cover page
+          print(deal.gross_proceeds)  # May still be available
+      else:
+          print(f"${deal.price} x {deal.shares:,}")
+
+  - id: deal-424b2-different
+    summary: 424B2 structured notes have different content than equity 424B5
+    severity: medium
+    solution: |
+      deal = prospectus.deal
+      if deal.offering_type.value == "structured_note":
+          # Most equity fields (shares, dilution) will be None
+          # Use prospectus.structured_note_terms instead
+          terms = prospectus.structured_note_terms
+          if terms:
+              print(terms.underlying, terms.maturity_date)
+
+  - id: deal-dilution-equity-only
+    summary: Dilution data only populated for equity offerings, not debt/notes
+    severity: medium
+    solution: |
+      if deal.dilution_per_share is not None:
+          print(f"Dilution: ${deal.dilution_per_share}/share")
+      # None for debt offerings, structured notes, ATMs without dilution table
+
   - id: eightk-items-different
     summary: 8-K items indicate events, detail often in exhibits
     severity: low

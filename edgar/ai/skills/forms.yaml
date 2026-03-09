@@ -9,6 +9,10 @@ mappings:
 
   capital_raising:
     "IPO|going public": "S-1"
+    "prospectus supplement|shelf takedown|follow-on offering": "424B5"
+    "ipo prospectus|ipo pricing": "424B4"
+    "resale prospectus|pipe resale": "424B3"
+    "structured note prospectus": "424B2"
     "crowdfunding": "C"
     "private placement": "D"
     "regulation a|mini-ipo": "1-A"
@@ -35,3 +39,4 @@ gotchas:
   - "/A suffix = amendment (10-K/A, 8-K/A)"
   - "Form 4 = insider trades; SC 13D = 5%+ ownership disclosure"
   - "DEF 14A = final proxy; PRE 14A = preliminary draft"
+  - "424B5 = shelf takedown supplement; 424B4 = IPO final; 424B3 = resale; 424B2 = structured notes"

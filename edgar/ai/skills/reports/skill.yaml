@@ -79,6 +79,42 @@ patterns:
       Properties return None when a section is absent (e.g. capital_structure for SHOP).
       Use fuzzy keyword lookup: forty_f["business"] matches any heading containing "business".
 
+  - name: 424B Prospectus / Deal Summary
+    when: Need offering terms, deal economics, underwriting, or dilution from a 424B filing
+    code: |
+      prospectus = company.get_filings(form="424B5")[0].obj()  # Prospectus424B
+      deal = prospectus.deal                   # Deal (never None)
+
+      # Core economics
+      deal.price                               # Per-share price (float | None)
+      deal.shares                              # Shares offered (int | None)
+      deal.gross_proceeds                      # Total offering amount
+      deal.net_proceeds                        # After underwriting fees
+      deal.discount_rate                       # Fee / price (0.05 = 5%)
+
+      # Classification
+      deal.offering_type                       # OfferingType enum
+      deal.is_atm                              # True for at-the-market
+      deal.security_type                       # "Common Stock", etc.
+
+      # Underwriting
+      deal.lead_bookrunner                     # Lead bank name
+      deal.underwriter_count                   # Syndicate size
+      deal.total_fees                          # Total fees
+
+      # Dilution (equity offerings only)
+      deal.dilution_per_share                  # Dilution to new investors
+      deal.shares_before                       # Pre-offering outstanding
+      deal.shares_after                        # Post-offering outstanding
+
+      # Serialization
+      deal.to_dict()                           # Flat dict, no None values
+      deal.to_context()                        # Text for LLM prompts
+      prospectus.lifecycle                     # ShelfLifecycle (S-3 → 424B chain)
+    note: |
+      deal is always returned (never None); individual fields are None when absent.
+      424B3 = resale; 424B4 = IPO final; 424B5 = shelf takedown / ATM.
+
   - name: 8-K Events
     when: Extract current report events
     code: |

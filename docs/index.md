@@ -153,7 +153,7 @@ financials.income_statement()
 - Analyze fund holdings and strategy changes
 - Track insider buying and selling activity
 - Monitor material events through 8-K filings
-- Research IPOs and new offerings
+- Research IPOs and follow-on offerings with parsed prospectus data (price, proceeds, underwriters, dilution)
 
 ### Academic Research
 - Large-scale financial data analysis
