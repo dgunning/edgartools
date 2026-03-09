@@ -31,11 +31,10 @@ def test_xbrl_extraction_from_hidden():
     assert "1234567000" not in text
     assert "$1,234,567" in text or "1, 234, 567" in text  # May have spaces
     
-    # Check that XBRL data was extracted
+    # Check that XBRL data was extracted (xbrl_data is a List[XBRLFact])
     assert doc.metadata.xbrl_data is not None
-    assert 'facts' in doc.metadata.xbrl_data
-    
-    facts = doc.metadata.xbrl_data['facts']
+
+    facts = doc.metadata.xbrl_data
     assert len(facts) >= 2  # Should have both visible and hidden facts
     
     # Find the hidden fact
@@ -88,9 +87,9 @@ def test_multiple_hidden_xbrl_facts():
     config = ParserConfig(extract_xbrl=True)
     doc = parse_html(html, config)
     
-    # Verify XBRL extraction
+    # Verify XBRL extraction (xbrl_data is a List[XBRLFact])
     assert doc.metadata.xbrl_data is not None
-    facts = doc.metadata.xbrl_data['facts']
+    facts = doc.metadata.xbrl_data
     
     # Should have 4 facts total (2 visible, 2 hidden)
     assert len(facts) >= 4
@@ -152,7 +151,7 @@ def test_nested_hidden_xbrl():
     doc = parse_html(html, config)
     
     # All XBRL facts should be extracted even from nested hidden
-    facts = doc.metadata.xbrl_data['facts']
+    facts = doc.metadata.xbrl_data
     hidden_facts = [f for f in facts if f.metadata and f.metadata.get('hidden')]
     
     # Both facts should be marked as hidden

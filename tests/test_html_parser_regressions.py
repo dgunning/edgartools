@@ -323,9 +323,9 @@ class TestXBRLExtractionRegressions:
         config = ParserConfig(extract_xbrl=True)
         doc = parse_html(html, config=config)
 
-        # Should have extracted XBRL metadata
+        # Should have extracted XBRL metadata (xbrl_data is a List[XBRLFact])
         if hasattr(doc.metadata, 'xbrl_data') and doc.metadata.xbrl_data:
-            facts = doc.metadata.xbrl_data.get('facts', [])
+            facts = doc.metadata.xbrl_data
 
             # Should find facts (at least the visible one, ideally both)
             assert len(facts) > 0

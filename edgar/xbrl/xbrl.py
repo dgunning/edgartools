@@ -1630,8 +1630,12 @@ class XBRL:
                             continue
                         if va == vb:
                             continue
-                        if va != 0 and abs((va - vb) / va) < 0.001:
-                            continue
+                        # Skip numeric tolerance check for non-numeric values
+                        try:
+                            if va != 0 and abs((va - vb) / va) < 0.001:
+                                continue
+                        except TypeError:
+                            pass
                         values_agree = False
                         break
 

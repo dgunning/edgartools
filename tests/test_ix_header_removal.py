@@ -87,9 +87,9 @@ def test_xbrl_extraction_from_header():
     assert "iso4217:USD" not in text
     assert "0000320193" not in text
     
-    # Check XBRL data was extracted
+    # Check XBRL data was extracted (xbrl_data is a List[XBRLFact])
     assert doc.metadata.xbrl_data is not None
-    facts = doc.metadata.xbrl_data.get('facts', [])
+    facts = doc.metadata.xbrl_data
     
     # Should have extracted the nonNumeric facts
     assert len(facts) >= 2
