@@ -227,10 +227,13 @@ def _is_selling_stockholders(table: 'TableNode') -> bool:
                        ('after offering' in text or 'after the offering' in text)
     has_name = 'name and address' in text or 'name of selling' in text
     has_beneficial = 'beneficial' in text and 'offered' in text
+    has_shares_offered = 'shares offered' in text or 'shares to be offered' in text
     has_numeric = _has_numeric_cells(table)
     if has_selling_kw and has_numeric:
         return True
     if has_before_after and has_name and has_numeric:
+        return True
+    if has_before_after and has_shares_offered and has_numeric:
         return True
     if has_name and has_beneficial and has_numeric and len(table.rows) >= 5:
         return True
@@ -643,10 +646,19 @@ def extract_selling_stockholders_data(table: 'TableNode'):
 
         # Skip header-like rows
         first_lower = non_empty[0].lower()
-        if any(kw in first_lower for kw in ('name', 'selling stockholder', 'selling shareholder',
-                                             'beneficial owner')):
-            if len(non_empty) > 1 and any(kw in non_empty[1].lower() for kw in
-                                          ('shares', 'before', 'number')):
+        row_text = ' '.join(c.lower() for c in non_empty)
+        _header_kws = ('name', 'selling stockholder', 'selling shareholder', 'selling security',
+                        'beneficial owner', 'number of shares', 'shares beneficially',
+                        'before offering', 'before the offering', 'after offering',
+                        'after the offering', 'class a', 'class b', 'ordinary shares')
+        if any(kw in first_lower for kw in _header_kws):
+            if len(non_empty) > 1 and any(kw in row_text for kw in
+                                          ('shares', 'before', 'number', 'percent', 'offered',
+                                           'after', 'beneficial', 'class')):
+                continue
+            # Single-cell header (e.g. "Number of shares owned" spanning columns)
+            if len(non_empty) == 1 and any(kw in first_lower for kw in
+                                            ('shares', 'before', 'after', 'number', 'percent', 'beneficial')):
                 continue
 
         # Skip footnote rows
@@ -661,16 +673,23 @@ def extract_selling_stockholders_data(table: 'TableNode'):
             t = c.text().strip()
             if not t or t == '$':
                 continue
-            if c.is_numeric:
-                numeric_vals.append(t)
-            elif '%' in t or re.match(r'^[\d.]+\s*%$', t):
+            # Check percentage before is_numeric — some parsers mark % cells as numeric
+            if '%' in t or re.match(r'^[\d.]+\s*%$', t):
                 pct_vals.append(t)
+            elif c.is_numeric:
+                numeric_vals.append(t)
             elif not name:
                 name = t
 
         if not name or name.lower() in ('total', 'subtotal', ''):
             if name.lower() == 'total' and numeric_vals:
                 total_offered = numeric_vals[0]
+            continue
+
+        # Skip header fragments that weren't caught above
+        name_lower = name.lower().strip()
+        if (name_lower.startswith('number') and not numeric_vals) or \
+           name_lower in ('shares', 'percent', 'percentage'):
             continue
 
         # Skip long text (footnotes/disclaimers)
