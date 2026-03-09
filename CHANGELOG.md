@@ -41,6 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Standardization Bug Fixes** — Resolved 5 correctness bugs: Coal/Mines SIC range overlap, incorrect ambiguity flag on override, O(n²) linear scan replaced with O(1) dict lookup, dual `ReverseIndex` singleton, and raw data mutation on `statement_type` field ([d681caec](https://github.com/dgunning/edgartools/commit/d681caec))
 
+- **Non-Numeric Value Comparison Guard** — `_merge_same_label_line_items` no longer crashes with `TypeError` when XBRL fact values are strings (e.g., Boeing, Carrier). The numeric tolerance check is now wrapped in a try/except ([03b8d4c6](https://github.com/dgunning/edgartools/commit/03b8d4c6))
+
+- **Regression Test Updates** — Updated 7 regression test files for current API: `financials.cashflow_statement()` method call, `Statement.role_or_type` attribute, `abs()` for preferred_sign-affected COGS assertions, and `xbrl_data` list format ([78ae478e](https://github.com/dgunning/edgartools/commit/78ae478e))
+
 ## [5.21.1] - 2026-03-06
 
 ### Fixed
