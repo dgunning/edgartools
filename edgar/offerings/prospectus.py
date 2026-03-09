@@ -466,13 +466,24 @@ class Prospectus424B:
 
     @cached_property
     def selling_stockholders(self) -> Optional[SellingStockholdersData]:
-        """Selling stockholders. Returns None until Phase 3."""
-        return None
+        """Selling stockholders table data.
+        Returns None if no selling stockholders table is found."""
+        from edgar.offerings._424b_tables import extract_selling_stockholders_data
+        tables = self._classified_tables.get('selling_stockholders', [])
+        if not tables:
+            return None
+        result = extract_selling_stockholders_data(tables[0])
+        return result if result.is_populated else None
 
     @cached_property
     def structured_note_terms(self) -> Optional[StructuredNoteTerms]:
-        """Structured note terms. Returns None until Phase 3."""
-        return None
+        """Structured note key terms (CUSIP, maturity, underlying, etc.).
+        Returns None if no key terms table is found."""
+        from edgar.offerings._424b_tables import extract_structured_note_terms
+        tables = self._classified_tables.get('key_terms', [])
+        if not tables:
+            return None
+        return extract_structured_note_terms(tables[0])
 
     @cached_property
     def dilution(self) -> Optional[DilutionData]:
@@ -494,8 +505,54 @@ class Prospectus424B:
 
     @cached_property
     def underwriting(self) -> Optional[UnderwritingInfo]:
-        """Underwriting info. Returns None until Phase 3."""
-        return None
+        """Underwriting syndicate or placement agent info.
+        Uses table extraction first, falls back to cover page text."""
+        from edgar.offerings._424b_tables import extract_underwriting_from_tables
+        from edgar.offerings._424b_cover import extract_underwriting_from_text
+
+        doc = self._filing.parse()
+        if not doc:
+            return None
+
+        # Try table-based extraction first (most reliable)
+        table_results = extract_underwriting_from_tables(doc)
+
+        entries: list[UnderwriterEntry] = []
+        fee_type = 'underwriting_discount'
+
+        # Prefer allocation tables (have full legal names)
+        alloc = [r for r in table_results if r['type'] == 'allocation']
+        if alloc:
+            for name, amt in zip(alloc[0]['names'], alloc[0].get('allocations', [])):
+                entries.append(UnderwriterEntry(name=name, shares_allocated=amt))
+        else:
+            # Use cover grid or role listing names
+            for tr in table_results:
+                for name in tr['names']:
+                    if not any(e.name == name for e in entries):
+                        entries.append(UnderwriterEntry(name=name))
+
+        # Fall back to text-based extraction if no tables found
+        if not entries:
+            text_results = extract_underwriting_from_text(self._filing)
+            for tx in text_results:
+                for name in tx['names']:
+                    if not any(e.name == name for e in entries):
+                        entries.append(UnderwriterEntry(name=name))
+                if tx['role'] in ('sole_placement_agent', 'placement_agent'):
+                    fee_type = 'placement_agent_fees'
+
+        if not entries:
+            return None
+
+        # Detect fee type from pricing table if available
+        if self.pricing and self.pricing.fee_type:
+            fee_type = self.pricing.fee_type
+
+        return UnderwritingInfo(
+            underwriters=entries,
+            fee_type=fee_type,
+        )
 
     @cached_property
     def filing_fees(self) -> FilingFeesData:
@@ -561,6 +618,21 @@ class Prospectus424B:
             t.add_row("Proceeds", *[c.proceeds or "" for c in self.pricing.columns])
         return t
 
+    @cached_property
+    def _underwriting_table(self) -> Optional[Table]:
+        """Rich Table for underwriting info."""
+        uw = self.underwriting
+        if not uw or not uw.underwriters:
+            return None
+        t = Table(box=box.SIMPLE, padding=(0, 1), title="Underwriting")
+        t.add_column("Name", style="bold")
+        t.add_column("Allocation", justify="right", style="deep_sky_blue1")
+        for entry in uw.underwriters[:10]:
+            t.add_row(entry.name, entry.shares_allocated or "")
+        if len(uw.underwriters) > 10:
+            t.add_row(f"... +{len(uw.underwriters) - 10} more", "")
+        return t
+
     def __rich__(self):
         title = f"{self.company}  {self.filing_date}"
         subtitle = f"{self.form}  {self._offering_type.display_name}"
@@ -571,6 +643,11 @@ class Prospectus424B:
         if pt is not None:
             renderables.append(Text(""))
             renderables.append(pt)
+
+        ut = self._underwriting_table
+        if ut is not None:
+            renderables.append(Text(""))
+            renderables.append(ut)
 
         return Panel(
             Group(*renderables),

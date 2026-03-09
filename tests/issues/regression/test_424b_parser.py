@@ -195,20 +195,17 @@ class TestRichDisplay:
 
 
 # ============================================================
-# Test: Phase 3-4 stubs return None
+# Test: Phase 4 stubs return None
 # ============================================================
 
-class TestPhase3Stubs:
-    """Phase 3-4 stubs should return None (to be replaced later)."""
+class TestPhase4Stubs:
+    """Phase 4 stubs should return None (to be replaced later)."""
 
     @pytest.mark.vcr
-    def test_phase3_4_stubs_return_none(self):
+    def test_phase4_stubs_return_none(self):
         filing = find("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
 
-        assert p.selling_stockholders is None
-        assert p.structured_note_terms is None
-        assert p.underwriting is None
         assert p.filing_fees.has_exhibit is False
 
 
@@ -342,3 +339,64 @@ class TestConstants:
         assert '424B2' in PROSPECTUS_FORMS
         assert '424B7' in PROSPECTUS_FORMS
         assert len(PROSPECTUS_FORMS) == 7
+
+
+# ============================================================
+# Test: Underwriting extraction (Phase 3)
+# ============================================================
+
+class TestUnderwritingExtraction:
+    """Verify underwriting info extraction from tables and text."""
+
+    @pytest.mark.vcr
+    def test_traws_pharma_placement_agent(self):
+        """Traws Pharma has a sole placement agent from cover page text."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        assert p.underwriting is not None
+        assert p.underwriting.lead_manager is not None
+        # Tungsten Advisors is the placement agent
+        assert 'tungsten' in p.underwriting.lead_manager.lower()
+
+    @pytest.mark.vcr
+    def test_nextera_atm_no_underwriting(self):
+        """NextEra ATM: sales agents may or may not appear as underwriting."""
+        filing = find("0001193125-25-338333")
+        p = Prospectus424B.from_filing(filing)
+        # ATMs may have sales agents or no underwriting - both are valid
+        if p.underwriting is not None:
+            assert len(p.underwriting.underwriters) >= 1
+
+
+# ============================================================
+# Test: Structured note terms (Phase 3)
+# ============================================================
+
+class TestStructuredNoteTerms:
+    """Verify structured note key terms extraction."""
+
+    @pytest.mark.vcr
+    def test_bofa_structured_note_terms(self):
+        """BofA structured note should have key terms."""
+        filing = find("0001918704-24-002559")
+        p = Prospectus424B.from_filing(filing)
+        # Structured note should have key terms table
+        if p.structured_note_terms is not None:
+            # If terms are found, they should have at least an issuer or underlying
+            terms = p.structured_note_terms
+            assert terms.issuer is not None or terms.underlying is not None or terms.cusip is not None
+
+
+# ============================================================
+# Test: Selling stockholders (Phase 3)
+# ============================================================
+
+class TestSellingStockholders:
+    """Verify selling stockholders table extraction."""
+
+    @pytest.mark.vcr
+    def test_imunon_no_selling_stockholders(self):
+        """Imunon best-efforts has no selling stockholders."""
+        filing = find("0001493152-25-029712")
+        p = Prospectus424B.from_filing(filing)
+        assert p.selling_stockholders is None

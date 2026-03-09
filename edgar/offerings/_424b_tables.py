@@ -23,6 +23,9 @@ __all__ = [
     'extract_offering_terms',
     'extract_dilution_data',
     'extract_capitalization_data',
+    'extract_selling_stockholders_data',
+    'extract_structured_note_terms',
+    'extract_underwriting_from_tables',
 ]
 
 
@@ -599,3 +602,322 @@ def extract_capitalization_data(table: 'TableNode'):
                 fields['total_capitalization_as_adjusted'] = values[1]
 
     return CapitalizationData(rows=rows_data, **fields)
+
+
+def extract_selling_stockholders_data(table: 'TableNode'):
+    """
+    Extract selling stockholder entries from a selling_stockholders table.
+
+    These tables list stockholders with shares before/after the offering.
+    Column layouts vary but typically include:
+    name | shares_before | pct_before | shares_offered | shares_after | pct_after
+    """
+    from edgar.offerings.prospectus import SellingStockholdersData, SellingStockholderEntry
+
+    entries: list = []
+    total_offered: Optional[str] = None
+
+    # Determine column mapping from headers or first row
+    header_cells = []
+    for h in table.headers:
+        for c in h:
+            t = c.text().strip()
+            if t:
+                header_cells.append(t.lower())
+
+    if not header_cells:
+        # Try first non-empty row as header
+        for r in table.rows:
+            cells = [c.text().strip() for c in r.cells if c.text().strip()]
+            if cells and any(kw in ' '.join(cells).lower() for kw in
+                            ('name', 'selling', 'beneficial', 'shares')):
+                header_cells = [c.lower() for c in cells]
+                break
+
+    # Parse data rows
+    for row in table.rows:
+        cells = [c.text().strip() for c in row.cells]
+        non_empty = [c for c in cells if c and c != '$']
+        if not non_empty:
+            continue
+
+        # Skip header-like rows
+        first_lower = non_empty[0].lower()
+        if any(kw in first_lower for kw in ('name', 'selling stockholder', 'selling shareholder',
+                                             'beneficial owner')):
+            if len(non_empty) > 1 and any(kw in non_empty[1].lower() for kw in
+                                          ('shares', 'before', 'number')):
+                continue
+
+        # Skip footnote rows
+        if first_lower.startswith('(') and len(first_lower) < 5:
+            continue
+
+        # Extract name (first non-numeric, non-$ cell)
+        name = ''
+        numeric_vals = []
+        pct_vals = []
+        for c in row.cells:
+            t = c.text().strip()
+            if not t or t == '$':
+                continue
+            if c.is_numeric:
+                numeric_vals.append(t)
+            elif '%' in t or re.match(r'^[\d.]+\s*%$', t):
+                pct_vals.append(t)
+            elif not name:
+                name = t
+
+        if not name or name.lower() in ('total', 'subtotal', ''):
+            if name.lower() == 'total' and numeric_vals:
+                total_offered = numeric_vals[0]
+            continue
+
+        # Skip long text (footnotes/disclaimers)
+        if len(name) > 120:
+            continue
+
+        entry = SellingStockholderEntry(name=name)
+        # Map numeric values positionally: before, offered, after
+        if len(numeric_vals) >= 3:
+            entry.shares_before_offering = numeric_vals[0]
+            entry.shares_offered = numeric_vals[1]
+            entry.shares_after_offering = numeric_vals[2]
+        elif len(numeric_vals) == 2:
+            entry.shares_before_offering = numeric_vals[0]
+            entry.shares_offered = numeric_vals[1]
+        elif len(numeric_vals) == 1:
+            entry.shares_offered = numeric_vals[0]
+
+        if len(pct_vals) >= 2:
+            entry.pct_before_offering = pct_vals[0]
+            entry.pct_after_offering = pct_vals[1]
+        elif len(pct_vals) == 1:
+            entry.pct_before_offering = pct_vals[0]
+
+        entries.append(entry)
+
+    return SellingStockholdersData(
+        stockholders=entries,
+        total_shares_offered=total_offered,
+    )
+
+
+def extract_structured_note_terms(table: 'TableNode'):
+    """
+    Extract key terms from a structured note key_terms table.
+
+    These are 2-column key-value tables with terms like:
+    Issuer | Bank of America Corporation
+    CUSIP | 06055HBV7
+    Maturity Date | January 20, 2028
+    """
+    from edgar.offerings.prospectus import StructuredNoteTerms
+
+    fields: dict = {}
+    additional: dict = {}
+
+    for row in table.rows:
+        cells = [c.text().strip() for c in row.cells if c.text().strip()]
+        if len(cells) < 2:
+            continue
+
+        key = cells[0].rstrip(':').strip()
+        value = cells[-1].strip()
+        key_lower = key.lower()
+
+        if not value or value == key:
+            continue
+
+        if 'issuer' in key_lower and 'co-issuer' not in key_lower:
+            fields['issuer'] = value
+        elif 'guarantor' in key_lower:
+            fields['guarantor'] = value
+        elif 'cusip' in key_lower:
+            fields['cusip'] = value
+        elif 'pricing date' in key_lower:
+            fields['pricing_date'] = value
+        elif 'issue date' in key_lower or 'settlement date' in key_lower:
+            fields['issue_date'] = value
+        elif 'maturity date' in key_lower or 'final valuation' in key_lower:
+            fields['maturity_date'] = value
+        elif 'underlying' in key_lower or 'reference asset' in key_lower:
+            fields['underlying'] = value
+        elif 'denomination' in key_lower:
+            fields['denominations'] = value
+        elif key_lower in ('term', 'term:'):
+            fields['term'] = value
+        elif 'principal amount' in key_lower or 'aggregate' in key_lower:
+            fields['principal_amount'] = value
+        elif 'upside participation' in key_lower:
+            fields['upside_participation_rate'] = value
+        elif 'max' in key_lower and 'return' in key_lower:
+            fields['max_return'] = value
+        elif 'threshold' in key_lower:
+            fields['threshold_value'] = value
+        elif 'buffer' in key_lower:
+            fields['buffer_amount'] = value
+        elif 'coupon' in key_lower and 'rate' in key_lower:
+            fields['coupon_rate'] = value
+        elif 'coupon' in key_lower and 'frequency' in key_lower:
+            fields['coupon_frequency'] = value
+        else:
+            additional[key] = value
+
+    return StructuredNoteTerms(**fields, additional_terms=additional)
+
+
+# ---------------------------------------------------------------------------
+# Underwriter table extraction
+# ---------------------------------------------------------------------------
+
+# Bank name patterns for recognizing underwriter/agent names in tables
+_BANK_PATTERNS = [
+    r'\bj\.?\s*p\.?\s*morgan\b', r'\bjpmorgan\b',
+    r'\bmorgan stanley\b', r'\bgoldman sachs\b',
+    r'\bbofa securities\b', r'\bmerrill lynch\b', r'\bbank of america\b',
+    r'\bcitigroup\b', r'\bcitibank\b', r'\bciti(?:group)?\s*global\b',
+    r'\bbarclays\b', r'\bwells fargo\b', r'\bdeutsche bank\b',
+    r'\bubs\s+(?:securities|investment)\b', r'\brbc\s+capital\b',
+    r'\bbnp\s+paribas\b',
+    r'\bpiper\s+sandler\b', r'\bjefferies\b', r'\bstifel\b',
+    r'\bwilliam\s+blair\b', r'\bneedham\b', r'\bcanaccord\b',
+    r'\bleerink\b', r'\bevercore\b', r'\bmizuho\b',
+    r'\btd\s+(?:securities|cowen|global)\b', r'\btruist\b', r'\bsmbc\b',
+    r'\bbmo\s+capital\b', r'\bmufg\b', r'\bguggenheim\b',
+    r'\braymond\s+james\b', r'\boppenheimer\b', r'\bnomura\b',
+    r'\bscotiabank\b', r'\bscotia\s+capital\b', r'\bloop\s+capital\b',
+    r'\bladenburg\b', r'\bwainwright\b', r'\bh\.c\.\s+wainwright\b',
+    r'\ba\.g\.p\.\b', r'\baegis\b', r'\both\s+capital\b',
+    r'\bboustead\b', r'\bef\s+hutton\b', r'\btungsten\b',
+    r'\bascendiant\b', r'\bthinkequity\b', r'\bcraig.hallum\b', r'\bbtig\b',
+    r'\bu\.s\.\s+bancorp\b', r'\bcredit\s+agricole\b', r'\blloyds\b',
+    r'\bnatwest\b', r'\bpnc\s+capital\b', r'\bregions\s+securities\b',
+    r'\bcitizens\b', r'\bfifth\s+third\b',
+    r'\bblackstone\s+(?:capital|securities)\b', r'\brothschild\b',
+    r'\bcibc\b', r'\bkeybanc\b', r'\bsantander\b',
+    r'\bsociete\s+generale\b', r'\bmacquarie\b',
+    r'\bbny\s+(?:mellon|capital)\b', r'\bbank\s+of\s+montreal\b',
+]
+
+
+def _count_bank_hits(text: str) -> int:
+    """Count how many distinct bank name patterns match in text."""
+    return sum(1 for p in _BANK_PATTERNS if re.search(p, text, re.IGNORECASE))
+
+
+def _clean_underwriter_name(name: str) -> str:
+    """Clean extracted underwriter name."""
+    name = re.sub(r'\n', ' ', name)
+    for suffix in [r'\s+structuring\s+advisor', r'\s+lead\s+manager',
+                   r'\s+joint\s+book', r'\s+co-?manager', r'\s+\([^)]*\)']:
+        name = re.sub(suffix, '', name, flags=re.IGNORECASE)
+    return re.sub(r'\s+', ' ', name).strip()
+
+
+def extract_underwriting_from_tables(document) -> list:
+    """
+    Find underwriter/agent info from tables in a parsed Document.
+
+    Uses three table patterns:
+    - cover_grid: bank names as header cells (large-cap cover page layout)
+    - allocation: 'Underwriter' header + bank names in rows
+    - role_listing: first row is role label, second row is bank names
+
+    Returns list of dicts with keys: type, names, role_label
+    """
+    ROLE_KEYWORDS = [
+        'joint book', 'book-running', 'sole book', 'co-manager',
+        'senior co-manager', 'lead manager', 'underwriter',
+        'placement agent', 'sales agent', 'financial advisor',
+        'structuring advisor', 'co-lead'
+    ]
+    results = []
+
+    for i, table in enumerate(document.tables):
+        headers_list = [c.text().strip() for h in table.headers for c in h if c.text().strip()]
+        header_text = ' '.join(headers_list).lower()
+        rows = _get_row_texts(table)
+        row_cells = _get_table_cells(table)
+        row_text = ' '.join(row_cells).lower()
+
+        bank_hits_headers = _count_bank_hits(header_text)
+        bank_hits_rows = _count_bank_hits(row_text)
+
+        # Pattern A: Cover page grid — bank names as header cells
+        is_cover_grid = bank_hits_headers >= 2 and len(table.rows) <= 2
+
+        # Pattern B: Allocation table — 'Underwriter' in headers/first row + banks in rows
+        has_underwriter_header = any(
+            h.lower() in ('underwriter', 'underwriters')
+            or 'number of shares' in h.lower()
+            or 'principal amount' in h.lower()
+            for h in headers_list
+        )
+        first_data_row = next((r for r in rows if r), None)
+        has_row_based_header = False
+        if first_data_row:
+            first_row_text = ' '.join(first_data_row).lower()
+            if 'underwriter' in first_row_text or 'number of shares' in first_row_text \
+                    or 'principal amount' in first_row_text:
+                has_row_based_header = True
+
+        is_allocation = (
+            (has_underwriter_header or has_row_based_header)
+            and bank_hits_rows >= 1
+            and len(table.rows) >= 2
+        )
+
+        # Pattern C: Role-label listing — role in row[0], banks in row[1]
+        is_role_listing = False
+        role_label = None
+        if rows and len(rows) >= 2:
+            first_row_text = ' '.join(rows[0]).lower()
+            for kw in ROLE_KEYWORDS:
+                if kw in first_row_text:
+                    second_row = rows[1] if len(rows) > 1 else []
+                    if _count_bank_hits(' '.join(second_row).lower()) >= 1:
+                        is_role_listing = True
+                        role_label = rows[0][0] if rows[0] else first_row_text
+                        break
+
+        if not (is_cover_grid or is_allocation or is_role_listing):
+            continue
+
+        table_type = (
+            'cover_grid' if is_cover_grid else
+            'role_listing' if is_role_listing else
+            'allocation'
+        )
+
+        names = []
+        allocations = []
+        if is_cover_grid:
+            names = [c for c in headers_list if _count_bank_hits(c.lower()) >= 1]
+        elif is_allocation:
+            start_row = 1 if has_row_based_header else 0
+            for row in rows[start_row:]:
+                if row and row[0]:
+                    cell_lower = row[0].lower()
+                    if cell_lower not in ('total', 'subtotal', '') and _count_bank_hits(cell_lower) >= 1:
+                        clean = _clean_underwriter_name(row[0])
+                        names.append(clean)
+                        # Allocation amount is the last cell if numeric-looking
+                        if len(row) >= 2 and re.match(r'[\d,.$]+', row[-1]):
+                            allocations.append(row[-1])
+                        else:
+                            allocations.append(None)
+        elif is_role_listing:
+            if len(rows) > 1:
+                for raw_name in rows[1]:
+                    names.append(_clean_underwriter_name(raw_name))
+
+        results.append({
+            'table_index': i,
+            'type': table_type,
+            'names': names[:30],
+            'allocations': allocations[:30],
+            'role_label': role_label,
+        })
+
+    return results

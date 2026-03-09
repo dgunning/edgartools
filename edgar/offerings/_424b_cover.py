@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
-__all__ = ['extract_cover_page_fields']
+__all__ = ['extract_cover_page_fields', 'extract_underwriting_from_text']
 
 
 def extract_cover_page_fields(filing: 'Filing') -> dict:
@@ -141,3 +141,84 @@ def extract_cover_page_fields(filing: 'Filing') -> dict:
                 result['offering_price'] = None
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# Text-based underwriter / agent extraction
+# ---------------------------------------------------------------------------
+
+# Cover page role label patterns: "Sole Placement Agent\nTungsten Advisors"
+_COVER_ROLE_PATTERNS = [
+    (r'Sole\s+Book[-\s]Running\s+Manager\s*\n+([^\n]+)', 'sole_book_runner'),
+    (r'Joint\s+Book[-\s]Running\s+Managers?\s*\n+([^\n]+)', 'joint_book_runners'),
+    (r'Sole\s+Placement\s+Agent\s*\n+([^\n]+)', 'sole_placement_agent'),
+    (r'Placement\s+Agent\s*\n+([^\n]+)', 'placement_agent'),
+    (r'Sole\s+(?:Lead\s+)?Manager\s*\n+([^\n]+)', 'sole_manager'),
+    (r'(?:Sole\s+)?Underwriter\s*\n+([^\n]+)', 'underwriter'),
+    (r'Sales\s+Agent\s*\n+([^\n]+)', 'sales_agent'),
+]
+
+# ATM sales agreement text patterns
+_ATM_TEXT_PATTERNS = [
+    r'(?:entered\s+into\s+an?\s+)?(?:Sales|Equity\s+Distribution|At[\s\-]+the[\s\-]+Market'
+    r'(?:\s+Issuance)?)\s+Agreement[^"]{0,60}with\s+'
+    r'([A-Z][^\n\(\)]{3,60}?(?:LLC|Inc\.|Corp\.|L\.P\.|&\s+Co\.))\s*[,\(]',
+    r'through\s+([A-Z][^\n\(\)]{3,60}?(?:LLC|Inc\.|Corp\.|L\.P\.|&\s+Co\.))\s*[,\(]',
+]
+
+
+def _clean_agent_name(name: str) -> str:
+    """Clean extracted agent name."""
+    name = re.sub(r'\n', ' ', name)
+    for suffix in [r'\s+structuring\s+advisor', r'\s+lead\s+manager',
+                   r'\s+joint\s+book', r'\s+co-?manager', r'\s+\([^)]*\)']:
+        name = re.sub(suffix, '', name, flags=re.IGNORECASE)
+    return re.sub(r'\s+', ' ', name).strip()
+
+
+def extract_underwriting_from_text(filing: 'Filing') -> list:
+    """
+    Extract underwriter/agent names from document text (non-table signals).
+
+    Searches cover page (first 8000 chars) for:
+    - Role label + agent name on next line ("Sole Placement Agent\\nTungsten")
+    - ATM agreement text mentioning agent name
+
+    Returns list of dicts with keys: role, names, source.
+    """
+    try:
+        doc = filing.parse()
+        text = doc.text()
+    except Exception:
+        return []
+
+    results = []
+    cover = text[:8000]
+
+    # Signal: Cover page role label + agent name
+    for pattern, role in _COVER_ROLE_PATTERNS:
+        m = re.search(pattern, cover, re.IGNORECASE)
+        if m:
+            name = m.group(1).strip()
+            if 2 < len(name) < 100 and not name.lower().startswith('table') \
+                    and not name.startswith('The date'):
+                results.append({
+                    'role': role,
+                    'names': [_clean_agent_name(name)],
+                    'source': 'cover_page',
+                })
+
+    # Signal: ATM sales agreement pattern
+    for pat in _ATM_TEXT_PATTERNS:
+        m = re.search(pat, cover, re.IGNORECASE)
+        if m:
+            name = m.group(1).strip()
+            if 3 < len(name) < 80:
+                results.append({
+                    'role': 'atm_sales_agent',
+                    'names': [_clean_agent_name(name)],
+                    'source': 'cover_text',
+                })
+                break
+
+    return results
