@@ -113,14 +113,16 @@ def classify_offering_type(filing: 'Filing') -> dict:
 
     # --- PIPE resale (narrow_cover only to avoid base-prospectus boilerplate) ---
     pr: list[str] = []
-    if re.search(r'(offer and resale|resale by the selling stockholder)', narrow_cover):
+    if re.search(r'(offer and resale|resale by the selling stockholder|resale by the selling shareholder)', narrow_cover):
         pr.append('resale_by_selling_cover')
+    if 'resale' in narrow_cover and 'direct listing' in narrow_cover:
+        pr.append('direct_listing_resale_cover')
     if re.search(
         r'(will not receive any proceeds|not receive any of the proceeds|'
         r'not receive proceeds from the sale)', narrow_cover
     ):
         pr.append('no_proceeds_cover')
-    if 'selling stockholder' in narrow_cover:
+    if 'selling stockholder' in narrow_cover or 'selling shareholder' in narrow_cover:
         pr.append('selling_stockholder_cover')
     if 'private placement' in narrow_cover and 'resale' in narrow_cover:
         pr.append('private_placement_resale_cover')
@@ -157,10 +159,10 @@ def classify_offering_type(filing: 'Filing') -> dict:
             be.append('placement_agent_cover')
     if 'pre-funded warrant' in narrow_cover:
         be.append('prefunded_warrants_cover')
-    be_idx = narrow_cover.find('best efforts')
-    if be_idx >= 0:
-        be_context = narrow_cover[be_idx:be_idx + 150]
-        if not re.search(r'best efforts.{0,100}(register|registration|effective)', be_context):
+    be_match = re.search(r'best[- ]efforts', narrow_cover)
+    if be_match:
+        be_context = narrow_cover[be_match.start():be_match.start() + 150]
+        if not re.search(r'best[- ]efforts.{0,100}(register|registration|effective)', be_context):
             be.append('best_efforts_cover')
     signals['best_efforts'] = be
 
@@ -170,7 +172,7 @@ def classify_offering_type(filing: 'Filing') -> dict:
         fc.append('public_offering_price_table')
     if re.search(r'underwriting discount|underwriters?\s+commission', cover[:5000]):
         fc.append('underwriting_discount')
-    if re.search(r'(option|option to purchase).{0,100}additional shares', cover[:5000]):
+    if re.search(r'(option|option to purchase).{0,100}additional (shares|units)', cover[:5000]):
         fc.append('overallotment_option')
     if re.search(
         r'(j\.p\. morgan|goldman sachs|morgan stanley|jefferies|piper sandler|'
@@ -178,6 +180,15 @@ def classify_offering_type(filing: 'Filing') -> dict:
         narrow_cover,
     ):
         fc.append('named_underwriter_cover')
+    # IPO / SPAC patterns: prose-style price + underwriter references
+    if 'initial public offering' in cover:
+        fc.append('ipo_text')
+    if re.search(r'the underwriters have a \d+[- ]day', cover):
+        fc.append('underwriter_option_text')
+    if re.search(r'(?:has a price of|price of) \$[\d.,]+\s+(?:per |and )', cover):
+        fc.append('prose_price')
+    if re.search(r'over[- ]?allotment', cover) and 'underwriter' in cover:
+        fc.append('overallotment_underwriter')
     signals['firm_commitment'] = fc
 
     # --- Decision cascade (first match wins) ---
@@ -206,7 +217,8 @@ def classify_offering_type(filing: 'Filing') -> dict:
     # 5. PIPE resale (before best_efforts)
     if ('no_proceeds_cover' in signals['pipe_resale'] and
             'selling_stockholder_cover' in signals['pipe_resale']) or \
-       'resale_by_selling_cover' in signals['pipe_resale']:
+       'resale_by_selling_cover' in signals['pipe_resale'] or \
+       'direct_listing_resale_cover' in signals['pipe_resale']:
         return _result('pipe_resale', 'high', signals['pipe_resale'], sub_type='equity_resale')
 
     # 6. Debt offering
@@ -226,6 +238,16 @@ def classify_offering_type(filing: 'Filing') -> dict:
     if 'named_underwriter_cover' in signals['firm_commitment'] and \
        'underwriting_discount' in signals['firm_commitment']:
         return _result('firm_commitment', 'high', signals['firm_commitment'])
+    # IPO / SPAC prose-style patterns (no tabular pricing)
+    if 'ipo_text' in signals['firm_commitment'] and \
+       'underwriter_option_text' in signals['firm_commitment']:
+        return _result('firm_commitment', 'high', signals['firm_commitment'])
+    if 'ipo_text' in signals['firm_commitment'] and \
+       'overallotment_underwriter' in signals['firm_commitment']:
+        return _result('firm_commitment', 'high', signals['firm_commitment'])
+    if 'prose_price' in signals['firm_commitment'] and \
+       'overallotment_underwriter' in signals['firm_commitment']:
+        return _result('firm_commitment', 'high', signals['firm_commitment'])
 
     # Medium confidence fallbacks
     if len(signals['atm']) >= 1:
@@ -235,6 +257,9 @@ def classify_offering_type(filing: 'Filing') -> dict:
     if 'best_efforts_cover' in signals['best_efforts'] or len(signals['best_efforts']) >= 2:
         return _result('best_efforts', 'medium', signals['best_efforts'])
     if 'underwriting_discount' in signals['firm_commitment']:
+        return _result('firm_commitment', 'medium', signals['firm_commitment'])
+    # IPO text alone is medium confidence
+    if 'ipo_text' in signals['firm_commitment'] and len(signals['firm_commitment']) >= 2:
         return _result('firm_commitment', 'medium', signals['firm_commitment'])
 
     return _result('unknown', 'low', [])
