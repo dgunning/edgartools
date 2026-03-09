@@ -12,9 +12,11 @@ from edgar import find
 from edgar.offerings.prospectus import (
     Prospectus424B,
     ShelfLifecycle,
+    Deal,
     OfferingType,
     CoverPageData,
     PROSPECTUS_FORMS,
+    _parse_sec_number,
 )
 from edgar.offerings._424b_classifier import classify_offering_type
 from edgar.offerings._424b_cover import extract_cover_page_fields
@@ -547,3 +549,225 @@ class TestShelfLifecycle:
         text = str(lc)
         assert "ShelfLifecycle" in text
         assert "#5/5" in text
+
+
+# ============================================================
+# Test: _parse_sec_number helper
+# ============================================================
+
+class TestParseSecNumber:
+    """Unit tests for the _parse_sec_number helper."""
+
+    def test_dollar_with_commas(self):
+        assert _parse_sec_number("$1,234,567") == 1234567.0
+
+    def test_plain_number_with_commas(self):
+        assert _parse_sec_number("1,234,567") == 1234567.0
+
+    def test_decimal_price(self):
+        assert _parse_sec_number("$3.6100") == pytest.approx(3.61)
+
+    def test_million_multiplier(self):
+        assert _parse_sec_number("10.5 million") == 10500000.0
+
+    def test_billion_multiplier(self):
+        assert _parse_sec_number("1.2 billion") == 1200000000.0
+
+    def test_parenthetical_negative(self):
+        assert _parse_sec_number("(0.45)") == pytest.approx(-0.45)
+
+    def test_parenthetical_negative_with_inner_space(self):
+        assert _parse_sec_number("( 0.45)") == pytest.approx(-0.45)
+
+    def test_plain_negative_number(self):
+        assert _parse_sec_number("-0.45") == pytest.approx(-0.45)
+
+    def test_plain_negative_dollar(self):
+        assert _parse_sec_number("-$5.00") == pytest.approx(-5.0)
+
+    def test_bare_dash_sentinel(self):
+        assert _parse_sec_number("-") is None
+
+    def test_percentage_strip(self):
+        assert _parse_sec_number("3.5%") == pytest.approx(3.5)
+
+    def test_none_input(self):
+        assert _parse_sec_number(None) is None
+
+    def test_empty_string(self):
+        assert _parse_sec_number("") is None
+
+    def test_atm_sentinel(self):
+        assert _parse_sec_number("at-the-market") is None
+
+    def test_exchange_sentinel(self):
+        assert _parse_sec_number("exchange-offer") is None
+
+    def test_preliminary_sentinel(self):
+        assert _parse_sec_number("preliminary-TBD") is None
+
+    def test_real_offering_amount(self):
+        assert _parse_sec_number("$7,000,040.63") == pytest.approx(7000040.63)
+
+    def test_dollar_sign_with_space(self):
+        assert _parse_sec_number("$ 25.00") == pytest.approx(25.0)
+
+
+# ============================================================
+# Test: Deal object
+# ============================================================
+
+class TestDeal:
+    """Verify Deal object synthesizes data from sub-objects correctly."""
+
+    @pytest.mark.vcr
+    def test_deal_always_returned(self):
+        """prospectus.deal never returns None."""
+        filing = find("0001214659-26-002941")  # Alzamend 424B5
+        p = Prospectus424B.from_filing(filing)
+        assert isinstance(p.deal, Deal)
+
+    @pytest.mark.vcr
+    def test_deal_is_cached(self):
+        """deal property returns same instance on repeated access."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        assert p.deal is p.deal
+
+    @pytest.mark.vcr
+    def test_alzamend_offering_type(self):
+        """Alzamend is an ATM offering."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.offering_type == OfferingType.ATM
+        assert deal.is_atm is True
+
+    @pytest.mark.vcr
+    def test_alzamend_security_type(self):
+        """Alzamend offers common stock."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.security_type is not None
+        assert 'common stock' in deal.security_type.lower()
+
+    @pytest.mark.vcr
+    def test_traws_pharma_price(self):
+        """Traws Pharma per-share price from pricing table = $5.103."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.price == pytest.approx(5.103, abs=0.01)
+
+    @pytest.mark.vcr
+    def test_traws_pharma_fee_per_share(self):
+        """Traws Pharma has placement agent fee per share."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.fee_per_share is not None
+        assert deal.fee_type == "placement_agent_fees"
+
+    @pytest.mark.vcr
+    def test_traws_pharma_discount_rate(self):
+        """Discount rate is fee_per_share / price."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        if deal.discount_rate is not None:
+            assert 0 < deal.discount_rate < 1  # Should be a fraction, not percent
+
+    @pytest.mark.vcr
+    def test_traws_pharma_dilution(self):
+        """Traws Pharma has dilution data: $5.046/share."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.dilution_per_share == pytest.approx(5.046, abs=0.01)
+
+    @pytest.mark.vcr
+    def test_traws_pharma_gross_proceeds(self):
+        """Traws Pharma gross proceeds from pricing table total column."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.gross_proceeds is not None
+        assert deal.gross_proceeds == pytest.approx(3103629.29, abs=1.0)
+
+    @pytest.mark.vcr
+    def test_traws_pharma_net_proceeds(self):
+        """Traws Pharma net proceeds from pricing table total column."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.net_proceeds is not None
+        # Net proceeds should be less than gross
+        assert deal.net_proceeds < deal.gross_proceeds
+
+    @pytest.mark.vcr
+    def test_traws_pharma_underwriting(self):
+        """Traws Pharma has Tungsten Advisors as placement agent."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert deal.lead_bookrunner is not None
+        assert 'tungsten' in deal.lead_bookrunner.lower()
+        assert deal.underwriter_count >= 1
+
+    @pytest.mark.vcr
+    def test_bofa_structured_note_graceful(self):
+        """BofA 424B2 structured note: most equity fields should be None."""
+        filing = find("0001918704-24-002559")
+        p = Prospectus424B.from_filing(filing)
+        deal = p.deal
+        assert isinstance(deal, Deal)
+        # Structured notes typically don't have equity-style shares/dilution
+        assert deal.offering_type == OfferingType.STRUCTURED_NOTE
+        assert deal.security_type is not None
+
+    @pytest.mark.vcr
+    def test_to_dict_no_none_values(self):
+        """to_dict() should not contain any None values."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        d = p.deal.to_dict()
+        for key, val in d.items():
+            assert val is not None, f"to_dict() has None for {key}"
+        # Should have at least offering_type
+        assert 'offering_type' in d
+
+    @pytest.mark.vcr
+    def test_to_dict_has_core_fields(self):
+        """to_dict() for Traws Pharma should have price and gross_proceeds."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        d = p.deal.to_dict()
+        assert 'price' in d
+        assert 'gross_proceeds' in d
+
+    @pytest.mark.vcr
+    def test_to_context_produces_text(self):
+        """to_context() should produce readable LLM context."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        ctx = p.deal.to_context()
+        assert "DEAL SUMMARY" in ctx
+        assert "Offering Type" in ctx
+
+    @pytest.mark.vcr
+    def test_deal_repr(self):
+        """repr() should produce rich output without crashing."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        text = repr(p.deal)
+        assert "Deal" in text
+
+    @pytest.mark.vcr
+    def test_deal_str(self):
+        """str() should produce readable summary."""
+        filing = find("0001104659-24-132924")
+        p = Prospectus424B.from_filing(filing)
+        text = str(p.deal)
+        assert "Deal" in text
+        assert "Traws Pharma" in text or "company=" in text
