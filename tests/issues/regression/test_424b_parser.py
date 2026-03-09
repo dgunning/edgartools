@@ -11,6 +11,7 @@ import pytest
 from edgar import find
 from edgar.offerings.prospectus import (
     Prospectus424B,
+    ShelfLifecycle,
     OfferingType,
     CoverPageData,
     PROSPECTUS_FORMS,
@@ -404,30 +405,145 @@ class TestSellingStockholders:
 
 
 # ============================================================
-# Test: Lifecycle navigation (Phase 4)
+# Test: ShelfLifecycle
 # ============================================================
 
-class TestLifecycleNavigation:
-    """Verify lifecycle navigation properties."""
+class TestShelfLifecycle:
+    """Verify ShelfLifecycle computation from related filings."""
 
     @pytest.mark.vcr
-    def test_file_number_extraction(self):
-        """File number should be extractable from a 424B filing."""
-        filing = find("0001493152-25-029712")
+    def test_lifecycle_returns_shelf_lifecycle(self):
+        """lifecycle property should return a ShelfLifecycle object."""
+        filing = find("0001214659-26-002941")  # Alzamend 424B5
         p = Prospectus424B.from_filing(filing)
-        # Should have a 333-XXXXX file number
-        fn = p._file_number
-        if fn is not None:
-            assert fn.startswith('333-')
+        lc = p.lifecycle
+        assert lc is not None
+        assert isinstance(lc, ShelfLifecycle)
 
     @pytest.mark.vcr
-    def test_base_file_number_strips_suffix(self):
-        """Base file number should strip -01/-02 suffixes."""
+    def test_alzamend_shelf_filed_date(self):
+        """Alzamend shelf was filed 2023-08-02."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        assert lc.shelf_filed_date == "2023-08-02"
+
+    @pytest.mark.vcr
+    def test_alzamend_takedown_position(self):
+        """Alzamend 424B5 is takedown #5 of 5."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        assert lc.takedown_number == 5
+        assert lc.total_takedowns == 5
+        assert lc.is_latest_takedown is True
+
+    @pytest.mark.vcr
+    def test_alzamend_shelf_registration(self):
+        """Shelf registration should be an S-3 variant."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        reg = lc.shelf_registration
+        assert reg is not None
+        assert 'S-3' in reg.form or 'S-1' in reg.form
+
+    @pytest.mark.vcr
+    def test_alzamend_effective_date(self):
+        """Alzamend shelf was declared effective on 2023-08-10."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        assert lc.effective_date == "2023-08-10"
+
+    @pytest.mark.vcr
+    def test_alzamend_review_period(self):
+        """S-3 to EFFECT was 8 days."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        assert lc.review_period_days == 8
+
+    @pytest.mark.vcr
+    def test_alzamend_shelf_expires(self):
+        """Shelf expires 3 years after filing."""
+        from datetime import date
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        assert lc.shelf_expires == date(2026, 8, 2)
+
+    @pytest.mark.vcr
+    def test_alzamend_cadence(self):
+        """Average days between takedowns should be positive."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        assert lc.avg_days_between_takedowns is not None
+        assert lc.avg_days_between_takedowns > 0
+
+    @pytest.mark.vcr
+    def test_alzamend_filings_returns_full_set(self):
+        """filings property should return all related filings."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        assert len(lc.filings) >= 7  # S-3, EFFECT, 5x 424B5
+
+    @pytest.mark.vcr
+    def test_imunon_lifecycle_accessible(self):
+        """Imunon 424B5 should have an accessible lifecycle."""
         filing = find("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
-        base = p._base_file_number
-        if base is not None:
-            # Should be 333-XXXXXX format (no further suffix)
-            parts = base.split('-')
-            assert len(parts) == 2
-            assert parts[0] == '333'
+        lc = p.lifecycle
+        # lifecycle may or may not be available depending on filing metadata
+        if lc is not None:
+            assert isinstance(lc, ShelfLifecycle)
+            reg = lc.shelf_registration
+            if reg is not None:
+                assert 'S-' in reg.form or 'F-' in reg.form
+
+    @pytest.mark.vcr
+    def test_backward_compat_shelf_registration(self):
+        """Prospectus424B.shelf_registration should delegate to lifecycle."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        assert p.shelf_registration is not None
+        assert p.shelf_registration is p.lifecycle.shelf_registration
+
+    @pytest.mark.vcr
+    def test_backward_compat_related_filings(self):
+        """Prospectus424B.related_filings should delegate to lifecycle."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        assert p.related_filings is not None
+
+    @pytest.mark.vcr
+    def test_lifecycle_rich_display(self):
+        """Rich display should render without error."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        text = repr(lc)
+        assert "Shelf Lifecycle" in text
+        assert "Alzamend" in text
+
+    @pytest.mark.vcr
+    def test_lifecycle_str(self):
+        """str() should produce readable summary."""
+        filing = find("0001214659-26-002941")
+        p = Prospectus424B.from_filing(filing)
+        lc = p.lifecycle
+        assert lc is not None
+        text = str(lc)
+        assert "ShelfLifecycle" in text
+        assert "#5/5" in text

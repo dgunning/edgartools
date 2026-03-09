@@ -8,6 +8,7 @@ Phase 1: Cover page extraction + offering type classification + obj() dispatch.
 from __future__ import annotations
 
 import re
+from datetime import date, timedelta
 from enum import Enum
 from functools import cached_property
 from typing import List, Optional, TYPE_CHECKING
@@ -21,9 +22,9 @@ from rich.table import Table
 from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
-    from edgar._filings import Filing
+    from edgar._filings import Filing, Filings
 
-__all__ = ['Prospectus424B', 'OfferingType', 'CoverPageData']
+__all__ = ['Prospectus424B', 'ShelfLifecycle', 'OfferingType', 'CoverPageData']
 
 # Forms handled by this parser
 PROSPECTUS_FORMS = ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']
@@ -283,6 +284,252 @@ class FilingFeesData(BaseModel):
     total_fee_amount: Optional[str] = None
     offering_rows: List[FilingFeesRow] = []
     is_final_prospectus: bool = True
+
+
+# ---------------------------------------------------------------------------
+# Shelf Lifecycle
+# ---------------------------------------------------------------------------
+
+# Registration forms that start a shelf
+_SHELF_FORMS = {'S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1', 'S-1/A', 'S-3/A', 'F-3/A'}
+_TAKEDOWN_FORMS = {'424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8'}
+
+
+def _parse_filing_date(d) -> Optional[date]:
+    """Parse a filing date string or date to a date object."""
+    if isinstance(d, date):
+        return d
+    if isinstance(d, str):
+        try:
+            return date.fromisoformat(d)
+        except (ValueError, TypeError):
+            return None
+    return None
+
+
+class ShelfLifecycle:
+    """Lifecycle position and insights for a 424B filing within its shelf registration.
+
+    Computes actionable insights from the related filings returned by
+    Filing.related_filings(): shelf registration date, SEC review period,
+    shelf expiration, takedown position, offering cadence, and a timeline.
+
+    Usage:
+        prospectus = filing.obj()  # Prospectus424B
+        lc = prospectus.lifecycle
+        lc.takedown_number       # e.g. 5
+        lc.total_takedowns       # e.g. 5
+        lc.shelf_expires         # e.g. date(2026, 8, 2)
+        lc.avg_days_between_takedowns  # e.g. 228.0
+    """
+
+    def __init__(self, current_filing: 'Filing', related: 'Filings'):
+        self._current = current_filing
+        self._related = related
+
+    # ------------------------------------------------------------------
+    # Core properties
+    # ------------------------------------------------------------------
+
+    @property
+    def filings(self) -> 'Filings':
+        """The full set of related filings under this shelf."""
+        return self._related
+
+    @cached_property
+    def shelf_registration(self) -> Optional['Filing']:
+        """The S-3/F-3/S-1 filing that initiated this shelf."""
+        for f in self._related:
+            base_form = f.form.replace('/A', '')
+            if base_form in ('S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'):
+                return f
+        return None
+
+    @cached_property
+    def _effective_filing(self) -> Optional['Filing']:
+        """The EFFECT filing that declared the shelf effective."""
+        for f in self._related:
+            if f.form == 'EFFECT':
+                return f
+        return None
+
+    @cached_property
+    def shelf_filed_date(self) -> Optional[str]:
+        """Date the shelf registration was filed (string)."""
+        reg = self.shelf_registration
+        return str(reg.filing_date) if reg else None
+
+    @cached_property
+    def effective_date(self) -> Optional[str]:
+        """Date the shelf was declared effective (string)."""
+        eff = self._effective_filing
+        return str(eff.filing_date) if eff else None
+
+    @cached_property
+    def shelf_expires(self) -> Optional[date]:
+        """Expiration date of the shelf (filed date + 3 years)."""
+        if not self.shelf_filed_date:
+            return None
+        filed = _parse_filing_date(self.shelf_filed_date)
+        if not filed:
+            return None
+        try:
+            return filed.replace(year=filed.year + 3)
+        except ValueError:
+            # Feb 29 -> Feb 28
+            return filed.replace(year=filed.year + 3, day=filed.day - 1)
+
+    @cached_property
+    def days_to_expiry(self) -> Optional[int]:
+        """Days remaining until the shelf expires. Negative if expired."""
+        exp = self.shelf_expires
+        if not exp:
+            return None
+        return (exp - date.today()).days
+
+    @cached_property
+    def review_period_days(self) -> Optional[int]:
+        """Days between shelf filing (S-3) and declared effective (EFFECT)."""
+        if not self.shelf_filed_date or not self.effective_date:
+            return None
+        filed = _parse_filing_date(self.shelf_filed_date)
+        eff = _parse_filing_date(self.effective_date)
+        if filed and eff:
+            return (eff - filed).days
+        return None
+
+    @cached_property
+    def takedowns(self) -> List['Filing']:
+        """All 424B* takedown filings, in chronological order."""
+        result = []
+        for f in self._related:
+            base_form = f.form.replace('/A', '')
+            if base_form in _TAKEDOWN_FORMS:
+                result.append(f)
+        return result
+
+    @cached_property
+    def total_takedowns(self) -> int:
+        """Total number of takedowns under this shelf."""
+        return len(self.takedowns)
+
+    @cached_property
+    def takedown_number(self) -> Optional[int]:
+        """1-based position of the current filing among takedowns."""
+        for i, f in enumerate(self.takedowns, 1):
+            if f.accession_no == self._current.accession_no:
+                return i
+        return None
+
+    @cached_property
+    def is_latest_takedown(self) -> bool:
+        """Whether the current filing is the most recent takedown."""
+        return self.takedown_number == self.total_takedowns
+
+    @cached_property
+    def avg_days_between_takedowns(self) -> Optional[float]:
+        """Average days between consecutive takedowns."""
+        if len(self.takedowns) < 2:
+            return None
+        dates = []
+        for f in self.takedowns:
+            d = _parse_filing_date(f.filing_date)
+            if d:
+                dates.append(d)
+        if len(dates) < 2:
+            return None
+        gaps = [(dates[i] - dates[i - 1]).days for i in range(1, len(dates))]
+        return sum(gaps) / len(gaps)
+
+    @cached_property
+    def related_8k(self) -> Optional['Filing']:
+        """8-K filed on the same day as the current filing, if any."""
+        for f in self._related:
+            if f.form == '8-K' and str(f.filing_date) == str(self._current.filing_date):
+                return f
+        return None
+
+    # ------------------------------------------------------------------
+    # Rich display
+    # ------------------------------------------------------------------
+
+    def __rich__(self):
+        company_name = self._current.company
+
+        # Summary table
+        summary = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
+        summary.add_column("field", style="bold deep_sky_blue1", min_width=24)
+        summary.add_column("value")
+
+        reg = self.shelf_registration
+        if reg:
+            summary.add_row("Shelf Registration", f"{reg.form} filed {reg.filing_date}")
+
+        eff = self._effective_filing
+        if eff:
+            review = f" ({self.review_period_days} days review)" if self.review_period_days is not None else ""
+            summary.add_row("Effective Date", f"{eff.filing_date}{review}")
+
+        exp = self.shelf_expires
+        if exp:
+            remaining = self.days_to_expiry
+            if remaining is not None and remaining > 0:
+                summary.add_row("Shelf Expires", f"{exp} ({remaining} days remaining)")
+            elif remaining is not None:
+                summary.add_row("Shelf Expires", f"{exp} (EXPIRED)")
+            else:
+                summary.add_row("Shelf Expires", str(exp))
+
+        td_num = self.takedown_number
+        if td_num is not None:
+            latest = " (latest)" if self.is_latest_takedown else ""
+            summary.add_row("Takedown Position", f"#{td_num} of {self.total_takedowns}{latest}")
+
+        avg = self.avg_days_between_takedowns
+        if avg is not None:
+            summary.add_row("Avg Cadence", f"{avg:.0f} days between takedowns")
+
+        # Timeline table
+        timeline = Table(box=box.SIMPLE, padding=(0, 1))
+        timeline.add_column("#", style="dim", justify="right")
+        timeline.add_column("Form", style="bold")
+        timeline.add_column("Date")
+        timeline.add_column("Description")
+
+        takedown_idx = 0
+        for i, f in enumerate(self._related, 1):
+            base_form = f.form.replace('/A', '')
+            is_current = f.accession_no == self._current.accession_no
+
+            if base_form in ('S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'):
+                desc = "Shelf registration"
+            elif f.form == 'EFFECT':
+                desc = "Declared effective"
+            elif base_form in _TAKEDOWN_FORMS:
+                takedown_idx += 1
+                desc = f"Takedown #{takedown_idx}"
+            elif f.form == '8-K':
+                desc = "Current report"
+            else:
+                desc = ""
+
+            marker = "  << current" if is_current else ""
+            style = "bold green" if is_current else None
+            timeline.add_row(str(i), f.form, str(f.filing_date), f"{desc}{marker}", style=style)
+
+        return Panel(
+            Group(summary, Text(""), timeline),
+            title=f"[bold]Shelf Lifecycle: {company_name}[/bold]",
+            box=box.ROUNDED,
+        )
+
+    def __repr__(self):
+        return repr_rich(self.__rich__())
+
+    def __str__(self):
+        td = self.takedown_number
+        pos = f"#{td}/{self.total_takedowns}" if td else "?"
+        return f"ShelfLifecycle(takedown={pos}, takedowns={self.total_takedowns})"
 
 
 # ---------------------------------------------------------------------------
@@ -591,110 +838,42 @@ class Prospectus424B:
         )
 
     # ------------------------------------------------------------------
-    # Lifecycle navigation (Phase 4)
+    # Lifecycle navigation
     # ------------------------------------------------------------------
 
     @cached_property
-    def _file_number(self) -> Optional[str]:
-        """The 333-XXXXX Securities Act file number for this filing's shelf."""
-        try:
-            ih = self._filing.index_headers
-            fv = ih.filer.filing_values if ih.filer else None
-            fn = fv.file_number if fv else None
-            if fn and fn.startswith('333-'):
-                return fn
-        except Exception:
-            pass
-        # Fallback to full header
-        try:
-            fns = self._filing.header.file_numbers or []
-            for fn in fns:
-                if fn and fn.startswith('333-'):
-                    return fn
-        except Exception:
-            pass
-        return None
+    def lifecycle(self) -> Optional[ShelfLifecycle]:
+        """Shelf lifecycle position and insights.
 
-    @cached_property
-    def _base_file_number(self) -> Optional[str]:
-        """Strip suffix from file number: '333-278184-02' -> '333-278184'."""
-        fn = self._file_number
-        if not fn:
+        Returns a ShelfLifecycle object with takedown position, shelf expiry,
+        review period, cadence analysis, and a Rich timeline display.
+        Returns None if related filings cannot be determined.
+        """
+        try:
+            related = self._filing.related_filings()
+            if related is None or related.empty:
+                return None
+            return ShelfLifecycle(self._filing, related)
+        except Exception:
             return None
-        parts = fn.split('-')
-        if len(parts) >= 2:
-            return parts[0] + '-' + parts[1]
-        return fn
 
     @cached_property
     def shelf_registration(self) -> Optional['Filing']:
-        """Find the shelf registration (S-3, S-3ASR, F-3, S-1) for this filing."""
-        base_fn = self._base_file_number
-        if not base_fn:
-            return None
-
-        try:
-            from edgar import Company
-            entity = Company(self._filing.cik)
-            filings = entity.get_filings(form=['S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'])
-            for f in filings.head(20):
-                try:
-                    ih = f.index_headers
-                    fv = ih.filer.filing_values if ih.filer else None
-                    f_fn = fv.file_number if fv else None
-                    if f_fn and base_fn in f_fn:
-                        return f
-                except Exception:
-                    continue
-        except Exception:
-            pass
-        return None
+        """The shelf registration filing (S-3, F-3, S-1). Delegates to lifecycle."""
+        lc = self.lifecycle
+        return lc.shelf_registration if lc else None
 
     @cached_property
-    def related_filings(self) -> Optional[list]:
-        """All 424B* filings under the same shelf registration file number."""
-        base_fn = self._base_file_number
-        if not base_fn:
-            return None
-
-        try:
-            from edgar import Company
-            entity = Company(self._filing.cik)
-            filings = entity.get_filings(form=PROSPECTUS_FORMS)
-            related = []
-            for f in filings.head(100):
-                if f.accession_no == self._filing.accession_no:
-                    continue
-                try:
-                    ih = f.index_headers
-                    fv = ih.filer.filing_values if ih.filer else None
-                    f_fn = fv.file_number if fv else None
-                    if f_fn and base_fn in f_fn:
-                        related.append(f)
-                except Exception:
-                    continue
-            return related if related else None
-        except Exception:
-            pass
-        return None
+    def related_filings(self):
+        """All filings under the same shelf file number. Delegates to lifecycle."""
+        lc = self.lifecycle
+        return lc.filings if lc else None
 
     @cached_property
     def related_8k(self) -> Optional['Filing']:
-        """Find the 8-K filed on the same day (firm commitment offerings).
-        Returns None for ATM/resale filings or if no 8-K found."""
-        if self._offering_type not in (OfferingType.FIRM_COMMITMENT, OfferingType.BEST_EFFORTS):
-            return None
-
-        try:
-            from edgar import Company
-            entity = Company(self._filing.cik)
-            filings = entity.get_filings(form='8-K')
-            for f in filings.head(20):
-                if f.filing_date == self._filing.filing_date:
-                    return f
-        except Exception:
-            pass
-        return None
+        """8-K filed on the same day. Delegates to lifecycle."""
+        lc = self.lifecycle
+        return lc.related_8k if lc else None
 
     # ------------------------------------------------------------------
     # Rich display
