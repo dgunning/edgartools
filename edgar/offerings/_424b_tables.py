@@ -87,6 +87,13 @@ def _has_numeric_cells(table: 'TableNode') -> bool:
     return any(c.is_numeric for r in table.rows for c in r.cells)
 
 
+def _prefix_dollar(val: str) -> str:
+    """Prefix a value with $ unless it already has one or contains %."""
+    if not val or val.startswith('$') or '%' in val:
+        return val
+    return '$' + val
+
+
 def _extract_row_label_and_values(row) -> tuple:
     """
     Extract (label, numeric_values) from a row with sparse cells.
@@ -229,7 +236,7 @@ def _is_selling_stockholders(table: 'TableNode') -> bool:
     has_beneficial = 'beneficial' in text and 'offered' in text
     has_shares_offered = 'shares offered' in text or 'shares to be offered' in text
     has_numeric = _has_numeric_cells(table)
-    if has_selling_kw and has_numeric:
+    if has_selling_kw and has_numeric and len(table.rows) >= 3:
         return True
     if has_before_after and has_name and has_numeric:
         return True
@@ -295,9 +302,9 @@ def _is_underwriting_syndicate(table: 'TableNode') -> bool:
                 short_header_cells.append(ct.lower())
     specific_bank_patterns = [
         r'\bj\.?p\.?\s*morgan\b', r'\bmorgan stanley\b', r'\bgoldman\b',
-        r'\bmerrill lynch\b', r'\bbarclays\b', r'\bcitigroup\b', r'\bciti\b',
+        r'\bmerrill lynch\b', r'\bbarclays\b', r'\bcitigroup\b', r'\bcitibank\b',
         r'\bwells fargo\b', r'\bbofa securities\b',
-        r'\bcredit suisse\b', r'\bdeutsche bank\b', r'\bubs\s+\b',
+        r'\bcredit suisse\b', r'\bdeutsche bank\b', r'\bubs\b',
         r'\brbc\s+capital\b', r'\bjefferies\b', r'\bpiper sandler\b',
         r'\bmizuho\b', r'\bbny\s+capital\b', r'\bbnp paribas\b',
         r'\bstifel\b', r'\bcanaccord\b', r'\bleerink\b',
@@ -444,9 +451,9 @@ def extract_pricing_data(table: 'TableNode'):
         col_label = header_labels[i] if i < len(header_labels) else None
         columns.append(PricingColumnData(
             column_label=col_label,
-            offering_price='$' + offering_price_vals[i] if i < len(offering_price_vals) else None,
-            fee_or_discount='$' + fee_vals[i] if i < len(fee_vals) else None,
-            proceeds='$' + proceeds_vals[i] if i < len(proceeds_vals) else None,
+            offering_price=_prefix_dollar(offering_price_vals[i]) if i < len(offering_price_vals) else None,
+            fee_or_discount=_prefix_dollar(fee_vals[i]) if i < len(fee_vals) else None,
+            proceeds=_prefix_dollar(proceeds_vals[i]) if i < len(proceeds_vals) else None,
         ))
 
     # Detect percentage pricing (debt offerings)
@@ -677,6 +684,9 @@ def extract_selling_stockholders_data(table: 'TableNode'):
             if '%' in t or re.match(r'^[\d.]+\s*%$', t):
                 pct_vals.append(t)
             elif c.is_numeric:
+                # Skip dash placeholders (—, –, -, --) used as zero/null
+                if t in ('\u2014', '\u2013', '-', '--', '*'):
+                    continue
                 numeric_vals.append(t)
             elif not name:
                 name = t
@@ -922,7 +932,7 @@ def extract_underwriting_from_tables(document) -> list:
                         clean = _clean_underwriter_name(row[0])
                         names.append(clean)
                         # Allocation amount is the last cell if numeric-looking
-                        if len(row) >= 2 and re.match(r'[\d,.$]+', row[-1]):
+                        if len(row) >= 2 and re.fullmatch(r'[\d,.$]+', row[-1]):
                             allocations.append(row[-1])
                         else:
                             allocations.append(None)

@@ -7,6 +7,7 @@ Phase 1: Cover page extraction + offering type classification + obj() dispatch.
 
 from __future__ import annotations
 
+import logging
 import re
 from datetime import date, timedelta
 from enum import Enum
@@ -20,6 +21,8 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar.richtools import repr_rich
+
+log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from edgar._filings import Filing, Filings
@@ -291,7 +294,7 @@ class FilingFeesData(BaseModel):
 # ---------------------------------------------------------------------------
 
 # Registration forms that start a shelf
-_SHELF_FORMS = {'S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1', 'S-1/A', 'S-3/A', 'F-3/A'}
+_SHELF_BASE_FORMS = {'S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'}
 _TAKEDOWN_FORMS = {'424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8'}
 
 
@@ -332,6 +335,11 @@ class ShelfLifecycle:
     # ------------------------------------------------------------------
 
     @property
+    def filing(self) -> 'Filing':
+        """The current 424B filing this lifecycle was computed from."""
+        return self._current
+
+    @property
     def filings(self) -> 'Filings':
         """The full set of related filings under this shelf."""
         return self._related
@@ -341,7 +349,7 @@ class ShelfLifecycle:
         """The S-3/F-3/S-1 filing that initiated this shelf."""
         for f in self._related:
             base_form = f.form.replace('/A', '')
-            if base_form in ('S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'):
+            if base_form in _SHELF_BASE_FORMS:
                 return f
         return None
 
@@ -475,6 +483,8 @@ class ShelfLifecycle:
             remaining = self.days_to_expiry
             if remaining is not None and remaining > 0:
                 summary.add_row("Shelf Expires", f"{exp} ({remaining} days remaining)")
+            elif remaining is not None and remaining == 0:
+                summary.add_row("Shelf Expires", f"{exp} (expires today)")
             elif remaining is not None:
                 summary.add_row("Shelf Expires", f"{exp} (EXPIRED)")
             else:
@@ -501,7 +511,7 @@ class ShelfLifecycle:
             base_form = f.form.replace('/A', '')
             is_current = f.accession_no == self._current.accession_no
 
-            if base_form in ('S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'):
+            if base_form in _SHELF_BASE_FORMS:
                 desc = "Shelf registration"
             elif f.form == 'EFFECT':
                 desc = "Declared effective"
@@ -558,6 +568,8 @@ class ShelfLifecycle:
             remaining = self.days_to_expiry
             if remaining is not None and remaining > 0:
                 lines.append(f"Shelf Expires: {self.shelf_expires} ({remaining} days remaining)")
+            elif remaining is not None and remaining == 0:
+                lines.append(f"Shelf Expires: {self.shelf_expires} (expires today)")
             elif remaining is not None:
                 lines.append(f"Shelf Expires: {self.shelf_expires} (EXPIRED)")
 
@@ -579,7 +591,7 @@ class ShelfLifecycle:
                 is_current = f.accession_no == self._current.accession_no
                 marker = " << current" if is_current else ""
 
-                if base_form in ('S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'):
+                if base_form in _SHELF_BASE_FORMS:
                     desc = "Shelf registration"
                 elif f.form == 'EFFECT':
                     desc = "Declared effective"
@@ -925,7 +937,8 @@ class Prospectus424B:
             if related is None or related.empty:
                 return None
             return ShelfLifecycle(self._filing, related)
-        except Exception:
+        except Exception as e:
+            log.debug("ShelfLifecycle construction failed for %s: %s", self._filing.accession_no, e)
             return None
 
     @cached_property
