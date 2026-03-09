@@ -531,6 +531,77 @@ class ShelfLifecycle:
         pos = f"#{td}/{self.total_takedowns}" if td else "?"
         return f"ShelfLifecycle(takedown={pos}, takedowns={self.total_takedowns})"
 
+    # ------------------------------------------------------------------
+    # AI context
+    # ------------------------------------------------------------------
+
+    def to_context(self, detail: str = 'standard') -> str:
+        """Returns AI-optimized shelf lifecycle context for language models.
+
+        Args:
+            detail: Level of detail - 'minimal', 'standard', or 'full'
+
+        Returns:
+            Markdown-KV formatted context string optimized for LLMs
+        """
+        lines = []
+        lines.append(f"SHELF LIFECYCLE: {self._current.company}")
+        lines.append("")
+
+        reg = self.shelf_registration
+        if reg:
+            lines.append(f"Shelf Registration: {reg.form} filed {reg.filing_date}")
+        if self.effective_date:
+            review = f" ({self.review_period_days} days review)" if self.review_period_days is not None else ""
+            lines.append(f"Effective Date: {self.effective_date}{review}")
+        if self.shelf_expires:
+            remaining = self.days_to_expiry
+            if remaining is not None and remaining > 0:
+                lines.append(f"Shelf Expires: {self.shelf_expires} ({remaining} days remaining)")
+            elif remaining is not None:
+                lines.append(f"Shelf Expires: {self.shelf_expires} (EXPIRED)")
+
+        td_num = self.takedown_number
+        if td_num is not None:
+            latest = " (latest)" if self.is_latest_takedown else ""
+            lines.append(f"Takedown Position: #{td_num} of {self.total_takedowns}{latest}")
+
+        avg = self.avg_days_between_takedowns
+        if avg is not None:
+            lines.append(f"Avg Cadence: {avg:.0f} days between takedowns")
+
+        if detail in ('standard', 'full'):
+            lines.append("")
+            lines.append("TIMELINE:")
+            takedown_idx = 0
+            for f in self._related:
+                base_form = f.form.replace('/A', '')
+                is_current = f.accession_no == self._current.accession_no
+                marker = " << current" if is_current else ""
+
+                if base_form in ('S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'):
+                    desc = "Shelf registration"
+                elif f.form == 'EFFECT':
+                    desc = "Declared effective"
+                elif base_form in _TAKEDOWN_FORMS:
+                    takedown_idx += 1
+                    desc = f"Takedown #{takedown_idx}"
+                elif f.form == '8-K':
+                    desc = "Current report"
+                else:
+                    desc = ""
+
+                lines.append(f"  {f.form:10s} {f.filing_date}  {desc}{marker}")
+
+        if detail == 'full':
+            lines.append("")
+            lines.append("AVAILABLE ACTIONS:")
+            lines.append("  - .shelf_registration -> Filing object for the S-3/F-3/S-1")
+            lines.append("  - .takedowns -> list of all 424B* takedown Filing objects")
+            lines.append("  - .filings -> full Filings set under this shelf")
+
+        return "\n".join(lines)
+
 
 # ---------------------------------------------------------------------------
 # Main class
@@ -874,6 +945,106 @@ class Prospectus424B:
         """8-K filed on the same day. Delegates to lifecycle."""
         lc = self.lifecycle
         return lc.related_8k if lc else None
+
+    # ------------------------------------------------------------------
+    # AI context
+    # ------------------------------------------------------------------
+
+    def to_context(self, detail: str = 'standard') -> str:
+        """Returns AI-optimized prospectus context for language models.
+
+        Args:
+            detail: Level of detail - 'minimal', 'standard', or 'full'
+
+        Returns:
+            Markdown-KV formatted context string optimized for LLMs
+        """
+        cp = self._cover_page
+        lines = []
+
+        lines.append(f"PROSPECTUS: {self.company} ({self.form})")
+        lines.append("")
+        lines.append(f"Filed: {self.filing_date}")
+        lines.append(f"Offering Type: {self._offering_type.display_name}")
+
+        if cp.security_description:
+            lines.append(f"Security: {cp.security_description[:100]}")
+        if cp.offering_amount:
+            lines.append(f"Offering Amount: {cp.offering_amount}")
+        if cp.offering_price:
+            lines.append(f"Offering Price: {cp.offering_price}")
+        if cp.exchange_ticker:
+            lines.append(f"Ticker: {cp.exchange_ticker}")
+        if cp.registration_number:
+            lines.append(f"Registration No.: {cp.registration_number}")
+
+        flags = []
+        if cp.is_atm:
+            flags.append("ATM")
+        if cp.is_preliminary:
+            flags.append("PRELIMINARY")
+        if cp.is_supplement:
+            flags.append("Supplement")
+        if self.is_amendment:
+            flags.append("AMENDMENT")
+        if flags:
+            lines.append(f"Status: {' | '.join(flags)}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # Standard: add pricing and underwriting summaries
+        if self.pricing and self.pricing.columns:
+            lines.append("")
+            lines.append("PRICING:")
+            for col in self.pricing.columns:
+                label = col.column_label or "Value"
+                parts = []
+                if col.offering_price:
+                    parts.append(f"Price: {col.offering_price}")
+                if col.proceeds:
+                    parts.append(f"Proceeds: {col.proceeds}")
+                if parts:
+                    lines.append(f"  {label}: {', '.join(parts)}")
+
+        uw = self.underwriting
+        if uw and uw.underwriters:
+            lines.append("")
+            lines.append(f"UNDERWRITING ({uw.fee_type.replace('_', ' ').title()}):")
+            for entry in uw.underwriters[:5]:
+                lines.append(f"  - {entry.name}")
+            if len(uw.underwriters) > 5:
+                lines.append(f"  ... +{len(uw.underwriters) - 5} more")
+
+        lc = self.lifecycle
+        if lc:
+            lines.append("")
+            td_num = lc.takedown_number
+            if td_num is not None:
+                latest = " (latest)" if lc.is_latest_takedown else ""
+                lines.append(f"Shelf Position: Takedown #{td_num} of {lc.total_takedowns}{latest}")
+            if lc.shelf_expires:
+                remaining = lc.days_to_expiry
+                if remaining is not None and remaining > 0:
+                    lines.append(f"Shelf Expires: {lc.shelf_expires} ({remaining} days remaining)")
+                elif remaining is not None:
+                    lines.append(f"Shelf Expires: {lc.shelf_expires} (EXPIRED)")
+
+        if detail == 'full':
+            lines.append("")
+            lines.append("AVAILABLE ACTIONS:")
+            lines.append("  - .cover_page -> CoverPageData with all extracted fields")
+            lines.append("  - .pricing -> PricingData (offering price, fee, proceeds)")
+            lines.append("  - .underwriting -> UnderwritingInfo (syndicate details)")
+            lines.append("  - .offering_terms -> OfferingTerms (shares, warrants, use of proceeds)")
+            lines.append("  - .selling_stockholders -> SellingStockholdersData")
+            lines.append("  - .structured_note_terms -> StructuredNoteTerms (for 424B2)")
+            lines.append("  - .dilution -> DilutionData")
+            lines.append("  - .capitalization -> CapitalizationData")
+            lines.append("  - .filing_fees -> FilingFeesData (from XBRL exhibit)")
+            lines.append("  - .lifecycle -> ShelfLifecycle (takedown position, expiry, timeline)")
+
+        return "\n".join(lines)
 
     # ------------------------------------------------------------------
     # Rich display
