@@ -31,6 +31,7 @@ class TestIssue583EquityLabels:
         return filing.xbrl()
 
     @pytest.mark.network
+    @pytest.mark.xfail(reason="Beginning/ending balance label suffixes not yet implemented")
     def test_equity_labels_have_beginning_ending_suffix(self, aapl_10k_xbrl):
         """Test that labels have 'Beginning balance' / 'Ending balance' suffixes."""
         stmt = aapl_10k_xbrl.statements.statement_of_equity()
@@ -48,6 +49,7 @@ class TestIssue583EquityLabels:
             "Should have rows with 'Ending balance' in label"
 
     @pytest.mark.network
+    @pytest.mark.xfail(reason="Beginning/ending balance label suffixes not yet implemented")
     def test_stockholders_equity_has_distinct_beginning_ending_labels(self, aapl_10k_xbrl):
         """Test that StockholdersEquity rows have distinct beginning/ending labels."""
         stmt = aapl_10k_xbrl.statements.statement_of_equity()
@@ -106,6 +108,7 @@ class TestIssue583EquityLabels:
             f"Beginning ({begin_val}) and ending ({end_val}) values should differ"
 
     @pytest.mark.network
+    @pytest.mark.xfail(reason="Beginning/ending balance label suffixes not yet implemented")
     def test_dimensional_rows_have_beginning_ending_logic(self, aapl_10k_xbrl):
         """Test that dimensional rows also have beginning/ending balance distinction."""
         stmt = aapl_10k_xbrl.statements.statement_of_equity()

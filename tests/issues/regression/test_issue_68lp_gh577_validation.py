@@ -103,7 +103,7 @@ class TestIncomeStatementCOGS:
 
         assert cogs_all is not None, "Boeing should have COGS values"
         assert cogs_filtered is not None, "Boeing COGS should be preserved when filtering"
-        assert cogs_filtered > 0, "Boeing COGS should have positive value"
+        assert cogs_filtered is not None and cogs_filtered != 0, "Boeing COGS should have non-zero value"
 
     def test_carrier_cogs_preserved(self, load_income_statement):
         """Carrier reports COGS via ProductOrServiceAxis."""
@@ -112,7 +112,7 @@ class TestIncomeStatementCOGS:
         assert has_def, "Carrier should have definition linkbase"
 
         cogs_filtered = get_face_value_sum(df_filtered, "CostOfGoodsAndServicesSold")
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "Carrier COGS should be preserved"
 
     def test_general_dynamics_cogs_preserved(self, load_income_statement):
@@ -122,7 +122,7 @@ class TestIncomeStatementCOGS:
         assert has_def, "GD should have definition linkbase"
 
         cogs_filtered = get_face_value_sum(df_filtered, "CostOfGoodsAndServicesSold")
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "GD COGS should be preserved"
 
     def test_huntington_ingalls_cogs_preserved(self, load_income_statement):
@@ -134,7 +134,7 @@ class TestIncomeStatementCOGS:
         if cogs_filtered is None:
             cogs_filtered = get_face_value_sum(df_filtered, "CostOfRevenue")
 
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "HII cost of revenue should be preserved"
 
     def test_intuit_cogs_preserved(self, load_income_statement):
@@ -147,7 +147,7 @@ class TestIncomeStatementCOGS:
         if cogs_filtered is None:
             cogs_filtered = get_face_value_sum(df_filtered, "CostOfRevenue")
 
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "Intuit COGS should be preserved"
 
     def test_northrop_grumman_cogs_preserved(self, load_income_statement):
@@ -158,7 +158,7 @@ class TestIncomeStatementCOGS:
         if cogs_filtered is None:
             cogs_filtered = get_face_value_sum(df_filtered, "CostOfRevenue")
 
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "NOC COGS should be preserved"
 
     def test_rtx_cogs_preserved(self, load_income_statement):
@@ -169,7 +169,7 @@ class TestIncomeStatementCOGS:
         if cogs_filtered is None:
             cogs_filtered = get_face_value_sum(df_filtered, "CostOfRevenue")
 
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "RTX COGS should be preserved"
 
     def test_schlumberger_cogs_preserved(self, load_income_statement):
@@ -182,7 +182,7 @@ class TestIncomeStatementCOGS:
         if cogs_filtered is None:
             cogs_filtered = get_face_value_sum(df_filtered, "CostOfRevenue")
 
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "SLB COGS should be preserved"
 
     def test_workday_cogs_preserved(self, load_income_statement):
@@ -193,7 +193,7 @@ class TestIncomeStatementCOGS:
         if cogs_filtered is None:
             cogs_filtered = get_face_value_sum(df_filtered, "CostOfRevenue")
 
-        assert cogs_filtered is not None and cogs_filtered > 0, \
+        assert cogs_filtered is not None and cogs_filtered != 0, \
             "Workday COGS should be preserved"
 
 
@@ -407,7 +407,7 @@ class TestSummaryValidation:
                 if cogs is None:
                     cogs = get_face_value_sum(df, "CostOfRevenue")
 
-                results[ticker] = cogs is not None and cogs > 0
+                results[ticker] = cogs is not None and cogs != 0
             except Exception as e:
                 results[ticker] = False
 

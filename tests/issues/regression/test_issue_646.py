@@ -44,7 +44,8 @@ def test_dis_cost_of_goods_includes_all_dimensional_members():
     assert cogs_value == cogs_value, "COGS parent value is NaN — dimensional total not computed"
 
     # FY2024: Service (~$52,677M) + Product (~$6,089M) = ~$58,766M
-    assert cogs_value > 55_000_000_000, (
+    # Value may be negative due to preferred_sign application, so use abs()
+    assert abs(cogs_value) > 55_000_000_000, (
         f"COGS value {cogs_value:,.0f} appears to be a single dimensional member, "
         f"not the sum. Expected > $55B (Service + Product combined)."
     )

@@ -25,8 +25,8 @@ def test_sny_income_vs_comprehensive_income():
     assert comprehensive is not None, "comprehensive_income() should resolve for SNY"
 
     # They must be different statements (different roles)
-    assert income.role != comprehensive.role, (
-        f"income_statement() and comprehensive_income() resolved to the same role: {income.role}"
+    assert income.role_or_type != comprehensive.role_or_type, (
+        f"income_statement() and comprehensive_income() resolved to the same role: {income.role_or_type}"
     )
 
     # Income statement should contain P&L indicators, not OCI

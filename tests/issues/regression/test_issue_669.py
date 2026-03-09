@@ -36,50 +36,69 @@ class TestIssue669PreferredSignInDataFrame:
         return Company("AZN").get_filings(form="20-F", year=2024).latest()
 
     def test_default_applies_preferred_sign(self, azn_filing):
-        """Default to_dataframe() should show cash outflows as negative."""
+        """Default to_dataframe() should apply preferred_sign (negate raw values)."""
         xbrl = azn_filing.xbrl()
         cf = xbrl.statements.cashflow_statement()
         if cf is None:
             pytest.skip("Cash flow statement not found")
-        df = cf.to_dataframe()
+        df_pres = cf.to_dataframe()  # presentation=True is default
+        df_raw = cf.to_dataframe(presentation=False)
 
-        # Find an outflow concept that has preferred_sign=-1
-        if 'preferred_sign' in df.columns:
-            negative_rows = df[df['preferred_sign'] == -1]
-            if not negative_rows.empty:
-                period_cols = get_period_columns(df)
-                if period_cols:
-                    # With presentation=True (default), values with preferred_sign=-1 should be negative
-                    row = negative_rows.iloc[0]
-                    value = row[period_cols[0]]
-                    if pd.notna(value) and value != 0:
-                        assert value < 0, (
-                            f"Default to_dataframe() should show outflows as negative. "
-                            f"Got {value} for {row.get('concept', 'unknown')}"
-                        )
+        if 'preferred_sign' not in df_pres.columns:
+            pytest.skip("No preferred_sign column")
+
+        period_cols = get_period_columns(df_pres)
+        if not period_cols:
+            pytest.skip("No period columns")
+
+        # For rows with preferred_sign=-1, presentation values should be negated vs raw
+        neg_mask = df_pres['preferred_sign'] == -1
+        if not neg_mask.any():
+            pytest.skip("No rows with preferred_sign=-1")
+
+        col = period_cols[0]
+        pres_val = df_pres.loc[neg_mask, col].dropna()
+        raw_val = df_raw.loc[neg_mask, col].dropna()
+        if pres_val.empty or raw_val.empty:
+            pytest.skip("No non-null values to compare")
+
+        # The key invariant: presentation flips the sign relative to raw
+        assert pres_val.iloc[0] == -raw_val.iloc[0], (
+            f"presentation=True should negate raw values for preferred_sign=-1. "
+            f"pres={pres_val.iloc[0]}, raw={raw_val.iloc[0]}"
+        )
 
     def test_presentation_false_returns_raw(self, azn_filing):
-        """presentation=False should return raw positive XBRL instance values."""
+        """presentation=False should return unmodified XBRL instance values."""
         xbrl = azn_filing.xbrl()
         cf = xbrl.statements.cashflow_statement()
         if cf is None:
             pytest.skip("Cash flow statement not found")
-        df = cf.to_dataframe(presentation=False)
+        df_pres = cf.to_dataframe(presentation=True)
+        df_raw = cf.to_dataframe(presentation=False)
 
-        # Find an outflow concept that has preferred_sign=-1
-        if 'preferred_sign' in df.columns:
-            negative_rows = df[df['preferred_sign'] == -1]
-            if not negative_rows.empty:
-                period_cols = get_period_columns(df)
-                if period_cols:
-                    # With presentation=False, raw values should be positive
-                    row = negative_rows.iloc[0]
-                    value = row[period_cols[0]]
-                    if pd.notna(value) and value != 0:
-                        assert value > 0, (
-                            f"presentation=False should return raw positive values. "
-                            f"Got {value} for {row.get('concept', 'unknown')}"
-                        )
+        if 'preferred_sign' not in df_pres.columns:
+            pytest.skip("No preferred_sign column")
+
+        period_cols = get_period_columns(df_pres)
+        if not period_cols:
+            pytest.skip("No period columns")
+
+        neg_mask = df_pres['preferred_sign'] == -1
+        if not neg_mask.any():
+            pytest.skip("No rows with preferred_sign=-1")
+
+        col = period_cols[0]
+        pres_val = df_pres.loc[neg_mask, col].dropna()
+        raw_val = df_raw.loc[neg_mask, col].dropna()
+        if pres_val.empty or raw_val.empty:
+            pytest.skip("No non-null values to compare")
+
+        # Raw and presentation should differ (sign flip)
+        assert pres_val.iloc[0] != raw_val.iloc[0], (
+            f"presentation=True and False should produce different values. "
+            f"Both returned {pres_val.iloc[0]}"
+        )
 
 
 @pytest.mark.network
@@ -92,7 +111,7 @@ class TestIssue669StitchedPreferredSign:
         financials = company.get_financials()
         if financials is None:
             pytest.skip("Financials not available")
-        cf = financials.cashflow_statement
+        cf = financials.cashflow_statement()
         if cf is None:
             pytest.skip("Cash flow statement not available")
         df = cf.to_dataframe()
@@ -104,7 +123,7 @@ class TestIssue669StitchedPreferredSign:
         financials = company.get_financials()
         if financials is None:
             pytest.skip("Financials not available")
-        cf = financials.cashflow_statement
+        cf = financials.cashflow_statement()
         if cf is None:
             pytest.skip("Cash flow statement not available")
 
