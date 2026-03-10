@@ -9,7 +9,10 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
-import vcr
+try:
+    import vcr
+except ImportError:
+    vcr = None
 
 from edgar import get_by_accession_number
 from edgar.funds.nmfp3 import MoneyMarketFund, NMFP2_FORMS, NMFP3_FORMS, MONEY_MARKET_FORMS
@@ -24,7 +27,7 @@ my_vcr = vcr.VCR(
     match_on=["method", "scheme", "host", "port", "path", "query"],
     filter_headers=["User-Agent", "Authorization"],
     decode_compressed_response=True,
-)
+) if vcr else None
 
 # Cache the filing and parsed object for all tests in this module
 _filing = None

@@ -10,7 +10,10 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-import vcr
+try:
+    import vcr
+except ImportError:
+    vcr = None
 
 from edgar import get_by_accession_number
 from edgar.funds.ncen import (
@@ -34,7 +37,7 @@ my_vcr = vcr.VCR(
     match_on=["method", "scheme", "host", "port", "path", "query"],
     filter_headers=["User-Agent", "Authorization"],
     decode_compressed_response=True,
-)
+) if vcr else None
 
 
 # ---------------------------------------------------------------------------

@@ -1,6 +1,9 @@
 from pathlib import Path
 
-import vcr
+try:
+    import vcr
+except ImportError:
+    vcr = None
 from edgar.xbrl import *
 from rich import print
 from edgar import *
@@ -17,7 +20,7 @@ my_vcr = vcr.VCR(
     match_on=["method", "scheme", "host", "port", "path", "query"],
     filter_headers=["User-Agent", "Authorization"],
     decode_compressed_response=True,
-)
+) if vcr else None
 
 @pytest.fixture(scope="session")
 def comcast_xbrl():
