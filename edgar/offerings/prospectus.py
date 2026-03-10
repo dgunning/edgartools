@@ -27,7 +27,8 @@ log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from edgar._filings import Filing, Filings
 
-__all__ = ['Prospectus424B', 'ShelfLifecycle', 'Deal', 'OfferingType', 'CoverPageData']
+__all__ = ['Prospectus424B', 'ShelfLifecycle', 'Deal', 'OfferingType', 'CoverPageData',
+           'SellingStockholdersData', 'SellingStockholderEntry']
 
 # Forms handled by this parser
 PROSPECTUS_FORMS = ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']
@@ -184,12 +185,44 @@ class OfferingTerms(BaseModel):
 
 
 class SellingStockholderEntry(BaseModel):
+    """A single row from a selling stockholders table.
+
+    Raw string values are preserved as-is from the filing.
+    Use the numeric properties (shares_before, shares_offered, etc.) for parsed int/float values.
+    """
     name: str
     shares_before_offering: Optional[str] = None
     pct_before_offering: Optional[str] = None
     shares_offered: Optional[str] = None
     shares_after_offering: Optional[str] = None
     pct_after_offering: Optional[str] = None
+    warrants_or_convertible: Optional[str] = None
+
+    # --- Numeric properties (return None on parse failure) ---
+
+    @property
+    def shares_before(self) -> Optional[int]:
+        return _parse_sec_int(self.shares_before_offering)
+
+    @property
+    def shares(self) -> Optional[int]:
+        return _parse_sec_int(self.shares_offered)
+
+    @property
+    def shares_after(self) -> Optional[int]:
+        return _parse_sec_int(self.shares_after_offering)
+
+    @property
+    def pct_before(self) -> Optional[float]:
+        return _parse_sec_number(self.pct_before_offering)
+
+    @property
+    def pct_after(self) -> Optional[float]:
+        return _parse_sec_number(self.pct_after_offering)
+
+    @property
+    def warrants(self) -> Optional[int]:
+        return _parse_sec_int(self.warrants_or_convertible)
 
 
 class SellingStockholdersData(BaseModel):
@@ -204,6 +237,22 @@ class SellingStockholdersData(BaseModel):
     @property
     def is_populated(self) -> bool:
         return len(self.stockholders) > 0
+
+    def to_dataframe(self):
+        """Convert selling stockholders to a pandas DataFrame with numeric columns."""
+        import pandas as pd
+        rows = []
+        for entry in self.stockholders:
+            rows.append({
+                'name': entry.name,
+                'shares_before': entry.shares_before,
+                'pct_before': entry.pct_before,
+                'shares_offered': entry.shares,
+                'shares_after': entry.shares_after,
+                'pct_after': entry.pct_after,
+                'warrants': entry.warrants,
+            })
+        return pd.DataFrame(rows)
 
 
 class UnderwriterEntry(BaseModel):
@@ -1222,12 +1271,21 @@ class Prospectus424B:
     @cached_property
     def selling_stockholders(self) -> Optional[SellingStockholdersData]:
         """Selling stockholders table data.
+        Merges all selling stockholder tables found in the filing.
         Returns None if no selling stockholders table is found."""
         from edgar.offerings._424b_tables import extract_selling_stockholders_data
         tables = self._classified_tables.get('selling_stockholders', [])
         if not tables:
             return None
+        # Extract from first table
         result = extract_selling_stockholders_data(tables[0])
+        # Merge additional tables (e.g. warrants table separate from common shares)
+        for extra_table in tables[1:]:
+            extra = extract_selling_stockholders_data(extra_table)
+            if extra.is_populated:
+                result.stockholders.extend(extra.stockholders)
+                if extra.total_shares_offered and not result.total_shares_offered:
+                    result.total_shares_offered = extra.total_shares_offered
         return result if result.is_populated else None
 
     @cached_property

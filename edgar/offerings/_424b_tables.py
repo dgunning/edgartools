@@ -613,13 +613,94 @@ def extract_capitalization_data(table: 'TableNode'):
     return CapitalizationData(rows=rows_data, **fields)
 
 
+def _build_column_map(header_cells: list) -> dict:
+    """Map header text to semantic column roles.
+
+    Returns a dict like {'before': 0, 'offered': 1, 'after': 2, 'warrant': 3}
+    mapping role names to numeric-column indices (0-based among numeric columns).
+    """
+    col_map = {}
+    numeric_idx = 0
+    pct_idx = 0
+    for h in header_cells:
+        hl = h.lower()
+        is_pct = 'percent' in hl or '%' in hl
+        is_numeric_header = any(kw in hl for kw in (
+            'shares', 'number', 'amount', 'beneficial', 'warrant',
+            'issuable', 'exercise', 'conversion', 'percent', '%',
+            'before', 'after', 'offered', 'registered',
+        ))
+        if not is_numeric_header:
+            continue
+
+        if is_pct:
+            if 'after' in hl:
+                col_map['pct_after'] = pct_idx
+            elif any(kw in hl for kw in ('before', 'prior', 'owned')):
+                col_map['pct_before'] = pct_idx
+            pct_idx += 1
+        else:
+            if any(kw in hl for kw in ('warrant', 'issuable', 'exercise', 'conversion')):
+                col_map['warrant'] = numeric_idx
+            elif 'after' in hl:
+                # Check 'after' before 'before' — headers like
+                # "shares beneficially owned after offering" contain 'owned'
+                # which would otherwise match the 'before' category
+                col_map['after'] = numeric_idx
+            elif any(kw in hl for kw in ('offered', 'registered', 'to be sold', 'being offered')):
+                col_map['offered'] = numeric_idx
+            elif any(kw in hl for kw in ('before', 'prior', 'owned', 'beneficial')):
+                col_map['before'] = numeric_idx
+            numeric_idx += 1
+
+    return col_map
+
+
+def _assign_entry_values(entry, numeric_vals, pct_vals, col_map):
+    """Assign numeric/pct values to a SellingStockholderEntry using header mapping or positional fallback."""
+    if col_map:
+        # Header-aware mapping
+        for role, idx in col_map.items():
+            if role == 'before' and idx < len(numeric_vals):
+                entry.shares_before_offering = numeric_vals[idx]
+            elif role == 'offered' and idx < len(numeric_vals):
+                entry.shares_offered = numeric_vals[idx]
+            elif role == 'after' and idx < len(numeric_vals):
+                entry.shares_after_offering = numeric_vals[idx]
+            elif role == 'warrant' and idx < len(numeric_vals):
+                entry.warrants_or_convertible = numeric_vals[idx]
+            elif role == 'pct_before' and idx < len(pct_vals):
+                entry.pct_before_offering = pct_vals[idx]
+            elif role == 'pct_after' and idx < len(pct_vals):
+                entry.pct_after_offering = pct_vals[idx]
+    else:
+        # Positional fallback: before, offered, after
+        if len(numeric_vals) >= 3:
+            entry.shares_before_offering = numeric_vals[0]
+            entry.shares_offered = numeric_vals[1]
+            entry.shares_after_offering = numeric_vals[2]
+            if len(numeric_vals) >= 4:
+                entry.warrants_or_convertible = numeric_vals[3]
+        elif len(numeric_vals) == 2:
+            entry.shares_before_offering = numeric_vals[0]
+            entry.shares_offered = numeric_vals[1]
+        elif len(numeric_vals) == 1:
+            entry.shares_offered = numeric_vals[0]
+
+        if len(pct_vals) >= 2:
+            entry.pct_before_offering = pct_vals[0]
+            entry.pct_after_offering = pct_vals[1]
+        elif len(pct_vals) == 1:
+            entry.pct_before_offering = pct_vals[0]
+
+
 def extract_selling_stockholders_data(table: 'TableNode'):
     """
     Extract selling stockholder entries from a selling_stockholders table.
 
     These tables list stockholders with shares before/after the offering.
-    Column layouts vary but typically include:
-    name | shares_before | pct_before | shares_offered | shares_after | pct_after
+    Uses header-aware column mapping when headers are available,
+    with positional fallback for tables without clear headers.
     """
     from edgar.offerings.prospectus import SellingStockholdersData, SellingStockholderEntry
 
@@ -642,6 +723,9 @@ def extract_selling_stockholders_data(table: 'TableNode'):
                             ('name', 'selling', 'beneficial', 'shares')):
                 header_cells = [c.lower() for c in cells]
                 break
+
+    # Build semantic column map from headers
+    col_map = _build_column_map(header_cells)
 
     # Parse data rows
     for row in table.rows:
@@ -706,23 +790,7 @@ def extract_selling_stockholders_data(table: 'TableNode'):
             continue
 
         entry = SellingStockholderEntry(name=name)
-        # Map numeric values positionally: before, offered, after
-        if len(numeric_vals) >= 3:
-            entry.shares_before_offering = numeric_vals[0]
-            entry.shares_offered = numeric_vals[1]
-            entry.shares_after_offering = numeric_vals[2]
-        elif len(numeric_vals) == 2:
-            entry.shares_before_offering = numeric_vals[0]
-            entry.shares_offered = numeric_vals[1]
-        elif len(numeric_vals) == 1:
-            entry.shares_offered = numeric_vals[0]
-
-        if len(pct_vals) >= 2:
-            entry.pct_before_offering = pct_vals[0]
-            entry.pct_after_offering = pct_vals[1]
-        elif len(pct_vals) == 1:
-            entry.pct_before_offering = pct_vals[0]
-
+        _assign_entry_values(entry, numeric_vals, pct_vals, col_map)
         entries.append(entry)
 
     return SellingStockholdersData(
