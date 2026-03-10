@@ -1900,7 +1900,7 @@ def generate_rich_representation(xbrl) -> Union[str, 'Panel']:
     """
     Generate a rich representation of the XBRL document.
 
-    Follows the EdgarTools design language (docs/internal/design-language.md):
+    Follows the EdgarTools design language:
     - Card-based layout with box.ROUNDED, expand=False
     - Semantic colors from edgar.display.styles
     - No emojis - uses unicode symbols from SYMBOLS

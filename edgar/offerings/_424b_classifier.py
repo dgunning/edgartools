@@ -5,8 +5,7 @@ Uses a priority cascade over cover-page text signals to classify
 the offering type. All primary signals appear in the first 3,000
 characters (cover page); secondary signals in the first 8,000.
 
-See docs/internal/research/424b-research-results/offering-type-classification.md
-for validation results (12/12 = 100% accuracy).
+Validation results: 12/12 = 100% accuracy.
 """
 
 from __future__ import annotations

@@ -157,10 +157,10 @@ patterns:
 
       - [Related guide](path/to/guide.md)
     note: |
-      Follow docs/internal/docs-guidelines.md strictly.
+      Follow docs-internal/docs-guidelines.md strictly.
       Lead with hero code + image. Push reference tables to the bottom.
       Sections named after actions ("Access Holdings Data") not objects ("Holdings Data").
-      No emojis in prose -- use Unicode symbols per docs/internal/design-language.md.
+      No emojis in prose -- use Unicode symbols per docs-internal/design-language.md.
 
   - name: User Guide Article
     when: Writing a task-oriented walkthrough for a topic

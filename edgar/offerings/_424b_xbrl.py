@@ -8,7 +8,7 @@ and fee calculations.
 Coverage: ~43% of 424B2, ~23% of 424B5, ~7% of 424B3, 0% of 424B1/424B4.
 Available from early 2022 onwards (SEC Rule 408).
 
-See docs/internal/research/424b-research-results/xbrl-filing-fees-extraction.md
+See xbrl-filing-fees-extraction research for implementation details.
 """
 
 from __future__ import annotations

@@ -1674,7 +1674,7 @@ class Company(Entity):
     def __rich__(self):
         """Creates a rich representation of the company with detailed information.
 
-        Design follows the EdgarTools display language (docs/internal/design-language.md):
+        Design follows the EdgarTools display language:
         - Single outer border (card-based) with box.ROUNDED
         - No emojis - uses unicode symbols from SYMBOLS
         - Semantic colors from edgar.display.styles

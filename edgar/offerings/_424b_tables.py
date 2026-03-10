@@ -4,8 +4,7 @@
 Classifies tables from filing.parse().tables into semantic types,
 then extracts structured data from identified tables.
 
-See docs/internal/research/424b-research-results/table-classification.md
-for validation results and edge cases.
+See table-classification research for validation results and edge cases.
 """
 
 from __future__ import annotations

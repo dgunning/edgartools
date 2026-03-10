@@ -4,8 +4,7 @@
 Extracts 11 fields from the cover page of 424B* filings using
 a combination of filing metadata and text regex patterns.
 
-See docs/internal/research/424b-research-results/cover-page-patterns.md
-for validation results (89% overall, near-zero true failures).
+Validation results: 89% overall, near-zero true failures.
 """
 
 from __future__ import annotations
