@@ -6,9 +6,11 @@ Ground truth filings:
   - ETF: AB Active ETFs, Inc. (accession 0001410368-26-010918)
 """
 from decimal import Decimal
+from pathlib import Path
 
 import pandas as pd
 import pytest
+import vcr
 
 from edgar import get_by_accession_number
 from edgar.funds.ncen import (
@@ -22,6 +24,18 @@ from edgar.funds.ncen import (
     SignatureInfo,
 )
 
+# Mark all tests in this module as network tests
+pytestmark = pytest.mark.network
+
+CASSETTES_DIR = Path(__file__).parent / "cassettes"
+my_vcr = vcr.VCR(
+    cassette_library_dir=str(CASSETTES_DIR),
+    record_mode="once",
+    match_on=["method", "scheme", "host", "port", "path", "query"],
+    filter_headers=["User-Agent", "Authorization"],
+    decode_compressed_response=True,
+)
+
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -30,15 +44,17 @@ from edgar.funds.ncen import (
 @pytest.fixture(scope="module")
 def mutual_fund_census():
     """AB CAP FUND, INC. — mutual fund, 3 series, no ETFs."""
-    filing = get_by_accession_number("0001410368-26-010921")
-    return filing.obj()
+    with my_vcr.use_cassette("test_ncen_mutual_fund.yaml"):
+        filing = get_by_accession_number("0001410368-26-010921")
+        return filing.obj()
 
 
 @pytest.fixture(scope="module")
 def etf_census():
     """AB Active ETFs, Inc. — ETF company, 22 series."""
-    filing = get_by_accession_number("0001410368-26-010918")
-    return filing.obj()
+    with my_vcr.use_cassette("test_ncen_etf.yaml"):
+        filing = get_by_accession_number("0001410368-26-010918")
+        return filing.obj()
 
 
 # ---------------------------------------------------------------------------
@@ -471,8 +487,9 @@ class TestDisplay:
 class TestObjIntegration:
 
     def test_obj_returns_fund_census(self):
-        filing = get_by_accession_number("0001410368-26-010921")
-        result = filing.obj()
+        with my_vcr.use_cassette("test_ncen_mutual_fund.yaml"):
+            filing = get_by_accession_number("0001410368-26-010921")
+            result = filing.obj()
         assert isinstance(result, FundCensus)
 
     def test_get_obj_info(self):

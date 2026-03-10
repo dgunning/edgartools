@@ -139,7 +139,7 @@ def pytest_collection_modifyitems(items):
         'test_has_html', 'test_periodtype', 'test_fund_reference',
         # Additional fast patterns (no network calls)
         'test_cost_of_revenue', 'test_datamule', 'test_earnings',
-        'test_is_individual', 'test_ncen', 'test_ncsr', 'test_nmfp',
+        'test_is_individual', 'test_nmfp3_unit',
         'test_rendered_statement', 'test_skill_diagnostics', 'test_synonym',
         'test_unit_handling', 'test_unit_compatibility', 'test_tesla_net_income',
         'test_notes_extraction', 'test_page_breaks', 'test_paths',
@@ -172,6 +172,10 @@ def pytest_collection_modifyitems(items):
         'test_ten_d', 'test_ttm', 'test_form3', 'test_form4',
         'test_forty_f', 'test_bdc', 'test_edgar', 'test_include_dimensions',
         'test_standardization_integration',
+        # Fund filing tests that need network (use get_by_accession_number)
+        'test_ncen', 'test_ncsr',
+        # XBRL tests that need network (use Company() or XBRL.from_filing)
+        'test_xbrl_periods',
     ]
 
     for item in items:

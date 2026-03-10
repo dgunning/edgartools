@@ -6,9 +6,11 @@ Ground truth filings:
   - Semi-Annual (N-CSRS): AMERICAN CENTURY QUANTITATIVE EQUITY FUNDS (accession 0000827060-26-000002)
 """
 from decimal import Decimal
+from pathlib import Path
 
 import pandas as pd
 import pytest
+import vcr
 
 from edgar import get_by_accession_number
 from edgar.funds.ncsr import (
@@ -19,6 +21,18 @@ from edgar.funds.ncsr import (
     ShareClassInfo,
 )
 
+# Mark all tests in this module as network tests
+pytestmark = pytest.mark.network
+
+CASSETTES_DIR = Path(__file__).parent / "cassettes"
+my_vcr = vcr.VCR(
+    cassette_library_dir=str(CASSETTES_DIR),
+    record_mode="once",
+    match_on=["method", "scheme", "host", "port", "path", "query"],
+    filter_headers=["User-Agent", "Authorization"],
+    decode_compressed_response=True,
+)
+
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -27,15 +41,17 @@ from edgar.funds.ncsr import (
 @pytest.fixture(scope="module")
 def annual_report():
     """ALGER PORTFOLIOS — N-CSR, 7 share classes."""
-    filing = get_by_accession_number("0001133228-26-002293")
-    return filing.obj()
+    with my_vcr.use_cassette("test_ncsr_annual.yaml"):
+        filing = get_by_accession_number("0001133228-26-002293")
+        return filing.obj()
 
 
 @pytest.fixture(scope="module")
 def semiannual_report():
     """AMERICAN CENTURY QUANTITATIVE EQUITY FUNDS — N-CSRS."""
-    filing = get_by_accession_number("0000827060-26-000002")
-    return filing.obj()
+    with my_vcr.use_cassette("test_ncsr_semiannual.yaml"):
+        filing = get_by_accession_number("0000827060-26-000002")
+        return filing.obj()
 
 
 # ---------------------------------------------------------------------------

@@ -1,29 +1,48 @@
+from pathlib import Path
+
+import vcr
 from edgar.xbrl import *
 from rich import print
 from edgar import *
 from edgar.xbrl.periods import determine_periods_to_display
 import pytest
 
+# Mark all tests in this module as network tests
+pytestmark = pytest.mark.network
+
+CASSETTES_DIR = Path(__file__).parent / "cassettes"
+my_vcr = vcr.VCR(
+    cassette_library_dir=str(CASSETTES_DIR),
+    record_mode="once",
+    match_on=["method", "scheme", "host", "port", "path", "query"],
+    filter_headers=["User-Agent", "Authorization"],
+    decode_compressed_response=True,
+)
+
 @pytest.fixture(scope="session")
 def comcast_xbrl():
-    filing = Filing(company='COMCAST CORP', cik=1166691, form='10-K', filing_date='2025-01-31', accession_no='0001166691-25-000011')
-    return XBRL.from_filing(filing)
+    with my_vcr.use_cassette("test_xbrl_periods_comcast.yaml"):
+        filing = Filing(company='COMCAST CORP', cik=1166691, form='10-K', filing_date='2025-01-31', accession_no='0001166691-25-000011')
+        return XBRL.from_filing(filing)
 
 @pytest.fixture(scope="session")
 def mara_xbrl():
-    f = Filing(company='MARA Holdings, Inc.', cik=1507605, form='10-Q', filing_date='2025-07-29',
-           accession_no='0001507605-25-000018')
-    return XBRL.from_filing(f)
+    with my_vcr.use_cassette("test_xbrl_periods_mara.yaml"):
+        f = Filing(company='MARA Holdings, Inc.', cik=1507605, form='10-Q', filing_date='2025-07-29',
+               accession_no='0001507605-25-000018')
+        return XBRL.from_filing(f)
 
 def test_get_periods_to_display_for_company_with_changed_fiscal_year():
-    c = Company("MSFT")
-    filings = c.get_filings(form="10-K", filing_date='2013-01-01:2015-12-31')
-    for filing in filings:
-        xb = filing.xbrl()
-        print(xb.period_of_report)
+    with my_vcr.use_cassette("test_xbrl_periods_msft.yaml"):
+        c = Company("MSFT")
+        filings = c.get_filings(form="10-K", filing_date='2013-01-01:2015-12-31')
+        for filing in filings:
+            xb = filing.xbrl()
+            print(xb.period_of_report)
     filing = Filing(company='MICROSOFT CORP', cik=789019, form='10-K', filing_date='2015-07-31', accession_no='0001193125-15-272806')
 
-    xb = filing.xbrl()
+    with my_vcr.use_cassette("test_xbrl_periods_msft_2015.yaml"):
+        xb = filing.xbrl()
 
     periods = determine_periods_to_display(xb, "IncomeStatement")
     print(periods)
@@ -47,17 +66,19 @@ def test_get_periods_to_display_for_company_with_changed_fiscal_year():
 
 
 def test_quarterly_period_selection():
-    c = Company("AVGO")
-    f = Filing(company='Broadcom Inc.', cik=1730168, form='10-Q', filing_date='2025-03-12', accession_no='0001730168-25-000021')
-    xb = f.xbrl()
+    with my_vcr.use_cassette("test_xbrl_periods_avgo.yaml"):
+        c = Company("AVGO")
+        f = Filing(company='Broadcom Inc.', cik=1730168, form='10-Q', filing_date='2025-03-12', accession_no='0001730168-25-000021')
+        xb = f.xbrl()
     periods = determine_periods_to_display(xb, "IncomeStatement")
     assert periods[0][0] == 'duration_2024-11-04_2025-02-02'
     print(xb.statements.income_statement())
 
 def test_annual_period_selection():
-    filing = Filing(company='COMCAST CORP', cik=1166691, form='10-K', filing_date='2025-01-31',
-                    accession_no='0001166691-25-000011')
-    xb = filing.xbrl()
+    with my_vcr.use_cassette("test_xbrl_periods_comcast.yaml"):
+        filing = Filing(company='COMCAST CORP', cik=1166691, form='10-K', filing_date='2025-01-31',
+                        accession_no='0001166691-25-000011')
+        xb = filing.xbrl()
     print(xb.statements.balance_sheet())
 
 def test_periods_for_quarterly_filing(mara_xbrl):
