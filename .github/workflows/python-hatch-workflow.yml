@@ -37,7 +37,7 @@ jobs:
 
     - name: Upload coverage data
       uses: actions/upload-artifact@v4
-      if: matrix.python-version == '3.11'
+      if: matrix.python-version == '3.13'
       with:
         name: coverage-fast
         path: |
