@@ -1421,6 +1421,23 @@ class Prospectus424B:
         Returns None if related filings cannot be determined.
         """
         try:
+            # Use file_number from cover page (already extracted from SGML header)
+            # to skip the redundant accession_number lookup in related_filings().
+            # Use trigger_full_load=False to avoid paginating through the entire
+            # filing history — shelf registrations expire after 3 years so the
+            # relevant filings are almost always in the most recent ~1000.
+            file_number = self._cover_page.registration_number
+            if file_number:
+                from edgar.entity import Company
+                company = Company(self._filing.cik)
+                related = company.get_filings(
+                    file_number=file_number,
+                    sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")],
+                    trigger_full_load=False,
+                )
+                if related is not None and not related.empty:
+                    return ShelfLifecycle(self._filing, related)
+            # Fallback to generic related_filings if no file number on cover page
             related = self._filing.related_filings()
             if related is None or related.empty:
                 return None

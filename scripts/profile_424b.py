@@ -91,6 +91,11 @@ def profile_single_filing(filing):
     uw = prospectus.underwriting
     timings['underwriting'] = time.perf_counter() - t0
 
+    # Phase 10: Lifecycle (SEC API calls for related filings)
+    t0 = time.perf_counter()
+    lc = prospectus.lifecycle
+    timings['lifecycle'] = time.perf_counter() - t0
+
     # Full end-to-end (fresh object, no prior caching)
     t0 = time.perf_counter()
     p2 = Prospectus424B.from_filing(filing)
@@ -105,6 +110,7 @@ def profile_single_filing(filing):
     timings['html_size_kb'] = html_size_kb
     timings['num_tables'] = num_tables
     timings['num_classified'] = num_classified
+    timings['file_number'] = prospectus.cover_page.registration_number or 'N/A'
 
     return timings
 
@@ -130,7 +136,7 @@ def main():
             all_timings.append(t)
 
             print(f"  HTML: {t['html_size_kb']:.0f} KB, {t['num_tables']} raw tables, "
-                  f"{t['num_classified']} classified")
+                  f"{t['num_classified']} classified, file# {t['file_number']}")
             print(f"  html_download:       {t['html_download']:7.3f}s")
             print(f"  html_parse:          {t['html_parse']:7.3f}s")
             print(f"  cover_extract:       {t['cover_extract']:7.3f}s  (parses HTML)")
@@ -140,6 +146,7 @@ def main():
             print(f"  deal:                {t['deal']:7.3f}s  (tables+compute)")
             print(f"  selling_stockholders:{t['selling_stockholders']:7.3f}s")
             print(f"  underwriting:        {t['underwriting']:7.3f}s")
+            print(f"  lifecycle:           {t['lifecycle']:7.3f}s  (Company + file_number filter)")
             print(f"  ---")
             print(f"  full_no_lifecycle:   {t['full_no_lifecycle']:7.3f}s  (end-to-end)")
         except Exception as e:
@@ -155,7 +162,8 @@ def main():
 
     phases = ['html_download', 'html_parse', 'cover_extract', 'classify',
               'table_classify', 'from_filing', 'deal',
-              'selling_stockholders', 'underwriting', 'full_no_lifecycle']
+              'selling_stockholders', 'underwriting', 'lifecycle',
+              'full_no_lifecycle']
 
     for phase in phases:
         vals = [t[phase] for t in all_timings]
