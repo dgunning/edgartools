@@ -12,6 +12,7 @@ from edgar import Company
 from edgar.xbrl.parsers.concepts import get_balance_type, US_GAAP_BALANCE_TYPES
 
 
+@pytest.mark.fast
 class TestBalanceTypeMapping:
     """Test the static US-GAAP balance type mapping."""
 
@@ -72,6 +73,7 @@ class TestBalanceTypeMapping:
         assert len(US_GAAP_BALANCE_TYPES) >= 100
 
 
+@pytest.mark.network
 class TestDataFrameMetadataColumns:
     """Test that metadata columns appear in DataFrame exports."""
 
@@ -136,6 +138,7 @@ class TestDataFrameMetadataColumns:
             assert value in valid_values, f"Invalid preferred_sign value: {value}"
 
 
+@pytest.mark.network
 class TestOriginalIssue463:
     """Test that the original issue #463 is resolved."""
 
@@ -208,6 +211,7 @@ class TestOriginalIssue463:
             assert df['preferred_sign'].notna().any()
 
 
+@pytest.mark.network
 class TestStatementTypesCoverage:
     """Test metadata columns across different statement types."""
 
@@ -255,6 +259,7 @@ class TestStatementTypesCoverage:
             assert len(balances) > 0, "Balance sheet should have balance types"
 
 
+@pytest.mark.network
 class TestColumnOrdering:
     """Test that new metadata columns appear in the correct position."""
 
