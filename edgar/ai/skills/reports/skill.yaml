@@ -107,6 +107,16 @@ patterns:
       deal.shares_before                       # Pre-offering outstanding
       deal.shares_after                        # Post-offering outstanding
 
+      # Selling stockholders (PIPE resale filings, typically 424B3)
+      ss = prospectus.selling_stockholders     # SellingStockholdersData | None
+      if ss:
+          ss.count                             # Number of stockholders
+          for e in ss.stockholders:
+              e.name, e.shares, e.shares_before, e.shares_after  # parsed int
+              e.pct_before, e.pct_after        # parsed float
+              e.warrants                       # warrants/convertibles (int | None)
+          df = ss.to_dataframe()               # Numeric DataFrame
+
       # Serialization
       deal.to_dict()                           # Flat dict, no None values
       deal.to_context()                        # Text for LLM prompts
@@ -114,6 +124,7 @@ patterns:
     note: |
       deal is always returned (never None); individual fields are None when absent.
       424B3 = resale; 424B4 = IPO final; 424B5 = shelf takedown / ATM.
+      selling_stockholders returns None if no table found; numeric properties return None on parse failure.
 
   - name: 8-K Events
     when: Extract current report events

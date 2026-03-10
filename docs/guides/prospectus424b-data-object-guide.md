@@ -106,10 +106,47 @@ prospectus.cover_page          # CoverPageData: company, registration, flags
 prospectus.pricing             # PricingData: per-unit and total columns
 prospectus.underwriting        # UnderwritingInfo: syndicate, fee type
 prospectus.offering_terms      # OfferingTerms: shares, warrants, use of proceeds
+prospectus.selling_stockholders  # SellingStockholdersData: PIPE resale tables
 prospectus.dilution            # DilutionData: NTBV impact table
 prospectus.capitalization      # CapitalizationData: actual vs. as-adjusted
 prospectus.structured_note_terms  # StructuredNoteTerms: CUSIP, maturity (424B2)
 prospectus.filing_fees         # FilingFeesData: from XBRL exhibit
+```
+
+## Selling Stockholders (PIPE Resale Filings)
+
+For PIPE resale prospectuses (typically 424B3), the selling stockholders table lists investors reselling privately placed shares:
+
+```python
+ss = prospectus.selling_stockholders   # SellingStockholdersData or None
+if ss:
+    ss.count                           # Number of selling stockholders
+    for entry in ss.stockholders:
+        entry.name                     # "Lincoln Park Capital Fund, LLC"
+        entry.shares                   # 1500000 (parsed int, None on failure)
+        entry.shares_before            # 2000000
+        entry.shares_after             # 500000
+        entry.pct_before               # 9.5 (parsed float)
+        entry.pct_after                # 2.8
+        entry.warrants                 # 750000 (warrants/convertibles, if present)
+```
+
+Raw string values are always preserved (`shares_offered`, `shares_before_offering`, etc.). The numeric properties (`shares`, `shares_before`, etc.) parse them to `int`/`float`, returning `None` on failure.
+
+### DataFrame Output
+
+```python
+df = ss.to_dataframe()
+# Returns DataFrame with numeric columns:
+#   name | shares_before | pct_before | shares_offered | shares_after | pct_after | warrants
+```
+
+### Offering Type Check
+
+```python
+if prospectus.offering_type.has_selling_stockholders:
+    # This is a PIPE_RESALE or BASE_PROSPECTUS_UPDATE
+    ss = prospectus.selling_stockholders
 ```
 
 ## Shelf Lifecycle
