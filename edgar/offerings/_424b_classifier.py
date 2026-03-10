@@ -19,12 +19,13 @@ if TYPE_CHECKING:
 __all__ = ['classify_offering_type']
 
 
-def classify_offering_type(filing: 'Filing') -> dict:
+def classify_offering_type(filing: 'Filing', document=None) -> dict:
     """
     Classify a 424B filing into an offering type.
 
     Args:
         filing: An EdgarTools Filing object with a 424B* form type.
+        document: Pre-parsed Document object. If provided, avoids re-parsing.
 
     Returns:
         dict with keys:
@@ -47,7 +48,7 @@ def classify_offering_type(filing: 'Filing') -> dict:
         }
 
     try:
-        doc = filing.parse()
+        doc = document or filing.parse()
         text = doc.text()
     except Exception as e:
         return {

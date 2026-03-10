@@ -1126,11 +1126,13 @@ class Prospectus424B:
     """
 
     def __init__(self, filing: 'Filing', cover_page: CoverPageData,
-                 offering_type: OfferingType, confidence: str):
+                 offering_type: OfferingType, confidence: str,
+                 document=None):
         self._filing = filing
         self._cover_page = cover_page
         self._offering_type = offering_type
         self._confidence = confidence
+        self._document = document
 
     # ------------------------------------------------------------------
     # Construction
@@ -1150,10 +1152,16 @@ class Prospectus424B:
         from edgar.offerings._424b_cover import extract_cover_page_fields
         from edgar.offerings._424b_classifier import classify_offering_type
 
-        cover_fields = extract_cover_page_fields(filing)
+        # Parse once, reuse everywhere
+        try:
+            document = filing.parse()
+        except Exception:
+            document = None
+
+        cover_fields = extract_cover_page_fields(filing, document=document)
         cover_page = CoverPageData(**cover_fields)
 
-        classification = classify_offering_type(filing)
+        classification = classify_offering_type(filing, document=document)
         offering_type = OfferingType(classification.get('type', 'unknown'))
         confidence = classification.get('confidence', 'low')
 
@@ -1162,6 +1170,7 @@ class Prospectus424B:
             cover_page=cover_page,
             offering_type=offering_type,
             confidence=confidence,
+            document=document,
         )
 
     # ------------------------------------------------------------------
@@ -1244,7 +1253,7 @@ class Prospectus424B:
     def _classified_tables(self) -> dict:
         """Dict mapping table type -> list of matching TableNode objects."""
         from edgar.offerings._424b_tables import classify_tables_in_document
-        doc = self._filing.parse()
+        doc = self._document
         if not doc:
             return {}
         return classify_tables_in_document(doc)
@@ -1323,7 +1332,7 @@ class Prospectus424B:
         from edgar.offerings._424b_tables import extract_underwriting_from_tables
         from edgar.offerings._424b_cover import extract_underwriting_from_text
 
-        doc = self._filing.parse()
+        doc = self._document
         if not doc:
             return None
 
@@ -1347,7 +1356,7 @@ class Prospectus424B:
 
         # Fall back to text-based extraction if no tables found
         if not entries:
-            text_results = extract_underwriting_from_text(self._filing)
+            text_results = extract_underwriting_from_text(self._filing, document=doc)
             for tx in text_results:
                 for name in tx['names']:
                     if not any(e.name == name for e in entries):

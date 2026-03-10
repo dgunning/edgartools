@@ -18,14 +18,18 @@ if TYPE_CHECKING:
 __all__ = ['extract_cover_page_fields', 'extract_underwriting_from_text']
 
 
-def extract_cover_page_fields(filing: 'Filing') -> dict:
+def extract_cover_page_fields(filing: 'Filing', document=None) -> dict:
     """
     Extract all cover page fields from a 424B* filing.
+
+    Args:
+        filing: Filing object (used for metadata and as fallback for parsing).
+        document: Pre-parsed Document object. If provided, avoids re-parsing.
 
     Returns a dict with 11 fields suitable for CoverPageData(**result).
     """
     try:
-        doc = filing.parse()
+        doc = document or filing.parse()
         text = doc.text() if doc else ''
     except Exception:
         text = ''
@@ -178,7 +182,7 @@ def _clean_agent_name(name: str) -> str:
     return re.sub(r'\s+', ' ', name).strip()
 
 
-def extract_underwriting_from_text(filing: 'Filing') -> list:
+def extract_underwriting_from_text(filing: 'Filing', document=None) -> list:
     """
     Extract underwriter/agent names from document text (non-table signals).
 
@@ -186,10 +190,14 @@ def extract_underwriting_from_text(filing: 'Filing') -> list:
     - Role label + agent name on next line ("Sole Placement Agent\\nTungsten")
     - ATM agreement text mentioning agent name
 
+    Args:
+        filing: Filing object (used as fallback for parsing).
+        document: Pre-parsed Document object. If provided, avoids re-parsing.
+
     Returns list of dicts with keys: role, names, source.
     """
     try:
-        doc = filing.parse()
+        doc = document or filing.parse()
         text = doc.text()
     except Exception:
         return []
