@@ -390,8 +390,13 @@ class StatementStitcher:
             if any(bracket in label for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
                 continue
 
-            # Skip dimensional segment rows — they share the same concept name as their
-            # parent total row, so the last segment would overwrite the correct total value
+            # Skip dimensional segment rows — they share the same concept name as
+            # their parent total row, so the last segment overwrites the correct
+            # total value (e.g., Goodwill segment 650M replacing total 7,970M).
+            # This applies even when include_dimensions=True because the stitcher
+            # uses concept as a dict key and cannot yet differentiate segments.
+            # Note: parent total rows do NOT have is_dimension=True; only child
+            # segment rows do, so this skip never drops total-level values.
             if item.get('is_dimension', False):
                 continue
 

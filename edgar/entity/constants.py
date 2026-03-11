@@ -130,8 +130,8 @@ FILER_TYPE_DOMESTIC_FORMS = frozenset({
     'S-11', 'S-11/A', 'S-3ASR', 'S-1MEF', 'S-3MEF', 'S-4MEF', 'S-4EF',
     # Small business forms (pre-2008)
     'SB-2', 'SB-2/A', 'SB-2MEF',
-    '10KSB', '10KSB/A', '10KSB405', '10QSB', '10QSB/A',
-    '10SB12G', '10SB12G/A', '10SB12B', '10SB12B/A',
+    '10-KSB', '10-KSB/A', '10-KSB405', '10-QSB', '10-QSB/A',
+    '10-SB12G', '10-SB12G/A', '10-SB12B', '10-SB12B/A',
     # Domestic Exchange Act registration
     '10-12G', '10-12G/A', '10-12B', '10-12B/A',
     # Unit Investment Trust forms
