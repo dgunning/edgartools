@@ -386,8 +386,13 @@ class StatementStitcher:
             if item.get('is_abstract', False) and not item.get('children'):
                 continue
 
-            # Skip dimension items
+            # Skip dimension items (taxonomy structural items)
             if any(bracket in label for bracket in ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']):
+                continue
+
+            # Skip dimensional segment rows — they share the same concept name as their
+            # parent total row, so the last segment would overwrite the correct total value
+            if item.get('is_dimension', False):
                 continue
 
             # Use concept as the primary key for identifying the same financial line item

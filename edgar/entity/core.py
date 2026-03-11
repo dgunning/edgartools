@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from edgar.enums import FormType
 
 # Import constants and utilities from separate modules
-from edgar.entity.constants import COMPANY_FORMS
+from edgar.entity.constants import COMPANY_FORMS, FILER_TYPE_FOREIGN_FORMS, FILER_TYPE_DOMESTIC_FORMS
 from edgar.entity.utils import has_company_filings, normalize_cik
 
 # TTM (Trailing Twelve Months) imports
@@ -735,6 +735,13 @@ class Company(Entity):
         elif '20-F' in form_types or '20-F/A' in form_types or '6-K' in form_types:
             return 'Foreign'
         elif '10-K' in form_types or '10-K/A' in form_types or '10-Q' in form_types:
+            return 'Domestic'
+
+        # Extended fallback: foreign forms (ADR, foreign registration, sovereign)
+        if form_types & FILER_TYPE_FOREIGN_FORMS:
+            return 'Foreign'
+        # Extended fallback: domestic forms (registration, UITs, funds, crowdfunding)
+        if form_types & FILER_TYPE_DOMESTIC_FORMS:
             return 'Domestic'
         return None
 

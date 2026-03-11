@@ -104,6 +104,48 @@ INDIVIDUAL_FORMS = {
 # All known form types for validation
 ALL_FORM_TYPES = COMPANY_FORMS | FUND_FORMS | INDIVIDUAL_FORMS
 
+# Filer type classification form sets (used by Company.filer_type fallback)
+# Priority order: Foreign signals first, then Domestic signals
+# See docs-internal/research/sec-filings/data-structures/filer-type-gap-analysis.md
+
+FILER_TYPE_FOREIGN_FORMS = frozenset({
+    # ADR deposit registrations (100% confidence foreign)
+    'F-6', 'F-6EF', 'F-6 POS', 'F-6/A',
+    # Foreign private issuer exemption
+    '12G3-2B',
+    # Foreign registration statements
+    'F-1', 'F-1/A', 'F-3', 'F-3/A', 'F-4', 'F-4/A',
+    'F-10', 'F-10/A', 'F-3ASR', 'F-1MEF', 'F-3MEF', 'F-4MEF',
+    # Foreign Exchange Act registration
+    '20FR12B', '20FR12G', '20FR12B/A', '20FR12G/A',
+    # Foreign government annual reports
+    '18-K', '18-K/A',
+    # Sub-national foreign entity reports
+    'SE',
+})
+
+FILER_TYPE_DOMESTIC_FORMS = frozenset({
+    # Domestic registration statements
+    'S-1', 'S-1/A', 'S-3', 'S-3/A', 'S-4', 'S-4/A',
+    'S-11', 'S-11/A', 'S-3ASR', 'S-1MEF', 'S-3MEF', 'S-4MEF', 'S-4EF',
+    # Small business forms (pre-2008)
+    'SB-2', 'SB-2/A', 'SB-2MEF',
+    '10KSB', '10KSB/A', '10KSB405', '10QSB', '10QSB/A',
+    '10SB12G', '10SB12G/A', '10SB12B', '10SB12B/A',
+    # Domestic Exchange Act registration
+    '10-12G', '10-12G/A', '10-12B', '10-12B/A',
+    # Unit Investment Trust forms
+    'S-6', 'S-6/A', 'REGDEX', 'REGDEX/A',
+    '24F-2NT', '24F-2NT/A', '487', '497J',
+    # Investment company fund forms
+    'N-1A', 'N-1A/A', 'N-2', 'N-2/A', 'N-3', 'N-4', 'N-5', 'N-6',
+    'N-8A', 'N-8F', 'N-CSR', 'N-CSRS', 'N-CEN', 'N-PORT',
+    'NSAR-A', 'NSAR-B', '485BPOS', '485APOS',
+    '40-APP', '40-APP/A', '40-17G', '40-17G/A',
+    # Regulation Crowdfunding (US-only)
+    'C', 'C/A', 'C-U', 'C-AR', 'C-TR',
+})
+
 # Name-based heuristic constants for company detection
 # Loose keywords: substring match (keyword appears anywhere in uppercased name)
 # Only keywords long enough (>=7 chars) or with distinctive punctuation to avoid
