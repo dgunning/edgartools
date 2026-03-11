@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.23.0] - 2026-03-11
+
+### Added
+
+- **424B Prospectus Parser** — New multi-phase parser for 424B prospectus filings (424B1 through 424B8). Extracts cover page data, classifies offering types (firm commitment, ATM, best efforts, PIPE resale, structured notes, debt offerings, and more), and parses underwriting terms, selling stockholder tables, and structured note payoff details. Access via `filing.obj()` on any 424B filing ([9975dd67](https://github.com/dgunning/edgartools/commit/9975dd67))
+
+- **Deal Object** — `Deal` provides a normalized summary of a 424B prospectus including issuer, security type, pricing, aggregate proceeds, underwriters, and key dates. Condenses complex prospectus data into a single structured object ([1035846a](https://github.com/dgunning/edgartools/commit/1035846a))
+
+- **ShelfLifecycle Object** — `ShelfLifecycle` traces a shelf registration (S-3) through its full lifecycle: original filing, effectiveness date, takedowns (424B filings), amendments, and expiration. Computes review period, cadence metrics, and remaining capacity ([0057e00d](https://github.com/dgunning/edgartools/commit/0057e00d))
+
+- **XBRL Filing Fees Extraction** — 424B filings that embed XBRL fee exhibits are now parsed, extracting fee tables, total offering amounts, and registration fees ([64abd16d](https://github.com/dgunning/edgartools/commit/64abd16d))
+
+- **Selling Stockholders** — Extracts selling stockholder tables with numeric properties (`shares_before`, `shares_offered`, `shares_after`, `pct_before`, `pct_after`), warrant support, and `to_dataframe()` output ([3987131d](https://github.com/dgunning/edgartools/commit/3987131d))
+
+- **to_context() for AI Workflows** — `Prospectus424B.to_context()` and `ShelfLifecycle.to_context()` produce condensed text summaries suitable for LLM context windows ([f3b6d283](https://github.com/dgunning/edgartools/commit/f3b6d283))
+
+### Fixed
+
+- **XBRLS Detailed View Overwriting Totals** — Dimensional segment rows in stitched statements were overwriting parent total values (e.g., Goodwill 7,970M replaced by segment 650M). Stitching now skips `is_dimension` rows so totals are preserved ([#687](https://github.com/dgunning/edgartools/issues/687)) ([be898b30](https://github.com/dgunning/edgartools/commit/be898b30))
+
+- **Filer Type Classification** — ~955 companies lack `state_of_incorporation` data, causing `filer_type` to return `None`. Now infers filer type from recent filing forms: 40-F → Canadian, 20-F/6-K → Foreign, 10-K/10-Q → Domestic. Also classifies ADR deposits, UITs, investment company funds, and crowdfunding issuers ([#562](https://github.com/dgunning/edgartools/issues/562)) ([7e827bc4](https://github.com/dgunning/edgartools/commit/7e827bc4), [be898b30](https://github.com/dgunning/edgartools/commit/be898b30))
+
+- **Small Business Form Hyphens** — Corrected form names `10KSB` → `10-KSB`, `10QSB` → `10-QSB` to match SEC EDGAR data format ([eeea01d4](https://github.com/dgunning/edgartools/commit/eeea01d4))
+
+- **Document Stitching Dimension Skip** — Stitching dimension skip now applies unconditionally since the stitcher uses concept as dict key and cannot yet differentiate segments from totals when both share the same concept ([eeea01d4](https://github.com/dgunning/edgartools/commit/eeea01d4))
+
+- **424B Parser Bug Fixes** — 17 bugs fixed across two review passes covering cover page extraction, table classification, offering type detection (424B4 classification improved from 0% → 100%), and selling stockholder table detection ([73f594cf](https://github.com/dgunning/edgartools/commit/73f594cf), [1180e8d0](https://github.com/dgunning/edgartools/commit/1180e8d0), [962766bf](https://github.com/dgunning/edgartools/commit/962766bf), [58dc4afb](https://github.com/dgunning/edgartools/commit/58dc4afb))
+
+### Performance
+
+- **424B HTML Parsing** — Parse HTML once per 424B prospectus instead of 4 times, reducing parse time significantly ([3eb81c12](https://github.com/dgunning/edgartools/commit/3eb81c12))
+
+- **ShelfLifecycle Speed** — Lifecycle construction now uses SGML `file_number` and skips full filing loads, making lifecycle queries substantially faster ([466a80bb](https://github.com/dgunning/edgartools/commit/466a80bb))
+
+### Changed
+
+- **CI Test Matrix** — Reduced test matrix from 4 Python versions to 3.10 and 3.13 only ([6d6674de](https://github.com/dgunning/edgartools/commit/6d6674de))
+
+- **Fast Test Suite Cleanup** — Moved 195 misclassified network tests out of the fast test suite and fixed `xbrl_balance_weight` network tests leaking into fast tests ([fb8a8974](https://github.com/dgunning/edgartools/commit/fb8a8974), [e31e8d38](https://github.com/dgunning/edgartools/commit/e31e8d38))
+
 ## [5.22.0] - 2026-03-08
 
 ### Added
