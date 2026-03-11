@@ -84,6 +84,14 @@ filings = get_filings(
 )
 ```
 
+!!! tip "See it live on edgar.tools"
+    The code above filters filings by form, date, and amendments. **edgar.tools** provides the same filtering in a visual interface — combine criteria and see results update in real time.
+
+    - **[Filter the real-time filing stream →](https://app.edgar.tools/filings?utm_source=edgartools-docs&utm_medium=see-live&utm_content=filtering-filings)**
+    - **[Browse Apple's filing history →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=filtering-filings)**
+
+    Also available via REST API with form type, date range, and ticker filters. Free tier: 100 API calls/day.
+
 ## Filter After Getting Filings
 
 Use the `.filter()` method to refine an existing collection:

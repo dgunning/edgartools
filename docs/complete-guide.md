@@ -16,7 +16,11 @@ EdgarTools is a Python library that turns EDGAR's raw data into structured Pytho
 ```python
 from edgar import Company
 
-income = Company("AAPL").get_filings(form="10-K")[0].obj().financials.income_statement()
+income = (Company("AAPL")
+            .get_filings(form="10-K")[0].obj()
+            .financials
+            .income_statement()
+          )
 print(income)
 ```
 
@@ -207,6 +211,15 @@ balance = financials.balance_sheet()
 [:material-notebook: Open in Colab](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/financial-statements-sec-python.ipynb){ .md-button }
 &nbsp;
 [:material-notebook: Multi-Period Analysis](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/XBRL2-StitchingStatements.ipynb){ .md-button }
+
+!!! tip "See it live on edgar.tools"
+    The code above extracts financials programmatically. **[edgar.tools](https://app.edgar.tools?utm_source=edgartools-docs&utm_medium=see-live&utm_content=complete-guide)** renders the same statements visually — multi-year income, balance sheet, and cash flow for any company, with export to Excel, PDF, or CSV.
+
+    - **[See Apple's multi-year financials →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=complete-guide)**
+    - **[See Microsoft's financials →](https://app.edgar.tools/companies/MSFT?utm_source=edgartools-docs&utm_medium=see-live&utm_content=complete-guide)**
+    - **[Browse 12 XBRL disclosure topics →](https://app.edgar.tools/disclosures?utm_source=edgartools-docs&utm_medium=see-live&utm_content=complete-guide)**
+
+    Also includes insider trades, 13F holdings, real-time filing stream, REST API, and hosted MCP server. Free tier available.
 
 ---
 

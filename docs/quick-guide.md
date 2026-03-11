@@ -171,3 +171,12 @@ Common EdgarTools operations at a glance. For a step-by-step introduction, see t
 | 📈 Get pay vs performance DataFrame      | `proxy.pay_vs_performance`                                    |
 | 📉 Get company TSR                       | `proxy.total_shareholder_return`                               |
 | 📉 Get peer group TSR                    | `proxy.peer_group_tsr`                                        |
+
+!!! tip "Prefer a visual interface?"
+    Every operation above also works through **[edgar.tools](https://app.edgar.tools?utm_source=edgartools-docs&utm_medium=see-live&utm_content=cheat-sheet)** — the same SEC data in a web UI, no code required.
+
+    - **[Browse any company's filings and financials →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=cheat-sheet)**
+    - **[Watch filings arrive in real time →](https://app.edgar.tools/filings?utm_source=edgartools-docs&utm_medium=see-live&utm_content=cheat-sheet)**
+    - **[Search disclosures across 12 XBRL topics →](https://app.edgar.tools/disclosures?utm_source=edgartools-docs&utm_medium=see-live&utm_content=cheat-sheet)**
+
+    Also includes a REST API (20+ endpoints), hosted MCP server, and data exports. Free tier: 100 API calls/day.

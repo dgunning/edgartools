@@ -35,6 +35,14 @@ cash_flow = company.cashflow_statement(periods=5, annual=True)
 print(f"Retrieved {len(income_stmt.periods)} periods of data")
 ```
 
+!!! tip "See it live on edgar.tools"
+    The code above builds multi-year financials with a FastAPI endpoint. **edgar.tools** already serves the same data — multi-period income statements, balance sheets, and cash flows for any company, with export to Excel, PDF, or CSV.
+
+    - **[See Apple's multi-year financials →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=multi-year)**
+    - **[Browse revenue disclosures across all filing years →](https://app.edgar.tools/disclosures/revenue?utm_source=edgartools-docs&utm_medium=see-live&utm_content=multi-year)**
+
+    Also available via REST API — 20+ endpoints including multi-period financial data. [API docs →](https://app.edgar.tools/docs?utm_source=edgartools-docs&utm_medium=see-live&utm_content=multi-year)
+
 ## Core Data Retrieval Patterns
 
 ### Multi-Year Annual Statements

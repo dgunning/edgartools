@@ -153,6 +153,14 @@ print(f"Latest 10-Q: {latest_10q.filing_date}")
 latest_annual = Company("MSFT").get_filings(form="10-K").latest()
 ```
 
+!!! tip "See it live on edgar.tools"
+    The code above searches filings by form type, date, and company. **edgar.tools** puts the same search in a visual interface — filter by form, date range, and company with results updating in real time.
+
+    - **[Browse the real-time filing stream →](https://app.edgar.tools/filings?utm_source=edgartools-docs&utm_medium=see-live&utm_content=searching-filings)**
+    - **[Search Apple's full filing history →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=searching-filings)**
+
+    Also includes a REST API with filing search endpoints. Free tier: 100 API calls/day. [Pricing →](https://app.edgar.tools/pricing?utm_source=edgartools-docs&utm_medium=see-live&utm_content=searching-filings)
+
 ## Advanced Filtering
 
 ### Filter by Multiple Criteria

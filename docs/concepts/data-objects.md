@@ -141,6 +141,14 @@ for obj in data_objects:
 revenues.sort(key=lambda x: x[0])
 ```
 
+!!! tip "See it live on edgar.tools"
+    The code above combines multiple Data Objects for cross-period analysis. **edgar.tools** does this automatically — multi-year financials, disclosure timelines, and filing comparisons for any company, with export to Excel or PDF.
+
+    - **[See Apple's financials across multiple years →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=data-objects-concepts)**
+    - **[Browse 12 XBRL disclosure topics →](https://app.edgar.tools/disclosures?utm_source=edgartools-docs&utm_medium=see-live&utm_content=data-objects-concepts)**
+
+    Free tier available. Also includes a REST API and hosted MCP server for AI integrations.
+
 ### Custom Data Extraction
 
 You can extend Data Objects with your own extraction logic:

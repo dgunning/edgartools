@@ -120,6 +120,14 @@ FilerQualification.SMALLER_REPORTING_COMPANY  # "Smaller reporting company"
 FilerQualification.EMERGING_GROWTH_COMPANY    # "Emerging growth company"
 ```
 
+!!! tip "See it live on edgar.tools"
+    The code above checks filer categories programmatically. **edgar.tools** shows the same company metadata visually — filer status, industry classification, shares outstanding, and public float for any SEC entity.
+
+    - **[See Apple's company profile →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=entity-api)**
+    - **[Search 940K+ SEC entities →](https://app.edgar.tools/companies?utm_source=edgartools-docs&utm_medium=see-live&utm_content=entity-api)**
+
+    Free tier available. Also includes a REST API for programmatic entity lookups. [API docs →](https://app.edgar.tools/docs?utm_source=edgartools-docs&utm_medium=see-live&utm_content=entity-api)
+
 ---
 
 ## Company Icon API

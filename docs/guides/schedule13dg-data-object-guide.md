@@ -42,6 +42,14 @@ recent_13d = get_filings(form="SCHEDULE 13D").head(10)
 recent_13g = get_filings(form="SCHEDULE 13G").head(10)
 ```
 
+!!! tip "See it live on edgar.tools"
+    The code above parses individual 13D/G filings. **edgar.tools** connects beneficial ownership data into a searchable interface — see who holds 5%+ of any company and track activist investor positions.
+
+    - **[See Apple's major holders →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=schedule13dg)**
+    - **[Browse Tesla's ownership filings →](https://app.edgar.tools/companies/TSLA?utm_source=edgartools-docs&utm_medium=see-live&utm_content=schedule13dg)**
+
+    Also includes insider trades, 13F institutional holdings, and cross-filing linkages. Free tier available. [Pricing →](https://app.edgar.tools/pricing?utm_source=edgartools-docs&utm_medium=see-live&utm_content=schedule13dg)
+
 ---
 
 ## Schedule 13D (Active Investors)

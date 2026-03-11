@@ -59,6 +59,14 @@ tech_subset = (CompanySubset()
                .get())
 ```
 
+!!! tip "See it live on edgar.tools"
+    The code above builds company subsets programmatically. **edgar.tools** lets you browse and search 940K+ SEC entities visually — filter by exchange, industry, or name.
+
+    - **[Search the full SEC entity database →](https://app.edgar.tools/companies?utm_source=edgartools-docs&utm_medium=see-live&utm_content=company-subsets)**
+    - **[See Apple's company profile →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=company-subsets)**
+
+    Free tier available. Also includes a REST API for programmatic company lookups. [API docs →](https://app.edgar.tools/docs?utm_source=edgartools-docs&utm_medium=see-live&utm_content=company-subsets)
+
 ## Core Functions
 
 ### Exchange-Based Selection

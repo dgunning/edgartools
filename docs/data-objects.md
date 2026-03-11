@@ -71,6 +71,15 @@ form4.transactions                         # buy/sell details with prices
 
 [:octicons-arrow-right-24: Insider Trades guide](insider-filings.md)
 
+!!! tip "See it live on edgar.tools"
+    Every filing type above — 10-K, 8-K, Form 4, 13F, proxy statements — is also browsable on **edgar.tools** with AI enrichment layered on top:
+
+    - **[Browse Apple's filings, financials, and insider trades →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=data-objects)**
+    - **[Watch filings arrive in real time →](https://app.edgar.tools/filings?utm_source=edgartools-docs&utm_medium=see-live&utm_content=data-objects)**
+    - **[Search disclosures across 12 XBRL topics →](https://app.edgar.tools/disclosures?utm_source=edgartools-docs&utm_medium=see-live&utm_content=data-objects)**
+
+    Includes AI-classified 8-K events, insider sentiment analysis, and multi-year disclosure comparison. Free tier available.
+
 ---
 
 ## Beneficial Ownership (Schedule 13D/G)

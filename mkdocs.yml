@@ -8,8 +8,12 @@ extra_css:
 
 markdown_extensions:
   - admonition
+  - attr_list
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 theme:
   name: material
@@ -61,6 +65,7 @@ nav:
     - Company Subsets: company-subsets.md
     - Track Insiders: guides/company-insiders.md
     - Entity API: guides/entity-api-guide.md
+    - Company Classification: guides/company-classification.md
     - Business Development Companies: guides/bdc-guide.md
 
   # ==========================================

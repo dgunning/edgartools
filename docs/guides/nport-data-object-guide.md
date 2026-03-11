@@ -72,6 +72,14 @@ The `derivatives_data()` DataFrame adds columns specific to derivatives:
 | `termination_date` | Contract expiration date |
 | `pct_value` | Percentage of NAV |
 
+!!! tip "See it live on edgar.tools"
+    The code above parses N-PORT portfolio holdings in Python. **edgar.tools** renders fund portfolios visually — browse holdings, derivative exposures, and risk metrics for any registered fund.
+
+    - **[Browse company filings and fund data →](https://app.edgar.tools/companies?utm_source=edgartools-docs&utm_medium=see-live&utm_content=nport-guide)**
+    - **[Watch filings arrive in real time →](https://app.edgar.tools/filings?utm_source=edgartools-docs&utm_medium=see-live&utm_content=nport-guide)**
+
+    Free tier available. Also includes a REST API for programmatic access. [Pricing →](https://app.edgar.tools/pricing?utm_source=edgartools-docs&utm_medium=see-live&utm_content=nport-guide)
+
 ---
 
 ## Derivative-Specific DataFrames

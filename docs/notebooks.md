@@ -63,6 +63,15 @@ Extract income statements, balance sheets, and cash flow statements from SEC fil
 | **Viewing Financial Statements** — Display and navigate financial statement tables | Beginner | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/Viewing-Financial-Statements.ipynb) &nbsp; [GitHub](https://github.com/dgunning/edgartools/blob/main/notebooks/Viewing-Financial-Statements.ipynb) |
 | **Financial Statements to DataFrame** — Build quarterly IS, BS, and CF DataFrames with multi-index (Ticker, Period) for multiple companies | Intermediate | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/dgunning/edgartools/blob/main/notebooks/financial-statements-to-dataframe.ipynb) &nbsp; [GitHub](https://github.com/dgunning/edgartools/blob/main/notebooks/financial-statements-to-dataframe.ipynb) |
 
+!!! tip "Prefer a visual interface?"
+    Every tutorial above runs as Python code. **[edgar.tools](https://app.edgar.tools?utm_source=edgartools-docs&utm_medium=see-live&utm_content=notebooks)** puts the same data in a web UI — no code, no notebooks, no setup.
+
+    - **[Browse any company's filings and financials →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=notebooks)**
+    - **[See filings arrive in real time →](https://app.edgar.tools/filings?utm_source=edgartools-docs&utm_medium=see-live&utm_content=notebooks)**
+    - **[Explore insider trades with sentiment analysis →](https://app.edgar.tools/companies/TSLA?utm_source=edgartools-docs&utm_medium=see-live&utm_content=notebooks)**
+
+    Free tier available. Also includes a REST API and hosted MCP server for AI integrations.
+
 ---
 
 ## XBRL Deep Dive
