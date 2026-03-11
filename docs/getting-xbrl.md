@@ -354,6 +354,14 @@ msft_rnd = msft_statements.get_concept_value("ResearchAndDevelopmentExpense")  #
 aapl_rnd = aapl_statements.get_concept_value("ResearchAndDevelopmentExpense")  # $31.4B (positive)
 ```
 
+!!! tip "Need help building an XBRL pipeline?"
+    The code above extracts XBRL data for one company. Scaling to thousands — with taxonomy normalization, custom extension mapping, and multi-year consistency — is where it gets hard.
+
+    - **[XBRL consulting for AI & data teams →](https://www.edgar.tools/consulting/xbrl?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-consulting)**
+    - **[See all SEC data consulting services →](https://www.edgar.tools/consulting?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-consulting)**
+
+    From the creator of edgartools. [Book a call →](https://www.edgar.tools/consulting/xbrl?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-consulting#contact)
+
 ## Future Enhancements
 
 - Enhanced support for non-standard financial statements

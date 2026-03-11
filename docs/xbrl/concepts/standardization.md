@@ -568,6 +568,14 @@ label = mapper.map_concept(
 
 ---
 
+!!! tip "Need help scaling XBRL standardization?"
+    EdgarTools maps 2,067 XBRL tags to 95 standard concepts. But production pipelines hit custom extensions, deprecated tags, and taxonomy version changes that go beyond standard mappings.
+
+    - **[XBRL consulting for AI & data teams →](https://www.edgar.tools/consulting/xbrl?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-standardization)**
+    - **[See all SEC data consulting services →](https://www.edgar.tools/consulting?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-standardization)**
+
+    From the creator of edgartools. [Book a call →](https://www.edgar.tools/consulting/xbrl?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-standardization#contact)
+
 ## Credits
 
 The standardization taxonomy is based on the production mappings shared by
