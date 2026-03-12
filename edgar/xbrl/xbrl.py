@@ -1642,6 +1642,26 @@ class XBRL:
                     if not values_agree:
                         continue
 
+                    # Guard: the merge is only useful when the secondary adds at least one
+                    # new period that the primary doesn't already have.  If the primary
+                    # already covers every period of the secondary, the two items are
+                    # *different concepts that coincidentally share a label and values*
+                    # (e.g. AdditionalPaidInCapital vs a StockholdersEquity breakdown row
+                    # in Boeing's equity-changes table).  Merging would silently drop the
+                    # independent concept from the rendered statement.  (GH-703)
+                    periods_a = set(values_a.keys())
+                    periods_b = set(values_b.keys())
+                    # After the merge the surviving primary would gain `periods_secondary - periods_primary`.
+                    # If that set is empty the secondary contributes nothing new → skip.
+                    if len(periods_b) >= len(periods_a):
+                        # b would be primary; a is secondary — check that a adds new periods
+                        if not (periods_a - periods_b):
+                            continue  # a adds nothing new; don't merge
+                    else:
+                        # a would be primary; b is secondary — check that b adds new periods
+                        if not (periods_b - periods_a):
+                            continue  # b adds nothing new; don't merge
+
                     # Determine primary (more period values) and secondary
                     if len(values_b) > len(values_a):
                         primary_idx, secondary_idx = b_idx, a_idx
