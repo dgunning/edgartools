@@ -1290,6 +1290,10 @@ class EntityFacts:
         """
         Get the most recent shares outstanding value.
 
+        Tries DEI entity-level concept first, then falls back to US-GAAP
+        balance sheet concept. This handles multi-class share companies
+        (e.g., GOOG) that don't report the DEI concept.
+
         Returns:
             Number of shares outstanding as float, or None if not available
 
@@ -1298,8 +1302,21 @@ class EntityFacts:
             if shares:
                 print(f"Shares Outstanding: {shares:,.0f}")
         """
-        fact = self.get_fact('dei:EntityCommonStockSharesOutstanding')
-        return fact.numeric_value if fact else None
+        # Try DEI entity-level concept first (most authoritative)
+        # Suppress warnings during fallback chain — only warn if all attempts fail
+        old_suppress = getattr(self, '_suppress_warnings', False)
+        self._suppress_warnings = True
+        try:
+            fact = self.get_fact('dei:EntityCommonStockSharesOutstanding')
+            if fact:
+                return fact.numeric_value
+            # Fallback to US-GAAP balance sheet concept (covers multi-class companies like GOOG)
+            fact = self.get_fact('us-gaap:CommonStockSharesOutstanding')
+            if fact:
+                return fact.numeric_value
+        finally:
+            self._suppress_warnings = old_suppress
+        return None
 
     @property
     def public_float(self) -> Optional[float]:
