@@ -1,22 +1,14 @@
 """
 Regression tests for GitHub Issue #703: Balance sheet missing equity components.
 
-When a company's filing contains both a balance sheet and a Statement of Changes in
-Stockholders' Equity (embedded in the same XBRL document), the presentation tree can
-have multiple instances of `StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest`
-with preferred labels matching equity component names (e.g., "Additional paid-in capital",
-"Retained earnings").
+Root cause: _merge_same_label_line_items (a global post-processing step) incorrectly
+merged genuine equity-component line items with equity-changes breakdown rows that
+shared the same label and coincidentally equal values.
 
-The _merge_same_label_line_items function was incorrectly merging the genuine
-equity-component line items (e.g., AdditionalPaidInCapital) with the equity-changes
-SE breakdown rows because:
-  1. Both had the same label ("Additional paid-in capital")
-  2. Both had matching values for the overlapping balance sheet dates
-
-The fix: only merge when the secondary item adds at least one new period that the
-primary doesn't already have.  If the primary covers all of the secondary's periods
-(i.e. the secondary is a subset), they are different concepts that happen to agree
-on the shared dates — keep both.
+Fix: Removed the global merge heuristic entirely.  Replaced with
+_merge_sibling_concept_switches which runs during tree traversal, scoped to direct
+siblings under the same parent.  This correctly handles XBRL concept switches
+(GH-572) without affecting unrelated concepts elsewhere in the statement.
 """
 
 import pytest
@@ -24,122 +16,150 @@ from edgar.xbrl.xbrl import XBRL
 
 
 @pytest.mark.fast
-class TestIssue703MergeGuard:
-    """Unit tests for the 'secondary must add new periods' guard."""
+class TestIssue703SiblingMerge:
+    """Verify sibling-scoped merge handles concept switches without false merges."""
 
-    def test_subset_secondary_not_merged(self):
-        """Secondary is a subset of primary — must NOT be merged (GH-703 case)."""
-        # Primary = equity-changes breakdown row, Secondary = dedicated concept
-        # Both have values for 2024 and 2025 that happen to be equal.
-        line_items = [
+    def _make_node(self, element_name, depth, children=None, display_label='', parent=None,
+                   is_abstract=False, order=1.0, preferred_label=None):
+        """Create a minimal PresentationNode-like object for testing."""
+        class FakeNode:
+            pass
+        node = FakeNode()
+        node.element_name = element_name
+        node.depth = depth
+        node.children = children or []
+        node.display_label = display_label
+        node.parent = parent
+        node.is_abstract = is_abstract
+        node.order = order
+        node.preferred_label = preferred_label
+        node.is_company_preferred_label = False
+        return node
+
+    def test_complementary_siblings_merge(self):
+        """Sibling concepts with same label and non-overlapping periods should merge."""
+        nodes = {
+            'concept_new': self._make_node('concept_new', 2, display_label='Revenue'),
+            'concept_old': self._make_node('concept_old', 2, display_label='Revenue'),
+        }
+        children = ['concept_new', 'concept_old']
+
+        result = [
             {
-                'concept': 'us-gaap:AdditionalPaidInCapital',
-                'label': 'Additional paid-in capital',
-                'values': {'instant_2025-12-31': 21441, 'instant_2024-12-31': 18964},
-                'all_names': ['us-gaap:AdditionalPaidInCapital'],
-                'is_abstract': False,
+                'concept': 'concept_new', 'label': 'Revenue',
+                'values': {'2025': 100}, 'all_names': ['concept_new'],
+                'is_abstract': False, 'has_values': True,
                 'decimals': {}, 'units': {}, 'period_types': {},
                 'preferred_signs': {}, 'balance': {}, 'weight': {},
             },
             {
-                # StockholdersEquity breakdown labeled "Additional paid-in capital"
-                'concept': 'us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
-                'label': 'Additional paid-in capital',
-                'values': {
-                    'instant_2022-12-31': 9947,
-                    'instant_2023-12-31': 10309,
-                    'instant_2024-12-31': 18964,   # matches APIC
-                    'instant_2025-12-31': 21441,   # matches APIC
-                },
-                'all_names': ['us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest'],
-                'is_abstract': False,
-                'decimals': {}, 'units': {}, 'period_types': {},
-                'preferred_signs': {}, 'balance': {}, 'weight': {},
-            },
-        ]
-
-        result = XBRL._merge_same_label_line_items(line_items)
-
-        # Both should be preserved — APIC is NOT a subset of SE breakdown
-        assert len(result) == 2
-
-    def test_complementary_periods_still_merge(self):
-        """Items with non-overlapping periods should still be merged (original use case)."""
-        line_items = [
-            {
-                'concept': 'aapl:DerivativeInstrument',
-                'label': 'Change in fair value of derivative instruments',
-                'values': {'2024': 10, '2023': -5},
-                'all_names': ['aapl:DerivativeInstrument'],
-                'is_abstract': False,
-                'decimals': {}, 'units': {}, 'period_types': {},
-                'preferred_signs': {}, 'balance': {}, 'weight': {},
-            },
-            {
-                'concept': 'us-gaap:CashFlowHedge',
-                'label': 'Change in fair value of derivative instruments',
-                'values': {'2025': 15},
-                'all_names': ['us-gaap:CashFlowHedge'],
-                'is_abstract': False,
+                'concept': 'concept_old', 'label': 'Revenue',
+                'values': {'2024': 90, '2023': 80}, 'all_names': ['concept_old'],
+                'is_abstract': False, 'has_values': True,
                 'decimals': {}, 'units': {}, 'period_types': {},
                 'preferred_signs': {}, 'balance': {}, 'weight': {},
             },
         ]
 
-        result = XBRL._merge_same_label_line_items(line_items)
-        assert len(result) == 1
-        assert result[0]['values'] == {'2025': 15, '2024': 10, '2023': -5}
+        XBRL._merge_sibling_concept_switches(result, 0, children, nodes)
 
-    def test_partial_overlap_with_new_periods_merges(self):
-        """Secondary that adds new periods AND has agreeing overlap values should merge."""
-        line_items = [
-            {
-                'concept': 'us-gaap:ConceptA',
-                'label': 'Net income',
-                'values': {'2025': 100, '2024': 90},
-                'all_names': ['ConceptA'],
-                'is_abstract': False,
-                'decimals': {}, 'units': {}, 'period_types': {},
-                'preferred_signs': {}, 'balance': {}, 'weight': {},
-            },
-            {
-                'concept': 'company:ConceptB',
-                'label': 'Net income',
-                'values': {'2024': 90, '2023': 80},   # adds 2023
-                'all_names': ['ConceptB'],
-                'is_abstract': False,
-                'decimals': {}, 'units': {}, 'period_types': {},
-                'preferred_signs': {}, 'balance': {}, 'weight': {},
-            },
-        ]
-
-        result = XBRL._merge_same_label_line_items(line_items)
         assert len(result) == 1
         assert result[0]['values'] == {'2025': 100, '2024': 90, '2023': 80}
 
-    def test_equal_period_sets_with_equal_values_not_merged(self):
-        """Two items with identical period sets and identical values are different concepts — don't merge."""
-        line_items = [
+    def test_different_concepts_same_label_not_merged(self):
+        """Non-sibling concepts with same label must NOT be merged (the #703 bug)."""
+        # Simulate BA's case: APIC and SE breakdown row are NOT siblings
+        # (they have different parents in the tree), so they would never
+        # be passed to _merge_sibling_concept_switches together.
+        # This test verifies the method doesn't merge when secondary adds no new periods.
+        nodes = {
+            'us-gaap:APIC': self._make_node('us-gaap:APIC', 5, display_label='Additional paid-in capital'),
+            'us-gaap:SE': self._make_node('us-gaap:SE', 6, display_label='Additional paid-in capital'),
+        }
+        children = ['us-gaap:APIC', 'us-gaap:SE']
+
+        result = [
             {
-                'concept': 'us-gaap:RetainedEarnings',
-                'label': 'Retained earnings',
-                'values': {'2025': 17252, '2024': 15362},
-                'all_names': ['us-gaap:RetainedEarnings'],
-                'is_abstract': False,
+                'concept': 'us-gaap:APIC', 'label': 'Additional paid-in capital',
+                'values': {'2025': 21441, '2024': 18964},
+                'all_names': ['us-gaap:APIC'],
+                'is_abstract': False, 'has_values': True,
                 'decimals': {}, 'units': {}, 'period_types': {},
                 'preferred_signs': {}, 'balance': {}, 'weight': {},
             },
             {
-                'concept': 'us-gaap:StockholdersEquityTotal',
-                'label': 'Retained earnings',
-                'values': {'2025': 17252, '2024': 15362},  # identical periods and values
-                'all_names': ['us-gaap:StockholdersEquityTotal'],
-                'is_abstract': False,
+                'concept': 'us-gaap:SE', 'label': 'Additional paid-in capital',
+                'values': {'2022': 9947, '2023': 10309, '2024': 18964, '2025': 21441},
+                'all_names': ['us-gaap:SE'],
+                'is_abstract': False, 'has_values': True,
                 'decimals': {}, 'units': {}, 'period_types': {},
                 'preferred_signs': {}, 'balance': {}, 'weight': {},
             },
         ]
 
-        result = XBRL._merge_same_label_line_items(line_items)
-        # Neither contributes new periods to the other — keep both
+        XBRL._merge_sibling_concept_switches(result, 0, children, nodes)
+
+        # APIC is a subset of SE — secondary adds no new periods → not merged
+        assert len(result) == 2
+
+    def test_disagreeing_values_not_merged(self):
+        """Siblings with same label but different overlapping values must NOT merge."""
+        nodes = {
+            'us-gaap:A': self._make_node('us-gaap:A', 3, display_label='Adjustment'),
+            'us-gaap:B': self._make_node('us-gaap:B', 3, display_label='Adjustment'),
+        }
+        children = ['us-gaap:A', 'us-gaap:B']
+
+        result = [
+            {
+                'concept': 'us-gaap:A', 'label': 'Adjustment',
+                'values': {'2025': 100, '2024': 50},
+                'all_names': ['us-gaap:A'],
+                'is_abstract': False, 'has_values': True,
+                'decimals': {}, 'units': {}, 'period_types': {},
+                'preferred_signs': {}, 'balance': {}, 'weight': {},
+            },
+            {
+                'concept': 'us-gaap:B', 'label': 'Adjustment',
+                'values': {'2024': 999, '2023': 80},
+                'all_names': ['us-gaap:B'],
+                'is_abstract': False, 'has_values': True,
+                'decimals': {}, 'units': {}, 'period_types': {},
+                'preferred_signs': {}, 'balance': {}, 'weight': {},
+            },
+        ]
+
+        XBRL._merge_sibling_concept_switches(result, 0, children, nodes)
+
+        assert len(result) == 2
+
+    def test_non_leaf_concepts_not_merged(self):
+        """Concepts with children in the tree should not be merged."""
+        nodes = {
+            'concept_a': self._make_node('concept_a', 2, children=['child1'],
+                                          display_label='Total'),
+            'concept_b': self._make_node('concept_b', 2, display_label='Total'),
+        }
+        children = ['concept_a', 'concept_b']
+
+        result = [
+            {
+                'concept': 'concept_a', 'label': 'Total',
+                'values': {'2025': 100}, 'all_names': ['concept_a'],
+                'is_abstract': False, 'has_values': True,
+                'decimals': {}, 'units': {}, 'period_types': {},
+                'preferred_signs': {}, 'balance': {}, 'weight': {},
+            },
+            {
+                'concept': 'concept_b', 'label': 'Total',
+                'values': {'2024': 90}, 'all_names': ['concept_b'],
+                'is_abstract': False, 'has_values': True,
+                'decimals': {}, 'units': {}, 'period_types': {},
+                'preferred_signs': {}, 'balance': {}, 'weight': {},
+            },
+        ]
+
+        XBRL._merge_sibling_concept_switches(result, 0, children, nodes)
+
+        # concept_a has children → not a leaf → skip merge
         assert len(result) == 2

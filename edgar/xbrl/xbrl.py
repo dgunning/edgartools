@@ -1002,10 +1002,6 @@ class XBRL:
             from edgar.xbrl.deduplication_strategy import RevenueDeduplicator
             line_items = RevenueDeduplicator.deduplicate_statement_items(line_items)
 
-        # Issue edgartools-3n9t / gh:572: Merge rows with same label but different concepts
-        # from XBRL concept switches between periods (complementary NaN values)
-        line_items = self._merge_same_label_line_items(line_items)
-
         # Issue #575: Reorder items so components appear before their totals
         # This fixes cases where the presentation linkbase has incorrect ordering
         # (e.g., IESC filing puts Cash at the end instead of with Current Assets)
@@ -1497,9 +1493,139 @@ class XBRL:
             result.extend(dim_items_added)
 
         # Process children
+        pre_children_len = len(result)
         for child_id in node.children:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
                                       should_display_dimensions, valid_dimensional_members, view)
+
+        # GH-572: Merge sibling concept-switch duplicates (scoped to direct children only)
+        if len(node.children) >= 2:
+            self._merge_sibling_concept_switches(result, pre_children_len, node.children, nodes)
+
+    @staticmethod
+    def _merge_sibling_concept_switches(result: List[Dict[str, Any]], start_idx: int,
+                                         children: List[str],
+                                         nodes: Dict[str, 'PresentationNode']) -> None:
+        """Merge sibling line items that represent XBRL concept switches.
+
+        When a company switches XBRL concepts between fiscal years (e.g.,
+        aapl:DerivativeInstrument to us-gaap:CashFlowHedge), both appear as
+        siblings under the same parent with the same label but complementary
+        period values.  This merges them in-place, scoped to siblings only —
+        never across unrelated parts of the statement.
+
+        Guards:
+        1. Same parent (structural — both are siblings in the presentation tree)
+        2. Same label
+        3. Both are leaf concepts (no children — avoids subtree complications)
+        4. Value agreement on any overlapping periods (0.1% tolerance)
+        5. The merge must add new periods (secondary contributes something)
+        """
+        from collections import defaultdict
+
+        children_set = set(children)
+
+        # Find direct-child items in result and their positions
+        sibling_items = []
+        for idx in range(start_idx, len(result)):
+            item = result[idx]
+            if item.get('concept') in children_set:
+                sibling_items.append((idx, item))
+
+        # Group by label (skip abstract / dimensional items)
+        label_groups: Dict[str, List] = defaultdict(list)
+        for idx, item in sibling_items:
+            if item.get('is_abstract') or item.get('is_dimensional'):
+                continue
+            # Only merge leaf concepts (no children in the tree)
+            concept_id = item.get('concept', '')
+            if concept_id in nodes and nodes[concept_id].children:
+                continue
+            label = item.get('label', '')
+            if label:
+                label_groups[label].append((idx, item))
+
+        indices_to_remove = set()
+        for label, group in label_groups.items():
+            if len(group) < 2:
+                continue
+
+            for a_pos in range(len(group)):
+                a_idx, item_a = group[a_pos]
+                if a_idx in indices_to_remove:
+                    continue
+                values_a = item_a.get('values', {})
+
+                for b_pos in range(a_pos + 1, len(group)):
+                    b_idx, item_b = group[b_pos]
+                    if b_idx in indices_to_remove:
+                        continue
+                    values_b = item_b.get('values', {})
+
+                    # Guard: overlapping values must agree
+                    overlap = set(values_a.keys()) & set(values_b.keys())
+                    agree = True
+                    for pk in overlap:
+                        va, vb = values_a[pk], values_b[pk]
+                        if va is None or vb is None:
+                            continue
+                        if va == vb:
+                            continue
+                        try:
+                            if va != 0 and abs((va - vb) / va) < 0.001:
+                                continue
+                        except TypeError:
+                            pass
+                        agree = False
+                        break
+
+                    if not agree:
+                        continue
+
+                    # Determine primary (more periods) and secondary
+                    if len(values_b) > len(values_a):
+                        primary_idx, secondary_idx = b_idx, a_idx
+                    else:
+                        primary_idx, secondary_idx = a_idx, b_idx
+                    primary = result[primary_idx]
+                    secondary = result[secondary_idx]
+
+                    # Guard: secondary must contribute at least one new period
+                    if not (set(secondary.get('values', {}).keys()) - set(primary.get('values', {}).keys())):
+                        continue
+
+                    # Merge values
+                    for pk, val in secondary.get('values', {}).items():
+                        if pk not in primary['values']:
+                            primary['values'][pk] = val
+
+                    # Propagate metadata
+                    for meta_key in ('preferred_signs', 'balance', 'weight',
+                                     'units', 'decimals', 'period_types'):
+                        p_meta = primary.get(meta_key, {})
+                        s_meta = secondary.get(meta_key, {})
+                        if isinstance(p_meta, dict) and isinstance(s_meta, dict):
+                            for pk, val in s_meta.items():
+                                if pk not in p_meta:
+                                    p_meta[pk] = val
+                            primary[meta_key] = p_meta
+
+                    # Merge concept names
+                    p_names = primary.get('all_names', [])
+                    for name in secondary.get('all_names', []):
+                        if name not in p_names:
+                            p_names.append(name)
+                    primary['all_names'] = p_names
+                    primary['has_values'] = len(primary['values']) > 0
+
+                    indices_to_remove.add(secondary_idx)
+                    if secondary_idx == a_idx:
+                        break
+
+        # Remove merged items in reverse order to preserve indices
+        if indices_to_remove:
+            for idx in sorted(indices_to_remove, reverse=True):
+                result.pop(idx)
 
     def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
         """Adjust level of dimensional items based on definition linkbase member hierarchy.
@@ -1575,135 +1701,6 @@ class XBRL:
 
         # Replace items in-place
         dim_items[:] = ordered
-
-    @staticmethod
-    def _merge_same_label_line_items(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Merge rows with same label but different concepts from XBRL concept switches.
-
-        When a company switches concepts between periods (e.g., aapl:DerivativeInstrument
-        to us-gaap:CashFlowHedge), the presentation tree creates separate rows with the
-        same label but complementary period values. Merge when values agree on overlap.
-
-        Two guards prevent incorrect merges:
-        1. Same label — group non-abstract, non-dimensional items by label
-        2. Value agreement — overlapping period values must match (0.1% tolerance)
-        """
-        from collections import defaultdict
-
-        # Build label -> [indices] map for non-abstract, non-dimensional items
-        label_groups: Dict[str, List[int]] = defaultdict(list)
-        for i, item in enumerate(line_items):
-            if item.get('is_abstract') or item.get('is_dimensional'):
-                continue
-            label = item.get('label', '')
-            if label:
-                label_groups[label].append(i)
-
-        # Only process labels with multiple items
-        indices_to_remove: set = set()
-        for label, indices in label_groups.items():
-            if len(indices) < 2:
-                continue
-
-            # Try pairwise merging (process in order so primary is first occurrence)
-            for a_pos in range(len(indices)):
-                a_idx = indices[a_pos]
-                if a_idx in indices_to_remove:
-                    continue
-                item_a = line_items[a_idx]
-                values_a = item_a.get('values', {})
-
-                for b_pos in range(a_pos + 1, len(indices)):
-                    b_idx = indices[b_pos]
-                    if b_idx in indices_to_remove:
-                        continue
-                    item_b = line_items[b_idx]
-                    values_b = item_b.get('values', {})
-
-                    # Check overlapping period values agree
-                    overlap_keys = set(values_a.keys()) & set(values_b.keys())
-                    values_agree = True
-                    for pk in overlap_keys:
-                        va = values_a[pk]
-                        vb = values_b[pk]
-                        if va is None or vb is None:
-                            continue
-                        if va == vb:
-                            continue
-                        # Skip numeric tolerance check for non-numeric values
-                        try:
-                            if va != 0 and abs((va - vb) / va) < 0.001:
-                                continue
-                        except TypeError:
-                            pass
-                        values_agree = False
-                        break
-
-                    if not values_agree:
-                        continue
-
-                    # Guard: the merge is only useful when the secondary adds at least one
-                    # new period that the primary doesn't already have.  If the primary
-                    # already covers every period of the secondary, the two items are
-                    # *different concepts that coincidentally share a label and values*
-                    # (e.g. AdditionalPaidInCapital vs a StockholdersEquity breakdown row
-                    # in Boeing's equity-changes table).  Merging would silently drop the
-                    # independent concept from the rendered statement.  (GH-703)
-                    periods_a = set(values_a.keys())
-                    periods_b = set(values_b.keys())
-                    # After the merge the surviving primary would gain `periods_secondary - periods_primary`.
-                    # If that set is empty the secondary contributes nothing new → skip.
-                    if len(periods_b) >= len(periods_a):
-                        # b would be primary; a is secondary — check that a adds new periods
-                        if not (periods_a - periods_b):
-                            continue  # a adds nothing new; don't merge
-                    else:
-                        # a would be primary; b is secondary — check that b adds new periods
-                        if not (periods_b - periods_a):
-                            continue  # b adds nothing new; don't merge
-
-                    # Determine primary (more period values) and secondary
-                    if len(values_b) > len(values_a):
-                        primary_idx, secondary_idx = b_idx, a_idx
-                    else:
-                        primary_idx, secondary_idx = a_idx, b_idx
-                    primary = line_items[primary_idx]
-                    secondary = line_items[secondary_idx]
-
-                    # Merge secondary values into primary
-                    for pk, val in secondary.get('values', {}).items():
-                        if pk not in primary['values']:
-                            primary['values'][pk] = val
-
-                    # Propagate metadata from secondary where primary is missing
-                    for meta_key in ('preferred_signs', 'balance', 'weight', 'units', 'decimals', 'period_types'):
-                        primary_meta = primary.get(meta_key, {})
-                        secondary_meta = secondary.get(meta_key, {})
-                        if isinstance(primary_meta, dict) and isinstance(secondary_meta, dict):
-                            for pk, val in secondary_meta.items():
-                                if pk not in primary_meta:
-                                    primary_meta[pk] = val
-                            primary[meta_key] = primary_meta
-
-                    # Merge all_names
-                    primary_names = primary.get('all_names', [])
-                    secondary_names = secondary.get('all_names', [])
-                    for name in secondary_names:
-                        if name not in primary_names:
-                            primary_names.append(name)
-                    primary['all_names'] = primary_names
-
-                    indices_to_remove.add(secondary_idx)
-
-                    # If a was consumed as secondary, stop matching it against further items.
-                    # The primary (b) will be revisited when the outer loop reaches it.
-                    if secondary_idx == a_idx:
-                        break
-
-        if not indices_to_remove:
-            return line_items
-
-        return [item for i, item in enumerate(line_items) if i not in indices_to_remove]
 
     @staticmethod
     def _reorder_by_calculation_parent(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
