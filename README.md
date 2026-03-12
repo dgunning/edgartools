@@ -401,9 +401,9 @@ See our [Contributing Guide](CONTRIBUTING.md) for details.
 
 Need help building production SEC data infrastructure? The creator of EdgarTools offers consulting for teams building financial AI products:
 
-- **SEC Data Sprint** (1–3 days, from $5K) — Working prototype on your data
-- **Architecture Review** (1–2 weeks, from $7.5K) — Pipeline audit with prioritized fixes
-- **Pipeline Build** (2–4 weeks, from $15K) — Production-ready code, tests, and handoff
+- **SEC Data Sprint** (1–3 days) — Working prototype on your data
+- **Architecture Review** (1–2 weeks) — Pipeline audit with prioritized fixes
+- **Pipeline Build** (2–4 weeks) — Production-ready code, tests, and handoff
 
 [Learn more →](https://www.edgar.tools/consulting)
 
