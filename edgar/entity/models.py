@@ -76,6 +76,11 @@ class FinancialFact:
     is_total: bool = False                 # Total/sum item
     presentation_order: Optional[float] = None  # Order in presentation
 
+    @property
+    def is_dimensioned(self) -> bool:
+        """Whether this fact has dimensional context (segment, class, etc.)."""
+        return bool(self.dimensions)
+
     def to_llm_context(self) -> Dict[str, Any]:
         """
         Generate rich context for LLM consumption.

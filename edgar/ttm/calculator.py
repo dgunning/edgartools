@@ -191,6 +191,22 @@ class TTMCalculator:
             warning=warning
         )
 
+    def quarterize(self) -> List[FinancialFact]:
+        """Convert YTD and annual facts into discrete quarterly facts.
+
+        Derives Q2, Q3, Q4 from cumulative filings:
+          Q2 = YTD_6M - Q1
+          Q3 = YTD_9M - YTD_6M
+          Q4 = FY - YTD_9M
+
+        Derived facts have ``calculation_context`` set to the derivation method
+        (e.g., 'derived_q4_fy_minus_ytd9').
+
+        Returns:
+            Quarterly facts sorted by period_end descending.
+        """
+        return self._quarterize_facts()
+
     def calculate_ttm_trend(self, periods: int = 8) -> pd.DataFrame:
         """Calculate rolling TTM values for multiple periods.
 
