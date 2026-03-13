@@ -7,7 +7,7 @@ users to query standardized, multi-period financial data.
 
 import re
 from collections import defaultdict
-from functools import lru_cache
+
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import pandas as pd
@@ -542,7 +542,6 @@ class StitchedFactQuery(FactQuery):
 
         return df
 
-    @lru_cache(maxsize=8)
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -553,6 +552,10 @@ class StitchedFactQuery(FactQuery):
         Returns:
             pandas DataFrame with query results
         """
+        cache_key = columns
+        cache = getattr(self, '_df_cache', {})
+        if cache_key in cache:
+            return cache[cache_key]
         results = self.execute()
 
         if not results:
@@ -594,7 +597,10 @@ class StitchedFactQuery(FactQuery):
                                    if col not in first_columns
                                    and col not in skip_columns]
 
-        return df[columns]
+        result = df[columns]
+        cache[cache_key] = result
+        self._df_cache = cache
+        return result
 
     def __rich__(self):
         title = Text.assemble(("Stitched Facts Query"),

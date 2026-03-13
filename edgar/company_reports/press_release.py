@@ -1,5 +1,4 @@
 """Press release attachment classes for 8-K filings."""
-from functools import lru_cache
 from typing import Optional
 
 from edgar._filings import Attachment, Attachments
@@ -53,14 +52,18 @@ class PressRelease:
     def description(self) -> str:
         return self.attachment.description
 
-    @lru_cache(maxsize=1)
     def html(self) -> Optional[str]:
+        if hasattr(self, '_cached_html'):
+            return self._cached_html
         content = self.attachment.download()
         if content is None:
             return None
         if isinstance(content, bytes):
-            return content.decode('utf-8', errors='replace')
-        return content
+            result = content.decode('utf-8', errors='replace')
+        else:
+            result = content
+        self._cached_html = result
+        return result
 
     def text(self) -> Optional[str]:
         html = self.html()

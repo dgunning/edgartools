@@ -7,7 +7,7 @@ import tempfile
 import time
 import webbrowser
 import zipfile
-from functools import lru_cache
+
 from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
@@ -963,8 +963,9 @@ class FilingHomepage:
             if datafile.description in xbrl_document_types:
                 return datafile
 
-    @lru_cache(maxsize=1)
     def get_filers(self):
+        if hasattr(self, '_cached_filers'):
+            return self._cached_filers
         filer_divs = self._soup.find_all("div", id="filerDiv")
         filer_infos = []
         for filer_div in filer_divs:
@@ -1008,6 +1009,7 @@ class FilingHomepage:
 
             filer_infos.append(filer_info)
 
+        self._cached_filers = filer_infos
         return filer_infos
 
     @property
@@ -1016,8 +1018,9 @@ class FilingHomepage:
         _,_, period = self.get_filing_dates()
         return period
 
-    @lru_cache(maxsize=None)
     def get_filing_dates(self)-> Optional[Tuple[str,str, Optional[str]]]:
+        if hasattr(self, '_cached_filing_dates'):
+            return self._cached_filing_dates
         # Find the form grouping divs
         grouping_divs = self._soup.find_all("div", class_="formGrouping")
         if len(grouping_divs) == 0:
@@ -1032,8 +1035,12 @@ class FilingHomepage:
             first_info_div = period_grouping_div.find("div", class_="info")
             if first_info_div:
                 period = first_info_div.text.strip()
-                return filing_date, accepted_date, period
-        return filing_date, accepted_date, None
+                result = filing_date, accepted_date, period
+                self._cached_filing_dates = result
+                return result
+        result = filing_date, accepted_date, None
+        self._cached_filing_dates = result
+        return result
 
     @classmethod
     def load(cls, url: str):

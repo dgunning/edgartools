@@ -10,7 +10,7 @@ from _thread import interrupt_main
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date
-from functools import lru_cache, partial, wraps
+from functools import cached_property, lru_cache, partial, wraps
 from pathlib import Path
 from typing import Callable, Iterable, List, Optional, Tuple, TypeVar, Union
 
@@ -123,8 +123,7 @@ class EdgarSettings:
     max_connections: int
     retries: int = 3
 
-    @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def limits(self):
         return httpx.Limits(max_connections=default_max_connections)
 

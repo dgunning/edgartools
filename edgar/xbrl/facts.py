@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 from decimal import Decimal
-from functools import lru_cache
+
 from textwrap import dedent
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
@@ -792,7 +792,6 @@ class FactQuery:
 
         return results
 
-    @lru_cache(maxsize=8)
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -801,6 +800,10 @@ class FactQuery:
         Returns:
             pandas DataFrame with query results
         """
+        cache_key = columns
+        cache = getattr(self, '_df_cache', {})
+        if cache_key in cache:
+            return cache[cache_key]
         results = self.execute()
 
         if not results:
@@ -860,7 +863,10 @@ class FactQuery:
                                    if col not in first_columns
                                    and col not in skip_columns]
 
-        return df[columns]
+        result = df[columns]
+        cache[cache_key] = result
+        self._df_cache = cache
+        return result
 
     def __rich__(self):
 

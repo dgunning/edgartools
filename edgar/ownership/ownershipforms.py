@@ -10,7 +10,7 @@ The top level object is Ownership
 import itertools
 from dataclasses import dataclass, field
 from datetime import date
-from functools import lru_cache
+from functools import cached_property
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -1907,8 +1907,7 @@ class Ownership:
                     ))
         return activities
 
-    @property
-    @lru_cache(maxsize=8)
+    @cached_property
     def market_trades(self):
         return self.non_derivative_table.market_trades
 
@@ -2003,14 +2002,12 @@ class Ownership:
         ]
         return " / ".join(owners)
 
-    @property
-    @lru_cache(maxsize=8)
+    @cached_property
     def derivative_trades(self):
         # First get the derivative trades from the derivative table
         return self.derivative_table.derivative_trades
 
-    @property
-    @lru_cache(maxsize=8)
+    @cached_property
     def shares_traded(self):
         # Sum the Shares if Shares is all numeric
         if np.issubdtype(self.market_trades.Shares.dtype, np.number):

@@ -1,6 +1,6 @@
 import re
 import warnings
-from functools import lru_cache
+from functools import cached_property
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -281,22 +281,22 @@ class TextBlock(Block):
         super().__init__(text, **tags)
         self.inline: bool = inline
 
-    @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def num_words(self):
         "return the number of words in this text block"
         if self.is_linebreak() or self.is_empty():
             return 0
         return len(self.text.split(" "))
 
-    @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def is_header(self):
         return is_header(self.text)
 
-    @lru_cache(maxsize=1)
     def analyze(self):
-        return TextAnalysis(self.text)
+        if hasattr(self, '_cached_analysis'):
+            return self._cached_analysis
+        self._cached_analysis = TextAnalysis(self.text)
+        return self._cached_analysis
 
     def __str__(self):
         return "TextBlock"
@@ -314,10 +314,12 @@ class TableBlock(Block):
         super().__init__(text=None, **tag)
         self.table_element = table_element
 
-    @lru_cache()
     def get_text(self):
+        if hasattr(self, '_cached_text'):
+            return self._cached_text
         _text = table_to_text(self.table_element)
         _text = "\n" + _text + "\n"
+        self._cached_text = _text
         return _text
 
     def to_dataframe(self) -> pd.DataFrame:
@@ -937,8 +939,7 @@ class TextAnalysis:
         """Checks if the majority of the words in the text are in title case."""
         return self.num_title_case_words / self.num_words > 0.6
 
-    @property
-    @lru_cache(maxsize=1)
+    @cached_property
     def is_regular_text(self):
         return self.num_words > 25
 

@@ -27,7 +27,7 @@ class TickerSeriesResolver:
     """Handles ticker to series ID resolution with caching."""
 
     @staticmethod
-    @lru_cache(maxsize=1000)
+    @lru_cache(maxsize=128)
     def resolve_ticker_to_series(ticker: str) -> List[SeriesInfo]:
         """Resolve ticker to all associated series with ETF fallback."""
         if not ticker:

@@ -259,13 +259,13 @@ def get_cik_tickers():
     # Primary source: company_tickers.json (via bundled parquet or SEC API)
     return get_company_tickers(clean_name=False, clean_suffix=False)[['ticker', 'cik']]
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
 def list_all_tickers():
     """List all tickers from the merged data"""
     return get_cik_tickers()['ticker'].tolist()
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
 def get_company_cik_lookup():
     df = get_cik_tickers()
 
@@ -282,7 +282,7 @@ def get_company_cik_lookup():
     return lookup
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
 def get_cik_ticker_lookup():
     """Create a mapping of CIK to base ticker symbols.
     For CIKs with multiple tickers, uses the shortest ticker (usually the base symbol).
@@ -352,7 +352,7 @@ def find_ticker_safe(cik: Union[int, str]) -> Optional[str]:
         # This ensures we never trigger network calls
         return None
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
 def get_company_ticker_name_exchange():
     """
     Return a DataFrame with columns [cik	name	ticker	exchange]
@@ -374,7 +374,7 @@ def get_companies_by_exchange(exchange: Union[List[str], str]):
     return df[df['exchange'].str.lower().isin(exchanges)].reset_index(drop=True)
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
 def get_mutual_fund_tickers():
     """
     Get mutual fund tickers.
@@ -385,7 +385,7 @@ def get_mutual_fund_tickers():
     return pd.DataFrame(data['data'], columns=['cik', 'seriesId', 'classId', 'ticker'])
 
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1)
 def get_mutual_fund_lookup():
     df = get_mutual_fund_tickers()
     return dict(zip(df['ticker'], df['cik'], strict=False))

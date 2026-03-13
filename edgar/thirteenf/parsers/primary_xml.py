@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from decimal import Decimal
-from functools import lru_cache
+
 
 from bs4 import Tag
 
@@ -13,7 +13,6 @@ from edgar.xmltools import child_text, find_element
 __all__ = ['parse_primary_document_xml']
 
 
-@lru_cache(maxsize=8)
 def parse_primary_document_xml(primary_document_xml: str):
     """
     Parse the primary 13F XML document.

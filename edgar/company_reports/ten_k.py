@@ -1,6 +1,6 @@
 """Form 10-K annual report class."""
 import re
-from functools import cached_property, lru_cache
+from functools import cached_property
 
 from rich import box
 from rich.console import Group, Text
@@ -336,10 +336,15 @@ class TenK(CompanyReport):
             return index
         return None
 
-    @lru_cache(maxsize=1)
     def id_parse_document(self, markdown:bool=False):
+        cache = getattr(self, '_id_parse_cache', {})
+        if markdown in cache:
+            return cache[markdown]
         from edgar.files.html_documents_id_parser import ParsedHtml10K
-        return ParsedHtml10K().extract_html(self._filing.html(), self.structure, markdown=markdown)
+        result = ParsedHtml10K().extract_html(self._filing.html(), self.structure, markdown=markdown)
+        cache[markdown] = result
+        self._id_parse_cache = cache
+        return result
 
     def __str__(self):
         return f"""TenK('{self.company}')"""

@@ -54,7 +54,7 @@ class TickerResolutionService:
     }
 
     @staticmethod
-    @lru_cache(maxsize=4096)
+    @lru_cache(maxsize=128)
     def resolve_ticker(ticker: Optional[str] = None,
                       cusip: Optional[str] = None,
                       isin: Optional[str] = None,

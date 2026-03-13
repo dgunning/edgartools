@@ -1,7 +1,6 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from functools import lru_cache
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import pyarrow as pa
@@ -255,17 +254,20 @@ class Report:
         if table:
             return rich_to_text(table.render(500))
 
-    @lru_cache
     def _get_report_table(self):
         """
         Get the first table in the document
         """
+        if hasattr(self, '_cached_report_table'):
+            return self._cached_report_table
         parser = HTMLParser(ParserConfig())
         document = parser.parse(self.content)
         if len(document.tables) == 0:
             log.warning(f"No tables found in {self.html_file_name}")
+            self._cached_report_table = None
             return None
-        return document.tables[0]
+        self._cached_report_table = document.tables[0]
+        return self._cached_report_table
 
     def view(self):
         table = self._get_report_table()

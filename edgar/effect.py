@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import Optional
 
 import pandas as pd
@@ -94,13 +93,15 @@ class Effect:
                 return filings[0]
         return None
 
-    @lru_cache(maxsize=1)
     def summary(self) -> pd.DataFrame:
-        return pd.DataFrame([{"cik": self.cik,
+        if hasattr(self, '_cached_summary'):
+            return self._cached_summary
+        self._cached_summary = pd.DataFrame([{"cik": self.cik,
                               "entity": self.entity,
                               "source": self.source_submission_type or "",
                               "live": self.is_live,
                               "effective": self.effective_date}]).set_index("entity")
+        return self._cached_summary
 
     def __str__(self):
         return (f"EffectSubmission(effective='{self.effective_date}', type='{self.submission_type}', "

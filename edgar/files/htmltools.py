@@ -1,7 +1,7 @@
 import re
 import warnings
 from dataclasses import dataclass
-from functools import lru_cache, partial
+from functools import partial
 from io import StringIO
 from typing import Any, Callable, Dict, List, Optional
 
@@ -100,7 +100,6 @@ def get_text_elements(elements: List[Element]):
     return [e for e in elements if e.type == "text"]
 
 
-@lru_cache(maxsize=8)
 def chunk(html: str):
     document = HtmlDocument.from_html(html)
     return list(document.generate_chunks())
@@ -352,9 +351,11 @@ class ChunkedDocument:
         self.prefix_src = prefix_src
         self.document_id_parse:Dict = {}
 
-    @lru_cache(maxsize=4)
     def as_dataframe(self):
-        return self.chunk_fn(self.chunks)
+        if hasattr(self, '_cached_dataframe'):
+            return self._cached_dataframe
+        self._cached_dataframe = self.chunk_fn(self.chunks)
+        return self._cached_dataframe
 
     def show_items(self, df_query: str, *columns):
         result = self._chunked_data.query(df_query)
