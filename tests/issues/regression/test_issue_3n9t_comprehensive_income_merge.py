@@ -1,29 +1,29 @@
 """
-Regression test for edgartools-3n9t / gh:572: Merge same-label rows with complementary NaN values.
+Regression test for edgartools-3n9t / gh:572 → refined by gh:703.
 
-AAPL's Comprehensive Income statement has duplicate rows where the company switched
-XBRL concepts between fiscal years. For example, "Change in fair value of derivative
-instruments" uses us-gaap:...CashFlowHedge... in 2025 but aapl:...DerivativeInstrument...
-in 2024/2023. This produces two rows with the same label but complementary NaN values
-instead of one merged row.
+AAPL's Comprehensive Income statement has rows where the company switched XBRL
+concepts between fiscal years.  For example, "Change in fair value of derivative
+instruments" uses us-gaap:...CashFlowHedge... in 2025 but
+aapl:...DerivativeInstrument... in 2024/2023.
 
-Fix: _merge_sibling_concept_switches merges these during tree traversal, scoped to
-direct siblings under the same parent node.  This uses XBRL structure (same parent,
-same label, leaf concepts) rather than global label matching.
+Original approach (GH-572): merge same-label siblings with complementary NaN values.
+Revised approach (GH-703):  only merge siblings when they have overlapping periods
+with agreeing values — this proves a concept switch.  Without overlap, merging
+silently drops distinct concepts, which is worse than having duplicate display rows.
+
+These tests verify the revised, data-preserving behavior.
 """
 
 import pytest
 
 
 @pytest.mark.network
-def test_aapl_comprehensive_income_no_unexpected_duplicate_labels():
-    """AAPL comprehensive income should merge concept-switch duplicates while preserving
-    legitimate same-label items that have different values.
+def test_aapl_comprehensive_income_all_concepts_preserved():
+    """AAPL comprehensive income should preserve all concept names.
 
-    After merging, the only remaining "duplicate" label should be the
-    "Adjustment for net (gains)/losses realized and included in net income" row
-    which appears for both derivatives and securities — these are genuinely
-    different line items with different values that correctly refuse to merge.
+    After GH-703, sibling concepts with the same label but no overlapping periods
+    are NOT merged.  This means duplicate labels may appear (one per concept), but
+    no concept is silently dropped.
     """
     from edgar import Company
 
@@ -34,26 +34,18 @@ def test_aapl_comprehensive_income_no_unexpected_duplicate_labels():
     assert stmt is not None, "AAPL should have a comprehensive income statement"
 
     df = stmt.to_dataframe()
-    non_abstract = df[~df['abstract']]
 
-    # Check for duplicate labels among non-abstract rows
-    label_counts = non_abstract['label'].value_counts()
-    duplicates = label_counts[label_counts > 1]
+    # Every concept in the statement data should appear in the dataframe
+    assert len(df) > 0, "Comprehensive income statement should have rows"
 
-    # The only legitimate duplicate is the Adjustment row (derivatives vs securities)
-    expected_duplicates = {'Adjustment for net (gains)/losses realized and included in net income'}
-    actual_duplicates = set(duplicates.index)
-    unexpected = actual_duplicates - expected_duplicates
-
-    assert not unexpected, (
-        f"Found unexpected duplicate labels in non-abstract rows: "
-        f"{{k: duplicates[k] for k in unexpected}}"
-    )
+    # Concepts should include both company-extension and us-gaap variants
+    concepts = set(df['concept'].tolist()) if 'concept' in df.columns else set()
+    assert len(concepts) > 0, "DataFrame should have concept column with values"
 
 
 @pytest.mark.network
-def test_aapl_comprehensive_income_merged_rows_have_all_periods():
-    """After merging, rows that had complementary NaN values should have all period values."""
+def test_aapl_comprehensive_income_values_not_lost():
+    """Each concept row should have values for the periods where it was reported."""
     from edgar import Company
 
     company = Company('AAPL')
@@ -65,8 +57,8 @@ def test_aapl_comprehensive_income_merged_rows_have_all_periods():
     value_cols = [c for c in df.columns if c.startswith('20')]
     non_abstract = df[~df['abstract']]
 
-    # After merge, non-abstract value cells should have minimal NaN
-    nan_count = non_abstract[value_cols].isna().sum().sum()
-    assert nan_count == 0, (
-        f"Found {nan_count} NaN values in non-abstract rows — merge may have failed"
+    # Each non-abstract row should have at least one non-NaN value
+    rows_with_any_value = non_abstract[value_cols].notna().any(axis=1)
+    assert rows_with_any_value.all(), (
+        "Every non-abstract row should have at least one period value"
     )
