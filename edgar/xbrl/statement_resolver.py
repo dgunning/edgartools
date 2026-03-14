@@ -231,6 +231,9 @@ statement_registry = {
         ],
         key_concepts=[
             "us-gaap_ComprehensiveIncomeNetOfTax",
+            # Issue #706: Older filings (pre-2015) use the "IncludingPortionAttributableToNoncontrollingInterest"
+            # variant instead of the base concept - common when CI is embedded in the equity statement
+            "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
             # IFRS equivalents
             "ifrs-full_ComprehensiveIncome",
             "ifrs-full_OtherComprehensiveIncome"
@@ -1201,6 +1204,63 @@ class StatementResolver:
 
                 if VERBOSE_EXCEPTIONS:
                     log.debug("ComprehensiveIncome fallback rejected: no candidates contain P&L data")
+
+        # Issue #706: Special fallback for ComprehensiveIncome -> StatementOfEquity
+        # Many older filings (pre-2015) embed OCI data within the equity statement instead
+        # of reporting a separate Consolidated Statement of Comprehensive Income.
+        # Examples: IBM 2010, GE 2010, Apple 2010-2012 (StatementOfShareholdersEquityAndOtherComprehensiveIncome)
+        # We fall back to the equity statement if it contains comprehensive income concepts.
+        #
+        # NOTE: We use a broad search for equity candidates because older filings may use
+        # non-standard primary concepts (e.g., us-gaap_IncreaseDecreaseInStockholdersEquityRollForward
+        # used by GE 2010) that are not recognized in the type index.
+        if statement_type == 'ComprehensiveIncome':
+            # Gather equity statement candidates from multiple sources:
+            # 1. Statements already typed as StatementOfEquity
+            # 2. Statements with any known equity primary concept (handles GE-style roll-forward concept)
+            equity_primary_concepts = (
+                statement_registry['StatementOfEquity'].primary_concepts +
+                statement_registry['StatementOfEquity'].alternative_concepts
+            )
+            all_equity_candidates = list(self._statement_by_type.get('StatementOfEquity', []))
+            seen_roles = {s.get('role') for s in all_equity_candidates}
+            for concept in equity_primary_concepts:
+                for stmt in self._statement_by_primary_concept.get(concept, []):
+                    role = stmt.get('role')
+                    if role not in seen_roles:
+                        all_equity_candidates.append(stmt)
+                        seen_roles.add(role)
+
+            if all_equity_candidates:
+                # CI concepts that indicate the equity statement embeds comprehensive income data.
+                # Using a broad set to cover both modern (post-2012) and legacy (pre-2015) taxonomies.
+                ci_indicator_concepts = {
+                    'us-gaap_ComprehensiveIncomeNetOfTax',
+                    'us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest',
+                    'us-gaap_OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecrease',
+                    'us-gaap_OtherComprehensiveIncomeLossNetOfTax',
+                    'us-gaap_ComprehensiveIncomeMember',
+                }
+
+                for candidate in all_equity_candidates:
+                    role = candidate.get('role', '')
+                    if role not in self.xbrl.presentation_trees:
+                        continue
+
+                    tree = self.xbrl.presentation_trees[role]
+                    all_nodes = set(tree.all_nodes.keys())
+
+                    # Check if any CI indicator concept is present
+                    has_ci_data = any(c in all_nodes for c in ci_indicator_concepts)
+
+                    if has_ci_data:
+                        if VERBOSE_EXCEPTIONS:
+                            log.info(f"ComprehensiveIncome not found as separate statement, "
+                                     f"using StatementOfEquity as fallback (role: {role}). "
+                                     f"This is normal for older filings that embed OCI in the equity statement.")
+                        result = ([candidate], role, 'StatementOfEquity', 0.75)
+                        self._cache[cache_key] = result
+                        return result
 
         # No good match found, return best guess with low confidence
         statements, role, conf = self._get_best_guess(statement_type)

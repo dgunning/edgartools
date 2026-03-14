@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **ComprehensiveIncome Resolver Fallback for Historical Filings** — `comprehensive_income()` now returns a `Statement` for older filings (pre-2015) that embed Other Comprehensive Income (OCI) data within the equity rollforward statement rather than filing a separate Consolidated Statement of Comprehensive Income. Previously, these filings returned `None`, causing `AttributeError` when users called `.to_dataframe()`. The resolver now falls back to the equity statement when it contains CI concepts such as `ComprehensiveIncomeNetOfTax` or `OtherComprehensiveIncomeLossNetOfTax`. Affected companies include IBM, GE, Ford, and TSLA for annual 10-K filings from 2009-2013 ([#706](https://github.com/dgunning/edgartools/issues/706))
+
+- **Legacy Roll-Forward Equity Concept Support** — The ComprehensiveIncome fallback now also finds equity statements that use the legacy `us-gaap_IncreaseDecreaseInStockholdersEquityRollForward` primary concept (GE 2010 pattern) in addition to the standard `us-gaap_StatementOfStockholdersEquityAbstract` concept ([#706](https://github.com/dgunning/edgartools/issues/706))
+
 ## [5.23.0] - 2026-03-11
 
 ### Added
