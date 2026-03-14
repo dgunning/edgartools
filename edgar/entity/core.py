@@ -883,17 +883,15 @@ class Company(Entity):
             EntityFacts object with SIC code and ticker set, optionally filtered by period type
         """
         facts = super().get_facts(period_type)
-        if facts:
-            # Inject SIC code and ticker for industry-specific statement building
-            # Ticker is used for curated industries like payment_networks where SIC doesn't map well
-            # Only set if not already populated to avoid overwriting shared cached object
-            if facts._sic_code is None:
-                facts._sic_code = self.sic
-            if facts._ticker is None:
-                facts._ticker = self.tickers[0] if self.tickers else None
+        if facts and facts._sic_code is None and facts._sic_resolver is None:
+            # Defer SIC/ticker resolution until statement-building time.
+            # This avoids triggering a submissions download just to get metadata
+            # when the user only needs raw facts, shares_outstanding, or TTM metrics.
+            company = self  # capture for closure
+            facts._sic_resolver = lambda: (company.sic, company.tickers[0] if company.tickers else None)
         return facts
 
-    @property
+    @cached_property
     def facts(self) -> Optional['EntityFacts']:
         """Get enhanced structured facts about this company."""
         return self.get_facts()

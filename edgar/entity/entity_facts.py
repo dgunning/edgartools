@@ -157,8 +157,20 @@ class EntityFacts:
         self._facts = facts
         self._sic_code = sic_code
         self._ticker = ticker
+        self._sic_resolver = None
         self._fact_index = self._build_indices()
         self._cache = {}
+
+    def _resolve_industry_info(self):
+        """Lazily resolve SIC code and ticker for industry-specific statement enhancements.
+
+        Called only when building statements, not on initial facts access.
+        This avoids triggering a submissions download just to get SIC/ticker
+        when the user only needs raw facts, shares_outstanding, or TTM metrics.
+        """
+        if self._sic_code is None and self._sic_resolver is not None:
+            self._sic_code, self._ticker = self._sic_resolver()
+            self._sic_resolver = None
 
     def _suggest_concepts(self, query: str, n: int = 3) -> List[str]:
         """Return up to n concept keys similar to query, using difflib."""
@@ -320,13 +332,15 @@ class EntityFacts:
         filtered_facts = self.query().by_period_type(period_type).execute()
 
         # Create a new EntityFacts instance with the filtered facts
-        return EntityFacts(
+        filtered = EntityFacts(
             cik=self.cik,
             name=self.name,
             facts=filtered_facts,
             sic_code=self._sic_code,
             ticker=self._ticker
         )
+        filtered._sic_resolver = self._sic_resolver
+        return filtered
 
     def __rich__(self):
         """Creates a rich representation providing an at-a-glance view of company facts."""
@@ -1412,6 +1426,7 @@ class EntityFacts:
             df = stmt.to_dataframe()
         """
         # Always build the enhanced multi-period statement
+        self._resolve_industry_info()
         from edgar.entity.enhanced_statement import EnhancedStatementBuilder
         builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
         enhanced_stmt = builder.build_multi_period_statement(
@@ -1460,6 +1475,7 @@ class EntityFacts:
         """
         if not as_of:
             # Always build the enhanced multi-period statement for regular periods
+            self._resolve_industry_info()
             from edgar.entity.enhanced_statement import EnhancedStatementBuilder
             builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
             enhanced_stmt = builder.build_multi_period_statement(
@@ -1577,6 +1593,7 @@ class EntityFacts:
             df = stmt.to_dataframe()
         """
         # Always build the enhanced multi-period statement
+        self._resolve_industry_info()
         from edgar.entity.enhanced_statement import EnhancedStatementBuilder
         builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
         enhanced_stmt = builder.build_multi_period_statement(
