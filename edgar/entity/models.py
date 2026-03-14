@@ -18,7 +18,7 @@ class DataQuality(Enum):
     LOW = "low"           # Estimated or inferred
 
 
-@dataclass
+@dataclass(slots=True)
 class FinancialFact:
     """
     Unified fact representation optimized for both traditional analysis and AI consumption.

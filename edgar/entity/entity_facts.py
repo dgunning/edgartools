@@ -6,7 +6,7 @@ analytics and AI-ready interfaces.
 """
 
 import warnings
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from datetime import date
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
@@ -76,7 +76,19 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     return json.loads(company_facts_file.read_text())
 
 
-_company_facts_cache: Dict[int, 'EntityFacts'] = {}
+_COMPANY_FACTS_CACHE_MAXSIZE = 16
+
+_company_facts_cache: OrderedDict[int, 'EntityFacts'] = OrderedDict()
+
+
+def clear_company_facts_cache():
+    """Clear the in-memory company facts cache.
+
+    Use this in long-running processes (web apps, MCP servers, notebooks)
+    to free memory from previously loaded EntityFacts objects.
+    Each major company's facts can consume 40-80 MB.
+    """
+    _company_facts_cache.clear()
 
 
 def get_company_facts(cik: int):
@@ -94,6 +106,7 @@ def get_company_facts(cik: int):
     """
     cached = _company_facts_cache.get(cik)
     if cached is not None:
+        _company_facts_cache.move_to_end(cik)
         return cached
 
     if is_using_local_storage():
@@ -111,6 +124,9 @@ def get_company_facts(cik: int):
     result = EntityFactsParser.parse_company_facts(company_facts_json)
     if result is not None:
         _company_facts_cache[cik] = result
+        # Evict oldest entry if cache exceeds max size
+        while len(_company_facts_cache) > _COMPANY_FACTS_CACHE_MAXSIZE:
+            _company_facts_cache.popitem(last=False)
     return result
 
 

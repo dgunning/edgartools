@@ -39,6 +39,7 @@ from edgar.entity import (
     get_icon_from_ticker,
     get_ticker_to_cik_lookup,
 )
+from edgar.entity.entity_facts import clear_company_facts_cache
 from edgar.files import detect_page_breaks, mark_page_breaks
 from edgar.files.html import Document
 from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage

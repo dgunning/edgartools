@@ -549,8 +549,8 @@ class Entity(SecFiler):
         return filings.latest(n)
 
     def __str__(self):
-        if hasattr(self, 'data'):
-            return f"Entity({self.data.name} [{self.cik}])"
+        if self._data is not None:
+            return f"Entity({self._data.name} [{self.cik}])"
         return f"Entity(CIK={self.cik})"
 
     def __rich__(self):
@@ -886,8 +886,11 @@ class Company(Entity):
         if facts:
             # Inject SIC code and ticker for industry-specific statement building
             # Ticker is used for curated industries like payment_networks where SIC doesn't map well
-            facts._sic_code = self.sic
-            facts._ticker = self.tickers[0] if self.tickers else None
+            # Only set if not already populated to avoid overwriting shared cached object
+            if facts._sic_code is None:
+                facts._sic_code = self.sic
+            if facts._ticker is None:
+                facts._ticker = self.tickers[0] if self.tickers else None
         return facts
 
     @property
@@ -1501,14 +1504,14 @@ class Company(Entity):
         raise ValueError(f"Invalid date format: '{as_of}'. Use 'YYYY-MM-DD' or 'YYYY-QN'")
 
     def __str__(self):
-        if hasattr(self, 'data') and self.data.name:
+        if self._data is not None and self._data.name:
             # Handle individuals (persons)
-            if self.data.is_individual:
+            if self._data.is_individual:
                 return f"{self.display_name} (Person) CIK:{self.cik}"
 
             # Company format
             ticker = self.get_ticker()
-            parts = [self.data.name]
+            parts = [self._data.name]
             if ticker:
                 parts.append(f"[{ticker}]")
             parts.append(f"CIK:{self.cik}")
