@@ -76,7 +76,7 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     return json.loads(company_facts_file.read_text())
 
 
-_COMPANY_FACTS_CACHE_MAXSIZE = 16
+_COMPANY_FACTS_CACHE_MAXSIZE = 1
 
 _company_facts_cache: OrderedDict[int, 'EntityFacts'] = OrderedDict()
 
