@@ -1872,8 +1872,9 @@ class Filing:
                 self._sgml = FilingSGML.from_filing(self)
             except (ValueError, Exception) as e:
                 from edgar.sgml.sgml_parser import SECIdentityError, SECFilingNotFoundError, SECHTMLResponseError
+                from edgar.httprequests import IdentityNotSetException
                 # Don't fall back on permanent errors — propagate them
-                if isinstance(e, (SECIdentityError, SECFilingNotFoundError)):
+                if isinstance(e, (SECIdentityError, SECFilingNotFoundError, IdentityNotSetException)):
                     raise
                 # Don't fall back on network errors — propagate them so callers
                 # (e.g. xbrl()) can show local-storage-aware error messages
