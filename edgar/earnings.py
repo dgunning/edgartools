@@ -125,6 +125,10 @@ _STRONG_KEYWORDS = {
     StatementType.CASH_FLOW: [
         'cash flows from operating', 'cash flows from investing',
         'cash flows from financing',
+        'net cash provided by operating', 'net cash used in operating',
+        'net cash provided by investing', 'net cash used in investing',
+        'net cash provided by financing', 'net cash used in financing',
+        'net cash provided by (used in)',
     ],
 }
 
@@ -155,7 +159,8 @@ _STATEMENT_KEYWORDS = {
         'cash flows', 'operating activities', 'investing activities',
         'financing activities', 'cash and cash equivalents, beginning',
         'cash and cash equivalents, end', 'depreciation and amortization',
-        'capital expenditures',
+        'capital expenditures', 'net cash provided by', 'net cash used in',
+        'cash at beginning', 'cash at end of period',
     ],
     StatementType.SEGMENT_DATA: [
         'client computing', 'data center', 'foundry', 'segment revenue',
@@ -966,10 +971,26 @@ class EarningsRelease:
 
     @property
     def detected_scale(self) -> Scale:
-        """Detect the primary scale used in the document."""
+        """Detect the primary scale used in the document.
+
+        Uses parenthetical patterns like '(in millions)' that appear near
+        financial tables, rather than bare word matches in narrative text.
+        """
         if self._scale is None:
-            text = self.document.text()
-            self._scale = Scale.detect(text)
+            text = self.document.text().lower()
+            # Look for explicit parenthetical scale markers near tables
+            # Matches: "(in millions", "(dollars in millions", "(amounts in millions"
+            _parens_millions = r'\((?:dollars |amounts |figures )?in\s+millions'
+            _parens_thousands = r'\((?:dollars |amounts |figures )?in\s+thousands'
+            _parens_billions = r'\((?:dollars |amounts |figures )?in\s+billions'
+            if re.search(_parens_millions, text):
+                self._scale = Scale.MILLIONS
+            elif re.search(_parens_thousands, text):
+                self._scale = Scale.THOUSANDS
+            elif re.search(_parens_billions, text):
+                self._scale = Scale.BILLIONS
+            else:
+                self._scale = Scale.UNITS
         return self._scale
 
     @property
@@ -1072,7 +1093,7 @@ class EarningsRelease:
     def _extract_tables(self) -> List[FinancialTable]:
         """Extract and classify all tables from the document."""
         tables = []
-        doc_scale = Scale.UNITS  # Safe default — per-table detection is primary
+        doc_scale = self.detected_scale  # Use document-level scale as fallback
 
         for idx, table_node in enumerate(self.document.tables):
             df = _extract_clean_dataframe(table_node)
@@ -1283,9 +1304,9 @@ def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
             if pattern in header_text:
                 return stmt_type
 
-    # 2. Keyword matching on row labels (expanded range)
+    # 2. Keyword matching on row labels (scan all rows for classification)
     labels = []
-    for row in table_node.rows[:20]:
+    for row in table_node.rows[:40]:
         for cell in row.cells:
             content = (cell.content or "").strip()
             if content and len(content) > 3:
@@ -1293,7 +1314,7 @@ def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
                 break
 
     if hasattr(df, 'index'):
-        labels.extend([str(x).lower() for x in df.index[:20]])
+        labels.extend([str(x).lower() for x in df.index])
 
     labels_text = ' '.join(labels)
 
