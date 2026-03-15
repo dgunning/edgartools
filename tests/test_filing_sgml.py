@@ -473,22 +473,35 @@ def test_nosuchkey_error():
 
 def test_handle_sec_error_message_in_sgml_with_invalid_identity(monkeypatch):
     """Test that an invalid identity causes appropriate error handling"""
-    # Use monkeypatch to set invalid identity without affecting other tests
-    monkeypatch.setenv("EDGAR_IDENTITY", "harvey")  # Invalid identity - not email format
+    from unittest.mock import patch
+
+    # Simulate the HTML error page SEC returns for undeclared automated tools
+    sec_identity_error_html = (
+        '<html><head><title>EDGAR | Error</title></head><body>'
+        '<p>Your Request Originates from an Undeclared Automated Tool</p>'
+        '</body></html>'
+    )
     filing = Filing(company='Walmart Inc.', cik=104169, form='4', filing_date='2025-09-24', accession_no='0000104169-25-000155')
 
-    # This should fail when trying to parse the HTML error response
-    with pytest.raises(SECIdentityError):
-        filing.sgml()
+    # Mock the HTTP fetch to return the SEC identity error page
+    with patch('edgar.sgml.sgml_common.read_content_as_string', return_value=sec_identity_error_html):
+        with pytest.raises(SECIdentityError):
+            filing.sgml()
 
 
-def test_handle_sec_error_message_with_nonexistent_filing(monkeypatch):
-    """Test behavior when requesting a non-existent filing"""
-    # Use monkeypatch to set proper identity without affecting other tests
-    monkeypatch.setenv("EDGAR_IDENTITY", "Test User test@example.com")
+def test_handle_sec_error_message_with_nonexistent_filing():
+    """Test that a non-existent filing raises SECFilingNotFoundError"""
+    from unittest.mock import patch
+
+    # Simulate the XML error SEC returns for missing filings (AWS S3 NoSuchKey)
+    sec_not_found_xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<Error><Code>NoSuchKey</Code>'
+        '<Message>The specified key does not exist.</Message></Error>'
+    )
     filing = Filing(company='Walmart Inc.', cik=104169, form='4', filing_date='2025-09-24', accession_no='0000104169-25-999999')
 
-    # This should fail when SEC returns error content
-    # Could be either SECFilingNotFoundError or SECHTMLResponseError depending on SEC's response
-    with pytest.raises((SECFilingNotFoundError, SECHTMLResponseError)):
-        filing.sgml()
+    # Mock the HTTP fetch to return the SEC not-found error
+    with patch('edgar.sgml.sgml_common.read_content_as_string', return_value=sec_not_found_xml):
+        with pytest.raises(SECFilingNotFoundError):
+            filing.sgml()
