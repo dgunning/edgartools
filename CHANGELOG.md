@@ -7,11 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.23.3] - 2026-03-15
+
 ### Fixed
 
-- **ComprehensiveIncome Resolver Fallback for Historical Filings** — `comprehensive_income()` now returns a `Statement` for older filings (pre-2015) that embed Other Comprehensive Income (OCI) data within the equity rollforward statement rather than filing a separate Consolidated Statement of Comprehensive Income. Previously, these filings returned `None`, causing `AttributeError` when users called `.to_dataframe()`. The resolver now falls back to the equity statement when it contains CI concepts such as `ComprehensiveIncomeNetOfTax` or `OtherComprehensiveIncomeLossNetOfTax`. Affected companies include IBM, GE, Ford, and TSLA for annual 10-K filings from 2009-2013 ([#706](https://github.com/dgunning/edgartools/issues/706))
+- **Duplicate rows from XBRL concept renames** — When companies switch XBRL concepts between years (e.g. AAPL switching from `aapl:` company extension to `us-gaap` concepts), Comprehensive Income and other statements showed duplicate rows with complementary NaN values. A new `_merge_complementary_rows()` pass detects adjacent same-label rows with non-overlapping period values and merges them into a single row
 
-- **Legacy Roll-Forward Equity Concept Support** — The ComprehensiveIncome fallback now also finds equity statements that use the legacy `us-gaap_IncreaseDecreaseInStockholdersEquityRollForward` primary concept (GE 2010 pattern) in addition to the standard `us-gaap_StatementOfStockholdersEquityAbstract` concept ([#706](https://github.com/dgunning/edgartools/issues/706))
+- **EntityFacts duplicate labels from orphan concept renames** — Balance sheet from `get_facts()` showed duplicate rows (e.g. Accounts Receivable, Inventory, Accounts Payable) when a concept rename caused the same data to appear in both the main tree and the Additional Items section. Orphan facts whose label already exists in the main tree are now skipped
+
+- **EarningsRelease scale detection** — Scale was incorrectly detected as "billions" for companies like GOOG because `Scale.detect()` matched bare words like "billion" in narrative text. Now uses parenthetical patterns `(in millions)` / `(dollars in millions)` which appear near financial tables ([#693](https://github.com/dgunning/edgartools/issues/693))
+
+- **EarningsRelease cash flow misclassification** — GOOG EPS showed $0.00 because a 34-row cash flow table was misclassified as income statement due to "net income" and "accrued revenue share" keywords. Added strong cash flow keywords and expanded row scan range from 20 to 40 rows ([#700](https://github.com/dgunning/edgartools/issues/700))
+
+- **IdentityNotSetException swallowed by SGML fallback** — Missing EDGAR identity now raises a clear `IdentityNotSetException` instead of silently falling back to the homepage index ([#707](https://github.com/dgunning/edgartools/issues/707))
+
+- **ComprehensiveIncome Resolver Fallback for Historical Filings** — `comprehensive_income()` now returns a `Statement` for older filings (pre-2015) that embed OCI data within the equity rollforward statement. The resolver falls back to the equity statement when it contains CI concepts. Affected companies include IBM, GE, Ford, and TSLA for 10-K filings from 2009-2013 ([#706](https://github.com/dgunning/edgartools/issues/706))
+
+- **14 Jupyter notebooks broken by recent API changes** — Updated all notebooks to use current API patterns ([#708](https://github.com/dgunning/edgartools/issues/708))
+
+### Added
+
+- **Foreign filer support in `get_financials()`** — Falls back to 20-F (foreign private issuers) and 40-F (Canadian filers) when no 10-K exists. `get_quarterly_financials()` falls back to 6-K. Companies like AZN, TM, TD now return financials
+
+- **`clear_company_facts_cache()`** — New public function to free memory from previously loaded EntityFacts objects in long-running processes
+
+### Improved
+
+- **Company class memory footprint** — Company facts cache reduced to 1 entry (~25MB ceiling), `FinancialFact` uses `slots=True`, SIC/ticker resolution deferred to statement-build time to avoid unnecessary submissions downloads ([#705](https://github.com/dgunning/edgartools/issues/705))
+
+- **EarningsRelease exhibit selection** — `from_filing()` now tries multiple EX-99.* exhibits when the first one lacks an income statement, instead of always using EX-99.1
+
+- **`Company.facts` cached** — Changed from `@property` to `@cached_property` to prevent redundant `get_facts()` calls
 
 ## [5.23.0] - 2026-03-11
 
