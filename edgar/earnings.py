@@ -141,6 +141,9 @@ _STATEMENT_KEYWORDS = {
         'noninterest expense', 'loss from operations', 'loss before',
         'pretax income', 'pre-tax income', 'income before provision',
         'provision for credit', 'provision for income',
+        'net earnings', 'diluted eps', 'basic eps',
+        'eps (diluted)', 'eps (basic)', 'reported sales',
+        'cost of products sold', 'sales to customers',
     ],
     StatementType.BALANCE_SHEET: [
         'total assets', 'total liabilities', 'stockholders', 'current assets',
@@ -911,7 +914,10 @@ class EarningsRelease:
     @classmethod
     def from_filing(cls, filing: 'Filing') -> Optional['EarningsRelease']:
         """
-        Find and wrap the EX-99.1 earnings exhibit from a filing.
+        Find and wrap the best EX-99 earnings exhibit from a filing.
+
+        Tries EX-99.1 first. If it has no income statement, tries subsequent
+        EX-99.* exhibits before falling back to EX-99.1.
 
         Args:
             filing: An SEC Filing object (typically an 8-K)
@@ -919,10 +925,27 @@ class EarningsRelease:
         Returns:
             EarningsRelease if an EX-99 exhibit is found, None otherwise.
         """
-        exhibit = find_earnings_exhibit(filing.attachments)
-        if exhibit:
-            return cls(exhibit)
-        return None
+        exhibits = find_earnings_exhibits(filing.attachments)
+        if not exhibits:
+            return None
+
+        # Try first exhibit (common case — EX-99.1)
+        first = cls(exhibits[0])
+        if len(exhibits) == 1:
+            return first
+
+        # If the first exhibit has an income statement, use it
+        if first.income_statement is not None:
+            return first
+
+        # Try remaining exhibits for one with an income statement
+        for exhibit in exhibits[1:]:
+            candidate = cls(exhibit)
+            if candidate.income_statement is not None:
+                return candidate
+
+        # No exhibit had an income statement — return the first one anyway
+        return first
 
     @property
     def document(self):
@@ -1190,37 +1213,54 @@ def get_earnings_tables(filing: 'Filing') -> List[FinancialTable]:
     return []
 
 
-def find_earnings_exhibit(attachments: 'Attachments') -> Optional['Attachment']:
+def find_earnings_exhibits(attachments: 'Attachments') -> List['Attachment']:
     """
-    Find the EX-99.1 (or similar) earnings press release exhibit.
+    Find all EX-99.* HTML exhibits that may contain earnings data.
+
+    Returns exhibits in order of priority (EX-99.1 first, then EX-99.2, etc.).
 
     Args:
         attachments: Attachments collection from a filing
 
     Returns:
-        The earnings exhibit Attachment if found, None otherwise.
+        List of HTML Attachment objects matching EX-99.* pattern.
     """
-    exhibit_patterns = [
-        r'EX-99\.1',
-        r'EX-99\.01',
-        r'EX-99',
-    ]
+    candidates = []
+    for attachment in attachments:
+        desc = (attachment.description or "").upper()
+        doc = (attachment.document or "").lower()
 
-    for pattern in exhibit_patterns:
-        for attachment in attachments:
-            desc = (attachment.description or "").upper()
-            doc = (attachment.document or "").lower()
+        is_ex99 = (re.search(r'EX-99', desc, re.IGNORECASE)
+                   or re.search(r'ex-?99', doc, re.IGNORECASE))
+        if not is_ex99:
+            continue
+        if any(x in doc for x in ['.xsd', '.xml', '_lab.', '_pre.', '_def.', '_cal.']):
+            continue
+        if attachment.is_html():
+            candidates.append(attachment)
 
-            if re.search(pattern, desc, re.IGNORECASE):
-                if any(x in doc for x in ['.xsd', '.xml', '_lab.', '_pre.', '_def.', '_cal.']):
-                    continue
-                if attachment.is_html():
-                    return attachment
+    # Sort by exhibit number (EX-99.1 before EX-99.2, etc.)
+    def _exhibit_sort_key(att):
+        desc = (att.description or "")
+        m = re.search(r'EX-99\.?(\d+)', desc, re.IGNORECASE)
+        return int(m.group(1)) if m else 99
+    candidates.sort(key=_exhibit_sort_key)
 
-            if re.search(r'ex-?99', doc, re.IGNORECASE) and attachment.is_html():
-                return attachment
+    return candidates
 
-    return None
+
+def find_earnings_exhibit(attachments: 'Attachments') -> Optional['Attachment']:
+    """
+    Find the first EX-99 HTML exhibit from a filing's attachments.
+
+    Args:
+        attachments: Attachments collection from a filing
+
+    Returns:
+        The first EX-99 HTML Attachment if found, None otherwise.
+    """
+    candidates = find_earnings_exhibits(attachments)
+    return candidates[0] if candidates else None
 
 
 # =============================================================================
