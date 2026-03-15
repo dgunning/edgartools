@@ -63,6 +63,92 @@ def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
     return False
 
 
+def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Merge adjacent same-label rows whose period values are complementary.
+
+    When a company switches XBRL concepts across years (e.g. from a company-extension
+    to a us-gaap concept), the presentation tree contains both concepts with identical
+    labels but non-overlapping period values.  This merges those rows so users see a
+    single row with all period values filled in.
+
+    Only merges when:
+    1. Two rows share the same label (and same level/abstract status)
+    2. They appear within a short distance of each other (adjacent or nearly so)
+    3. Their period values don't conflict (one has a value where the other has None)
+    """
+    if not data or len(data) < 2:
+        return data
+
+    # Build a label→indices map for non-abstract data rows
+    from collections import defaultdict
+    label_indices = defaultdict(list)
+    for i, item in enumerate(data):
+        if item.get('is_abstract'):
+            continue
+        label = item.get('label', '')
+        if label:
+            label_indices[label].append(i)
+
+    # Identify merge pairs: same label, close together, complementary values
+    merged_into = {}  # index → target index (the row it was merged into)
+    for label, indices in label_indices.items():
+        if len(indices) < 2:
+            continue
+        # Check consecutive pairs in order
+        for k in range(len(indices) - 1):
+            a_idx, b_idx = indices[k], indices[k + 1]
+            if a_idx in merged_into or b_idx in merged_into:
+                continue
+            # Must be close together (allow 1 abstract row between them)
+            if b_idx - a_idx > 2:
+                continue
+            a_item, b_item = data[a_idx], data[b_idx]
+            # Must be same level and same dimension status
+            if a_item.get('level') != b_item.get('level'):
+                continue
+            if a_item.get('is_dimension') != b_item.get('is_dimension'):
+                continue
+            # Check value complementarity
+            a_vals = a_item.get('values', {})
+            b_vals = b_item.get('values', {})
+            all_keys = set(a_vals.keys()) | set(b_vals.keys())
+            if not all_keys:
+                continue
+            conflict = False
+            has_complement = False
+            for key in all_keys:
+                av = a_vals.get(key)
+                bv = b_vals.get(key)
+                if av is not None and bv is not None:
+                    conflict = True
+                    break
+                if (av is None) != (bv is None):
+                    has_complement = True
+            if conflict or not has_complement:
+                continue
+            # Merge b into a
+            for key in all_keys:
+                if a_vals.get(key) is None and b_vals.get(key) is not None:
+                    a_vals[key] = b_vals[key]
+            # Copy over any units/period_types from b that a is missing
+            for meta_key in ('units', 'period_types'):
+                a_meta = a_item.get(meta_key, {})
+                b_meta = b_item.get(meta_key, {})
+                if b_meta:
+                    if not a_meta:
+                        a_item[meta_key] = dict(b_meta)
+                    else:
+                        for key in b_meta:
+                            if key not in a_meta or a_meta[key] is None:
+                                a_meta[key] = b_meta[key]
+            merged_into[b_idx] = a_idx
+
+    if not merged_into:
+        return data
+
+    return [item for i, item in enumerate(data) if i not in merged_into]
+
+
 _FINANCIAL_WORDS = [
     # 14-letter words
     'POSTRETIREMENT',
@@ -1613,6 +1699,10 @@ class Statement:
         data = self.xbrl.get_statement(statement_id, period_filter=period_filter, view=view)
         if data is None:
             raise StatementValidationError(f"Failed to retrieve data for statement {statement_id}")
+        # Merge adjacent same-label rows with complementary NaN values (Issue #3n9t).
+        # This handles concept renames across periods where a company switches between
+        # us-gaap and company-extension concepts for the same line item.
+        data = _merge_complementary_rows(data)
         return data
 
     def text(self, raw_html: bool = False) -> Optional[str]:

@@ -1923,12 +1923,23 @@ class EnhancedStatementBuilder:
                 if item:
                     items.append(item)
 
+        # Collect all labels already in the tree to avoid duplicating them as orphans
+        existing_labels = set()
+        def _collect_labels(item_list):
+            for it in item_list:
+                if not it.is_abstract and it.label:
+                    existing_labels.add(it.label)
+                if it.children:
+                    _collect_labels(it.children)
+        _collect_labels(items)
+
         # Add orphan facts that have values but aren't in the virtual tree
         orphan_section = self._add_orphan_facts(
-            period_maps, 
-            virtual_tree.get('nodes', {}), 
-            periods, 
-            virtual_tree_key
+            period_maps,
+            virtual_tree.get('nodes', {}),
+            periods,
+            virtual_tree_key,
+            existing_labels=existing_labels
         )
         if orphan_section:
             items.append(orphan_section)
@@ -2308,7 +2319,8 @@ class EnhancedStatementBuilder:
                          period_maps: Dict[str, Dict[str, FinancialFact]],
                          virtual_tree_nodes: Dict[str, Any],
                          periods: List[str],
-                         statement_type: str) -> Optional[MultiPeriodItem]:
+                         statement_type: str,
+                         existing_labels: Optional[set] = None) -> Optional[MultiPeriodItem]:
         """Add valuable facts not in virtual tree as 'Additional Items' section."""
 
         # Find all concepts that have values but aren't in the virtual tree
@@ -2355,6 +2367,9 @@ class EnhancedStatementBuilder:
                     values[period] = None
 
             if has_values:
+                # Skip orphan if its label already exists in the main tree (concept rename duplicate)
+                if existing_labels and (label or concept) in existing_labels:
+                    continue
                 orphan_item = MultiPeriodItem(
                     concept=concept,
                     label=label or concept,

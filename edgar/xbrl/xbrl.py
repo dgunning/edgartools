@@ -2069,6 +2069,12 @@ class XBRL:
         if not statement_data:
             return None
 
+        # Merge adjacent same-label rows with complementary NaN values (Issue #3n9t)
+        from edgar.xbrl.statements import _merge_complementary_rows
+        statement_data = _merge_complementary_rows(statement_data)
+        if not statement_data:
+            return None
+
         # Get the statement title
         statement_info = statement_to_concepts.get(actual_statement_type)
         if statement_info:
