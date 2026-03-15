@@ -364,10 +364,11 @@ def test_company_financials():
     assert financials.statement_of_equity()
 
 
-def test_company_with_no_latest_10k_has_no_financials():
+def test_foreign_filer_gets_financials_via_annual_report():
+    """Foreign filers (20-F, 40-F) should get financials even without a 10-K."""
     company = Company('TD')
     financials = company.get_financials()
-    assert financials is None
+    assert financials is not None
 
 
 def test_iterate_company_filings():

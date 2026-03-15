@@ -610,14 +610,14 @@ class Company(Entity):
 
     def get_financials(self) -> Optional[Financials]:
         """
-        Get financial statements from this company's latest 10-K annual report.
+        Get financial statements from this company's latest annual report.
 
-        This is the recommended starting point for financial analysis. Returns a
-        Financials object with access to income statement, balance sheet, and
-        cash flow statement — typically covering 3 years of data.
+        Checks 10-K first, then falls back to 20-F (foreign private issuers)
+        and 40-F (Canadian filers). Returns a Financials object with access to
+        income statement, balance sheet, and cash flow statement.
 
         Returns:
-            Financials object, or None if no 10-K filing is available
+            Financials object, or None if no annual filing is available
 
         Example::
 
@@ -630,17 +630,23 @@ class Company(Entity):
         tenk_filing = self.latest_tenk
         if tenk_filing is not None:
             return tenk_filing.financials
+        # Fall back to 20-F (foreign private issuers) and 40-F (Canadian filers)
+        for form in ('20-F', '40-F'):
+            filing = self.get_filings(form=form, amendments=False, trigger_full_load=False).latest()
+            if filing is not None:
+                return Financials.extract(filing)
         return None
 
     def get_quarterly_financials(self) -> Optional[Financials]:
         """
-        Get financial statements from this company's latest 10-Q quarterly report.
+        Get financial statements from this company's latest quarterly report.
 
+        Checks 10-Q first, then falls back to 6-K (foreign private issuers).
         Returns a Financials object with the same interface as get_financials(),
         but with quarterly data instead of annual.
 
         Returns:
-            Financials object, or None if no 10-Q filing is available
+            Financials object, or None if no quarterly filing is available
 
         Example::
 
@@ -651,6 +657,10 @@ class Company(Entity):
         tenq_filing = self.latest_tenq
         if tenq_filing is not None:
             return tenq_filing.financials
+        # Fall back to 6-K (foreign private issuers)
+        filing = self.get_filings(form='6-K', amendments=False, trigger_full_load=False).latest()
+        if filing is not None:
+            return Financials.extract(filing)
         return None
 
     @property
