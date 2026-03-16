@@ -67,8 +67,8 @@ class TestCombinedItemsHeading:
         assert result is not None
         assert 'Business and Properties content here' in result
 
-    def test_item_2_resolves_combined_items_1_and_2(self):
-        """Item 2 lookup should also resolve via combined heading."""
+    def test_item_2_resolves_combined_items_2_and_3(self):
+        """Item 2 as first number in combined heading."""
         sections = {
             'part_i_items_2_and_3._properties_and_legal': 'Properties and Legal content',
         }
@@ -76,6 +76,16 @@ class TestCombinedItemsHeading:
         result = tenk['Item 2']
         assert result is not None
         assert 'Properties and Legal content' in result
+
+    def test_item_2_resolves_combined_items_1_and_2(self):
+        """Item 2 as second number in combined heading (VNOM pattern)."""
+        sections = {
+            'part_i_items_1_and_2._business_and_properties': 'Business and Properties content here',
+        }
+        tenk = self._make_tenk_with_sections(sections)
+        result = tenk['Item 2']
+        assert result is not None
+        assert 'Business and Properties content here' in result
 
     def test_friendly_name_business_resolves_combined(self):
         """Friendly name 'business' should also resolve combined headings."""
