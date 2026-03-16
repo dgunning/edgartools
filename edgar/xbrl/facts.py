@@ -1195,11 +1195,12 @@ class FactsView:
                     fact_dict['statement_type'] = statement_type_found
                     fact_dict['statement_role'] = statement_role_found
 
-            # Add weight from calculation tree (Issue #463)
+            # Add weight from calculation tree (Issue #463, GH-712)
             # Weight indicates calculation role (1.0 = add, -1.0 = subtract)
             # Note: Weight is role-specific, use primary statement role when available
             statement_type = fact_dict.get('statement_type')
-            fact_dict['weight'] = self._get_primary_weight(element_id, statement_type)
+            statement_role = fact_dict.get('statement_role')
+            fact_dict['weight'] = self._get_primary_weight(element_id, statement_type, statement_role)
 
             enriched_facts.append(fact_dict)
 
@@ -1651,16 +1652,22 @@ class FactsView:
 
         return result
 
-    def _get_primary_weight(self, element_id: str, statement_type: Optional[str]) -> Optional[float]:
+    def _get_primary_weight(self, element_id: str, statement_type: Optional[str],
+                            statement_role: Optional[str] = None) -> Optional[float]:
         """
         Get calculation weight for element from primary statement role.
 
         Weight is role-specific (same concept can have different weights in different statements).
         Returns weight from primary statement role if available.
 
+        GH-712: Use exact role URI match first (from presentation tree scan), then fall back
+        to keyword matching. The old keyword-only approach missed income statements named
+        "Statement of Operations" (no "income" keyword), causing wrong weights.
+
         Args:
-            element_id: Normalized element ID (e.g., 'us_gaap_Revenue')
+            element_id: Normalized element ID (e.g., 'us-gaap_Revenue')
             statement_type: Statement type ('IncomeStatement', 'BalanceSheet', etc.)
+            statement_role: Exact role URI from presentation tree (preferred for matching)
 
         Returns:
             Weight value (typically 1.0 or -1.0) or None if not in calculations
@@ -1668,12 +1675,20 @@ class FactsView:
         if not hasattr(self.xbrl, 'calculation_trees'):
             return None
 
-        # Try to find weight in calculation trees
+        # GH-712: First try exact role URI match (most reliable)
+        if statement_role and statement_role in self.xbrl.calculation_trees:
+            calc_tree = self.xbrl.calculation_trees[statement_role]
+            node = calc_tree.all_nodes.get(element_id)
+            if node:
+                return node.weight
+
+        # Fallback: keyword matching on role URI
         for role_uri, calc_tree in self.xbrl.calculation_trees.items():
-            # Prefer calculation tree matching the statement type
             if statement_type:
                 role_lower = role_uri.lower()
-                if statement_type == "IncomeStatement" and "income" in role_lower:
+                if statement_type == "IncomeStatement" and (
+                    "income" in role_lower or "operation" in role_lower
+                ):
                     node = calc_tree.all_nodes.get(element_id)
                     if node:
                         return node.weight

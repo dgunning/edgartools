@@ -995,7 +995,8 @@ class XBRL:
         # Generate line items recursively
         line_items = []
         self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
-                                  should_display_dimensions, valid_dimensional_members, view)
+                                  should_display_dimensions, valid_dimensional_members, view,
+                                  statement_role=found_role)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
@@ -1017,7 +1018,8 @@ class XBRL:
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
                              path: Optional[List[str]] = None, should_display_dimensions: bool = False,
                              valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
-                             view: Optional['StatementView'] = None) -> None:
+                             view: Optional['StatementView'] = None,
+                             statement_role: Optional[str] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -1034,6 +1036,7 @@ class XBRL:
                   STANDARD: Strict member filtering per presentation linkbase
                   DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
                   SUMMARY: No dimensional facts shown
+            statement_role: Role URI of the statement being generated (GH-712)
         """
         from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
@@ -1072,15 +1075,25 @@ class XBRL:
                 from edgar.xbrl.parsers.concepts import get_balance_type
                 balance = get_balance_type(element_id)
 
-        # Get weight and calculation parent from calculation trees (Issue #463, #514)
+        # Get weight and calculation parent from calculation trees (Issue #463, #514, GH-712)
         calculation_parent = None
         if hasattr(self, 'calculation_trees') and self.calculation_trees:
-            for calc_tree in self.calculation_trees.values():
+            # GH-712: Prefer calc tree matching this statement's role URI
+            if statement_role and statement_role in self.calculation_trees:
+                calc_tree = self.calculation_trees[statement_role]
                 if element_id_normalized in calc_tree.all_nodes:
                     calc_node = calc_tree.all_nodes[element_id_normalized]
                     weight = calc_node.weight
-                    calculation_parent = calc_node.parent  # Metric parent (Issue #514 refinement)
-                    break  # Use first weight/parent found
+                    calculation_parent = calc_node.parent
+
+            # Fallback: iterate all calc trees if not found in statement's own tree
+            if weight is None:
+                for calc_tree in self.calculation_trees.values():
+                    if element_id_normalized in calc_tree.all_nodes:
+                        calc_node = calc_tree.all_nodes[element_id_normalized]
+                        weight = calc_node.weight
+                        calculation_parent = calc_node.parent
+                        break
 
         # Calculate preferred_sign from preferred_label (for Issue #463)
         # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
@@ -1495,7 +1508,8 @@ class XBRL:
         # Process children
         for child_id in node.children:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
-                                      should_display_dimensions, valid_dimensional_members, view)
+                                      should_display_dimensions, valid_dimensional_members, view,
+                                      statement_role=statement_role)
 
     def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
         """Adjust level of dimensional items based on definition linkbase member hierarchy.
