@@ -62,10 +62,50 @@ def reset_http_client_state():
     httpclient.HTTP_MGR.httpx_params["verify"] = True
 
 
+@pytest.fixture
+def reset_local_storage_state():
+    """
+    Reset EDGAR local storage environment variables before and after each test.
+
+    This guards against test ordering bugs where a test calls use_local_storage()
+    directly (setting EDGAR_USE_LOCAL_DATA=1) without restoring the variable,
+    causing subsequent network tests to attempt local file reads instead of SEC
+    API calls, which returns None for get_company_facts() and breaks any test
+    that calls get_facts() without a None check.
+
+    Root cause (test_issue_381_pr_493.py): use_local_storage() sets both
+    EDGAR_LOCAL_DATA_DIR and EDGAR_USE_LOCAL_DATA, but the test's finally block
+    only restored EDGAR_LOCAL_DATA_DIR, leaving EDGAR_USE_LOCAL_DATA=1 globally.
+    """
+    import os
+    original_use_local = os.environ.get('EDGAR_USE_LOCAL_DATA')
+    original_data_dir = os.environ.get('EDGAR_LOCAL_DATA_DIR')
+
+    # Ensure we start each network test with local storage disabled
+    if 'EDGAR_USE_LOCAL_DATA' in os.environ:
+        del os.environ['EDGAR_USE_LOCAL_DATA']
+
+    yield
+
+    # Restore original state after test
+    if original_use_local is not None:
+        os.environ['EDGAR_USE_LOCAL_DATA'] = original_use_local
+    elif 'EDGAR_USE_LOCAL_DATA' in os.environ:
+        del os.environ['EDGAR_USE_LOCAL_DATA']
+
+    if original_data_dir is not None:
+        os.environ['EDGAR_LOCAL_DATA_DIR'] = original_data_dir
+    elif 'EDGAR_LOCAL_DATA_DIR' in os.environ:
+        del os.environ['EDGAR_LOCAL_DATA_DIR']
+
+
 def pytest_runtest_setup(item):
-    """Auto-apply reset_http_client_state fixture to network tests."""
+    """Auto-apply isolation fixtures to network tests."""
     if "network" in {m.name for m in item.iter_markers()}:
         item.fixturenames.append("reset_http_client_state")
+        item.fixturenames.append("reset_local_storage_state")
+
+
 # Base paths
 FIXTURE_DIR = Path("tests/fixtures/xbrl")
 DATA_DIR = Path("data/xbrl/datafiles")

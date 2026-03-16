@@ -32,6 +32,28 @@ for _group in _EQUIVALENT_STANDARD_CONCEPTS:
     for _sc in _group:
         _EQUIV_MAP[_sc] = _canonical
 
+# Known concept renames: bare concept name pairs where a company switched from
+# one XBRL concept to another across filing years to represent the same line item.
+# These are NOT taxonomically equivalent — they may have different meanings in the
+# XBRL taxonomy, but a specific company used them interchangeably.
+#
+# The stitcher merges these in a separate pass after standard-concept merging.
+# Value agreement on overlapping periods is still enforced as a safety check.
+#
+# Each entry: (old_bare_name, new_bare_name) with a comment noting company + year.
+_KNOWN_CONCEPT_RENAMES = [
+    # PG switched pre-tax income concept at FY2024 (Issue #711)
+    ('IncomeLossFromContinuingOperationsBeforeIncomeTaxes',
+     'IncomeLossIncludingPortionAttributableToNoncontrollingInterest'),
+]
+
+# Build fast lookup: bare_concept_name -> canonical (first in pair)
+_RENAME_MAP: dict[str, str] = {}
+for _pair in _KNOWN_CONCEPT_RENAMES:
+    _canonical = _pair[0]
+    for _name in _pair:
+        _RENAME_MAP[_name] = _canonical
+
 
 class StatementStitcher:
     """
@@ -144,6 +166,10 @@ class StatementStitcher:
 
         # Merge duplicate rows that map to the same standard_concept
         self._merge_duplicate_standard_concepts()
+
+        # Merge known concept renames (Issue #711): handles cases where a company
+        # switched to a completely different concept name across filing years.
+        self._merge_known_concept_renames()
 
         # Format the stitched data
         return self._format_output_with_ordering(statements)
@@ -622,6 +648,45 @@ class StatementStitcher:
                         self._merge_into(a_key, b_key)
                         merged = True
                         break
+
+    def _merge_known_concept_renames(self):
+        """Merge concepts from known cross-filing renames.
+
+        Handles the case where a company switches to a completely different XBRL
+        concept name across filing years — not a variant (one containing the
+        other) but a genuine rename.  For example, PG renamed their pre-tax
+        income concept at the FY2024 boundary (Issue #711).
+
+        Unlike _merge_duplicate_standard_concepts which groups by standard_concept,
+        this method uses the _KNOWN_CONCEPT_RENAMES pairs.  Value agreement on
+        overlapping periods is still enforced.
+        """
+        if not _RENAME_MAP:
+            return
+
+        # Group concept keys by their canonical equivalent bare name
+        canonical_to_keys: dict[str, list[str]] = defaultdict(list)
+        for concept_key in list(self.data.keys()):
+            bare = self._bare_concept_name(concept_key)
+            canonical = _RENAME_MAP.get(bare)
+            if canonical:
+                canonical_to_keys[canonical].append(concept_key)
+
+        for canonical, keys in canonical_to_keys.items():
+            if len(keys) <= 1:
+                continue
+            # Sort so the concept with the most data is primary
+            keys.sort(key=lambda k: (-len(self.data.get(k, {})), k))
+            primary = keys[0]
+            for secondary in keys[1:]:
+                if secondary not in self.data:
+                    continue
+                a_data = self.data.get(primary, {})
+                b_data = self.data.get(secondary, {})
+                overlap = set(a_data.keys()) & set(b_data.keys())
+                if overlap and not self._overlap_values_agree(a_data, b_data, overlap):
+                    continue
+                self._merge_into(primary, secondary)
 
     def _format_output_with_ordering(self, statements: List[Dict[str, Any]]) -> Dict[str, Any]:
         """

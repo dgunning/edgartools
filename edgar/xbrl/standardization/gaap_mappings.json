@@ -4005,6 +4005,22 @@
     "first_year": 2015,
     "last_year": 2025
   },
+  "IncomeLossFromContinuingOperationsBeforeIncomeTaxes": {
+    "standard_tags": [
+      "PretaxIncomeLoss"
+    ],
+    "display_name": "Income Before Tax",
+    "statement": "IncomeStatement",
+    "section": "Income Before Tax",
+    "is_total": true,
+    "confidence": 0.9,
+    "company_count": 1,
+    "occurrence_rate": 0.01,
+    "temporal_consistency": 1.0,
+    "years_present": 5,
+    "first_year": 2019,
+    "last_year": 2023
+  },
   "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest": {
     "standard_tags": [
       "PretaxIncomeLoss"

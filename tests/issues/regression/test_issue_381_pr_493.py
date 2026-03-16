@@ -47,8 +47,10 @@ class TestDownloadBulkDataRespectsLocalStorage:
         custom_path = tmp_path / "edgar_storage"
         custom_path.mkdir()
 
-        # Save original env var
-        original_env = os.environ.get('EDGAR_LOCAL_DATA_DIR')
+        # Save original env vars (use_local_storage sets BOTH EDGAR_LOCAL_DATA_DIR and
+        # EDGAR_USE_LOCAL_DATA; both must be restored to avoid poisoning subsequent tests)
+        original_data_dir = os.environ.get('EDGAR_LOCAL_DATA_DIR')
+        original_use_local = os.environ.get('EDGAR_USE_LOCAL_DATA')
 
         try:
             use_local_storage(custom_path)
@@ -62,11 +64,18 @@ class TestDownloadBulkDataRespectsLocalStorage:
             assert result == custom_path, \
                 f"get_edgar_data_directory returned {result}, expected {custom_path}"
         finally:
-            # Restore original env var
-            if original_env is not None:
-                os.environ['EDGAR_LOCAL_DATA_DIR'] = original_env
+            # Restore EDGAR_LOCAL_DATA_DIR
+            if original_data_dir is not None:
+                os.environ['EDGAR_LOCAL_DATA_DIR'] = original_data_dir
             elif 'EDGAR_LOCAL_DATA_DIR' in os.environ:
                 del os.environ['EDGAR_LOCAL_DATA_DIR']
+            # Restore EDGAR_USE_LOCAL_DATA (use_local_storage sets this to "1";
+            # leaving it set causes get_company_facts() to attempt local file reads
+            # in later tests that expect network access, returning None and breaking them)
+            if original_use_local is not None:
+                os.environ['EDGAR_USE_LOCAL_DATA'] = original_use_local
+            elif 'EDGAR_USE_LOCAL_DATA' in os.environ:
+                del os.environ['EDGAR_USE_LOCAL_DATA']
 
     @pytest.mark.asyncio
     async def test_download_bulk_data_uses_custom_directory(self, tmp_path):
@@ -81,8 +90,9 @@ class TestDownloadBulkDataRespectsLocalStorage:
         custom_path = tmp_path / "bulk_data"
         custom_path.mkdir()
 
-        # Save original env var
-        original_env = os.environ.get('EDGAR_LOCAL_DATA_DIR')
+        # Save original env vars (use_local_storage sets BOTH; both must be restored)
+        original_data_dir = os.environ.get('EDGAR_LOCAL_DATA_DIR')
+        original_use_local = os.environ.get('EDGAR_USE_LOCAL_DATA')
 
         try:
             # Set custom storage path
@@ -110,11 +120,18 @@ class TestDownloadBulkDataRespectsLocalStorage:
                         assert str(custom_path) in str(called_path), \
                             f"download_bulk_data used path {called_path}, expected path under {custom_path}"
         finally:
-            # Restore original env var
-            if original_env is not None:
-                os.environ['EDGAR_LOCAL_DATA_DIR'] = original_env
+            # Restore EDGAR_LOCAL_DATA_DIR
+            if original_data_dir is not None:
+                os.environ['EDGAR_LOCAL_DATA_DIR'] = original_data_dir
             elif 'EDGAR_LOCAL_DATA_DIR' in os.environ:
                 del os.environ['EDGAR_LOCAL_DATA_DIR']
+            # Restore EDGAR_USE_LOCAL_DATA (use_local_storage sets this to "1";
+            # leaving it set causes get_company_facts() to attempt local file reads
+            # in later tests that expect network access, returning None and breaking them)
+            if original_use_local is not None:
+                os.environ['EDGAR_USE_LOCAL_DATA'] = original_use_local
+            elif 'EDGAR_USE_LOCAL_DATA' in os.environ:
+                del os.environ['EDGAR_USE_LOCAL_DATA']
 
     def test_data_directory_not_hardcoded_at_import(self, tmp_path):
         """
