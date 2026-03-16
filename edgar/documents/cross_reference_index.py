@@ -10,6 +10,7 @@ This module provides functionality to:
 3. Navigate to page ranges to extract content
 """
 
+import html as html_lib
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -49,6 +50,9 @@ class PageRange:
             return []
 
         ranges = []
+        # Normalize en-dash HTML entities and Unicode en-dashes to hyphens
+        page_str = page_str.replace('&#8211;', '-').replace('\u2013', '-')
+
         # Split by comma to handle multiple ranges
         parts = [p.strip() for p in page_str.split(',')]
 
@@ -126,18 +130,54 @@ class CrossReferenceIndex:
         Returns:
             True if Cross Reference Index is present
         """
-        # Look for the specific heading
-        if 'Form 10-K Cross Reference Index' not in self.html:
+        # Look for the specific heading (case-insensitive, allow hyphen in "Cross-Reference")
+        if not re.search(r'FORM\s+10-K\s+CROSS[- ]?REFERENCE\s+INDEX', self.html, re.IGNORECASE):
             return False
 
         # Look for table with Item/page mapping pattern
-        # Search for a row with "Item 1A", "Risk Factors", and page numbers
+        # Search for a row with "Item 1A" or bare "1A.", "Risk Factors", and page numbers
         pattern = (
-            r'<td[^>]*>.*?Item\s+1A\..*?</td>'
+            r'<td[^>]*>.*?(?:Item\s+)?1A\..*?</td>'
             r'.*?<td[^>]*>.*?Risk\s+Factors.*?</td>'
-            r'.*?<td[^>]*>.*?\d+(?:-\d+)?.*?</td>'
+            r'.*?<td[^>]*>.*?\d+(?:(?:&#8211;|-)\d+)?.*?</td>'
         )
         return bool(re.search(pattern, self.html, re.DOTALL | re.IGNORECASE))
+
+    def _find_index_table(self) -> Optional[str]:
+        """Find the cross-reference index table HTML.
+
+        The heading may appear multiple times (e.g., TOC link + actual table).
+        We search from the last occurrence and handle two layouts:
+        1. Heading inside a <table> (GE style) — search backwards for <table
+        2. Heading before a <table> (Citigroup style) — search forwards for <table
+        """
+        # Find all occurrences and use the last one (actual table, not TOC link)
+        matches = list(re.finditer(
+            r'FORM\s+10-K\s+CROSS[- ]?REFERENCE\s+INDEX', self.html, re.IGNORECASE
+        ))
+        if not matches:
+            return None
+
+        heading_pos = matches[-1].start()
+
+        # Check if heading is inside a table (search backwards for <table)
+        preceding = self.html[max(0, heading_pos - 5000):heading_pos]
+        last_table_open = preceding.rfind('<table')
+        last_table_close = preceding.rfind('</table>')
+
+        if last_table_open != -1 and last_table_open > last_table_close:
+            # Heading is inside an open table — use that table
+            table_start = max(0, heading_pos - 5000) + last_table_open
+        else:
+            # Heading is before the table — search forward
+            table_start = self.html.find('<table', heading_pos)
+            if table_start == -1:
+                return None
+
+        table_end = self.html.find('</table>', table_start)
+        if table_end == -1:
+            return None
+        return self.html[table_start:table_end + 8]
 
     def parse(self) -> Dict[str, IndexEntry]:
         """
@@ -156,50 +196,66 @@ class CrossReferenceIndex:
 
         self._entries = {}
 
-        # The Cross Reference Index table is typically near the end of the document.
-        # Search in the last 1MB of HTML (table is usually in the last 10-20% of document)
-        search_start = max(0, len(self.html) - 1000000)
-        search_region = self.html[search_start:]
+        table_html = self._find_index_table()
+        if not table_html:
+            return self._entries
 
-        # Pattern to match table rows with Item number, title, and pages
-        # Example row structure:
-        # <td colspan="3"><span>Item 1A.</span></td>
-        # <td colspan="3" style="padding:0 1pt"/>  <!-- Empty -->
-        # <td colspan="3"><span>Risk Factors</span></td>
-        # <td colspan="3" style="padding:0 1pt"/>  <!-- Empty -->
-        # <td colspan="3"><span>26-33</span></td>
-        row_pattern = (
-            r'<tr[^>]*>'
-            r'.*?<td[^>]*>.*?<span[^>]*>Item\s+(\d+[A-Z]?)\.?</span>.*?</td>'  # Item number
-            r'.*?<td[^>]*(?:/?>|>.*?</td>)'  # Empty spacer or separator
-            r'.*?<td[^>]*>.*?<span[^>]*>(.*?)</span>.*?</td>'  # Item title
-            r'.*?<td[^>]*(?:/?>|>.*?</td>)'  # Empty spacer or separator
-            r'.*?<td[^>]*>.*?<span[^>]*>(.*?)</span>.*?</td>'  # Page numbers
-            r'.*?</tr>'
-        )
-
+        # Extract rows and parse cell text from each row
         current_part = None
+        last_entry = None
+        item_number_pattern = re.compile(r'^(?:Item\s+)?(\d+[A-Z]?)\.?$', re.IGNORECASE)
+        # Pattern for continuation rows: just page numbers like "129, 160-164,"
+        page_continuation_pattern = re.compile(r'^[\d,\s&#;.\-\u2013]+$')
 
-        # Also look for Part headers
-        part_pattern = r'<td[^>]*>.*?<span[^>]*>Part\s+(I+|IV).*?</span>.*?</td>'
+        for row_match in re.finditer(r'<tr[^>]*>(.*?)</tr>', table_html, re.DOTALL):
+            row_html = row_match.group(1)
+            # Extract non-empty text from each <td>
+            cells = re.findall(r'<td[^>]*>(.*?)</td>', row_html, re.DOTALL)
+            cell_texts = []
+            for cell in cells:
+                text = re.sub(r'<[^>]+>', '', cell).strip()
+                if text and text != '&#160;' and text != '\xa0':
+                    cell_texts.append(text)
 
-        # Find all matches
-        for match in re.finditer(row_pattern, search_region, re.DOTALL | re.IGNORECASE):
-            item_num = match.group(1).strip()
-            item_title = match.group(2).strip()
-            page_str = match.group(3).strip()
+            if not cell_texts:
+                continue
 
-            # Parse page numbers
-            pages = PageRange.parse(page_str)
+            # Check for Part headers
+            part_match = re.match(r'^Part\s+(I+|IV)', cell_texts[0], re.IGNORECASE)
+            if part_match:
+                current_part = f"Part {part_match.group(1).upper()}"
+                continue
 
-            entry = IndexEntry(
-                item_number=item_num,
-                item_title=item_title,
-                pages=pages,
-                part=current_part
-            )
+            # Check for item row: first cell should be an item number
+            item_match = item_number_pattern.match(cell_texts[0])
+            if item_match:
+                item_num = item_match.group(1).upper()
+                item_title = cell_texts[1] if len(cell_texts) > 1 else ''
+                page_str = cell_texts[2] if len(cell_texts) > 2 else ''
 
-            self._entries[item_num] = entry
+                # Decode HTML entities in title
+                item_title = html_lib.unescape(item_title)
+
+                pages = PageRange.parse(page_str)
+
+                entry = IndexEntry(
+                    item_number=item_num,
+                    item_title=item_title,
+                    pages=pages,
+                    part=current_part
+                )
+
+                self._entries[item_num] = entry
+                last_entry = entry
+                continue
+
+            # Continuation row: page numbers that belong to the previous item
+            # (e.g., "129, 160-164," or "299-300")
+            combined = ' '.join(cell_texts)
+            if last_entry and page_continuation_pattern.match(combined):
+                extra_pages = PageRange.parse(combined)
+                if extra_pages:
+                    last_entry.pages.extend(extra_pages)
 
         return self._entries
 
