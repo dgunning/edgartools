@@ -161,9 +161,8 @@ def tool(
                 "properties": params,
                 "required": required or []
             },
+            "output_schema": output_schema or TOOL_OUTPUT_SCHEMA,
         }
-        if output_schema is not None:
-            entry["output_schema"] = output_schema
         TOOLS[name] = entry
 
         @wraps(func)
