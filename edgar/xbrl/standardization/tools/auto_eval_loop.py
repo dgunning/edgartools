@@ -576,7 +576,8 @@ def _propose_for_unmapped(
                 target_companies=gap.ticker,
             )
 
-    return None
+    # Heuristics exhausted — search the actual filing with discovery tools
+    return _propose_via_discovery(gap, known_concepts, tried_concepts)
 
 
 def _propose_for_validation_failure(
@@ -625,6 +626,139 @@ def _propose_for_high_variance(
         target_metric=gap.metric,
         target_companies=gap.ticker,
     )
+
+
+def _propose_via_discovery(
+    gap: MetricGap,
+    known_concepts: List[str],
+    tried_concepts: set,
+    min_periods: int = 2,
+) -> Optional[ConfigChange]:
+    """
+    Search the actual XBRL filing to discover the right concept.
+
+    This is the escalation path when heuristic name variations fail.
+    Calls discover_concepts() to search calc trees and facts, then
+    verifies the candidate across MULTIPLE fiscal periods to avoid
+    false positives from coincidental single-period value matches.
+
+    Args:
+        gap: The metric gap to resolve.
+        known_concepts: Concepts already in config.
+        tried_concepts: Concepts already attempted (from graveyard).
+        min_periods: Minimum periods that must match to accept (default 2).
+    """
+    from edgar.xbrl.standardization.tools.discover_concepts import discover_concepts, strip_prefix
+    from edgar.xbrl.standardization.tools.verify_mapping import verify_mapping
+
+    from edgar import Company, set_identity, use_local_storage
+    set_identity("Dev Gunning developer-gunning@gmail.com")
+    use_local_storage(True)
+
+    try:
+        company = Company(gap.ticker)
+        filings_10k = list(company.get_filings(form='10-K', amendments=False))[:3]
+        if not filings_10k:
+            return None
+        xbrl = filings_10k[0].xbrl()
+    except Exception as e:
+        logger.warning(f"Discovery failed for {gap.ticker}: could not load filing: {e}")
+        return None
+
+    # Get facts for broader search
+    facts_df = None
+    try:
+        facts = company.get_facts()
+        facts_df = facts.to_dataframe()
+    except Exception:
+        pass  # Facts search is optional — calc tree search alone can work
+
+    # Discover candidates from the most recent filing
+    candidates = discover_concepts(
+        metric_name=gap.metric,
+        xbrl=xbrl,
+        facts_df=facts_df,
+        ticker=gap.ticker,
+        known_concepts=known_concepts,
+        top_k=5,
+    )
+
+    if not candidates:
+        logger.info(f"Discovery found no candidates for {gap.ticker}:{gap.metric}")
+        return None
+
+    # Load XBRL for older filings (for multi-period verification)
+    older_xbrls = []
+    for filing in filings_10k[1:]:
+        try:
+            older_xbrls.append(filing.xbrl())
+        except Exception:
+            pass
+
+    # Try each candidate — verify across multiple periods
+    for candidate in candidates:
+        concept = candidate.concept
+        clean_concept = strip_prefix(concept)
+
+        if clean_concept in known_concepts or clean_concept in tried_concepts:
+            continue
+
+        # Verify across all available periods
+        periods_matched = 0
+        periods_checked = 0
+        variances = []
+
+        all_xbrls = [xbrl] + older_xbrls
+        for period_xbrl in all_xbrls:
+            verification = verify_mapping(
+                metric=gap.metric,
+                concept=concept,
+                xbrl=period_xbrl,
+                ticker=gap.ticker,
+                tolerance_pct=15.0,
+            )
+            if verification.xbrl_value is not None and verification.reference_value is not None:
+                periods_checked += 1
+                if verification.is_valid:
+                    periods_matched += 1
+                    variances.append(verification.variance_pct)
+
+        if periods_checked == 0:
+            logger.debug(f"Discovery candidate {clean_concept}: no data in any period")
+            continue
+
+        if periods_matched < min(min_periods, periods_checked):
+            logger.debug(
+                f"Discovery candidate {clean_concept}: only {periods_matched}/{periods_checked} "
+                f"periods matched (need {min_periods})"
+            )
+            continue
+
+        avg_variance = sum(variances) / len(variances) if variances else 0
+
+        logger.info(
+            f"Discovery found multi-period verified concept for {gap.ticker}:{gap.metric}: "
+            f"{clean_concept} ({periods_matched}/{periods_checked} periods, "
+            f"avg variance={avg_variance:.1f}%)"
+        )
+        return ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_CONCEPT,
+            yaml_path=f"metrics.{gap.metric}.known_concepts",
+            new_value=clean_concept,
+            rationale=(
+                f"Discovered via {candidate.source} search, verified across "
+                f"{periods_matched}/{periods_checked} fiscal periods "
+                f"(avg variance={avg_variance:.1f}%, "
+                f"confidence={candidate.confidence:.2f}). "
+                f"{candidate.reasoning}"
+            ),
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
+    logger.info(f"Discovery found candidates but none passed multi-period verification for {gap.ticker}:{gap.metric}")
+    return None
 
 
 def _generate_concept_variations(standard_tag: str, metric_name: str) -> List[str]:
