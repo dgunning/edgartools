@@ -279,12 +279,14 @@ def _is_key_terms(table: 'TableNode') -> bool:
                            'selling agent', 'face amount', 'original offering price']
     core_matches = sum(1 for kw in core_keywords if kw in text)
     supp_matches = sum(1 for kw in supporting_keywords if kw in text)
-    # Use non-empty column count — layout tables may pad with many empty cells
-    ncols = max(
-        (sum(1 for c in r.cells if c.text().strip()) for r in table.rows),
-        default=0,
+    # Use median non-empty column count — a few pricing rows at the bottom
+    # shouldn't disqualify a 20-row key-value table, and layout tables may
+    # pad with many empty cells.
+    ne_counts = sorted(
+        sum(1 for c in r.cells if c.text().strip()) for r in table.rows
     )
-    if ncols <= 3 and (core_matches >= 2 or (core_matches >= 1 and supp_matches >= 3)):
+    ncols_median = ne_counts[len(ne_counts) // 2] if ne_counts else 0
+    if ncols_median <= 3 and (core_matches >= 2 or (core_matches >= 1 and supp_matches >= 3)):
         return True
     return False
 
@@ -371,6 +373,10 @@ def classify_table(table: 'TableNode') -> str:
     'selling_stockholders', 'key_terms', 'dilution', 'capitalization',
     'underwriting_syndicate', 'expenses', 'other'.
     """
+    # key_terms checked early — bulleted or wide-layout key-value tables
+    # would otherwise be swallowed by _is_layout_table
+    if _is_key_terms(table):
+        return 'key_terms'
     if _is_layout_table(table):
         return 'layout'
     if _is_toc_table(table):
@@ -379,8 +385,6 @@ def classify_table(table: 'TableNode') -> str:
         return 'pricing_table'
     if _is_selling_stockholders(table):
         return 'selling_stockholders'
-    if _is_key_terms(table):
-        return 'key_terms'
     if _is_dilution(table):
         return 'dilution'
     if _is_capitalization(table):
@@ -892,8 +896,13 @@ def extract_structured_note_terms(table: 'TableNode'):
     fields: dict = {}
     additional: dict = {}
 
+    _BULLETS = frozenset(('·', '•', '●', '-', '—', '■', '▪'))
+
     for row in table.rows:
         cells = [c.text().strip() for c in row.cells if c.text().strip()]
+        # Skip leading bullet cells (e.g. ['•', 'Issue Date:', '$15M'])
+        while cells and cells[0] in _BULLETS:
+            cells = cells[1:]
         if len(cells) < 2:
             continue
 
