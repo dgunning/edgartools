@@ -2,6 +2,7 @@
 Table-related nodes for the document tree.
 """
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
@@ -14,6 +15,19 @@ from edgar.documents.nodes import Node
 from edgar.documents.table_utils import process_table_matrix
 from edgar.documents.types import NodeType, TableType
 from edgar.richtools import rich_to_text
+
+# Pre-compiled regex for stripping ISO currency prefixes (US$, C$, A$, HK$, etc.)
+_CURRENCY_PREFIX_RE = re.compile(r'^[A-Z]{0,3}\$')
+
+# Numeric placeholder symbols
+_NUMERIC_PLACEHOLDERS = frozenset(['—', '–', '-', '--', 'N/A', 'n/a', 'NM', 'nm'])
+
+
+def _clean_numeric_text(text: str) -> str:
+    """Strip currency prefixes and formatting from a numeric cell value."""
+    clean = _CURRENCY_PREFIX_RE.sub('', text)
+    clean = clean.replace(',', '').replace('$', '').replace('%', '')  # trailing $ or extra $
+    return clean.replace('(', '-').replace(')', '')
 
 
 @dataclass
@@ -55,17 +69,10 @@ class Cell:
         text = self.text().strip()
         if not text:
             return False
-
-        # Em dash and similar symbols are numeric placeholders (like null/zero)
-        if text in ['—', '–', '-', '--', 'N/A', 'n/a', 'NM', 'nm']:
+        if text in _NUMERIC_PLACEHOLDERS:
             return True
-
-        # Remove common formatting
-        clean_text = text.replace(',', '').replace('$', '').replace('%', '')
-        clean_text = clean_text.replace('(', '-').replace(')', '')
-
         try:
-            float(clean_text)
+            float(_clean_numeric_text(text))
             return True
         except ValueError:
             return False
@@ -75,18 +82,11 @@ class Cell:
         """Get numeric value if cell is numeric."""
         if not self.is_numeric:
             return None
-
         text = self.text().strip()
-
-        # Em dash and similar symbols represent zero/null
-        if text in ['—', '–', '-', '--', 'N/A', 'n/a', 'NM', 'nm']:
+        if text in _NUMERIC_PLACEHOLDERS:
             return 0.0
-
-        clean_text = text.replace(',', '').replace('$', '').replace('%', '')
-        clean_text = clean_text.replace('(', '-').replace(')', '')
-
         try:
-            return float(clean_text)
+            return float(_clean_numeric_text(text))
         except ValueError:
             return None
 

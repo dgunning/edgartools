@@ -29,6 +29,23 @@ __all__ = [
 
 
 # ---------------------------------------------------------------------------
+# Shared constants
+# ---------------------------------------------------------------------------
+
+# Matches SEC page numbers: plain digits (1-999), roman numerals, or
+# supplement-prefixed variants like "S-9", "S- ii" (with optional space).
+_PAGE_NUMBER_RE = re.compile(
+    r'^(S-\s*[ivxlIVXL]+|S-\s*\d+|[ivxlIVXL]+|\d{1,3})$', re.IGNORECASE
+)
+
+# Labels to skip when extracting underwriter names from allocation tables
+_ALLOC_SKIP_LABELS = frozenset({'total', 'subtotal', ''})
+
+# Pre-compiled whitespace normalizer (used per-cell in hot paths)
+_WS_RE = re.compile(r'\s+')
+
+
+# ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
 
@@ -60,8 +77,9 @@ def _get_all_cells_including_headers(table: 'TableNode') -> List[str]:
 
 
 def _get_full_text(table: 'TableNode') -> str:
-    """Lowercase text from all cells including headers."""
-    return ' '.join(_get_all_cells_including_headers(table)).lower()
+    """Lowercase text from all cells including headers, with normalized whitespace."""
+    cells = [_WS_RE.sub(' ',t) for t in _get_all_cells_including_headers(table)]
+    return ' '.join(cells).lower()
 
 
 def _get_row_texts(table: 'TableNode') -> List[List[str]]:
@@ -88,7 +106,7 @@ def _has_numeric_cells(table: 'TableNode') -> bool:
 
 def _prefix_dollar(val: str) -> str:
     """Prefix a value with $ unless it already has one or contains %."""
-    if not val or val.startswith('$') or '%' in val:
+    if not val or '$' in val or '%' in val:
         return val
     return '$' + val
 
@@ -141,7 +159,7 @@ def _is_layout_table(table: 'TableNode') -> bool:
     # Single value = page number or long text
     if len(cells) == 1:
         v = cells[0].strip()
-        if re.match(r'^(S-\s*[ivxlIVXL]+|S-\s*\d+|[ivxlIVXL]+|\d{1,3})$', v, re.IGNORECASE):
+        if _PAGE_NUMBER_RE.match(v):
             return True
         if len(v) > 100:
             return True
@@ -168,13 +186,12 @@ def _is_toc_table(table: 'TableNode') -> bool:
     rows = _get_row_texts(table)
     if len(rows) < 3:
         return False
-    page_pattern = re.compile(r'^(S-\s*[ivxlIVXL]+|S-\s*\d+|[ivxlIVXL]+|\d{1,3})$', re.IGNORECASE)
     page_matches = 0
     valid_rows = 0
     for row in rows:
         if len(row) >= 2:
             valid_rows += 1
-            if page_pattern.match(row[-1].strip()):
+            if _PAGE_NUMBER_RE.match(row[-1].strip()):
                 page_matches += 1
     return valid_rows >= 3 and page_matches / valid_rows >= 0.6
 
@@ -190,12 +207,12 @@ def _is_pricing_table(table: 'TableNode') -> bool:
         return False
     text = _get_full_text(table)
     has_offering = ('offering price' in text or 'public offering price' in text or
-                    'subscription price' in text)
+                    'subscription price' in text or 'price to public' in text)
     has_proceeds = 'proceeds' in text
     has_fee = ('discount' in text or 'commission' in text or
                'placement agent' in text or 'placement agents' in text or
                "agent's fee" in text or "agent fees" in text or
-               'underwriting' in text)
+               'underwriting' in text or 'sales load' in text)
     has_numeric = _has_numeric_cells(table)
     is_rights = 'subscription price' in text and has_proceeds and has_numeric
     return has_offering and has_proceeds and (has_fee or is_rights) and has_numeric
@@ -442,6 +459,63 @@ def extract_pricing_data(table: 'TableNode'):
     # Build columns from the extracted values
     # Typically: col 0 = per unit, col -1 = total
     num_cols = max(len(offering_price_vals), len(fee_vals), len(proceeds_vals))
+
+    # Fallback: column-header-based layout (headers are "Price to Public", "Discount", "Proceeds")
+    # Used by SPAC 424B4 and some structured note filings where row labels are "Per Unit"/"Total"
+    if num_cols == 0 and raw_rows:
+        col_headers = []
+        for c in _get_all_cells_including_headers(table):
+            cn = _WS_RE.sub(' ',c).strip().lower()
+            if cn:
+                col_headers.append(cn)
+        # Map header labels to column indices
+        price_idx = fee_idx = proceeds_idx = None
+        for idx, h in enumerate(col_headers):
+            if 'offering price' in h or 'price to public' in h:
+                price_idx = idx
+            elif any(kw in h for kw in ('discount', 'commission', 'sales load',
+                                         'placement agent', "agent's fee")):
+                fee_idx = idx
+            elif 'proceeds' in h:
+                proceeds_idx = idx
+        if price_idx is not None or proceeds_idx is not None:
+            # Determine column order from header positions
+            detected = []
+            if price_idx is not None:
+                detected.append((price_idx, 'price'))
+            if fee_idx is not None:
+                detected.append((fee_idx, 'fee'))
+            if proceeds_idx is not None:
+                detected.append((proceeds_idx, 'proceeds'))
+            detected.sort()
+            field_order = [f for _, f in detected]  # e.g. ['price', 'fee', 'proceeds']
+
+            columns = []
+            for raw in raw_rows:
+                label = _WS_RE.sub(' ', raw[0]).strip() if raw else ''
+                vals = raw[1:] if len(raw) > 1 else []
+                # Filter to numeric-looking values (skip footnote refs like "(1)")
+                num_vals = [v for v in vals if re.search(r'\d', v) and not re.fullmatch(r'\(\d+\)', v)]
+                if not num_vals:
+                    continue
+                # Map values to fields by detected column order
+                fields: dict[str, str | None] = {}
+                for i, fname in enumerate(field_order):
+                    fields[fname] = _prefix_dollar(num_vals[i]) if i < len(num_vals) else None
+                columns.append(PricingColumnData(
+                    column_label=label,
+                    offering_price=fields.get('price'),
+                    fee_or_discount=fields.get('fee'),
+                    proceeds=fields.get('proceeds'),
+                ))
+            if columns:
+                fee_type = 'underwriting_discount' if fee_idx is not None else None
+                return PricingData(
+                    columns=columns,
+                    fee_type=fee_type,
+                    raw_rows=raw_rows,
+                )
+
     if num_cols == 0:
         return PricingData(raw_rows=raw_rows)
 
@@ -913,7 +987,7 @@ def _clean_underwriter_name(name: str) -> str:
     for suffix in [r'\s+structuring\s+advisor', r'\s+lead\s+manager',
                    r'\s+joint\s+book', r'\s+co-?manager', r'\s+\([^)]*\)']:
         name = re.sub(suffix, '', name, flags=re.IGNORECASE)
-    return re.sub(r'\s+', ' ', name).strip()
+    return _WS_RE.sub(' ',name).strip()
 
 
 def extract_underwriting_from_tables(document) -> list:
@@ -1017,16 +1091,15 @@ def extract_underwriting_from_tables(document) -> list:
             # When table was identified structurally (row-based header + numeric data),
             # accept firm names even if they're not in _BANK_PATTERNS
             trust_structure = has_row_based_header and bank_hits_rows == 0
-            skip_labels = {'total', 'subtotal', ''}
             start_row = 1 if has_row_based_header else 0
             for row in rows[start_row:]:
                 if row and row[0]:
-                    cell_lower = row[0].lower().strip()
-                    if cell_lower in skip_labels:
+                    cell_lower = row[0].strip().lower()
+                    if cell_lower in _ALLOC_SKIP_LABELS:
                         continue
                     # When trusting structure, reject cells that are too long
                     # to be a firm name (likely description text)
-                    if trust_structure and len(row[0].strip()) > 80:
+                    if trust_structure and len(cell_lower) > 80:
                         continue
                     if trust_structure or _count_bank_hits(cell_lower) >= 1:
                         clean = _clean_underwriter_name(row[0])
