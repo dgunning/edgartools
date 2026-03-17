@@ -278,6 +278,97 @@ class TestStatementToContext:
         assert tokens < 600
 
 
+class TestSchedule13DToContext:
+    """Tests for Schedule13D.to_context()."""
+
+    @pytest.fixture(scope="class")
+    def schedule13d(self):
+        from edgar import get_filings
+        filings = get_filings(form="SC 13D", amendments=False)
+        for filing in filings:
+            obj = filing.obj()
+            if obj is not None:
+                return obj
+        pytest.skip("No parseable SC 13D filing found")
+
+    @pytest.mark.network
+    def test_minimal_format(self, schedule13d):
+        ctx = schedule13d.to_context('minimal')
+        assert "SCHEDULE13D" in ctx
+        assert "Ownership:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, schedule13d):
+        ctx = schedule13d.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+        assert ".reporting_persons" in ctx
+
+    @pytest.mark.network
+    def test_standard_token_budget(self, schedule13d):
+        ctx = schedule13d.to_context('standard')
+        tokens = len(ctx) // 4
+        assert tokens < 800
+
+
+class TestFormDToContext:
+    """Tests for FormD.to_context()."""
+
+    @pytest.fixture(scope="class")
+    def formd(self):
+        from edgar import get_filings
+        filings = get_filings(form="D")
+        filing = filings[0]
+        return filing.obj()
+
+    @pytest.mark.network
+    def test_minimal_format(self, formd):
+        ctx = formd.to_context('minimal')
+        assert "FORMD" in ctx
+        assert "Issuer:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, formd):
+        ctx = formd.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+        assert ".offering_data" in ctx
+
+    @pytest.mark.network
+    def test_standard_token_budget(self, formd):
+        ctx = formd.to_context('standard')
+        tokens = len(ctx) // 4
+        assert tokens < 600
+
+
+class TestForm144ToContext:
+    """Tests for Form144.to_context()."""
+
+    @pytest.fixture(scope="class")
+    def form144(self):
+        from edgar import get_filings
+        filings = get_filings(form="144")
+        filing = filings[0]
+        return filing.obj()
+
+    @pytest.mark.network
+    def test_minimal_format(self, form144):
+        ctx = form144.to_context('minimal')
+        assert "FORM144" in ctx
+        assert "Seller:" in ctx
+        assert "Units to Sell:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, form144):
+        ctx = form144.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+        assert ".to_dataframe()" in ctx
+
+    @pytest.mark.network
+    def test_standard_token_budget(self, form144):
+        ctx = form144.to_context('standard')
+        tokens = len(ctx) // 4
+        assert tokens < 800
+
+
 class TestThirteenFToContext:
     """Tests for ThirteenF.to_context() using a known filing."""
 

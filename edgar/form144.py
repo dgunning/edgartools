@@ -1061,6 +1061,122 @@ class Form144:
 
         return table
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        from edgar.display.formatting import format_currency_short
+
+        lines = []
+
+        # === IDENTITY ===
+        form_label = "FORM144/A" if self.is_amendment else "FORM144"
+        lines.append(f"{form_label}: {self.issuer_name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Seller: {self.person_selling}")
+        if self.relationships:
+            lines.append(f"Relationship: {', '.join(self.relationships)}")
+        if self.security_class:
+            lines.append(f"Security: {self.security_class}")
+        lines.append(f"Units to Sell: {self.total_units_to_be_sold:,}")
+        if self.total_market_value:
+            lines.append(f"Market Value: {format_currency_short(self.total_market_value)}")
+        if self.approx_sale_date:
+            lines.append(f"Sale Date: {self.approx_sale_date}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"Filed: {self.filing_date}")
+        lines.append(f"Issuer CIK: {self.issuer_cik}")
+        if self.filer.cik:
+            lines.append(f"Filer CIK: {self.filer.cik}")
+
+        # Metrics
+        metrics = []
+        try:
+            if self.percent_of_holdings:
+                metrics.append(f"  % of Holdings: {self.percent_of_holdings:.1f}%")
+        except Exception:
+            pass
+        try:
+            if self.avg_price_per_unit:
+                metrics.append(f"  Avg Price: {format_currency_short(self.avg_price_per_unit)}")
+        except Exception:
+            pass
+        try:
+            if self.holding_period_years is not None:
+                metrics.append(f"  Holding Period: {self.holding_period_years} years")
+        except Exception:
+            pass
+        if metrics:
+            lines.append("")
+            lines.append("METRICS:")
+            lines.extend(metrics)
+
+        # Compliance
+        compliance = []
+        try:
+            if self.is_10b5_1_plan:
+                compliance.append("  10b5-1 Plan: Yes")
+                if self.cooling_off_compliant is not None:
+                    compliance.append(f"  Cooling-Off Compliant: {'Yes' if self.cooling_off_compliant else 'No'}")
+        except Exception:
+            pass
+        try:
+            flags = self.anomaly_flags
+            if flags:
+                compliance.append(f"  Flags: {', '.join(flags)}")
+        except Exception:
+            pass
+        if compliance:
+            lines.append("")
+            lines.append("COMPLIANCE:")
+            lines.extend(compliance)
+
+        # Recent sales
+        try:
+            if self.total_amount_sold_past_3_months:
+                lines.append("")
+                lines.append("RECENT SALES (3 MONTHS):")
+                lines.append(f"  Units Sold: {self.total_amount_sold_past_3_months:,}")
+                if self.total_gross_proceeds_past_3_months:
+                    lines.append(f"  Gross Proceeds: {format_currency_short(self.total_gross_proceeds_past_3_months)}")
+        except Exception:
+            pass
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .securities_info             Securities detail with market values")
+        lines.append("  .securities_selling          Acquisition history of shares")
+        lines.append("  .recent_sales                Sales in past 3 months")
+        lines.append("  .get_summary()               Filing summary dict")
+        lines.append("  .to_analyst_summary()        Full analyst metrics dict")
+        lines.append("  .to_dataframe()              Securities as DataFrame")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        if self.exchange_name:
+            lines.append("")
+            lines.append(f"Exchange: {self.exchange_name}")
+        if self.broker_name:
+            lines.append(f"Broker: {self.broker_name}")
+
+        if self.remarks:
+            lines.append("")
+            lines.append(f"Remarks: {self.remarks[:200]}")
+
+        return "\n".join(lines)
+
     def __rich__(self):
         # Build title with amendment indicator
         form_type = f"Form {self._filing.form}"

@@ -381,6 +381,112 @@ class FormD:
                    offering_data=offering_data,
                    signature_block=signature_block)
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+        issuer = self.primary_issuer
+        od = self.offering_data
+
+        # === IDENTITY ===
+        amendment = "/A" if not self.is_new else ""
+        lines.append(f"FORMD{amendment}: {issuer.entity_name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Issuer: {issuer.entity_name}")
+        if issuer.cik:
+            lines.append(f"CIK: {issuer.cik}")
+        if issuer.entity_type:
+            lines.append(f"Entity Type: {issuer.entity_type}")
+        if issuer.jurisdiction:
+            lines.append(f"Jurisdiction: {issuer.jurisdiction}")
+
+        # Offering amounts
+        if od.offering_sales_amounts:
+            osa = od.offering_sales_amounts
+            if osa.total_offering_amount:
+                lines.append(f"Total Offering: {osa.total_offering_amount}")
+            if osa.total_amount_sold:
+                lines.append(f"Amount Sold: {osa.total_amount_sold}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        if od.offering_sales_amounts:
+            osa = od.offering_sales_amounts
+            if osa.total_remaining:
+                lines.append(f"Remaining: {osa.total_remaining}")
+
+        # Exemptions
+        if od.federal_exemptions:
+            lines.append(f"Exemptions: {', '.join(od.federal_exemptions)}")
+
+        # Security type flags
+        flags = []
+        if od.is_equity:
+            flags.append("Equity")
+        if od.is_pooled_investment:
+            flags.append("Pooled Investment")
+        if flags:
+            lines.append(f"Security Type: {', '.join(flags)}")
+
+        # Investors
+        if od.investors:
+            inv = od.investors
+            if inv.total_already_invested:
+                lines.append(f"Investors: {inv.total_already_invested}")
+            if inv.has_non_accredited_investors:
+                lines.append("Non-Accredited Investors: Yes")
+
+        # Dates
+        if od.date_of_first_sale:
+            lines.append(f"First Sale: {od.date_of_first_sale}")
+
+        if od.revenue_range:
+            lines.append(f"Revenue Range: {od.revenue_range}")
+
+        if od.minimum_investment:
+            lines.append(f"Minimum Investment: {od.minimum_investment}")
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .primary_issuer            Issuer company details")
+        lines.append("  .offering_data             Full offering details")
+        lines.append("  .related_persons           Related persons list")
+        lines.append("  .signature_block           Filing signatures")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        # Related persons
+        if self.related_persons:
+            lines.append("")
+            lines.append(f"RELATED PERSONS: {len(self.related_persons)}")
+            for p in self.related_persons[:5]:
+                name = f"{p.first_name} {p.last_name}".strip()
+                if name:
+                    lines.append(f"  {name}")
+
+        # Sales compensation
+        if od.sales_compensation_recipients:
+            lines.append("")
+            lines.append(f"SALES COMPENSATION RECIPIENTS: {len(od.sales_compensation_recipients)}")
+
+        # Use of proceeds
+        if od.use_of_proceeds and od.use_of_proceeds.gross_proceeds_used:
+            lines.append("")
+            lines.append(f"Gross Proceeds Used: {od.use_of_proceeds.gross_proceeds_used}")
+
+        return "\n".join(lines)
+
     def __rich__(self):
         highlight_col_style = "deep_sky_blue1 bold"
         # Issuer Table

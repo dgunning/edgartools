@@ -485,6 +485,93 @@ class Schedule13D:
         # (can exceed 100% slightly due to rounding in source data)
         return min(total_pct, 100.0)
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # === IDENTITY ===
+        form_label = "SCHEDULE13D/A" if self.is_amendment else "SCHEDULE13D"
+        lines.append(f"{form_label}: {self.issuer_info.name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Filed: {self.filing_date}")
+        if self.date_of_event:
+            lines.append(f"Event Date: {self.date_of_event}")
+        lines.append(f"Security: {self.security_info.title}")
+        lines.append(f"Ownership: {self.total_percent:.1f}% ({self.total_shares:,} shares)")
+
+        # Filer(s)
+        if self.reporting_persons:
+            names = [p.name for p in self.reporting_persons[:3]]
+            filer_str = ", ".join(names)
+            if len(self.reporting_persons) > 3:
+                filer_str += f" (+{len(self.reporting_persons) - 3} more)"
+            lines.append(f"Filer: {filer_str}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        if self.issuer_info.cik:
+            lines.append(f"Issuer CIK: {self.issuer_info.cik}")
+        if self.issuer_info.cusip:
+            lines.append(f"CUSIP: {self.issuer_info.cusip}")
+
+        # Per-person breakdown
+        if len(self.reporting_persons) > 0:
+            lines.append("")
+            lines.append("REPORTING PERSONS:")
+            for p in self.reporting_persons[:5]:
+                p_line = f"  {p.name}: {p.percent_of_class:.1f}% ({p.aggregate_amount:,} shares)"
+                if p.type_of_reporting_person:
+                    p_line += f" [{p.type_of_reporting_person}]"
+                lines.append(p_line)
+            if len(self.reporting_persons) > 5:
+                lines.append(f"  ... ({len(self.reporting_persons) - 5} more)")
+
+        # Purpose (abbreviated)
+        if self.items and self.items.item4_purpose_of_transaction:
+            purpose = self.items.item4_purpose_of_transaction[:200]
+            lines.append("")
+            lines.append(f"PURPOSE: {purpose}")
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .issuer_info               Subject company details")
+        lines.append("  .reporting_persons          All filer details with voting/dispositive power")
+        lines.append("  .items                      Narrative items 1-7")
+        lines.append("  .total_shares               Aggregate beneficial ownership")
+        lines.append("  .total_percent              Ownership percentage")
+        lines.append("  .signatures                 Filing signatures")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        # Source of funds
+        if self.items and self.items.item3_source_of_funds:
+            lines.append("")
+            lines.append(f"Source of Funds: {self.items.item3_source_of_funds[:150]}")
+
+        # Voting/dispositive power detail for first person
+        if self.reporting_persons:
+            p = self.reporting_persons[0]
+            lines.append("")
+            lines.append(f"VOTING/DISPOSITIVE POWER ({p.name}):")
+            lines.append(f"  Sole Voting: {p.sole_voting_power:,}")
+            lines.append(f"  Shared Voting: {p.shared_voting_power:,}")
+            lines.append(f"  Sole Dispositive: {p.sole_dispositive_power:,}")
+            lines.append(f"  Shared Dispositive: {p.shared_dispositive_power:,}")
+
+        return "\n".join(lines)
+
     def __rich__(self):
         """Rich console rendering"""
         from edgar.beneficial_ownership.rendering import render_schedule13d
@@ -910,6 +997,82 @@ class Schedule13G:
     def is_passive_investor(self) -> bool:
         """Check if this is a passive investor (13G are passive by definition)"""
         return True
+
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # === IDENTITY ===
+        form_label = "SCHEDULE13G/A" if self.is_amendment else "SCHEDULE13G"
+        lines.append(f"{form_label}: {self.issuer_info.name} (Passive)")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Filed: {self.filing_date}")
+        if self.event_date:
+            lines.append(f"Event Date: {self.event_date}")
+        lines.append(f"Security: {self.security_info.title}")
+        lines.append(f"Ownership: {self.total_percent:.1f}% ({self.total_shares:,} shares)")
+
+        if self.reporting_persons:
+            names = [p.name for p in self.reporting_persons[:3]]
+            filer_str = ", ".join(names)
+            if len(self.reporting_persons) > 3:
+                filer_str += f" (+{len(self.reporting_persons) - 3} more)"
+            lines.append(f"Filer: {filer_str}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        if self.issuer_info.cik:
+            lines.append(f"Issuer CIK: {self.issuer_info.cik}")
+        if self.issuer_info.cusip:
+            lines.append(f"CUSIP: {self.issuer_info.cusip}")
+        if self.rule_designation:
+            lines.append(f"Rule: {self.rule_designation}")
+
+        # Per-person breakdown
+        if len(self.reporting_persons) > 0:
+            lines.append("")
+            lines.append("REPORTING PERSONS:")
+            for p in self.reporting_persons[:5]:
+                p_line = f"  {p.name}: {p.percent_of_class:.1f}% ({p.aggregate_amount:,} shares)"
+                if p.type_of_reporting_person:
+                    p_line += f" [{p.type_of_reporting_person}]"
+                lines.append(p_line)
+            if len(self.reporting_persons) > 5:
+                lines.append(f"  ... ({len(self.reporting_persons) - 5} more)")
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .issuer_info               Subject company details")
+        lines.append("  .reporting_persons          All filer details with voting/dispositive power")
+        lines.append("  .items                      Structured items data")
+        lines.append("  .total_shares               Aggregate beneficial ownership")
+        lines.append("  .total_percent              Ownership percentage")
+        lines.append("  .is_passive_investor        Always True for 13G")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        if self.reporting_persons:
+            p = self.reporting_persons[0]
+            lines.append("")
+            lines.append(f"VOTING/DISPOSITIVE POWER ({p.name}):")
+            lines.append(f"  Sole Voting: {p.sole_voting_power:,}")
+            lines.append(f"  Shared Voting: {p.shared_voting_power:,}")
+            lines.append(f"  Sole Dispositive: {p.sole_dispositive_power:,}")
+            lines.append(f"  Shared Dispositive: {p.shared_dispositive_power:,}")
+
+        return "\n".join(lines)
 
     def __rich__(self):
         """Rich console rendering"""
