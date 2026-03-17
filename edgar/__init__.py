@@ -16,6 +16,7 @@ from edgar._filings import (
     get_by_accession_number_enriched,
     get_filings,
 )
+from edgar.context import HasContext, compose_context
 from edgar.core import CAUTION, CRAWL, NORMAL, edgar_mode, get_identity, listify, set_identity
 from edgar.current_filings import CurrentFilings, get_all_current_filings, get_current_filings, iter_current_filings_pages
 
