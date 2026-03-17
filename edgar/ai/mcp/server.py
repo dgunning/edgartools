@@ -100,8 +100,36 @@ def _import_tools():
     from edgar.ai.mcp.tools import proxy  # noqa: F401
 
 
+# Server instructions — sent to the LLM on first connection, before any tool call.
+# This is the system prompt for the tool suite.
+SERVER_INSTRUCTIONS = """EdgarTools provides access to all SEC EDGAR filing data. 12 tools organized by intent:
+
+DISCOVER companies and filings:
+- edgar_company: Start here for any company question (profile, financials, filings)
+- edgar_search: Find companies by name or list filings by form type
+- edgar_screen: Filter companies by industry, exchange, or state
+- edgar_text_search: Full-text search across filing content (EFTS)
+- edgar_monitor: See what was just filed with the SEC
+
+EXAMINE specific filings:
+- edgar_filing: Get structured context for any filing by accession number or URL
+- edgar_read: Extract specific sections (risk factors, MD&A, business description, items)
+
+ANALYZE financial data:
+- edgar_trends: Revenue, income, EPS time series with growth rates
+- edgar_compare: Side-by-side company comparison on financial metrics
+- edgar_ownership: Insider transactions (Form 4) or institutional portfolios (13F)
+- edgar_fund: Mutual fund, ETF, BDC, and money market fund data
+- edgar_proxy: Executive compensation and governance (DEF 14A)
+
+Common workflows:
+1. Company research: edgar_company → edgar_read (10-K sections) → edgar_trends
+2. Filing analysis: edgar_filing (by accession/URL) → edgar_read (extract sections)
+3. Event monitoring: edgar_monitor → edgar_filing (examine new filings)
+4. Peer comparison: edgar_screen (find peers) → edgar_compare (compare metrics)"""
+
 # Create the server
-app = Server("edgartools")
+app = Server("edgartools", instructions=SERVER_INSTRUCTIONS)
 
 
 @app.list_tools()
