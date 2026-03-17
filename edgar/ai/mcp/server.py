@@ -112,7 +112,7 @@ DISCOVER companies and filings:
 - edgar_monitor: See what was just filed with the SEC
 
 EXAMINE specific filings:
-- edgar_filing: Get structured context for any filing by accession number or URL
+- edgar_filing: Get structured context for a filing (by company+form or accession number/URL)
 - edgar_read: Extract specific sections (risk factors, MD&A, business description, items)
 
 ANALYZE financial data:
