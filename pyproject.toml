@@ -58,6 +58,7 @@ dependencies = [
   "pyrate-limiter>=3.0.0",
   "httpxthrottlecache>=0.3.0",
   "truststore>=0.9.0",
+  "pyyaml>=6.0",
 ]
 dynamic = ["version"]
 

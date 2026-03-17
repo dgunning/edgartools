@@ -65,6 +65,10 @@ bd create --title "..." --type bug --priority P1  # Create issue
 
 **Statuses**: `open`, `in_progress`, `blocked`, `closed`
 
+## Rules
+
+- **Never run `sudo` without asking first.** If a command requires `sudo`, stop and tell the user before executing it.
+
 ## Development
 
 | Task | Reference |
