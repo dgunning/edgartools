@@ -1525,6 +1525,89 @@ class FundReport:
         self._derivatives_table_cache = df_to_rich_table(derivatives, title="Derivative Positions", title_style="bold deep_sky_blue1", max_rows=2000)
         return self._derivatives_table_cache
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        from edgar.display.formatting import format_currency_short
+        lines = []
+        gi = self.general_info
+
+        # === IDENTITY ===
+        lines.append(f"FUNDREPORT: {self.name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Report Date: {gi.rep_period_date}")
+        try:
+            fi = self.fund_info
+            if fi:
+                if fi.total_assets:
+                    lines.append(f"Total Assets: {format_currency_short(float(fi.total_assets))}")
+                if fi.net_assets:
+                    lines.append(f"Net Assets: {format_currency_short(float(fi.net_assets))}")
+        except Exception:
+            pass
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"CIK: {self.cik}")
+        if self.series_id:
+            lines.append(f"Series ID: {self.series_id}")
+
+        try:
+            invs = self.investments
+            if invs:
+                lines.append(f"Holdings: {len(invs)}")
+        except Exception:
+            pass
+
+        # Top holdings
+        try:
+            df = self.investment_data()
+            if df is not None and len(df) > 0:
+                lines.append("")
+                lines.append("TOP HOLDINGS:")
+                for _, row in df.head(5).iterrows():
+                    name = row.get('name', row.get('title', '?'))
+                    pct = row.get('pct_value', 0)
+                    val = row.get('value_usd', 0)
+                    h_line = f"  {name}: {format_currency_short(float(val))}" if val else f"  {name}"
+                    if pct:
+                        h_line += f" ({float(pct):.1f}%)"
+                    lines.append(h_line)
+                if len(df) > 5:
+                    lines.append(f"  ... ({len(df) - 5} more)")
+        except Exception:
+            pass
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .investment_data()         Holdings as DataFrame")
+        lines.append("  .investments               All positions list")
+        lines.append("  .fund_info                 Fund-level financials")
+        lines.append("  .derivatives               Derivative positions")
+        lines.append("  .non_derivatives            Non-derivative positions")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        try:
+            fi = self.fund_info
+            if fi and fi.total_liabilities:
+                lines.append("")
+                lines.append(f"Total Liabilities: {format_currency_short(float(fi.total_liabilities))}")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __rich__(self):
         title = f"{self.general_info.name} - {self.general_info.series_name} {self.general_info.rep_period_date}"
 

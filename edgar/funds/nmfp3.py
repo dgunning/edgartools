@@ -416,6 +416,68 @@ class MoneyMarketFund:
             max_rows=15,
         )
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        from edgar.display.formatting import format_currency_short
+        lines = []
+
+        # === IDENTITY ===
+        lines.append(f"MONEYMARKETFUND: {self.name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Report Date: {self.report_date}")
+        if self.fund_category:
+            lines.append(f"Category: {self.fund_category}")
+        if self.net_assets:
+            lines.append(f"Net Assets: {format_currency_short(float(self.net_assets))}")
+        lines.append(f"Securities: {self.num_securities}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"CIK: {self.cik}")
+        if self.series_id:
+            lines.append(f"Series ID: {self.series_id}")
+        if self.average_maturity_wam is not None:
+            lines.append(f"WAM: {self.average_maturity_wam} days")
+        if self.average_maturity_wal is not None:
+            lines.append(f"WAL: {self.average_maturity_wal} days")
+        lines.append(f"Share Classes: {self.num_share_classes}")
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .portfolio_data()          Holdings as DataFrame")
+        lines.append("  .holdings_by_category()    Holdings grouped by category")
+        lines.append("  .share_class_data()        Share class details")
+        lines.append("  .yield_history()           7-day yield time series")
+        lines.append("  .nav_history()             NAV per share time series")
+        lines.append("  .liquidity_history()       Liquidity metrics time series")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        try:
+            cats = self.holdings_by_category()
+            if cats is not None and len(cats) > 0:
+                lines.append("")
+                lines.append("HOLDINGS BY CATEGORY:")
+                for _, row in cats.head(8).iterrows():
+                    cat = row.get('investment_category', '?')
+                    val = row.get('market_value', 0)
+                    lines.append(f"  {cat}: {format_currency_short(float(val))}" if val else f"  {cat}")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __rich__(self):
         title = f"{self.general_info.series_name}  {self.general_info.report_date}"
         return Panel(

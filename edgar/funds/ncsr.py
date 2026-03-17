@@ -260,6 +260,63 @@ class FundShareholderReport:
             max_rows=30,
         )
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        from edgar.display.formatting import format_currency_short
+        lines = []
+
+        # === IDENTITY ===
+        lines.append(f"FUNDSHAREHOLDERREPORT: {self.fund_name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Report Type: {self.report_type}")
+        if self.net_assets:
+            lines.append(f"Net Assets: {format_currency_short(float(self.net_assets))}")
+        lines.append(f"Share Classes: {self.num_share_classes}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"CIK: {self.cik}")
+        if self.series_id:
+            lines.append(f"Series ID: {self.series_id}")
+        if self.portfolio_turnover:
+            lines.append(f"Portfolio Turnover: {float(self.portfolio_turnover):.1f}%")
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .performance_data()        Returns by share class and period")
+        lines.append("  .expense_data()            Expense ratios by share class")
+        lines.append("  .holdings_data()           Portfolio holdings by class")
+        lines.append("  .share_classes             Share class details list")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        try:
+            if self.share_classes:
+                lines.append("")
+                lines.append("SHARE CLASSES:")
+                for sc in self.share_classes[:8]:
+                    sc_line = f"  {sc.class_name}"
+                    if hasattr(sc, 'ticker') and sc.ticker:
+                        sc_line += f" ({sc.ticker})"
+                    if hasattr(sc, 'expense_ratio_pct') and sc.expense_ratio_pct:
+                        sc_line += f" ER: {float(sc.expense_ratio_pct):.2f}%"
+                    lines.append(sc_line)
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __rich__(self):
         renderables = [self._summary_table]
         expense = self._expense_table

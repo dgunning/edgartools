@@ -605,6 +605,84 @@ class MunicipalAdvisorForm:
 
 
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # === IDENTITY ===
+        amendment = "/A" if self.is_amendment else ""
+        name = self.applicant.full_name if self.applicant and hasattr(self.applicant, 'full_name') else "Unknown"
+        lines.append(f"MAI{amendment}: {name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        if self.filer and self.filer.cik:
+            lines.append(f"CIK: {self.filer.cik}")
+        if self.applicant and hasattr(self.applicant, 'crd') and self.applicant.crd:
+            lines.append(f"CRD: {self.applicant.crd}")
+        if self.is_individual is not None:
+            lines.append(f"Type: {'Individual' if self.is_individual else 'Organization'}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        # Advisory offices
+        if self.municipal_advisor_offices:
+            lines.append(f"Advisory Firms: {len(self.municipal_advisor_offices)}")
+            for office in self.municipal_advisor_offices[:3]:
+                if hasattr(office, 'firm_name') and office.firm_name:
+                    lines.append(f"  {office.firm_name}")
+
+        # Employment
+        try:
+            if self.employment_history and self.employment_history.current_employer:
+                ce = self.employment_history.current_employer
+                if hasattr(ce, 'employer_name') and ce.employer_name:
+                    lines.append(f"Current Employer: {ce.employer_name}")
+        except Exception:
+            pass
+
+        # Disclosures summary
+        try:
+            if self.disclosures:
+                flags = []
+                for disc_type in ['criminal', 'regulatory', 'civil', 'complaint', 'termination', 'financial']:
+                    disc = getattr(self.disclosures, disc_type, None)
+                    if disc and disc.any():
+                        flags.append(disc_type)
+                if flags:
+                    lines.append(f"Disclosures: {', '.join(flags)}")
+        except Exception:
+            pass
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .applicant                 Applicant details")
+        lines.append("  .municipal_advisor_offices  Advisory firm offices")
+        lines.append("  .employment_history        Employment history")
+        lines.append("  .disclosures               Regulatory disclosures")
+        lines.append("  .signature                 Filing signature")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        if self.contact:
+            lines.append("")
+            lines.append("CONTACT:")
+            if self.contact.name:
+                lines.append(f"  Name: {self.contact.name}")
+            if self.contact.phone:
+                lines.append(f"  Phone: {self.contact.phone}")
+
+        return "\n".join(lines)
+
     def __rich__(self):
 
         PAD = 80

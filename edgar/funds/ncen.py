@@ -487,6 +487,62 @@ class FundCensus:
             max_rows=20,
         )
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # === IDENTITY ===
+        lines.append(f"FUNDCENSUS: {self.name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Report Date: {self.report_date}")
+        lines.append(f"Series: {self.num_series}")
+        if self.classification_type:
+            lines.append(f"Classification: {self.classification_type}")
+        if self.is_etf_company:
+            lines.append("ETF Company: Yes")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"CIK: {self.cik}")
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .series_data()             Series overview DataFrame")
+        lines.append("  .service_providers()       All service providers DataFrame")
+        lines.append("  .broker_data()             Broker-dealer commissions")
+        lines.append("  .director_data()           Board directors with CRD")
+        lines.append("  .etf_data()                ETF-specific series data")
+        lines.append("  .series                    List of FundSeriesInfo objects")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        try:
+            sd = self.series_data()
+            if sd is not None and len(sd) > 0:
+                lines.append("")
+                lines.append("SERIES:")
+                for _, row in sd.head(8).iterrows():
+                    name = row.get('name', '?')
+                    ftype = row.get('fund_type', '')
+                    lines.append(f"  {name}" + (f" ({ftype})" if ftype else ""))
+                if len(sd) > 8:
+                    lines.append(f"  ... ({len(sd) - 8} more)")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __rich__(self):
         title = f"{self.registrant.name}  {self.report_date}"
         return Panel(

@@ -776,6 +776,74 @@ class NPX:
         fund_display = self.fund_name or "Unknown Fund"
         return f"N-PX{amendment}: {fund_display} - {self.period_of_report} ({vote_count} votes)"
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # === IDENTITY ===
+        amendment = "/A" if self.is_amendment else ""
+        fund = self.fund_name or "Unknown Fund"
+        lines.append(f"NPX{amendment}: {fund}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Period: {self.period_of_report}")
+        vote_count = len(self._proxy_votes) if self._proxy_votes else 0
+        lines.append(f"Votes: {vote_count:,}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"CIK: {self.cik}")
+        if self.submission_type:
+            lines.append(f"Form: {self.submission_type}")
+
+        # Voting summary
+        try:
+            pv = self.proxy_votes
+            if pv:
+                alignment = pv.management_alignment_rate()
+                if alignment is not None:
+                    lines.append(f"Management Alignment: {alignment:.1%}")
+                against = pv.against_management()
+                if against and len(against) > 0:
+                    lines.append(f"Against Management: {len(against)} votes")
+        except Exception:
+            pass
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .proxy_votes               ProxyVotes container")
+        lines.append("  .proxy_votes.to_dataframe() Full voting record")
+        lines.append("  .proxy_votes.against_management()  Votes against mgmt")
+        lines.append("  .proxy_votes.summary_by_category() Category breakdown")
+        lines.append("  .proxy_votes.filter_by_issuer()    Filter by company")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        try:
+            pv = self.proxy_votes
+            if pv:
+                summary = pv.summary_by_category()
+                if summary is not None and len(summary) > 0:
+                    lines.append("")
+                    lines.append("VOTE CATEGORIES:")
+                    for _, row in summary.head(8).iterrows():
+                        cat = row.iloc[0] if len(row) > 0 else '?'
+                        lines.append(f"  {cat}")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __rich__(self):
         # Header panel
         title = Text()

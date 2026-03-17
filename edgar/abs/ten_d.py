@@ -504,6 +504,94 @@ class TenD:
         issuer_name = self.issuing_entity.name if self.issuing_entity else self.company
         return f"TenD('{issuer_name}')"
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # === IDENTITY ===
+        try:
+            self._ensure_header_parsed()
+            issuer_name = self.issuing_entity.name if self.issuing_entity else self.company
+        except Exception:
+            issuer_name = self.company
+        lines.append(f"TEND: {issuer_name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Filed: {self.filing_date}")
+        try:
+            if self.distribution_period:
+                dp = self.distribution_period
+                if dp.start_date and dp.end_date:
+                    lines.append(f"Distribution Period: {dp.start_date} to {dp.end_date}")
+        except Exception:
+            pass
+        try:
+            if self.abs_type:
+                lines.append(f"ABS Type: {self.abs_type.value}")
+        except Exception:
+            pass
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"Form: {self.form}")
+        lines.append(f"CIK: {str(self._filing.cik).zfill(10)}")
+
+        try:
+            if self.depositor:
+                lines.append(f"Depositor: {self.depositor.name}")
+        except Exception:
+            pass
+
+        try:
+            if self.sponsors:
+                names = [s.name for s in self.sponsors[:3]]
+                lines.append(f"Sponsor: {', '.join(names)}")
+        except Exception:
+            pass
+
+        try:
+            classes = self.security_classes
+            if classes:
+                lines.append(f"Security Classes: {len(classes)}")
+        except Exception:
+            pass
+
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .issuing_entity            ABS issuing entity")
+        lines.append("  .depositor                 Depositor details")
+        lines.append("  .sponsors                  Sponsor list")
+        lines.append("  .distribution_period       Distribution date range")
+        lines.append("  .security_classes          Registered security classes")
+        if self.has_asset_data:
+            lines.append("  .asset_data                CMBS asset-level data")
+            lines.append("  .loans                     Loan-level DataFrame")
+            lines.append("  .properties                Property-level DataFrame")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        try:
+            classes = self.security_classes
+            if classes:
+                lines.append("")
+                lines.append("SECURITY CLASSES:")
+                for c in classes[:10]:
+                    lines.append(f"  {c}")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __repr__(self):
         return repr_rich(self.__rich__())
 

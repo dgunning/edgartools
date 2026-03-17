@@ -369,6 +369,70 @@ class TestForm144ToContext:
         assert tokens < 800
 
 
+class TestFundReportToContext:
+    @pytest.fixture(scope="class")
+    def fund_report(self):
+        from edgar import get_filings
+        for filing in get_filings(form="NPORT-P"):
+            obj = filing.obj()
+            if obj is not None:
+                return obj
+        pytest.skip("No parseable NPORT-P found")
+
+    @pytest.mark.network
+    def test_minimal_format(self, fund_report):
+        ctx = fund_report.to_context('minimal')
+        assert "FUNDREPORT:" in ctx
+        assert "Report Date:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, fund_report):
+        ctx = fund_report.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+
+
+class TestMoneyMarketFundToContext:
+    @pytest.fixture(scope="class")
+    def mmf(self):
+        from edgar import get_filings
+        for filing in get_filings(form="N-MFP2"):
+            obj = filing.obj()
+            if obj is not None:
+                return obj
+        pytest.skip("No parseable N-MFP2 found")
+
+    @pytest.mark.network
+    def test_minimal_format(self, mmf):
+        ctx = mmf.to_context('minimal')
+        assert "MONEYMARKETFUND:" in ctx
+        assert "Securities:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, mmf):
+        ctx = mmf.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+
+
+class TestEffectToContext:
+    @pytest.fixture(scope="class")
+    def effect(self):
+        from edgar import get_filings
+        filing = get_filings(form="EFFECT")[0]
+        return filing.obj()
+
+    @pytest.mark.network
+    def test_minimal_format(self, effect):
+        ctx = effect.to_context('minimal')
+        assert "EFFECT:" in ctx
+        assert "Effective Date:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, effect):
+        ctx = effect.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+        assert ".get_source_filing()" in ctx
+
+
 class TestThirteenFToContext:
     """Tests for ThirteenF.to_context() using a known filing."""
 
