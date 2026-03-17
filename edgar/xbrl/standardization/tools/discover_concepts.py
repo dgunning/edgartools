@@ -118,33 +118,39 @@ def _search_calc_trees(
     xbrl: XBRL,
     known_concepts: Optional[List[str]] = None
 ) -> List[CandidateConcept]:
-    """Search calculation trees for matching concepts."""
+    """Search calculation trees for matching concepts.
+
+    Uses xbrl.calculation_trees (Dict[str, CalculationTree]) where each tree
+    has .all_nodes (Dict[str, CalculationNode]) with element_id, weight,
+    parent, and children attributes.
+    """
     candidates = []
-    
+
     try:
+        # Check that calculation_trees exist
+        if not hasattr(xbrl, 'calculation_trees') or not xbrl.calculation_trees:
+            return candidates
+
         # Get all concepts from all calc trees
         all_concepts = {}
-        
-        for statement in ['INCOME', 'BALANCE', 'CASHFLOW', 'OPERATIONS']:
-            try:
-                calc_tree = getattr(xbrl.calculations, statement, None)
-                if calc_tree is None:
-                    continue
-                    
-                for node in calc_tree.traverse():
-                    concept = node.name
-                    all_concepts[concept] = {
-                        'statement': statement,
-                        'parent': node.parent.name if node.parent else None,
-                        'weight': node.weight if hasattr(node, 'weight') else 1.0
-                    }
-            except Exception:
-                continue
-        
+
+        for role_uri, tree in xbrl.calculation_trees.items():
+            # Derive a short statement label from the role URI
+            role_label = role_uri.split('/')[-1] if '/' in role_uri else role_uri
+
+            for concept_name, node in tree.all_nodes.items():
+                # concept_name is like "us-gaap_OperatingIncomeLoss" or "us-gaap:Revenue"
+                all_concepts[concept_name] = {
+                    'statement': role_label,
+                    'parent': node.parent,
+                    'weight': node.weight,
+                    'role_uri': role_uri,
+                }
+
         # Score each concept
         for concept, context in all_concepts.items():
             stripped = strip_prefix(concept)
-            
+
             # Check against known concepts first
             if known_concepts:
                 for known in known_concepts:
@@ -166,7 +172,7 @@ def _search_calc_trees(
                             tree_context=context
                         ))
                         break
-            
+
             # Check semantic similarity to metric name
             similarity = semantic_similarity(metric_name, stripped)
             if similarity > 0.5:
@@ -179,10 +185,10 @@ def _search_calc_trees(
                         reasoning=f"Semantic similarity: {similarity:.2f}",
                         tree_context=context
                     ))
-                    
+
     except Exception as e:
         pass
-    
+
     return candidates
 
 

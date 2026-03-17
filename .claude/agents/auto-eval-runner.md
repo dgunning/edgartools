@@ -148,6 +148,71 @@ Gap arrives
     └── External data changed? → Update snapshot, re-validate
 ```
 
+## Haiku Swarm Orchestration (Parallel Scouts)
+
+You can deploy cheap parallel Haiku agents to explore gaps simultaneously:
+
+### Available Scout Agents
+
+| Agent | Purpose | I/O |
+|-------|---------|-----|
+| `haiku-concept-scout` | Find XBRL concepts for unmapped metrics | Reads XBRL filings |
+| `haiku-period-verifier` | Verify concepts across 2-3 fiscal periods | Reads XBRL filings |
+| `haiku-cross-company-learner` | Check if a concept transfers to other companies | Reads XBRL filings |
+| `haiku-gap-classifier` | Fast triage without file I/O | No I/O |
+
+### Parallel Scout Pattern
+
+```python
+# 1. Identify gaps
+gaps, baseline = identify_gaps()
+
+# 2. Deploy scouts in parallel (using Claude Code Agent tool)
+# For each gap, spawn a haiku-concept-scout with model="haiku"
+# Each scout returns strict JSON with candidates
+
+# 3. Collect results, build proposals
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    ScoutResult, scout_result_to_change, select_non_conflicting,
+    batch_evaluate, cross_company_learn,
+    build_scout_prompt, build_classifier_prompt,
+)
+
+# 4. Batch evaluate non-conflicting proposals
+proposals = select_non_conflicting(all_proposals)
+batch_result = batch_evaluate(proposals, baseline)
+
+# 5. For each KEEP, propagate via cross-company learning
+for change in batch_result.changes_kept:
+    learn_proposals = cross_company_learn(
+        metric=change.target_metric,
+        concept=change.new_value,
+        source_ticker=change.target_companies,
+    )
+```
+
+### Map-Reduce Protocol
+
+1. **Map phase**: Spawn 5-10 Haiku scouts in parallel (one per gap)
+2. **Collect phase**: Wait for all scouts, parse JSON results
+3. **Reduce phase**: Opus reviews results, selects best proposals
+4. **Batch eval**: Apply non-conflicting changes, measure CQS ONCE
+5. **Learning cascade**: For each KEEP, check cross-company transfer
+
+### Offline Mode
+
+Before running, verify offline readiness:
+```python
+from edgar.xbrl.standardization.tools.auto_eval import check_offline_readiness
+check_offline_readiness()  # Warns if local data missing
+```
+
+Or preload data:
+```python
+from edgar.xbrl.standardization.tools.bulk_preload import preload_cohort
+preload_cohort(["AAPL", "JPM", "XOM", "WMT", "JNJ"])
+```
+
 ## Nightly Focus Areas (Task Scoping)
 
 To prevent wandering, each session should have a focus:
@@ -163,18 +228,23 @@ Example: `run_overnight(focus_area="banking")` — only touch banking-related ga
 
 After each session, report:
 - **Experiments**: total / kept / discarded / vetoed
-- **CQS trajectory**: start → peak → end
+- **CQS trajectory**: start -> peak -> end
 - **Config diffs**: what was changed
 - **Graveyard patterns**: metrics with >3 failures (flag for Tier 3 / human review)
 
 ## File Locations
 
 ```
-edgar/xbrl/standardization/tools/auto_eval.py       — CQS computation, gap analysis
-edgar/xbrl/standardization/tools/auto_eval_loop.py   — Experiment loop, config changes
-edgar/xbrl/standardization/ledger/schema.py           — AutoEvalExperiment, AutoEvalGraveyard tables
-edgar/xbrl/standardization/config/                     — Tier 1 config files
-edgar/xbrl/standardization/tools/discover_concepts.py  — Concept discovery AI tool
-edgar/xbrl/standardization/tools/verify_mapping.py     — Value verification AI tool
-edgar/xbrl/standardization/tools/learn_mappings.py     — Cross-company pattern learning
+edgar/xbrl/standardization/tools/auto_eval.py        — CQS computation, gap analysis, offline readiness
+edgar/xbrl/standardization/tools/auto_eval_loop.py    — Experiment loop, config changes, batch eval, scouts
+edgar/xbrl/standardization/tools/bulk_preload.py       — Pre-download data for offline mode
+edgar/xbrl/standardization/ledger/schema.py            — AutoEvalExperiment, AutoEvalGraveyard tables
+edgar/xbrl/standardization/config/                      — Tier 1 config files
+edgar/xbrl/standardization/tools/discover_concepts.py   — Concept discovery (uses calculation_trees API)
+edgar/xbrl/standardization/tools/verify_mapping.py      — Value verification AI tool
+edgar/xbrl/standardization/tools/learn_mappings.py      — Cross-company pattern learning
+.claude/agents/haiku-concept-scout.md                    — Haiku scout for concept discovery
+.claude/agents/haiku-period-verifier.md                  — Haiku scout for multi-period verification
+.claude/agents/haiku-cross-company-learner.md            — Haiku scout for pattern transfer
+.claude/agents/haiku-gap-classifier.md                   — Haiku scout for fast gap triage
 ```

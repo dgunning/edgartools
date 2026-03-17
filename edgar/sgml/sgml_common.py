@@ -447,8 +447,25 @@ class FilingSGML:
 
     @classmethod
     def from_filing(cls, filing: 'Filing') -> 'FilingSGML':
-        """Create from a Filing object that provides text_url."""
-        filing_sgml = cls.from_source(filing.text_url)
+        """Create from a Filing object that provides text_url.
+
+        When local storage is enabled, attempts to load the filing from the
+        local filesystem first (avoiding network requests). Falls back to the
+        network URL if the local file doesn't exist.
+        """
+        source = filing.text_url
+
+        # Check local storage first to avoid network requests
+        from edgar.storage._local import is_using_local_storage, local_filing_path
+        if is_using_local_storage():
+            try:
+                local_path = local_filing_path(filing.filing_date, filing.accession_no)
+                if local_path.exists():
+                    source = local_path
+            except Exception:
+                pass  # Fall back to network URL
+
+        filing_sgml = cls.from_source(source)
         if not filing_sgml.accession_number:
             filing_sgml.header.filing_metadata.update('ACCESSION NUMBER', filing.accession_no)
         if not filing_sgml.header.filing_metadata.get("CIK"):

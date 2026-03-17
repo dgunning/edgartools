@@ -365,27 +365,32 @@ def identify_gaps(
     if ledger is None:
         ledger = ExperimentLedger()
 
-    # Run full evaluation
-    cqs_result = compute_cqs(
-        eval_cohort=eval_cohort,
-        snapshot_mode=snapshot_mode,
-        use_ai=use_ai,
-        ledger=ledger,
-    )
-
-    # Re-run orchestrator for detailed results (reuse from CQS cache if possible)
+    # Run orchestrator ONCE — reuse results for both CQS computation and gap analysis
+    start_time = time.time()
     orchestrator = Orchestrator(snapshot_mode=snapshot_mode)
     all_results = orchestrator.map_companies(
         tickers=eval_cohort, use_ai=use_ai, validate=True
     )
 
+    # Compute CQS from the orchestrator results directly
+    golden_masters = ledger.get_all_golden_masters(active_only=True)
+    golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
+
+    company_scores: Dict[str, 'CompanyCQS'] = {}
+    for ticker, metrics in all_results.items():
+        company_scores[ticker] = _compute_company_cqs(
+            ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {})
+        )
+
+    cqs_result = _aggregate_cqs(company_scores, None, time.time() - start_time)
+    cqs_result.company_scores = company_scores
+    logger.info(f"identify_gaps eval: {cqs_result.summary()}")
+
     # Get graveyard counts per metric
     graveyard_counts = _get_graveyard_counts(ledger)
 
-    # Build gap list
+    # Build gap list (reusing golden_set from CQS computation above)
     gaps: List[MetricGap] = []
-    golden_masters = ledger.get_all_golden_masters(active_only=True)
-    golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
 
     for ticker, metrics in all_results.items():
         validations = orchestrator.validation_results.get(ticker, {})
@@ -545,6 +550,33 @@ def print_cqs_report(result: CQSResult):
 
     print("=" * 70)
     print()
+
+
+def check_offline_readiness(eval_cohort: Optional[List[str]] = None) -> bool:
+    """
+    Quick check that the eval cohort has local data available.
+
+    Returns True if all companies have at least one local 10-K filing.
+    Prints a warning for any companies missing local data.
+    """
+    from edgar.xbrl.standardization.tools.bulk_preload import verify_offline_readiness
+
+    if eval_cohort is None:
+        eval_cohort = QUICK_EVAL_COHORT
+
+    readiness = verify_offline_readiness(eval_cohort)
+
+    if not readiness['overall_ready']:
+        missing = [
+            ticker for ticker, status in readiness['tickers'].items()
+            if not status.get('ready', False)
+        ]
+        logger.warning(
+            f"Offline data missing for: {', '.join(missing)}. "
+            f"Run bulk_preload.preload_cohort() to download."
+        )
+
+    return readiness['overall_ready']
 
 
 def print_gap_report(gaps: List[MetricGap], limit: int = 20):

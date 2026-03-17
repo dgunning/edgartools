@@ -1118,3 +1118,372 @@ def get_config_fingerprint() -> str:
         if path.exists():
             h.update(path.read_bytes())
     return h.hexdigest()[:16]
+
+
+# =============================================================================
+# PHASE 1: PARALLEL SCOUT INFRASTRUCTURE
+# =============================================================================
+
+@dataclass
+class ScoutResult:
+    """Result from a Haiku scout agent."""
+    ticker: str
+    metric: str
+    candidates: List[Dict[str, Any]] = field(default_factory=list)
+    classification: str = ""           # "unmapped" | "structural" | "validation_failure"
+    recommended_action: str = ""       # "add_concept" | "add_exclusion" | "skip"
+    best_candidate: Optional[str] = None
+    confidence: float = 0.0
+    error: Optional[str] = None
+
+    @property
+    def has_proposal(self) -> bool:
+        return self.best_candidate is not None and self.confidence > 0.5
+
+
+def scout_result_to_change(result: ScoutResult, gap: MetricGap) -> Optional[ConfigChange]:
+    """Convert a scout result into a ConfigChange proposal."""
+    if not result.has_proposal:
+        return None
+
+    if result.recommended_action == "add_concept" and result.best_candidate:
+        return ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_CONCEPT,
+            yaml_path=f"metrics.{result.metric}.known_concepts",
+            new_value=result.best_candidate,
+            rationale=f"Haiku scout found concept (confidence={result.confidence:.2f})",
+            target_metric=result.metric,
+            target_companies=result.ticker,
+        )
+    elif result.recommended_action == "add_exclusion":
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_EXCLUSION,
+            yaml_path=f"companies.{result.ticker}.exclude_metrics",
+            new_value=result.metric,
+            rationale=f"Haiku scout classified as structural gap ({result.classification})",
+            target_metric=result.metric,
+            target_companies=result.ticker,
+        )
+
+    return None
+
+
+def build_scout_prompt(gap: MetricGap, known_concepts: List[str]) -> str:
+    """Build the prompt for a Haiku concept scout agent."""
+    return (
+        f"Search for XBRL concepts matching metric '{gap.metric}' "
+        f"for company {gap.ticker}. "
+        f"Reference value: {gap.reference_value}. "
+        f"Known concepts already in config: {known_concepts}. "
+        f"Gap type: {gap.gap_type}. "
+        f"Return strict JSON with candidates found in calculation trees."
+    )
+
+
+def build_classifier_prompt(gap: MetricGap, graveyard_count: int) -> str:
+    """Build the prompt for a Haiku gap classifier agent."""
+    return (
+        f"Classify metric gap: ticker={gap.ticker}, metric={gap.metric}, "
+        f"gap_type={gap.gap_type}, reference_value={gap.reference_value}, "
+        f"xbrl_value={gap.xbrl_value}, variance={gap.current_variance}, "
+        f"graveyard_count={graveyard_count}. "
+        f"Return strict JSON classification."
+    )
+
+
+def build_verifier_prompt(
+    ticker: str, metric: str, concept: str
+) -> str:
+    """Build the prompt for a Haiku period verifier agent."""
+    return (
+        f"Verify concept '{concept}' for metric '{metric}' "
+        f"across multiple fiscal periods for company {ticker}. "
+        f"Load the 3 most recent 10-K filings, extract the concept value "
+        f"from each, and report whether the concept is consistent. "
+        f"Return strict JSON with per-period results."
+    )
+
+
+def build_learner_prompt(
+    metric: str, concept: str, source_ticker: str, target_tickers: List[str]
+) -> str:
+    """Build the prompt for a Haiku cross-company learner agent."""
+    return (
+        f"Check if concept '{concept}' (which works for {source_ticker}'s '{metric}') "
+        f"also works for: {', '.join(target_tickers)}. "
+        f"For each ticker, check if the concept exists in calc trees and has a value. "
+        f"Return strict JSON with per-company results."
+    )
+
+
+# =============================================================================
+# PHASE 2: BATCH EVALUATION
+# =============================================================================
+
+def changes_conflict(a: ConfigChange, b: ConfigChange) -> bool:
+    """
+    Check if two config changes conflict (modify the same scope).
+
+    Two changes conflict if they modify the same key path in the same file.
+    Company-specific changes to different companies never conflict.
+    Metric-level changes to different metrics never conflict.
+    """
+    if a.file != b.file:
+        return False
+
+    a_parts = a.yaml_path.split('.')
+    b_parts = b.yaml_path.split('.')
+
+    if a.file == "companies.yaml":
+        # Company-specific changes: conflict only if same company + same path
+        if len(a_parts) >= 2 and len(b_parts) >= 2:
+            return a_parts[1] == b_parts[1] and a.yaml_path == b.yaml_path
+        return a.yaml_path == b.yaml_path
+
+    if a.file == "metrics.yaml":
+        # Metric-level changes: conflict only if same metric + same path
+        if len(a_parts) >= 2 and len(b_parts) >= 2:
+            return a_parts[1] == b_parts[1] and a.yaml_path == b.yaml_path
+        return a.yaml_path == b.yaml_path
+
+    # For other files, any overlap in path prefix is a conflict
+    return a.yaml_path == b.yaml_path
+
+
+def select_non_conflicting(changes: List[ConfigChange]) -> List[ConfigChange]:
+    """Select the largest non-conflicting subset of changes."""
+    selected: List[ConfigChange] = []
+    for change in changes:
+        if not any(changes_conflict(change, s) for s in selected):
+            selected.append(change)
+    return selected
+
+
+@dataclass
+class BatchResult:
+    """Result of batch-evaluating multiple config changes."""
+    changes_applied: List[ConfigChange]
+    changes_kept: List[ConfigChange]
+    changes_reverted: List[ConfigChange]
+    cqs_before: float
+    cqs_after: float
+    duration_seconds: float = 0.0
+
+
+def batch_evaluate(
+    changes: List[ConfigChange],
+    baseline_cqs: CQSResult,
+    eval_cohort: Optional[List[str]] = None,
+    ledger: Optional[ExperimentLedger] = None,
+) -> BatchResult:
+    """
+    Evaluate a batch of non-conflicting config changes together.
+
+    Applies all changes at once, measures CQS, and if it improved, keeps all.
+    If CQS dropped, uses binary search to find which change(s) caused regression.
+
+    Args:
+        changes: List of non-conflicting ConfigChanges.
+        baseline_cqs: CQS before any changes.
+        eval_cohort: Companies to evaluate.
+        ledger: ExperimentLedger.
+
+    Returns:
+        BatchResult with which changes were kept/reverted.
+    """
+    start_time = time.time()
+    if eval_cohort is None:
+        eval_cohort = QUICK_EVAL_COHORT
+
+    # Filter to non-conflicting
+    batch = select_non_conflicting(changes)
+    if not batch:
+        return BatchResult(
+            changes_applied=[], changes_kept=[], changes_reverted=[],
+            cqs_before=baseline_cqs.cqs, cqs_after=baseline_cqs.cqs,
+        )
+
+    # Apply all changes
+    applied: List[ConfigChange] = []
+    for change in batch:
+        try:
+            apply_config_change(change)
+            applied.append(change)
+        except Exception as e:
+            logger.warning(f"Failed to apply {change.target_metric}: {e}")
+
+    if not applied:
+        return BatchResult(
+            changes_applied=[], changes_kept=[], changes_reverted=[],
+            cqs_before=baseline_cqs.cqs, cqs_after=baseline_cqs.cqs,
+        )
+
+    # Measure aggregate CQS
+    try:
+        new_cqs = compute_cqs(
+            eval_cohort=eval_cohort,
+            snapshot_mode=True,
+            use_ai=False,
+            baseline_cqs=baseline_cqs.cqs,
+            ledger=ledger,
+        )
+    except Exception as e:
+        logger.error(f"Batch evaluation failed: {e}")
+        for change in applied:
+            revert_config_change(change)
+        return BatchResult(
+            changes_applied=applied, changes_kept=[], changes_reverted=applied,
+            cqs_before=baseline_cqs.cqs, cqs_after=baseline_cqs.cqs,
+            duration_seconds=time.time() - start_time,
+        )
+
+    # Check for regressions (hard veto -> revert all)
+    if new_cqs.vetoed or new_cqs.total_regressions > 0:
+        logger.warning(f"Batch VETOED: {new_cqs.total_regressions} regressions")
+        for change in applied:
+            revert_config_change(change)
+        return BatchResult(
+            changes_applied=applied, changes_kept=[], changes_reverted=applied,
+            cqs_before=baseline_cqs.cqs, cqs_after=new_cqs.cqs,
+            duration_seconds=time.time() - start_time,
+        )
+
+    # CQS improved -> keep all
+    if new_cqs.cqs > baseline_cqs.cqs:
+        logger.info(f"Batch KEPT: {len(applied)} changes, CQS {baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f}")
+        return BatchResult(
+            changes_applied=applied, changes_kept=applied, changes_reverted=[],
+            cqs_before=baseline_cqs.cqs, cqs_after=new_cqs.cqs,
+            duration_seconds=time.time() - start_time,
+        )
+
+    # CQS didn't improve -> binary search to isolate problematic changes
+    logger.info("Batch didn't improve CQS — isolating individual changes")
+    kept, reverted = _binary_search_changes(applied, baseline_cqs, eval_cohort, ledger)
+
+    final_cqs = compute_cqs(eval_cohort=eval_cohort, snapshot_mode=True, ledger=ledger)
+
+    return BatchResult(
+        changes_applied=applied, changes_kept=kept, changes_reverted=reverted,
+        cqs_before=baseline_cqs.cqs, cqs_after=final_cqs.cqs,
+        duration_seconds=time.time() - start_time,
+    )
+
+
+def _binary_search_changes(
+    changes: List[ConfigChange],
+    baseline_cqs: CQSResult,
+    eval_cohort: List[str],
+    ledger: Optional[ExperimentLedger],
+) -> tuple:
+    """
+    Binary search to find which changes help vs hurt.
+
+    Reverts all, then re-applies one at a time, keeping those that improve.
+    Falls back to sequential evaluation for small batches.
+    """
+    # For small batches, just try each individually
+    for change in changes:
+        revert_config_change(change)
+
+    kept: List[ConfigChange] = []
+    reverted: List[ConfigChange] = []
+
+    for change in changes:
+        try:
+            apply_config_change(change)
+            new_cqs = compute_cqs(
+                eval_cohort=eval_cohort, snapshot_mode=True,
+                baseline_cqs=baseline_cqs.cqs, ledger=ledger,
+            )
+
+            if new_cqs.cqs > baseline_cqs.cqs and new_cqs.total_regressions == 0:
+                kept.append(change)
+                logger.info(f"  Individual KEEP: {change.target_metric}")
+            else:
+                revert_config_change(change)
+                reverted.append(change)
+                logger.info(f"  Individual REVERT: {change.target_metric}")
+        except Exception:
+            revert_config_change(change)
+            reverted.append(change)
+
+    return kept, reverted
+
+
+# =============================================================================
+# PHASE 3: CROSS-COMPANY LEARNING
+# =============================================================================
+
+def cross_company_learn(
+    metric: str,
+    concept: str,
+    source_ticker: str,
+    target_tickers: Optional[List[str]] = None,
+) -> List[ConfigChange]:
+    """
+    When a concept works for one company, generate proposals to apply it to others.
+
+    This is called after a successful KEEP decision to propagate the learning.
+    The actual verification should be done by Haiku learner agents.
+
+    Args:
+        metric: The metric name (e.g., "LongTermDebt").
+        concept: The concept that worked (e.g., "LongTermDebtNoncurrent").
+        source_ticker: The ticker where this concept was discovered.
+        target_tickers: Other tickers to try. Defaults to QUICK_EVAL_COHORT.
+
+    Returns:
+        List of ConfigChanges to evaluate (add concept to known_concepts).
+    """
+    if target_tickers is None:
+        target_tickers = [t for t in QUICK_EVAL_COHORT if t != source_ticker]
+
+    # The concept goes into metrics.yaml known_concepts which is universal,
+    # so if it's already there from the original KEEP, we don't need per-company
+    # proposals. Instead, we check if any target companies need exclusions removed
+    # or if the concept helps them.
+
+    proposals = []
+
+    # Read current config to check if concept is already in known_concepts
+    metrics_path = CONFIG_DIR / "metrics.yaml"
+    if not metrics_path.exists():
+        return proposals
+
+    with open(metrics_path, 'r') as f:
+        metrics_config = yaml.safe_load(f)
+
+    metric_def = metrics_config.get("metrics", {}).get(metric, {})
+    known = metric_def.get("known_concepts", [])
+
+    if concept not in known:
+        # The concept should already be added by the original KEEP, but
+        # just in case, propose adding it
+        proposals.append(ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_CONCEPT,
+            yaml_path=f"metrics.{metric}.known_concepts",
+            new_value=concept,
+            rationale=f"Cross-company learning from {source_ticker}: {concept} works for {metric}",
+            target_metric=metric,
+            target_companies=",".join(target_tickers),
+        ))
+
+    return proposals
+
+
+# =============================================================================
+# PHASE 4: CONCURRENCY GUARDS
+# =============================================================================
+
+def enable_wal_mode(ledger: ExperimentLedger) -> None:
+    """Enable WAL mode on the ledger's SQLite database for concurrent reads."""
+    try:
+        if hasattr(ledger, 'conn') and ledger.conn:
+            ledger.conn.execute("PRAGMA journal_mode=WAL")
+            logger.info("SQLite WAL mode enabled for experiment ledger")
+    except Exception as e:
+        logger.warning(f"Failed to enable WAL mode: {e}")
