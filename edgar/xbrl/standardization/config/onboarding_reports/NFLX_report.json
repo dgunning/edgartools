@@ -21,6 +21,7 @@
     "ShortTermDebt",
     "LongTermDebt",
     "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
     "DividendsPaid",
     "Inventory",
@@ -28,23 +29,12 @@
     "AccountsPayable",
     "DepreciationAmortization"
   ],
-  "metrics_failed": [
-    "WeightedAverageSharesDiluted"
-  ],
+  "metrics_failed": [],
   "metrics_excluded": [],
-  "failures": {
-    "WeightedAverageSharesDiluted": {
-      "metric": "WeightedAverageSharesDiluted",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 4392610000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    }
-  },
-  "remediation_complexity": "needs_review",
+  "failures": {},
+  "remediation_complexity": "clean",
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-03-06T01:19:14.297297"
+  "timestamp": "2026-03-06T01:36:48.292418"
 }
