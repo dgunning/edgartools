@@ -22,13 +22,10 @@ logger = logging.getLogger(__name__)
 
 @tool(
     name="edgar_monitor",
-    description="""Get the latest SEC filings in real-time (updated every few minutes).
-
-Returns today's filings from the SEC's live feed. Use this to monitor new filings,
-track 8-K events, or see insider trades as they happen.
+    description="""Use this to see what was just filed with the SEC. Returns the latest filings from today's live feed, updated every few minutes. Filter by form type to track specific events.
 
 Examples:
-- Latest filings: (no parameters)
+- All latest: (no parameters)
 - Today's 8-Ks: form="8-K"
 - Insider trades: form="4"
 - Latest 10-Ks: form="10-K"
@@ -79,7 +76,7 @@ async def edgar_monitor(
             result["form_filter"] = form
 
         next_steps = [
-            "Use edgar_filing with an accession_number to read a specific filing's content",
+            "Use edgar_filing with an accession_number to examine a filing",
             "Use edgar_company to get full company analysis",
         ]
 

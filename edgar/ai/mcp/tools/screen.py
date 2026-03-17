@@ -22,13 +22,10 @@ logger = logging.getLogger(__name__)
 
 @tool(
     name="edgar_screen",
-    description="""Discover companies by industry, exchange, or state. Returns matching
-companies from SEC reference data — instant, no API calls.
-
-Combine filters to narrow results (e.g., software companies on NYSE in Delaware).
+    description="""Use this to discover or screen companies by industry, exchange, or state. Returns matching companies from SEC reference data — instant results, no API calls. Combine filters to narrow results.
 
 Examples:
-- By industry keyword: industry="software"
+- By industry: industry="software"
 - By SIC code: sic=2834 (pharmaceutical)
 - By exchange: exchange="NYSE"
 - By state: state="DE" (Delaware)

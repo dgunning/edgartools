@@ -23,13 +23,12 @@ logger = logging.getLogger(__name__)
 
 @tool(
     name="edgar_search",
-    description="""Search SEC data: companies, filings, or both.
+    description="""Use this to find companies by name or list filings by form type and company. This searches metadata (names, form types, dates) — not filing text content. For full-text content search, use edgar_text_search instead.
 
 Examples:
 - Find companies: query="software", search_type="companies"
-- Recent 10-Ks: form="10-K", search_type="filings", limit=20
-- Company filings: identifier="AAPL", form="8-K", search_type="filings"
-- Everything: query="artificial intelligence", search_type="all\"""",
+- Company's 8-Ks: identifier="AAPL", form="8-K", search_type="filings"
+- Recent 10-Ks: form="10-K", search_type="filings\"""",
     params={
         "query": {
             "type": "string",
@@ -89,7 +88,7 @@ async def edgar_search(
             )
             result["filings"] = filings
             if filings:
-                next_steps.append("Use edgar_filing with accession_number to read content")
+                next_steps.append("Use edgar_filing with accession_number to examine a filing")
 
         # If nothing specified, give helpful guidance
         if not result:

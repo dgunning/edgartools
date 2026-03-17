@@ -22,17 +22,13 @@ logger = logging.getLogger(__name__)
 
 @tool(
     name="edgar_text_search",
-    description="""Full-text search across all SEC filings. Searches the actual text
-content of filings — find filings that mention specific topics, products, risks, etc.
-
-This searches EDGAR's EFTS (Electronic Full-Text Search) index, which covers
-all filing text content, not just metadata.
+    description="""Use this to find filings that mention specific topics, products, risks, or events. Searches the actual text content of all SEC filings via EDGAR's full-text search index (EFTS). Different from edgar_search which only searches metadata.
 
 Examples:
 - Topic search: query="artificial intelligence"
-- Scoped to form: query="cybersecurity incident", forms=["8-K"]
-- Date range: query="supply chain disruption", start_date="2024-01-01", end_date="2024-12-31"
-- Company + topic: query="tariff impact", forms=["10-K"], identifier="AAPL\"""",
+- 8-K events: query="cybersecurity incident", forms=["8-K"]
+- Date range: query="supply chain disruption", start_date="2024-01-01"
+- Company-specific: query="tariff impact", forms=["10-K"], identifier="AAPL\"""",
     params={
         "query": {
             "type": "string",
@@ -136,7 +132,7 @@ async def edgar_text_search(
             result["note"] = f"Showing {len(results)} of {search_result.total} matches. Increase limit for more."
 
         next_steps = [
-            "Use edgar_filing with an accession_number to read the full filing content",
+            "Use edgar_filing with an accession_number to examine the filing, then edgar_read to extract sections",
             "Use edgar_company with a CIK to get company details",
         ]
 

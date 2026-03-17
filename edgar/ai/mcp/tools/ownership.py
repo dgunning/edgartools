@@ -22,17 +22,12 @@ logger = logging.getLogger(__name__)
 
 @tool(
     name="edgar_ownership",
-    description="""Get ownership data: insider transactions, fund portfolios, or quarter-over-quarter portfolio changes.
-
-- For companies: shows insider trading activity (Form 4 filings)
-- For funds/institutions: shows WHAT they own (13F portfolio holdings)
-- Portfolio diff: shows what changed between quarters (new positions, exits, increases, decreases)
+    description="""Use this for insider trading activity (Form 4) or institutional fund portfolios (13F). For companies, use analysis_type="insiders". For funds/institutions, use analysis_type="fund_portfolio" with the fund's CIK.
 
 Examples:
 - Insider trades: identifier="AAPL", analysis_type="insiders"
 - Berkshire portfolio: identifier="1067983", analysis_type="fund_portfolio"
-- Portfolio changes: identifier="1067983", analysis_type="portfolio_diff"
-- Vanguard holdings: identifier="102909", analysis_type="fund_portfolio\"""",
+- Portfolio changes: identifier="1067983", analysis_type="portfolio_diff\"""",
     params={
         "identifier": {
             "type": "string",

@@ -26,14 +26,12 @@ logger = logging.getLogger(__name__)
 
 @tool(
     name="edgar_company",
-    description="""Get company information and analysis. Combines profile, financials,
-filings, and ownership data in one call. Use 'include' to control what data is returned.
+    description="""Use this as the starting point for any company-level question. Returns profile, financials, recent filings, and ownership data in one call. Control what's included with the 'include' parameter.
 
 Examples:
-- Basic info: identifier="AAPL"
-- Full analysis: identifier="AAPL", include=["profile", "financials", "filings", "ownership"]
-- Just financials: identifier="MSFT", include=["financials"], periods=8
-- TTM financials: identifier="AAPL", include=["financials"], period="ttm", periods=4""",
+- Company overview: identifier="AAPL"
+- Financials only: identifier="MSFT", include=["financials"], periods=8
+- Full analysis: identifier="AAPL", include=["profile", "financials", "filings", "ownership"]""",
     params={
         "identifier": {
             "type": "string",
@@ -121,7 +119,7 @@ async def edgar_company(
         if "ownership" not in include:
             next_steps.append("Add 'ownership' to include for insider/institutional data")
         next_steps.append("Use edgar_compare to compare with peer companies")
-        next_steps.append("Use edgar_filing to read specific SEC filing content")
+        next_steps.append("Use edgar_read to read specific filing sections (risk factors, MD&A, etc.)")
 
         return success(result, next_steps=next_steps)
 

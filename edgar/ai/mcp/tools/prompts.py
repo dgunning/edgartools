@@ -122,9 +122,9 @@ def _render_due_diligence(identifier: str) -> GetPromptResult:
 
 2. **Financial Trends**: Use edgar_trends with concepts ["revenue", "net_income", "eps"] over 5 years to understand growth trajectory.
 
-3. **Risk Factors**: Use edgar_filing to read the latest 10-K risk_factors section.
+3. **Risk Factors**: Use edgar_read to read the latest 10-K risk_factors section.
 
-4. **Recent Events**: Use edgar_filing to check the latest 8-K for material events.
+4. **Recent Events**: Use edgar_read to check the latest 8-K for material events.
 
 5. **Insider Activity**: Use edgar_ownership with analysis_type "insiders" to review recent insider transactions.
 
@@ -149,13 +149,13 @@ def _render_earnings_analysis(identifier: str) -> GetPromptResult:
                     type="text",
                     text=f"""Analyze recent earnings performance for {identifier}. Follow these steps:
 
-1. **Latest Earnings**: Use edgar_filing with form "8-K" and sections ["items", "earnings"] to find the most recent earnings release.
+1. **Latest Earnings**: Use edgar_read with form "8-K" and sections ["items", "earnings"] to find the most recent earnings release.
 
 2. **Financial Trends**: Use edgar_trends with concepts ["revenue", "net_income", "eps", "gross_profit"] for both annual (5 years) and quarterly (8 quarters) to show the trajectory.
 
 3. **Peer Comparison**: Use edgar_compare with {identifier} and 2-3 peer companies, comparing ["revenue", "net_income", "net_margin"].
 
-4. **Management Commentary**: Use edgar_filing with the latest 10-K or 10-Q, sections ["mda"] for management's discussion.
+4. **Management Commentary**: Use edgar_read with the latest 10-K or 10-Q, sections ["mda"] for management's discussion.
 
 5. **Synthesis**: Provide:
    - Revenue and earnings growth trends (accelerating/decelerating?)
@@ -267,9 +267,9 @@ def _render_filing_comparison(identifier: str, form: str = "10-K", compare_to: s
 
 1. **Company Profiles**: Use edgar_company for both {identifier} and {compare_to} with include ["profile"] to understand each company.
 
-2. **Filing A**: Use edgar_filing with identifier="{identifier}" and form="{form}" to get the latest {form} filing. Read sections ["business", "risk_factors", "mda"].
+2. **Filing A**: Use edgar_read with identifier="{identifier}" and form="{form}" to get the latest {form} filing. Read sections ["business", "risk_factors", "mda"].
 
-3. **Filing B**: Use edgar_filing with identifier="{compare_to}" and form="{form}" to get the latest {form} filing. Read the same sections.
+3. **Filing B**: Use edgar_read with identifier="{compare_to}" and form="{form}" to get the latest {form} filing. Read the same sections.
 
 4. **Financial Comparison**: Use edgar_compare with identifiers ["{identifier}", "{compare_to}"] to compare financial metrics.
 
@@ -286,13 +286,13 @@ def _render_filing_comparison(identifier: str, form: str = "10-K", compare_to: s
 
 1. **Company Profile**: Use edgar_company with identifier="{identifier}" and include ["profile"] for context.
 
-2. **Latest Filing**: Use edgar_filing with identifier="{identifier}", form="{form}", and filing_index=0. Read sections ["business", "risk_factors", "mda"].
+2. **Latest Filing**: Use edgar_read with identifier="{identifier}", form="{form}", and filing_index=0. Read sections ["business", "risk_factors", "mda"].
 
-3. **Previous Filing**: Use edgar_filing with identifier="{identifier}", form="{form}", and filing_index=1. Read the same sections.
+3. **Previous Filing**: Use edgar_read with identifier="{identifier}", form="{form}", and filing_index=1. Read the same sections.
 
 4. **Financial Trends**: Use edgar_trends with identifier="{identifier}" and concepts ["revenue", "net_income", "eps", "assets"] over 5 periods to see the trajectory.
 
-5. **Recent Events**: Use edgar_filing with form="8-K" for {identifier} to check for material events between the two filing periods.
+5. **Recent Events**: Use edgar_read with form="8-K" for {identifier} to check for material events between the two filing periods.
 
 6. **Synthesis**: Highlight year-over-year changes:
    - Business description changes — new products, markets, or strategy shifts
@@ -323,9 +323,9 @@ def _render_activist_tracking(identifier: str) -> GetPromptResult:
 
 1. **Company Profile**: Use edgar_company with identifier="{identifier}" and include ["profile", "financials"] to understand the target company.
 
-2. **SC 13D Filings**: Use edgar_filing with identifier="{identifier}" and form="SC 13D" to find activist ownership filings (>5% stakes with intent to influence).
+2. **SC 13D Filings**: Use edgar_read with identifier="{identifier}" and form="SC 13D" to find activist ownership filings (>5% stakes with intent to influence).
 
-3. **SC 13G Filings**: Use edgar_filing with identifier="{identifier}" and form="SC 13G" to find passive large holder filings (>5% stakes, passive intent).
+3. **SC 13G Filings**: Use edgar_read with identifier="{identifier}" and form="SC 13G" to find passive large holder filings (>5% stakes, passive intent).
 
 4. **Proxy Context**: Use edgar_proxy with identifier="{identifier}" to get executive compensation and governance data — often a focus of activist campaigns.
 

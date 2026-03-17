@@ -244,7 +244,18 @@ Search for companies or filings.
 - `limit` (default: 10): Max results
 
 #### 3. edgar_filing
-Read filing content or specific sections.
+Examine any SEC filing by accession number or URL.
+
+**Example prompts:**
+- "Tell me about filing 0000320193-23-000077"
+- "What's in this SEC filing?" (paste URL)
+
+**Parameters:**
+- `input` (required): Accession number or SEC URL
+- `detail`: `minimal`, `standard` (default), or `full`
+
+#### 4. edgar_read
+Read specific sections from a filing.
 
 **Example prompts:**
 - "Show me the risk factors from Apple's latest 10-K"
@@ -255,7 +266,7 @@ Read filing content or specific sections.
 - OR `identifier` + `form`: Company + form type
 - `sections`: `summary`, `business`, `risk_factors`, `mda`, `financials`, or `all`
 
-#### 4. edgar_compare
+#### 5. edgar_compare
 Compare companies side-by-side or analyze an industry.
 
 **Example prompts:**

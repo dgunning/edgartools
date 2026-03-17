@@ -53,15 +53,9 @@ def _df_to_records(df: pd.DataFrame, limit: int, columns: Optional[list[str]] = 
 
 @tool(
     name="edgar_fund",
-    description="""Get fund, ETF, BDC (Business Development Company), and money market fund data.
+    description="""Use this for mutual fund, ETF, BDC, and money market fund analysis. Supports fund lookup, portfolio holdings, money market yields, and BDC investments.
 
-Actions:
-- lookup: Get fund hierarchy (company/series/class) by ticker, series ID, class ID, or CIK
-- search: Search for funds by name
-- portfolio: Get fund portfolio holdings (NPORT-P filings)
-- money_market: Get money market fund data (N-MFP3/N-MFP2 filings) — yields, share classes, holdings
-- bdc_search: Search for Business Development Companies by name or ticker
-- bdc_portfolio: Get BDC portfolio investments from Schedule of Investments
+Actions: lookup (find fund by ticker/CIK), search (by name), portfolio (NPORT holdings), money_market (yields/NAV), bdc_search, bdc_portfolio.
 
 Examples:
 - Fund lookup: action="lookup", identifier="VFINX"
@@ -610,7 +604,7 @@ async def _bdc_portfolio(identifier: str, limit: int) -> Any:
         next_steps = [
             "Use action='bdc_search' to find other BDCs",
             "Use edgar_company with this CIK for full company analysis",
-            "Use edgar_filing to read the BDC's latest 10-K or 10-Q",
+            "Use edgar_read to read the BDC's latest 10-K or 10-Q sections",
         ]
 
         return success(result, next_steps=next_steps)

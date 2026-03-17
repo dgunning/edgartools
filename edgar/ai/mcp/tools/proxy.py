@@ -67,15 +67,12 @@ def _df_to_records(df: pd.DataFrame, limit: int, columns: Optional[list[str]] = 
 
 @tool(
     name="edgar_proxy",
-    description="""Get executive compensation and governance data from DEF 14A proxy statements.
-
-Returns CEO/NEO compensation, pay vs performance metrics, governance indicators,
-and performance measures extracted from XBRL-tagged proxy filings.
+    description="""Use this for CEO compensation, executive pay, and corporate governance questions. Extracts compensation tables, pay-vs-performance metrics, and governance data from DEF 14A proxy statements.
 
 Examples:
-- Apple proxy: identifier="AAPL"
-- Microsoft proxy: identifier="MSFT"
-- Older proxy: identifier="AAPL", filing_index=1""",
+- CEO pay: identifier="AAPL"
+- Compare pay: identifier="MSFT"
+- Prior year: identifier="AAPL", filing_index=1""",
     params={
         "identifier": {
             "type": "string",
@@ -104,7 +101,7 @@ async def edgar_proxy(
                 f"No DEF 14A proxy filings found for '{identifier}'",
                 suggestions=[
                     "This company may not file proxy statements (e.g., foreign private issuers use 20-F)",
-                    "Try edgar_filing with form='DEF 14A' to search more broadly",
+                    "Try edgar_read with form='DEF 14A' to search more broadly",
                     "Use edgar_company to verify the company identifier",
                 ],
                 error_code="NO_FILINGS"
@@ -127,7 +124,7 @@ async def edgar_proxy(
                 f"Could not parse proxy statement for '{identifier}' (filing {filing.accession_no})",
                 suggestions=[
                     "The filing may not be parseable as a proxy statement",
-                    "Use edgar_filing with form='DEF 14A' to read the raw filing text",
+                    "Use edgar_read with form='DEF 14A' to read the raw filing text",
                 ],
                 error_code="PARSE_ERROR"
             )
@@ -150,7 +147,7 @@ async def edgar_proxy(
                 "SPACs, or registered investment companies)."
             )
             return success(result, next_steps=[
-                "Use edgar_filing to read the proxy statement text directly",
+                "Use edgar_read to read the proxy statement text directly",
                 "Try a different company that is a large accelerated filer",
             ])
 
@@ -215,7 +212,7 @@ async def edgar_proxy(
 
         next_steps = [
             "Use edgar_company for full company profile and financials",
-            "Use edgar_filing with form='DEF 14A' to read proxy statement text",
+            "Use edgar_read with form='DEF 14A' to read proxy statement text",
             "Use edgar_compare to compare executive compensation across companies",
         ]
 

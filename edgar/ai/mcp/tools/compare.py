@@ -60,14 +60,12 @@ INDUSTRY_FUNCTIONS = {
 
 @tool(
     name="edgar_compare",
-    description="""Compare multiple companies or analyze an industry sector.
-
-Provide specific companies OR select an industry for automatic peer selection.
+    description="""Use this to compare companies side-by-side on financial metrics, or analyze an industry sector with automatic peer selection.
 
 Examples:
-- Compare specific: identifiers=["AAPL", "MSFT", "GOOGL"]
-- Industry peers: industry="software", limit=5
-- Custom metrics: identifiers=["JPM", "BAC", "WFC"], metrics=["revenue", "net_income", "assets"]""",
+- Compare companies: identifiers=["AAPL", "MSFT", "GOOGL"]
+- Industry analysis: industry="software", limit=5
+- Bank comparison: identifiers=["JPM", "BAC", "WFC"], metrics=["revenue", "net_income", "assets"]""",
     params={
         "identifiers": {
             "type": "array",
@@ -178,7 +176,7 @@ async def edgar_compare(
 
         next_steps = [
             "Use edgar_company for detailed analysis of a specific company",
-            "Use edgar_filing to read specific SEC filings"
+            "Use edgar_read to read specific filing sections"
         ]
 
         return success(result, next_steps=next_steps)

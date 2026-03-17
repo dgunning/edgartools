@@ -12,16 +12,18 @@ Design principles:
 5. Helpful error messages with suggestions
 
 Tools:
-- edgar_company: Get company info, financials, filings, ownership in one call
-- edgar_search: Search companies and/or filings
-- edgar_filing: Read SEC filing content and sections (10-K, 10-Q, 8-K, DEF 14A, 13D/G, 13F)
+- edgar_company: Starting point for company questions (profile, financials, filings, ownership)
+- edgar_filing: Examine any filing by accession number or URL (structured context)
+- edgar_read: Read specific sections from filings (risk factors, MD&A, business, etc.)
+- edgar_search: Find companies by name or list filings by form type
+- edgar_text_search: Full-text search across SEC filing content (EFTS)
 - edgar_compare: Compare multiple companies or analyze industry
 - edgar_ownership: Insider transactions, fund portfolios
 - edgar_monitor: Real-time SEC filings feed
 - edgar_trends: Financial time series with growth rates
 - edgar_screen: Company discovery by industry, exchange, state
-- edgar_text_search: Full-text search across SEC filing content
-- edgar_proxy: Proxy statement (DEF 14A) executive compensation and governance
+- edgar_fund: Fund, ETF, BDC, money market data
+- edgar_proxy: Executive compensation and governance (DEF 14A)
 
 Usage:
     python -m edgar.ai            # Via module
@@ -87,6 +89,7 @@ def _import_tools():
     from edgar.ai.mcp.tools import company  # noqa: F401
     from edgar.ai.mcp.tools import search  # noqa: F401
     from edgar.ai.mcp.tools import filing  # noqa: F401
+    from edgar.ai.mcp.tools import reader  # noqa: F401
     from edgar.ai.mcp.tools import compare  # noqa: F401
     from edgar.ai.mcp.tools import ownership  # noqa: F401
     from edgar.ai.mcp.tools import monitor  # noqa: F401
@@ -95,7 +98,6 @@ def _import_tools():
     from edgar.ai.mcp.tools import text_search  # noqa: F401
     from edgar.ai.mcp.tools import fund  # noqa: F401
     from edgar.ai.mcp.tools import proxy  # noqa: F401
-    from edgar.ai.mcp.tools import context  # noqa: F401
 
 
 # Create the server
@@ -227,7 +229,15 @@ Search for companies or filings.
 ```
 
 ### edgar_filing
-Read SEC filing content.
+Examine any SEC filing by accession number or URL.
+
+```json
+{"input": "0000320193-23-000077"}
+{"input": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000077/...", "detail": "full"}
+```
+
+### edgar_read
+Read specific sections from a filing.
 
 ```json
 {"identifier": "AAPL", "form": "10-K", "sections": ["business", "risk_factors"]}

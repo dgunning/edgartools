@@ -35,8 +35,7 @@ CONCEPT_MAP = {
 
 @tool(
     name="edgar_trends",
-    description="""Get financial trends over time for a company. Returns XBRL-sourced
-time series data with growth rates — answers 'How has revenue grown over N years?'
+    description="""Use this for financial trend analysis over time. Returns XBRL-sourced time series with growth rates for revenue, income, EPS, and other metrics across multiple periods.
 
 Examples:
 - Revenue trend: identifier="AAPL", concepts=["revenue"]
@@ -183,7 +182,7 @@ async def edgar_trends(
 
         next_steps = [
             "Use edgar_compare to compare these trends with peer companies",
-            "Use edgar_filing to read the company's latest 10-K for context",
+            "Use edgar_read to read the company's latest 10-K sections for context",
         ]
 
         return success(result, next_steps=next_steps)

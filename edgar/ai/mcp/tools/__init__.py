@@ -3,10 +3,17 @@ EdgarTools MCP Tools
 
 Intent-based tools for SEC filing analysis:
 - edgar_company: Company intelligence (profile, financials, filings, ownership)
-- edgar_search: Search companies and filings
-- edgar_filing: Read filing content and sections
+- edgar_filing: Examine any filing by accession number or URL (structured context)
+- edgar_read: Read specific sections from filings (risk factors, MD&A, etc.)
+- edgar_search: Search companies and filings by metadata
+- edgar_text_search: Full-text search across filing content (EFTS)
 - edgar_compare: Compare companies or analyze industries
 - edgar_ownership: Insider transactions, institutional holders, fund portfolios
+- edgar_monitor: Latest SEC filings feed
+- edgar_trends: Financial time series with growth rates
+- edgar_screen: Discover companies by industry/exchange/state
+- edgar_fund: Fund, ETF, BDC, money market data
+- edgar_proxy: Executive compensation and governance
 """
 
 from edgar.ai.mcp.tools.base import (
