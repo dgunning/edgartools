@@ -1,83 +1,164 @@
-# XBRL2 Standardization
+# XBRL Standardization
 
-This package provides functionality for standardizing XBRL concepts across different company filings.
+Maps company-specific XBRL concepts to standardized metrics, enabling cross-company financial comparisons. Uses a multi-layer architecture (Tree Parser → Facts Search → AI Semantic) with validation against yfinance reference data.
 
-## Overview
+## Directory Structure
 
-The standardization module maps company-specific XBRL concepts to standardized concept names, 
-enabling consistent presentation of financial statements regardless of the filing entity.
-
-This is particularly useful for:
-- Comparing financial data across different companies
-- Building standardized reports and visualizations
-- Creating consistent financial datasets for analysis
-
-## Components
-
-- `StandardConcept`: An enumeration of standard financial statement concepts
-- `MappingStore`: Storage for mappings between company-specific and standard concepts
-- `ConceptMapper`: Maps company-specific concepts to standard concepts using various techniques
-- `standardize_statement`: Function to standardize a statement's labels
-
-## Usage
-
-```python
-from edgar.xbrl.standardization import StandardConcept, initialize_default_mappings, ConceptMapper,
-    standardize_statement
-
-# Get the default mappings
-store = initialize_default_mappings()
-
-# Create a mapper
-mapper = ConceptMapper(store)
-
-# Standardize a statement
-standardized_data = standardize_statement(statement_data, mapper)
+```
+standardization/
+├── config/                     Tier 1 configuration (YAML)
+│   ├── metrics.yaml            Metric definitions, known_concepts, tree_hints
+│   ├── companies.yaml          Company-specific overrides, exclusions, divergences
+│   ├── industry_metrics.yaml   Industry-specific concept mappings
+│   ├── yf_snapshots/           Cached yfinance reference data
+│   └── onboarding_reports/     Per-company onboarding results
+├── layers/                     Multi-layer mapping engine
+│   ├── tree_parser.py          Layer 1: Static calculation tree parsing
+│   ├── facts_search.py         Layer 2: Static facts database search
+│   └── ai_semantic.py          Layer 3: Dynamic AI semantic mapping
+├── ledger/
+│   └── schema.py               SQLite experiment ledger (extraction runs, golden masters, auto-eval)
+├── tools/                      Reusable tools for agents and automation
+│   ├── auto_eval.py            CQS computation, gap analysis
+│   ├── auto_eval_loop.py       Experiment loop, config changes, tournament eval
+│   ├── auto_eval_dashboard.py  Morning review terminal dashboard
+│   ├── discover_concepts.py    Search calc trees + facts for concept candidates
+│   ├── verify_mapping.py       Value comparison against yfinance
+│   ├── learn_mappings.py       Cross-company pattern discovery
+│   ├── onboard_company.py      Automated single-company onboarding
+│   ├── pipeline_orchestrator.py State machine for batch expansion
+│   └── ...
+├── orchestrator.py             Main multi-layer orchestrator
+├── reference_validator.py      Validation against yfinance snapshots
+├── models.py                   MappingResult, MappingSource, ConfidenceLevel
+└── config_loader.py            YAML config loading
 ```
 
-## Concept Mappings
+## Auto-Eval: Autonomous Quality Measurement
 
-The standardized concept mappings are stored in the `concept_mappings.json` file included
-in this package. This file maps standard concept names to lists of company-specific concept IDs.
+The auto-eval system applies the [autoresearch](https://x.com/kaboroevich/status/1928862789851525568) pattern to XBRL extraction quality. An autonomous agent modifies only YAML configuration files ("weights") while the evaluation harness (Orchestrator + ReferenceValidator + yf_snapshots) remains fixed. A single **Composite Quality Score (CQS)** drives all experiment decisions.
 
-The file is automatically loaded when initializing the `MappingStore` and can be extended
-with new mappings as needed.
+### Architecture
 
-## Customization and Advanced Usage
+```
+Gap Analysis → Propose Config Change → Apply → Measure CQS → Keep/Revert
+                     ↑                                            |
+                     └── Graveyard (skip after 3 failures) ←──────┘
+```
 
-For organizations managing custom XBRL taxonomies, company-specific concepts, or large-scale
-standardization projects, see the comprehensive customization guide:
+**Key constraint**: the agent never touches the extraction engine (Python code). It only modifies Tier 1 configs:
 
-**[Customizing XBRL Standardization](../../../docs/advanced/customizing-standardization.md)**
+| Config File | Contents |
+|---|---|
+| `config/metrics.yaml` | Metric definitions, known_concepts, tree_hints |
+| `config/companies.yaml` | Company-specific overrides, exclusions, divergences |
+| `config/industry_metrics.yaml` | Industry-specific concept mappings |
 
-This guide covers:
-- CSV-based mapping workflows for Excel editing
-- Validation techniques and quality assurance
-- Handling ambiguous taxonomies and priority resolution
-- CIK vs ticker-based mapping strategies
-- Entity detection and automated mapping
-- Production deployment patterns
-
-### Utility Functions
-
-The `utils` module provides tools for working with standardization mappings:
+### CQS Formula
 
 ```python
-from edgar.xbrl.standardization.utils import (
-    export_mappings_to_csv,
-    import_mappings_from_csv,
-    validate_mappings
+if regression_rate > 0:
+    return CQS_baseline - 0.01  # Hard veto — regressions always fail
+
+cqs = (0.50 * pass_rate           # Fraction of metrics passing validation
+     + 0.20 * (1 - variance/100)  # Lower variance is better
+     + 0.15 * coverage_rate       # Fraction of metrics mapped
+     + 0.10 * golden_master_rate  # Fraction with golden masters
+     + 0.05 * (1 - regression_rate))
+```
+
+### Quick Start
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval import (
+    compute_cqs, identify_gaps, print_cqs_report, print_gap_report
 )
 
-# Export mappings to CSV for editing in Excel
-export_mappings_to_csv(store, 'mappings.csv', include_metadata=True)
+# Measure current quality
+cqs = compute_cqs(snapshot_mode=True)
+print_cqs_report(cqs)
 
-# Import edited mappings back
-mappings_dict = import_mappings_from_csv('mappings_edited.csv', validate=True)
-
-# Validate mapping integrity
-report = validate_mappings(store)
-print(f"Valid: {report.is_valid}, Warnings: {len(report.warnings)}")
+# Find gaps ranked by CQS impact
+gaps, cqs = identify_gaps(snapshot_mode=True)
+print_gap_report(gaps)
 ```
 
-See the customization guide for complete documentation and examples.
+### Running Experiments
+
+Each experiment is a single config change, measured before and after:
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    ConfigChange, ChangeType, evaluate_experiment, log_experiment
+)
+from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+
+ledger = ExperimentLedger()
+baseline = compute_cqs(snapshot_mode=True, ledger=ledger)
+
+change = ConfigChange(
+    file="metrics.yaml",
+    change_type=ChangeType.ADD_CONCEPT,
+    yaml_path="metrics.COGS.known_concepts",
+    new_value="CrudeOilAndProductPurchases",
+    rationale="Energy sector COGS variant",
+    target_metric="COGS",
+    target_companies="XOM",
+)
+
+result = evaluate_experiment(change, baseline, ledger=ledger)
+log_experiment(change, result, ledger)
+# Decision: KEEP (CQS +0.003) or DISCARD/VETO
+```
+
+### Overnight Loop
+
+Run unattended for hours with built-in safety:
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight, propose_change
+from edgar.xbrl.standardization.tools.auto_eval_dashboard import print_overnight_report
+
+report = run_overnight(
+    duration_hours=7.5,
+    focus_area="banking",    # optional: limit scope
+    use_tournament=True,     # 2-stage eval (5-co fast + 20-co validation)
+    propose_fn=propose_change,
+)
+print_overnight_report(report)
+```
+
+### Tournament Evaluation
+
+Prevents overfitting to the 5-company quick-eval cohort:
+
+```
+Proposal → Stage 1 (5 cos, ~3 min) → PASS? → Stage 2 (20 cos, ~10 min) → PASS? → KEEP
+                                    → FAIL → DISCARD              → FAIL → DISCARD
+```
+
+### Proposal Pipeline
+
+`propose_change()` tries three escalation levels:
+
+1. **Structural detection** — if yfinance reference is `None`, add exclusion (company doesn't have this metric)
+2. **Heuristic name variations** — try common XBRL concept name patterns (fast, no I/O)
+3. **Concept discovery** — search the actual XBRL filing's calc trees and facts via `discover_concepts()`, then verify each candidate across **2-3 fiscal periods** to prevent false positives from coincidental single-period matches
+
+### Dashboard
+
+Morning review of overnight results:
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_dashboard import show_dashboard
+show_dashboard()  # Rich terminal UI with experiment history, graveyard patterns, CQS trajectory
+```
+
+### Safety Invariants
+
+1. **Regressions are a hard veto** — any regression caps CQS below baseline, no exceptions
+2. **No single company drops >5pp** in pass_rate
+3. **Circuit breaker** — 10 consecutive failures stops the session
+4. **All changes are git-recoverable** — `git checkout` reverts any config
+5. **Graveyard prevents loops** — metrics with 3+ failed attempts are skipped
+6. **Multi-period verification** — discovered concepts must match across multiple fiscal years
