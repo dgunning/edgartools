@@ -270,15 +270,20 @@ def _is_key_terms(table: 'TableNode') -> bool:
     if _fraction_long_cells(table, 200) > 0.5:
         return False
     text = _get_full_text(table)
-    core_keywords = ['cusip', 'maturity date', 'underlying', 'pricing date',
+    core_keywords = ['cusip', 'maturity date', 'stated maturity', 'underlying',
+                     'market measure', 'pricing date',
                      'issue date', 'valuation date', 'denominations',
                      'upside participation', 'max return', 'threshold value']
     supporting_keywords = ['issuer', 'guarantor', 'notes offered', 'term:',
                            'redemption amount', 'indenture', 'calculation agent',
-                           'selling agent']
+                           'selling agent', 'face amount', 'original offering price']
     core_matches = sum(1 for kw in core_keywords if kw in text)
     supp_matches = sum(1 for kw in supporting_keywords if kw in text)
-    ncols = max((len(r.cells) for r in table.rows), default=0)
+    # Use non-empty column count — layout tables may pad with many empty cells
+    ncols = max(
+        (sum(1 for c in r.cells if c.text().strip()) for r in table.rows),
+        default=0,
+    )
     if ncols <= 3 and (core_matches >= 2 or (core_matches >= 1 and supp_matches >= 3)):
         return True
     return False
@@ -892,9 +897,9 @@ def extract_structured_note_terms(table: 'TableNode'):
         if len(cells) < 2:
             continue
 
-        key = cells[0].rstrip(':').strip()
+        key = _WS_RE.sub(' ', cells[0]).rstrip(':').strip()
         value = cells[-1].strip()
-        key_lower = key.lower()
+        key_lower = key.lower().rstrip('*')
 
         if not value or value == key:
             continue
@@ -909,9 +914,9 @@ def extract_structured_note_terms(table: 'TableNode'):
             fields['pricing_date'] = value
         elif 'issue date' in key_lower or 'settlement date' in key_lower:
             fields['issue_date'] = value
-        elif 'maturity date' in key_lower or 'final valuation' in key_lower:
+        elif 'maturity date' in key_lower or 'stated maturity' in key_lower or 'final valuation' in key_lower:
             fields['maturity_date'] = value
-        elif 'underlying' in key_lower or 'reference asset' in key_lower:
+        elif 'underlying' in key_lower or 'reference asset' in key_lower or 'market measure' in key_lower:
             fields['underlying'] = value
         elif 'denomination' in key_lower:
             fields['denominations'] = value
