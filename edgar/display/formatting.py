@@ -67,6 +67,41 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
     return ''.join(reversed(result))
 
 
+def format_currency_short(value: Union[int, float, Decimal, None]) -> str:
+    """Format currency with scale abbreviation for AI context output.
+
+    Examples:
+        >>> format_currency_short(394_328_000_000)
+        '$394.3B'
+        >>> format_currency_short(18_550_000)
+        '$18.6M'
+        >>> format_currency_short(42_500)
+        '$42,500'
+        >>> format_currency_short(-1_200_000)
+        '-$1.2M'
+        >>> format_currency_short(None)
+        ''
+    """
+    if value is None:
+        return ""
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return ""
+    if value != value:  # NaN check
+        return ""
+    abs_val = abs(value)
+    sign = "-" if value < 0 else ""
+    if abs_val >= 1_000_000_000:
+        return f"{sign}${abs_val / 1_000_000_000:,.1f}B"
+    elif abs_val >= 1_000_000:
+        return f"{sign}${abs_val / 1_000_000:,.1f}M"
+    elif abs_val >= 1_000:
+        return f"{sign}${abs_val:,.0f}"
+    else:
+        return f"{sign}${abs_val:,.2f}"
+
+
 def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
     """Format a date as a string"""
     if isinstance(value, str):

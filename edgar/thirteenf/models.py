@@ -1071,6 +1071,157 @@ class ThirteenF:
             display_limit=display_limit,
         )
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        from edgar.display.formatting import format_currency_short
+
+        lines = []
+
+        # === IDENTITY ===
+        lines.append(f"THIRTEENF: {self.management_company_name}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Report Date: {self.report_period}")
+
+        if detail == 'minimal':
+            try:
+                total_val = self.total_value
+                if total_val is not None:
+                    lines.append(f"Holdings: {self.total_holdings}")
+                    lines.append(f"Total Value: {format_currency_short(float(total_val))}")
+            except Exception:
+                pass
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"CIK: {str(self.filing.cik).zfill(10)}")
+        lines.append(f"Filed: {self.filing_date}")
+        lines.append(f"Form: {self.form}")
+
+        # Summary section
+        lines.append("")
+        lines.append("SUMMARY:")
+        try:
+            lines.append(f"  Holdings: {self.total_holdings}")
+            total_val = self.total_value
+            if total_val is not None:
+                lines.append(f"  Total Value: {format_currency_short(float(total_val))}")
+        except Exception:
+            pass
+
+        # Top holdings
+        top_n = 5
+        try:
+            holdings_df = self.holdings
+            if holdings_df is not None and len(holdings_df) > 0:
+                total_val_f = float(self.total_value) if self.total_value else None
+                lines.append("")
+                lines.append("TOP HOLDINGS:")
+                for _, row in holdings_df.head(top_n).iterrows():
+                    issuer = row.get('Issuer', '?')
+                    val = float(row.get('Value', 0))
+                    h_line = f"  {issuer}: {format_currency_short(val)}"
+                    if total_val_f and total_val_f > 0:
+                        pct = val / total_val_f * 100
+                        h_line += f" ({pct:.1f}%)"
+                    lines.append(h_line)
+                remaining = len(holdings_df) - top_n
+                if remaining > 0:
+                    lines.append(f"  ... ({remaining} more)")
+        except Exception:
+            pass
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .holdings                    All holdings as DataFrame")
+        lines.append("  .holdings_view()             Formatted holdings table")
+        lines.append("  .compare_holdings()          Quarter-over-quarter changes")
+        lines.append("  .holding_history()           Multi-quarter history")
+        lines.append("  .investment_manager          Manager name and address")
+        lines.append("  .previous_holding_report()   Prior quarter filing")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL: top 10 instead of 5, manager details, signer ===
+        try:
+            holdings_df = self.holdings
+            if holdings_df is not None and len(holdings_df) > top_n:
+                extra = holdings_df.iloc[top_n:10]
+                if len(extra) > 0:
+                    # Find the overflow line and replace with additional holdings
+                    insert_idx = None
+                    for i, l in enumerate(lines):
+                        if l.startswith("  ... ("):
+                            insert_idx = i
+                            break
+                    if insert_idx is not None:
+                        extra_lines = []
+                        total_val_f = float(self.total_value) if self.total_value else None
+                        for _, row in extra.iterrows():
+                            issuer = row.get('Issuer', '?')
+                            val = float(row.get('Value', 0))
+                            h_line = f"  {issuer}: {format_currency_short(val)}"
+                            if total_val_f and total_val_f > 0:
+                                pct = val / total_val_f * 100
+                                h_line += f" ({pct:.1f}%)"
+                            extra_lines.append(h_line)
+                        remaining_full = len(holdings_df) - 10
+                        overflow = f"  ... ({remaining_full} more)" if remaining_full > 0 else None
+                        lines[insert_idx:insert_idx + 1] = extra_lines + ([overflow] if overflow else [])
+        except Exception:
+            pass
+
+        # Manager details
+        try:
+            mgr = self.investment_manager
+            if mgr and mgr.address:
+                addr = mgr.address
+                addr_parts = []
+                if hasattr(addr, 'city') and addr.city:
+                    addr_parts.append(addr.city)
+                if hasattr(addr, 'state') and addr.state:
+                    addr_parts.append(addr.state)
+                if addr_parts:
+                    lines.append("")
+                    lines.append(f"MANAGER: {mgr.name}")
+                    lines.append(f"  Location: {', '.join(addr_parts)}")
+        except Exception:
+            pass
+
+        # Signer
+        try:
+            if self.primary_form_information and self.primary_form_information.signature:
+                sig = self.primary_form_information.signature
+                if sig.name:
+                    lines.append("")
+                    lines.append("SIGNER:")
+                    lines.append(f"  Name: {sig.name}")
+                    if sig.title:
+                        lines.append(f"  Title: {sig.title}")
+        except Exception:
+            pass
+
+        # Other managers
+        try:
+            others = self.other_managers
+            if others:
+                lines.append("")
+                lines.append(f"OTHER MANAGERS: {len(others)}")
+                for om in others[:5]:
+                    lines.append(f"  {om.name} (CIK: {om.cik})")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __rich__(self):
         from edgar.thirteenf.rendering import render_rich
         return render_rich(self)
