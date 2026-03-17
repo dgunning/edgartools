@@ -35,7 +35,8 @@ class CandidateConcept:
 
 
 # Regex patterns for prefix stripping
-NAMESPACE_PREFIX_PATTERN = re.compile(r'^(us-gaap:|dei:|ifrs-full:)')
+# Handles both colon form (us-gaap:Revenue) and underscore form (us-gaap_Revenue)
+NAMESPACE_PREFIX_PATTERN = re.compile(r'^(us-gaap[_:]|dei[_:]|ifrs-full[_:])')
 COMPANY_PREFIX_PATTERN = re.compile(r'^[a-z]{2,5}_', re.IGNORECASE)
 
 

@@ -782,7 +782,9 @@ def _generate_concept_variations(standard_tag: str, metric_name: str) -> List[st
     alternatives = {
         "Revenue": ["Revenues", "SalesRevenueNet", "RevenueFromContractWithCustomerExcludingAssessedTax"],
         "NetIncome": ["NetIncomeLoss", "ProfitLoss", "NetIncomeLossAvailableToCommonStockholdersBasic"],
-        "OperatingIncome": ["OperatingIncomeLoss", "IncomeLossFromOperations"],
+        "OperatingIncome": ["OperatingIncomeLoss", "IncomeLossFromOperations",
+                           "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+                           "IncomeLossFromContinuingOperations"],
         "TotalAssets": ["Assets"],
         "TotalLiabilities": ["Liabilities"],
         "ShareholdersEquity": ["StockholdersEquity", "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"],
@@ -793,7 +795,9 @@ def _generate_concept_variations(standard_tag: str, metric_name: str) -> List[st
         "Goodwill": ["GoodwillNet", "GoodwillGross"],
         "IntangibleAssets": ["IntangibleAssetsNetExcludingGoodwill", "FiniteLivedIntangibleAssetsNet"],
         "LongTermDebt": ["LongTermDebtNoncurrent", "LongTermDebtAndCapitalLeaseObligations"],
-        "CashAndEquivalents": ["CashAndCashEquivalentsAtCarryingValue", "CashCashEquivalentsAndShortTermInvestments"],
+        "CashAndEquivalents": ["CashAndCashEquivalentsAtCarryingValue", "CashCashEquivalentsAndShortTermInvestments",
+                               "CashAndDueFromBanks",
+                               "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"],
     }
 
     if metric_name in alternatives:
