@@ -310,6 +310,28 @@ recent_activity = df.sort_values('filing_date', ascending=False).head(10)
 print(recent_activity)
 ```
 
+## How Ticker Resolution Works
+
+When you call `Company("AAPL")`, edgartools resolves the ticker to a CIK number using a three-level waterfall:
+
+1. **Bundled data (instant, no network)** — edgartools ships with a `company_tickers.parquet` file containing ~10,600 exchange-listed tickers. This is tried first and works completely offline.
+
+2. **Local downloaded data** — If you've called `download_edgar_data(reference=True)` and enabled `use_local_storage()`, locally cached ticker data is used. This includes the full SEC ticker universe.
+
+3. **Live SEC API** — As a final fallback for brand-new tickers (e.g., recent IPOs not yet in bundled data), edgartools fetches from `data.sec.gov`.
+
+This means **`Company()` lookups work offline by default** for established tickers — no setup required. For full offline coverage including recent IPOs, see the [Local Storage guide](local-storage.md).
+
+```python
+# Works offline — no internet needed for established tickers
+company = Company("AAPL")
+
+# For full offline coverage (including recent IPOs):
+from edgar import download_edgar_data, use_local_storage
+download_edgar_data(submissions=False, facts=False, reference=True)
+use_local_storage()
+```
+
 ## Performance Tips
 
 1. **Use CIK when possible**: Faster than ticker lookup
@@ -362,3 +384,5 @@ Now that you can find and screen companies, learn how to:
 
 - **[Company API Reference](../api/company.md)** - Complete Company class documentation
 - **[Business Overview Data Sources](business-overview-data-sources-guide.md)** - Build company overview pages
+- **[Company Subsets](../company-subsets.md)** - Create research datasets by exchange, industry, or popularity
+- **[Local Storage](local-storage.md)** - Offline usage and caching ticker data locally

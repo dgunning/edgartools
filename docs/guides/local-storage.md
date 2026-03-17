@@ -30,12 +30,22 @@ There are times when you want to minimize or eliminate these requests:
 
 | I want to... | Function needed |
 |--------------|-----------------|
-| Look up companies by ticker/CIK offline | `download_edgar_data(reference=True)` |
+| Look up companies by ticker/CIK offline | Already works for ~10,600 tickers (bundled data). For the full universe: `download_edgar_data(reference=True)` |
 | Use `company.get_facts()` / `EntityFacts` offline | `download_edgar_data(facts=True)` |
 | Browse filing lists offline | `download_edgar_data(submissions=True)` |
 | Parse `filing.xbrl()` offline | `download_filings()` |
 | Read filing HTML/text offline | `download_filings()` |
 | Analyze filing attachments offline | `download_filings()` |
+
+## Bundled Reference Data (Always Available)
+
+!!! info "Ticker lookups work offline by default"
+
+    edgartools ships with a bundled `company_tickers.parquet` file containing ~10,600 exchange-listed tickers with CIK, ticker, company name, and exchange. This is loaded automatically — no download or configuration needed.
+
+    `Company("AAPL")` works without an internet connection. See [How Ticker Resolution Works](finding-companies.md#how-ticker-resolution-works) for details.
+
+    To get the full SEC ticker universe (including recent IPOs and non-exchange entities), download reference data as described below.
 
 ## Supported Local Data Types
 
