@@ -1,0 +1,161 @@
+{
+  "run_id": "e2e_industrial_2026-03-05T00:34:11.843894",
+  "timestamp": "2026-03-05T00:34:11.843904",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": "Healthcare_Pharma",
+    "tickers": [
+      "JNJ",
+      "UNH",
+      "LLY",
+      "PFE"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 37,
+    "10k_passed": 37,
+    "10k_skipped": 1,
+    "10q_total": 68,
+    "10q_passed": 67,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 37,
+      "10k_passed": 37,
+      "10k_skipped": 1,
+      "10q_total": 68,
+      "10q_passed": 67,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 1,
+  "skipped_count": 1,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000078003-25-000150",
+      "metric": "DividendsPaid",
+      "xbrl_value": 0.0,
+      "ref_value": -2444000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DividendsCommonStockCash",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 56.9,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    }
+  ],
+  "errors": []
+}

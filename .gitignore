@@ -25,3 +25,9 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
+# Temp artifacts (pip, pytest, generic)
+pip-uninstall-*/
+pytest-of-*/
+tmp*/
+# Local MCP config
+.mcp.json

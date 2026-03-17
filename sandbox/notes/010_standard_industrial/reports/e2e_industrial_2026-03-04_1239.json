@@ -1,0 +1,549 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T12:39:34.928776",
+  "timestamp": "2026-03-04T12:39:34.928786",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "NEE",
+      "DUK",
+      "SO"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 28,
+    "10k_passed": 28,
+    "10k_skipped": 27,
+    "10q_total": 28,
+    "10q_passed": 28,
+    "10q_skipped": 25
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 28,
+      "10k_passed": 28,
+      "10k_skipped": 27,
+      "10q_total": 28,
+      "10q_passed": 28,
+      "10q_skipped": 25
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 0,
+  "skipped_count": 52,
+  "error_count": 0,
+  "failures": [],
+  "skipped": [
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 100.0,
+      "reason": "XBRL selects wrong concept (DisposalGroupGain/EquityMethodInvestments). Utility holding company revenue not captured by standard tree extraction.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "COGS",
+      "variance_pct": 78.3,
+      "reason": "XBRL OperatingExpenses ($17.6B) vs yfinance COGS ($9.9B). Wrong concept used \u2014 captures all opex instead of cost of goods.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 19.7,
+      "reason": "XBRL CapitalExpendituresIncurredButNotYetPaid vs standard Capex concept. Subsidiary-level extraction captures partial capex.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "TotalAssets",
+      "variance_pct": 48.4,
+      "reason": "XBRL Assets ($98B) vs yfinance ($190B). Subsidiary-level extraction \u2014 captures FPL subsidiary but not full consolidated NEE.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Goodwill",
+      "variance_pct": 39.1,
+      "reason": "Subsidiary-level Goodwill ($3.0B) vs consolidated ($4.9B).\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "IntangibleAssets",
+      "variance_pct": 52.9,
+      "reason": "Inherits Goodwill subsidiary-level extraction gap.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 83.0,
+      "reason": "Subsidiary-level LongTermDebtCurrent ($1.7B) vs consolidated ($9.9B). Utility holding company multi-entity debt structure.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "LongTermDebt",
+      "variance_pct": 99.4,
+      "reason": "XBRL LongTermDebtNoncurrent ($436M) vs yfinance ($72.4B). Extreme subsidiary-level extraction \u2014 only captures one subsidiary's LTD.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "AccountsPayable",
+      "variance_pct": 91.0,
+      "reason": "Subsidiary-level AP ($631M) vs consolidated ($7.0B).\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Revenue",
+      "variance_pct": 100.0,
+      "reason": "XBRL selects wrong concept (DisposalGroupGain/EquityMethodInvestments). Utility holding company revenue not captured by standard tree extraction.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Capex",
+      "variance_pct": 50.3,
+      "reason": "XBRL CapitalExpendituresIncurredButNotYetPaid vs standard Capex concept. Subsidiary-level extraction captures partial capex.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "TotalAssets",
+      "variance_pct": 49.3,
+      "reason": "XBRL Assets ($98B) vs yfinance ($190B). Subsidiary-level extraction \u2014 captures FPL subsidiary but not full consolidated NEE.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "ShortTermDebt",
+      "variance_pct": 52.3,
+      "reason": "Subsidiary-level LongTermDebtCurrent ($1.7B) vs consolidated ($9.9B). Utility holding company multi-entity debt structure.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "LongTermDebt",
+      "variance_pct": 99.8,
+      "reason": "XBRL LongTermDebtNoncurrent ($436M) vs yfinance ($72.4B). Extreme subsidiary-level extraction \u2014 only captures one subsidiary's LTD.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "DividendsPaid",
+      "variance_pct": 516.9,
+      "reason": "XBRL PaymentsOfDividends ($7.2B) vs yfinance ($1.2B). Likely capturing intercompany dividend payments in addition to external dividends.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "AccountsPayable",
+      "variance_pct": 99.0,
+      "reason": "Subsidiary-level AP ($631M) vs consolidated ($7.0B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "COGS",
+      "variance_pct": 78.6,
+      "reason": "Subsidiary-level CostOfGoodsAndServicesSold ($3.3B) vs consolidated ($15.2B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Goodwill",
+      "variance_pct": 81.1,
+      "reason": "Subsidiary Goodwill ($3.7B) vs consolidated ($19.3B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "IntangibleAssets",
+      "variance_pct": 79.6,
+      "reason": "Inherits Goodwill subsidiary-level extraction gap.\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 42.1,
+      "reason": "Subsidiary-level LongTermDebtCurrent ($4.6B) vs consolidated ($7.9B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "LongTermDebt",
+      "variance_pct": 97.6,
+      "reason": "Subsidiary-level LTD ($1.8B) vs consolidated ($76.3B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "CashAndEquivalents",
+      "variance_pct": 92.4,
+      "reason": "Subsidiary-level cash ($24M) vs consolidated ($314M).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "DividendsPaid",
+      "variance_pct": 96.6,
+      "reason": "Subsidiary-level Dividends ($110M) vs consolidated ($3.2B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Inventory",
+      "variance_pct": 82.2,
+      "reason": "XBRL EnergyRelatedInventoryCoal captures only coal inventory, missing other energy inventory types.\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "AccountsReceivable",
+      "variance_pct": 59.6,
+      "reason": "Subsidiary-level AR ($1.9B) vs consolidated ($4.7B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "AccountsPayable",
+      "variance_pct": 96.1,
+      "reason": "Subsidiary-level AP ($214M) vs consolidated ($5.5B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "COGS",
+      "variance_pct": 83.0,
+      "reason": "Subsidiary-level CostOfGoodsAndServicesSold ($3.3B) vs consolidated ($15.2B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Capex",
+      "variance_pct": 99.1,
+      "reason": "Subsidiary-level Capex ($30M) vs consolidated ($3.5B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Goodwill",
+      "variance_pct": 80.8,
+      "reason": "Subsidiary Goodwill ($3.7B) vs consolidated ($19.3B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "IntangibleAssets",
+      "variance_pct": 80.8,
+      "reason": "Inherits Goodwill subsidiary-level extraction gap.\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "ShortTermDebt",
+      "variance_pct": 67.9,
+      "reason": "Subsidiary-level LongTermDebtCurrent ($4.6B) vs consolidated ($7.9B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "LongTermDebt",
+      "variance_pct": 96.5,
+      "reason": "Subsidiary-level LTD ($1.8B) vs consolidated ($76.3B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "DividendsPaid",
+      "variance_pct": 95.3,
+      "reason": "Subsidiary-level Dividends ($110M) vs consolidated ($3.2B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Inventory",
+      "variance_pct": 84.0,
+      "reason": "XBRL EnergyRelatedInventoryCoal captures only coal inventory, missing other energy inventory types.\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "AccountsReceivable",
+      "variance_pct": 99.7,
+      "reason": "Subsidiary-level AR ($1.9B) vs consolidated ($4.7B).\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "AccountsPayable",
+      "variance_pct": 93.5,
+      "reason": "Subsidiary-level AP ($214M) vs consolidated ($5.5B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 33.4,
+      "reason": "Subsidiary-level Revenues ($17.8B) vs consolidated ($26.7B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "COGS",
+      "variance_pct": 69.3,
+      "reason": "Subsidiary-level COGS ($4.1B) vs consolidated ($13.4B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "TotalAssets",
+      "variance_pct": 74.8,
+      "reason": "Subsidiary-level Assets ($36.5B) vs consolidated ($145.2B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "IntangibleAssets",
+      "variance_pct": 95.9,
+      "reason": "Subsidiary-level Goodwill ($223M) vs consolidated ($5.5B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 100.0,
+      "reason": "XBRL ShortTermBorrowings ($0) vs yfinance ($6.1B). Subsidiary level.\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "CashAndEquivalents",
+      "variance_pct": 98.8,
+      "reason": "Subsidiary-level cash ($13M) vs consolidated ($1.1B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "StockBasedCompensation",
+      "variance_pct": 22.7,
+      "reason": "Minor variance: XBRL AllocatedShareBasedCompensation ($102M) vs yfinance ($132M). Subsidiary vs consolidated gap.\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Inventory",
+      "variance_pct": 88.5,
+      "reason": "XBRL EnergyRelatedInventoryNaturalGasInStorage ($388M) captures only gas inventory vs yfinance total inventory ($3.4B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Revenue",
+      "variance_pct": 27.0,
+      "reason": "Subsidiary-level Revenues ($17.8B) vs consolidated ($26.7B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "COGS",
+      "variance_pct": 61.8,
+      "reason": "Subsidiary-level COGS ($4.1B) vs consolidated ($13.4B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "NetIncome",
+      "variance_pct": 65.6,
+      "reason": "Subsidiary-level NetIncome ($588M) vs consolidated ($1.7B) for 10-Q.\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "TotalAssets",
+      "variance_pct": 75.2,
+      "reason": "Subsidiary-level Assets ($36.5B) vs consolidated ($145.2B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "IntangibleAssets",
+      "variance_pct": 96.2,
+      "reason": "Subsidiary-level Goodwill ($223M) vs consolidated ($5.5B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "ShortTermDebt",
+      "variance_pct": 98.1,
+      "reason": "XBRL ShortTermBorrowings ($0) vs yfinance ($6.1B). Subsidiary level.\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "CashAndEquivalents",
+      "variance_pct": 83.7,
+      "reason": "Subsidiary-level cash ($13M) vs consolidated ($1.1B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Inventory",
+      "variance_pct": 87.3,
+      "reason": "XBRL EnergyRelatedInventoryNaturalGasInStorage ($388M) captures only gas inventory vs yfinance total inventory ($3.4B).\n"
+    }
+  ],
+  "errors": []
+}

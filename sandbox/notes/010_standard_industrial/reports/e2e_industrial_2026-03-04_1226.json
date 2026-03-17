@@ -1,0 +1,187 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T12:26:43.871894",
+  "timestamp": "2026-03-04T12:26:43.871902",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "BRK-B"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 3,
+    "10k_passed": 3,
+    "10k_skipped": 7,
+    "10q_total": 0,
+    "10q_passed": 0,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 3,
+      "10k_passed": 3,
+      "10k_skipped": 7,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 0,
+  "skipped_count": 7,
+  "error_count": 0,
+  "failures": [],
+  "skipped": [
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 24.2,
+      "reason": "BRK conglomerate structure: XBRL Revenues ($321.6B) captures insurance premiums + railroad + manufacturing but misses some segments. yfinance ($424.2B) includes all consolidated revenue. Structural conglomerate extraction gap.\n"
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "TotalAssets",
+      "variance_pct": 20.5,
+      "reason": "XBRL Assets ($917.8B) vs yfinance ($1.15T). Missing insurance subsidiary assets or dimensional filtering excluding some segments.\n"
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "Goodwill",
+      "variance_pct": 32.2,
+      "reason": "XBRL Goodwill ($56.9B) vs yfinance ($83.9B). Missing subsidiary goodwill from insurance or other segments.\n"
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "IntangibleAssets",
+      "variance_pct": 22.8,
+      "reason": "Composite metric inherits Goodwill under-extraction ($56.9B vs $83.9B).\n"
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 46.1,
+      "reason": "XBRL ShortTermBorrowings ($1.3B) vs yfinance ($2.4B). Insurance subsidiary debt not captured in standard extraction.\n"
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "AccountsReceivable",
+      "variance_pct": 35.5,
+      "reason": "XBRL NotesReceivableNet ($27.8B) vs yfinance ($43.1B). Insurance receivables and reinsurance recoverables may not be captured.\n"
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "DepreciationAmortization",
+      "variance_pct": 96.8,
+      "reason": "XBRL DDA ($411M corporate only) vs yfinance ($12.9B consolidated including BNSF railroad, utilities, manufacturing subsidiaries).\n"
+    }
+  ],
+  "errors": []
+}

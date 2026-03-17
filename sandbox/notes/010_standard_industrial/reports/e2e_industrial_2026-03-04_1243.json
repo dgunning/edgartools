@@ -1,0 +1,203 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T12:43:56.664017",
+  "timestamp": "2026-03-04T12:43:56.664028",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "SNOW"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 14,
+    "10k_passed": 11,
+    "10k_skipped": 0,
+    "10q_total": 14,
+    "10q_passed": 13,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 4,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "filing_date": "2025-01-31",
+      "accession_no": "0001640147-25-000052",
+      "metric": "Capex",
+      "xbrl_value": -46279000.0,
+      "ref_value": -75712000.0,
+      "variance_pct": 38.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "filing_date": "2025-01-31",
+      "accession_no": "0001640147-25-000052",
+      "metric": "Goodwill",
+      "xbrl_value": 14800000.0,
+      "ref_value": 1056559000.0,
+      "variance_pct": 98.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "filing_date": "2025-01-31",
+      "accession_no": "0001640147-25-000052",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 292828000.0,
+      "ref_value": 1472747000.0,
+      "variance_pct": 80.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "filing_date": "2025-10-31",
+      "accession_no": "0001640147-25-000211",
+      "metric": "WeightedAverageSharesDiluted",
+      "xbrl_value": 0.0,
+      "ref_value": 339648000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}
