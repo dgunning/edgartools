@@ -49,7 +49,7 @@ class TestToolRegistry:
     def test_tool_schemas_have_required_fields(self):
         """Each registered tool has name, description, handler, and schema."""
         from edgar.ai.mcp.tools.base import TOOLS
-        from edgar.ai.mcp.tools import company, search, filing, compare, ownership  # noqa: F401
+        from edgar.ai.mcp.tools import company, search, filing, reader, compare, ownership  # noqa: F401
 
         for name, info in TOOLS.items():
             assert "name" in info, f"Tool {name} missing 'name'"
@@ -61,7 +61,7 @@ class TestToolRegistry:
     def test_get_tool_definitions(self):
         """get_tool_definitions returns list usable by MCP list_tools."""
         from edgar.ai.mcp.tools.base import get_tool_definitions
-        from edgar.ai.mcp.tools import company, search, filing, compare, ownership  # noqa: F401
+        from edgar.ai.mcp.tools import company, search, filing, reader, compare, ownership  # noqa: F401
 
         definitions = get_tool_definitions()
         assert isinstance(definitions, list)
@@ -365,14 +365,37 @@ class TestEdgarSearchTool:
 
 
 class TestEdgarFilingTool:
-    """Test edgar_filing intent tool."""
+    """Test edgar_filing (context) intent tool."""
+
+    @pytest.mark.asyncio
+    async def test_filing_by_accession(self):
+        """Get filing context by accession number."""
+        from edgar.ai.mcp.tools.filing import edgar_filing
+
+        result = await edgar_filing(
+            input="0000320193-23-000077",
+        )
+        assert result.success is True
+        assert "context" in result.data
+
+    @pytest.mark.asyncio
+    async def test_filing_no_params_returns_error(self):
+        """Calling with no input returns error."""
+        from edgar.ai.mcp.tools.filing import edgar_filing
+
+        result = await edgar_filing(input="no-accession-here")
+        assert result.success is False
+
+
+class TestEdgarReadTool:
+    """Test edgar_read (section reader) intent tool."""
 
     @pytest.mark.asyncio
     async def test_latest_10k_summary(self):
         """Get latest 10-K filing summary for a company."""
-        from edgar.ai.mcp.tools.filing import edgar_filing
+        from edgar.ai.mcp.tools.reader import edgar_read
 
-        result = await edgar_filing(
+        result = await edgar_read(
             identifier="AAPL",
             form="10-K",
             sections=["summary"],
@@ -381,11 +404,11 @@ class TestEdgarFilingTool:
         assert result.data["form_type"] in ["10-K", "10-K/A"]
 
     @pytest.mark.asyncio
-    async def test_filing_no_params_returns_error(self):
+    async def test_read_no_params_returns_error(self):
         """Calling with no parameters returns error."""
-        from edgar.ai.mcp.tools.filing import edgar_filing
+        from edgar.ai.mcp.tools.reader import edgar_read
 
-        result = await edgar_filing()
+        result = await edgar_read()
         assert result.success is False
 
 

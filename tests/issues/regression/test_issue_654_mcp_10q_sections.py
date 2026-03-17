@@ -38,7 +38,7 @@ class TestExtractSectionMapping:
 
     def test_10q_mda_uses_part_i_item_2(self):
         """MDA section on 10-Q should use 'Part I, Item 2' key, not obj.mda attribute."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         mda_text = "Management's Discussion and Analysis content here."
         obj = self._make_10q_obj({"Part I, Item 2": mda_text})
@@ -52,7 +52,7 @@ class TestExtractSectionMapping:
 
     def test_10q_risk_factors_uses_part_ii_item_1a(self):
         """Risk Factors on 10-Q should use 'Part II, Item 1A' key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         rf_text = "Risk Factors: economic conditions, competition..."
         obj = self._make_10q_obj({"Part II, Item 1A": rf_text})
@@ -64,7 +64,7 @@ class TestExtractSectionMapping:
 
     def test_10q_legal_uses_part_ii_item_1(self):
         """Legal Proceedings on 10-Q should use 'Part II, Item 1' key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         legal_text = "Legal Proceedings: pending litigation..."
         obj = self._make_10q_obj({"Part II, Item 1": legal_text})
@@ -75,7 +75,7 @@ class TestExtractSectionMapping:
 
     def test_10q_controls_uses_part_i_item_4(self):
         """Controls & Procedures on 10-Q should use 'Part I, Item 4' key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         controls_text = "Controls and Procedures: disclosure controls evaluated..."
         obj = self._make_10q_obj({"Part I, Item 4": controls_text})
@@ -86,7 +86,7 @@ class TestExtractSectionMapping:
 
     def test_10q_financials_uses_financials_cached_property(self):
         """Financials section uses obj.financials cached property, not __getitem__."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         fin = MagicMock()
         fin.income_statement.return_value = "Net income: $1B"
@@ -103,7 +103,7 @@ class TestExtractSectionMapping:
 
     def test_10q_section_missing_returns_none_not_raises(self):
         """If a section is absent from the filing, return None gracefully."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         # 10-Q with no risk factors section
         obj = self._make_10q_obj({})
@@ -112,7 +112,7 @@ class TestExtractSectionMapping:
 
     def test_10k_mda_uses_friendly_name_key(self):
         """MDA section on 10-K uses 'mda' friendly key via TenK.__getitem__."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         mda_text = "MD&A: our revenues increased by 15% year-over-year."
         obj = self._make_10k_obj({"mda": mda_text})
@@ -123,7 +123,7 @@ class TestExtractSectionMapping:
 
     def test_10k_business_uses_business_key(self):
         """Business section on 10-K uses 'business' friendly key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         business_text = "Business: we develop and sell software products..."
         obj = self._make_10k_obj({"business": business_text})
@@ -134,7 +134,7 @@ class TestExtractSectionMapping:
 
     def test_10k_risk_factors_uses_risk_factors_key(self):
         """Risk Factors on 10-K uses 'risk_factors' friendly key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         rf_text = "Risk Factors: competitive market, regulatory changes..."
         obj = self._make_10k_obj({"risk_factors": rf_text})
@@ -149,7 +149,7 @@ class TestSectionMapCompleteness:
 
     def test_10q_section_map_contains_correct_part_item_keys(self):
         """SECTION_MAP_10Q must map to Part/Item format keys, not old attribute names."""
-        from edgar.ai.mcp.tools.filing import SECTION_MAP_10Q
+        from edgar.ai.mcp.tools.reader import SECTION_MAP_10Q
 
         # Verify canonical format (Part X, Item Y)
         assert SECTION_MAP_10Q["mda"] == "Part I, Item 2"
@@ -165,7 +165,7 @@ class TestSectionMapCompleteness:
 
     def test_10k_section_map_contains_friendly_names(self):
         """SECTION_MAP_10K must map to friendly names accepted by TenK.__getitem__."""
-        from edgar.ai.mcp.tools.filing import SECTION_MAP_10K
+        from edgar.ai.mcp.tools.reader import SECTION_MAP_10K
 
         # These friendly names are directly accepted by TenK.__getitem__
         assert SECTION_MAP_10K["mda"] == "mda"
@@ -174,7 +174,7 @@ class TestSectionMapCompleteness:
 
     def test_old_item_style_values_not_in_maps(self):
         """Old broken keys like 'item7', 'part1item2' must not appear in maps."""
-        from edgar.ai.mcp.tools.filing import SECTION_MAP_10K, SECTION_MAP_10Q
+        from edgar.ai.mcp.tools.reader import SECTION_MAP_10K, SECTION_MAP_10Q
 
         broken_patterns = ["item7", "item1a", "part1item2", "part2item1a", "item8"]
         for broken in broken_patterns:
@@ -195,7 +195,7 @@ class TestExtractSectionDoesNotUseAttributeAccess:
         After the fix, _extract_section must not call getattr at all for narrative
         sections, so this error must never surface.
         """
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         # Build an object where attribute access raises AttributeError
         # but __getitem__ works correctly
@@ -220,7 +220,7 @@ class TestExtractSectionDoesNotUseAttributeAccess:
 
     def test_silence_check_returns_none_not_raises_for_unknown_section(self):
         """Unknown section name produces None, not an exception."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         obj = MagicMock()
         obj.__getitem__ = MagicMock(return_value=None)

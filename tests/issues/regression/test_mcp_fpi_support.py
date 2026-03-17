@@ -30,7 +30,7 @@ class TestSectionMapCompleteness:
 
     def test_20f_section_map_exists(self):
         """SECTION_MAP_20F must exist and contain required FPI sections."""
-        from edgar.ai.mcp.tools.filing import SECTION_MAP_20F
+        from edgar.ai.mcp.tools.reader import SECTION_MAP_20F
 
         assert SECTION_MAP_20F is not None
         # Required sections for 20-F
@@ -45,7 +45,7 @@ class TestSectionMapCompleteness:
 
     def test_20f_section_map_values(self):
         """SECTION_MAP_20F values should map to Item numbers for TwentyF.__getitem__."""
-        from edgar.ai.mcp.tools.filing import SECTION_MAP_20F
+        from edgar.ai.mcp.tools.reader import SECTION_MAP_20F
 
         # These map to TwentyF Item keys
         assert SECTION_MAP_20F["business"] == "Item 4"
@@ -59,7 +59,7 @@ class TestSectionMapCompleteness:
 
     def test_6k_section_map_exists(self):
         """SECTION_MAP_6K must exist and contain required sections."""
-        from edgar.ai.mcp.tools.filing import SECTION_MAP_6K
+        from edgar.ai.mcp.tools.reader import SECTION_MAP_6K
 
         assert SECTION_MAP_6K is not None
         assert "financials" in SECTION_MAP_6K
@@ -67,7 +67,7 @@ class TestSectionMapCompleteness:
 
     def test_6k_section_map_values(self):
         """SECTION_MAP_6K values should be correct."""
-        from edgar.ai.mcp.tools.filing import SECTION_MAP_6K
+        from edgar.ai.mcp.tools.reader import SECTION_MAP_6K
 
         assert SECTION_MAP_6K["financials"] == "financials"
         assert SECTION_MAP_6K["full_text"] == "full_text"
@@ -78,28 +78,28 @@ class TestGetSectionList:
 
     def test_20f_returns_correct_sections(self):
         """_get_section_list returns 20-F sections for 20-F form type."""
-        from edgar.ai.mcp.tools.filing import _get_section_list, SECTION_MAP_20F
+        from edgar.ai.mcp.tools.reader import _get_section_list, SECTION_MAP_20F
 
         sections = _get_section_list("20-F")
         assert sections == list(SECTION_MAP_20F.keys())
 
     def test_20f_amended_returns_correct_sections(self):
         """_get_section_list returns 20-F sections for 20-F/A form type."""
-        from edgar.ai.mcp.tools.filing import _get_section_list, SECTION_MAP_20F
+        from edgar.ai.mcp.tools.reader import _get_section_list, SECTION_MAP_20F
 
         sections = _get_section_list("20-F/A")
         assert sections == list(SECTION_MAP_20F.keys())
 
     def test_6k_returns_correct_sections(self):
         """_get_section_list returns 6-K sections for 6-K form type."""
-        from edgar.ai.mcp.tools.filing import _get_section_list, SECTION_MAP_6K
+        from edgar.ai.mcp.tools.reader import _get_section_list, SECTION_MAP_6K
 
         sections = _get_section_list("6-K")
         assert sections == list(SECTION_MAP_6K.keys())
 
     def test_6k_amended_returns_correct_sections(self):
         """_get_section_list returns 6-K sections for 6-K/A form type."""
-        from edgar.ai.mcp.tools.filing import _get_section_list, SECTION_MAP_6K
+        from edgar.ai.mcp.tools.reader import _get_section_list, SECTION_MAP_6K
 
         sections = _get_section_list("6-K/A")
         assert sections == list(SECTION_MAP_6K.keys())
@@ -124,7 +124,7 @@ class TestExtractSectionFPI:
 
     def test_20f_business_uses_item_4(self):
         """Business section on 20-F should use 'Item 4' key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         business_text = "Information on the Company: BioNTech SE is a biotechnology company..."
         obj = self._make_20f_obj({"Item 4": business_text})
@@ -135,7 +135,7 @@ class TestExtractSectionFPI:
 
     def test_20f_risk_factors_uses_item_3(self):
         """Risk Factors on 20-F should use 'Item 3' key (Key Information)."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         rf_text = "Key Information: Risk factors include regulatory approval, competition..."
         obj = self._make_20f_obj({"Item 3": rf_text})
@@ -146,7 +146,7 @@ class TestExtractSectionFPI:
 
     def test_20f_mda_uses_item_5(self):
         """MD&A on 20-F should use 'Item 5' key (Operating and Financial Review)."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         mda_text = "Operating and Financial Review: Our revenues increased by 25%..."
         obj = self._make_20f_obj({"Item 5": mda_text})
@@ -157,7 +157,7 @@ class TestExtractSectionFPI:
 
     def test_20f_directors_uses_item_6(self):
         """Directors section on 20-F should use 'Item 6' key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         directors_text = "Directors, Senior Management and Employees: Our board consists of..."
         obj = self._make_20f_obj({"Item 6": directors_text})
@@ -168,7 +168,7 @@ class TestExtractSectionFPI:
 
     def test_20f_shareholders_uses_item_7(self):
         """Shareholders section on 20-F should use 'Item 7' key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         shareholders_text = "Major Shareholders: The following table shows our major shareholders..."
         obj = self._make_20f_obj({"Item 7": shareholders_text})
@@ -179,7 +179,7 @@ class TestExtractSectionFPI:
 
     def test_20f_controls_uses_item_15(self):
         """Controls section on 20-F should use 'Item 15' key."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         controls_text = "Controls and Procedures: Our disclosure controls are effective..."
         obj = self._make_20f_obj({"Item 15": controls_text})
@@ -190,7 +190,7 @@ class TestExtractSectionFPI:
 
     def test_20f_financials_uses_financials_property(self):
         """Financials section uses obj.financials property, not __getitem__."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         fin = MagicMock()
         fin.income_statement.return_value = "Revenue: $5B"
@@ -207,7 +207,7 @@ class TestExtractSectionFPI:
 
     def test_20f_amended_form_uses_same_mapping(self):
         """20-F/A should use the same section mapping as 20-F."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         business_text = "Company information for amended filing..."
         obj = self._make_20f_obj({"Item 4": business_text})
@@ -218,7 +218,7 @@ class TestExtractSectionFPI:
 
     def test_6k_financials_uses_financials_property(self):
         """6-K financials section uses obj.financials property."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         fin = MagicMock()
         fin.income_statement.return_value = "Quarterly Revenue: $1.2B"
@@ -235,7 +235,7 @@ class TestExtractSectionFPI:
 
     def test_20f_missing_section_returns_none(self):
         """If a section is absent from a 20-F filing, return None gracefully."""
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         obj = self._make_20f_obj({})
         result = _extract_section(obj, "20-F", "directors")
@@ -250,7 +250,7 @@ class TestExtractSectionDoesNotUseAttributeAccess:
         Accessing obj.business on TwentyF may raise AttributeError.
         After the fix, _extract_section must use __getitem__ instead.
         """
-        from edgar.ai.mcp.tools.filing import _extract_section
+        from edgar.ai.mcp.tools.reader import _extract_section
 
         class StrictTwentyF:
             def __getitem__(self, key):
