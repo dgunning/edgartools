@@ -1184,7 +1184,7 @@ def _scout_single_gap(gap: MetricGap, known_concepts: List[str]) -> ScoutResult:
     discover_concepts() and verify_mapping() functions directly.
     """
     from edgar.xbrl.standardization.tools.discover_concepts import discover_concepts, strip_prefix
-    from edgar.xbrl.standardization.tools.verify_mapping import verify_mapping
+    from edgar.xbrl.standardization.tools.verify_mapping import verify_mapping, _extract_xbrl_value
     from edgar import Company, set_identity, use_local_storage
 
     set_identity("Dev Gunning developer-gunning@gmail.com")
@@ -1266,9 +1266,10 @@ def _scout_single_gap(gap: MetricGap, known_concepts: List[str]) -> ScoutResult:
             if clean_concept in known_concepts:
                 continue
 
-            # Verify across periods
+            # Try multi-period verification via verify_mapping (needs yfinance)
             periods_matched = 0
             periods_checked = 0
+            has_xbrl_value = False
             all_xbrls = [xbrl] + older_xbrls
 
             for period_xbrl in all_xbrls:
@@ -1276,11 +1277,14 @@ def _scout_single_gap(gap: MetricGap, known_concepts: List[str]) -> ScoutResult:
                     metric=gap.metric, concept=concept,
                     xbrl=period_xbrl, ticker=gap.ticker, tolerance_pct=15.0,
                 )
+                if verification.xbrl_value is not None:
+                    has_xbrl_value = True
                 if verification.xbrl_value is not None and verification.reference_value is not None:
                     periods_checked += 1
                     if verification.is_valid:
                         periods_matched += 1
 
+            # Accept if multi-period verification passes
             if periods_checked > 0 and periods_matched >= min(2, periods_checked):
                 result.best_candidate = clean_concept
                 result.confidence = candidate.confidence
@@ -1293,6 +1297,24 @@ def _scout_single_gap(gap: MetricGap, known_concepts: List[str]) -> ScoutResult:
                     "periods_checked": periods_checked,
                 })
                 break
+
+            # Fallback: if yfinance isn't available (verify_mapping returns
+            # xbrl_value=None without trying), extract value directly.
+            # If concept is a known variation found in calc tree AND has an
+            # XBRL value, propose it. CQS eval loop will catch bad proposals.
+            if periods_checked == 0 and candidate.source == "variation":
+                xbrl_val = _extract_xbrl_value(xbrl, concept)
+                if xbrl_val is not None and candidate.confidence >= 0.9:
+                    result.best_candidate = clean_concept
+                    result.confidence = candidate.confidence * 0.9
+                    result.recommended_action = "add_concept"
+                    result.classification = "unmapped"
+                    result.candidates.append({
+                        "concept": clean_concept,
+                        "source": "variation_unverified",
+                        "xbrl_value": xbrl_val,
+                    })
+                    break
 
     except Exception as e:
         result.error = str(e)
