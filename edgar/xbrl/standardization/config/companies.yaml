@@ -18,6 +18,9 @@ companies:
   AAPL:
     name: "Apple Inc."
     cik: 320193
+    exclude_metrics:
+      - Goodwill          # Apple has no goodwill (no major acquisitions)
+      - IntangibleAssets   # Apple reports zero intangible assets
 
   MSFT:
     name: "Microsoft Corporation"
@@ -653,6 +656,16 @@ companies:
           Energy sector needs dedicated archetype or extraction strategy.
           Consider adding "Energy" archetype (F?) with industry-specific P&L handling.
         review_date: "2026-04-26"
+      LongTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 30.0
+        reason: "XOM debt classification differs from yfinance normalization"
+        skip_validation: false
+      WeightedAverageSharesDiluted:
+        form_types: ["10-K", "10-Q"]
+        variance_pct: 5.0
+        reason: "Minor rounding differences in diluted share count"
+        skip_validation: false
     notes: "Integrated oil and gas company"
 
   CVX:
@@ -1663,8 +1676,10 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 20.0  # 20% tolerance for financials
     exclude_metrics:
-      - COGS  # Banks don't have traditional COGS
-      - SGA   # Banks use different expense categories
+      - COGS              # Banks don't have traditional COGS
+      - SGA               # Banks use different expense categories
+      - AccountsReceivable  # Banking: no traditional A/R (uses loan receivables)
+      - AccountsPayable     # Banking: no traditional A/P
     street_view_notes:
       ShortTermDebt: "Hybrid: Commercial GAAP + Dealer Street View"
     notes: "Hybrid bank - commercial + significant dealer/trading operations"

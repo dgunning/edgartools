@@ -37,6 +37,7 @@ metrics:
       - CostOfGoodsSold
       - CostOfSales
       - CostOfServices  # Service companies (consulting, healthcare)
+      - CrudeOilAndProductPurchases  # Energy companies (XOM, CVX)
     tree_hints:
       statements: [INCOME, OPERATIONS]
       parent_pattern: OperatingIncome
