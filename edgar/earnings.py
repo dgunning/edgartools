@@ -216,13 +216,33 @@ _ROW_TYPE_PATTERNS = {
 }
 
 
-def _classify_row_type(label: str) -> RowType:
-    """Classify a row's type based on its label text."""
+def _classify_row_type(label: str, parent_context: str = '') -> RowType:
+    """Classify a row's type based on its label text and optional parent context.
+
+    When HTML tables have hierarchical labels like:
+        Earnings per share:
+          Basic          $2.85
+          Diluted        $2.84
+    the parent "Earnings per share:" is passed as parent_context for "Basic"/"Diluted".
+    """
     label_lower = label.lower()
+    # Check the label itself first
     for row_type, patterns in _ROW_TYPE_PATTERNS.items():
         for pattern in patterns:
             if pattern in label_lower:
                 return row_type
+    # If no match but we have parent context, classify using parent
+    # Check SHARES before PER_SHARE to handle parents like
+    # "Shares used in computing earnings per share:" (contains both patterns)
+    if parent_context:
+        parent_lower = parent_context.lower()
+        # Priority order: SHARES, then PER_SHARE, then others
+        priority_order = [RowType.SHARES, RowType.PER_SHARE, RowType.PERCENTAGE]
+        for row_type in priority_order:
+            patterns = _ROW_TYPE_PATTERNS.get(row_type, [])
+            for pattern in patterns:
+                if pattern in parent_lower:
+                    return row_type
     return RowType.AMOUNT
 
 
@@ -448,21 +468,32 @@ class FinancialTable:
     raw_index: int = 0
     """Original index in document (for debugging)."""
 
-    row_types: dict = field(default_factory=dict)
-    """Mapping of row label → RowType for each row."""
+    row_types: Union[dict, list] = field(default_factory=list)
+    """List of RowType by position, or legacy dict of label → RowType."""
 
     def __bool__(self) -> bool:
         """FinancialTable is truthy if it has data."""
         return not self.dataframe.empty
 
-    def get_row_type(self, label: str) -> RowType:
-        """Get the RowType for a given row label."""
-        return self.row_types.get(label, RowType.AMOUNT)
+    def get_row_type(self, label: str, position: int = -1) -> RowType:
+        """Get the RowType for a given row label or position.
+
+        When position >= 0 and row_types is a list, uses positional lookup
+        to correctly handle duplicate labels (e.g., two 'Basic' rows —
+        one PER_SHARE, one SHARES).
+        """
+        if isinstance(self.row_types, list):
+            if 0 <= position < len(self.row_types):
+                return self.row_types[position]
+        if isinstance(self.row_types, dict):
+            return self.row_types.get(label, RowType.AMOUNT)
+        return RowType.AMOUNT
 
     @property
     def per_share_rows(self) -> pd.DataFrame:
         """Return only per-share rows (EPS, dividends per share, etc.)."""
-        mask = [self.get_row_type(str(idx)) == RowType.PER_SHARE for idx in self.dataframe.index]
+        mask = [self.get_row_type(str(idx), pos) == RowType.PER_SHARE
+                for pos, idx in enumerate(self.dataframe.index)]
         return self.dataframe.loc[mask]
 
     @property
@@ -478,8 +509,9 @@ class FinancialTable:
 
         df = self.dataframe.copy()
         # Only scale AMOUNT rows — skip PER_SHARE, SHARES, PERCENTAGE
-        skip_labels = {str(idx) for idx in df.index
-                       if self.get_row_type(str(idx)) != RowType.AMOUNT}
+        skip_positions = {pos for pos, idx in enumerate(df.index)
+                          if self.get_row_type(str(idx), pos) != RowType.AMOUNT}
+        skip_labels = {str(df.index[pos]) for pos in skip_positions}
 
         for col_idx in range(len(df.columns)):
             col_series = df.iloc[:, col_idx]
@@ -684,11 +716,11 @@ class FinancialTable:
         for col in df.columns:
             period_info = _parse_period_header(str(col))
 
-            for idx_label in df.index:
+            for pos, idx_label in enumerate(df.index):
                 label = str(idx_label)
-                row_type = self.get_row_type(label)
+                row_type = self.get_row_type(label, pos)
 
-                raw_val = df.at[idx_label, col]
+                raw_val = df.iloc[pos][col]
                 # Skip non-numeric cells (headers, subtitles, NaN)
                 numeric_val = None
                 if isinstance(raw_val, (int, float)):
@@ -1069,6 +1101,112 @@ class EarningsRelease:
                 return t
         return None
 
+    def get_key_metrics(self, quarterly: bool = True) -> dict:
+        """Extract headline metrics from the earnings release.
+
+        Returns a dict with the most commonly needed values:
+        revenue, net_income, eps_basic, eps_diluted, period, and scale.
+
+        Args:
+            quarterly: If True (default), prefer quarterly columns (3-month periods)
+                       over annual/YTD columns when both are present.
+
+        Returns:
+            Dict with keys: revenue, net_income, eps_basic, eps_diluted,
+            period (column header string), scale (Scale enum).
+            Values are None when not found.
+        """
+        result = {
+            'revenue': None,
+            'net_income': None,
+            'eps_basic': None,
+            'eps_diluted': None,
+            'period': None,
+            'scale': None,
+        }
+
+        inc = self.income_statement
+        if not inc:
+            return result
+
+        result['scale'] = inc.scale
+
+        # Select the best column (prefer quarterly if requested)
+        col = self._select_period_column(inc, quarterly=quarterly)
+        if col is None:
+            return result
+        result['period'] = str(col)
+
+        # Extract revenue — first row matching revenue patterns
+        revenue_patterns = ['revenue', 'net sales', 'total revenue', 'net revenue', 'sales']
+        net_income_patterns = ['net income', 'net loss', 'net earnings', 'net income (loss)']
+
+        df = inc.dataframe
+        for pos, idx_label in enumerate(df.index):
+            label_lower = str(idx_label).lower().strip()
+            val = df.iloc[pos][col]
+            if not isinstance(val, (int, float)):
+                continue
+
+            # Revenue (first match)
+            if result['revenue'] is None:
+                for pat in revenue_patterns:
+                    if pat in label_lower:
+                        scaled = val * inc.scale.value if inc.get_row_type(str(idx_label), pos) == RowType.AMOUNT and inc.scale != Scale.UNITS else val
+                        result['revenue'] = scaled
+                        break
+
+            # Net income (first match)
+            if result['net_income'] is None:
+                for pat in net_income_patterns:
+                    if pat in label_lower:
+                        scaled = val * inc.scale.value if inc.get_row_type(str(idx_label), pos) == RowType.AMOUNT and inc.scale != Scale.UNITS else val
+                        result['net_income'] = scaled
+                        break
+
+            # EPS — look for per-share rows
+            row_type = inc.get_row_type(str(idx_label), pos)
+            if row_type == RowType.PER_SHARE:
+                if result['eps_basic'] is None and 'basic' in label_lower:
+                    result['eps_basic'] = val  # Per-share rows are not scaled
+                elif result['eps_diluted'] is None and 'diluted' in label_lower:
+                    result['eps_diluted'] = val
+
+        return result
+
+    @staticmethod
+    def _select_period_column(table: 'FinancialTable', quarterly: bool = True) -> Optional[str]:
+        """Select the best period column from a table.
+
+        When quarterly=True, prefers 3-month columns over 12-month/YTD columns.
+        Falls back to the first period column if no quarterly column found.
+        """
+        if not table.periods:
+            # Fall back to first column
+            return table.dataframe.columns[0] if len(table.dataframe.columns) > 0 else None
+
+        if not quarterly:
+            return table.periods[0]
+
+        # Parse each period column and prefer quarterly (3-month) ones
+        quarterly_cols = []
+        annual_cols = []
+        for col in table.periods:
+            info = _parse_period_header(str(col))
+            duration = info.get('duration_months')
+            if duration and duration <= 3:
+                quarterly_cols.append(col)
+            elif duration and duration >= 12:
+                annual_cols.append(col)
+            else:
+                quarterly_cols.append(col)  # Unknown duration, assume quarterly
+
+        if quarterly_cols:
+            return quarterly_cols[0]
+        if annual_cols:
+            return annual_cols[0]
+        return table.periods[0]
+
     def to_facts_dataframe(self) -> pd.DataFrame:
         """Combine all financial tables into a single facts DataFrame.
 
@@ -1110,8 +1248,14 @@ class EarningsRelease:
             periods = [c for c in df.columns
                       if c and str(c).strip() and _YEAR_PATTERN.search(str(c))]
 
-            row_types = {str(idx_label): _classify_row_type(str(idx_label))
-                         for idx_label in df.index}
+            # Build row types as a positional list with parent context
+            # (list avoids collisions when duplicate labels like "Basic" appear
+            # in both EPS and share-count sections)
+            parent_contexts = df.attrs.get('_row_parent_contexts', [])
+            row_types = []
+            for i, idx_label in enumerate(df.index):
+                parent = parent_contexts[i] if i < len(parent_contexts) else ''
+                row_types.append(_classify_row_type(str(idx_label), parent))
 
             table = FinancialTable(
                 dataframe=df,
@@ -1520,6 +1664,8 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
 
     row_labels = []
     row_data = []
+    row_parent_contexts = []  # Parent context for each data row (for row type classification)
+    current_parent_context = ''  # Tracks the most recent label-only row
 
     # Track if we should skip date-header rows from data
     skip_date_rows = bool(date_headers_from_rows)
@@ -1574,8 +1720,13 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
 
         if label_cell and data_cells:
             row_labels.append(label_cell)
+            # Track parent context for this row (used for row type classification)
+            row_parent_contexts.append(current_parent_context)
             merged_data = _merge_currency_symbols(data_cells)
             row_data.append(merged_data)
+        elif label_cell and not data_cells:
+            # Label-only row (e.g., "Earnings per share:") — track as parent context
+            current_parent_context = label_cell
 
     if not row_data:
         return pd.DataFrame()
@@ -1617,6 +1768,9 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
     # Convert numeric columns (using positional indexing to handle duplicate column names)
     for i, col in enumerate(df.columns):
         df.iloc[:, i] = df.iloc[:, i].apply(_parse_numeric)
+
+    # Attach parent contexts for row type classification
+    df.attrs['_row_parent_contexts'] = row_parent_contexts[:len(df)]
 
     return df
 
