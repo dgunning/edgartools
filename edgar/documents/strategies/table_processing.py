@@ -14,6 +14,23 @@ from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.documents.types import TableType
 
 
+def _text_content(elem) -> str:
+    """Extract text content from an lxml element, compatible with both
+    lxml.html.HtmlElement and lxml.etree._Element (from iterparse)."""
+    if hasattr(elem, 'text_content'):
+        return elem.text_content()
+    # Manual extraction for raw etree elements
+    parts = []
+    if elem.text:
+        parts.append(elem.text)
+    for child in elem.iter():
+        if child is not elem and child.text:
+            parts.append(child.text)
+        if child.tail:
+            parts.append(child.tail)
+    return ''.join(parts)
+
+
 class TableProcessor:
     """
     Advanced table processing with type detection and structure analysis.
@@ -149,7 +166,7 @@ class TableProcessor:
                 # If the previous row was a header and this row has years or units,
                 # it's likely part of the header
                 if headers_found and not is_header_row:
-                    row_text = tr.text_content().strip()
+                    row_text = _text_content(tr).strip()
                     # Check for units like "(in millions)" or "(in thousands)"
                     if '(in millions)' in row_text or '(in thousands)' in row_text or '(in billions)' in row_text:
                         is_header_row = True
@@ -380,7 +397,7 @@ class TableProcessor:
             return False
 
         # Get row text for analysis
-        row_text = tr.text_content()
+        row_text = _text_content(tr)
         row_text_lower = row_text.lower()
 
         # Check for date ranges with financial data (Oracle Table 6 pattern)
@@ -419,7 +436,7 @@ class TableProcessor:
         year_cells = 0
         date_phrases = 0
         for cell in cells:
-            cell_text = cell.text_content().strip()
+            cell_text = _text_content(cell).strip()
             if cell_text:
                 # Check for individual years
                 if re.match(r'^\s*(19\d{2}|20\d{2})\s*$', cell_text):
@@ -516,7 +533,7 @@ class TableProcessor:
         text_cells = 0
         number_cells = 0
         for cell in cells:
-            cell_text = cell.text_content().strip()
+            cell_text = _text_content(cell).strip()
             if cell_text:
                 # Remove common symbols for analysis
                 clean_text = cell_text.replace('$', '').replace('%', '').replace(',', '').replace('(', '').replace(')', '')
