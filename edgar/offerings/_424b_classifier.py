@@ -113,7 +113,7 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
 
     # --- PIPE resale (narrow_cover only to avoid base-prospectus boilerplate) ---
     pr: list[str] = []
-    if re.search(r'(offer and resale|resale by the selling stockholder|resale by the selling shareholder)', narrow_cover):
+    if re.search(r'(offer and resale|resale by the selling stockholder|resale by the selling shareholder|resale by the selling securityholder)', narrow_cover):
         pr.append('resale_by_selling_cover')
     if 'resale' in narrow_cover and 'direct listing' in narrow_cover:
         pr.append('direct_listing_resale_cover')
@@ -122,10 +122,13 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
         r'not receive proceeds from the sale)', narrow_cover
     ):
         pr.append('no_proceeds_cover')
-    if 'selling stockholder' in narrow_cover or 'selling shareholder' in narrow_cover:
+    if 'selling stockholder' in narrow_cover or 'selling shareholder' in narrow_cover \
+            or 'selling securityholder' in narrow_cover:
         pr.append('selling_stockholder_cover')
     if 'private placement' in narrow_cover and 'resale' in narrow_cover:
         pr.append('private_placement_resale_cover')
+    if 'standby equity purchase agreement' in narrow_cover and 'resale' in narrow_cover:
+        pr.append('sepa_resale_cover')
     signals['pipe_resale'] = pr
 
     # --- Debt offering ---
@@ -170,8 +173,13 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
     fc: list[str] = []
     if re.search(r'public offering price\s+\$[\d.,]+', cover[:5000]):
         fc.append('public_offering_price_table')
-    if re.search(r'underwriting discount|underwriters?\s+commission', cover[:5000]):
-        fc.append('underwriting_discount')
+    uw_disc_match = re.search(r'underwriting discount|underwriters?\s+commission', cover[:5000])
+    if uw_disc_match:
+        # Exclude boilerplate "other than underwriting discounts" in resale filings
+        ctx_start = max(0, uw_disc_match.start() - 30)
+        ctx = cover[ctx_start:uw_disc_match.end()]
+        if not re.search(r'other than\s+underwriting', ctx):
+            fc.append('underwriting_discount')
     if re.search(r'(option|option to purchase).{0,100}additional (shares|units)', cover[:5000]):
         fc.append('overallotment_option')
     if re.search(
@@ -218,7 +226,8 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
     if ('no_proceeds_cover' in signals['pipe_resale'] and
             'selling_stockholder_cover' in signals['pipe_resale']) or \
        'resale_by_selling_cover' in signals['pipe_resale'] or \
-       'direct_listing_resale_cover' in signals['pipe_resale']:
+       'direct_listing_resale_cover' in signals['pipe_resale'] or \
+       'sepa_resale_cover' in signals['pipe_resale']:
         return _result('pipe_resale', 'high', signals['pipe_resale'], sub_type='equity_resale')
 
     # 6. Debt offering

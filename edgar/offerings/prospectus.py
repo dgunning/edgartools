@@ -1343,7 +1343,7 @@ class Prospectus424B:
         fee_type = 'underwriting_discount'
 
         # Prefer allocation tables (have full legal names)
-        alloc = [r for r in table_results if r['type'] == 'allocation']
+        alloc = [r for r in table_results if r['type'] == 'allocation' and r['names']]
         if alloc:
             for name, amt in zip(alloc[0]['names'], alloc[0].get('allocations', [])):
                 entries.append(UnderwriterEntry(name=name, shares_allocated=amt))

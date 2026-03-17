@@ -141,7 +141,7 @@ def _is_layout_table(table: 'TableNode') -> bool:
     # Single value = page number or long text
     if len(cells) == 1:
         v = cells[0].strip()
-        if re.match(r'^(S-?\d+|[ivxlIVXL]+|\d{1,3})$', v, re.IGNORECASE):
+        if re.match(r'^(S-\s*[ivxlIVXL]+|S-\s*\d+|[ivxlIVXL]+|\d{1,3})$', v, re.IGNORECASE):
             return True
         if len(v) > 100:
             return True
@@ -168,7 +168,7 @@ def _is_toc_table(table: 'TableNode') -> bool:
     rows = _get_row_texts(table)
     if len(rows) < 3:
         return False
-    page_pattern = re.compile(r'^(S-?\d+|[ivxlIVXL]+|\d{1,3})$', re.IGNORECASE)
+    page_pattern = re.compile(r'^(S-\s*[ivxlIVXL]+|S-\s*\d+|[ivxlIVXL]+|\d{1,3})$', re.IGNORECASE)
     page_matches = 0
     valid_rows = 0
     for row in rows:
@@ -894,6 +894,11 @@ _BANK_PATTERNS = [
     r'\bcibc\b', r'\bkeybanc\b', r'\bsantander\b',
     r'\bsociete\s+generale\b', r'\bmacquarie\b',
     r'\bbny\s+(?:mellon|capital)\b', r'\bbank\s+of\s+montreal\b',
+    # SPAC-specialist underwriters
+    r'\bseaport\s+global\b', r'\bd\.?\s*boral\b',
+    r'\bcohen\s+(?:&|and)\s+company\b', r'\bdominari\b',
+    r'\bjett\s+capital\b', r'\bbenchmark\s+company\b',
+    r'\bstonex\b', r'\bpolaris\s+advisory\b', r'\bwebull\b',
 ]
 
 
@@ -953,14 +958,32 @@ def extract_underwriting_from_tables(document) -> list:
         first_data_row = next((r for r in rows if r), None)
         has_row_based_header = False
         if first_data_row:
-            first_row_text = ' '.join(first_data_row).lower()
-            if 'underwriter' in first_row_text or 'number of shares' in first_row_text \
-                    or 'principal amount' in first_row_text:
-                has_row_based_header = True
+            # Check if any individual cell in the first row is a header label
+            # (not "underwriter" buried in a paragraph about over-allotment, etc.)
+            for cell in first_data_row:
+                cell_stripped = cell.strip().lower()
+                if len(cell_stripped) > 60:
+                    continue  # Skip paragraph-length cells
+                if cell_stripped in ('underwriter', 'underwriters', 'name of underwriter',
+                                     'name of underwriters'):
+                    has_row_based_header = True
+                    break
+                if 'number of shares' in cell_stripped or 'principal amount' in cell_stripped:
+                    has_row_based_header = True
+                    break
 
+        # When the table explicitly labels itself (e.g. "Underwriters | Number of Shares"),
+        # trust the structure even if firm names aren't in _BANK_PATTERNS.
+        # This handles SPAC-specialist underwriters not in the whitelist.
+        has_numeric_alloc = False
+        if has_row_based_header and bank_hits_rows == 0:
+            for row in rows[1:]:
+                if len(row) >= 2 and re.search(r'\d', row[-1]):
+                    has_numeric_alloc = True
+                    break
         is_allocation = (
             (has_underwriter_header or has_row_based_header)
-            and bank_hits_rows >= 1
+            and (bank_hits_rows >= 1 or (has_row_based_header and has_numeric_alloc))
             and len(table.rows) >= 2
         )
 
@@ -991,15 +1014,25 @@ def extract_underwriting_from_tables(document) -> list:
         if is_cover_grid:
             names = [c for c in headers_list if _count_bank_hits(c.lower()) >= 1]
         elif is_allocation:
+            # When table was identified structurally (row-based header + numeric data),
+            # accept firm names even if they're not in _BANK_PATTERNS
+            trust_structure = has_row_based_header and bank_hits_rows == 0
+            skip_labels = {'total', 'subtotal', ''}
             start_row = 1 if has_row_based_header else 0
             for row in rows[start_row:]:
                 if row and row[0]:
-                    cell_lower = row[0].lower()
-                    if cell_lower not in ('total', 'subtotal', '') and _count_bank_hits(cell_lower) >= 1:
+                    cell_lower = row[0].lower().strip()
+                    if cell_lower in skip_labels:
+                        continue
+                    # When trusting structure, reject cells that are too long
+                    # to be a firm name (likely description text)
+                    if trust_structure and len(row[0].strip()) > 80:
+                        continue
+                    if trust_structure or _count_bank_hits(cell_lower) >= 1:
                         clean = _clean_underwriter_name(row[0])
                         names.append(clean)
                         # Allocation amount is the last cell if numeric-looking
-                        if len(row) >= 2 and re.fullmatch(r'[\d,.$]+', row[-1]):
+                        if len(row) >= 2 and re.fullmatch(r'[\d,.$\[\] ]+', row[-1].strip()):
                             allocations.append(row[-1])
                         else:
                             allocations.append(None)
