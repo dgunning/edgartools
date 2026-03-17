@@ -72,6 +72,9 @@ class FactsSearcher:
         try:
             c = Company(ticker)
             facts = c.get_facts()
+            if facts is None:
+                print(f"    Facts not available for {ticker} (not downloaded locally?)")
+                return results
             df = facts.to_dataframe()
             all_concepts = set(df['concept'].unique())
         except Exception as e:

@@ -1207,15 +1207,40 @@ def _scout_single_gap(gap: MetricGap, known_concepts: List[str]) -> ScoutResult:
         # Get facts for broader search
         facts_df = None
         try:
-            facts_df = company.get_facts().to_dataframe()
+            facts = company.get_facts()
+            if facts is not None:
+                facts_df = facts.to_dataframe()
         except Exception:
             pass
 
-        # Discover candidates
+        # Discover candidates via calc tree + facts search
         candidates = discover_concepts(
             metric_name=gap.metric, xbrl=xbrl, facts_df=facts_df,
             ticker=gap.ticker, known_concepts=known_concepts, top_k=5,
         )
+
+        # Also try known concept variations (common XBRL name alternatives)
+        # that might not be found by similarity matching
+        variations = _generate_concept_variations(gap.metric, gap.metric)
+        variation_candidates = []
+        calc_tree_concepts = set()
+        if hasattr(xbrl, 'calculation_trees') and xbrl.calculation_trees:
+            for tree in xbrl.calculation_trees.values():
+                for name in tree.all_nodes:
+                    stripped = strip_prefix(name)
+                    calc_tree_concepts.add(stripped)
+
+        for var in variations:
+            if var not in known_concepts and var in calc_tree_concepts:
+                # This variation exists in the calc tree — high confidence
+                from edgar.xbrl.standardization.tools.discover_concepts import CandidateConcept
+                variation_candidates.append(CandidateConcept(
+                    concept=var, source="variation", confidence=0.92,
+                    reasoning=f"Known variation '{var}' found in calc tree",
+                ))
+
+        # Merge: variations first (higher precision), then discovery candidates
+        candidates = variation_candidates + candidates
 
         if not candidates:
             result.classification = "unmapped"

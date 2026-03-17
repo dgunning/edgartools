@@ -219,9 +219,10 @@ def _resolve_single_gap(
         try:
             company = Company(ticker)
             filing = list(company.get_filings(form='10-K'))[0]
+            facts = company.get_facts()
             xbrl_cache[ticker] = {
                 'xbrl': filing.xbrl(),
-                'facts_df': company.get_facts().to_dataframe()
+                'facts_df': facts.to_dataframe() if facts is not None else None
             }
         except Exception as e:
             return Resolution(
