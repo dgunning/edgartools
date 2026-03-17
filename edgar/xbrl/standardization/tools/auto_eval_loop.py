@@ -1121,12 +1121,12 @@ def get_config_fingerprint() -> str:
 
 
 # =============================================================================
-# PHASE 1: PARALLEL SCOUT INFRASTRUCTURE
+# PHASE 1: PARALLEL SCOUT INFRASTRUCTURE (Python ThreadPoolExecutor)
 # =============================================================================
 
 @dataclass
 class ScoutResult:
-    """Result from a Haiku scout agent."""
+    """Result from a parallel concept scout."""
     ticker: str
     metric: str
     candidates: List[Dict[str, Any]] = field(default_factory=list)
@@ -1138,6 +1138,8 @@ class ScoutResult:
 
     @property
     def has_proposal(self) -> bool:
+        if self.recommended_action == "add_exclusion" and self.confidence > 0.5:
+            return True
         return self.best_candidate is not None and self.confidence > 0.5
 
 
@@ -1152,7 +1154,7 @@ def scout_result_to_change(result: ScoutResult, gap: MetricGap) -> Optional[Conf
             change_type=ChangeType.ADD_CONCEPT,
             yaml_path=f"metrics.{result.metric}.known_concepts",
             new_value=result.best_candidate,
-            rationale=f"Haiku scout found concept (confidence={result.confidence:.2f})",
+            rationale=f"Parallel scout found concept (confidence={result.confidence:.2f})",
             target_metric=result.metric,
             target_companies=result.ticker,
         )
@@ -1162,7 +1164,7 @@ def scout_result_to_change(result: ScoutResult, gap: MetricGap) -> Optional[Conf
             change_type=ChangeType.ADD_EXCLUSION,
             yaml_path=f"companies.{result.ticker}.exclude_metrics",
             new_value=result.metric,
-            rationale=f"Haiku scout classified as structural gap ({result.classification})",
+            rationale=f"Classified as structural gap ({result.classification})",
             target_metric=result.metric,
             target_companies=result.ticker,
         )
@@ -1170,51 +1172,185 @@ def scout_result_to_change(result: ScoutResult, gap: MetricGap) -> Optional[Conf
     return None
 
 
-def build_scout_prompt(gap: MetricGap, known_concepts: List[str]) -> str:
-    """Build the prompt for a Haiku concept scout agent."""
-    return (
-        f"Search for XBRL concepts matching metric '{gap.metric}' "
-        f"for company {gap.ticker}. "
-        f"Reference value: {gap.reference_value}. "
-        f"Known concepts already in config: {known_concepts}. "
-        f"Gap type: {gap.gap_type}. "
-        f"Return strict JSON with candidates found in calculation trees."
-    )
+def _scout_single_gap(gap: MetricGap, known_concepts: List[str]) -> ScoutResult:
+    """
+    Scout a single gap using Python — discover concepts, verify multi-period.
+
+    This is the unit of work for ThreadPoolExecutor. It calls the existing
+    discover_concepts() and verify_mapping() functions directly.
+    """
+    from edgar.xbrl.standardization.tools.discover_concepts import discover_concepts, strip_prefix
+    from edgar.xbrl.standardization.tools.verify_mapping import verify_mapping
+    from edgar import Company, set_identity, use_local_storage
+
+    set_identity("Dev Gunning developer-gunning@gmail.com")
+    use_local_storage(True)
+
+    result = ScoutResult(ticker=gap.ticker, metric=gap.metric)
+
+    # Structural gap: no reference value
+    if gap.reference_value is None:
+        result.classification = "structural"
+        result.recommended_action = "add_exclusion"
+        result.confidence = 0.9
+        return result
+
+    try:
+        company = Company(gap.ticker)
+        filings_10k = list(company.get_filings(form='10-K', amendments=False))[:3]
+        if not filings_10k:
+            result.error = "No 10-K filings found"
+            return result
+
+        xbrl = filings_10k[0].xbrl()
+
+        # Get facts for broader search
+        facts_df = None
+        try:
+            facts_df = company.get_facts().to_dataframe()
+        except Exception:
+            pass
+
+        # Discover candidates
+        candidates = discover_concepts(
+            metric_name=gap.metric, xbrl=xbrl, facts_df=facts_df,
+            ticker=gap.ticker, known_concepts=known_concepts, top_k=5,
+        )
+
+        if not candidates:
+            result.classification = "unmapped"
+            result.recommended_action = "skip"
+            return result
+
+        # Multi-period verification for top candidates
+        older_xbrls = []
+        for filing in filings_10k[1:]:
+            try:
+                older_xbrls.append(filing.xbrl())
+            except Exception:
+                pass
+
+        for candidate in candidates:
+            concept = candidate.concept
+            clean_concept = strip_prefix(concept)
+
+            if clean_concept in known_concepts:
+                continue
+
+            # Verify across periods
+            periods_matched = 0
+            periods_checked = 0
+            all_xbrls = [xbrl] + older_xbrls
+
+            for period_xbrl in all_xbrls:
+                verification = verify_mapping(
+                    metric=gap.metric, concept=concept,
+                    xbrl=period_xbrl, ticker=gap.ticker, tolerance_pct=15.0,
+                )
+                if verification.xbrl_value is not None and verification.reference_value is not None:
+                    periods_checked += 1
+                    if verification.is_valid:
+                        periods_matched += 1
+
+            if periods_checked > 0 and periods_matched >= min(2, periods_checked):
+                result.best_candidate = clean_concept
+                result.confidence = candidate.confidence
+                result.recommended_action = "add_concept"
+                result.classification = "unmapped"
+                result.candidates.append({
+                    "concept": clean_concept,
+                    "source": candidate.source,
+                    "periods_matched": periods_matched,
+                    "periods_checked": periods_checked,
+                })
+                break
+
+    except Exception as e:
+        result.error = str(e)
+
+    return result
+
+
+def parallel_scout_gaps(
+    gaps: List[MetricGap],
+    known_concepts_map: Optional[Dict[str, List[str]]] = None,
+    max_workers: int = 5,
+) -> List[ScoutResult]:
+    """
+    Scout multiple gaps in parallel using ThreadPoolExecutor.
+
+    Each gap gets its own thread running discover_concepts() + verify_mapping().
+    This is pure Python parallelism — no LLM calls, deterministic, free.
+
+    Args:
+        gaps: List of MetricGaps to explore.
+        known_concepts_map: Dict of metric -> known_concepts list. If None,
+            reads from metrics.yaml.
+        max_workers: Maximum parallel threads (default 5).
+
+    Returns:
+        List of ScoutResults, one per gap.
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if known_concepts_map is None:
+        known_concepts_map = _load_known_concepts()
+
+    results: List[ScoutResult] = []
+    futures_map = {}
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for gap in gaps:
+            known = known_concepts_map.get(gap.metric, [])
+            future = executor.submit(_scout_single_gap, gap, known)
+            futures_map[future] = gap
+
+        for future in as_completed(futures_map):
+            gap = futures_map[future]
+            try:
+                result = future.result(timeout=120)
+                results.append(result)
+                if result.has_proposal:
+                    logger.info(
+                        f"Scout found: {gap.ticker}:{gap.metric} -> "
+                        f"{result.best_candidate} ({result.confidence:.2f})"
+                    )
+            except Exception as e:
+                logger.warning(f"Scout failed for {gap.ticker}:{gap.metric}: {e}")
+                results.append(ScoutResult(
+                    ticker=gap.ticker, metric=gap.metric, error=str(e)
+                ))
+
+    return results
+
+
+def _load_known_concepts() -> Dict[str, List[str]]:
+    """Load known_concepts for all metrics from metrics.yaml."""
+    metrics_path = CONFIG_DIR / "metrics.yaml"
+    if not metrics_path.exists():
+        return {}
+
+    with open(metrics_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    result = {}
+    for metric, defn in config.get("metrics", {}).items():
+        result[metric] = defn.get("known_concepts", [])
+    return result
 
 
 def build_classifier_prompt(gap: MetricGap, graveyard_count: int) -> str:
-    """Build the prompt for a Haiku gap classifier agent."""
+    """Build the prompt for a Haiku gap classifier agent.
+
+    Gap classification is a reasoning task — Haiku adds value here by
+    applying industry knowledge that deterministic code cannot.
+    """
     return (
         f"Classify metric gap: ticker={gap.ticker}, metric={gap.metric}, "
         f"gap_type={gap.gap_type}, reference_value={gap.reference_value}, "
         f"xbrl_value={gap.xbrl_value}, variance={gap.current_variance}, "
         f"graveyard_count={graveyard_count}. "
         f"Return strict JSON classification."
-    )
-
-
-def build_verifier_prompt(
-    ticker: str, metric: str, concept: str
-) -> str:
-    """Build the prompt for a Haiku period verifier agent."""
-    return (
-        f"Verify concept '{concept}' for metric '{metric}' "
-        f"across multiple fiscal periods for company {ticker}. "
-        f"Load the 3 most recent 10-K filings, extract the concept value "
-        f"from each, and report whether the concept is consistent. "
-        f"Return strict JSON with per-period results."
-    )
-
-
-def build_learner_prompt(
-    metric: str, concept: str, source_ticker: str, target_tickers: List[str]
-) -> str:
-    """Build the prompt for a Haiku cross-company learner agent."""
-    return (
-        f"Check if concept '{concept}' (which works for {source_ticker}'s '{metric}') "
-        f"also works for: {', '.join(target_tickers)}. "
-        f"For each ticker, check if the concept exists in calc trees and has a value. "
-        f"Return strict JSON with per-company results."
     )
 
 
@@ -1422,33 +1558,34 @@ def cross_company_learn(
     concept: str,
     source_ticker: str,
     target_tickers: Optional[List[str]] = None,
+    max_workers: int = 5,
 ) -> List[ConfigChange]:
     """
-    When a concept works for one company, generate proposals to apply it to others.
+    When a concept works for one company, verify it transfers to others.
 
-    This is called after a successful KEEP decision to propagate the learning.
-    The actual verification should be done by Haiku learner agents.
+    Uses Python ThreadPoolExecutor to check the concept across multiple
+    companies in parallel. Returns proposals only for verified transfers.
 
     Args:
         metric: The metric name (e.g., "LongTermDebt").
         concept: The concept that worked (e.g., "LongTermDebtNoncurrent").
         source_ticker: The ticker where this concept was discovered.
         target_tickers: Other tickers to try. Defaults to QUICK_EVAL_COHORT.
+        max_workers: Max parallel threads.
 
     Returns:
         List of ConfigChanges to evaluate (add concept to known_concepts).
     """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from edgar.xbrl.standardization.tools.verify_mapping import verify_mapping
+    from edgar import Company, set_identity, use_local_storage
+
     if target_tickers is None:
         target_tickers = [t for t in QUICK_EVAL_COHORT if t != source_ticker]
 
-    # The concept goes into metrics.yaml known_concepts which is universal,
-    # so if it's already there from the original KEEP, we don't need per-company
-    # proposals. Instead, we check if any target companies need exclusions removed
-    # or if the concept helps them.
-
     proposals = []
 
-    # Read current config to check if concept is already in known_concepts
+    # Check if concept is already in known_concepts
     metrics_path = CONFIG_DIR / "metrics.yaml"
     if not metrics_path.exists():
         return proposals
@@ -1459,18 +1596,55 @@ def cross_company_learn(
     metric_def = metrics_config.get("metrics", {}).get(metric, {})
     known = metric_def.get("known_concepts", [])
 
-    if concept not in known:
-        # The concept should already be added by the original KEEP, but
-        # just in case, propose adding it
+    if concept in known:
+        # Already universal — no per-company proposals needed
+        return proposals
+
+    def _check_ticker(ticker: str) -> Optional[str]:
+        """Check if concept works for a single ticker. Returns ticker if yes."""
+        set_identity("Dev Gunning developer-gunning@gmail.com")
+        use_local_storage(True)
+        try:
+            company = Company(ticker)
+            filing = list(company.get_filings(form='10-K', amendments=False))[0]
+            xbrl = filing.xbrl()
+            result = verify_mapping(
+                metric=metric, concept=concept,
+                xbrl=xbrl, ticker=ticker, tolerance_pct=15.0,
+            )
+            if result.is_valid:
+                return ticker
+        except Exception:
+            pass
+        return None
+
+    # Parallel verification across target companies
+    verified_tickers = []
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(_check_ticker, t): t for t in target_tickers}
+        for future in as_completed(futures):
+            result = future.result(timeout=60)
+            if result:
+                verified_tickers.append(result)
+
+    if verified_tickers:
+        all_tickers = ",".join([source_ticker] + verified_tickers)
         proposals.append(ConfigChange(
             file="metrics.yaml",
             change_type=ChangeType.ADD_CONCEPT,
             yaml_path=f"metrics.{metric}.known_concepts",
             new_value=concept,
-            rationale=f"Cross-company learning from {source_ticker}: {concept} works for {metric}",
+            rationale=(
+                f"Cross-company verified: {concept} works for {metric} across "
+                f"{len(verified_tickers)+1} companies ({all_tickers})"
+            ),
             target_metric=metric,
-            target_companies=",".join(target_tickers),
+            target_companies=all_tickers,
         ))
+        logger.info(
+            f"Cross-company learning: {concept} verified for "
+            f"{len(verified_tickers)}/{len(target_tickers)} targets"
+        )
 
     return proposals
 

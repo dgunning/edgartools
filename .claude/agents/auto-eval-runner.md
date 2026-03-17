@@ -148,56 +148,53 @@ Gap arrives
     └── External data changed? → Update snapshot, re-validate
 ```
 
-## Haiku Swarm Orchestration (Parallel Scouts)
+## Parallel Scouting (Python ThreadPoolExecutor)
 
-You can deploy cheap parallel Haiku agents to explore gaps simultaneously:
+Mechanical tasks (concept discovery, period verification, cross-company checking) run
+as pure Python in parallel via ThreadPoolExecutor. Haiku is only used for reasoning
+tasks like gap classification.
 
-### Available Scout Agents
-
-| Agent | Purpose | I/O |
-|-------|---------|-----|
-| `haiku-concept-scout` | Find XBRL concepts for unmapped metrics | Reads XBRL filings |
-| `haiku-period-verifier` | Verify concepts across 2-3 fiscal periods | Reads XBRL filings |
-| `haiku-cross-company-learner` | Check if a concept transfers to other companies | Reads XBRL filings |
-| `haiku-gap-classifier` | Fast triage without file I/O | No I/O |
-
-### Parallel Scout Pattern
+### Parallel Scout Usage
 
 ```python
+from edgar.xbrl.standardization.tools.auto_eval import identify_gaps
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    parallel_scout_gaps, scout_result_to_change,
+    select_non_conflicting, batch_evaluate, cross_company_learn,
+)
+
 # 1. Identify gaps
 gaps, baseline = identify_gaps()
 
-# 2. Deploy scouts in parallel (using Claude Code Agent tool)
-# For each gap, spawn a haiku-concept-scout with model="haiku"
-# Each scout returns strict JSON with candidates
+# 2. Scout gaps in parallel (Python threads, no LLM calls)
+scout_results = parallel_scout_gaps(gaps[:10], max_workers=5)
 
-# 3. Collect results, build proposals
-from edgar.xbrl.standardization.tools.auto_eval_loop import (
-    ScoutResult, scout_result_to_change, select_non_conflicting,
-    batch_evaluate, cross_company_learn,
-    build_scout_prompt, build_classifier_prompt,
-)
+# 3. Convert to proposals, filter non-conflicting
+proposals = [scout_result_to_change(r, g) for r, g in zip(scout_results, gaps) if r.has_proposal]
+proposals = [p for p in proposals if p is not None]
+batch = select_non_conflicting(proposals)
 
-# 4. Batch evaluate non-conflicting proposals
-proposals = select_non_conflicting(all_proposals)
-batch_result = batch_evaluate(proposals, baseline)
+# 4. Batch evaluate (single CQS measurement)
+batch_result = batch_evaluate(batch, baseline)
 
-# 5. For each KEEP, propagate via cross-company learning
+# 5. Cross-company learning for each KEEP
 for change in batch_result.changes_kept:
     learn_proposals = cross_company_learn(
         metric=change.target_metric,
         concept=change.new_value,
-        source_ticker=change.target_companies,
+        source_ticker=change.target_companies.split(",")[0],
     )
 ```
 
-### Map-Reduce Protocol
+### Haiku Gap Classifier
 
-1. **Map phase**: Spawn 5-10 Haiku scouts in parallel (one per gap)
-2. **Collect phase**: Wait for all scouts, parse JSON results
-3. **Reduce phase**: Opus reviews results, selects best proposals
-4. **Batch eval**: Apply non-conflicting changes, measure CQS ONCE
-5. **Learning cascade**: For each KEEP, check cross-company transfer
+For ambiguous gaps where deterministic code can't decide (e.g., "is this a structural
+gap for banking companies?"), use the `haiku-gap-classifier` agent:
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import build_classifier_prompt
+# Spawn via Claude Code Agent tool with model="haiku", subagent_type="haiku-gap-classifier"
+```
 
 ### Offline Mode
 
@@ -236,15 +233,12 @@ After each session, report:
 
 ```
 edgar/xbrl/standardization/tools/auto_eval.py        — CQS computation, gap analysis, offline readiness
-edgar/xbrl/standardization/tools/auto_eval_loop.py    — Experiment loop, config changes, batch eval, scouts
+edgar/xbrl/standardization/tools/auto_eval_loop.py    — Experiment loop, parallel scouts, batch eval
 edgar/xbrl/standardization/tools/bulk_preload.py       — Pre-download data for offline mode
 edgar/xbrl/standardization/ledger/schema.py            — AutoEvalExperiment, AutoEvalGraveyard tables
 edgar/xbrl/standardization/config/                      — Tier 1 config files
 edgar/xbrl/standardization/tools/discover_concepts.py   — Concept discovery (uses calculation_trees API)
-edgar/xbrl/standardization/tools/verify_mapping.py      — Value verification AI tool
+edgar/xbrl/standardization/tools/verify_mapping.py      — Value verification tool
 edgar/xbrl/standardization/tools/learn_mappings.py      — Cross-company pattern learning
-.claude/agents/haiku-concept-scout.md                    — Haiku scout for concept discovery
-.claude/agents/haiku-period-verifier.md                  — Haiku scout for multi-period verification
-.claude/agents/haiku-cross-company-learner.md            — Haiku scout for pattern transfer
-.claude/agents/haiku-gap-classifier.md                   — Haiku scout for fast gap triage
+.claude/agents/haiku-gap-classifier.md                   — Haiku for reasoning-only gap classification
 ```
