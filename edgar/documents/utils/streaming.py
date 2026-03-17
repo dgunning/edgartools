@@ -57,6 +57,7 @@ class StreamingParser:
         self.tag_stack = []
         self.text_buffer = []
         self.in_table = False
+        self._table_depth = 0
         self.table_buffer = []
         self.bytes_processed = 0
 
@@ -93,8 +94,10 @@ class StreamingParser:
             for event, elem in parser:
                 self._process_event(event, elem)
 
-                # Check size limit
-                self.bytes_processed += len(etree.tostring(elem, encoding='unicode', method='html'))
+                # Check size limit (only on end events outside tables to
+                # avoid repeatedly serializing growing table subtrees)
+                if event == 'end' and self._table_depth == 0:
+                    self.bytes_processed += len(etree.tostring(elem, encoding='unicode', method='html'))
                 if self.bytes_processed > self.config.max_document_size:
                     raise DocumentTooLargeError(self.bytes_processed, self.config.max_document_size)
 
@@ -102,14 +105,17 @@ class StreamingParser:
                 if len(self.node_buffer) >= self.MAX_NODE_BUFFER:
                     self._flush_buffer()
 
-                # Clean up processed elements to save memory
-                elem.clear()
-                while elem.getprevious() is not None:
-                    parent = elem.getparent()
-                    if parent is not None:
-                        del parent[0]
-                    else:
-                        break
+                # Clean up processed elements to save memory.
+                # Skip clearing while inside a table — _end_table needs
+                # the full element tree (tr/td children) to extract data.
+                if self._table_depth == 0:
+                    elem.clear()
+                    while elem.getprevious() is not None:
+                        parent = elem.getparent()
+                        if parent is not None:
+                            del parent[0]
+                        else:
+                            break
 
             # Final flush
             self._flush_buffer()
@@ -269,6 +275,7 @@ class StreamingParser:
 
     def _start_table(self, elem: HtmlElement):
         """Start processing a table."""
+        self._table_depth += 1
         self.in_table = True
         self.table_buffer = []
 
@@ -280,7 +287,8 @@ class StreamingParser:
         # Import node types at runtime to avoid circular imports
         from edgar.documents.table_nodes import TableNode
 
-        self.in_table = False
+        self._table_depth -= 1
+        self.in_table = self._table_depth > 0
 
         # Process table with table processor if available
         if self.strategies.get('table_processing'):
