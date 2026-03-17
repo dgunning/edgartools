@@ -286,9 +286,9 @@ def _render_filing_comparison(identifier: str, form: str = "10-K", compare_to: s
 
 1. **Company Profile**: Use edgar_company with identifier="{identifier}" and include ["profile"] for context.
 
-2. **Latest Filing**: Use edgar_read with identifier="{identifier}", form="{form}", and filing_index=0. Read sections ["business", "risk_factors", "mda"].
+2. **Latest Filing**: Use edgar_filing with identifier="{identifier}" and form="{form}" to get the latest filing context. Then use edgar_read with the same identifier and form, sections=["business", "risk_factors", "mda"] to extract content.
 
-3. **Previous Filing**: Use edgar_read with identifier="{identifier}", form="{form}", and filing_index=1. Read the same sections.
+3. **Previous Filing**: Use edgar_search with identifier="{identifier}", form="{form}", search_type="filings" to list recent filings. Pick the second one's accession_number, then use edgar_read with that accession_number and sections=["business", "risk_factors", "mda"].
 
 4. **Financial Trends**: Use edgar_trends with identifier="{identifier}" and concepts ["revenue", "net_income", "eps", "assets"] over 5 periods to see the trajectory.
 

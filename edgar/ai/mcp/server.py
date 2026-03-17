@@ -126,7 +126,9 @@ Common workflows:
 1. Company research: edgar_company → edgar_read (10-K sections) → edgar_trends
 2. Filing analysis: edgar_filing (by accession/URL) → edgar_read (extract sections)
 3. Event monitoring: edgar_monitor → edgar_filing (examine new filings)
-4. Peer comparison: edgar_screen (find peers) → edgar_compare (compare metrics)"""
+4. Peer comparison: edgar_screen (find peers) → edgar_compare (compare metrics)
+
+Pre-built analysis prompts are available via prompts/list: due_diligence, earnings_analysis, industry_overview, insider_monitor, fund_analysis, filing_comparison, activist_tracking."""
 
 # Create the server
 app = Server("edgartools", instructions=SERVER_INSTRUCTIONS)
