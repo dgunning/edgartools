@@ -738,6 +738,122 @@ class Statement:
         rendered_statement = self.render()
         return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # Render once and reuse
+        stmt_type = self.canonical_type or self.role_or_type
+        try:
+            rendered = self.render()
+        except Exception:
+            rendered = None
+
+        # === IDENTITY ===
+        title = rendered.title if rendered else stmt_type
+        lines.append(f"STATEMENT: {title}")
+        lines.append("")
+
+        # Entity info from parent XBRL
+        try:
+            entity = self.xbrl.entity_info
+            if entity:
+                name = entity.get('entity_name', '')
+                ticker = entity.get('ticker', '')
+                if name:
+                    entity_str = name
+                    if ticker:
+                        entity_str += f" ({ticker})"
+                    lines.append(f"Entity: {entity_str}")
+        except Exception:
+            pass
+
+        # Period info
+        if rendered and rendered.header:
+            period_labels = [h for h in rendered.header.columns if h]
+            if period_labels:
+                lines.append(f"Periods: {', '.join(period_labels)}")
+
+        # Line item count
+        if rendered and rendered.rows:
+            lines.append(f"Line Items: {len(rendered.rows)}")
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        # Units note (strip any Rich markup tags)
+        try:
+            if rendered and rendered.units_note:
+                import re
+                units_clean = re.sub(r'\[/?[^\]]+\]', '', rendered.units_note)
+                lines.append(f"Scale: {units_clean}")
+        except Exception:
+            pass
+
+        # Key line items (first few non-abstract rows with values)
+        if rendered and rendered.rows:
+            lines.append("")
+            lines.append("KEY LINE ITEMS:")
+            count = 0
+            for row in rendered.rows:
+                if count >= 8:
+                    break
+                if row.is_abstract:
+                    continue
+                # Get first cell value
+                cell_vals = [c for c in (row.cells or []) if c and c.value is not None]
+                if not cell_vals:
+                    continue
+                label = row.label or ''
+                # Format the value using the cell's own formatter
+                val_str = cell_vals[0].get_formatted_value()
+                if label:
+                    lines.append(f"  {label}: {val_str}")
+                    count += 1
+            # Count remaining data rows
+            remaining_data = sum(1 for r in rendered.rows
+                                 if not r.is_abstract
+                                 and any(c and c.value is not None for c in (r.cells or [])))
+            remaining = remaining_data - count
+            if remaining > 0:
+                lines.append(f"  ... ({remaining} more)")
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .render()                Rendered table for display")
+        lines.append("  .to_dataframe()          Full data as DataFrame")
+        lines.append("  .validate()              Validate accounting identity")
+        lines.append("  .calculate_ratios()      Financial ratios")
+        lines.append("  .text()                  Narrative content (if note)")
+        lines.append("  .analyze_trends()        Multi-period trend analysis")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        # Statement metadata
+        if self.canonical_type:
+            lines.append("")
+            lines.append(f"Statement Type: {self.canonical_type}")
+        if self.is_segmented():
+            lines.append("Segmented: Yes")
+
+        # Note/textblock indicator
+        try:
+            if self.is_note:
+                lines.append("Contains Narrative: Yes")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     @property
     def docs(self):
         """

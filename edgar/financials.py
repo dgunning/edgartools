@@ -767,6 +767,32 @@ class Financials:
 
         return f"Financials({' '.join(parts)})"
 
+    def get_currency_symbol(self) -> str:
+        """
+        Get the reporting currency symbol for this filing.
+
+        Detects the most common monetary unit from the XBRL units dict.
+        Returns '$' as default if currency cannot be determined.
+        """
+        if self.xb is None:
+            return "$"
+        try:
+            from collections import Counter
+            from edgar.xbrl.core import get_currency_symbol as _get_sym
+            # Count currency measures across all unit definitions
+            currencies = Counter()
+            for unit_info in self.xb.units.values():
+                if unit_info.get('type') == 'simple':
+                    measure = unit_info.get('measure', '')
+                    if measure.startswith('iso4217:'):
+                        currencies[measure] += 1
+            if currencies:
+                most_common = currencies.most_common(1)[0][0]
+                return _get_sym(most_common)
+        except Exception:
+            pass
+        return "$"
+
     def to_context(self) -> str:
         """
         Return context string for LLMs with available actions.

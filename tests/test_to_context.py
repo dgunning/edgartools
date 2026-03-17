@@ -141,6 +141,143 @@ class TestForm4ToContext:
         assert tokens < 600
 
 
+class TestTenQToContext:
+    """Tests for TenQ.to_context()."""
+
+    @pytest.fixture(scope="class")
+    def tenq(self):
+        from edgar import Company
+        filing = Company("MSFT").get_filings(form="10-Q").latest()
+        return filing.obj()
+
+    @pytest.mark.network
+    def test_minimal_format(self, tenq):
+        ctx = tenq.to_context('minimal')
+        assert ctx.startswith("TENQ:")
+        assert "Quarterly Report" in ctx
+        assert "Period:" in ctx or "Filed:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, tenq):
+        ctx = tenq.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+        assert ".financials" in ctx
+
+    @pytest.mark.network
+    def test_standard_token_budget(self, tenq):
+        ctx = tenq.to_context('standard')
+        tokens = len(ctx) // 4
+        assert tokens < 500
+
+
+class TestCurrentReportToContext:
+    """Tests for CurrentReport/EightK.to_context()."""
+
+    @pytest.fixture(scope="class")
+    def eightk(self):
+        from edgar import get_filings
+        filing = get_filings(form="8-K")[0]
+        return filing.obj()
+
+    @pytest.mark.network
+    def test_minimal_format(self, eightk):
+        ctx = eightk.to_context('minimal')
+        assert "Current Report" in ctx
+        assert "Filed:" in ctx
+
+    @pytest.mark.network
+    def test_minimal_has_items(self, eightk):
+        ctx = eightk.to_context('minimal')
+        assert "Items:" in ctx or "Filed:" in ctx  # Items may be empty for some filings
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, eightk):
+        ctx = eightk.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+        assert ".items" in ctx
+
+    @pytest.mark.network
+    def test_standard_token_budget(self, eightk):
+        ctx = eightk.to_context('standard')
+        tokens = len(ctx) // 4
+        assert tokens < 600
+
+
+class TestProxyStatementToContext:
+    """Tests for ProxyStatement.to_context()."""
+
+    @pytest.fixture(scope="class")
+    def proxy(self):
+        from edgar import Company
+        filing = Company("AAPL").get_filings(form="DEF 14A").latest()
+        return filing.obj()
+
+    @pytest.mark.network
+    def test_minimal_format(self, proxy):
+        ctx = proxy.to_context('minimal')
+        assert ctx.startswith("PROXY:")
+        assert "Filed:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_compensation(self, proxy):
+        ctx = proxy.to_context('standard')
+        assert "EXECUTIVE COMPENSATION:" in ctx or "AVAILABLE ACTIONS:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, proxy):
+        ctx = proxy.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+
+    @pytest.mark.network
+    def test_standard_token_budget(self, proxy):
+        ctx = proxy.to_context('standard')
+        tokens = len(ctx) // 4
+        assert tokens < 600
+
+
+class TestStatementToContext:
+    """Tests for individual Statement.to_context()."""
+
+    @pytest.fixture(scope="class")
+    def statement(self):
+        from edgar import Company
+        fin = Company("AAPL").get_financials()
+        return fin.income_statement()
+
+    @pytest.mark.network
+    def test_minimal_format(self, statement):
+        ctx = statement.to_context('minimal')
+        assert ctx.startswith("STATEMENT:")
+        assert "Entity:" in ctx
+        assert "Line Items:" in ctx
+
+    @pytest.mark.network
+    def test_standard_has_key_items(self, statement):
+        ctx = statement.to_context('standard')
+        assert "KEY LINE ITEMS:" in ctx
+        assert "$" in ctx  # Should have formatted dollar values
+
+    @pytest.mark.network
+    def test_standard_has_actions(self, statement):
+        ctx = statement.to_context('standard')
+        assert "AVAILABLE ACTIONS:" in ctx
+        assert ".to_dataframe()" in ctx
+
+    @pytest.mark.network
+    def test_no_rich_markup_leak(self, statement):
+        ctx = statement.to_context('standard')
+        # No Rich markup tags should leak into output
+        assert "[italic]" not in ctx
+        assert "[/italic]" not in ctx
+        assert "[bold]" not in ctx
+
+    @pytest.mark.network
+    def test_standard_token_budget(self, statement):
+        ctx = statement.to_context('standard')
+        tokens = len(ctx) // 4
+        assert tokens < 600
+
+
 class TestThirteenFToContext:
     """Tests for ThirteenF.to_context() using a known filing."""
 

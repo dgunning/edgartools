@@ -67,8 +67,12 @@ def moneyfmt(value, places=0, curr='$', sep=',', dp='.',
     return ''.join(reversed(result))
 
 
-def format_currency_short(value: Union[int, float, Decimal, None]) -> str:
+def format_currency_short(value: Union[int, float, Decimal, None], currency: str = '$') -> str:
     """Format currency with scale abbreviation for AI context output.
+
+    Args:
+        value: Numeric value to format
+        currency: Currency symbol (default: '$'). Pass result of get_currency_symbol().
 
     Examples:
         >>> format_currency_short(394_328_000_000)
@@ -81,6 +85,8 @@ def format_currency_short(value: Union[int, float, Decimal, None]) -> str:
         '-$1.2M'
         >>> format_currency_short(None)
         ''
+        >>> format_currency_short(1_000_000, currency='NT$')
+        'NT$1.0M'
     """
     if value is None:
         return ""
@@ -93,13 +99,13 @@ def format_currency_short(value: Union[int, float, Decimal, None]) -> str:
     abs_val = abs(value)
     sign = "-" if value < 0 else ""
     if abs_val >= 1_000_000_000:
-        return f"{sign}${abs_val / 1_000_000_000:,.1f}B"
+        return f"{sign}{currency}{abs_val / 1_000_000_000:,.1f}B"
     elif abs_val >= 1_000_000:
-        return f"{sign}${abs_val / 1_000_000:,.1f}M"
+        return f"{sign}{currency}{abs_val / 1_000_000:,.1f}M"
     elif abs_val >= 1_000:
-        return f"{sign}${abs_val:,.0f}"
+        return f"{sign}{currency}{abs_val:,.0f}"
     else:
-        return f"{sign}${abs_val:,.2f}"
+        return f"{sign}{currency}{abs_val:,.2f}"
 
 
 def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:

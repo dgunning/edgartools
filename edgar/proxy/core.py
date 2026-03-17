@@ -435,6 +435,125 @@ class ProxyStatement:
         company_display = self.company_name or "Unknown Company"
         return f"DEF 14A{amendment}: {company_display} - {self.fiscal_year_end or self.filing_date}"
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        from edgar.display.formatting import format_currency_short
+
+        lines = []
+
+        # === IDENTITY ===
+        company = self.company_name or "Unknown Company"
+        lines.append(f"PROXY: {company}")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Filed: {self.filing_date}")
+        if self.fiscal_year_end:
+            lines.append(f"Fiscal Year End: {self.fiscal_year_end}")
+        lines.append(f"Form: {self.form}")
+
+        if not self.has_xbrl:
+            lines.append("XBRL: Not available")
+            if detail == 'minimal':
+                return "\n".join(lines)
+            lines.append("")
+            lines.append("AVAILABLE ACTIONS:")
+            lines.append("  .has_xbrl                Whether XBRL data is present")
+            return "\n".join(lines)
+
+        if detail == 'minimal':
+            # Headline compensation
+            peo_comp = self.peo_total_comp
+            if peo_comp:
+                lines.append(f"CEO Total Comp: {format_currency_short(float(peo_comp))}")
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"CIK: {self.cik}")
+
+        # Executive compensation
+        peo_comp = self.peo_total_comp
+        peo_name = self.peo_name
+        neo_comp = self.neo_avg_total_comp
+        if peo_comp or neo_comp:
+            lines.append("")
+            lines.append("EXECUTIVE COMPENSATION:")
+            if peo_name:
+                lines.append(f"  CEO: {peo_name}")
+            if peo_comp:
+                lines.append(f"  CEO Total Comp: {format_currency_short(float(peo_comp))}")
+            peo_cap = self.peo_actually_paid_comp
+            if peo_cap:
+                lines.append(f"  CEO Actually Paid: {format_currency_short(float(peo_cap))}")
+            if neo_comp:
+                lines.append(f"  NEO Avg Total Comp: {format_currency_short(float(neo_comp))}")
+
+        # Pay vs performance highlights
+        tsr = self.total_shareholder_return
+        peer_tsr = self.peer_group_tsr
+        if tsr is not None:
+            lines.append("")
+            lines.append("PAY VS PERFORMANCE:")
+            lines.append(f"  Total Shareholder Return: ${float(tsr):,.2f}")
+            if peer_tsr is not None:
+                lines.append(f"  Peer Group TSR: ${float(peer_tsr):,.2f}")
+            ni = self.net_income
+            if ni is not None:
+                lines.append(f"  Net Income: {format_currency_short(float(ni))}")
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .executive_compensation  Multi-year comp DataFrame")
+        lines.append("  .pay_vs_performance      Pay vs performance DataFrame")
+        lines.append("  .peo_total_comp          CEO total compensation")
+        lines.append("  .named_executives        Named executive officers list")
+        lines.append("  .performance_measures    Company performance measures")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        # Named executives
+        try:
+            if self.has_individual_executive_data:
+                execs = self.named_executives
+                if execs:
+                    lines.append("")
+                    lines.append(f"NAMED EXECUTIVES: {len(execs)}")
+                    for ex in execs[:8]:
+                        role_str = f" ({ex.role})" if ex.role else ""
+                        lines.append(f"  {ex.name}{role_str}")
+        except Exception:
+            pass
+
+        # Performance measures
+        try:
+            measures = self.performance_measures
+            if measures:
+                lines.append("")
+                lines.append("PERFORMANCE MEASURES:")
+                for m in measures[:5]:
+                    lines.append(f"  {m}")
+        except Exception:
+            pass
+
+        # Governance
+        try:
+            itp = self.insider_trading_policy_adopted
+            if itp is not None:
+                lines.append("")
+                lines.append(f"Insider Trading Policy: {'Adopted' if itp else 'Not adopted'}")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __rich__(self):
         # Header
         title = Text()

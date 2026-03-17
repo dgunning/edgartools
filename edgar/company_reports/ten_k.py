@@ -378,12 +378,13 @@ class TenK(CompanyReport):
             try:
                 fin = self.financials
                 if fin:
+                    cs = fin.get_currency_symbol()
                     revenue = fin.get_revenue()
                     net_income = fin.get_net_income()
                     if revenue:
-                        lines.append(f"Revenue: {format_currency_short(revenue)}")
+                        lines.append(f"Revenue: {format_currency_short(revenue, cs)}")
                     if net_income:
-                        lines.append(f"Net Income: {format_currency_short(net_income)}")
+                        lines.append(f"Net Income: {format_currency_short(net_income, cs)}")
             except Exception:
                 pass
             return "\n".join(lines)
@@ -396,6 +397,7 @@ class TenK(CompanyReport):
         try:
             fin = self.financials
             if fin:
+                cs = fin.get_currency_symbol()
                 fin_lines = []
                 for label, getter in [
                     ("Revenue", "get_revenue"),
@@ -407,7 +409,7 @@ class TenK(CompanyReport):
                     try:
                         val = getattr(fin, getter)()
                         if val is not None:
-                            fin_lines.append(f"  {label}: {format_currency_short(val)}")
+                            fin_lines.append(f"  {label}: {format_currency_short(val, cs)}")
                     except Exception:
                         pass
                 if fin_lines:

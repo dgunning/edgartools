@@ -715,6 +715,116 @@ class CurrentReport(CompanyReport):
     def __str__(self):
         return f"{self.company} {self.form} {self.date_of_report}"
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        lines = []
+
+        # === IDENTITY ===
+        form_upper = self.form.replace('-', '').replace('/', '').upper()
+        lines.append(f"{form_upper}: {self.company} Current Report")
+        lines.append("")
+
+        # === CORE METADATA ===
+        lines.append(f"Filed: {self.filing_date}")
+        try:
+            dor = self.date_of_report
+            if dor:
+                lines.append(f"Event Date: {dor}")
+        except Exception:
+            pass
+
+        # Items reported
+        try:
+            items = self.items
+            if items:
+                # Build item descriptions from structure
+                item_desc = []
+                for item in items:
+                    item_num = item.replace("Item ", "").strip()
+                    struct_item = self.structure.get_item(item)
+                    if struct_item:
+                        item_desc.append(f"{item_num} ({struct_item.get('Title', '')})")
+                    else:
+                        item_desc.append(item_num)
+                lines.append(f"Items: {', '.join(item_desc)}")
+        except Exception:
+            pass
+
+        if detail == 'minimal':
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"Form: {self.form}")
+        lines.append(f"CIK: {str(self._filing.cik).zfill(10)}")
+
+        # Flags
+        flags = []
+        try:
+            if self.has_press_release:
+                flags.append("has_press_release")
+        except Exception:
+            pass
+        try:
+            if self.has_earnings:
+                flags.append("has_earnings")
+        except Exception:
+            pass
+        if flags:
+            lines.append(f"Flags: {', '.join(flags)}")
+
+        # Items with full descriptions
+        try:
+            items = self.items
+            if items:
+                lines.append("")
+                lines.append("ITEMS:")
+                for item in items:
+                    item_num = item.replace("Item ", "").strip()
+                    struct_item = self.structure.get_item(item)
+                    title = struct_item.get('Title', '') if struct_item else ''
+                    lines.append(f"  {item_num}: {title}")
+        except Exception:
+            pass
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  [item_number]            Get text for specific item")
+        lines.append("  .items                   All reported item numbers")
+        lines.append("  .press_releases          Press release attachments")
+        lines.append("  .earnings                Parsed earnings release")
+        lines.append("  .income_statement        Income statement (from earnings)")
+        lines.append("  .balance_sheet           Balance sheet (from earnings)")
+        lines.append("  .text()                  Full filing text content")
+        lines.append("  .document                Parsed HTML document")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        # Exhibit list
+        try:
+            attachments = self._filing.attachments
+            if attachments and len(attachments) > 0:
+                lines.append("")
+                lines.append("EXHIBITS:")
+                for att in list(attachments)[:10]:
+                    doc_type = getattr(att, 'document_type', '') or ''
+                    desc = getattr(att, 'description', '') or ''
+                    if doc_type or desc:
+                        lines.append(f"  {doc_type}: {desc}" if desc else f"  {doc_type}")
+                if len(attachments) > 10:
+                    lines.append(f"  ... ({len(attachments) - 10} more)")
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     def __repr__(self):
         return repr_rich(self.__rich__())
 

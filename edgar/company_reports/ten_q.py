@@ -79,6 +79,118 @@ class TenQ(CompanyReport):
     def __str__(self):
         return f"""TenQ('{self.company}')"""
 
+    def to_context(self, detail: str = 'standard') -> str:
+        """
+        AI-optimized context string.
+
+        Args:
+            detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+        """
+        from edgar.display.formatting import format_currency_short
+
+        lines = []
+
+        # === IDENTITY ===
+        lines.append(f"TENQ: {self.company} Quarterly Report")
+        lines.append("")
+
+        # === CORE METADATA ===
+        try:
+            period = self.period_of_report
+            if period:
+                lines.append(f"Period: {period}")
+        except Exception:
+            pass
+        lines.append(f"Filed: {self.filing_date}")
+
+        if detail == 'minimal':
+            try:
+                fin = self.financials
+                if fin:
+                    cs = fin.get_currency_symbol()
+                    revenue = fin.get_revenue()
+                    net_income = fin.get_net_income()
+                    if revenue:
+                        lines.append(f"Revenue: {format_currency_short(revenue, cs)}")
+                    if net_income:
+                        lines.append(f"Net Income: {format_currency_short(net_income, cs)}")
+            except Exception:
+                pass
+            return "\n".join(lines)
+
+        # === STANDARD ===
+        lines.append(f"Form: {self.form}")
+        lines.append(f"CIK: {str(self._filing.cik).zfill(10)}")
+
+        # Financials section
+        try:
+            fin = self.financials
+            if fin:
+                cs = fin.get_currency_symbol()
+                fin_lines = []
+                for label, getter in [
+                    ("Revenue", "get_revenue"),
+                    ("Net Income", "get_net_income"),
+                    ("Total Assets", "get_total_assets"),
+                    ("Operating Income", "get_operating_income"),
+                ]:
+                    try:
+                        val = getattr(fin, getter)()
+                        if val is not None:
+                            fin_lines.append(f"  {label}: {format_currency_short(val, cs)}")
+                    except Exception:
+                        pass
+                if fin_lines:
+                    lines.append("")
+                    lines.append("FINANCIALS:")
+                    lines.extend(fin_lines)
+        except Exception:
+            pass
+
+        # Sections
+        try:
+            items = self.items
+            if items:
+                seen = set()
+                unique_items = []
+                for item in items:
+                    if item not in seen:
+                        seen.add(item)
+                        unique_items.append(item)
+                lines.append("")
+                lines.append("SECTIONS:")
+                lines.append(f"  {', '.join(unique_items)}")
+        except Exception:
+            pass
+
+        # Available actions
+        lines.append("")
+        lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .financials              XBRL financial statements")
+        lines.append("  .income_statement        Income statement")
+        lines.append("  .balance_sheet           Balance sheet")
+        lines.append("  .cash_flow_statement     Cash flow statement")
+        lines.append("  .items                   All available section items")
+        lines.append("  .document                Parsed HTML document")
+
+        if detail == 'standard':
+            return "\n".join(lines)
+
+        # === FULL ===
+        try:
+            auditor = self.auditor
+            if auditor:
+                lines.append("")
+                lines.append("AUDITOR:")
+                aud_line = f"  {auditor.name}"
+                if auditor.location:
+                    aud_line += f", {auditor.location}"
+                lines.append(aud_line)
+        except Exception:
+            pass
+
+        return "\n".join(lines)
+
     @cached_property
     def document(self):
         """
