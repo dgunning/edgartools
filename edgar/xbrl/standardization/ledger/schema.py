@@ -248,6 +248,57 @@ class RegressionReport:
 
 
 # =============================================================================
+# AUTO-EVAL DATA CLASSES
+# =============================================================================
+
+@dataclass
+class AutoEvalExperiment:
+    """Record of a single auto-eval experiment (config change + measurement)."""
+    experiment_id: str
+    run_id: str                       # Links to pipeline run
+    timestamp: str
+    target_metric: str                # The metric gap being addressed
+    target_companies: str             # Comma-separated tickers
+    change_type: str                  # add_concept | add_divergence | add_tree_hint | etc.
+    config_diff: str                  # YAML diff of the change
+    cqs_before: float
+    cqs_after: float
+    decision: str                     # KEEP | DISCARD | VETO
+    duration_seconds: float = 0.0
+    rationale: str = ""               # Why the change was proposed
+    notes: str = ""
+
+    def __post_init__(self):
+        if not self.timestamp:
+            self.timestamp = datetime.now().isoformat()
+
+    @property
+    def cqs_delta(self) -> float:
+        return self.cqs_after - self.cqs_before
+
+    @property
+    def improved(self) -> bool:
+        return self.decision == "KEEP"
+
+
+@dataclass
+class AutoEvalGraveyard:
+    """Record of a discarded experiment — prevents re-attempting failed approaches."""
+    experiment_id: str
+    target_metric: str
+    target_companies: str
+    discard_reason: str               # regression | no_improvement | company_drop | error
+    detail: str                       # Human-readable explanation
+    similar_attempts: int = 0         # Count of prior similar failures
+    timestamp: str = ""
+    config_diff: str = ""             # What was tried
+
+    def __post_init__(self):
+        if not self.timestamp:
+            self.timestamp = datetime.now().isoformat()
+
+
+# =============================================================================
 # EXPERIMENT LEDGER
 # =============================================================================
 
@@ -405,6 +456,39 @@ class ExperimentLedger:
                 )
             ''')
 
+            # Auto-eval experiments table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS auto_eval_experiments (
+                    experiment_id TEXT PRIMARY KEY,
+                    run_id TEXT,
+                    timestamp TEXT NOT NULL,
+                    target_metric TEXT NOT NULL,
+                    target_companies TEXT,
+                    change_type TEXT NOT NULL,
+                    config_diff TEXT,
+                    cqs_before REAL,
+                    cqs_after REAL,
+                    decision TEXT NOT NULL,
+                    duration_seconds REAL,
+                    rationale TEXT,
+                    notes TEXT
+                )
+            ''')
+
+            # Auto-eval graveyard table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS auto_eval_graveyard (
+                    experiment_id TEXT PRIMARY KEY,
+                    target_metric TEXT NOT NULL,
+                    target_companies TEXT,
+                    discard_reason TEXT NOT NULL,
+                    detail TEXT,
+                    similar_attempts INTEGER DEFAULT 0,
+                    timestamp TEXT NOT NULL,
+                    config_diff TEXT
+                )
+            ''')
+
             # Create indexes
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_pipeline_state ON pipeline_state(state)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_runs_ticker ON extraction_runs(ticker)')
@@ -413,6 +497,8 @@ class ExperimentLedger:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_runs_strategy ON extraction_runs(strategy_fingerprint)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_golden_ticker ON golden_masters(ticker)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_cohort_name ON cohort_tests(cohort_name)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_autoeval_metric ON auto_eval_experiments(target_metric)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_graveyard_metric ON auto_eval_graveyard(target_metric)')
 
             conn.commit()
 
@@ -863,6 +949,111 @@ class ExperimentLedger:
             print(f"\nSTATUS: {len(report.regressions)} REGRESSIONS DETECTED")
 
         print(f"{'='*60}\n")
+
+    # =========================================================================
+    # AUTO-EVAL EXPERIMENTS
+    # =========================================================================
+
+    def record_experiment(self, experiment: AutoEvalExperiment) -> str:
+        """Record an auto-eval experiment."""
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO auto_eval_experiments (
+                    experiment_id, run_id, timestamp, target_metric,
+                    target_companies, change_type, config_diff,
+                    cqs_before, cqs_after, decision, duration_seconds,
+                    rationale, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                experiment.experiment_id, experiment.run_id,
+                experiment.timestamp, experiment.target_metric,
+                experiment.target_companies, experiment.change_type,
+                experiment.config_diff, experiment.cqs_before,
+                experiment.cqs_after, experiment.decision,
+                experiment.duration_seconds, experiment.rationale,
+                experiment.notes,
+            ))
+            conn.commit()
+        logger.info(
+            f"Recorded experiment {experiment.experiment_id}: "
+            f"{experiment.decision} (CQS {experiment.cqs_before:.4f} -> {experiment.cqs_after:.4f})"
+        )
+        return experiment.experiment_id
+
+    def get_experiments(self, limit: int = 50, decision: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get recent auto-eval experiments."""
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            if decision:
+                cursor.execute('''
+                    SELECT * FROM auto_eval_experiments
+                    WHERE decision = ?
+                    ORDER BY timestamp DESC LIMIT ?
+                ''', (decision, limit))
+            else:
+                cursor.execute('''
+                    SELECT * FROM auto_eval_experiments
+                    ORDER BY timestamp DESC LIMIT ?
+                ''', (limit,))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def record_graveyard(self, entry: AutoEvalGraveyard) -> str:
+        """Record a discarded experiment in the graveyard."""
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO auto_eval_graveyard (
+                    experiment_id, target_metric, target_companies,
+                    discard_reason, detail, similar_attempts,
+                    timestamp, config_diff
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                entry.experiment_id, entry.target_metric,
+                entry.target_companies, entry.discard_reason,
+                entry.detail, entry.similar_attempts,
+                entry.timestamp, entry.config_diff,
+            ))
+            conn.commit()
+        logger.info(f"Graveyard: {entry.target_metric} — {entry.discard_reason}")
+        return entry.experiment_id
+
+    def get_graveyard_entries(
+        self, target_metric: Optional[str] = None, limit: int = 100
+    ) -> List[Dict[str, Any]]:
+        """Get graveyard entries, optionally filtered by metric."""
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            if target_metric:
+                cursor.execute('''
+                    SELECT * FROM auto_eval_graveyard
+                    WHERE target_metric = ?
+                    ORDER BY timestamp DESC LIMIT ?
+                ''', (target_metric, limit))
+            else:
+                cursor.execute('''
+                    SELECT * FROM auto_eval_graveyard
+                    ORDER BY timestamp DESC LIMIT ?
+                ''', (limit,))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_graveyard_count(self, target_metric: str, target_companies: str = "") -> int:
+        """Count graveyard entries for a specific metric (and optionally company)."""
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            if target_companies:
+                cursor.execute('''
+                    SELECT COUNT(*) FROM auto_eval_graveyard
+                    WHERE target_metric = ? AND target_companies = ?
+                ''', (target_metric, target_companies))
+            else:
+                cursor.execute('''
+                    SELECT COUNT(*) FROM auto_eval_graveyard
+                    WHERE target_metric = ?
+                ''', (target_metric,))
+            return cursor.fetchone()[0]
 
     # =========================================================================
     # ANALYTICS

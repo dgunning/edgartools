@@ -9,6 +9,9 @@ Available Tools:
 - verify_mapping: Value comparison with consolidation checks
 - learn_mappings: Auto-expand known_concepts from patterns
 - resolve_gaps: Full gap resolution workflow with coverage comparison
+- auto_eval: Autonomous quality measurement (CQS computation, gap analysis)
+- auto_eval_loop: Experiment infrastructure (config changes, tournament eval, overnight loop)
+- auto_eval_dashboard: Morning review terminal dashboard
 """
 
 from .discover_concepts import discover_concepts, CandidateConcept, discover
