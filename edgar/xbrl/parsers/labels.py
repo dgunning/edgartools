@@ -5,6 +5,7 @@ This module handles parsing of XBRL label linkbases and extracting
 element labels for display purposes.
 """
 
+import sys
 from pathlib import Path
 from typing import Dict, Union
 
@@ -67,6 +68,19 @@ class LabelsParser(BaseParser):
             xml_lang = '{http://www.w3.org/XML/1998/namespace}lang'
             default_role = 'http://www.xbrl.org/2003/role/label'
 
+            # Intern role URIs: the same ~10 role strings repeat for every element.
+            # sys.intern deduplicates them to a single object, saving significant memory.
+            _intern = sys.intern
+            _role_intern_cache = {}
+
+            def _intern_role(role_str):
+                cached = _role_intern_cache.get(role_str)
+                if cached is not None:
+                    return cached
+                interned = _intern(role_str)
+                _role_intern_cache[role_str] = interned
+                return interned
+
             # Optimize: Process labels in a single pass with direct attribute access
             for label in labels:
                 label_id = label.get(xlink_label)
@@ -79,7 +93,7 @@ class LabelsParser(BaseParser):
                     continue
 
                 # Get attributes - direct lookup is faster than method calls
-                role = label.get(xlink_role, default_role)
+                role = _intern_role(label.get(xlink_role, default_role))
                 lang = label.get(xml_lang, 'en-US')
 
                 # Create nested dictionaries only when needed

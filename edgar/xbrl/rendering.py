@@ -269,15 +269,31 @@ class RenderedStatement:
     def periods(self):
         return self.header.periods
 
+    def __getitem__(self, label: str) -> Optional['StatementRow']:
+        """Look up a row by label (case-insensitive, substring fallback).
+
+        For drill-down to notes, use Statement.__getitem__ instead which
+        returns a StatementLineItem with .note/.notes properties.
+        """
+        if not self.rows:
+            return None
+        label_lower = label.lower()
+        # Exact match first
+        for row in self.rows:
+            if row.label.lower() == label_lower:
+                return row
+        # Substring fallback
+        for row in self.rows:
+            if label_lower in row.label.lower():
+                return row
+        return None
+
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to a JSON-safe dict.
 
         Pre-applies cell formatters so the resulting dict contains only
         plain Python types (strings, numbers, lists, dicts) and can be
         passed directly to ``json.dumps``.
-
-        ``comparison_data`` is excluded from statement-level metadata
-        because each cell already carries its own ``comparison`` field.
         """
         from datetime import date as _date
 
@@ -335,11 +351,7 @@ class RenderedStatement:
                 'metadata': _json_safe(h.metadata),
             }
 
-        # Filter comparison_data out of metadata — it's redundant
-        filtered_metadata = _json_safe({
-            k: v for k, v in self.metadata.items()
-            if k != 'comparison_data'
-        })
+        filtered_metadata = _json_safe(self.metadata)
 
         return {
             'title': self.title,
@@ -1737,7 +1749,6 @@ def render_statement(
             'standard': standard,
             'show_date_range': show_date_range,
             'entity_info': entity_info,
-            'comparison_data': comparison_data,
             **footer_metadata  # Add footer metadata
         },
         statement_type=statement_type,

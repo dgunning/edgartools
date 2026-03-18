@@ -134,6 +134,18 @@ class XBRL:
         # Reverse index: element_name -> list of context_ids with facts (lazy-initialized)
         self._element_context_index = None
 
+        # FilingSummary-based role categories (role_uri -> category string)
+        self._filing_summary_categories: Dict[str, str] = {}
+        # FilingSummary-based menu categories (role_uri -> MenuCategory string)
+        self._filing_summary_menu_categories: Dict[str, str] = {}
+
+        # Cache for statement concepts used by notes.py expands logic (lazy-initialized)
+        self._statement_concepts_cache = None
+
+        # Notes caches (lazy-initialized by notes.py)
+        self._notes_cache = None                  # Notes collection once built
+        self._concept_to_notes_cache = None       # Reverse index: concept_id → List[Note]
+
     def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
         """
         Determine if a statement should display dimensioned line items.
@@ -542,6 +554,29 @@ class XBRL:
         except Exception:
             pass
 
+        # Load authoritative categories from FilingSummary.xml
+        # SGML is already loaded from filing.attachments above, so this is zero-cost
+        try:
+            sgml = filing.sgml()
+            if sgml:
+                filing_summary = sgml.filing_summary
+                if filing_summary:
+                    _MENU_CATEGORY_TO_CLASSIFICATION = {
+                        'Notes': 'note',
+                        'Tables': 'note',
+                        'Policies': 'note',
+                        'Details': 'disclosure',
+                        'Cover': 'document',
+                    }
+                    for report in filing_summary.reports:
+                        if report.role and report.menu_category:
+                            classification = _MENU_CATEGORY_TO_CLASSIFICATION.get(report.menu_category)
+                            if classification:
+                                xbrl._filing_summary_categories[report.role] = classification
+                            xbrl._filing_summary_menu_categories[report.role] = report.menu_category
+        except Exception:
+            pass
+
         return xbrl
 
     @property
@@ -759,7 +794,24 @@ class XBRL:
                     else:
                         statement_type = matched_type
 
-            # If we didn't find a match, try additional patterns for notes and disclosures
+            # Use FilingSummary.xml authoritative categories if available (Fix 2)
+            if not statement_type and role in self._filing_summary_categories:
+                fs_category = self._filing_summary_categories[role]
+                fs_menu = self._filing_summary_menu_categories.get(role, '')
+                statement_category = fs_category
+                # Derive a type name from the menu category
+                if fs_menu == 'Notes':
+                    statement_type = "Notes"
+                elif fs_menu == 'Tables':
+                    statement_type = "NoteTable"
+                elif fs_menu == 'Policies':
+                    statement_type = "AccountingPolicies"
+                elif fs_menu == 'Details':
+                    statement_type = "Disclosures"
+                elif fs_menu == 'Cover':
+                    statement_type = "CoverPage"
+
+            # Fall back to keyword-based patterns for notes and disclosures
             if not statement_type:
                 if 'us-gaap_NotesToFinancialStatementsAbstract' in primary_concept or 'note' in role_def:
                     statement_type = "Notes"
@@ -784,7 +836,8 @@ class XBRL:
                 'type': statement_type,
                 'primary_concept': primary_concept,
                 'role_name': role_name,
-                'category': statement_category  # This will be None for backward compatibility unless set above
+                'category': statement_category,  # This will be None for backward compatibility unless set above
+                'menu_category': self._filing_summary_menu_categories.get(role)  # From FilingSummary.xml
             }
 
             statements.append(statement)

@@ -6,6 +6,7 @@ This module provides functions for working with financial statements.
 
 import re
 import warnings
+import weakref
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
@@ -1849,6 +1850,11 @@ class Statement:
         return "\n\n".join(text_parts) if text_parts else None
 
     @property
+    def html(self) -> Optional[str]:
+        """Get raw HTML content from a note/disclosure statement."""
+        return self.text(raw_html=True)
+
+    @property
     def is_note(self) -> bool:
         """Check if this statement contains narrative TextBlock content."""
         from edgar.xbrl.abstract_detection import is_textblock_concept
@@ -1860,6 +1866,97 @@ class Statement:
             is_textblock_concept(item.get('concept', '').replace(':', '_'))
             for item in data
         )
+
+    def __getitem__(self, label: str) -> Optional['StatementLineItem']:
+        """Look up a line item by label for drill-down to notes.
+
+        Args:
+            label: Line item label (case-insensitive, supports partial match)
+
+        Returns:
+            StatementLineItem with .note/.notes drill-down, or None
+
+        Example:
+            >>> stmt = xbrl.statements['BalanceSheet']
+            >>> item = stmt['Long-term Debt']
+            >>> item.note  # → Note explaining this line item
+        """
+        rendered = self.render()
+        if not rendered or not rendered.rows:
+            return None
+
+        label_lower = label.lower()
+
+        # Pass 1: exact case-insensitive match
+        for row in rendered.rows:
+            if row.label.lower() == label_lower:
+                return StatementLineItem(row, self.xbrl)
+
+        # Pass 2: substring match
+        for row in rendered.rows:
+            if label_lower in row.label.lower():
+                return StatementLineItem(row, self.xbrl)
+
+        return None
+
+
+class StatementLineItem:
+    """A single line item from a financial statement, with drill-down to notes.
+
+    Created by Statement.__getitem__ — not intended for direct construction.
+
+    Example:
+        >>> item = balance_sheet['Long-term Debt']
+        >>> item.label        # 'Long-term debt, non-current'
+        >>> item.concept      # 'us-gaap_LongTermDebtNoncurrent'
+        >>> item.note         # → Note object (most specific match)
+        >>> item.notes        # → [Note, ...] (all related notes)
+        >>> item.values       # {'instant_2024-12-31': 98071000000, ...}
+    """
+    __slots__ = ('_row', '_xbrl_ref')
+
+    def __init__(self, row, xbrl):
+        self._row = row
+        self._xbrl_ref = weakref.ref(xbrl) if xbrl is not None else None
+
+    @property
+    def _xbrl(self):
+        return self._xbrl_ref() if self._xbrl_ref is not None else None
+
+    @property
+    def label(self) -> str:
+        return self._row.label
+
+    @property
+    def concept(self) -> str:
+        return self._row.metadata.get('concept', '')
+
+    @property
+    def values(self) -> list:
+        """Cell values in period order (matches header column order)."""
+        return [cell.value for cell in (self._row.cells or [])]
+
+    @property
+    def note(self) -> Optional[Any]:
+        """The most relevant Note for this line item, or None."""
+        notes = self.notes
+        return notes[0] if notes else None
+
+    @property
+    def notes(self) -> List[Any]:
+        """All Notes related to this line item, ranked by specificity."""
+        xbrl = self._xbrl
+        if not xbrl or not self.concept:
+            return []
+        from edgar.xbrl.notes import get_notes_for_concept
+        return get_notes_for_concept(self.concept, xbrl)
+
+    def __repr__(self):
+        concept_str = f", concept='{self.concept}'" if self.concept else ""
+        return f"StatementLineItem('{self.label}'{concept_str})"
+
+    def __str__(self):
+        return self.label
 
 
 class Statements:
