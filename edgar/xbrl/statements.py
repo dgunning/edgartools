@@ -1880,36 +1880,75 @@ class Statement:
         )
 
     def __getitem__(self, label: str) -> Optional['StatementLineItem']:
-        """Look up a line item by label for drill-down to notes.
+        """Look up a line item by exact label (case-insensitive).
+
+        For fuzzy/partial matching, use .search() instead.
 
         Args:
-            label: Line item label (case-insensitive, supports partial match)
+            label: Exact line item label (case-insensitive)
 
         Returns:
             StatementLineItem with .note/.notes drill-down, or None
 
         Example:
-            >>> stmt = xbrl.statements['BalanceSheet']
-            >>> item = stmt['Long-term Debt']
-            >>> item.note  # → Note explaining this line item
+            >>> stmt['Cash and cash equivalents']     # exact match
+            >>> stmt['cash and cash equivalents']     # case-insensitive
+            >>> stmt.search('cash')                   # fuzzy search
         """
         rendered = self.render()
         if not rendered or not rendered.rows:
             return None
 
         label_lower = label.lower()
-
-        # Pass 1: exact case-insensitive match
         for row in rendered.rows:
             if row.label.lower() == label_lower:
                 return StatementLineItem(row, self.xbrl)
 
-        # Pass 2: substring match
-        for row in rendered.rows:
-            if label_lower in row.label.lower():
-                return StatementLineItem(row, self.xbrl)
-
         return None
+
+    def search(self, keyword: str) -> List['StatementLineItem']:
+        """Search line items by keyword. Returns all matches, best first.
+
+        Ranking: exact label > label starts with keyword > word match > substring.
+
+        Args:
+            keyword: Search term (case-insensitive)
+
+        Returns:
+            List of matching StatementLineItems, best match first.
+
+        Example:
+            >>> stmt.search('debt')       # → [Long-term debt, Short-term debt, ...]
+            >>> stmt.search('total')      # → [Total assets, Total liabilities, ...]
+        """
+        if not keyword or not keyword.strip():
+            return []
+
+        rendered = self.render()
+        if not rendered or not rendered.rows:
+            return []
+
+        key = keyword.strip().lower()
+        scored = []
+        for row in rendered.rows:
+            if row.is_abstract:
+                continue
+            label = row.label.lower()
+            words = [w.rstrip("',;:-()") for w in label.split()]
+
+            if label == key:
+                scored.append((0, row))
+            elif label.startswith(key):
+                scored.append((1, row))
+            elif any(w == key for w in words):
+                scored.append((2, row))
+            elif any(w.startswith(key) for w in words):
+                scored.append((3, row))
+            elif key in label:
+                scored.append((4, row))
+
+        scored.sort(key=lambda x: x[0])
+        return [StatementLineItem(row, self.xbrl) for _, row in scored]
 
 
 class StatementLineItem:

@@ -270,7 +270,7 @@ class RenderedStatement:
         return self.header.periods
 
     def __getitem__(self, label: str) -> Optional['StatementRow']:
-        """Look up a row by label (case-insensitive, substring fallback).
+        """Look up a row by exact label (case-insensitive).
 
         For drill-down to notes, use Statement.__getitem__ instead which
         returns a StatementLineItem with .note/.notes properties.
@@ -278,13 +278,8 @@ class RenderedStatement:
         if not self.rows:
             return None
         label_lower = label.lower()
-        # Exact match first
         for row in self.rows:
             if row.label.lower() == label_lower:
-                return row
-        # Substring fallback
-        for row in self.rows:
-            if label_lower in row.label.lower():
                 return row
         return None
 

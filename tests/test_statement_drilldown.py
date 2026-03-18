@@ -240,10 +240,11 @@ class TestRenderedStatementGetItem:
         rs = self._make_rendered(rows)
         assert rs['long-term debt'] is rows[0]
 
-    def test_substring_fallback(self):
+    def test_exact_only_no_substring(self):
+        """Partial label should NOT match — use search() for fuzzy."""
         rows = [StatementRow(label='Long-term debt, net of unamortized discount', level=1)]
         rs = self._make_rendered(rows)
-        assert rs['Long-term debt'] is rows[0]
+        assert rs['Long-term debt'] is None
 
     def test_not_found_returns_none(self):
         rows = [StatementRow(label='Cash', level=0)]
@@ -264,6 +265,75 @@ class TestNotesCaching:
         assert mock_xbrl._notes_cache is None
         notes = Notes.from_xbrl(mock_xbrl)
         assert mock_xbrl._notes_cache is notes
+
+
+# ── Statement.search() tests ──────────────────────────────────────────────────
+
+class TestStatementSearch:
+    """Test Statement.search() fuzzy matching."""
+
+    @pytest.fixture
+    def mock_statement(self):
+        """Statement with a mock render() returning typical balance sheet rows."""
+        from unittest.mock import MagicMock, patch
+        from edgar.xbrl.xbrl import XBRL
+        from edgar.xbrl.statements import Statement
+
+        xbrl = XBRL()
+        stmt = Statement(xbrl, 'http://example.com/role/BalanceSheet')
+
+        rows = [
+            StatementRow(label='ASSETS:', level=0, is_abstract=True),
+            StatementRow(label='Cash and cash equivalents', level=1,
+                         metadata={'concept': 'us-gaap_Cash'}),
+            StatementRow(label='Total current assets', level=1,
+                         metadata={'concept': 'us-gaap_AssetsCurrent'}),
+            StatementRow(label='Total assets', level=0,
+                         metadata={'concept': 'us-gaap_Assets'}),
+            StatementRow(label='Long-term debt, net of unamortized discount', level=1,
+                         metadata={'concept': 'us-gaap_LongTermDebt'}),
+            StatementRow(label='Total liabilities', level=0,
+                         metadata={'concept': 'us-gaap_Liabilities'}),
+        ]
+        rendered = RenderedStatement(
+            title='Balance Sheet', header=StatementHeader(), rows=rows)
+
+        with patch.object(stmt, 'render', return_value=rendered):
+            yield stmt
+
+    def test_search_exact_match_first(self, mock_statement):
+        results = mock_statement.search('Total assets')
+        assert len(results) >= 1
+        assert results[0].label == 'Total assets'
+
+    def test_search_returns_multiple(self, mock_statement):
+        results = mock_statement.search('total')
+        labels = [r.label for r in results]
+        assert 'Total current assets' in labels
+        assert 'Total assets' in labels
+        assert 'Total liabilities' in labels
+
+    def test_search_skips_abstracts(self, mock_statement):
+        results = mock_statement.search('assets')
+        labels = [r.label for r in results]
+        assert 'ASSETS:' not in labels
+
+    def test_search_substring_match(self, mock_statement):
+        results = mock_statement.search('Long-term debt')
+        assert len(results) >= 1
+        assert 'Long-term debt' in results[0].label
+
+    def test_search_empty_returns_empty(self, mock_statement):
+        assert mock_statement.search('') == []
+        assert mock_statement.search('  ') == []
+
+    def test_search_no_match(self, mock_statement):
+        assert mock_statement.search('nonexistent') == []
+
+    def test_search_returns_line_items(self, mock_statement):
+        results = mock_statement.search('cash')
+        assert all(isinstance(r, StatementLineItem) for r in results)
+        assert results[0].concept == 'us-gaap_Cash'
 
 
 # ── Statement.report property ─────────────────────────────────────────────────
