@@ -211,6 +211,12 @@ def compute_cqs(
     # Aggregate across companies
     result = _aggregate_cqs(company_scores, baseline_cqs, time.time() - start_time)
 
+    # Record valid results and promote golden masters
+    count = record_eval_results(all_results, orchestrator.validation_results, ledger)
+    if count > 0:
+        promoted = ledger.promote_golden_masters(min_periods=1)
+        logger.info(f"Recorded {count} extraction runs, promoted {len(promoted)} golden masters")
+
     logger.info(f"Auto-eval complete: {result.summary()}")
     return result
 
@@ -348,6 +354,56 @@ def _aggregate_cqs(
 
 
 # =============================================================================
+# RESULT RECORDING & GOLDEN MASTER PROMOTION
+# =============================================================================
+
+def record_eval_results(
+    all_results: Dict[str, Dict[str, MappingResult]],
+    validation_results: Dict[str, dict],
+    ledger,
+) -> int:
+    """
+    Record valid extractions from auto-eval as ExtractionRun entries.
+
+    This bridges the gap between auto-eval validation and the golden master
+    promotion pipeline. Without ExtractionRun records, promote_golden_masters()
+    has no data for expansion companies.
+    """
+    from edgar.xbrl.standardization.ledger.schema import ExtractionRun
+    from edgar.xbrl.standardization.tools.auto_eval_loop import get_config_fingerprint
+
+    fingerprint = get_config_fingerprint()
+    recorded = 0
+
+    for ticker, metrics in all_results.items():
+        for metric, result in metrics.items():
+            if result.validation_status != "valid":
+                continue
+
+            val = validation_results.get(ticker, {}).get(metric)
+            fiscal_period = result.fiscal_period if result.fiscal_period else "unknown"
+
+            run = ExtractionRun(
+                ticker=ticker,
+                metric=metric,
+                fiscal_period=fiscal_period,
+                form_type="10-K",
+                archetype=result.source.value,
+                strategy_name=result.source.value,
+                strategy_fingerprint=fingerprint,
+                extracted_value=val.xbrl_value if val else None,
+                reference_value=val.reference_value if val else None,
+                variance_pct=val.variance_pct if val else None,
+                is_valid=True,
+                confidence=result.confidence,
+            )
+            ledger.record_run(run)
+            recorded += 1
+
+    return recorded
+
+
+# =============================================================================
 # GAP ANALYSIS
 # =============================================================================
 
@@ -476,14 +532,16 @@ def _classify_gap(
             notes="Golden master regressed — high priority",
         )
 
-    # Validation failure: mapped but wrong value
-    if result.is_mapped and result.validation_status == "invalid":
+    # Validation failure: mapped but wrong value (or reset after validation failure)
+    # Check validation_status before is_mapped — the orchestrator resets concept to None
+    # on validation failure, so is_mapped becomes False but validation_status stays "invalid"
+    if result.validation_status == "invalid":
         return MetricGap(
             ticker=ticker, metric=metric, gap_type="validation_failure",
             estimated_impact=per_metric_impact * 1.5,
             current_variance=variance, reference_value=ref_val,
             xbrl_value=xbrl_val, graveyard_count=gc,
-            notes=f"Mapped to {result.concept} but failed validation",
+            notes=result.reasoning or f"Mapped to {result.concept} but failed validation",
         )
 
     # Unmapped: no concept found

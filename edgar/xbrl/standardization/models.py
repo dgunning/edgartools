@@ -171,6 +171,7 @@ class MetricConfig:
     composite: bool = False  # True if metric requires aggregating multiple components
     components: List[str] = field(default_factory=list)  # Component concepts for composite metrics
     standard_tag: List[str] = field(default_factory=list)  # Upstream GAAP standard_tag(s) for expansion
+    validation_tolerance: Optional[float] = None  # Per-metric validation tolerance % override
 
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""

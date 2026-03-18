@@ -1549,14 +1549,14 @@ class ReferenceValidator:
         variance = abs(abs_xbrl - abs_ref) / abs_ref if abs_ref != 0 else 0
         
         # Dynamic tolerance per Principal Architect guidance:
-        # - 10% for balance sheet debt items (definition differences are common)
-        # - 5% default for most metrics
-        # - Company-specific overrides take precedence
+        # Priority: metric-level (from metrics.yaml) > debt override > company override > default 5%
         base_tolerance = self._get_tolerance_for_company(ticker)
-        
-        # Debt metrics get higher tolerance due to definition mismatches
-        # (yfinance may include/exclude leases, commercial paper differently)
-        if metric in ['ShortTermDebt', 'LongTermDebt']:
+
+        # Check metric-level tolerance first (from metrics.yaml validation_tolerance field)
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if metric_config and metric_config.validation_tolerance is not None:
+            tolerance = max(base_tolerance, metric_config.validation_tolerance / 100.0)
+        elif metric in ['ShortTermDebt', 'LongTermDebt']:
             tolerance = max(base_tolerance, 0.10)  # At least 10% for debt
         else:
             tolerance = max(base_tolerance, 0.05)

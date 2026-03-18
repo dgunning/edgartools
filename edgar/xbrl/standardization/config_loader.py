@@ -133,6 +133,7 @@ class ConfigLoader:
                 composite=data.get("composite", False),
                 components=data.get("components", []),
                 standard_tag=raw_tag,
+                validation_tolerance=data.get("validation_tolerance"),
             )
 
         # Expand known_concepts using upstream GAAP mappings
