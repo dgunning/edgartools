@@ -76,6 +76,12 @@ class CompanyCQS:
     metrics_valid: int         # Validation-passing metrics
     metrics_excluded: int      # CONFIG-excluded metrics
     cqs: float                 # Composite quality score for this company
+    # Two-score architecture
+    ef_pass_rate: float = 0.0  # Extraction Fidelity: fraction of correctly extracted concepts
+    sa_pass_rate: float = 0.0  # Standardization Alignment: fraction matching yfinance
+    ef_cqs: float = 0.0       # EF component of CQS
+    sa_cqs: float = 0.0       # SA component of CQS
+    explained_variance_count: int = 0  # Gaps with documented explanations
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -86,13 +92,14 @@ class MetricGap:
     """A gap in the extraction pipeline, ranked by CQS impact."""
     ticker: str
     metric: str
-    gap_type: str              # "unmapped" | "validation_failure" | "high_variance" | "regression"
+    gap_type: str              # "unmapped" | "validation_failure" | "high_variance" | "regression" | "explained_variance"
     estimated_impact: float    # Estimated CQS improvement if resolved [0-1]
     current_variance: Optional[float] = None
     reference_value: Optional[float] = None
     xbrl_value: Optional[float] = None
     graveyard_count: int = 0   # Number of prior failed attempts
     notes: str = ""
+    variance_type: str = "raw" # "raw" | "explained" | "standardized"
 
     @property
     def is_dead_end(self) -> bool:
@@ -124,6 +131,13 @@ class CQSResult:
     total_valid: int
     total_regressions: int
 
+    # Two-score architecture
+    ef_cqs: float = 0.0        # Extraction Fidelity CQS
+    sa_cqs: float = 0.0        # Standardization Alignment CQS
+    ef_pass_rate: float = 0.0  # Aggregate EF pass rate
+    sa_pass_rate: float = 0.0  # Aggregate SA pass rate
+    explained_variance_count: int = 0  # Total explained variance gaps
+
     # Per-company breakdown
     company_scores: Dict[str, CompanyCQS] = field(default_factory=dict)
 
@@ -144,6 +158,7 @@ class CQSResult:
         veto = " [VETOED]" if self.vetoed else ""
         return (
             f"CQS={self.cqs:.4f}{veto} | "
+            f"EF={self.ef_cqs:.4f} SA={self.sa_cqs:.4f} | "
             f"pass={self.pass_rate:.1%} var={self.mean_variance:.1f}% "
             f"cov={self.coverage_rate:.1%} golden={self.golden_master_rate:.1%} "
             f"regress={self.total_regressions} | "
@@ -235,6 +250,9 @@ def _compute_company_cqs(
     variances = []
     golden_count = 0
     regression_count = 0
+    ef_pass_count = 0
+    sa_pass_count = 0
+    explained_variance_count = 0
 
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
@@ -254,10 +272,22 @@ def _compute_company_cqs(
             if (ticker, metric) in golden_set:
                 regression_count += 1
 
-        # Collect variance from validation results
+        # Collect variance and EF/SA from validation results
         val_result = validations.get(metric)
         if val_result and val_result.variance_pct is not None:
             variances.append(abs(val_result.variance_pct))
+
+        # EF/SA scoring from validation results
+        if val_result:
+            if val_result.ef_pass:
+                ef_pass_count += 1
+            if val_result.sa_pass:
+                sa_pass_count += 1
+            if val_result.variance_type == "explained":
+                explained_variance_count += 1
+        elif result.is_mapped:
+            # No validation result but mapped = EF pass
+            ef_pass_count += 1
 
         # Check golden master status
         if (ticker, metric) in golden_set:
@@ -268,6 +298,8 @@ def _compute_company_cqs(
     mean_variance = sum(variances) / len(variances) if variances else 0.0
     coverage_rate = mapped / total if total > 0 else 0.0
     golden_master_rate = golden_count / total if total > 0 else 0.0
+    ef_pass_rate = ef_pass_count / total if total > 0 else 0.0
+    sa_pass_rate = sa_pass_count / total if total > 0 else 0.0
 
     # Per-company CQS (same formula as aggregate)
     cqs = (
@@ -277,6 +309,12 @@ def _compute_company_cqs(
         + 0.10 * golden_master_rate
         + 0.05 * (1.0 if regression_count == 0 else 0.0)
     )
+
+    # EF-CQS: extraction fidelity component (concept found correctly)
+    ef_cqs = ef_pass_rate
+
+    # SA-CQS: standardization alignment (value matches yfinance)
+    sa_cqs = sa_pass_rate
 
     return CompanyCQS(
         ticker=ticker,
@@ -290,6 +328,11 @@ def _compute_company_cqs(
         metrics_valid=valid,
         metrics_excluded=excluded,
         cqs=cqs,
+        ef_pass_rate=ef_pass_rate,
+        sa_pass_rate=sa_pass_rate,
+        ef_cqs=ef_cqs,
+        sa_cqs=sa_cqs,
+        explained_variance_count=explained_variance_count,
     )
 
 
@@ -320,6 +363,11 @@ def _aggregate_cqs(
     total_metrics = sum(s.metrics_total for s in scores)
     regression_rate = total_regressions / total_metrics if total_metrics > 0 else 0.0
 
+    # Aggregate EF/SA scores
+    ef_pass_rate = sum(s.ef_pass_rate for s in scores) / n
+    sa_pass_rate = sum(s.sa_pass_rate for s in scores) / n
+    explained_variance_count = sum(s.explained_variance_count for s in scores)
+
     # Compute composite CQS
     raw_cqs = (
         0.50 * pass_rate
@@ -328,6 +376,10 @@ def _aggregate_cqs(
         + 0.10 * golden_master_rate
         + 0.05 * (1 - regression_rate)
     )
+
+    # EF-CQS and SA-CQS (simple averages across companies)
+    ef_cqs = sum(s.ef_cqs for s in scores) / n
+    sa_cqs = sum(s.sa_cqs for s in scores) / n
 
     # HARD VETO: regressions cap CQS below baseline
     vetoed = False
@@ -342,6 +394,11 @@ def _aggregate_cqs(
         golden_master_rate=golden_master_rate,
         regression_rate=regression_rate,
         cqs=raw_cqs,
+        ef_cqs=ef_cqs,
+        sa_cqs=sa_cqs,
+        ef_pass_rate=ef_pass_rate,
+        sa_pass_rate=sa_pass_rate,
+        explained_variance_count=explained_variance_count,
         companies_evaluated=n,
         total_metrics=total_metrics,
         total_mapped=sum(s.metrics_mapped for s in scores),
@@ -555,12 +612,28 @@ def _classify_gap(
 
     # High variance: mapped and "valid" but variance is concerning
     if variance is not None and abs(variance) > 10:
+        # Check if this is an explained variance (documented reason exists)
+        vtype = "raw"
+        if validation and hasattr(validation, 'variance_type'):
+            vtype = validation.variance_type
+
+        if vtype == "explained":
+            return MetricGap(
+                ticker=ticker, metric=metric, gap_type="explained_variance",
+                estimated_impact=per_metric_impact * 0.1,  # Low priority — already understood
+                current_variance=variance, reference_value=ref_val,
+                xbrl_value=xbrl_val, graveyard_count=gc,
+                notes=f"Explained variance {variance:.1f}% — documented reason exists",
+                variance_type="explained",
+            )
+
         return MetricGap(
             ticker=ticker, metric=metric, gap_type="high_variance",
             estimated_impact=per_metric_impact * 0.5,
             current_variance=variance, reference_value=ref_val,
             xbrl_value=xbrl_val, graveyard_count=gc,
             notes=f"Variance {variance:.1f}% is above 10% threshold",
+            variance_type=vtype,
         )
 
     return None
@@ -593,6 +666,8 @@ def print_cqs_report(result: CQSResult):
 
     veto_str = " ** HARD VETO — REGRESSIONS DETECTED **" if result.vetoed else ""
     print(f"\n  CQS: {result.cqs:.4f}{veto_str}")
+    print(f"  EF-CQS (Extraction Fidelity):       {result.ef_cqs:.4f}")
+    print(f"  SA-CQS (Standardization Alignment):  {result.sa_cqs:.4f}")
     print()
 
     print("  Sub-metrics:")
@@ -601,6 +676,10 @@ def print_cqs_report(result: CQSResult):
     print(f"    Coverage Rate:      {result.coverage_rate:.1%}  (weight: 0.15)")
     print(f"    Golden Master Rate: {result.golden_master_rate:.1%}  (weight: 0.10)")
     print(f"    Regression Rate:    {result.regression_rate:.1%}  (weight: 0.05, inverted)")
+    print()
+    print(f"    EF Pass Rate:       {result.ef_pass_rate:.1%}")
+    print(f"    SA Pass Rate:       {result.sa_pass_rate:.1%}")
+    print(f"    Explained Gaps:     {result.explained_variance_count}")
     print()
 
     print("  Totals:")
@@ -614,14 +693,14 @@ def print_cqs_report(result: CQSResult):
     if result.company_scores:
         print()
         print("  Per-Company Breakdown:")
-        print(f"    {'Ticker':<8} {'CQS':>6} {'Pass':>6} {'Cov':>6} {'Var%':>6} {'Gold':>6} {'Reg':>4}")
-        print("    " + "-" * 48)
+        print(f"    {'Ticker':<8} {'CQS':>6} {'EF':>6} {'SA':>6} {'Pass':>6} {'Cov':>6} {'Var%':>6} {'Reg':>4}")
+        print("    " + "-" * 56)
         for ticker in sorted(result.company_scores.keys()):
             cs = result.company_scores[ticker]
             print(
-                f"    {ticker:<8} {cs.cqs:>6.3f} {cs.pass_rate:>5.1%} "
-                f"{cs.coverage_rate:>5.1%} {cs.mean_variance:>5.1f} "
-                f"{cs.golden_master_rate:>5.1%} {cs.regression_count:>4d}"
+                f"    {ticker:<8} {cs.cqs:>6.3f} {cs.ef_cqs:>5.1%} {cs.sa_cqs:>5.1%} "
+                f"{cs.pass_rate:>5.1%} {cs.coverage_rate:>5.1%} "
+                f"{cs.mean_variance:>5.1f} {cs.regression_count:>4d}"
             )
 
     print("=" * 70)

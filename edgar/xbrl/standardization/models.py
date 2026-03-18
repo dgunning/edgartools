@@ -158,6 +158,36 @@ class AuditLogEntry:
 
 
 @dataclass
+class StandardizationFormula:
+    """
+    A composite formula that explains how yfinance aggregates XBRL concepts.
+
+    This bridges the gap between raw XBRL extraction (Extraction Fidelity)
+    and yfinance's standardized values (Standardization Alignment).
+
+    Example: yfinance D&A = DDA + AmortizationOfIntangibleAssets
+    """
+    metric: str                         # Target metric name
+    components: List[str]               # XBRL concept names to sum
+    notes: str = ""                     # Human-readable explanation
+    scope: str = "default"              # "default", "sector:Energy", "company:ABBV"
+    discovered_by: str = "manual"       # "auto_solver", "manual", "investigation"
+    validated_tickers: List[str] = field(default_factory=list)  # Companies where validated
+    variance_pct: float = 0.0           # Average variance across validated companies
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'metric': self.metric,
+            'components': self.components,
+            'notes': self.notes,
+            'scope': self.scope,
+            'discovered_by': self.discovered_by,
+            'validated_tickers': self.validated_tickers,
+            'variance_pct': self.variance_pct,
+        }
+
+
+@dataclass
 class MetricConfig:
     """Configuration for a single metric from metrics.yaml."""
     name: str
@@ -172,6 +202,8 @@ class MetricConfig:
     components: List[str] = field(default_factory=list)  # Component concepts for composite metrics
     standard_tag: List[str] = field(default_factory=list)  # Upstream GAAP standard_tag(s) for expansion
     validation_tolerance: Optional[float] = None  # Per-metric validation tolerance % override
+    standardization: Optional[Dict[str, Any]] = None  # Composite formula rules for SA scoring
+    known_variances: Optional[Dict[str, Any]] = None  # Per-company explained variance records
 
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""

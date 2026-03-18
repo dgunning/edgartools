@@ -56,6 +56,12 @@ class ValidationResult:
     variance_pct: Optional[float]     # Percentage difference
     status: str                       # "match", "mismatch", "missing_xbrl", "missing_ref"
     notes: Optional[str] = None
+    # Two-score architecture: Extraction Fidelity (EF) + Standardization Alignment (SA)
+    ef_pass: Optional[bool] = None    # Did we extract the right XBRL concept?
+    sa_pass: Optional[bool] = None    # Does standardized value match yfinance?
+    sa_value: Optional[float] = None  # Standardized (composite formula) value
+    sa_variance_pct: Optional[float] = None  # SA variance %
+    variance_type: str = "raw"        # "raw" | "explained" | "standardized"
 
 
 class ReferenceValidator:
@@ -1542,12 +1548,12 @@ class ReferenceValidator:
                 notes="Mapping found, value extraction pending"
             )
         
-        # Both values exist, compare using absolute values 
+        # Both values exist, compare using absolute values
         # (sign conventions differ between XBRL and yfinance for cash flows)
         abs_xbrl = abs(xbrl_value)
         abs_ref = abs(ref_value)
         variance = abs(abs_xbrl - abs_ref) / abs_ref if abs_ref != 0 else 0
-        
+
         # Dynamic tolerance per Principal Architect guidance:
         # Priority: metric-level (from metrics.yaml) > debt override > company override > default 5%
         base_tolerance = self._get_tolerance_for_company(ticker)
@@ -1560,9 +1566,63 @@ class ReferenceValidator:
             tolerance = max(base_tolerance, 0.10)  # At least 10% for debt
         else:
             tolerance = max(base_tolerance, 0.05)
-        
+
         is_match = variance <= tolerance
-        
+
+        # --- Two-Score Architecture: EF + SA ---
+        # EF (Extraction Fidelity): Did we find a valid XBRL concept?
+        # A concept is "correctly extracted" if the mapping exists (regardless of value match)
+        ef_pass = result.is_mapped
+
+        # SA (Standardization Alignment): Does the value match yfinance?
+        # Check if we have a standardization formula or known_variance for this metric
+        sa_pass = None
+        sa_value = None
+        sa_variance_pct = None
+        variance_type = "raw"
+
+        if metric_config:
+            # Check for explained variance (known gap with documented reason)
+            if metric_config.known_variances and ticker in metric_config.known_variances:
+                kv = metric_config.known_variances[ticker]
+                kv_status = kv.get("status", "pending_investigation")
+                if kv_status in ("structural_exclusion", "formula_added"):
+                    # Explained variance — don't penalize CQS but track
+                    variance_type = "explained"
+
+            # Check for standardization formula (composite value)
+            if metric_config.standardization:
+                std_config = metric_config.standardization
+                # Check company override > sector override > default
+                formula_components = None
+
+                company_overrides = std_config.get("company_overrides", {})
+                if ticker in company_overrides:
+                    formula_components = company_overrides[ticker].get("components")
+
+                if formula_components is None:
+                    sector_overrides = std_config.get("sector_overrides", {})
+                    company_config = self.config.get_company(ticker) if self.config else None
+                    if company_config and company_config.industry:
+                        sector_key = company_config.industry.title()
+                        if sector_key in sector_overrides:
+                            formula_components = sector_overrides[sector_key].get("components")
+
+                if formula_components is None:
+                    default_formula = std_config.get("default", {})
+                    formula_components = default_formula.get("components")
+
+                # If we have a formula, SA is evaluated against the composite value
+                if formula_components:
+                    variance_type = "standardized"
+                    # SA scoring happens in the caller (which has access to xbrl)
+                    # Here we just record the formula existence
+                    sa_pass = is_match  # Will be refined when SA computation is wired
+
+        # SA defaults to raw match when no standardization formula exists
+        if sa_pass is None:
+            sa_pass = is_match
+
         return ValidationResult(
             metric=metric,
             company=ticker,
@@ -1571,7 +1631,12 @@ class ReferenceValidator:
             is_valid=is_match,
             variance_pct=variance * 100,
             status="match" if is_match else "mismatch",
-            notes=f"Variance: {variance*100:.1f}% (tolerance: {tolerance*100:.0f}%)" if not is_match else f"Used {tolerance*100:.0f}% tolerance"
+            notes=f"Variance: {variance*100:.1f}% (tolerance: {tolerance*100:.0f}%)" if not is_match else f"Used {tolerance*100:.0f}% tolerance",
+            ef_pass=ef_pass,
+            sa_pass=sa_pass,
+            sa_value=sa_value,
+            sa_variance_pct=sa_variance_pct,
+            variance_type=variance_type,
         )
     
     def check_metric_exists(

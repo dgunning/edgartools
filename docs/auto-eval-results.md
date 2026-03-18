@@ -405,3 +405,112 @@ All 3 remaining unmapped gaps are structural — concepts are found by Layer 2 b
 | `tools/auto_eval.py` | Record 0.0 instead of None for variance_pct |
 | `config/metrics.yaml` | Increased tolerances: D&A 30→45%, SBC 20→35%, WADS 15→25% |
 | `config/companies.yaml` | Added exclusions: MS:CashAndEquivalents, DE:Capex, CAT:AccountsReceivable |
+
+---
+
+## Session 6 — Strict Tolerances + Two-Score Architecture (2026-03-18)
+
+**Goal:** Revert inflated tolerances, separate Extraction Fidelity from Standardization Alignment, build Auto-Solver for reverse-engineering yfinance formulas.
+
+### Motivation
+
+Session 5 achieved CQS 0.9796 by increasing tolerances (D&A 45%, SBC 35%, WADS 25%) and excluding metrics (MS:Cash, DE:Capex, CAT:AR). The project owner correctly challenged: "Why not increase tolerances to infinity?" Tolerances mask definitional gaps rather than explaining them.
+
+The real goal is **reverse-engineering yfinance's standardization methodology** — understanding exactly which XBRL concepts yfinance sums to produce its numbers. Every gap at 5% tolerance is a question to answer, not a number to hide.
+
+### Architecture: Two Scores, Not One
+
+**Score 1: Extraction Fidelity (EF-CQS)** — "Did we extract the right XBRL concept?"
+- Measures: can we parse XBRL correctly?
+- Tolerance: ~0% (concept correctness, not value matching)
+- No yfinance dependency
+
+**Score 2: Standardization Alignment (SA-CQS)** — "Can we reproduce yfinance's aggregated number?"
+- Measures: do we understand yfinance's composition formulas?
+- Tolerance: 5% (strict, after applying composite formula)
+- Requires yfinance reference
+
+### Gap Taxonomy (new)
+
+| Type | Meaning | CQS Impact |
+|------|---------|------------|
+| unmapped | No concept found | EF fail |
+| validation_failure | Concept found but wrong value | EF pass, SA fail |
+| high_variance | Value diverges >10% | EF pass, SA fail (investigation needed) |
+| explained_variance | Diverges but reason documented | EF pass, SA tracked separately |
+
+### Changes Applied
+
+**Phase 1: Reverted Session 5 config inflation**
+
+| Change | Before | After |
+|--------|--------|-------|
+| D&A tolerance | 45% | 30% |
+| SBC tolerance | 35% | 20% |
+| WADS tolerance | 25% | 15% |
+| MS:CashAndEquivalents | excluded | re-included |
+| DE:Capex | excluded | re-included |
+| CAT:AccountsReceivable | excluded | re-included |
+
+CQS will drop from 0.9796 — this is correct. The previous score was artificially inflated.
+
+**Phase 2: Built Auto-Solver (`tools/auto_solver.py`)**
+
+New module for reverse-engineering yfinance composite formulas:
+- `solve_metric(ticker, metric)` — bounded subset-sum search (1-4 terms) over XBRL facts
+- `validate_formula(formula, tickers)` — cross-company validation at 5% tolerance
+- `solve_all_gaps(gaps)` — batch processing from auto-eval gap analysis
+- `FormulaCandidate` dataclass with components, values, variance
+
+**Phase 3: Two-Score Data Model**
+
+| File | Change |
+|------|--------|
+| `models.py` | Added `StandardizationFormula` dataclass |
+| `models.py` | Added `standardization`, `known_variances` to `MetricConfig` |
+| `config_loader.py` | Reads `standardization` and `known_variances` from YAML |
+| `reference_validator.py` | `ValidationResult` gains `ef_pass`, `sa_pass`, `sa_value`, `sa_variance_pct`, `variance_type` |
+| `reference_validator.py` | `_compare_values()` populates EF/SA fields, checks `known_variances` for explained variance |
+
+**Phase 4: Two-Score CQS Reporting**
+
+| File | Change |
+|------|--------|
+| `auto_eval.py` | `CompanyCQS` gains `ef_pass_rate`, `sa_pass_rate`, `ef_cqs`, `sa_cqs`, `explained_variance_count` |
+| `auto_eval.py` | `CQSResult` gains `ef_cqs`, `sa_cqs`, `ef_pass_rate`, `sa_pass_rate`, `explained_variance_count` |
+| `auto_eval.py` | `MetricGap` gains `variance_type` field and `explained_variance` gap type |
+| `auto_eval.py` | `_compute_company_cqs()` computes EF/SA from validation results |
+| `auto_eval.py` | `_aggregate_cqs()` aggregates EF/SA across companies |
+| `auto_eval.py` | `print_cqs_report()` displays EF-CQS and SA-CQS in report |
+
+### Investigation Backlog
+
+Priority order for Auto-Solver (most cross-company impact first):
+
+| Batch | Metric | Companies | Hypothesis |
+|-------|--------|-----------|------------|
+| 1 | DepreciationAmortization | ABBV, SLB, GE, HD, PEP | yfinance = DDA + AmortizationOfIntangibleAssets |
+| 2 | Capex | SLB, CAT, RTX, DE | yfinance = PP&E + IntangibleAssets + other investing |
+| 3 | AccountsReceivable | HD, PEP, CAT | yfinance includes non-trade receivables |
+| 4 | SBC, WADS, Cash | RTX, MCD, MS | Various structural differences |
+
+### What This Achieves
+
+1. **CQS becomes honest** — measures actual understanding, not tolerance width
+2. **Investigation backlog is visible** — every gap is a question to answer
+3. **Composite formulas are reusable** — once discovered, they work for all companies
+4. **Path to yfinance independence** — once every metric has a formula, yfinance is just a regression test
+5. **Intrinsic validation endgame** — accounting identities (A=L+E) replace external reference
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `config/metrics.yaml` | Reverted D&A 45→30%, SBC 35→20%, WADS 25→15% |
+| `config/companies.yaml` | Reverted exclusions: MS:Cash, DE:Capex, CAT:AR |
+| New: `tools/auto_solver.py` | Combinatorial search to discover yfinance formulas |
+| `models.py` | Added `StandardizationFormula`, `standardization`/`known_variances` fields |
+| `config_loader.py` | Reads standardization and known_variances from YAML |
+| `reference_validator.py` | EF/SA fields in ValidationResult, explained_variance support |
+| `auto_eval.py` | Two-score CQS (EF + SA), explained_variance gap type |
+| `docs/auto-eval-results.md` | This document |
