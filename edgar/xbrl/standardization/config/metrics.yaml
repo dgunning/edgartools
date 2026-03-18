@@ -117,6 +117,8 @@ metrics:
       - PaymentsToDevelopSoftware
       - PaymentsToAcquireOilAndGasPropertyAndEquipment  # Energy sector
       - PaymentsToAcquireOtherPropertyPlantAndEquipment # LLY uses this ($5.06B vs 5.34B yfinance)
+      - PaymentsForCapitalImprovements
+      - CapitalExpenditures
       # Note: PaymentsToAcquireBusinessesNetOfCashAcquired removed - M&A acquisitions, not capital expenditures
     exclude_patterns:
       - Businesses          # Exclude M&A acquisitions (PaymentsToAcquireBusinesses*)
@@ -169,6 +171,7 @@ metrics:
       - IndefiniteLivedTrademarks  # KO uses this
       - FiniteLivedIntangibleAssetsNet
       - IndefiniteLivedIntangibleAssetsExcludingGoodwill
+      - OtherIntangibleAssetsNet
     tree_hints:
       statements: [BALANCE]
       section: assets
@@ -191,6 +194,10 @@ metrics:
       - LongTermDebtCurrent
       - CommercialPaper
       - ShortTermBorrowings
+      - NotesPayable
+      - CurrentPortionOfLongTermDebt
+      - OtherShortTermBorrowings
+      - ShortTermBankLoansAndNotesPayable
     # Dimensional handling: include dimensional values for CommercialPaper
     # JPM reports CommercialPaper ONLY with dimensions (VIE)
     dimensional_handling:
@@ -223,6 +230,7 @@ metrics:
       - CashAndCashEquivalentsAtCarryingValue
       - CashAndCashEquivalents
       - Cash
+      - CashAndDueFromBanks
     tree_hints:
       statements: [BALANCE, CASHFLOW]
       section: assets_current
@@ -289,6 +297,10 @@ metrics:
       - AccountsReceivableNetCurrent
       - ReceivablesNetCurrent
       - TradeAccountsReceivable
+      - AccountsReceivableNet
+      - AccountsNotesAndLoansReceivableNetCurrent
+      - AccountsAndOtherReceivablesNetCurrent
+      - NotesAndAccountsReceivableNet
     tree_hints:
       statements: [BALANCE]
       section: assets_current
@@ -303,6 +315,7 @@ metrics:
       - AccountsPayableTradeCurrent
       - TradeAndOtherPayablesCurrent
       - AccountsPayableAndAccruedLiabilitiesCurrent
+      - AccountsPayableAndAccruedLiabilities
     exclude_patterns:
       - Liabilities  # Prevent fallback to total Liabilities or LiabilitiesCurrent
     tree_hints:
@@ -319,6 +332,7 @@ metrics:
       - DepreciationAndAmortization
       - DepreciationAmortizationAndAccretionNet  # GE, RTX, WMT use this variant
       - Depreciation
+      - DepreciationAmortizationAndOther
     exclude_patterns:
       - Accumulated  # Prevent matching AccumulatedDepreciation (balance sheet cumulative)
     tree_hints:

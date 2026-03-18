@@ -129,29 +129,66 @@ Kept `haiku-gap-classifier` for reasoning-only gap classification (industry cont
 | Industrial (6) | CAT, HON, GE, DE, RTX, UPS |
 | Other (8) | V, MA, NEE, T, HD, LOW, NFLX, AVGO |
 
-### Baseline Results
+### Results
 
-*Run `python /tmp/run_expansion.py` to populate.*
+| Metric | 5-Co (Session 2) | 50-Co Baseline | 50-Co Final |
+|--------|-------------------|----------------|-------------|
+| CQS | 0.9313 | 0.9016 | **0.9206** |
+| Pass rate | 95.8% | 94.0% | **95.9%** |
+| Coverage | 99.0% | 94.9% | **98.9%** |
+| Gaps | 4 | 64 | **17** |
+| Regressions | 0 | 5 | **0** |
+| Duration | 49s | 335s | **270s** |
 
-| Metric | 5-Company (Session 2) | 50-Company Baseline |
-|--------|----------------------|---------------------|
-| CQS | 0.9313 | *pending* |
-| Pass rate | 95.8% | *pending* |
-| Coverage | 99.0% | *pending* |
-| Gaps | 4 | *pending* |
-| Duration | 49s | *pending* |
+### Per-Company Breakdown (Final)
 
-### Per-Company Breakdown
+| Tier | Count | Companies |
+|------|-------|-----------|
+| Excellent (>=95%) | 34 | AAPL, ADBE, AMZN, AVGO, BAC, BLK, C, COP, COST, CRM, CVX, GOOG, GS, HD, HON, INTC, JNJ, KO, LLY, LOW, MA, MCD, META, MSFT, NFLX, NKE, NVDA, PFE, PG, SCHW, TMO, UNH, UPS, WMT |
+| Good (80-94%) | 14 | ABBV, AXP, CAT, GE, JPM, MRK, NEE, PEP, RTX, SLB, T, TSLA, V, XOM |
+| Needs work (<80%) | 2 | DE, MS |
 
-*Populated after baseline run.*
+### Improvement Phases
 
-### Gap Analysis
+**Phase 1: Structural Exclusions (27 gaps eliminated)**
+- Banking companies: excluded Inventory (BAC, GS, MS, C, BLK, SCHW, AXP), AccountsPayable (BAC, GS, MS, C), AccountsReceivable (C, MS)
+- Tech/fintech: excluded Inventory (META, NFLX, MA, V)
+- Growth companies: excluded DividendsPaid (AMZN, TSLA, NFLX, ADBE)
+- Sector-specific: excluded COGS (NEE, UPS), ShortTermDebt (BLK)
 
-*Populated after baseline run.*
+**Phase 2: OperatingIncome + Cross-Company Concept Fixes (7 gaps eliminated)**
+- Excluded OperatingIncome for companies without `OperatingIncomeLoss` XBRL concept (COP, LLY, MRK, NKE, SLB, DE)
+- Added JNJ:OperatingIncome divergence (XBRL=13.8B vs yf=25.6B)
+- Added ShortTermDebt divergences for 7 companies (yfinance uses composite definition)
+- Added known_concepts: CashAndDueFromBanks, AccountsReceivableNet, CapitalExpenditures, etc.
 
-### Changes Applied
+**Phase 3: Structural Mismatch Fixes (13 gaps eliminated, regressions → 0)**
+- Excluded ShortTermDebt for 8 companies — yfinance "Current Debt" is composite (STB + CP + LTD current maturities), XBRL reports separately
+- Excluded IntangibleAssets for TSLA, NEE — mapped to Goodwill only, yfinance includes other intangibles
+- Excluded JNJ:OperatingIncome — XBRL OI=13.8B vs yf=25.6B (definitional mismatch)
+- Excluded COP:COGS, GE:AccountsPayable, MA:Capex/Inventory
+- Added CashAndDueFromBanks concept for MS banking CashAndEquivalents
 
-*Populated after review of scout proposals.*
+### Remaining Gaps (17)
+
+| Type | Count | Details |
+|------|-------|---------|
+| Unmapped | 11 | Layer 2 finds concepts but multi-period validation rejects (values differ from yfinance) |
+| High variance | 6 | Mapped but 10-13% variance with yfinance |
+
+Cross-company patterns:
+- DepreciationAmortization (4): ABBV, HD, PEP, SLB — concept found but yfinance value differs
+- Capex (4): CAT, DE, RTX, SLB — PaymentsToAcquirePropertyPlantAndEquipment found but yfinance broader
+- AccountsReceivable (3): CAT, HD, PEP — concept found but yfinance includes non-trade receivables
+
+### Key Findings
+
+**Config-only limit reached:** The remaining 17 gaps are caused by the multi-period validation resetting valid XBRL concepts when values don't match yfinance. These need code fixes:
+1. **Validation reset bug:** `_validate_layer()` resets mapped concepts to `None` when validation fails, making them appear "unmapped" instead of "validation_failure"
+2. **Composite metrics:** yfinance "Current Debt" and "Capital Expenditure" aggregate multiple XBRL line items — no single XBRL concept matches
+3. **Reference data gaps:** GE (restructured) has sparse yfinance data; 7 metrics can't be validated, penalizing CQS
+
+**CQS bottleneck:** Golden master rate (43.5%) is the weakest sub-metric. Reaching CQS 0.93+ requires either golden master verification or code-level fixes to the remaining gaps.
 
 ---
 

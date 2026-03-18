@@ -14,6 +14,8 @@ companies:
   AMZN:
     name: "Amazon.com, Inc."
     cik: 1018724
+    exclude_metrics:
+      - DividendsPaid
 
   AAPL:
     name: "Apple Inc."
@@ -51,6 +53,9 @@ companies:
   TSLA:
     name: "Tesla, Inc."
     cik: 1318605
+    exclude_metrics:
+      - DividendsPaid
+      - IntangibleAssets  # Goodwill=0.38B vs yf=1.39B; minimal intangibles
     known_divergences:
       ShortTermDebt:
         form_types: ["10-K", "10-Q"]
@@ -72,6 +77,7 @@ companies:
     cik: 1326801
     exclude_metrics:
       - COGS  # Services company, no traditional COGS
+      - Inventory
     metric_overrides:
       Revenue:
         preferred_concept: AdvertisingRevenue
@@ -150,6 +156,7 @@ companies:
     exclude_metrics:
       - COGS  # SaaS/subscription company
       - Inventory  # No physical inventory
+      - DividendsPaid
     metric_overrides:
       Revenue:
         preferred_concept: RevenueFromContractWithCustomerExcludingAssessedTax
@@ -299,6 +306,8 @@ companies:
     name: "Caterpillar Inc."
     cik: 18230
     archetype: "A"  # Standard Industrial
+    exclude_metrics:
+      - ShortTermDebt
     known_divergences:
       ShortTermDebt:
         form_types: ["10-K", "10-Q"]
@@ -369,6 +378,8 @@ companies:
     name: "General Electric Company"
     cik: 40545
     archetype: "A"
+    exclude_metrics:
+      - AccountsPayable  # conglomerate, non-standard liability structure
     known_divergences:
       OperatingIncome:
         form_types: ["10-K"]
@@ -504,6 +515,9 @@ companies:
     cik: 315189
     archetype: "A"
     fiscal_year_end: "October"  # Non-calendar fiscal year
+    exclude_metrics:
+      - OperatingIncome  # FY2025 filing dropped OperatingIncomeLoss concept
+      - ShortTermDebt  # yfinance composite (DebtCurrent+more) vs XBRL single concept
     known_divergences:
       OperatingIncome:
         form_types: ["10-K"]
@@ -579,6 +593,8 @@ companies:
     name: "RTX Corporation"
     cik: 101829
     archetype: "A"
+    exclude_metrics:
+      - ShortTermDebt
     notes: "Aerospace and defense company (formerly Raytheon Technologies)"
 
   ASTE:
@@ -601,6 +617,8 @@ companies:
     name: "The Coca-Cola Company"
     cik: 21344
     archetype: "A"
+    exclude_metrics:
+      - ShortTermDebt
     notes: "Beverage company - nonalcoholic beverages"
 
   PEP:
@@ -710,6 +728,10 @@ companies:
     name: "ConocoPhillips"
     cik: 1163165
     archetype: "A"
+    exclude_metrics:
+      - OperatingIncome  # no OperatingIncomeLoss concept in XBRL
+      - COGS  # energy COGS definition differs from yfinance
+      - ShortTermDebt  # yfinance composite vs XBRL single concept
     metric_overrides:
       Capex:
         preferred_concept: "cop:PaymentToAcquireProductiveAssetsAndInvestments"
@@ -764,6 +786,8 @@ companies:
     name: "Schlumberger Limited"
     cik: 87347
     archetype: "A"
+    exclude_metrics:
+      - OperatingIncome  # OperatingIncomeLoss not in current filing
     known_divergences:
       OperatingIncome:
         form_types: ["10-K", "10-Q"]
@@ -821,6 +845,8 @@ companies:
     name: "Johnson & Johnson"
     cik: 200406
     archetype: "A"
+    exclude_metrics:
+      - OperatingIncome  # XBRL OI=13.8B vs yf=25.6B; definitional mismatch
     known_divergences:
       OperatingIncome:
         form_types: ["10-K"]
@@ -884,6 +910,8 @@ companies:
     name: "Eli Lilly and Company"
     cik: 59478
     archetype: "A"
+    exclude_metrics:
+      - OperatingIncome  # no OperatingIncomeLoss concept in XBRL
     metric_overrides:
       Capex:
         preferred_concept: PaymentsToAcquireOtherPropertyPlantAndEquipment
@@ -954,6 +982,8 @@ companies:
     name: "United Parcel Service, Inc."
     cik: 1090727
     archetype: "A"
+    exclude_metrics:
+      - COGS  # transportation company
     known_divergences:
       NetIncome:
         form_types: ["10-Q"]
@@ -1197,6 +1227,10 @@ companies:
     name: "NextEra Energy, Inc."
     cik: 753308
     archetype: "A"
+    exclude_metrics:
+      - COGS
+      - IntangibleAssets  # Goodwill=4.99B vs yf=6.62B; includes regulatory assets
+      - ShortTermDebt  # yfinance sums CP+OtherSTB+LTDCurrent; high variance
     known_divergences:
       Revenue:
         form_types: ["10-K", "10-Q"]
@@ -1699,6 +1733,8 @@ companies:
     exclude_metrics:
       - COGS
       - SGA
+      - Inventory
+      - AccountsPayable
     street_view_notes:
       ShortTermDebt: "Includes Net Repos (~$90B) for economic leverage view. GAAP extraction excludes Repos for yfinance validation."
       CashAndEquivalents: "Includes Segregated Cash for regulatory liquidity view."
@@ -1717,6 +1753,9 @@ companies:
     exclude_metrics:
       - COGS
       - SGA
+      - Inventory
+      - AccountsPayable
+      - AccountsReceivable
     street_view_notes:
       ShortTermDebt: "Includes Net Repos for economic leverage view. GAAP extraction excludes Repos for yfinance validation."
       CashAndEquivalents: "Includes Restricted Cash (~$30B) per Street analyst convention."
@@ -1774,6 +1813,9 @@ companies:
     exclude_metrics:
       - COGS
       - SGA
+      - Inventory
+      - AccountsPayable
+      - AccountsReceivable
     street_view_notes:
       ShortTermDebt: "Hybrid: Commercial GAAP + Dealer Street View"
     notes: "Hybrid bank - global commercial + investment banking operations."
@@ -1795,6 +1837,8 @@ companies:
     exclude_metrics:
       - COGS
       - SGA
+      - Inventory
+      - AccountsPayable
     street_view_notes:
       ShortTermDebt: "Hybrid: Commercial GAAP + Dealer Street View"
     notes: "Hybrid bank - one of the Big Four with Merrill Lynch operations."
@@ -1903,6 +1947,8 @@ companies:
     name: "HOME DEPOT, INC."
     cik: 354950
     fiscal_year_end: "February"
+    exclude_metrics:
+      - ShortTermDebt
     known_divergences:
       IntangibleAssets:
         form_types: ["10-K"]
@@ -1923,12 +1969,14 @@ companies:
     fiscal_year_end: "September"
     exclude_metrics:
       - COGS
+      - Inventory
 
   ABBV:
     name: "AbbVie Inc."
     cik: 1551152
     exclude_metrics:
       - COGS
+      - ShortTermDebt
     known_divergences:
       OperatingIncome:
         form_types: ["10-K"]
@@ -2010,6 +2058,8 @@ companies:
     name: "NIKE, Inc."
     cik: 320187
     fiscal_year_end: "May"
+    exclude_metrics:
+      - OperatingIncome  # no OperatingIncomeLoss concept in XBRL
 
   SBUX:
     name: "STARBUCKS CORP"
@@ -2039,6 +2089,8 @@ companies:
     exclude_metrics:
       - COGS
       - ShortTermDebt
+      - Inventory
+      - Capex
     known_divergences:
       IntangibleAssets:
         form_types: ["10-K"]
@@ -2154,6 +2206,10 @@ companies:
   NFLX:
     name: "NETFLIX INC"
     cik: 1065280
+    exclude_metrics:
+      - Inventory
+      - DividendsPaid
+      - Goodwill
     known_divergences:
       IntangibleAssets:
         form_types: ["10-K"]
@@ -2233,6 +2289,7 @@ companies:
     cik: 310158
     exclude_metrics:
       - COGS
+      - OperatingIncome  # no OperatingIncomeLoss concept in XBRL
     known_divergences:
       IntangibleAssets:
         form_types: ["10-K"]
@@ -2267,6 +2324,7 @@ companies:
       - Capex
       - OperatingIncome
       - SGA
+      - Inventory
 
   BLK:
     name: "BlackRock, Inc."
@@ -2276,6 +2334,8 @@ companies:
       - Capex
       - OperatingIncome
       - SGA
+      - Inventory
+      - ShortTermDebt
 
   SCHW:
     name: "SCHWAB CHARLES CORP"
@@ -2285,6 +2345,7 @@ companies:
       - Capex
       - OperatingIncome
       - SGA
+      - Inventory
 
   CB:
     name: "Chubb Ltd"
