@@ -576,14 +576,18 @@ def propose_change(
     if gap.gap_type == "unmapped":
         return _propose_for_unmapped(gap, tried_concepts, config_dir)
     elif gap.gap_type == "validation_failure":
-        change = _propose_for_validation_failure(gap, config_dir)
-        if change is not None:
-            return change
+        # Try standard proposal first; escalate to solver if it fails or has been tried
+        if gap.graveyard_count == 0:
+            change = _propose_for_validation_failure(gap, config_dir)
+            if change is not None:
+                return change
         return _propose_via_solver(gap, tried_concepts)
     elif gap.gap_type == "high_variance":
-        change = _propose_for_high_variance(gap, config_dir)
-        if change is not None:
-            return change
+        # Try tree_hint first; escalate to solver after first graveyard failure
+        if gap.graveyard_count == 0:
+            change = _propose_for_high_variance(gap, config_dir)
+            if change is not None:
+                return change
         return _propose_via_solver(gap, tried_concepts)
     elif gap.gap_type == "explained_variance":
         logger.info(f"Skipping explained variance: {gap.ticker}:{gap.metric}")

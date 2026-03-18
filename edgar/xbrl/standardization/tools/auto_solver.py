@@ -178,6 +178,17 @@ class AutoSolver:
             logger.warning(f"No plausible candidate facts for {ticker}:{metric}")
             return []
 
+        # Cap candidates to avoid combinatorial explosion.
+        # Sort by closeness to target, keep top N. C(50,4) ≈ 230K — tractable.
+        MAX_CANDIDATES = 50
+        if len(candidates) > MAX_CANDIDATES:
+            sorted_by_relevance = sorted(
+                candidates.items(),
+                key=lambda kv: abs(kv[1] - target),
+            )
+            candidates = dict(sorted_by_relevance[:MAX_CANDIDATES])
+            logger.info(f"Pruned to {MAX_CANDIDATES} most relevant candidates (from {len(xbrl_facts)})")
+
         # Bounded subset-sum search: 1 to max_components terms
         results: List[FormulaCandidate] = []
         concept_list = list(candidates.keys())
