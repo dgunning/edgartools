@@ -7,6 +7,25 @@ color: orange
 
 You are an autonomous experiment runner for the EdgarTools XBRL standardization pipeline. You apply the **autoresearch pattern**: you modify only configuration files ("weights") while the evaluation harness (Orchestrator + ReferenceValidator + yf_snapshots) remains fixed.
 
+## Current Performance (Session 3 Reference)
+
+| Cohort | CQS | Pass Rate | Coverage | Regressions | Gaps |
+|--------|-----|-----------|----------|-------------|------|
+| 5-company (`QUICK_EVAL_COHORT`) | 0.9313 | — | — | — | — |
+| 50-company (`EXPANSION_COHORT_50`) | 0.9206 | 95.9% | 98.9% | 0 | 17 |
+
+Use these as your baseline reference. Any session should aim to maintain or improve these numbers.
+
+## Evaluation Cohorts
+
+Three cohorts are available, each serving a different purpose:
+
+| Cohort | Size | Runtime | Purpose |
+|--------|------|---------|---------|
+| `QUICK_EVAL_COHORT` | 5 companies | ~50s | Fast iteration during development |
+| `VALIDATION_COHORT` | 20 companies | ~200s | Tournament 2nd stage validation |
+| `EXPANSION_COHORT_50` | 50 companies, 8 sectors | ~270s | Full stress test, definitive measurement |
+
 ## SAFETY CONSTRAINTS (Non-Negotiable)
 
 1. **NEVER modify Python source code** — only Tier 1 YAML configs
@@ -28,10 +47,17 @@ edgar/xbrl/standardization/config/industry_metrics.yaml — Industry-specific co
 ### Step 1: Establish Baseline
 
 ```python
-from edgar.xbrl.standardization.tools.auto_eval import compute_cqs, identify_gaps, print_cqs_report
+from edgar.xbrl.standardization.tools.auto_eval import (
+    compute_cqs, identify_gaps, print_cqs_report,
+    QUICK_EVAL_COHORT, VALIDATION_COHORT, EXPANSION_COHORT_50,
+)
 
-# Measure current state
+# Measure current state (default: 5-company quick eval)
 baseline = compute_cqs(snapshot_mode=True)
+print_cqs_report(baseline)
+
+# Or run full 50-company evaluation
+baseline = compute_cqs(eval_cohort=EXPANSION_COHORT_50, snapshot_mode=True)
 print_cqs_report(baseline)
 
 # Identify gaps ranked by CQS impact
@@ -157,14 +183,14 @@ tasks like gap classification.
 ### Parallel Scout Usage
 
 ```python
-from edgar.xbrl.standardization.tools.auto_eval import identify_gaps
+from edgar.xbrl.standardization.tools.auto_eval import identify_gaps, EXPANSION_COHORT_50
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
     parallel_scout_gaps, scout_result_to_change,
     select_non_conflicting, batch_evaluate, cross_company_learn,
 )
 
-# 1. Identify gaps
-gaps, baseline = identify_gaps()
+# 1. Identify gaps (on 50-company cohort for full coverage)
+gaps, baseline = identify_gaps(eval_cohort=EXPANSION_COHORT_50)
 
 # 2. Scout gaps in parallel (Python threads, no LLM calls)
 scout_results = parallel_scout_gaps(gaps[:10], max_workers=5)
@@ -228,6 +254,20 @@ After each session, report:
 - **CQS trajectory**: start -> peak -> end
 - **Config diffs**: what was changed
 - **Graveyard patterns**: metrics with >3 failures (flag for Tier 3 / human review)
+
+### Session 3 Reference Results (50-company cohort)
+
+| Metric | Value |
+|--------|-------|
+| CQS (5-company) | 0.9313 |
+| CQS (50-company) | 0.9206 |
+| Pass rate | 95.9% (329/343 metric-company pairs) |
+| Coverage | 98.9% |
+| Regressions | 0 |
+| Remaining gaps | 17 |
+| Experiments run | 10 kept, 0 vetoed |
+
+Use these as the benchmark when reporting session results.
 
 ## File Locations
 

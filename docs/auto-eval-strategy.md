@@ -1,6 +1,7 @@
 # Auto-Eval Strategy: Applying Autoresearch Ethos to EdgarTools
 
 *Strategy Report — March 2026*
+*Updated March 18, 2026 to reflect implemented state after 3 sessions*
 
 ---
 
@@ -14,14 +15,14 @@ EdgarTools' XBRL concept-mapping pipeline has a structurally identical shape. Th
 
 | Autoresearch Concept | EdgarTools Equivalent | Location | Status |
 |---|---|---|---|
-| `val_bpb` (single eval metric) | **CQS** (Composite Quality Score) — weighted blend of pass_rate, mean_variance, coverage, golden_master_rate, regression_rate | Needs building (~50 lines) | **New** |
+| `val_bpb` (single eval metric) | **CQS** (Composite Quality Score) — weighted blend of pass_rate, mean_variance, coverage, golden_master_rate, regression_rate | `standardization/tools/auto_eval.py` (~620 lines) | **Implemented** |
 | `train.py` (single modifiable file) | **metrics.yaml** + **companies.yaml** + **industry_metrics.yaml** (Tier 1 config) | `standardization/config/` | Exists |
 | `program.md` (agent instructions) | **CLAUDE.md** + `.claude/agents/*.md` + `.claude/skills/*/SKILL.md` | Root + `.claude/` | Exists |
-| 5-min time budget per experiment | **Quick eval tier**: 5 representative companies, snapshot mode, ~3 min | Needs building | **New** |
+| 5-min time budget per experiment | **Quick eval tier**: 5 representative companies, snapshot mode, ~50 seconds | `auto_eval.py` — `QUICK_EVAL_COHORT` | **Implemented** |
 | `prepare.py` (fixed eval harness) | **Orchestrator** + **ReferenceValidator** + **yf_snapshots/** (96 frozen JSONs) | `standardization/` | Exists |
 | Experiment log (`runs.jsonl`) | **ExperimentLedger** (`ledger/schema.py`) with `PipelineRun`, `ExtractionRun` tables | `standardization/ledger/` | Exists |
-| Overnight autonomy (100 experiments) | **auto_eval_loop** with cron, graveyard, morning dashboard | Needs building | **New** |
-| Experiment comparison & selection | **ExperimentLedger** + 2 new tables (`auto_eval_experiments`, `auto_eval_graveyard`) | `standardization/ledger/` | Partially exists |
+| Overnight autonomy (100 experiments) | **auto_eval_loop** with circuit breaker, graveyard, morning dashboard | `standardization/tools/auto_eval_loop.py` (~1700 lines) | **Implemented** |
+| Experiment comparison & selection | **ExperimentLedger** + `AutoEvalExperiment` + `AutoEvalGraveyard` tables | `standardization/ledger/schema.py` | **Implemented** |
 
 **Key structural parallel:** In autoresearch, the agent never touches `prepare.py` (the eval harness) — it only modifies `train.py` (the model code). Similarly, our auto-eval agent never touches the Orchestrator or ReferenceValidator Python code — it only modifies Tier 1 YAML configs. This constraint is what makes overnight autonomy safe.
 
@@ -90,47 +91,14 @@ These values match intuition: banking is perfect, industrial is excellent, new c
 
 ### Implementation
 
-```python
-# standardization/tools/auto_eval.py
+Fully implemented in `standardization/tools/auto_eval.py` (~620 lines). Key components:
 
-from dataclasses import dataclass
-from typing import List, Dict
-
-@dataclass
-class CQSResult:
-    """Composite Quality Score with component breakdown."""
-    cqs: float
-    pass_rate: float
-    mean_variance: float
-    coverage_rate: float
-    golden_master_rate: float
-    regression_rate: float
-    company_scores: Dict[str, float]  # per-company CQS for drill-down
-
-def compute_cqs(
-    eval_cohort: List[str],
-    snapshot_mode: bool = True,
-    check_golden_masters: bool = True,
-) -> CQSResult:
-    """
-    Compute CQS across an eval cohort.
-
-    Uses existing infrastructure:
-    - Orchestrator.map_companies() for extraction
-    - ReferenceValidator for validation
-    - ExperimentLedger for golden master checks
-
-    Args:
-        eval_cohort: List of tickers to evaluate
-        snapshot_mode: Use frozen yf_snapshots (True) or live yfinance (False)
-        check_golden_masters: Whether to verify golden master stability
-    """
-    # 1. Run orchestrator on cohort (reuses Orchestrator.map_companies)
-    # 2. Collect ValidationResults from ReferenceValidator
-    # 3. Query ExperimentLedger for golden master status
-    # 4. Compute weighted CQS
-    ...
-```
+- **`compute_cqs()`** — Runs the Orchestrator on an eval cohort, collects validation results, queries golden master status, and computes the weighted CQS. Returns a `CQSResult` dataclass with per-company breakdown.
+- **`identify_gaps()`** — Runs the orchestrator once and computes both CQS and gap analysis in a single pass (previously required two orchestrator runs; optimized from ~300s to ~49s for 5 companies).
+- **`print_cqs_report()`, `print_gap_report()`** — Formatted console output for human review.
+- **`check_offline_readiness()`** — Verifies that local SEC bulk data is available before starting an eval run.
+- **Three cohort definitions**: `QUICK_EVAL_COHORT` (5), `VALIDATION_COHORT` (20), `EXPANSION_COHORT_50` (50).
+- **Data classes**: `CompanyCQS`, `MetricGap`, `CQSResult`.
 
 ---
 
@@ -200,179 +168,155 @@ The quick-eval cohort uses 5 companies, one per accounting archetype, matching t
 | Johnson & Johnson | JNJ | Standard (Healthcare) | Pharma/MedTech segments, recent spin-off (Kenvue) |
 
 **Decision record — Why 5 companies, not 10 or 20:**
-The Orchestrator's `map_company()` (`orchestrator.py:70-145`) runs 3 extraction layers sequentially per company. With snapshot mode (no network calls), each company takes ~30-40 seconds. Five companies fit within the 3-minute quick-eval budget while covering all major archetypes. The full-eval tier (all 96 companies) runs once at the end of the overnight session.
+The Orchestrator's `map_company()` runs 3 extraction layers sequentially per company. With snapshot mode and local bulk data, five companies complete in ~50 seconds — far faster than the original 3-minute estimate. This speed enables a 2-stage tournament approach: quick-tier (5 companies, ~50s) for per-experiment evaluation, then validation-tier (20 companies, ~200s) for promising changes. The 50-company expansion cohort (~270s) serves as a full stress test.
 
-### The Loop — Overnight Operation (11 PM - 7 AM)
+**Actual eval tier timings (Session 3, 2026-03-18):**
+
+| Tier | Cohort | Time | Purpose |
+|------|--------|------|---------|
+| Quick | 5 companies (AAPL, JPM, XOM, WMT, JNJ) | ~50s | Per-experiment evaluation |
+| Validation | 20 companies | ~200s | Tournament 2nd stage (overfitting protection) |
+| Expansion | 50 companies (8 sectors) | ~270s | Full stress test |
+
+### The Loop — Overnight Operation
+
+The loop is implemented in `auto_eval_loop.py` via three main entry points:
+
+- **`evaluate_experiment()`** — single experiment: apply change, measure CQS, decide KEEP/DISCARD
+- **`tournament_eval()`** — 2-stage evaluation: quick-tier (5 companies) then validation-tier (20 companies)
+- **`run_overnight()`** — full overnight loop with circuit breaker (halts after 10 consecutive failures)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    AUTO-EVAL OVERNIGHT LOOP                     │
+│           Implemented: auto_eval_loop.run_overnight()           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  23:00  ┌──────────────────────┐                                │
-│         │ 1. BASELINE          │                                │
-│         │    compute_cqs()     │  CQS_baseline = 0.956          │
-│         │    on eval cohort    │                                 │
-│         └──────────┬───────────┘                                │
-│                    │                                             │
-│  23:05  ┌──────────▼───────────┐                                │
-│         │ 2. GAP ANALYSIS      │                                │
-│         │    Identify top       │  "AMZN:IntangibleAssets,       │
-│         │    failing metrics    │   HD:OperatingIncome,          │
-│         │    across all cos     │   NVDA:SharesOutstanding"      │
+│         ┌──────────────────────┐                                │
+│         │ 1. BASELINE + GAPS   │                                │
+│         │    identify_gaps()   │  CQS + gaps in one pass (~50s) │
+│         │    (single orch run) │                                 │
 │         └──────────┬───────────┘                                │
 │                    │                                             │
 │         ┌──────────▼───────────┐                                │
-│         │ 3. EXPERIMENT LOOP   │  Repeat for each gap:          │
-│  23:10  │    ┌───────────────┐ │                                │
-│   to    │    │ a. PROPOSE    │ │  Agent suggests config change  │
-│  06:30  │    │    config mod │ │  (add concept / divergence /   │
-│         │    └───────┬───────┘ │   tree_hint / exclusion)       │
-│         │    ┌───────▼───────┐ │                                │
-│         │    │ b. APPLY      │ │  Write to Tier 1 YAML          │
-│         │    │    change     │ │                                 │
-│         │    └───────┬───────┘ │                                │
-│         │    ┌───────▼───────┐ │                                │
-│         │    │ c. EVAL       │ │  run quick-tier (5 cos, 3 min) │
-│         │    │    CQS_new    │ │                                 │
-│         │    └───────┬───────┘ │                                │
-│         │    ┌───────▼───────┐ │                                │
-│         │    │ d. DECIDE     │ │  if CQS_new > CQS_baseline    │
-│         │    │              │ │     AND regressions == 0:       │
-│         │    │  KEEP or     │ │     KEEP → new baseline         │
-│         │    │  DISCARD     │ │  else:                          │
-│         │    │              │ │     DISCARD → log to graveyard  │
-│         │    └───────┬───────┘ │                                │
-│         │    ┌───────▼───────┐ │                                │
-│         │    │ e. LOG        │ │  Record in auto_eval_experiments│
-│         │    └───────────────┘ │                                │
+│         │ 2. PARALLEL SCOUT    │  ThreadPoolExecutor scouts     │
+│         │    parallel_scout    │  all gaps concurrently (~17s)  │
+│         │    _gaps()           │  using discover_concepts       │
 │         └──────────┬───────────┘                                │
 │                    │                                             │
-│  06:30  ┌──────────▼───────────┐                                │
-│         │ 4. FULL-TIER EVAL    │                                │
-│         │    All 96 companies  │  CQS_final = 0.963 (+0.007)   │
-│         │    ~30 min           │                                 │
+│         ┌──────────▼───────────┐                                │
+│         │ 3. BATCH EVALUATE    │  Non-conflicting changes       │
+│         │    batch_evaluate()  │  applied together; CQS         │
+│         │                      │  measured once. Binary search  │
+│         │                      │  on failure to find culprit.   │
 │         └──────────┬───────────┘                                │
 │                    │                                             │
-│  07:00  ┌──────────▼───────────┐                                │
-│         │ 5. FINALIZE          │                                │
+│         ┌──────────▼───────────┐                                │
+│         │ 4. TOURNAMENT EVAL   │  Promising changes get 2nd     │
+│         │    tournament_eval() │  stage: 20-co validation       │
+│         │    (5-co → 20-co)    │  (~200s) for overfitting check │
+│         └──────────┬───────────┘                                │
+│                    │                                             │
+│         ┌──────────▼───────────┐                                │
+│         │ 5. CROSS-COMPANY     │  Verify concept transfers      │
+│         │    cross_company     │  across companies in parallel   │
+│         │    _learn()          │                                 │
+│         └──────────┬───────────┘                                │
+│                    │                                             │
+│         ┌──────────▼───────────┐                                │
+│         │ 6. FINALIZE          │                                │
 │         │    • Evolution report │                                │
 │         │    • Git commit       │                                │
 │         │    • Dashboard update │                                │
+│         └──────────┬───────────┘                                │
+│                    │                                             │
+│         ┌──────────▼───────────┐                                │
+│         │ 7. MORNING DASHBOARD │  Human reviews results          │
+│         │    auto_eval         │  (auto_eval_dashboard.py)       │
+│         │    _dashboard.py     │                                 │
 │         └──────────────────────┘                                │
 │                                                                 │
-│  07:00  ┌──────────────────────┐                                │
-│         │ 6. MORNING DASHBOARD │  Human reviews results          │
-│         └──────────────────────┘                                │
+│  Safety: Circuit breaker halts after 10 consecutive failures.   │
+│  Graveyard: Gaps that fail 3+ times are skipped automatically.  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Experiment Decision Logic
 
-```python
-# standardization/tools/auto_eval_loop.py (conceptual)
+Implemented in `auto_eval_loop.py` as `evaluate_experiment()`. The decision rules are:
 
-def evaluate_experiment(
-    change: ConfigChange,
-    baseline_cqs: CQSResult,
-    eval_cohort: List[str],
-) -> ExperimentDecision:
-    """
-    Apply a config change, measure CQS, decide KEEP or DISCARD.
+1. **CQS must improve** (CQS_new > CQS_baseline)
+2. **Zero golden master regressions** (regression_rate == 0)
+3. **No single company's pass_rate drops by more than 5pp**
 
-    Decision rules:
-    1. CQS must improve (CQS_new > CQS_baseline)
-    2. Zero golden master regressions (regression_rate == 0)
-    3. No single company's pass_rate drops by more than 5pp
+If all three pass, the change is KEPT and becomes the new baseline. Otherwise, the config is reverted and the change is logged to the graveyard. Supporting functions include `apply_config_change()`, `revert_config_change()`, `revert_all_configs()`, and `log_to_graveyard()`.
 
-    If all three pass → KEEP (update baseline)
-    Otherwise → DISCARD (revert config, log to graveyard)
-    """
-    # Apply change to Tier 1 config
-    apply_config_change(change)
-
-    # Run quick-tier eval
-    new_cqs = compute_cqs(eval_cohort, snapshot_mode=True)
-
-    # Check decision criteria
-    cqs_improved = new_cqs.cqs > baseline_cqs.cqs
-    no_regressions = new_cqs.regression_rate == 0.0
-    no_company_collapse = all(
-        new_cqs.company_scores[t] >= baseline_cqs.company_scores[t] - 0.05
-        for t in eval_cohort
-    )
-
-    if cqs_improved and no_regressions and no_company_collapse:
-        return ExperimentDecision(action="KEEP", cqs_delta=new_cqs.cqs - baseline_cqs.cqs)
-    else:
-        revert_config_change(change)
-        log_to_graveyard(change, reason=...)
-        return ExperimentDecision(action="DISCARD", cqs_delta=0)
-```
+The `propose_change()` function uses 3-level escalation to generate config change proposals from gaps:
+1. Direct concept lookup from known variations
+2. `discover_concepts` API for XBRL concept discovery
+3. Exclusion (when no valid concept exists for a company/metric combination)
 
 ### Gap Prioritization
 
-Gaps are ranked by estimated CQS impact to maximize overnight productivity:
+Gaps are ranked by estimated CQS impact to maximize overnight productivity. The `identify_gaps()` function in `auto_eval.py` returns `MetricGap` objects classified by type:
 
-```python
-def prioritize_gaps(gaps: List[MetricGap], eval_cohort: List[str]) -> List[MetricGap]:
-    """
-    Rank gaps by expected CQS improvement.
+- **Validation failures** (affect pass_rate, 0.50 weight) are prioritized highest
+- **Unmapped metrics** (affect coverage_rate, 0.15 weight) are next
+- **High variance** (affect mean_variance, 0.20 weight) are lower priority
 
-    Priority = (companies_affected / total_companies) * metric_weight
-
-    Where metric_weight reflects the CQS sub-metric most impacted:
-    - Unmapped metric → affects coverage_rate (0.15 weight)
-    - Validation failure → affects pass_rate (0.50 weight)
-    - High variance → affects mean_variance (0.20 weight)
-
-    Validation failures are prioritized over unmapped metrics
-    because pass_rate has 3.3x the CQS weight of coverage_rate.
-    """
-    ...
-```
+Gaps affecting multiple companies are prioritized over single-company gaps, since cross-company concept fixes (e.g., adding a new `known_concept` to `metrics.yaml`) resolve multiple gaps at once.
 
 ### Morning Dashboard
 
+Implemented in `auto_eval_dashboard.py` (~380 lines). Below is representative output reflecting Session 3 results:
+
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║              AUTO-EVAL OVERNIGHT REPORT — 2026-03-18            ║
+║              AUTO-EVAL SESSION 3 REPORT — 2026-03-18            ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  CQS Trajectory: 0.956 → 0.963 (+0.007)                        ║
-║  ████████████████████████████████████████████████▓░░  96.3%      ║
+║  CQS Trajectory (50-co): 0.9016 → 0.9206 (+0.0190)             ║
+║  ████████████████████████████████████████████████░░░  92.1%      ║
 ║                                                                  ║
-║  Experiments:  47 run │ 31 kept │ 12 discarded │ 4 errored      ║
-║  Duration:     7h 42m │ Avg experiment: 3.2 min                 ║
-║  Config diff:  +18 known_concepts, +3 divergences, +2 exclusions║
+║  CQS Trajectory (5-co):  0.9265 → 0.9313 (+0.0048)             ║
+║  █████████████████████████████████████████████████░░  93.1%      ║
 ║                                                                  ║
-╠════════════════════ TOP IMPROVEMENTS ════════════════════════════╣
+║  Gaps resolved: 47/64 (73%)   │ Remaining: 17                  ║
+║  Regressions:   0             │ Pass rate: 95.9%               ║
+║  Coverage:      98.9%         │ Duration: 270s (50-co eval)    ║
 ║                                                                  ║
-║  Metric               Companies    CQS Impact    Change         ║
+╠════════════════════ IMPROVEMENTS BY PHASE ═══════════════════════╣
+║                                                                  ║
+║  Phase    Gaps Fixed   Type                                      ║
 ║  ──────────────────────────────────────────────────────────────  ║
-║  IntangibleAssets      HD,LOW,TGT   +0.0021      +concept       ║
-║  OperatingIncome       XOM,CVX      +0.0018      +tree_hint     ║
-║  DeprecAmort           AMZN,GOOG    +0.0012      +composite     ║
-║  AccountsPayable       WMT,COST     +0.0009      +concept       ║
+║  Phase 1  27           Structural exclusions (banking, tech)    ║
+║  Phase 2   7           OperatingIncome + cross-company concepts ║
+║  Phase 3  13           ShortTermDebt/IntangibleAssets mismatches║
 ║                                                                  ║
-╠════════════════════ GRAVEYARD (discarded) ═══════════════════════╣
+╠════════════════════ COMPANY TIERS ═══════════════════════════════╣
 ║                                                                  ║
-║  Metric               Attempt       Reason                      ║
+║  Excellent (>=95%):  34 companies (AAPL, MSFT, GOOG, ...)      ║
+║  Good (80-94%):      14 companies (CAT, JPM, TSLA, ...)        ║
+║  Needs work (<80%):   2 companies (DE, MS)                     ║
+║                                                                  ║
+╠════════════════════ REMAINING GAPS (17) ═════════════════════════╣
+║                                                                  ║
+║  Pattern            Count  Companies                            ║
 ║  ──────────────────────────────────────────────────────────────  ║
-║  ShortTermDebt         +concept      JPM regressed (-3pp)        ║
-║  Capex                 +composite    XOM variance +22%           ║
-║  SharesOutstanding     +concept      NVDA split distortion       ║
+║  DeprecAmort          4    ABBV, HD, PEP, SLB                   ║
+║  Capex                4    CAT, DE, RTX, SLB                    ║
+║  AccountsReceivable   3    CAT, HD, PEP                         ║
+║  Other                6    (various high-variance mismatches)   ║
 ║                                                                  ║
 ╠════════════════════ FLAGGED FOR REVIEW ══════════════════════════╣
 ║                                                                  ║
-║  ⚠ ShortTermDebt failed 3 different approaches — may need       ║
-║    Tier 3 (code) change for dimensional handling                 ║
-║  ⚠ NVDA SharesOutstanding consistently fails due to stock       ║
-║    split normalization — known yfinance divergence               ║
-║                                                                  ║
-╠════════════════════ GOLDEN MASTER STATUS ════════════════════════╣
-║                                                                  ║
-║  Total: 142 │ Held: 142 │ New: 8 │ Regressed: 0                ║
+║  ! Config-only limit reached at CQS ~0.92                      ║
+║    Remaining gaps need code fixes:                              ║
+║    - Layer 2 multi-period validation resets valid concepts      ║
+║    - yfinance composite metrics (CurrentDebt, Capex) can't     ║
+║      match single XBRL concepts                                ║
+║  ! Golden master rate (43.5%) is the CQS bottleneck            ║
+║    Needs manual verification or code improvements              ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
@@ -441,165 +385,94 @@ Week N:
 
 | Optimization Target | Cadence | Budget | Decision Gate |
 |---|---|---|---|
-| Tier 1 config (metrics.yaml, etc.) | Nightly | 3 min/experiment | CQS improvement + zero regressions |
+| Tier 1 config (metrics.yaml, etc.) | Per session | ~50s/experiment (quick-tier) | CQS improvement + zero regressions |
 | Agent instructions (.md files) | Weekly | Full task battery (~30 min) | Battery score improvement + CQS non-regression |
 | Extraction engine (Python source) | Manual | Full E2E suite (~2 hours) | Human code review + all tests pass |
 
 ---
 
-## 6. What Needs Building
+## 6. Current State — What Has Been Built
 
-### New Components
+All components originally planned in this section have been implemented and battle-tested across 3 sessions. The system grew larger than initial estimates due to parallel scouting, batch evaluation, and cross-company learning features added in Session 2.
 
-| Component | Location | Est. Lines | Purpose | Depends On |
+### Implemented Components
+
+| Component | Location | Actual Lines | Key Functions | Status |
 |---|---|---|---|---|
-| `auto_eval.py` | `standardization/tools/auto_eval.py` | ~300 | `compute_cqs()`, `run_experiment()`, `compare_experiments()` | Orchestrator, ReferenceValidator, ExperimentLedger |
-| `auto_eval_loop.py` | `standardization/tools/auto_eval_loop.py` | ~500 | Overnight loop: propose → eval → keep/discard → log | auto_eval.py, config parsers |
-| `auto_eval_dashboard.py` | `standardization/tools/auto_eval_dashboard.py` | ~200 | Morning review terminal dashboard (Rich-based) | auto_eval_loop.py results |
-| `agent_battery.py` | `standardization/tools/agent_battery.py` | ~400 | Task batteries for agent instruction optimization | Agent definitions, eval harness |
-| Ledger schema extension | `standardization/ledger/schema.py` | ~50 | 2 new tables: `auto_eval_experiments`, `auto_eval_graveyard` | Existing schema |
-| `run-auto-eval` skill | `.claude/skills/run-auto-eval/SKILL.md` | ~100 | CLI invocation of auto-eval loop | auto_eval_loop.py |
-| `auto-eval-runner` agent | `.claude/agents/auto-eval-runner.md` | ~200 | Agent constrained to Tier 1 config modifications only | auto_eval.py, Tier 1 configs |
+| `auto_eval.py` | `standardization/tools/auto_eval.py` | ~620 | `compute_cqs()`, `identify_gaps()`, `print_cqs_report()`, `check_offline_readiness()` | **In use** |
+| `auto_eval_loop.py` | `standardization/tools/auto_eval_loop.py` | ~1,700 | `evaluate_experiment()`, `tournament_eval()`, `run_overnight()`, `propose_change()`, `parallel_scout_gaps()`, `batch_evaluate()`, `cross_company_learn()` | **In use** |
+| `auto_eval_dashboard.py` | `standardization/tools/auto_eval_dashboard.py` | ~380 | Morning review terminal dashboard | **In use** |
+| Ledger schema extension | `standardization/ledger/schema.py` | ~50 | `AutoEvalExperiment`, `AutoEvalGraveyard` data classes | **In use** |
+| `run-auto-eval` skill | `.claude/skills/run-auto-eval/SKILL.md` | ~100 | CLI invocation of auto-eval loop | **In use** |
+| `auto-eval-runner` agent | `.claude/agents/auto-eval-runner.md` | ~200 | Agent constrained to Tier 1 config modifications only | **In use** |
 
-**Total: ~1,750 net-new lines across 7 files, composing ~3,000 lines of existing infrastructure.**
+**Total: ~2,720 net-new lines across 3 core Python files + agent/skill definitions, composing ~3,000 lines of existing infrastructure.** (Grew from the original estimate of ~1,750 lines due to parallel scout infrastructure and batch evaluation logic added in Session 2.)
 
-### New Ledger Tables
+Note: The originally planned `agent_battery.py` (task batteries for agent instruction optimization) was not built — agent optimization via A/B testing (Section 5) remains a future enhancement.
 
-```python
-# Extension to standardization/ledger/schema.py
+### Ledger Tables
 
-@dataclass
-class AutoEvalExperiment:
-    """Record of a single auto-eval experiment."""
-    experiment_id: str           # UUID
-    run_id: str                  # Links to parent overnight run
-    timestamp: str               # ISO 8601
-    target_metric: str           # e.g., "IntangibleAssets"
-    target_companies: List[str]  # e.g., ["HD", "LOW", "TGT"]
-    change_type: str             # "add_concept" | "add_divergence" | "add_tree_hint" | "add_exclusion"
-    change_description: str      # Human-readable description
-    config_diff: str             # Unified diff of YAML change
-    cqs_before: float
-    cqs_after: float
-    cqs_delta: float
-    decision: str                # "KEEP" | "DISCARD"
-    duration_seconds: float
-    golden_masters_checked: int
-    golden_masters_regressed: int
+`AutoEvalExperiment` and `AutoEvalGraveyard` are implemented in `standardization/ledger/schema.py` as data classes. The graveyard tracks failed approaches and prevents re-attempting them: gaps that fail 3+ times are automatically skipped by `parallel_scout_gaps()`.
 
-@dataclass
-class AutoEvalGraveyard:
-    """Record of a discarded experiment — what didn't work and why."""
-    experiment_id: str           # Links to AutoEvalExperiment
-    target_metric: str
-    change_description: str
-    discard_reason: str          # "cqs_declined" | "regression" | "company_collapse" | "error"
-    detail: str                  # Specific explanation (e.g., "JPM pass_rate dropped 95% → 92%")
-    similar_attempts: int        # How many times this metric has been attempted
-    timestamp: str
-```
+### Integration Architecture
 
-### Integration Points with Existing Code
+`compute_cqs()` runs the full extraction pipeline in a single pass via `identify_gaps()`, which was optimized in Session 2 to call the Orchestrator once (previously twice), reducing eval time from ~300s to ~49s for 5 companies. The function integrates with:
 
-`compute_cqs()` integrates with existing infrastructure at these specific points:
-
-```python
-# How CQS connects to existing code
-
-from edgar.xbrl.standardization.orchestrator import Orchestrator
-from edgar.xbrl.standardization.reference_validator import ReferenceValidator
-from edgar.xbrl.standardization.ledger import ExperimentLedger
-from edgar.xbrl.standardization.tools.kpi_tracker import RunStatistics
-from edgar.xbrl.standardization.tools.onboard_company import OnboardingResult
-
-def compute_cqs(eval_cohort, snapshot_mode=True):
-    orch = Orchestrator()
-
-    # 1. Extract: reuses Orchestrator.map_companies()
-    #    (orchestrator.py:287-332)
-    results = orch.map_companies(eval_cohort, use_ai=False, validate=True)
-
-    # 2. Validate: reuses ReferenceValidator
-    #    (reference_validator.py — validate_and_update_mappings)
-    validator = ReferenceValidator(snapshot_mode=snapshot_mode)
-    validation_results = {}
-    for ticker, metrics in results.items():
-        validation_results[ticker] = validator.validate_and_update_mappings(
-            ticker, metrics, xbrl=..., filing_date=..., form_type=...
-        )
-
-    # 3. Golden masters: reuses ExperimentLedger
-    #    (ledger/schema.py — GoldenMaster table)
-    ledger = ExperimentLedger()
-    golden_masters = ledger.get_all_golden_masters()
-
-    # 4. Compute sub-metrics from existing data structures
-    pass_rate = compute_aggregate_pass_rate(validation_results)       # OnboardingResult pattern
-    mean_variance = compute_mean_variance(validation_results)         # From ValidationResult.variance_pct
-    coverage_rate = compute_coverage(results)                         # RunStatistics pattern
-    gm_rate = compute_golden_master_rate(golden_masters, results)     # Ledger query
-    regression_rate = compute_regression_rate(golden_masters, results)# Cohort comparison
-
-    # 5. Weighted combination
-    cqs = (0.50 * pass_rate
-         + 0.20 * (1 - mean_variance / 100)
-         + 0.15 * coverage_rate
-         + 0.10 * gm_rate
-         + 0.05 * (1 - regression_rate))
-
-    return CQSResult(
-        cqs=cqs,
-        pass_rate=pass_rate,
-        mean_variance=mean_variance,
-        coverage_rate=coverage_rate,
-        golden_master_rate=gm_rate,
-        regression_rate=regression_rate,
-        company_scores={t: compute_cqs_single(t, results, validation_results) for t in eval_cohort},
-    )
-```
+- **Orchestrator** (`orchestrator.py`) for multi-layer concept extraction
+- **ReferenceValidator** (`reference_validator.py`) for yfinance validation
+- **ExperimentLedger** (`ledger/schema.py`) for golden master tracking
+- **yf_snapshots/** for deterministic offline validation
 
 ---
 
 ## 7. What This Enables
 
-### Scaling Math
+### Scaling Math — Actual Results
 
-Current state (from `docs/financial-database-status.md`):
-- 96 companies with snapshots, ~51 fully onboarded
-- 24 standardized metrics per company
-- 95-100% pass rates across mature archetypes
-- Concept-mapping-resolver resolves ~2 metrics per session (`.claude/agents/concept-mapping-resolver.md:717-788`)
+**Session 3 actuals (50-company expansion):**
+- 50 companies evaluated in ~270 seconds (~5.4s per company with local bulk data)
+- 64 gaps identified at baseline; 47 resolved in one session (73% resolution rate)
+- Resolution phases: structural exclusions (27), cross-company concepts (7), mismatch fixes (13)
+- Final state: 34 companies at Excellent (>=95% CQS), 14 at Good (80-94%), 2 need work (<80%)
 
-**With auto-eval overnight loop:**
-- 47 experiments/night (from loop capacity estimate: 7.5 hours / ~10 min per propose+eval cycle)
-- ~65% KEEP rate (conservative — autoresearch sees ~40-60%)
-- ~31 kept changes/night × ~1 metric resolved each = **~30 metrics resolved per night**
-- Each company has ~3-5 failing metrics on average
-- **~6-10 companies fully onboarded per night**
+**Config-only ceiling:**
+CQS has plateaued at ~0.92 for the 50-company cohort. The remaining 17 gaps are not config-solvable — they require code changes to:
+1. Layer 2 multi-period validation (resets valid concepts when values differ from yfinance)
+2. Composite metric handling (yfinance "Current Debt" aggregates multiple XBRL line items)
+3. Reference data gaps (GE restructuring means sparse yfinance data)
 
-**Projected timeline to S&P 500:**
-- Current: 51 companies at high quality
-- Remaining: ~450 companies
-- At 8 companies/night: **~56 nights (~2 months)**
-- Conservative (weeknights only, maintenance days): **~3 months**
+**CQS bottleneck:** Golden master rate (43.5%) is the weakest sub-metric. Reaching CQS 0.95+ requires either systematic golden master verification or code improvements to the validation pipeline.
+
+**Revised timeline to S&P 500:**
+- Current: 50 companies at CQS 0.9206 average
+- Config-only resolution rate: ~73% of gaps per session
+- Remaining: ~450 companies to onboard
+- Bulk data availability means new companies can be evaluated instantly (no network dependency)
+- Bottleneck is no longer eval speed (~5.4s/company) but code fixes needed for the ~17 gap patterns that recur across companies
 
 ### Self-Improving Agent Quality
 
-Each overnight run generates data that improves future runs:
+Each session generates data that improves future sessions. Real examples from Sessions 1-3:
 
 ```
-Night 1: Agent resolves IntangibleAssets for HD
-  → Adds OtherIntangibleAssetsNet to known_concepts
-  → Graveyard records: GoodwillAndIntangibleAssetsNet was a parent concept (rejected)
+Session 1: identify_gaps() finds 12 gaps across 5 companies
+  → Resolves 5 via config-only changes (exclusions + known_concepts)
+  → CQS: 0.9062 → 0.9265
 
-Night 2: Agent encounters IntangibleAssets for LOW
-  → known_concepts already has OtherIntangibleAssetsNet → auto-resolves (Layer 1)
-  → Graveyard prevents re-attempting parent concept
+Session 2: Bulk data download (25GB) unblocks Layer 2 facts search
+  → JPM:CashAndEquivalents, XOM:LongTermDebt auto-resolve (no config needed)
+  → parallel_scout_gaps() replaces 3 Haiku agents with ThreadPoolExecutor
+  → identify_gaps() optimized from ~300s to ~49s (single orchestrator pass)
+  → CQS: 0.9265 → 0.9313
 
-Night 5: Agent instruction update adds "check for Amortizable variants" heuristic
-  → Task battery validates the new heuristic
-  → Future IntangibleAssets gaps resolved faster
+Session 3: 50-company expansion stress test
+  → Cross-company patterns emerge: ShortTermDebt exclusions help 8 companies
+  → Concept variations (e.g., CashAndDueFromBanks) added to metrics.yaml
+     help ALL banking companies automatically
+  → 47/64 gaps resolved; CQS: 0.9016 → 0.9206 (50-co)
 ```
+
+The key cross-company leverage pattern confirmed by Session 3: a concept variation added to `metrics.yaml` for one company immediately benefits all companies using that metric. This is the auto-eval system's highest-value feedback loop.
 
 ### Continuous Regression Protection
 
@@ -613,15 +486,20 @@ Auto-eval adds a pre-commit gate: every config change is validated against all g
 
 ### Knowledge Accumulation
 
-Three knowledge stores grow automatically:
+Three knowledge stores grow automatically, plus a session results log:
 
-1. **Evolution reports** (`.claude/skills/write-evolution-report/SKILL.md`): Generated after each overnight run, tracking CQS trajectory, new golden masters, and architectural decisions.
+1. **Auto-eval results log** (`docs/auto-eval-results.md`): Tracks CQS evolution across sessions with per-company breakdowns, gap resolution details, and architectural notes. Updated after each session.
 
-2. **Graveyard**: Discarded experiments with structured reasons. Over time, reveals patterns:
-   - "ShortTermDebt has been attempted 12 times, always fails due to dimensional complexity → needs Tier 3 change"
-   - "Insurance companies consistently fail on Revenue due to premium normalization → needs archetype-specific handling"
+2. **Graveyard** (`AutoEvalGraveyard` in ledger): Discarded experiments with structured reasons. Real examples from Session 3:
+   - ShortTermDebt exclusions needed for 8 companies — yfinance "Current Debt" is a composite metric
+   - OperatingIncome excluded for 6 companies — XBRL `OperatingIncomeLoss` concept absent
 
 3. **Config evolution**: `git log` on Tier 1 YAML files shows the full history of what worked, when, and for which companies.
+
+4. **Pipeline speed log** (from `auto-eval-results.md`): Tracks performance improvements across sessions:
+   - Session 1: `identify_gaps` ~300s
+   - Session 2 (no local data): 145s; (with bulk facts): 49s
+   - Session 3 (50 companies): 270s
 
 ### Human-in-the-Loop
 
@@ -635,12 +513,63 @@ This matches autoresearch's model: humans edit `program.md` (strategy); agents e
 
 ---
 
+## 8. The 50-Company Expansion (Session 3)
+
+Session 3 (2026-03-18) was the first real stress test of the auto-eval system at scale — expanding from 5 to 50 companies across 8 sectors.
+
+### Expansion Cohort
+
+| Sector | Count | Companies |
+|--------|-------|-----------|
+| Tech | 10 | AAPL, MSFT, GOOG, AMZN, META, NVDA, TSLA, CRM, ADBE, INTC |
+| Banking/Finance | 8 | JPM, BAC, GS, MS, C, BLK, SCHW, AXP |
+| Energy | 4 | XOM, CVX, COP, SLB |
+| Consumer | 7 | WMT, PG, KO, PEP, MCD, NKE, COST |
+| Healthcare/Pharma | 7 | JNJ, UNH, PFE, LLY, ABBV, MRK, TMO |
+| Industrial | 6 | CAT, HON, GE, DE, RTX, UPS |
+| Other | 8 | V, MA, NEE, T, HD, LOW, NFLX, AVGO |
+
+### Results
+
+| Metric | 5-Co (Session 2) | 50-Co Baseline | 50-Co Final |
+|--------|-------------------|----------------|-------------|
+| CQS | 0.9313 | 0.9016 | **0.9206** |
+| Pass rate | 95.8% | 94.0% | **95.9%** |
+| Coverage | 99.0% | 94.9% | **98.9%** |
+| Gaps | 4 | 64 | **17** |
+| Regressions | 0 | 5 | **0** |
+| Duration | 49s | 335s | **270s** |
+
+### Resolution Phases
+
+The 47 resolved gaps fell into three phases:
+
+1. **Structural Exclusions (27 gaps):** Banking companies missing Inventory, tech companies missing COGS — these are legitimately absent metrics that should be excluded, not resolved.
+
+2. **Cross-Company Concept Fixes (7 gaps):** Adding `known_concepts` and `known_divergences` that transfer across companies (e.g., OperatingIncome exclusions for 6 companies that lack the `OperatingIncomeLoss` XBRL concept).
+
+3. **Structural Mismatch Fixes (13 gaps):** ShortTermDebt exclusions (yfinance "Current Debt" is a composite that can't match a single XBRL concept), IntangibleAssets exclusions (definitional mismatch).
+
+### Key Learnings
+
+1. **Bulk data > clever code:** Downloading 25GB of SEC company facts resolved 3 gaps that concept discovery couldn't find. Layer 2 facts search needs local data to work.
+
+2. **Python parallel > LLM agents:** `ThreadPoolExecutor` for mechanical tasks (concept scouting, cross-company verification) is faster, free, and deterministic. Only the `haiku-gap-classifier` remains for reasoning-heavy gap classification.
+
+3. **Cross-company leverage is high:** A concept variation added to `metrics.yaml` for one company immediately helps all companies using that metric. This is the highest-value feedback loop.
+
+4. **Config-only limit reached at CQS ~0.92:** The remaining 17 gaps need code fixes — Layer 2 multi-period validation resets valid concepts, and yfinance composite metrics (CurrentDebt, Capex) can't be matched by single XBRL concepts.
+
+5. **CQS bottleneck is golden_master_rate (43.5%):** This is the weakest sub-metric. Reaching CQS 0.93+ at scale requires either systematic golden master verification or code improvements to the validation pipeline.
+
+---
+
 ## Appendix A: Comparison with Autoresearch at Every Level
 
 | Level | Autoresearch | EdgarTools Auto-Eval | Key Difference |
 |---|---|---|---|
 | **Eval metric** | `val_bpb` (bits per byte on validation set) | CQS (weighted composite of 5 sub-metrics) | CQS is a composite because SEC data quality has multiple dimensions; `val_bpb` is a single natural metric for language modeling |
-| **Eval speed** | ~5 min (train small model + eval) | ~3 min quick-tier (5 companies, snapshot mode) | EdgarTools is faster because snapshots eliminate network calls |
+| **Eval speed** | ~5 min (train small model + eval) | ~50s quick-tier (5 cos), ~270s full (50 cos) | EdgarTools is faster because local bulk data + snapshots eliminate network calls |
 | **Modifiable surface** | `train.py` (single Python file) | 3 YAML config files (metrics, companies, industry) | YAML is safer — syntax errors are caught by parser, never crash runtime |
 | **Fixed harness** | `prepare.py` (data loading, eval loop) | Orchestrator + ReferenceValidator + yf_snapshots | Same pattern: the eval harness is never modified by the agent |
 | **Agent instructions** | `program.md` (research strategy) | `.claude/agents/*.md` + `.claude/skills/*/SKILL.md` | EdgarTools has many specialized agents vs one general agent |
@@ -648,18 +577,21 @@ This matches autoresearch's model: humans edit `program.md` (strategy); agents e
 | **Success criterion** | `val_bpb` strictly decreases | CQS strictly increases + zero golden master regressions | EdgarTools has an additional regression constraint |
 | **Failure mode** | Bad experiment wastes 5 min | Bad config change caught by ReferenceValidator in <1 min | EdgarTools fails faster due to deterministic validation |
 | **Knowledge retention** | `runs.jsonl` entries | Graveyard + evolution reports + git history | EdgarTools accumulates structured "what doesn't work" knowledge |
+| **Parallel execution** | Sequential experiments | ThreadPoolExecutor for scouting + batch evaluation | EdgarTools replaced LLM agents with Python parallelism for mechanical tasks |
 | **Human role** | Edit `program.md` occasionally | Review morning dashboard, approve Tier 3 changes | Same: humans set strategy, agents execute |
 
 ## Appendix B: Risk Analysis
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Config change passes quick-tier but fails on full cohort | Medium | Low (caught in step 4) | Full-tier eval as final gate before commit |
-| Agent proposes same failed change repeatedly | Medium | Low (wastes time) | Graveyard lookup before proposing; skip if >3 prior failures |
-| CQS weights don't reflect true quality priorities | Low | Medium | Validate CQS against human quality rankings; adjust weights quarterly |
-| Golden master set becomes stale or too conservative | Low | Medium | Review golden master set monthly; retire golden masters for companies with structural changes |
-| Overnight run produces conflicting changes | Medium | Low | Sequential experiment application; each builds on previous baseline |
-| Config file grows too large (too many known_concepts) | Low | Low | Periodic pruning of unused concepts (concepts that never matched) |
+| Risk | Likelihood | Impact | Mitigation | Session Experience |
+|---|---|---|---|---|
+| Config change passes quick-tier but fails on full cohort | Medium | Low (caught in step 4) | 2-stage tournament eval (5-co then 20-co) | Confirmed: tournament_eval catches overfitting |
+| Agent proposes same failed change repeatedly | Medium | Low (wastes time) | Graveyard lookup before proposing; skip if >3 prior failures | Implemented: graveyard integration in parallel_scout_gaps() |
+| CQS weights don't reflect true quality priorities | Low | Medium | Validate CQS against human quality rankings; adjust weights quarterly | golden_master_rate (43.5%) now identified as bottleneck |
+| Golden master set becomes stale or too conservative | Low | Medium | Review golden master set monthly; retire golden masters for companies with structural changes | Not yet an issue — golden master verification is manual |
+| Overnight run produces conflicting changes | Medium | Low | batch_evaluate() with binary search identifies conflicts | Implemented: changes_conflict() + select_non_conflicting() |
+| Config file grows too large (too many known_concepts) | Low | Low | Periodic pruning of unused concepts | Not yet an issue at 50 companies |
+| Config-only limit reached | **Confirmed** | Medium | Code changes needed (Tier 3) | Remaining 17 gaps at 50-co need Layer 2 validation fixes |
+| LLM agents too slow/expensive for mechanical tasks | **Confirmed** | Medium | Replace with Python ThreadPoolExecutor | Done in Session 2: 3 Haiku agents replaced |
 
 ## Appendix C: Decision Records
 
@@ -685,16 +617,16 @@ This matches autoresearch's model: humans edit `program.md` (strategy); agents e
 
 **Trade-off:** ~16% of gaps (true unmapped requiring code changes) cannot be resolved overnight. These are flagged in the morning dashboard for human investigation.
 
-### DR-3: Why 3-Minute Quick Eval Budget
+**Session 3 update:** This trade-off proved accurate. Of 64 gaps in the 50-company expansion, 47 (73%) were resolved via Tier 1 config changes. The remaining 17 (27%) require Tier 3 code changes — primarily Layer 2 multi-period validation resets and yfinance composite metric mismatches. The config-only ceiling appears to be CQS ~0.92.
 
-**Context:** Need to balance experiment throughput (more experiments = more CQS improvement) against eval reliability (more companies = higher confidence).
+### DR-3: Quick Eval Turned Out Much Faster Than Planned
 
-**Decision:** Quick-tier uses 5 companies in snapshot mode, targeting ~3 minutes per eval.
+**Original context:** Planned for ~3 minutes per quick-tier eval (5 companies x ~30-40s each).
 
-**Rationale:**
-- 5 companies × ~30 seconds each = ~2.5 minutes extraction + ~30 seconds validation
-- 7.5 hours overnight / (3 min eval + ~7 min propose+apply+decide) = ~45 experiments
-- 45 experiments × 65% KEEP rate = ~29 kept changes — sufficient for 6-10 new companies/night
-- Full-tier eval (96 companies, ~30 min) runs once at the end as a safety net
+**Actual result:** With local bulk data (25GB downloaded in Session 2), quick-tier eval runs in ~50 seconds — roughly 3.5x faster than planned. This fundamentally changed the architecture:
 
-**Alternative considered:** 10 companies, ~6 min eval — only 25 experiments per night, roughly halving throughput. The full-tier final eval catches false positives from the smaller quick-tier cohort.
+- The 2-stage tournament approach (`tournament_eval()`) became practical: quick-tier (50s) for screening, validation-tier (20 companies, ~200s) for confirmation
+- Batch evaluation (`batch_evaluate()`) applies multiple non-conflicting changes in a single eval pass, further improving throughput
+- The 50-company expansion cohort completes in ~270 seconds — fast enough to run as a stress test rather than requiring overnight
+
+**Implication:** The bottleneck shifted from eval speed to the quality of gap proposals. With eval so fast, the limiting factor is generating good config changes, not measuring their impact. This motivated the `parallel_scout_gaps()` and `cross_company_learn()` functions in Session 2.

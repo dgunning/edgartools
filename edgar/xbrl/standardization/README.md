@@ -54,6 +54,16 @@ Gap Analysis → Propose Config Change → Apply → Measure CQS → Keep/Revert
 | `config/companies.yaml` | Company-specific overrides, exclusions, divergences |
 | `config/industry_metrics.yaml` | Industry-specific concept mappings |
 
+### Evaluation Cohorts
+
+| Cohort | Size | Time | Purpose |
+|---|---|---|---|
+| `QUICK_EVAL_COHORT` | 5 companies (AAPL, JPM, XOM, WMT, JNJ) | ~50s | Fast iteration during development |
+| `VALIDATION_COHORT` | 20 companies | ~200s | Tournament stage-2 validation |
+| `EXPANSION_COHORT_50` | 50 companies across 8 sectors | ~270s | Full cross-sector quality measurement |
+
+Current 50-company results: **CQS 0.9206**, 95.9% pass rate, 98.9% coverage, 0 regressions.
+
 ### CQS Formula
 
 ```python
@@ -71,11 +81,16 @@ cqs = (0.50 * pass_rate           # Fraction of metrics passing validation
 
 ```python
 from edgar.xbrl.standardization.tools.auto_eval import (
-    compute_cqs, identify_gaps, print_cqs_report, print_gap_report
+    compute_cqs, identify_gaps, print_cqs_report, print_gap_report,
+    QUICK_EVAL_COHORT, VALIDATION_COHORT, EXPANSION_COHORT_50,
 )
 
-# Measure current quality
+# Measure current quality (defaults to 5-company quick eval)
 cqs = compute_cqs(snapshot_mode=True)
+print_cqs_report(cqs)
+
+# Full 50-company evaluation
+cqs = compute_cqs(eval_cohort=EXPANSION_COHORT_50, snapshot_mode=True)
 print_cqs_report(cqs)
 
 # Find gaps ranked by CQS impact
@@ -109,6 +124,25 @@ change = ConfigChange(
 result = evaluate_experiment(change, baseline, ledger=ledger)
 log_experiment(change, result, ledger)
 # Decision: KEEP (CQS +0.003) or DISCARD/VETO
+```
+
+### Parallel Scouting
+
+Scout gaps in parallel using ThreadPoolExecutor (no LLM calls):
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    parallel_scout_gaps, scout_result_to_change,
+    select_non_conflicting, batch_evaluate,
+)
+
+# Scout top gaps in parallel
+scout_results = parallel_scout_gaps(gaps[:20], max_workers=5)
+
+# Convert to config changes and batch evaluate
+proposals = [scout_result_to_change(r, g) for r, g in zip(scout_results, gaps[:20]) if r.has_proposal]
+batch = select_non_conflicting([p for p in proposals if p])
+result = batch_evaluate(batch, baseline_cqs=cqs)
 ```
 
 ### Overnight Loop
