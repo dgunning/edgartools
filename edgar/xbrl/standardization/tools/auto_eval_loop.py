@@ -719,9 +719,15 @@ def _propose_via_solver(
         return None
 
     try:
+        # Use multi_period=True to run inline multi-period validation
+        # during the search itself (loads 3 10-K filings upfront,
+        # validates each candidate across all periods before yielding).
         solver = AutoSolver(snapshot_mode=True)
         candidates = solver.solve_metric(
-            gap.ticker, gap.metric, yfinance_value=gap.reference_value
+            gap.ticker, gap.metric,
+            yfinance_value=gap.reference_value,
+            multi_period=True,
+            num_periods=3,
         )
 
         if not candidates:
@@ -729,24 +735,11 @@ def _propose_via_solver(
             return None
 
         best = candidates[0]
-        logger.info(f"Solver candidate for {gap.ticker}:{gap.metric}: {best}")
-
-        # Gate 1: Multi-period validation on source company
-        mp = solver.validate_formula_multi_period(best, gap.ticker, num_periods=3)
-        mp_checked = mp["periods_checked"]
-        mp_passed = mp["periods_passed"]
-        min_periods = min(2, mp_checked)
-
-        if mp_checked == 0 or mp_passed < min_periods:
-            logger.info(
-                f"Solver formula REJECTED for {gap.ticker}:{gap.metric}: "
-                f"multi-period {mp_passed}/{mp_checked} (need {min_periods})"
-            )
-            return None
-
+        mp_checked = best.periods_checked
+        mp_passed = best.periods_passed
         logger.info(
-            f"Multi-period validated: {gap.ticker}:{gap.metric} "
-            f"{mp_passed}/{mp_checked} periods pass"
+            f"Solver candidate for {gap.ticker}:{gap.metric}: {best} "
+            f"(multi-period: {mp_passed}/{mp_checked})"
         )
 
         # Gate 2: Cross-company validation

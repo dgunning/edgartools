@@ -40,6 +40,8 @@ class FormulaCandidate:
     target: float                   # yfinance value
     variance_pct: float             # How close (0 = exact match)
     statement_family: str = ""      # Which statement the components come from
+    periods_checked: int = 0        # Multi-period: how many periods had all components
+    periods_passed: int = 0         # Multi-period: how many periods matched target
 
     def __repr__(self):
         parts = " + ".join(
@@ -92,6 +94,15 @@ class AutoSolver:
     yfinance target value within 1% tolerance.
     """
 
+    # Map auto-solver family codes to DataFrame statement_type values
+    FAMILY_TO_STATEMENT_TYPES = {
+        "INCOME": ["IncomeStatement"],
+        "OPERATIONS": ["IncomeStatement"],
+        "BALANCE": ["BalanceSheet"],
+        "FINANCIAL_POSITION": ["BalanceSheet"],
+        "CASHFLOW": ["CashFlowStatement"],
+    }
+
     # Statement family mapping: which statements to search for each metric
     METRIC_STATEMENT_FAMILIES = {
         "DepreciationAmortization": ["CASHFLOW"],
@@ -133,6 +144,8 @@ class AutoSolver:
         metric: str,
         yfinance_value: Optional[float] = None,
         xbrl_facts: Optional[Dict[str, float]] = None,
+        multi_period: bool = False,
+        num_periods: int = 3,
     ) -> List[FormulaCandidate]:
         """
         Discover which combination of XBRL facts sums to yfinance's value.
@@ -142,6 +155,8 @@ class AutoSolver:
             metric: Metric name (e.g., "DepreciationAmortization")
             yfinance_value: Target yfinance value. If None, fetched from snapshot.
             xbrl_facts: Dict of {concept_name: value}. If None, extracted from filing.
+            multi_period: If True, validate candidates inline across multiple periods.
+            num_periods: Number of annual filings to check (default 3).
 
         Returns:
             List of FormulaCandidate, ranked by: fewest components, lowest variance.
@@ -153,9 +168,22 @@ class AutoSolver:
                 logger.warning(f"No yfinance value for {ticker}:{metric}")
                 return []
 
-        # Get XBRL facts
+        # Get XBRL facts — optionally load multiple periods upfront
+        other_period_facts: List[Dict[str, float]] = []
+
         if xbrl_facts is None:
-            xbrl_facts = self._extract_xbrl_facts(ticker, metric)
+            if multi_period:
+                all_period_facts = self._extract_multi_period_facts(
+                    ticker, metric, num_periods=num_periods
+                )
+                if not all_period_facts:
+                    logger.warning(f"No XBRL facts for {ticker}:{metric}")
+                    return []
+                xbrl_facts = all_period_facts[0]  # Primary = latest filing
+                other_period_facts = all_period_facts[1:]
+            else:
+                xbrl_facts = self._extract_xbrl_facts(ticker, metric)
+
             if not xbrl_facts:
                 logger.warning(f"No XBRL facts for {ticker}:{metric}")
                 return []
@@ -164,6 +192,7 @@ class AutoSolver:
         logger.info(
             f"Solving {ticker}:{metric} — target=${target/1e9:.2f}B, "
             f"{len(xbrl_facts)} candidate facts"
+            + (f", {len(other_period_facts)} additional periods" if multi_period else "")
         )
 
         # Filter to positive-valued facts within plausible range
@@ -203,6 +232,22 @@ class AutoSolver:
                     combo_concepts = [concept_list[i] for i in combo_indices]
                     combo_values = [value_list[i] for i in combo_indices]
 
+                    # Phase B: Inline multi-period constraint
+                    periods_checked = 1  # Primary period always counts
+                    periods_passed = 1   # Primary matched (within tolerance)
+
+                    if multi_period and other_period_facts:
+                        mp_checked, mp_passed = self._check_multi_period(
+                            combo_concepts, target, other_period_facts,
+                        )
+                        periods_checked += mp_checked
+                        periods_passed += mp_passed
+
+                        # Require at least min(2, periods_checked) to pass
+                        min_required = min(2, periods_checked)
+                        if periods_passed < min_required:
+                            continue  # Reject: doesn't hold across periods
+
                     results.append(FormulaCandidate(
                         metric=metric,
                         ticker=ticker,
@@ -212,6 +257,8 @@ class AutoSolver:
                         target=target,
                         variance_pct=variance * 100,
                         statement_family=self._get_statement_family(metric),
+                        periods_checked=periods_checked,
+                        periods_passed=periods_passed,
                     ))
 
         # Sort: fewest components first, then lowest variance
@@ -331,7 +378,9 @@ class AutoSolver:
         for filing in filings:
             try:
                 xbrl = filing.xbrl()
-                fact_values = self._parse_facts_from_xbrl(xbrl)
+                fact_values = self._parse_facts_from_xbrl(
+                    xbrl, period_filter="annual",
+                )
                 if not fact_values:
                     continue
 
@@ -405,12 +454,24 @@ class AutoSolver:
     # =========================================================================
 
     @staticmethod
-    def _parse_facts_from_xbrl(xbrl) -> Dict[str, float]:
+    def _parse_facts_from_xbrl(
+        xbrl,
+        period_filter: str = "annual",
+        statement_families: Optional[List[str]] = None,
+    ) -> Dict[str, float]:
         """
-        Extract all numeric facts from an already-loaded XBRL object.
+        Extract numeric facts from an XBRL object, filtered by period and statement.
 
-        Returns dict of {concept_name: value} with namespace prefixes stripped.
-        Only the first value per concept is kept (largest period).
+        Args:
+            xbrl: Loaded XBRL object.
+            period_filter: "annual" (>300 day duration, latest instant),
+                           "quarterly" (60-100 day duration), or "all".
+            statement_families: Optional list of family codes (e.g., ["INCOME"])
+                                to restrict which statements are searched.
+
+        Returns:
+            Dict of {concept_name: value} with namespace prefixes stripped.
+            Only the first value per concept is kept.
         """
         if xbrl is None or xbrl.facts is None:
             return {}
@@ -419,10 +480,31 @@ class AutoSolver:
         if facts_df is None or facts_df.empty:
             return {}
 
+        # Phase C: Statement-family pre-filtering
+        if statement_families:
+            target_types = set()
+            for family in statement_families:
+                target_types.update(
+                    AutoSolver.FAMILY_TO_STATEMENT_TYPES.get(family, [])
+                )
+            if target_types and "statement_type" in facts_df.columns:
+                stmt_filtered = facts_df[facts_df["statement_type"].isin(target_types)]
+                # Fallback: if too few facts after filtering, use all statements
+                if len(stmt_filtered) >= 5:
+                    facts_df = stmt_filtered
+
+        # Phase A: Period-aware filtering
+        if period_filter != "all":
+            facts_df = AutoSolver._filter_by_period(facts_df, period_filter)
+
+        # Build {concept: value} dict
         result = {}
         for _, row in facts_df.iterrows():
             concept = row.get("concept", "")
-            value = row.get("value")
+            # Prefer numeric_value (Decimal) over string value
+            value = row.get("numeric_value")
+            if value is None:
+                value = row.get("value")
             if value is None:
                 continue
             try:
@@ -431,12 +513,63 @@ class AutoSolver:
                 continue
             if value == 0:
                 continue
+            # Strip namespace prefixes
             clean = concept
-            for prefix in ["us-gaap:", "us-gaap_", "ifrs-full:"]:
+            for prefix in ["us-gaap:", "us-gaap_", "ifrs-full:", "dei:", "srt:"]:
                 clean = clean.replace(prefix, "")
             if clean not in result:
                 result[clean] = value
         return result
+
+    @staticmethod
+    def _filter_by_period(facts_df, period_filter: str):
+        """
+        Filter a facts DataFrame to rows matching the requested period type.
+
+        For "annual": duration facts with >300 days, instant facts at latest date.
+        For "quarterly": duration facts with 60-100 days, instant facts at latest date.
+        """
+        import pandas as pd
+
+        has_period_type = "period_type" in facts_df.columns
+        if not has_period_type:
+            return facts_df
+
+        duration_mask = facts_df["period_type"] == "duration"
+        instant_mask = facts_df["period_type"] == "instant"
+        filtered_parts = []
+
+        # --- Duration facts (Revenue, NetIncome, CashFlow items) ---
+        duration_df = facts_df[duration_mask]
+        if (
+            not duration_df.empty
+            and "period_start" in duration_df.columns
+            and "period_end" in duration_df.columns
+        ):
+            start = pd.to_datetime(duration_df["period_start"], errors="coerce")
+            end = pd.to_datetime(duration_df["period_end"], errors="coerce")
+            days = (end - start).dt.days
+
+            if period_filter == "annual":
+                duration_df = duration_df[days > 300]
+            elif period_filter == "quarterly":
+                duration_df = duration_df[(days >= 60) & (days <= 100)]
+
+            filtered_parts.append(duration_df)
+
+        # --- Instant facts (TotalAssets, Cash, balance sheet items) ---
+        instant_df = facts_df[instant_mask]
+        if not instant_df.empty and "period_instant" in instant_df.columns:
+            # Keep only the latest instant date (fiscal year end for 10-K)
+            dates = pd.to_datetime(instant_df["period_instant"], errors="coerce")
+            latest = dates.max()
+            if pd.notna(latest):
+                instant_df = instant_df[dates == latest]
+            filtered_parts.append(instant_df)
+
+        if filtered_parts:
+            return pd.concat(filtered_parts, ignore_index=True)
+        return facts_df  # Fallback: return unfiltered if nothing matched
 
     def _get_yfinance_target(self, ticker: str, metric: str) -> Optional[float]:
         """Get yfinance reference value from snapshot or live API."""
@@ -457,10 +590,12 @@ class AutoSolver:
         self, ticker: str, metric: str
     ) -> Dict[str, float]:
         """
-        Extract all numeric XBRL facts from the latest 10-K filing.
+        Extract numeric XBRL facts from the latest 10-K filing.
 
-        Returns dict of {concept_name: value} for the annual period.
+        Uses period-aware filtering (annual) and statement-family pre-filtering
+        when a family mapping exists for the metric.
         """
+        statement_families = self.METRIC_STATEMENT_FAMILIES.get(metric)
         try:
             company = Company(ticker)
             filings = company.get_filings(form="10-K")
@@ -469,11 +604,91 @@ class AutoSolver:
 
             filing = filings[0]
             xbrl = filing.xbrl()
-            return self._parse_facts_from_xbrl(xbrl)
+            return self._parse_facts_from_xbrl(
+                xbrl,
+                period_filter="annual",
+                statement_families=statement_families,
+            )
 
         except Exception as e:
             logger.warning(f"Failed to extract XBRL facts for {ticker}: {e}")
             return {}
+
+    def _extract_multi_period_facts(
+        self, ticker: str, metric: str, num_periods: int = 3
+    ) -> List[Dict[str, float]]:
+        """
+        Extract period-aware facts from the last N 10-K filings.
+
+        Returns a list of fact dicts, one per filing, ordered newest-first.
+        Used by solve_metric(multi_period=True) to validate candidates inline.
+        """
+        statement_families = self.METRIC_STATEMENT_FAMILIES.get(metric)
+        try:
+            company = Company(ticker)
+            filings = list(company.get_filings(form="10-K"))[:num_periods]
+        except Exception as e:
+            logger.warning(f"Failed to load filings for {ticker}: {e}")
+            return []
+
+        all_facts: List[Dict[str, float]] = []
+        for filing in filings:
+            try:
+                xbrl = filing.xbrl()
+                facts = self._parse_facts_from_xbrl(
+                    xbrl,
+                    period_filter="annual",
+                    statement_families=statement_families,
+                )
+                if facts:
+                    all_facts.append(facts)
+            except Exception as e:
+                logger.debug(f"Failed to extract facts from {filing}: {e}")
+                continue
+
+        return all_facts
+
+    def _check_multi_period(
+        self,
+        combo_concepts: List[str],
+        target: float,
+        other_period_facts: List[Dict[str, float]],
+        tolerance: float = 0.05,
+    ) -> Tuple[int, int]:
+        """
+        Check if a formula holds across additional periods.
+
+        Soft constraint: periods where a component is MISSING are skipped
+        (not counted as failure). Only periods with all components present
+        are checked against the target.
+
+        Returns:
+            (periods_checked, periods_passed) — excludes primary period.
+        """
+        checked = 0
+        passed = 0
+
+        for facts in other_period_facts:
+            # Check that all components are present
+            total = 0.0
+            all_present = True
+            for concept in combo_concepts:
+                if concept in facts:
+                    total += abs(facts[concept])
+                else:
+                    all_present = False
+                    break
+
+            if not all_present:
+                # Soft constraint: missing concept → skip, don't penalize
+                continue
+
+            checked += 1
+            variance = abs(total - target) / target if target != 0 else 0
+            if variance <= tolerance:
+                passed += 1
+
+        return checked, passed
 
     def _get_statement_family(self, metric: str) -> str:
         """Get the statement family label for a metric."""
