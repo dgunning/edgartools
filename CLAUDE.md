@@ -15,7 +15,8 @@ Python library for SEC Edgar filings analysis.
 | Filing access | `edgar/_filings.py` | `Filing`, `Filings` |
 | Company data | `edgar/entity/core.py` | `Company`, `Entity` |
 | XBRL parsing | `edgar/xbrl/xbrl.py` | `XBRL` |
-| Statements | `edgar/xbrl/statements.py` | `Statement` |
+| Statements | `edgar/xbrl/statements.py` | `Statement`, `StatementLineItem` |
+| Notes & disclosures | `edgar/xbrl/notes.py` | `Note`, `Notes` |
 | Documents | `edgar/documents/` | `Document`, `HTMLParser` |
 | Reports (10-K/Q/8-K) | `edgar/company_reports/` | `TenK`, `TenQ`, `EightK`, `AuditorInfo`, `SubsidiaryList` |
 | Reference data | `edgar/reference/` | Tickers, forms |
@@ -37,8 +38,10 @@ from edgar import Filing, Filings, Company, find, obj
 
 ```
 Company → company.get_financials() → Financials → income/balance/cashflow
+Filing → filing.obj() → TenK/TenQ → .notes → Notes → Note → .tables/.text/.expands
 Filing → filing.obj() → TenK/TenQ/EightK → .reports → Reports
 Filing → filing.xbrl() → XBRL → statements
+Statement → stmt['line item'] → StatementLineItem → .note → Note (drill-down)
 Company → company.get_facts() → EntityFacts → Statement
 Filing → filing.document() → Document → extractors
 ```

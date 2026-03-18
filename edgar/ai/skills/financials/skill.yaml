@@ -61,6 +61,14 @@ patterns:
       multi = MultiFinancials.extract(filings)
       income_detailed = multi.income_statement(view="detailed")  # dimensional breakdowns across years
 
+      # Drill down: statement line item → note that explains it
+      # (requires the filing object: tenk = company.get_filings(form="10-K")[0].obj())
+      bs = tenk.balance_sheet                            # Statement from report object
+      item = bs['Commercial paper']                      # exact match → StatementLineItem
+      item.note                                          # → Note object for 'Debt'
+      item.note.text                                     # narrative explanation
+      bs.search('debt')                                  # fuzzy → ranked list of StatementLineItems
+
   - name: All Metrics at Once
     when: Comprehensive snapshot
     code: |

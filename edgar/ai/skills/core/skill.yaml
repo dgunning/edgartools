@@ -41,6 +41,9 @@ patterns:
     code: |
       report = filing.obj()               # TenK, TenQ, EightK, etc.
       report.reports                      # XBRL viewer pages (statements, notes, details)
+      report.notes                        # Notes to financial statements (10-K/10-Q)
+      report.notes['Debt']               # Single note by title
+      report.notes.search('revenue')     # Fuzzy search → ranked list
       xbrl = filing.xbrl()                # XBRL data (or None)
       doc = filing.document()             # Primary document text
       attachments = filing.attachments    # All exhibits

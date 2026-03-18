@@ -32,6 +32,57 @@ patterns:
       tenk.auditor                      # AuditorInfo: .name .firm_id .location .icfr_attestation
       tenk.subsidiaries                 # SubsidiaryList from EX-21 (TenK only), .to_dataframe()
       tenk.reports                      # Reports from FilingSummary.xml (statements, notes, details)
+      tenk.notes                        # Notes collection (see "Notes & Disclosures" pattern below)
+
+  - name: Notes & Disclosures
+    when: Need the detail behind a financial statement number (debt terms, revenue recognition, leases, contingencies)
+    code: |
+      tenk = filing.obj()
+
+      # Browse all notes
+      tenk.notes                          # Notes collection — shows table of contents
+      len(tenk.notes)                     # Number of notes
+      tenk.notes[5]                       # By number (1-based)
+      tenk.notes['Debt']                  # By title (case-insensitive, exact match)
+      tenk.notes.search('debt')           # Fuzzy search → ranked list of Notes
+
+      # Explore a single note
+      note = tenk.notes['Debt']
+      note.title                          # 'Debt'
+      note.text                           # Narrative text (plain text from TextBlock)
+      note.html                           # Raw HTML content
+      note.tables                         # Child table Statements (XBRL data)
+      note.policies                       # Accounting policy Statements
+      note.details                        # Detail breakdown Statements
+      note.expands                        # Statement line items this note explains
+      note.expands_statements             # Which statements (e.g., ['BalanceSheet'])
+
+      # Get table data
+      note.tables[0].to_dataframe()             # XBRL-structured DataFrame
+      note.tables[0].report.to_dataframe()      # HTML-extracted DataFrame
+
+      # AI-optimized context
+      note.to_context(detail='standard')         # For LLM consumption
+      tenk.notes.to_context(focus=['debt', 'revenue'])  # Filtered context
+
+  - name: Drill Down from Statements
+    when: See a number on a financial statement and need the note that explains it
+    code: |
+      bs = tenk.balance_sheet
+      bs['Cash and cash equivalents']            # Exact match → StatementLineItem
+      bs.search('cash')                          # Fuzzy → ranked list of StatementLineItems
+
+      item = bs['Commercial paper']
+      item.label                                 # 'Commercial paper'
+      item.concept                               # 'us-gaap_CommercialPaper'
+      item.note                                  # → Note (most specific match)
+      item.notes                                 # → [Note, ...] (all related)
+      item.note.title                            # 'Debt'
+      item.note.tables                           # Child table Statements
+    note: |
+      stmt['label'] is EXACT match (case-insensitive). Use stmt.search('keyword') for fuzzy.
+      .note returns the single most relevant Note. .notes returns all matches ranked by specificity.
+      Works on any Statement: balance_sheet, income_statement, cashflow_statement.
 
   - name: 10-Q Sections
     when: Extract quarterly report sections
