@@ -98,11 +98,12 @@ def _import_tools():
     from edgar.ai.mcp.tools import text_search  # noqa: F401
     from edgar.ai.mcp.tools import fund  # noqa: F401
     from edgar.ai.mcp.tools import proxy  # noqa: F401
+    from edgar.ai.mcp.tools import notes  # noqa: F401
 
 
 # Server instructions — sent to the LLM on first connection, before any tool call.
 # This is the system prompt for the tool suite.
-SERVER_INSTRUCTIONS = """EdgarTools provides access to all SEC EDGAR filing data. 12 tools organized by intent:
+SERVER_INSTRUCTIONS = """EdgarTools provides access to all SEC EDGAR filing data. 13 tools organized by intent:
 
 DISCOVER companies and filings:
 - edgar_company: Start here for any company question (profile, financials, filings)
@@ -114,6 +115,7 @@ DISCOVER companies and filings:
 EXAMINE specific filings:
 - edgar_filing: Get structured context for a filing (by company+form or accession number/URL)
 - edgar_read: Extract specific sections (risk factors, MD&A, business description, items)
+- edgar_notes: Drill into notes and disclosures — the detail behind financial statement numbers
 
 ANALYZE financial data:
 - edgar_trends: Revenue, income, EPS time series with growth rates
