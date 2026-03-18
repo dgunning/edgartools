@@ -21,7 +21,8 @@ class PresentationParser(BaseParser):
 
     def __init__(self, presentation_roles: Dict[str, Dict[str, Any]],
                  presentation_trees: Dict[str, PresentationTree],
-                 element_catalog: Dict[str, ElementCatalog]):
+                 element_catalog: Dict[str, ElementCatalog],
+                 role_types: Dict[str, Dict] = None):
         """
         Initialize presentation parser with data structure references.
 
@@ -29,6 +30,7 @@ class PresentationParser(BaseParser):
             presentation_roles: Reference to presentation roles dictionary
             presentation_trees: Reference to presentation trees dictionary
             element_catalog: Reference to element catalog dictionary
+            role_types: Shared dict of role type definitions from schema (human-readable definitions)
         """
         super().__init__()
 
@@ -36,6 +38,7 @@ class PresentationParser(BaseParser):
         self.presentation_roles = presentation_roles
         self.presentation_trees = presentation_trees
         self.element_catalog = element_catalog
+        self.role_types = role_types if role_types is not None else {}
 
     def parse_presentation(self, file_path: Union[str, Path]) -> None:
         """Parse presentation linkbase file and build presentation trees."""
@@ -73,9 +76,10 @@ class PresentationParser(BaseParser):
                 if not role:
                     continue
 
-                # Store role information
+                # Store role information — prefer human-readable definition from schema
                 role_id = role.split('/')[-1] if '/' in role else role
-                role_def = role_id.replace('_', ' ')
+                schema_def = self.role_types.get(role, {}).get('definition')
+                role_def = schema_def if schema_def else role_id.replace('_', ' ')
 
                 self.presentation_roles[role] = {
                     'roleUri': role,

@@ -79,13 +79,20 @@ class TenQ(CompanyReport):
     def __str__(self):
         return f"""TenQ('{self.company}')"""
 
-    def to_context(self, detail: str = 'standard') -> str:
+    def to_context(self, detail: str = 'standard', focus: 'str | list[str] | None' = None) -> str:
         """
         AI-optimized context string.
 
         Args:
             detail: 'minimal' (~100 tokens), 'standard' (~300 tokens), 'full' (~500+ tokens)
+            focus: Optional topic or list of topics for cross-cutting context.
+                   When set, returns statement lines + note + policy for that topic.
+                   Example: focus='debt' or focus=['debt', 'revenue']
         """
+        # Handle focus mode — cross-cutting topic context
+        if focus:
+            return self._focused_context(focus, detail)
+
         from edgar.display.formatting import format_currency_short
 
         lines = []
@@ -170,6 +177,7 @@ class TenQ(CompanyReport):
         lines.append("  .income_statement        Income statement")
         lines.append("  .balance_sheet           Balance sheet")
         lines.append("  .cash_flow_statement     Cash flow statement")
+        lines.append("  .notes                   Notes to financial statements")
         lines.append("  .items                   All available section items")
         lines.append("  .document                Parsed HTML document")
 

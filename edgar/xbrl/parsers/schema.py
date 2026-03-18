@@ -19,17 +19,20 @@ from .base import BaseParser
 class SchemaParser(BaseParser):
     """Parser for XBRL taxonomy schemas."""
 
-    def __init__(self, element_catalog: Dict[str, ElementCatalog]):
+    def __init__(self, element_catalog: Dict[str, ElementCatalog],
+                 role_types: Dict[str, Dict] = None):
         """
         Initialize schema parser with data structure references.
 
         Args:
             element_catalog: Reference to element catalog dictionary
+            role_types: Shared dict for role type definitions (human-readable definitions from schema)
         """
         super().__init__()
 
         # Store references to data structures
         self.element_catalog = element_catalog
+        self.role_types = role_types if role_types is not None else {}
 
         # Will be set by coordinator when needed
         self.parse_labels_content = None
@@ -108,6 +111,10 @@ class SchemaParser(BaseParser):
 
             # Extract embedded linkbases if present
             embedded_linkbases = self._extract_embedded_linkbases(content)
+
+            # Propagate role type definitions (human-readable names) to shared dict
+            if embedded_linkbases and 'role_types' in embedded_linkbases:
+                self.role_types.update(embedded_linkbases['role_types'])
 
             # If embedded linkbases were found, parse them
             if embedded_linkbases and 'linkbases' in embedded_linkbases:
