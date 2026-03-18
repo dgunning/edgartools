@@ -1599,29 +1599,8 @@ class ReferenceValidator:
                     variance_type = "explained"
 
             # Check for standardization formula (composite value)
-            if metric_config.standardization:
-                std_config = metric_config.standardization
-                # Check company override > sector override > default
-                formula_components = None
-
-                company_overrides = std_config.get("company_overrides", {})
-                if ticker in company_overrides:
-                    formula_components = company_overrides[ticker].get("components")
-
-                if formula_components is None:
-                    sector_overrides = std_config.get("sector_overrides", {})
-                    company_config = self.config.get_company(ticker) if self.config else None
-                    if company_config and company_config.industry:
-                        sector_key = company_config.industry.title()
-                        if sector_key in sector_overrides:
-                            formula_components = sector_overrides[sector_key].get("components")
-
-                if formula_components is None:
-                    default_formula = std_config.get("default", {})
-                    formula_components = default_formula.get("components")
-
-                # If we have a formula, SA is evaluated against the composite value
-                if formula_components:
+            formula_components = self._resolve_formula_components(metric, ticker)
+            if formula_components:
                     variance_type = "standardized"
                     # SA scoring happens in the caller (which has access to xbrl)
                     # Here we just record the formula existence
@@ -1647,6 +1626,40 @@ class ReferenceValidator:
             variance_type=variance_type,
         )
     
+    def _resolve_formula_components(self, metric: str, ticker: str) -> Optional[List[str]]:
+        """
+        Resolve standardization formula components for a metric+ticker.
+
+        Resolution order: company override > sector override > default.
+
+        Returns:
+            List of XBRL concept names, or None if no formula configured.
+        """
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if not metric_config or not metric_config.standardization:
+            return None
+
+        std_config = metric_config.standardization
+        formula_components = None
+
+        company_overrides = std_config.get("company_overrides", {})
+        if ticker in company_overrides:
+            formula_components = company_overrides[ticker].get("components")
+
+        if formula_components is None:
+            sector_overrides = std_config.get("sector_overrides", {})
+            company_config = self.config.get_company(ticker) if self.config else None
+            if company_config and company_config.industry:
+                sector_key = company_config.industry.title()
+                if sector_key in sector_overrides:
+                    formula_components = sector_overrides[sector_key].get("components")
+
+        if formula_components is None:
+            default_formula = std_config.get("default", {})
+            formula_components = default_formula.get("components")
+
+        return formula_components if formula_components else None
+
     def _compute_sa_composite(
         self,
         metric: str,
@@ -1664,29 +1677,7 @@ class ReferenceValidator:
         Returns:
             (composite_value, variance_fraction, sa_pass) or None if no formula/components.
         """
-        metric_config = self.config.get_metric(metric) if self.config else None
-        if not metric_config or not metric_config.standardization:
-            return None
-
-        std_config = metric_config.standardization
-        formula_components = None
-
-        # Resolve: company override > sector override > default
-        company_overrides = std_config.get("company_overrides", {})
-        if ticker in company_overrides:
-            formula_components = company_overrides[ticker].get("components")
-
-        if formula_components is None:
-            sector_overrides = std_config.get("sector_overrides", {})
-            company_config = self.config.get_company(ticker) if self.config else None
-            if company_config and company_config.industry:
-                sector_key = company_config.industry.title()
-                if sector_key in sector_overrides:
-                    formula_components = sector_overrides[sector_key].get("components")
-
-        if formula_components is None:
-            default_formula = std_config.get("default", {})
-            formula_components = default_formula.get("components")
+        formula_components = self._resolve_formula_components(metric, ticker)
 
         if not formula_components:
             return None

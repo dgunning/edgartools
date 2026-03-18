@@ -308,8 +308,6 @@ class AutoSolver:
         Returns:
             Dict with 'periods_checked', 'periods_passed', 'results' (per-period).
         """
-        from edgar.xbrl.standardization.yf_snapshot import load_snapshot
-
         tolerance = tolerance_pct / 100.0
         results = {
             "periods_checked": 0,
@@ -324,37 +322,18 @@ class AutoSolver:
             logger.warning(f"Multi-period validation failed for {ticker}: {e}")
             return results
 
-        # Load yfinance snapshot for multi-period reference values
-        snapshot = load_snapshot(ticker) if self.snapshot_mode else None
+        # Hoist reference lookup — same value for all periods
+        ref_value = self._get_yfinance_target(ticker, formula.metric)
+        if ref_value is None:
+            return results
+        target = abs(ref_value)
 
         for filing in filings:
             try:
                 xbrl = filing.xbrl()
-                if xbrl is None or xbrl.facts is None:
+                fact_values = self._parse_facts_from_xbrl(xbrl)
+                if not fact_values:
                     continue
-
-                facts_df = xbrl.facts.to_dataframe()
-                if facts_df is None or facts_df.empty:
-                    continue
-
-                # Extract facts for this period
-                fact_values = {}
-                for _, row in facts_df.iterrows():
-                    concept = row.get("concept", "")
-                    value = row.get("value")
-                    if value is None:
-                        continue
-                    try:
-                        value = float(value)
-                    except (ValueError, TypeError):
-                        continue
-                    if value == 0:
-                        continue
-                    clean = concept
-                    for prefix in ["us-gaap:", "us-gaap_", "ifrs-full:"]:
-                        clean = clean.replace(prefix, "")
-                    if clean not in fact_values:
-                        fact_values[clean] = value
 
                 # Sum formula components
                 total = 0.0
@@ -371,13 +350,6 @@ class AutoSolver:
                         "status": f"missing:{','.join(missing)}",
                     })
                     continue
-
-                # Get reference value for this period
-                ref_value = self._get_yfinance_target(ticker, formula.metric)
-                if ref_value is None:
-                    continue
-
-                target = abs(ref_value)
                 variance = abs(total - target) / target if target != 0 else 0
                 passed = variance <= tolerance
 
@@ -432,6 +404,40 @@ class AutoSolver:
     # Internal helpers
     # =========================================================================
 
+    @staticmethod
+    def _parse_facts_from_xbrl(xbrl) -> Dict[str, float]:
+        """
+        Extract all numeric facts from an already-loaded XBRL object.
+
+        Returns dict of {concept_name: value} with namespace prefixes stripped.
+        Only the first value per concept is kept (largest period).
+        """
+        if xbrl is None or xbrl.facts is None:
+            return {}
+
+        facts_df = xbrl.facts.to_dataframe()
+        if facts_df is None or facts_df.empty:
+            return {}
+
+        result = {}
+        for _, row in facts_df.iterrows():
+            concept = row.get("concept", "")
+            value = row.get("value")
+            if value is None:
+                continue
+            try:
+                value = float(value)
+            except (ValueError, TypeError):
+                continue
+            if value == 0:
+                continue
+            clean = concept
+            for prefix in ["us-gaap:", "us-gaap_", "ifrs-full:"]:
+                clean = clean.replace(prefix, "")
+            if clean not in result:
+                result[clean] = value
+        return result
+
     def _get_yfinance_target(self, ticker: str, metric: str) -> Optional[float]:
         """Get yfinance reference value from snapshot or live API."""
         from edgar.xbrl.standardization.reference_validator import ReferenceValidator
@@ -451,7 +457,7 @@ class AutoSolver:
         self, ticker: str, metric: str
     ) -> Dict[str, float]:
         """
-        Extract all numeric XBRL facts from the relevant statement family.
+        Extract all numeric XBRL facts from the latest 10-K filing.
 
         Returns dict of {concept_name: value} for the annual period.
         """
@@ -463,43 +469,7 @@ class AutoSolver:
 
             filing = filings[0]
             xbrl = filing.xbrl()
-            if xbrl is None or xbrl.facts is None:
-                return {}
-
-            facts_df = xbrl.facts.to_dataframe()
-            if facts_df is None or facts_df.empty:
-                return {}
-
-            # Filter to the relevant statement family
-            statement_families = self.METRIC_STATEMENT_FAMILIES.get(metric, [])
-
-            # Get annual period facts (duration > 300 days)
-            result = {}
-            for _, row in facts_df.iterrows():
-                concept = row.get("concept", "")
-                value = row.get("value")
-
-                # Skip non-numeric
-                if value is None:
-                    continue
-                try:
-                    value = float(value)
-                except (ValueError, TypeError):
-                    continue
-
-                if value == 0:
-                    continue
-
-                # Strip namespace prefix
-                clean_concept = concept
-                for prefix in ["us-gaap:", "us-gaap_", "ifrs-full:"]:
-                    clean_concept = clean_concept.replace(prefix, "")
-
-                # Only keep the first (largest period) value per concept
-                if clean_concept not in result:
-                    result[clean_concept] = value
-
-            return result
+            return self._parse_facts_from_xbrl(xbrl)
 
         except Exception as e:
             logger.warning(f"Failed to extract XBRL facts for {ticker}: {e}")

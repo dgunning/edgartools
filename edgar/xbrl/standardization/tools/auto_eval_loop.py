@@ -41,7 +41,7 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     VALIDATION_COHORT,
     EXPANSION_COHORT_50,
 )
-from edgar.xbrl.standardization.tools.auto_solver import AutoSolver, FormulaCandidate
+from edgar.xbrl.standardization.tools.auto_solver import AutoSolver
 
 logger = logging.getLogger(__name__)
 
@@ -581,14 +581,14 @@ def propose_change(
             change = _propose_for_validation_failure(gap, config_dir)
             if change is not None:
                 return change
-        return _propose_via_solver(gap, tried_concepts)
+        return _propose_via_solver(gap)
     elif gap.gap_type == "high_variance":
         # Try tree_hint first; escalate to solver after first graveyard failure
         if gap.graveyard_count == 0:
             change = _propose_for_high_variance(gap, config_dir)
             if change is not None:
                 return change
-        return _propose_via_solver(gap, tried_concepts)
+        return _propose_via_solver(gap)
     elif gap.gap_type == "explained_variance":
         logger.info(f"Skipping explained variance: {gap.ticker}:{gap.metric}")
         return None
@@ -699,7 +699,6 @@ def _propose_for_high_variance(
 
 def _propose_via_solver(
     gap: MetricGap,
-    tried_concepts: set,
 ) -> Optional[ConfigChange]:
     """
     Escalate to the Auto-Solver to discover composite formulas.
@@ -754,63 +753,41 @@ def _propose_via_solver(
         validation_tickers = [t for t in QUICK_EVAL_COHORT if t != gap.ticker][:3]
         validation = solver.validate_formula(best, validation_tickers)
 
+        # Collapse sector vs company-specific into scope + label
         if validation.is_sector_pattern:
-            # Sector-wide formula — write as default standardization
-            logger.info(
-                f"Sector pattern found for {gap.metric}: "
-                f"{validation.pass_count}/{validation.total_count} companies, "
-                f"{mp_passed}/{mp_checked} periods"
-            )
-            return ConfigChange(
-                file="metrics.yaml",
-                change_type=ChangeType.ADD_STANDARDIZATION,
-                yaml_path=f"metrics.{gap.metric}.standardization",
-                new_value={
-                    "scope": "default",
-                    "components": best.components,
-                    "notes": (
-                        f"Auto-solver via {gap.ticker}, "
-                        f"{mp_passed}/{mp_checked} periods, "
-                        f"{validation.pass_count}/{validation.total_count} companies"
-                    ),
-                },
-                rationale=(
-                    f"Auto-solver: {' + '.join(best.components)} "
-                    f"({best.variance_pct:.1f}% var, "
-                    f"{mp_passed}/{mp_checked} periods, "
-                    f"{validation.pass_count}/{validation.total_count} cross-co)"
-                ),
-                target_metric=gap.metric,
-                target_companies=gap.ticker,
-            )
+            scope = "default"
+            scope_label = "sector"
         else:
-            # Company-specific — write as company override standardization
-            logger.info(
-                f"Company-specific formula for {gap.ticker}:{gap.metric} "
-                f"({mp_passed}/{mp_checked} periods, "
-                f"{validation.pass_count}/{validation.total_count} cross-co)"
-            )
-            return ConfigChange(
-                file="metrics.yaml",
-                change_type=ChangeType.ADD_STANDARDIZATION,
-                yaml_path=f"metrics.{gap.metric}.standardization",
-                new_value={
-                    "scope": f"company:{gap.ticker}",
-                    "components": best.components,
-                    "notes": (
-                        f"Auto-solver company-specific, "
-                        f"{mp_passed}/{mp_checked} periods, "
-                        f"{validation.pass_count}/{validation.total_count} cross-co"
-                    ),
-                },
-                rationale=(
-                    f"Auto-solver: {' + '.join(best.components)} "
-                    f"({best.variance_pct:.1f}% var, "
-                    f"{mp_passed}/{mp_checked} periods, company-specific)"
+            scope = f"company:{gap.ticker}"
+            scope_label = "company-specific"
+
+        logger.info(
+            f"{scope_label.title()} formula for {gap.ticker}:{gap.metric} "
+            f"({mp_passed}/{mp_checked} periods, "
+            f"{validation.pass_count}/{validation.total_count} cross-co)"
+        )
+
+        return ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_STANDARDIZATION,
+            yaml_path=f"metrics.{gap.metric}.standardization",
+            new_value={
+                "scope": scope,
+                "components": best.components,
+                "notes": (
+                    f"Auto-solver {scope_label} via {gap.ticker}, "
+                    f"{mp_passed}/{mp_checked} periods, "
+                    f"{validation.pass_count}/{validation.total_count} companies"
                 ),
-                target_metric=gap.metric,
-                target_companies=gap.ticker,
-            )
+            },
+            rationale=(
+                f"Auto-solver: {' + '.join(best.components)} "
+                f"({best.variance_pct:.1f}% var, "
+                f"{mp_passed}/{mp_checked} periods, {scope_label})"
+            ),
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
 
     except Exception as e:
         logger.warning(f"Solver failed for {gap.ticker}:{gap.metric}: {e}")
