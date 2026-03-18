@@ -514,3 +514,67 @@ Priority order for Auto-Solver (most cross-company impact first):
 | `reference_validator.py` | EF/SA fields in ValidationResult, explained_variance support |
 | `auto_eval.py` | Two-score CQS (EF + SA), explained_variance gap type |
 | `docs/auto-eval-results.md` | This document |
+
+---
+
+## Session 7 — Auto-Solver Integration + Parallelization (2026-03-18)
+
+**Goal:** Wire the Auto-Solver and two-score architecture into the auto-eval loop so overnight runs can autonomously discover composite formulas and report EF/SA scores. Add process-level parallelization for speed.
+
+### Changes
+
+**1. Auto-Solver wired into proposal pipeline (`auto_eval_loop.py`)**
+
+- Added `ChangeType.ADD_STANDARDIZATION` and `ADD_KNOWN_VARIANCE` with YAML write handlers (default/company/sector scopes)
+- Added `_propose_via_solver()` — bounded subset-sum search over XBRL facts, cross-validates across 3 companies
+- Solver escalation: fires after first-line proposals (tree_hint, divergence) are graveyarded (`graveyard_count > 0`)
+- Multi-period validation gate: formula must hold for >=2 of last 3 annual filings
+- Cross-company validation gate: >=2 companies pass = sector pattern (default scope); otherwise company override
+- Both gates must pass to write `ADD_STANDARDIZATION` (instead of `ADD_KNOWN_VARIANCE`)
+- Solver candidate cap: 50 most relevant facts (sorted by closeness to target) — prevents C(910,4)=28B combinatorial explosion
+
+**2. SA scoring wired into reference_validator.py**
+
+- Added `_compute_sa_composite()` — resolves standardization formulas from config (company > sector > default), extracts XBRL values, sums, compares at 5% tolerance
+- Wired into `validate_company()` after `_compare_values()` — when `variance_type == "standardized"`, computes actual composite value
+
+**3. Parallelization (`orchestrator.py`, `auto_eval.py`)**
+
+- Added `max_workers` parameter to `compute_cqs()`, `identify_gaps()`, `map_companies()`, `run_overnight()`
+- Uses `ProcessPoolExecutor` — each subprocess creates its own Orchestrator (bypasses GIL)
+- Benchmark: 2.2x speedup on 20-company VALIDATION_COHORT (147s → 67s), scores identical
+
+**4. Dashboard updates (`auto_eval_dashboard.py`)**
+
+- EF-CQS, SA-CQS, Explained Gaps rows in CQS panel
+- Two-Score Architecture section in overnight report with EF/SA trajectory and solver stats
+
+### Verified Results
+
+Dry-run (15 min, 5 companies): CQS 0.9785, EF 0.6199, SA 0.6199, 27 proposals generated.
+
+Live run (7 min, 5 companies): Solver discovered real formulas:
+- **JPM:IntangibleAssets** — `jpm:GoodwillServicingAssetsAtFairValueAndOtherIntangibleAssets` (0.0% variance, exact match)
+- **XOM:OperatingIncome** — `ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest` (0.3%)
+- **XOM:Inventory** — `xom:LongTermDebtInUsDollars` (0.4%) — correctly rejected by multi-period validation (19%/24% in prior years)
+
+Multi-period validation successfully catches false positives: XOM's debt concept matched Inventory by coincidence in one year but failed at 19% and 24% in prior years.
+
+### Key Findings
+
+1. **Solver works end-to-end** — finds formulas in <1s after 50-candidate cap
+2. **Multi-period validation is essential** — catches coincidental single-period matches (XOM debt ≠ inventory)
+3. **CQS didn't improve from solver proposals** — `ADD_KNOWN_VARIANCE` (Session 7 initial) didn't change pass_rate. Fixed by upgrading to `ADD_STANDARDIZATION` which feeds composite values through SA scoring
+4. **Process parallelization effective** — 2.2x on 20 companies, GIL was the bottleneck (threads gave 0.9x)
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `tools/auto_eval_loop.py` | ChangeType.ADD_STANDARDIZATION/ADD_KNOWN_VARIANCE, `_propose_via_solver()`, solver escalation, `max_workers` |
+| `tools/auto_solver.py` | `validate_formula_multi_period()`, candidate cap at 50 |
+| `reference_validator.py` | `_compute_sa_composite()`, SA scoring wired into validate_company |
+| `tools/auto_eval_dashboard.py` | EF/SA rows, two-score overnight report |
+| `orchestrator.py` | `_map_companies_parallel()` with ProcessPoolExecutor |
+| `tools/auto_eval.py` | `max_workers` param, `DEFAULT_MAX_WORKERS` |
+| New: `tools/test_solver_integration.py` | Integration test script |
