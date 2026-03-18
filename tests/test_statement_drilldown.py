@@ -264,3 +264,27 @@ class TestNotesCaching:
         assert mock_xbrl._notes_cache is None
         notes = Notes.from_xbrl(mock_xbrl)
         assert mock_xbrl._notes_cache is notes
+
+
+# ── Statement.report property ─────────────────────────────────────────────────
+
+class TestStatementReport:
+
+    def test_report_defaults_to_none(self):
+        """Statement.report is None when not built from FilingSummary."""
+        from edgar.xbrl.xbrl import XBRL
+        xbrl = XBRL()
+        from edgar.xbrl.statements import Statement
+        stmt = Statement(xbrl, 'http://example.com/role/BalanceSheet')
+        assert stmt.report is None
+
+    def test_report_set_by_notes_builder(self):
+        """Statement._report is set when built from FilingSummary."""
+        from unittest.mock import MagicMock
+        from edgar.xbrl.statements import Statement
+        from edgar.xbrl.xbrl import XBRL
+        xbrl = XBRL()
+        stmt = Statement(xbrl, 'http://example.com/role/DebtTables')
+        mock_report = MagicMock()
+        stmt._report = mock_report
+        assert stmt.report is mock_report

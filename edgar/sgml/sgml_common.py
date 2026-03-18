@@ -229,7 +229,7 @@ class FilingSGML:
     Main class that parses and provides access to both the header and documents
     from an SGML filing.
     """
-    __slots__ = ('header', '_documents_by_sequence', '__dict__')  # Use slots for memory efficiency
+    __slots__ = ('header', '_documents_by_sequence', '__dict__', '__weakref__')
 
     def __init__(self, header: FilingHeader, documents: defaultdict[str, List[SGMLDocument]]):
         """

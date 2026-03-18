@@ -145,6 +145,7 @@ class XBRL:
         # Notes caches (lazy-initialized by notes.py)
         self._notes_cache = None                  # Notes collection once built
         self._concept_to_notes_cache = None       # Reverse index: concept_id → List[Note]
+        self._filing_summary = None               # FilingSummary for rich notes hierarchy
 
     def _is_dimension_display_statement(self, statement_type: str, role_definition: str) -> bool:
         """
@@ -574,6 +575,7 @@ class XBRL:
                             if classification:
                                 xbrl._filing_summary_categories[report.role] = classification
                             xbrl._filing_summary_menu_categories[report.role] = report.menu_category
+                    xbrl._filing_summary = filing_summary
         except Exception:
             pass
 

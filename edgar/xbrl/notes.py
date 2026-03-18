@@ -838,10 +838,11 @@ def _get_concept_to_notes_index(xbrl: 'XBRL') -> Dict[str, List['Note']]:
     if xbrl._concept_to_notes_cache is not None:
         return xbrl._concept_to_notes_cache
 
-    # Build Notes if not already cached
+    # Build Notes if not already cached — use FilingSummary if available
+    # for rich hierarchy (tables/policies/details as children)
     notes = xbrl._notes_cache
     if notes is None:
-        notes = Notes.from_xbrl(xbrl)  # This also sets xbrl._notes_cache
+        notes = Notes.from_xbrl(xbrl, filing_summary=xbrl._filing_summary)
 
     index = _build_concept_to_notes_index(notes, xbrl)
     xbrl._concept_to_notes_cache = index
