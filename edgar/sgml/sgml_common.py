@@ -1,3 +1,4 @@
+import weakref
 import zipfile
 from collections import defaultdict
 from functools import cached_property
@@ -363,7 +364,7 @@ class FilingSGML:
         if summary_attachment:
             filing_summary = FilingSummary.parse(summary_attachment.content)
             filing_summary.reports._filing_summary = filing_summary
-            filing_summary._filing_sgml = self
+            filing_summary._filing_sgml = weakref.ref(self)
             return filing_summary
 
     def download(self,  path: Union[str, Path], archive: bool = False):

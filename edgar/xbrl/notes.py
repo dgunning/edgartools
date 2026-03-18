@@ -340,6 +340,8 @@ class Notes:
                 continue
 
             statement = Statement(xbrl, report.role) if report.role in stmt_roles else None
+            if statement:
+                statement._report = report
 
             # Children linked via ParentRole
             tables, policies, details = [], [], []
@@ -347,6 +349,7 @@ class Notes:
                 if child.role not in stmt_roles:
                     continue
                 child_stmt = Statement(xbrl, child.role)
+                child_stmt._report = child  # Link to FilingSummary Report for HTML access
                 if child.menu_category == 'Tables':
                     tables.append(child_stmt)
                 elif child.menu_category == 'Policies':
@@ -365,7 +368,9 @@ class Notes:
                             and dr.short_name.lower().startswith(prefix)
                             and dr.role in stmt_roles
                             and dr.role != report.role):
-                        details.append(Statement(xbrl, dr.role))
+                        detail_stmt = Statement(xbrl, dr.role)
+                        detail_stmt._report = dr
+                        details.append(detail_stmt)
 
             notes.append(Note(
                 number=idx,

@@ -1,4 +1,5 @@
 import re
+import weakref
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Union
@@ -242,7 +243,8 @@ class Report:
         """
         Get the content of the report
         """
-        sgml = self._reports._filing_summary._filing_sgml
+        sgml_ref = self._reports._filing_summary._filing_sgml
+        sgml = sgml_ref() if sgml_ref is not None else None
         if sgml:
             return sgml.get_content(self.html_file_name)
 

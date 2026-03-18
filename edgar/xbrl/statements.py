@@ -377,6 +377,18 @@ class Statement:
         # Store both for backward compatibility during transition
         self._include_dimensions = include_dimensions
         self._view = normalize_view(view) if view is not None else None
+        self._report = None  # Set by notes.py when built from FilingSummary
+
+    @property
+    def report(self):
+        """The FilingSummary Report backing this statement, if available.
+
+        Provides access to the rendered HTML version of the table:
+            >>> note.tables[0].report.to_dataframe()  # HTML-extracted DataFrame
+            >>> note.tables[0].report.view()           # Rich display
+            >>> note.tables[0].report.content           # Raw HTML
+        """
+        return self._report
 
     def is_segmented(self) -> bool:
         """
