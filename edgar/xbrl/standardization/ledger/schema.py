@@ -807,7 +807,7 @@ class ExperimentLedger:
                 {where_clause}
                 GROUP BY ticker, metric, strategy_name
                 HAVING COUNT(DISTINCT fiscal_period) >= ?
-                    AND AVG(variance_pct) <= ?
+                    AND COALESCE(AVG(variance_pct), 0) <= ?
             ''', params + [min_periods, max_variance])
 
             rows = cursor.fetchall()

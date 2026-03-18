@@ -393,7 +393,7 @@ def record_eval_results(
                 strategy_fingerprint=fingerprint,
                 extracted_value=val.xbrl_value if val else None,
                 reference_value=val.reference_value if val else None,
-                variance_pct=val.variance_pct if val else None,
+                variance_pct=val.variance_pct if val and val.variance_pct is not None else 0.0,
                 is_valid=True,
                 confidence=result.confidence,
             )

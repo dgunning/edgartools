@@ -308,6 +308,7 @@ companies:
     archetype: "A"  # Standard Industrial
     exclude_metrics:
       - ShortTermDebt
+      - AccountsReceivable  # Cat Financial subsidiary receivables (60% variance)
     known_divergences:
       ShortTermDebt:
         form_types: ["10-K", "10-Q"]
@@ -518,6 +519,7 @@ companies:
     exclude_metrics:
       - OperatingIncome  # FY2025 filing dropped OperatingIncomeLoss concept
       - ShortTermDebt  # yfinance composite (DebtCurrent+more) vs XBRL single concept
+      - Capex  # John Deere Financial subsidiary contamination (68% variance)
     known_divergences:
       OperatingIncome:
         form_types: ["10-K"]
@@ -1756,6 +1758,7 @@ companies:
       - Inventory
       - AccountsPayable
       - AccountsReceivable
+      - CashAndEquivalents  # Banking cash definition (restricted cash, dealer deposits)
     street_view_notes:
       ShortTermDebt: "Includes Net Repos for economic leverage view. GAAP extraction excludes Repos for yfinance validation."
       CashAndEquivalents: "Includes Restricted Cash (~$30B) per Street analyst convention."

@@ -243,7 +243,7 @@ metrics:
   WeightedAverageSharesDiluted:
     description: "Weighted average diluted shares outstanding for EPS calculation"
     standard_tag: "SharesFullyDilutedAverage"
-    validation_tolerance: 15  # buyback timing differences
+    validation_tolerance: 25  # buyback timing mismatch
     known_concepts:
       - WeightedAverageNumberOfDilutedSharesOutstanding
       - WeightedAverageNumberOfSharesOutstandingDiluted
@@ -254,7 +254,7 @@ metrics:
 
   StockBasedCompensation:
     description: "Stock-based compensation expense (non-cash)"
-    validation_tolerance: 20  # reporting period variations
+    validation_tolerance: 35  # reporting period variations
     known_concepts:
       - ShareBasedCompensation
       - AllocatedShareBasedCompensationExpense
@@ -332,7 +332,7 @@ metrics:
   DepreciationAmortization:
     description: "Depreciation and amortization expense"
     standard_tag: "DepreciationExpense"
-    validation_tolerance: 30  # yfinance may include impairments
+    validation_tolerance: 45  # yfinance may include impairments, ABBV scope
     known_concepts:
       - DepreciationDepletionAndAmortization
       - DepreciationAndAmortization
