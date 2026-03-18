@@ -558,10 +558,7 @@ def propose_change(
     if config_dir is None:
         config_dir = CONFIG_DIR
 
-    # Skip dead ends
-    if gap.graveyard_count >= 3:
-        logger.info(f"Skipping dead end: {gap.ticker}:{gap.metric} ({gap.graveyard_count} graveyard entries)")
-        return None
+    # Dead-end filtering is handled by identify_gaps() — no redundant check here
 
     # Check what's already been tried
     tried_concepts = set()
@@ -576,11 +573,8 @@ def propose_change(
     if gap.gap_type == "unmapped":
         return _propose_for_unmapped(gap, tried_concepts, config_dir)
     elif gap.gap_type == "validation_failure":
-        # Try standard proposal first; escalate to solver if it fails or has been tried
-        if gap.graveyard_count == 0:
-            change = _propose_for_validation_failure(gap, config_dir)
-            if change is not None:
-                return change
+        # Divergence tolerance never improves CQS for validation failures
+        # (the underlying concept is wrong, not slightly off) — go straight to solver
         return _propose_via_solver(gap)
     elif gap.gap_type == "high_variance":
         # Try tree_hint first; escalate to solver after first graveyard failure
@@ -716,6 +710,7 @@ def _propose_via_solver(
     If multi-period fails → reject (likely coincidental match).
     """
     if gap.reference_value is None:
+        logger.warning(f"Solver skipped {gap.ticker}:{gap.metric} — reference_value is None")
         return None
 
     try:
@@ -1169,13 +1164,13 @@ def run_overnight(
 
         # Try each gap
         made_progress = False
+        experiments_before = report.experiments_total
+        null_proposals = 0
         for gap in gaps:
             if time.time() >= deadline:
                 break
 
-            # Skip dead ends
-            if gap.is_dead_end:
-                continue
+            # Dead-end filtering is handled by identify_gaps() — no redundant check here
 
             # Get proposal from the agent function
             if propose_fn is None:
@@ -1186,9 +1181,12 @@ def run_overnight(
 
             change = propose_fn(gap, ledger.get_graveyard_entries(gap.metric))
             if change is None:
+                null_proposals += 1
                 continue
 
             report.experiments_total += 1
+            if change.change_type == ChangeType.ADD_STANDARDIZATION:
+                report.solver_proposals += 1
 
             if dry_run:
                 logger.info(f"[DRY RUN] Would apply: {change.to_diff_string()}")
@@ -1205,6 +1203,8 @@ def run_overnight(
 
             if result.decision == Decision.KEEP:
                 report.experiments_kept += 1
+                if change.change_type == ChangeType.ADD_STANDARDIZATION:
+                    report.solver_kept += 1
                 report.config_diffs.append(change.to_diff_string())
                 consecutive_failures = 0
                 made_progress = True
@@ -1232,8 +1232,17 @@ def run_overnight(
                 consecutive_failures += 1
                 logger.info(f"DISCARDED: {change.target_metric} — {result.reason}")
 
-        if not made_progress and propose_fn is not None:
-            consecutive_failures += 1
+        # Fix 2: Only increment if no experiments were even attempted this iteration
+        # (avoids double-counting with per-discard increments above)
+        if not made_progress and report.experiments_total == experiments_before:
+            if null_proposals > 0:
+                # Fix 3: All gaps tried but none could produce a proposal — stop spinning
+                report.stopped_early = True
+                report.stop_reason = f"All {null_proposals} gaps exhausted (no viable proposals)"
+                logger.warning(report.stop_reason)
+                consecutive_failures = max_consecutive_failures  # Force circuit breaker
+            elif propose_fn is not None:
+                consecutive_failures += 1
 
     # Finalize
     report.finished_at = datetime.now().isoformat()

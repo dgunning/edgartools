@@ -108,8 +108,10 @@ class MetricGap:
 
     @property
     def is_dead_end(self) -> bool:
-        """Skip gaps with too many prior failures."""
-        return self.graveyard_count >= 3
+        """Skip gaps with too many prior failures across ALL strategies."""
+        # Threshold is 6 (3 per strategy × 2 strategies: heuristic + solver)
+        # to prevent one strategy's failures from killing another's budget
+        return self.graveyard_count >= 6
 
 
 @dataclass
@@ -660,9 +662,8 @@ def _get_graveyard_counts(ledger) -> Dict[str, int]:
         for entry in entries:
             key = f"{entry.get('target_companies', '')}:{entry.get('target_metric', '')}"
             counts[key] = counts.get(key, 0) + 1
-    except (AttributeError, Exception):
-        # Graveyard table may not exist yet
-        pass
+    except Exception as e:
+        logger.warning(f"Failed to read graveyard counts: {e}")
     return counts
 
 
