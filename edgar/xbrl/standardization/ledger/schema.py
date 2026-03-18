@@ -1055,6 +1055,27 @@ class ExperimentLedger:
                 ''', (target_metric,))
             return cursor.fetchone()[0]
 
+    def clear_graveyard_entries(
+        self, target_metric: str, target_companies: str = ""
+    ) -> int:
+        """Clear graveyard entries for a specific metric:ticker combo.
+
+        Use after a fundamental pipeline change that invalidates prior failures.
+        Returns the number of entries cleared.
+        """
+        with self._connect() as conn:
+            if target_companies:
+                cursor = conn.execute(
+                    "DELETE FROM auto_eval_graveyard WHERE target_metric = ? AND target_companies = ?",
+                    (target_metric, target_companies),
+                )
+            else:
+                cursor = conn.execute(
+                    "DELETE FROM auto_eval_graveyard WHERE target_metric = ?",
+                    (target_metric,),
+                )
+            return cursor.rowcount
+
     # =========================================================================
     # ANALYTICS
     # =========================================================================
