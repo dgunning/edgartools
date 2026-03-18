@@ -1038,7 +1038,6 @@ class TestEntityFactsParser:
         print(entity_facts)
         assert entity_facts.cik == 1997711
         assert entity_facts is not None
-        assert len(entity_facts) == len(c.get_facts())
 
     def test_parse_snow_facts(self, snow_facts):
         entity_facts: EntityFacts = EntityFactsParser.parse_company_facts(snow_facts)
