@@ -11,9 +11,13 @@ Key design principles:
 """
 
 import json
+import logging
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 from edgar import Company, set_identity, use_local_storage
 from edgar.storage._local import is_using_local_storage
@@ -27,6 +31,38 @@ from .reference_validator import ReferenceValidator, ValidationResult
 
 
 AUDIT_LOG_FILE = Path(__file__).parent / "company_mappings" / "audit_log.jsonl"
+
+
+def _process_company_worker(args):
+    """
+    Top-level worker function for ProcessPoolExecutor.
+
+    Each subprocess creates its own Orchestrator to avoid shared-state issues.
+    Must be top-level (not a method/closure) to be pickle-able.
+    """
+    ticker, snapshot_mode, use_ai, validate = args
+
+    set_identity("Dev Gunning developer-gunning@gmail.com")
+    use_local_storage(True)
+
+    orch = Orchestrator(snapshot_mode=snapshot_mode)
+    results, xbrl, filing_date, form_type = orch._map_company_with_xbrl(
+        ticker, use_ai=use_ai
+    )
+
+    validations = {}
+    if validate:
+        validations = orch.validator.validate_and_update_mappings(
+            ticker, results, xbrl,
+            filing_date=filing_date, form_type=form_type,
+        )
+
+    mapped = sum(1 for r in results.values() if r.is_mapped)
+    excluded = sum(1 for r in results.values() if r.source == MappingSource.CONFIG)
+    total = len(results) - excluded
+    logger.info(f"{ticker}: {mapped}/{total} mapped")
+
+    return ticker, results, validations
 
 
 class Orchestrator:
@@ -288,7 +324,8 @@ class Orchestrator:
         self,
         tickers: Optional[List[str]] = None,
         use_ai: bool = True,
-        validate: bool = True
+        validate: bool = True,
+        max_workers: int = 1,
     ) -> Dict[str, Dict[str, MappingResult]]:
         """
         Map all metrics for multiple companies.
@@ -297,13 +334,19 @@ class Orchestrator:
             tickers: List of tickers (defaults to MAG7)
             use_ai: Whether to use AI layer
             validate: Whether to validate mappings against yfinance
+            max_workers: Number of parallel workers (1 = sequential, >1 = parallel)
         """
         set_identity("Dev Gunning developer-gunning@gmail.com")
         use_local_storage(True)  # Use bulk data, no API calls
-        
+
         if tickers is None:
             tickers = list(self.config.companies.keys())
-        
+
+        if max_workers > 1 and len(tickers) > 1:
+            return self._map_companies_parallel(
+                tickers, use_ai=use_ai, validate=validate, max_workers=max_workers
+            )
+
         all_results = {}
         xbrl_cache = {}  # Cache XBRL objects for validation
         filing_context_cache = {}  # Cache filing context for validation
@@ -315,20 +358,64 @@ class Orchestrator:
             if xbrl is not None:
                 xbrl_cache[ticker] = xbrl
             filing_context_cache[ticker] = (filing_date, form_type)
-            
+
             # Print summary
             mapped = sum(1 for r in results.values() if r.is_mapped)
             excluded = sum(1 for r in results.values() if r.source == MappingSource.CONFIG)
             total = len(results) - excluded
             print(f"  Layer 1+2+4: {mapped}/{total} mapped")
-        
+
         # Validate all results against yfinance
         if validate:
             print("\n" + "=" * 60)
             print("VALIDATING AGAINST YFINANCE REFERENCE")
             print("=" * 60)
             self._validate_all(all_results, xbrl_cache, filing_context_cache)
-        
+
+        return all_results
+
+    def _map_companies_parallel(
+        self,
+        tickers: List[str],
+        use_ai: bool = True,
+        validate: bool = True,
+        max_workers: int = 4,
+    ) -> Dict[str, Dict[str, MappingResult]]:
+        """
+        Map companies in parallel using ProcessPoolExecutor.
+
+        Each subprocess creates its own Orchestrator to avoid
+        shared-state issues (GIL, validator caches, _current_ticker).
+        """
+        all_results = {}
+        snapshot_mode = self.validator._snapshot_mode
+
+        args_list = [
+            (ticker, snapshot_mode, use_ai, validate)
+            for ticker in tickers
+        ]
+
+        logger.info(f"Parallel mapping: {len(tickers)} companies, {max_workers} workers")
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(_process_company_worker, args): args[0]
+                for args in args_list
+            }
+
+            completed = 0
+            for future in as_completed(futures):
+                ticker = futures[future]
+                try:
+                    ticker, results, validations = future.result()
+                    all_results[ticker] = results
+                    if validations:
+                        self.validation_results[ticker] = validations
+                    completed += 1
+                    logger.info(f"[{completed}/{len(tickers)}] {ticker} done")
+                except Exception as e:
+                    logger.error(f"{ticker} failed: {e}")
+                    all_results[ticker] = self.tree_parser._empty_results(ticker, str(e))
+
         return all_results
     
     def _validate_all(

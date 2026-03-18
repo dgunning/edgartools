@@ -1063,6 +1063,7 @@ def run_overnight(
     dry_run: bool = False,
     ledger: Optional[ExperimentLedger] = None,
     propose_fn=None,
+    max_workers: int = 1,
 ) -> OvernightReport:
     """
     Run an overnight auto-eval session.
@@ -1082,6 +1083,7 @@ def run_overnight(
         dry_run: If True, don't actually apply changes.
         ledger: ExperimentLedger instance.
         propose_fn: Callable(gap, graveyard) -> ConfigChange. If None, skips proposals.
+        max_workers: Parallel workers for CQS computation (1 = sequential).
 
     Returns:
         OvernightReport with session summary.
@@ -1107,6 +1109,7 @@ def run_overnight(
         eval_cohort=QUICK_EVAL_COHORT,
         snapshot_mode=True,
         ledger=ledger,
+        max_workers=max_workers,
     )
     report.cqs_start = baseline.cqs
     report.cqs_peak = baseline.cqs
@@ -1140,6 +1143,7 @@ def run_overnight(
             eval_cohort=QUICK_EVAL_COHORT,
             snapshot_mode=True,
             ledger=ledger,
+            max_workers=max_workers,
         )
         current_baseline = cqs_result
 
@@ -1204,6 +1208,7 @@ def run_overnight(
                     eval_cohort=QUICK_EVAL_COHORT,
                     snapshot_mode=True,
                     ledger=ledger,
+                    max_workers=max_workers,
                 )
                 if current_baseline.cqs > report.cqs_peak:
                     report.cqs_peak = current_baseline.cqs

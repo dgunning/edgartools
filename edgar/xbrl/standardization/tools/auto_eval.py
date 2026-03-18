@@ -29,6 +29,11 @@ logger = logging.getLogger(__name__)
 # 5-company quick-eval cohort: diverse archetypes for fast feedback
 QUICK_EVAL_COHORT = ["AAPL", "JPM", "XOM", "WMT", "JNJ"]
 
+# Default parallelism for compute_cqs / identify_gaps.
+# Set to >1 to parallelize company evaluation across processes.
+# The overnight loop sets this to speed up repeated CQS measurements.
+DEFAULT_MAX_WORKERS = 1
+
 # 20-company validation cohort: broader coverage for overfitting protection
 VALIDATION_COHORT = [
     "AAPL", "MSFT", "GOOG", "AMZN", "META", "NVDA", "TSLA",  # Tech
@@ -176,6 +181,7 @@ def compute_cqs(
     use_ai: bool = False,
     baseline_cqs: Optional[float] = None,
     ledger=None,
+    max_workers: Optional[int] = None,
 ) -> CQSResult:
     """
     Compute the Composite Quality Score for a cohort of companies.
@@ -190,6 +196,7 @@ def compute_cqs(
         use_ai: Whether to use Layer 3 AI mapping (False for deterministic eval).
         baseline_cqs: If provided, regressions trigger hard veto below this value.
         ledger: ExperimentLedger instance for golden master lookups.
+        max_workers: Parallel workers (None = use DEFAULT_MAX_WORKERS).
 
     Returns:
         CQSResult with composite score and per-company breakdown.
@@ -206,9 +213,11 @@ def compute_cqs(
         ledger = ExperimentLedger()
 
     # Run orchestrator on the cohort
+    workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
     orchestrator = Orchestrator(snapshot_mode=snapshot_mode)
     all_results = orchestrator.map_companies(
-        tickers=eval_cohort, use_ai=use_ai, validate=True
+        tickers=eval_cohort, use_ai=use_ai, validate=True,
+        max_workers=workers,
     )
 
     # Gather golden masters for regression detection
@@ -470,6 +479,7 @@ def identify_gaps(
     use_ai: bool = False,
     ledger=None,
     max_graveyard: int = 3,
+    max_workers: Optional[int] = None,
 ) -> Tuple[List[MetricGap], CQSResult]:
     """
     Run evaluation and identify gaps ranked by CQS impact.
@@ -483,6 +493,7 @@ def identify_gaps(
         use_ai: Use AI mapping layer.
         ledger: ExperimentLedger for golden master + graveyard lookups.
         max_graveyard: Skip gaps with this many graveyard entries.
+        max_workers: Number of parallel workers (1 = sequential, >1 = parallel).
 
     Returns:
         Tuple of (ranked gaps, CQS result).
@@ -497,10 +508,12 @@ def identify_gaps(
         ledger = ExperimentLedger()
 
     # Run orchestrator ONCE — reuse results for both CQS computation and gap analysis
+    workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
     start_time = time.time()
     orchestrator = Orchestrator(snapshot_mode=snapshot_mode)
     all_results = orchestrator.map_companies(
-        tickers=eval_cohort, use_ai=use_ai, validate=True
+        tickers=eval_cohort, use_ai=use_ai, validate=True,
+        max_workers=workers,
     )
 
     # Compute CQS from the orchestrator results directly
