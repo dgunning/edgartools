@@ -139,6 +139,10 @@ def _render_cqs_panel(console, cqs: CQSResult):
     table.add_row("Regressions", f"{cqs.total_regressions}")
     table.add_row("Companies", f"{cqs.companies_evaluated}")
     table.add_row("Duration", f"{cqs.duration_seconds:.1f}s")
+    table.add_row("", "")  # spacer
+    table.add_row("EF-CQS", f"[green]{cqs.ef_cqs:.4f}[/green]")
+    table.add_row("SA-CQS", f"[yellow]{cqs.sa_cqs:.4f}[/yellow]")
+    table.add_row("Explained Gaps", f"{cqs.explained_variance_count}")
 
     console.print(table)
 
@@ -368,6 +372,12 @@ def print_overnight_report(report: OvernightReport):
     print(f"    End:       {report.cqs_end:.4f}")
     print(f"    Peak:      {report.cqs_peak:.4f}")
     print(f"    Delta:     {report.cqs_improvement:+.4f}")
+
+    print(f"\n  Two-Score Architecture:")
+    print(f"    EF-CQS:    {report.ef_cqs_start:.4f} -> {report.ef_cqs_end:.4f}")
+    print(f"    SA-CQS:    {report.sa_cqs_start:.4f} -> {report.sa_cqs_end:.4f}")
+    if report.solver_proposals > 0:
+        print(f"    Solver:    {report.solver_kept}/{report.solver_proposals} proposals kept")
 
     if report.stopped_early:
         print(f"\n  Early Stop:  {report.stop_reason}")

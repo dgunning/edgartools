@@ -41,6 +41,7 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     VALIDATION_COHORT,
     EXPANSION_COHORT_50,
 )
+from edgar.xbrl.standardization.tools.auto_solver import AutoSolver, FormulaCandidate
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,8 @@ class ChangeType(str, Enum):
     ADD_EXCLUSION = "add_exclusion"
     REMOVE_PATTERN = "remove_pattern"
     MODIFY_VALUE = "modify_value"
+    ADD_STANDARDIZATION = "add_standardization"     # Write standardization formula to metrics.yaml
+    ADD_KNOWN_VARIANCE = "add_known_variance"       # Write explained variance to metrics.yaml
 
 
 class Decision(str, Enum):
@@ -144,6 +147,14 @@ class OvernightReport:
     # Circuit breaker
     stopped_early: bool = False
     stop_reason: str = ""
+
+    # Two-score architecture
+    ef_cqs_start: float = 0.0
+    ef_cqs_end: float = 0.0
+    sa_cqs_start: float = 0.0
+    sa_cqs_end: float = 0.0
+    solver_proposals: int = 0
+    solver_kept: int = 0
 
     # Config changes committed
     config_diffs: List[str] = field(default_factory=list)
@@ -235,6 +246,50 @@ def apply_config_change(change: ConfigChange) -> None:
     elif change.change_type == ChangeType.MODIFY_VALUE:
         # Direct value replacement
         parent[target_key] = change.new_value
+
+    elif change.change_type == ChangeType.ADD_STANDARDIZATION:
+        # Write a standardization formula to metrics.yaml
+        # new_value = {"scope": "default"|"company:TICKER"|"sector:NAME", "components": [...], "notes": "..."}
+        if target_key not in parent:
+            parent[target_key] = {}
+        std_config = parent[target_key]
+        scope = change.new_value.get("scope", "default") if isinstance(change.new_value, dict) else "default"
+        components = change.new_value.get("components", []) if isinstance(change.new_value, dict) else []
+        notes = change.new_value.get("notes", "") if isinstance(change.new_value, dict) else ""
+
+        if scope == "default":
+            std_config["default"] = {"components": components}
+            if notes:
+                std_config["default"]["notes"] = notes
+        elif scope.startswith("company:"):
+            ticker_key = scope.split(":", 1)[1]
+            if "company_overrides" not in std_config:
+                std_config["company_overrides"] = {}
+            std_config["company_overrides"][ticker_key] = {"components": components}
+            if notes:
+                std_config["company_overrides"][ticker_key]["notes"] = notes
+        elif scope.startswith("sector:"):
+            sector_key = scope.split(":", 1)[1]
+            if "sector_overrides" not in std_config:
+                std_config["sector_overrides"] = {}
+            std_config["sector_overrides"][sector_key] = {"components": components}
+            if notes:
+                std_config["sector_overrides"][sector_key]["notes"] = notes
+
+    elif change.change_type == ChangeType.ADD_KNOWN_VARIANCE:
+        # Write an explained variance entry to metrics.yaml
+        # new_value = {"ticker": "ABBV", "status": "formula_added", "variance_pct": 2.3, "reason": "..."}
+        if target_key not in parent:
+            parent[target_key] = {}
+        kv_config = parent[target_key]
+        kv_data = change.new_value if isinstance(change.new_value, dict) else {}
+        ticker_key = kv_data.get("ticker", "")
+        if ticker_key:
+            kv_config[ticker_key] = {
+                "status": kv_data.get("status", "formula_added"),
+                "variance_pct": kv_data.get("variance_pct", 0),
+                "reason": kv_data.get("reason", "Auto-solver discovered formula"),
+            }
 
     else:
         raise ValueError(f"Unknown change type: {change.change_type}")
@@ -521,9 +576,18 @@ def propose_change(
     if gap.gap_type == "unmapped":
         return _propose_for_unmapped(gap, tried_concepts, config_dir)
     elif gap.gap_type == "validation_failure":
-        return _propose_for_validation_failure(gap, config_dir)
+        change = _propose_for_validation_failure(gap, config_dir)
+        if change is not None:
+            return change
+        return _propose_via_solver(gap, tried_concepts)
     elif gap.gap_type == "high_variance":
-        return _propose_for_high_variance(gap, config_dir)
+        change = _propose_for_high_variance(gap, config_dir)
+        if change is not None:
+            return change
+        return _propose_via_solver(gap, tried_concepts)
+    elif gap.gap_type == "explained_variance":
+        logger.info(f"Skipping explained variance: {gap.ticker}:{gap.metric}")
+        return None
     elif gap.gap_type == "regression":
         # Regressions need human/AI investigation — don't auto-propose
         logger.warning(f"Regression on {gap.ticker}:{gap.metric} — needs investigation")
@@ -627,6 +691,94 @@ def _propose_for_high_variance(
         target_metric=gap.metric,
         target_companies=gap.ticker,
     )
+
+
+def _propose_via_solver(
+    gap: MetricGap,
+    tried_concepts: set,
+) -> Optional[ConfigChange]:
+    """
+    Escalate to the Auto-Solver to discover composite formulas.
+
+    When standard proposals (divergence, tree_hint) fail, the solver
+    performs a bounded subset-sum search over XBRL facts to find
+    combinations that match the yfinance target value.
+    """
+    if gap.reference_value is None:
+        return None
+
+    try:
+        solver = AutoSolver(snapshot_mode=True)
+        candidates = solver.solve_metric(
+            gap.ticker, gap.metric, yfinance_value=gap.reference_value
+        )
+
+        if not candidates:
+            logger.info(f"Solver found no formulas for {gap.ticker}:{gap.metric}")
+            return None
+
+        best = candidates[0]
+        logger.info(f"Solver candidate for {gap.ticker}:{gap.metric}: {best}")
+
+        # Cross-validate against other companies from QUICK_EVAL_COHORT
+        validation_tickers = [t for t in QUICK_EVAL_COHORT if t != gap.ticker][:3]
+        validation = solver.validate_formula(best, validation_tickers)
+
+        if validation.is_sector_pattern:
+            # Sector-wide formula — write as default standardization
+            logger.info(
+                f"Sector pattern found for {gap.metric}: "
+                f"{validation.pass_count}/{validation.total_count} pass"
+            )
+            return ConfigChange(
+                file="metrics.yaml",
+                change_type=ChangeType.ADD_STANDARDIZATION,
+                yaml_path=f"metrics.{gap.metric}.standardization",
+                new_value={
+                    "scope": "default",
+                    "components": best.components,
+                    "notes": (
+                        f"Auto-solver discovered via {gap.ticker}, "
+                        f"validated {validation.pass_count}/{validation.total_count} companies"
+                    ),
+                },
+                rationale=(
+                    f"Auto-solver: {' + '.join(best.components)} matches yfinance "
+                    f"({best.variance_pct:.1f}% variance), sector pattern "
+                    f"({validation.pass_count}/{validation.total_count})"
+                ),
+                target_metric=gap.metric,
+                target_companies=gap.ticker,
+            )
+        else:
+            # Company-specific — write as known_variance with formula
+            logger.info(
+                f"Company-specific formula for {gap.ticker}:{gap.metric} "
+                f"(cross-validation: {validation.pass_count}/{validation.total_count})"
+            )
+            return ConfigChange(
+                file="metrics.yaml",
+                change_type=ChangeType.ADD_KNOWN_VARIANCE,
+                yaml_path=f"metrics.{gap.metric}.known_variances",
+                new_value={
+                    "ticker": gap.ticker,
+                    "status": "formula_added",
+                    "variance_pct": round(best.variance_pct, 2),
+                    "reason": (
+                        f"Auto-solver formula: {' + '.join(best.components)} "
+                        f"(company-specific, {validation.pass_count}/{validation.total_count} cross-validate)"
+                    ),
+                },
+                rationale=(
+                    f"Auto-solver: company-specific formula for {gap.ticker}:{gap.metric}"
+                ),
+                target_metric=gap.metric,
+                target_companies=gap.ticker,
+            )
+
+    except Exception as e:
+        logger.warning(f"Solver failed for {gap.ticker}:{gap.metric}: {e}")
+        return None
 
 
 def _propose_via_discovery(
@@ -958,6 +1110,8 @@ def run_overnight(
     )
     report.cqs_start = baseline.cqs
     report.cqs_peak = baseline.cqs
+    report.ef_cqs_start = baseline.ef_cqs
+    report.sa_cqs_start = baseline.sa_cqs
     current_baseline = baseline
 
     consecutive_failures = 0
@@ -1074,6 +1228,8 @@ def run_overnight(
     report.finished_at = datetime.now().isoformat()
     report.duration_hours = (time.time() - start_time) / 3600
     report.cqs_end = current_baseline.cqs
+    report.ef_cqs_end = current_baseline.ef_cqs
+    report.sa_cqs_end = current_baseline.sa_cqs
 
     logger.info(
         f"Session {session_id} complete: "

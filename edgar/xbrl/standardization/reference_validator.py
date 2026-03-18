@@ -823,7 +823,15 @@ class ReferenceValidator:
             validation = self._compare_values(
                 metric, ticker, xbrl_value, ref_value, result
             )
-            
+
+            # SA SCORING: Compute composite value via standardization formula
+            if validation.variance_type == "standardized" and xbrl is not None and ref_value is not None:
+                sa_result = self._compute_sa_composite(metric, ticker, xbrl, ref_value)
+                if sa_result is not None:
+                    validation.sa_value = sa_result[0]
+                    validation.sa_variance_pct = sa_result[1] * 100
+                    validation.sa_pass = sa_result[2]
+
             # IDENTITY CHECK GUARDRAIL (Bank Sector Expansion)
             # If OperatingIncome is extracted, cross-check against accounting identity
             if metric == 'OperatingIncome' and xbrl_value is not None and xbrl:
@@ -1639,6 +1647,71 @@ class ReferenceValidator:
             variance_type=variance_type,
         )
     
+    def _compute_sa_composite(
+        self,
+        metric: str,
+        ticker: str,
+        xbrl,
+        ref_value: float,
+        tolerance: float = 0.05,
+    ) -> Optional[Tuple[float, float, bool]]:
+        """
+        Compute the Standardization Alignment composite value.
+
+        Resolves the formula from config (company override > sector override > default),
+        sums component values from XBRL, and compares to the reference value.
+
+        Returns:
+            (composite_value, variance_fraction, sa_pass) or None if no formula/components.
+        """
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if not metric_config or not metric_config.standardization:
+            return None
+
+        std_config = metric_config.standardization
+        formula_components = None
+
+        # Resolve: company override > sector override > default
+        company_overrides = std_config.get("company_overrides", {})
+        if ticker in company_overrides:
+            formula_components = company_overrides[ticker].get("components")
+
+        if formula_components is None:
+            sector_overrides = std_config.get("sector_overrides", {})
+            company_config = self.config.get_company(ticker) if self.config else None
+            if company_config and company_config.industry:
+                sector_key = company_config.industry.title()
+                if sector_key in sector_overrides:
+                    formula_components = sector_overrides[sector_key].get("components")
+
+        if formula_components is None:
+            default_formula = std_config.get("default", {})
+            formula_components = default_formula.get("components")
+
+        if not formula_components:
+            return None
+
+        # Sum absolute values of each component
+        composite = 0.0
+        components_found = 0
+        for component in formula_components:
+            val = self._extract_xbrl_value(xbrl, component)
+            if val is not None:
+                composite += abs(val)
+                components_found += 1
+
+        if components_found == 0:
+            return None
+
+        abs_ref = abs(ref_value)
+        if abs_ref == 0:
+            return (composite, 0.0, True)
+
+        variance_fraction = abs(composite - abs_ref) / abs_ref
+        sa_pass = variance_fraction <= tolerance
+
+        return (composite, variance_fraction, sa_pass)
+
     def check_metric_exists(
         self,
         ticker: str,
@@ -1646,7 +1719,7 @@ class ReferenceValidator:
     ) -> Tuple[bool, Optional[float]]:
         """
         Quick check if a metric exists for a company in reference data.
-        
+
         Returns (exists, value).
         """
         if yf is None:
