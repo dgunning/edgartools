@@ -39,6 +39,24 @@ VALIDATION_COHORT = [
     "CAT",                                                       # Industrial
 ]
 
+# 50-company expansion cohort: first real stress test at scale
+EXPANSION_COHORT_50 = [
+    # Tech (10)
+    "AAPL", "MSFT", "GOOG", "AMZN", "META", "NVDA", "TSLA", "CRM", "ADBE", "INTC",
+    # Banking/Finance (8)
+    "JPM", "BAC", "GS", "MS", "C", "BLK", "SCHW", "AXP",
+    # Energy (4)
+    "XOM", "CVX", "COP", "SLB",
+    # Consumer (7)
+    "WMT", "PG", "KO", "PEP", "MCD", "NKE", "COST",
+    # Healthcare/Pharma (7)
+    "JNJ", "UNH", "PFE", "LLY", "ABBV", "MRK", "TMO",
+    # Industrial (6)
+    "CAT", "HON", "GE", "DE", "RTX", "UPS",
+    # Other (8)
+    "V", "MA", "NEE", "T", "HD", "LOW", "NFLX", "AVGO",
+]
+
 
 # =============================================================================
 # DATA CLASSES

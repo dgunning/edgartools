@@ -39,6 +39,7 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     identify_gaps,
     QUICK_EVAL_COHORT,
     VALIDATION_COHORT,
+    EXPANSION_COHORT_50,
 )
 
 logger = logging.getLogger(__name__)

@@ -113,6 +113,48 @@ Kept `haiku-gap-classifier` for reasoning-only gap classification (industry cont
 
 ---
 
+## Session 3 — 50-Company Expansion (2026-03-18)
+
+**Goal:** Scale auto-eval from 5 to 50 companies. First real stress test of the system.
+
+### Cohort (50 companies, 8 sectors)
+
+| Sector | Companies |
+|--------|-----------|
+| Tech (10) | AAPL, MSFT, GOOG, AMZN, META, NVDA, TSLA, CRM, ADBE, INTC |
+| Banking/Finance (8) | JPM, BAC, GS, MS, C, BLK, SCHW, AXP |
+| Energy (4) | XOM, CVX, COP, SLB |
+| Consumer (7) | WMT, PG, KO, PEP, MCD, NKE, COST |
+| Healthcare/Pharma (7) | JNJ, UNH, PFE, LLY, ABBV, MRK, TMO |
+| Industrial (6) | CAT, HON, GE, DE, RTX, UPS |
+| Other (8) | V, MA, NEE, T, HD, LOW, NFLX, AVGO |
+
+### Baseline Results
+
+*Run `python /tmp/run_expansion.py` to populate.*
+
+| Metric | 5-Company (Session 2) | 50-Company Baseline |
+|--------|----------------------|---------------------|
+| CQS | 0.9313 | *pending* |
+| Pass rate | 95.8% | *pending* |
+| Coverage | 99.0% | *pending* |
+| Gaps | 4 | *pending* |
+| Duration | 49s | *pending* |
+
+### Per-Company Breakdown
+
+*Populated after baseline run.*
+
+### Gap Analysis
+
+*Populated after baseline run.*
+
+### Changes Applied
+
+*Populated after review of scout proposals.*
+
+---
+
 ## Architecture Notes
 
 ### What Worked
