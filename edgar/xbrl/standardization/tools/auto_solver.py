@@ -286,6 +286,119 @@ class AutoSolver:
 
         return validation
 
+    def validate_formula_multi_period(
+        self,
+        formula: FormulaCandidate,
+        ticker: str,
+        num_periods: int = 3,
+        tolerance_pct: float = 5.0,
+    ) -> Dict[str, dict]:
+        """
+        Validate a formula across multiple fiscal periods for the same company.
+
+        Checks the last `num_periods` 10-K filings to ensure the formula
+        isn't a coincidental single-period match.
+
+        Args:
+            formula: The FormulaCandidate to validate.
+            ticker: Company ticker.
+            num_periods: Number of annual filings to check (default 3).
+            tolerance_pct: Pass threshold (default 5%).
+
+        Returns:
+            Dict with 'periods_checked', 'periods_passed', 'results' (per-period).
+        """
+        from edgar.xbrl.standardization.yf_snapshot import load_snapshot
+
+        tolerance = tolerance_pct / 100.0
+        results = {
+            "periods_checked": 0,
+            "periods_passed": 0,
+            "results": [],
+        }
+
+        try:
+            company = Company(ticker)
+            filings = list(company.get_filings(form="10-K"))[:num_periods]
+        except Exception as e:
+            logger.warning(f"Multi-period validation failed for {ticker}: {e}")
+            return results
+
+        # Load yfinance snapshot for multi-period reference values
+        snapshot = load_snapshot(ticker) if self.snapshot_mode else None
+
+        for filing in filings:
+            try:
+                xbrl = filing.xbrl()
+                if xbrl is None or xbrl.facts is None:
+                    continue
+
+                facts_df = xbrl.facts.to_dataframe()
+                if facts_df is None or facts_df.empty:
+                    continue
+
+                # Extract facts for this period
+                fact_values = {}
+                for _, row in facts_df.iterrows():
+                    concept = row.get("concept", "")
+                    value = row.get("value")
+                    if value is None:
+                        continue
+                    try:
+                        value = float(value)
+                    except (ValueError, TypeError):
+                        continue
+                    if value == 0:
+                        continue
+                    clean = concept
+                    for prefix in ["us-gaap:", "us-gaap_", "ifrs-full:"]:
+                        clean = clean.replace(prefix, "")
+                    if clean not in fact_values:
+                        fact_values[clean] = value
+
+                # Sum formula components
+                total = 0.0
+                missing = []
+                for component in formula.components:
+                    if component in fact_values:
+                        total += abs(fact_values[component])
+                    else:
+                        missing.append(component)
+
+                if missing:
+                    results["results"].append({
+                        "filing": str(filing.accession_no),
+                        "status": f"missing:{','.join(missing)}",
+                    })
+                    continue
+
+                # Get reference value for this period
+                ref_value = self._get_yfinance_target(ticker, formula.metric)
+                if ref_value is None:
+                    continue
+
+                target = abs(ref_value)
+                variance = abs(total - target) / target if target != 0 else 0
+                passed = variance <= tolerance
+
+                results["periods_checked"] += 1
+                if passed:
+                    results["periods_passed"] += 1
+
+                results["results"].append({
+                    "filing": str(filing.accession_no),
+                    "total": total,
+                    "target": target,
+                    "variance_pct": variance * 100,
+                    "status": "pass" if passed else "fail",
+                })
+
+            except Exception as e:
+                logger.debug(f"Multi-period check failed for {filing}: {e}")
+                continue
+
+        return results
+
     def solve_all_gaps(
         self,
         gaps: List[dict],

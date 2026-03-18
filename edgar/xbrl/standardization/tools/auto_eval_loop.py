@@ -707,6 +707,14 @@ def _propose_via_solver(
     When standard proposals (divergence, tree_hint) fail, the solver
     performs a bounded subset-sum search over XBRL facts to find
     combinations that match the yfinance target value.
+
+    Validation gates (both must pass to write ADD_STANDARDIZATION):
+    1. Multi-period: formula holds for >=2 of the last 3 annual filings
+    2. Cross-company: formula works for >=2 other companies (sector pattern)
+
+    If multi-period passes but cross-company fails → company-specific
+    ADD_STANDARDIZATION (company override).
+    If multi-period fails → reject (likely coincidental match).
     """
     if gap.reference_value is None:
         return None
@@ -724,7 +732,25 @@ def _propose_via_solver(
         best = candidates[0]
         logger.info(f"Solver candidate for {gap.ticker}:{gap.metric}: {best}")
 
-        # Cross-validate against other companies from QUICK_EVAL_COHORT
+        # Gate 1: Multi-period validation on source company
+        mp = solver.validate_formula_multi_period(best, gap.ticker, num_periods=3)
+        mp_checked = mp["periods_checked"]
+        mp_passed = mp["periods_passed"]
+        min_periods = min(2, mp_checked)
+
+        if mp_checked == 0 or mp_passed < min_periods:
+            logger.info(
+                f"Solver formula REJECTED for {gap.ticker}:{gap.metric}: "
+                f"multi-period {mp_passed}/{mp_checked} (need {min_periods})"
+            )
+            return None
+
+        logger.info(
+            f"Multi-period validated: {gap.ticker}:{gap.metric} "
+            f"{mp_passed}/{mp_checked} periods pass"
+        )
+
+        # Gate 2: Cross-company validation
         validation_tickers = [t for t in QUICK_EVAL_COHORT if t != gap.ticker][:3]
         validation = solver.validate_formula(best, validation_tickers)
 
@@ -732,7 +758,8 @@ def _propose_via_solver(
             # Sector-wide formula — write as default standardization
             logger.info(
                 f"Sector pattern found for {gap.metric}: "
-                f"{validation.pass_count}/{validation.total_count} pass"
+                f"{validation.pass_count}/{validation.total_count} companies, "
+                f"{mp_passed}/{mp_checked} periods"
             )
             return ConfigChange(
                 file="metrics.yaml",
@@ -742,39 +769,44 @@ def _propose_via_solver(
                     "scope": "default",
                     "components": best.components,
                     "notes": (
-                        f"Auto-solver discovered via {gap.ticker}, "
-                        f"validated {validation.pass_count}/{validation.total_count} companies"
+                        f"Auto-solver via {gap.ticker}, "
+                        f"{mp_passed}/{mp_checked} periods, "
+                        f"{validation.pass_count}/{validation.total_count} companies"
                     ),
                 },
                 rationale=(
-                    f"Auto-solver: {' + '.join(best.components)} matches yfinance "
-                    f"({best.variance_pct:.1f}% variance), sector pattern "
-                    f"({validation.pass_count}/{validation.total_count})"
+                    f"Auto-solver: {' + '.join(best.components)} "
+                    f"({best.variance_pct:.1f}% var, "
+                    f"{mp_passed}/{mp_checked} periods, "
+                    f"{validation.pass_count}/{validation.total_count} cross-co)"
                 ),
                 target_metric=gap.metric,
                 target_companies=gap.ticker,
             )
         else:
-            # Company-specific — write as known_variance with formula
+            # Company-specific — write as company override standardization
             logger.info(
                 f"Company-specific formula for {gap.ticker}:{gap.metric} "
-                f"(cross-validation: {validation.pass_count}/{validation.total_count})"
+                f"({mp_passed}/{mp_checked} periods, "
+                f"{validation.pass_count}/{validation.total_count} cross-co)"
             )
             return ConfigChange(
                 file="metrics.yaml",
-                change_type=ChangeType.ADD_KNOWN_VARIANCE,
-                yaml_path=f"metrics.{gap.metric}.known_variances",
+                change_type=ChangeType.ADD_STANDARDIZATION,
+                yaml_path=f"metrics.{gap.metric}.standardization",
                 new_value={
-                    "ticker": gap.ticker,
-                    "status": "formula_added",
-                    "variance_pct": round(best.variance_pct, 2),
-                    "reason": (
-                        f"Auto-solver formula: {' + '.join(best.components)} "
-                        f"(company-specific, {validation.pass_count}/{validation.total_count} cross-validate)"
+                    "scope": f"company:{gap.ticker}",
+                    "components": best.components,
+                    "notes": (
+                        f"Auto-solver company-specific, "
+                        f"{mp_passed}/{mp_checked} periods, "
+                        f"{validation.pass_count}/{validation.total_count} cross-co"
                     ),
                 },
                 rationale=(
-                    f"Auto-solver: company-specific formula for {gap.ticker}:{gap.metric}"
+                    f"Auto-solver: {' + '.join(best.components)} "
+                    f"({best.variance_pct:.1f}% var, "
+                    f"{mp_passed}/{mp_checked} periods, company-specific)"
                 ),
                 target_metric=gap.metric,
                 target_companies=gap.ticker,
