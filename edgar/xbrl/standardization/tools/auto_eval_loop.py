@@ -40,9 +40,11 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     MetricGap,
     compute_cqs,
     identify_gaps,
+    generate_subcohorts,
     QUICK_EVAL_COHORT,
     VALIDATION_COHORT,
     EXPANSION_COHORT_50,
+    EXPANSION_COHORT_100,
     SUB_COHORT_A,
     SUB_COHORT_B,
     SUB_COHORT_C,
@@ -2882,6 +2884,51 @@ class EvaluatedProposal:
             "worker_id": self.worker_id,
         }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> 'EvaluatedProposal':
+        """Deserialize from JSON dict (for inter-agent communication)."""
+        gap_data = d["gap"]
+        gap = MetricGap(
+            ticker=gap_data["ticker"],
+            metric=gap_data["metric"],
+            gap_type=gap_data["gap_type"],
+            estimated_impact=gap_data.get("estimated_impact", 0.0),
+            reference_value=gap_data.get("reference_value"),
+            xbrl_value=gap_data.get("xbrl_value"),
+            hv_subtype=gap_data.get("hv_subtype"),
+            current_variance=gap_data.get("current_variance"),
+            graveyard_count=gap_data.get("graveyard_count", 0),
+            notes=gap_data.get("notes", ""),
+        )
+
+        prop_data = d["proposal"]
+        proposal = ConfigChange(
+            file=prop_data["file"],
+            change_type=ChangeType(prop_data["change_type"]),
+            yaml_path=prop_data["yaml_path"],
+            old_value=prop_data.get("old_value"),
+            new_value=prop_data["new_value"],
+            rationale=prop_data.get("rationale", ""),
+            target_metric=prop_data.get("target_metric", ""),
+            target_companies=prop_data.get("target_companies", ""),
+        )
+
+        dec_data = d["decision"]
+        decision = ExperimentDecision(
+            decision=Decision(dec_data["decision"]),
+            cqs_before=dec_data["cqs_before"],
+            cqs_after=dec_data["cqs_after"],
+            reason=dec_data.get("reason", ""),
+            duration_seconds=dec_data.get("duration_seconds", 0.0),
+        )
+
+        return cls(
+            gap=gap,
+            proposal=proposal,
+            decision=decision,
+            worker_id=d.get("worker_id", ""),
+        )
+
 
 def propose_only_loop(
     eval_cohort: List[str],
@@ -2975,6 +3022,8 @@ def propose_and_evaluate_loop(
     focus_area: Optional[str] = None,
     escalation_threshold: int = 3,
     worker_id: str = "",
+    checkpoint_interval: int = 1,
+    role: str = "combined",
 ) -> List[EvaluatedProposal]:
     """
     Worker-mode: propose changes AND evaluate them on sub-cohort using in-memory config.
@@ -2996,11 +3045,16 @@ def propose_and_evaluate_loop(
         focus_area: Optional focus filter.
         escalation_threshold: Subtype failures before GPT escalation.
         worker_id: Identifier for this worker (for logging).
+        checkpoint_interval: Write checkpoint every N proposals evaluated.
+        role: Worker role ("combined", "runner", or "evaluator").
 
     Returns:
         List of EvaluatedProposal for proposals that passed evaluation (KEEP only).
     """
     from edgar.xbrl.standardization.config_loader import get_config
+    from edgar.xbrl.standardization.tools.auto_eval_checkpoint import (
+        WorkerCheckpoint, write_checkpoint,
+    )
 
     if ledger is None:
         ledger = ExperimentLedger()
@@ -3009,9 +3063,21 @@ def propose_and_evaluate_loop(
         propose_fn = propose_change
 
     prefix = f"[Worker {worker_id}] " if worker_id else ""
+    t_session_start = time.time()
     logger.info(f"{prefix}Starting propose_and_evaluate_loop on {len(eval_cohort)} companies")
 
+    # Initialize checkpoint
+    cp = WorkerCheckpoint(
+        worker_id=worker_id or "anonymous",
+        role=role,
+        phase="baseline",
+        cohort_size=len(eval_cohort),
+    )
+    if worker_id:
+        _safe_write_checkpoint(cp)
+
     # Load baseline config and compute baseline CQS
+    t0 = time.time()
     baseline_config = get_config(reload=True)
     baseline_cqs = compute_cqs(
         eval_cohort=eval_cohort,
@@ -3021,8 +3087,17 @@ def propose_and_evaluate_loop(
         max_workers=max_workers,
         config=baseline_config,
     )
+    t_baseline = time.time() - t0
+
+    cp.baseline_cqs = baseline_cqs.cqs
+    cp.current_cqs = baseline_cqs.cqs
+    cp.phase = "gaps"
+    cp.elapsed_seconds = time.time() - t_session_start
+    if worker_id:
+        _safe_write_checkpoint(cp)
 
     # Identify gaps using the baseline config
+    t1 = time.time()
     gaps, _ = identify_gaps(
         eval_cohort=eval_cohort,
         snapshot_mode=True,
@@ -3030,8 +3105,15 @@ def propose_and_evaluate_loop(
         max_workers=max_workers,
         config=baseline_config,
     )
+    t_gaps = time.time() - t1
 
     logger.info(f"{prefix}Found {len(gaps)} gaps (CQS={baseline_cqs.cqs:.4f})")
+    logger.info(f"{prefix}Timing: baseline={t_baseline:.1f}s, gaps={t_gaps:.1f}s")
+
+    cp.gaps_found = len(gaps)
+    cp.elapsed_seconds = time.time() - t_session_start
+    if worker_id:
+        _safe_write_checkpoint(cp)
 
     # Filter by focus area
     if focus_area:
@@ -3040,11 +3122,16 @@ def propose_and_evaluate_loop(
 
     if not gaps:
         logger.info(f"{prefix}No gaps to evaluate")
+        cp.phase = "finished"
+        cp.elapsed_seconds = time.time() - t_session_start
+        if worker_id:
+            _safe_write_checkpoint(cp)
         return []
 
     # Generate and evaluate proposals
     evaluated: List[EvaluatedProposal] = []
     tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
+    proposals_evaluated = 0
 
     for gap in gaps:
         graveyard_entries = ledger.get_graveyard_entries(gap.metric)
@@ -3053,6 +3140,8 @@ def propose_and_evaluate_loop(
         if change is None:
             tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
             continue
+
+        cp.current_gap = f"{gap.ticker}:{gap.metric}"
 
         # Evaluate in memory (no disk writes)
         result = evaluate_experiment_in_memory(
@@ -3063,6 +3152,8 @@ def propose_and_evaluate_loop(
             ledger=ledger,
         )
 
+        proposals_evaluated += 1
+
         logger.info(
             f"{prefix}{result.decision.value}: {change.change_type.value} for "
             f"{gap.ticker}:{gap.metric} "
@@ -3071,6 +3162,7 @@ def propose_and_evaluate_loop(
         )
 
         if result.decision == Decision.KEEP:
+            cp.keeps += 1
             # Update baseline for next proposal (rolling baseline)
             baseline_config = apply_change_to_config(change, baseline_config)
             baseline_cqs = compute_cqs(
@@ -3081,6 +3173,7 @@ def propose_and_evaluate_loop(
                 max_workers=max_workers,
                 config=baseline_config,
             )
+            cp.current_cqs = baseline_cqs.cqs
 
             evaluated.append(EvaluatedProposal(
                 gap=gap,
@@ -3088,13 +3181,43 @@ def propose_and_evaluate_loop(
                 decision=result,
                 worker_id=worker_id,
             ))
+        elif result.decision == Decision.VETO:
+            cp.vetoes += 1
+            tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
         else:
+            cp.discards += 1
             tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
 
+        # Update checkpoint at configured interval
+        cp.proposals_total = proposals_evaluated
+        cp.phase = f"eval_{proposals_evaluated}"
+        cp.elapsed_seconds = time.time() - t_session_start
+        if worker_id and (proposals_evaluated % checkpoint_interval == 0):
+            _safe_write_checkpoint(cp)
+
+    t_total = time.time() - t_session_start
     logger.info(
-        f"{prefix}Finished: {len(evaluated)} KEEPs from {len(gaps)} gaps"
+        f"{prefix}Finished: {len(evaluated)} KEEPs from {len(gaps)} gaps "
+        f"(baseline={t_baseline:.1f}s, gaps={t_gaps:.1f}s, total={t_total:.1f}s)"
     )
+
+    # Final checkpoint
+    cp.phase = "finished"
+    cp.current_gap = None
+    cp.elapsed_seconds = t_total
+    if worker_id:
+        _safe_write_checkpoint(cp)
+
     return evaluated
+
+
+def _safe_write_checkpoint(cp) -> None:
+    """Write checkpoint with error suppression (non-critical)."""
+    try:
+        from edgar.xbrl.standardization.tools.auto_eval_checkpoint import write_checkpoint
+        write_checkpoint(cp)
+    except Exception as e:
+        logger.debug(f"Checkpoint write failed (non-critical): {e}")
 
 
 def save_proposals_to_json(
@@ -3151,3 +3274,317 @@ def load_proposals_from_json(input_path: Path) -> List[ProposalRecord]:
 
     logger.info(f"Loaded {len(proposals)} proposals from {input_path}")
     return proposals
+
+
+def save_evaluated_to_json(
+    proposals: List[EvaluatedProposal],
+    output_path: Path,
+) -> None:
+    """Save evaluated proposals to a JSON file for coordinator collection."""
+    data = [p.to_dict() for p in proposals]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, 'w') as f:
+        json.dump(data, f, indent=2, default=str)
+    logger.info(f"Saved {len(proposals)} evaluated proposals to {output_path}")
+
+
+def load_evaluated_from_json(input_path: Path) -> List[EvaluatedProposal]:
+    """Load evaluated proposals from a worker's JSON output file."""
+    with open(input_path, 'r') as f:
+        data = json.load(f)
+    proposals = [EvaluatedProposal.from_dict(item) for item in data]
+    logger.info(f"Loaded {len(proposals)} evaluated proposals from {input_path}")
+    return proposals
+
+
+# =============================================================================
+# PHASE 6: EVALUATOR-ONLY MODE
+# =============================================================================
+
+def evaluate_proposals_in_memory(
+    proposals: List[ProposalRecord],
+    eval_cohort: List[str],
+    baseline_config,
+    baseline_cqs: CQSResult,
+    ledger: Optional[ExperimentLedger] = None,
+    worker_id: str = "",
+    checkpoint_interval: int = 1,
+) -> List[EvaluatedProposal]:
+    """Evaluate a batch of pre-built proposals in-memory. Returns only KEEPs.
+
+    This is the pure evaluator function — it receives proposals (from runners)
+    and evaluates each on a sub-cohort. Unlike propose_and_evaluate_loop(),
+    this skips gap identification and proposal generation.
+
+    Args:
+        proposals: Pre-built proposals to evaluate.
+        eval_cohort: List of tickers for evaluation.
+        baseline_config: In-memory MappingConfig snapshot.
+        baseline_cqs: CQS baseline for comparison.
+        ledger: ExperimentLedger for golden master lookups.
+        worker_id: Identifier for this evaluator (for logging/checkpoints).
+        checkpoint_interval: Write checkpoint every N proposals.
+
+    Returns:
+        List of EvaluatedProposal for proposals that passed (KEEP only).
+    """
+    from edgar.xbrl.standardization.tools.auto_eval_checkpoint import (
+        WorkerCheckpoint, write_checkpoint,
+    )
+
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    prefix = f"[Evaluator {worker_id}] " if worker_id else ""
+    t_start = time.time()
+    logger.info(f"{prefix}Evaluating {len(proposals)} proposals on {len(eval_cohort)} companies")
+
+    cp = WorkerCheckpoint(
+        worker_id=worker_id or "anonymous",
+        role="evaluator",
+        phase="eval_0",
+        cohort_size=len(eval_cohort),
+        gaps_found=len(proposals),
+        baseline_cqs=baseline_cqs.cqs,
+        current_cqs=baseline_cqs.cqs,
+    )
+    if worker_id:
+        _safe_write_checkpoint(cp)
+
+    evaluated: List[EvaluatedProposal] = []
+    current_config = baseline_config
+    current_cqs = baseline_cqs
+
+    for i, record in enumerate(proposals):
+        cp.current_gap = f"{record.gap.ticker}:{record.gap.metric}"
+
+        result = evaluate_experiment_in_memory(
+            change=record.proposal,
+            baseline_cqs=current_cqs,
+            baseline_config=current_config,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+        )
+
+        logger.info(
+            f"{prefix}{result.decision.value}: {record.proposal.change_type.value} for "
+            f"{record.gap.ticker}:{record.gap.metric} "
+            f"(CQS {result.cqs_before:.4f} -> {result.cqs_after:.4f}, "
+            f"{result.duration_seconds:.1f}s)"
+        )
+
+        if result.decision == Decision.KEEP:
+            cp.keeps += 1
+            current_config = apply_change_to_config(record.proposal, current_config)
+            current_cqs = compute_cqs(
+                eval_cohort=eval_cohort,
+                snapshot_mode=True,
+                use_ai=False,
+                ledger=ledger,
+                config=current_config,
+            )
+            cp.current_cqs = current_cqs.cqs
+
+            evaluated.append(EvaluatedProposal(
+                gap=record.gap,
+                proposal=record.proposal,
+                decision=result,
+                worker_id=worker_id,
+            ))
+        elif result.decision == Decision.VETO:
+            cp.vetoes += 1
+        else:
+            cp.discards += 1
+
+        cp.proposals_total = i + 1
+        cp.phase = f"eval_{i + 1}"
+        cp.elapsed_seconds = time.time() - t_start
+        if worker_id and ((i + 1) % checkpoint_interval == 0):
+            _safe_write_checkpoint(cp)
+
+    cp.phase = "finished"
+    cp.current_gap = None
+    cp.elapsed_seconds = time.time() - t_start
+    if worker_id:
+        _safe_write_checkpoint(cp)
+
+    logger.info(f"{prefix}Finished: {len(evaluated)} KEEPs from {len(proposals)} proposals")
+    return evaluated
+
+
+# =============================================================================
+# PHASE 7: TEAM SESSION COORDINATOR
+# =============================================================================
+
+class TeamSession:
+    """Coordinator for agent team auto-eval sessions.
+
+    The team lead creates a session, gets worker assignments, launches
+    agents, then collects and validates results.
+
+    Usage:
+        session = TeamSession(eval_cohort=EXPANSION_COHORT_100, num_workers=5)
+        session.establish_baseline()
+        assignments = session.get_worker_assignments()
+        # ... user launches agents ...
+        results = session.collect_results()
+        report = session.validate_winners(results)
+    """
+
+    def __init__(self, eval_cohort: List[str], num_workers: int = 3, ledger=None):
+        self.session_id = f"team_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.eval_cohort = eval_cohort
+        self.num_workers = num_workers
+        self.ledger = ledger or ExperimentLedger()
+        self.subcohorts = generate_subcohorts(eval_cohort, k=num_workers, ledger=self.ledger)
+        self.baseline_config = None
+        self.baseline_cqs = None
+        self._results_dir = Path(__file__).parent.parent / "company_mappings" / "team_results"
+
+    def establish_baseline(self, max_workers: int = 4) -> CQSResult:
+        """Compute full-cohort baseline. Call once at session start."""
+        from edgar.xbrl.standardization.config_loader import get_config
+
+        self.baseline_config = get_config(reload=True)
+        self.baseline_cqs = compute_cqs(
+            eval_cohort=self.eval_cohort,
+            config=self.baseline_config,
+            snapshot_mode=True,
+            ledger=self.ledger,
+            max_workers=max_workers,
+        )
+        logger.info(
+            f"[TeamSession {self.session_id}] Baseline established: "
+            f"CQS={self.baseline_cqs.cqs:.4f} on {len(self.eval_cohort)} companies"
+        )
+        return self.baseline_cqs
+
+    def get_worker_assignments(self) -> List[Dict]:
+        """Return assignment dicts for the team lead to dispatch agents."""
+        return [
+            {
+                "worker_id": f"worker_{chr(65 + i)}",  # worker_A, worker_B, ...
+                "eval_cohort": subcohort,
+                "cohort_size": len(subcohort),
+                "role": "combined",
+            }
+            for i, subcohort in enumerate(self.subcohorts)
+        ]
+
+    def collect_results(self, results_dir: Optional[Path] = None) -> List[EvaluatedProposal]:
+        """Collect EvaluatedProposal results from worker output files or checkpoint dir."""
+        search_dir = results_dir or self._results_dir
+        all_results: List[EvaluatedProposal] = []
+
+        if not search_dir.exists():
+            logger.warning(f"Results directory not found: {search_dir}")
+            return all_results
+
+        for path in sorted(search_dir.glob("evaluated_worker_*.json")):
+            try:
+                proposals = load_evaluated_from_json(path)
+                all_results.extend(proposals)
+                logger.info(f"Collected {len(proposals)} results from {path.name}")
+            except Exception as e:
+                logger.error(f"Failed to load results from {path}: {e}")
+
+        logger.info(f"[TeamSession] Collected {len(all_results)} total results from workers")
+        return all_results
+
+    def validate_winners(
+        self,
+        proposals: List[EvaluatedProposal],
+        max_workers: int = 4,
+    ) -> OvernightReport:
+        """Validate worker-approved proposals on FULL cohort.
+
+        De-duplicates conflicting proposals, then evaluates each winner
+        against the full eval_cohort. Only the coordinator calls this.
+
+        Args:
+            proposals: EvaluatedProposal results from workers.
+            max_workers: Parallel workers for CQS computation.
+
+        Returns:
+            OvernightReport summarizing the session.
+        """
+        if self.baseline_config is None or self.baseline_cqs is None:
+            raise RuntimeError("Must call establish_baseline() before validate_winners()")
+
+        started_at = datetime.now().isoformat()
+        t_start = time.time()
+
+        # De-duplicate: extract ConfigChange objects, select non-conflicting
+        changes = [p.proposal for p in proposals]
+        non_conflicting = select_non_conflicting(changes)
+        logger.info(
+            f"[TeamSession] Validating {len(non_conflicting)} non-conflicting proposals "
+            f"(from {len(proposals)} worker results) on full {len(self.eval_cohort)}-company cohort"
+        )
+
+        # Evaluate each on full cohort
+        current_config = self.baseline_config
+        current_cqs = self.baseline_cqs
+        kept = []
+        discarded = 0
+        vetoed = 0
+        cqs_peak = current_cqs.cqs
+
+        for change in non_conflicting:
+            result = evaluate_experiment_in_memory(
+                change=change,
+                baseline_cqs=current_cqs,
+                baseline_config=current_config,
+                eval_cohort=self.eval_cohort,
+                ledger=self.ledger,
+            )
+
+            if result.decision == Decision.KEEP:
+                current_config = apply_change_to_config(change, current_config)
+                current_cqs = compute_cqs(
+                    eval_cohort=self.eval_cohort,
+                    snapshot_mode=True,
+                    use_ai=False,
+                    ledger=self.ledger,
+                    max_workers=max_workers,
+                    config=current_config,
+                )
+                kept.append(change)
+                cqs_peak = max(cqs_peak, current_cqs.cqs)
+                logger.info(f"[TeamSession] KEEP: {change.target_metric} -> CQS={current_cqs.cqs:.4f}")
+            elif result.decision == Decision.VETO:
+                vetoed += 1
+                logger.info(f"[TeamSession] VETO: {change.target_metric}")
+            else:
+                discarded += 1
+                logger.info(f"[TeamSession] DISCARD: {change.target_metric}")
+
+        duration_hours = (time.time() - t_start) / 3600
+
+        report = OvernightReport(
+            session_id=self.session_id,
+            started_at=started_at,
+            finished_at=datetime.now().isoformat(),
+            duration_hours=duration_hours,
+            focus_area=None,
+            experiments_total=len(non_conflicting),
+            experiments_kept=len(kept),
+            experiments_discarded=discarded,
+            experiments_vetoed=vetoed,
+            cqs_start=self.baseline_cqs.cqs,
+            cqs_end=current_cqs.cqs,
+            cqs_peak=cqs_peak,
+            config_diffs=[c.to_diff_string() for c in kept],
+        )
+
+        logger.info(
+            f"[TeamSession] Validation complete: {len(kept)}/{len(non_conflicting)} kept, "
+            f"CQS {self.baseline_cqs.cqs:.4f} -> {current_cqs.cqs:.4f}"
+        )
+        return report
+
+    def dashboard(self) -> str:
+        """Print current team status from checkpoint files."""
+        from edgar.xbrl.standardization.tools.auto_eval_checkpoint import print_team_dashboard
+        print_team_dashboard()
+        return "Dashboard printed"

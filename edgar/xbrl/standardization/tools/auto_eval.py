@@ -94,6 +94,113 @@ SUB_COHORT_C = [
     "T", "HD", "LOW", "NFLX", "AVGO",     # Other
 ]
 
+# 100-company expansion cohort: production-scale stress test
+EXPANSION_COHORT_100 = EXPANSION_COHORT_50 + [
+    # Semiconductors (4)
+    "AMD", "QCOM", "TXN", "MU",
+    # Biotech/Pharma (4)
+    "GILD", "AMGN", "REGN", "VRTX",
+    # REITs (4)
+    "PLD", "AMT", "EQIX", "SPG",
+    # Utilities (3)
+    "DUK", "SO", "D",
+    # Telecom/Media (4)
+    "CMCSA", "DIS", "VZ", "TMUS",
+    # Aerospace/Defense (3)
+    "LMT", "BA", "NOC",
+    # Food & Beverage (3)
+    "MDLZ", "KHC", "STZ",
+    # Transportation (3)
+    "FDX", "CSX", "NSC",
+    # Specialty Finance/Insurance (4)
+    "ICE", "CME", "AON", "MMC",
+    # Retail/E-commerce (3)
+    "TGT", "ROST", "ORLY",
+    # Materials/Chemicals (3)
+    "LIN", "APD", "SHW",
+    # Software/Cloud (4)
+    "ORCL", "NOW", "SNOW", "PANW",
+    # Medical Devices (3)
+    "ABT", "MDT", "SYK",
+    # Diversified (5)
+    "BRK-B", "DHR", "SPGI", "MCO", "ITW",
+]
+
+
+# =============================================================================
+# DYNAMIC SUB-COHORT GENERATION
+# =============================================================================
+
+def generate_subcohorts(
+    tickers: List[str],
+    k: int,
+    ledger=None,
+) -> List[List[str]]:
+    """Split N tickers into K balanced sub-cohorts.
+
+    Balancing criteria:
+    1. Sector diversity (round-robin by industry)
+    2. Hard gaps distributed evenly (using graveyard counts)
+    3. Roughly equal size (max diff = 1)
+
+    Args:
+        tickers: Full list of tickers to partition.
+        k: Number of sub-cohorts to create.
+        ledger: Optional ExperimentLedger for graveyard counts.
+
+    Returns:
+        List of K sub-cohort lists, each roughly N/k tickers.
+    """
+    from edgar.xbrl.standardization.config_loader import get_config
+
+    if k <= 0:
+        raise ValueError(f"k must be positive, got {k}")
+    if k >= len(tickers):
+        return [[t] for t in tickers]
+
+    config = get_config()
+
+    # Group tickers by industry
+    industry_groups: Dict[str, List[Tuple[str, int]]] = {}
+    for ticker in tickers:
+        industry = _get_ticker_industry(ticker, config)
+        graveyard_count = 0
+        if ledger is not None:
+            try:
+                entries = ledger.get_graveyard_entries(ticker)
+                graveyard_count = len(entries) if entries else 0
+            except Exception:
+                pass
+        industry_groups.setdefault(industry, []).append((ticker, graveyard_count))
+
+    # Within each industry, sort by graveyard count descending (hard gaps first)
+    for industry in industry_groups:
+        industry_groups[industry].sort(key=lambda x: x[1], reverse=True)
+
+    # Round-robin assign across K buckets
+    buckets: List[List[str]] = [[] for _ in range(k)]
+    bucket_idx = 0
+
+    # Iterate through industries in sorted order for determinism
+    for industry in sorted(industry_groups.keys()):
+        for ticker, _count in industry_groups[industry]:
+            buckets[bucket_idx].append(ticker)
+            bucket_idx = (bucket_idx + 1) % k
+
+    return buckets
+
+
+def _get_ticker_industry(ticker: str, config) -> str:
+    """Get industry for a ticker, with graceful fallback."""
+    try:
+        company = config.companies.get(ticker)
+        industry = config._get_industry_for_company(ticker, company)
+        if industry:
+            return industry
+    except Exception:
+        pass
+    return "other"
+
 
 # =============================================================================
 # DATA CLASSES
@@ -165,6 +272,15 @@ class MetricGap:
 
 
 @dataclass
+class TimingBreakdown:
+    """Per-company timing data from a CQS computation."""
+    per_company: Dict[str, float]   # ticker -> seconds
+    total_seconds: float
+    parallelism: int                # max_workers used
+    companies_evaluated: int
+
+
+@dataclass
 class CQSResult:
     """
     Composite Quality Score — the single number that drives auto-eval decisions.
@@ -203,6 +319,9 @@ class CQSResult:
 
     # Whether regressions triggered hard veto
     vetoed: bool = False
+
+    # Per-company timing breakdown
+    timing: Optional[TimingBreakdown] = None
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -288,6 +407,15 @@ def compute_cqs(
 
     # Aggregate across companies
     result = _aggregate_cqs(company_scores, baseline_cqs, time.time() - start_time)
+
+    # Attach per-company timing if available
+    if orchestrator._company_timings:
+        result.timing = TimingBreakdown(
+            per_company=dict(orchestrator._company_timings),
+            total_seconds=result.duration_seconds,
+            parallelism=workers,
+            companies_evaluated=len(eval_cohort),
+        )
 
     # Record valid results and promote golden masters
     count = record_eval_results(all_results, orchestrator.validation_results, ledger)

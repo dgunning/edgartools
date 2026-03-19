@@ -12,6 +12,7 @@ Key design principles:
 
 import json
 import logging
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -41,6 +42,7 @@ def _process_company_worker(args):
     Must be top-level (not a method/closure) to be pickle-able.
     """
     ticker, snapshot_mode, use_ai, validate, config = args
+    start = time.time()
 
     set_identity("Dev Gunning developer-gunning@gmail.com")
     use_local_storage(True)
@@ -60,9 +62,10 @@ def _process_company_worker(args):
     mapped = sum(1 for r in results.values() if r.is_mapped)
     excluded = sum(1 for r in results.values() if r.source == MappingSource.CONFIG)
     total = len(results) - excluded
-    logger.info(f"{ticker}: {mapped}/{total} mapped")
+    elapsed = time.time() - start
+    logger.info(f"{ticker}: {mapped}/{total} mapped ({elapsed:.1f}s)")
 
-    return ticker, results, validations
+    return ticker, results, validations, elapsed
 
 
 class Orchestrator:
@@ -78,6 +81,7 @@ class Orchestrator:
         self.validator = ReferenceValidator(self.config, snapshot_mode=snapshot_mode)
         self.audit_log = []
         self.validation_results = {}
+        self._company_timings: Dict[str, float] = {}  # ticker -> seconds
 
     def flush_audit_log(self, path=None) -> int:
         """Flush in-memory audit log entries to a JSONL file on disk.
@@ -353,8 +357,10 @@ class Orchestrator:
 
         for ticker in tickers:
             print(f"\nProcessing {ticker}...")
+            t_start = time.time()
             results, xbrl, filing_date, form_type = self._map_company_with_xbrl(ticker, use_ai=use_ai)
             all_results[ticker] = results
+            self._company_timings[ticker] = time.time() - t_start
             if xbrl is not None:
                 xbrl_cache[ticker] = xbrl
             filing_context_cache[ticker] = (filing_date, form_type)
@@ -406,12 +412,13 @@ class Orchestrator:
             for future in as_completed(futures):
                 ticker = futures[future]
                 try:
-                    ticker, results, validations = future.result()
+                    ticker, results, validations, elapsed = future.result()
                     all_results[ticker] = results
                     if validations:
                         self.validation_results[ticker] = validations
+                    self._company_timings[ticker] = elapsed
                     completed += 1
-                    logger.info(f"[{completed}/{len(tickers)}] {ticker} done")
+                    logger.info(f"[{completed}/{len(tickers)}] {ticker} done ({elapsed:.1f}s)")
                 except Exception as e:
                     logger.error(f"{ticker} failed: {e}")
                     all_results[ticker] = self.tree_parser._empty_results(ticker, str(e))

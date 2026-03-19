@@ -1,0 +1,155 @@
+"""
+Checkpoint protocol for agent team auto-eval sessions.
+
+Workers write structured checkpoint files so the team lead can monitor
+progress without being in the loop. Checkpoints are atomic (tempfile + rename)
+and read-safe for concurrent access.
+"""
+
+import json
+import logging
+import os
+import tempfile
+from dataclasses import dataclass, field, asdict
+from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
+
+logger = logging.getLogger(__name__)
+
+CHECKPOINTS_DIR = Path(__file__).parent.parent / "company_mappings" / "checkpoints"
+
+
+@dataclass
+class WorkerCheckpoint:
+    """Structured status report from a worker agent."""
+    worker_id: str
+    role: str                    # "runner" | "evaluator" | "combined"
+    phase: str                   # "starting" | "baseline" | "gaps" | "eval_N" | "finished"
+    cohort_size: int
+    gaps_found: int = 0
+    proposals_total: int = 0
+    keeps: int = 0
+    discards: int = 0
+    vetoes: int = 0
+    baseline_cqs: float = 0.0
+    current_cqs: float = 0.0
+    elapsed_seconds: float = 0.0
+    last_update: str = ""        # ISO timestamp
+    current_gap: Optional[str] = None  # "TICKER:metric" in progress
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'WorkerCheckpoint':
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+
+def write_checkpoint(cp: WorkerCheckpoint) -> None:
+    """Atomic write checkpoint to checkpoints/worker_{id}.json."""
+    CHECKPOINTS_DIR.mkdir(parents=True, exist_ok=True)
+    cp.last_update = datetime.now().isoformat()
+
+    target = CHECKPOINTS_DIR / f"{cp.worker_id}.json"
+
+    # Atomic write: write to temp file then rename
+    fd, tmp_path = tempfile.mkstemp(
+        dir=str(CHECKPOINTS_DIR), suffix=".tmp", prefix=f"{cp.worker_id}_"
+    )
+    try:
+        with os.fdopen(fd, 'w') as f:
+            json.dump(cp.to_dict(), f, indent=2)
+        os.replace(tmp_path, str(target))
+    except Exception:
+        # Clean up temp file on failure
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+def read_all_checkpoints() -> List[WorkerCheckpoint]:
+    """Read all worker checkpoint files."""
+    if not CHECKPOINTS_DIR.exists():
+        return []
+
+    checkpoints = []
+    for path in sorted(CHECKPOINTS_DIR.glob("worker_*.json")):
+        try:
+            with open(path, 'r') as f:
+                data = json.load(f)
+            checkpoints.append(WorkerCheckpoint.from_dict(data))
+        except Exception as e:
+            logger.warning(f"Failed to read checkpoint {path}: {e}")
+
+    return checkpoints
+
+
+def print_team_dashboard() -> None:
+    """Print formatted dashboard of all worker status for the team lead."""
+    checkpoints = read_all_checkpoints()
+
+    if not checkpoints:
+        print("No active workers found.")
+        return
+
+    print("\n" + "=" * 90)
+    print("AGENT TEAM DASHBOARD")
+    print("=" * 90)
+
+    # Header
+    print(f"{'Worker':<12} {'Role':<10} {'Phase':<12} {'Cohort':>6} "
+          f"{'Gaps':>5} {'K/D/V':>9} {'CQS':>8} {'Elapsed':>8} {'Current Gap':<20}")
+    print("-" * 90)
+
+    total_keeps = 0
+    total_discards = 0
+    total_vetoes = 0
+
+    for cp in checkpoints:
+        kdv = f"{cp.keeps}/{cp.discards}/{cp.vetoes}"
+        elapsed = f"{cp.elapsed_seconds:.0f}s" if cp.elapsed_seconds < 3600 else f"{cp.elapsed_seconds/3600:.1f}h"
+        current = cp.current_gap or ""
+        if len(current) > 20:
+            current = current[:17] + "..."
+
+        print(f"{cp.worker_id:<12} {cp.role:<10} {cp.phase:<12} {cp.cohort_size:>6} "
+              f"{cp.gaps_found:>5} {kdv:>9} {cp.current_cqs:>8.4f} {elapsed:>8} {current:<20}")
+
+        total_keeps += cp.keeps
+        total_discards += cp.discards
+        total_vetoes += cp.vetoes
+
+    print("-" * 90)
+    total_proposals = total_keeps + total_discards + total_vetoes
+    print(f"{'TOTAL':<12} {'':<10} {'':<12} {sum(cp.cohort_size for cp in checkpoints):>6} "
+          f"{sum(cp.gaps_found for cp in checkpoints):>5} "
+          f"{total_keeps}/{total_discards}/{total_vetoes}{'':>0} "
+          f"{'':>8} {'':>8}")
+
+    # Summary
+    finished = sum(1 for cp in checkpoints if cp.phase == "finished")
+    active = len(checkpoints) - finished
+    print(f"\nWorkers: {len(checkpoints)} total, {active} active, {finished} finished")
+    if total_proposals > 0:
+        print(f"Proposals: {total_proposals} evaluated, {total_keeps} kept ({total_keeps/total_proposals:.0%} keep rate)")
+    print()
+
+
+def cleanup_checkpoints() -> None:
+    """Remove checkpoint files after session ends."""
+    if not CHECKPOINTS_DIR.exists():
+        return
+
+    count = 0
+    for path in CHECKPOINTS_DIR.glob("worker_*.json"):
+        try:
+            path.unlink()
+            count += 1
+        except OSError as e:
+            logger.warning(f"Failed to remove checkpoint {path}: {e}")
+
+    if count > 0:
+        logger.info(f"Cleaned up {count} checkpoint files")

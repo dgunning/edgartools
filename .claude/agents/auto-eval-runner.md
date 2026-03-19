@@ -342,11 +342,71 @@ Three pre-defined sub-cohorts split the 50-company EXPANSION_COHORT across secto
 
 Import from: `edgar.xbrl.standardization.tools.auto_eval`
 
+## Team Mode (100+ Companies)
+
+When launched by a `TeamSession`, workers receive dynamic sub-cohort assignments instead of
+using the hardcoded `SUB_COHORT_A/B/C` lists. The team protocol supports arbitrary N/K splits.
+
+### Receiving Assignments
+
+```python
+# The team lead gives you an assignment dict:
+assignment = {
+    "worker_id": "worker_A",
+    "eval_cohort": ["AAPL", "MSFT", ...],  # Dynamic sub-cohort
+    "cohort_size": 20,
+    "role": "combined",  # or "runner" or "evaluator"
+}
+
+# Run the loop with your assignment
+from edgar.xbrl.standardization.tools.auto_eval_loop import propose_and_evaluate_loop
+
+evaluated = propose_and_evaluate_loop(
+    eval_cohort=assignment["eval_cohort"],
+    worker_id=assignment["worker_id"],
+    max_workers=2,
+    checkpoint_interval=1,
+    role=assignment["role"],
+)
+
+# Save results for coordinator collection
+from edgar.xbrl.standardization.tools.auto_eval_loop import save_evaluated_to_json
+from pathlib import Path
+output = Path("edgar/xbrl/standardization/company_mappings/team_results")
+save_evaluated_to_json(evaluated, output / f"evaluated_{assignment['worker_id']}.json")
+```
+
+### Checkpoint Protocol
+
+Workers automatically write checkpoint files during `propose_and_evaluate_loop()` when
+a `worker_id` is provided. The team lead monitors progress via:
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_checkpoint import print_team_dashboard
+print_team_dashboard()
+```
+
+### Role Parameter
+
+| Role | Behavior |
+|------|----------|
+| `"combined"` | Proposes AND evaluates (default, recommended) |
+| `"runner"` | Proposes changes only, saves to JSON |
+| `"evaluator"` | Evaluates pre-built proposals from runners |
+
+### 100-Company Cohort
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval import EXPANSION_COHORT_100
+# 100 companies across 16+ sectors
+```
+
 ## File Locations
 
 ```
-edgar/xbrl/standardization/tools/auto_eval.py        — CQS computation, gap analysis, offline readiness, sub-cohorts
-edgar/xbrl/standardization/tools/auto_eval_loop.py    — Experiment loop, parallel scouts, batch eval, propose_only_loop
+edgar/xbrl/standardization/tools/auto_eval.py        — CQS computation, gap analysis, offline readiness, sub-cohorts, generate_subcohorts()
+edgar/xbrl/standardization/tools/auto_eval_loop.py    — Experiment loop, TeamSession, evaluate_proposals_in_memory(), EvaluatedProposal.from_dict()
+edgar/xbrl/standardization/tools/auto_eval_checkpoint.py — WorkerCheckpoint, write_checkpoint(), print_team_dashboard()
 edgar/xbrl/standardization/tools/bulk_preload.py       — Pre-download data for offline mode
 edgar/xbrl/standardization/ledger/schema.py            — AutoEvalExperiment, AutoEvalGraveyard tables
 edgar/xbrl/standardization/config/                      — Tier 1 config files
