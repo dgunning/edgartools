@@ -19,16 +19,18 @@ standardization/
 ├── ledger/
 │   └── schema.py               SQLite experiment ledger (extraction runs, golden masters, auto-eval)
 ├── tools/                      Reusable tools for agents and automation
-│   ├── auto_eval.py            CQS computation, gap analysis, DEFAULT_MAX_WORKERS
-│   ├── auto_eval_loop.py       Experiment loop, config changes, tournament eval, solver integration
+│   ├── auto_eval.py            CQS computation, gap analysis, cohort definitions
+│   ├── auto_eval_loop.py       Experiment loop, TeamSession, propose_and_evaluate_loop
+│   ├── auto_eval_checkpoint.py Checkpoint I/O and team dashboard
 │   ├── auto_eval_dashboard.py  Morning review terminal dashboard (EF/SA scores)
 │   ├── auto_solver.py          Subset-sum search for yfinance composite formulas
 │   ├── discover_concepts.py    Search calc trees + facts for concept candidates
 │   ├── verify_mapping.py       Value comparison against yfinance
 │   ├── learn_mappings.py       Cross-company pattern discovery
-│   ├── onboard_company.py      Automated single-company onboarding
+│   ├── onboard_company.py      Automated single/batch company onboarding
+│   ├── refresh_yf_snapshots.py Refresh yfinance reference snapshots
+│   ├── bulk_preload.py         Pre-download SEC filings for offline operation
 │   ├── pipeline_orchestrator.py State machine for batch expansion
-│   ├── test_solver_integration.py  Integration test for solver pipeline
 │   └── ...
 ├── orchestrator.py             Main multi-layer orchestrator
 ├── reference_validator.py      Validation against yfinance snapshots
@@ -63,8 +65,10 @@ Gap Analysis → Propose Config Change → Apply → Measure CQS → Keep/Revert
 | `QUICK_EVAL_COHORT` | 5 companies (AAPL, JPM, XOM, WMT, JNJ) | ~50s | Fast iteration during development |
 | `VALIDATION_COHORT` | 20 companies | ~200s | Tournament stage-2 validation |
 | `EXPANSION_COHORT_50` | 50 companies across 8 sectors | ~270s | Full cross-sector quality measurement |
+| `EXPANSION_COHORT_100` | 100 companies across 14 sectors | ~600s | Production-scale stress test |
+| `EXPANSION_COHORT_500` | 500 S&P 500 tickers | est. ~50min | Full-index coverage (requires onboarding) |
 
-Current 50-company results: **CQS 0.9206**, 95.9% pass rate, 98.9% coverage, 0 regressions.
+Current 100-company results: **CQS 0.9652** across all sectors.
 
 ### CQS Formula
 
@@ -85,6 +89,7 @@ cqs = (0.50 * pass_rate           # Fraction of metrics passing validation
 from edgar.xbrl.standardization.tools.auto_eval import (
     compute_cqs, identify_gaps, print_cqs_report, print_gap_report,
     QUICK_EVAL_COHORT, VALIDATION_COHORT, EXPANSION_COHORT_50,
+    EXPANSION_COHORT_100, EXPANSION_COHORT_500,
 )
 
 # Measure current quality (defaults to 5-company quick eval)
@@ -255,3 +260,77 @@ Set `max_workers` on `compute_cqs()`, `identify_gaps()`, `run_overnight()`, or `
 5. **Graveyard prevents loops** — metrics with 3+ failed attempts are skipped
 6. **Multi-period verification** — discovered concepts and solver formulas must match across multiple fiscal years
 7. **Solver candidate cap** — subset-sum search limited to 50 most relevant facts (prevents combinatorial explosion)
+8. **Full-cohort validation** — team workers propose on subcohorts, but winners must pass full-cohort validation before applying (prevents subcohort overfitting)
+
+### Agent Team Architecture
+
+For 100+ company evaluation, a team of parallel worker agents splits the cohort:
+
+```
+TeamSession
+├── generate_subcohorts(tickers, k=5)    # Balanced by sector + graveyard count
+├── establish_baseline(max_workers=4)     # Full-cohort CQS baseline
+├── Worker 0..K-1                         # Each runs propose_and_evaluate_loop()
+│   ├── Checkpoint files (resumable)
+│   └── Auto-saved results → team_results/
+├── collect_results()                     # Gathers all worker results
+├── validate_winners(collected)           # Re-evaluates on FULL cohort
+│   └── select_non_conflicting()          # De-duplicates proposals
+└── _validated_changes                    # Changes safe to apply
+```
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval import (
+    generate_subcohorts, EXPANSION_COHORT_100,
+)
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    TeamSession, propose_and_evaluate_loop,
+)
+
+# Initialize session
+session = TeamSession(eval_cohort=EXPANSION_COHORT_100, num_workers=5)
+baseline = session.establish_baseline(max_workers=4)
+assignments = session.get_worker_assignments()
+
+# Run workers (can be parallelized across agents)
+for assignment in assignments:
+    propose_and_evaluate_loop(
+        eval_cohort=assignment['eval_cohort'],
+        worker_id=assignment['worker_id'],
+        max_workers=1,
+    )
+
+# Monitor progress
+session.dashboard()
+
+# Collect and validate on full cohort
+collected = session.collect_results()
+report = session.validate_winners(collected)
+
+# Apply validated changes
+for change in session._validated_changes:
+    apply_config_change(change)
+```
+
+**Key design decisions:**
+- Workers auto-save results to `team_results/evaluated_{worker_id}.json`
+- Checkpoints enable resumability if a worker crashes
+- `validate_winners()` re-evaluates all worker-approved proposals against the full cohort to prevent subcohort overfitting
+- `generate_subcohorts()` balances by industry and graveyard count (hard gaps distributed evenly)
+
+### Company Onboarding
+
+Add new companies to the evaluation pipeline:
+
+```bash
+# Single company
+python -m edgar.xbrl.standardization.tools.onboard_company TICKER
+
+# Batch (generates yf_snapshots + companies.yaml fragments)
+python -m edgar.xbrl.standardization.tools.onboard_company --tickers HD,V,ABBV,MCD
+
+# Skip AI layer for faster onboarding
+python -m edgar.xbrl.standardization.tools.onboard_company --no-ai --tickers TICKER1,TICKER2
+```
+
+The onboarding pipeline: resolve CIK → detect archetype from SIC → detect fiscal year end → generate yfinance snapshot → run extraction → classify failures → generate YAML fragment.
