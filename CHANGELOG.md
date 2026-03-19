@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.25.1] - 2026-03-19
+
+### Added
+
+- **BDC health metrics** — `PortfolioInvestments` now exposes `nonaccrual_fair_value`, `non_accrual_rate`, `pik_investments`, `pik_fair_value`, and `pik_exposure` properties. Non-accrual data is extracted from the entity-level XBRL concept `us-gaap:FairValueOptionLoansHeldAsAssetsAggregateAmountInNonaccrualStatus`. Rich display shows color-coded non-accrual and PIK summary lines
+
+### Fixed
+
+- **Pickle serialization of XBRL objects** — Replaced `weakref` with strong references in `Note`, `StatementLineItem`, `FilingSummary`, and `WeakCache`. Weak references caused `pickle.dumps()` to fail on these objects, breaking caching and multiprocessing workflows
+
 ## [5.25.0] - 2026-03-18
 
 ### Added
@@ -15,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`Note` and `Notes` classes** — First-class objects for financial statement notes, built from FilingSummary.xml hierarchy. Access via `tenk.notes` or `tenq.notes`. Browse by number (`notes[5]`), title (`notes['Debt']`), or fuzzy search (`notes.search('revenue')`). Each note exposes `.tables`, `.policies`, `.details`, `.text`, `.html`, `.expands` (which statement lines it explains), and `.to_context()` for AI consumption
 
-- **`StatementLineItem`** — Lightweight wrapper returned by `Statement.__getitem__` with `.label`, `.concept`, `.note` (most relevant note), `.notes` (all related), and `.values`. Uses `__slots__` and weakref for minimal memory footprint
+- **`StatementLineItem`** — Lightweight wrapper returned by `Statement.__getitem__` with `.label`, `.concept`, `.note` (most relevant note), `.notes` (all related), and `.values`. Uses `__slots__` for minimal memory footprint
 
 - **`Statement.search()`** — Fuzzy search for statement line items with ranked results (exact > startswith > word match > substring). Complements the exact-match `__getitem__`. Consistent with the `Notes.search()` pattern
 
@@ -34,8 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improved
 
 - **XBRL memory optimizations** — Label role URI strings are now interned via `sys.intern()`, eliminating ~10,000 duplicate URL string allocations per filing. `comparison_data` removed from `RenderedStatement.metadata` (was stored but never read back). Duplicate `_collect_note_concepts` tree walks eliminated in `expands_statements`
-
-- **`FilingSummary._filing_sgml` converted to weakref** — Breaks a strong reference chain that pinned the entire SGML document in memory as long as any `Report` was reachable. `FilingSGML` now supports weakrefs via `__weakref__` in `__slots__`
 
 - **`Statement.__getitem__` is now exact-match only** — Previously used substring fallback that could silently return wrong rows for ambiguous queries like `stmt['Total']`. Now returns the correct match or `None`. Use `stmt.search()` for fuzzy lookups
 
