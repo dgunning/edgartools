@@ -34,6 +34,53 @@ from .reference_validator import ReferenceValidator, ValidationResult
 AUDIT_LOG_FILE = Path(__file__).parent / "company_mappings" / "audit_log.jsonl"
 
 
+# =============================================================================
+# PERSISTENT PROCESS POOL WITH WORKER-SIDE XBRL CACHE (Phase 1b)
+# =============================================================================
+
+# Module-level persistent pool — survives across multiple compute_cqs() calls
+_PERSISTENT_POOL: Optional[ProcessPoolExecutor] = None
+_POOL_MAX_WORKERS: int = 0
+
+# Per-worker process-global XBRL cache (populated in subprocesses)
+_WORKER_XBRL_CACHE: Dict[str, tuple] = {}  # ticker -> (filing, xbrl, filing_date, form_type)
+
+
+def _worker_initializer():
+    """Initialize persistent pool worker with identity and local storage."""
+    set_identity("Dev Gunning developer-gunning@gmail.com")
+    use_local_storage(True)
+
+
+def get_persistent_pool(max_workers: int = 4) -> ProcessPoolExecutor:
+    """Get or create the module-level persistent process pool.
+
+    The pool persists across multiple compute_cqs() calls within a session,
+    keeping worker processes alive so their XBRL caches are reused.
+    """
+    global _PERSISTENT_POOL, _POOL_MAX_WORKERS
+    if _PERSISTENT_POOL is None or _POOL_MAX_WORKERS != max_workers:
+        if _PERSISTENT_POOL is not None:
+            _PERSISTENT_POOL.shutdown(wait=False)
+        _PERSISTENT_POOL = ProcessPoolExecutor(
+            max_workers=max_workers,
+            initializer=_worker_initializer,
+        )
+        _POOL_MAX_WORKERS = max_workers
+        logger.info(f"Created persistent process pool with {max_workers} workers")
+    return _PERSISTENT_POOL
+
+
+def shutdown_persistent_pool():
+    """Shut down the persistent pool (call at session end)."""
+    global _PERSISTENT_POOL, _POOL_MAX_WORKERS
+    if _PERSISTENT_POOL is not None:
+        _PERSISTENT_POOL.shutdown(wait=True)
+        _PERSISTENT_POOL = None
+        _POOL_MAX_WORKERS = 0
+        logger.info("Persistent process pool shut down")
+
+
 def _process_company_worker(args):
     """
     Top-level worker function for ProcessPoolExecutor.
@@ -64,6 +111,51 @@ def _process_company_worker(args):
     total = len(results) - excluded
     elapsed = time.time() - start
     logger.info(f"{ticker}: {mapped}/{total} mapped ({elapsed:.1f}s)")
+
+    return ticker, results, validations, elapsed
+
+
+def _process_company_worker_cached(args):
+    """Worker function with per-process XBRL caching (Phase 1b).
+
+    On first call for a ticker, parses XBRL and caches the result.
+    On subsequent calls (same ticker, different config), reuses the cached
+    XBRL — only the mapping layers re-run with the new config.
+    """
+    global _WORKER_XBRL_CACHE
+    ticker, snapshot_mode, use_ai, validate, config = args
+    start = time.time()
+
+    orch = Orchestrator(config=config, snapshot_mode=snapshot_mode)
+
+    # Check per-worker XBRL cache
+    cached = _WORKER_XBRL_CACHE.get(ticker)
+    if cached is not None:
+        # Cache hit — skip filing lookup and XBRL parsing
+        results, xbrl, filing_date, form_type = orch._map_company_with_xbrl(
+            ticker, use_ai=use_ai, cached_xbrl=cached,
+        )
+    else:
+        # Cache miss — parse and cache for next time
+        results, xbrl, filing_date, form_type = orch._map_company_with_xbrl(
+            ticker, use_ai=use_ai
+        )
+        if xbrl is not None:
+            filing = orch._get_filing(ticker)
+            _WORKER_XBRL_CACHE[ticker] = (filing, xbrl, filing_date, form_type)
+
+    validations = {}
+    if validate:
+        validations = orch.validator.validate_and_update_mappings(
+            ticker, results, xbrl,
+            filing_date=filing_date, form_type=form_type,
+        )
+
+    mapped = sum(1 for r in results.values() if r.is_mapped)
+    excluded = sum(1 for r in results.values() if r.source == MappingSource.CONFIG)
+    total = len(results) - excluded
+    elapsed = time.time() - start
+    logger.info(f"{ticker}: {mapped}/{total} mapped ({elapsed:.1f}s, cache={'hit' if cached else 'miss'})")
 
     return ticker, results, validations, elapsed
 
@@ -262,7 +354,8 @@ class Orchestrator:
         ticker: str,
         use_ai: bool = True,
         use_facts: bool = True,
-        amendments: bool = False
+        amendments: bool = False,
+        cached_xbrl: tuple = None,
     ) -> tuple:
         """
         Map company and return both results and XBRL object.
@@ -270,31 +363,39 @@ class Orchestrator:
 
         Uses same layer order as map_company:
         Layer 1 (Tree) -> Layer 2 (Facts) -> Layer 3 (AI)
+
+        Args:
+            cached_xbrl: Optional (filing, xbrl, filing_date, form_type) tuple
+                to skip filing lookup and XBRL parsing (Phase 1b optimization).
         """
-        filing = self._get_filing(ticker, amendments)
-        if filing is None:
-            return self.tree_parser._empty_results(ticker, "No filing found"), None, None, None
+        if cached_xbrl is not None:
+            filing, xbrl, filing_date, form_type = cached_xbrl
+        else:
+            filing = self._get_filing(ticker, amendments)
+            if filing is None:
+                return self.tree_parser._empty_results(ticker, "No filing found"), None, None, None
 
-        try:
-            xbrl = filing.xbrl()
-        except OSError as e:
-            # Filesystem error (e.g. read-only local cache) - retry with writable cache
-            if is_using_local_storage():
-                print(f"  Local storage error for {ticker}, retrying via network...")
-                xbrl = self._retry_xbrl_with_writable_cache(filing)
-                if xbrl is None:
+            try:
+                xbrl = filing.xbrl()
+            except OSError as e:
+                # Filesystem error (e.g. read-only local cache) - retry with writable cache
+                if is_using_local_storage():
+                    print(f"  Local storage error for {ticker}, retrying via network...")
+                    xbrl = self._retry_xbrl_with_writable_cache(filing)
+                    if xbrl is None:
+                        return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
+                else:
                     return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
-            else:
+            except Exception as e:
                 return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
-        except Exception as e:
-            return self.tree_parser._empty_results(ticker, f"XBRL error: {e}"), None, None, None
 
-        form_type = getattr(filing, 'form', '10-K')
-        filing_date = getattr(filing, 'period_of_report', None)
+            form_type = getattr(filing, 'form', '10-K')
+            filing_date = getattr(filing, 'period_of_report', None)
+
         fiscal_period = self.tree_parser._get_fiscal_period(filing)
 
-        # Layer 1: Tree Parser (static)
-        results = self.tree_parser.map_company(ticker, filing)
+        # Layer 1: Tree Parser (static) — pass pre-parsed XBRL to avoid re-parsing
+        results = self.tree_parser.map_company(ticker, filing, xbrl=xbrl)
         self._log_layer_results(ticker, fiscal_period, results, "tree")
 
         # Validate Layer 1 and get gaps
@@ -388,10 +489,11 @@ class Orchestrator:
         max_workers: int = 4,
     ) -> Dict[str, Dict[str, MappingResult]]:
         """
-        Map companies in parallel using ProcessPoolExecutor.
+        Map companies in parallel using a persistent ProcessPoolExecutor.
 
-        Each subprocess creates its own Orchestrator to avoid
-        shared-state issues (GIL, validator caches, _current_ticker).
+        Uses the module-level persistent pool (Phase 1b) so worker processes
+        survive across multiple compute_cqs() calls. Each worker caches parsed
+        XBRL per ticker, so subsequent calls skip the expensive XBRL parsing.
         """
         all_results = {}
         snapshot_mode = self.validator._snapshot_mode
@@ -402,26 +504,26 @@ class Orchestrator:
         ]
 
         logger.info(f"Parallel mapping: {len(tickers)} companies, {max_workers} workers")
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            futures = {
-                executor.submit(_process_company_worker, args): args[0]
-                for args in args_list
-            }
+        pool = get_persistent_pool(max_workers)
+        futures = {
+            pool.submit(_process_company_worker_cached, args): args[0]
+            for args in args_list
+        }
 
-            completed = 0
-            for future in as_completed(futures):
-                ticker = futures[future]
-                try:
-                    ticker, results, validations, elapsed = future.result()
-                    all_results[ticker] = results
-                    if validations:
-                        self.validation_results[ticker] = validations
-                    self._company_timings[ticker] = elapsed
-                    completed += 1
-                    logger.info(f"[{completed}/{len(tickers)}] {ticker} done ({elapsed:.1f}s)")
-                except Exception as e:
-                    logger.error(f"{ticker} failed: {e}")
-                    all_results[ticker] = self.tree_parser._empty_results(ticker, str(e))
+        completed = 0
+        for future in as_completed(futures):
+            ticker = futures[future]
+            try:
+                ticker, results, validations, elapsed = future.result()
+                all_results[ticker] = results
+                if validations:
+                    self.validation_results[ticker] = validations
+                self._company_timings[ticker] = elapsed
+                completed += 1
+                logger.info(f"[{completed}/{len(tickers)}] {ticker} done ({elapsed:.1f}s)")
+            except Exception as e:
+                logger.error(f"{ticker} failed: {e}")
+                all_results[ticker] = self.tree_parser._empty_results(ticker, str(e))
 
         return all_results
     

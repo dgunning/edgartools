@@ -39,30 +39,32 @@ class TreeParser:
             "tree_medium": 0.80
         })
     
-    def map_company(self, ticker: str, filing=None) -> Dict[str, MappingResult]:
+    def map_company(self, ticker: str, filing=None, xbrl=None) -> Dict[str, MappingResult]:
         """
         Map all metrics for a company from its latest 10-K.
-        
+
         Args:
             ticker: Company ticker symbol
             filing: Optional specific filing to use (otherwise gets latest 10-K)
-            
+            xbrl: Optional pre-parsed XBRL object (avoids redundant parsing)
+
         Returns:
             Dict mapping metric name to MappingResult
         """
         company_config = self.config.get_company(ticker)
-        
+
         # Get XBRL data
         if filing is None:
             filing = self._get_latest_filing(ticker)
-        
+
         if filing is None:
             return self._empty_results(ticker, "No filing found")
-        
-        try:
-            xbrl = filing.xbrl()
-        except Exception as e:
-            return self._empty_results(ticker, f"XBRL parse error: {e}")
+
+        if xbrl is None:
+            try:
+                xbrl = filing.xbrl()
+            except Exception as e:
+                return self._empty_results(ticker, f"XBRL parse error: {e}")
         
         # Get fiscal period
         fiscal_period = self._get_fiscal_period(filing)

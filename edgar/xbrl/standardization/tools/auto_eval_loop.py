@@ -39,6 +39,9 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     CQSResult,
     MetricGap,
     compute_cqs,
+    compute_cqs_incremental,
+    compute_cqs_incremental_batch,
+    is_change_company_scoped,
     identify_gaps,
     generate_subcohorts,
     QUICK_EVAL_COHORT,
@@ -129,6 +132,7 @@ class ExperimentDecision:
     reason: str
     company_deltas: Dict[str, float] = field(default_factory=dict)
     duration_seconds: float = 0.0
+    new_cqs_result: Optional[CQSResult] = field(default=None, repr=False)
 
     @property
     def cqs_delta(self) -> float:
@@ -761,6 +765,7 @@ def evaluate_experiment(
         reason=reason,
         company_deltas=company_deltas,
         duration_seconds=duration,
+        new_cqs_result=new_cqs,
     )
 
 
@@ -849,16 +854,25 @@ def evaluate_experiment_in_memory(
             if target_new and target_new.cqs > target_baseline.cqs:
                 target_improved = True
 
-    # Full cohort eval with modified config (in memory)
+    # Full cohort eval — use incremental CQS for company-scoped changes (Phase 2a)
     try:
-        new_cqs = compute_cqs(
-            eval_cohort=eval_cohort,
-            snapshot_mode=True,
-            use_ai=False,
-            baseline_cqs=baseline_cqs.cqs,
-            ledger=ledger,
-            config=modified_config,
-        )
+        if is_change_company_scoped(change) and baseline_cqs.company_scores:
+            new_cqs = compute_cqs_incremental(
+                baseline_result=baseline_cqs,
+                change=change,
+                config=modified_config,
+                eval_cohort=eval_cohort,
+                ledger=ledger,
+            )
+        else:
+            new_cqs = compute_cqs(
+                eval_cohort=eval_cohort,
+                snapshot_mode=True,
+                use_ai=False,
+                baseline_cqs=baseline_cqs.cqs,
+                ledger=ledger,
+                config=modified_config,
+            )
     except Exception as e:
         return ExperimentDecision(
             decision=Decision.DISCARD,
@@ -933,6 +947,7 @@ def evaluate_experiment_in_memory(
         reason=reason,
         company_deltas=company_deltas,
         duration_seconds=duration,
+        new_cqs_result=new_cqs,
     )
 
 
@@ -2117,13 +2132,16 @@ def run_overnight(
                 consecutive_failures = 0
                 made_progress = True
 
-                # Update baseline
-                current_baseline = compute_cqs(
-                    eval_cohort=cohort,
-                    snapshot_mode=True,
-                    ledger=ledger,
-                    max_workers=max_workers,
-                )
+                # Reuse CQS from evaluation (Phase 1a optimization)
+                if result.new_cqs_result is not None:
+                    current_baseline = result.new_cqs_result
+                else:
+                    current_baseline = compute_cqs(
+                        eval_cohort=cohort,
+                        snapshot_mode=True,
+                        ledger=ledger,
+                        max_workers=max_workers,
+                    )
                 if current_baseline.cqs > report.cqs_peak:
                     report.cqs_peak = current_baseline.cqs
 
@@ -3166,14 +3184,18 @@ def propose_and_evaluate_loop(
             cp.keeps += 1
             # Update baseline for next proposal (rolling baseline)
             baseline_config = apply_change_to_config(change, baseline_config)
-            baseline_cqs = compute_cqs(
-                eval_cohort=eval_cohort,
-                snapshot_mode=True,
-                use_ai=False,
-                ledger=ledger,
-                max_workers=max_workers,
-                config=baseline_config,
-            )
+            # Reuse CQS from evaluate_experiment_in_memory (Phase 1a optimization)
+            if result.new_cqs_result is not None:
+                baseline_cqs = result.new_cqs_result
+            else:
+                baseline_cqs = compute_cqs(
+                    eval_cohort=eval_cohort,
+                    snapshot_mode=True,
+                    use_ai=False,
+                    ledger=ledger,
+                    max_workers=max_workers,
+                    config=baseline_config,
+                )
             cp.current_cqs = baseline_cqs.cqs
 
             evaluated.append(EvaluatedProposal(
@@ -3384,13 +3406,17 @@ def evaluate_proposals_in_memory(
         if result.decision == Decision.KEEP:
             cp.keeps += 1
             current_config = apply_change_to_config(record.proposal, current_config)
-            current_cqs = compute_cqs(
-                eval_cohort=eval_cohort,
-                snapshot_mode=True,
-                use_ai=False,
-                ledger=ledger,
-                config=current_config,
-            )
+            # Reuse CQS from evaluate_experiment_in_memory (Phase 1a optimization)
+            if result.new_cqs_result is not None:
+                current_cqs = result.new_cqs_result
+            else:
+                current_cqs = compute_cqs(
+                    eval_cohort=eval_cohort,
+                    snapshot_mode=True,
+                    use_ai=False,
+                    ledger=ledger,
+                    config=current_config,
+                )
             cp.current_cqs = current_cqs.cqs
 
             evaluated.append(EvaluatedProposal(
@@ -3507,8 +3533,9 @@ class TeamSession:
     ) -> OvernightReport:
         """Validate worker-approved proposals on FULL cohort.
 
-        De-duplicates conflicting proposals, then evaluates each winner
-        against the full eval_cohort. Only the coordinator calls this.
+        De-duplicates conflicting proposals, then evaluates winners using
+        batched evaluation for non-conflicting company-scoped changes (Phase 2b)
+        and sequential evaluation for global-scoped changes.
 
         Args:
             proposals: EvaluatedProposal results from workers.
@@ -3531,7 +3558,20 @@ class TeamSession:
             f"(from {len(proposals)} worker results) on full {len(self.eval_cohort)}-company cohort"
         )
 
-        # Evaluate each on full cohort
+        # Phase 2b: Split into batchable (company-scoped) and sequential (global)
+        company_scoped = []
+        global_scoped = []
+        for change in non_conflicting:
+            if is_change_company_scoped(change):
+                company_scoped.append(change)
+            else:
+                global_scoped.append(change)
+
+        logger.info(
+            f"[TeamSession] Proposal split: {len(company_scoped)} company-scoped (batchable), "
+            f"{len(global_scoped)} global-scoped (sequential)"
+        )
+
         current_config = self.baseline_config
         current_cqs = self.baseline_cqs
         kept = []
@@ -3539,7 +3579,83 @@ class TeamSession:
         vetoed = 0
         cqs_peak = current_cqs.cqs
 
-        for change in non_conflicting:
+        # --- Batch evaluate company-scoped proposals ---
+        if company_scoped:
+            batch_config = current_config
+            for change in company_scoped:
+                batch_config = apply_change_to_config(change, batch_config)
+
+            try:
+                batch_cqs = compute_cqs_incremental_batch(
+                    baseline_result=current_cqs,
+                    changes=company_scoped,
+                    config=batch_config,
+                    eval_cohort=self.eval_cohort,
+                    ledger=self.ledger,
+                    max_workers=max_workers,
+                )
+                # Check: batch improved or held steady AND no regressions
+                if not batch_cqs.vetoed and batch_cqs.cqs >= current_cqs.cqs - 0.0001:
+                    # Batch success — keep all
+                    current_config = batch_config
+                    current_cqs = batch_cqs
+                    kept.extend(company_scoped)
+                    cqs_peak = max(cqs_peak, current_cqs.cqs)
+                    logger.info(
+                        f"[TeamSession] BATCH KEEP: {len(company_scoped)} company-scoped proposals "
+                        f"-> CQS={current_cqs.cqs:.4f}"
+                    )
+                else:
+                    # Batch failed — fall back to individual evaluation
+                    logger.info(
+                        f"[TeamSession] Batch evaluation regressed "
+                        f"({current_cqs.cqs:.4f} -> {batch_cqs.cqs:.4f}), "
+                        f"falling back to individual evaluation"
+                    )
+                    for change in company_scoped:
+                        result = evaluate_experiment_in_memory(
+                            change=change,
+                            baseline_cqs=current_cqs,
+                            baseline_config=current_config,
+                            eval_cohort=self.eval_cohort,
+                            ledger=self.ledger,
+                        )
+                        if result.decision == Decision.KEEP:
+                            current_config = apply_change_to_config(change, current_config)
+                            if result.new_cqs_result is not None:
+                                current_cqs = result.new_cqs_result
+                            kept.append(change)
+                            cqs_peak = max(cqs_peak, current_cqs.cqs)
+                            logger.info(f"[TeamSession] KEEP: {change.target_metric} -> CQS={current_cqs.cqs:.4f}")
+                        elif result.decision == Decision.VETO:
+                            vetoed += 1
+                            logger.info(f"[TeamSession] VETO: {change.target_metric}")
+                        else:
+                            discarded += 1
+                            logger.info(f"[TeamSession] DISCARD: {change.target_metric}")
+            except Exception as e:
+                logger.warning(f"[TeamSession] Batch evaluation error: {e}, falling back to sequential")
+                for change in company_scoped:
+                    result = evaluate_experiment_in_memory(
+                        change=change,
+                        baseline_cqs=current_cqs,
+                        baseline_config=current_config,
+                        eval_cohort=self.eval_cohort,
+                        ledger=self.ledger,
+                    )
+                    if result.decision == Decision.KEEP:
+                        current_config = apply_change_to_config(change, current_config)
+                        if result.new_cqs_result is not None:
+                            current_cqs = result.new_cqs_result
+                        kept.append(change)
+                        cqs_peak = max(cqs_peak, current_cqs.cqs)
+                    elif result.decision == Decision.VETO:
+                        vetoed += 1
+                    else:
+                        discarded += 1
+
+        # --- Sequential evaluation for global-scoped proposals ---
+        for change in global_scoped:
             result = evaluate_experiment_in_memory(
                 change=change,
                 baseline_cqs=current_cqs,
@@ -3550,14 +3666,17 @@ class TeamSession:
 
             if result.decision == Decision.KEEP:
                 current_config = apply_change_to_config(change, current_config)
-                current_cqs = compute_cqs(
-                    eval_cohort=self.eval_cohort,
-                    snapshot_mode=True,
-                    use_ai=False,
-                    ledger=self.ledger,
-                    max_workers=max_workers,
-                    config=current_config,
-                )
+                if result.new_cqs_result is not None:
+                    current_cqs = result.new_cqs_result
+                else:
+                    current_cqs = compute_cqs(
+                        eval_cohort=self.eval_cohort,
+                        snapshot_mode=True,
+                        use_ai=False,
+                        ledger=self.ledger,
+                        max_workers=max_workers,
+                        config=current_config,
+                    )
                 kept.append(change)
                 cqs_peak = max(cqs_peak, current_cqs.cqs)
                 logger.info(f"[TeamSession] KEEP: {change.target_metric} -> CQS={current_cqs.cqs:.4f}")
@@ -3594,6 +3713,12 @@ class TeamSession:
             f"CQS {self.baseline_cqs.cqs:.4f} -> {current_cqs.cqs:.4f}"
         )
         return report
+
+    def shutdown(self):
+        """Clean up resources (persistent pool, etc.)."""
+        from edgar.xbrl.standardization.orchestrator import shutdown_persistent_pool
+        shutdown_persistent_pool()
+        logger.info(f"[TeamSession] Session {self.session_id} shut down")
 
     def dashboard(self) -> str:
         """Print current team status from checkpoint files."""

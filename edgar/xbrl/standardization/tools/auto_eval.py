@@ -522,6 +522,246 @@ def compute_cqs(
     return result
 
 
+# =============================================================================
+# INCREMENTAL CQS (Phase 2a)
+# =============================================================================
+
+# Change types that only affect specific companies (safe for incremental eval)
+_COMPANY_SCOPED_CHANGES = frozenset([
+    "add_exclusion",
+    "add_known_variance",
+    "add_company_override",
+    "set_industry",
+])
+
+# Change types that can affect ALL companies (must use full eval)
+_GLOBAL_SCOPED_CHANGES = frozenset([
+    "add_concept",
+    "add_tree_hint",
+    "add_standardization",
+    "remove_pattern",
+    "modify_value",
+    "add_divergence",
+])
+
+
+def is_change_company_scoped(change) -> bool:
+    """Determine if a config change only affects specific companies.
+
+    Company-scoped changes are safe for incremental CQS — they can't cause
+    cross-company regressions. Global changes MUST use full-cohort evaluation.
+    """
+    change_type = change.change_type.value if hasattr(change.change_type, 'value') else str(change.change_type)
+    if change_type in _COMPANY_SCOPED_CHANGES:
+        # Must also have specific target companies
+        targets = [t.strip() for t in change.target_companies.split(",") if t.strip()]
+        return len(targets) > 0
+    return False
+
+
+def get_affected_tickers(change) -> List[str]:
+    """Extract the list of tickers affected by a config change."""
+    return [t.strip() for t in change.target_companies.split(",") if t.strip()]
+
+
+def compute_cqs_incremental(
+    baseline_result: CQSResult,
+    change,
+    config,
+    eval_cohort: Optional[List[str]] = None,
+    ledger=None,
+    max_workers: Optional[int] = None,
+) -> CQSResult:
+    """Incrementally recompute CQS after a config change.
+
+    For company-scoped changes (add_exclusion, add_known_variance), only
+    re-evaluates the affected company(ies) and substitutes into the baseline
+    matrix. For global changes, falls back to full compute_cqs().
+
+    Args:
+        baseline_result: The CQSResult from the previous evaluation.
+        change: ConfigChange describing what was modified.
+        config: The MappingConfig with the change already applied.
+        eval_cohort: Full list of tickers in the cohort.
+        ledger: ExperimentLedger for golden master lookups.
+        max_workers: Parallel workers for full eval fallback.
+
+    Returns:
+        Updated CQSResult with the change reflected.
+    """
+    from edgar.xbrl.standardization.orchestrator import Orchestrator
+    from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+
+    start_time = time.time()
+
+    if eval_cohort is None:
+        eval_cohort = QUICK_EVAL_COHORT
+
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    # Safety check: global changes must use full eval
+    if not is_change_company_scoped(change):
+        logger.info(
+            f"Incremental CQS: change type '{change.change_type.value}' is global-scoped, "
+            f"falling back to full compute_cqs()"
+        )
+        return compute_cqs(
+            eval_cohort=eval_cohort,
+            snapshot_mode=True,
+            use_ai=False,
+            baseline_cqs=baseline_result.cqs,
+            ledger=ledger,
+            max_workers=max_workers,
+            config=config,
+        )
+
+    affected = get_affected_tickers(change)
+    # Only re-evaluate tickers that are in the eval cohort
+    affected_in_cohort = [t for t in affected if t in baseline_result.company_scores]
+
+    if not affected_in_cohort:
+        # Change doesn't affect any company in the cohort — return baseline unchanged
+        logger.info(f"Incremental CQS: no affected tickers in cohort, returning baseline")
+        return baseline_result
+
+    # Re-evaluate only the affected companies with the new config
+    workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
+    orchestrator = Orchestrator(config=config, snapshot_mode=True)
+    updated_results = orchestrator.map_companies(
+        tickers=affected_in_cohort, use_ai=False, validate=True,
+        max_workers=min(workers, len(affected_in_cohort)),
+    )
+
+    # Gather golden masters
+    golden_masters = ledger.get_all_golden_masters(active_only=True)
+    golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
+
+    # Build updated company_scores: start from baseline, substitute affected
+    updated_scores = dict(baseline_result.company_scores)
+    for ticker in affected_in_cohort:
+        if ticker in updated_results:
+            updated_scores[ticker] = _compute_company_cqs(
+                ticker,
+                updated_results[ticker],
+                golden_set,
+                orchestrator.validation_results.get(ticker, {}),
+            )
+
+    # Re-aggregate with the updated matrix
+    result = _aggregate_cqs(updated_scores, baseline_result.cqs, time.time() - start_time)
+
+    # Record results for affected companies
+    if updated_results:
+        record_eval_results(updated_results, orchestrator.validation_results, ledger)
+
+    logger.info(
+        f"Incremental CQS: re-evaluated {len(affected_in_cohort)} company(ies) "
+        f"({', '.join(affected_in_cohort)}), "
+        f"CQS {baseline_result.cqs:.4f} -> {result.cqs:.4f} "
+        f"({time.time() - start_time:.1f}s)"
+    )
+    return result
+
+
+def compute_cqs_incremental_batch(
+    baseline_result: CQSResult,
+    changes: list,
+    config,
+    eval_cohort: Optional[List[str]] = None,
+    ledger=None,
+    max_workers: Optional[int] = None,
+) -> CQSResult:
+    """Incrementally recompute CQS after multiple company-scoped changes.
+
+    Collects all affected tickers from the batch of changes, re-evaluates
+    them in a single orchestrator run, and re-aggregates the matrix.
+
+    All changes must be company-scoped. If any global change is present,
+    falls back to full compute_cqs().
+
+    Args:
+        baseline_result: CQSResult from previous evaluation.
+        changes: List of ConfigChanges already applied to config.
+        config: MappingConfig with all changes applied.
+        eval_cohort: Full cohort tickers.
+        ledger: ExperimentLedger.
+        max_workers: Workers for orchestrator.
+
+    Returns:
+        Updated CQSResult with all changes reflected.
+    """
+    from edgar.xbrl.standardization.orchestrator import Orchestrator
+    from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+
+    start_time = time.time()
+
+    if eval_cohort is None:
+        eval_cohort = QUICK_EVAL_COHORT
+
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    # Collect all affected tickers across the batch
+    all_affected = set()
+    for change in changes:
+        if not is_change_company_scoped(change):
+            logger.info(
+                f"Incremental batch: found global change '{change.change_type.value}', "
+                f"falling back to full eval"
+            )
+            return compute_cqs(
+                eval_cohort=eval_cohort,
+                snapshot_mode=True,
+                use_ai=False,
+                baseline_cqs=baseline_result.cqs,
+                ledger=ledger,
+                max_workers=max_workers,
+                config=config,
+            )
+        all_affected.update(get_affected_tickers(change))
+
+    # Only re-evaluate tickers in the eval cohort
+    affected_in_cohort = [t for t in all_affected if t in baseline_result.company_scores]
+
+    if not affected_in_cohort:
+        return baseline_result
+
+    # Re-evaluate affected companies with the batch config
+    workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
+    orchestrator = Orchestrator(config=config, snapshot_mode=True)
+    updated_results = orchestrator.map_companies(
+        tickers=affected_in_cohort, use_ai=False, validate=True,
+        max_workers=min(workers, len(affected_in_cohort)),
+    )
+
+    golden_masters = ledger.get_all_golden_masters(active_only=True)
+    golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
+
+    updated_scores = dict(baseline_result.company_scores)
+    for ticker in affected_in_cohort:
+        if ticker in updated_results:
+            updated_scores[ticker] = _compute_company_cqs(
+                ticker,
+                updated_results[ticker],
+                golden_set,
+                orchestrator.validation_results.get(ticker, {}),
+            )
+
+    result = _aggregate_cqs(updated_scores, baseline_result.cqs, time.time() - start_time)
+
+    if updated_results:
+        record_eval_results(updated_results, orchestrator.validation_results, ledger)
+
+    logger.info(
+        f"Incremental batch CQS: {len(changes)} changes, "
+        f"re-evaluated {len(affected_in_cohort)} company(ies), "
+        f"CQS {baseline_result.cqs:.4f} -> {result.cqs:.4f} "
+        f"({time.time() - start_time:.1f}s)"
+    )
+    return result
+
+
 def _compute_company_cqs(
     ticker: str,
     metrics: Dict[str, MappingResult],
