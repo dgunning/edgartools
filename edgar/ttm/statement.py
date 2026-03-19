@@ -514,7 +514,7 @@ class TTMStatementBuilder:
 
         """
         return self._build_statement(
-            self.facts.cash_flow,
+            self.facts.cashflow_statement,
             'CashFlowStatement',
             as_of,
             max_periods=max_periods

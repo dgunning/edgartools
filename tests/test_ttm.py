@@ -1681,3 +1681,64 @@ class TestCompanyTTMIntegration:
         assert stmt is not None
         assert stmt.statement_type == 'IncomeStatement'
         assert len(stmt.periods) == 2
+
+    def test_facts_income_statement_ttm_periods(self):
+        """Test that facts.income_statement(period='ttm', periods=2) is supported."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        stmt = facts.income_statement(period='ttm', periods=2)
+
+        assert stmt is not None
+        assert stmt.statement_type == 'IncomeStatement'
+        assert len(stmt.periods) == 2
+
+    def test_facts_cashflow_statement_ttm_periods(self):
+        """Test that facts.cashflow_statement(period='ttm', periods=2) is supported."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        stmt = facts.cashflow_statement(period='ttm', periods=2)
+
+        assert stmt is not None
+        assert stmt.statement_type == 'CashFlowStatement'
+        assert len(stmt.periods) == 2
+
+    def test_facts_balance_sheet_ttm_raises(self):
+        """Balance sheet should reject TTM period because it is point-in-time data."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        with pytest.raises(ValueError, match="TTM not applicable"):
+            facts.balance_sheet(period='ttm')
+
+    def test_facts_get_ttm_revenue(self):
+        """Test that facts.get_ttm_revenue() is available and returns a metric."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        ttm = facts.get_ttm_revenue()
+        assert ttm is not None
+        assert ttm.value is not None
+
+    def test_company_get_ttm_delegates(self):
+        """Test that Company.get_ttm() delegates correctly to facts-level API."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        ttm = company.get_ttm("Revenues")
+
+        assert ttm is not None
+        assert ttm.value is not None
