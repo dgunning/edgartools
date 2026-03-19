@@ -341,12 +341,16 @@ class ExperimentLedger:
         """Get a database connection. Reuses persistent connection for :memory: DBs."""
         if self._persistent_conn is not None:
             return self._persistent_conn
-        return sqlite3.connect(self.db_path)
+        return sqlite3.connect(self.db_path, timeout=30)
 
     def _init_database(self):
         """Initialize database schema."""
         with self._connect() as conn:
             cursor = conn.cursor()
+
+            # Enable WAL mode for concurrent read access (workers read while coordinator writes)
+            if self.db_path != ":memory:":
+                cursor.execute("PRAGMA journal_mode=WAL")
 
             # Extraction runs table
             cursor.execute('''

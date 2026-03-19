@@ -151,74 +151,74 @@ Schedule nightly focus to prevent wandering:
 
 For faster gap resolution, launch 3 parallel worker agents on sub-cohorts, then coordinate centrally.
 
-### Architecture
+### Architecture (Propose + Evaluate)
 
 ```
 COORDINATOR (main session)
     |-- Launch 3 WORKER agents in parallel (sub-cohorts A/B/C)
-    |       Each: propose_only_loop() → writes proposals JSON
-    |       Does NOT apply config changes
+    |       Each: propose_and_evaluate_loop() → evaluates in-memory, returns KEEPs only
+    |       Does NOT write to disk — uses in-memory config copies
     |
-    |-- Collect proposals from all 3 workers
-    |-- Apply + evaluate sequentially (one at a time, with ConfigLock)
+    |-- Collect KEEP proposals from all 3 workers
+    |-- Validate winners on full 50-company cohort (disk writes, ConfigLock)
     |-- After 3 KEEPs: global CQS checkpoint on all 50 companies
     |
     |-- Hard gaps (exhausted) → COMPOSITE-METRIC-MASTER agent
     |-- Repeat until CQS >= target or exhausted
 ```
 
+**Key speedup**: Workers evaluate proposals on their sub-cohorts using in-memory config copies (no disk I/O, no locks). The coordinator only validates the pre-filtered winners.
+
 ### Step 1: Establish Baseline
 
 ```python
 from edgar.xbrl.standardization.tools.auto_eval import compute_cqs, EXPANSION_COHORT_50
-from edgar.xbrl.standardization.tools.auto_eval_loop import enable_wal_mode
 from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
 
 ledger = ExperimentLedger()
-enable_wal_mode(ledger)  # Required for concurrent reads
 baseline = compute_cqs(eval_cohort=EXPANSION_COHORT_50, snapshot_mode=True, ledger=ledger)
 ```
 
-### Step 2: Launch 3 Worker Agents
+### Step 2: Launch 3 Worker Agents (Propose + Evaluate)
 
 Launch via Agent tool with `subagent_type="auto-eval-runner"`:
 
-Each worker runs:
+Each worker runs `propose_and_evaluate_loop()` which proposes AND evaluates in-memory:
 ```python
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
-    propose_only_loop, save_proposals_to_json, propose_change,
+    propose_and_evaluate_loop, propose_change,
 )
 from edgar.xbrl.standardization.tools.auto_eval import SUB_COHORT_A  # or B, C
 
-proposals = propose_only_loop(
+# Worker proposes AND evaluates on its sub-cohort (in-memory, no disk writes)
+evaluated = propose_and_evaluate_loop(
     eval_cohort=SUB_COHORT_A,
     propose_fn=propose_change,
     max_workers=2,
     worker_id="worker_A",
 )
-save_proposals_to_json(proposals, Path("...proposals_worker_A.json"))
+# Returns only KEEP proposals — pre-filtered by CQS evaluation
 ```
 
-### Step 3: Coordinator Collects & Evaluates
+**Fallback**: `propose_only_loop()` is still available for propose-only mode.
+
+### Step 3: Coordinator Validates Winners
 
 ```python
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
-    load_proposals_from_json, select_non_conflicting,
-    evaluate_experiment, log_experiment, ConfigLock,
+    apply_config_change, revert_config_change,
+    evaluate_experiment, log_experiment,
 )
 
-# Collect from all workers
-all_proposals = []
-for path in proposal_files:
-    all_proposals.extend(load_proposals_from_json(path))
-
-# De-duplicate and filter non-conflicting
-batch = select_non_conflicting([p.proposal for p in all_proposals])
-
-# Evaluate sequentially (coordinator only)
-for change in batch:
-    result = evaluate_experiment(change, baseline, ledger=ledger)
-    log_experiment(change, result, ledger)
+# Coordinator: only validates worker-approved proposals on full cohort
+for ep in worker_keeps:
+    apply_config_change(ep.proposal)  # disk write
+    result = evaluate_experiment(ep.proposal, baseline, eval_cohort=EXPANSION_COHORT_50, ledger=ledger)
+    log_experiment(ep.proposal, result, ledger)
+    if result.decision != Decision.KEEP:
+        revert_config_change(ep.proposal)
+    else:
+        baseline = compute_cqs(eval_cohort=EXPANSION_COHORT_50, snapshot_mode=True, ledger=ledger)
 ```
 
 ### Step 4: Hard Gaps → Composite Metric Master

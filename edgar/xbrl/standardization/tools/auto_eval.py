@@ -234,6 +234,7 @@ def compute_cqs(
     baseline_cqs: Optional[float] = None,
     ledger=None,
     max_workers: Optional[int] = None,
+    config=None,
 ) -> CQSResult:
     """
     Compute the Composite Quality Score for a cohort of companies.
@@ -249,6 +250,7 @@ def compute_cqs(
         baseline_cqs: If provided, regressions trigger hard veto below this value.
         ledger: ExperimentLedger instance for golden master lookups.
         max_workers: Parallel workers (None = use DEFAULT_MAX_WORKERS).
+        config: In-memory MappingConfig for parallel eval (None = load from disk).
 
     Returns:
         CQSResult with composite score and per-company breakdown.
@@ -266,7 +268,7 @@ def compute_cqs(
 
     # Run orchestrator on the cohort
     workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
-    orchestrator = Orchestrator(snapshot_mode=snapshot_mode)
+    orchestrator = Orchestrator(config=config, snapshot_mode=snapshot_mode)
     all_results = orchestrator.map_companies(
         tickers=eval_cohort, use_ai=use_ai, validate=True,
         max_workers=workers,
@@ -532,6 +534,7 @@ def identify_gaps(
     ledger=None,
     max_graveyard: int = 3,
     max_workers: Optional[int] = None,
+    config=None,
 ) -> Tuple[List[MetricGap], CQSResult]:
     """
     Run evaluation and identify gaps ranked by CQS impact.
@@ -546,6 +549,7 @@ def identify_gaps(
         ledger: ExperimentLedger for golden master + graveyard lookups.
         max_graveyard: Skip gaps with this many graveyard entries.
         max_workers: Number of parallel workers (1 = sequential, >1 = parallel).
+        config: In-memory MappingConfig for parallel eval (None = load from disk).
 
     Returns:
         Tuple of (ranked gaps, CQS result).
@@ -562,7 +566,7 @@ def identify_gaps(
     # Run orchestrator ONCE — reuse results for both CQS computation and gap analysis
     workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
     start_time = time.time()
-    orchestrator = Orchestrator(snapshot_mode=snapshot_mode)
+    orchestrator = Orchestrator(config=config, snapshot_mode=snapshot_mode)
     all_results = orchestrator.map_companies(
         tickers=eval_cohort, use_ai=use_ai, validate=True,
         max_workers=workers,

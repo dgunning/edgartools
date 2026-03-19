@@ -40,12 +40,12 @@ def _process_company_worker(args):
     Each subprocess creates its own Orchestrator to avoid shared-state issues.
     Must be top-level (not a method/closure) to be pickle-able.
     """
-    ticker, snapshot_mode, use_ai, validate = args
+    ticker, snapshot_mode, use_ai, validate, config = args
 
     set_identity("Dev Gunning developer-gunning@gmail.com")
     use_local_storage(True)
 
-    orch = Orchestrator(snapshot_mode=snapshot_mode)
+    orch = Orchestrator(config=config, snapshot_mode=snapshot_mode)
     results, xbrl, filing_date, form_type = orch._map_company_with_xbrl(
         ticker, use_ai=use_ai
     )
@@ -391,7 +391,7 @@ class Orchestrator:
         snapshot_mode = self.validator._snapshot_mode
 
         args_list = [
-            (ticker, snapshot_mode, use_ai, validate)
+            (ticker, snapshot_mode, use_ai, validate, self.config)
             for ticker in tickers
         ]
 

@@ -271,43 +271,62 @@ Use these as the benchmark when reporting session results.
 
 ## Worker Mode (Multi-Agent Protocol)
 
-When launched by the coordinator with a sub-cohort and `propose_only=True`, run in **worker mode**:
+When launched by the coordinator with a sub-cohort, run in **worker mode**. Two modes are available:
 
-1. **Do NOT apply config changes** — only generate proposals
-2. **Do NOT call evaluate_experiment()** — the coordinator handles evaluation
-3. **Write proposals to JSON** — the coordinator collects them
+### Propose + Evaluate Mode (Recommended)
 
-### Worker Mode Usage
+Workers propose AND evaluate on their sub-cohort using in-memory config copies. No disk writes, no locks. Only KEEP proposals are returned.
 
 ```python
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
-    propose_only_loop, save_proposals_to_json, propose_change,
+    propose_and_evaluate_loop, propose_change,
     make_escalation_propose_fn,
 )
 from edgar.xbrl.standardization.tools.auto_eval import SUB_COHORT_A
 from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
-from pathlib import Path
 
 ledger = ExperimentLedger()
 
-# Generate proposals without applying them
-proposals = propose_only_loop(
+# Propose AND evaluate on sub-cohort (in-memory, no disk writes)
+evaluated = propose_and_evaluate_loop(
     eval_cohort=SUB_COHORT_A,
     propose_fn=propose_change,  # or make_escalation_propose_fn(gpt_caller=...)
     ledger=ledger,
     max_workers=2,
     worker_id="worker_A",
 )
+# Returns only KEEP proposals — coordinator validates on full cohort
+```
 
-# Save for coordinator collection
+### Propose-Only Mode (Legacy)
+
+Workers generate proposals without evaluating. Coordinator evaluates all proposals sequentially.
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    propose_only_loop, save_proposals_to_json, propose_change,
+)
+from edgar.xbrl.standardization.tools.auto_eval import SUB_COHORT_A
+from pathlib import Path
+
+ledger = ExperimentLedger()
+
+proposals = propose_only_loop(
+    eval_cohort=SUB_COHORT_A,
+    propose_fn=propose_change,
+    ledger=ledger,
+    max_workers=2,
+    worker_id="worker_A",
+)
+
 output_path = Path("edgar/xbrl/standardization/company_mappings/proposals_worker_A.json")
 save_proposals_to_json(proposals, output_path)
 ```
 
 ### Worker Mode Safety
 
-- Workers are **read-only** on config files
-- Workers share the same SQLite ledger (WAL mode enabled)
+- Workers use **in-memory config copies** — no disk writes in propose+evaluate mode
+- Workers share the same SQLite ledger (WAL mode enabled, 30s timeout)
 - Workers use `max_workers=2` each (6 total cores across 3 workers)
 - If the worker has MCP access, it can use `mcp__pal__chat` for GPT escalation
 

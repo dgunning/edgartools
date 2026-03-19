@@ -450,6 +450,109 @@ def revert_all_configs() -> None:
 
 
 # =============================================================================
+# IN-MEMORY CONFIG MUTATION (for parallel eval)
+# =============================================================================
+
+def apply_change_to_config(change: ConfigChange, config) -> 'MappingConfig':
+    """
+    Apply a config change to an in-memory MappingConfig. Returns a new copy.
+
+    This is the in-memory equivalent of apply_config_change(). It operates on
+    a MappingConfig deepcopy instead of YAML files on disk, enabling parallel
+    evaluation without file locks or disk I/O.
+
+    Args:
+        change: The config change to apply.
+        config: The baseline MappingConfig to mutate (not modified in place).
+
+    Returns:
+        A new MappingConfig with the change applied.
+    """
+    import copy
+    new_config = copy.deepcopy(config)
+
+    if change.change_type == ChangeType.ADD_CONCEPT:
+        metric = new_config.metrics.get(change.target_metric)
+        if metric and change.new_value not in metric.known_concepts:
+            metric.known_concepts.append(change.new_value)
+
+    elif change.change_type == ChangeType.ADD_EXCLUSION:
+        company = new_config.companies.get(change.target_companies)
+        if company and change.new_value not in company.exclude_metrics:
+            company.exclude_metrics.append(change.new_value)
+
+    elif change.change_type == ChangeType.ADD_STANDARDIZATION:
+        metric = new_config.metrics.get(change.target_metric)
+        if metric:
+            if metric.standardization is None:
+                metric.standardization = {}
+            std = metric.standardization
+            val = change.new_value if isinstance(change.new_value, dict) else {}
+            scope = val.get("scope", "default")
+            components = val.get("components", [])
+            notes = val.get("notes", "")
+
+            if scope == "default":
+                std["default"] = {"components": components}
+                if notes:
+                    std["default"]["notes"] = notes
+            elif scope.startswith("company:"):
+                ticker_key = scope.split(":", 1)[1]
+                if "company_overrides" not in std:
+                    std["company_overrides"] = {}
+                std["company_overrides"][ticker_key] = {"components": components}
+                if notes:
+                    std["company_overrides"][ticker_key]["notes"] = notes
+            elif scope.startswith("sector:"):
+                sector_key = scope.split(":", 1)[1]
+                if "sector_overrides" not in std:
+                    std["sector_overrides"] = {}
+                std["sector_overrides"][sector_key] = {"components": components}
+                if notes:
+                    std["sector_overrides"][sector_key]["notes"] = notes
+
+    elif change.change_type == ChangeType.ADD_KNOWN_VARIANCE:
+        metric = new_config.metrics.get(change.target_metric)
+        if metric:
+            if metric.known_variances is None:
+                metric.known_variances = {}
+            kv_data = change.new_value if isinstance(change.new_value, dict) else {}
+            ticker_key = kv_data.get("ticker", "")
+            if ticker_key:
+                metric.known_variances[ticker_key] = {
+                    "status": kv_data.get("status", "formula_added"),
+                    "variance_pct": kv_data.get("variance_pct", 0),
+                    "reason": kv_data.get("reason", "Auto-solver discovered formula"),
+                }
+
+    elif change.change_type == ChangeType.ADD_TREE_HINT:
+        metric = new_config.metrics.get(change.target_metric)
+        if metric and isinstance(change.new_value, dict):
+            metric.tree_hints.update(change.new_value)
+
+    elif change.change_type == ChangeType.SET_INDUSTRY:
+        company = new_config.companies.get(change.target_companies)
+        if company:
+            company.industry = change.new_value
+
+    elif change.change_type == ChangeType.ADD_COMPANY_OVERRIDE:
+        company = new_config.companies.get(change.target_companies)
+        if company and isinstance(change.new_value, dict):
+            company.metric_overrides.update(change.new_value)
+
+    elif change.change_type == ChangeType.ADD_DIVERGENCE:
+        company = new_config.companies.get(change.target_companies)
+        if company and isinstance(change.new_value, dict):
+            company.metric_overrides.update(change.new_value)
+
+    elif change.change_type in (ChangeType.REMOVE_PATTERN, ChangeType.MODIFY_VALUE):
+        # These are rare in auto-eval; fall through without mutation
+        logger.warning(f"apply_change_to_config: {change.change_type} not supported in-memory")
+
+    return new_config
+
+
+# =============================================================================
 # EXPERIMENT EVALUATION
 # =============================================================================
 
@@ -648,6 +751,178 @@ def evaluate_experiment(
         )
     else:
         reason = f"CQS improved by {delta:.4f}"
+    return ExperimentDecision(
+        decision=Decision.KEEP,
+        cqs_before=baseline_cqs.cqs,
+        cqs_after=new_cqs.cqs,
+        reason=reason,
+        company_deltas=company_deltas,
+        duration_seconds=duration,
+    )
+
+
+# =============================================================================
+# IN-MEMORY EXPERIMENT EVALUATION (for parallel eval)
+# =============================================================================
+
+def evaluate_experiment_in_memory(
+    change: ConfigChange,
+    baseline_cqs: CQSResult,
+    baseline_config,
+    eval_cohort: Optional[List[str]] = None,
+    ledger: Optional[ExperimentLedger] = None,
+    max_company_drop: float = 5.0,
+) -> ExperimentDecision:
+    """
+    Evaluate a config change using in-memory config. No disk writes, no locks.
+
+    Same decision logic as evaluate_experiment() but uses apply_change_to_config()
+    instead of apply_config_change()/revert_config_change(). No ConfigLock needed,
+    no revert needed — the baseline_config is never modified.
+
+    Args:
+        change: The config change to evaluate.
+        baseline_cqs: CQS before the change.
+        baseline_config: The in-memory MappingConfig to apply the change to.
+        eval_cohort: Companies to evaluate on.
+        ledger: Ledger for golden master lookups.
+        max_company_drop: Maximum allowed per-company pass_rate drop (pp).
+
+    Returns:
+        ExperimentDecision with KEEP/DISCARD/VETO and reasoning.
+    """
+    start_time = time.time()
+
+    if eval_cohort is None:
+        eval_cohort = QUICK_EVAL_COHORT
+
+    # Apply change in memory (returns new config, baseline_config untouched)
+    try:
+        modified_config = apply_change_to_config(change, baseline_config)
+    except Exception as e:
+        return ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=baseline_cqs.cqs,
+            reason=f"Failed to apply change in memory: {e}",
+            duration_seconds=time.time() - start_time,
+        )
+
+    # --- FAST PRE-SCREEN for company-scoped changes ---
+    target_tickers = [t.strip() for t in change.target_companies.split(",") if t.strip()]
+    target_improved = False
+
+    if len(target_tickers) == 1 and eval_cohort and len(eval_cohort) > 5:
+        target = target_tickers[0]
+        target_baseline = baseline_cqs.company_scores.get(target)
+
+        if target_baseline is not None:
+            try:
+                target_cqs = compute_cqs(
+                    eval_cohort=[target],
+                    snapshot_mode=True,
+                    use_ai=False,
+                    ledger=ledger,
+                    config=modified_config,
+                )
+            except Exception as e:
+                return ExperimentDecision(
+                    decision=Decision.DISCARD,
+                    cqs_before=baseline_cqs.cqs,
+                    cqs_after=baseline_cqs.cqs,
+                    reason=f"In-memory pre-screen error: {e}",
+                    duration_seconds=time.time() - start_time,
+                )
+
+            target_new = target_cqs.company_scores.get(target)
+            if target_new and target_new.cqs <= target_baseline.cqs:
+                return ExperimentDecision(
+                    decision=Decision.DISCARD,
+                    cqs_before=target_baseline.cqs,
+                    cqs_after=target_new.cqs,
+                    reason=f"In-memory pre-screen: {target} CQS not improved ({target_baseline.cqs:.4f} -> {target_new.cqs:.4f})",
+                    duration_seconds=time.time() - start_time,
+                )
+            if target_new and target_new.cqs > target_baseline.cqs:
+                target_improved = True
+
+    # Full cohort eval with modified config (in memory)
+    try:
+        new_cqs = compute_cqs(
+            eval_cohort=eval_cohort,
+            snapshot_mode=True,
+            use_ai=False,
+            baseline_cqs=baseline_cqs.cqs,
+            ledger=ledger,
+            config=modified_config,
+        )
+    except Exception as e:
+        return ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=baseline_cqs.cqs,
+            reason=f"In-memory evaluation error: {e}",
+            duration_seconds=time.time() - start_time,
+        )
+
+    duration = time.time() - start_time
+
+    # Check for hard veto (regressions)
+    if new_cqs.vetoed or new_cqs.total_regressions > 0:
+        return ExperimentDecision(
+            decision=Decision.VETO,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=new_cqs.cqs,
+            reason=f"HARD VETO: {new_cqs.total_regressions} regression(s) detected",
+            duration_seconds=duration,
+        )
+
+    # Check per-company drops
+    company_deltas: Dict[str, float] = {}
+    for ticker, new_score in new_cqs.company_scores.items():
+        old_score = baseline_cqs.company_scores.get(ticker)
+        if old_score:
+            delta_pp = (new_score.pass_rate - old_score.pass_rate) * 100
+            company_deltas[ticker] = delta_pp
+            if delta_pp < -max_company_drop:
+                return ExperimentDecision(
+                    decision=Decision.DISCARD,
+                    cqs_before=baseline_cqs.cqs,
+                    cqs_after=new_cqs.cqs,
+                    reason=f"Company {ticker} dropped {delta_pp:.1f}pp (limit: {max_company_drop}pp)",
+                    company_deltas=company_deltas,
+                    duration_seconds=duration,
+                )
+
+    # Check for CQS improvement (same logic as evaluate_experiment)
+    if target_improved:
+        if new_cqs.cqs < baseline_cqs.cqs - 0.0001:
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"Global regression despite target improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
+    else:
+        if new_cqs.cqs <= baseline_cqs.cqs:
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"No CQS improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
+
+    # SUCCESS
+    delta = new_cqs.cqs - baseline_cqs.cqs
+    if target_improved and delta <= 0:
+        reason = f"Target company improved, global CQS non-regressing ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})"
+    else:
+        reason = f"CQS improved by {delta:.4f}"
+
     return ExperimentDecision(
         decision=Decision.KEEP,
         cqs_before=baseline_cqs.cqs,
@@ -2562,6 +2837,52 @@ class ProposalRecord:
         }
 
 
+@dataclass
+class EvaluatedProposal:
+    """A proposal that has been evaluated in-memory by a worker.
+
+    Only KEEP proposals are returned by propose_and_evaluate_loop().
+    """
+    gap: MetricGap
+    proposal: ConfigChange
+    decision: ExperimentDecision
+    worker_id: str = ""
+
+    def to_dict(self) -> dict:
+        return {
+            "gap": {
+                "ticker": self.gap.ticker,
+                "metric": self.gap.metric,
+                "gap_type": self.gap.gap_type,
+                "estimated_impact": self.gap.estimated_impact,
+                "reference_value": self.gap.reference_value,
+                "xbrl_value": self.gap.xbrl_value,
+                "hv_subtype": self.gap.hv_subtype,
+                "current_variance": self.gap.current_variance,
+                "graveyard_count": self.gap.graveyard_count,
+                "notes": self.gap.notes,
+            },
+            "proposal": {
+                "file": self.proposal.file,
+                "change_type": self.proposal.change_type.value,
+                "yaml_path": self.proposal.yaml_path,
+                "old_value": self.proposal.old_value,
+                "new_value": self.proposal.new_value,
+                "rationale": self.proposal.rationale,
+                "target_metric": self.proposal.target_metric,
+                "target_companies": self.proposal.target_companies,
+            },
+            "decision": {
+                "decision": self.decision.decision.value,
+                "cqs_before": self.decision.cqs_before,
+                "cqs_after": self.decision.cqs_after,
+                "reason": self.decision.reason,
+                "duration_seconds": self.decision.duration_seconds,
+            },
+            "worker_id": self.worker_id,
+        }
+
+
 def propose_only_loop(
     eval_cohort: List[str],
     propose_fn=None,
@@ -2644,6 +2965,136 @@ def propose_only_loop(
 
     logger.info(f"{prefix}Generated {len(proposals)} proposals from {len(gaps)} gaps")
     return proposals
+
+
+def propose_and_evaluate_loop(
+    eval_cohort: List[str],
+    propose_fn=None,
+    ledger: Optional[ExperimentLedger] = None,
+    max_workers: int = 1,
+    focus_area: Optional[str] = None,
+    escalation_threshold: int = 3,
+    worker_id: str = "",
+) -> List[EvaluatedProposal]:
+    """
+    Worker-mode: propose changes AND evaluate them on sub-cohort using in-memory config.
+
+    Unlike propose_only_loop(), this function evaluates each proposal against the
+    worker's sub-cohort using evaluate_experiment_in_memory(). Only KEEP proposals
+    are returned, and the baseline config is updated after each KEEP so subsequent
+    proposals build on prior improvements.
+
+    This eliminates the coordinator bottleneck: workers do both proposal generation
+    AND evaluation in parallel, and the coordinator only validates the pre-filtered
+    winners on the full cohort.
+
+    Args:
+        eval_cohort: List of tickers in this worker's sub-cohort.
+        propose_fn: Callable(gap, graveyard_entries) -> ConfigChange.
+        ledger: ExperimentLedger instance (read-only in worker mode).
+        max_workers: Parallel workers for CQS computation.
+        focus_area: Optional focus filter.
+        escalation_threshold: Subtype failures before GPT escalation.
+        worker_id: Identifier for this worker (for logging).
+
+    Returns:
+        List of EvaluatedProposal for proposals that passed evaluation (KEEP only).
+    """
+    from edgar.xbrl.standardization.config_loader import get_config
+
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    if propose_fn is None:
+        propose_fn = propose_change
+
+    prefix = f"[Worker {worker_id}] " if worker_id else ""
+    logger.info(f"{prefix}Starting propose_and_evaluate_loop on {len(eval_cohort)} companies")
+
+    # Load baseline config and compute baseline CQS
+    baseline_config = get_config(reload=True)
+    baseline_cqs = compute_cqs(
+        eval_cohort=eval_cohort,
+        snapshot_mode=True,
+        use_ai=False,
+        ledger=ledger,
+        max_workers=max_workers,
+        config=baseline_config,
+    )
+
+    # Identify gaps using the baseline config
+    gaps, _ = identify_gaps(
+        eval_cohort=eval_cohort,
+        snapshot_mode=True,
+        ledger=ledger,
+        max_workers=max_workers,
+        config=baseline_config,
+    )
+
+    logger.info(f"{prefix}Found {len(gaps)} gaps (CQS={baseline_cqs.cqs:.4f})")
+
+    # Filter by focus area
+    if focus_area:
+        gaps = _filter_gaps_by_focus(gaps, focus_area)
+        logger.info(f"{prefix}{len(gaps)} gaps after focus filter: {focus_area}")
+
+    if not gaps:
+        logger.info(f"{prefix}No gaps to evaluate")
+        return []
+
+    # Generate and evaluate proposals
+    evaluated: List[EvaluatedProposal] = []
+    tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
+
+    for gap in gaps:
+        graveyard_entries = ledger.get_graveyard_entries(gap.metric)
+
+        change = propose_fn(gap, graveyard_entries)
+        if change is None:
+            tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
+            continue
+
+        # Evaluate in memory (no disk writes)
+        result = evaluate_experiment_in_memory(
+            change=change,
+            baseline_cqs=baseline_cqs,
+            baseline_config=baseline_config,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+        )
+
+        logger.info(
+            f"{prefix}{result.decision.value}: {change.change_type.value} for "
+            f"{gap.ticker}:{gap.metric} "
+            f"(CQS {result.cqs_before:.4f} -> {result.cqs_after:.4f}, "
+            f"{result.duration_seconds:.1f}s)"
+        )
+
+        if result.decision == Decision.KEEP:
+            # Update baseline for next proposal (rolling baseline)
+            baseline_config = apply_change_to_config(change, baseline_config)
+            baseline_cqs = compute_cqs(
+                eval_cohort=eval_cohort,
+                snapshot_mode=True,
+                use_ai=False,
+                ledger=ledger,
+                max_workers=max_workers,
+                config=baseline_config,
+            )
+
+            evaluated.append(EvaluatedProposal(
+                gap=gap,
+                proposal=change,
+                decision=result,
+                worker_id=worker_id,
+            ))
+        else:
+            tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
+
+    logger.info(
+        f"{prefix}Finished: {len(evaluated)} KEEPs from {len(gaps)} gaps"
+    )
+    return evaluated
 
 
 def save_proposals_to_json(
