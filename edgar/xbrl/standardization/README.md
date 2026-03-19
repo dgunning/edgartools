@@ -40,6 +40,39 @@ standardization/
 
 ## Auto-Eval: Autonomous Quality Measurement
 
+### The Goal: Subscription-Grade Financial Data
+
+Everything we build here serves one purpose: producing financial data reliable enough that people would pay a monthly subscription for it. That means competing with Koyfin, Wisesheets, and Macrotrends — not as a research prototype, but as a product users trust for real investment decisions.
+
+What "subscription-grade" requires:
+
+- **99.5%+ accuracy** on every metric we choose to display. One wrong number on a stock a user knows destroys trust in everything else.
+- **Industry-aware coverage** — show only metrics that apply. No blank cells that look like bugs. "N/A — not applicable for this industry" is a feature, not a gap.
+- **Zero regressions** — a number that was right yesterday must be right today. Users building models can't tolerate data that changes unpredictably.
+- **Thousands of companies**, not hundreds. Retail investors hold small-caps and mid-caps too.
+- **Fewer metrics, higher confidence** beats more metrics with lower confidence. Better to show 12 metrics at 99.9% than 21 at 95%.
+
+Every team-eval run should be measured against these thresholds. When we report CQS numbers, the question is always: **how far are we from subscription-grade?**
+
+#### Latest Assessment (2026-03-19, EXPANSION_COHORT_100)
+
+| Measure | Current | Subscription Target | Gap |
+|---------|---------|-------------------|-----|
+| Overall CQS | 0.9652 | 0.995+ | -3pp |
+| Pass rate | 95.0% | 99.5%+ | -4.5pp |
+| Mean variance | 0.9% | <0.5% | -0.4pp |
+| Regressions | 7 | 0 | -7 |
+| Companies | 100 | 5,000+ | ~2% coverage |
+| Perfect-score companies | 42/100 | >95% of displayed | needs industry-aware display |
+
+**What's production-ready today**: Revenue, Net Income, EPS, Total Assets, Cash, Total Equity — essentially bulletproof across all 100 companies. These alone cover the majority of what retail investors look up.
+
+**What's not ready**: Intangible assets for telecoms (VZ, TMUS off by 80%+), utility-specific accounting (D at 0.755 CQS), composite metrics like D&A that require multi-concept formulas. A paying subscriber seeing these errors on popular stocks would cancel.
+
+**The path forward**: Industry-aware metric selection (don't show COGS for banks), fix the ~10 worst-scoring companies, scale from 100 → 500 → 5,000 with the onboarding pipeline.
+
+---
+
 The auto-eval system applies the [autoresearch](https://x.com/kaboroevich/status/1928862789851525568) pattern to XBRL extraction quality. An autonomous agent modifies only YAML configuration files ("weights") while the evaluation harness (Orchestrator + ReferenceValidator + yf_snapshots) remains fixed. A single **Composite Quality Score (CQS)** drives all experiment decisions.
 
 ### Architecture
