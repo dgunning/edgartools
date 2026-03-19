@@ -15,7 +15,9 @@ Key invariants:
 """
 
 import hashlib
+import json
 import logging
+import re
 import subprocess
 import time
 import uuid
@@ -23,7 +25,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import yaml
 
@@ -161,9 +163,42 @@ class OvernightReport:
     # Config changes committed
     config_diffs: List[str] = field(default_factory=list)
 
+    # GPT escalation counters
+    gpt_consultations: int = 0       # How many times GPT was consulted
+    gpt_proposals_kept: int = 0      # How many GPT proposals survived CQS eval
+
     @property
     def cqs_improvement(self) -> float:
         return self.cqs_end - self.cqs_start
+
+
+# =============================================================================
+# SUBTYPE FAILURE TRACKING (GPT Escalation)
+# =============================================================================
+
+class _SubtypeFailureTracker:
+    """Track per-gap subtype failures within a session to trigger GPT escalation.
+
+    Lightweight in-session counter (not persisted — resets each overnight session).
+    Tracks how many times each (ticker, metric, hv_subtype) combination has been
+    tried without improvement, including both graveyard entries AND null-proposal events.
+    """
+
+    def __init__(self, escalation_threshold: int = 3):
+        self.threshold = escalation_threshold
+        self._counts: Dict[str, int] = {}  # key = "TICKER:metric:subtype"
+
+    def record_failure(self, ticker: str, metric: str, hv_subtype: Optional[str]) -> None:
+        key = f"{ticker}:{metric}:{hv_subtype or 'none'}"
+        self._counts[key] = self._counts.get(key, 0) + 1
+
+    def should_escalate(self, ticker: str, metric: str, hv_subtype: Optional[str]) -> bool:
+        key = f"{ticker}:{metric}:{hv_subtype or 'none'}"
+        return self._counts.get(key, 0) >= self.threshold
+
+    def get_count(self, ticker: str, metric: str, hv_subtype: Optional[str]) -> int:
+        key = f"{ticker}:{metric}:{hv_subtype or 'none'}"
+        return self._counts.get(key, 0)
 
 
 # =============================================================================
@@ -1125,6 +1160,272 @@ def _generate_concept_variations(standard_tag: str, metric_name: str) -> List[st
 
 
 # =============================================================================
+# GPT-5.4 ESCALATION
+# =============================================================================
+
+def _consult_gpt(
+    gap: 'MetricGap',
+    graveyard_entries: List[Dict],
+    config_dir: Path,
+) -> Optional[ConfigChange]:
+    """
+    Escalate to GPT-5.4 when deterministic strategies are exhausted.
+
+    Sends structured context about the gap, extraction evidence, and
+    prior failed attempts. Parses GPT's response into a ConfigChange.
+
+    Only called after subtype-specific failures exceed the escalation threshold.
+
+    Returns:
+        ConfigChange if GPT proposes a valid change, None otherwise.
+    """
+    # Build context about the gap
+    evidence = gap.extraction_evidence
+    evidence_context = ""
+    if evidence:
+        evidence_context = (
+            f"- Resolution type: {evidence.resolution_type}\n"
+            f"- Components used: {evidence.components_used}\n"
+            f"- Components missing: {evidence.components_missing}\n"
+            f"- Company industry: {evidence.company_industry}\n"
+        )
+    else:
+        evidence_context = "- No extraction evidence available\n"
+
+    # Format prior failed attempts
+    graveyard_text = "None"
+    if graveyard_entries:
+        entries = []
+        for entry in graveyard_entries[-5:]:  # Last 5 attempts
+            entries.append(
+                f"  - config_diff: {entry.get('config_diff', 'N/A')}\n"
+                f"    discard_reason: {entry.get('discard_reason', 'N/A')}\n"
+                f"    detail: {entry.get('detail', 'N/A')}"
+            )
+        graveyard_text = "\n".join(entries)
+
+    prompt = f"""You are an XBRL standardization expert. A metric gap resists automated resolution.
+
+## Gap Details
+- Ticker: {gap.ticker}, Metric: {gap.metric}
+- Reference value (yfinance): {gap.reference_value}
+- Extracted value (XBRL): {gap.xbrl_value}
+- hv_subtype: {gap.hv_subtype}
+- Current variance: {gap.current_variance}%
+- Gap type: {gap.gap_type}
+{evidence_context}
+
+## Prior Failed Attempts
+{graveyard_text}
+
+## Available Fix Strategies
+You may propose ONE of these ConfigChange types:
+1. ADD_CONCEPT: Add an XBRL concept to metrics.yaml known_concepts list
+2. ADD_STANDARDIZATION: Add a composite formula to metrics.yaml
+3. SET_INDUSTRY: Set industry field in companies.yaml
+4. ADD_COMPANY_OVERRIDE: Add metric_overrides in companies.yaml
+5. ADD_EXCLUSION: Exclude this metric for this company
+6. ADD_DIVERGENCE: Document a known divergence
+
+## Response Format (strict JSON only — no markdown fences)
+{{
+  "change_type": "one of the above (e.g. ADD_CONCEPT)",
+  "file": "metrics.yaml or companies.yaml",
+  "yaml_path": "dot.notation.path (e.g. metrics.Revenue.known_concepts)",
+  "new_value": "<value - string for ADD_CONCEPT, dict for others>",
+  "rationale": "why this will work"
+}}
+
+If you believe this gap is fundamentally unresolvable (structural mismatch
+between XBRL and yfinance), respond with ADD_EXCLUSION or ADD_DIVERGENCE."""
+
+    # Collect file paths to send as context
+    absolute_file_paths = []
+    metrics_path = config_dir / "metrics.yaml"
+    companies_path = config_dir / "companies.yaml"
+    if metrics_path.exists():
+        absolute_file_paths.append(str(metrics_path))
+    if companies_path.exists():
+        absolute_file_paths.append(str(companies_path))
+
+    logger.info(f"GPT CONSULTATION: {gap.ticker}:{gap.metric} (subtype={gap.hv_subtype})")
+
+    try:
+        response_text = _call_gpt_via_mcp(prompt, absolute_file_paths)
+    except Exception as e:
+        logger.warning(f"GPT consultation failed for {gap.ticker}:{gap.metric}: {e}")
+        return None
+
+    if not response_text:
+        logger.warning(f"GPT returned empty response for {gap.ticker}:{gap.metric}")
+        return None
+
+    # Parse the JSON response
+    return _parse_gpt_response(response_text, gap)
+
+
+def _call_gpt_via_mcp(prompt: str, file_paths: List[str]) -> Optional[str]:
+    """
+    Call GPT-5.4 via the mcp__pal__chat MCP tool.
+
+    This function is designed to be monkey-patched or overridden in testing.
+    In production, it's called within an agent context that has MCP access.
+
+    The default implementation tries to import and call the MCP tool directly.
+    If that fails, it returns None (the escalation is simply skipped).
+    """
+    # Try to call via MCP tool interface
+    # In production, this is overridden by the agent framework
+    logger.warning(
+        "GPT consultation requires MCP tool access (mcp__pal__chat). "
+        "Override _call_gpt_via_mcp or use make_escalation_propose_fn() "
+        "with a gpt_caller argument."
+    )
+    return None
+
+
+def _parse_gpt_response(response_text: str, gap: 'MetricGap') -> Optional[ConfigChange]:
+    """Parse GPT's JSON response into a ConfigChange."""
+    try:
+        # Strip markdown code fences if present
+        text = response_text.strip()
+        text = re.sub(r'^```(?:json)?\s*', '', text)
+        text = re.sub(r'\s*```$', '', text)
+        text = text.strip()
+
+        data = json.loads(text)
+
+        # Validate required fields
+        required = {"change_type", "file", "yaml_path", "new_value", "rationale"}
+        missing = required - set(data.keys())
+        if missing:
+            logger.warning(f"GPT response missing fields: {missing}")
+            return None
+
+        # Map change_type string to ChangeType enum
+        change_type_str = data["change_type"].upper()
+        # Handle both "ADD_CONCEPT" and "add_concept" formats
+        try:
+            change_type = ChangeType(change_type_str.lower())
+        except ValueError:
+            # Try matching by name
+            try:
+                change_type = ChangeType[change_type_str]
+            except KeyError:
+                logger.warning(f"GPT proposed unknown change_type: {data['change_type']}")
+                return None
+
+        # Validate file is a Tier 1 config
+        if data["file"] not in TIER1_CONFIGS:
+            logger.warning(f"GPT proposed non-Tier1 file: {data['file']}")
+            return None
+
+        return ConfigChange(
+            file=data["file"],
+            change_type=change_type,
+            yaml_path=data["yaml_path"],
+            new_value=data["new_value"],
+            rationale=f"[GPT-5.4] {data['rationale']}",
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
+    except json.JSONDecodeError as e:
+        logger.warning(f"Failed to parse GPT response as JSON: {e}")
+        logger.debug(f"GPT response was: {response_text[:500]}")
+        return None
+    except Exception as e:
+        logger.warning(f"Error parsing GPT response: {e}")
+        return None
+
+
+# =============================================================================
+# GPT ESCALATION WRAPPER
+# =============================================================================
+
+def propose_change_with_escalation(
+    gap: 'MetricGap',
+    graveyard_entries: List[Dict],
+    config_dir: Optional[Path] = None,
+    tracker: Optional[_SubtypeFailureTracker] = None,
+    gpt_caller: Optional[Callable] = None,
+) -> Optional[ConfigChange]:
+    """
+    Enhanced propose_change with GPT-5.4 escalation.
+
+    Flow:
+    1. Try deterministic propose_change() first
+    2. If None returned, record subtype failure
+    3. If subtype failures >= threshold, escalate to GPT-5.4
+    4. GPT proposals go through the same CQS eval gate
+
+    Args:
+        gap: The metric gap to address.
+        graveyard_entries: Prior failed attempts.
+        config_dir: Override config directory.
+        tracker: Subtype failure tracker for escalation decisions.
+        gpt_caller: Optional callable(prompt, file_paths) -> str for GPT calls.
+            If provided, overrides the default _call_gpt_via_mcp.
+    """
+    # Try deterministic first
+    change = propose_change(gap, graveyard_entries, config_dir)
+    if change is not None:
+        return change
+
+    # Record this null-proposal as a subtype failure
+    if tracker:
+        tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
+
+        if tracker.should_escalate(gap.ticker, gap.metric, gap.hv_subtype):
+            logger.info(
+                f"GPT ESCALATION: {gap.ticker}:{gap.metric} "
+                f"(subtype={gap.hv_subtype}, "
+                f"failures={tracker.get_count(gap.ticker, gap.metric, gap.hv_subtype)})"
+            )
+
+            # Temporarily override the MCP caller if provided
+            if gpt_caller is not None:
+                original = globals().get('_call_gpt_via_mcp')
+                globals()['_call_gpt_via_mcp'] = gpt_caller
+                try:
+                    result = _consult_gpt(gap, graveyard_entries, config_dir or CONFIG_DIR)
+                finally:
+                    globals()['_call_gpt_via_mcp'] = original
+                return result
+            else:
+                return _consult_gpt(gap, graveyard_entries, config_dir or CONFIG_DIR)
+
+    return None
+
+
+def make_escalation_propose_fn(
+    escalation_threshold: int = 3,
+    gpt_caller: Optional[Callable] = None,
+) -> Callable:
+    """
+    Factory that creates a propose_fn with GPT escalation built in.
+
+    Args:
+        escalation_threshold: Number of subtype failures before GPT escalation.
+        gpt_caller: Optional callable(prompt, file_paths) -> str for GPT calls.
+            If None, uses the default _call_gpt_via_mcp (which requires MCP access).
+
+    Returns:
+        A propose_fn compatible with run_overnight(propose_fn=...).
+    """
+    tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
+
+    def _propose(gap, graveyard_entries):
+        return propose_change_with_escalation(
+            gap, graveyard_entries, tracker=tracker, gpt_caller=gpt_caller,
+        )
+
+    # Attach tracker for external inspection (e.g., reporting)
+    _propose._tracker = tracker
+    return _propose
+
+
+# =============================================================================
 # TOURNAMENT EVALUATION (Phase 4)
 # =============================================================================
 
@@ -1227,6 +1528,7 @@ def run_overnight(
     ledger: Optional[ExperimentLedger] = None,
     propose_fn=None,
     max_workers: int = 1,
+    escalation_threshold: int = 3,
 ) -> OvernightReport:
     """
     Run an overnight auto-eval session.
@@ -1247,6 +1549,7 @@ def run_overnight(
         ledger: ExperimentLedger instance.
         propose_fn: Callable(gap, graveyard) -> ConfigChange. If None, skips proposals.
         max_workers: Parallel workers for CQS computation (1 = sequential).
+        escalation_threshold: Subtype failures before GPT escalation (default 3).
 
     Returns:
         OvernightReport with session summary.
@@ -1279,6 +1582,9 @@ def run_overnight(
     report.ef_cqs_start = baseline.ef_cqs
     report.sa_cqs_start = baseline.sa_cqs
     current_baseline = baseline
+
+    # Subtype failure tracker — for GPT escalation in propose_fn
+    tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
 
     consecutive_failures = 0
     max_consecutive_failures = 10
@@ -1346,6 +1652,10 @@ def run_overnight(
                 null_proposals += 1
                 continue
 
+            # Track GPT consultations
+            if change.rationale.startswith("[GPT-5.4]"):
+                report.gpt_consultations += 1
+
             report.experiments_total += 1
             if change.change_type == ChangeType.ADD_STANDARDIZATION:
                 report.solver_proposals += 1
@@ -1367,6 +1677,9 @@ def run_overnight(
                 report.experiments_kept += 1
                 if change.change_type == ChangeType.ADD_STANDARDIZATION:
                     report.solver_kept += 1
+                is_gpt = change.rationale.startswith("[GPT-5.4]")
+                if is_gpt:
+                    report.gpt_proposals_kept += 1
                 report.config_diffs.append(change.to_diff_string())
                 consecutive_failures = 0
                 made_progress = True
@@ -1387,11 +1700,13 @@ def run_overnight(
             elif result.decision == Decision.VETO:
                 report.experiments_vetoed += 1
                 consecutive_failures += 1
+                tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
                 logger.warning(f"VETOED: {change.target_metric} — {result.reason}")
 
             else:
                 report.experiments_discarded += 1
                 consecutive_failures += 1
+                tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
                 logger.info(f"DISCARDED: {change.target_metric} — {result.reason}")
 
         # Fix 2: Only increment if no experiments were even attempted this iteration
