@@ -12,6 +12,7 @@ Key design principles:
 
 import json
 import logging
+import pickle
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Dict, List, Optional
@@ -42,8 +43,39 @@ AUDIT_LOG_FILE = Path(__file__).parent / "company_mappings" / "audit_log.jsonl"
 _PERSISTENT_POOL: Optional[ProcessPoolExecutor] = None
 _POOL_MAX_WORKERS: int = 0
 
-# Per-worker process-global XBRL cache (populated in subprocesses)
-_WORKER_XBRL_CACHE: Dict[str, tuple] = {}  # ticker -> (filing, xbrl, filing_date, form_type)
+# Disk-backed XBRL cache (replaces unbounded in-memory cache to prevent OOM)
+_XBRL_DISK_CACHE_DIR: Optional[Path] = None
+
+
+def _get_xbrl_cache_dir() -> Path:
+    """Get or create the disk cache directory for pickled XBRL objects."""
+    global _XBRL_DISK_CACHE_DIR
+    if _XBRL_DISK_CACHE_DIR is None:
+        _XBRL_DISK_CACHE_DIR = Path.home() / ".edgar" / "xbrl_cache"
+        _XBRL_DISK_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    return _XBRL_DISK_CACHE_DIR
+
+
+def _save_xbrl_to_disk(ticker: str, xbrl, filing_date, form_type):
+    """Pickle XBRL + metadata to disk. Silently skips on failure."""
+    try:
+        path = _get_xbrl_cache_dir() / f"{ticker}.pkl"
+        with open(path, 'wb') as f:
+            pickle.dump((xbrl, filing_date, form_type), f, protocol=pickle.HIGHEST_PROTOCOL)
+    except Exception as e:
+        logger.warning(f"Failed to cache XBRL for {ticker}: {e}")
+
+
+def _load_xbrl_from_disk(ticker: str):
+    """Load pickled XBRL from disk. Returns (xbrl, filing_date, form_type) or None."""
+    try:
+        path = _get_xbrl_cache_dir() / f"{ticker}.pkl"
+        if path.exists():
+            with open(path, 'rb') as f:
+                return pickle.load(f)  # (xbrl, filing_date, form_type)
+    except Exception as e:
+        logger.warning(f"Failed to load cached XBRL for {ticker}: {e}")
+    return None
 
 
 def _worker_initializer():
@@ -71,14 +103,23 @@ def get_persistent_pool(max_workers: int = 4) -> ProcessPoolExecutor:
     return _PERSISTENT_POOL
 
 
-def shutdown_persistent_pool():
-    """Shut down the persistent pool (call at session end)."""
+def shutdown_persistent_pool(clear_cache: bool = False):
+    """Shut down the persistent pool (call at session end).
+
+    Args:
+        clear_cache: If True, delete all pickled XBRL files from disk cache.
+    """
     global _PERSISTENT_POOL, _POOL_MAX_WORKERS
     if _PERSISTENT_POOL is not None:
         _PERSISTENT_POOL.shutdown(wait=True)
         _PERSISTENT_POOL = None
         _POOL_MAX_WORKERS = 0
         logger.info("Persistent process pool shut down")
+    if clear_cache:
+        cache_dir = _get_xbrl_cache_dir()
+        for pkl in cache_dir.glob("*.pkl"):
+            pkl.unlink()
+        logger.info("XBRL disk cache cleared")
 
 
 def _process_company_worker(args):
@@ -116,33 +157,33 @@ def _process_company_worker(args):
 
 
 def _process_company_worker_cached(args):
-    """Worker function with per-process XBRL caching (Phase 1b).
+    """Worker function with disk-backed XBRL caching.
 
-    On first call for a ticker, parses XBRL and caches the result.
-    On subsequent calls (same ticker, different config), reuses the cached
-    XBRL — only the mapping layers re-run with the new config.
+    On first call for a ticker, parses XBRL and saves to disk (~200-500ms).
+    On subsequent calls, loads from disk (~200-500ms vs 2-8s XML parse).
+    Only one XBRL object is in memory at a time — no unbounded dict.
     """
-    global _WORKER_XBRL_CACHE
     ticker, snapshot_mode, use_ai, validate, config = args
     start = time.time()
 
     orch = Orchestrator(config=config, snapshot_mode=snapshot_mode)
 
-    # Check per-worker XBRL cache
-    cached = _WORKER_XBRL_CACHE.get(ticker)
-    if cached is not None:
-        # Cache hit — skip filing lookup and XBRL parsing
+    # Check disk cache first (~200ms read vs 2-8s XML parse)
+    disk_cached = _load_xbrl_from_disk(ticker)
+    if disk_cached is not None:
+        xbrl, filing_date, form_type = disk_cached
+        filing = orch._get_filing(ticker)  # Fast local lookup (~100ms)
+        cached_xbrl = (filing, xbrl, filing_date, form_type)
         results, xbrl, filing_date, form_type = orch._map_company_with_xbrl(
-            ticker, use_ai=use_ai, cached_xbrl=cached,
+            ticker, use_ai=use_ai, cached_xbrl=cached_xbrl,
         )
     else:
-        # Cache miss — parse and cache for next time
+        # Cold parse — then save to disk for next time
         results, xbrl, filing_date, form_type = orch._map_company_with_xbrl(
             ticker, use_ai=use_ai
         )
         if xbrl is not None:
-            filing = orch._get_filing(ticker)
-            _WORKER_XBRL_CACHE[ticker] = (filing, xbrl, filing_date, form_type)
+            _save_xbrl_to_disk(ticker, xbrl, filing_date, form_type)
 
     validations = {}
     if validate:
@@ -155,7 +196,7 @@ def _process_company_worker_cached(args):
     excluded = sum(1 for r in results.values() if r.source == MappingSource.CONFIG)
     total = len(results) - excluded
     elapsed = time.time() - start
-    logger.info(f"{ticker}: {mapped}/{total} mapped ({elapsed:.1f}s, cache={'hit' if cached else 'miss'})")
+    logger.info(f"{ticker}: {mapped}/{total} mapped ({elapsed:.1f}s, cache={'hit' if disk_cached else 'miss'})")
 
     return ticker, results, validations, elapsed
 
