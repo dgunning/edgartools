@@ -1,0 +1,111 @@
+[
+  {
+    "gap": {
+      "ticker": "APD",
+      "metric": "ShortTermDebt",
+      "gap_type": "validation_failure",
+      "estimated_impact": 0.03571428571428571,
+      "reference_value": 751000000.0,
+      "xbrl_value": 34700000.0,
+      "hv_subtype": null,
+      "current_variance": 95.37949400798935,
+      "graveyard_count": 0,
+      "notes": "Synthesized from 3 components via Fallback"
+    },
+    "proposal": {
+      "file": "metrics.yaml",
+      "change_type": "add_standardization",
+      "yaml_path": "metrics.ShortTermDebt.standardization",
+      "old_value": null,
+      "new_value": {
+        "scope": "company:APD",
+        "components": [
+          "LongTermDebtAndCapitalLeaseObligationsCurrent"
+        ],
+        "notes": "Auto-solver company-specific via APD, 1/1 periods, 0/3 companies"
+      },
+      "rationale": "Auto-solver: LongTermDebtAndCapitalLeaseObligationsCurrent (0.0% var, 1/1 periods, company-specific)",
+      "target_metric": "ShortTermDebt",
+      "target_companies": "APD"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9478909996702585,
+      "cqs_after": 0.9623037375736054,
+      "reason": "CQS improved by 0.0144",
+      "duration_seconds": 280.40790271759033
+    },
+    "worker_id": "worker_3"
+  },
+  {
+    "gap": {
+      "ticker": "EQIX",
+      "metric": "Inventory",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.02631578947368421,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.EQIX.exclude_metrics",
+      "old_value": null,
+      "new_value": "Inventory",
+      "rationale": "No reference value for Inventory \u2014 structural gap for EQIX",
+      "target_metric": "Inventory",
+      "target_companies": "EQIX"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9623037375736054,
+      "cqs_after": 0.9626107551174652,
+      "reason": "CQS improved by 0.0003",
+      "duration_seconds": 301.8752179145813
+    },
+    "worker_id": "worker_3"
+  },
+  {
+    "gap": {
+      "ticker": "PEP",
+      "metric": "DepreciationAmortization",
+      "gap_type": "high_variance",
+      "estimated_impact": 0.011904761904761904,
+      "reference_value": 4178000000.0,
+      "xbrl_value": 3451000000.0,
+      "hv_subtype": "hv_wrong_concept",
+      "current_variance": 17.400670177118236,
+      "graveyard_count": 1,
+      "notes": "Variance 17.4% is above 10% threshold"
+    },
+    "proposal": {
+      "file": "metrics.yaml",
+      "change_type": "add_standardization",
+      "yaml_path": "metrics.DepreciationAmortization.standardization",
+      "old_value": null,
+      "new_value": {
+        "scope": "company:PEP",
+        "components": [
+          "RepaymentsOfLongTermDebt",
+          "ProceedsFromStockOptionsExercised"
+        ],
+        "notes": "Auto-solver company-specific via PEP, 2/3 periods, 0/3 companies"
+      },
+      "rationale": "Auto-solver: RepaymentsOfLongTermDebt + ProceedsFromStockOptionsExercised (0.0% var, 2/3 periods, company-specific)",
+      "target_metric": "DepreciationAmortization",
+      "target_companies": "PEP"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9626107551174652,
+      "cqs_after": 0.962702211618939,
+      "reason": "CQS improved by 0.0001",
+      "duration_seconds": 299.7561981678009
+    },
+    "worker_id": "worker_3"
+  }
+]

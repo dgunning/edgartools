@@ -1,0 +1,16 @@
+{
+  "worker_id": "worker_3",
+  "role": "combined",
+  "phase": "finished",
+  "cohort_size": 20,
+  "gaps_found": 11,
+  "proposals_total": 5,
+  "keeps": 3,
+  "discards": 2,
+  "vetoes": 0,
+  "baseline_cqs": 0.9478909996702585,
+  "current_cqs": 0.962702211618939,
+  "elapsed_seconds": 2404.1585564613342,
+  "last_update": "2026-03-19T16:29:50.886404",
+  "current_gap": null
+}

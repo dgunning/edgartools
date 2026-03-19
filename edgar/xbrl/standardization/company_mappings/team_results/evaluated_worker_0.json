@@ -1,0 +1,305 @@
+[
+  {
+    "gap": {
+      "ticker": "VZ",
+      "metric": "IntangibleAssets",
+      "gap_type": "validation_failure",
+      "estimated_impact": 0.03571428571428571,
+      "reference_value": 190338000000.0,
+      "xbrl_value": 33299000000.0,
+      "hv_subtype": null,
+      "current_variance": 82.50533261881495,
+      "graveyard_count": 0,
+      "notes": "Synthesized from 2 components via Fallback"
+    },
+    "proposal": {
+      "file": "metrics.yaml",
+      "change_type": "add_standardization",
+      "yaml_path": "metrics.IntangibleAssets.standardization",
+      "old_value": null,
+      "new_value": {
+        "scope": "company:VZ",
+        "components": [
+          "LongTermDebtCurrent",
+          "LiabilitiesCurrent",
+          "PropertyPlantAndEquipmentNet"
+        ],
+        "notes": "Auto-solver company-specific via VZ, 2/3 periods, 0/3 companies"
+      },
+      "rationale": "Auto-solver: LongTermDebtCurrent + LiabilitiesCurrent + PropertyPlantAndEquipmentNet (0.1% var, 2/3 periods, company-specific)",
+      "target_metric": "IntangibleAssets",
+      "target_companies": "VZ"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9479095420792751,
+      "cqs_after": 0.9609131152011804,
+      "reason": "CQS improved by 0.0130",
+      "duration_seconds": 280.22377824783325
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "ICE",
+      "metric": "Inventory",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.03125,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.ICE.exclude_metrics",
+      "old_value": null,
+      "new_value": "Inventory",
+      "rationale": "No reference value for Inventory \u2014 structural gap for ICE",
+      "target_metric": "Inventory",
+      "target_companies": "ICE"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9609131152011804,
+      "cqs_after": 0.9613818652011804,
+      "reason": "CQS improved by 0.0005",
+      "duration_seconds": 284.219181060791
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "BRK-B",
+      "metric": "LongTermDebt",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.027777777777777776,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.BRK-B.exclude_metrics",
+      "old_value": null,
+      "new_value": "LongTermDebt",
+      "rationale": "No reference value for LongTermDebt \u2014 structural gap for BRK-B",
+      "target_metric": "LongTermDebt",
+      "target_companies": "BRK-B"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9613818652011804,
+      "cqs_after": 0.9617250024560824,
+      "reason": "CQS improved by 0.0003",
+      "duration_seconds": 328.19936633110046
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "BRK-B",
+      "metric": "WeightedAverageSharesDiluted",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.027777777777777776,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.BRK-B.exclude_metrics",
+      "old_value": null,
+      "new_value": "WeightedAverageSharesDiluted",
+      "rationale": "No reference value for WeightedAverageSharesDiluted \u2014 structural gap for BRK-B",
+      "target_metric": "WeightedAverageSharesDiluted",
+      "target_companies": "BRK-B"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9617250024560824,
+      "cqs_after": 0.9621110318678471,
+      "reason": "CQS improved by 0.0004",
+      "duration_seconds": 217.08509612083435
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "BRK-B",
+      "metric": "StockBasedCompensation",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.027777777777777776,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.BRK-B.exclude_metrics",
+      "old_value": null,
+      "new_value": "StockBasedCompensation",
+      "rationale": "No reference value for StockBasedCompensation \u2014 structural gap for BRK-B",
+      "target_metric": "StockBasedCompensation",
+      "target_companies": "BRK-B"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9621110318678471,
+      "cqs_after": 0.9625485318678471,
+      "reason": "CQS improved by 0.0004",
+      "duration_seconds": 175.92448782920837
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "BRK-B",
+      "metric": "AccountsPayable",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.027777777777777776,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.BRK-B.exclude_metrics",
+      "old_value": null,
+      "new_value": "AccountsPayable",
+      "rationale": "No reference value for AccountsPayable \u2014 structural gap for BRK-B",
+      "target_metric": "AccountsPayable",
+      "target_companies": "BRK-B"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9625485318678471,
+      "cqs_after": 0.9630485318678471,
+      "reason": "CQS improved by 0.0005",
+      "duration_seconds": 144.18401265144348
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "AON",
+      "metric": "Inventory",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.025,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.AON.exclude_metrics",
+      "old_value": null,
+      "new_value": "Inventory",
+      "rationale": "No reference value for Inventory \u2014 structural gap for AON",
+      "target_metric": "Inventory",
+      "target_companies": "AON"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9630485318678471,
+      "cqs_after": 0.963344584499426,
+      "reason": "CQS improved by 0.0003",
+      "duration_seconds": 138.6819145679474
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "VRTX",
+      "metric": "DividendsPaid",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.023809523809523808,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.VRTX.exclude_metrics",
+      "old_value": null,
+      "new_value": "DividendsPaid",
+      "rationale": "No reference value for DividendsPaid \u2014 structural gap for VRTX",
+      "target_metric": "DividendsPaid",
+      "target_companies": "VRTX"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.963344584499426,
+      "cqs_after": 0.9637017273565689,
+      "reason": "CQS improved by 0.0004",
+      "duration_seconds": 146.89146280288696
+    },
+    "worker_id": "worker_0"
+  },
+  {
+    "gap": {
+      "ticker": "SLB",
+      "metric": "Capex",
+      "gap_type": "high_variance",
+      "estimated_impact": 0.0125,
+      "reference_value": -1946000000.0,
+      "xbrl_value": -1694000000.0,
+      "hv_subtype": "hv_wrong_concept",
+      "current_variance": 12.949640287769784,
+      "graveyard_count": 1,
+      "notes": "Variance 12.9% is above 10% threshold"
+    },
+    "proposal": {
+      "file": "metrics.yaml",
+      "change_type": "add_standardization",
+      "yaml_path": "metrics.Capex.standardization",
+      "old_value": null,
+      "new_value": {
+        "scope": "company:SLB",
+        "components": [
+          "ProceedsFromSaleOfEquityMethodInvestments",
+          "PaymentsOfDividends"
+        ],
+        "notes": "Auto-solver company-specific via SLB, 1/1 periods, 0/3 companies"
+      },
+      "rationale": "Auto-solver: ProceedsFromSaleOfEquityMethodInvestments + PaymentsOfDividends (0.3% var, 1/1 periods, company-specific)",
+      "target_metric": "Capex",
+      "target_companies": "SLB"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9637017273565689,
+      "cqs_after": 0.9637807355785626,
+      "reason": "CQS improved by 0.0001",
+      "duration_seconds": 148.63983821868896
+    },
+    "worker_id": "worker_0"
+  }
+]
