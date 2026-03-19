@@ -7,6 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.25.0] - 2026-03-18
+
+### Added
+
+- **Statement-to-note drill-down** — Navigate from any financial statement line item to the note that explains it. `balance_sheet['Cash and cash equivalents'].note` returns the related `Note` object via a lazy-built reverse index that maps XBRL concepts to notes — the same mechanism the SEC's own EDGAR viewer uses
+
+- **`Note` and `Notes` classes** — First-class objects for financial statement notes, built from FilingSummary.xml hierarchy. Access via `tenk.notes` or `tenq.notes`. Browse by number (`notes[5]`), title (`notes['Debt']`), or fuzzy search (`notes.search('revenue')`). Each note exposes `.tables`, `.policies`, `.details`, `.text`, `.html`, `.expands` (which statement lines it explains), and `.to_context()` for AI consumption
+
+- **`StatementLineItem`** — Lightweight wrapper returned by `Statement.__getitem__` with `.label`, `.concept`, `.note` (most relevant note), `.notes` (all related), and `.values`. Uses `__slots__` and weakref for minimal memory footprint
+
+- **`Statement.search()`** — Fuzzy search for statement line items with ranked results (exact > startswith > word match > substring). Complements the exact-match `__getitem__`. Consistent with the `Notes.search()` pattern
+
+- **`Statement.report` property** — Links to the FilingSummary `Report` for HTML table access. Enables `note.tables[0].report.to_dataframe()` for HTML-extracted DataFrames alongside the XBRL path
+
+- **`RenderedStatement.__getitem__`** — Look up rows by exact label (case-insensitive) on rendered statements
+
+- **`edgar_notes` MCP tool** — New tool for AI agents to drill into notes and disclosures by company and topic. Returns structured note content, related statement lines, and child table data. Surfaces the detail behind financial statement numbers that no other SEC MCP server exposes
+
+- **`CompanyReport.notes`** — Cached property on TenK/TenQ providing hierarchical notes access from report objects
+
+- **`TenK.to_context(focus=...)` / `TenQ.to_context(focus=...)`** — Focus mode generates cross-cutting context for specific topics (e.g., `focus='debt'`), pulling statement line items, note content, and policies together
+
+- **Role type definitions from schema** — XBRL parser now extracts human-readable role definitions from taxonomy schemas, improving statement and note titles
+
+### Improved
+
+- **XBRL memory optimizations** — Label role URI strings are now interned via `sys.intern()`, eliminating ~10,000 duplicate URL string allocations per filing. `comparison_data` removed from `RenderedStatement.metadata` (was stored but never read back). Duplicate `_collect_note_concepts` tree walks eliminated in `expands_statements`
+
+- **`FilingSummary._filing_sgml` converted to weakref** — Breaks a strong reference chain that pinned the entire SGML document in memory as long as any `Report` was reachable. `FilingSGML` now supports weakrefs via `__weakref__` in `__slots__`
+
+- **`Statement.__getitem__` is now exact-match only** — Previously used substring fallback that could silently return wrong rows for ambiguous queries like `stmt['Total']`. Now returns the correct match or `None`. Use `stmt.search()` for fuzzy lookups
+
+### Fixed
+
+- **Drill-down required notes pre-load** — Accessing `stmt['Debt'].note` before `tenk.notes` produced empty results because notes were built without FilingSummary. Now the XBRL object stores its FilingSummary during `from_filing()` so the lazy notes builder always gets the full hierarchy
+
+## [5.24.0] - 2026-03-17
+
+### Added
+
+- **`to_context()` on all data objects** — AI-optimized context strings with progressive detail levels (`minimal`, `standard`, `full`) added to TenK, TenQ, EightK, TwentyF, ProxyStatement, Statement, Form4, ThirteenF, Schedule13D/G, FormD, Form144, and all remaining data objects. Completes the 4-phase `to_context()` epic
+
+- **`compose_context()` utility** — Compose multiple objects into a single AI context string with automatic budget allocation and detail-level downgrading. `from edgar import compose_context`
+
+- **`edgar_notes` MCP tool routing** — MCP server instructions updated with tool routing guidance. `edgar_filing` now accepts identifier+form for direct company filing access
+
+- **`output_schema` on all MCP tools** — All 12 MCP tools now declare their output schema for better AI integration
+
+- **Reference Data documentation** — New documentation page and notebook for SEC reference data (tickers, exchanges, CIK lookups) ([GH-713](https://github.com/dgunning/edgartools/issues/713))
+
+- **`EarningsRelease.get_key_metrics()`** — Extract key financial metrics from 8-K earnings releases
+
+### Fixed
+
+- **Prospectus pricing extraction** — Fix whitespace, keyword matching, currency detection, and column-header fallback for 424B price parsing
+
+- **StructuredNoteTerms extraction** — Fix cascade priority, median ncols, bullet stripping, whitespace in keys, layout tables, and multi-table merge for structured note prospectuses
+
+- **Streaming parser crash** — Fix `text_content()` crash on raw etree elements and table children being destroyed before processing
+
+- **Prospectus TOC contamination** — Fix missing underwriters and SEPA misclassification in prospectus parsing
+
+## [5.23.4] - 2026-03-16
+
+### Fixed
+
+- **TenK combined items heading** — Fix lookup for second item number in combined items like "Item 7 & 7A" ([GH-710](https://github.com/dgunning/edgartools/issues/710))
+
+- **XBRL calculation weights** — Fix incorrect calculation weights for income statement concepts that caused validation mismatches ([GH-712](https://github.com/dgunning/edgartools/issues/712))
+
+- **PG XBRL concept rename** — Fix Procter & Gamble stitching issue where concept rename caused duplicate rows ([GH-711](https://github.com/dgunning/edgartools/issues/711))
+
+- **Citigroup 10-K section extraction** — Fix section extraction via cross-reference index for Citigroup's non-standard filing format ([GH-251](https://github.com/dgunning/edgartools/issues/251))
+
 ## [5.23.3] - 2026-03-15
 
 ### Fixed
