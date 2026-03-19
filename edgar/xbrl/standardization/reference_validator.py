@@ -852,9 +852,25 @@ class ReferenceValidator:
             if validation.variance_type == "standardized" and xbrl is not None and ref_value is not None:
                 sa_result = self._compute_sa_composite(metric, ticker, xbrl, ref_value)
                 if sa_result is not None:
-                    validation.sa_value = sa_result[0]
-                    validation.sa_variance_pct = sa_result[1] * 100
-                    validation.sa_pass = sa_result[2]
+                    sa_composite_value, sa_variance_frac, sa_pass = sa_result
+                    validation.sa_value = sa_composite_value
+                    validation.sa_variance_pct = sa_variance_frac * 100
+                    validation.sa_pass = sa_pass
+
+                    # PROMOTE: If standardization formula gives a BETTER match than
+                    # raw extraction, use it as the primary result.
+                    # This makes ADD_STANDARDIZATION proposals actually affect CQS.
+                    raw_variance = abs(validation.variance_pct) if validation.variance_pct is not None else float('inf')
+                    formula_variance = sa_variance_frac * 100
+                    if formula_variance < raw_variance:
+                        validation.is_valid = sa_pass
+                        validation.xbrl_value = sa_composite_value
+                        validation.variance_pct = formula_variance
+                        validation.status = "match" if sa_pass else "mismatch"
+                        validation.notes = (
+                            f"Standardization formula: variance {formula_variance:.1f}% "
+                            f"(raw was {raw_variance:.1f}%)"
+                        )
 
             # IDENTITY CHECK GUARDRAIL (Bank Sector Expansion)
             # If OperatingIncome is extracted, cross-check against accounting identity

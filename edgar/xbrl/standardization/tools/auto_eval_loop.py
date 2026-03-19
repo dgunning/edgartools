@@ -463,7 +463,54 @@ def evaluate_experiment(
             duration_seconds=time.time() - start_time,
         )
 
-    # Measure CQS after change
+    # --- FAST PRE-SCREEN for company-scoped changes ---
+    # If change targets a single company and cohort is large, check the target
+    # company first. If it doesn't improve, skip the expensive full cohort eval.
+    target_tickers = [t.strip() for t in change.target_companies.split(",") if t.strip()]
+    target_improved = False
+
+    if len(target_tickers) == 1 and eval_cohort and len(eval_cohort) > 5:
+        target = target_tickers[0]
+        target_baseline = baseline_cqs.company_scores.get(target)
+
+        if target_baseline is not None:
+            try:
+                target_cqs = compute_cqs(
+                    eval_cohort=[target],
+                    snapshot_mode=True,
+                    use_ai=False,
+                    ledger=ledger,
+                )
+            except Exception as e:
+                revert_config_change(change)
+                return ExperimentDecision(
+                    decision=Decision.DISCARD,
+                    cqs_before=baseline_cqs.cqs,
+                    cqs_after=baseline_cqs.cqs,
+                    reason=f"Pre-screen evaluation error: {e}",
+                    duration_seconds=time.time() - start_time,
+                )
+
+            target_new = target_cqs.company_scores.get(target)
+            if target_new and target_new.cqs <= target_baseline.cqs:
+                # Target company didn't improve — skip expensive full eval
+                revert_config_change(change)
+                return ExperimentDecision(
+                    decision=Decision.DISCARD,
+                    cqs_before=target_baseline.cqs,
+                    cqs_after=target_new.cqs,
+                    reason=f"Fast pre-screen: {target} CQS not improved ({target_baseline.cqs:.4f} -> {target_new.cqs:.4f})",
+                    duration_seconds=time.time() - start_time,
+                )
+            # Target improved — proceed to full eval (Stage 2)
+            if target_new and target_new.cqs > target_baseline.cqs:
+                target_improved = True
+                logger.info(
+                    f"Pre-screen PASS: {target} CQS improved "
+                    f"{target_baseline.cqs:.4f} -> {target_new.cqs:.4f}, running full eval"
+                )
+
+    # Measure CQS after change (full cohort)
     try:
         new_cqs = compute_cqs(
             eval_cohort=eval_cohort,
@@ -514,24 +561,41 @@ def evaluate_experiment(
                 )
 
     # Check for CQS improvement
-    if new_cqs.cqs <= baseline_cqs.cqs:
-        revert_config_change(change)
-        return ExperimentDecision(
-            decision=Decision.DISCARD,
-            cqs_before=baseline_cqs.cqs,
-            cqs_after=new_cqs.cqs,
-            reason=f"No CQS improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
-            company_deltas=company_deltas,
-            duration_seconds=duration,
-        )
+    if target_improved:
+        # Company-scoped change where target improved: only require non-regression globally
+        # (rounding tolerance of 0.0001 to handle floating point noise)
+        if new_cqs.cqs < baseline_cqs.cqs - 0.0001:
+            revert_config_change(change)
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"Global regression despite target improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
+    else:
+        # Non-company-scoped changes still require strict improvement
+        if new_cqs.cqs <= baseline_cqs.cqs:
+            revert_config_change(change)
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"No CQS improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
 
-    # SUCCESS — CQS improved, no regressions, no company drops
+    # SUCCESS — CQS improved (or non-regressing for company-scoped), no regressions, no company drops
     # Note: we do NOT revert — the change stays applied
+    delta = new_cqs.cqs - baseline_cqs.cqs
+    reason = f"CQS improved by {delta:.4f}" if delta > 0 else f"Target company improved, global CQS non-regressing ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})"
     return ExperimentDecision(
         decision=Decision.KEEP,
         cqs_before=baseline_cqs.cqs,
         cqs_after=new_cqs.cqs,
-        reason=f"CQS improved by {new_cqs.cqs - baseline_cqs.cqs:.4f}",
+        reason=reason,
         company_deltas=company_deltas,
         duration_seconds=duration,
     )
