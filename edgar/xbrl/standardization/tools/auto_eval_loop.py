@@ -67,6 +67,8 @@ class ChangeType(str, Enum):
     MODIFY_VALUE = "modify_value"
     ADD_STANDARDIZATION = "add_standardization"     # Write standardization formula to metrics.yaml
     ADD_KNOWN_VARIANCE = "add_known_variance"       # Write explained variance to metrics.yaml
+    SET_INDUSTRY = "set_industry"                   # Set industry field in companies.yaml
+    ADD_COMPANY_OVERRIDE = "add_company_override"   # Add metric_overrides entry in companies.yaml
 
 
 class Decision(str, Enum):
@@ -290,6 +292,26 @@ def apply_config_change(change: ConfigChange) -> None:
                 "variance_pct": kv_data.get("variance_pct", 0),
                 "reason": kv_data.get("reason", "Auto-solver discovered formula"),
             }
+
+    elif change.change_type == ChangeType.SET_INDUSTRY:
+        # Set industry field on a company in companies.yaml
+        # yaml_path should be "companies.{ticker}.industry"
+        if target_key not in parent or parent[target_key] is None:
+            parent[target_key] = change.new_value
+        else:
+            # Don't overwrite existing industry
+            parent[target_key] = change.new_value
+
+    elif change.change_type == ChangeType.ADD_COMPANY_OVERRIDE:
+        # Add a metric_overrides entry in companies.yaml
+        # yaml_path = "companies.{ticker}.metric_overrides"
+        # new_value = {"MetricName": {"preferred_concept": "...", "notes": "..."}}
+        if target_key not in parent:
+            parent[target_key] = {}
+        if isinstance(change.new_value, dict):
+            parent[target_key].update(change.new_value)
+        else:
+            parent[target_key] = change.new_value
 
     else:
         raise ValueError(f"Unknown change type: {change.change_type}")
@@ -577,8 +599,21 @@ def propose_change(
         # (the underlying concept is wrong, not slightly off) — go straight to solver
         return _propose_via_solver(gap)
     elif gap.gap_type == "high_variance":
-        # Try tree_hint first; escalate to solver after first graveyard failure
-        if gap.graveyard_count == 0:
+        # Route based on hv_subtype for targeted proposals
+        if gap.hv_subtype == "hv_missing_industry":
+            change = _propose_industry_assignment(gap)
+            if change is not None:
+                return change
+            # Fall through to solver if industry assignment isn't possible
+
+        if gap.hv_subtype == "hv_missing_component":
+            change = _propose_component_fix(gap)
+            if change is not None:
+                return change
+            # Fall through to solver
+
+        # Default: tree_hint first, then solver
+        if gap.graveyard_count == 0 and gap.hv_subtype not in ("hv_missing_industry", "hv_missing_component"):
             change = _propose_for_high_variance(gap, config_dir)
             if change is not None:
                 return change
@@ -691,6 +726,119 @@ def _propose_for_high_variance(
     )
 
 
+def _propose_industry_assignment(
+    gap: MetricGap,
+) -> Optional[ConfigChange]:
+    """
+    Propose setting the industry field for a company with no industry in companies.yaml.
+
+    Looks up the company's SIC code and maps it to an industry category.
+    """
+    try:
+        from edgar import Company
+        from edgar.entity.mappings_loader import get_industry_for_sic
+
+        company = Company(gap.ticker)
+        sic = company.data.sic
+        if not sic:
+            logger.info(f"No SIC code for {gap.ticker} — cannot assign industry")
+            return None
+
+        industry = get_industry_for_sic(sic)
+        if not industry:
+            logger.info(f"SIC {sic} for {gap.ticker} does not map to a known industry")
+            return None
+
+        # Check if company already has industry set in config
+        companies_path = CONFIG_DIR / "companies.yaml"
+        if companies_path.exists():
+            with open(companies_path, 'r') as f:
+                companies_config = yaml.safe_load(f)
+            company_entry = companies_config.get("companies", {}).get(gap.ticker, {})
+            if company_entry.get("industry"):
+                logger.info(f"{gap.ticker} already has industry={company_entry['industry']}")
+                return None
+
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.SET_INDUSTRY,
+            yaml_path=f"companies.{gap.ticker}.industry",
+            new_value=industry,
+            rationale=f"Company {gap.ticker} has SIC {sic} -> industry '{industry}' (was missing)",
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
+    except Exception as e:
+        logger.warning(f"Industry assignment failed for {gap.ticker}: {e}")
+        return None
+
+
+def _propose_component_fix(
+    gap: MetricGap,
+) -> Optional[ConfigChange]:
+    """
+    Propose a fix for a composite metric with missing components.
+
+    When a composite metric (like IntangibleAssets = Goodwill + IntangibleAssetsNetExcludingGoodwill)
+    has some components found but others missing, search XBRL facts for alternate concepts
+    that could fill the missing component.
+    """
+    evidence = gap.extraction_evidence
+    if evidence is None or not evidence.components_missing:
+        return None
+
+    if gap.reference_value is None:
+        return None
+
+    # Calculate the residual: what value the missing components should sum to
+    found_total = evidence.extracted_value or 0.0
+    residual = abs(gap.reference_value) - abs(found_total)
+
+    if residual <= 0:
+        return None
+
+    # Try to solve for the residual using the auto-solver
+    try:
+        solver = AutoSolver(snapshot_mode=True)
+        candidates = solver.solve_metric(
+            gap.ticker, gap.metric,
+            yfinance_value=residual,
+            multi_period=False,  # Skip multi-period for component search
+        )
+
+        if not candidates:
+            logger.info(
+                f"No component fix found for {gap.ticker}:{gap.metric} "
+                f"(missing: {evidence.components_missing}, residual=${residual/1e9:.2f}B)"
+            )
+            return None
+
+        best = candidates[0]
+
+        # Propose adding the discovered concept(s) as known_concepts for the missing component
+        missing_component = evidence.components_missing[0]
+        new_concept = best.components[0] if len(best.components) == 1 else best.components[0]
+
+        return ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_CONCEPT,
+            yaml_path=f"metrics.{gap.metric}.known_concepts",
+            new_value=new_concept,
+            rationale=(
+                f"Component fix: {missing_component} missing in composite {gap.metric}. "
+                f"Found {new_concept} matching residual ${residual/1e9:.2f}B "
+                f"({best.variance_pct:.1f}% variance)"
+            ),
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
+    except Exception as e:
+        logger.warning(f"Component fix failed for {gap.ticker}:{gap.metric}: {e}")
+        return None
+
+
 def _propose_via_solver(
     gap: MetricGap,
 ) -> Optional[ConfigChange]:
@@ -714,16 +862,30 @@ def _propose_via_solver(
         return None
 
     try:
-        # Use multi_period=True to run inline multi-period validation
-        # during the search itself (loads 3 10-K filings upfront,
-        # validates each candidate across all periods before yielding).
         solver = AutoSolver(snapshot_mode=True)
-        candidates = solver.solve_metric(
-            gap.ticker, gap.metric,
-            yfinance_value=gap.reference_value,
-            multi_period=True,
-            num_periods=3,
-        )
+
+        # Composite-aware: solve component-by-component when evidence shows composite
+        evidence = gap.extraction_evidence
+        if (evidence and evidence.resolution_type == "composite"
+                and evidence.components_used and evidence.components_missing):
+            candidates = solver.solve_composite_metric(
+                ticker=gap.ticker,
+                metric=gap.metric,
+                found_components=evidence.components_used,
+                found_total=evidence.extracted_value or 0.0,
+                target=abs(gap.reference_value),
+            )
+        else:
+            # Standard solver: search for full target value
+            # Use multi_period=True to run inline multi-period validation
+            # during the search itself (loads 3 10-K filings upfront,
+            # validates each candidate across all periods before yielding).
+            candidates = solver.solve_metric(
+                gap.ticker, gap.metric,
+                yfinance_value=gap.reference_value,
+                multi_period=True,
+                num_periods=3,
+            )
 
         if not candidates:
             logger.info(f"Solver found no formulas for {gap.ticker}:{gap.metric}")

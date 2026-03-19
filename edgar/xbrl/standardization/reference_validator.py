@@ -62,6 +62,11 @@ class ValidationResult:
     sa_value: Optional[float] = None  # Standardized (composite formula) value
     sa_variance_pct: Optional[float] = None  # SA variance %
     variance_type: str = "raw"        # "raw" | "explained" | "standardized"
+    # Extraction evidence for diagnostic drilling
+    resolution_type: str = "none"            # "direct" | "composite" | "industry" | "none"
+    components_used: Optional[list] = None   # XBRL concepts used in extraction
+    components_missing: Optional[list] = None  # Expected components not found
+    company_industry: Optional[str] = None   # Industry resolved for this company
 
 
 class ReferenceValidator:
@@ -701,7 +706,13 @@ class ReferenceValidator:
             
             # Get reference value from yfinance
             ref_value = self._get_yfinance_value(stock, metric, target_date=filing_date)
-            
+
+            # Evidence tracking — populated during extraction, attached to ValidationResult
+            _resolution_type = "none"
+            _components_used = []
+            _components_missing = []
+            _company_industry = None
+
             # Get XBRL value (if we have a mapping and XBRL object)
             xbrl_value = None
             if result.is_mapped and xbrl:
@@ -728,20 +739,25 @@ class ReferenceValidator:
                         result.source = MappingSource.INDUSTRY
                         result.concept = f"industry_logic:{metric}"
                         result.confidence = 1.0
+                        _resolution_type = "industry"
                 # Check if metric is composite (sum of multiple concepts)
                 elif metric in self.COMPOSITE_METRICS:
                     # HYBRID LOGIC: If mapped to a "Total" concept, use direct extraction
                     # This prevents using component sum when a direct total (like DebtCurrent) exists
                     # Added LongTermDebtAndCapitalLeaseObligationsCurrent for KO (8.7% variance vs composite double-counting)
                     if result.concept in [
-                        'us-gaap:DebtCurrent', 
-                        'us-gaap:ShortTermDebt', 
+                        'us-gaap:DebtCurrent',
+                        'us-gaap:ShortTermDebt',
                         'us-gaap:ShortTermDebtAndCapitalLeaseObligations', # Note: fixed name
                         'us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent'
                     ]:
                         xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
+                        _resolution_type = "direct"
+                        _components_used = [result.concept]
                     else:
-                        xbrl_value = self._extract_composite_value(xbrl, metric)
+                        xbrl_value, _components_used, _components_missing = \
+                            self._extract_composite_value_with_evidence(xbrl, metric)
+                        _resolution_type = "composite"
                 else:
                     # Specialized Logic for 10-Q Flow Metrics (Derivation)
                     if form_type == '10-Q' and metric in QUARTERLY_DERIVABLE_METRICS:
@@ -771,7 +787,10 @@ class ReferenceValidator:
                                 xbrl_value = None
                     else:
                         xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
-            
+                        _resolution_type = "direct"
+                        if result.concept:
+                            _components_used = [result.concept]
+
             # FALLBACK: Industry/Calculated Logic when no mapping exists (or was invalidated)
             elif not result.is_mapped and xbrl and ref_value:
                 # 1. Try Industry Extraction (OperatingIncome, Banking Debt/Cash, etc.)
@@ -784,21 +803,25 @@ class ReferenceValidator:
                     result.confidence = 0.85
                     result.source = MappingSource.TREE
                     result.reasoning = "Industry Logic Extraction (Unmapped Fallback)"
-                
+                    _resolution_type = "industry"
+
                 # 2. Try Composite Metrics Fallback
                 elif metric in self.COMPOSITE_METRICS:
-                     composite_value = self._extract_composite_value(xbrl, metric)
+                     composite_value, _components_used, _components_missing = \
+                         self._extract_composite_value_with_evidence(xbrl, metric)
                      if composite_value is not None:
                         xbrl_value = composite_value
                         result.concept = f"Composite: {', '.join(self.COMPOSITE_METRICS[metric])}"
                         result.confidence = 0.85
                         result.source = MappingSource.TREE
                         result.reasoning = f"Synthesized from {len(self.COMPOSITE_METRICS[metric])} components via Fallback"
+                        _resolution_type = "composite"
             
             # FALLBACK: Generalized Composite Metrics (ShortTermDebt, IntangibleAssets, etc.)
             # Per Principal Architect: attempt composite construction before giving up
             elif not result.is_mapped and xbrl and metric in self.COMPOSITE_METRICS and ref_value:
-                composite_value = self._extract_composite_value(xbrl, metric)
+                composite_value, _components_used, _components_missing = \
+                    self._extract_composite_value_with_evidence(xbrl, metric)
                 if composite_value is not None:
                     xbrl_value = composite_value
                     # Mark as synthesized composite
@@ -806,6 +829,7 @@ class ReferenceValidator:
                     result.confidence = 0.85
                     result.source = MappingSource.TREE
                     result.reasoning = f"Synthesized from {len(self.COMPOSITE_METRICS[metric])} components via Fallback"
+                    _resolution_type = "composite"
             
             # SIGN CONVENTION: Capex is positive in XBRL but negative in yfinance
             # Per Principal Architect: XBRL reports outflows as positive; Street models use negative
@@ -862,8 +886,25 @@ class ReferenceValidator:
                 except Exception as e:
                     pass
 
+            # Resolve company industry for evidence (cached via _try_industry_extraction)
+            if _company_industry is None:
+                try:
+                    from edgar.entity.mappings_loader import get_industry_for_sic
+                    from edgar import Company as _Co
+                    _c = _Co(ticker)
+                    _sic = _c.data.sic
+                    _company_industry = get_industry_for_sic(_sic) if _sic else None
+                except Exception:
+                    pass
+
+            # Attach extraction evidence to ValidationResult
+            validation.resolution_type = _resolution_type
+            validation.components_used = _components_used if _components_used else None
+            validation.components_missing = _components_missing if _components_missing else None
+            validation.company_industry = _company_industry
+
             validations[metric] = validation
-        
+
         return validations
     
     def validate_and_update_mappings(
@@ -1461,7 +1502,24 @@ class ReferenceValidator:
 
         Used for metrics like IntangibleAssets = Goodwill + IntangibleAssetsNetExcludingGoodwill
         """
+        value, _, _ = self._extract_composite_value_with_evidence(xbrl, metric)
+        return value
+
+    def _extract_composite_value_with_evidence(
+        self,
+        xbrl,
+        metric: str
+    ) -> tuple:
+        """
+        Extract composite value and return evidence about which components were found/missing.
+
+        Returns:
+            (value, components_used, components_missing) tuple.
+            value is None if no components found.
+        """
         ticker = getattr(self, '_current_ticker', None)
+        components_used = []
+        components_missing = []
 
         # Strategy 1: Try total concepts directly (avoids dimensional component issues)
         if ticker:
@@ -1470,7 +1528,7 @@ class ReferenceValidator:
                 concept = total_concept if ':' in total_concept else f"us-gaap:{total_concept}"
                 value = self._extract_xbrl_value(xbrl, concept)
                 if value is not None:
-                    return value
+                    return value, [total_concept], []
 
         # Strategy 2: Component summation
         components = get_composite_components(ticker, metric) if ticker else None
@@ -1478,7 +1536,7 @@ class ReferenceValidator:
         # Fall back to hardcoded if no config
         if not components:
             if metric not in self.COMPOSITE_METRICS:
-                return None
+                return None, [], []
             components = self.COMPOSITE_METRICS[metric]
 
         total = 0.0
@@ -1505,8 +1563,11 @@ class ReferenceValidator:
             if value is not None:
                 total += value
                 found_any = True
+                components_used.append(component)
+            else:
+                components_missing.append(component)
 
-        return total if found_any else None
+        return (total if found_any else None), components_used, components_missing
     
     def _compare_values(
         self,

@@ -93,6 +93,22 @@ class CompanyCQS:
 
 
 @dataclass
+class ExtractionEvidence:
+    """Structured diagnostic explaining what the validator actually extracted and why."""
+    metric: str
+    ticker: str
+    reference_value: Optional[float] = None       # yfinance target
+    extracted_value: Optional[float] = None        # what validator actually got
+    resolution_type: str = "none"                  # "direct" | "composite" | "industry" | "none"
+    components_used: List[str] = field(default_factory=list)     # XBRL concepts actually used
+    components_missing: List[str] = field(default_factory=list)  # Expected components not found
+    period_selected: str = ""                      # Which period was used
+    variance_pct: Optional[float] = None           # Actual variance
+    failure_reason: str = ""                       # Human-readable explanation
+    company_industry: Optional[str] = None         # Industry from config or SIC lookup
+
+
+@dataclass
 class MetricGap:
     """A gap in the extraction pipeline, ranked by CQS impact."""
     ticker: str
@@ -105,6 +121,8 @@ class MetricGap:
     graveyard_count: int = 0   # Number of prior failed attempts
     notes: str = ""
     variance_type: str = "raw" # "raw" | "explained" | "standardized"
+    extraction_evidence: Optional[ExtractionEvidence] = None  # Diagnostic evidence from validator
+    hv_subtype: Optional[str] = None  # "hv_missing_component" | "hv_wrong_concept" | "hv_missing_industry" | "hv_period_mismatch"
 
     @property
     def is_dead_end(self) -> bool:
@@ -568,6 +586,53 @@ def identify_gaps(
     return active_gaps, cqs_result
 
 
+def _build_extraction_evidence(
+    ticker: str,
+    metric: str,
+    validation,
+) -> ExtractionEvidence:
+    """Build ExtractionEvidence from a ValidationResult."""
+    if validation is None:
+        return ExtractionEvidence(
+            metric=metric, ticker=ticker,
+            failure_reason="No validation result available",
+        )
+
+    return ExtractionEvidence(
+        metric=metric,
+        ticker=ticker,
+        reference_value=validation.reference_value,
+        extracted_value=validation.xbrl_value,
+        resolution_type=getattr(validation, 'resolution_type', 'none'),
+        components_used=getattr(validation, 'components_used', None) or [],
+        components_missing=getattr(validation, 'components_missing', None) or [],
+        variance_pct=validation.variance_pct,
+        company_industry=getattr(validation, 'company_industry', None),
+        failure_reason=validation.notes or "",
+    )
+
+
+def _determine_hv_subtype(evidence: ExtractionEvidence) -> Optional[str]:
+    """Determine the high_variance subtype from extraction evidence."""
+    # Composite metric with missing components
+    if evidence.resolution_type == "composite" and evidence.components_missing:
+        return "hv_missing_component"
+
+    # Company has no industry set — may need industry-specific extraction
+    if evidence.company_industry is None:
+        return "hv_missing_industry"
+
+    # Direct metric with wrong value — standard solver target
+    if evidence.resolution_type == "direct" and evidence.extracted_value is not None:
+        return "hv_wrong_concept"
+
+    # Value extracted but from a resolution path that produced wrong result
+    if evidence.extracted_value is not None:
+        return "hv_wrong_concept"
+
+    return None
+
+
 def _classify_gap(
     ticker: str,
     metric: str,
@@ -594,6 +659,9 @@ def _classify_gap(
         ref_val = validation.reference_value
         variance = validation.variance_pct
 
+    # Build extraction evidence from validation result
+    evidence = _build_extraction_evidence(ticker, metric, validation)
+
     # Regression: previously golden, now failing
     if (ticker, metric) in golden_set and result.validation_status == "invalid":
         return MetricGap(
@@ -602,6 +670,7 @@ def _classify_gap(
             current_variance=variance, reference_value=ref_val,
             xbrl_value=xbrl_val, graveyard_count=gc,
             notes="Golden master regressed — high priority",
+            extraction_evidence=evidence,
         )
 
     # Validation failure: mapped but wrong value (or reset after validation failure)
@@ -614,6 +683,7 @@ def _classify_gap(
             current_variance=variance, reference_value=ref_val,
             xbrl_value=xbrl_val, graveyard_count=gc,
             notes=result.reasoning or f"Mapped to {result.concept} but failed validation",
+            extraction_evidence=evidence,
         )
 
     # Unmapped: no concept found
@@ -623,6 +693,7 @@ def _classify_gap(
             estimated_impact=per_metric_impact,
             reference_value=ref_val, graveyard_count=gc,
             notes="No mapping found",
+            extraction_evidence=evidence,
         )
 
     # High variance: mapped and "valid" but variance is concerning
@@ -640,7 +711,11 @@ def _classify_gap(
                 xbrl_value=xbrl_val, graveyard_count=gc,
                 notes=f"Explained variance {variance:.1f}% — documented reason exists",
                 variance_type="explained",
+                extraction_evidence=evidence,
             )
+
+        # Determine high_variance subtype for targeted proposal routing
+        hv_subtype = _determine_hv_subtype(evidence)
 
         return MetricGap(
             ticker=ticker, metric=metric, gap_type="high_variance",
@@ -649,6 +724,8 @@ def _classify_gap(
             xbrl_value=xbrl_val, graveyard_count=gc,
             notes=f"Variance {variance:.1f}% is above 10% threshold",
             variance_type=vtype,
+            extraction_evidence=evidence,
+            hv_subtype=hv_subtype,
         )
 
     return None

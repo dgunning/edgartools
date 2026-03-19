@@ -267,6 +267,74 @@ class AutoSolver:
         logger.info(f"Found {len(results)} formula candidates for {ticker}:{metric}")
         return results
 
+    def solve_composite_metric(
+        self,
+        ticker: str,
+        metric: str,
+        found_components: List[str],
+        found_total: float,
+        target: float,
+    ) -> List[FormulaCandidate]:
+        """
+        Solve for missing components in a composite metric.
+
+        Instead of searching for facts that sum to `target`, finds facts
+        that fill the gap: target - found_total (the residual).
+
+        Args:
+            ticker: Company ticker.
+            metric: Metric name (e.g., "IntangibleAssets").
+            found_components: Components already successfully extracted.
+            found_total: Sum of already-found component values.
+            target: The full yfinance target value.
+
+        Returns:
+            List of FormulaCandidate representing the residual match.
+        """
+        residual = abs(target) - abs(found_total)
+        if residual <= 0:
+            logger.info(
+                f"Composite solver: {ticker}:{metric} found_total={found_total} "
+                f">= target={target}, no residual to solve"
+            )
+            return []
+
+        logger.info(
+            f"Composite solver: {ticker}:{metric} searching for residual "
+            f"${residual/1e9:.2f}B (target=${target/1e9:.2f}B - found=${found_total/1e9:.2f}B, "
+            f"found_components={found_components})"
+        )
+
+        # Use solve_metric with the residual as the target
+        candidates = self.solve_metric(
+            ticker, metric,
+            yfinance_value=residual,
+            multi_period=False,  # Component search is less strict
+        )
+
+        # Filter out candidates that include already-found components
+        filtered = []
+        found_set = set(found_components)
+        for candidate in candidates:
+            overlap = found_set.intersection(set(candidate.components))
+            if not overlap:
+                # Update candidate to reflect it's solving the residual
+                candidate.target = target  # Full target for context
+                filtered.append(candidate)
+
+        if filtered:
+            logger.info(
+                f"Composite solver found {len(filtered)} residual candidates "
+                f"for {ticker}:{metric}"
+            )
+        else:
+            logger.info(
+                f"Composite solver: all {len(candidates)} candidates overlap "
+                f"with found components {found_components}"
+            )
+
+        return filtered
+
     def validate_formula(
         self,
         formula: FormulaCandidate,

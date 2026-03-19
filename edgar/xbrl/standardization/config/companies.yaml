@@ -656,6 +656,7 @@ companies:
     name: "Exxon Mobil Corporation"
     cik: 34088
     archetype: "A"
+    industry: "energy"
     metric_overrides:
       Capex:
         preferred_concept: PaymentsToAcquireProductiveAssets
@@ -692,6 +693,7 @@ companies:
     name: "Chevron Corporation"
     cik: 93410
     archetype: "A"
+    industry: "energy"
     metric_overrides:
       Capex:
         preferred_concept: PaymentsToAcquireProductiveAssets
@@ -730,6 +732,7 @@ companies:
     name: "ConocoPhillips"
     cik: 1163165
     archetype: "A"
+    industry: "energy"
     exclude_metrics:
       - OperatingIncome  # no OperatingIncomeLoss concept in XBRL
       - COGS  # energy COGS definition differs from yfinance
@@ -788,6 +791,7 @@ companies:
     name: "Schlumberger Limited"
     cik: 87347
     archetype: "A"
+    industry: "energy"
     exclude_metrics:
       - OperatingIncome  # OperatingIncomeLoss not in current filing
     known_divergences:
