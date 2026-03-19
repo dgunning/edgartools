@@ -863,6 +863,7 @@ class ReferenceValidator:
                     raw_variance = abs(validation.variance_pct) if validation.variance_pct is not None else float('inf')
                     formula_variance = sa_variance_frac * 100
                     if formula_variance < raw_variance:
+                        old_status = validation.status
                         validation.is_valid = sa_pass
                         validation.xbrl_value = sa_composite_value
                         validation.variance_pct = formula_variance
@@ -870,6 +871,17 @@ class ReferenceValidator:
                         validation.notes = (
                             f"Standardization formula: variance {formula_variance:.1f}% "
                             f"(raw was {raw_variance:.1f}%)"
+                        )
+                        logger.info(
+                            f"[SA PROMOTE] {ticker}:{metric} — standardization formula promoted: "
+                            f"variance {raw_variance:.1f}% -> {formula_variance:.1f}%, "
+                            f"status {old_status} -> {validation.status}, "
+                            f"sa_pass={sa_pass}, value={sa_composite_value}"
+                        )
+                    else:
+                        logger.debug(
+                            f"[SA SKIP] {ticker}:{metric} — formula not better: "
+                            f"raw={raw_variance:.1f}% vs formula={formula_variance:.1f}%"
                         )
 
             # IDENTITY CHECK GUARDRAIL (Bank Sector Expansion)

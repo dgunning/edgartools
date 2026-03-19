@@ -472,6 +472,11 @@ def evaluate_experiment(
     if len(target_tickers) == 1 and eval_cohort and len(eval_cohort) > 5:
         target = target_tickers[0]
         target_baseline = baseline_cqs.company_scores.get(target)
+        logger.info(
+            f"[PRE-SCREEN] Company-scoped change for {target} "
+            f"(metric={change.target_metric}, type={change.change_type.value}), "
+            f"evaluating target only before full cohort"
+        )
 
         if target_baseline is not None:
             try:
@@ -494,6 +499,13 @@ def evaluate_experiment(
             target_new = target_cqs.company_scores.get(target)
             if target_new and target_new.cqs <= target_baseline.cqs:
                 # Target company didn't improve — skip expensive full eval
+                prescreen_duration = time.time() - start_time
+                logger.info(
+                    f"[PRE-SCREEN REJECT] {target} CQS not improved "
+                    f"({target_baseline.cqs:.4f} -> {target_new.cqs:.4f}), "
+                    f"skipped full cohort eval (saved ~{len(eval_cohort) * 8}s), "
+                    f"pre-screen took {prescreen_duration:.1f}s"
+                )
                 revert_config_change(change)
                 return ExperimentDecision(
                     decision=Decision.DISCARD,
@@ -564,6 +576,11 @@ def evaluate_experiment(
     if target_improved:
         # Company-scoped change where target improved: only require non-regression globally
         # (rounding tolerance of 0.0001 to handle floating point noise)
+        logger.info(
+            f"[RELAXED GATE] Target {target_tickers[0]} improved, "
+            f"using non-regression gate: global CQS {baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f} "
+            f"(threshold: >= {baseline_cqs.cqs - 0.0001:.4f})"
+        )
         if new_cqs.cqs < baseline_cqs.cqs - 0.0001:
             revert_config_change(change)
             return ExperimentDecision(
@@ -590,7 +607,15 @@ def evaluate_experiment(
     # SUCCESS — CQS improved (or non-regressing for company-scoped), no regressions, no company drops
     # Note: we do NOT revert — the change stays applied
     delta = new_cqs.cqs - baseline_cqs.cqs
-    reason = f"CQS improved by {delta:.4f}" if delta > 0 else f"Target company improved, global CQS non-regressing ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})"
+    if target_improved and delta <= 0:
+        reason = f"Target company improved, global CQS non-regressing ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})"
+        logger.info(
+            f"[RELAXED GATE KEEP] Company-scoped change KEPT via relaxed gate: "
+            f"metric={change.target_metric}, target={target_tickers[0]}, "
+            f"global delta={delta:+.4f}, duration={duration:.1f}s"
+        )
+    else:
+        reason = f"CQS improved by {delta:.4f}"
     return ExperimentDecision(
         decision=Decision.KEEP,
         cqs_before=baseline_cqs.cqs,
