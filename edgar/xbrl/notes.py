@@ -14,7 +14,6 @@ Usage:
     >>> tenk.notes['Debt'].to_context()   # AI-optimized context
 """
 import re
-import weakref
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from rich import box
@@ -61,12 +60,7 @@ class Note:
         self.policies = policies or []
         self.details = details or []
         self.menu_category = menu_category
-        self._xbrl_ref = weakref.ref(xbrl) if xbrl is not None else None
-
-    @property
-    def _xbrl(self) -> Optional['XBRL']:
-        """Dereference the weak reference to the XBRL object."""
-        return self._xbrl_ref() if self._xbrl_ref is not None else None
+        self._xbrl = xbrl
 
     @property
     def table_count(self) -> int:

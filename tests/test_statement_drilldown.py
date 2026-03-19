@@ -207,13 +207,11 @@ class TestStatementLineItem:
         assert isinstance(all_notes, list)
         assert len(all_notes) >= 1
 
-    def test_uses_weakref(self, mock_xbrl):
-        """StatementLineItem uses weakref to avoid preventing XBRL GC."""
+    def test_stores_xbrl_reference(self, mock_xbrl):
+        """StatementLineItem stores a direct reference (pickle-safe)."""
         row = StatementRow(label='X', level=0, metadata={'concept': 'foo'})
         item = StatementLineItem(row, mock_xbrl)
         assert item._xbrl is mock_xbrl
-        # weakref slot is set
-        assert item._xbrl_ref is not None
 
 
 # ── RenderedStatement.__getitem__ tests ───────────────────────────────────────

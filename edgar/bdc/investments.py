@@ -33,6 +33,9 @@ CONCEPT_PIK_RATE = 'us-gaap_InvestmentInterestRatePaidInKind'
 CONCEPT_SPREAD = 'us-gaap_InvestmentBasisSpreadVariableRate'
 CONCEPT_PCT_NET_ASSETS = 'us-gaap_InvestmentOwnedPercentOfNetAssets'
 
+# Entity-level aggregate concepts (not per-investment)
+CONCEPT_NONACCRUAL_LOANS_FV = 'us-gaap:FairValueOptionLoansHeldAsAssetsAggregateAmountInNonaccrualStatus'
+
 # Known investment types for parsing (order matters - more specific first)
 INVESTMENT_TYPES = [
     # Secured Debt (used by some BDCs like Main Street)
@@ -400,10 +403,12 @@ class PortfolioInvestments:
     def __init__(
         self,
         investments: list[PortfolioInvestment],
-        period: Optional[str] = None
+        period: Optional[str] = None,
+        nonaccrual_fair_value: Optional[Decimal] = None,
     ):
         self._investments = investments
         self._period = period
+        self._nonaccrual_fair_value = nonaccrual_fair_value
 
     def __len__(self) -> int:
         return len(self._investments)
@@ -469,6 +474,56 @@ class PortfolioInvestments:
         """Total unrealized gain/loss across all investments."""
         return self.total_fair_value - self.total_cost
 
+    # --- Health metrics ---
+
+    @property
+    def nonaccrual_fair_value(self) -> Optional[Decimal]:
+        """Fair value of loans on non-accrual status (entity-level aggregate from XBRL).
+
+        Returns None if the BDC does not tag this concept in its filing.
+        """
+        return self._nonaccrual_fair_value
+
+    @property
+    def non_accrual_rate(self) -> Optional[float]:
+        """Non-accrual rate: fair value of non-accrual loans / total fair value.
+
+        Returns None if non-accrual data is not available in the filing.
+        The BDC sector average is ~0.7%. Rates above 1.5% warrant investigation;
+        above 3% is a serious credit quality signal.
+        """
+        if self._nonaccrual_fair_value is None:
+            return None
+        total_fv = self.total_fair_value
+        if not total_fv:
+            return 0.0
+        return float(self._nonaccrual_fair_value / total_fv)
+
+    @property
+    def pik_investments(self) -> list[PortfolioInvestment]:
+        """Investments with Payment-In-Kind interest."""
+        return [inv for inv in self._investments if inv.pik_rate]
+
+    @property
+    def pik_fair_value(self) -> Decimal:
+        """Total fair value of PIK investments."""
+        return sum(
+            (inv.fair_value for inv in self._investments
+             if inv.pik_rate and inv.fair_value is not None),
+            Decimal(0)
+        )
+
+    @property
+    def pik_exposure(self) -> float:
+        """PIK exposure: fair value of PIK investments / total fair value.
+
+        Returns 0.0 if no investments or no fair value data.
+        """
+        total_fv = self.total_fair_value
+        if not total_fv:
+            return 0.0
+        return float(self.pik_fair_value / total_fv)
+
     def filter(
         self,
         investment_type: Optional[str] = None,
@@ -506,7 +561,8 @@ class PortfolioInvestments:
                 if inv.fair_value is not None and inv.fair_value >= min_fair_value
             ]
 
-        return PortfolioInvestments(investments, period=self._period)
+        return PortfolioInvestments(investments, period=self._period,
+                                    nonaccrual_fair_value=self._nonaccrual_fair_value)
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert to pandas DataFrame."""
@@ -570,6 +626,24 @@ class PortfolioInvestments:
         gain_loss = self.total_unrealized_gain_loss
         style = "green" if gain_loss >= 0 else "red"
         summary.add_row("Unrealized G/L", f"[{style}]${gain_loss:,.0f}[/{style}]")
+
+        # Health metrics
+        if self._nonaccrual_fair_value is not None:
+            rate = self.non_accrual_rate
+            rate_style = "green" if rate < 0.015 else ("yellow" if rate < 0.03 else "red")
+            summary.add_row(
+                "Non-Accrual",
+                f"[{rate_style}]${self._nonaccrual_fair_value:,.0f} ({rate:.1%})[/{rate_style}]"
+            )
+
+        pik_invs = self.pik_investments
+        if pik_invs:
+            pik_fv = self.pik_fair_value
+            pik_exp = self.pik_exposure
+            summary.add_row(
+                "PIK",
+                f"{len(pik_invs)} investments (${pik_fv:,.0f}, {pik_exp:.1%})"
+            )
 
         from rich.console import Group
         return Panel(
@@ -795,6 +869,20 @@ class PortfolioInvestments:
             except (ValueError, TypeError, InvalidOperation):
                 pass
 
+        # Extract entity-level non-accrual aggregate
+        nonaccrual_fv = None
+        for fact in all_facts:
+            if (fact.get('concept') == CONCEPT_NONACCRUAL_LOANS_FV
+                    and fact.get('period_instant') == period
+                    and not fact.get(dim_key)):  # entity-level only (no investment dimension)
+                value = fact.get('numeric_value') or fact.get('value')
+                if value is not None and not pd.isna(value):
+                    try:
+                        nonaccrual_fv = Decimal(str(value))
+                    except (ValueError, InvalidOperation):
+                        pass
+                    break
+
         # Create PortfolioInvestment objects
         portfolio = [
             PortfolioInvestment(**inv_data)
@@ -811,4 +899,4 @@ class PortfolioInvestments:
             reverse=True
         )
 
-        return cls(portfolio, period=period)
+        return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv)

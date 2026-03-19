@@ -6,7 +6,6 @@ This module provides functions for working with financial statements.
 
 import re
 import warnings
-import weakref
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
@@ -1964,15 +1963,11 @@ class StatementLineItem:
         >>> item.notes        # → [Note, ...] (all related notes)
         >>> item.values       # {'instant_2024-12-31': 98071000000, ...}
     """
-    __slots__ = ('_row', '_xbrl_ref')
+    __slots__ = ('_row', '_xbrl')
 
     def __init__(self, row, xbrl):
         self._row = row
-        self._xbrl_ref = weakref.ref(xbrl) if xbrl is not None else None
-
-    @property
-    def _xbrl(self):
-        return self._xbrl_ref() if self._xbrl_ref is not None else None
+        self._xbrl = xbrl
 
     @property
     def label(self) -> str:

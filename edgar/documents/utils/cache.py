@@ -4,7 +4,6 @@ Cache utilities for performance optimization.
 
 import threading
 import time
-import weakref
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -123,41 +122,36 @@ class LRUCache(Generic[T]):
 
 class WeakCache:
     """
-    Weak reference cache for parsed nodes.
-    
-    Allows garbage collection of unused nodes while
-    maintaining references to actively used ones.
+    Cache for parsed nodes.
+
+    Uses strong references so cached objects are pickle-safe and won't
+    disappear unexpectedly. Call ``clear()`` to free memory.
     """
 
     def __init__(self):
-        """Initialize weak cache."""
-        self._cache: Dict[str, weakref.ref] = {}
+        """Initialize cache."""
+        self._cache: Dict[str, Any] = {}
         self._lock = threading.RLock()
         self.stats = CacheStats()
 
     def get(self, key: str) -> Optional[Any]:
         """
         Get item from cache.
-        
+
         Args:
             key: Cache key
-            
+
         Returns:
-            Cached object or None if not found or collected
+            Cached object or None if not found
         """
         start_time = time.time()
 
         with self._lock:
-            ref = self._cache.get(key)
-            if ref is not None:
-                obj = ref()
-                if obj is not None:
-                    self.stats.hits += 1
-                    self.stats.total_time += time.time() - start_time
-                    return obj
-                else:
-                    # Object was garbage collected
-                    del self._cache[key]
+            obj = self._cache.get(key)
+            if obj is not None:
+                self.stats.hits += 1
+                self.stats.total_time += time.time() - start_time
+                return obj
 
             self.stats.misses += 1
             self.stats.total_time += time.time() - start_time
@@ -165,37 +159,23 @@ class WeakCache:
 
     def put(self, key: str, value: Any) -> None:
         """
-        Put item in cache with weak reference.
-        
+        Put item in cache.
+
         Args:
             key: Cache key
             value: Object to cache
         """
         with self._lock:
-            self._cache[key] = weakref.ref(value)
+            self._cache[key] = value
 
     def clear(self) -> None:
-        """Clear all cached references."""
+        """Clear all cached entries."""
         with self._lock:
             self._cache.clear()
 
     def cleanup(self) -> int:
-        """
-        Remove dead references.
-        
-        Returns:
-            Number of references removed
-        """
-        with self._lock:
-            dead_keys = [
-                key for key, ref in self._cache.items()
-                if ref() is None
-            ]
-
-            for key in dead_keys:
-                del self._cache[key]
-
-            return len(dead_keys)
+        """No-op retained for API compatibility. Returns 0."""
+        return 0
 
 
 class TimeBasedCache(Generic[T]):
