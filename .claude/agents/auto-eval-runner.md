@@ -269,16 +269,72 @@ After each session, report:
 
 Use these as the benchmark when reporting session results.
 
+## Worker Mode (Multi-Agent Protocol)
+
+When launched by the coordinator with a sub-cohort and `propose_only=True`, run in **worker mode**:
+
+1. **Do NOT apply config changes** — only generate proposals
+2. **Do NOT call evaluate_experiment()** — the coordinator handles evaluation
+3. **Write proposals to JSON** — the coordinator collects them
+
+### Worker Mode Usage
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    propose_only_loop, save_proposals_to_json, propose_change,
+    make_escalation_propose_fn,
+)
+from edgar.xbrl.standardization.tools.auto_eval import SUB_COHORT_A
+from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+from pathlib import Path
+
+ledger = ExperimentLedger()
+
+# Generate proposals without applying them
+proposals = propose_only_loop(
+    eval_cohort=SUB_COHORT_A,
+    propose_fn=propose_change,  # or make_escalation_propose_fn(gpt_caller=...)
+    ledger=ledger,
+    max_workers=2,
+    worker_id="worker_A",
+)
+
+# Save for coordinator collection
+output_path = Path("edgar/xbrl/standardization/company_mappings/proposals_worker_A.json")
+save_proposals_to_json(proposals, output_path)
+```
+
+### Worker Mode Safety
+
+- Workers are **read-only** on config files
+- Workers share the same SQLite ledger (WAL mode enabled)
+- Workers use `max_workers=2` each (6 total cores across 3 workers)
+- If the worker has MCP access, it can use `mcp__pal__chat` for GPT escalation
+
+### Sub-Cohorts
+
+Three pre-defined sub-cohorts split the 50-company EXPANSION_COHORT across sectors:
+
+| Cohort | Size | Key Hard Gaps |
+|--------|------|---------------|
+| `SUB_COHORT_A` | 17 | CAT:AccountsReceivable |
+| `SUB_COHORT_B` | 17 | MS:CashAndEquivalents, DE:Capex |
+| `SUB_COHORT_C` | 16 | ABBV:DepreciationAmortization |
+
+Import from: `edgar.xbrl.standardization.tools.auto_eval`
+
 ## File Locations
 
 ```
-edgar/xbrl/standardization/tools/auto_eval.py        — CQS computation, gap analysis, offline readiness
-edgar/xbrl/standardization/tools/auto_eval_loop.py    — Experiment loop, parallel scouts, batch eval
+edgar/xbrl/standardization/tools/auto_eval.py        — CQS computation, gap analysis, offline readiness, sub-cohorts
+edgar/xbrl/standardization/tools/auto_eval_loop.py    — Experiment loop, parallel scouts, batch eval, propose_only_loop
 edgar/xbrl/standardization/tools/bulk_preload.py       — Pre-download data for offline mode
 edgar/xbrl/standardization/ledger/schema.py            — AutoEvalExperiment, AutoEvalGraveyard tables
 edgar/xbrl/standardization/config/                      — Tier 1 config files
 edgar/xbrl/standardization/tools/discover_concepts.py   — Concept discovery (uses calculation_trees API)
 edgar/xbrl/standardization/tools/verify_mapping.py      — Value verification tool
 edgar/xbrl/standardization/tools/learn_mappings.py      — Cross-company pattern learning
+edgar/xbrl/standardization/company_mappings/hard_gap_investigations/ — Hard gap investigation reports
 .claude/agents/haiku-gap-classifier.md                   — Haiku for reasoning-only gap classification
+.claude/agents/composite-metric-master.md                — Deep investigation of hard gaps
 ```

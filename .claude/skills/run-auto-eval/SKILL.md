@@ -147,12 +147,101 @@ Schedule nightly focus to prevent wandering:
 4. Circuit breaker: 10 consecutive failures stops the session
 5. All changes are git-recoverable (`git checkout`)
 
+## Multi-Agent Mode
+
+For faster gap resolution, launch 3 parallel worker agents on sub-cohorts, then coordinate centrally.
+
+### Architecture
+
+```
+COORDINATOR (main session)
+    |-- Launch 3 WORKER agents in parallel (sub-cohorts A/B/C)
+    |       Each: propose_only_loop() → writes proposals JSON
+    |       Does NOT apply config changes
+    |
+    |-- Collect proposals from all 3 workers
+    |-- Apply + evaluate sequentially (one at a time, with ConfigLock)
+    |-- After 3 KEEPs: global CQS checkpoint on all 50 companies
+    |
+    |-- Hard gaps (exhausted) → COMPOSITE-METRIC-MASTER agent
+    |-- Repeat until CQS >= target or exhausted
+```
+
+### Step 1: Establish Baseline
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval import compute_cqs, EXPANSION_COHORT_50
+from edgar.xbrl.standardization.tools.auto_eval_loop import enable_wal_mode
+from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+
+ledger = ExperimentLedger()
+enable_wal_mode(ledger)  # Required for concurrent reads
+baseline = compute_cqs(eval_cohort=EXPANSION_COHORT_50, snapshot_mode=True, ledger=ledger)
+```
+
+### Step 2: Launch 3 Worker Agents
+
+Launch via Agent tool with `subagent_type="auto-eval-runner"`:
+
+Each worker runs:
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    propose_only_loop, save_proposals_to_json, propose_change,
+)
+from edgar.xbrl.standardization.tools.auto_eval import SUB_COHORT_A  # or B, C
+
+proposals = propose_only_loop(
+    eval_cohort=SUB_COHORT_A,
+    propose_fn=propose_change,
+    max_workers=2,
+    worker_id="worker_A",
+)
+save_proposals_to_json(proposals, Path("...proposals_worker_A.json"))
+```
+
+### Step 3: Coordinator Collects & Evaluates
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    load_proposals_from_json, select_non_conflicting,
+    evaluate_experiment, log_experiment, ConfigLock,
+)
+
+# Collect from all workers
+all_proposals = []
+for path in proposal_files:
+    all_proposals.extend(load_proposals_from_json(path))
+
+# De-duplicate and filter non-conflicting
+batch = select_non_conflicting([p.proposal for p in all_proposals])
+
+# Evaluate sequentially (coordinator only)
+for change in batch:
+    result = evaluate_experiment(change, baseline, ledger=ledger)
+    log_experiment(change, result, ledger)
+```
+
+### Step 4: Hard Gaps → Composite Metric Master
+
+Gaps that resist all workers → launch `composite-metric-master` agent for deep investigation.
+
+### Resource Limits
+
+| Resource | Limit | Rationale |
+|----------|-------|-----------|
+| Workers | 3 | 3 sub-cohorts × 2 threads each = 6 cores |
+| max_workers per agent | 2 | Leaves 2 cores for coordination |
+| SEC rate limit | 3/s per worker | 3×3=9, at SEC limit of 10 |
+| Config writes | Coordinator only | ConfigLock as defense-in-depth |
+
 ## Key Files
 
 ```
-edgar/xbrl/standardization/tools/auto_eval.py           — CQS computation, gap analysis
-edgar/xbrl/standardization/tools/auto_eval_loop.py       — Experiment loop, config changes
+edgar/xbrl/standardization/tools/auto_eval.py           — CQS computation, gap analysis, sub-cohorts
+edgar/xbrl/standardization/tools/auto_eval_loop.py       — Experiment loop, config changes, propose_only_loop
 edgar/xbrl/standardization/tools/auto_eval_dashboard.py   — Morning review dashboard
 edgar/xbrl/standardization/ledger/schema.py               — AutoEvalExperiment, Graveyard tables
-.claude/agents/auto-eval-runner.md                         — Autonomous agent definition
+edgar/xbrl/standardization/company_mappings/hard_gap_investigations/ — Hard gap reports
+.claude/agents/auto-eval-runner.md                         — Autonomous agent definition (supports worker mode)
+.claude/agents/composite-metric-master.md                  — Hard gap investigation agent
 ```

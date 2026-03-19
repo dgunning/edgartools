@@ -62,6 +62,38 @@ EXPANSION_COHORT_50 = [
     "V", "MA", "NEE", "T", "HD", "LOW", "NFLX", "AVGO",
 ]
 
+# Sub-cohorts for multi-agent parallel evaluation.
+# Balanced across sectors with hard gaps distributed:
+# CAT in A, MS/DE in B, ABBV in C.
+SUB_COHORT_A = [
+    "AAPL", "MSFT", "GOOG", "AMZN",    # Tech
+    "JPM", "BAC", "GS",                  # Banking
+    "XOM", "CVX",                         # Energy
+    "WMT", "PG",                          # Consumer
+    "JNJ", "UNH",                         # Healthcare
+    "CAT", "HON",                         # Industrial (CAT = hard gap)
+    "V", "MA",                            # Other
+]
+
+SUB_COHORT_B = [
+    "META", "NVDA", "TSLA", "CRM",       # Tech
+    "MS", "C", "BLK",                     # Banking (MS = hard gap)
+    "COP", "SLB",                         # Energy
+    "KO", "PEP", "MCD",                   # Consumer
+    "PFE", "LLY",                         # Healthcare
+    "GE", "DE",                           # Industrial (DE = hard gap)
+    "NEE",                                # Other
+]
+
+SUB_COHORT_C = [
+    "ADBE", "INTC",                       # Tech
+    "SCHW", "AXP",                        # Finance
+    "NKE", "COST",                        # Consumer
+    "ABBV", "MRK", "TMO",                 # Healthcare (ABBV = hard gap)
+    "RTX", "UPS",                         # Industrial
+    "T", "HD", "LOW", "NFLX", "AVGO",     # Other
+]
+
 
 # =============================================================================
 # DATA CLASSES

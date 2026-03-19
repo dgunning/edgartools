@@ -14,6 +14,7 @@ Key invariants:
 6. Circuit breaker: 10 consecutive failures stops the session
 """
 
+import fcntl
 import hashlib
 import json
 import logging
@@ -42,6 +43,9 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     QUICK_EVAL_COHORT,
     VALIDATION_COHORT,
     EXPANSION_COHORT_50,
+    SUB_COHORT_A,
+    SUB_COHORT_B,
+    SUB_COHORT_C,
 )
 from edgar.xbrl.standardization.tools.auto_solver import AutoSolver
 
@@ -205,6 +209,25 @@ class _SubtypeFailureTracker:
 # CONFIG MANIPULATION
 # =============================================================================
 
+class ConfigLock:
+    """File-based lock for serializing config writes.
+
+    Defense-in-depth: the multi-agent protocol already ensures only the
+    coordinator writes configs, but this lock guards against accidental
+    concurrent writes within a single process or from multiple coordinators.
+    """
+    LOCK_FILE = CONFIG_DIR / ".config.lock"
+
+    def __enter__(self):
+        self._fd = open(self.LOCK_FILE, 'w')
+        fcntl.flock(self._fd, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, *args):
+        fcntl.flock(self._fd, fcntl.LOCK_UN)
+        self._fd.close()
+
+
 def apply_config_change(change: ConfigChange) -> None:
     """
     Apply a YAML configuration change.
@@ -221,139 +244,140 @@ def apply_config_change(change: ConfigChange) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
 
-    with open(path, 'r') as f:
-        config = yaml.safe_load(f)
+    with ConfigLock():
+        with open(path, 'r') as f:
+            config = yaml.safe_load(f)
 
-    # Navigate to parent of target path
-    keys = change.yaml_path.split('.')
-    parent = config
-    for key in keys[:-1]:
-        if isinstance(parent, dict) and key in parent:
-            parent = parent[key]
-        else:
-            raise ValueError(f"Path not found: {change.yaml_path} (missing key: {key})")
+        # Navigate to parent of target path
+        keys = change.yaml_path.split('.')
+        parent = config
+        for key in keys[:-1]:
+            if isinstance(parent, dict) and key in parent:
+                parent = parent[key]
+            else:
+                raise ValueError(f"Path not found: {change.yaml_path} (missing key: {key})")
 
-    target_key = keys[-1]
+        target_key = keys[-1]
 
-    # Apply change based on type
-    if change.change_type == ChangeType.ADD_CONCEPT:
-        # Add to a list (e.g., known_concepts)
-        if target_key not in parent:
-            parent[target_key] = []
-        if isinstance(parent[target_key], list):
-            if change.new_value not in parent[target_key]:
-                parent[target_key].append(change.new_value)
-        else:
-            raise ValueError(f"Expected list at {change.yaml_path}, got {type(parent[target_key])}")
+        # Apply change based on type
+        if change.change_type == ChangeType.ADD_CONCEPT:
+            # Add to a list (e.g., known_concepts)
+            if target_key not in parent:
+                parent[target_key] = []
+            if isinstance(parent[target_key], list):
+                if change.new_value not in parent[target_key]:
+                    parent[target_key].append(change.new_value)
+            else:
+                raise ValueError(f"Expected list at {change.yaml_path}, got {type(parent[target_key])}")
 
-    elif change.change_type == ChangeType.ADD_EXCLUSION:
-        # Add to exclude_metrics list
-        if target_key not in parent:
-            parent[target_key] = []
-        if isinstance(parent[target_key], list):
-            if change.new_value not in parent[target_key]:
-                parent[target_key].append(change.new_value)
-        else:
-            raise ValueError(f"Expected list at {change.yaml_path}")
+        elif change.change_type == ChangeType.ADD_EXCLUSION:
+            # Add to exclude_metrics list
+            if target_key not in parent:
+                parent[target_key] = []
+            if isinstance(parent[target_key], list):
+                if change.new_value not in parent[target_key]:
+                    parent[target_key].append(change.new_value)
+            else:
+                raise ValueError(f"Expected list at {change.yaml_path}")
 
-    elif change.change_type == ChangeType.ADD_DIVERGENCE:
-        # Add a known_divergences entry (dict)
-        if target_key not in parent:
-            parent[target_key] = {}
-        if isinstance(change.new_value, dict):
-            parent[target_key].update(change.new_value)
-        else:
+        elif change.change_type == ChangeType.ADD_DIVERGENCE:
+            # Add a known_divergences entry (dict)
+            if target_key not in parent:
+                parent[target_key] = {}
+            if isinstance(change.new_value, dict):
+                parent[target_key].update(change.new_value)
+            else:
+                parent[target_key] = change.new_value
+
+        elif change.change_type == ChangeType.ADD_TREE_HINT:
+            # Add or update tree_hints
+            if target_key not in parent:
+                parent[target_key] = {}
+            if isinstance(change.new_value, dict):
+                parent[target_key].update(change.new_value)
+            else:
+                parent[target_key] = change.new_value
+
+        elif change.change_type == ChangeType.REMOVE_PATTERN:
+            # Remove from a list
+            if target_key in parent and isinstance(parent[target_key], list):
+                if change.old_value in parent[target_key]:
+                    parent[target_key].remove(change.old_value)
+
+        elif change.change_type == ChangeType.MODIFY_VALUE:
+            # Direct value replacement
             parent[target_key] = change.new_value
 
-    elif change.change_type == ChangeType.ADD_TREE_HINT:
-        # Add or update tree_hints
-        if target_key not in parent:
-            parent[target_key] = {}
-        if isinstance(change.new_value, dict):
-            parent[target_key].update(change.new_value)
+        elif change.change_type == ChangeType.ADD_STANDARDIZATION:
+            # Write a standardization formula to metrics.yaml
+            # new_value = {"scope": "default"|"company:TICKER"|"sector:NAME", "components": [...], "notes": "..."}
+            if target_key not in parent:
+                parent[target_key] = {}
+            std_config = parent[target_key]
+            scope = change.new_value.get("scope", "default") if isinstance(change.new_value, dict) else "default"
+            components = change.new_value.get("components", []) if isinstance(change.new_value, dict) else []
+            notes = change.new_value.get("notes", "") if isinstance(change.new_value, dict) else ""
+
+            if scope == "default":
+                std_config["default"] = {"components": components}
+                if notes:
+                    std_config["default"]["notes"] = notes
+            elif scope.startswith("company:"):
+                ticker_key = scope.split(":", 1)[1]
+                if "company_overrides" not in std_config:
+                    std_config["company_overrides"] = {}
+                std_config["company_overrides"][ticker_key] = {"components": components}
+                if notes:
+                    std_config["company_overrides"][ticker_key]["notes"] = notes
+            elif scope.startswith("sector:"):
+                sector_key = scope.split(":", 1)[1]
+                if "sector_overrides" not in std_config:
+                    std_config["sector_overrides"] = {}
+                std_config["sector_overrides"][sector_key] = {"components": components}
+                if notes:
+                    std_config["sector_overrides"][sector_key]["notes"] = notes
+
+        elif change.change_type == ChangeType.ADD_KNOWN_VARIANCE:
+            # Write an explained variance entry to metrics.yaml
+            # new_value = {"ticker": "ABBV", "status": "formula_added", "variance_pct": 2.3, "reason": "..."}
+            if target_key not in parent:
+                parent[target_key] = {}
+            kv_config = parent[target_key]
+            kv_data = change.new_value if isinstance(change.new_value, dict) else {}
+            ticker_key = kv_data.get("ticker", "")
+            if ticker_key:
+                kv_config[ticker_key] = {
+                    "status": kv_data.get("status", "formula_added"),
+                    "variance_pct": kv_data.get("variance_pct", 0),
+                    "reason": kv_data.get("reason", "Auto-solver discovered formula"),
+                }
+
+        elif change.change_type == ChangeType.SET_INDUSTRY:
+            # Set industry field on a company in companies.yaml
+            # yaml_path should be "companies.{ticker}.industry"
+            if target_key not in parent or parent[target_key] is None:
+                parent[target_key] = change.new_value
+            else:
+                # Don't overwrite existing industry
+                parent[target_key] = change.new_value
+
+        elif change.change_type == ChangeType.ADD_COMPANY_OVERRIDE:
+            # Add a metric_overrides entry in companies.yaml
+            # yaml_path = "companies.{ticker}.metric_overrides"
+            # new_value = {"MetricName": {"preferred_concept": "...", "notes": "..."}}
+            if target_key not in parent:
+                parent[target_key] = {}
+            if isinstance(change.new_value, dict):
+                parent[target_key].update(change.new_value)
+            else:
+                parent[target_key] = change.new_value
+
         else:
-            parent[target_key] = change.new_value
+            raise ValueError(f"Unknown change type: {change.change_type}")
 
-    elif change.change_type == ChangeType.REMOVE_PATTERN:
-        # Remove from a list
-        if target_key in parent and isinstance(parent[target_key], list):
-            if change.old_value in parent[target_key]:
-                parent[target_key].remove(change.old_value)
-
-    elif change.change_type == ChangeType.MODIFY_VALUE:
-        # Direct value replacement
-        parent[target_key] = change.new_value
-
-    elif change.change_type == ChangeType.ADD_STANDARDIZATION:
-        # Write a standardization formula to metrics.yaml
-        # new_value = {"scope": "default"|"company:TICKER"|"sector:NAME", "components": [...], "notes": "..."}
-        if target_key not in parent:
-            parent[target_key] = {}
-        std_config = parent[target_key]
-        scope = change.new_value.get("scope", "default") if isinstance(change.new_value, dict) else "default"
-        components = change.new_value.get("components", []) if isinstance(change.new_value, dict) else []
-        notes = change.new_value.get("notes", "") if isinstance(change.new_value, dict) else ""
-
-        if scope == "default":
-            std_config["default"] = {"components": components}
-            if notes:
-                std_config["default"]["notes"] = notes
-        elif scope.startswith("company:"):
-            ticker_key = scope.split(":", 1)[1]
-            if "company_overrides" not in std_config:
-                std_config["company_overrides"] = {}
-            std_config["company_overrides"][ticker_key] = {"components": components}
-            if notes:
-                std_config["company_overrides"][ticker_key]["notes"] = notes
-        elif scope.startswith("sector:"):
-            sector_key = scope.split(":", 1)[1]
-            if "sector_overrides" not in std_config:
-                std_config["sector_overrides"] = {}
-            std_config["sector_overrides"][sector_key] = {"components": components}
-            if notes:
-                std_config["sector_overrides"][sector_key]["notes"] = notes
-
-    elif change.change_type == ChangeType.ADD_KNOWN_VARIANCE:
-        # Write an explained variance entry to metrics.yaml
-        # new_value = {"ticker": "ABBV", "status": "formula_added", "variance_pct": 2.3, "reason": "..."}
-        if target_key not in parent:
-            parent[target_key] = {}
-        kv_config = parent[target_key]
-        kv_data = change.new_value if isinstance(change.new_value, dict) else {}
-        ticker_key = kv_data.get("ticker", "")
-        if ticker_key:
-            kv_config[ticker_key] = {
-                "status": kv_data.get("status", "formula_added"),
-                "variance_pct": kv_data.get("variance_pct", 0),
-                "reason": kv_data.get("reason", "Auto-solver discovered formula"),
-            }
-
-    elif change.change_type == ChangeType.SET_INDUSTRY:
-        # Set industry field on a company in companies.yaml
-        # yaml_path should be "companies.{ticker}.industry"
-        if target_key not in parent or parent[target_key] is None:
-            parent[target_key] = change.new_value
-        else:
-            # Don't overwrite existing industry
-            parent[target_key] = change.new_value
-
-    elif change.change_type == ChangeType.ADD_COMPANY_OVERRIDE:
-        # Add a metric_overrides entry in companies.yaml
-        # yaml_path = "companies.{ticker}.metric_overrides"
-        # new_value = {"MetricName": {"preferred_concept": "...", "notes": "..."}}
-        if target_key not in parent:
-            parent[target_key] = {}
-        if isinstance(change.new_value, dict):
-            parent[target_key].update(change.new_value)
-        else:
-            parent[target_key] = change.new_value
-
-    else:
-        raise ValueError(f"Unknown change type: {change.change_type}")
-
-    # Write back
-    with open(path, 'w') as f:
-        yaml.dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+        # Write back
+        with open(path, 'w') as f:
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
     logger.info(f"Applied config change: {change.to_diff_string()}")
 
@@ -2376,3 +2400,182 @@ def enable_wal_mode(ledger: ExperimentLedger) -> None:
             logger.info("SQLite WAL mode enabled for experiment ledger")
     except Exception as e:
         logger.warning(f"Failed to enable WAL mode: {e}")
+
+
+# =============================================================================
+# PHASE 5: MULTI-AGENT PROPOSAL-ONLY LOOP
+# =============================================================================
+
+@dataclass
+class ProposalRecord:
+    """A gap + proposed change pair produced by a worker agent."""
+    gap: MetricGap
+    proposal: ConfigChange
+    worker_id: str = ""
+
+    def to_dict(self) -> dict:
+        return {
+            "gap": {
+                "ticker": self.gap.ticker,
+                "metric": self.gap.metric,
+                "gap_type": self.gap.gap_type,
+                "estimated_impact": self.gap.estimated_impact,
+                "reference_value": self.gap.reference_value,
+                "xbrl_value": self.gap.xbrl_value,
+                "hv_subtype": self.gap.hv_subtype,
+                "current_variance": self.gap.current_variance,
+                "graveyard_count": self.gap.graveyard_count,
+                "notes": self.gap.notes,
+            },
+            "proposal": {
+                "file": self.proposal.file,
+                "change_type": self.proposal.change_type.value,
+                "yaml_path": self.proposal.yaml_path,
+                "old_value": self.proposal.old_value,
+                "new_value": self.proposal.new_value,
+                "rationale": self.proposal.rationale,
+                "target_metric": self.proposal.target_metric,
+                "target_companies": self.proposal.target_companies,
+            },
+            "worker_id": self.worker_id,
+        }
+
+
+def propose_only_loop(
+    eval_cohort: List[str],
+    propose_fn=None,
+    ledger: Optional[ExperimentLedger] = None,
+    max_workers: int = 1,
+    focus_area: Optional[str] = None,
+    escalation_threshold: int = 3,
+    worker_id: str = "",
+) -> List[ProposalRecord]:
+    """
+    Identify gaps and generate proposals WITHOUT applying them.
+
+    This is the worker-mode counterpart to run_overnight(). It runs the same
+    gap identification and proposal logic but stops short of applying or
+    evaluating changes. The coordinator collects proposals from multiple
+    workers and applies them sequentially.
+
+    Args:
+        eval_cohort: List of tickers to evaluate.
+        propose_fn: Callable(gap, graveyard_entries) -> ConfigChange.
+            If None, uses the default propose_change.
+        ledger: ExperimentLedger instance (read-only in worker mode).
+        max_workers: Parallel workers for CQS computation.
+        focus_area: Optional focus filter.
+        escalation_threshold: Subtype failures before GPT escalation.
+        worker_id: Identifier for this worker (for logging).
+
+    Returns:
+        List of ProposalRecord dicts with gap + proposed change pairs.
+    """
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    if propose_fn is None:
+        propose_fn = propose_change
+
+    prefix = f"[Worker {worker_id}] " if worker_id else ""
+    logger.info(f"{prefix}Starting propose_only_loop on {len(eval_cohort)} companies")
+
+    # Identify gaps
+    gaps, cqs_result = identify_gaps(
+        eval_cohort=eval_cohort,
+        snapshot_mode=True,
+        ledger=ledger,
+        max_workers=max_workers,
+    )
+
+    logger.info(f"{prefix}Found {len(gaps)} gaps (CQS={cqs_result.cqs:.4f})")
+
+    # Filter by focus area
+    if focus_area:
+        gaps = _filter_gaps_by_focus(gaps, focus_area)
+        logger.info(f"{prefix}{len(gaps)} gaps after focus filter: {focus_area}")
+
+    if not gaps:
+        logger.info(f"{prefix}No gaps to propose on")
+        return []
+
+    # Generate proposals for each gap
+    proposals: List[ProposalRecord] = []
+    tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
+
+    for gap in gaps:
+        graveyard_entries = ledger.get_graveyard_entries(gap.metric)
+
+        change = propose_fn(gap, graveyard_entries)
+        if change is None:
+            tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
+            continue
+
+        proposals.append(ProposalRecord(
+            gap=gap,
+            proposal=change,
+            worker_id=worker_id,
+        ))
+        logger.info(
+            f"{prefix}Proposed: {change.change_type.value} for "
+            f"{gap.ticker}:{gap.metric}"
+        )
+
+    logger.info(f"{prefix}Generated {len(proposals)} proposals from {len(gaps)} gaps")
+    return proposals
+
+
+def save_proposals_to_json(
+    proposals: List[ProposalRecord],
+    output_path: Path,
+) -> None:
+    """Save proposals to a JSON file for coordinator collection."""
+    data = [p.to_dict() for p in proposals]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, 'w') as f:
+        json.dump(data, f, indent=2, default=str)
+    logger.info(f"Saved {len(proposals)} proposals to {output_path}")
+
+
+def load_proposals_from_json(input_path: Path) -> List[ProposalRecord]:
+    """Load proposals from a worker's JSON output file."""
+    with open(input_path, 'r') as f:
+        data = json.load(f)
+
+    proposals = []
+    for item in data:
+        gap_data = item["gap"]
+        prop_data = item["proposal"]
+
+        gap = MetricGap(
+            ticker=gap_data["ticker"],
+            metric=gap_data["metric"],
+            gap_type=gap_data["gap_type"],
+            estimated_impact=gap_data.get("estimated_impact", 0.0),
+            reference_value=gap_data.get("reference_value"),
+            xbrl_value=gap_data.get("xbrl_value"),
+            hv_subtype=gap_data.get("hv_subtype"),
+            current_variance=gap_data.get("current_variance"),
+            graveyard_count=gap_data.get("graveyard_count", 0),
+            notes=gap_data.get("notes", ""),
+        )
+
+        change = ConfigChange(
+            file=prop_data["file"],
+            change_type=ChangeType(prop_data["change_type"]),
+            yaml_path=prop_data["yaml_path"],
+            old_value=prop_data.get("old_value"),
+            new_value=prop_data["new_value"],
+            rationale=prop_data.get("rationale", ""),
+            target_metric=prop_data.get("target_metric", ""),
+            target_companies=prop_data.get("target_companies", ""),
+        )
+
+        proposals.append(ProposalRecord(
+            gap=gap,
+            proposal=change,
+            worker_id=item.get("worker_id", ""),
+        ))
+
+    logger.info(f"Loaded {len(proposals)} proposals from {input_path}")
+    return proposals
