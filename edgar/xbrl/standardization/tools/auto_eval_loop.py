@@ -236,6 +236,10 @@ def apply_config_change(change: ConfigChange) -> None:
     and writes back. The change is immediately visible to the next
     Orchestrator run.
 
+    Before modifying, saves a snapshot of the file content so that
+    revert_config_change() can restore to the pre-change state (preserving
+    any previously KEPT changes) instead of reverting to git HEAD.
+
     Raises:
         ValueError: If the config file or path is invalid.
         FileNotFoundError: If the config file doesn't exist.
@@ -245,8 +249,12 @@ def apply_config_change(change: ConfigChange) -> None:
         raise FileNotFoundError(f"Config file not found: {path}")
 
     with ConfigLock():
+        # Save pre-change snapshot for surgical revert
         with open(path, 'r') as f:
-            config = yaml.safe_load(f)
+            pre_change_content = f.read()
+        change._pre_change_snapshot = pre_change_content
+
+        config = yaml.safe_load(pre_change_content)
 
         # Navigate to parent of target path
         keys = change.yaml_path.split('.')
@@ -388,25 +396,39 @@ def apply_config_change(change: ConfigChange) -> None:
 
 def revert_config_change(change: ConfigChange) -> None:
     """
-    Revert a config change using git checkout.
+    Revert a config change by restoring the pre-change snapshot.
 
-    This is the safest rollback — restores the file to its git HEAD state.
+    Uses the snapshot saved by apply_config_change() to restore the file
+    to its state before THIS change, preserving any previously KEPT changes.
+    Falls back to git checkout HEAD if no snapshot is available.
     """
     path = change.config_file_path
-    try:
-        subprocess.run(
-            ["git", "checkout", "HEAD", "--", str(path)],
-            cwd=str(path.parent),
-            check=True,
-            capture_output=True,
-        )
-        # Invalidate config cache after revert so next read sees HEAD state
+    snapshot = getattr(change, '_pre_change_snapshot', None)
+
+    if snapshot is not None:
+        # Surgical revert: restore to pre-change state (preserves prior KEEPs)
+        with ConfigLock():
+            with open(path, 'w') as f:
+                f.write(snapshot)
         from edgar.xbrl.standardization.config_loader import get_config
         get_config(reload=True)
-        logger.info(f"Reverted {change.file} to HEAD")
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to revert {change.file}: {e.stderr.decode()}")
-        raise
+        logger.info(f"Reverted {change.file} to pre-change snapshot (preserving prior KEEPs)")
+    else:
+        # Fallback: git checkout HEAD (only used if snapshot wasn't saved)
+        logger.warning(f"No snapshot for {change.file}, falling back to git checkout HEAD")
+        try:
+            subprocess.run(
+                ["git", "checkout", "HEAD", "--", str(path)],
+                cwd=str(path.parent),
+                check=True,
+                capture_output=True,
+            )
+            from edgar.xbrl.standardization.config_loader import get_config
+            get_config(reload=True)
+            logger.info(f"Reverted {change.file} to HEAD")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to revert {change.file}: {e.stderr.decode()}")
+            raise
 
 
 def revert_all_configs() -> None:
