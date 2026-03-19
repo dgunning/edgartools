@@ -2392,6 +2392,176 @@ companies:
     name: "Medtronic plc"
     cik: 1613103
 
+  # --- Batch onboarded 2026-03-19 (EXPANSION_COHORT_100 gap fill) ---
+
+  MU:
+    name: "MICRON TECHNOLOGY INC"
+    cik: 723125
+    fiscal_year_end: "August"
+
+  REGN:
+    name: "REGENERON PHARMACEUTICALS, INC."
+    cik: 872589
+
+  VRTX:
+    name: "VERTEX PHARMACEUTICALS INC / MA"
+    cik: 875320
+
+  EQIX:
+    name: "EQUINIX INC"
+    cik: 1101239
+    exclude_metrics:
+      - COGS
+      - Capex
+
+  D:
+    name: "DOMINION ENERGY, INC"
+    cik: 715957
+    known_divergences:
+      OperatingIncome:
+        form_types: ["10-K"]
+        variance_pct: 82.9
+        reason: "Utility regulatory accounting — operating income definition differs"
+        skip_validation: true
+        added_date: "2026-03-19"
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 49.5
+        reason: "Current portion classification differs from yfinance"
+        skip_validation: true
+        added_date: "2026-03-19"
+
+  CMCSA:
+    name: "COMCAST CORP"
+    cik: 1166691
+
+  VZ:
+    name: "VERIZON COMMUNICATIONS INC"
+    cik: 732712
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 82.5
+        reason: "Wireless spectrum licenses classification differs"
+        skip_validation: true
+        added_date: "2026-03-19"
+
+  TMUS:
+    name: "T-Mobile US, Inc."
+    cik: 1283699
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 84.8
+        reason: "Wireless spectrum licenses classification differs"
+        skip_validation: true
+        added_date: "2026-03-19"
+
+  LMT:
+    name: "LOCKHEED MARTIN CORP"
+    cik: 936468
+
+  NOC:
+    name: "NORTHROP GRUMMAN CORP /DE/"
+    cik: 1133421
+
+  KHC:
+    name: "Kraft Heinz Co"
+    cik: 1637459
+
+  STZ:
+    name: "CONSTELLATION BRANDS, INC."
+    cik: 16918
+    fiscal_year_end: "February"
+
+  CSX:
+    name: "CSX CORP"
+    cik: 277948
+
+  NSC:
+    name: "NORFOLK SOUTHERN CORP"
+    cik: 702165
+
+  ICE:
+    name: "Intercontinental Exchange, Inc."
+    cik: 1571949
+    exclude_metrics:
+      - COGS
+      - Capex
+      - OperatingIncome
+      - SGA
+      - ShortTermDebt
+
+  AON:
+    name: "Aon plc"
+    cik: 315293
+    exclude_metrics:
+      - COGS
+
+  MMC:
+    name: "MARSH & MCLENNAN COMPANIES, INC."
+    cik: 62709
+    exclude_metrics:
+      - COGS
+
+  TGT:
+    name: "TARGET CORP"
+    cik: 27419
+    fiscal_year_end: "January"
+
+  ROST:
+    name: "ROSS STORES, INC."
+    cik: 745732
+    fiscal_year_end: "February"
+
+  ORLY:
+    name: "O REILLY AUTOMOTIVE INC"
+    cik: 898173
+
+  APD:
+    name: "Air Products & Chemicals, Inc."
+    cik: 2969
+    fiscal_year_end: "September"
+    known_divergences:
+      ShortTermDebt:
+        form_types: ["10-K"]
+        variance_pct: 95.4
+        reason: "Current portion classification differs from yfinance"
+        skip_validation: true
+        added_date: "2026-03-19"
+
+  SHW:
+    name: "SHERWIN WILLIAMS CO"
+    cik: 89800
+
+  PANW:
+    name: "Palo Alto Networks Inc"
+    cik: 1327567
+    fiscal_year_end: "July"
+    known_divergences:
+      IntangibleAssets:
+        form_types: ["10-K"]
+        variance_pct: 85.7
+        reason: "Acquired intangibles classification differs"
+        skip_validation: true
+        added_date: "2026-03-19"
+
+  SYK:
+    name: "STRYKER CORP"
+    cik: 310764
+
+  SPGI:
+    name: "S&P Global Inc."
+    cik: 64040
+
+  MCO:
+    name: "MOODYS CORP /DE/"
+    cik: 1059556
+
+  ITW:
+    name: "ILLINOIS TOOL WORKS INC"
+    cik: 49826
+
 # Default settings
 defaults:
   confidence_thresholds:

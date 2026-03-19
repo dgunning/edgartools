@@ -45,6 +45,7 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     VALIDATION_COHORT,
     EXPANSION_COHORT_50,
     EXPANSION_COHORT_100,
+    EXPANSION_COHORT_500,
     SUB_COHORT_A,
     SUB_COHORT_B,
     SUB_COHORT_C,
@@ -3208,6 +3209,13 @@ def propose_and_evaluate_loop(
     if worker_id:
         _safe_write_checkpoint(cp)
 
+    # Auto-save results so TeamSession.collect_results() can find them
+    if worker_id and evaluated:
+        results_dir = Path(__file__).parent.parent / "company_mappings" / "team_results"
+        results_dir.mkdir(parents=True, exist_ok=True)
+        save_evaluated_to_json(evaluated, results_dir / f"evaluated_{worker_id}.json")
+        logger.info(f"{prefix}Auto-saved {len(evaluated)} results to team_results/evaluated_{worker_id}.json")
+
     return evaluated
 
 
@@ -3440,6 +3448,7 @@ class TeamSession:
         self.baseline_config = None
         self.baseline_cqs = None
         self._results_dir = Path(__file__).parent.parent / "company_mappings" / "team_results"
+        self._results_dir.mkdir(parents=True, exist_ok=True)
 
     def establish_baseline(self, max_workers: int = 4) -> CQSResult:
         """Compute full-cohort baseline. Call once at session start."""
@@ -3576,6 +3585,9 @@ class TeamSession:
             cqs_peak=cqs_peak,
             config_diffs=[c.to_diff_string() for c in kept],
         )
+
+        # Expose validated changes so the coordinator can apply them
+        self._validated_changes = kept
 
         logger.info(
             f"[TeamSession] Validation complete: {len(kept)}/{len(non_conflicting)} kept, "

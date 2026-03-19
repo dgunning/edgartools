@@ -126,6 +126,101 @@ EXPANSION_COHORT_100 = EXPANSION_COHORT_50 + [
     "BRK-B", "DHR", "SPGI", "MCO", "ITW",
 ]
 
+# 500-company expansion cohort: full S&P 500 scale
+# Extends EXPANSION_COHORT_100 with ~400 additional S&P 500 members.
+# Organized by GICS sector for balanced subcohort generation.
+EXPANSION_COHORT_500 = EXPANSION_COHORT_100 + [
+    # Information Technology (40)
+    "AMAT", "LRCX", "KLAC", "MCHP", "CDNS", "SNPS", "ANSS", "FTNT",
+    "CRWD", "ZS", "DDOG", "TEAM", "WDAY", "SPLK", "CTSH", "INTU",
+    "FISV", "FIS", "GPN", "BR", "JKHY", "EPAM", "IT", "MSCI",
+    "MPWR", "ON", "NXPI", "ADI", "SWKS", "QRVO", "ENPH", "SEDG",
+    "HPQ", "HPE", "DELL", "WDC", "STX", "KEYS", "TER", "ZBRA",
+    # Healthcare (35)
+    "ISRG", "DXCM", "EW", "ZBH", "BSX", "BDX", "BAX", "HOLX",
+    "IDXX", "VEEV", "ZTS", "A", "IQV", "CRL", "MTD", "WST",
+    "ALGN", "TFX", "TECH", "BIO", "VTRS", "OGN", "CTLT",
+    "CI", "ELV", "HCA", "HUM", "CNC", "MOH", "CVS",
+    "BMY", "BIIB", "MRNA", "INCY", "BMRN",
+    # Financials (35)
+    "WFC", "USB", "PNC", "TFC", "FITB", "KEY", "CFG", "RF", "HBAN",
+    "NTRS", "STT", "SIVB", "ZION", "CMA", "FRC",
+    "CB", "AIG", "MET", "PRU", "ALL", "TRV", "AFL", "PGR",
+    "CINF", "GL", "ERIE",
+    "RJF", "MKTX", "CBOE", "NDAQ", "COIN",
+    "ARE", "DLR", "O", "PSA",
+    # Consumer Discretionary (30)
+    "SBUX", "YUM", "CMG", "DPZ", "DARDEN", "HLT", "MAR", "RCL",
+    "LVS", "WYNN", "MGM", "BKNG",
+    "LULU", "TJX", "DG", "DLTR", "BBY", "TSCO", "ULTA", "AZO",
+    "EBAY", "ETSY", "W", "APTV", "GM", "F", "RIVN", "LCID",
+    "LEN", "DHI",
+    # Industrials (35)
+    "MMM", "EMR", "ROK", "ETN", "PH", "DOV", "OTIS", "CARR",
+    "SWK", "TT", "IR", "IEX", "NDSN", "ROP",
+    "WM", "RSG", "FAST", "CTAS",
+    "GWW", "URI", "PWR", "VRSK",
+    "TDG", "HWM", "HEI", "GD", "HII", "LHX", "TXT", "CW",
+    "DAL", "UAL", "LUV", "ALK", "JBLU",
+    # Consumer Staples (20)
+    "PM", "MO", "TAP", "BF-B", "SAM",
+    "SYY", "HSY", "HRL", "GIS", "K", "CPB", "SJM", "MKC",
+    "CL", "CLX", "CHD", "EL", "KMB",
+    "KR", "WBA",
+    # Energy (15)
+    "EOG", "PXD", "FANG", "DVN", "MPC", "PSX", "VLO",
+    "HES", "OXY", "HAL", "BKR", "CTRA",
+    "KMI", "WMB", "OKE",
+    # Utilities (10)
+    "AEP", "ED", "EXC", "SRE", "WEC", "ES", "XEL", "PEG",
+    "CMS", "AES",
+    # Materials (15)
+    "ECL", "DD", "PPG", "NUE", "FCX", "NEM", "FMC", "CF",
+    "ALB", "CE", "EMN", "IFF", "IP", "PKG", "WRK",
+    # Real Estate (10)
+    "CCI", "WELL", "AVB", "EQR", "MAA", "UDR", "CPT",
+    "SUI", "HST", "PEAK",
+    # Communication Services (15)
+    "GOOGL", "CHTR", "FOXA", "NWSA", "PARA", "WBD", "LYV",
+    "MTCH", "EA", "TTWO", "ATVI", "RBLX",
+    "TRMB", "ZM", "TWLO",
+    # Additional Technology (20)
+    "AKAM", "FFIV", "JNPR", "NTAP", "PAYC", "PCTY", "MANH",
+    "TYL", "TOST", "BILL", "SQ", "PYPL", "AFRM", "SHOP",
+    "NET", "MDB", "DOCU", "OKTA", "U", "PLTR",
+    # Additional Healthcare (15)
+    "CAH", "MCK", "ABC", "GEHC", "RMD", "COO", "XRAY",
+    "HSIC", "PODD", "RVMD", "EXAS", "SRPT", "ALNY", "SGEN", "NBIX",
+    # Additional Financials (20)
+    "TROW", "BEN", "IVZ", "AMG", "SEIC", "EV",
+    "L", "ACGL", "RNR", "W-R", "AIZ", "BRO", "WRB", "RLI",
+    "MTB", "FCNCA", "FHN", "EWBC", "WAL", "PACW",
+    # Additional Industrials (20)
+    "AME", "XYL", "GNRC", "AOS", "SNA",
+    "PCAR", "ODFL", "SAIA", "J", "EXPD",
+    "WAB", "HUBB", "ALLE", "MAS", "WTS",
+    "PAYX", "CPRT", "CSGP", "CBRE", "JCI",
+    # Additional Consumer (15)
+    "RH", "GRMN", "DECK", "CROX", "FIVE", "OLLI", "BOOT",
+    "PENN", "CZR", "DKNG",
+    "ABNB", "EXPE", "TRIP", "LYFT", "UBER",
+    # Additional Materials/Chemicals (10)
+    "BALL", "AVY", "SEE", "SON", "RPM",
+    "VMC", "MLM", "CCK", "LYB", "DOW",
+    # Additional Energy (10)
+    "TRGP", "LNG", "DINO", "MRO", "APA",
+    "AR", "RRC", "EQT", "SWN", "CNX",
+    # Additional Utilities (10)
+    "AWK", "WTRG", "NI", "EVRG", "PNW",
+    "DTE", "ATO", "CNP", "LNT", "FE",
+    # Additional REITs (10)
+    "VTR", "KIM", "REG", "FRT", "BXP",
+    "SLG", "VNO", "MPW", "OHI", "NNN",
+    # Additional Misc (10)
+    "VRSN", "GEN", "WEX", "LDOS", "SAIC",
+    "CACI", "BAH", "KBR", "TTEK", "LECO",
+]
+
 
 # =============================================================================
 # DYNAMIC SUB-COHORT GENERATION

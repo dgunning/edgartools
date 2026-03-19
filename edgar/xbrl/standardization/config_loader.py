@@ -72,17 +72,21 @@ class MappingConfig:
         return list(excluded)
     
     def _get_industry_for_company(self, ticker: str, company: Optional[CompanyConfig] = None) -> Optional[str]:
-        """Auto-detect industry from SEC SIC code, with fallback to manual config.
-        
+        """Get industry for a company, preferring manual config over network calls.
+
         Priority:
-        1. Auto-detect from SEC SIC code
-        2. Manual industry from company config
+        1. Manual industry from company config (no network)
+        2. Auto-detect from SEC SIC code (requires network)
         """
-        # Try auto-detection from SIC first
+        # Check manual config first — avoids unnecessary network calls
+        if company and company.industry:
+            return company.industry
+
+        # Fall through to SEC API auto-detection
         try:
             from edgar import Company
             from edgar.entity.mappings_loader import get_industry_for_sic
-            
+
             c = Company(ticker)
             sic = c.data.sic
             if sic:
@@ -90,12 +94,8 @@ class MappingConfig:
                 if industry:
                     return industry
         except Exception:
-            pass  # Fall through to manual config
-        
-        # Fallback to manual industry config
-        if company and company.industry:
-            return company.industry
-        
+            pass
+
         return None
 
 

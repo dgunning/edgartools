@@ -1,0 +1,14 @@
+{
+  "_metadata": {
+    "ticker": "MMC",
+    "fetched_at": "2026-03-19T14:13:24.434106",
+    "yfinance_version": "1.2.0",
+    "schema_version": "1.0.0"
+  },
+  "financials": {},
+  "quarterly_financials": {},
+  "balance_sheet": {},
+  "quarterly_balance_sheet": {},
+  "cashflow": {},
+  "quarterly_cashflow": {}
+}
