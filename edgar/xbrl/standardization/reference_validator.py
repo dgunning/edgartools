@@ -8,6 +8,7 @@ comparing the XBRL extracted values with reference values.
 Key principle: We map XBRL concepts → extract XBRL values → validate against reference
 """
 
+import logging
 import os
 from typing import Dict, List, Optional, Tuple, Union
 from datetime import datetime
@@ -24,6 +25,7 @@ from .extraction_rules import get_extraction_rule, get_concept_priority, get_com
 from .layers.dimensional_aggregator import DimensionalAggregator
 from edgar import Company
 
+logger = logging.getLogger(__name__)
 
 # Flow metrics that need quarterly derivation for 10-Q validation
 # 10-Q filings report YTD cumulative values, but yfinance expects quarterly period values

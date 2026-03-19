@@ -379,6 +379,10 @@ def apply_config_change(change: ConfigChange) -> None:
         with open(path, 'w') as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
+    # Invalidate the config cache so the next Orchestrator/Validator sees the new YAML
+    from edgar.xbrl.standardization.config_loader import get_config
+    get_config(reload=True)
+
     logger.info(f"Applied config change: {change.to_diff_string()}")
 
 
@@ -396,6 +400,9 @@ def revert_config_change(change: ConfigChange) -> None:
             check=True,
             capture_output=True,
         )
+        # Invalidate config cache after revert so next read sees HEAD state
+        from edgar.xbrl.standardization.config_loader import get_config
+        get_config(reload=True)
         logger.info(f"Reverted {change.file} to HEAD")
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to revert {change.file}: {e.stderr.decode()}")
@@ -415,6 +422,9 @@ def revert_all_configs() -> None:
             logger.info(f"Reverted {name}")
         except subprocess.CalledProcessError:
             pass  # File may not be modified
+    # Invalidate config cache after reverting all configs
+    from edgar.xbrl.standardization.config_loader import get_config
+    get_config(reload=True)
 
 
 # =============================================================================
