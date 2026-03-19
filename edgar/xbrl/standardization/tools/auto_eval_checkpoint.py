@@ -21,6 +21,40 @@ CHECKPOINTS_DIR = Path(__file__).parent.parent / "company_mappings" / "checkpoin
 
 
 @dataclass
+class GapSummary:
+    """Compact summary of a MetricGap for checkpoint persistence."""
+    ticker: str
+    metric: str
+    gap_type: str              # "unmapped" | "validation_failure" | "high_variance" | "regression"
+    reference_value: Optional[float] = None
+    xbrl_value: Optional[float] = None
+    current_variance: Optional[float] = None
+    graveyard_count: int = 0
+    decision: Optional[str] = None  # "KEEP" | "DISCARD" | "VETO" | None (not yet evaluated)
+    change_type: Optional[str] = None  # "add_concept" | "add_exclusion" | etc.
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'GapSummary':
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+    @classmethod
+    def from_metric_gap(cls, gap) -> 'GapSummary':
+        """Create from a MetricGap object."""
+        return cls(
+            ticker=gap.ticker,
+            metric=gap.metric,
+            gap_type=gap.gap_type,
+            reference_value=gap.reference_value,
+            xbrl_value=gap.xbrl_value,
+            current_variance=gap.current_variance,
+            graveyard_count=gap.graveyard_count,
+        )
+
+
+@dataclass
 class WorkerCheckpoint:
     """Structured status report from a worker agent."""
     worker_id: str
@@ -37,13 +71,19 @@ class WorkerCheckpoint:
     elapsed_seconds: float = 0.0
     last_update: str = ""        # ISO timestamp
     current_gap: Optional[str] = None  # "TICKER:metric" in progress
+    gaps: List[GapSummary] = field(default_factory=list)
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        d = asdict(self)
+        d['gaps'] = [g.to_dict() for g in self.gaps]
+        return d
 
     @classmethod
     def from_dict(cls, d: dict) -> 'WorkerCheckpoint':
-        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+        gaps_data = d.pop('gaps', [])
+        cp = cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+        cp.gaps = [GapSummary.from_dict(g) for g in gaps_data]
+        return cp
 
 
 def write_checkpoint(cp: WorkerCheckpoint) -> None:
@@ -135,6 +175,26 @@ def print_team_dashboard() -> None:
     print(f"\nWorkers: {len(checkpoints)} total, {active} active, {finished} finished")
     if total_proposals > 0:
         print(f"Proposals: {total_proposals} evaluated, {total_keeps} kept ({total_keeps/total_proposals:.0%} keep rate)")
+
+    # Gap summary (if any checkpoints have gap data)
+    all_gaps = [g for cp in checkpoints for g in cp.gaps]
+    if all_gaps:
+        print(f"\nGAPS: {len(all_gaps)} total")
+        by_decision = {}
+        for g in all_gaps:
+            d = g.decision or "pending"
+            by_decision.setdefault(d, []).append(g)
+        for decision in ["KEEP", "DISCARD", "VETO", "pending"]:
+            if decision in by_decision:
+                count = len(by_decision[decision])
+                label = decision.upper() if decision != "pending" else "PENDING"
+                print(f"  {label}: {count}")
+                for g in by_decision[decision][:5]:  # Show first 5
+                    var = f" variance={g.current_variance:.0f}%" if g.current_variance else ""
+                    ref = f" yf={g.reference_value/1e9:.1f}B" if g.reference_value else ""
+                    print(f"    {g.ticker}:{g.metric} ({g.gap_type}){ref}{var}")
+                if count > 5:
+                    print(f"    ... and {count - 5} more")
     print()
 
 

@@ -3072,7 +3072,7 @@ def propose_and_evaluate_loop(
     """
     from edgar.xbrl.standardization.config_loader import get_config
     from edgar.xbrl.standardization.tools.auto_eval_checkpoint import (
-        WorkerCheckpoint, write_checkpoint,
+        WorkerCheckpoint, GapSummary, write_checkpoint,
     )
 
     if ledger is None:
@@ -3130,9 +3130,13 @@ def propose_and_evaluate_loop(
     logger.info(f"{prefix}Timing: baseline={t_baseline:.1f}s, gaps={t_gaps:.1f}s")
 
     cp.gaps_found = len(gaps)
+    cp.gaps = [GapSummary.from_metric_gap(g) for g in gaps]
     cp.elapsed_seconds = time.time() - t_session_start
     if worker_id:
         _safe_write_checkpoint(cp)
+
+    # Build lookup for updating gap decisions during eval
+    _gap_index = {f"{g.ticker}:{g.metric}": i for i, g in enumerate(cp.gaps)}
 
     # Filter by focus area
     if focus_area:
@@ -3210,6 +3214,12 @@ def propose_and_evaluate_loop(
         else:
             cp.discards += 1
             tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
+
+        # Record decision on the gap summary in the checkpoint
+        gap_key = f"{gap.ticker}:{gap.metric}"
+        if gap_key in _gap_index:
+            cp.gaps[_gap_index[gap_key]].decision = result.decision.value
+            cp.gaps[_gap_index[gap_key]].change_type = change.change_type.value
 
         # Update checkpoint at configured interval
         cp.proposals_total = proposals_evaluated
@@ -3359,7 +3369,7 @@ def evaluate_proposals_in_memory(
         List of EvaluatedProposal for proposals that passed (KEEP only).
     """
     from edgar.xbrl.standardization.tools.auto_eval_checkpoint import (
-        WorkerCheckpoint, write_checkpoint,
+        WorkerCheckpoint, GapSummary, write_checkpoint,
     )
 
     if ledger is None:
@@ -3377,7 +3387,9 @@ def evaluate_proposals_in_memory(
         gaps_found=len(proposals),
         baseline_cqs=baseline_cqs.cqs,
         current_cqs=baseline_cqs.cqs,
+        gaps=[GapSummary.from_metric_gap(r.gap) for r in proposals],
     )
+    _gap_index = {f"{r.gap.ticker}:{r.gap.metric}": i for i, r in enumerate(proposals)}
     if worker_id:
         _safe_write_checkpoint(cp)
 
@@ -3429,6 +3441,12 @@ def evaluate_proposals_in_memory(
             cp.vetoes += 1
         else:
             cp.discards += 1
+
+        # Record decision on the gap summary
+        gap_key = f"{record.gap.ticker}:{record.gap.metric}"
+        if gap_key in _gap_index:
+            cp.gaps[_gap_index[gap_key]].decision = result.decision.value
+            cp.gaps[_gap_index[gap_key]].change_type = record.proposal.change_type.value
 
         cp.proposals_total = i + 1
         cp.phase = f"eval_{i + 1}"
