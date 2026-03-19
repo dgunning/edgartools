@@ -137,6 +137,14 @@ metrics:
     universal: false
     notes: Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets.
       Excludes M&A acquisitions.
+    standardization:
+      company_overrides:
+        CAT:
+          components:
+          - PaymentsToAcquireEquipmentOnLease
+          - ProceedsFromSaleOfFinanceReceivables
+          - PaymentsOfDividendsCommonStock
+          notes: Auto-solver company-specific via CAT, 2/3 periods, 0/3 companies
   TotalAssets:
     description: Total assets
     known_concepts:
@@ -299,6 +307,13 @@ metrics:
       section: assets_current
     universal: false
     notes: Not applicable to service companies
+    standardization:
+      company_overrides:
+        XOM:
+          components:
+          - InventoryPartsAndComponentsNetOfReserves
+          - EnergyRelatedInventory
+          notes: Auto-solver company-specific via XOM, 2/3 periods
   AccountsReceivable:
     description: Trade accounts receivable (current)
     standard_tag: TradeReceivables
@@ -324,6 +339,14 @@ metrics:
       section: assets_current
     universal: false
     notes: Rising AR faster than revenue may signal quality issues
+    standardization:
+      company_overrides:
+        PEP:
+          components:
+          - ShortTermInvestments
+          - EquityMethodInvestments
+          - DebtCurrent
+          notes: Auto-solver company-specific via PEP, 2/3 periods
   AccountsPayable:
     description: Trade accounts payable (current)
     standard_tag: TradePayables
@@ -366,6 +389,14 @@ metrics:
       section: operating
     universal: true
     notes: Required for EBITDA calculation and maintenance capex analysis
+    standardization:
+      company_overrides:
+        SLB:
+          components:
+          - IncreaseDecreaseInAccountsPayableAndAccruedLiabilities
+          - CashAcquiredFromAcquisition
+          - NetCashProvidedByUsedInInvestingActivities
+          notes: Auto-solver company-specific via SLB, 1/1 periods
 derived_metrics:
   FreeCashFlow:
     formula: OperatingCashFlow - Capex
