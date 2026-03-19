@@ -91,6 +91,24 @@ report = run_overnight(
 print_overnight_report(report)
 ```
 
+### Run on Large Cohort (50 companies) with GPT Escalation
+
+```python
+from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight, make_escalation_propose_fn
+from edgar.xbrl.standardization.tools.auto_eval import EXPANSION_COHORT_50
+from edgar.xbrl.standardization.tools.auto_eval_dashboard import print_overnight_report
+
+report = run_overnight(
+    duration_hours=24,
+    eval_cohort=EXPANSION_COHORT_50,  # 50 companies across 7 sectors
+    propose_fn=make_escalation_propose_fn(escalation_threshold=3),
+    max_workers=1,
+)
+print_overnight_report(report)
+```
+
+When `eval_cohort` has >=20 companies, tournament mode is auto-disabled (direct eval on the full cohort is sufficient to prevent overfitting).
+
 ### Dry Run (Preview Only)
 
 ```python
@@ -104,9 +122,12 @@ print_overnight_report(report)
 |--------|---------|-------------|
 | `duration_hours` | 7.5 | How long to run |
 | `focus_area` | None | Filter: "banking", "add_concept", metric name, etc. |
-| `use_tournament` | True | 2-stage eval (5-co fast + 20-co validation) |
+| `use_tournament` | True | 2-stage eval (5-co fast + 20-co validation). Auto-disabled for cohorts >=20 |
 | `dry_run` | False | Preview proposals without applying |
 | `snapshot_mode` | True | Use cached yfinance data |
+| `eval_cohort` | QUICK_EVAL_COHORT | List of tickers to evaluate. Use EXPANSION_COHORT_50 for broad coverage |
+| `escalation_threshold` | 3 | Subtype failures before GPT-5.4 escalation |
+| `propose_fn` | None | Proposal function. Use `propose_change` (deterministic) or `make_escalation_propose_fn()` (with GPT escalation) |
 
 ## Focus Areas
 

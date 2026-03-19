@@ -1,362 +1,386 @@
-# Metric Definitions for Concept Mapping
-# This file is the single source of truth for target metrics
-
-version: "1.0.0"
-
-# Target metrics with known XBRL concepts and tree hints
+version: 1.0.0
 metrics:
   Revenue:
-    description: "Total revenue from operations"
-    standard_tag: "Revenue"
+    description: Total revenue from operations
+    standard_tag: Revenue
     known_concepts:
-      # Parent total first — tree parser uses first-match-wins
-      - Revenues
-      # ASC 606 - Standard revenue recognition (fallback for companies without Revenues)
-      - RevenueFromContractWithCustomerExcludingAssessedTax
-      - SalesRevenueNet
-      - Revenue
-      - TotalRevenues
-      - NetSales
-      # ASC 944 - Insurance revenue (Archetype E)
-      - PremiumsEarnedNet       # Primary insurance revenue concept
-      - NetPremiumsEarned       # Alternative naming
-      - PremiumsEarned          # Basic premiums concept
-      - InsuranceServiceRevenue # IFRS 17 terminology
+    - Revenues
+    - RevenueFromContractWithCustomerExcludingAssessedTax
+    - SalesRevenueNet
+    - Revenue
+    - TotalRevenues
+    - NetSales
+    - PremiumsEarnedNet
+    - NetPremiumsEarned
+    - PremiumsEarned
+    - InsuranceServiceRevenue
     tree_hints:
-      statements: [INCOME, OPERATIONS]
+      statements:
+      - INCOME
+      - OPERATIONS
       parent_pattern: OperatingIncome
       weight: 1.0
-    universal: true  # Present in all MAG7
-
+    universal: true
   COGS:
-    description: "Cost of goods/services sold"
-    standard_tag: "CostOfGoodsAndServicesSold"
+    description: Cost of goods/services sold
+    standard_tag: CostOfGoodsAndServicesSold
     known_concepts:
-      - CostOfGoodsAndServicesSold
-      - CostOfRevenue
-      - CostOfGoodsSold
-      - CostOfSales
-      - CostOfServices  # Service companies (consulting, healthcare)
-      - CrudeOilAndProductPurchases  # Energy companies (XOM, CVX)
+    - CostOfGoodsAndServicesSold
+    - CostOfRevenue
+    - CostOfGoodsSold
+    - CostOfSales
+    - CostOfServices
+    - CrudeOilAndProductPurchases
     tree_hints:
-      statements: [INCOME, OPERATIONS]
+      statements:
+      - INCOME
+      - OPERATIONS
       parent_pattern: OperatingIncome
       weight: -1.0
     universal: false
-    notes: "Services companies (META, FDX) may not have traditional COGS"
-
+    notes: Services companies (META, FDX) may not have traditional COGS
   SGA:
-    description: "Selling, general, and administrative expenses"
-    standard_tag: "SellingGeneralAndAdminExpenses"
+    description: Selling, general, and administrative expenses
+    standard_tag: SellingGeneralAndAdminExpenses
     known_concepts:
-      - SellingGeneralAndAdministrativeExpense
-      - SellingAndMarketingExpense
-      - GeneralAndAdministrativeExpense
+    - SellingGeneralAndAdministrativeExpense
+    - SellingAndMarketingExpense
+    - GeneralAndAdministrativeExpense
     tree_hints:
-      statements: [INCOME, OPERATIONS]
+      statements:
+      - INCOME
+      - OPERATIONS
       parent_pattern: CostsAndExpenses
       weight: 1.0
     universal: false
-    notes: "Often split into separate line items"
-
+    notes: Often split into separate line items
   OperatingIncome:
-    description: "Income from operations"
+    description: Income from operations
     known_concepts:
-      - OperatingIncomeLoss
-      # Note: IncomeLossFromContinuingOperationsBeforeIncomeTaxes is PretaxIncome, NOT OperatingIncome
-      # Removed incorrect fallbacks that were causing wrong mappings
+    - OperatingIncomeLoss
     tree_hints:
-      statements: [INCOME, OPERATIONS]
+      statements:
+      - INCOME
+      - OPERATIONS
       parent_pattern: IncomeLossBeforeTax
       weight: 1.0
     universal: true
-
   PretaxIncome:
-    description: "Income before income taxes"
+    description: Income before income taxes
     known_concepts:
-      - IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
-      - IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
-      - IncomeLossFromContinuingOperationsBeforeIncomeTaxes
+    - IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+    - IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
+    - IncomeLossFromContinuingOperationsBeforeIncomeTaxes
     tree_hints:
-      statements: [INCOME, OPERATIONS]
+      statements:
+      - INCOME
+      - OPERATIONS
       parent_pattern: NetIncome
       weight: 1.0
     universal: true
-
   NetIncome:
-    description: "Net income/loss"
-    standard_tag: ["NetIncome", "ProfitLoss"]
+    description: Net income/loss
+    standard_tag:
+    - NetIncome
+    - ProfitLoss
     known_concepts:
-      - NetIncomeLoss
-      - ProfitLoss
-      - NetIncome
+    - NetIncomeLoss
+    - ProfitLoss
+    - NetIncome
     tree_hints:
-      statements: [INCOME, OPERATIONS]
+      statements:
+      - INCOME
+      - OPERATIONS
       is_root: true
     universal: true
-
   OperatingCashFlow:
-    description: "Cash from operating activities"
-    standard_tag: "NetCashFromOperatingActivities"
+    description: Cash from operating activities
+    standard_tag: NetCashFromOperatingActivities
     known_concepts:
-      - NetCashProvidedByUsedInOperatingActivities
+    - NetCashProvidedByUsedInOperatingActivities
     tree_hints:
-      statements: [CASHFLOW]
+      statements:
+      - CASHFLOW
       section: operating
     universal: true
-
   Capex:
-    description: "Capital expenditures (including intangibles)"
-    standard_tag: "CapitalExpenses"
-    validation_tolerance: 40  # yfinance includes leases, JV investments
+    description: Capital expenditures (including intangibles)
+    standard_tag: CapitalExpenses
+    validation_tolerance: 40
     known_concepts:
-      - PaymentsToAcquirePropertyPlantAndEquipment
-      - PaymentsToAcquireProductiveAssets  # CVX uses this (matches yfinance exactly)
-      - CapitalExpendituresIncurredButNotYetPaid
-      # Expanded per architect guidance - pharma/tech need intangibles
-      - PaymentsToAcquireIntangibleAssets
-      - PaymentsToDevelopSoftware
-      - PaymentsToAcquireOilAndGasPropertyAndEquipment  # Energy sector
-      - PaymentsToAcquireOtherPropertyPlantAndEquipment # LLY uses this ($5.06B vs 5.34B yfinance)
-      - PaymentsForCapitalImprovements
-      - CapitalExpenditures
-      # Note: PaymentsToAcquireBusinessesNetOfCashAcquired removed - M&A acquisitions, not capital expenditures
+    - PaymentsToAcquirePropertyPlantAndEquipment
+    - PaymentsToAcquireProductiveAssets
+    - CapitalExpendituresIncurredButNotYetPaid
+    - PaymentsToAcquireIntangibleAssets
+    - PaymentsToDevelopSoftware
+    - PaymentsToAcquireOilAndGasPropertyAndEquipment
+    - PaymentsToAcquireOtherPropertyPlantAndEquipment
+    - PaymentsForCapitalImprovements
+    - CapitalExpenditures
+    - CapitalExpensesNet
+    - CapitalExpensesGross
+    - CapitalExpensesTotal
+    - CapitalExpensesCurrent
+    - CapitalExpensesNoncurrent
+    - TotalCapitalExpenses
+    - NetCapitalExpenses
     exclude_patterns:
-      - Businesses          # Exclude M&A acquisitions (PaymentsToAcquireBusinesses*)
-      - Acquisitions        # Exclude acquisition-related concepts
-      - NetOfCash           # Exclude cash-netted M&A concepts
-      - InvestmentsInAffiliates  # Exclude equity method investments
+    - Businesses
+    - Acquisitions
+    - NetOfCash
+    - InvestmentsInAffiliates
     tree_hints:
-      statements: [CASHFLOW]
+      statements:
+      - CASHFLOW
       section: investing
       weight: -1.0
     universal: false
-    notes: "Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets. Excludes M&A acquisitions."
-
+    notes: Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets.
+      Excludes M&A acquisitions.
   TotalAssets:
-    description: "Total assets"
+    description: Total assets
     known_concepts:
-      - Assets
-      - TotalAssets
+    - Assets
+    - TotalAssets
     tree_hints:
-      statements: [BALANCE, FINANCIAL_POSITION]
+      statements:
+      - BALANCE
+      - FINANCIAL_POSITION
       is_root: true
     universal: true
-
   Goodwill:
-    description: "Goodwill from acquisitions"
-    standard_tag: "Goodwill"
+    description: Goodwill from acquisitions
+    standard_tag: Goodwill
     known_concepts:
-      - Goodwill
+    - Goodwill
     exclude_patterns:
-      - IncludingGoodwill    # Blocks IntangibleAssetsNetIncludingGoodwill
-      - Impaired             # Blocks GoodwillImpairedAccumulatedImpairmentLoss
-      - Gross                # Blocks GoodwillGross
+    - IncludingGoodwill
+    - Impaired
+    - Gross
     tree_hints:
-      statements: [BALANCE]
+      statements:
+      - BALANCE
       section: assets
     universal: true
-
   IntangibleAssets:
-    description: "Goodwill and other intangible assets (matches yfinance)"
-    # Composite metric: sum of Goodwill + IntangibleAssetsNetExcludingGoodwill
-    # yfinance field: "Goodwill And Other Intangible Assets"
-    validation_tolerance: 25  # yfinance includes goodwill + other intangibles
+    description: Goodwill and other intangible assets (matches yfinance)
+    validation_tolerance: 25
     composite: true
     components:
-      - Goodwill
-      - IntangibleAssetsNetExcludingGoodwill
-      - IndefiniteLivedTrademarks  # KO uses this instead of IntangibleAssetsNet
+    - Goodwill
+    - IntangibleAssetsNetExcludingGoodwill
+    - IndefiniteLivedTrademarks
     known_concepts:
-      - Goodwill
-      - IntangibleAssetsNetExcludingGoodwill
-      - IndefiniteLivedTrademarks  # KO uses this
-      - FiniteLivedIntangibleAssetsNet
-      - IndefiniteLivedIntangibleAssetsExcludingGoodwill
-      - OtherIntangibleAssetsNet
+    - Goodwill
+    - IntangibleAssetsNetExcludingGoodwill
+    - IndefiniteLivedTrademarks
+    - FiniteLivedIntangibleAssetsNet
+    - IndefiniteLivedIntangibleAssetsExcludingGoodwill
+    - OtherIntangibleAssetsNet
     tree_hints:
-      statements: [BALANCE]
+      statements:
+      - BALANCE
       section: assets
     universal: true
-    notes: "Sum of Goodwill + IntangibleAssetsNet to match yfinance. KO uses IndefiniteLivedTrademarks."
-
+    notes: Sum of Goodwill + IntangibleAssetsNet to match yfinance. KO uses IndefiniteLivedTrademarks.
   ShortTermDebt:
-    description: "Short-term borrowings and current debt (matches yfinance Current Debt)"
-    # Composite metric: yfinance includes all current debt obligations
-    # Common components: LongTermDebtCurrent + CommercialPaper + ShortTermBorrowings
+    description: Short-term borrowings and current debt (matches yfinance Current
+      Debt)
     composite: true
     components:
-      - LongTermDebtCurrent
-      - CommercialPaper
-      - ShortTermBorrowings
+    - LongTermDebtCurrent
+    - CommercialPaper
+    - ShortTermBorrowings
     known_concepts:
-      - DebtCurrent  # "Total" concept - Preferred over components if available
-      - ShortTermDebt  # "Total" concept
-      - ShortTermDebtAndCapitalLeaseObligationsCurrent
-      - LongTermDebtCurrent
-      - CommercialPaper
-      - ShortTermBorrowings
-      - NotesPayable
-      - CurrentPortionOfLongTermDebt
-      - OtherShortTermBorrowings
-      - ShortTermBankLoansAndNotesPayable
-    # Dimensional handling: include dimensional values for CommercialPaper
-    # JPM reports CommercialPaper ONLY with dimensions (VIE)
+    - DebtCurrent
+    - ShortTermDebt
+    - ShortTermDebtAndCapitalLeaseObligationsCurrent
+    - LongTermDebtCurrent
+    - CommercialPaper
+    - ShortTermBorrowings
+    - NotesPayable
+    - CurrentPortionOfLongTermDebt
+    - OtherShortTermBorrowings
+    - ShortTermBankLoansAndNotesPayable
     dimensional_handling:
-      mode: "include_dimensional"  # Include dimensional values when no non-dim total exists
-      # Note: This allows extraction of values that exist only with dimensions
-      # like JPM's CommercialPaper reported under "Beneficial interests issued by consolidated VIEs"
+      mode: include_dimensional
     tree_hints:
-      statements: [BALANCE]
+      statements:
+      - BALANCE
       section: liabilities_current
     universal: false
-    notes: "yfinance 'Current Debt' sums multiple short-term debt types"
-
+    notes: yfinance 'Current Debt' sums multiple short-term debt types
   LongTermDebt:
-    description: "Long-term debt (non-current portion)"
-    standard_tag: "LongTermDebt"
+    description: Long-term debt (non-current portion)
+    standard_tag: LongTermDebt
     known_concepts:
-      - LongTermDebtNoncurrent
-      - LongTermDebt
-      - LongTermDebtAndCapitalLeaseObligations
+    - LongTermDebtNoncurrent
+    - LongTermDebt
+    - LongTermDebtAndCapitalLeaseObligations
     tree_hints:
-      statements: [BALANCE]
+      statements:
+      - BALANCE
       section: liabilities_noncurrent
     universal: true
-    notes: "LongTermDebtNoncurrent preferred (excludes current portion)"
-
+    notes: LongTermDebtNoncurrent preferred (excludes current portion)
   CashAndEquivalents:
-    description: "Cash and cash equivalents"
-    standard_tag: "CashAndCashEquivalents"
+    description: Cash and cash equivalents
+    standard_tag: CashAndCashEquivalents
     known_concepts:
-      - CashAndCashEquivalentsAtCarryingValue
-      - CashAndCashEquivalents
-      - Cash
-      - CashAndDueFromBanks
+    - CashAndCashEquivalentsAtCarryingValue
+    - CashAndCashEquivalents
+    - Cash
+    - CashAndDueFromBanks
+    - CashAndCashEquivalentsNet
+    - CashAndCashEquivalentsGross
+    - CashAndCashEquivalentsTotal
+    - CashAndCashEquivalentsCurrent
+    - CashAndCashEquivalentsNoncurrent
+    - TotalCashAndCashEquivalents
+    - NetCashAndCashEquivalents
+    - CashCashEquivalentsAndShortTermInvestments
+    - CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents
     tree_hints:
-      statements: [BALANCE, CASHFLOW]
+      statements:
+      - BALANCE
+      - CASHFLOW
       section: assets_current
     universal: true
-
-  # === UNIVERSAL ADDITIONS ===
-
   WeightedAverageSharesDiluted:
-    description: "Weighted average diluted shares outstanding for EPS calculation"
-    standard_tag: "SharesFullyDilutedAverage"
-    validation_tolerance: 15  # buyback timing mismatch
+    description: Weighted average diluted shares outstanding for EPS calculation
+    standard_tag: SharesFullyDilutedAverage
+    validation_tolerance: 15
     known_concepts:
-      - WeightedAverageNumberOfDilutedSharesOutstanding
-      - WeightedAverageNumberOfSharesOutstandingDiluted
+    - WeightedAverageNumberOfDilutedSharesOutstanding
+    - WeightedAverageNumberOfSharesOutstandingDiluted
     tree_hints:
-      statements: [INCOME]
+      statements:
+      - INCOME
     universal: true
-    notes: "Essential for per-share valuation metrics"
-
+    notes: Essential for per-share valuation metrics
   StockBasedCompensation:
-    description: "Stock-based compensation expense (non-cash)"
-    validation_tolerance: 20  # reporting period variations
+    description: Stock-based compensation expense (non-cash)
+    validation_tolerance: 20
     known_concepts:
-      - ShareBasedCompensation
-      - AllocatedShareBasedCompensationExpense
-      - StockCompensationExpense
+    - ShareBasedCompensation
+    - AllocatedShareBasedCompensationExpense
+    - StockCompensationExpense
+    - StockBasedCompensationNet
     tree_hints:
-      statements: [CASHFLOW]
+      statements:
+      - CASHFLOW
       section: operating
     universal: false
-    notes: "Critical for calculating 'Real' Free Cash Flow"
-
+    notes: Critical for calculating 'Real' Free Cash Flow
   DividendsPaid:
-    description: "Cash dividends paid to shareholders"
-    standard_tag: "CommonDividendsPaid"
+    description: Cash dividends paid to shareholders
+    standard_tag: CommonDividendsPaid
     known_concepts:
-      - PaymentsOfDividends
-      - PaymentsOfDividendsCommonStock
-      - DividendsPaidCommonStock
+    - PaymentsOfDividends
+    - PaymentsOfDividendsCommonStock
+    - DividendsPaidCommonStock
     tree_hints:
-      statements: [CASHFLOW]
+      statements:
+      - CASHFLOW
       section: financing
       weight: -1.0
     universal: false
-    notes: "For total shareholder return and payout ratio analysis"
-
-  # === ARCHETYPE A: WORKING CAPITAL ===
-
+    notes: For total shareholder return and payout ratio analysis
   Inventory:
-    description: "Current inventory on hand"
-    standard_tag: "Inventories"
+    description: Current inventory on hand
+    standard_tag: Inventories
     known_concepts:
-      - InventoryNet
-      - Inventories
-      - InventoryFinishedGoods
+    - InventoryNet
+    - Inventories
+    - InventoryFinishedGoods
     tree_hints:
-      statements: [BALANCE]
+      statements:
+      - BALANCE
       section: assets_current
     universal: false
-    notes: "Not applicable to service companies"
-
+    notes: Not applicable to service companies
   AccountsReceivable:
-    description: "Trade accounts receivable (current)"
-    standard_tag: "TradeReceivables"
-    validation_tolerance: 25  # yfinance includes non-trade receivables
+    description: Trade accounts receivable (current)
+    standard_tag: TradeReceivables
+    validation_tolerance: 25
     known_concepts:
-      - AccountsReceivableNetCurrent
-      - ReceivablesNetCurrent
-      - TradeAccountsReceivable
-      - AccountsReceivableNet
-      - AccountsNotesAndLoansReceivableNetCurrent
-      - AccountsAndOtherReceivablesNetCurrent
-      - NotesAndAccountsReceivableNet
+    - AccountsReceivableNetCurrent
+    - ReceivablesNetCurrent
+    - TradeAccountsReceivable
+    - AccountsReceivableNet
+    - AccountsNotesAndLoansReceivableNetCurrent
+    - AccountsAndOtherReceivablesNetCurrent
+    - NotesAndAccountsReceivableNet
+    - TradeReceivablesNet
+    - TradeReceivablesGross
+    - TradeReceivablesTotal
+    - TradeReceivablesCurrent
+    - TradeReceivablesNoncurrent
+    - TotalTradeReceivables
+    - NetTradeReceivables
     tree_hints:
-      statements: [BALANCE]
+      statements:
+      - BALANCE
       section: assets_current
     universal: false
-    notes: "Rising AR faster than revenue may signal quality issues"
-
+    notes: Rising AR faster than revenue may signal quality issues
   AccountsPayable:
-    description: "Trade accounts payable (current)"
-    standard_tag: "TradePayables"
+    description: Trade accounts payable (current)
+    standard_tag: TradePayables
     known_concepts:
-      - AccountsPayableCurrent
-      - AccountsPayableTradeCurrent
-      - TradeAndOtherPayablesCurrent
-      - AccountsPayableAndAccruedLiabilitiesCurrent
-      - AccountsPayableAndAccruedLiabilities
+    - AccountsPayableCurrent
+    - AccountsPayableTradeCurrent
+    - TradeAndOtherPayablesCurrent
+    - AccountsPayableAndAccruedLiabilitiesCurrent
+    - AccountsPayableAndAccruedLiabilities
     exclude_patterns:
-      - Liabilities  # Prevent fallback to total Liabilities or LiabilitiesCurrent
+    - Liabilities
     tree_hints:
-      statements: [BALANCE]
+      statements:
+      - BALANCE
       section: liabilities_current
     universal: false
-    notes: "High AP indicates supplier leverage"
-
+    notes: High AP indicates supplier leverage
   DepreciationAmortization:
-    description: "Depreciation and amortization expense"
-    standard_tag: "DepreciationExpense"
-    validation_tolerance: 30  # yfinance may include impairments, ABBV scope
+    description: Depreciation and amortization expense
+    standard_tag: DepreciationExpense
+    validation_tolerance: 30
     known_concepts:
-      - DepreciationDepletionAndAmortization
-      - DepreciationAndAmortization
-      - DepreciationAmortizationAndAccretionNet  # GE, RTX, WMT use this variant
-      - Depreciation
-      - DepreciationAmortizationAndOther
+    - DepreciationDepletionAndAmortization
+    - DepreciationAndAmortization
+    - DepreciationAmortizationAndAccretionNet
+    - Depreciation
+    - DepreciationAmortizationAndOther
+    - DepreciationExpenseNet
+    - DepreciationExpenseGross
+    - DepreciationExpenseTotal
+    - DepreciationExpenseCurrent
+    - DepreciationExpenseNoncurrent
+    - TotalDepreciationExpense
+    - NetDepreciationExpense
     exclude_patterns:
-      - Accumulated  # Prevent matching AccumulatedDepreciation (balance sheet cumulative)
+    - Accumulated
     tree_hints:
-      statements: [CASHFLOW]
+      statements:
+      - CASHFLOW
       section: operating
     universal: true
-    notes: "Required for EBITDA calculation and maintenance capex analysis"
-
-# Derived metrics (calculated from above)
+    notes: Required for EBITDA calculation and maintenance capex analysis
 derived_metrics:
   FreeCashFlow:
-    formula: "OperatingCashFlow - Capex"
-    requires: [OperatingCashFlow, Capex]
-
+    formula: OperatingCashFlow - Capex
+    requires:
+    - OperatingCashFlow
+    - Capex
   TangibleAssets:
-    formula: "TotalAssets - Goodwill - IntangibleAssets"
-    requires: [TotalAssets, Goodwill, IntangibleAssets]
-
+    formula: TotalAssets - Goodwill - IntangibleAssets
+    requires:
+    - TotalAssets
+    - Goodwill
+    - IntangibleAssets
   NetDebt:
-    formula: "ShortTermDebt + LongTermDebt - CashAndEquivalents"
-    requires: [ShortTermDebt, LongTermDebt, CashAndEquivalents]
+    formula: ShortTermDebt + LongTermDebt - CashAndEquivalents
+    requires:
+    - ShortTermDebt
+    - LongTermDebt
+    - CashAndEquivalents

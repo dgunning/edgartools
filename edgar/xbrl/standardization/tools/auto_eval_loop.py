@@ -1529,6 +1529,7 @@ def run_overnight(
     propose_fn=None,
     max_workers: int = 1,
     escalation_threshold: int = 3,
+    eval_cohort: Optional[List[str]] = None,
 ) -> OvernightReport:
     """
     Run an overnight auto-eval session.
@@ -1550,12 +1551,21 @@ def run_overnight(
         propose_fn: Callable(gap, graveyard) -> ConfigChange. If None, skips proposals.
         max_workers: Parallel workers for CQS computation (1 = sequential).
         escalation_threshold: Subtype failures before GPT escalation (default 3).
+        eval_cohort: List of tickers to evaluate. Defaults to QUICK_EVAL_COHORT.
 
     Returns:
         OvernightReport with session summary.
     """
     if ledger is None:
         ledger = ExperimentLedger()
+
+    cohort = eval_cohort or QUICK_EVAL_COHORT
+
+    # Tournament is designed for small quick-eval cohorts.
+    # When evaluating on >=20 companies, direct eval is sufficient.
+    if len(cohort) >= 20 and use_tournament:
+        logger.info(f"Auto-disabling tournament for {len(cohort)}-company cohort (direct eval sufficient)")
+        use_tournament = False
 
     session_id = f"overnight_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     start_time = time.time()
@@ -1570,9 +1580,9 @@ def run_overnight(
     )
 
     # Step 1: Baseline CQS
-    logger.info(f"Session {session_id}: Establishing baseline...")
+    logger.info(f"Session {session_id}: Establishing baseline on {len(cohort)} companies...")
     baseline = compute_cqs(
-        eval_cohort=QUICK_EVAL_COHORT,
+        eval_cohort=cohort,
         snapshot_mode=True,
         ledger=ledger,
         max_workers=max_workers,
@@ -1609,7 +1619,7 @@ def run_overnight(
 
         # Identify gaps
         gaps, cqs_result = identify_gaps(
-            eval_cohort=QUICK_EVAL_COHORT,
+            eval_cohort=cohort,
             snapshot_mode=True,
             ledger=ledger,
             max_workers=max_workers,
@@ -1686,7 +1696,7 @@ def run_overnight(
 
                 # Update baseline
                 current_baseline = compute_cqs(
-                    eval_cohort=QUICK_EVAL_COHORT,
+                    eval_cohort=cohort,
                     snapshot_mode=True,
                     ledger=ledger,
                     max_workers=max_workers,
