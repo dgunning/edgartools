@@ -8,10 +8,13 @@ analytics and AI-ready interfaces.
 import warnings
 from collections import OrderedDict, defaultdict
 from datetime import date
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
 if TYPE_CHECKING:
     from edgar.entity.query import FactQuery
+    from edgar.ttm.statement import TTMStatement
+    from edgar.ttm.calculator import TTMMetric
     from edgar.entity.unit_handling import UnitResult
     from edgar.enums import PeriodType
 
@@ -1394,9 +1397,244 @@ class EntityFacts:
         """
         return self.get_fact('dei:EntityPublicFloat')
 
+    def _get_split_adjusted_facts(self) -> List[FinancialFact]:
+        """Get all facts adjusted for stock splits, with caching."""
+        cache_attr = '_cached_split_adjusted_facts'
+        if hasattr(self, cache_attr):
+            return getattr(self, cache_attr)
+
+        facts = self._facts
+        if not facts:
+            return []
+
+        from edgar.ttm.splits import apply_split_adjustments, detect_splits
+        splits = detect_splits(facts)
+        adjusted_facts = apply_split_adjustments(facts, splits) if splits else facts
+
+        object.__setattr__(self, cache_attr, adjusted_facts)
+        return adjusted_facts
+
+    def _prepare_quarterly_facts(self, facts: List[FinancialFact]) -> List[FinancialFact]:
+        """Enhance facts with derived quarter-level duration facts for TTM/quarterly views."""
+        from edgar.ttm.calculator import TTMCalculator
+
+        concept_facts = defaultdict(list)
+        for fact in facts:
+            concept_facts[fact.concept].append(fact)
+
+        derived_facts: List[FinancialFact] = []
+
+        for c_facts in concept_facts.values():
+            try:
+                calc = TTMCalculator(c_facts)
+                quarterly = calc._quarterize_facts()
+                for quarter_fact in quarterly:
+                    if quarter_fact.calculation_context and 'derived' in quarter_fact.calculation_context:
+                        derived_facts.append(quarter_fact)
+            except (ValueError, KeyError, AttributeError, IndexError, TypeError):
+                continue
+
+        def _collect_facts(concepts: List[str]) -> List[FinancialFact]:
+            collected: List[FinancialFact] = []
+            for name in concepts:
+                if name in concept_facts:
+                    collected.extend(concept_facts[name])
+                for prefix in ['us-gaap', 'ifrs-full']:
+                    prefixed = f"{prefix}:{name}"
+                    if prefixed in concept_facts:
+                        collected.extend(concept_facts[prefixed])
+            return collected
+
+        net_income_facts = _collect_facts([
+            "NetIncomeLoss",
+            "NetIncomeLossAvailableToCommonStockholdersBasic",
+        ])
+        shares_basic = _collect_facts([
+            "WeightedAverageNumberOfSharesOutstandingBasic",
+            "WeightedAverageNumberOfSharesOutstandingBasicAndDiluted",
+        ])
+        shares_diluted = _collect_facts([
+            "WeightedAverageNumberOfDilutedSharesOutstanding",
+            "WeightedAverageNumberOfSharesOutstandingDiluted",
+        ])
+
+        def _has_eps_for_period(concept_name: str, period_end: date, fiscal_period: str) -> bool:
+            candidates = [concept_name]
+            if ":" in concept_name:
+                candidates.append(concept_name.split(":", 1)[1])
+            else:
+                candidates.append(f"us-gaap:{concept_name}")
+                candidates.append(f"ifrs-full:{concept_name}")
+
+            for name in candidates:
+                for fact in concept_facts.get(name, []):
+                    if (
+                        fact.period_end == period_end
+                        and fact.fiscal_period == fiscal_period
+                        and fact.period_type == "duration"
+                    ):
+                        return True
+            return False
+
+        if net_income_facts and shares_basic:
+            calc = TTMCalculator(net_income_facts)
+            for eps_fact in calc.derive_eps_for_quarter(
+                net_income_facts,
+                shares_basic,
+                "us-gaap:EarningsPerShareBasic",
+            ):
+                if not _has_eps_for_period(eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period):
+                    derived_facts.append(eps_fact)
+
+        if net_income_facts and shares_diluted:
+            calc = TTMCalculator(net_income_facts)
+            for eps_fact in calc.derive_eps_for_quarter(
+                net_income_facts,
+                shares_diluted,
+                "us-gaap:EarningsPerShareDiluted",
+            ):
+                if not _has_eps_for_period(eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period):
+                    derived_facts.append(eps_fact)
+
+        return facts + derived_facts
+
+    def _parse_ttm_date(self, as_of: Optional[Union[date, str]]) -> Optional[date]:
+        """Parse TTM 'as_of' parameter into a date object."""
+        if as_of is None:
+            return None
+
+        if isinstance(as_of, date):
+            return as_of
+
+        if not isinstance(as_of, str):
+            raise TypeError(f"as_of must be date, str, or None, got {type(as_of).__name__}")
+
+        # Try ISO format: YYYY-MM-DD
+        if '-' in as_of and len(as_of.split('-')) == 3:
+            try:
+                parsed = date.fromisoformat(as_of)
+                if parsed.year < 1900 or parsed.year > 2100:
+                    raise ValueError(f"Year must be between 1900 and 2100, got {parsed.year}")
+                return parsed
+            except ValueError as e:
+                if "year" in str(e).lower():
+                    raise
+                raise ValueError(f"Invalid date format: '{as_of}'. Expected ISO format YYYY-MM-DD") from e
+
+        # Try quarter format: YYYY-QN
+        parts = as_of.upper().split('-')
+        if len(parts) == 2 and 'Q' in parts[1]:
+            try:
+                year = int(parts[0])
+                if year < 1900 or year > 2100:
+                    raise ValueError(f"Year must be between 1900 and 2100, got {year}")
+
+                quarter = int(parts[1].replace('Q', ''))
+                if quarter not in (1, 2, 3, 4):
+                    raise ValueError(f"Quarter must be 1-4, got {quarter}")
+
+                quarter_ends = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
+                month, day = quarter_ends[quarter]
+                return date(year, month, day)
+            except ValueError:
+                raise
+            except (TypeError, KeyError) as e:
+                raise ValueError(f"Invalid quarter format: '{as_of}'. Expected YYYY-QN (e.g., '2024-Q2')") from e
+
+        raise ValueError(f"Invalid date format: '{as_of}'. Use 'YYYY-MM-DD' or 'YYYY-QN'")
+
+    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """Calculate Trailing Twelve Months value for a concept."""
+        from edgar.ttm.calculator import TTMCalculator
+
+        facts = self._get_split_adjusted_facts()
+
+        if ':' not in concept:
+            concept_candidates = [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']
+        else:
+            concept_candidates = [concept]
+
+        target_facts = [fact for fact in facts if fact.concept in concept_candidates]
+
+        if not target_facts:
+            raise KeyError(f"Concept '{concept}' not found in facts")
+
+        calc = TTMCalculator(target_facts)
+        as_of_date = self._parse_ttm_date(as_of)
+        return calc.calculate_ttm(as_of=as_of_date)
+
+    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """Get Trailing Twelve Months revenue using common revenue concepts."""
+        revenue_concepts = [
+            'RevenueFromContractWithCustomerExcludingAssessedTax',
+            'Revenues',
+            'SalesRevenueNet',
+            'Revenue',
+        ]
+        for concept in revenue_concepts:
+            try:
+                return self.get_ttm(concept, as_of)
+            except KeyError:
+                continue
+        raise KeyError("Could not find revenue concept in company facts")
+
+    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """Get Trailing Twelve Months net income using common net income concepts."""
+        income_concepts = ['NetIncomeLoss', 'NetIncome', 'ProfitLoss']
+        for concept in income_concepts:
+            try:
+                return self.get_ttm(concept, as_of)
+            except KeyError:
+                continue
+        raise KeyError("Could not find net income concept in company facts")
+
+    @cached_property
+    def _ttm_ready_facts(self) -> 'EntityFacts':
+        """Cached facts prepared for quarterly/TTM operations."""
+        prepared_facts = self._prepare_quarterly_facts(self._get_split_adjusted_facts())
+        return EntityFacts(
+            cik=self.cik,
+            name=self.name,
+            facts=prepared_facts,
+            sic_code=self._sic_code,
+            ticker=self._ticker,
+        )
+
+    def _build_enhanced_statement(self,
+                                  facts: List[FinancialFact],
+                                  statement_type: str,
+                                  periods: int,
+                                  annual: bool,
+                                  as_dataframe: bool,
+                                  concise_format: bool) -> Union[pd.DataFrame, MultiPeriodStatement]:
+        """Build an enhanced multi-period statement from a fact set."""
+        self._resolve_industry_info()
+        from edgar.entity.enhanced_statement import EnhancedStatementBuilder
+
+        builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
+        enhanced_stmt = builder.build_multi_period_statement(
+            facts=facts,
+            statement_type=statement_type,
+            periods=periods,
+            annual=annual,
+        )
+        enhanced_stmt.company_name = self.name
+        enhanced_stmt.ticker = self._ticker
+        enhanced_stmt.cik = str(self.cik)
+        enhanced_stmt.concise_format = concise_format
+
+        if as_dataframe:
+            return enhanced_stmt.to_dataframe()
+        return enhanced_stmt
+
     # Financial statement helpers
-    def income_statement(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                         annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+    def income_statement(self,
+                         periods: int = 4,
+                         period_length: Optional[int] = None,
+                         as_dataframe: bool = False,
+                         annual: Optional[bool] = None,
+                         concise_format: bool = False,
+                         period: str = 'annual') -> Union[pd.DataFrame, MultiPeriodStatement, 'TTMStatement']:
         """
         Get income statement facts for recent periods.
 
@@ -1404,8 +1642,9 @@ class EntityFacts:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
-            annual: If True, prefer annual (FY) periods over interim periods
+            annual: Legacy parameter - if provided, overrides period (True='annual', False='quarterly')
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
+            period: 'annual', 'quarterly', or 'ttm' (trailing twelve months)
 
         Returns:
             MultiPeriodStatement or DataFrame with income statement data
@@ -1425,29 +1664,39 @@ class EntityFacts:
             stmt = facts.income_statement(periods=4)
             df = stmt.to_dataframe()
         """
-        # Always build the enhanced multi-period statement
-        self._resolve_industry_info()
-        from edgar.entity.enhanced_statement import EnhancedStatementBuilder
-        builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
-        enhanced_stmt = builder.build_multi_period_statement(
-            facts=self._facts,
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
+        period = period.lower()
+        if period not in {'annual', 'quarterly', 'ttm'}:
+            raise ValueError("period must be one of: 'annual', 'quarterly', 'ttm'")
+
+        if period == 'ttm':
+            from edgar.ttm.statement import TTMStatementBuilder
+
+            ttm_facts = self._ttm_ready_facts
+            stmt = TTMStatementBuilder(ttm_facts).build_income_statement(max_periods=periods)
+            if as_dataframe:
+                return stmt.to_dataframe()
+            return stmt
+
+        statement_facts = self._ttm_ready_facts if period == 'quarterly' else self
+        return self._build_enhanced_statement(
+            facts=statement_facts._facts,
             statement_type='IncomeStatement',
             periods=periods,
-            annual=annual
+            annual=(period == 'annual'),
+            as_dataframe=as_dataframe,
+            concise_format=concise_format,
         )
-        enhanced_stmt.company_name = self.name
-        enhanced_stmt.ticker = self._ticker
-        enhanced_stmt.cik = str(self.cik)
-        enhanced_stmt.concise_format = concise_format
 
-        # Return DataFrame if requested
-        if as_dataframe:
-            return enhanced_stmt.to_dataframe()
-
-        return enhanced_stmt
-
-    def balance_sheet(self, periods: int = 4, as_of: Optional[date] = None, as_dataframe: bool = False,
-                      annual: bool = True, concise_format: bool = False) -> Union[pd.DataFrame, MultiPeriodStatement]:
+    def balance_sheet(self,
+                      periods: int = 4,
+                      as_of: Optional[date] = None,
+                      as_dataframe: bool = False,
+                      annual: Optional[bool] = None,
+                      concise_format: bool = False,
+                      period: str = 'annual') -> Union[pd.DataFrame, MultiPeriodStatement]:
         """
         Get balance sheet facts for recent periods or as of a specific date.
 
@@ -1455,8 +1704,9 @@ class EntityFacts:
             periods: Number of periods to retrieve (ignored if as_of is specified)
             as_of: Optional date for point-in-time view; if specified, gets single snapshot
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
-            annual: If True, prefer annual (FY) periods over interim periods
+            annual: Legacy parameter - if provided, overrides period
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
+            period: 'annual' or 'quarterly' (TTM is not applicable to balance sheets)
 
         Returns:
             MultiPeriodStatement or DataFrame with balance sheet data
@@ -1473,100 +1723,88 @@ class EntityFacts:
             stmt = facts.balance_sheet(periods=4)
             df = stmt.to_dataframe()
         """
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
+        period = period.lower()
+        if period == 'ttm':
+            raise ValueError("TTM not applicable for Balance Sheet (point-in-time data)")
+        if period not in {'annual', 'quarterly'}:
+            raise ValueError("period must be one of: 'annual', 'quarterly'")
+
         if not as_of:
-            # Always build the enhanced multi-period statement for regular periods
-            self._resolve_industry_info()
-            from edgar.entity.enhanced_statement import EnhancedStatementBuilder
-            builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
-            enhanced_stmt = builder.build_multi_period_statement(
+            return self._build_enhanced_statement(
                 facts=self._facts,
                 statement_type='BalanceSheet',
                 periods=periods,
-                annual=annual
+                annual=(period == 'annual'),
+                as_dataframe=as_dataframe,
+                concise_format=concise_format,
             )
-            enhanced_stmt.company_name = self.name
-            enhanced_stmt.ticker = self._ticker
-            enhanced_stmt.cik = str(self.cik)
-            enhanced_stmt.concise_format = concise_format
 
-            # Return DataFrame if requested
-            if as_dataframe:
-                return enhanced_stmt.to_dataframe()
-
-            return enhanced_stmt
         from edgar.entity.query import FactQuery
         query = FactQuery(self._facts, self._fact_index)
 
         query = query.by_statement_type('BalanceSheet')
 
-        if as_of:
-            # Point-in-time view - get latest instant facts as of the specified date
-            query = query.as_of(as_of).latest_instant()
-            facts = query.execute()
+        # Point-in-time view - get latest instant facts as of the specified date
+        query = query.as_of(as_of).latest_instant()
+        facts = query.execute()
 
-            if not facts:
-                if not as_dataframe:
-                    from edgar.entity.statement import FinancialStatement
-                    return FinancialStatement(
-                        data=pd.DataFrame(),
-                        statement_type="BalanceSheet",
-                        entity_name=self.name,
-                        period_lengths=[],
-                        mixed_periods=False
-                    )
-                else:
-                    return pd.DataFrame()
-
-            # Convert to simple DataFrame for point-in-time view
-            records = []
-            for fact in facts:
-                records.append({
-                    'label': fact.label,
-                    'concept': fact.concept,
-                    'value': fact.get_formatted_value(),
-                    'raw_value': fact.numeric_value or fact.value,
-                    'unit': fact.unit,
-                    'period_end': fact.period_end,
-                    'filing_date': fact.filing_date,
-                    'form_type': fact.form_type
-                })
-
-            df = pd.DataFrame(records)
-
+        if not facts:
             if not as_dataframe:
                 from edgar.entity.statement import FinancialStatement
-                # For point-in-time, create a single-column statement
-                if not df.empty:
-                    period_label = f"As of {as_of}"
-                    pivot_data = pd.DataFrame({
-                        period_label: df.set_index('label')['raw_value']
-                    })
-                else:
-                    pivot_data = pd.DataFrame()
-
                 return FinancialStatement(
-                    data=pivot_data,
+                    data=pd.DataFrame(),
                     statement_type="BalanceSheet",
                     entity_name=self.name,
-                    period_lengths=['instant'],
+                    period_lengths=[],
                     mixed_periods=False
                 )
+            return pd.DataFrame()
+
+        records = []
+        for fact in facts:
+            records.append({
+                'label': fact.label,
+                'concept': fact.concept,
+                'value': fact.get_formatted_value(),
+                'raw_value': fact.numeric_value or fact.value,
+                'unit': fact.unit,
+                'period_end': fact.period_end,
+                'filing_date': fact.filing_date,
+                'form_type': fact.form_type
+            })
+
+        df = pd.DataFrame(records)
+
+        if not as_dataframe:
+            from edgar.entity.statement import FinancialStatement
+            if not df.empty:
+                period_label = f"As of {as_of}"
+                pivot_data = pd.DataFrame({
+                    period_label: df.set_index('label')['raw_value']
+                })
             else:
-                return df
-        else:
-            # Multi-period view - get trends over time using latest instant facts per period
-            # Pass entity information and return preference (flip the boolean)
-            result = query.latest_periods(periods, annual=annual).pivot_by_period(
-                return_statement=not as_dataframe)
+                pivot_data = pd.DataFrame()
 
-            # If returning a Statement object, set the entity name
-            if not as_dataframe and hasattr(result, 'entity_name'):
-                result.entity_name = self.name
+            return FinancialStatement(
+                data=pivot_data,
+                statement_type="BalanceSheet",
+                entity_name=self.name,
+                period_lengths=['instant'],
+                mixed_periods=False
+            )
 
-            return result
+        return df
 
-    def cashflow_statement(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                           annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+    def cashflow_statement(self,
+                           periods: int = 4,
+                           period_length: Optional[int] = None,
+                           as_dataframe: bool = False,
+                           annual: Optional[bool] = None,
+                           concise_format: bool = False,
+                           period: str = 'annual') -> Union[pd.DataFrame, MultiPeriodStatement, 'TTMStatement']:
         """
         Get cash flow statement facts.
 
@@ -1574,8 +1812,9 @@ class EntityFacts:
             periods: Number of periods to retrieve
             period_length: Optional filter for period length in months (3=quarterly, 12=annual)
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
-            annual: If True, prefer annual (FY) periods over interim periods
+            annual: Legacy parameter - if provided, overrides period
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
+            period: 'annual', 'quarterly', or 'ttm' (trailing twelve months)
 
         Returns:
             MultiPeriodStatement or DataFrame with cash flow data
@@ -1592,26 +1831,31 @@ class EntityFacts:
             stmt = facts.cashflow_statement(periods=4)
             df = stmt.to_dataframe()
         """
-        # Always build the enhanced multi-period statement
-        self._resolve_industry_info()
-        from edgar.entity.enhanced_statement import EnhancedStatementBuilder
-        builder = EnhancedStatementBuilder(sic_code=self._sic_code, ticker=self._ticker)
-        enhanced_stmt = builder.build_multi_period_statement(
-            facts=self._facts,
+        if annual is not None:
+            period = 'annual' if annual else 'quarterly'
+
+        period = period.lower()
+        if period not in {'annual', 'quarterly', 'ttm'}:
+            raise ValueError("period must be one of: 'annual', 'quarterly', 'ttm'")
+
+        if period == 'ttm':
+            from edgar.ttm.statement import TTMStatementBuilder
+
+            ttm_facts = self._ttm_ready_facts
+            stmt = TTMStatementBuilder(ttm_facts).build_cashflow_statement(max_periods=periods)
+            if as_dataframe:
+                return stmt.to_dataframe()
+            return stmt
+
+        statement_facts = self._ttm_ready_facts if period == 'quarterly' else self
+        return self._build_enhanced_statement(
+            facts=statement_facts._facts,
             statement_type='CashFlow',
             periods=periods,
-            annual=annual
+            annual=(period == 'annual'),
+            as_dataframe=as_dataframe,
+            concise_format=concise_format,
         )
-        enhanced_stmt.company_name = self.name
-        enhanced_stmt.ticker = self._ticker
-        enhanced_stmt.cik = str(self.cik)
-        enhanced_stmt.concise_format = concise_format
-
-        # Return DataFrame if requested
-        if as_dataframe:
-            return enhanced_stmt.to_dataframe()
-
-        return enhanced_stmt
 
     def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
                   annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:

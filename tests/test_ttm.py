@@ -1396,6 +1396,76 @@ class TestTTMStatement:
         assert isinstance(rich_output, Panel)
 
 
+class TestTTMStatementBuilder:
+    """Tests for TTMStatementBuilder behavior."""
+
+    def test_uses_fiscal_year_for_display_labels(self, monkeypatch):
+        """TTM labels should use fiscal_year (important for non-calendar filers like AAPL)."""
+
+        class _Item:
+            def __init__(self, concept: str, label: str):
+                self.concept = concept
+                self.label = label
+                self.is_total = False
+
+        class _Statement:
+            def iter_hierarchy(self):
+                yield _Item("Revenues", "Revenue"), 0, None
+
+        class _Facts:
+            name = "Test Co"
+            cik = 1234
+
+            def __init__(self):
+                self._fact_index = {
+                    "by_concept": {
+                        "Revenues": [
+                            make_fact(
+                                concept="us-gaap:Revenues",
+                                value=100,
+                                unit="USD",
+                                period_start=date(2025, 10, 1),
+                                period_end=date(2025, 12, 31),
+                                fiscal_year=2026,
+                                fiscal_period="Q1",
+                            )
+                        ]
+                    }
+                }
+
+            def income_statement(self, periods=8, annual=False):
+                assert annual is False
+                return _Statement()
+
+        def _mock_trend(self, periods=8):
+            return pd.DataFrame(
+                [
+                    {
+                        "ttm_value": 1000.0,
+                        "yoy_growth": 0.1,
+                        "fiscal_year": 2026,
+                        "fiscal_period": "Q1",
+                        "as_of_date": date(2025, 12, 31),
+                    },
+                    {
+                        "ttm_value": 900.0,
+                        "yoy_growth": 0.05,
+                        "fiscal_year": 2025,
+                        "fiscal_period": "Q4",
+                        "as_of_date": date(2025, 9, 30),
+                    },
+                ]
+            )
+
+        monkeypatch.setattr(TTMCalculator, "calculate_ttm_trend", _mock_trend)
+
+        stmt = TTMStatementBuilder(_Facts()).build_income_statement(max_periods=2)
+
+        assert stmt.periods == [(2026, "Q1"), (2025, "Q4")]
+        assert "Q1 2026" in stmt.items[0]["values"]
+        assert "Q1 2025" not in stmt.items[0]["values"]
+
+
 class TestStockSplitsEdgeCases:
     """Additional edge case tests for stock splits."""
 
@@ -1668,6 +1738,8 @@ class TestCreateDerivedQuarter:
         assert derived.period_start == date(2024, 10, 1)
 
 
+@pytest.mark.network
+@pytest.mark.vcr
 class TestCompanyTTMIntegration:
     """Tests for Company TTM integration."""
 
@@ -1681,3 +1753,117 @@ class TestCompanyTTMIntegration:
         assert stmt is not None
         assert stmt.statement_type == 'IncomeStatement'
         assert len(stmt.periods) == 2
+
+    def test_facts_income_statement_ttm_periods(self):
+        """Test that facts.income_statement(period='ttm', periods=2) is supported."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        stmt = facts.income_statement(period='ttm', periods=2)
+
+        assert stmt is not None
+        assert stmt.statement_type == 'IncomeStatement'
+        assert len(stmt.periods) == 2
+
+    def test_facts_cashflow_statement_ttm_periods(self):
+        """Test that facts.cashflow_statement(period='ttm', periods=2) is supported."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        stmt = facts.cashflow_statement(period='ttm', periods=2)
+
+        assert stmt is not None
+        assert stmt.statement_type == 'CashFlowStatement'
+        assert len(stmt.periods) == 2
+
+    def test_facts_balance_sheet_ttm_raises(self):
+        """Balance sheet should reject TTM period because it is point-in-time data."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        with pytest.raises(ValueError, match="TTM not applicable"):
+            facts.balance_sheet(period='ttm')
+
+    def test_facts_get_ttm_revenue(self):
+        """Test that facts.get_ttm_revenue() returns a realistic, non-trivial value."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        ttm = facts.get_ttm_revenue()
+        assert ttm is not None
+        assert ttm.value > 300_000_000_000
+
+    def test_company_get_ttm_delegates(self):
+        """Test that Company.get_ttm() delegates correctly to facts-level API."""
+        from edgar import Company
+
+        company = Company("KO")
+        ttm = company.get_ttm("Revenues")
+
+        assert ttm is not None
+        assert ttm.value > 10_000_000_000
+
+    def test_msft_fiscal_year_labels_match_fiscal_periods(self):
+        """Regression: display quarter labels should use fiscal year for non-calendar filers."""
+        from edgar import Company
+
+        company = Company("MSFT")
+        stmt = company.income_statement(period='ttm', periods=4)
+
+        assert stmt is not None
+        assert stmt.periods
+
+        q1_years_in_statement = [fy for fy, fp in stmt.periods if fp == "Q1"]
+        assert q1_years_in_statement
+
+        facts = company.get_facts()
+        assert facts is not None
+        q1_facts = (
+            facts.query()
+            .by_statement_type("IncomeStatement")
+            .by_fiscal_period("Q1")
+            .execute()
+        )
+        q1_fact_years = {fact.fiscal_year for fact in q1_facts}
+        assert q1_fact_years
+
+        for fiscal_year in q1_years_in_statement:
+            assert fiscal_year in q1_fact_years
+
+    def test_ttm_ready_facts_are_cached(self, monkeypatch):
+        """Quarterization should run once and be reused across repeated TTM-ready calls."""
+        from edgar import Company
+
+        company = Company("AAPL")
+        facts = company.get_facts()
+        assert facts is not None
+
+        # Ensure this test is order-independent if facts object was reused/cached elsewhere.
+        facts.__dict__.pop("_ttm_ready_facts", None)
+
+        prepare_calls = 0
+        original_prepare = facts._prepare_quarterly_facts
+
+        def counting_prepare(raw_facts):
+            nonlocal prepare_calls
+            prepare_calls += 1
+            return original_prepare(raw_facts)
+
+        monkeypatch.setattr(facts, "_prepare_quarterly_facts", counting_prepare)
+
+        _ = facts._ttm_ready_facts
+        _ = facts._ttm_ready_facts
+
+        assert prepare_calls == 1
