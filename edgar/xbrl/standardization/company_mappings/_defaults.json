@@ -17,13 +17,40 @@
                 ],
                 "IntangibleAssetsNetExcludingGoodwill": [
                     "us-gaap:IntangibleAssetsNetExcludingGoodwill",
-                    "us-gaap:IndefiniteLivedIntangibleAssetsExcludingGoodwill",
                     "us-gaap:IndefiniteLivedTrademarks",
-                    "us-gaap:FiniteLivedIntangibleAssetsNet",
                     "us-gaap:OtherIntangibleAssetsNet"
                 ]
             },
-            "notes": "Try IntangibleAssetsNetIncludingGoodwill total first; fall back to Goodwill + Other Intangibles."
+            "subcomponents": {
+                "IntangibleAssetsNetExcludingGoodwill": [
+                    "us-gaap:FiniteLivedIntangibleAssetsNet",
+                    "us-gaap:IndefiniteLivedIntangibleAssetsExcludingGoodwill"
+                ]
+            },
+            "notes": "Try IntangibleAssetsNetIncludingGoodwill total first; fall back to Goodwill + Other Intangibles. If no single total concept exists, sum FiniteLived + IndefiniteLived sub-components."
+        },
+        "DepreciationAmortization": {
+            "method": "composite_sum",
+            "total_concepts": [
+                "us-gaap:DepreciationDepletionAndAmortization",
+                "us-gaap:DepreciationAndAmortization",
+                "us-gaap:DepreciationAmortizationAndAccretionNet"
+            ],
+            "components": [
+                "Depreciation",
+                "AmortizationOfIntangibleAssets"
+            ],
+            "concept_priority": {
+                "Depreciation": [
+                    "us-gaap:Depreciation",
+                    "us-gaap:DepreciationNonproduction"
+                ],
+                "AmortizationOfIntangibleAssets": [
+                    "us-gaap:AmortizationOfIntangibleAssets",
+                    "us-gaap:AmortizationOfFiniteLivedIntangibleAssets"
+                ]
+            },
+            "notes": "Try single D&A total first; fall back to summing Depreciation + AmortizationOfIntangibleAssets (common for pharma/medical companies)"
         },
         "ShortTermDebt": {
             "method": "composite_sum",

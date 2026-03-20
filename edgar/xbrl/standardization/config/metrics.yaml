@@ -261,6 +261,7 @@ metrics:
     known_concepts:
     - WeightedAverageNumberOfDilutedSharesOutstanding
     - WeightedAverageNumberOfSharesOutstandingDiluted
+    - WeightedAverageNumberOfShareOutstandingBasicAndDiluted
     tree_hints:
       statements:
       - INCOME
@@ -274,6 +275,7 @@ metrics:
     - AllocatedShareBasedCompensationExpense
     - StockCompensationExpense
     - StockBasedCompensationNet
+    - ShareBasedCompensationIncludingDiscontinuedOperations
     tree_hints:
       statements:
       - CASHFLOW
@@ -368,6 +370,10 @@ metrics:
     description: Depreciation and amortization expense
     standard_tag: DepreciationExpense
     validation_tolerance: 30
+    composite: true
+    components:
+    - Depreciation
+    - AmortizationOfIntangibleAssets
     known_concepts:
     - DepreciationDepletionAndAmortization
     - DepreciationAndAmortization
@@ -381,6 +387,8 @@ metrics:
     - DepreciationExpenseNoncurrent
     - TotalDepreciationExpense
     - NetDepreciationExpense
+    - AmortizationOfIntangibleAssets
+    - DepreciationNonproduction
     exclude_patterns:
     - Accumulated
     tree_hints:
@@ -388,7 +396,8 @@ metrics:
       - CASHFLOW
       section: operating
     universal: true
-    notes: Required for EBITDA calculation and maintenance capex analysis
+    notes: Required for EBITDA calculation and maintenance capex analysis. Pharma/medical
+      companies often split into Depreciation + AmortizationOfIntangibleAssets.
     standardization:
       company_overrides:
         SLB:

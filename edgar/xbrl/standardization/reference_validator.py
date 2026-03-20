@@ -21,7 +21,7 @@ except ImportError:
 
 from .config_loader import get_config, MappingConfig
 from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern
-from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components, get_total_concepts
+from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components, get_total_concepts, get_subcomponents
 from .layers.dimensional_aggregator import DimensionalAggregator
 from edgar import Company
 
@@ -150,8 +150,10 @@ class ReferenceValidator:
         'IntangibleAssetsNetExcludingGoodwill': [
             'IntangibleAssetsNetExcludingGoodwill',
             'IndefiniteLivedTrademarks',  # KO uses this instead
-            'FiniteLivedIntangibleAssetsNet',
+            'OtherIntangibleAssetsNet',
         ],
+        # Note: FiniteLivedIntangibleAssetsNet moved to subcomponents in _defaults.json
+        # (summed with IndefiniteLivedIntangibleAssetsExcludingGoodwill, not an alternative)
     }
     
     def __init__(
@@ -170,11 +172,27 @@ class ReferenceValidator:
         if yf is None and not snapshot_mode:
             print("Warning: yfinance not installed. Install with: pip install yfinance")
     
+    def _is_composite_metric(self, metric: str) -> bool:
+        """Check if a metric should use composite extraction.
+
+        Checks both the hardcoded COMPOSITE_METRICS dict and the config-driven
+        composite flag in metrics.yaml. Config-driven composites require both
+        composite: true AND non-empty components or total_concepts.
+        """
+        if metric in self.COMPOSITE_METRICS:
+            return True
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if metric_config and metric_config.composite:
+            # Safeguard: only treat as composite if components or total_concepts are defined
+            if metric_config.components or get_total_concepts(getattr(self, '_current_ticker', '') or '', metric):
+                return True
+        return False
+
     def _get_stock(self, ticker: str):
         """
         Get yfinance Stock object with caching.
-        
-        Caches Stock objects to avoid redundant API calls when 
+
+        Caches Stock objects to avoid redundant API calls when
         validating after each layer.
         """
         if yf is None:
@@ -743,7 +761,7 @@ class ReferenceValidator:
                         result.confidence = 1.0
                         _resolution_type = "industry"
                 # Check if metric is composite (sum of multiple concepts)
-                elif metric in self.COMPOSITE_METRICS:
+                elif self._is_composite_metric(metric):
                     # HYBRID LOGIC: If mapped to a "Total" concept, use direct extraction
                     # This prevents using component sum when a direct total (like DebtCurrent) exists
                     # Added LongTermDebtAndCapitalLeaseObligationsCurrent for KO (8.7% variance vs composite double-counting)
@@ -808,29 +826,31 @@ class ReferenceValidator:
                     _resolution_type = "industry"
 
                 # 2. Try Composite Metrics Fallback
-                elif metric in self.COMPOSITE_METRICS:
+                elif self._is_composite_metric(metric):
                      composite_value, _components_used, _components_missing = \
                          self._extract_composite_value_with_evidence(xbrl, metric)
                      if composite_value is not None:
                         xbrl_value = composite_value
-                        result.concept = f"Composite: {', '.join(self.COMPOSITE_METRICS[metric])}"
+                        comp_names = self.COMPOSITE_METRICS.get(metric, _components_used)
+                        result.concept = f"Composite: {', '.join(comp_names)}"
                         result.confidence = 0.85
                         result.source = MappingSource.TREE
-                        result.reasoning = f"Synthesized from {len(self.COMPOSITE_METRICS[metric])} components via Fallback"
+                        result.reasoning = f"Synthesized from {len(comp_names)} components via Fallback"
                         _resolution_type = "composite"
             
             # FALLBACK: Generalized Composite Metrics (ShortTermDebt, IntangibleAssets, etc.)
             # Per Principal Architect: attempt composite construction before giving up
-            elif not result.is_mapped and xbrl and metric in self.COMPOSITE_METRICS and ref_value:
+            elif not result.is_mapped and xbrl and self._is_composite_metric(metric) and ref_value:
                 composite_value, _components_used, _components_missing = \
                     self._extract_composite_value_with_evidence(xbrl, metric)
                 if composite_value is not None:
                     xbrl_value = composite_value
                     # Mark as synthesized composite
-                    result.concept = f"Composite: {', '.join(self.COMPOSITE_METRICS[metric])}"
+                    comp_names = self.COMPOSITE_METRICS.get(metric, _components_used)
+                    result.concept = f"Composite: {', '.join(comp_names)}"
                     result.confidence = 0.85
                     result.source = MappingSource.TREE
-                    result.reasoning = f"Synthesized from {len(self.COMPOSITE_METRICS[metric])} components via Fallback"
+                    result.reasoning = f"Synthesized from {len(comp_names)} components via Fallback"
                     _resolution_type = "composite"
             
             # SIGN CONVENTION: Capex is positive in XBRL but negative in yfinance
@@ -1589,6 +1609,22 @@ class ReferenceValidator:
                 value = self._extract_xbrl_value(xbrl, concept)
                 if value is not None:
                     break
+
+            # Subcomponent fallback: if no alternative matched, try summing sub-components
+            # e.g., IntangibleAssetsNetExcludingGoodwill = FiniteLived + IndefiniteLived
+            if value is None and ticker:
+                sub_concepts = get_subcomponents(ticker, metric, component)
+                if sub_concepts:
+                    sub_total = 0.0
+                    sub_found = False
+                    for sub_concept in sub_concepts:
+                        sc = sub_concept if ':' in sub_concept else f"us-gaap:{sub_concept}"
+                        sub_val = self._extract_xbrl_value(xbrl, sc)
+                        if sub_val is not None:
+                            sub_total += sub_val
+                            sub_found = True
+                    if sub_found:
+                        value = sub_total
 
             if value is not None:
                 total += value

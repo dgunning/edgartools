@@ -2599,6 +2599,7 @@ defaults:
       - SGA            # Use Non-Interest Expense instead
       - OperatingIncome  # Use PretaxIncome (interest is primary revenue)
       - Capex          # Capital-light, loan book is the "investment"
+      - Inventory      # No physical inventory
     
     # Securities & Asset Management (SIC 6200-6289)
     securities:
@@ -2606,16 +2607,19 @@ defaults:
       - SGA            # Different expense structure
       - OperatingIncome  # Use PretaxIncome
       - Capex          # Asset-light
-    
+      - Inventory      # No physical inventory
+
     # Insurance (SIC 6300-6399)
     insurance:
       - COGS           # Premiums/claims model
       - OperatingIncome  # Underwriting income different
-    
+      - Inventory      # No physical inventory
+
     # Investment Companies (SIC 6720-6799)
     investment_companies:
       - COGS           # AUM fees model
       - Capex          # Asset-light
+      - Inventory      # No physical inventory
     
     # Legacy: financial_services (manual fallback)
     financial_services:
@@ -2633,6 +2637,19 @@ defaults:
     # Business Services (SIC 7389) - V, MA (payment networks)
     business_services:
       - COGS  # Services model, no goods
+
+    # Transportation (SIC 4000-4799) - NSC, CSX, FDX
+    transportation:
+      - COGS       # Railway/courier operating expenses, not traditional COGS
+      - Inventory   # Materials & supplies, not product inventory
+
+    # Telecommunications (SIC 4810-4899) - CMCSA, TMUS
+    telecom:
+      - COGS  # Network costs, not goods sold
+
+    # Utilities (SIC 4910-4941) - SO
+    utilities:
+      - Inventory  # Fuel inventory, not product inventory
 
 # =============================================================================
 # COHORT DEFINITIONS

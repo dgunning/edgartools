@@ -148,6 +148,33 @@ def get_composite_components(
     return None
 
 
+def get_subcomponents(
+    ticker: str,
+    metric: str,
+    component: str,
+    industry: Optional[str] = None
+) -> List[str]:
+    """Get subcomponents to sum when primary alternatives fail for a component.
+
+    When a component like IntangibleAssetsNetExcludingGoodwill has no direct
+    match, subcomponents (e.g., FiniteLived + IndefiniteLived) can be summed
+    as a fallback.
+
+    Args:
+        ticker: Company ticker
+        metric: Metric name (e.g., 'IntangibleAssets')
+        component: Component name (e.g., 'IntangibleAssetsNetExcludingGoodwill')
+        industry: Optional industry
+
+    Returns:
+        List of XBRL concept strings to sum, or empty list.
+    """
+    rule = get_extraction_rule(ticker, metric, industry)
+    if rule and "subcomponents" in rule:
+        return rule["subcomponents"].get(component, [])
+    return []
+
+
 def get_total_concepts(
     ticker: str,
     metric: str,
