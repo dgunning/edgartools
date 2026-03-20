@@ -321,6 +321,7 @@ class CompanyCQS:
     ef_cqs: float = 0.0       # EF component of CQS
     sa_cqs: float = 0.0       # SA component of CQS
     explained_variance_count: int = 0  # Gaps with documented explanations
+    failed_metrics: List[str] = field(default_factory=list)  # Metrics that failed validation
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -795,6 +796,7 @@ def _compute_company_cqs(
     ef_pass_count = 0
     sa_pass_count = 0
     explained_variance_count = 0
+    failed_metrics = []
 
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
@@ -813,6 +815,10 @@ def _compute_company_cqs(
             # A previously golden metric that now fails = regression
             if (ticker, metric) in golden_set:
                 regression_count += 1
+
+        # Track failed metrics for derive_gaps_from_cqs fast path
+        if result.validation_status != "valid" and result.source != MappingSource.CONFIG:
+            failed_metrics.append(metric)
 
         # Collect variance and EF/SA from validation results
         val_result = validations.get(metric)
@@ -875,6 +881,7 @@ def _compute_company_cqs(
         ef_cqs=ef_cqs,
         sa_cqs=sa_cqs,
         explained_variance_count=explained_variance_count,
+        failed_metrics=failed_metrics,
     )
 
 
@@ -1096,6 +1103,48 @@ def identify_gaps(
         logger.info(f"Skipping {len(dead_ends)} dead-end gaps (>={max_graveyard} graveyard entries)")
 
     return active_gaps, cqs_result
+
+
+def derive_gaps_from_cqs(
+    cqs_result: CQSResult,
+    graveyard_counts: Dict[str, int],
+) -> List[MetricGap]:
+    """
+    Derive gaps from an existing CQSResult without re-running the orchestrator.
+
+    This is the fast path after a KEEP decision — we already have per-company
+    scores and know which metrics failed. ~0s vs ~150s for identify_gaps().
+
+    Args:
+        cqs_result: CQSResult with company_scores populated.
+        graveyard_counts: Dict of "ticker:metric" -> graveyard count.
+
+    Returns:
+        List of MetricGap, sorted by estimated impact (highest first).
+    """
+    gaps: List[MetricGap] = []
+
+    for ticker, score in cqs_result.company_scores.items():
+        company_total = max(score.metrics_total, 1)
+        per_metric_impact = 0.50 / company_total
+
+        for metric in score.failed_metrics:
+            graveyard_key = f"{ticker}:{metric}"
+            gc = graveyard_counts.get(graveyard_key, 0)
+
+            gap = MetricGap(
+                ticker=ticker,
+                metric=metric,
+                gap_type="validation_failure",  # Conservative default
+                estimated_impact=per_metric_impact,
+                graveyard_count=gc,
+                notes="Derived from CQSResult (fast path)",
+            )
+            if not gap.is_dead_end:
+                gaps.append(gap)
+
+    gaps.sort(key=lambda g: (-g.estimated_impact, g.graveyard_count))
+    return gaps
 
 
 def _build_extraction_evidence(

@@ -43,6 +43,8 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     compute_cqs_incremental_batch,
     is_change_company_scoped,
     identify_gaps,
+    derive_gaps_from_cqs,
+    _get_graveyard_counts,
     generate_subcohorts,
     QUICK_EVAL_COHORT,
     VALIDATION_COHORT,
@@ -210,6 +212,29 @@ class _SubtypeFailureTracker:
     def get_count(self, ticker: str, metric: str, hv_subtype: Optional[str]) -> int:
         key = f"{ticker}:{metric}:{hv_subtype or 'none'}"
         return self._counts.get(key, 0)
+
+
+class ProposalCache:
+    """
+    In-session cache to prevent re-proposing identical changes.
+
+    Tracks (ticker, metric, proposal_key) tuples. Resets each session.
+    This avoids wasting evaluation time on proposals that were already
+    rejected in the current session.
+    """
+
+    def __init__(self):
+        self._tried: set = set()
+
+    def was_tried(self, ticker: str, metric: str, proposal_key: str) -> bool:
+        return (ticker, metric, proposal_key) in self._tried
+
+    def record(self, ticker: str, metric: str, proposal_key: str):
+        self._tried.add((ticker, metric, proposal_key))
+
+    def proposal_key_for(self, change: 'ConfigChange') -> str:
+        """Generate a dedup key from a ConfigChange."""
+        return f"{change.change_type.value}:{change.new_value}"
 
 
 # =============================================================================
@@ -2038,9 +2063,12 @@ def run_overnight(
 
     # Subtype failure tracker — for GPT escalation in propose_fn
     tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
+    proposal_cache = ProposalCache()
 
     consecutive_failures = 0
     max_consecutive_failures = 10
+
+    use_fast_path_gaps = None  # Set after KEEP to skip identify_gaps()
 
     # Step 2: Main experiment loop
     while time.time() < deadline:
@@ -2060,14 +2088,18 @@ def run_overnight(
             logger.warning(report.stop_reason)
             break
 
-        # Identify gaps
-        gaps, cqs_result = identify_gaps(
-            eval_cohort=cohort,
-            snapshot_mode=True,
-            ledger=ledger,
-            max_workers=max_workers,
-        )
-        current_baseline = cqs_result
+        # Identify gaps (skip if we have fast-path gaps from a KEEP)
+        if use_fast_path_gaps is not None:
+            gaps = use_fast_path_gaps
+            use_fast_path_gaps = None
+        else:
+            gaps, cqs_result = identify_gaps(
+                eval_cohort=cohort,
+                snapshot_mode=True,
+                ledger=ledger,
+                max_workers=max_workers,
+            )
+            current_baseline = cqs_result
 
         if not gaps:
             report.stopped_early = True
@@ -2104,6 +2136,14 @@ def run_overnight(
             if change is None:
                 null_proposals += 1
                 continue
+
+            # Proposal dedup: skip proposals that were already tried this session
+            pkey = proposal_cache.proposal_key_for(change)
+            if proposal_cache.was_tried(gap.ticker, gap.metric, pkey):
+                logger.debug(f"Skipping duplicate proposal: {gap.ticker}:{gap.metric} {pkey}")
+                null_proposals += 1
+                continue
+            proposal_cache.record(gap.ticker, gap.metric, pkey)
 
             # Track GPT consultations
             if change.rationale.startswith("[GPT-5.4]"):
@@ -2156,7 +2196,12 @@ def run_overnight(
                     report.cqs_peak = current_baseline.cqs
 
                 logger.info(f"KEPT: {change.target_metric} — CQS now {current_baseline.cqs:.4f}")
-                break  # Re-analyze gaps with updated config
+                # Fast path: derive gaps instead of re-running identify_gaps()
+                graveyard_counts = _get_graveyard_counts(ledger)
+                use_fast_path_gaps = derive_gaps_from_cqs(current_baseline, graveyard_counts)
+                if focus_area:
+                    use_fast_path_gaps = _filter_gaps_by_focus(use_fast_path_gaps, focus_area)
+                break  # Re-enter outer loop with fast-path gaps
 
             elif result.decision == Decision.VETO:
                 report.experiments_vetoed += 1
