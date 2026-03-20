@@ -71,6 +71,86 @@ class ValidationResult:
     company_industry: Optional[str] = None   # Industry resolved for this company
 
 
+@dataclass
+class ReferenceVerdict:
+    """Result of adjudicating between reference sources."""
+    status: str              # "trusted", "reference_disputed", "mismatch", "missing"
+    reference_value: Optional[float]
+    trust_source: str        # "xbrl", "golden_master", "yfinance", "none"
+    notes: str = ""
+
+
+class ReferenceAdjudicator:
+    """
+    Deterministic trust hierarchy for reference data.
+
+    Priority:
+    1. SEC XBRL filing (primary source -- what we extracted)
+    2. Prior stable golden master value
+    3. yfinance snapshot (check freshness/staleness)
+
+    When XBRL matches golden but not yfinance, the reference is "disputed"
+    and excluded from pass rate (but flagged for review).
+    """
+
+    def __init__(self, tolerance_pct: float = 15.0):
+        self.tolerance_pct = tolerance_pct
+
+    def adjudicate(
+        self,
+        xbrl_value: Optional[float],
+        reference_value: Optional[float],
+        golden_value: Optional[float],
+        metric: str,
+        ticker: str,
+    ) -> ReferenceVerdict:
+        """
+        Adjudicate between XBRL extraction, golden master, and yfinance.
+        """
+        if xbrl_value is None:
+            return ReferenceVerdict(
+                status="missing", reference_value=reference_value,
+                trust_source="none", notes="No XBRL value extracted",
+            )
+
+        if reference_value is None:
+            return ReferenceVerdict(
+                status="missing", reference_value=None,
+                trust_source="none", notes="No reference value available",
+            )
+
+        # Check if XBRL matches yfinance (within tolerance)
+        xbrl_ref_var = abs(xbrl_value - reference_value) / max(abs(reference_value), 1) * 100
+        if xbrl_ref_var <= self.tolerance_pct:
+            return ReferenceVerdict(
+                status="trusted", reference_value=reference_value,
+                trust_source="yfinance",
+                notes=f"XBRL matches yfinance ({xbrl_ref_var:.1f}% variance)",
+            )
+
+        # XBRL doesn't match yfinance -- check golden master
+        if golden_value is not None:
+            xbrl_golden_var = abs(xbrl_value - golden_value) / max(abs(golden_value), 1) * 100
+            if xbrl_golden_var <= self.tolerance_pct:
+                return ReferenceVerdict(
+                    status="reference_disputed",
+                    reference_value=golden_value,
+                    trust_source="golden_master",
+                    notes=(
+                        f"XBRL matches golden master ({xbrl_golden_var:.1f}%) "
+                        f"but not yfinance ({xbrl_ref_var:.1f}%). "
+                        f"yfinance may be stale or wrong."
+                    ),
+                )
+
+        # No golden to fall back on -- trust yfinance
+        return ReferenceVerdict(
+            status="mismatch", reference_value=reference_value,
+            trust_source="yfinance",
+            notes=f"XBRL vs yfinance variance: {xbrl_ref_var:.1f}%",
+        )
+
+
 class ReferenceValidator:
     """
     Validates XBRL mappings against external reference data.

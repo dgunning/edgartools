@@ -9,6 +9,9 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
     RegressionDiagnosis,
     diagnose_regression,
 )
+from edgar.xbrl.standardization.reference_validator import (
+    ReferenceAdjudicator, ReferenceVerdict,
+)
 
 
 def _make_company_cqs(ticker, failed_metrics, **overrides):
@@ -261,3 +264,76 @@ class TestProposeRegressionFix:
         assert change is not None
         assert change.change_type == ChangeType.ADD_COMPANY_OVERRIDE
         assert "PaymentsToAcquirePropertyPlantAndEquipment" in str(change.new_value)
+
+
+class TestReferenceAdjudication:
+    """Test the reference data trust hierarchy."""
+
+    def test_verdict_trusted_when_sources_agree(self):
+        adj = ReferenceAdjudicator()
+        verdict = adj.adjudicate(
+            xbrl_value=394_328_000_000,
+            reference_value=394_328_000_000,
+            golden_value=None,
+            metric="Revenue",
+            ticker="AAPL",
+        )
+        assert verdict.status == "trusted"
+        assert verdict.reference_value == 394_328_000_000
+
+    def test_verdict_disputed_when_xbrl_matches_golden_but_not_ref(self):
+        adj = ReferenceAdjudicator()
+        verdict = adj.adjudicate(
+            xbrl_value=5_000_000_000,
+            reference_value=3_500_000_000,
+            golden_value=5_100_000_000,
+            metric="ShortTermDebt",
+            ticker="D",
+        )
+        assert verdict.status == "reference_disputed"
+        assert verdict.trust_source == "golden_master"
+
+    def test_verdict_uses_reference_when_no_golden(self):
+        adj = ReferenceAdjudicator()
+        verdict = adj.adjudicate(
+            xbrl_value=5_000_000_000,
+            reference_value=3_500_000_000,
+            golden_value=None,
+            metric="ShortTermDebt",
+            ticker="D",
+        )
+        assert verdict.status == "mismatch"
+        assert verdict.trust_source == "yfinance"
+
+    def test_verdict_missing_when_no_xbrl(self):
+        adj = ReferenceAdjudicator()
+        verdict = adj.adjudicate(
+            xbrl_value=None,
+            reference_value=100,
+            golden_value=None,
+            metric="Revenue",
+            ticker="X",
+        )
+        assert verdict.status == "missing"
+
+    def test_verdict_missing_when_no_reference(self):
+        adj = ReferenceAdjudicator()
+        verdict = adj.adjudicate(
+            xbrl_value=100,
+            reference_value=None,
+            golden_value=None,
+            metric="Revenue",
+            ticker="X",
+        )
+        assert verdict.status == "missing"
+
+    def test_custom_tolerance(self):
+        adj = ReferenceAdjudicator(tolerance_pct=5.0)
+        verdict = adj.adjudicate(
+            xbrl_value=100,
+            reference_value=90,  # 11% variance -- outside 5% tolerance
+            golden_value=None,
+            metric="Revenue",
+            ticker="X",
+        )
+        assert verdict.status == "mismatch"

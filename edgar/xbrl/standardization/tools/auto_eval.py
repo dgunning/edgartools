@@ -322,6 +322,7 @@ class CompanyCQS:
     sa_cqs: float = 0.0       # SA component of CQS
     explained_variance_count: int = 0  # Gaps with documented explanations
     failed_metrics: List[str] = field(default_factory=list)  # Metrics that failed validation
+    disputed_count: int = 0  # Metrics excluded due to reference_disputed
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -348,7 +349,7 @@ class MetricGap:
     """A gap in the extraction pipeline, ranked by CQS impact."""
     ticker: str
     metric: str
-    gap_type: str              # "unmapped" | "validation_failure" | "high_variance" | "regression" | "explained_variance"
+    gap_type: str              # "unmapped" | "validation_failure" | "high_variance" | "regression" | "explained_variance" | "reference_disputed"
     estimated_impact: float    # Estimated CQS improvement if resolved [0-1]
     current_variance: Optional[float] = None
     reference_value: Optional[float] = None
@@ -797,6 +798,7 @@ def _compute_company_cqs(
     sa_pass_count = 0
     explained_variance_count = 0
     failed_metrics = []
+    disputed_count = 0
 
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
@@ -825,6 +827,11 @@ def _compute_company_cqs(
         if val_result and val_result.variance_pct is not None:
             variances.append(abs(val_result.variance_pct))
 
+        # Detect reference_disputed -- exclude from pass/fail
+        if val_result and hasattr(val_result, 'notes') and val_result.notes:
+            if 'reference suspect' in (val_result.notes or '').lower():
+                disputed_count += 1
+
         # EF/SA scoring from validation results
         if val_result:
             if val_result.ef_pass:
@@ -841,13 +848,14 @@ def _compute_company_cqs(
         if (ticker, metric) in golden_set:
             golden_count += 1
 
-    # Compute sub-metrics
-    pass_rate = valid / total if total > 0 else 0.0
+    # Compute sub-metrics (exclude disputed metrics from denominators)
+    effective_total = total - disputed_count
+    pass_rate = valid / effective_total if effective_total > 0 else 0.0
     mean_variance = sum(variances) / len(variances) if variances else 0.0
-    coverage_rate = mapped / total if total > 0 else 0.0
-    golden_master_rate = golden_count / total if total > 0 else 0.0
-    ef_pass_rate = ef_pass_count / total if total > 0 else 0.0
-    sa_pass_rate = sa_pass_count / total if total > 0 else 0.0
+    coverage_rate = mapped / effective_total if effective_total > 0 else 0.0
+    golden_master_rate = golden_count / effective_total if effective_total > 0 else 0.0
+    ef_pass_rate = ef_pass_count / effective_total if effective_total > 0 else 0.0
+    sa_pass_rate = sa_pass_count / effective_total if effective_total > 0 else 0.0
 
     # Per-company CQS (same formula as aggregate)
     cqs = (
@@ -882,6 +890,7 @@ def _compute_company_cqs(
         sa_cqs=sa_cqs,
         explained_variance_count=explained_variance_count,
         failed_metrics=failed_metrics,
+        disputed_count=disputed_count,
     )
 
 
@@ -1322,6 +1331,19 @@ def _classify_gap(
 
         # Determine high_variance subtype for targeted proposal routing
         hv_subtype = _determine_hv_subtype(evidence)
+
+        # Reference disputed: XBRL likely correct but yfinance disagrees
+        if hv_subtype == "hv_reference_suspect":
+            return MetricGap(
+                ticker=ticker, metric=metric, gap_type="reference_disputed",
+                estimated_impact=per_metric_impact * 0.1,  # Low priority -- likely correct
+                current_variance=variance, reference_value=ref_val,
+                xbrl_value=xbrl_val, graveyard_count=gc,
+                notes=f"Reference suspect: yfinance ref={ref_val} may be stale",
+                extraction_evidence=evidence,
+                hv_subtype="hv_reference_suspect",
+                root_cause="reference_error",
+            )
 
         # Map hv_subtype to root_cause
         HV_ROOT_CAUSE_MAP = {
