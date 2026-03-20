@@ -145,6 +145,11 @@ metrics:
           - ProceedsFromSaleOfFinanceReceivables
           - PaymentsOfDividendsCommonStock
           notes: Auto-solver company-specific via CAT, 2/3 periods, 0/3 companies
+        SLB:
+          components:
+          - ProceedsFromSaleOfEquityMethodInvestments
+          - PaymentsOfDividends
+          notes: Auto-solver company-specific via SLB, 1/1 periods, 0/3 companies
   TotalAssets:
     description: Total assets
     known_concepts:
@@ -406,6 +411,11 @@ metrics:
           - CashAcquiredFromAcquisition
           - NetCashProvidedByUsedInInvestingActivities
           notes: Auto-solver company-specific via SLB, 1/1 periods
+        AON:
+          components:
+          - ProceedsFromSaleAndMaturityOfOtherInvestments
+          - PaymentsOfDividendsCommonStock
+          notes: Auto-solver company-specific via AON, 1/1 periods, 0/3 companies
 derived_metrics:
   FreeCashFlow:
     formula: OperatingCashFlow - Capex
