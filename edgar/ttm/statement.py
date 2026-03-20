@@ -254,10 +254,10 @@ class TTMStatementBuilder:
 
         def _is_eps_concept(concept: str) -> bool:
             return "earningspershare" in concept.lower()
- 
+
         def _label_year(row) -> int:
-                fy = row.get("fiscal_year")
-                return int(fy) if pd.notna(fy) else int(row["as_of_date"].year)
+            fy = row.get("fiscal_year")
+            return int(fy) if pd.notna(fy) else int(row["as_of_date"].year)
 
         def _trend_for_eps(eps_concept: str, max_periods: int) -> Optional[pd.DataFrame]:
             net_income_concepts = [

@@ -8,6 +8,7 @@ analytics and AI-ready interfaces.
 import warnings
 from collections import OrderedDict, defaultdict
 from datetime import date
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
 if TYPE_CHECKING:
@@ -1587,8 +1588,9 @@ class EntityFacts:
                 continue
         raise KeyError("Could not find net income concept in company facts")
 
-    def _create_ttm_ready_facts(self) -> 'EntityFacts':
-        """Create an EntityFacts instance with split-adjusted and quarterized facts."""
+    @cached_property
+    def _ttm_ready_facts(self) -> 'EntityFacts':
+        """Cached facts prepared for quarterly/TTM operations."""
         prepared_facts = self._prepare_quarterly_facts(self._get_split_adjusted_facts())
         return EntityFacts(
             cik=self.cik,
@@ -1672,13 +1674,13 @@ class EntityFacts:
         if period == 'ttm':
             from edgar.ttm.statement import TTMStatementBuilder
 
-            ttm_facts = self._create_ttm_ready_facts()
+            ttm_facts = self._ttm_ready_facts
             stmt = TTMStatementBuilder(ttm_facts).build_income_statement(max_periods=periods)
             if as_dataframe:
                 return stmt.to_dataframe()
             return stmt
 
-        statement_facts = self._create_ttm_ready_facts() if period == 'quarterly' else self
+        statement_facts = self._ttm_ready_facts if period == 'quarterly' else self
         return self._build_enhanced_statement(
             facts=statement_facts._facts,
             statement_type='IncomeStatement',
@@ -1839,13 +1841,13 @@ class EntityFacts:
         if period == 'ttm':
             from edgar.ttm.statement import TTMStatementBuilder
 
-            ttm_facts = self._create_ttm_ready_facts()
+            ttm_facts = self._ttm_ready_facts
             stmt = TTMStatementBuilder(ttm_facts).build_cashflow_statement(max_periods=periods)
             if as_dataframe:
                 return stmt.to_dataframe()
             return stmt
 
-        statement_facts = self._create_ttm_ready_facts() if period == 'quarterly' else self
+        statement_facts = self._ttm_ready_facts if period == 'quarterly' else self
         return self._build_enhanced_statement(
             facts=statement_facts._facts,
             statement_type='CashFlow',
