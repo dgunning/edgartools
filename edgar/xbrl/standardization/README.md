@@ -54,22 +54,29 @@ What "subscription-grade" requires:
 
 Every team-eval run should be measured against these thresholds. When we report CQS numbers, the question is always: **how far are we from subscription-grade?**
 
-#### Latest Assessment (2026-03-19, EXPANSION_COHORT_100)
+#### Latest Assessment (2026-03-20, EXPANSION_COHORT_100)
 
-| Measure | Current | Subscription Target | Gap |
-|---------|---------|-------------------|-----|
-| Overall CQS | 0.9652 | 0.995+ | -3pp |
-| Pass rate | 95.0% | 99.5%+ | -4.5pp |
-| Mean variance | 0.9% | <0.5% | -0.4pp |
-| Regressions | 7 | 0 | -7 |
-| Companies | 100 | 5,000+ | ~2% coverage |
-| Perfect-score companies | 42/100 | >95% of displayed | needs industry-aware display |
+| Measure | Current | Previous | Subscription Target | Gap |
+|---------|---------|----------|-------------------|-----|
+| Overall CQS | 0.9709 | 0.9652 | 0.995+ | -2.4pp |
+| Pass rate | 95.9% | 95.0% | 99.5%+ | -3.6pp |
+| Mean variance | 1.1% | 0.9% | <0.5% | -0.6pp |
+| Coverage | 98.5% | 98.2% | 99%+ | -0.5pp |
+| Regressions | 8 | 7 | 0 | -8 |
+| Companies | 100 | 100 | 5,000+ | ~2% coverage |
+
+**What changed (Tier 3 fixes, 2026-03-20)**:
+- Config-driven composite routing — `composite: true` in metrics.yaml now actually triggers composite extraction (was dead code)
+- IntangibleAssets subcomponent summation — FiniteLived + IndefiniteLived instead of first-match-wins
+- DepreciationAmortization as composite — tries total concepts first, falls back to Depreciation + AmortizationOfIntangibleAssets
+- Industry exclusions for transportation (COGS, Inventory), telecom (COGS), utilities (Inventory), plus Inventory for banking/securities/insurance
+- Concept additions for StockBasedCompensation, WeightedAverageSharesDiluted, DepreciationAmortization
 
 **What's production-ready today**: Revenue, Net Income, EPS, Total Assets, Cash, Total Equity — essentially bulletproof across all 100 companies. These alone cover the majority of what retail investors look up.
 
-**What's not ready**: Intangible assets for telecoms (VZ, TMUS off by 80%+), utility-specific accounting (D at 0.755 CQS), composite metrics like D&A that require multi-concept formulas. A paying subscriber seeing these errors on popular stocks would cancel.
+**What's not ready**: D (0.777 CQS, utility OperatingIncome/ShortTermDebt), PLD (0.808, REIT IntangibleAssets/ShortTermDebt), VZ (0.854, telecom IntangibleAssets variance), CME (0.862, exchange multi-metric gaps). 8 regressions need investigation (1 new since Tier 3, likely from IntangibleAssets alternatives cleanup).
 
-**The path forward**: Industry-aware metric selection (don't show COGS for banks), fix the ~10 worst-scoring companies, scale from 100 → 500 → 5,000 with the onboarding pipeline.
+**The path forward**: Investigate the 8 regressions, deep-dive the ~10 worst-scoring companies (D, PLD, VZ, CME, MS, DE, DIS), scale from 100 → 500 → 5,000 with the onboarding pipeline.
 
 ---
 
@@ -101,7 +108,7 @@ Gap Analysis → Propose Config Change → Apply → Measure CQS → Keep/Revert
 | `EXPANSION_COHORT_100` | 100 companies across 14 sectors | ~600s | Production-scale stress test |
 | `EXPANSION_COHORT_500` | 500 S&P 500 tickers | est. ~50min | Full-index coverage (requires onboarding) |
 
-Current 100-company results: **CQS 0.9652** across all sectors.
+Current 100-company results: **CQS 0.9709** across all sectors (up from 0.9652 after Tier 3 fixes).
 
 ### CQS Formula
 
