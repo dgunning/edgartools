@@ -923,11 +923,8 @@ def _aggregate_cqs(
     ef_cqs = sum(s.ef_cqs for s in scores) / n
     sa_cqs = sum(s.sa_cqs for s in scores) / n
 
-    # HARD VETO: regressions cap CQS below baseline
-    vetoed = False
-    if total_regressions > 0 and baseline_cqs is not None:
-        raw_cqs = baseline_cqs - 0.01
-        vetoed = True
+    # Note: regression veto logic moved to evaluate_experiment() which compares
+    # new vs baseline regression counts. _aggregate_cqs computes honest scores.
 
     return CQSResult(
         pass_rate=pass_rate,
@@ -948,7 +945,7 @@ def _aggregate_cqs(
         total_regressions=total_regressions,
         company_scores=company_scores,
         duration_seconds=duration,
-        vetoed=vetoed,
+        vetoed=False,
     )
 
 

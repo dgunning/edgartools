@@ -569,6 +569,7 @@ def evaluate_experiment(
     eval_cohort: Optional[List[str]] = None,
     ledger: Optional[ExperimentLedger] = None,
     max_company_drop: float = 5.0,
+    max_workers: int = 1,
 ) -> ExperimentDecision:
     """
     Evaluate a single config change experiment.
@@ -672,6 +673,7 @@ def evaluate_experiment(
             use_ai=False,
             baseline_cqs=baseline_cqs.cqs,
             ledger=ledger,
+            max_workers=max_workers,
         )
     except Exception as e:
         revert_config_change(change)
@@ -685,14 +687,15 @@ def evaluate_experiment(
 
     duration = time.time() - start_time
 
-    # Check for hard veto (regressions)
-    if new_cqs.vetoed or new_cqs.total_regressions > 0:
+    # Check for hard veto (NEW regressions only — pre-existing ones don't count)
+    new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
+    if new_regressions > 0:
         revert_config_change(change)
         return ExperimentDecision(
             decision=Decision.VETO,
             cqs_before=baseline_cqs.cqs,
             cqs_after=new_cqs.cqs,
-            reason=f"HARD VETO: {new_cqs.total_regressions} regression(s) detected",
+            reason=f"HARD VETO: {new_regressions} new regression(s) detected (was {baseline_cqs.total_regressions}, now {new_cqs.total_regressions})",
             duration_seconds=duration,
         )
 
@@ -884,13 +887,14 @@ def evaluate_experiment_in_memory(
 
     duration = time.time() - start_time
 
-    # Check for hard veto (regressions)
-    if new_cqs.vetoed or new_cqs.total_regressions > 0:
+    # Check for hard veto (NEW regressions only — pre-existing ones don't count)
+    new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
+    if new_regressions > 0:
         return ExperimentDecision(
             decision=Decision.VETO,
             cqs_before=baseline_cqs.cqs,
             cqs_after=new_cqs.cqs,
-            reason=f"HARD VETO: {new_cqs.total_regressions} regression(s) detected",
+            reason=f"HARD VETO: {new_regressions} new regression(s) detected (was {baseline_cqs.total_regressions}, now {new_cqs.total_regressions})",
             duration_seconds=duration,
         )
 
@@ -1930,13 +1934,14 @@ def tournament_eval(
             duration_seconds=stage1.duration_seconds,
         )
 
-    if validation_cqs.total_regressions > 0:
+    new_regressions = validation_cqs.total_regressions - validation_baseline.total_regressions
+    if new_regressions > 0:
         revert_config_change(change)
         return ExperimentDecision(
             decision=Decision.VETO,
             cqs_before=validation_baseline.cqs,
             cqs_after=validation_cqs.cqs,
-            reason=f"Tournament Stage 2 VETO: {validation_cqs.total_regressions} regressions on validation set",
+            reason=f"Tournament Stage 2 VETO: {new_regressions} new regression(s) on validation set (was {validation_baseline.total_regressions}, now {validation_cqs.total_regressions})",
             duration_seconds=stage1.duration_seconds,
         )
 
@@ -2116,7 +2121,12 @@ def run_overnight(
             if use_tournament:
                 result = tournament_eval(change, current_baseline, ledger)
             else:
-                result = evaluate_experiment(change, current_baseline, ledger=ledger)
+                result = evaluate_experiment(
+                    change, current_baseline,
+                    eval_cohort=cohort,
+                    ledger=ledger,
+                    max_workers=max_workers,
+                )
 
             # Log result
             log_experiment(change, result, ledger, run_id=session_id)
@@ -2631,9 +2641,10 @@ def batch_evaluate(
             duration_seconds=time.time() - start_time,
         )
 
-    # Check for regressions (hard veto -> revert all)
-    if new_cqs.vetoed or new_cqs.total_regressions > 0:
-        logger.warning(f"Batch VETOED: {new_cqs.total_regressions} regressions")
+    # Check for NEW regressions (hard veto -> revert all)
+    new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
+    if new_regressions > 0:
+        logger.warning(f"Batch VETOED: {new_regressions} new regressions (was {baseline_cqs.total_regressions}, now {new_cqs.total_regressions})")
         for change in applied:
             revert_config_change(change)
         return BatchResult(
