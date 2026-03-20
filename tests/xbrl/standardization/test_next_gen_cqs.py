@@ -438,3 +438,93 @@ class TestIsMetricForbidden:
                 yaml.dump(industry_yaml, f)
 
             assert not _is_metric_forbidden("COGS", "AAPL", Path(tmpdir))
+
+
+from edgar.xbrl.standardization.tools.auto_solver import AutoSolver, FormulaCandidate
+
+
+class TestRicherSolver:
+    """Test extended formula solver capabilities."""
+
+    def test_sign_flip_detection(self):
+        """Solver should find formulas involving subtraction (A - B)."""
+        solver = AutoSolver(max_components=4, allow_subtraction=True)
+
+        # Target: 100, Facts: A=150, B=50 → A - B = 100
+        facts = {"ConceptA": 150.0, "ConceptB": 50.0}
+        candidates = solver.solve_metric(
+            "TEST", "TestMetric",
+            yfinance_value=100.0,
+            xbrl_facts=facts,
+        )
+        assert len(candidates) >= 1
+        # At least one should be a subtraction formula
+        found_subtraction = any(
+            any(v < 0 for v in c.values) and abs(c.variance_pct) < 1.0
+            for c in candidates
+        )
+        assert found_subtraction, f"No subtraction formula found in {candidates}"
+
+    def test_subtraction_not_found_without_flag(self):
+        """Without allow_subtraction, only additive formulas are found."""
+        solver = AutoSolver(max_components=4, allow_subtraction=False)
+        facts = {"ConceptA": 150.0, "ConceptB": 50.0}
+        candidates = solver.solve_metric(
+            "TEST", "TestMetric",
+            yfinance_value=100.0,
+            xbrl_facts=facts,
+        )
+        # No additive combo of 150 and 50 sums to 100
+        subtraction_results = [c for c in candidates if any(v < 0 for v in c.values)]
+        assert len(subtraction_results) == 0
+
+    def test_scale_normalization(self):
+        """Solver should detect scale mismatches (thousands vs raw)."""
+        solver = AutoSolver(max_components=4, allow_scale_search=True)
+
+        # Target: 5,000,000, Facts: A=5000 (in thousands)
+        facts = {"ConceptA": 5000.0}
+        candidates = solver.solve_metric(
+            "TEST", "TestMetric",
+            yfinance_value=5_000_000.0,
+            xbrl_facts=facts,
+        )
+        assert len(candidates) >= 1
+        # Should find ConceptA * 1000 = 5,000,000
+        scale_match = any(abs(c.total - 5_000_000) < 50_000 for c in candidates)
+        assert scale_match, f"No scale-corrected formula found in {candidates}"
+
+    def test_scale_not_found_without_flag(self):
+        """Without allow_scale_search, scale mismatches are not found."""
+        solver = AutoSolver(max_components=4, allow_scale_search=False)
+        facts = {"ConceptA": 5000.0}
+        candidates = solver.solve_metric(
+            "TEST", "TestMetric",
+            yfinance_value=5_000_000.0,
+            xbrl_facts=facts,
+        )
+        # 5000 is within 2x of 5M (5000 <= 10M), so it's a candidate
+        # but additive search won't match since 5000 != 5M
+        exact_match = [c for c in candidates if abs(c.variance_pct) < 1.0]
+        assert len(exact_match) == 0
+
+    def test_increased_component_cap(self):
+        """Solver should support up to 6 components."""
+        solver = AutoSolver(max_components=6)
+
+        # 6 facts that sum to target
+        target = 600.0
+        facts = {f"C{i}": 100.0 for i in range(6)}
+        candidates = solver.solve_metric(
+            "TEST", "TestMetric",
+            yfinance_value=target,
+            xbrl_facts=facts,
+        )
+        assert any(len(c.components) == 6 for c in candidates)
+
+    def test_default_params_unchanged(self):
+        """Default AutoSolver behavior should be unchanged."""
+        solver = AutoSolver()
+        assert solver.max_components == 4
+        assert solver.allow_subtraction is False
+        assert solver.allow_scale_search is False

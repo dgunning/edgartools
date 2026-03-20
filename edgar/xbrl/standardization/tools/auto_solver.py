@@ -133,10 +133,14 @@ class AutoSolver:
         max_components: int = 4,
         search_tolerance_pct: float = 1.0,
         snapshot_mode: bool = True,
+        allow_subtraction: bool = False,
+        allow_scale_search: bool = False,
     ):
         self.max_components = max_components
         self.search_tolerance = search_tolerance_pct / 100.0
         self.snapshot_mode = snapshot_mode
+        self.allow_subtraction = allow_subtraction
+        self.allow_scale_search = allow_scale_search
 
     def solve_metric(
         self,
@@ -260,6 +264,58 @@ class AutoSolver:
                         periods_checked=periods_checked,
                         periods_passed=periods_passed,
                     ))
+
+        # Phase C: Subtraction search (A - B, A + B - C, etc.)
+        if self.allow_subtraction and len(concept_list) >= 2:
+            for size in range(2, min(self.max_components + 1, len(concept_list) + 1)):
+                for combo_indices in combinations(range(len(concept_list)), size):
+                    combo_concepts = [concept_list[i] for i in combo_indices]
+                    combo_values = [value_list[i] for i in combo_indices]
+
+                    # Try subtracting each single element from the sum of the rest
+                    for neg_idx in range(len(combo_values)):
+                        signed_values = list(combo_values)
+                        signed_values[neg_idx] = -signed_values[neg_idx]
+                        combo_sum = sum(signed_values)
+
+                        if target != 0:
+                            variance = abs(combo_sum - target) / target
+                        else:
+                            variance = 0
+
+                        if variance <= self.search_tolerance:
+                            results.append(FormulaCandidate(
+                                metric=metric,
+                                ticker=ticker,
+                                components=combo_concepts,
+                                values=signed_values,
+                                total=combo_sum,
+                                target=target,
+                                variance_pct=variance * 100,
+                                statement_family=self._get_statement_family(metric),
+                            ))
+
+        # Phase D: Scale normalization search
+        if self.allow_scale_search:
+            scale_factors = [1000, 1_000_000, 0.001, 0.000001]
+            for concept, value in candidates.items():
+                for scale in scale_factors:
+                    scaled = value * scale
+                    if target != 0:
+                        variance = abs(scaled - target) / target
+                    else:
+                        variance = 0
+                    if variance <= self.search_tolerance:
+                        results.append(FormulaCandidate(
+                            metric=metric,
+                            ticker=ticker,
+                            components=[concept],
+                            values=[scaled],
+                            total=scaled,
+                            target=target,
+                            variance_pct=variance * 100,
+                            statement_family=self._get_statement_family(metric),
+                        ))
 
         # Sort: fewest components first, then lowest variance
         results.sort(key=lambda f: (len(f.components), f.variance_pct))
