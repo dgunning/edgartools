@@ -169,7 +169,7 @@ class TestDiagnoseRegression:
         }
 
         mock_validation = MagicMock()
-        mock_validation.xbrl_value = 3_200_000_000
+        mock_validation.extracted_value = 3_200_000_000
         mock_validation.reference_value = 5_100_000_000
         mock_validation.components_used = ["PaymentsToAcquireProductiveAssets"]
 
@@ -191,7 +191,7 @@ class TestDiagnoseRegression:
         }
 
         mock_validation = MagicMock()
-        mock_validation.xbrl_value = 2_000_000_000
+        mock_validation.extracted_value = 2_000_000_000
         mock_validation.reference_value = 1_500_000_000
         mock_validation.components_used = ["ShortTermBorrowings"]
 
@@ -218,9 +218,46 @@ class TestDiagnoseRegression:
         }
 
         mock_validation = MagicMock()
-        mock_validation.xbrl_value = 7_000_000_000  # 30% drift
+        mock_validation.extracted_value = 7_000_000_000  # 30% drift
         mock_validation.reference_value = 10_500_000_000
         mock_validation.components_used = ["SameConcept"]
 
         diag = diagnose_regression("X", "Y", mock_validation, mock_ledger)
         assert diag.diagnosis_type == "value_drifted"
+
+
+class TestProposeRegressionFix:
+    """Test _propose_regression_fix with real ExtractionEvidence and mocked ledger."""
+
+    def test_concept_changed_produces_company_override(self):
+        """_propose_regression_fix generates ADD_COMPANY_OVERRIDE for concept changes."""
+        from edgar.xbrl.standardization.tools.auto_eval_loop import _propose_regression_fix, ChangeType
+        from edgar.xbrl.standardization.tools.auto_eval import ExtractionEvidence
+
+        evidence = ExtractionEvidence(
+            metric="Capex", ticker="CAT",
+            extracted_value=3_200_000_000,
+            reference_value=5_100_000_000,
+            components_used=["PaymentsToAcquireProductiveAssets"],
+        )
+        gap = MetricGap(
+            ticker="CAT", metric="Capex", gap_type="regression",
+            estimated_impact=0.05, graveyard_count=0,
+            extraction_evidence=evidence,
+        )
+
+        mock_ledger = MagicMock()
+        mock_ledger.get_golden_extraction_context.return_value = {
+            "concept": "PaymentsToAcquirePropertyPlantAndEquipment",
+            "value": 5_000_000_000,
+            "reference_value": 5_100_000_000,
+            "fiscal_period": "2024-FY",
+            "strategy_name": "PaymentsToAcquirePropertyPlantAndEquipment",
+            "run_timestamp": "2025-01-01T00:00:00",
+            "variance_pct": 2.0,
+        }
+
+        change = _propose_regression_fix(gap, ledger=mock_ledger)
+        assert change is not None
+        assert change.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+        assert "PaymentsToAcquirePropertyPlantAndEquipment" in str(change.new_value)

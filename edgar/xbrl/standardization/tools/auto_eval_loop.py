@@ -1109,7 +1109,7 @@ def diagnose_regression(
     ref_value = None
 
     if current_validation:
-        current_value = getattr(current_validation, 'xbrl_value', None) if not isinstance(current_validation, dict) else current_validation.get('xbrl_value')
+        current_value = getattr(current_validation, 'extracted_value', None) if not isinstance(current_validation, dict) else current_validation.get('extracted_value')
         ref_value = getattr(current_validation, 'reference_value', None) if not isinstance(current_validation, dict) else current_validation.get('reference_value')
         components = getattr(current_validation, 'components_used', None) if not isinstance(current_validation, dict) else current_validation.get('components_used')
         if components:
@@ -1162,7 +1162,8 @@ def diagnose_regression(
 
 def _propose_regression_fix(
     gap: MetricGap,
-    config_dir: Path,
+    config_dir: Optional[Path] = None,
+    ledger: Optional[ExperimentLedger] = None,
 ) -> Optional[ConfigChange]:
     """
     Propose a fix for a regressed golden master.
@@ -1172,7 +1173,8 @@ def _propose_regression_fix(
     - reference_changed -> add known_divergence
     - value_drifted -> add known_divergence with tolerance
     """
-    ledger = ExperimentLedger()
+    if ledger is None:
+        ledger = ExperimentLedger()
     diag = diagnose_regression(gap.ticker, gap.metric, gap.extraction_evidence, ledger)
 
     if not diag.has_actionable_fix:
