@@ -255,6 +255,10 @@ class TTMStatementBuilder:
         def _is_eps_concept(concept: str) -> bool:
             return "earningspershare" in concept.lower()
 
+        def _label_year(row) -> int:
+            fy = row.get("fiscal_year")
+            return int(fy) if pd.notna(fy) else int(row["as_of_date"].year)
+
         def _trend_for_eps(eps_concept: str, max_periods: int) -> Optional[pd.DataFrame]:
             net_income_concepts = [
                 "NetIncomeLoss",
@@ -364,8 +368,9 @@ class TTMStatementBuilder:
                 trend = trend[trend["as_of_date"] <= as_of].reset_index(drop=True)
             if trend.empty:
                 return None
+
             trend["display_quarter"] = trend.apply(
-                lambda row: f"{row['fiscal_period']} {row['as_of_date'].year}", axis=1
+                lambda row: f"{row['fiscal_period']} {_label_year(row)}", axis=1
             )
             return trend.head(max_periods)
 
@@ -381,8 +386,9 @@ class TTMStatementBuilder:
                 trend = trend[trend["as_of_date"] <= as_of].reset_index(drop=True)
             if trend.empty:
                 return None
+
             trend["display_quarter"] = trend.apply(
-                lambda row: f"{row['fiscal_period']} {row['as_of_date'].year}", axis=1
+                lambda row: f"{row['fiscal_period']} {_label_year(row)}", axis=1
             )
             return trend.head(max_periods)
 
@@ -422,7 +428,11 @@ class TTMStatementBuilder:
         if base_trend is not None:
             base_period_labels = base_trend["display_quarter"].tolist()
             base_periods = [
-                (int(row["as_of_date"].year), str(row["fiscal_period"])) for _, row in base_trend.iterrows()
+                (
+                    int(row["fiscal_year"]) if pd.notna(row.get("fiscal_year")) else int(row["as_of_date"].year),
+                    str(row["fiscal_period"])
+                )
+                for _, row in base_trend.iterrows()
             ]
 
         # Use iter_hierarchy to traverse all nested items, not just the root level
@@ -514,7 +524,7 @@ class TTMStatementBuilder:
 
         """
         return self._build_statement(
-            self.facts.cash_flow,
+            self.facts.cashflow_statement,
             'CashFlowStatement',
             as_of,
             max_periods=max_periods
