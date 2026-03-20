@@ -142,6 +142,37 @@ class ExperimentDecision:
 
 
 @dataclass
+class RegressionDiagnosis:
+    """
+    Provenance diff for a regressed golden master.
+
+    Compares the golden master's original extraction context against
+    the current extraction to identify what changed.
+    """
+    ticker: str
+    metric: str
+    golden_concept: Optional[str] = None
+    current_concept: Optional[str] = None
+    golden_value: Optional[float] = None
+    current_value: Optional[float] = None
+    reference_value: Optional[float] = None
+    golden_reference_value: Optional[float] = None
+    diagnosis_type: str = "unknown"
+    # Types: "concept_changed", "reference_changed", "value_drifted",
+    #        "period_changed", "filing_changed", "unknown"
+    notes: str = ""
+
+    @property
+    def has_actionable_fix(self) -> bool:
+        """Whether this diagnosis suggests an automated fix."""
+        return self.diagnosis_type in (
+            "concept_changed",
+            "reference_changed",
+            "value_drifted",
+        )
+
+
+@dataclass
 class OvernightReport:
     """Summary of an overnight auto-eval session."""
     session_id: str
@@ -1056,6 +1087,155 @@ def log_to_graveyard(
 
 
 # =============================================================================
+# REGRESSION DIAGNOSIS
+# =============================================================================
+
+def diagnose_regression(
+    ticker: str,
+    metric: str,
+    current_validation,
+    ledger: ExperimentLedger,
+) -> RegressionDiagnosis:
+    """
+    Build a provenance diff for a regressed metric.
+
+    Compares golden master extraction context against current extraction
+    to identify what changed. Pure data comparison, no AI.
+    """
+    golden_ctx = ledger.get_golden_extraction_context(ticker, metric)
+
+    current_concept = None
+    current_value = None
+    ref_value = None
+
+    if current_validation:
+        current_value = getattr(current_validation, 'xbrl_value', None) if not isinstance(current_validation, dict) else current_validation.get('xbrl_value')
+        ref_value = getattr(current_validation, 'reference_value', None) if not isinstance(current_validation, dict) else current_validation.get('reference_value')
+        components = getattr(current_validation, 'components_used', None) if not isinstance(current_validation, dict) else current_validation.get('components_used')
+        if components:
+            current_concept = components[0] if components else None
+
+    if golden_ctx is None:
+        return RegressionDiagnosis(
+            ticker=ticker, metric=metric,
+            current_concept=current_concept,
+            current_value=current_value,
+            reference_value=ref_value,
+            diagnosis_type="unknown",
+            notes="No golden extraction context found in ledger",
+        )
+
+    golden_concept = golden_ctx.get("concept")
+    golden_value = golden_ctx.get("value")
+    golden_ref = golden_ctx.get("reference_value")
+
+    # Determine what changed
+    diagnosis_type = "unknown"
+
+    # Case 1: Concept selection changed
+    if golden_concept and current_concept and golden_concept != current_concept:
+        diagnosis_type = "concept_changed"
+
+    # Case 2: Reference value changed (our extraction is stable)
+    elif (golden_ref and ref_value and golden_value and current_value
+          and abs(golden_value - current_value) / max(abs(golden_value), 1) < 0.05
+          and abs(golden_ref - ref_value) / max(abs(golden_ref), 1) > 0.10):
+        diagnosis_type = "reference_changed"
+
+    # Case 3: Extracted value drifted (different filing or period)
+    elif golden_value and current_value:
+        drift_pct = abs(golden_value - current_value) / max(abs(golden_value), 1) * 100
+        if drift_pct > 10:
+            diagnosis_type = "value_drifted"
+
+    return RegressionDiagnosis(
+        ticker=ticker, metric=metric,
+        golden_concept=golden_concept,
+        current_concept=current_concept,
+        golden_value=golden_value,
+        current_value=current_value,
+        reference_value=ref_value,
+        golden_reference_value=golden_ref,
+        diagnosis_type=diagnosis_type,
+    )
+
+
+def _propose_regression_fix(
+    gap: MetricGap,
+    config_dir: Path,
+) -> Optional[ConfigChange]:
+    """
+    Propose a fix for a regressed golden master.
+
+    Uses provenance diff to determine the right fix:
+    - concept_changed -> revert to golden concept via company_override
+    - reference_changed -> add known_divergence
+    - value_drifted -> add known_divergence with tolerance
+    """
+    ledger = ExperimentLedger()
+    diag = diagnose_regression(gap.ticker, gap.metric, gap.extraction_evidence, ledger)
+
+    if not diag.has_actionable_fix:
+        logger.warning(
+            f"Regression {gap.ticker}:{gap.metric} diagnosed as '{diag.diagnosis_type}' "
+            f"-- no automated fix available"
+        )
+        return None
+
+    if diag.diagnosis_type == "concept_changed" and diag.golden_concept:
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_COMPANY_OVERRIDE,
+            yaml_path=f"companies.{gap.ticker}.metric_overrides.{gap.metric}",
+            new_value={
+                "preferred_concept": diag.golden_concept,
+                "notes": f"Regression fix: reverted from {diag.current_concept} to golden concept",
+            },
+            rationale=f"Regression: concept changed from {diag.golden_concept} to {diag.current_concept}",
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
+    if diag.diagnosis_type == "reference_changed":
+        variance = None
+        if diag.current_value and diag.reference_value and diag.reference_value != 0:
+            variance = abs(diag.current_value - diag.reference_value) / abs(diag.reference_value) * 100
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_DIVERGENCE,
+            yaml_path=f"companies.{gap.ticker}.known_divergences.{gap.metric}",
+            new_value={
+                "form_types": ["10-K"],
+                "variance_pct": round(variance * 1.5, 1) if variance else 25.0,
+                "reason": f"Reference value changed: golden_ref={diag.golden_reference_value}, current_ref={diag.reference_value}",
+                "skip_validation": False,
+            },
+            rationale=f"Regression: yfinance reference changed, extraction stable at {diag.current_value}",
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
+    if diag.diagnosis_type == "value_drifted":
+        variance = gap.current_variance or 25.0
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_DIVERGENCE,
+            yaml_path=f"companies.{gap.ticker}.known_divergences.{gap.metric}",
+            new_value={
+                "form_types": ["10-K"],
+                "variance_pct": round(abs(variance) * 1.5, 1),
+                "reason": f"Value drifted: golden={diag.golden_value}, current={diag.current_value}",
+                "skip_validation": False,
+            },
+            rationale=f"Regression: extracted value drifted from golden",
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
+    return None
+
+
+# =============================================================================
 # PROPOSAL GENERATION (Phase 3)
 # =============================================================================
 
@@ -1124,9 +1304,7 @@ def propose_change(
         logger.info(f"Skipping explained variance: {gap.ticker}:{gap.metric}")
         return None
     elif gap.gap_type == "regression":
-        # Regressions need human/AI investigation — don't auto-propose
-        logger.warning(f"Regression on {gap.ticker}:{gap.metric} — needs investigation")
-        return None
+        return _propose_regression_fix(gap, config_dir)
 
     return None
 

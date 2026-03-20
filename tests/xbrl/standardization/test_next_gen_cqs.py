@@ -4,7 +4,11 @@ from unittest.mock import MagicMock, patch
 from edgar.xbrl.standardization.tools.auto_eval import (
     CQSResult, CompanyCQS, MetricGap, derive_gaps_from_cqs,
 )
-from edgar.xbrl.standardization.tools.auto_eval_loop import ProposalCache
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    ProposalCache,
+    RegressionDiagnosis,
+    diagnose_regression,
+)
 
 
 def _make_company_cqs(ticker, failed_metrics, **overrides):
@@ -102,3 +106,121 @@ class TestProposalCache:
         cache = ProposalCache()
         cache.record("AAPL", "Revenue", "add_concept:Revenues")
         assert not cache.was_tried("MSFT", "Revenue", "add_concept:Revenues")
+
+
+class TestRegressionDiagnosis:
+    """Test regression provenance diff pipeline."""
+
+    def test_diagnosis_identifies_concept_change(self):
+        diag = RegressionDiagnosis(
+            ticker="CAT",
+            metric="Capex",
+            golden_concept="PaymentsToAcquirePropertyPlantAndEquipment",
+            current_concept="PaymentsToAcquireProductiveAssets",
+            golden_value=5_000_000_000,
+            current_value=3_200_000_000,
+            reference_value=5_100_000_000,
+            diagnosis_type="concept_changed",
+        )
+        assert diag.diagnosis_type == "concept_changed"
+        assert diag.has_actionable_fix
+
+    def test_diagnosis_identifies_reference_changed(self):
+        diag = RegressionDiagnosis(
+            ticker="D",
+            metric="ShortTermDebt",
+            golden_concept="ShortTermBorrowings",
+            current_concept="ShortTermBorrowings",
+            golden_value=2_000_000_000,
+            current_value=2_000_000_000,
+            reference_value=1_500_000_000,
+            golden_reference_value=2_050_000_000,
+            diagnosis_type="reference_changed",
+        )
+        assert diag.diagnosis_type == "reference_changed"
+        assert diag.has_actionable_fix
+
+    def test_diagnosis_unknown_is_not_actionable(self):
+        diag = RegressionDiagnosis(
+            ticker="X", metric="Y", diagnosis_type="unknown",
+        )
+        assert not diag.has_actionable_fix
+
+    def test_value_drifted_is_actionable(self):
+        diag = RegressionDiagnosis(
+            ticker="X", metric="Y", diagnosis_type="value_drifted",
+        )
+        assert diag.has_actionable_fix
+
+
+class TestDiagnoseRegression:
+    """Test diagnose_regression() with mocked ledger data."""
+
+    def test_diagnose_concept_changed(self):
+        mock_ledger = MagicMock()
+        mock_ledger.get_golden_extraction_context.return_value = {
+            "concept": "PaymentsToAcquirePropertyPlantAndEquipment",
+            "value": 5_000_000_000,
+            "reference_value": 5_100_000_000,
+            "fiscal_period": "2024-FY",
+            "strategy_name": "PaymentsToAcquirePropertyPlantAndEquipment",
+            "run_timestamp": "2025-01-01T00:00:00",
+            "variance_pct": 2.0,
+        }
+
+        mock_validation = MagicMock()
+        mock_validation.xbrl_value = 3_200_000_000
+        mock_validation.reference_value = 5_100_000_000
+        mock_validation.components_used = ["PaymentsToAcquireProductiveAssets"]
+
+        diag = diagnose_regression("CAT", "Capex", mock_validation, mock_ledger)
+        assert diag.diagnosis_type == "concept_changed"
+        assert diag.golden_concept == "PaymentsToAcquirePropertyPlantAndEquipment"
+        assert diag.current_concept == "PaymentsToAcquireProductiveAssets"
+
+    def test_diagnose_reference_changed(self):
+        mock_ledger = MagicMock()
+        mock_ledger.get_golden_extraction_context.return_value = {
+            "concept": "ShortTermBorrowings",
+            "value": 2_000_000_000,
+            "reference_value": 2_050_000_000,
+            "fiscal_period": "2024-FY",
+            "strategy_name": "ShortTermBorrowings",
+            "run_timestamp": "2025-01-01T00:00:00",
+            "variance_pct": 2.5,
+        }
+
+        mock_validation = MagicMock()
+        mock_validation.xbrl_value = 2_000_000_000
+        mock_validation.reference_value = 1_500_000_000
+        mock_validation.components_used = ["ShortTermBorrowings"]
+
+        diag = diagnose_regression("D", "ShortTermDebt", mock_validation, mock_ledger)
+        assert diag.diagnosis_type == "reference_changed"
+
+    def test_diagnose_unknown_when_no_golden_context(self):
+        mock_ledger = MagicMock()
+        mock_ledger.get_golden_extraction_context.return_value = None
+
+        diag = diagnose_regression("CAT", "Capex", None, mock_ledger)
+        assert diag.diagnosis_type == "unknown"
+
+    def test_diagnose_value_drifted(self):
+        mock_ledger = MagicMock()
+        mock_ledger.get_golden_extraction_context.return_value = {
+            "concept": "SameConcept",
+            "value": 10_000_000_000,
+            "reference_value": 10_500_000_000,
+            "fiscal_period": "2024-FY",
+            "strategy_name": "SameConcept",
+            "run_timestamp": "2025-01-01T00:00:00",
+            "variance_pct": 5.0,
+        }
+
+        mock_validation = MagicMock()
+        mock_validation.xbrl_value = 7_000_000_000  # 30% drift
+        mock_validation.reference_value = 10_500_000_000
+        mock_validation.components_used = ["SameConcept"]
+
+        diag = diagnose_regression("X", "Y", mock_validation, mock_ledger)
+        assert diag.diagnosis_type == "value_drifted"

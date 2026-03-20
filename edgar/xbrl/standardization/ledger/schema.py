@@ -907,6 +907,52 @@ class ExperimentLedger:
             no_data=no_data,
         )
 
+    def get_golden_extraction_context(
+        self,
+        ticker: str,
+        metric: str,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get the extraction context from when the golden master was created.
+
+        Returns dict with: concept, value, reference_value, fiscal_period,
+        strategy_name, run_timestamp, variance_pct.
+        """
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            # Find the golden master
+            cursor.execute('''
+                SELECT * FROM golden_masters
+                WHERE ticker = ? AND metric = ? AND is_active = 1
+                ORDER BY created_at DESC LIMIT 1
+            ''', (ticker, metric))
+            gm = cursor.fetchone()
+            if gm is None:
+                return None
+
+            # Find the extraction run closest to golden master creation
+            cursor.execute('''
+                SELECT * FROM extraction_runs
+                WHERE ticker = ? AND metric = ? AND is_valid = 1
+                ORDER BY ABS(julianday(run_timestamp) - julianday(?))
+                LIMIT 1
+            ''', (ticker, metric, gm['created_at']))
+            run = cursor.fetchone()
+            if run is None:
+                return None
+
+            return {
+                "concept": run['strategy_name'] or '',
+                "value": run['extracted_value'],
+                "reference_value": run['reference_value'],
+                "fiscal_period": run['fiscal_period'],
+                "strategy_name": run['strategy_name'] or '',
+                "run_timestamp": run['run_timestamp'],
+                "variance_pct": run['variance_pct'],
+            }
+
     def _get_latest_run(
         self,
         ticker: str,
