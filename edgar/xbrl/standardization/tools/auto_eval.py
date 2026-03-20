@@ -357,6 +357,22 @@ class MetricGap:
     variance_type: str = "raw" # "raw" | "explained" | "standardized"
     extraction_evidence: Optional[ExtractionEvidence] = None  # Diagnostic evidence from validator
     hv_subtype: Optional[str] = None  # "hv_missing_component" | "hv_wrong_concept" | "hv_missing_industry" | "hv_period_mismatch"
+    root_cause: Optional[str] = None  # Detailed root cause from taxonomy
+
+    @property
+    def fix_tier(self) -> str:
+        """Determine fix tier based on root cause."""
+        TIER_1A = {"missing_concept", "wrong_concept", "industry_structural"}
+        TIER_1B = {"extension_concept", "partial_composite", "sign_error"}
+        TIER_2 = {"scale_mismatch", "reference_error"}
+        if self.root_cause in TIER_1A:
+            return "1A"
+        elif self.root_cause in TIER_1B:
+            return "1B"
+        elif self.root_cause in TIER_2:
+            return "2"
+        else:
+            return "3"
 
     @property
     def is_dead_end(self) -> bool:
@@ -1125,6 +1141,11 @@ def _determine_hv_subtype(evidence: ExtractionEvidence) -> Optional[str]:
     if evidence.resolution_type == "direct" and evidence.extracted_value is not None:
         return "hv_wrong_concept"
 
+    # Reference value suspiciously small or zero (possible bad ref data)
+    if evidence.reference_value is not None and evidence.extracted_value is not None:
+        if abs(evidence.reference_value) < 1.0:  # Less than $1 — likely bad ref data
+            return "hv_reference_suspect"
+
     # Value extracted but from a resolution path that produced wrong result
     if evidence.extracted_value is not None:
         return "hv_wrong_concept"
@@ -1170,6 +1191,7 @@ def _classify_gap(
             xbrl_value=xbrl_val, graveyard_count=gc,
             notes="Golden master regressed — high priority",
             extraction_evidence=evidence,
+            root_cause="regression",
         )
 
     # Validation failure: mapped but wrong value (or reset after validation failure)
@@ -1183,17 +1205,55 @@ def _classify_gap(
             xbrl_value=xbrl_val, graveyard_count=gc,
             notes=result.reasoning or f"Mapped to {result.concept} but failed validation",
             extraction_evidence=evidence,
+            root_cause="wrong_concept",
         )
 
     # Unmapped: no concept found
     if not result.is_mapped:
+        rc = "industry_structural" if ref_val is None else "missing_concept"
         return MetricGap(
             ticker=ticker, metric=metric, gap_type="unmapped",
             estimated_impact=per_metric_impact,
             reference_value=ref_val, graveyard_count=gc,
             notes="No mapping found",
             extraction_evidence=evidence,
+            root_cause=rc,
         )
+
+    # --- Sign and scale detection (before general high_variance) ---
+    # Sign error: values match magnitude but opposite signs
+    if (xbrl_val is not None and ref_val is not None
+            and ref_val != 0 and xbrl_val != 0):
+        if (xbrl_val > 0) != (ref_val > 0):
+            magnitude_ratio = abs(xbrl_val) / abs(ref_val)
+            if 0.8 < magnitude_ratio < 1.2:  # magnitudes match within 20%
+                return MetricGap(
+                    ticker=ticker, metric=metric, gap_type="high_variance",
+                    estimated_impact=per_metric_impact * 1.2,
+                    current_variance=variance, reference_value=ref_val,
+                    xbrl_value=xbrl_val, graveyard_count=gc,
+                    notes=f"Sign inverted: XBRL={xbrl_val:.0f}, ref={ref_val:.0f}",
+                    extraction_evidence=evidence,
+                    hv_subtype="hv_sign_inverted",
+                    root_cause="sign_error",
+                )
+
+    # Scale mismatch: values differ by factor of 10/100/1000
+    if (xbrl_val is not None and ref_val is not None
+            and abs(ref_val) > 0 and abs(xbrl_val) > 0):
+        ratio = abs(xbrl_val) / abs(ref_val)
+        for scale in [1000, 100, 10, 0.001, 0.01, 0.1]:
+            if 0.9 < (ratio / scale) < 1.1:  # within 10% of a round scale factor
+                return MetricGap(
+                    ticker=ticker, metric=metric, gap_type="high_variance",
+                    estimated_impact=per_metric_impact * 1.0,
+                    current_variance=variance, reference_value=ref_val,
+                    xbrl_value=xbrl_val, graveyard_count=gc,
+                    notes=f"Scale mismatch ~{scale}x: XBRL={xbrl_val:.0f}, ref={ref_val:.0f}",
+                    extraction_evidence=evidence,
+                    hv_subtype="hv_scale_mismatch",
+                    root_cause="scale_mismatch",
+                )
 
     # High variance: mapped and "valid" but variance is concerning
     if variance is not None and abs(variance) > 10:
@@ -1211,10 +1271,20 @@ def _classify_gap(
                 notes=f"Explained variance {variance:.1f}% — documented reason exists",
                 variance_type="explained",
                 extraction_evidence=evidence,
+                root_cause="explained_variance",
             )
 
         # Determine high_variance subtype for targeted proposal routing
         hv_subtype = _determine_hv_subtype(evidence)
+
+        # Map hv_subtype to root_cause
+        HV_ROOT_CAUSE_MAP = {
+            "hv_missing_component": "partial_composite",
+            "hv_missing_industry": "sector_specific",
+            "hv_wrong_concept": "wrong_concept",
+            "hv_reference_suspect": "reference_error",
+        }
+        rc = HV_ROOT_CAUSE_MAP.get(hv_subtype, "wrong_concept") if hv_subtype else "wrong_concept"
 
         return MetricGap(
             ticker=ticker, metric=metric, gap_type="high_variance",
@@ -1225,6 +1295,7 @@ def _classify_gap(
             variance_type=vtype,
             extraction_evidence=evidence,
             hv_subtype=hv_subtype,
+            root_cause=rc,
         )
 
     return None

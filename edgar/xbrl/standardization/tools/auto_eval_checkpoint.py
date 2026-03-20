@@ -86,6 +86,129 @@ class WorkerCheckpoint:
         return cp
 
 
+@dataclass
+class SessionState:
+    """Persistent state for the CQS improvement loop.
+
+    Written after every batch validation. Enables crash recovery
+    and cross-session learning.
+    """
+    session_id: str                           # e.g. "2026-03-20-overnight"
+    phase: str                                # "measure" | "diagnose" | "fix" | "validate" | "record" | "finished"
+    baseline_cqs: float                       # CQS at session start
+    current_cqs: float                        # Best CQS achieved so far
+    baseline_commit: str                      # Git commit hash at session start
+    current_commit: str                       # Git commit hash of last applied batch
+
+    # Progress tracking
+    gaps_total: int = 0                       # Total gaps found in diagnosis
+    gaps_processed: int = 0                   # Gaps attempted so far
+    gaps_remaining_tier1: int = 0             # Tier 1A/1B gaps left
+    gaps_remaining_tier2: int = 0             # Tier 2+ gaps (for human report)
+
+    # Experiment counts
+    experiments_total: int = 0
+    experiments_kept: int = 0
+    experiments_discarded: int = 0
+    experiments_vetoed: int = 0
+
+    # Batch tracking
+    current_batch: List[str] = field(default_factory=list)  # change_ids in current batch
+    batches_completed: int = 0
+
+    # Safety
+    consecutive_failures: int = 0             # Circuit breaker counter
+    regressions_found: int = 0
+    worst_company: str = ""                   # Ticker of lowest-CQS company
+    worst_company_cqs: float = 0.0
+
+    # Timing
+    started_at: str = ""                      # ISO timestamp
+    last_update: str = ""
+    elapsed_seconds: float = 0.0
+
+    # Next session guidance
+    next_session_focus: str = ""              # Human-readable recommendation
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'SessionState':
+        # Filter to only known fields to handle forward/backward compat
+        known = {k: v for k, v in d.items() if k in cls.__dataclass_fields__}
+        return cls(**known)
+
+
+SESSION_STATE_DIR = Path(__file__).parent.parent / "company_mappings"
+SESSION_STATE_FILE = SESSION_STATE_DIR / "session_state.json"
+
+
+def write_session_state(state: SessionState) -> None:
+    """Atomic write session state. Same pattern as write_checkpoint."""
+    SESSION_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    state.last_update = datetime.now().isoformat()
+
+    fd, tmp_path = tempfile.mkstemp(
+        dir=str(SESSION_STATE_DIR), suffix=".tmp", prefix="session_state_"
+    )
+    try:
+        with os.fdopen(fd, 'w') as f:
+            json.dump(state.to_dict(), f, indent=2)
+        os.replace(tmp_path, str(SESSION_STATE_FILE))
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+def read_session_state() -> Optional[SessionState]:
+    """Read session state. Returns None if no session file exists."""
+    if not SESSION_STATE_FILE.exists():
+        return None
+    try:
+        with open(SESSION_STATE_FILE, 'r') as f:
+            data = json.load(f)
+        return SessionState.from_dict(data)
+    except Exception as e:
+        logger.warning(f"Failed to read session state: {e}")
+        return None
+
+
+def clear_session_state() -> None:
+    """Remove session state file (session completed cleanly)."""
+    try:
+        SESSION_STATE_FILE.unlink(missing_ok=True)
+    except OSError as e:
+        logger.warning(f"Failed to remove session state file: {e}")
+
+
+def recover_session() -> Optional[SessionState]:
+    """Check for crashed session and return recovery state.
+
+    Recovery protocol:
+    1. Read session_state.json
+    2. If phase != "finished", session crashed — return state to resume from
+    3. If phase == "finished", session completed — return None
+    """
+    state = read_session_state()
+    if state is None:
+        return None
+
+    if state.phase == "finished":
+        logger.info(f"Session {state.session_id} completed normally (CQS {state.current_cqs:.4f})")
+        return None
+
+    logger.warning(
+        f"Crashed session detected: {state.session_id} "
+        f"phase={state.phase}, processed={state.gaps_processed}/{state.gaps_total}, "
+        f"CQS {state.baseline_cqs:.4f} -> {state.current_cqs:.4f}"
+    )
+    return state
+
+
 def write_checkpoint(cp: WorkerCheckpoint) -> None:
     """Atomic write checkpoint to checkpoints/worker_{id}.json."""
     CHECKPOINTS_DIR.mkdir(parents=True, exist_ok=True)
