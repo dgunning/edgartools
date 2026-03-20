@@ -1311,12 +1311,48 @@ def propose_change(
     return None
 
 
+def _is_metric_forbidden(metric: str, ticker: str, config_dir: Path) -> bool:
+    """Check if metric is forbidden by the company's industry archetype."""
+    industry_path = config_dir / "industry_metrics.yaml"
+    companies_path = config_dir / "companies.yaml"
+
+    if not industry_path.exists() or not companies_path.exists():
+        return False
+
+    with open(companies_path) as f:
+        companies = yaml.safe_load(f) or {}
+    with open(industry_path) as f:
+        industry_config = yaml.safe_load(f) or {}
+
+    company = companies.get("companies", {}).get(ticker, {})
+    industry = company.get("industry", "").lower()
+
+    if not industry:
+        return False
+
+    archetype = industry_config.get(industry, {})
+    forbidden = archetype.get("forbidden_metrics", [])
+    return metric in forbidden
+
+
 def _propose_for_unmapped(
     gap: MetricGap,
     tried_concepts: set,
     config_dir: Path,
 ) -> Optional[ConfigChange]:
     """Propose a concept addition for an unmapped metric."""
+    # Check if metric is forbidden by industry archetype
+    if _is_metric_forbidden(gap.metric, gap.ticker, config_dir):
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_EXCLUSION,
+            yaml_path=f"companies.{gap.ticker}.exclude_metrics",
+            new_value=gap.metric,
+            rationale=f"{gap.metric} is forbidden for {gap.ticker}'s industry archetype",
+            target_metric=gap.metric,
+            target_companies=gap.ticker,
+        )
+
     # Load metrics config to see what concepts are already known
     metrics_path = config_dir / "metrics.yaml"
     if not metrics_path.exists():

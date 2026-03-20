@@ -6,7 +6,26 @@ version: "1.0.0"
 # Banking (SIC 6020-6099)
 banking:
   sic_ranges: [[6020, 6099]]
-  
+
+  # Metrics that don't apply to banks — auto-exclude for banking companies
+  forbidden_metrics:
+    - COGS          # Banks don't have cost of goods sold
+    - Inventory     # Banks don't hold inventory
+    - GrossProfit   # Replaced by NetInterestIncome
+    - Capex         # Minimal/different for banks
+
+  # Metrics that banks use instead of standard ones
+  required_alternatives:
+    InterestExpense:
+      replaces: COGS
+      notes: "Bank raw material cost is interest paid to depositors"
+    NetInterestIncome:
+      replaces: GrossProfit
+      notes: "InterestIncome - InterestExpense"
+    PPNR:
+      replaces: OperatingIncome
+      notes: "Pre-Provision Net Revenue"
+
   concept_mapping:
     COGS:
       counterpart: InterestExpense
@@ -60,7 +79,20 @@ banking:
 # Insurance (SIC 6300-6399)
 insurance:
   sic_ranges: [[6300, 6399]]
-  
+
+  forbidden_metrics:
+    - COGS
+    - Inventory
+    - GrossProfit
+
+  required_alternatives:
+    LossesAndAdjustments:
+      replaces: COGS
+      notes: "Insurance cost analog"
+    UnderwritingIncome:
+      replaces: OperatingIncome
+      notes: "Underwriting result"
+
   concept_mapping:
     COGS:
       counterpart: LossesAndAdjustments
@@ -75,7 +107,19 @@ insurance:
 # REITs (SIC 6500-6553, 6798)
 reits:
   sic_ranges: [[6500, 6553], [6798, 6798]]
-  
+
+  forbidden_metrics:
+    - COGS
+    - Inventory
+
+  required_alternatives:
+    FFO:
+      replaces: NetIncome
+      notes: "Funds From Operations — excludes depreciation (phantom expense for RE)"
+    NOI:
+      replaces: OperatingIncome
+      notes: "Net Operating Income"
+
   concept_mapping:
     COGS:
       counterpart: PropertyOperatingExpenses

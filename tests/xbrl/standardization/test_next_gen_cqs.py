@@ -337,3 +337,104 @@ class TestReferenceAdjudication:
             ticker="X",
         )
         assert verdict.status == "mismatch"
+
+
+import yaml
+import os
+import tempfile
+from pathlib import Path
+
+
+class TestIndustryArchetypes:
+    """Test industry archetype template structure in industry_metrics.yaml."""
+
+    @property
+    def config_path(self):
+        return Path(__file__).resolve().parents[3] / "edgar/xbrl/standardization/config/industry_metrics.yaml"
+
+    def test_banking_has_forbidden_metrics(self):
+        with open(self.config_path) as f:
+            config = yaml.safe_load(f)
+        banking = config.get("banking", {})
+        forbidden = banking.get("forbidden_metrics", [])
+        assert "Inventory" in forbidden, "Banking should forbid Inventory"
+        assert "COGS" in forbidden, "Banking should forbid COGS"
+
+    def test_insurance_has_forbidden_metrics(self):
+        with open(self.config_path) as f:
+            config = yaml.safe_load(f)
+        insurance = config.get("insurance", {})
+        forbidden = insurance.get("forbidden_metrics", [])
+        assert "COGS" in forbidden
+        assert "Inventory" in forbidden
+
+    def test_reit_has_required_alternatives(self):
+        with open(self.config_path) as f:
+            config = yaml.safe_load(f)
+        reits = config.get("reits", {})
+        required = reits.get("required_alternatives", {})
+        assert "FFO" in required
+        assert "NOI" in required
+
+    def test_archetype_has_sic_mapping(self):
+        with open(self.config_path) as f:
+            config = yaml.safe_load(f)
+        for archetype_name in ["banking", "insurance", "reits"]:
+            archetype = config.get(archetype_name, {})
+            assert "sic_ranges" in archetype, f"{archetype_name} missing sic_ranges"
+
+    def test_banking_required_alternatives(self):
+        with open(self.config_path) as f:
+            config = yaml.safe_load(f)
+        banking = config.get("banking", {})
+        required = banking.get("required_alternatives", {})
+        assert "InterestExpense" in required
+        assert required["InterestExpense"]["replaces"] == "COGS"
+
+
+class TestIsMetricForbidden:
+    """Test the _is_metric_forbidden helper."""
+
+    def test_forbidden_metric_returns_true(self):
+        from edgar.xbrl.standardization.tools.auto_eval_loop import _is_metric_forbidden
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Write minimal config files
+            companies_yaml = {"companies": {"JPM": {"industry": "banking"}}}
+            industry_yaml = {"banking": {"forbidden_metrics": ["COGS", "Inventory"]}}
+
+            with open(os.path.join(tmpdir, "companies.yaml"), "w") as f:
+                yaml.dump(companies_yaml, f)
+            with open(os.path.join(tmpdir, "industry_metrics.yaml"), "w") as f:
+                yaml.dump(industry_yaml, f)
+
+            assert _is_metric_forbidden("COGS", "JPM", Path(tmpdir))
+            assert _is_metric_forbidden("Inventory", "JPM", Path(tmpdir))
+
+    def test_allowed_metric_returns_false(self):
+        from edgar.xbrl.standardization.tools.auto_eval_loop import _is_metric_forbidden
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            companies_yaml = {"companies": {"JPM": {"industry": "banking"}}}
+            industry_yaml = {"banking": {"forbidden_metrics": ["COGS"]}}
+
+            with open(os.path.join(tmpdir, "companies.yaml"), "w") as f:
+                yaml.dump(companies_yaml, f)
+            with open(os.path.join(tmpdir, "industry_metrics.yaml"), "w") as f:
+                yaml.dump(industry_yaml, f)
+
+            assert not _is_metric_forbidden("Revenue", "JPM", Path(tmpdir))
+
+    def test_no_industry_returns_false(self):
+        from edgar.xbrl.standardization.tools.auto_eval_loop import _is_metric_forbidden
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            companies_yaml = {"companies": {"AAPL": {}}}
+            industry_yaml = {"banking": {"forbidden_metrics": ["COGS"]}}
+
+            with open(os.path.join(tmpdir, "companies.yaml"), "w") as f:
+                yaml.dump(companies_yaml, f)
+            with open(os.path.join(tmpdir, "industry_metrics.yaml"), "w") as f:
+                yaml.dump(industry_yaml, f)
+
+            assert not _is_metric_forbidden("COGS", "AAPL", Path(tmpdir))
