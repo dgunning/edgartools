@@ -91,6 +91,48 @@ class Decision(str, Enum):
     VETO = "VETO"  # Hard veto due to regression
 
 
+class AIAgentType(str, Enum):
+    """Specialized AI agents for the long-tail gaps."""
+    REGRESSION_INVESTIGATOR = "regression_investigator"
+    REFERENCE_AUDITOR = "reference_auditor"
+    SEMANTIC_MAPPER = "semantic_mapper"
+    PATTERN_LEARNER = "pattern_learner"
+
+
+class AIAgentRouter:
+    """
+    Routes hard gaps to specialized AI agents.
+
+    Key invariant: AI proposals go through evaluate_experiment() with the
+    same CQS gate as deterministic proposals. AI never bypasses the gate.
+    """
+
+    MIN_GRAVEYARD_FOR_AI = 3
+
+    def route(self, gap: 'MetricGap') -> Optional[AIAgentType]:
+        """Route a single gap to the appropriate AI agent. Returns None if deterministic."""
+        if gap.graveyard_count < self.MIN_GRAVEYARD_FOR_AI:
+            return None
+        if gap.gap_type == "regression":
+            return AIAgentType.REGRESSION_INVESTIGATOR
+        if gap.hv_subtype == "hv_reference_suspect":
+            return AIAgentType.REFERENCE_AUDITOR
+        if gap.gap_type in ("validation_failure", "high_variance"):
+            return AIAgentType.SEMANTIC_MAPPER
+        return None
+
+    def route_cross_company(
+        self,
+        metric: str,
+        failing_tickers: List[str],
+        industry: Optional[str] = None,
+    ) -> Optional[AIAgentType]:
+        """Route a cross-company pattern to Pattern Learner."""
+        if len(failing_tickers) >= 3:
+            return AIAgentType.PATTERN_LEARNER
+        return None
+
+
 @dataclass
 class ConfigChange:
     """Describes a proposed YAML configuration modification."""
@@ -102,6 +144,8 @@ class ConfigChange:
     rationale: str = ""          # Why this change is proposed
     target_metric: str = ""      # Which metric gap this addresses
     target_companies: str = ""   # Comma-separated tickers affected
+    source: str = "deterministic"   # "deterministic" | "ai_agent"
+    ai_agent_type: str = ""         # Which AI agent generated this (if any)
 
     @property
     def config_file_path(self) -> Path:
@@ -2350,6 +2394,11 @@ def run_overnight(
 
             change = propose_fn(gap, ledger.get_graveyard_entries(gap.metric))
             if change is None:
+                router = AIAgentRouter()
+                agent_type = router.route(gap)
+                if agent_type is not None:
+                    logger.info(f"AI routing: {gap.ticker}:{gap.metric} -> {agent_type.value}")
+                    # TODO: Phase 2 — call the actual AI agent here
                 null_proposals += 1
                 continue
 

@@ -5,6 +5,8 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     CQSResult, CompanyCQS, MetricGap, derive_gaps_from_cqs,
 )
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    AIAgentRouter,
+    AIAgentType,
     ProposalCache,
     RegressionDiagnosis,
     diagnose_regression,
@@ -528,3 +530,48 @@ class TestRicherSolver:
         assert solver.max_components == 4
         assert solver.allow_subtraction is False
         assert solver.allow_scale_search is False
+
+
+class TestAIAgentRouter:
+    """Test AI agent routing infrastructure."""
+
+    def test_regression_routes_to_investigator(self):
+        router = AIAgentRouter()
+        gap = MetricGap(ticker="CAT", metric="Capex", gap_type="regression",
+                        estimated_impact=0.05, graveyard_count=3)
+        assert router.route(gap) == AIAgentType.REGRESSION_INVESTIGATOR
+
+    def test_reference_suspect_routes_to_auditor(self):
+        router = AIAgentRouter()
+        gap = MetricGap(ticker="D", metric="ShortTermDebt", gap_type="high_variance",
+                        estimated_impact=0.03, graveyard_count=4, hv_subtype="hv_reference_suspect")
+        assert router.route(gap) == AIAgentType.REFERENCE_AUDITOR
+
+    def test_solver_exhaustion_routes_to_semantic_mapper(self):
+        router = AIAgentRouter()
+        gap = MetricGap(ticker="ABBV", metric="DepreciationAmortization",
+                        gap_type="validation_failure", estimated_impact=0.03, graveyard_count=5)
+        assert router.route(gap) == AIAgentType.SEMANTIC_MAPPER
+
+    def test_cross_company_pattern_routes_to_pattern_learner(self):
+        router = AIAgentRouter()
+        agent = router.route_cross_company(metric="IntangibleAssets",
+                                           failing_tickers=["AMZN", "NVDA", "CRM"],
+                                           industry="Technology")
+        assert agent == AIAgentType.PATTERN_LEARNER
+
+    def test_simple_gap_returns_none(self):
+        router = AIAgentRouter()
+        gap = MetricGap(ticker="AAPL", metric="Revenue", gap_type="unmapped",
+                        estimated_impact=0.05, graveyard_count=0)
+        assert router.route(gap) is None
+
+    def test_low_graveyard_returns_none(self):
+        router = AIAgentRouter()
+        gap = MetricGap(ticker="AAPL", metric="Revenue", gap_type="validation_failure",
+                        estimated_impact=0.05, graveyard_count=2)
+        assert router.route(gap) is None
+
+    def test_cross_company_below_threshold_returns_none(self):
+        router = AIAgentRouter()
+        assert router.route_cross_company(metric="Revenue", failing_tickers=["AAPL", "MSFT"]) is None
