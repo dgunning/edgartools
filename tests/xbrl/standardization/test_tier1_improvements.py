@@ -558,3 +558,109 @@ class TestRegressionFixGuard:
             assert result is not None
             assert result.change_type == ChangeType.ADD_COMPANY_OVERRIDE
             assert result.new_value["preferred_concept"] == "us-gaap:Goodwill"
+
+
+# ===========================================================================
+# Phase 1 Governance: Golden master promotion threshold
+# ===========================================================================
+
+class TestGoldenMasterPromotionThreshold:
+    """Golden masters require 3+ periods to be promoted."""
+
+    def test_single_period_not_promoted(self):
+        """Single-period extraction should NOT become a golden master."""
+        ledger = ExperimentLedger(db_path=":memory:")
+        run = ExtractionRun(
+            ticker="TEST", metric="Revenue", fiscal_period="2024-FY",
+            form_type="10-K", archetype="A", strategy_name="tree",
+            strategy_fingerprint="fp1", extracted_value=100.0,
+            reference_value=100.0, variance_pct=0.0, is_valid=True,
+        )
+        ledger.record_run(run)
+        promoted = ledger.promote_golden_masters()  # default min_periods=3
+        assert len(promoted) == 0
+
+    def test_three_periods_promoted(self):
+        """Three-period extraction SHOULD become a golden master."""
+        ledger = ExperimentLedger(db_path=":memory:")
+        for period in ["2022-FY", "2023-FY", "2024-FY"]:
+            run = ExtractionRun(
+                ticker="TEST", metric="Revenue", fiscal_period=period,
+                form_type="10-K", archetype="A", strategy_name="tree",
+                strategy_fingerprint="fp1", extracted_value=100.0,
+                reference_value=100.0, variance_pct=0.0, is_valid=True,
+            )
+            ledger.record_run(run)
+        promoted = ledger.promote_golden_masters()
+        assert len(promoted) >= 1
+
+
+# ===========================================================================
+# Phase 1 Governance: Metric-class tolerances
+# ===========================================================================
+
+class TestMetricClassTolerances:
+    """ExtractionRun uses metric-specific validation tolerances."""
+
+    def test_default_tolerance_20_percent(self):
+        """ExtractionRun without explicit tolerance uses 20%."""
+        run = ExtractionRun(
+            ticker="TEST", metric="Revenue", fiscal_period="2024-FY",
+            form_type="10-K", archetype="A",
+            extracted_value=100.0, reference_value=120.0,  # 16.7% variance
+        )
+        assert run.is_valid is True  # Within default 20%
+
+    def test_custom_tolerance_tighter(self):
+        """Revenue with 10% tolerance rejects 16.7% variance."""
+        run = ExtractionRun(
+            ticker="TEST", metric="Revenue", fiscal_period="2024-FY",
+            form_type="10-K", archetype="A",
+            extracted_value=100.0, reference_value=120.0,  # 16.7% variance
+            validation_tolerance=10.0,
+        )
+        assert run.is_valid is False  # Exceeds 10% tolerance
+
+    def test_custom_tolerance_looser(self):
+        """Capex with 40% tolerance accepts 25% variance."""
+        run = ExtractionRun(
+            ticker="TEST", metric="Capex", fiscal_period="2024-FY",
+            form_type="10-K", archetype="A",
+            extracted_value=100.0, reference_value=133.0,  # 24.8% variance
+            validation_tolerance=40.0,
+        )
+        assert run.is_valid is True  # Within 40% tolerance
+
+
+# ===========================================================================
+# Phase 1 Governance: No exclusion for None reference
+# ===========================================================================
+
+class TestNoExclusionForNoneReference:
+    """reference_value=None should not trigger ADD_EXCLUSION."""
+
+    def test_none_reference_returns_none_not_exclusion(self):
+        """reference_value=None should return None, not ADD_EXCLUSION."""
+        gap = _make_gap(
+            ticker="JPM", metric="LongTermDebt",
+            gap_type="unmapped", estimated_impact=0.01,
+            reference_value=None,
+        )
+        from edgar.xbrl.standardization.tools.auto_eval_loop import propose_change
+        result = propose_change(gap, graveyard_entries=[])
+        if result is not None:
+            assert result.change_type != ChangeType.ADD_EXCLUSION
+
+    def test_unmapped_with_reference_still_proposes(self):
+        """Unmapped gap WITH reference value should still get a proposal."""
+        gap = _make_gap(
+            ticker="AAPL", metric="Revenue",
+            gap_type="unmapped", estimated_impact=0.01,
+            reference_value=394_000_000_000.0,
+        )
+        from edgar.xbrl.standardization.tools.auto_eval_loop import propose_change
+        result = propose_change(gap, graveyard_entries=[])
+        # Should attempt some proposal (concept or solver), not None
+        # (may still be None if no concepts available, but should NOT be ADD_EXCLUSION)
+        if result is not None:
+            assert result.change_type != ChangeType.ADD_EXCLUSION

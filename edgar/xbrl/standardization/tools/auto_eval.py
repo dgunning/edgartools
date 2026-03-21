@@ -546,7 +546,7 @@ def compute_cqs(
     # Record valid results and promote golden masters
     count = record_eval_results(all_results, orchestrator.validation_results, ledger)
     if count > 0:
-        promoted = ledger.promote_golden_masters(min_periods=1)
+        promoted = ledger.promote_golden_masters()  # Uses default min_periods=3
         logger.info(f"Recorded {count} extraction runs, promoted {len(promoted)} golden masters")
 
     logger.info(f"Auto-eval complete: {result.summary()}")
@@ -1006,8 +1006,10 @@ def record_eval_results(
     """
     from edgar.xbrl.standardization.ledger.schema import ExtractionRun
     from edgar.xbrl.standardization.tools.auto_eval_loop import get_config_fingerprint
+    from edgar.xbrl.standardization.config_loader import get_config
 
     fingerprint = get_config_fingerprint()
+    config = get_config()
     recorded = 0
 
     for ticker, metrics in all_results.items():
@@ -1017,6 +1019,12 @@ def record_eval_results(
 
             val = validation_results.get(ticker, {}).get(metric)
             fiscal_period = result.fiscal_period if result.fiscal_period else "unknown"
+
+            # Look up metric-specific tolerance from config
+            metric_config = config.get_metric(metric) if config else None
+            tolerance = (metric_config.validation_tolerance
+                         if metric_config and metric_config.validation_tolerance is not None
+                         else 20.0)
 
             run = ExtractionRun(
                 ticker=ticker,
@@ -1032,6 +1040,7 @@ def record_eval_results(
                 variance_pct=val.variance_pct if val and val.variance_pct is not None else 0.0,
                 is_valid=True,
                 confidence=result.confidence,
+                validation_tolerance=tolerance,
             )
             ledger.record_run(run)
             recorded += 1

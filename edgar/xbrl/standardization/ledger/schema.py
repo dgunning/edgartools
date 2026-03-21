@@ -80,6 +80,7 @@ class ExtractionRun:
     variance_pct: Optional[float] = None
     is_valid: bool = False
     confidence: float = 0.0
+    validation_tolerance: float = 20.0  # Metric-specific tolerance (from metrics.yaml)
 
     # Metadata
     run_id: Optional[str] = None
@@ -110,8 +111,8 @@ class ExtractionRun:
             else:
                 self.variance_pct = 100.0 if self.extracted_value != 0 else 0.0
 
-            # Valid if within 20% tolerance
-            self.is_valid = self.variance_pct <= 20.0
+            # Valid if within metric-specific tolerance (default 20%)
+            self.is_valid = self.variance_pct <= self.validation_tolerance
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""

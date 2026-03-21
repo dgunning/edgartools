@@ -1439,17 +1439,14 @@ def _propose_for_unmapped(
     metric_def = metrics_config.get("metrics", {}).get(gap.metric, {})
     known_concepts = metric_def.get("known_concepts", [])
 
-    # If reference value is None, this is likely a structural gap -> add exclusion
+    # If reference value is None, skip — don't exclude the metric.
+    # Future validation layers (SEC-native self-validation) may be able to verify it.
     if gap.reference_value is None:
-        return ConfigChange(
-            file="companies.yaml",
-            change_type=ChangeType.ADD_EXCLUSION,
-            yaml_path=f"companies.{gap.ticker}.exclude_metrics",
-            new_value=gap.metric,
-            rationale=f"No reference value for {gap.metric} — structural gap for {gap.ticker}",
-            target_metric=gap.metric,
-            target_companies=gap.ticker,
+        logger.info(
+            f"Skipping {gap.ticker}:{gap.metric} — no reference value available "
+            f"(metric remains in pipeline for future validation)"
         )
+        return None
 
     # Try common concept variations not yet in known_concepts
     standard_tag = metric_def.get("standard_tag", gap.metric)
