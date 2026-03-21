@@ -1234,11 +1234,14 @@ def _propose_regression_fix(
         )
         return None
 
-    STRATEGY_NAMES = {"tree", "facts", "composite", "config", "industry", "unknown"}
+    # Strategy/source labels that are NOT real XBRL concepts — derived from MappingSource enum
+    # plus extraction-layer labels. A golden_concept holding one of these is the bug fixed in Fix 5.
+    from edgar.xbrl.standardization.models import MappingSource as _MS
+    _NON_CONCEPT_NAMES = {s.value for s in _MS} | {"facts", "composite"}
 
     if diag.diagnosis_type == "concept_changed" and diag.golden_concept:
         # Don't use strategy names as preferred_concept — they're not XBRL concepts
-        if diag.golden_concept in STRATEGY_NAMES:
+        if diag.golden_concept in _NON_CONCEPT_NAMES:
             logger.warning(
                 f"Regression {gap.ticker}:{gap.metric}: golden_concept is strategy name "
                 f"'{diag.golden_concept}', not a real XBRL concept — falling through to solver"

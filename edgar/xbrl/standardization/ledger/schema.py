@@ -80,7 +80,9 @@ class ExtractionRun:
     variance_pct: Optional[float] = None
     is_valid: bool = False
     confidence: float = 0.0
-    validation_tolerance: float = 20.0  # Metric-specific tolerance (from metrics.yaml)
+    # Transient: used only in __post_init__ to compute is_valid, NOT persisted to DB.
+    # When deserializing from DB, defaults to 20.0 — but is_valid was already computed correctly.
+    validation_tolerance: float = 20.0
 
     # Metadata
     run_id: Optional[str] = None

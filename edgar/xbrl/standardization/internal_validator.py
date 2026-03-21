@@ -99,13 +99,12 @@ class InternalConsistencyValidator:
             'description': 'FCF = OperatingCashFlow - Capex'
         },
 
-        # Cross-statement: PretaxIncome >= NetIncome (taxes are non-negative)
-        'pretax_ge_net_income': {
-            'lhs': 'PretaxIncome',
-            'rhs': [('NetIncome', 1)],
-            'operator': 'calculate',
-            'description': 'PretaxIncome >= NetIncome (tax reduces income)',
-        },
+        # NOTE: A PretaxIncome >= NetIncome inequality check was considered here
+        # but removed because the validator only supports equality checks with 5%
+        # tolerance. Since PretaxIncome is typically 25-33% higher than NetIncome
+        # (due to taxes), an equality check would always FAIL, producing false
+        # INVALID_INTERNAL status that undermines the internal override feature.
+        # Inequality operator support can be added in a future iteration.
     }
     
     def __init__(self, tolerance: float = 0.05):
