@@ -664,3 +664,70 @@ class TestNoExclusionForNoneReference:
         # (may still be None if no concepts available, but should NOT be ADD_EXCLUSION)
         if result is not None:
             assert result.change_type != ChangeType.ADD_EXCLUSION
+
+
+# ===========================================================================
+# Phase 2: SEC-Native Self-Validation
+# ===========================================================================
+
+class TestInternalValidation:
+    """Internal consistency validation using accounting equations."""
+
+    def test_balance_sheet_equation_passes(self):
+        """Assets = Liabilities + Equity should pass within tolerance."""
+        from edgar.xbrl.standardization.internal_validator import (
+            InternalConsistencyValidator, ValidationStatus,
+        )
+        validator = InternalConsistencyValidator()
+        values = {
+            'TotalAssets': 1_000_000.0,
+            'TotalLiabilities': 600_000.0,
+            'StockholdersEquity': 400_000.0,
+        }
+        results = validator.validate(values)
+        assert results['balance_sheet_equation'].status == ValidationStatus.PASS
+
+    def test_balance_sheet_equation_fails(self):
+        """Mismatched values should fail the equation."""
+        from edgar.xbrl.standardization.internal_validator import (
+            InternalConsistencyValidator, ValidationStatus,
+        )
+        validator = InternalConsistencyValidator()
+        values = {
+            'TotalAssets': 1_000_000.0,
+            'TotalLiabilities': 600_000.0,
+            'StockholdersEquity': 200_000.0,  # Off by 200K
+        }
+        results = validator.validate(values)
+        assert results['balance_sheet_equation'].status == ValidationStatus.FAIL
+
+    def test_internal_validity_overall(self):
+        """get_internal_validity returns correct aggregate status."""
+        from edgar.xbrl.standardization.internal_validator import InternalConsistencyValidator
+        validator = InternalConsistencyValidator()
+        values = {
+            'TotalAssets': 1_000_000.0,
+            'TotalLiabilities': 600_000.0,
+            'StockholdersEquity': 400_000.0,
+            'Revenue': 500_000.0,
+            'COGS': 300_000.0,
+            'GrossProfit': 200_000.0,
+        }
+        result = validator.get_internal_validity(values)
+        assert result.passed_count >= 2
+        assert result.failed_count == 0
+
+    def test_concept_consensus_counts(self):
+        """Cross-company concept frequency is computed correctly."""
+        from edgar.xbrl.standardization.internal_validator import InternalConsistencyValidator
+        from types import SimpleNamespace
+
+        all_results = {
+            'AAPL': {'Revenue': SimpleNamespace(concept='us-gaap:Revenues')},
+            'MSFT': {'Revenue': SimpleNamespace(concept='us-gaap:Revenues')},
+            'GOOG': {'Revenue': SimpleNamespace(concept='us-gaap:Revenues')},
+            'XOM': {'Revenue': SimpleNamespace(concept='us-gaap:SalesRevenueNet')},
+        }
+        counts = InternalConsistencyValidator.compute_concept_consensus(all_results, 'Revenue')
+        assert counts['us-gaap:Revenues'] == 3
+        assert counts['us-gaap:SalesRevenueNet'] == 1

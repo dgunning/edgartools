@@ -98,6 +98,14 @@ class InternalConsistencyValidator:
             'operator': 'calculate',
             'description': 'FCF = OperatingCashFlow - Capex'
         },
+
+        # Cross-statement: PretaxIncome >= NetIncome (taxes are non-negative)
+        'pretax_ge_net_income': {
+            'lhs': 'PretaxIncome',
+            'rhs': [('NetIncome', 1)],
+            'operator': 'calculate',
+            'description': 'PretaxIncome >= NetIncome (tax reduces income)',
+        },
     }
     
     def __init__(self, tolerance: float = 0.05):
@@ -277,3 +285,25 @@ class InternalConsistencyValidator:
             )
         else:
             return f"Internal: {internal_result.status}, External: {external_status}"
+
+    @staticmethod
+    def compute_concept_consensus(
+        all_results: Dict[str, Dict],
+        metric: str,
+    ) -> Dict[str, int]:
+        """
+        Count how often each XBRL concept is used for a metric across companies.
+
+        Returns dict mapping concept name to count. Useful for detecting outliers:
+        if 90% of tech companies use us-gaap:Revenues for Revenue but one uses
+        us-gaap:SalesRevenueNet, that outlier deserves investigation.
+        """
+        concept_counts: Dict[str, int] = {}
+        for ticker, metrics in all_results.items():
+            result = metrics.get(metric)
+            if result is None:
+                continue
+            concept = getattr(result, 'concept', None)
+            if concept:
+                concept_counts[concept] = concept_counts.get(concept, 0) + 1
+        return concept_counts

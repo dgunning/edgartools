@@ -252,9 +252,9 @@ Filing Event (EDGAR RSS)
 | 1a: Fix min_periods | min_periods=3 | 2026-03-21 | 2026-03-21 | 0.9734 | TBD | Changed call site to use default min_periods=3. 96/96 tests pass. |
 | 1b: Unverified state | Replace exclusion | 2026-03-21 | 2026-03-21 | - | TBD | Replaced ADD_EXCLUSION with None return + log. Kept AI scout exclusion path (line 2655). |
 | 1c: Metric tolerances | Per-metric thresholds | 2026-03-21 | 2026-03-21 | - | TBD | Added validation_tolerance field to ExtractionRun. 6/19 metrics have explicit tolerances; rest use 20% default. |
-| 2a: Calc linkbase | Self-validation | - | - | - | - | - |
-| 2b: Cross-statement | Reconciliation checks | - | - | - | - | - |
-| 2c: Cross-company | Peer consistency | - | - | - | - | - |
+| 2a: Calc linkbase | Self-validation | 2026-03-21 | 2026-03-21 | 0.9734 | TBD | Wired InternalConsistencyValidator into validate_and_update_mappings. 5 equations (4 accounting + 1 cross-statement). Internal override: if equations pass but yfinance disagrees, trust extraction. |
+| 2b: Cross-statement | Reconciliation checks | 2026-03-21 | 2026-03-21 | - | TBD | Added PretaxIncome >= NetIncome cross-statement equation. |
+| 2c: Cross-company | Peer consistency | 2026-03-21 | 2026-03-21 | - | TBD | Added compute_concept_consensus() method. Informational for now — becomes proposal heuristic in later phases. |
 | 3a: Metric expansion | 19 -> 50 metrics | - | - | - | - | - |
 | 3b: Historical | 3 annual + 4 quarterly | - | - | - | - | - |
 | 3c: Applicability | Required/optional/forbidden | - | - | - | - | - |

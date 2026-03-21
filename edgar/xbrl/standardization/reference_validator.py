@@ -64,6 +64,8 @@ class ValidationResult:
     sa_value: Optional[float] = None  # Standardized (composite formula) value
     sa_variance_pct: Optional[float] = None  # SA variance %
     variance_type: str = "raw"        # "raw" | "explained" | "standardized"
+    # Internal consistency validation
+    internal_status: Optional[str] = None    # "VALID_INTERNAL" | "INVALID_INTERNAL" | "VALID_PARTIAL" | None
     # Extraction evidence for diagnostic drilling
     resolution_type: str = "none"            # "direct" | "composite" | "industry" | "none"
     components_used: Optional[list] = None   # XBRL concepts used in extraction
@@ -1062,15 +1064,28 @@ class ReferenceValidator:
         Returns:
             Dict of validation results per metric
         """
+        # Run internal consistency validation BEFORE external
+        from edgar.xbrl.standardization.internal_validator import InternalConsistencyValidator
+        internal_validator = InternalConsistencyValidator()
+        extracted_values = {}
+        for metric, mapping_result in results.items():
+            if mapping_result.value is not None:
+                extracted_values[metric] = mapping_result.value
+        internal_result = internal_validator.get_internal_validity(extracted_values)
+
         validations = self.validate_company(ticker, results, xbrl, filing_date=filing_date, form_type=form_type)
-        
+
+        # Stamp each ValidationResult with internal status
+        for validation in validations.values():
+            validation.internal_status = internal_result.status
+
         # Update MappingResult objects based on validation
         for metric, validation in validations.items():
             if metric not in results:
                 continue
-            
+
             result = results[metric]
-            
+
             if validation.status == "match":
                 result.validation_status = "valid"
                 result.validation_notes = "Value matches reference"
@@ -1081,12 +1096,25 @@ class ReferenceValidator:
                     retry_successful = self._retry_with_calculation(
                         ticker, metric, result, validation, xbrl
                     )
-                
+
                 if not retry_successful:
-                    # FEEDBACK LOOP: Mark as INVALID
-                    result.validation_status = "invalid"
-                    result.validation_notes = f"Value mismatch: {validation.notes}"
-                    result.confidence_level = ConfidenceLevel.INVALID
+                    # INTERNAL OVERRIDE: If accounting equations pass but yfinance
+                    # disagrees, trust our extraction — the reference is likely stale
+                    if internal_result.status == "VALID_INTERNAL":
+                        result.validation_status = "valid"
+                        result.validation_notes = (
+                            "External mismatch but internal accounting equations pass — "
+                            "reference data likely stale or using different methodology"
+                        )
+                        logger.info(
+                            f"[INTERNAL OVERRIDE] {ticker}:{metric} — "
+                            f"internal pass overrides external mismatch"
+                        )
+                    else:
+                        # FEEDBACK LOOP: Mark as INVALID
+                        result.validation_status = "invalid"
+                        result.validation_notes = f"Value mismatch: {validation.notes}"
+                        result.confidence_level = ConfidenceLevel.INVALID
             elif validation.status == "missing_ref":
                 result.validation_status = "valid"  # Can't validate, assume OK
                 result.validation_notes = "No reference data available"
