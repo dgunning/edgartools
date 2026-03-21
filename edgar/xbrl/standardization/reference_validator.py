@@ -207,6 +207,24 @@ class ReferenceValidator:
         'AccountsReceivable': ('balance_sheet', 'Accounts Receivable'),
         'AccountsPayable': ('balance_sheet', 'Accounts Payable'),
         'DepreciationAmortization': ('cashflow', 'Depreciation And Amortization'),
+        # Phase 3 expansion: Income Statement
+        'GrossProfit': ('financials', 'Gross Profit'),
+        'ResearchAndDevelopment': ('financials', 'Research Development'),
+        'InterestExpense': ('financials', 'Interest Expense'),
+        'IncomeTaxExpense': ('financials', 'Tax Provision'),
+        'EarningsPerShareDiluted': ('financials', 'Diluted EPS'),
+        'EarningsPerShareBasic': ('financials', 'Basic EPS'),
+        # Phase 3 expansion: Balance Sheet
+        'CurrentAssets': ('balance_sheet', 'Current Assets'),
+        'CurrentLiabilities': ('balance_sheet', 'Current Liabilities'),
+        'TotalLiabilities': ('balance_sheet', 'Total Liabilities Net Minority Interest'),
+        'StockholdersEquity': ('balance_sheet', 'Stockholders Equity'),
+        'PropertyPlantEquipment': ('balance_sheet', 'Net PPE'),
+        'RetainedEarnings': ('balance_sheet', 'Retained Earnings'),
+        # Phase 3 expansion: Cash Flow
+        'InvestingCashFlow': ('cashflow', 'Investing Cash Flow'),
+        'FinancingCashFlow': ('cashflow', 'Financing Cash Flow'),
+        'ShareRepurchases': ('cashflow', 'Repurchase Of Capital Stock'),
     }
     
     # Fallback fields when GAAP "As Reported" field is not available

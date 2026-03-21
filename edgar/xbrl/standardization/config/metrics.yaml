@@ -483,6 +483,194 @@ metrics:
           - PaymentsOfDividendsCommonStock
           - DeferredIncomeTaxExpenseBenefit
           notes: Auto-solver company-specific via MSFT, 2/3 periods, 0/3 companies
+  # ==========================================================================
+  # Phase 3 Expansion: Income Statement Metrics
+  # ==========================================================================
+  GrossProfit:
+    description: Revenue minus cost of goods sold
+    standard_tag: GrossProfit
+    known_concepts:
+    - GrossProfit
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      parent_pattern: OperatingIncome
+      weight: 1.0
+    universal: false
+    notes: Not applicable to services companies or banks
+  ResearchAndDevelopment:
+    description: Research and development expense
+    standard_tag: ResearchAndDevelopmentExpense
+    known_concepts:
+    - ResearchAndDevelopmentExpense
+    - ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost
+    - ResearchAndDevelopmentExpenseSoftwareExcludingAcquiredInProcessCost
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+    universal: false
+    notes: Not all companies have R&D
+    validation_tolerance: 20
+  InterestExpense:
+    description: Interest expense on debt
+    standard_tag: InterestExpense
+    known_concepts:
+    - InterestExpense
+    - InterestExpenseDebt
+    - InterestAndDebtExpense
+    - InterestIncomeExpenseNet
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+    universal: true
+    validation_tolerance: 25
+  IncomeTaxExpense:
+    description: Income tax provision (expense or benefit)
+    standard_tag: IncomeTaxExpenseBenefit
+    known_concepts:
+    - IncomeTaxExpenseBenefit
+    - IncomeTaxesPaidNet
+    - CurrentIncomeTaxExpenseBenefit
+    tree_hints:
+      statements:
+      - INCOME
+    universal: true
+    validation_tolerance: 25
+  EarningsPerShareDiluted:
+    description: Diluted earnings per share
+    standard_tag: EarningsPerShareDiluted
+    known_concepts:
+    - EarningsPerShareDiluted
+    tree_hints:
+      statements:
+      - INCOME
+    universal: true
+    validation_tolerance: 15
+  EarningsPerShareBasic:
+    description: Basic earnings per share
+    standard_tag: EarningsPerShareBasic
+    known_concepts:
+    - EarningsPerShareBasic
+    tree_hints:
+      statements:
+      - INCOME
+    universal: true
+    validation_tolerance: 15
+  # ==========================================================================
+  # Phase 3 Expansion: Balance Sheet Metrics
+  # ==========================================================================
+  CurrentAssets:
+    description: Total current assets
+    standard_tag: AssetsCurrent
+    known_concepts:
+    - AssetsCurrent
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+  CurrentLiabilities:
+    description: Total current liabilities
+    standard_tag: LiabilitiesCurrent
+    known_concepts:
+    - LiabilitiesCurrent
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+  TotalLiabilities:
+    description: Total liabilities
+    standard_tag: Liabilities
+    known_concepts:
+    - Liabilities
+    - LiabilitiesAndStockholdersEquity
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+  StockholdersEquity:
+    description: Total stockholders equity including noncontrolling interest
+    standard_tag: StockholdersEquity
+    known_concepts:
+    - StockholdersEquity
+    - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+    - Equity
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+  PropertyPlantEquipment:
+    description: Net property, plant and equipment
+    standard_tag: PropertyPlantAndEquipmentNet
+    known_concepts:
+    - PropertyPlantAndEquipmentNet
+    - PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: false
+    notes: Not meaningful for banks/financial services
+    validation_tolerance: 20
+  RetainedEarnings:
+    description: Retained earnings (accumulated deficit)
+    standard_tag: RetainedEarningsAccumulatedDeficit
+    known_concepts:
+    - RetainedEarningsAccumulatedDeficit
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+    validation_tolerance: 20
+  # ==========================================================================
+  # Phase 3 Expansion: Cash Flow Metrics
+  # ==========================================================================
+  InvestingCashFlow:
+    description: Net cash from investing activities
+    standard_tag: NetCashProvidedByUsedInInvestingActivities
+    known_concepts:
+    - NetCashProvidedByUsedInInvestingActivities
+    - NetCashProvidedByUsedInInvestingActivitiesContinuingOperations
+    tree_hints:
+      statements:
+      - CASHFLOW
+    universal: true
+    validation_tolerance: 25
+  FinancingCashFlow:
+    description: Net cash from financing activities
+    standard_tag: NetCashProvidedByUsedInFinancingActivities
+    known_concepts:
+    - NetCashProvidedByUsedInFinancingActivities
+    - NetCashProvidedByUsedInFinancingActivitiesContinuingOperations
+    tree_hints:
+      statements:
+      - CASHFLOW
+    universal: true
+    validation_tolerance: 25
+  ShareRepurchases:
+    description: Payments for stock buybacks
+    standard_tag: PaymentsForRepurchaseOfCommonStock
+    known_concepts:
+    - PaymentsForRepurchaseOfCommonStock
+    - PaymentsForRepurchaseOfEquity
+    - StockRepurchasedAndRetiredDuringPeriodValue
+    tree_hints:
+      statements:
+      - CASHFLOW
+    universal: false
+    validation_tolerance: 25
+  # ==========================================================================
+  # Phase 3 Expansion: Per-Share Metrics
+  # ==========================================================================
+  DividendPerShare:
+    description: Dividends per share declared
+    standard_tag: CommonStockDividendsPerShareDeclared
+    known_concepts:
+    - CommonStockDividendsPerShareDeclared
+    - CommonStockDividendsPerShareCashPaid
+    universal: false
+    validation_tolerance: 15
 derived_metrics:
   FreeCashFlow:
     formula: OperatingCashFlow - Capex
@@ -501,3 +689,18 @@ derived_metrics:
     - ShortTermDebt
     - LongTermDebt
     - CashAndEquivalents
+  EBITDA:
+    formula: OperatingIncome + DepreciationAmortization
+    requires:
+    - OperatingIncome
+    - DepreciationAmortization
+  WorkingCapital:
+    formula: CurrentAssets - CurrentLiabilities
+    requires:
+    - CurrentAssets
+    - CurrentLiabilities
+  TotalDebt:
+    formula: ShortTermDebt + LongTermDebt
+    requires:
+    - ShortTermDebt
+    - LongTermDebt

@@ -255,9 +255,9 @@ Filing Event (EDGAR RSS)
 | 2a: Calc linkbase | Self-validation | 2026-03-21 | 2026-03-21 | 0.9734 | TBD | Wired InternalConsistencyValidator into validate_and_update_mappings. 5 equations (4 accounting + 1 cross-statement). Internal override: if equations pass but yfinance disagrees, trust extraction. |
 | 2b: Cross-statement | Reconciliation checks | 2026-03-21 | 2026-03-21 | - | TBD | Added PretaxIncome >= NetIncome cross-statement equation. |
 | 2c: Cross-company | Peer consistency | 2026-03-21 | 2026-03-21 | - | TBD | Added compute_concept_consensus() method. Informational for now — becomes proposal heuristic in later phases. |
-| 3a: Metric expansion | 19 -> 50 metrics | - | - | - | - | - |
-| 3b: Historical | 3 annual + 4 quarterly | - | - | - | - | - |
-| 3c: Applicability | Required/optional/forbidden | - | - | - | - | - |
+| 3a: Metric expansion | 19 -> 50 metrics | 2026-03-22 | 2026-03-22 | 0.9734 | TBD | Added 18 base metrics (37 total) + 3 derived (EBITDA, WorkingCapital, TotalDebt) + 15 yfinance mappings. Config auto-expanded to 37 metrics. |
+| 3b: Historical | 3 annual + 4 quarterly | - | - | - | - | Deferred — requires orchestrator changes. Solver already supports multi_period=True. |
+| 3c: Applicability | Required/optional/forbidden | 2026-03-22 | 2026-03-22 | - | TBD | Added PropertyPlantEquipment, R&D, ShareRepurchases to banking forbidden list. |
 | 4a: S&P 500 | 500 companies | - | - | - | - | - |
 | 4b: SEC XBRL API | Second reference source | - | - | - | - | - |
 | 4c: Event-driven | Real-time processing | - | - | - | - | - |

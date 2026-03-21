@@ -9,10 +9,13 @@ banking:
 
   # Metrics that don't apply to banks — auto-exclude for banking companies
   forbidden_metrics:
-    - COGS          # Banks don't have cost of goods sold
-    - Inventory     # Banks don't hold inventory
-    - GrossProfit   # Replaced by NetInterestIncome
-    - Capex         # Minimal/different for banks
+    - COGS                    # Banks don't have cost of goods sold
+    - Inventory               # Banks don't hold inventory
+    - GrossProfit             # Replaced by NetInterestIncome
+    - Capex                   # Minimal/different for banks
+    - PropertyPlantEquipment  # Not meaningful for banks
+    - ResearchAndDevelopment  # Banks don't have R&D
+    - ShareRepurchases        # Different capital management
 
   # Metrics that banks use instead of standard ones
   required_alternatives:
