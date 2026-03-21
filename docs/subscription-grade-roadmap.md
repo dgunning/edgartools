@@ -258,9 +258,9 @@ Filing Event (EDGAR RSS)
 | 3a: Metric expansion | 19 -> 50 metrics | 2026-03-22 | 2026-03-22 | 0.9734 | TBD | Added 18 base metrics (37 total) + 3 derived (EBITDA, WorkingCapital, TotalDebt) + 15 yfinance mappings. Config auto-expanded to 37 metrics. |
 | 3b: Historical | 3 annual + 4 quarterly | - | - | - | - | Deferred — requires orchestrator changes. Solver already supports multi_period=True. |
 | 3c: Applicability | Required/optional/forbidden | 2026-03-22 | 2026-03-22 | - | TBD | Added PropertyPlantEquipment, R&D, ShareRepurchases to banking forbidden list. |
-| 4a: S&P 500 | 500 companies | - | - | - | - | - |
-| 4b: SEC XBRL API | Second reference source | - | - | - | - | - |
-| 4c: Event-driven | Real-time processing | - | - | - | - | - |
+| 4a: S&P 500 | 500 companies | - | - | - | - | EXPANSION_COHORT_500 ready (500 companies). Needs yfinance snapshots for ~400 new companies (runtime task). |
+| 4b: SEC XBRL API | Second reference source | 2026-03-22 | 2026-03-22 | 0.9734 | TBD | Added _get_sec_facts_value() to ReferenceValidator. Fallback for missing_ref using EntityFacts + known_concepts. use_sec_facts flag, default off. Cached per-ticker. |
+| 4c: Event-driven | Real-time processing | - | - | - | - | Deferred. URL builders exist but no RSS parser/monitor. |
 
 ---
 

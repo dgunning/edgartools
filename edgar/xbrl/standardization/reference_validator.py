@@ -260,13 +260,16 @@ class ReferenceValidator:
         self,
         config: Optional[MappingConfig] = None,
         tolerance_pct: float = 15.0,  # 15% tolerance for matching
-        snapshot_mode: bool = False
+        snapshot_mode: bool = False,
+        use_sec_facts: bool = False,
     ):
         self.config = config or get_config()
         self.tolerance = tolerance_pct / 100.0
         self._yf_cache = {}  # Cache yfinance Stock objects by ticker
         self._dimensional_aggregator = DimensionalAggregator()  # For dimensional value aggregation
         self._snapshot_mode = snapshot_mode
+        self._use_sec_facts = use_sec_facts
+        self._sec_facts_cache = {}  # Cache EntityFacts objects by ticker
         self._snapshot_cache = {}  # Cache loaded snapshot dicts by ticker
 
         if yf is None and not snapshot_mode:
@@ -1134,8 +1137,28 @@ class ReferenceValidator:
                         result.validation_notes = f"Value mismatch: {validation.notes}"
                         result.confidence_level = ConfidenceLevel.INVALID
             elif validation.status == "missing_ref":
-                result.validation_status = "valid"  # Can't validate, assume OK
-                result.validation_notes = "No reference data available"
+                # Try SEC Company Facts API as fallback reference
+                sec_value = self._get_sec_facts_value(ticker, metric)
+                if sec_value is not None and validation.xbrl_value is not None:
+                    variance = abs(validation.xbrl_value - sec_value) / abs(sec_value) * 100 if sec_value != 0 else (100.0 if validation.xbrl_value != 0 else 0.0)
+                    validation.reference_value = sec_value
+                    validation.variance_pct = variance
+                    metric_config = self.config.get_metric(metric) if self.config else None
+                    tol = (metric_config.validation_tolerance if metric_config and metric_config.validation_tolerance else 20.0)
+                    if variance <= tol:
+                        validation.status = "match"
+                        validation.is_valid = True
+                        result.validation_status = "valid"
+                        result.validation_notes = f"SEC facts reference match (variance {variance:.1f}%)"
+                        logger.info(f"[SEC FACTS] {ticker}:{metric} — SEC reference match ({variance:.1f}%)")
+                    else:
+                        validation.status = "mismatch"
+                        validation.is_valid = False
+                        result.validation_status = "invalid"
+                        result.validation_notes = f"SEC facts reference mismatch (variance {variance:.1f}%)"
+                else:
+                    result.validation_status = "valid"  # Can't validate, assume OK
+                    result.validation_notes = "No reference data available"
             elif validation.status == "mapping_needed":
                 result.validation_status = "pending"
                 result.validation_notes = "Mapping required"
@@ -1366,6 +1389,51 @@ class ReferenceValidator:
                 return val
 
         return None
+
+    def _get_sec_facts_value(self, ticker: str, metric: str) -> Optional[float]:
+        """Get reference value from SEC Company Facts API as yfinance fallback.
+
+        Uses the existing EntityFacts infrastructure to query data.sec.gov/api/xbrl/.
+        Tries known_concepts from metrics.yaml config until a value is found.
+        Results are cached per-ticker for the lifetime of this validator.
+        """
+        if not self._use_sec_facts:
+            return None
+
+        try:
+            # Cache EntityFacts per ticker
+            if ticker not in self._sec_facts_cache:
+                from edgar.reference import get_cik_for_ticker
+                cik = get_cik_for_ticker(ticker)
+                if cik is None:
+                    self._sec_facts_cache[ticker] = None
+                    return None
+                from edgar.entity.entity_facts import get_company_facts
+                self._sec_facts_cache[ticker] = get_company_facts(int(cik))
+
+            facts = self._sec_facts_cache[ticker]
+            if facts is None:
+                return None
+
+            # Get known concepts for this metric from config
+            metric_config = self.config.get_metric(metric) if self.config else None
+            if not metric_config or not metric_config.known_concepts:
+                return None
+
+            # Try each known concept until we find a value
+            for concept in metric_config.known_concepts[:5]:
+                try:
+                    value = facts.get_concept(concept, annual=True)
+                    if value is not None:
+                        return float(value)
+                except Exception:
+                    continue
+
+            return None
+        except Exception as e:
+            logger.debug(f"SEC facts lookup failed for {ticker}:{metric}: {e}")
+            self._sec_facts_cache[ticker] = None
+            return None
 
     def _extract_xbrl_value(
         self,

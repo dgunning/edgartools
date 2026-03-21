@@ -731,3 +731,32 @@ class TestInternalValidation:
         counts = InternalConsistencyValidator.compute_concept_consensus(all_results, 'Revenue')
         assert counts['us-gaap:Revenues'] == 3
         assert counts['us-gaap:SalesRevenueNet'] == 1
+
+
+# ===========================================================================
+# Phase 4: SEC Facts Reference Source
+# ===========================================================================
+
+class TestSECFactsReference:
+    """SEC Company Facts API as second reference source."""
+
+    def test_sec_facts_disabled_by_default(self):
+        """SEC facts lookup is off by default."""
+        from edgar.xbrl.standardization.reference_validator import ReferenceValidator
+        rv = ReferenceValidator()
+        assert rv._use_sec_facts is False
+
+    def test_sec_facts_enabled_flag(self):
+        """SEC facts lookup can be enabled via constructor."""
+        from edgar.xbrl.standardization.reference_validator import ReferenceValidator
+        rv = ReferenceValidator(use_sec_facts=True)
+        assert rv._use_sec_facts is True
+        assert hasattr(rv, '_get_sec_facts_value')
+        assert hasattr(rv, '_sec_facts_cache')
+
+    def test_sec_facts_returns_none_when_disabled(self):
+        """_get_sec_facts_value returns None when use_sec_facts is False."""
+        from edgar.xbrl.standardization.reference_validator import ReferenceValidator
+        rv = ReferenceValidator(use_sec_facts=False)
+        result = rv._get_sec_facts_value("AAPL", "Revenue")
+        assert result is None
