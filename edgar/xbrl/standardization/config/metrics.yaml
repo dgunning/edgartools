@@ -235,6 +235,18 @@ metrics:
           components:
           - jpm:GoodwillServicingAssetsAtFairValueAndOtherIntangibleAssets
           notes: Auto-solver company-specific via JPM, 1/1 periods, 0/3 companies
+        LMT:
+          components:
+          - OtherAssetsCurrent
+          - ContractWithCustomerAssetNetCurrent
+          - IntangibleAssetsNetExcludingGoodwill
+          notes: Auto-solver company-specific via LMT, 3/3 periods, 0/3 companies
+        CME:
+          components:
+          - OtherAssetsNoncurrent
+          - OtherIndefiniteLivedIntangibleAssets
+          - Goodwill
+          notes: Auto-solver company-specific via CME, 3/3 periods, 0/3 companies
   ShortTermDebt:
     description: Short-term borrowings and current debt (matches yfinance Current
       Debt)

@@ -70,6 +70,7 @@ class ExtractionRun:
 
     # Strategy
     strategy_name: str = ""
+    concept: Optional[str] = None  # Actual XBRL concept (e.g., "us-gaap:Goodwill")
     strategy_fingerprint: str = ""
     strategy_params: Dict[str, Any] = field(default_factory=dict)
 
@@ -363,6 +364,7 @@ class ExperimentLedger:
                     archetype TEXT NOT NULL,
                     sub_archetype TEXT,
                     strategy_name TEXT NOT NULL,
+                    concept TEXT,
                     strategy_fingerprint TEXT NOT NULL,
                     strategy_params TEXT,
                     extracted_value REAL,
@@ -504,6 +506,12 @@ class ExperimentLedger:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_autoeval_metric ON auto_eval_experiments(target_metric)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_graveyard_metric ON auto_eval_graveyard(target_metric)')
 
+            # Migration: add concept column to extraction_runs if missing
+            cursor.execute("PRAGMA table_info(extraction_runs)")
+            columns = {row[1] for row in cursor.fetchall()}
+            if 'concept' not in columns:
+                cursor.execute('ALTER TABLE extraction_runs ADD COLUMN concept TEXT')
+
             conn.commit()
 
     # =========================================================================
@@ -525,14 +533,16 @@ class ExperimentLedger:
             cursor.execute('''
                 INSERT OR REPLACE INTO extraction_runs (
                     run_id, ticker, metric, fiscal_period, form_type,
-                    archetype, sub_archetype, strategy_name, strategy_fingerprint,
+                    archetype, sub_archetype, strategy_name, concept,
+                    strategy_fingerprint,
                     strategy_params, extracted_value, reference_value, variance_pct,
                     is_valid, confidence, run_timestamp, extraction_notes,
                     components, metadata, is_golden_candidate, golden_master_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 run.run_id, run.ticker, run.metric, run.fiscal_period, run.form_type,
-                run.archetype, run.sub_archetype, run.strategy_name, run.strategy_fingerprint,
+                run.archetype, run.sub_archetype, run.strategy_name, run.concept,
+                run.strategy_fingerprint,
                 json.dumps(run.strategy_params), run.extracted_value, run.reference_value,
                 run.variance_pct, int(run.is_valid), run.confidence, run.run_timestamp,
                 run.extraction_notes, json.dumps(run.components), json.dumps(run.metadata),
@@ -610,6 +620,7 @@ class ExperimentLedger:
             archetype=row['archetype'],
             sub_archetype=row['sub_archetype'],
             strategy_name=row['strategy_name'],
+            concept=row['concept'] if 'concept' in row.keys() else None,
             strategy_fingerprint=row['strategy_fingerprint'],
             strategy_params=json.loads(row['strategy_params'] or '{}'),
             extracted_value=row['extracted_value'],
@@ -943,8 +954,12 @@ class ExperimentLedger:
             if run is None:
                 return None
 
+            # Prefer actual XBRL concept; fall back to strategy_name for old records
+            concept = (run['concept'] if 'concept' in run.keys() and run['concept'] else
+                       run['strategy_name'] or '')
+
             return {
-                "concept": run['strategy_name'] or '',
+                "concept": concept,
                 "value": run['extracted_value'],
                 "reference_value": run['reference_value'],
                 "fiscal_period": run['fiscal_period'],

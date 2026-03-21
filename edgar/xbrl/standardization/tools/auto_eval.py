@@ -1025,6 +1025,7 @@ def record_eval_results(
                 form_type="10-K",
                 archetype=result.source.value,
                 strategy_name=result.source.value,
+                concept=result.concept,
                 strategy_fingerprint=fingerprint,
                 extracted_value=val.xbrl_value if val else None,
                 reference_value=val.reference_value if val else None,

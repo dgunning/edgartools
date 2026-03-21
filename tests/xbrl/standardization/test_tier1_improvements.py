@@ -4,6 +4,8 @@ Fix 1: Auto-create metric_overrides in config writer
 Fix 2: Sign inversion proposal handler
 Fix 3: Regression identification API
 Fix 4: Improved solver candidate ranking
+Fix 5: Store actual XBRL concept in extraction_runs
+Fix 6: Guard against strategy-name golden concepts in regression fix
 """
 import os
 import tempfile
@@ -13,6 +15,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
+from edgar.xbrl.standardization.ledger.schema import ExperimentLedger, ExtractionRun
 from edgar.xbrl.standardization.tools.auto_eval import (
     CQSResult,
     CompanyCQS,
@@ -22,7 +25,9 @@ from edgar.xbrl.standardization.tools.auto_eval import (
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
     ChangeType,
     ConfigChange,
+    RegressionDiagnosis,
     apply_config_change,
+    _propose_regression_fix,
     _propose_sign_negate,
 )
 from edgar.xbrl.standardization.tools.auto_solver import FormulaCandidate
@@ -351,3 +356,205 @@ class TestSolverRanking:
         assert candidates[0] is c3  # 1 component, 0.3%
         assert candidates[1] is c2  # 1 component, 1.0%
         assert candidates[2] is c1  # 2 components
+
+
+# ===========================================================================
+# Fix 5: Store actual XBRL concept in extraction_runs
+# ===========================================================================
+
+class TestConceptStorage:
+    """ExtractionRun stores and retrieves the actual XBRL concept."""
+
+    def test_extraction_run_stores_concept(self):
+        """ExtractionRun with concept field -> concept stored in DB."""
+        ledger = ExperimentLedger(db_path=":memory:")
+        run = ExtractionRun(
+            ticker="CME", metric="IntangibleAssets",
+            fiscal_period="2024-FY", form_type="10-K",
+            archetype="A", strategy_name="tree",
+            concept="us-gaap:Goodwill",
+            strategy_fingerprint="abc123",
+            extracted_value=30_000_000_000.0,
+            reference_value=30_090_000_000.0,
+            variance_pct=0.3,
+            is_valid=True,
+            confidence=0.95,
+        )
+        run_id = ledger.record_run(run)
+        retrieved = ledger.get_run(run_id)
+        assert retrieved is not None
+        assert retrieved.concept == "us-gaap:Goodwill"
+        assert retrieved.strategy_name == "tree"
+
+    def test_golden_context_returns_concept(self):
+        """After recording with concept -> get_golden_extraction_context returns real concept."""
+        ledger = ExperimentLedger(db_path=":memory:")
+
+        # Record a valid run with actual concept
+        run = ExtractionRun(
+            ticker="CME", metric="IntangibleAssets",
+            fiscal_period="2024-FY", form_type="10-K",
+            archetype="A", strategy_name="tree",
+            concept="us-gaap:Goodwill",
+            strategy_fingerprint="abc123",
+            extracted_value=30_000_000_000.0,
+            reference_value=30_090_000_000.0,
+            variance_pct=0.3,
+            is_valid=True,
+            confidence=0.95,
+        )
+        ledger.record_run(run)
+
+        # Create a golden master so get_golden_extraction_context can find it
+        from edgar.xbrl.standardization.ledger.schema import GoldenMaster
+        gm = GoldenMaster(
+            golden_id="gm-cme-001",
+            ticker="CME", metric="IntangibleAssets",
+            archetype="A", sub_archetype=None,
+            strategy_name="tree",
+            strategy_fingerprint="abc123",
+            strategy_params={},
+            validated_periods=["2024-FY"],
+            validation_count=3,
+            avg_variance_pct=0.3,
+            max_variance_pct=0.5,
+            is_active=True,
+        )
+        ledger.create_golden_master(gm)
+
+        ctx = ledger.get_golden_extraction_context("CME", "IntangibleAssets")
+        assert ctx is not None
+        assert ctx["concept"] == "us-gaap:Goodwill"
+        assert ctx["strategy_name"] == "tree"
+
+    def test_golden_context_fallback_strategy_name(self):
+        """Old records without concept -> falls back to strategy_name."""
+        ledger = ExperimentLedger(db_path=":memory:")
+
+        # Record a run WITHOUT concept (simulating old record)
+        run = ExtractionRun(
+            ticker="VZ", metric="IntangibleAssets",
+            fiscal_period="2024-FY", form_type="10-K",
+            archetype="A", strategy_name="tree",
+            concept=None,  # No concept stored (old-style record)
+            strategy_fingerprint="def456",
+            extracted_value=190_000_000_000.0,
+            reference_value=190_460_000_000.0,
+            variance_pct=0.2,
+            is_valid=True,
+            confidence=0.90,
+        )
+        ledger.record_run(run)
+
+        from edgar.xbrl.standardization.ledger.schema import GoldenMaster
+        gm = GoldenMaster(
+            golden_id="gm-vz-001",
+            ticker="VZ", metric="IntangibleAssets",
+            archetype="A", sub_archetype=None,
+            strategy_name="tree",
+            strategy_fingerprint="def456",
+            strategy_params={},
+            validated_periods=["2024-FY"],
+            validation_count=3,
+            avg_variance_pct=0.2,
+            max_variance_pct=0.4,
+            is_active=True,
+        )
+        ledger.create_golden_master(gm)
+
+        ctx = ledger.get_golden_extraction_context("VZ", "IntangibleAssets")
+        assert ctx is not None
+        # Falls back to strategy_name since concept is None
+        assert ctx["concept"] == "tree"
+
+
+# ===========================================================================
+# Fix 6: Guard against strategy-name golden concepts
+# ===========================================================================
+
+class TestRegressionFixGuard:
+    """Regression fix proposals skip strategy-name golden concepts."""
+
+    def test_regression_fix_skips_strategy_name_concept(self):
+        """golden_concept='tree' -> doesn't propose preferred_concept='tree'."""
+        gap = _make_gap(
+            ticker="CME", metric="IntangibleAssets",
+            gap_type="regression", estimated_impact=0.02,
+            reference_value=30_090_000_000.0,
+        )
+        diag = RegressionDiagnosis(
+            ticker="CME", metric="IntangibleAssets",
+            golden_concept="tree",  # Strategy name, not XBRL concept!
+            current_concept="us-gaap:Goodwill",
+            golden_value=30_000_000_000.0,
+            diagnosis_type="concept_changed",
+        )
+        with patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.diagnose_regression",
+            return_value=diag,
+        ):
+            with patch(
+                "edgar.xbrl.standardization.tools.auto_eval_loop._propose_via_solver",
+                return_value=None,
+            ) as mock_solver:
+                result = _propose_regression_fix(gap)
+                # Should NOT produce a preferred_concept="tree" override
+                mock_solver.assert_called_once()
+                # The solver was called with a gap using golden_value as reference
+                solver_gap = mock_solver.call_args[0][0]
+                assert solver_gap.reference_value == 30_000_000_000.0
+
+    def test_regression_fix_routes_to_solver(self):
+        """golden_concept='tree' with golden_value -> routes to solver with golden value."""
+        gap = _make_gap(
+            ticker="CME", metric="IntangibleAssets",
+            gap_type="regression", estimated_impact=0.02,
+            reference_value=30_090_000_000.0,
+        )
+        diag = RegressionDiagnosis(
+            ticker="CME", metric="IntangibleAssets",
+            golden_concept="facts",
+            golden_value=30_000_000_000.0,
+            diagnosis_type="concept_changed",
+        )
+        mock_change = ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_STANDARDIZATION,
+            yaml_path="metrics.IntangibleAssets.standardization",
+            new_value={"formula": "Goodwill + IntangibleAssetsNetExcludingGoodwill"},
+        )
+        with patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.diagnose_regression",
+            return_value=diag,
+        ):
+            with patch(
+                "edgar.xbrl.standardization.tools.auto_eval_loop._propose_via_solver",
+                return_value=mock_change,
+            ) as mock_solver:
+                result = _propose_regression_fix(gap)
+                assert result == mock_change
+                # Solver got a gap with golden value, not the original reference
+                solver_gap = mock_solver.call_args[0][0]
+                assert solver_gap.reference_value == 30_000_000_000.0
+
+    def test_regression_fix_uses_real_concept(self):
+        """golden_concept='us-gaap:Goodwill' -> proposes correct preferred_concept."""
+        gap = _make_gap(
+            ticker="CME", metric="IntangibleAssets",
+            gap_type="regression", estimated_impact=0.02,
+            reference_value=30_090_000_000.0,
+        )
+        diag = RegressionDiagnosis(
+            ticker="CME", metric="IntangibleAssets",
+            golden_concept="us-gaap:Goodwill",
+            current_concept="us-gaap:IntangibleAssetsNetExcludingGoodwill",
+            diagnosis_type="concept_changed",
+        )
+        with patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.diagnose_regression",
+            return_value=diag,
+        ):
+            result = _propose_regression_fix(gap)
+            assert result is not None
+            assert result.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+            assert result.new_value["preferred_concept"] == "us-gaap:Goodwill"

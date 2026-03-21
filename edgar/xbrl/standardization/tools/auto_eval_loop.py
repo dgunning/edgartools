@@ -1234,7 +1234,26 @@ def _propose_regression_fix(
         )
         return None
 
+    STRATEGY_NAMES = {"tree", "facts", "composite", "config", "industry", "unknown"}
+
     if diag.diagnosis_type == "concept_changed" and diag.golden_concept:
+        # Don't use strategy names as preferred_concept — they're not XBRL concepts
+        if diag.golden_concept in STRATEGY_NAMES:
+            logger.warning(
+                f"Regression {gap.ticker}:{gap.metric}: golden_concept is strategy name "
+                f"'{diag.golden_concept}', not a real XBRL concept — falling through to solver"
+            )
+            # Try solver with golden value as target if available
+            if diag.golden_value is not None and diag.golden_value != 0:
+                solver_gap = MetricGap(
+                    ticker=gap.ticker, metric=gap.metric,
+                    gap_type="regression", estimated_impact=gap.estimated_impact,
+                    reference_value=diag.golden_value,
+                    graveyard_count=gap.graveyard_count,
+                )
+                return _propose_via_solver(solver_gap)
+            return _propose_via_solver(gap)
+
         return ConfigChange(
             file="companies.yaml",
             change_type=ChangeType.ADD_COMPANY_OVERRIDE,
