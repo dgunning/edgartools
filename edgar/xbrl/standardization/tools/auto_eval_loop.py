@@ -1562,7 +1562,7 @@ def _propose_component_fix(
 
     # Try to solve for the residual using the auto-solver
     try:
-        solver = AutoSolver(snapshot_mode=True)
+        solver = AutoSolver(snapshot_mode=True, allow_subtraction=True, allow_scale_search=True)
         candidates = solver.solve_metric(
             gap.ticker, gap.metric,
             yfinance_value=residual,
@@ -1624,7 +1624,7 @@ def _propose_via_solver(
         return None
 
     try:
-        solver = AutoSolver(snapshot_mode=True)
+        solver = AutoSolver(snapshot_mode=True, allow_subtraction=True, allow_scale_search=True)
 
         # Composite-aware: solve component-by-component when evidence shows composite
         evidence = gap.extraction_evidence
