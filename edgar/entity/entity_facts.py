@@ -162,7 +162,6 @@ class EntityFacts:
         self._ticker = ticker
         self._sic_resolver = None
         self._fact_index = self._build_indices()
-        self._cache = {}
 
     def _resolve_industry_info(self):
         """Lazily resolve SIC code and ticker for industry-specific statement enhancements.
@@ -183,37 +182,49 @@ class EntityFacts:
 
     def _build_indices(self) -> Dict[str, Dict]:
         """Build optimized indices for fast querying"""
-        indices = {
-            'by_concept': defaultdict(list),
-            'by_period': defaultdict(list),
-            'by_statement': defaultdict(list),
-            'by_form': defaultdict(list),
-            'by_fiscal_year': defaultdict(list),
-            'by_fiscal_period': defaultdict(list)
-        }
+        by_concept = defaultdict(list)
+        by_period = defaultdict(list)
+        by_statement = defaultdict(list)
+        by_form = defaultdict(list)
+        by_fiscal_year = defaultdict(list)
+        by_fiscal_period = defaultdict(list)
+
+        # Cache period key strings: only ~50-100 unique keys across 20K+ facts
+        _period_key_cache: Dict[tuple, str] = {}
 
         for fact in self._facts:
             # Index by concept
-            indices['by_concept'][fact.concept].append(fact)
+            by_concept[fact.concept].append(fact)
             if fact.label:
-                indices['by_concept'][fact.label.lower()].append(fact)
+                by_concept[fact.label.lower()].append(fact)
 
-            # Index by period
-            period_key = f"{fact.fiscal_year}-{fact.fiscal_period}"
-            indices['by_period'][period_key].append(fact)
+            # Index by period (intern keys to avoid 24K+ redundant string allocations)
+            pk_tuple = (fact.fiscal_year, fact.fiscal_period)
+            period_key = _period_key_cache.get(pk_tuple)
+            if period_key is None:
+                period_key = f"{fact.fiscal_year}-{fact.fiscal_period}"
+                _period_key_cache[pk_tuple] = period_key
+            by_period[period_key].append(fact)
 
             # Index by fiscal year and period
-            indices['by_fiscal_year'][fact.fiscal_year].append(fact)
-            indices['by_fiscal_period'][fact.fiscal_period].append(fact)
+            by_fiscal_year[fact.fiscal_year].append(fact)
+            by_fiscal_period[fact.fiscal_period].append(fact)
 
             # Index by statement type
             if fact.statement_type:
-                indices['by_statement'][fact.statement_type].append(fact)
+                by_statement[fact.statement_type].append(fact)
 
             # Index by form type
-            indices['by_form'][fact.form_type].append(fact)
+            by_form[fact.form_type].append(fact)
 
-        return indices
+        return {
+            'by_concept': by_concept,
+            'by_period': by_period,
+            'by_statement': by_statement,
+            'by_form': by_form,
+            'by_fiscal_year': by_fiscal_year,
+            'by_fiscal_period': by_fiscal_period,
+        }
 
     def __len__(self) -> int:
         """Return the total number of facts"""
