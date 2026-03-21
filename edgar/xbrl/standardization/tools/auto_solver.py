@@ -317,8 +317,8 @@ class AutoSolver:
                             statement_family=self._get_statement_family(metric),
                         ))
 
-        # Sort: fewest components first, then lowest variance
-        results.sort(key=lambda f: (len(f.components), f.variance_pct))
+        # Sort: most multi-period matches first, then fewest components, then lowest variance
+        results.sort(key=lambda f: (-f.periods_passed, len(f.components), f.variance_pct))
 
         logger.info(f"Found {len(results)} formula candidates for {ticker}:{metric}")
         return results

@@ -322,6 +322,7 @@ class CompanyCQS:
     sa_cqs: float = 0.0       # SA component of CQS
     explained_variance_count: int = 0  # Gaps with documented explanations
     failed_metrics: List[str] = field(default_factory=list)  # Metrics that failed validation
+    regressed_metrics: List[str] = field(default_factory=list)  # Metrics that regressed from golden
     disputed_count: int = 0  # Metrics excluded due to reference_disputed
 
     def to_dict(self) -> dict:
@@ -436,6 +437,9 @@ class CQSResult:
     # Per-company timing breakdown
     timing: Optional[TimingBreakdown] = None
 
+    # All regressed metrics as (ticker, metric) tuples
+    regressed_metrics: List[Tuple[str, str]] = field(default_factory=list)
+
     def to_dict(self) -> dict:
         d = asdict(self)
         d['company_scores'] = {k: v.to_dict() if isinstance(v, CompanyCQS) else v
@@ -453,6 +457,15 @@ class CQSResult:
             f"regress={self.total_regressions} | "
             f"{self.companies_evaluated} cos, {self.duration_seconds:.1f}s"
         )
+
+
+def list_regressions(cqs_result: CQSResult) -> List[Tuple[str, str]]:
+    """List all regressed metrics from a CQS result.
+
+    Returns: [(ticker, metric), ...] for every metric that was previously golden
+    but now fails validation.
+    """
+    return list(cqs_result.regressed_metrics)
 
 
 # =============================================================================
@@ -794,6 +807,7 @@ def _compute_company_cqs(
     variances = []
     golden_count = 0
     regression_count = 0
+    regressed_metrics = []
     ef_pass_count = 0
     sa_pass_count = 0
     explained_variance_count = 0
@@ -817,6 +831,7 @@ def _compute_company_cqs(
             # A previously golden metric that now fails = regression
             if (ticker, metric) in golden_set:
                 regression_count += 1
+                regressed_metrics.append(metric)
 
         # Track failed metrics for derive_gaps_from_cqs fast path
         if result.validation_status != "valid" and result.source != MappingSource.CONFIG:
@@ -890,6 +905,7 @@ def _compute_company_cqs(
         sa_cqs=sa_cqs,
         explained_variance_count=explained_variance_count,
         failed_metrics=failed_metrics,
+        regressed_metrics=regressed_metrics,
         disputed_count=disputed_count,
     )
 
@@ -925,6 +941,12 @@ def _aggregate_cqs(
     ef_pass_rate = sum(s.ef_pass_rate for s in scores) / n
     sa_pass_rate = sum(s.sa_pass_rate for s in scores) / n
     explained_variance_count = sum(s.explained_variance_count for s in scores)
+
+    # Collect all regressed metrics across companies
+    all_regressed = []
+    for ticker, cs in company_scores.items():
+        for m in cs.regressed_metrics:
+            all_regressed.append((ticker, m))
 
     # Compute composite CQS
     raw_cqs = (
@@ -962,6 +984,7 @@ def _aggregate_cqs(
         company_scores=company_scores,
         duration_seconds=duration,
         vetoed=False,
+        regressed_metrics=all_regressed,
     )
 
 

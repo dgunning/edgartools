@@ -364,10 +364,16 @@ def apply_config_change(change: ConfigChange) -> None:
         config = yaml.safe_load(pre_change_content)
 
         # Navigate to parent of target path
+        # For ADD_COMPANY_OVERRIDE and ADD_DIVERGENCE, auto-create missing intermediate dicts
+        # (e.g., companies.CME.metric_overrides may not exist yet)
+        AUTO_CREATE_TYPES = {ChangeType.ADD_COMPANY_OVERRIDE, ChangeType.ADD_DIVERGENCE}
         keys = change.yaml_path.split('.')
         parent = config
         for key in keys[:-1]:
             if isinstance(parent, dict) and key in parent:
+                parent = parent[key]
+            elif change.change_type in AUTO_CREATE_TYPES and isinstance(parent, dict):
+                parent[key] = {}
                 parent = parent[key]
             else:
                 raise ValueError(f"Path not found: {change.yaml_path} (missing key: {key})")
@@ -1340,6 +1346,12 @@ def propose_change(
                 return change
             # Fall through to solver
 
+        if gap.hv_subtype == "hv_sign_inverted":
+            change = _propose_sign_negate(gap)
+            if change is not None:
+                return change
+            # Fall through to solver
+
         # Default: tree_hint first, then solver
         if gap.graveyard_count == 0 and gap.hv_subtype not in ("hv_missing_industry", "hv_missing_component"):
             change = _propose_for_high_variance(gap, config_dir)
@@ -1536,6 +1548,41 @@ def _propose_industry_assignment(
         return None
 
 
+def _propose_sign_negate(gap: MetricGap) -> Optional[ConfigChange]:
+    """Propose sign negation for metrics where XBRL and reference have opposite signs.
+
+    When the gap classifier detects hv_sign_inverted (opposite signs but similar magnitudes),
+    propose a sign_negate override so the extraction layer negates the value before comparison.
+    """
+    if gap.hv_subtype != "hv_sign_inverted":
+        return None
+    if gap.xbrl_value is None or gap.reference_value is None:
+        return None
+    if gap.reference_value == 0:
+        return None
+    # Only propose if magnitudes are close (within 20%)
+    mag_ratio = abs(gap.xbrl_value) / abs(gap.reference_value)
+    if not (0.8 < mag_ratio < 1.2):
+        return None
+
+    logger.info(
+        f"Sign negate proposal for {gap.ticker}:{gap.metric}: "
+        f"XBRL={gap.xbrl_value:.0f}, ref={gap.reference_value:.0f}"
+    )
+    return ConfigChange(
+        file="companies.yaml",
+        change_type=ChangeType.ADD_COMPANY_OVERRIDE,
+        yaml_path=f"companies.{gap.ticker}.metric_overrides.{gap.metric}",
+        new_value={
+            "sign_negate": True,
+            "notes": f"Sign convention differs from yfinance (XBRL={gap.xbrl_value:.0f}, ref={gap.reference_value:.0f})",
+        },
+        rationale=f"Sign inverted: XBRL={gap.xbrl_value:.0f}, ref={gap.reference_value:.0f}",
+        target_metric=gap.metric,
+        target_companies=gap.ticker,
+    )
+
+
 def _propose_component_fix(
     gap: MetricGap,
 ) -> Optional[ConfigChange]:
@@ -1658,7 +1705,8 @@ def _propose_via_solver(
         mp_passed = best.periods_passed
         logger.info(
             f"Solver candidate for {gap.ticker}:{gap.metric}: {best} "
-            f"(multi-period: {mp_passed}/{mp_checked})"
+            f"(multi-period: {mp_passed}/{mp_checked}, "
+            f"components={len(best.components)}, rank 1/{len(candidates)})"
         )
 
         # Gate 2: Cross-company validation

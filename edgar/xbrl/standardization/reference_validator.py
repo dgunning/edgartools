@@ -1763,6 +1763,13 @@ class ReferenceValidator:
                 notes="Mapping found, value extraction pending"
             )
         
+        # Apply sign_negate override if configured for this (ticker, metric)
+        company_config = self.config.get_company(ticker) if self.config else None
+        if company_config and metric in company_config.metric_overrides:
+            override = company_config.metric_overrides[metric]
+            if override.get('sign_negate'):
+                xbrl_value = -xbrl_value
+
         # Both values exist, compare using absolute values
         # (sign conventions differ between XBRL and yfinance for cash flows)
         abs_xbrl = abs(xbrl_value)
