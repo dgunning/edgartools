@@ -65,6 +65,14 @@ metrics:
       parent_pattern: IncomeLossBeforeTax
       weight: 1.0
     universal: true
+    standardization:
+      company_overrides:
+        DIS:
+          components:
+          - IncomeLossFromContinuingOperationsAttributableToNoncontrollingEntity
+          - IncomeTaxExpenseBenefit
+          - ProfitLoss
+          notes: Auto-solver company-specific via DIS, 0/0 periods, 0/3 companies
   PretaxIncome:
     description: Income before income taxes
     known_concepts:
@@ -150,6 +158,31 @@ metrics:
           - ProceedsFromSaleOfEquityMethodInvestments
           - PaymentsOfDividends
           notes: Auto-solver company-specific via SLB, 1/1 periods, 0/3 companies
+        SNOW:
+          components:
+          - ProceedsFromStockOptionsExercised
+          - PaymentsOfDebtIssuanceCosts
+          notes: Auto-solver company-specific via SNOW, 1/1 periods, 0/3 companies
+        CMCSA:
+          components:
+          - PaymentsToAcquirePropertyPlantAndEquipment
+          - DeferredIncomeTaxExpenseBenefit
+          notes: Auto-solver company-specific via CMCSA, 2/3 periods, 1/3 companies
+        RTX:
+          components:
+          - PaymentsToAcquirePropertyPlantAndEquipment
+          - PaymentsToAcquireIntangibleAssets
+          notes: Auto-solver company-specific via RTX, 3/3 periods, 0/3 companies
+        TMUS:
+          components:
+          - PaymentsToAcquirePropertyPlantAndEquipment
+          - PaymentsToAcquireIntangibleAssets
+          notes: Auto-solver company-specific via TMUS, 2/3 periods, 0/3 companies
+        REGN:
+          components:
+          - IncreaseDecreaseInAccountsPayableAndAccruedLiabilities
+          - AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities
+          notes: Auto-solver company-specific via REGN, 2/3 periods, 0/3 companies
   TotalAssets:
     description: Total assets
     known_concepts:
@@ -196,6 +229,12 @@ metrics:
       section: assets
     universal: true
     notes: Sum of Goodwill + IntangibleAssetsNet to match yfinance. KO uses IndefiniteLivedTrademarks.
+    standardization:
+      company_overrides:
+        JPM:
+          components:
+          - jpm:GoodwillServicingAssetsAtFairValueAndOtherIntangibleAssets
+          notes: Auto-solver company-specific via JPM, 1/1 periods, 0/3 companies
   ShortTermDebt:
     description: Short-term borrowings and current debt (matches yfinance Current
       Debt)
@@ -416,6 +455,22 @@ metrics:
           - ProceedsFromSaleAndMaturityOfOtherInvestments
           - PaymentsOfDividendsCommonStock
           notes: Auto-solver company-specific via AON, 1/1 periods, 0/3 companies
+        UPS:
+          components:
+          - IncreaseDecreaseInOtherOperatingCapitalNet
+          - PaymentsToAcquirePropertyPlantAndEquipment
+          notes: Auto-solver company-specific via UPS, 2/3 periods, 0/3 companies
+        PEP:
+          components:
+          - RepaymentsOfLongTermDebt
+          - ProceedsFromStockOptionsExercised
+          notes: Auto-solver company-specific via PEP, 2/3 periods, 0/3 companies
+        MSFT:
+          components:
+          - IncreaseDecreaseInOtherNoncurrentAssets
+          - PaymentsOfDividendsCommonStock
+          - DeferredIncomeTaxExpenseBenefit
+          notes: Auto-solver company-specific via MSFT, 2/3 periods, 0/3 companies
 derived_metrics:
   FreeCashFlow:
     formula: OperatingCashFlow - Capex
