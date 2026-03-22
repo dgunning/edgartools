@@ -1421,14 +1421,16 @@ class ReferenceValidator:
                 return None
 
             # Try each known concept until we find a value.
-            # get_annual_fact accepts raw XBRL concept names (e.g., "Revenues").
+            # get_annual_fact requires fully qualified names (e.g., "us-gaap:Revenues").
+            # known_concepts stores local names (e.g., "Revenues"), so prepend "us-gaap:".
             for concept in metric_config.known_concepts[:5]:
+                qualified = f"us-gaap:{concept}" if ":" not in concept else concept
                 try:
-                    fact = facts.get_annual_fact(concept)
+                    fact = facts.get_annual_fact(qualified)
                     if fact is not None and getattr(fact, 'numeric_value', None) is not None:
                         return float(fact.numeric_value)
                 except Exception as e:
-                    logger.debug(f"SEC facts concept {concept} lookup failed for {ticker}: {e}")
+                    logger.debug(f"SEC facts concept {qualified} lookup failed for {ticker}: {e}")
                     continue
 
             return None
