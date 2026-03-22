@@ -480,6 +480,7 @@ def compute_cqs(
     ledger=None,
     max_workers: Optional[int] = None,
     config=None,
+    use_sec_facts: bool = False,
 ) -> CQSResult:
     """
     Compute the Composite Quality Score for a cohort of companies.
@@ -513,7 +514,7 @@ def compute_cqs(
 
     # Run orchestrator on the cohort
     workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
-    orchestrator = Orchestrator(config=config, snapshot_mode=snapshot_mode)
+    orchestrator = Orchestrator(config=config, snapshot_mode=snapshot_mode, use_sec_facts=use_sec_facts)
     all_results = orchestrator.map_companies(
         tickers=eval_cohort, use_ai=use_ai, validate=True,
         max_workers=workers,
@@ -602,6 +603,7 @@ def compute_cqs_incremental(
     eval_cohort: Optional[List[str]] = None,
     ledger=None,
     max_workers: Optional[int] = None,
+    use_sec_facts: bool = False,
 ) -> CQSResult:
     """Incrementally recompute CQS after a config change.
 
@@ -645,6 +647,7 @@ def compute_cqs_incremental(
             ledger=ledger,
             max_workers=max_workers,
             config=config,
+            use_sec_facts=use_sec_facts,
         )
 
     affected = get_affected_tickers(change)
@@ -658,7 +661,7 @@ def compute_cqs_incremental(
 
     # Re-evaluate only the affected companies with the new config
     workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
-    orchestrator = Orchestrator(config=config, snapshot_mode=True)
+    orchestrator = Orchestrator(config=config, snapshot_mode=True, use_sec_facts=use_sec_facts)
     updated_results = orchestrator.map_companies(
         tickers=affected_in_cohort, use_ai=False, validate=True,
         max_workers=min(workers, len(affected_in_cohort)),
@@ -702,6 +705,7 @@ def compute_cqs_incremental_batch(
     eval_cohort: Optional[List[str]] = None,
     ledger=None,
     max_workers: Optional[int] = None,
+    use_sec_facts: bool = False,
 ) -> CQSResult:
     """Incrementally recompute CQS after multiple company-scoped changes.
 
@@ -749,6 +753,7 @@ def compute_cqs_incremental_batch(
                 ledger=ledger,
                 max_workers=max_workers,
                 config=config,
+                use_sec_facts=use_sec_facts,
             )
         all_affected.update(get_affected_tickers(change))
 
@@ -760,7 +765,7 @@ def compute_cqs_incremental_batch(
 
     # Re-evaluate affected companies with the batch config
     workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
-    orchestrator = Orchestrator(config=config, snapshot_mode=True)
+    orchestrator = Orchestrator(config=config, snapshot_mode=True, use_sec_facts=use_sec_facts)
     updated_results = orchestrator.map_companies(
         tickers=affected_in_cohort, use_ai=False, validate=True,
         max_workers=min(workers, len(affected_in_cohort)),
@@ -1060,6 +1065,7 @@ def identify_gaps(
     max_graveyard: int = 3,
     max_workers: Optional[int] = None,
     config=None,
+    use_sec_facts: bool = False,
 ) -> Tuple[List[MetricGap], CQSResult]:
     """
     Run evaluation and identify gaps ranked by CQS impact.
@@ -1091,7 +1097,7 @@ def identify_gaps(
     # Run orchestrator ONCE — reuse results for both CQS computation and gap analysis
     workers = max_workers if max_workers is not None else DEFAULT_MAX_WORKERS
     start_time = time.time()
-    orchestrator = Orchestrator(config=config, snapshot_mode=snapshot_mode)
+    orchestrator = Orchestrator(config=config, snapshot_mode=snapshot_mode, use_sec_facts=use_sec_facts)
     all_results = orchestrator.map_companies(
         tickers=eval_cohort, use_ai=use_ai, validate=True,
         max_workers=workers,

@@ -209,7 +209,7 @@ class ReferenceValidator:
         'DepreciationAmortization': ('cashflow', 'Depreciation And Amortization'),
         # Phase 3 expansion: Income Statement
         'GrossProfit': ('financials', 'Gross Profit'),
-        'ResearchAndDevelopment': ('financials', 'Research Development'),
+        'ResearchAndDevelopment': ('financials', 'Research And Development'),
         'InterestExpense': ('financials', 'Interest Expense'),
         'IncomeTaxExpense': ('financials', 'Tax Provision'),
         'EarningsPerShareDiluted': ('financials', 'Diluted EPS'),
@@ -1403,8 +1403,8 @@ class ReferenceValidator:
         try:
             # Cache EntityFacts per ticker
             if ticker not in self._sec_facts_cache:
-                from edgar.reference import get_cik_for_ticker
-                cik = get_cik_for_ticker(ticker)
+                from edgar.reference.tickers import find_cik
+                cik = find_cik(ticker)
                 if cik is None:
                     self._sec_facts_cache[ticker] = None
                     return None
@@ -1420,13 +1420,15 @@ class ReferenceValidator:
             if not metric_config or not metric_config.known_concepts:
                 return None
 
-            # Try each known concept until we find a value
+            # Try each known concept until we find a value.
+            # get_annual_fact accepts raw XBRL concept names (e.g., "Revenues").
             for concept in metric_config.known_concepts[:5]:
                 try:
-                    value = facts.get_concept(concept, annual=True)
-                    if value is not None:
-                        return float(value)
-                except Exception:
+                    fact = facts.get_annual_fact(concept)
+                    if fact is not None and getattr(fact, 'numeric_value', None) is not None:
+                        return float(fact.numeric_value)
+                except Exception as e:
+                    logger.debug(f"SEC facts concept {concept} lookup failed for {ticker}: {e}")
                     continue
 
             return None

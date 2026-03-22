@@ -15,7 +15,6 @@ banking:
     - Capex                   # Minimal/different for banks
     - PropertyPlantEquipment  # Not meaningful for banks
     - ResearchAndDevelopment  # Banks don't have R&D
-    - ShareRepurchases        # Different capital management
 
   # Metrics that banks use instead of standard ones
   required_alternatives:

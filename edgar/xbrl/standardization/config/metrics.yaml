@@ -483,9 +483,13 @@ metrics:
           - PaymentsOfDividendsCommonStock
           - DeferredIncomeTaxExpenseBenefit
           notes: Auto-solver company-specific via MSFT, 2/3 periods, 0/3 companies
-  # ==========================================================================
-  # Phase 3 Expansion: Income Statement Metrics
-  # ==========================================================================
+        CME:
+          components:
+          - ShareBasedCompensation
+          - AmortizationOfIntangibleAssets
+          - PaymentsToAcquireAvailableForSaleSecuritiesDebt
+          - RestrictedCashAndCashEquivalentsAtCarryingValue
+          notes: Auto-solver company-specific via CME, 3/3 periods, 0/3 companies
   GrossProfit:
     description: Revenue minus cost of goods sold
     standard_tag: GrossProfit
@@ -520,7 +524,6 @@ metrics:
     - InterestExpense
     - InterestExpenseDebt
     - InterestAndDebtExpense
-    - InterestIncomeExpenseNet
     tree_hints:
       statements:
       - INCOME
@@ -532,7 +535,6 @@ metrics:
     standard_tag: IncomeTaxExpenseBenefit
     known_concepts:
     - IncomeTaxExpenseBenefit
-    - IncomeTaxesPaidNet
     - CurrentIncomeTaxExpenseBenefit
     tree_hints:
       statements:
@@ -559,9 +561,6 @@ metrics:
       - INCOME
     universal: true
     validation_tolerance: 15
-  # ==========================================================================
-  # Phase 3 Expansion: Balance Sheet Metrics
-  # ==========================================================================
   CurrentAssets:
     description: Total current assets
     standard_tag: AssetsCurrent
@@ -585,7 +584,6 @@ metrics:
     standard_tag: Liabilities
     known_concepts:
     - Liabilities
-    - LiabilitiesAndStockholdersEquity
     tree_hints:
       statements:
       - BALANCE
@@ -623,9 +621,6 @@ metrics:
       - BALANCE
     universal: true
     validation_tolerance: 20
-  # ==========================================================================
-  # Phase 3 Expansion: Cash Flow Metrics
-  # ==========================================================================
   InvestingCashFlow:
     description: Net cash from investing activities
     standard_tag: NetCashProvidedByUsedInInvestingActivities
@@ -660,15 +655,15 @@ metrics:
       - CASHFLOW
     universal: false
     validation_tolerance: 25
-  # ==========================================================================
-  # Phase 3 Expansion: Per-Share Metrics
-  # ==========================================================================
   DividendPerShare:
     description: Dividends per share declared
     standard_tag: CommonStockDividendsPerShareDeclared
     known_concepts:
     - CommonStockDividendsPerShareDeclared
     - CommonStockDividendsPerShareCashPaid
+    tree_hints:
+      statements:
+      - INCOME
     universal: false
     validation_tolerance: 15
 derived_metrics:

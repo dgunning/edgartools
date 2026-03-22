@@ -676,6 +676,7 @@ def evaluate_experiment(
     ledger: Optional[ExperimentLedger] = None,
     max_company_drop: float = 5.0,
     max_workers: int = 1,
+    use_sec_facts: bool = False,
 ) -> ExperimentDecision:
     """
     Evaluate a single config change experiment.
@@ -734,6 +735,7 @@ def evaluate_experiment(
                     snapshot_mode=True,
                     use_ai=False,
                     ledger=ledger,
+                    use_sec_facts=use_sec_facts,
                 )
             except Exception as e:
                 revert_config_change(change)
@@ -780,6 +782,7 @@ def evaluate_experiment(
             baseline_cqs=baseline_cqs.cqs,
             ledger=ledger,
             max_workers=max_workers,
+            use_sec_facts=use_sec_facts,
         )
     except Exception as e:
         revert_config_change(change)
@@ -889,6 +892,7 @@ def evaluate_experiment_in_memory(
     eval_cohort: Optional[List[str]] = None,
     ledger: Optional[ExperimentLedger] = None,
     max_company_drop: float = 5.0,
+    use_sec_facts: bool = False,
 ) -> ExperimentDecision:
     """
     Evaluate a config change using in-memory config. No disk writes, no locks.
@@ -941,6 +945,7 @@ def evaluate_experiment_in_memory(
                     use_ai=False,
                     ledger=ledger,
                     config=modified_config,
+                    use_sec_facts=use_sec_facts,
                 )
             except Exception as e:
                 return ExperimentDecision(
@@ -972,6 +977,7 @@ def evaluate_experiment_in_memory(
                 config=modified_config,
                 eval_cohort=eval_cohort,
                 ledger=ledger,
+                use_sec_facts=use_sec_facts,
             )
         else:
             new_cqs = compute_cqs(
@@ -981,6 +987,7 @@ def evaluate_experiment_in_memory(
                 baseline_cqs=baseline_cqs.cqs,
                 ledger=ledger,
                 config=modified_config,
+                use_sec_facts=use_sec_facts,
             )
     except Exception as e:
         return ExperimentDecision(
@@ -2227,6 +2234,7 @@ def tournament_eval(
     change: ConfigChange,
     baseline_cqs: CQSResult,
     ledger: Optional[ExperimentLedger] = None,
+    use_sec_facts: bool = False,
 ) -> ExperimentDecision:
     """
     Two-stage tournament evaluation for overfitting protection.
@@ -2246,6 +2254,7 @@ def tournament_eval(
         baseline_cqs=baseline_cqs,
         eval_cohort=QUICK_EVAL_COHORT,
         ledger=ledger,
+        use_sec_facts=use_sec_facts,
     )
 
     if stage1.decision != Decision.KEEP:
@@ -2261,6 +2270,7 @@ def tournament_eval(
         snapshot_mode=True,
         use_ai=False,
         ledger=ledger,
+        use_sec_facts=use_sec_facts,
     )
 
     # The change is still applied from Stage 1 (it was KEEP'd)
@@ -2271,6 +2281,7 @@ def tournament_eval(
         use_ai=False,
         baseline_cqs=validation_baseline.cqs,
         ledger=ledger,
+        use_sec_facts=use_sec_facts,
     )
 
     if validation_cqs.cqs <= validation_baseline.cqs:
@@ -2325,6 +2336,7 @@ def run_overnight(
     max_workers: int = 1,
     escalation_threshold: int = 3,
     eval_cohort: Optional[List[str]] = None,
+    use_sec_facts: bool = False,
 ) -> OvernightReport:
     """
     Run an overnight auto-eval session.
@@ -2381,6 +2393,7 @@ def run_overnight(
         snapshot_mode=True,
         ledger=ledger,
         max_workers=max_workers,
+        use_sec_facts=use_sec_facts,
     )
     report.cqs_start = baseline.cqs
     report.cqs_peak = baseline.cqs
@@ -2425,6 +2438,7 @@ def run_overnight(
                 snapshot_mode=True,
                 ledger=ledger,
                 max_workers=max_workers,
+                use_sec_facts=use_sec_facts,
             )
             current_baseline = cqs_result
 
@@ -2491,13 +2505,14 @@ def run_overnight(
 
             # Evaluate
             if use_tournament:
-                result = tournament_eval(change, current_baseline, ledger)
+                result = tournament_eval(change, current_baseline, ledger, use_sec_facts=use_sec_facts)
             else:
                 result = evaluate_experiment(
                     change, current_baseline,
                     eval_cohort=cohort,
                     ledger=ledger,
                     max_workers=max_workers,
+                    use_sec_facts=use_sec_facts,
                 )
 
             # Log result
@@ -2523,6 +2538,7 @@ def run_overnight(
                         snapshot_mode=True,
                         ledger=ledger,
                         max_workers=max_workers,
+                        use_sec_facts=use_sec_facts,
                     )
                 if current_baseline.cqs > report.cqs_peak:
                     report.cqs_peak = current_baseline.cqs

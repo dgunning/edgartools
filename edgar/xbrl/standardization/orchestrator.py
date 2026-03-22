@@ -206,12 +206,12 @@ class Orchestrator:
     Runs all mapping layers in sequence.
     """
 
-    def __init__(self, config: Optional[MappingConfig] = None, snapshot_mode: bool = False):
+    def __init__(self, config: Optional[MappingConfig] = None, snapshot_mode: bool = False, use_sec_facts: bool = False):
         self.config = config or get_config()
         self.tree_parser = TreeParser(self.config)
         self.ai_mapper = AISemanticMapper(self.config)
         self.facts_searcher = FactsSearcher(self.config)
-        self.validator = ReferenceValidator(self.config, snapshot_mode=snapshot_mode)
+        self.validator = ReferenceValidator(self.config, snapshot_mode=snapshot_mode, use_sec_facts=use_sec_facts)
         self.audit_log = []
         self.validation_results = {}
         self._company_timings: Dict[str, float] = {}  # ticker -> seconds
