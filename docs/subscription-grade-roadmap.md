@@ -249,18 +249,30 @@ Filing Event (EDGAR RSS)
 
 | Phase | Target | Started | Completed | CQS Before | CQS After | Key Findings |
 |-------|--------|---------|-----------|------------|-----------|--------------|
-| 1a: Fix min_periods | min_periods=3 | 2026-03-21 | 2026-03-21 | 0.9734 | TBD | Changed call site to use default min_periods=3. 96/96 tests pass. |
-| 1b: Unverified state | Replace exclusion | 2026-03-21 | 2026-03-21 | - | TBD | Replaced ADD_EXCLUSION with None return + log. Kept AI scout exclusion path (line 2655). |
-| 1c: Metric tolerances | Per-metric thresholds | 2026-03-21 | 2026-03-21 | - | TBD | Added validation_tolerance field to ExtractionRun. 6/19 metrics have explicit tolerances; rest use 20% default. |
-| 2a: Calc linkbase | Self-validation | 2026-03-21 | 2026-03-21 | 0.9734 | TBD | Wired InternalConsistencyValidator into validate_and_update_mappings. 5 equations (4 accounting + 1 cross-statement). Internal override: if equations pass but yfinance disagrees, trust extraction. |
-| 2b: Cross-statement | Reconciliation checks | 2026-03-21 | 2026-03-21 | - | TBD | Added PretaxIncome >= NetIncome cross-statement equation. |
-| 2c: Cross-company | Peer consistency | 2026-03-21 | 2026-03-21 | - | TBD | Added compute_concept_consensus() method. Informational for now — becomes proposal heuristic in later phases. |
-| 3a: Metric expansion | 19 -> 50 metrics | 2026-03-22 | 2026-03-22 | 0.9734 | TBD | Added 18 base metrics (37 total) + 3 derived (EBITDA, WorkingCapital, TotalDebt) + 15 yfinance mappings. Config auto-expanded to 37 metrics. |
+| 1a: Fix min_periods | min_periods=3 | 2026-03-21 | 2026-03-21 | 0.9734 | 0.9111 | Changed call site to use default min_periods=3. CQS drop expected: stricter golden masters + 37 metrics (vs 19). |
+| 1b: Unverified state | Replace exclusion | 2026-03-21 | 2026-03-21 | - | - | Replaced ADD_EXCLUSION with None return + log. Kept AI scout exclusion path (line 2655). |
+| 1c: Metric tolerances | Per-metric thresholds | 2026-03-21 | 2026-03-21 | - | - | Added validation_tolerance field to ExtractionRun. 6/19 metrics have explicit tolerances; rest use 20% default. |
+| 2a: Calc linkbase | Self-validation | 2026-03-21 | 2026-03-21 | - | - | Wired InternalConsistencyValidator into validate_and_update_mappings. 5 equations (4 accounting + 1 cross-statement). Internal override: if equations pass but yfinance disagrees, trust extraction. |
+| 2b: Cross-statement | Reconciliation checks | 2026-03-21 | 2026-03-21 | - | - | Added PretaxIncome >= NetIncome cross-statement equation. |
+| 2c: Cross-company | Peer consistency | 2026-03-21 | 2026-03-21 | - | - | Added compute_concept_consensus() method. Informational for now — becomes proposal heuristic in later phases. |
+| 3a: Metric expansion | 19 -> 50 metrics | 2026-03-22 | 2026-03-22 | 0.9734 | 0.9111 | Added 18 base metrics (37 total) + 3 derived (EBITDA, WorkingCapital, TotalDebt) + 15 yfinance mappings. CQS denominator grew 2x; new metrics not yet tuned. |
 | 3b: Historical | 3 annual + 4 quarterly | - | - | - | - | Deferred — requires orchestrator changes. Solver already supports multi_period=True. |
-| 3c: Applicability | Required/optional/forbidden | 2026-03-22 | 2026-03-22 | - | TBD | Added PropertyPlantEquipment, R&D, ShareRepurchases to banking forbidden list. |
+| 3c: Applicability | Required/optional/forbidden | 2026-03-22 | 2026-03-22 | - | - | Added PropertyPlantEquipment, R&D to banking forbidden list. ShareRepurchases re-enabled for banks (they do buybacks). |
 | 4a: S&P 500 | 500 companies | - | - | - | - | EXPANSION_COHORT_500 ready (500 companies). Needs yfinance snapshots for ~400 new companies (runtime task). |
-| 4b: SEC XBRL API | Second reference source | 2026-03-22 | 2026-03-22 | 0.9734 | TBD | Added _get_sec_facts_value() to ReferenceValidator. Fallback for missing_ref using EntityFacts + known_concepts. use_sec_facts flag, default off. Cached per-ticker. |
+| 4b: SEC XBRL API | Second reference source | 2026-03-22 | 2026-03-22 | 0.9111 | 0.9118 | SEC facts fallback enabled. 120 SEC facts matches in overnight run. 18/18 experiments kept (0 discards). Banking sector (JPM, C, MS, GS, BLK) primary beneficiary — 17 solver formulas for previously unreachable gaps. |
 | 4c: Event-driven | Real-time processing | - | - | - | - | Deferred. URL builders exist but no RSS parser/monitor. |
+
+### Overnight Run 004 Summary (2026-03-22)
+
+- **Duration:** 3.1 hours on 100 companies, 37 metrics
+- **Result:** 18/18 experiments kept, 0 discards, 0 vetoes
+- **CQS:** 0.9111 -> 0.9118 (+0.0007)
+- **EF-CQS:** 0.6569 -> 0.6582, **SA-CQS:** 0.6539 -> 0.6552
+- **Key bugs fixed this session:**
+  - `us-gaap:` prefix missing in SEC facts lookup (all lookups silently returned None)
+  - Fast-path gap derivation dropped `reference_value` (solver blocked after every KEEP)
+- **Companies solved:** JPM (3 metrics), C (3), MS (5), GS (5), BLK (1), PLD (1)
+- **Stop reason:** 3-hour time limit (natural end, not circuit breaker)
 
 ---
 
