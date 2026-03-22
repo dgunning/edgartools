@@ -91,6 +91,17 @@ class ExtractionRun:
     components: Dict[str, float] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+    # Provenance (canonical fact store evolution)
+    accession_number: Optional[str] = None   # Filing accession (e.g., "0000320193-24-000123")
+    statement_role: Optional[str] = None     # Presentation role URI or statement type
+    period_type: Optional[str] = None        # "instant" | "duration"
+    period_start: Optional[str] = None       # ISO date for duration start
+    period_end: Optional[str] = None         # ISO date for period end / instant date
+    unit: Optional[str] = None               # "USD", "shares", "pure"
+    decimals: Optional[int] = None           # XBRL decimals attribute
+    reference_source: Optional[str] = None   # "yfinance" | "sec_facts" | None
+    publish_confidence: Optional[str] = None # "high" | "medium" | "low" | "unverified"
+
     # Golden master tracking
     is_golden_candidate: bool = False
     golden_master_id: Optional[str] = None
@@ -385,6 +396,23 @@ class ExperimentLedger:
                 )
             ''')
 
+            # Schema migration: add provenance columns to existing DBs
+            for col, col_type in [
+                ('accession_number', 'TEXT'),
+                ('statement_role', 'TEXT'),
+                ('period_type', 'TEXT'),
+                ('period_start', 'TEXT'),
+                ('period_end', 'TEXT'),
+                ('unit', 'TEXT'),
+                ('decimals', 'INTEGER'),
+                ('reference_source', 'TEXT'),
+                ('publish_confidence', 'TEXT'),
+            ]:
+                try:
+                    cursor.execute(f'ALTER TABLE extraction_runs ADD COLUMN {col} {col_type}')
+                except sqlite3.OperationalError:
+                    pass  # Column already exists
+
             # Golden masters table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS golden_masters (
@@ -540,8 +568,11 @@ class ExperimentLedger:
                     strategy_fingerprint,
                     strategy_params, extracted_value, reference_value, variance_pct,
                     is_valid, confidence, run_timestamp, extraction_notes,
-                    components, metadata, is_golden_candidate, golden_master_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    components, metadata, is_golden_candidate, golden_master_id,
+                    accession_number, statement_role, period_type,
+                    period_start, period_end, unit, decimals,
+                    reference_source, publish_confidence
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 run.run_id, run.ticker, run.metric, run.fiscal_period, run.form_type,
                 run.archetype, run.sub_archetype, run.strategy_name, run.concept,
@@ -549,7 +580,10 @@ class ExperimentLedger:
                 json.dumps(run.strategy_params), run.extracted_value, run.reference_value,
                 run.variance_pct, int(run.is_valid), run.confidence, run.run_timestamp,
                 run.extraction_notes, json.dumps(run.components), json.dumps(run.metadata),
-                int(run.is_golden_candidate), run.golden_master_id
+                int(run.is_golden_candidate), run.golden_master_id,
+                run.accession_number, run.statement_role, run.period_type,
+                run.period_start, run.period_end, run.unit, run.decimals,
+                run.reference_source, run.publish_confidence,
             ))
             conn.commit()
 
@@ -612,8 +646,52 @@ class ExperimentLedger:
             ''', (strategy_fingerprint, limit))
             return [self._row_to_run(row) for row in cursor.fetchall()]
 
+    def get_canonical_facts(
+        self,
+        ticker: str,
+        metric: Optional[str] = None,
+        min_confidence: Optional[str] = None,
+        valid_only: bool = True,
+    ) -> List[ExtractionRun]:
+        """
+        Query extraction runs as canonical facts with optional filtering.
+
+        Args:
+            ticker: Company ticker (required)
+            metric: Filter to specific metric
+            min_confidence: Minimum publish_confidence ("high", "medium", "low")
+            valid_only: Only return valid extractions (default True)
+        """
+        confidence_order = {"high": 3, "medium": 2, "low": 1, "unverified": 0}
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            query = 'SELECT * FROM extraction_runs WHERE ticker = ?'
+            params: list = [ticker]
+
+            if valid_only:
+                query += ' AND is_valid = 1'
+            if metric:
+                query += ' AND metric = ?'
+                params.append(metric)
+
+            query += ' ORDER BY run_timestamp DESC'
+            cursor.execute(query, params)
+
+            runs = [self._row_to_run(row) for row in cursor.fetchall()]
+
+        # Filter by confidence in Python (column may be NULL in older rows)
+        if min_confidence and min_confidence in confidence_order:
+            min_level = confidence_order[min_confidence]
+            runs = [r for r in runs
+                    if confidence_order.get(r.publish_confidence or "unverified", 0) >= min_level]
+
+        return runs
+
     def _row_to_run(self, row: sqlite3.Row) -> ExtractionRun:
         """Convert database row to ExtractionRun."""
+        keys = row.keys()
         return ExtractionRun(
             run_id=row['run_id'],
             ticker=row['ticker'],
@@ -623,7 +701,7 @@ class ExperimentLedger:
             archetype=row['archetype'],
             sub_archetype=row['sub_archetype'],
             strategy_name=row['strategy_name'],
-            concept=row['concept'] if 'concept' in row.keys() else None,
+            concept=row['concept'] if 'concept' in keys else None,
             strategy_fingerprint=row['strategy_fingerprint'],
             strategy_params=json.loads(row['strategy_params'] or '{}'),
             extracted_value=row['extracted_value'],
@@ -637,6 +715,16 @@ class ExperimentLedger:
             metadata=json.loads(row['metadata'] or '{}'),
             is_golden_candidate=bool(row['is_golden_candidate']),
             golden_master_id=row['golden_master_id'],
+            # Provenance fields (may not exist in older DBs)
+            accession_number=row['accession_number'] if 'accession_number' in keys else None,
+            statement_role=row['statement_role'] if 'statement_role' in keys else None,
+            period_type=row['period_type'] if 'period_type' in keys else None,
+            period_start=row['period_start'] if 'period_start' in keys else None,
+            period_end=row['period_end'] if 'period_end' in keys else None,
+            unit=row['unit'] if 'unit' in keys else None,
+            decimals=row['decimals'] if 'decimals' in keys else None,
+            reference_source=row['reference_source'] if 'reference_source' in keys else None,
+            publish_confidence=row['publish_confidence'] if 'publish_confidence' in keys else None,
         )
 
     # =========================================================================

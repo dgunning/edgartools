@@ -64,6 +64,10 @@ class ValidationResult:
     sa_value: Optional[float] = None  # Standardized (composite formula) value
     sa_variance_pct: Optional[float] = None  # SA variance %
     variance_type: str = "raw"        # "raw" | "explained" | "standardized"
+    # RFA/SMA sub-scores: finer-grained than EF
+    rfa_pass: Optional[bool] = None   # Reported Fact Accuracy: extracted value matches authoritative source
+    rfa_source: Optional[str] = None  # "sec_facts" | "yfinance" | None — which source confirmed the fact
+    sma_pass: Optional[bool] = None   # Standardized Metric Accuracy: concept is semantically correct for this metric
     # Internal consistency validation
     internal_status: Optional[str] = None    # "VALID_INTERNAL" | "INVALID_INTERNAL" | "VALID_PARTIAL" | "EQUATION_CONFLICT" | None
     # Publish confidence: how trustworthy is this result for external consumption?
@@ -1155,6 +1159,8 @@ class ReferenceValidator:
                     if variance <= tol:
                         validation.status = "match"
                         validation.is_valid = True
+                        validation.rfa_pass = True
+                        validation.rfa_source = "sec_facts"
                         result.validation_status = "valid"
                         result.validation_notes = f"SEC facts reference match (variance {variance:.1f}%)"
                         logger.info(f"[SEC FACTS] {ticker}:{metric} — SEC reference match ({variance:.1f}%)")
@@ -2007,6 +2013,22 @@ class ReferenceValidator:
         if sa_pass is None:
             sa_pass = is_match
 
+        # --- RFA/SMA Sub-Scores ---
+        # RFA (Reported Fact Accuracy): does extracted value match an authoritative source?
+        rfa_pass = None
+        rfa_source = None
+        if result.is_mapped and is_match:
+            rfa_pass = True
+            rfa_source = "yfinance"  # Default; overridden if SEC facts matched later
+
+        # SMA (Standardized Metric Accuracy): is the concept semantically correct?
+        sma_pass = None
+        if result.is_mapped:
+            if metric_config and result.concept and metric_config.matches_concept(result.concept):
+                sma_pass = True   # Known canonical concept
+            elif result.source == MappingSource.TREE:
+                sma_pass = True   # Tree parser = semantic match
+
         return ValidationResult(
             metric=metric,
             company=ticker,
@@ -2021,6 +2043,9 @@ class ReferenceValidator:
             sa_value=sa_value,
             sa_variance_pct=sa_variance_pct,
             variance_type=variance_type,
+            rfa_pass=rfa_pass,
+            rfa_source=rfa_source,
+            sma_pass=sma_pass,
         )
     
     def _resolve_formula_components(self, metric: str, ticker: str) -> Optional[List[str]]:

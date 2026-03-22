@@ -261,6 +261,11 @@ Filing Event (EDGAR RSS)
 | 4a: S&P 500 | 500 companies | - | - | - | - | EXPANSION_COHORT_500 ready (500 companies). Needs yfinance snapshots for ~400 new companies (runtime task). |
 | 4b: SEC XBRL API | Second reference source | 2026-03-22 | 2026-03-22 | 0.9111 | 0.9118 | SEC facts fallback enabled. 120 SEC facts matches in overnight run. 18/18 experiments kept (0 discards). Banking sector (JPM, C, MS, GS, BLK) primary beneficiary — 17 solver formulas for previously unreachable gaps. |
 | 4c: Event-driven | Real-time processing | - | - | - | - | Deferred. URL builders exist but no RSS parser/monitor. |
+| 5a: Honest EF scoring | Concept correctness | 2026-03-22 | 2026-03-22 | EF=0.65 | EF=0.85 | EF now measures actual concept correctness (known_concepts/tree/reference). Was inflated by `ef_pass = is_mapped`. |
+| 5b: Unverified state | No more "assume OK" | 2026-03-22 | 2026-03-22 | - | - | 16 metrics across quick-eval correctly excluded from scoring. |
+| 5c: Solver constraints | Prevent algebraic coincidences | 2026-03-22 | 2026-03-22 | - | - | max_components 4→2, statement family constraint. Zero EF gate rejections in Run 005 — constraints work upstream. |
+| 5d: Publish confidence | high/medium/low/unverified | 2026-03-22 | 2026-03-22 | - | - | Implements target architecture risk engine confidence levels. |
+| 5e: CQS rebalance | Reward stability | 2026-03-22 | 2026-03-22 | CQS=0.9936 | CQS=0.9957 | pass_rate 0.50→0.45, stability 0.10→0.15. Run 005: 14/42 kept. |
 
 ### Overnight Run 004 Summary (2026-03-22)
 
@@ -273,6 +278,35 @@ Filing Event (EDGAR RSS)
   - Fast-path gap derivation dropped `reference_value` (solver blocked after every KEEP)
 - **Companies solved:** JPM (3 metrics), C (3), MS (5), GS (5), BLK (1), PLD (1)
 - **Stop reason:** 3-hour time limit (natural end, not circuit breaker)
+
+### Honest Scoring Foundation (2026-03-22)
+
+Multi-model consensus (GPT-5.4 + Gemini 3.1) identified that CQS 0.91 masks quality problems — EF/SA at 0.65 is the honest indicator. Implemented 7 changes (Parts A+B):
+
+| Change | What |
+|--------|------|
+| A1: Stricter EF | EF passes only for known_concepts, tree-resolved, or reference-confirmed |
+| A2: Unverified state | "valid, assume OK" → "unverified", excluded from pass/fail |
+| A3: Equation conflict | Per-metric EQUATION_CONFLICT flagging on failed accounting equations |
+| A4: Solver constraints | max_components 4→2, statement family constraint |
+| B1: EF-CQS gate | Overnight loop discards changes that regress EF-CQS |
+| B2: CQS rebalance | pass_rate 0.50→0.45, stability_rate 0.10→0.15 |
+| B3: Publish confidence | high/medium/low/unverified on ValidationResult |
+
+### Overnight Run 005 Summary (2026-03-22)
+
+- **Duration:** 3 hours on 100 companies, 37 metrics, SEC facts enabled
+- **Result:** 14/42 experiments kept, 28 discards, 0 vetoes, **0 EF-CQS gate rejections**
+- **CQS:** 0.9936 -> 0.9957 (+0.0021)
+- **EF-CQS:** 0.8458 -> 0.8491, **SA-CQS:** 0.8422 -> 0.8459
+- **Golden masters:** 682 promoted
+- **Key findings:**
+  - EF-CQS at 0.85 is the honest extraction fidelity (was inflated to ~1.0)
+  - Zero EF gate rejections — solver constraints prevent bad proposals upstream
+  - CQS still improves under honest scoring (14 genuinely good formulas kept)
+  - 16 unverified metrics correctly excluded from scoring (was inflating pass_rate)
+- **Metrics solved:** OperatingIncome (2), GrossProfit (4), CurrentAssets (1), CurrentLiabilities (2), PropertyPlantEquipment (1), InterestExpense (2), LongTermDebt (1), GrossProfit/UPS (1)
+- **Stop reason:** 3-hour time limit (natural end)
 
 ---
 

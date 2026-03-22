@@ -321,6 +321,9 @@ class CompanyCQS:
     ef_cqs: float = 0.0       # EF component of CQS
     sa_cqs: float = 0.0       # SA component of CQS
     explained_variance_count: int = 0  # Gaps with documented explanations
+    # RFA/SMA sub-scores (finer than EF)
+    rfa_pass_rate: float = 0.0  # Reported Fact Accuracy: value matches authoritative source
+    sma_pass_rate: float = 0.0  # Standardized Metric Accuracy: concept semantically correct
     unverified_count: int = 0  # Metrics with no reference data (excluded from pass/fail)
     unverified_metrics: List[str] = field(default_factory=list)  # Which metrics are unverified
     failed_metrics: List[str] = field(default_factory=list)  # Metrics that failed validation
@@ -427,6 +430,9 @@ class CQSResult:
     ef_pass_rate: float = 0.0  # Aggregate EF pass rate
     sa_pass_rate: float = 0.0  # Aggregate SA pass rate
     explained_variance_count: int = 0  # Total explained variance gaps
+    # RFA/SMA sub-scores
+    rfa_rate: float = 0.0   # Reported Fact Accuracy aggregate
+    sma_rate: float = 0.0   # Standardized Metric Accuracy aggregate
 
     # Per-company breakdown
     company_scores: Dict[str, CompanyCQS] = field(default_factory=dict)
@@ -454,7 +460,8 @@ class CQSResult:
         veto = " [VETOED]" if self.vetoed else ""
         return (
             f"CQS={self.cqs:.4f}{veto} | "
-            f"EF={self.ef_cqs:.4f} SA={self.sa_cqs:.4f} | "
+            f"EF={self.ef_cqs:.4f} SA={self.sa_cqs:.4f} "
+            f"RFA={self.rfa_rate:.4f} SMA={self.sma_rate:.4f} | "
             f"pass={self.pass_rate:.1%} var={self.mean_variance:.1f}% "
             f"cov={self.coverage_rate:.1%} golden={self.golden_master_rate:.1%} "
             f"regress={self.total_regressions} | "
@@ -818,6 +825,8 @@ def _compute_company_cqs(
     regressed_metrics = []
     ef_pass_count = 0
     sa_pass_count = 0
+    rfa_pass_count = 0
+    sma_pass_count = 0
     explained_variance_count = 0
     unverified_count = 0
     unverified_metrics_list = []
@@ -866,12 +875,16 @@ def _compute_company_cqs(
             if 'reference suspect' in (val_result.notes or '').lower():
                 disputed_count += 1
 
-        # EF/SA scoring from validation results
+        # EF/SA/RFA/SMA scoring from validation results
         if val_result:
             if val_result.ef_pass:
                 ef_pass_count += 1
             if val_result.sa_pass:
                 sa_pass_count += 1
+            if val_result.rfa_pass:
+                rfa_pass_count += 1
+            if val_result.sma_pass:
+                sma_pass_count += 1
             if val_result.variance_type == "explained":
                 explained_variance_count += 1
         elif result.is_mapped and result.source == MappingSource.TREE:
@@ -890,6 +903,8 @@ def _compute_company_cqs(
     golden_master_rate = golden_count / effective_total if effective_total > 0 else 0.0
     ef_pass_rate = ef_pass_count / effective_total if effective_total > 0 else 0.0
     sa_pass_rate = sa_pass_count / effective_total if effective_total > 0 else 0.0
+    rfa_pass_rate = rfa_pass_count / effective_total if effective_total > 0 else 0.0
+    sma_pass_rate = sma_pass_count / effective_total if effective_total > 0 else 0.0
 
     # Per-company CQS — stability_rate (golden masters = multi-period stable)
     # replaces golden_master_rate with higher weight to reward multi-period consistency
@@ -925,6 +940,8 @@ def _compute_company_cqs(
         ef_cqs=ef_cqs,
         sa_cqs=sa_cqs,
         explained_variance_count=explained_variance_count,
+        rfa_pass_rate=rfa_pass_rate,
+        sma_pass_rate=sma_pass_rate,
         unverified_count=unverified_count,
         unverified_metrics=unverified_metrics_list,
         failed_metrics=failed_metrics,
@@ -961,9 +978,11 @@ def _aggregate_cqs(
     total_metrics = sum(s.metrics_total for s in scores)
     regression_rate = total_regressions / total_metrics if total_metrics > 0 else 0.0
 
-    # Aggregate EF/SA scores
+    # Aggregate EF/SA/RFA/SMA scores
     ef_pass_rate = sum(s.ef_pass_rate for s in scores) / n
     sa_pass_rate = sum(s.sa_pass_rate for s in scores) / n
+    rfa_rate = sum(s.rfa_pass_rate for s in scores) / n
+    sma_rate = sum(s.sma_pass_rate for s in scores) / n
     explained_variance_count = sum(s.explained_variance_count for s in scores)
 
     # Collect all regressed metrics across companies
@@ -1001,6 +1020,8 @@ def _aggregate_cqs(
         ef_pass_rate=ef_pass_rate,
         sa_pass_rate=sa_pass_rate,
         explained_variance_count=explained_variance_count,
+        rfa_rate=rfa_rate,
+        sma_rate=sma_rate,
         companies_evaluated=n,
         total_metrics=total_metrics,
         total_mapped=sum(s.metrics_mapped for s in scores),
@@ -1066,6 +1087,8 @@ def record_eval_results(
                 is_valid=True,
                 confidence=result.confidence,
                 validation_tolerance=tolerance,
+                reference_source=val.rfa_source if val and hasattr(val, 'rfa_source') else None,
+                publish_confidence=val.publish_confidence if val and hasattr(val, 'publish_confidence') else None,
             )
             ledger.record_run(run)
             recorded += 1
