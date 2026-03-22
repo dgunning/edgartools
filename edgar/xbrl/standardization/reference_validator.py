@@ -65,7 +65,9 @@ class ValidationResult:
     sa_variance_pct: Optional[float] = None  # SA variance %
     variance_type: str = "raw"        # "raw" | "explained" | "standardized"
     # Internal consistency validation
-    internal_status: Optional[str] = None    # "VALID_INTERNAL" | "INVALID_INTERNAL" | "VALID_PARTIAL" | None
+    internal_status: Optional[str] = None    # "VALID_INTERNAL" | "INVALID_INTERNAL" | "VALID_PARTIAL" | "EQUATION_CONFLICT" | None
+    # Publish confidence: how trustworthy is this result for external consumption?
+    publish_confidence: str = "unverified"   # "high" | "medium" | "low" | "unverified"
     # Extraction evidence for diagnostic drilling
     resolution_type: str = "none"            # "direct" | "composite" | "industry" | "none"
     components_used: Optional[list] = None   # XBRL concepts used in extraction
@@ -1097,8 +1099,13 @@ class ReferenceValidator:
         validations = self.validate_company(ticker, results, xbrl, filing_date=filing_date, form_type=form_type)
 
         # Stamp each ValidationResult with internal status
-        for validation in validations.values():
-            validation.internal_status = internal_result.status
+        # Use per-metric granularity: metrics involved in failed equations get EQUATION_CONFLICT
+        failed_metrics_set = internal_result.get_failed_metrics()
+        for metric_name, validation in validations.items():
+            if metric_name in failed_metrics_set:
+                validation.internal_status = "EQUATION_CONFLICT"
+            else:
+                validation.internal_status = internal_result.status
 
         # Update MappingResult objects based on validation
         for metric, validation in validations.items():
@@ -1157,8 +1164,8 @@ class ReferenceValidator:
                         result.validation_status = "invalid"
                         result.validation_notes = f"SEC facts reference mismatch (variance {variance:.1f}%)"
                 else:
-                    result.validation_status = "valid"  # Can't validate, assume OK
-                    result.validation_notes = "No reference data available"
+                    result.validation_status = "unverified"
+                    result.validation_notes = "No reference data available — cannot validate"
             elif validation.status == "mapping_needed":
                 result.validation_status = "pending"
                 result.validation_notes = "Mapping required"
@@ -1168,8 +1175,57 @@ class ReferenceValidator:
             elif validation.status == "excluded":
                 result.validation_status = "valid"
                 result.validation_notes = "Metric excluded for this company"
-        
+
+        # Compute publish_confidence for each validation result
+        for metric, validation in validations.items():
+            result = results.get(metric)
+            validation.publish_confidence = self._compute_publish_confidence(
+                result, validation, ticker, metric
+            )
+
         return validations
+
+    def _compute_publish_confidence(
+        self,
+        result: Optional[MappingResult],
+        validation: ValidationResult,
+        ticker: str,
+        metric: str,
+    ) -> str:
+        """
+        Compute publish confidence level for a validation result.
+
+        Levels:
+        - high: Known concept + reference match + internal equations pass
+        - medium: Known concept + reference match OR internal equations pass
+        - low: Mapped but unvalidated, or high variance
+        - unverified: No reference data, no internal validation
+        """
+        if result is None or not result.is_mapped:
+            return "unverified"
+
+        has_ref_match = validation.status == "match"
+        has_known_concept = False
+        if self.config:
+            mc = self.config.get_metric(metric)
+            if mc and result.concept and mc.matches_concept(result.concept):
+                has_known_concept = True
+
+        internal_ok = validation.internal_status in ("VALID_INTERNAL", "VALID_PARTIAL")
+        equation_conflict = validation.internal_status == "EQUATION_CONFLICT"
+
+        if has_ref_match and has_known_concept and internal_ok:
+            return "high"
+        elif has_ref_match and (has_known_concept or internal_ok):
+            return "medium"
+        elif has_ref_match:
+            return "medium"
+        elif result.is_mapped and internal_ok and not equation_conflict:
+            return "low"
+        elif result.is_mapped:
+            return "low"
+        else:
+            return "unverified"
     
     def _retry_with_calculation(
         self,
@@ -1910,9 +1966,18 @@ class ReferenceValidator:
         is_match = variance <= tolerance
 
         # --- Two-Score Architecture: EF + SA ---
-        # EF (Extraction Fidelity): Did we find a valid XBRL concept?
-        # A concept is "correctly extracted" if the mapping exists (regardless of value match)
-        ef_pass = result.is_mapped
+        # EF (Extraction Fidelity): Did we find the RIGHT XBRL concept?
+        # EF passes only if: (a) concept is in known_concepts for this metric,
+        # (b) resolved via tree parser (Layer 1), or (c) validated against reference.
+        # Layer 2 (AI/facts search) and company formulas need validation confirmation.
+        ef_pass = False
+        if result.is_mapped:
+            if metric_config and result.concept and metric_config.matches_concept(result.concept):
+                ef_pass = True  # Known canonical concept
+            elif result.source == MappingSource.TREE:
+                ef_pass = True  # Tree parser resolution (presentation tree match)
+            elif is_match:
+                ef_pass = True  # Value confirmed against reference
 
         # SA (Standardization Alignment): Does the value match yfinance?
         # Check if we have a standardization formula or known_variance for this metric

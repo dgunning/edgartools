@@ -130,7 +130,7 @@ class AutoSolver:
 
     def __init__(
         self,
-        max_components: int = 4,
+        max_components: int = 2,  # Reduced from 4: 3+ component sums are algebraic coincidences
         search_tolerance_pct: float = 1.0,
         snapshot_mode: bool = True,
         allow_subtraction: bool = False,
@@ -227,6 +227,22 @@ class AutoSolver:
         concept_list = list(candidates.keys())
         value_list = [candidates[c] for c in concept_list]
 
+        # Statement family constraint: for multi-component formulas,
+        # at least one component must be a known concept for a metric in the
+        # same statement family as the target metric.
+        target_families = set(self.METRIC_STATEMENT_FAMILIES.get(metric, []))
+        related_concepts = set()
+        if target_families:
+            from edgar.xbrl.standardization.config_loader import get_config
+            config = get_config()
+            for m, families in self.METRIC_STATEMENT_FAMILIES.items():
+                if any(f in target_families for f in families):
+                    mc = config.get_metric(m) if config else None
+                    if mc:
+                        for kc in mc.known_concepts:
+                            clean = kc.replace('us-gaap:', '').replace('us-gaap_', '')
+                            related_concepts.add(clean)
+
         for size in range(1, min(self.max_components + 1, len(concept_list) + 1)):
             for combo_indices in combinations(range(len(concept_list)), size):
                 combo_sum = sum(value_list[i] for i in combo_indices)
@@ -235,6 +251,14 @@ class AutoSolver:
                 if variance <= self.search_tolerance:
                     combo_concepts = [concept_list[i] for i in combo_indices]
                     combo_values = [value_list[i] for i in combo_indices]
+
+                    # Statement family constraint: for 2+ component formulas,
+                    # at least one component must be a known concept from the same
+                    # statement family. This prevents algebraic coincidences across
+                    # unrelated financial statements.
+                    if size > 1 and related_concepts:
+                        if not any(c in related_concepts for c in combo_concepts):
+                            continue  # Skip: no component from same statement family
 
                     # Phase B: Inline multi-period constraint
                     periods_checked = 1  # Primary period always counts

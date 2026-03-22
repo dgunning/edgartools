@@ -321,6 +321,8 @@ class CompanyCQS:
     ef_cqs: float = 0.0       # EF component of CQS
     sa_cqs: float = 0.0       # SA component of CQS
     explained_variance_count: int = 0  # Gaps with documented explanations
+    unverified_count: int = 0  # Metrics with no reference data (excluded from pass/fail)
+    unverified_metrics: List[str] = field(default_factory=list)  # Which metrics are unverified
     failed_metrics: List[str] = field(default_factory=list)  # Metrics that failed validation
     failed_metric_refs: Dict[str, Optional[float]] = field(default_factory=dict)  # metric -> reference_value for failed metrics
     regressed_metrics: List[str] = field(default_factory=list)  # Metrics that regressed from golden
@@ -817,6 +819,8 @@ def _compute_company_cqs(
     ef_pass_count = 0
     sa_pass_count = 0
     explained_variance_count = 0
+    unverified_count = 0
+    unverified_metrics_list = []
     failed_metrics = []
     failed_metric_refs = {}
     disputed_count = 0
@@ -830,6 +834,12 @@ def _compute_company_cqs(
 
         if result.is_mapped:
             mapped += 1
+
+        # Handle unverified metrics — exclude from pass/fail denominator
+        if result.validation_status == "unverified":
+            unverified_count += 1
+            unverified_metrics_list.append(metric)
+            continue  # Don't count in pass/fail
 
         # Check validation status
         if result.validation_status == "valid":
@@ -864,16 +874,16 @@ def _compute_company_cqs(
                 sa_pass_count += 1
             if val_result.variance_type == "explained":
                 explained_variance_count += 1
-        elif result.is_mapped:
-            # No validation result but mapped = EF pass
+        elif result.is_mapped and result.source == MappingSource.TREE:
+            # Tree-resolved with no validation = EF pass (trusted source)
             ef_pass_count += 1
 
         # Check golden master status
         if (ticker, metric) in golden_set:
             golden_count += 1
 
-    # Compute sub-metrics (exclude disputed metrics from denominators)
-    effective_total = total - disputed_count
+    # Compute sub-metrics (exclude disputed + unverified metrics from denominators)
+    effective_total = total - disputed_count - unverified_count
     pass_rate = valid / effective_total if effective_total > 0 else 0.0
     mean_variance = sum(variances) / len(variances) if variances else 0.0
     coverage_rate = mapped / effective_total if effective_total > 0 else 0.0
@@ -881,12 +891,14 @@ def _compute_company_cqs(
     ef_pass_rate = ef_pass_count / effective_total if effective_total > 0 else 0.0
     sa_pass_rate = sa_pass_count / effective_total if effective_total > 0 else 0.0
 
-    # Per-company CQS (same formula as aggregate)
+    # Per-company CQS — stability_rate (golden masters = multi-period stable)
+    # replaces golden_master_rate with higher weight to reward multi-period consistency
+    stability_rate = golden_master_rate  # Golden masters require min_periods=3
     cqs = (
-        0.50 * pass_rate
+        0.45 * pass_rate
         + 0.20 * max(0, 1 - mean_variance / 100)
         + 0.15 * coverage_rate
-        + 0.10 * golden_master_rate
+        + 0.15 * stability_rate
         + 0.05 * (1.0 if regression_count == 0 else 0.0)
     )
 
@@ -913,6 +925,8 @@ def _compute_company_cqs(
         ef_cqs=ef_cqs,
         sa_cqs=sa_cqs,
         explained_variance_count=explained_variance_count,
+        unverified_count=unverified_count,
+        unverified_metrics=unverified_metrics_list,
         failed_metrics=failed_metrics,
         failed_metric_refs=failed_metric_refs,
         regressed_metrics=regressed_metrics,
@@ -958,12 +972,13 @@ def _aggregate_cqs(
         for m in cs.regressed_metrics:
             all_regressed.append((ticker, m))
 
-    # Compute composite CQS
+    # Compute composite CQS — stability_rate replaces golden_master_rate
+    stability_rate = golden_master_rate
     raw_cqs = (
-        0.50 * pass_rate
+        0.45 * pass_rate
         + 0.20 * max(0, 1 - mean_variance / 100)
         + 0.15 * coverage_rate
-        + 0.10 * golden_master_rate
+        + 0.15 * stability_rate
         + 0.05 * (1 - regression_rate)
     )
 

@@ -858,6 +858,20 @@ def evaluate_experiment(
                 duration_seconds=duration,
             )
 
+    # EF-CQS gate: KEEP requires EF-CQS did not decrease
+    # Prevents solver from improving CQS by finding numerically correct but semantically wrong mappings
+    ef_regression = new_cqs.ef_cqs < baseline_cqs.ef_cqs - 0.001  # Allow tiny float noise
+    if ef_regression:
+        revert_config_change(change)
+        return ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=new_cqs.cqs,
+            reason=f"EF-CQS regression: {baseline_cqs.ef_cqs:.4f} -> {new_cqs.ef_cqs:.4f}",
+            company_deltas=company_deltas,
+            duration_seconds=duration,
+        )
+
     # SUCCESS — CQS improved (or non-regressing for company-scoped), no regressions, no company drops
     # Note: we do NOT revert — the change stays applied
     delta = new_cqs.cqs - baseline_cqs.cqs
@@ -1049,6 +1063,18 @@ def evaluate_experiment_in_memory(
                 company_deltas=company_deltas,
                 duration_seconds=duration,
             )
+
+    # EF-CQS gate: KEEP requires EF-CQS did not decrease
+    ef_regression = new_cqs.ef_cqs < baseline_cqs.ef_cqs - 0.001
+    if ef_regression:
+        return ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=new_cqs.cqs,
+            reason=f"EF-CQS regression: {baseline_cqs.ef_cqs:.4f} -> {new_cqs.ef_cqs:.4f}",
+            company_deltas=company_deltas,
+            duration_seconds=duration,
+        )
 
     # SUCCESS
     delta = new_cqs.cqs - baseline_cqs.cqs

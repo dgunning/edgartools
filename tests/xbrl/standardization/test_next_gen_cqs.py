@@ -525,9 +525,9 @@ class TestRicherSolver:
         assert any(len(c.components) == 6 for c in candidates)
 
     def test_default_params_unchanged(self):
-        """Default AutoSolver behavior should be unchanged."""
+        """Default AutoSolver behavior: max_components=2 to prevent algebraic coincidences."""
         solver = AutoSolver()
-        assert solver.max_components == 4
+        assert solver.max_components == 2
         assert solver.allow_subtraction is False
         assert solver.allow_scale_search is False
 

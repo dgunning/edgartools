@@ -15,7 +15,7 @@ Accounting Equations Checked:
 4. Cash Flow: FreeCashFlow = OperatingCashFlow - Capex
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
 
@@ -38,6 +38,7 @@ class EquationResult:
     status: ValidationStatus
     variance_pct: Optional[float]
     notes: Optional[str] = None
+    metrics_involved: List[str] = field(default_factory=list)  # All metrics in this equation
 
 
 @dataclass
@@ -49,6 +50,14 @@ class InternalValidationResult:
     failed_count: int
     partial_count: int
     notes: Optional[str] = None
+
+    def get_failed_metrics(self) -> set:
+        """Return set of metric names involved in any failed equation."""
+        failed = set()
+        for eq_result in self.equation_results.values():
+            if eq_result.status == ValidationStatus.FAIL:
+                failed.update(eq_result.metrics_involved)
+        return failed
 
 
 class InternalConsistencyValidator:
@@ -147,28 +156,31 @@ class InternalConsistencyValidator:
         """Validate a single equation."""
         lhs_concept = eq_def['lhs']
         rhs_components = eq_def['rhs']
-        
+
+        # Track all metrics involved in this equation
+        all_metrics = [lhs_concept] + [comp for comp, _sign in rhs_components]
+
         # Get LHS value
         lhs_value = values.get(lhs_concept)
-        
+
         # Calculate RHS
         rhs_value = 0.0
         missing_components = []
-        
+
         for component, sign in rhs_components:
             comp_value = values.get(component)
             if comp_value is not None:
                 rhs_value += sign * comp_value
             else:
                 missing_components.append(component)
-        
+
         # Build RHS expression string
         rhs_parts = []
         for component, sign in rhs_components:
             prefix = "" if sign > 0 else "-"
             rhs_parts.append(f"{prefix}{component}")
         rhs_expression = " + ".join(rhs_parts).replace("+ -", "- ")
-        
+
         # Determine validation status
         if lhs_value is None:
             return EquationResult(
@@ -179,9 +191,10 @@ class InternalConsistencyValidator:
                 rhs_value=rhs_value if not missing_components else None,
                 status=ValidationStatus.SKIP,
                 variance_pct=None,
-                notes=f"Missing LHS: {lhs_concept}"
+                notes=f"Missing LHS: {lhs_concept}",
+                metrics_involved=all_metrics,
             )
-        
+
         if missing_components:
             return EquationResult(
                 equation_name=eq_name,
@@ -191,7 +204,8 @@ class InternalConsistencyValidator:
                 rhs_value=None,
                 status=ValidationStatus.PARTIAL,
                 variance_pct=None,
-                notes=f"Missing RHS components: {', '.join(missing_components)}"
+                notes=f"Missing RHS components: {', '.join(missing_components)}",
+                metrics_involved=all_metrics,
             )
         
         # Calculate variance
@@ -210,7 +224,8 @@ class InternalConsistencyValidator:
             rhs_value=rhs_value,
             status=ValidationStatus.PASS if is_pass else ValidationStatus.FAIL,
             variance_pct=variance_pct,
-            notes=f"Variance: {variance_pct:.1f}% (tolerance: {self.tolerance*100:.0f}%)"
+            notes=f"Variance: {variance_pct:.1f}% (tolerance: {self.tolerance*100:.0f}%)",
+            metrics_involved=all_metrics,
         )
     
     def get_internal_validity(
