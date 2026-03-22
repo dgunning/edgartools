@@ -322,6 +322,7 @@ class CompanyCQS:
     sa_cqs: float = 0.0       # SA component of CQS
     explained_variance_count: int = 0  # Gaps with documented explanations
     failed_metrics: List[str] = field(default_factory=list)  # Metrics that failed validation
+    failed_metric_refs: Dict[str, Optional[float]] = field(default_factory=dict)  # metric -> reference_value for failed metrics
     regressed_metrics: List[str] = field(default_factory=list)  # Metrics that regressed from golden
     disputed_count: int = 0  # Metrics excluded due to reference_disputed
 
@@ -817,6 +818,7 @@ def _compute_company_cqs(
     sa_pass_count = 0
     explained_variance_count = 0
     failed_metrics = []
+    failed_metric_refs = {}
     disputed_count = 0
 
     for metric, result in metrics.items():
@@ -841,6 +843,8 @@ def _compute_company_cqs(
         # Track failed metrics for derive_gaps_from_cqs fast path
         if result.validation_status != "valid" and result.source != MappingSource.CONFIG:
             failed_metrics.append(metric)
+            val_for_ref = validations.get(metric)
+            failed_metric_refs[metric] = val_for_ref.reference_value if val_for_ref else None
 
         # Collect variance and EF/SA from validation results
         val_result = validations.get(metric)
@@ -910,6 +914,7 @@ def _compute_company_cqs(
         sa_cqs=sa_cqs,
         explained_variance_count=explained_variance_count,
         failed_metrics=failed_metrics,
+        failed_metric_refs=failed_metric_refs,
         regressed_metrics=regressed_metrics,
         disputed_count=disputed_count,
     )
@@ -1186,6 +1191,7 @@ def derive_gaps_from_cqs(
                 gap_type="validation_failure",  # Conservative default
                 estimated_impact=per_metric_impact,
                 graveyard_count=gc,
+                reference_value=score.failed_metric_refs.get(metric),
                 notes="Derived from CQSResult (fast path)",
             )
             if not gap.is_dead_end:
