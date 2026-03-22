@@ -662,7 +662,7 @@ class ExperimentLedger:
             min_confidence: Minimum publish_confidence ("high", "medium", "low")
             valid_only: Only return valid extractions (default True)
         """
-        confidence_order = {"high": 3, "medium": 2, "low": 1, "unverified": 0}
+        confidence_levels = {"high": ["high"], "medium": ["high", "medium"], "low": ["high", "medium", "low"]}
         with self._connect() as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
@@ -675,19 +675,16 @@ class ExperimentLedger:
             if metric:
                 query += ' AND metric = ?'
                 params.append(metric)
+            if min_confidence and min_confidence in confidence_levels:
+                allowed = confidence_levels[min_confidence]
+                placeholders = ','.join('?' * len(allowed))
+                query += f" AND COALESCE(publish_confidence, 'unverified') IN ({placeholders})"
+                params.extend(allowed)
 
             query += ' ORDER BY run_timestamp DESC'
             cursor.execute(query, params)
 
-            runs = [self._row_to_run(row) for row in cursor.fetchall()]
-
-        # Filter by confidence in Python (column may be NULL in older rows)
-        if min_confidence and min_confidence in confidence_order:
-            min_level = confidence_order[min_confidence]
-            runs = [r for r in runs
-                    if confidence_order.get(r.publish_confidence or "unverified", 0) >= min_level]
-
-        return runs
+            return [self._row_to_run(row) for row in cursor.fetchall()]
 
     def _row_to_run(self, row: sqlite3.Row) -> ExtractionRun:
         """Convert database row to ExtractionRun."""

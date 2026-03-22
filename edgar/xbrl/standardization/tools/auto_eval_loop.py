@@ -185,6 +185,112 @@ class ExperimentDecision:
         return self.cqs_after - self.cqs_before
 
 
+def _apply_decision_gates(
+    baseline_cqs: CQSResult,
+    new_cqs: CQSResult,
+    target_improved: bool,
+    target_tickers: List[str],
+    max_company_drop: float,
+    duration: float,
+    change: Optional['ConfigChange'] = None,
+) -> ExperimentDecision:
+    """
+    Shared decision logic for experiment evaluation.
+
+    Returns VETO/DISCARD/KEEP decision based on regression checks,
+    per-company drops, CQS improvement, and EF-CQS gate.
+    Callers handle revert/cleanup.
+    """
+    # Check for hard veto (NEW regressions only)
+    new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
+    if new_regressions > 0:
+        return ExperimentDecision(
+            decision=Decision.VETO,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=new_cqs.cqs,
+            reason=f"HARD VETO: {new_regressions} new regression(s) detected (was {baseline_cqs.total_regressions}, now {new_cqs.total_regressions})",
+            duration_seconds=duration,
+        )
+
+    # Check per-company drops
+    company_deltas: Dict[str, float] = {}
+    for ticker, new_score in new_cqs.company_scores.items():
+        old_score = baseline_cqs.company_scores.get(ticker)
+        if old_score:
+            delta_pp = (new_score.pass_rate - old_score.pass_rate) * 100
+            company_deltas[ticker] = delta_pp
+            if delta_pp < -max_company_drop:
+                return ExperimentDecision(
+                    decision=Decision.DISCARD,
+                    cqs_before=baseline_cqs.cqs,
+                    cqs_after=new_cqs.cqs,
+                    reason=f"Company {ticker} dropped {delta_pp:.1f}pp (limit: {max_company_drop}pp)",
+                    company_deltas=company_deltas,
+                    duration_seconds=duration,
+                )
+
+    # Check for CQS improvement
+    if target_improved:
+        logger.info(
+            f"[RELAXED GATE] Target {target_tickers[0]} improved, "
+            f"using non-regression gate: global CQS {baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f} "
+            f"(threshold: >= {baseline_cqs.cqs - 0.0001:.4f})"
+        )
+        if new_cqs.cqs < baseline_cqs.cqs - 0.0001:
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"Global regression despite target improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
+    else:
+        if new_cqs.cqs <= baseline_cqs.cqs:
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"No CQS improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
+
+    # EF-CQS gate: KEEP requires EF-CQS did not decrease
+    if new_cqs.ef_cqs < baseline_cqs.ef_cqs - 0.001:
+        return ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=new_cqs.cqs,
+            reason=f"EF-CQS regression: {baseline_cqs.ef_cqs:.4f} -> {new_cqs.ef_cqs:.4f}",
+            company_deltas=company_deltas,
+            duration_seconds=duration,
+        )
+
+    # SUCCESS
+    delta = new_cqs.cqs - baseline_cqs.cqs
+    if target_improved and delta <= 0:
+        reason = f"Target company improved, global CQS non-regressing ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})"
+        if change and target_tickers:
+            logger.info(
+                f"[RELAXED GATE KEEP] Company-scoped change KEPT via relaxed gate: "
+                f"metric={change.target_metric}, target={target_tickers[0]}, "
+                f"global delta={delta:+.4f}, duration={duration:.1f}s"
+            )
+    else:
+        reason = f"CQS improved by {delta:.4f}"
+
+    return ExperimentDecision(
+        decision=Decision.KEEP,
+        cqs_before=baseline_cqs.cqs,
+        cqs_after=new_cqs.cqs,
+        reason=reason,
+        company_deltas=company_deltas,
+        duration_seconds=duration,
+        new_cqs_result=new_cqs,
+    )
+
+
 @dataclass
 class RegressionDiagnosis:
     """
@@ -796,103 +902,13 @@ def evaluate_experiment(
 
     duration = time.time() - start_time
 
-    # Check for hard veto (NEW regressions only — pre-existing ones don't count)
-    new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
-    if new_regressions > 0:
-        revert_config_change(change)
-        return ExperimentDecision(
-            decision=Decision.VETO,
-            cqs_before=baseline_cqs.cqs,
-            cqs_after=new_cqs.cqs,
-            reason=f"HARD VETO: {new_regressions} new regression(s) detected (was {baseline_cqs.total_regressions}, now {new_cqs.total_regressions})",
-            duration_seconds=duration,
-        )
-
-    # Check per-company drops
-    company_deltas: Dict[str, float] = {}
-    for ticker, new_score in new_cqs.company_scores.items():
-        old_score = baseline_cqs.company_scores.get(ticker)
-        if old_score:
-            delta_pp = (new_score.pass_rate - old_score.pass_rate) * 100
-            company_deltas[ticker] = delta_pp
-            if delta_pp < -max_company_drop:
-                revert_config_change(change)
-                return ExperimentDecision(
-                    decision=Decision.DISCARD,
-                    cqs_before=baseline_cqs.cqs,
-                    cqs_after=new_cqs.cqs,
-                    reason=f"Company {ticker} dropped {delta_pp:.1f}pp (limit: {max_company_drop}pp)",
-                    company_deltas=company_deltas,
-                    duration_seconds=duration,
-                )
-
-    # Check for CQS improvement
-    if target_improved:
-        # Company-scoped change where target improved: only require non-regression globally
-        # (rounding tolerance of 0.0001 to handle floating point noise)
-        logger.info(
-            f"[RELAXED GATE] Target {target_tickers[0]} improved, "
-            f"using non-regression gate: global CQS {baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f} "
-            f"(threshold: >= {baseline_cqs.cqs - 0.0001:.4f})"
-        )
-        if new_cqs.cqs < baseline_cqs.cqs - 0.0001:
-            revert_config_change(change)
-            return ExperimentDecision(
-                decision=Decision.DISCARD,
-                cqs_before=baseline_cqs.cqs,
-                cqs_after=new_cqs.cqs,
-                reason=f"Global regression despite target improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
-                company_deltas=company_deltas,
-                duration_seconds=duration,
-            )
-    else:
-        # Non-company-scoped changes still require strict improvement
-        if new_cqs.cqs <= baseline_cqs.cqs:
-            revert_config_change(change)
-            return ExperimentDecision(
-                decision=Decision.DISCARD,
-                cqs_before=baseline_cqs.cqs,
-                cqs_after=new_cqs.cqs,
-                reason=f"No CQS improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
-                company_deltas=company_deltas,
-                duration_seconds=duration,
-            )
-
-    # EF-CQS gate: KEEP requires EF-CQS did not decrease
-    # Prevents solver from improving CQS by finding numerically correct but semantically wrong mappings
-    ef_regression = new_cqs.ef_cqs < baseline_cqs.ef_cqs - 0.001  # Allow tiny float noise
-    if ef_regression:
-        revert_config_change(change)
-        return ExperimentDecision(
-            decision=Decision.DISCARD,
-            cqs_before=baseline_cqs.cqs,
-            cqs_after=new_cqs.cqs,
-            reason=f"EF-CQS regression: {baseline_cqs.ef_cqs:.4f} -> {new_cqs.ef_cqs:.4f}",
-            company_deltas=company_deltas,
-            duration_seconds=duration,
-        )
-
-    # SUCCESS — CQS improved (or non-regressing for company-scoped), no regressions, no company drops
-    # Note: we do NOT revert — the change stays applied
-    delta = new_cqs.cqs - baseline_cqs.cqs
-    if target_improved and delta <= 0:
-        reason = f"Target company improved, global CQS non-regressing ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})"
-        logger.info(
-            f"[RELAXED GATE KEEP] Company-scoped change KEPT via relaxed gate: "
-            f"metric={change.target_metric}, target={target_tickers[0]}, "
-            f"global delta={delta:+.4f}, duration={duration:.1f}s"
-        )
-    else:
-        reason = f"CQS improved by {delta:.4f}"
-    return ExperimentDecision(
-        decision=Decision.KEEP,
-        cqs_before=baseline_cqs.cqs,
-        cqs_after=new_cqs.cqs,
-        reason=reason,
-        company_deltas=company_deltas,
-        duration_seconds=duration,
-        new_cqs_result=new_cqs,
+    decision = _apply_decision_gates(
+        baseline_cqs, new_cqs, target_improved, target_tickers,
+        max_company_drop, duration, change,
     )
+    if decision.decision != Decision.KEEP:
+        revert_config_change(change)
+    return decision
 
 
 # =============================================================================
@@ -1014,83 +1030,9 @@ def evaluate_experiment_in_memory(
 
     duration = time.time() - start_time
 
-    # Check for hard veto (NEW regressions only — pre-existing ones don't count)
-    new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
-    if new_regressions > 0:
-        return ExperimentDecision(
-            decision=Decision.VETO,
-            cqs_before=baseline_cqs.cqs,
-            cqs_after=new_cqs.cqs,
-            reason=f"HARD VETO: {new_regressions} new regression(s) detected (was {baseline_cqs.total_regressions}, now {new_cqs.total_regressions})",
-            duration_seconds=duration,
-        )
-
-    # Check per-company drops
-    company_deltas: Dict[str, float] = {}
-    for ticker, new_score in new_cqs.company_scores.items():
-        old_score = baseline_cqs.company_scores.get(ticker)
-        if old_score:
-            delta_pp = (new_score.pass_rate - old_score.pass_rate) * 100
-            company_deltas[ticker] = delta_pp
-            if delta_pp < -max_company_drop:
-                return ExperimentDecision(
-                    decision=Decision.DISCARD,
-                    cqs_before=baseline_cqs.cqs,
-                    cqs_after=new_cqs.cqs,
-                    reason=f"Company {ticker} dropped {delta_pp:.1f}pp (limit: {max_company_drop}pp)",
-                    company_deltas=company_deltas,
-                    duration_seconds=duration,
-                )
-
-    # Check for CQS improvement (same logic as evaluate_experiment)
-    if target_improved:
-        if new_cqs.cqs < baseline_cqs.cqs - 0.0001:
-            return ExperimentDecision(
-                decision=Decision.DISCARD,
-                cqs_before=baseline_cqs.cqs,
-                cqs_after=new_cqs.cqs,
-                reason=f"Global regression despite target improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
-                company_deltas=company_deltas,
-                duration_seconds=duration,
-            )
-    else:
-        if new_cqs.cqs <= baseline_cqs.cqs:
-            return ExperimentDecision(
-                decision=Decision.DISCARD,
-                cqs_before=baseline_cqs.cqs,
-                cqs_after=new_cqs.cqs,
-                reason=f"No CQS improvement ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})",
-                company_deltas=company_deltas,
-                duration_seconds=duration,
-            )
-
-    # EF-CQS gate: KEEP requires EF-CQS did not decrease
-    ef_regression = new_cqs.ef_cqs < baseline_cqs.ef_cqs - 0.001
-    if ef_regression:
-        return ExperimentDecision(
-            decision=Decision.DISCARD,
-            cqs_before=baseline_cqs.cqs,
-            cqs_after=new_cqs.cqs,
-            reason=f"EF-CQS regression: {baseline_cqs.ef_cqs:.4f} -> {new_cqs.ef_cqs:.4f}",
-            company_deltas=company_deltas,
-            duration_seconds=duration,
-        )
-
-    # SUCCESS
-    delta = new_cqs.cqs - baseline_cqs.cqs
-    if target_improved and delta <= 0:
-        reason = f"Target company improved, global CQS non-regressing ({baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f})"
-    else:
-        reason = f"CQS improved by {delta:.4f}"
-
-    return ExperimentDecision(
-        decision=Decision.KEEP,
-        cqs_before=baseline_cqs.cqs,
-        cqs_after=new_cqs.cqs,
-        reason=reason,
-        company_deltas=company_deltas,
-        duration_seconds=duration,
-        new_cqs_result=new_cqs,
+    return _apply_decision_gates(
+        baseline_cqs, new_cqs, target_improved, target_tickers,
+        max_company_drop, duration,
     )
 
 

@@ -1218,16 +1218,11 @@ class ReferenceValidator:
                 has_known_concept = True
 
         internal_ok = validation.internal_status in ("VALID_INTERNAL", "VALID_PARTIAL")
-        equation_conflict = validation.internal_status == "EQUATION_CONFLICT"
 
         if has_ref_match and has_known_concept and internal_ok:
             return "high"
-        elif has_ref_match and (has_known_concept or internal_ok):
-            return "medium"
         elif has_ref_match:
             return "medium"
-        elif result.is_mapped and internal_ok and not equation_conflict:
-            return "low"
         elif result.is_mapped:
             return "low"
         else:
