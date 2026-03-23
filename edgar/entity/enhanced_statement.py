@@ -1974,6 +1974,8 @@ class EnhancedStatementBuilder:
         """Build Income Statement with essential concepts promoted to top level."""
         items = []
         nodes = virtual_tree['nodes']
+        promoted_added = set()
+        abstract_root = None
 
         # First, add the abstract root for structure
         for root_concept in virtual_tree.get('roots', []):
@@ -1987,6 +1989,7 @@ class EnhancedStatementBuilder:
                     statement_type=statement_type
                 )
                 if item:
+                    abstract_root = root_concept
                     # Clear children to rebuild with promoted concepts
                     item.children = []
 
@@ -2065,6 +2068,31 @@ class EnhancedStatementBuilder:
 
                     items.append(item)
                     break
+
+        # Keep additional root concepts that are not children of the abstract root.
+        # This preserves valid top-level concepts like weighted-average shares
+        # that may be rooted outside IncomeStatementAbstract in learned trees.
+        if items:
+            existing_root_concepts = {item.concept for item in items}
+            for root_concept in virtual_tree.get('roots', []):
+                if root_concept == abstract_root:
+                    continue
+                if root_concept in promoted_added:
+                    continue
+                if root_concept in existing_root_concepts:
+                    continue
+
+                root_item = self._build_canonical_item(
+                    root_concept,
+                    nodes,
+                    period_maps,
+                    periods,
+                    depth=0,
+                    statement_type=statement_type
+                )
+                if root_item:
+                    items.append(root_item)
+                    existing_root_concepts.add(root_concept)
 
         # If no abstract root, just build normally
         if not items:
