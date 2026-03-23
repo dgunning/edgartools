@@ -101,7 +101,8 @@ _ACCEPTS_LINKED_FROM = {
 _REVENUE_CONCEPTS = [
     'RevenueFromContractWithCustomerExcludingAssessedTax',
     'SalesRevenueNet',
-    'Revenues'
+    'Revenues',
+    'Revenue',
 ]
 
 # Cost concepts for deduplication (in priority order - first found wins)
