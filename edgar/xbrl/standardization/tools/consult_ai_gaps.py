@@ -8,6 +8,7 @@ proposals through the standard CQS gates.
 Usage inside Claude Code:
     from edgar.xbrl.standardization.tools.consult_ai_gaps import (
         consult_ai_gaps, evaluate_ai_proposals,
+        build_agent_prompt, collect_agent_proposals,
     )
 
     # Step 2a: Generate AI proposals
@@ -25,7 +26,7 @@ Usage inside Claude Code:
 import json
 import logging
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 from edgar.xbrl.standardization.tools.auto_eval import (
     MetricGap,
@@ -49,6 +50,29 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
 from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
 
 logger = logging.getLogger(__name__)
+
+
+def _select_model(gap: UnresolvedGap) -> str:
+    """Select AI model based on gap difficulty and agent type."""
+    if gap.difficulty_tier == "hard" or gap.ai_agent_type == "pattern_learner":
+        return "opus"
+    return "sonnet"
+
+
+def _metric_gap_from_unresolved(gap: UnresolvedGap) -> MetricGap:
+    """Project an UnresolvedGap back to a MetricGap for ProposalRecord."""
+    return MetricGap(
+        ticker=gap.ticker,
+        metric=gap.metric,
+        gap_type=gap.gap_type,
+        estimated_impact=gap.estimated_impact,
+        reference_value=gap.reference_value,
+        xbrl_value=gap.xbrl_value,
+        hv_subtype=gap.hv_subtype,
+        current_variance=gap.current_variance,
+        graveyard_count=gap.graveyard_count,
+        notes=gap.notes,
+    )
 
 
 def build_consultation_prompt(gap: UnresolvedGap) -> str:
@@ -136,6 +160,116 @@ between XBRL and yfinance), respond with ADD_EXCLUSION or ADD_DIVERGENCE."""
     return prompt
 
 
+def build_agent_prompt(gap: UnresolvedGap) -> str:
+    """Build an enriched prompt for gap-solver or gap-investigator agents.
+
+    Extends build_consultation_prompt() with:
+    - Machine-readable gap JSON for structured parsing
+    - Tool usage instructions specific to the agent type
+    - Config file paths to read
+    - Explicit output format requirements
+    """
+    base_prompt = build_consultation_prompt(gap)
+    gap_json = json.dumps(gap.to_dict(), indent=2, default=str)
+
+    if gap.difficulty_tier == "hard":
+        tool_instructions = """## Tool Usage Instructions (Opus Investigation)
+
+You have access to powerful investigation tools. Use them IN ORDER:
+
+1. **Read config state** — check what's already mapped in metrics.yaml and companies.yaml
+2. **Analyze graveyard** — understand ALL prior failures before trying anything
+3. **discover_concepts(ticker, metric)** — find candidate XBRL concepts
+4. **verify_mapping(ticker, metric, concept)** — validate candidates against yfinance
+5. **learn_mappings(metric, tickers)** — discover cross-company patterns
+6. **Load XBRL filing** — examine calculation trees and dimensional data directly:
+   ```python
+   from edgar import Company
+   company = Company(TICKER)
+   filing = company.get_filings(form="10-K").latest()
+   xbrl = filing.xbrl()
+   ```
+
+IMPORTANT: Do NOT re-propose anything found in the graveyard entries above."""
+    else:
+        tool_instructions = """## Tool Usage Instructions (Sonnet Solver)
+
+Use these tools IN ORDER:
+
+1. **Read config** — check metrics.yaml for current known_concepts
+2. **discover_concepts(ticker, metric)** — find candidate XBRL concepts
+3. **verify_mapping(ticker, metric, concept)** — validate candidates (variance < 15%)
+4. **check_fallback_quality(metric, concept)** — ensure semantic quality before proposing
+
+IMPORTANT: Do NOT re-propose anything found in the graveyard entries above."""
+
+    config_paths = """## Config File Paths
+
+```
+edgar/xbrl/standardization/config/metrics.yaml
+edgar/xbrl/standardization/config/companies.yaml
+```"""
+
+    return f"""{base_prompt}
+
+{tool_instructions}
+
+{config_paths}
+
+## Machine-Readable Gap Context
+
+```json
+{gap_json}
+```
+
+## REMINDER: Return ONLY a JSON object. No markdown fences, no explanation outside the JSON."""
+
+
+def collect_agent_proposals(
+    responses: List[Tuple[UnresolvedGap, Optional[str]]],
+) -> List[ProposalRecord]:
+    """Convert raw agent response strings into validated ProposalRecords.
+
+    Args:
+        responses: List of (gap, response_text) tuples. response_text may be None
+            if the agent failed or returned nothing.
+
+    Returns:
+        List of ProposalRecord ready for save_proposals_to_json().
+    """
+    proposals: List[ProposalRecord] = []
+
+    for gap, response_text in responses:
+        if response_text is None:
+            logger.info(f"Skipping {gap.ticker}:{gap.metric} — no agent response")
+            continue
+
+        change = parse_gpt_response(response_text, gap.ticker, gap.metric)
+
+        if change is None:
+            logger.info(f"Skipping {gap.ticker}:{gap.metric} — invalid response")
+            continue
+
+        change.source = "ai_agent"
+        change.ai_agent_type = gap.ai_agent_type
+
+        model = _select_model(gap)
+        worker_id = f"agent_{model}"
+
+        proposals.append(ProposalRecord(
+            gap=_metric_gap_from_unresolved(gap),
+            proposal=change,
+            worker_id=worker_id,
+        ))
+        logger.info(
+            f"Collected proposal for {gap.ticker}:{gap.metric}: "
+            f"{change.change_type.value} via {worker_id}"
+        )
+
+    logger.info(f"Collected {len(proposals)}/{len(responses)} valid proposals")
+    return proposals
+
+
 def consult_ai_gaps(
     manifest_path: Path,
     ai_caller: Callable[[str, str], Optional[str]],
@@ -174,10 +308,7 @@ def consult_ai_gaps(
     model_counts: Dict[str, int] = {"sonnet": 0, "opus": 0}
 
     for i, gap in enumerate(gaps):
-        # Select model based on difficulty tier
-        model = "opus" if gap.difficulty_tier == "hard" else "sonnet"
-        if gap.ai_agent_type == "pattern_learner":
-            model = "opus"
+        model = _select_model(gap)
 
         logger.info(
             f"[{i+1}/{len(gaps)}] Consulting {model} for "
@@ -201,25 +332,12 @@ def consult_ai_gaps(
         if change is not None:
             change.source = "ai_agent"
             change.ai_agent_type = gap.ai_agent_type
-            # Build MetricGap for ProposalRecord (required by existing serialization)
-            proposal_gap = MetricGap(
-                ticker=gap.ticker,
-                metric=gap.metric,
-                gap_type=gap.gap_type,
-                estimated_impact=gap.estimated_impact,
-                reference_value=gap.reference_value,
-                xbrl_value=gap.xbrl_value,
-                hv_subtype=gap.hv_subtype,
-                current_variance=gap.current_variance,
-                graveyard_count=gap.graveyard_count,
-                notes=gap.notes,
-            )
             proposals.append(ProposalRecord(
-                gap=proposal_gap,
+                gap=_metric_gap_from_unresolved(gap),
                 proposal=change,
-                worker_id=f"ai_{model}",
+                worker_id=f"agent_{model}",
             ))
-            model_counts[model] = model_counts.get(model, 0) + 1
+            model_counts[model] += 1
             logger.info(f"  -> Proposal: {change.change_type.value} on {change.yaml_path}")
         else:
             logger.info(f"  -> No valid proposal parsed")
