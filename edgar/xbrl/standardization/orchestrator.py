@@ -276,6 +276,7 @@ class Orchestrator:
         
         form_type = getattr(filing, 'form', '10-K')
         filing_date = getattr(filing, 'period_of_report', None)
+        self.validator._current_accession_number = getattr(filing, 'accession_no', None)
         fiscal_period = self.tree_parser._get_fiscal_period(filing)
 
         # Layer 1: Tree Parser (static)
@@ -432,6 +433,7 @@ class Orchestrator:
 
             form_type = getattr(filing, 'form', '10-K')
             filing_date = getattr(filing, 'period_of_report', None)
+            self.validator._current_accession_number = getattr(filing, 'accession_no', None)
 
         fiscal_period = self.tree_parser._get_fiscal_period(filing)
 

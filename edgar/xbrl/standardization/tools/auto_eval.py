@@ -1108,8 +1108,14 @@ def record_eval_results(
                 is_valid=True,
                 confidence=result.confidence,
                 validation_tolerance=tolerance,
-                reference_source=val.rfa_source if val and hasattr(val, 'rfa_source') else None,
-                publish_confidence=val.publish_confidence if val and hasattr(val, 'publish_confidence') else None,
+                reference_source=val.rfa_source if val else None,
+                publish_confidence=val.publish_confidence if val else None,
+                accession_number=val.accession_number if val else None,
+                period_type=val.period_type if val else None,
+                period_start=val.period_start if val else None,
+                period_end=val.period_end if val else None,
+                unit=val.unit if val else None,
+                decimals=val.fact_decimals if val else None,
             )
             ledger.record_run(run)
             recorded += 1

@@ -72,6 +72,13 @@ class ValidationResult:
     internal_status: Optional[str] = None    # "VALID_INTERNAL" | "INVALID_INTERNAL" | "VALID_PARTIAL" | "EQUATION_CONFLICT" | None
     # Publish confidence: how trustworthy is this result for external consumption?
     publish_confidence: str = "unverified"   # "high" | "medium" | "low" | "unverified"
+    # Fact provenance (captured from the XBRL fact used for extraction)
+    accession_number: Optional[str] = None
+    period_type: Optional[str] = None        # "instant" | "duration"
+    period_start: Optional[str] = None       # ISO date
+    period_end: Optional[str] = None         # ISO date
+    unit: Optional[str] = None               # "USD", "shares", "pure"
+    fact_decimals: Optional[int] = None      # XBRL decimals attribute
     # Extraction evidence for diagnostic drilling
     resolution_type: str = "none"            # "direct" | "composite" | "industry" | "none"
     components_used: Optional[list] = None   # XBRL concepts used in extraction
@@ -1062,10 +1069,19 @@ class ReferenceValidator:
             validation.components_missing = _components_missing if _components_missing else None
             validation.company_industry = _company_industry
 
+            # Stamp fact-level provenance from the last extraction
+            provenance = getattr(self, '_last_extraction_provenance', {})
+            if provenance:
+                validation.period_type = provenance.get('period_type')
+                validation.period_start = provenance.get('period_start')
+                validation.period_end = provenance.get('period_end')
+                validation.unit = provenance.get('unit')
+                validation.fact_decimals = provenance.get('decimals')
+
             validations[metric] = validation
 
         return validations
-    
+
     def validate_and_update_mappings(
         self,
         ticker: str,
@@ -1182,12 +1198,14 @@ class ReferenceValidator:
                 result.validation_status = "valid"
                 result.validation_notes = "Metric excluded for this company"
 
-        # Compute publish_confidence for each validation result
+        # Compute publish_confidence and stamp provenance for each validation result
+        accession = getattr(self, '_current_accession_number', None)
         for metric, validation in validations.items():
             result = results.get(metric)
             validation.publish_confidence = self._compute_publish_confidence(
                 result, validation, ticker, metric
             )
+            validation.accession_number = accession
 
         return validations
 
@@ -1510,6 +1528,7 @@ class ReferenceValidator:
         """
         Extract value for a concept (or list of candidate concepts).
         """
+        self._last_extraction_provenance = {}  # Reset per extraction
         try:
             if not xbrl:
                 return None
@@ -1706,6 +1725,15 @@ class ReferenceValidator:
 
                 # Get the value
                 value = float(latest['numeric_value'])
+
+                # Capture fact provenance from the selected row
+                self._last_extraction_provenance = {
+                    'period_type': latest.get('period_type') if hasattr(latest, 'get') else None,
+                    'period_start': str(latest.get('period_start', '')) or None,
+                    'period_end': str(latest.get('period_end', '')) or None,
+                    'unit': latest.get('unit_ref') if hasattr(latest, 'get') else None,
+                    'decimals': latest.get('decimals') if hasattr(latest, 'get') else None,
+                }
 
                 # Handle "placeholder zero"
                 if value == 0:
