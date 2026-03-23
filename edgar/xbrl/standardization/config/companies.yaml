@@ -1905,12 +1905,9 @@ companies:
       OperatingIncome:
         form_types:
         - 10-K
-        variance_pct: 67.8
-        reason: 'industry_logic OperatingIncome ($1.4B) vs yfinance ($4.4B). REIT
-          income structure differs from standard industrial.
-
-          '
-        skip_validation: true
+        variance_pct: 94.0
+        reason: 'Value drifted: golden=940261000.0, current=1626478000.0'
+        skip_validation: false
         added_date: '2026-03-04'
         remediation_status: deferred
         review_date: '2026-09-04'

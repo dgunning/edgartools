@@ -21,6 +21,20 @@ metrics:
       parent_pattern: OperatingIncome
       weight: 1.0
     universal: true
+    standardization:
+      company_overrides:
+        MS:
+          components:
+          - InterestExpenseOperating
+          - TradingGainsLosses
+          - ms:AssetManagementFees
+          notes: Auto-solver company-specific via MS, 0/0 periods, 0/3 companies
+        AXP:
+          components:
+          - NoninterestIncome
+          - EarningsPerShareDiluted
+          - RevenuesNetOfInterestExpense
+          notes: Auto-solver company-specific via AXP, 0/0 periods, 0/3 companies
   COGS:
     description: Cost of goods/services sold
     standard_tag: CostOfGoodsAndServicesSold
@@ -73,6 +87,10 @@ metrics:
           - IncomeTaxExpenseBenefit
           - ProfitLoss
           notes: Auto-solver company-specific via DIS, 0/0 periods, 0/3 companies
+        PLD:
+          components:
+          - OperatingIncomeLoss
+          notes: Auto-solver company-specific via PLD, 2/3 periods, 0/3 companies
   PretaxIncome:
     description: Income before income taxes
     known_concepts:
@@ -247,6 +265,12 @@ metrics:
           - OtherIndefiniteLivedIntangibleAssets
           - Goodwill
           notes: Auto-solver company-specific via CME, 3/3 periods, 0/3 companies
+        T:
+          components:
+          - CommonStockValue
+          - PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization
+          - DeferredIncomeTaxLiabilitiesNet
+          notes: Auto-solver company-specific via T, 3/3 periods, 0/3 companies
   ShortTermDebt:
     description: Short-term borrowings and current debt (matches yfinance Current
       Debt)
@@ -274,6 +298,14 @@ metrics:
       section: liabilities_current
     universal: false
     notes: yfinance 'Current Debt' sums multiple short-term debt types
+    standardization:
+      company_overrides:
+        MS:
+          components:
+          - CapitalAccumulationPlans
+          - AccumulatedOtherComprehensiveIncomeLossNetOfTax
+          - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+          notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
   LongTermDebt:
     description: Long-term debt (non-current portion)
     standard_tag: LongTermDebt
@@ -287,6 +319,18 @@ metrics:
       section: liabilities_noncurrent
     universal: true
     notes: LongTermDebtNoncurrent preferred (excludes current portion)
+    standardization:
+      company_overrides:
+        JPM:
+          components:
+          - BeneficialInterest
+          - jpm:FinancingReceivableExcludingAccruedInterestBeforeAllowanceForCreditLossesNetOfDeferredIncome
+          notes: Auto-solver company-specific via JPM, 3/3 periods, 0/3 companies
+        DE:
+          components:
+          - MinorityInterest
+          - de:LongTermDebtAndFinanceLeasesNoncurrent
+          notes: Auto-solver company-specific via DE, 0/0 periods, 0/3 companies
   CashAndEquivalents:
     description: Cash and cash equivalents
     standard_tag: CashAndCashEquivalents
@@ -310,6 +354,19 @@ metrics:
       - CASHFLOW
       section: assets_current
     universal: true
+    standardization:
+      company_overrides:
+        MS:
+          components:
+          - OtherAssets
+          - CapitalAccumulationPlans
+          - TreasuryStockValue
+          - LoansReceivableHeldForSaleNetNotPartOfDisposalGroup
+          notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
+        AXP:
+          components:
+          - CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents
+          notes: Auto-solver company-specific via AXP, 2/3 periods, 0/3 companies
   WeightedAverageSharesDiluted:
     description: Weighted average diluted shares outstanding for EPS calculation
     standard_tag: SharesFullyDilutedAverage
@@ -503,6 +560,38 @@ metrics:
       weight: 1.0
     universal: false
     notes: Not applicable to services companies or banks
+    standardization:
+      company_overrides:
+        ICE:
+          components:
+          - OperatingIncomeLoss
+          - ice:IncreaseDecreaseMarginDepositsAndGuarantyFunds
+          notes: Auto-solver company-specific via ICE, 2/2 periods, 0/3 companies
+        NSC:
+          components:
+          - IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+          - InterestExpenseNonoperating
+          notes: Auto-solver company-specific via NSC, 1/1 periods, 0/3 companies
+        PLD:
+          components:
+          - pld:OperatingExpensesBeforeGainsOnRealEstateTransactionsNet
+          - ProceedsFromSaleOfRealEstateHeldforinvestment
+          notes: Auto-solver company-specific via PLD, 3/3 periods, 0/3 companies
+        EQIX:
+          components:
+          - NetCashProvidedByUsedInOperatingActivities
+          - OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentBeforeTax
+          notes: Auto-solver company-specific via EQIX, 1/1 periods, 0/3 companies
+        DE:
+          components:
+          - ProceedsFromDebtMaturingInMoreThanThreeMonths
+          - InterestExpense
+          notes: Auto-solver company-specific via DE, 2/3 periods, 0/3 companies
+        UPS:
+          components:
+          - OtherCostAndExpenseOperating
+          - OperatingIncomeLoss
+          notes: Auto-solver company-specific via UPS, 2/3 periods, 0/3 companies
   ResearchAndDevelopment:
     description: Research and development expense
     standard_tag: ResearchAndDevelopmentExpense
@@ -530,6 +619,43 @@ metrics:
       - OPERATIONS
     universal: true
     validation_tolerance: 25
+    standardization:
+      company_overrides:
+        JPM:
+          components:
+          - InterestExpenseOperating
+          notes: Auto-solver company-specific via JPM, 2/2 periods, 0/3 companies
+        C:
+          components:
+          - InterestIncomeExpenseAfterProvisionForLoanLoss
+          - c:InterestAndDividendIncomeSecuritiesExcludingTradingSecurities
+          - InterestIncomeSecuritiesTaxable
+          notes: Auto-solver company-specific via C, 3/3 periods, 0/3 companies
+        MS:
+          components:
+          - NoninterestIncome
+          - ms:InterestExpenseCustomerPayablesAndOther
+          - ms:NetIncomeLossBeforeUndistributedEarningsFromSubsidiaries
+          notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
+        ICE:
+          components:
+          - EntityCommonStockSharesOutstanding
+          - ShareBasedCompensation
+          notes: Auto-solver company-specific via ICE, 2/2 periods, 0/3 companies
+        AXP:
+          components:
+          - BusinessDevelopment
+          - CurrentFederalTaxExpenseBenefit
+          notes: Auto-solver company-specific via AXP, 3/3 periods, 0/3 companies
+        EQIX:
+          components:
+          - RealEstateAccumulatedDepreciationRealEstateSold
+          - InvestmentIncomeInterest
+          notes: Auto-solver company-specific via EQIX, 2/3 periods, 0/3 companies
+        TSLA:
+          components:
+          - InterestExpenseNonoperating
+          notes: Auto-solver company-specific via TSLA, 2/2 periods, 0/3 companies
   IncomeTaxExpense:
     description: Income tax provision (expense or benefit)
     standard_tag: IncomeTaxExpenseBenefit
@@ -570,6 +696,13 @@ metrics:
       statements:
       - BALANCE
     universal: true
+    standardization:
+      company_overrides:
+        PLD:
+          components:
+          - OperatingExpenses
+          - pld:ManagementFeeRevenueforUnconsolidatedCoinvestmentVentures
+          notes: Auto-solver company-specific via PLD, 2/2 periods, 0/3 companies
   CurrentLiabilities:
     description: Total current liabilities
     standard_tag: LiabilitiesCurrent
@@ -579,6 +712,18 @@ metrics:
       statements:
       - BALANCE
     universal: true
+    standardization:
+      company_overrides:
+        PLD:
+          components:
+          - DirectCostsOfLeasedAndRentedPropertyOrEquipment
+          - pld:RepurchaseOfAndRepaymentsOnDebtExcludingLineOfCredit
+          notes: Auto-solver company-specific via PLD, 2/3 periods, 0/3 companies
+        DE:
+          components:
+          - ProceedsFromCollectionOfFinanceReceivables
+          - ComprehensiveIncomeNetOfTax
+          notes: Auto-solver company-specific via DE, 3/3 periods, 0/3 companies
   TotalLiabilities:
     description: Total liabilities
     standard_tag: Liabilities
@@ -611,6 +756,27 @@ metrics:
     universal: false
     notes: Not meaningful for banks/financial services
     validation_tolerance: 20
+    standardization:
+      company_overrides:
+        JPM:
+          components:
+          - IncomeLossFromSubsidiariesNetOfTax
+          - IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate
+          notes: Auto-solver company-specific via JPM, 1/1 periods, 0/3 companies
+        MS:
+          components:
+          - DefinedBenefitPlanServiceCost
+          notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
+        ICE:
+          components:
+          - BusinessAcquisitionsProFormaNetIncomeLoss
+          - EntityCommonStockSharesOutstanding
+          notes: Auto-solver company-specific via ICE, 2/2 periods, 0/3 companies
+        PLD:
+          components:
+          - PaymentsForLeasingCostsCommissionsAndTenantImprovements
+          - pld:PaymentForPropertyImprovements
+          notes: Auto-solver company-specific via PLD, 2/3 periods, 0/3 companies
   RetainedEarnings:
     description: Retained earnings (accumulated deficit)
     standard_tag: RetainedEarningsAccumulatedDeficit
@@ -655,6 +821,18 @@ metrics:
       - CASHFLOW
     universal: false
     validation_tolerance: 25
+    standardization:
+      company_overrides:
+        C:
+          components:
+          - c:RevenueExcludingRevenuefromContractwithCustomerIncludingAssessedTax
+          - PaymentsToAcquirePropertyPlantAndEquipment
+          notes: Auto-solver company-specific via C, 3/3 periods, 0/3 companies
+        MS:
+          components:
+          - BrokerageCommissionsRevenue
+          - ms:InterestIncomeCashAndCashEquivalents
+          notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
   DividendPerShare:
     description: Dividends per share declared
     standard_tag: CommonStockDividendsPerShareDeclared

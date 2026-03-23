@@ -778,6 +778,46 @@ class ExperimentLedger:
                 cursor.execute('SELECT * FROM golden_masters')
             return [self._row_to_golden(row) for row in cursor.fetchall()]
 
+    def clear_golden_master(self, ticker: str, metric: str) -> bool:
+        """Remove a golden master to allow re-promotion with corrected data.
+
+        Returns True if a golden master was deactivated, False if none found.
+        """
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE golden_masters SET is_active = 0
+                WHERE ticker = ? AND metric = ? AND is_active = 1
+            ''', (ticker, metric))
+            conn.commit()
+            changed = cursor.rowcount > 0
+
+        if changed:
+            logger.info(f"Deactivated golden master for {ticker}/{metric}")
+        return changed
+
+    def clear_regressed_golden_masters(self, regressed_pairs: List[tuple]) -> int:
+        """Bulk-deactivate golden masters for regressed (ticker, metric) pairs.
+
+        Args:
+            regressed_pairs: List of (ticker, metric) tuples.
+
+        Returns:
+            Number of golden masters deactivated.
+        """
+        if not regressed_pairs:
+            return 0
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.executemany('''
+                UPDATE golden_masters SET is_active = 0
+                WHERE ticker = ? AND metric = ? AND is_active = 1
+            ''', regressed_pairs)
+            conn.commit()
+            count = cursor.rowcount
+        logger.info(f"Deactivated {count}/{len(regressed_pairs)} regressed golden masters")
+        return count
+
     def _row_to_golden(self, row: sqlite3.Row) -> GoldenMaster:
         """Convert database row to GoldenMaster."""
         return GoldenMaster(

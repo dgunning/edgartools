@@ -31,3 +31,9 @@ pytest-of-*/
 tmp*/
 # Local MCP config
 .mcp.json
+# Experiment ledger databases (large binary, local state)
+**/experiment_ledger.db
+**/experiment_ledger.db.bak-*
+# Auto-eval operational artifacts
+*.config.lock
+proposals_worker_*.json

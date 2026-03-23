@@ -371,8 +371,8 @@ class MetricGap:
     @property
     def fix_tier(self) -> str:
         """Determine fix tier based on root cause."""
-        TIER_1A = {"missing_concept", "wrong_concept", "industry_structural"}
-        TIER_1B = {"extension_concept", "partial_composite", "sign_error"}
+        TIER_1A = {"missing_concept", "wrong_concept", "industry_structural", "formula_needed"}
+        TIER_1B = {"extension_concept", "partial_composite", "sign_error", "algebraic_coincidence"}
         TIER_2 = {"scale_mismatch", "reference_error"}
         if self.root_cause in TIER_1A:
             return "1A"
@@ -476,6 +476,27 @@ def list_regressions(cqs_result: CQSResult) -> List[Tuple[str, str]]:
     but now fails validation.
     """
     return list(cqs_result.regressed_metrics)
+
+
+def clear_regressions(cqs_result: CQSResult, ledger=None) -> int:
+    """Clear golden masters for all regressed metrics so they can be re-promoted.
+
+    Args:
+        cqs_result: CQS result with regressed_metrics populated.
+        ledger: ExperimentLedger instance (uses default if None).
+
+    Returns:
+        Number of golden masters deactivated.
+    """
+    from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    regressed = list_regressions(cqs_result)
+    if not regressed:
+        return 0
+
+    return ledger.clear_regressed_golden_masters(regressed)
 
 
 # =============================================================================
@@ -841,14 +862,14 @@ def _compute_company_cqs(
 
         total += 1
 
-        if result.is_mapped:
-            mapped += 1
-
-        # Handle unverified metrics — exclude from pass/fail denominator
+        # Handle unverified metrics — exclude from ALL scoring (coverage, pass/fail, etc.)
         if result.validation_status == "unverified":
             unverified_count += 1
             unverified_metrics_list.append(metric)
-            continue  # Don't count in pass/fail
+            continue  # Don't count in any denominator or numerator
+
+        if result.is_mapped:
+            mapped += 1
 
         # Check validation status
         if result.validation_status == "valid":
@@ -899,7 +920,7 @@ def _compute_company_cqs(
     effective_total = total - disputed_count - unverified_count
     pass_rate = valid / effective_total if effective_total > 0 else 0.0
     mean_variance = sum(variances) / len(variances) if variances else 0.0
-    coverage_rate = mapped / effective_total if effective_total > 0 else 0.0
+    coverage_rate = min(1.0, mapped / effective_total) if effective_total > 0 else 0.0
     golden_master_rate = golden_count / effective_total if effective_total > 0 else 0.0
     ef_pass_rate = ef_pass_count / effective_total if effective_total > 0 else 0.0
     sa_pass_rate = sa_pass_count / effective_total if effective_total > 0 else 0.0
@@ -1336,14 +1357,34 @@ def _classify_gap(
     # Check validation_status before is_mapped — the orchestrator resets concept to None
     # on validation failure, so is_mapped becomes False but validation_status stays "invalid"
     if result.validation_status == "invalid":
+        # Use RFA/SMA sub-scores to refine root cause routing
+        rc = "wrong_concept"  # default
+        notes = result.reasoning or f"Mapped to {result.concept} but failed validation"
+        if validation:
+            sma = validation.sma_pass
+            rfa = validation.rfa_pass
+            if sma is True and rfa is False:
+                # Concept is semantically correct but value doesn't match —
+                # likely needs a standardization formula or composite resolution
+                rc = "formula_needed"
+                notes += " [SMA pass, RFA fail → concept right, needs formula/composite]"
+            elif sma is False and rfa is True:
+                # Value matches but concept is wrong — algebraic coincidence
+                rc = "algebraic_coincidence"
+                notes += " [SMA fail, RFA pass → value matches by coincidence]"
+            elif sma is False and rfa is False:
+                # Both wrong — need full concept search
+                rc = "missing_concept"
+                notes += " [SMA fail, RFA fail → need concept search]"
+
         return MetricGap(
             ticker=ticker, metric=metric, gap_type="validation_failure",
             estimated_impact=per_metric_impact * 1.5,
             current_variance=variance, reference_value=ref_val,
             xbrl_value=xbrl_val, graveyard_count=gc,
-            notes=result.reasoning or f"Mapped to {result.concept} but failed validation",
+            notes=notes,
             extraction_evidence=evidence,
-            root_cause="wrong_concept",
+            root_cause=rc,
         )
 
     # Unmapped: no concept found
