@@ -361,6 +361,11 @@ class OvernightReport:
     gpt_consultations: int = 0       # How many times GPT was consulted
     gpt_proposals_kept: int = 0      # How many GPT proposals survived CQS eval
 
+    # Two-step architecture: gap manifest output
+    unresolved_count: int = 0
+    gap_manifest_path: str = ""
+    ai_routing_summary: Dict[str, int] = field(default_factory=dict)
+
     @property
     def cqs_improvement(self) -> float:
         return self.cqs_end - self.cqs_start
@@ -2030,7 +2035,7 @@ between XBRL and yfinance), respond with ADD_EXCLUSION or ADD_DIVERGENCE."""
         return None
 
     # Parse the JSON response
-    return _parse_gpt_response(response_text, gap)
+    return parse_gpt_response(response_text, gap.ticker, gap.metric)
 
 
 def _call_gpt_via_mcp(prompt: str, file_paths: List[str]) -> Optional[str]:
@@ -2053,8 +2058,18 @@ def _call_gpt_via_mcp(prompt: str, file_paths: List[str]) -> Optional[str]:
     return None
 
 
-def _parse_gpt_response(response_text: str, gap: 'MetricGap') -> Optional[ConfigChange]:
-    """Parse GPT's JSON response into a ConfigChange."""
+def parse_gpt_response(
+    response_text: str,
+    ticker: str,
+    metric: str,
+) -> Optional[ConfigChange]:
+    """Parse GPT/AI JSON response into a ConfigChange.
+
+    Args:
+        response_text: Raw JSON response from the AI model.
+        ticker: Target company ticker (for ConfigChange metadata).
+        metric: Target metric name (for ConfigChange metadata).
+    """
     try:
         # Strip markdown code fences if present
         text = response_text.strip()
@@ -2094,9 +2109,9 @@ def _parse_gpt_response(response_text: str, gap: 'MetricGap') -> Optional[Config
             change_type=change_type,
             yaml_path=data["yaml_path"],
             new_value=data["new_value"],
-            rationale=f"[GPT-5.4] {data['rationale']}",
-            target_metric=gap.metric,
-            target_companies=gap.ticker,
+            rationale=f"[AI] {data['rationale']}",
+            target_metric=metric,
+            target_companies=ticker,
         )
 
     except json.JSONDecodeError as e:
@@ -2372,11 +2387,13 @@ def run_overnight(
     # Subtype failure tracker — for GPT escalation in propose_fn
     tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
     proposal_cache = ProposalCache()
+    router = AIAgentRouter()
 
     consecutive_failures = 0
     max_consecutive_failures = 10
 
     use_fast_path_gaps = None  # Set after KEEP to skip identify_gaps()
+    unresolved_gaps: List[UnresolvedGap] = []
 
     # Step 2: Main experiment loop
     while time.time() < deadline:
@@ -2441,13 +2458,14 @@ def run_overnight(
                 report.stop_reason = "No proposal function"
                 break
 
-            change = propose_fn(gap, ledger.get_graveyard_entries(gap.metric))
+            graveyard_entries = ledger.get_graveyard_entries(gap.metric)
+            change = propose_fn(gap, graveyard_entries)
             if change is None:
-                router = AIAgentRouter()
                 agent_type = router.route(gap)
                 if agent_type is not None:
-                    logger.info(f"AI routing: {gap.ticker}:{gap.metric} -> {agent_type.value}")
-                    # TODO: Phase 2 — call the actual AI agent here
+                    unresolved = _build_unresolved_gap(gap, graveyard_entries, agent_type)
+                    unresolved_gaps.append(unresolved)
+                    logger.info(f"AI deferred: {gap.ticker}:{gap.metric} -> {agent_type.value}")
                 null_proposals += 1
                 continue
 
@@ -2549,6 +2567,33 @@ def run_overnight(
     report.cqs_end = current_baseline.cqs
     report.ef_cqs_end = current_baseline.ef_cqs
     report.sa_cqs_end = current_baseline.sa_cqs
+
+    # Emit gap manifest for Step 2 (AI consultation)
+    if unresolved_gaps:
+        # Build routing summary
+        routing_summary: Dict[str, int] = {}
+        for ug in unresolved_gaps:
+            routing_summary[ug.ai_agent_type] = routing_summary.get(ug.ai_agent_type, 0) + 1
+
+        manifest = GapManifest(
+            session_id=session_id,
+            created_at=datetime.now().isoformat(),
+            baseline_cqs=current_baseline.cqs,
+            eval_cohort=cohort,
+            gaps=unresolved_gaps,
+            config_fingerprint=get_config_fingerprint(),
+            deterministic_kept=report.experiments_kept,
+            deterministic_discarded=report.experiments_discarded + report.experiments_vetoed,
+        )
+        manifest_path = GAP_MANIFESTS_DIR / f"manifest_{session_id}.json"
+        save_gap_manifest(manifest, manifest_path)
+        report.gap_manifest_path = str(manifest_path)
+        report.unresolved_count = len(unresolved_gaps)
+        report.ai_routing_summary = routing_summary
+        logger.info(
+            f"Gap manifest: {len(unresolved_gaps)} unresolved gaps "
+            f"({routing_summary}) -> {manifest_path}"
+        )
 
     logger.info(
         f"Session {session_id} complete: "
@@ -3319,6 +3364,211 @@ class EvaluatedProposal:
             decision=decision,
             worker_id=d.get("worker_id", ""),
         )
+
+
+# =============================================================================
+# TWO-STEP ARCHITECTURE: GAP MANIFEST (Step 1 output → Step 2 input)
+# =============================================================================
+
+@dataclass
+class UnresolvedGap:
+    """Self-contained gap record for AI consultation.
+
+    Denormalizes all context the AI needs (extraction evidence, graveyard history)
+    so Step 2 can run without SQLite access.
+    """
+    # Core (from MetricGap)
+    ticker: str
+    metric: str
+    gap_type: str
+    hv_subtype: Optional[str] = None
+    reference_value: Optional[float] = None
+    xbrl_value: Optional[float] = None
+    current_variance: Optional[float] = None
+    estimated_impact: float = 0.0
+    graveyard_count: int = 0
+    root_cause: Optional[str] = None
+    notes: str = ""
+
+    # Extraction evidence (denormalized from ExtractionEvidence)
+    resolution_type: str = "none"
+    components_used: List[str] = field(default_factory=list)
+    components_missing: List[str] = field(default_factory=list)
+    company_industry: Optional[str] = None
+
+    # Graveyard history (denormalized from SQLite)
+    graveyard_entries: List[Dict] = field(default_factory=list)
+
+    # AI routing
+    ai_agent_type: str = ""
+    difficulty_tier: str = "standard"  # "standard" (Sonnet) | "hard" (Opus)
+
+    def to_dict(self) -> dict:
+        return {
+            "ticker": self.ticker,
+            "metric": self.metric,
+            "gap_type": self.gap_type,
+            "hv_subtype": self.hv_subtype,
+            "reference_value": self.reference_value,
+            "xbrl_value": self.xbrl_value,
+            "current_variance": self.current_variance,
+            "estimated_impact": self.estimated_impact,
+            "graveyard_count": self.graveyard_count,
+            "root_cause": self.root_cause,
+            "notes": self.notes,
+            "resolution_type": self.resolution_type,
+            "components_used": self.components_used,
+            "components_missing": self.components_missing,
+            "company_industry": self.company_industry,
+            "graveyard_entries": self.graveyard_entries,
+            "ai_agent_type": self.ai_agent_type,
+            "difficulty_tier": self.difficulty_tier,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'UnresolvedGap':
+        return cls(
+            ticker=d["ticker"],
+            metric=d["metric"],
+            gap_type=d["gap_type"],
+            hv_subtype=d.get("hv_subtype"),
+            reference_value=d.get("reference_value"),
+            xbrl_value=d.get("xbrl_value"),
+            current_variance=d.get("current_variance"),
+            estimated_impact=d.get("estimated_impact", 0.0),
+            graveyard_count=d.get("graveyard_count", 0),
+            root_cause=d.get("root_cause"),
+            notes=d.get("notes", ""),
+            resolution_type=d.get("resolution_type", "none"),
+            components_used=d.get("components_used", []),
+            components_missing=d.get("components_missing", []),
+            company_industry=d.get("company_industry"),
+            graveyard_entries=d.get("graveyard_entries", []),
+            ai_agent_type=d.get("ai_agent_type", ""),
+            difficulty_tier=d.get("difficulty_tier", "standard"),
+        )
+
+
+@dataclass
+class GapManifest:
+    """Output of Step 1 (MEASURE+SOLVE), input to Step 2 (CONSULT).
+
+    Self-contained JSON file with all unresolved gaps and their context.
+    """
+    session_id: str
+    created_at: str
+    baseline_cqs: float
+    eval_cohort: List[str]
+    gaps: List[UnresolvedGap]
+    config_fingerprint: str
+    deterministic_kept: int = 0
+    deterministic_discarded: int = 0
+
+    def to_dict(self) -> dict:
+        return {
+            "session_id": self.session_id,
+            "created_at": self.created_at,
+            "baseline_cqs": self.baseline_cqs,
+            "eval_cohort": self.eval_cohort,
+            "gaps": [g.to_dict() for g in self.gaps],
+            "config_fingerprint": self.config_fingerprint,
+            "deterministic_kept": self.deterministic_kept,
+            "deterministic_discarded": self.deterministic_discarded,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'GapManifest':
+        return cls(
+            session_id=d["session_id"],
+            created_at=d["created_at"],
+            baseline_cqs=d["baseline_cqs"],
+            eval_cohort=d["eval_cohort"],
+            gaps=[UnresolvedGap.from_dict(g) for g in d["gaps"]],
+            config_fingerprint=d["config_fingerprint"],
+            deterministic_kept=d.get("deterministic_kept", 0),
+            deterministic_discarded=d.get("deterministic_discarded", 0),
+        )
+
+
+GAP_MANIFESTS_DIR = Path(__file__).parent.parent / "company_mappings" / "gap_manifests"
+
+
+def save_gap_manifest(manifest: GapManifest, path: Path) -> None:
+    """Save a gap manifest to JSON."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, 'w') as f:
+        json.dump(manifest.to_dict(), f, indent=2, default=str)
+    logger.info(f"Saved gap manifest ({len(manifest.gaps)} gaps) to {path}")
+
+
+def load_gap_manifest(path: Path) -> GapManifest:
+    """Load a gap manifest from JSON."""
+    with open(path, 'r') as f:
+        data = json.load(f)
+    manifest = GapManifest.from_dict(data)
+    logger.info(f"Loaded gap manifest ({len(manifest.gaps)} gaps) from {path}")
+    return manifest
+
+
+def _compute_difficulty_tier(gap: MetricGap) -> str:
+    """Determine difficulty tier for AI model routing."""
+    if gap.graveyard_count >= 6:
+        return "hard"
+    if gap.gap_type == "regression":
+        return "hard"
+    if gap.root_cause in ("extension_concept", "algebraic_coincidence"):
+        return "hard"
+    return "standard"
+
+
+def _build_unresolved_gap(
+    gap: MetricGap,
+    graveyard_entries: List[Dict],
+    agent_type: AIAgentType,
+) -> UnresolvedGap:
+    """Build an UnresolvedGap from a MetricGap + pre-fetched graveyard + router output."""
+    evidence = gap.extraction_evidence
+    if evidence:
+        resolution_type = evidence.resolution_type
+        components_used = list(evidence.components_used)
+        components_missing = list(evidence.components_missing)
+        company_industry = evidence.company_industry
+    else:
+        resolution_type = "none"
+        components_used = []
+        components_missing = []
+        company_industry = None
+
+    # Filter graveyard to entries matching this ticker, keep only relevant fields
+    graveyard = [
+        {k: v for k, v in entry.items() if k in (
+            "config_diff", "discard_reason", "detail", "target_companies",
+            "change_type", "timestamp",
+        )}
+        for entry in graveyard_entries[:10]
+        if gap.ticker in entry.get("target_companies", "")
+    ]
+
+    return UnresolvedGap(
+        ticker=gap.ticker,
+        metric=gap.metric,
+        gap_type=gap.gap_type,
+        hv_subtype=gap.hv_subtype,
+        reference_value=gap.reference_value,
+        xbrl_value=gap.xbrl_value,
+        current_variance=gap.current_variance,
+        estimated_impact=gap.estimated_impact,
+        graveyard_count=gap.graveyard_count,
+        root_cause=gap.root_cause,
+        notes=gap.notes,
+        resolution_type=resolution_type,
+        components_used=components_used,
+        components_missing=components_missing,
+        company_industry=company_industry,
+        graveyard_entries=graveyard,
+        ai_agent_type=agent_type.value,
+        difficulty_tier=_compute_difficulty_tier(gap),
+    )
 
 
 def propose_only_loop(
