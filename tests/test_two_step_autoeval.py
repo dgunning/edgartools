@@ -33,10 +33,25 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
     save_gap_manifest,
 )
 from edgar.xbrl.standardization.tools.consult_ai_gaps import (
+    ACTION_VOCABULARY,
+    BenchmarkConfig,
+    BenchmarkResult,
+    COP_OUT_TYPES,
+    TypedAction,
+    _gap_key,
     build_agent_prompt,
     build_consultation_prompt,
+    build_typed_action_prompt,
     collect_agent_proposals,
+    collect_typed_proposals,
+    compile_action,
     consult_ai_gaps,
+    load_agent_responses,
+    parse_typed_action,
+    print_benchmark_comparison,
+    run_agent_benchmark,
+    save_agent_responses,
+    validate_action_preflight,
 )
 
 
@@ -828,3 +843,632 @@ def test_collect_agent_proposals_model_routing():
     assert len(proposals) == 2
     assert proposals[0].worker_id == "agent_sonnet"
     assert proposals[1].worker_id == "agent_opus"
+
+
+# =============================================================================
+# 27. _gap_key format
+# =============================================================================
+
+def test_gap_key_format():
+    """_gap_key returns 'TICKER:Metric' format."""
+    gap = _make_unresolved_gap(ticker="XOM", metric="Revenue")
+    assert _gap_key(gap) == "XOM:Revenue"
+
+
+# =============================================================================
+# 28. save/load agent responses round-trip
+# =============================================================================
+
+def test_save_load_agent_responses_roundtrip(tmp_path, monkeypatch):
+    """Save 2 responses, load back, verify content."""
+    import edgar.xbrl.standardization.tools.consult_ai_gaps as _mod
+    monkeypatch.setattr(_mod, "GAP_MANIFESTS_DIR", tmp_path)
+
+    gap_a = _make_unresolved_gap(ticker="XOM", metric="GrossProfit")
+    gap_b = _make_unresolved_gap(ticker="JPM", metric="NetIncome")
+
+    responses = [
+        (gap_a, '{"change_type": "ADD_CONCEPT", "rationale": "test"}'),
+        (gap_b, '{"change_type": "ADD_EXCLUSION", "rationale": "test2"}'),
+    ]
+
+    path = save_agent_responses("sess-001", responses)
+    assert path.exists()
+
+    cache = load_agent_responses("sess-001")
+    assert cache["XOM:GrossProfit"] == '{"change_type": "ADD_CONCEPT", "rationale": "test"}'
+    assert cache["JPM:NetIncome"] == '{"change_type": "ADD_EXCLUSION", "rationale": "test2"}'
+
+
+# =============================================================================
+# 29. load_agent_responses excludes null
+# =============================================================================
+
+def test_load_agent_responses_excludes_null(tmp_path, monkeypatch):
+    """Null responses are excluded from the returned dict."""
+    import edgar.xbrl.standardization.tools.consult_ai_gaps as _mod
+    monkeypatch.setattr(_mod, "GAP_MANIFESTS_DIR", tmp_path)
+
+    gap_a = _make_unresolved_gap(ticker="XOM", metric="Revenue")
+    gap_b = _make_unresolved_gap(ticker="JPM", metric="NetIncome")
+
+    responses = [
+        (gap_a, '{"some": "response"}'),
+        (gap_b, None),  # failed attempt
+    ]
+
+    save_agent_responses("sess-null", responses)
+    cache = load_agent_responses("sess-null")
+
+    assert "XOM:Revenue" in cache
+    assert "JPM:NetIncome" not in cache
+
+
+# =============================================================================
+# 30. load_agent_responses nonexistent file
+# =============================================================================
+
+def test_load_agent_responses_nonexistent(tmp_path, monkeypatch):
+    """Missing cache file returns empty dict, no exception."""
+    import edgar.xbrl.standardization.tools.consult_ai_gaps as _mod
+    monkeypatch.setattr(_mod, "GAP_MANIFESTS_DIR", tmp_path)
+
+    cache = load_agent_responses("does-not-exist")
+    assert cache == {}
+
+
+# =============================================================================
+# 31. collect_agent_proposals auto-save with session_id
+# =============================================================================
+
+def test_collect_agent_proposals_auto_save(tmp_path, monkeypatch):
+    """With session_id, both response cache and proposals file are written."""
+    import edgar.xbrl.standardization.tools.consult_ai_gaps as _mod
+    monkeypatch.setattr(_mod, "GAP_MANIFESTS_DIR", tmp_path)
+
+    gap = _make_unresolved_gap(ticker="PFE", metric="Revenue", difficulty_tier="standard")
+    valid_response = json.dumps({
+        "change_type": "ADD_CONCEPT",
+        "file": "metrics.yaml",
+        "yaml_path": "metrics.Revenue.known_concepts",
+        "new_value": "us-gaap:RevenueNet",
+        "rationale": "Test rationale",
+    })
+
+    proposals = collect_agent_proposals(
+        [(gap, valid_response)],
+        session_id="auto-save-001",
+    )
+
+    assert len(proposals) == 1
+    # Response cache file must exist
+    assert (tmp_path / "agent_responses_auto-save-001.json").exists()
+    # Proposals file must exist (non-empty proposals)
+    assert (tmp_path / "ai_proposals_auto-save-001.json").exists()
+
+
+# =============================================================================
+# 32. collect_agent_proposals no save without session_id
+# =============================================================================
+
+def test_collect_agent_proposals_no_save_without_session_id(tmp_path, monkeypatch):
+    """Without session_id, no files are written."""
+    import edgar.xbrl.standardization.tools.consult_ai_gaps as _mod
+    monkeypatch.setattr(_mod, "GAP_MANIFESTS_DIR", tmp_path)
+
+    gap = _make_unresolved_gap(ticker="PFE", metric="Revenue", difficulty_tier="standard")
+    valid_response = json.dumps({
+        "change_type": "ADD_CONCEPT",
+        "file": "metrics.yaml",
+        "yaml_path": "metrics.Revenue.known_concepts",
+        "new_value": "us-gaap:RevenueNet",
+        "rationale": "Test rationale",
+    })
+
+    proposals = collect_agent_proposals([(gap, valid_response)])
+
+    assert len(proposals) == 1
+    # No files should be written
+    json_files = list(tmp_path.glob("*.json"))
+    assert json_files == []
+
+
+# =============================================================================
+# 33. BenchmarkConfig dataclass
+# =============================================================================
+
+def test_benchmark_config_dataclass():
+    """BenchmarkConfig fields are accessible."""
+    config = BenchmarkConfig(
+        prompt_builder=build_consultation_prompt,
+        model="sonnet",
+        label="Base Sonnet",
+    )
+    assert config.model == "sonnet"
+    assert config.label == "Base Sonnet"
+    assert config.prompt_builder is build_consultation_prompt
+
+
+# =============================================================================
+# 34. BenchmarkResult properties
+# =============================================================================
+
+def test_benchmark_result_properties():
+    """resolution_rate, cop_out_rate, cqs_lift computed correctly."""
+    config = BenchmarkConfig(build_consultation_prompt, "sonnet", "Test")
+    result = BenchmarkResult(
+        config=config,
+        total_gaps=10,
+        valid_proposals=8,
+        kept=3,
+        discarded=4,
+        vetoed=1,
+        cop_outs=2,
+        cqs_start=0.80,
+        cqs_end=0.85,
+    )
+    assert result.resolution_rate == pytest.approx(0.3)       # 3/10
+    assert result.cop_out_rate == pytest.approx(0.25)          # 2/8
+    assert result.cqs_lift == pytest.approx(0.05)              # 0.85 - 0.80
+
+
+# =============================================================================
+# 35. BenchmarkResult zero division
+# =============================================================================
+
+def test_benchmark_result_zero_division():
+    """0 gaps/proposals doesn't crash."""
+    config = BenchmarkConfig(build_consultation_prompt, "sonnet", "Empty")
+    result = BenchmarkResult(
+        config=config,
+        total_gaps=0,
+        valid_proposals=0,
+        kept=0,
+        discarded=0,
+        vetoed=0,
+        cop_outs=0,
+        cqs_start=0.80,
+        cqs_end=0.80,
+    )
+    assert result.resolution_rate == 0.0
+    assert result.cop_out_rate == 0.0
+    assert result.cqs_lift == 0.0
+
+
+# =============================================================================
+# 36. Cop-out detection
+# =============================================================================
+
+def test_cop_out_detection():
+    """ADD_DIVERGENCE and ADD_EXCLUSION are cop-outs; ADD_CONCEPT is not."""
+    assert ChangeType.ADD_DIVERGENCE in COP_OUT_TYPES
+    assert ChangeType.ADD_EXCLUSION in COP_OUT_TYPES
+    assert ChangeType.ADD_CONCEPT not in COP_OUT_TYPES
+    assert ChangeType.ADD_STANDARDIZATION not in COP_OUT_TYPES
+
+
+# =============================================================================
+# 37. Benchmark uses response cache (no AI calls)
+# =============================================================================
+
+def test_benchmark_uses_response_cache(tmp_path, monkeypatch):
+    """Pre-seeded cache means ai_caller is NOT called."""
+    import edgar.xbrl.standardization.tools.consult_ai_gaps as _mod
+    monkeypatch.setattr(_mod, "GAP_MANIFESTS_DIR", tmp_path)
+
+    # Create manifest
+    gap = _make_unresolved_gap(
+        ticker="CVX", metric="Revenue",
+        difficulty_tier="standard", graveyard_count=2,
+    )
+    manifest = GapManifest(
+        session_id="bench-cache-001",
+        created_at="2026-03-23T00:00:00",
+        baseline_cqs=0.80,
+        eval_cohort=["CVX"],
+        gaps=[gap],
+        config_fingerprint="any",
+    )
+    manifest_path = tmp_path / "manifest_bench.json"
+    save_gap_manifest(manifest, manifest_path)
+
+    # Pre-seed cache for the arm
+    valid_response = json.dumps({
+        "change_type": "ADD_CONCEPT",
+        "file": "metrics.yaml",
+        "yaml_path": "metrics.Revenue.known_concepts",
+        "new_value": "us-gaap:RevenueNet",
+        "rationale": "cached",
+    })
+    cache_data = [{"gap_key": "CVX:Revenue", "response_text": valid_response}]
+    cache_path = tmp_path / "agent_responses_bench-cache-001_base_sonnet.json"
+    cache_path.write_text(json.dumps(cache_data))
+
+    # Mock compute_cqs and evaluate_experiment to avoid real computation
+    from unittest.mock import MagicMock
+    from edgar.xbrl.standardization.tools.auto_eval import CQSResult
+
+    fake_cqs = MagicMock(spec=CQSResult)
+    fake_cqs.cqs = 0.82
+    monkeypatch.setattr(_mod, "compute_cqs", lambda **kwargs: fake_cqs)
+
+    from edgar.xbrl.standardization.tools.auto_eval_loop import ExperimentDecision, Decision
+    fake_decision = ExperimentDecision(
+        decision=Decision.KEEP,
+        cqs_before=0.80,
+        cqs_after=0.82,
+        reason="improved",
+        new_cqs_result=fake_cqs,
+    )
+    monkeypatch.setattr(_mod, "evaluate_experiment", lambda *a, **kw: fake_decision)
+
+    ai_calls = []
+
+    def spy_caller(prompt: str, model: str) -> str:
+        ai_calls.append((prompt, model))
+        return valid_response
+
+    config = BenchmarkConfig(build_consultation_prompt, "sonnet", "Base Sonnet")
+    results = run_agent_benchmark(
+        manifest_path=manifest_path,
+        configs=[config],
+        ai_caller=spy_caller,
+        max_gaps=1,
+    )
+
+    # ai_caller should NOT have been called (cache hit)
+    assert ai_calls == [], f"Expected no AI calls but got {len(ai_calls)}"
+
+    assert len(results) == 1
+    r = results[0]
+    assert r.total_gaps == 1
+    assert r.valid_proposals == 1
+    assert r.kept == 1
+
+
+# =============================================================================
+# 38. print_benchmark_comparison smoke test
+# =============================================================================
+
+def test_print_benchmark_comparison_smoke(capsys):
+    """print_benchmark_comparison doesn't raise and outputs a table."""
+    config = BenchmarkConfig(build_consultation_prompt, "sonnet", "Test Arm")
+    result = BenchmarkResult(
+        config=config,
+        total_gaps=5,
+        valid_proposals=3,
+        kept=2,
+        discarded=1,
+        vetoed=0,
+        cop_outs=1,
+        cqs_start=0.80,
+        cqs_end=0.83,
+    )
+
+    print_benchmark_comparison([result])
+
+    captured = capsys.readouterr()
+    assert "Agent Benchmark Comparison" in captured.out
+    assert "Test Arm" in captured.out
+
+
+# =============================================================================
+# PHASE 1: TypedAction Schema Tests (39–42)
+# =============================================================================
+
+def test_typed_action_valid_map_concept():
+    """Valid MAP_CONCEPT response parses into TypedAction correctly."""
+    response = json.dumps({
+        "action": "MAP_CONCEPT",
+        "ticker": "XOM",
+        "metric": "GrossProfit",
+        "params": {"concept": "us-gaap:GrossProfit"},
+        "rationale": "XOM reports GrossProfit directly in XBRL",
+        "confidence": 0.85,
+    })
+
+    result = parse_typed_action(response, "XOM", "GrossProfit")
+
+    assert result is not None
+    assert result.action == "MAP_CONCEPT"
+    assert result.ticker == "XOM"
+    assert result.metric == "GrossProfit"
+    assert result.params["concept"] == "us-gaap:GrossProfit"
+    assert result.rationale == "XOM reports GrossProfit directly in XBRL"
+    assert result.confidence == pytest.approx(0.85)
+
+
+def test_typed_action_unknown_action_rejected():
+    """Action not in ACTION_VOCABULARY returns None."""
+    response = json.dumps({
+        "action": "INVENT_NEW_METRIC",
+        "ticker": "XOM",
+        "metric": "Revenue",
+        "params": {"concept": "us-gaap:Revenue"},
+        "rationale": "test",
+        "confidence": 0.5,
+    })
+
+    result = parse_typed_action(response, "XOM", "Revenue")
+    assert result is None
+
+
+def test_typed_action_missing_required_param():
+    """Missing 'concept' for MAP_CONCEPT returns None."""
+    response = json.dumps({
+        "action": "MAP_CONCEPT",
+        "ticker": "XOM",
+        "metric": "Revenue",
+        "params": {},  # Missing "concept"
+        "rationale": "test",
+        "confidence": 0.5,
+    })
+
+    result = parse_typed_action(response, "XOM", "Revenue")
+    assert result is None
+
+
+def test_typed_action_strips_markdown_fences():
+    """JSON inside ```json fences still parses correctly."""
+    inner = json.dumps({
+        "action": "FIX_SIGN_CONVENTION",
+        "ticker": "AAPL",
+        "metric": "ShareRepurchases",
+        "params": {},
+        "rationale": "Sign convention mismatch",
+        "confidence": 0.9,
+    })
+    fenced = f"```json\n{inner}\n```"
+
+    result = parse_typed_action(fenced, "AAPL", "ShareRepurchases")
+
+    assert result is not None
+    assert result.action == "FIX_SIGN_CONVENTION"
+    assert result.ticker == "AAPL"
+
+
+# =============================================================================
+# PHASE 2: Action Compiler Tests (43–47)
+# =============================================================================
+
+def test_compile_map_concept():
+    """MAP_CONCEPT produces correct yaml_path and ChangeType."""
+    action = TypedAction(
+        action="MAP_CONCEPT",
+        ticker="XOM",
+        metric="GrossProfit",
+        params={"concept": "us-gaap:GrossProfit"},
+        rationale="Direct XBRL concept",
+    )
+
+    change = compile_action(action)
+
+    assert change is not None
+    assert change.change_type == ChangeType.ADD_CONCEPT
+    assert change.file == "metrics.yaml"
+    assert change.yaml_path == "metrics.GrossProfit.known_concepts"
+    assert change.new_value == "us-gaap:GrossProfit"
+    assert change.target_metric == "GrossProfit"
+    assert change.target_companies == "XOM"
+    assert change.source == "ai_agent"
+
+
+def test_compile_fix_sign_convention():
+    """FIX_SIGN_CONVENTION produces ADD_COMPANY_OVERRIDE with sign_negate dict."""
+    action = TypedAction(
+        action="FIX_SIGN_CONVENTION",
+        ticker="AAPL",
+        metric="ShareRepurchases",
+        params={},
+        rationale="Sign inversion",
+    )
+
+    change = compile_action(action)
+
+    assert change is not None
+    assert change.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+    assert change.file == "companies.yaml"
+    assert change.yaml_path == "companies.AAPL.metric_overrides.ShareRepurchases"
+    assert change.new_value == {"sign_negate": True}
+
+
+def test_compile_exclude_metric():
+    """EXCLUDE_METRIC produces ADD_EXCLUSION with correct path."""
+    action = TypedAction(
+        action="EXCLUDE_METRIC",
+        ticker="AMZN",
+        metric="DividendsPaid",
+        params={"reason_code": "not_reported"},
+        rationale="Amazon does not pay dividends",
+    )
+
+    change = compile_action(action)
+
+    assert change is not None
+    assert change.change_type == ChangeType.ADD_EXCLUSION
+    assert change.file == "companies.yaml"
+    assert change.yaml_path == "companies.AMZN.exclude_metrics"
+    assert change.new_value == "DividendsPaid"
+
+
+def test_compile_escalate_returns_none():
+    """ESCALATE action produces no ConfigChange."""
+    action = TypedAction(
+        action="ESCALATE",
+        ticker="MS",
+        metric="CashAndEquivalents",
+        params={"reason": "Requires new engine capability"},
+        rationale="Cannot resolve with config changes",
+    )
+
+    change = compile_action(action)
+    assert change is None
+
+
+def test_preflight_rejects_duplicate_concept(tmp_path, monkeypatch):
+    """Concept already in known_concepts -> preflight error string."""
+    import yaml
+    from edgar.xbrl.standardization.tools import auto_eval_loop as _loop_mod
+    from edgar.xbrl.standardization.tools.consult_ai_gaps import _load_metrics_config
+
+    # Write a fake metrics.yaml with Revenue having a known concept
+    fake_config_dir = tmp_path / "config"
+    fake_config_dir.mkdir()
+    fake_metrics = fake_config_dir / "metrics.yaml"
+    fake_metrics.write_text(yaml.dump({
+        "metrics": {
+            "Revenue": {
+                "known_concepts": ["us-gaap:Revenue", "us-gaap:Revenues"],
+            }
+        }
+    }))
+
+    # Patch TIER1_CONFIGS to point at our fake and invalidate cache
+    original_configs = _loop_mod.TIER1_CONFIGS.copy()
+    _loop_mod.TIER1_CONFIGS["metrics.yaml"] = fake_metrics
+    _load_metrics_config._cache = None
+    try:
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="XOM",
+            metric="Revenue",
+            params={"concept": "us-gaap:Revenue"},
+        )
+
+        err = validate_action_preflight(action)
+        assert err is not None
+        assert "already in" in err
+        assert "us-gaap:Revenue" in err
+    finally:
+        _loop_mod.TIER1_CONFIGS.update(original_configs)
+        _load_metrics_config._cache = None
+
+
+# =============================================================================
+# PHASE 3: Typed Action Prompt Tests (48–50)
+# =============================================================================
+
+def test_build_typed_action_prompt_contains_vocabulary():
+    """Prompt lists all actions from ACTION_VOCABULARY."""
+    gap = _make_unresolved_gap(
+        ticker="XOM",
+        metric="GrossProfit",
+        difficulty_tier="standard",
+    )
+
+    prompt = build_typed_action_prompt(gap)
+
+    for action_name in ACTION_VOCABULARY:
+        assert action_name in prompt, f"Missing action {action_name} in prompt"
+
+
+def test_build_typed_action_prompt_no_yaml_paths():
+    """Prompt does NOT contain 'yaml_path' or config file paths."""
+    gap = _make_unresolved_gap(
+        ticker="XOM",
+        metric="Revenue",
+        difficulty_tier="standard",
+    )
+
+    prompt = build_typed_action_prompt(gap)
+
+    assert "yaml_path" not in prompt
+    assert "metrics.yaml" not in prompt
+    assert "companies.yaml" not in prompt
+    assert "edgar/xbrl/standardization/config" not in prompt
+
+
+def test_collect_typed_proposals_end_to_end():
+    """Valid MAP_CONCEPT response -> ProposalRecord with correct ConfigChange."""
+    gap = _make_unresolved_gap(
+        ticker="PFE",
+        metric="Revenue",
+        difficulty_tier="standard",
+        ai_agent_type="semantic_mapper",
+    )
+
+    response = json.dumps({
+        "action": "MAP_CONCEPT",
+        "ticker": "PFE",
+        "metric": "Revenue",
+        "params": {"concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"},
+        "rationale": "Standard ASC 606 concept for pharma",
+        "confidence": 0.88,
+    })
+
+    proposals, preflight_rejected = collect_typed_proposals([(gap, response)])
+
+    assert preflight_rejected == 0
+    assert len(proposals) == 1
+    pr = proposals[0]
+    assert pr.gap.ticker == "PFE"
+    assert pr.gap.metric == "Revenue"
+    assert pr.proposal.change_type == ChangeType.ADD_CONCEPT
+    assert pr.proposal.file == "metrics.yaml"
+    assert pr.proposal.yaml_path == "metrics.Revenue.known_concepts"
+    assert pr.proposal.new_value == "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+    assert pr.proposal.source == "ai_agent"
+    assert "sonnet" in pr.worker_id
+
+
+# =============================================================================
+# PHASE 4: Benchmark Integration Tests (51–53)
+# =============================================================================
+
+def test_benchmark_config_typed_actions_flag():
+    """use_typed_actions flag is accessible and defaults to False."""
+    config_raw = BenchmarkConfig(build_consultation_prompt, "sonnet", "Raw")
+    assert config_raw.use_typed_actions is False
+
+    config_typed = BenchmarkConfig(
+        build_typed_action_prompt, "sonnet", "Typed", use_typed_actions=True,
+    )
+    assert config_typed.use_typed_actions is True
+
+
+def test_benchmark_result_preflight_field():
+    """preflight_rejected field is tracked in BenchmarkResult."""
+    config = BenchmarkConfig(build_consultation_prompt, "sonnet", "Test")
+    result = BenchmarkResult(
+        config=config,
+        total_gaps=5,
+        valid_proposals=3,
+        kept=2,
+        discarded=0,
+        vetoed=0,
+        cop_outs=1,
+        cqs_start=0.80,
+        cqs_end=0.82,
+        preflight_rejected=1,
+    )
+    assert result.preflight_rejected == 1
+
+
+def test_benchmark_typed_vs_raw_arms():
+    """Typed action arm parses correctly; raw arm fails on same typed-action response."""
+    gap = _make_unresolved_gap(
+        ticker="XOM",
+        metric="GrossProfit",
+        difficulty_tier="standard",
+        ai_agent_type="semantic_mapper",
+    )
+
+    # This is a valid TypedAction response (NOT a valid raw ConfigChange response)
+    typed_response = json.dumps({
+        "action": "MAP_CONCEPT",
+        "ticker": "XOM",
+        "metric": "GrossProfit",
+        "params": {"concept": "us-gaap:GrossProfit"},
+        "rationale": "Direct XBRL concept",
+        "confidence": 0.85,
+    })
+
+    # Typed action pipeline should succeed
+    typed_proposals, preflight_rejected = collect_typed_proposals([(gap, typed_response)])
+    assert len(typed_proposals) == 1
+    assert preflight_rejected == 0
+    assert typed_proposals[0].proposal.change_type == ChangeType.ADD_CONCEPT
+
+    # Raw pipeline should fail (response doesn't have file/yaml_path/new_value)
+    raw_proposals = collect_agent_proposals([(gap, typed_response)])
+    assert len(raw_proposals) == 0
