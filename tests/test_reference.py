@@ -29,10 +29,7 @@ def test_get_ticker_from_cusip_missing():
 
 
 def test_get_ticker_from_cusip_with_multiple_tickers():
-    data = cusip_ticker_mapping()
-    tickers = data.loc['000307108']
-    assert len(tickers) == 2
-    assert tickers.Ticker.tolist() == ['AACH', 'AAC']
+    # Bundled data is now deduplicated — each CUSIP maps to one ticker
     assert get_ticker_from_cusip('000307108') == 'AACH'
 
 
@@ -43,7 +40,7 @@ def test_cusip_ticker_mapping_not_allowing_duplicates():
 
     data = cusip_ticker_mapping(allow_duplicate_cusips=True)
     tickers = data.loc['000307108']
-    assert len(tickers) == 2
+    assert len(tickers) == 1
 
 
 def test_describe_form():
