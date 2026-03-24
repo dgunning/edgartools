@@ -87,6 +87,7 @@ from edgar.storage import (
     use_datamule_storage,
     use_local_storage,
 )
+from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence, CorrespondenceThread, CorrespondenceType
 from edgar.search.efts import EFTSResult, EFTSSearch, search_filings
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
@@ -240,6 +241,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '424B5': ('Prospectus424B', 'prospectus (shelf takedown / ATM / PIPE)'),
         '424B7': ('Prospectus424B', 'prospectus (WKSI base update)'),
         '424B8': ('Prospectus424B', 'prospectus supplement'),
+        'CORRESP': ('Correspondence', 'company-to-SEC correspondence'),
+        'UPLOAD': ('Correspondence', 'SEC-to-company correspondence'),
     }
 
     if base_form in form_map:
@@ -345,6 +348,9 @@ def obj(sec_filing: Filing) -> Optional[object]:
 
     elif matches_form(sec_filing, PROXY_FORMS):
         return ProxyStatement.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, CORRESPONDENCE_FORMS):
+        return Correspondence.from_filing(sec_filing)
 
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:
