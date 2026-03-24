@@ -3,6 +3,7 @@ Utility modules for HTML parsing.
 """
 
 from edgar.documents.utils.cache import CacheManager, CacheStats, LRUCache, TimeBasedCache, WeakCache, cached, get_cache_manager
+from edgar.documents.utils.anchor_targets import find_anchor_targets, is_anchor_match
 from edgar.documents.utils.currency_merger import CurrencyColumnMerger
 
 # Note: CacheableMixin not exported to avoid circular imports
@@ -22,6 +23,8 @@ __all__ = [
     'get_cache_manager',
     'cached',
     'CacheStats',
+    'find_anchor_targets',
+    'is_anchor_match',
     'StreamingParser',
     'TableMatrix',
     'ColumnAnalyzer',
