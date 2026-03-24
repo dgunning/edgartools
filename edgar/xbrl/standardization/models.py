@@ -204,6 +204,7 @@ class MetricConfig:
     validation_tolerance: Optional[float] = None  # Per-metric validation tolerance % override
     standardization: Optional[Dict[str, Any]] = None  # Composite formula rules for SA scoring
     known_variances: Optional[Dict[str, Any]] = None  # Per-company explained variance records
+    sign_convention: Optional[str] = None  # "negate" to flip XBRL sign before comparison
 
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""

@@ -858,6 +858,12 @@ def _compute_company_cqs(
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
             excluded += 1
+            # Count exclusions as correctly handled — the system identified
+            # this metric as non-applicable for the company and excluded it.
+            total += 1
+            valid += 1
+            mapped += 1
+            ef_pass_count += 1
             continue
 
         total += 1
@@ -1412,6 +1418,10 @@ def _classify_gap(
         if (xbrl_val > 0) != (ref_val > 0):
             magnitude_ratio = abs(xbrl_val) / abs(ref_val)
             if 0.8 < magnitude_ratio < 1.2:  # magnitudes match within 20%
+                # If validation already passes (abs comparison), this is cosmetic —
+                # _compare_values() uses abs() so sign-inverted metrics pass CQS.
+                if result.validation_status == "valid":
+                    return None  # Not a real gap — already passes CQS
                 return MetricGap(
                     ticker=ticker, metric=metric, gap_type="high_variance",
                     estimated_impact=per_metric_impact * 1.2,

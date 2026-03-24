@@ -1966,9 +1966,12 @@ class ReferenceValidator:
                 notes="Mapping found, value extraction pending"
             )
         
-        # Apply sign_negate override if configured for this (ticker, metric)
+        # Apply sign convention: metric-level first, then company override
+        metric_config = self.config.get_metric(metric) if self.config else None
         company_config = self.config.get_company(ticker) if self.config else None
-        if company_config and metric in company_config.metric_overrides:
+        if metric_config and metric_config.sign_convention == "negate":
+            xbrl_value = -xbrl_value
+        elif company_config and metric in company_config.metric_overrides:
             override = company_config.metric_overrides[metric]
             if override.get('sign_negate'):
                 xbrl_value = -xbrl_value
@@ -1984,7 +1987,7 @@ class ReferenceValidator:
         base_tolerance = self._get_tolerance_for_company(ticker)
 
         # Check metric-level tolerance first (from metrics.yaml validation_tolerance field)
-        metric_config = self.config.get_metric(metric) if self.config else None
+        # metric_config already looked up above for sign convention
         if metric_config and metric_config.validation_tolerance is not None:
             tolerance = max(base_tolerance, metric_config.validation_tolerance / 100.0)
         elif metric in ['ShortTermDebt', 'LongTermDebt']:

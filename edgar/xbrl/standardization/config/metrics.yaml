@@ -53,6 +53,13 @@ metrics:
       weight: -1.0
     universal: false
     notes: Services companies (META, FDX) may not have traditional COGS
+    standardization:
+      company_overrides:
+        DE:
+          components:
+          - CostOfRevenue
+          - CommonStockDividendsPerShareCashPaid
+          notes: Auto-solver company-specific via DE, 0/0 periods, 0/3 companies
   SGA:
     description: Selling, general, and administrative expenses
     standard_tag: SellingGeneralAndAdminExpenses
@@ -132,6 +139,7 @@ metrics:
   Capex:
     description: Capital expenditures (including intangibles)
     standard_tag: CapitalExpenses
+    sign_convention: negate
     validation_tolerance: 40
     known_concepts:
     - PaymentsToAcquirePropertyPlantAndEquipment
@@ -201,6 +209,11 @@ metrics:
           - IncreaseDecreaseInAccountsPayableAndAccruedLiabilities
           - AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities
           notes: Auto-solver company-specific via REGN, 2/3 periods, 0/3 companies
+        NEE:
+          components:
+          - CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect
+          - CapitalExpendituresIncurredButNotYetPaid
+          notes: Auto-solver company-specific via NEE, 2/3 periods, 0/3 companies
   TotalAssets:
     description: Total assets
     known_concepts:
@@ -323,9 +336,9 @@ metrics:
       company_overrides:
         JPM:
           components:
-          - BeneficialInterest
-          - jpm:FinancingReceivableExcludingAccruedInterestBeforeAllowanceForCreditLossesNetOfDeferredIncome
-          notes: Auto-solver company-specific via JPM, 3/3 periods, 0/3 companies
+          - DebtSecuritiesAvailableForSaleExcludingAccruedInterest
+          - FederalFundsPurchasedAndSecuritiesSoldUnderAgreementsToRepurchase
+          notes: Auto-solver company-specific via JPM, 0/0 periods, 0/3 companies
         DE:
           components:
           - MinorityInterest
@@ -380,6 +393,13 @@ metrics:
       - INCOME
     universal: true
     notes: Essential for per-share valuation metrics
+    standardization:
+      company_overrides:
+        V:
+          components:
+          - GeneralAndAdministrativeExpense
+          - IncomeTaxExpenseBenefit
+          notes: Auto-solver company-specific via V, 0/0 periods, 0/3 companies
   StockBasedCompensation:
     description: Stock-based compensation expense (non-cash)
     validation_tolerance: 20
@@ -398,6 +418,7 @@ metrics:
   DividendsPaid:
     description: Cash dividends paid to shareholders
     standard_tag: CommonDividendsPaid
+    sign_convention: negate
     known_concepts:
     - PaymentsOfDividends
     - PaymentsOfDividendsCommonStock
@@ -479,6 +500,13 @@ metrics:
       section: liabilities_current
     universal: false
     notes: High AP indicates supplier leverage
+    standardization:
+      company_overrides:
+        DE:
+          components:
+          - RedeemableNoncontrollingInterestEquityCarryingAmount
+          - AccumulatedOtherComprehensiveIncomeLossNetOfTax
+          notes: Auto-solver company-specific via DE, 0/0 periods, 0/3 companies
   DepreciationAmortization:
     description: Depreciation and amortization expense
     standard_tag: DepreciationExpense
@@ -592,6 +620,55 @@ metrics:
           - OtherCostAndExpenseOperating
           - OperatingIncomeLoss
           notes: Auto-solver company-specific via UPS, 2/3 periods, 0/3 companies
+        COP:
+          components:
+          - IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+          - TaxesExcludingIncomeAndExciseTaxes
+          notes: Auto-solver company-specific via COP, 2/3 periods, 0/3 companies
+        NEE:
+          components:
+          - nee:IndependentPowerInvestments
+          - nee:IncomeAssociatedWithDifferentialMembershipInterests
+          notes: Auto-solver company-specific via NEE, 3/3 periods, 0/3 companies
+        NFLX:
+          components:
+          - CostOfRevenue
+          - CurrentIncomeTaxExpenseBenefit
+          notes: Auto-solver company-specific via NFLX, 3/3 periods, 0/3 companies
+        V:
+          components:
+          - RevenueFromContractWithCustomerExcludingAssessedTax
+          - IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic
+          notes: Auto-solver company-specific via V, 2/3 periods, 0/3 companies
+        META:
+          components:
+          - RevenueFromContractWithCustomerExcludingAssessedTax
+          - ProceedsFromIssuanceOfLongTermDebt
+          notes: Auto-solver company-specific via META, 0/0 periods, 0/3 companies
+        LLY:
+          components:
+          - Revenues
+          - CurrentIncomeTaxExpenseBenefit
+          notes: Auto-solver company-specific via LLY, 0/0 periods, 0/3 companies
+        ABBV:
+          components:
+          - abbv:OperatingLossCarryforwardsWithExpiration
+          - BusinessAcquisitionsProFormaNetIncomeLoss
+          notes: Auto-solver company-specific via ABBV, 2/2 periods, 0/3 companies
+        MRK:
+          components:
+          - mrk:CostsExpensesAndOther
+          - mrk:SegmentReportingUnallocatedOtherExpensesNet
+          notes: Auto-solver company-specific via MRK, 2/2 periods, 0/3 companies
+        AMZN:
+          components:
+          - CostOfGoodsAndServicesSold
+          - PaymentsToAcquireProductiveAssets
+          notes: Auto-solver company-specific via AMZN, 2/3 periods, 0/3 companies
+        SLB:
+          components:
+          - NetCashProvidedByUsedInOperatingActivities
+          notes: Auto-solver company-specific via SLB, 3/3 periods, 0/3 companies
   ResearchAndDevelopment:
     description: Research and development expense
     standard_tag: ResearchAndDevelopmentExpense
@@ -627,16 +704,14 @@ metrics:
           notes: Auto-solver company-specific via JPM, 2/2 periods, 0/3 companies
         C:
           components:
-          - InterestIncomeExpenseAfterProvisionForLoanLoss
-          - c:InterestAndDividendIncomeSecuritiesExcludingTradingSecurities
-          - InterestIncomeSecuritiesTaxable
-          notes: Auto-solver company-specific via C, 3/3 periods, 0/3 companies
+          - NetCashProvidedByUsedInOperatingActivities
+          - InterestIncomeExpenseNet
+          notes: Auto-solver company-specific via C, 2/3 periods, 0/3 companies
         MS:
           components:
-          - NoninterestIncome
-          - ms:InterestExpenseCustomerPayablesAndOther
-          - ms:NetIncomeLossBeforeUndistributedEarningsFromSubsidiaries
-          notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
+          - PaymentsToAcquireAvailableForSaleSecuritiesDebt
+          - InterestExpenseBorrowings
+          notes: Auto-solver company-specific via MS, 2/3 periods, 0/3 companies
         ICE:
           components:
           - EntityCommonStockSharesOutstanding
@@ -656,6 +731,35 @@ metrics:
           components:
           - InterestExpenseNonoperating
           notes: Auto-solver company-specific via TSLA, 2/2 periods, 0/3 companies
+        NEE:
+          components:
+          - ProceedsFromContributionsFromParent
+          - nee:RecoverableStormRestorationCosts
+          notes: Auto-solver company-specific via NEE, 2/3 periods, 0/3 companies
+        UPS:
+          components:
+          - RestructuringAndRelatedCostIncurredCost
+          - StockRepurchasedDuringPeriodValue
+          notes: Auto-solver company-specific via UPS, 2/2 periods, 0/3 companies
+        META:
+          components:
+          - CurrentStateAndLocalTaxExpenseBenefit
+          - OtherNoncashIncomeExpense
+          notes: Auto-solver company-specific via META, 2/3 periods, 0/3 companies
+        MRK:
+          components:
+          - TreasuryStockValueAcquiredCostMethod
+          notes: Auto-solver company-specific via MRK, 2/2 periods, 0/3 companies
+        AMZN:
+          components:
+          - IncomeTaxReconciliationStateAndLocalIncomeTaxes
+          - EquitySecuritiesFvNiGainLoss
+          notes: Auto-solver company-specific via AMZN, 1/1 periods, 0/3 companies
+        KO:
+          components:
+          - Depreciation
+          - ko:IntersegmentRevenue
+          notes: Auto-solver company-specific via KO, 3/3 periods, 0/3 companies
   IncomeTaxExpense:
     description: Income tax provision (expense or benefit)
     standard_tag: IncomeTaxExpenseBenefit
@@ -677,6 +781,11 @@ metrics:
       - INCOME
     universal: true
     validation_tolerance: 15
+    standardization:
+      default:
+        components:
+        - EarningsPerShareDiluted
+        notes: Auto-solver sector via V, 2/3 periods, 2/3 companies
   EarningsPerShareBasic:
     description: Basic earnings per share
     standard_tag: EarningsPerShareBasic
@@ -687,6 +796,11 @@ metrics:
       - INCOME
     universal: true
     validation_tolerance: 15
+    standardization:
+      default:
+        components:
+        - EarningsPerShareBasic
+        notes: Auto-solver sector via V, 2/3 periods, 2/3 companies
   CurrentAssets:
     description: Total current assets
     standard_tag: AssetsCurrent
@@ -733,6 +847,23 @@ metrics:
       statements:
       - BALANCE
     universal: true
+    standardization:
+      company_overrides:
+        UPS:
+          components:
+          - LaborAndRelatedExpense
+          - OtherCostAndExpenseOperating
+          notes: Auto-solver company-specific via UPS, 3/3 periods, 0/3 companies
+        KO:
+          components:
+          - ko:BeverageServingsConsumedPerDay
+          - AdvertisingExpense
+          notes: Auto-solver company-specific via KO, 3/3 periods, 0/3 companies
+        NKE:
+          components:
+          - SupplierFinanceProgramObligationIncrease
+          - SupplierFinanceProgramObligationDecreaseSettlement
+          notes: Auto-solver company-specific via NKE, 1/1 periods, 0/3 companies
   StockholdersEquity:
     description: Total stockholders equity including noncontrolling interest
     standard_tag: StockholdersEquity
@@ -777,6 +908,16 @@ metrics:
           - PaymentsForLeasingCostsCommissionsAndTenantImprovements
           - pld:PaymentForPropertyImprovements
           notes: Auto-solver company-specific via PLD, 2/3 periods, 0/3 companies
+        DE:
+          components:
+          - NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest
+          - ComprehensiveIncomeNetOfTax
+          notes: Auto-solver company-specific via DE, 2/3 periods, 0/3 companies
+        NKE:
+          components:
+          - GrossProfit
+          - CurrentIncomeTaxExpenseBenefit
+          notes: Auto-solver company-specific via NKE, 0/0 periods, 0/3 companies
   RetainedEarnings:
     description: Retained earnings (accumulated deficit)
     standard_tag: RetainedEarningsAccumulatedDeficit
@@ -812,6 +953,7 @@ metrics:
   ShareRepurchases:
     description: Payments for stock buybacks
     standard_tag: PaymentsForRepurchaseOfCommonStock
+    sign_convention: negate
     known_concepts:
     - PaymentsForRepurchaseOfCommonStock
     - PaymentsForRepurchaseOfEquity

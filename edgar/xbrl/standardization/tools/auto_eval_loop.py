@@ -56,6 +56,7 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     SUB_COHORT_C,
 )
 from edgar.xbrl.standardization.tools.auto_solver import AutoSolver
+from edgar.xbrl.standardization.tools.capability_registry import classify_gap_disposition
 
 logger = logging.getLogger(__name__)
 
@@ -3403,6 +3404,9 @@ class UnresolvedGap:
     ai_agent_type: str = ""
     difficulty_tier: str = "standard"  # "standard" (Sonnet) | "hard" (Opus)
 
+    # Capability-aware triage
+    disposition: str = "config_fixable"  # GapDisposition value
+
     def to_dict(self) -> dict:
         return {
             "ticker": self.ticker,
@@ -3423,6 +3427,7 @@ class UnresolvedGap:
             "graveyard_entries": self.graveyard_entries,
             "ai_agent_type": self.ai_agent_type,
             "difficulty_tier": self.difficulty_tier,
+            "disposition": self.disposition,
         }
 
     @classmethod
@@ -3446,6 +3451,7 @@ class UnresolvedGap:
             graveyard_entries=d.get("graveyard_entries", []),
             ai_agent_type=d.get("ai_agent_type", ""),
             difficulty_tier=d.get("difficulty_tier", "standard"),
+            disposition=d.get("disposition", "config_fixable"),
         )
 
 
@@ -3577,7 +3583,7 @@ def generate_gap_manifest(
     snapshot_mode: bool = True,
     max_workers: int = 1,
     ledger: Optional[ExperimentLedger] = None,
-) -> Tuple['GapManifest', Path]:
+) -> Tuple[GapManifest, Path]:
     """Generate a GapManifest from identify_gaps() without running the full overnight loop.
 
     Unlike run_overnight() which only routes gaps with graveyard_count >= 3 to AI,
@@ -3610,24 +3616,27 @@ def generate_gap_manifest(
     )
     logger.info(f"[generate_gap_manifest] Found {len(gaps)} gaps, baseline CQS={cqs_result.cqs:.4f}")
 
-    # Convert MetricGap -> UnresolvedGap with permissive routing (no graveyard threshold)
-    unresolved_gaps: List['UnresolvedGap'] = []
+    # Batch-fetch all graveyard entries (avoids N+1 queries)
+    all_graveyard = ledger.get_graveyard_entries()
+    graveyard_by_metric: Dict[str, List[Dict]] = {}
+    for entry in all_graveyard:
+        metric = entry.get("target_metric", "")
+        graveyard_by_metric.setdefault(metric, []).append(entry)
+
+    # Use AIAgentRouter for routing, with permissive fallback for gaps below threshold
+    router = AIAgentRouter()
+    unresolved_gaps: List[UnresolvedGap] = []
     for gap in gaps:
-        graveyard_entries = ledger.get_graveyard_entries(gap.metric)
+        graveyard_entries = graveyard_by_metric.get(gap.metric, [])
+        agent_type = router.route(gap) or AIAgentType.SEMANTIC_MAPPER
+        ugap = _build_unresolved_gap(gap, graveyard_entries, agent_type)
+        ugap.disposition = classify_gap_disposition(
+            root_cause=gap.root_cause,
+            reference_value=gap.reference_value,
+            hv_subtype=gap.hv_subtype,
+        ).value
+        unresolved_gaps.append(ugap)
 
-        # Route by gap characteristics (permissive — include all gaps)
-        if gap.gap_type == "regression":
-            agent_type = AIAgentType.REGRESSION_INVESTIGATOR
-        elif gap.hv_subtype == "hv_reference_suspect":
-            agent_type = AIAgentType.REFERENCE_AUDITOR
-        else:
-            agent_type = AIAgentType.SEMANTIC_MAPPER
-
-        unresolved_gaps.append(
-            _build_unresolved_gap(gap, graveyard_entries, agent_type)
-        )
-
-    # Sort by estimated CQS impact (highest first)
     unresolved_gaps.sort(key=lambda g: g.estimated_impact, reverse=True)
 
     manifest = GapManifest(
@@ -3641,9 +3650,6 @@ def generate_gap_manifest(
 
     manifest_path = GAP_MANIFESTS_DIR / f"manifest_{session_id}.json"
     save_gap_manifest(manifest, manifest_path)
-    logger.info(
-        f"[generate_gap_manifest] Saved {len(unresolved_gaps)} gaps to {manifest_path}"
-    )
     return manifest, manifest_path
 
 

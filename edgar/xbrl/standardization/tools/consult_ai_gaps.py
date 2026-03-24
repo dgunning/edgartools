@@ -790,9 +790,13 @@ def consult_ai_gaps(
             f"Proposals may be stale."
         )
 
+    from edgar.xbrl.standardization.tools.capability_registry import filter_actionable_gaps
+
     gaps = manifest.gaps
     if max_gaps > 0:
         gaps = gaps[:max_gaps]
+
+    gaps = filter_actionable_gaps(gaps)
 
     proposals: List[ProposalRecord] = []
     model_counts: Dict[str, int] = {"sonnet": 0, "opus": 0}
@@ -1027,9 +1031,13 @@ def run_agent_benchmark(
     manifest = load_gap_manifest(manifest_path)
     cohort = eval_cohort or QUICK_EVAL_COHORT
 
+    from edgar.xbrl.standardization.tools.capability_registry import filter_actionable_gaps
+
     gaps = manifest.gaps
     if max_gaps > 0:
         gaps = gaps[:max_gaps]
+
+    gaps = filter_actionable_gaps(gaps)
 
     results: List[BenchmarkResult] = []
 
