@@ -1206,6 +1206,37 @@ class TestEntityFactsParser:
         
         # Should have chosen the 10-K value (1002000)
         assert income_stmt.loc["Revenue", q1_cols[0]] == 1002000.0
+
+    def test_income_statement_includes_weighted_average_shares_concept(self):
+        """Test income_statement includes weighted-average shares concept when present in facts."""
+        facts = [
+            FinancialFact(
+                concept="us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+                taxonomy="us-gaap",
+                label="Weighted Average Number Of Shares Outstanding Basic",
+                value=1234567,
+                numeric_value=1234567.0,
+                unit="shares",
+                period_type="duration",
+                period_start=date(2024, 1, 1),
+                period_end=date(2024, 3, 31),
+                fiscal_year=2024,
+                fiscal_period="Q1",
+                filing_date=date(2024, 4, 15),
+                form_type="10-Q",
+                statement_type="IncomeStatement",
+                data_quality=DataQuality.HIGH
+            ),
+        ]
+
+        entity_facts = EntityFacts(cik=123456, name="Test Co", facts=facts)
+        income_stmt = entity_facts.income_statement(as_dataframe=True, annual=False)
+
+        assert not income_stmt.empty
+        assert any(
+            "weighted" in str(idx).lower() and "shares" in str(idx).lower()
+            for idx in income_stmt.index
+        )
     
     def test_financial_statement_formatting(self):
         """Test FinancialStatement formatting functionality"""
