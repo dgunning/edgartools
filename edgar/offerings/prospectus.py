@@ -339,6 +339,38 @@ class FilingFeesData(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Registration Fee Table (S-3 / F-3 / S-1 shelf capacity)
+# ---------------------------------------------------------------------------
+
+class FeeTableSecurity(BaseModel):
+    """A single security line from a registration fee table (Exhibit 107)."""
+    security_type: Optional[str] = None
+    security_title: Optional[str] = None
+    fee_rule: Optional[str] = None
+    amount_registered: Optional[str] = None
+    price_per_unit: Optional[float] = None
+    max_aggregate_amount: Optional[float] = None
+    fee_rate: Optional[float] = None
+    fee_amount: Optional[float] = None
+
+
+class RegistrationFeeTable(BaseModel):
+    """Parsed registration fee table from an EX-FILING FEES exhibit (Exhibit 107).
+
+    Provides the total registered offering capacity for a shelf registration
+    (S-3, F-3, S-1) and per-security breakdowns.
+    """
+    total_offering_amount: Optional[float] = None
+    net_fee_due: Optional[float] = None
+    total_fees_previously_paid: Optional[float] = None
+    securities: List[FeeTableSecurity] = []
+    carry_forwards: List[FeeTableSecurity] = []
+    has_carry_forward: bool = False
+    fee_deferred: bool = False
+    exhibit_url: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
 # Shelf Lifecycle
 # ---------------------------------------------------------------------------
 
@@ -505,6 +537,35 @@ class ShelfLifecycle:
             if f.form == '8-K' and str(f.filing_date) == str(self._current.filing_date):
                 return f
         return None
+
+    # ------------------------------------------------------------------
+    # Shelf capacity
+    # ------------------------------------------------------------------
+
+    @cached_property
+    def shelf_capacity(self) -> Optional['RegistrationFeeTable']:
+        """Fee table from the shelf registration (S-3/F-3/S-1).
+
+        Parses the EX-FILING FEES exhibit on the shelf registration to extract
+        the total registered offering amount and per-security breakdowns.
+        Returns None if no shelf registration found or no fee exhibit.
+        """
+        reg = self.shelf_registration
+        if not reg:
+            return None
+        try:
+            from edgar.offerings._fee_table import extract_registration_fee_table
+            return extract_registration_fee_table(reg)
+        except Exception as e:
+            log.debug("Failed to extract shelf capacity for %s: %s",
+                      self._current.accession_no, e)
+            return None
+
+    @cached_property
+    def total_offering_capacity(self) -> Optional[float]:
+        """Total registered offering amount from the shelf's fee table (dollars)."""
+        ft = self.shelf_capacity
+        return ft.total_offering_amount if ft else None
 
     # ------------------------------------------------------------------
     # Rich display
@@ -1244,6 +1305,31 @@ class Prospectus424B:
     @property
     def offering_price(self) -> Optional[str]:
         return self._cover_page.offering_price
+
+    # ------------------------------------------------------------------
+    # Section-level text access
+    # ------------------------------------------------------------------
+
+    @cached_property
+    def sections(self):
+        """Document sections for targeted text extraction.
+
+        Returns a Sections dict mapping section names to Section objects.
+        Each section provides .text() and .tables() for downstream extraction.
+
+        Example:
+            prospectus = filing.obj()
+            for name, section in prospectus.sections.items():
+                print(f"{name}: {len(section.text())} chars")
+
+            uop = prospectus.sections.get('use_of_proceeds')
+            if uop:
+                print(uop.text())
+        """
+        from edgar.documents.document import Sections
+        if self._document:
+            return self._document.sections
+        return Sections({})
 
     # ------------------------------------------------------------------
     # Lazy table-extracted data (Phase 2+)

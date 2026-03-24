@@ -425,7 +425,86 @@ class SectionExtractor:
                 (r'^(Item|ITEM)\s+9\.\s*01', 'Item 9.01 - Financial Statements and Exhibits'),
                 (r'^Financial.*Exhibits', 'Financial Statements and Exhibits')
             ]
-        }
+        },
+
+        # 424B prospectus supplements / takedowns
+        '424B': {
+            'about_this_prospectus': [
+                (r'^ABOUT\s+THIS\s+PROSPECTUS', 'About This Prospectus'),
+                (r'^About\s+This\s+Prospectus', 'About This Prospectus'),
+            ],
+            'summary': [
+                (r'^(?:THE\s+)?OFFERING\s*$', 'The Offering'),
+                (r'^SUMMARY\s*$', 'Summary'),
+                (r'^Summary\s*$', 'Summary'),
+                (r'^PROSPECTUS\s+SUMMARY', 'Prospectus Summary'),
+            ],
+            'risk_factors': [
+                (r'^RISK\s+FACTORS\s*$', 'Risk Factors'),
+                (r'^Risk\s+Factors\s*$', 'Risk Factors'),
+            ],
+            'use_of_proceeds': [
+                (r'^USE\s+OF\s+PROCEEDS\s*$', 'Use of Proceeds'),
+                (r'^Use\s+of\s+Proceeds\s*$', 'Use of Proceeds'),
+            ],
+            'dilution': [
+                (r'^DILUTION\s*$', 'Dilution'),
+                (r'^Dilution\s*$', 'Dilution'),
+            ],
+            'capitalization': [
+                (r'^CAPITALIZATION\s*$', 'Capitalization'),
+                (r'^Capitalization\s*$', 'Capitalization'),
+            ],
+            'description_of_securities': [
+                (r'^DESCRIPTION\s+OF\s+(?:CAPITAL\s+)?STOCK', 'Description of Capital Stock'),
+                (r'^Description\s+of\s+(?:Capital\s+)?Stock', 'Description of Capital Stock'),
+                (r'^DESCRIPTION\s+OF\s+(?:THE\s+)?SECURITIES', 'Description of Securities'),
+                (r'^Description\s+of\s+(?:the\s+)?Securities', 'Description of Securities'),
+                (r'^DESCRIPTION\s+OF\s+(?:THE\s+)?NOTES', 'Description of Notes'),
+                (r'^Description\s+of\s+(?:the\s+)?Notes', 'Description of Notes'),
+            ],
+            'description_of_debt_securities': [
+                (r'^DESCRIPTION\s+OF\s+DEBT\s+SECURITIES', 'Description of Debt Securities'),
+                (r'^Description\s+of\s+Debt\s+Securities', 'Description of Debt Securities'),
+            ],
+            'description_of_warrants': [
+                (r'^DESCRIPTION\s+OF\s+WARRANTS', 'Description of Warrants'),
+                (r'^Description\s+of\s+Warrants', 'Description of Warrants'),
+            ],
+            'selling_stockholders': [
+                (r'^SELLING\s+(?:STOCK|SECURITY)\s*HOLDERS', 'Selling Stockholders'),
+                (r'^Selling\s+(?:Stock|Security)\s*[Hh]olders', 'Selling Stockholders'),
+            ],
+            'underwriting': [
+                (r'^UNDERWRITING\s*$', 'Underwriting'),
+                (r'^Underwriting\s*$', 'Underwriting'),
+            ],
+            'plan_of_distribution': [
+                (r'^PLAN\s+OF\s+DISTRIBUTION', 'Plan of Distribution'),
+                (r'^Plan\s+of\s+Distribution', 'Plan of Distribution'),
+            ],
+            'legal_matters': [
+                (r'^LEGAL\s+MATTERS\s*$', 'Legal Matters'),
+                (r'^Legal\s+Matters\s*$', 'Legal Matters'),
+            ],
+            'experts': [
+                (r'^EXPERTS\s*$', 'Experts'),
+                (r'^Experts\s*$', 'Experts'),
+            ],
+            'tax_considerations': [
+                (r'^(?:U\.?S\.?\s+)?(?:FEDERAL\s+)?(?:INCOME\s+)?TAX\s+CONSIDERATIONS', 'Tax Considerations'),
+                (r'^(?:U\.?S\.?\s+)?(?:Federal\s+)?(?:Income\s+)?Tax\s+Considerations', 'Tax Considerations'),
+                (r'^(?:CERTAIN|MATERIAL)\s+.*TAX\s+(?:CONSIDERATIONS|CONSEQUENCES)', 'Tax Considerations'),
+            ],
+            'where_you_can_find_more_information': [
+                (r'^WHERE\s+YOU\s+CAN\s+FIND\s+MORE\s+INFORMATION', 'Where You Can Find More Information'),
+                (r'^Where\s+You\s+Can\s+Find\s+More\s+Information', 'Where You Can Find More Information'),
+            ],
+            'incorporation_by_reference': [
+                (r'^INCORPORATION\s+(?:OF\s+CERTAIN\s+(?:INFORMATION|DOCUMENTS)\s+)?BY\s+REFERENCE', 'Incorporation by Reference'),
+                (r'^Incorporation\s+(?:of\s+Certain\s+(?:Information|Documents)\s+)?by\s+Reference', 'Incorporation by Reference'),
+            ],
+        },
     }
 
     def __init__(self, form: Optional[str] = None):
@@ -459,11 +538,15 @@ class SectionExtractor:
             form = document._config.form
 
         # Only extract sections for forms that have standard sections
-        if not form or form not in ['10-K', '10-Q', '8-K', '20-F']:
+        # Map 424B variants to the common '424B' pattern key
+        pattern_key = form
+        if form and form.startswith('424B'):
+            pattern_key = '424B'
+        if not form or pattern_key not in self.SECTION_PATTERNS:
             return {}  # No filing type or unsupported form = no section detection
 
         # Get patterns for filing type
-        patterns = self.SECTION_PATTERNS.get(form, {})
+        patterns = self.SECTION_PATTERNS.get(pattern_key, {})
         if not patterns:
             return {}  # No patterns defined for this form type
 
