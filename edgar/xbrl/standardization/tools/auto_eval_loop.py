@@ -3571,6 +3571,82 @@ def _build_unresolved_gap(
     )
 
 
+def generate_gap_manifest(
+    eval_cohort: Optional[List[str]] = None,
+    session_id: Optional[str] = None,
+    snapshot_mode: bool = True,
+    max_workers: int = 1,
+    ledger: Optional[ExperimentLedger] = None,
+) -> Tuple['GapManifest', Path]:
+    """Generate a GapManifest from identify_gaps() without running the full overnight loop.
+
+    Unlike run_overnight() which only routes gaps with graveyard_count >= 3 to AI,
+    this function includes ALL gaps regardless of graveyard count. This makes it
+    suitable for fresh cohort evaluation where no graveyard history exists.
+
+    Args:
+        eval_cohort: Tickers to evaluate. Defaults to EXPANSION_COHORT_50.
+        session_id: Unique session ID. Auto-generated if None.
+        snapshot_mode: Use cached snapshots for SEC data.
+        max_workers: Parallel workers for CQS computation.
+        ledger: ExperimentLedger instance. Created if None.
+
+    Returns:
+        Tuple of (GapManifest, path where it was saved).
+    """
+    if eval_cohort is None:
+        eval_cohort = EXPANSION_COHORT_50
+    if session_id is None:
+        session_id = f"live_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    logger.info(f"[generate_gap_manifest] Identifying gaps for {len(eval_cohort)} companies...")
+    gaps, cqs_result = identify_gaps(
+        eval_cohort=eval_cohort,
+        snapshot_mode=snapshot_mode,
+        ledger=ledger,
+        max_workers=max_workers,
+    )
+    logger.info(f"[generate_gap_manifest] Found {len(gaps)} gaps, baseline CQS={cqs_result.cqs:.4f}")
+
+    # Convert MetricGap -> UnresolvedGap with permissive routing (no graveyard threshold)
+    unresolved_gaps: List['UnresolvedGap'] = []
+    for gap in gaps:
+        graveyard_entries = ledger.get_graveyard_entries(gap.metric)
+
+        # Route by gap characteristics (permissive — include all gaps)
+        if gap.gap_type == "regression":
+            agent_type = AIAgentType.REGRESSION_INVESTIGATOR
+        elif gap.hv_subtype == "hv_reference_suspect":
+            agent_type = AIAgentType.REFERENCE_AUDITOR
+        else:
+            agent_type = AIAgentType.SEMANTIC_MAPPER
+
+        unresolved_gaps.append(
+            _build_unresolved_gap(gap, graveyard_entries, agent_type)
+        )
+
+    # Sort by estimated CQS impact (highest first)
+    unresolved_gaps.sort(key=lambda g: g.estimated_impact, reverse=True)
+
+    manifest = GapManifest(
+        session_id=session_id,
+        created_at=datetime.now().isoformat(),
+        baseline_cqs=cqs_result.cqs,
+        eval_cohort=eval_cohort,
+        gaps=unresolved_gaps,
+        config_fingerprint=get_config_fingerprint(),
+    )
+
+    manifest_path = GAP_MANIFESTS_DIR / f"manifest_{session_id}.json"
+    save_gap_manifest(manifest, manifest_path)
+    logger.info(
+        f"[generate_gap_manifest] Saved {len(unresolved_gaps)} gaps to {manifest_path}"
+    )
+    return manifest, manifest_path
+
+
 def propose_only_loop(
     eval_cohort: List[str],
     propose_fn=None,
