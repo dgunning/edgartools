@@ -1079,7 +1079,7 @@ class EntityFacts:
         Args:
             concept_name: The canonical concept name (e.g., 'revenue', 'capex', 'operating_lease_payments')
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             return_metadata: If True, return dict with value and metadata (tag used, etc.)
 
         Returns:
@@ -1117,9 +1117,11 @@ class EntityFacts:
             warnings.warn(hint, stacklevel=2)
             return None
 
-        # Use the existing _get_standardized_concept_value infrastructure
-        # Try each synonym in priority order
-        target_unit = unit or 'USD'
+        # Try each synonym in priority order.
+        # If unit is not specified, do not force USD: share/count concepts
+        # (for example weighted-average shares) should resolve with their
+        # native units.
+        target_unit = unit
         synonyms_tried = []
 
         # Suppress warnings from get_fact() during synonym resolution

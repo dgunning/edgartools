@@ -14,6 +14,7 @@ from lxml import html as lxml_html
 
 from edgar.documents.document import Document
 from edgar.documents.nodes import Node
+from edgar.documents.utils.anchor_targets import find_anchor_targets, is_anchor_match
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
 
@@ -75,7 +76,7 @@ class SECSectionExtractor:
 
         for section_name, anchor_id in toc_mapping.items():
             # Verify the anchor target exists
-            target_elements = tree.xpath(f'//*[@id="{anchor_id}"]')
+            target_elements = find_anchor_targets(tree, anchor_id)
             if target_elements:
                 element = target_elements[0]
 
@@ -236,7 +237,7 @@ class SECSectionExtractor:
         tree = lxml_html.fromstring(html_content)
 
         # Verify start anchor exists
-        start_elements = tree.xpath(f'//*[@id="{boundary.anchor_id}"]')
+        start_elements = find_anchor_targets(tree, boundary.anchor_id)
         if not start_elements:
             return ""
 
@@ -260,12 +261,12 @@ class SECSectionExtractor:
 
             if event == 'start':
                 # Check if we've reached the start anchor
-                if el_id == boundary.anchor_id:
+                if is_anchor_match(el, boundary.anchor_id):
                     in_range = True
                     continue
 
                 # Check if we've reached the end boundary
-                if boundary.end_element_id and el_id == boundary.end_element_id:
+                if boundary.end_element_id and is_anchor_match(el, boundary.end_element_id):
                     in_range = False
                     break
 

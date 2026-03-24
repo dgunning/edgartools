@@ -668,6 +668,21 @@ class TestEntityFactsIntegration:
                 filing_date=date(2024, 3, 1),
                 form_type='10-K'
             ),
+            FinancialFact(
+                concept='CommonStockSharesOutstanding',
+                taxonomy='us-gaap',
+                label='Common Shares Outstanding',
+                value=5000000,
+                numeric_value=5000000.0,
+                unit='shares',
+                period_type='instant',
+                period_end=date(2024, 12, 31),
+                fiscal_year=2024,
+                fiscal_period='FY',
+                accession='0001234-24-000001',
+                filing_date=date(2024, 3, 1),
+                form_type='10-K'
+            ),
         ]
 
         return EntityFacts(cik=123456, name='Test Company', facts=facts)
@@ -677,6 +692,12 @@ class TestEntityFactsIntegration:
         value = mock_entity_facts.get_concept('revenue')
         assert value is not None
         assert value == 100000000.0
+
+    def test_get_concept_shares_without_unit_resolves(self, mock_entity_facts):
+        """Test get_concept resolves share counts natively without needing unit='shares' (i.e. unit is not defaulted to USD)."""
+        value = mock_entity_facts.get_concept('common_shares_outstanding')
+        assert value is not None
+        assert value == 5000000.0
 
     def test_get_concept_returns_none_for_unknown(self, mock_entity_facts):
         """Test get_concept returns None for unknown concept."""
