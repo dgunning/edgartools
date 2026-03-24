@@ -1472,3 +1472,199 @@ def test_benchmark_typed_vs_raw_arms():
     # Raw pipeline should fail (response doesn't have file/yaml_path/new_value)
     raw_proposals = collect_agent_proposals([(gap, typed_response)])
     assert len(raw_proposals) == 0
+
+
+# =============================================================================
+# PHASE 5: E2E Test — Prove the Thesis (54)
+# =============================================================================
+
+def test_e2e_typed_actions_solve_raw_pipeline_failure(tmp_path, monkeypatch):
+    """E2E: raw arm fails on valid XBRL reasoning; typed arm succeeds on same reasoning.
+
+    Given 3 gaps where the AI has correct XBRL reasoning:
+    - Raw arm: AI writes invented YAML paths -> evaluate_experiment DISCARDs all 3
+    - Typed arm: Same reasoning as TypedAction -> compile_action generates valid paths
+      -> evaluate_experiment KEEPs 2-3
+
+    This directly demonstrates the thesis: AI should emit typed intents, not raw YAML.
+    """
+    import re
+    from unittest.mock import MagicMock
+
+    import edgar.xbrl.standardization.tools.consult_ai_gaps as _mod
+    from edgar.xbrl.standardization.tools.auto_eval import CQSResult
+    from edgar.xbrl.standardization.tools.auto_eval_loop import (
+        Decision,
+        ExperimentDecision,
+    )
+
+    # --- Setup: redirect manifests dir, invalidate metrics cache ---
+    monkeypatch.setattr(_mod, "GAP_MANIFESTS_DIR", tmp_path)
+    from edgar.xbrl.standardization.tools.consult_ai_gaps import _load_metrics_config
+    _load_metrics_config._cache = None
+
+    # --- Create manifest with 3 gaps ---
+    gap_xom = _make_unresolved_gap(
+        ticker="XOM", metric="GrossProfit",
+        gap_type="high_variance", difficulty_tier="standard",
+        graveyard_count=2, ai_agent_type="semantic_mapper",
+    )
+    gap_aapl = _make_unresolved_gap(
+        ticker="AAPL", metric="ShareRepurchases",
+        gap_type="high_variance", difficulty_tier="standard",
+        graveyard_count=1, ai_agent_type="semantic_mapper",
+    )
+    gap_jpm = _make_unresolved_gap(
+        ticker="JPM", metric="GrossProfit",
+        gap_type="validation_failure", difficulty_tier="standard",
+        graveyard_count=3, company_industry="Financial",
+        ai_agent_type="semantic_mapper",
+    )
+
+    manifest = GapManifest(
+        session_id="e2e-thesis-001",
+        created_at="2026-03-24T00:00:00",
+        baseline_cqs=0.78,
+        eval_cohort=["XOM", "AAPL", "JPM"],
+        gaps=[gap_xom, gap_aapl, gap_jpm],
+        config_fingerprint="any",
+    )
+    manifest_path = tmp_path / "manifest_e2e_thesis.json"
+    save_gap_manifest(manifest, manifest_path)
+
+    # --- Raw responses: valid JSON, but invented YAML paths ---
+    raw_responses = {
+        "XOM:GrossProfit": json.dumps({
+            "change_type": "ADD_CONCEPT",
+            "file": "metrics.yaml",
+            "yaml_path": "metrics.GrossProfit.company_specific.XOM.components",
+            "new_value": "us-gaap:GrossProfit",
+            "rationale": "XOM reports GrossProfit directly",
+        }),
+        "AAPL:ShareRepurchases": json.dumps({
+            "change_type": "MODIFY_VALUE",
+            "file": "companies.yaml",
+            "yaml_path": "companies.AAPL.settings.sign_override",
+            "new_value": {"sign_negate": True},
+            "rationale": "Sign convention mismatch",
+        }),
+        "JPM:GrossProfit": json.dumps({
+            "change_type": "ADD_EXCLUSION",
+            "file": "companies.yaml",
+            "yaml_path": "global_settings.industry_exclusions.banking",
+            "new_value": "GrossProfit",
+            "rationale": "Banks have no COGS",
+        }),
+    }
+
+    # --- Typed responses: same reasoning, TypedAction format ---
+    typed_responses = {
+        "XOM:GrossProfit": json.dumps({
+            "action": "MAP_CONCEPT",
+            "ticker": "XOM", "metric": "GrossProfit",
+            "params": {"concept": "us-gaap:GrossProfit"},
+            "rationale": "XOM reports GrossProfit directly",
+            "confidence": 0.85,
+        }),
+        "AAPL:ShareRepurchases": json.dumps({
+            "action": "FIX_SIGN_CONVENTION",
+            "ticker": "AAPL", "metric": "ShareRepurchases",
+            "params": {},
+            "rationale": "Sign convention mismatch",
+            "confidence": 0.9,
+        }),
+        "JPM:GrossProfit": json.dumps({
+            "action": "EXCLUDE_METRIC",
+            "ticker": "JPM", "metric": "GrossProfit",
+            "params": {"reason_code": "industry_structural"},
+            "rationale": "Banks have no COGS",
+            "confidence": 0.95,
+        }),
+    }
+
+    # --- Mock AI caller: detect arm by prompt content ---
+    def mock_ai_caller(prompt: str, model: str) -> str:
+        is_typed = "Available Actions" in prompt
+        # Extract ticker and metric from prompt
+        for gap_key in ["XOM:GrossProfit", "AAPL:ShareRepurchases", "JPM:GrossProfit"]:
+            ticker, metric = gap_key.split(":")
+            if f"Ticker: {ticker}" in prompt and f"Metric: {metric}" in prompt:
+                if is_typed:
+                    return typed_responses[gap_key]
+                else:
+                    return raw_responses[gap_key]
+        return "{}"
+
+    # --- Smart mock evaluate_experiment: validates yaml_path ---
+    VALID_PATH_PATTERNS = [
+        r'^metrics\.\w+\.known_concepts$',
+        r'^companies\.\w+\.exclude_metrics$',
+        r'^companies\.\w+\.metric_overrides\.\w+$',
+        r'^companies\.\w+\.known_divergences\.\w+$',
+        r'^companies\.\w+\.industry$',
+        r'^metrics\.\w+\.standardization\.(default|company_overrides\.\w+)\.components$',
+    ]
+
+    fake_baseline = MagicMock(spec=CQSResult)
+    fake_baseline.cqs = 0.78
+
+    fake_improved = MagicMock(spec=CQSResult)
+    fake_improved.cqs = 0.82
+
+    def smart_evaluate(change, baseline, **kwargs):
+        path_valid = any(re.match(p, change.yaml_path) for p in VALID_PATH_PATTERNS)
+        if path_valid:
+            return ExperimentDecision(
+                decision=Decision.KEEP,
+                cqs_before=baseline.cqs,
+                cqs_after=0.82,
+                reason="valid path, improvement",
+                new_cqs_result=fake_improved,
+            )
+        else:
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline.cqs,
+                cqs_after=baseline.cqs,
+                reason=f"Invalid path: {change.yaml_path}",
+            )
+
+    monkeypatch.setattr(_mod, "compute_cqs", lambda **kwargs: fake_baseline)
+    monkeypatch.setattr(_mod, "evaluate_experiment", smart_evaluate)
+
+    # --- Run benchmark with 2 arms ---
+    results = run_agent_benchmark(
+        manifest_path=manifest_path,
+        configs=[
+            BenchmarkConfig(
+                build_consultation_prompt, "sonnet", "Raw Sonnet",
+                use_typed_actions=False,
+            ),
+            BenchmarkConfig(
+                build_typed_action_prompt, "sonnet", "Typed Sonnet",
+                use_typed_actions=True,
+            ),
+        ],
+        ai_caller=mock_ai_caller,
+        max_gaps=3,
+    )
+
+    # --- Assertions ---
+    assert len(results) == 2
+    raw, typed = results[0], results[1]
+
+    # Same gaps, different outcomes
+    assert raw.total_gaps == typed.total_gaps == 3
+
+    # Raw arm: all proposals fail (invented paths rejected by smart_evaluate)
+    assert raw.kept == 0
+
+    # Typed arm: compiler generates valid paths -> proposals succeed
+    assert typed.kept >= 2
+    assert typed.valid_proposals == 3
+
+    # Typed arm outperforms raw arm
+    assert typed.cqs_lift > raw.cqs_lift
+
+    # JPM:GrossProfit EXCLUDE_METRIC is a cop-out
+    assert typed.cop_outs == 1
