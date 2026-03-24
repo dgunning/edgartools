@@ -304,6 +304,30 @@ class TestEntityFacts:
         grouped = df.groupby('fiscal_year')['numeric_value'].count()
         assert len(grouped) > 0
     
+    def test_to_dataframe_pit_mode(self, entity_facts):
+        """Test Point-in-Time mode includes filing_date and form_type"""
+        df = entity_facts.to_dataframe(pit_mode=True)
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+
+        # PIT mode should include filing_date and form_type as standard columns
+        assert 'filing_date' in df.columns, "pit_mode should include filing_date"
+        assert 'form_type' in df.columns, "pit_mode should include form_type"
+
+        # Standard columns should still be present
+        for col in ['concept', 'label', 'numeric_value', 'period_end', 'fiscal_year']:
+            assert col in df.columns
+
+        # Verify filing_date has actual values
+        assert df['filing_date'].notna().any(), "filing_date should have non-null values"
+
+    def test_to_dataframe_pit_mode_off_excludes_filing_date(self, entity_facts):
+        """Default mode should NOT include filing_date in standard columns"""
+        df = entity_facts.to_dataframe()
+        assert 'filing_date' not in df.columns
+        assert 'form_type' not in df.columns
+
     def test_income_statement(self, entity_facts):
         """Test getting income statement data"""
         # Use annual=False since test data has quarterly data (annual needs >= 5 facts per period)

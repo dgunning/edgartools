@@ -245,7 +245,8 @@ class EntityFacts:
 
     def to_dataframe(self,
                      include_metadata: bool = False,
-                     columns: Optional[List[str]] = None) -> pd.DataFrame:
+                     columns: Optional[List[str]] = None,
+                     pit_mode: bool = False) -> pd.DataFrame:
         """
         Export all facts to a pandas DataFrame for analysis.
 
@@ -255,6 +256,10 @@ class EntityFacts:
         Args:
             include_metadata: Include filing references and data quality metadata (default: False)
             columns: Specific columns to include. If None, includes standard columns.
+            pit_mode: Point-in-Time mode for backtesting. When True, includes filing_date
+                and form_type as standard columns and preserves all fact versions
+                (no period deduplication), enabling lookahead-bias-free analysis.
+                Sort order becomes (concept, period_end, filing_date).
 
         Returns:
             DataFrame with one row per fact, sorted by concept and period_end
@@ -271,10 +276,12 @@ class EntityFacts:
             Custom columns for specific analysis:
             >>> df_slim = facts.to_dataframe(columns=['concept', 'fiscal_year', 'numeric_value'])
 
-            Filter and analyze:
-            >>> df = annual_facts.to_dataframe()
-            >>> revenue = df[df['concept'].str.contains('Revenue')]
-            >>> print(revenue[['fiscal_year', 'numeric_value']])
+            Point-in-Time mode for backtesting:
+            >>> df = facts.to_dataframe(pit_mode=True)
+            >>> # Get revenue as known on a specific date
+            >>> as_of = '2024-10-15'
+            >>> revenue = df[(df['concept'] == 'Revenues') & (df['filing_date'] <= as_of)]
+            >>> latest = revenue.sort_values('filing_date').groupby('period_end').last()
         """
         # Build records from facts
         records = []
@@ -291,6 +298,11 @@ class EntityFacts:
                 'fiscal_year': fact.fiscal_year,
                 'fiscal_period': fact.fiscal_period
             }
+
+            # PIT mode: include filing_date and form_type as standard columns
+            if pit_mode:
+                record['filing_date'] = fact.filing_date
+                record['form_type'] = fact.form_type
 
             # Add metadata if requested
             if include_metadata:
@@ -322,6 +334,9 @@ class EntityFacts:
                 sort_cols.append('concept')
             if 'period_end' in df.columns:
                 sort_cols.append('period_end')
+            # PIT mode: sort by filing_date too for temporal ordering
+            if pit_mode and 'filing_date' in df.columns:
+                sort_cols.append('filing_date')
             if sort_cols:
                 df = df.sort_values(sort_cols).reset_index(drop=True)
 
