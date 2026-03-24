@@ -822,7 +822,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -857,7 +857,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -888,7 +888,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -917,7 +917,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -945,7 +945,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -975,7 +975,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -1004,7 +1004,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -1053,7 +1053,7 @@ class EntityFacts:
         Args:
             concept_name: The canonical concept name (e.g., 'revenue', 'capex', 'operating_lease_payments')
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             return_metadata: If True, return dict with value and metadata (tag used, etc.)
 
         Returns:
@@ -2176,7 +2176,7 @@ class EntityFacts:
         Args:
             concept_variants: List of concept names to try in priority order
             period: Optional period filter (e.g., "2024-FY", "2024-Q3")
-            unit: Optional unit filter (defaults to USD)
+            unit: Optional unit filter (defaults to the fact's native unit)
             fallback_calculation: Optional function to calculate value from components
             return_detailed: If True, return UnitResult instead of just value
             strict_unit_match: If True, require exact unit match. If False, allow compatible units.
@@ -2407,7 +2407,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD)
+            unit: Optional unit filter (defaults to the fact's native unit)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
@@ -2445,7 +2445,7 @@ class EntityFacts:
 
         Args:
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD)
+            unit: Optional unit filter (defaults to the fact's native unit)
             annual: If True (default), prefer annual FY facts when period is not specified.
                    Falls back to most recent if no annual facts available.
 
