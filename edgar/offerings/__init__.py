@@ -9,6 +9,7 @@ from edgar.offerings.campaign import Campaign, Offering  # Campaign for backward
 from edgar.offerings.formc import FormC, FundingPortal, IssuerCompany, Signer
 from edgar.offerings.formd import FormD
 from edgar.offerings.prospectus import Prospectus424B, OfferingType
+from edgar.offerings.registration_s3 import RegistrationS3, S3OfferingType, S3CoverPage
 
 
 def group_offerings_by_file_number(filings) -> Dict[str, EntityFilings]:

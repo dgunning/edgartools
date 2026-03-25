@@ -234,6 +234,12 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'DEF 14A': ('ProxyStatement', 'proxy statement with executive compensation'),
         'DEFA14A': ('ProxyStatement', 'additional proxy soliciting materials'),
         'DEFM14A': ('ProxyStatement', 'merger-related proxy statement'),
+        'S-3': ('RegistrationS3', 'shelf registration statement'),
+        'S-3/A': ('RegistrationS3', 'shelf registration statement (amendment)'),
+        'S-3ASR': ('RegistrationS3', 'automatic shelf registration'),
+        'S-3ASR/A': ('RegistrationS3', 'automatic shelf registration (amendment)'),
+        'S-3D': ('RegistrationS3', 'shelf registration statement'),
+        'S-3DPOS': ('RegistrationS3', 'shelf registration statement'),
         '424B1': ('Prospectus424B', 'prospectus (exchange offer / IPO)'),
         '424B2': ('Prospectus424B', 'prospectus (structured note / debt)'),
         '424B3': ('Prospectus424B', 'prospectus (resale / rights offering)'),
@@ -326,6 +332,10 @@ def obj(sec_filing: Filing) -> Optional[object]:
             return FormD.from_xml(xml)
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ['S-3', 'S-3ASR', 'S-3D', 'S-3DPOS']):
+        from edgar.offerings.registration_s3 import RegistrationS3
+        return RegistrationS3.from_filing(sec_filing)
 
     elif matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):
         from edgar.offerings.prospectus import Prospectus424B
