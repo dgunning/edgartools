@@ -105,6 +105,7 @@ nav:
     - Fund Voting (N-PX): guides/npx-data-object-guide.md
     - ABS Distribution (10-D): guides/tend-data-object-guide.md
     - Prospectus Supplements (424B): guides/prospectus424b-data-object-guide.md
+    - Shelf Registrations (S-3): guides/registration-s3-data-object-guide.md
     - Municipal Advisors (MA-I): guides/mai-data-object-guide.md
     - SEC Correspondence (CORRESP): guides/correspondence-data-object-guide.md
 

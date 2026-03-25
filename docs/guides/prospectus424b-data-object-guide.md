@@ -162,6 +162,22 @@ lc.avg_days_between_takedowns      # 180.0
 lc.shelf_registration              # Filing object for the S-3
 ```
 
+To navigate the other direction -- from the S-3 shelf forward to its 424B takedowns -- use the `RegistrationS3` data object. `filing.obj()` returns it automatically for S-3, S-3/A, S-3ASR, S-3D, and S-3DPOS filings.
+
+```python
+from edgar import Company
+
+company = Company("ALZN")
+s3_filing = company.get_filings(form="S-3")[0]
+s3 = s3_filing.obj()                   # RegistrationS3
+
+s3.total_offering                      # total registered amount in dollars
+s3.takedowns                           # Filings with all 424B forms from this shelf
+s3.offering_type.display_name          # "Resale Registration"
+```
+
+See the [S-3 Registration Statement guide](registration-s3-data-object-guide.md) for the full API.
+
 ## Working with Multiple Offerings
 
 Build a DataFrame of a company's offering history:
