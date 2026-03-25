@@ -6,7 +6,7 @@ def find_anchor_targets(tree, anchor_id: str):
     if not anchor_id:
         return []
 
-    return tree.xpath('//*[@id=$anchor_id or @name=$anchor_id]', anchor_id=anchor_id)
+    return tree.xpath('//*[@id=$anchor_id or (self::a and @name=$anchor_id)]', anchor_id=anchor_id)
 
 
 def is_anchor_match(element, anchor_id: str) -> bool:
@@ -14,4 +14,6 @@ def is_anchor_match(element, anchor_id: str) -> bool:
     if not anchor_id:
         return False
 
-    return element.get('id', '') == anchor_id or element.get('name', '') == anchor_id
+    if element.get('id', '') == anchor_id:
+        return True
+    return element.tag == 'a' and element.get('name', '') == anchor_id
