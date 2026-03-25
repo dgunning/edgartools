@@ -1,119 +1,145 @@
 ---
 name: update-autonomous-docs
-description: "Update the autonomous system docs (architecture + roadmap) after implementing changes. Reads git diff, proposes updates, applies with confirmation. Use after implementing a plan, completing a milestone, or running an overnight eval."
-allowed-tools: Read, Edit, Bash(git log:*), Bash(git diff:*), Bash(wc:*), Bash(grep:*), Glob, Grep
+description: "Update the autonomous system docs (architecture.md + roadmap.md) after implementing changes. Reads git diff, proposes updates, applies with confirmation. Trigger this skill after implementing a plan, completing a milestone, running an overnight eval, finishing a consensus session, or any time the user says 'update docs', 'update autonomous docs', 'sync docs', or 'docs are stale'. Also trigger proactively when you've just completed significant implementation work on the standardization system — the docs should always reflect reality."
+allowed-tools: Read, Edit, Write, Bash(git log:*), Bash(git diff:*), Bash(wc:*), Bash(grep:*), Bash(date:*), Glob, Grep
 ---
 
 ## Pre-computed Context
 
-**Recent changes since last doc update:**
-!`git log --oneline --since="$(grep 'Updated' docs/autonomous-system/architecture.md 2>/dev/null | head -1 | grep -oP '\d{4}-\d{2}-\d{2}' | head -1 || echo '2026-03-24')" -- edgar/xbrl/standardization/ .claude/agents/ .claude/skills/ 2>/dev/null | head -20`
+**Last documented update:**
+!`grep -A5 'Current State' docs/autonomous-system/architecture.md 2>/dev/null | grep -oP '\d{4}-\d{2}-\d{2}' | tail -1 || echo 'unknown'`
 
-**Current doc state:**
-!`wc -l docs/autonomous-system/architecture.md docs/autonomous-system/roadmap.md 2>/dev/null`
+**Recent commits since last update:**
+!`LAST_DATE=$(grep -A5 'Current State' docs/autonomous-system/architecture.md 2>/dev/null | grep -oP '\d{4}-\d{2}-\d{2}' | tail -1 || echo '2026-03-24'); git log --oneline --since="$LAST_DATE" -- edgar/xbrl/standardization/ .claude/agents/ .claude/skills/ 2>/dev/null | head -15`
 
-**Pending Phase 6 tasks:**
+**Pending milestones:**
 !`grep '\- \[ \]' docs/autonomous-system/roadmap.md 2>/dev/null`
+
+**Completed milestones:**
+!`grep '\- \[x\]' docs/autonomous-system/roadmap.md 2>/dev/null`
 
 ---
 
 # Update Autonomous System Documentation
 
-You are maintaining two consolidated docs for the autonomous XBRL extraction quality system:
+You maintain two docs that are the single source of truth for the autonomous XBRL extraction quality system:
 
-1. **`docs/autonomous-system/architecture.md`** — How the system works RIGHT NOW. Updated when architecture, components, or current state numbers change.
-2. **`docs/autonomous-system/roadmap.md`** — Where we've been and where we're going. Updated when milestones are completed, runs finish, or consensus sessions happen.
+| Doc | Purpose | Update when... |
+|-----|---------|----------------|
+| `docs/autonomous-system/architecture.md` | How it works NOW | Architecture, components, numbers, file map, or key decisions change |
+| `docs/autonomous-system/roadmap.md` | History + plan | Milestones completed, runs finish, consensus sessions happen, new phases added |
 
-## Step 1: Detect What Changed
+The reason these docs exist is so that both humans and AI agents can resume context across sessions. Stale docs waste everyone's time, so keeping them accurate matters. But the flip side: touching sections that haven't changed creates noise. Only update what's actually affected.
 
-Read the git log and diff since the last documented update date (shown in architecture.md's Current State table).
+## Step 1: Read Current State
+
+Read BOTH docs before doing anything else — you need to know what's already documented to avoid duplicating or contradicting it.
+
+```
+Read docs/autonomous-system/architecture.md
+Read docs/autonomous-system/roadmap.md
+```
+
+Note the current numbers in the Current State table (CQS, EF-CQS, etc.) and which milestones are already checked off.
+
+## Step 2: Identify What Changed
+
+Use TWO sources to understand what changed:
+
+**A. Conversation context** — If you just finished implementing something in this session, you already know what changed. Use that knowledge directly — it's more accurate than git diff for understanding *intent*.
+
+**B. Git history** — For changes you weren't part of, or to catch things you might have missed:
 
 ```bash
-# Files changed in standardization
-git diff --stat <last_update_commit>..HEAD -- edgar/xbrl/standardization/
-
-# Specific code changes
-git diff <last_update_commit>..HEAD -- edgar/xbrl/standardization/tools/
+git log --oneline --since="LAST_UPDATE_DATE" -- edgar/xbrl/standardization/
+git diff --stat LAST_COMMIT..HEAD -- edgar/xbrl/standardization/tools/
 ```
 
-Classify changes into categories:
-- **Architecture change** — new components, modified decision gate, new validation layer → update architecture.md
-- **Numbers changed** — CQS/EF-CQS improved, new companies added → update architecture.md Current State
-- **Milestone completed** — Phase 6 checkbox item done → update roadmap.md
-- **Overnight run** — new run results → add to roadmap.md Run Log
-- **Consensus session** — new multi-model consultation → add to roadmap.md Consensus Sessions
-- **Config pattern** — new Tier 1 config patterns → update architecture.md Configuration section
+Replace `LAST_UPDATE_DATE` with the date from the Current State table's "Updated" column.
 
-## Step 2: Propose Updates
+Classify each change:
 
-Present a concise summary to the user:
+| Category | Affects | Example |
+|----------|---------|---------|
+| Architecture change | architecture.md components | New decision gate (LIS), new validation layer |
+| Numbers changed | architecture.md Current State | EF-CQS improved from 0.8491 to 0.86 |
+| Milestone completed | roadmap.md Phase 6 checkboxes | M1.1 implemented and verified |
+| Overnight run | roadmap.md Run Log | Run 006 completed with results |
+| Consensus session | roadmap.md Consensus Sessions | Session 005 with GPT/Gemini |
+| New file added | architecture.md File Map | New tool in tools/ directory |
+| Key decision | architecture.md Key Decisions | New persistent decision from consensus |
+
+If nothing meaningful changed since the last update, say so and stop — don't make edits for the sake of making edits.
+
+## Step 3: Propose Updates
+
+Show the user a concise preview:
 
 ```
-I'll update the autonomous system docs with these changes:
+Proposed doc updates:
 
 architecture.md:
-  - Current State: EF-CQS 0.8491 → 0.8623
-  - Key Components: Updated decision gate to describe LIS implementation
+  - Current State: EF-CQS 0.8491 → 0.8623 (updated date → 2026-03-25)
+  - Key Components: Added LIS description to Decision Gate section
 
 roadmap.md:
-  - Phase 6: Mark M1.1 and M1.2 as completed
-  - Run Log: Add Run 006 summary
-  - Phase Completion: Add row for M1 completion
+  - Phase 6: M1.1 ✓, M1.2 ✓ (with commit hashes)
+  - Run Log: Added Run 006 summary
+  - Phase Tracking: Added row for M1 completion
 
-Approve? (y/n)
+Approve?
 ```
 
-Wait for user confirmation before making edits.
+Wait for confirmation before editing.
 
-## Step 3: Apply Updates
+## Step 4: Apply Updates
 
-### architecture.md updates
+### architecture.md
 
-**Current State table** — Update numbers and the "Updated" date:
+**Current State table** — Update values and the "Updated" date column. This is the most common update.
+
+**Key Components** — Only modify sections where behavior actually changed. If the decision gate changed from CQS to LIS, update that paragraph. Don't touch the CQS formula section if it hasn't changed.
+
+**File Map** — Add new files. Remove deleted files. Don't reorganize what hasn't changed.
+
+**Key Decisions** — Add only if a consensus session produced a new persistent decision worth preserving across all future sessions.
+
+### roadmap.md
+
+**Phase 6 checkboxes** — Change `- [ ]` to `- [x]` and append completion info:
 ```markdown
-| Metric | Value | Updated |
-|--------|-------|---------|
-| EF-CQS | 0.XXXX | 2026-XX-XX |
+- [x] **M1.1: Implement LIS** — Completed 2026-03-25. `abc123de`.
 ```
 
-**Key Components** — Only update sections where the architecture actually changed (new component, modified behavior). Do NOT rewrite sections that haven't changed.
-
-**File Map** — Add any new files created in `tools/` or `config/`.
-
-**Key Decisions** — Only add if a new consensus session produced a new persistent decision.
-
-### roadmap.md updates
-
-**Phase 6 checkboxes** — Change `- [ ]` to `- [x]` with date:
+**Run Log** — Append in established format:
 ```markdown
-- [x] **M1.1: Implement LIS** — Completed 2026-03-25. `commit_hash`.
-```
-
-**Run Log** — Append new run summary in the established format:
-```markdown
-**Run NNN (2026-XX-XX)** — Duration, cohort, key config
-- Result: X/Y kept, Z discards, W vetoes
+**Run NNN (2026-XX-XX)** — Duration, cohort
+- Result: X/Y kept, Z discards
 - CQS: X→Y, EF-CQS: X→Y
-- Key: One-line summary of most important finding.
+- Key: One-line finding.
 ```
 
-**Phase Completion Tracking** — Add row if a new phase item was completed.
+**Phase Completion Tracking** — Add row for completed phase items.
 
-**Consensus Sessions** — Add row to session table + agreements if new consultation happened.
+**Consensus Sessions** — Add row to session table + key agreements.
 
-## Step 4: Verify
+**Continuation IDs** — Add new IDs from consensus sessions.
 
-After applying edits, check:
+## Step 5: Verify
 
-1. **Current State numbers consistent** — architecture.md and roadmap.md agree on latest CQS/EF-CQS
-2. **Checkbox count** — `grep '\- \[ \]' docs/autonomous-system/roadmap.md` shows correct pending count
-3. **No broken cross-references** — Both docs reference each other correctly
-4. **Updated date** — architecture.md Current State has today's date
+After editing, run these checks:
 
-## Rules
+1. Numbers match: architecture.md Current State and roadmap.md latest run agree on CQS/EF-CQS
+2. Checkbox count: `grep -c '\- \[ \]' docs/autonomous-system/roadmap.md` — report the count
+3. Updated date: architecture.md Current State shows today's date
+4. Cross-references: both docs still link to each other correctly
 
-- **Do NOT rewrite sections that didn't change.** Only touch what's affected by the implementation.
-- **Do NOT add new sections.** If the change doesn't fit an existing section, flag it for the user.
-- **Do NOT touch memory files.** Those are managed by the auto-memory system.
-- **Keep entries concise.** One-line summaries in tables. Detail belongs in git history.
-- **Always include commit hashes** for completed milestones and phase tracking entries.
+Report the verification results to the user.
+
+## Principles
+
+- **Minimal edits**: Only touch sections affected by the change. Three lines edited beats a full rewrite.
+- **Commit hashes**: Every completed milestone and phase tracking entry needs one.
+- **Concise entries**: One-line summaries in tables. Git history has the details.
+- **No new sections**: If something doesn't fit existing sections, flag it — don't restructure the doc.
+- **No memory files**: The auto-memory system manages those separately.
