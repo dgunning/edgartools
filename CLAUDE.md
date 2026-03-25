@@ -19,6 +19,7 @@ Python library for SEC Edgar filings analysis.
 | Documents | `edgar/documents/` | `Document`, `HTMLParser` |
 | Reports (10-K/Q/8-K) | `edgar/company_reports/` | `TenK`, `TenQ`, `EightK`, `AuditorInfo`, `SubsidiaryList` |
 | Reference data | `edgar/reference/` | Tickers, forms |
+| **Autonomous system** | `edgar/xbrl/standardization/` | CQS, auto-eval, typed actions |
 
 ## Entry Points
 
@@ -68,14 +69,37 @@ bd create --title "..." --type bug --priority P1  # Create issue
 ## Rules
 
 - **Never run `sudo` without asking first.** If a command requires `sudo`, stop and tell the user before executing it.
+- **Never echo, print, or log API keys or secrets.** Do not run `echo $OPENROUTER_API_KEY`, `printenv | grep KEY`, or any command that would display secret values. To check if a key is set, test it by using it directly (e.g., make an API call).
+
+## Autonomous System (Active Focus)
+
+The autonomous XBRL extraction quality system lives in `edgar/xbrl/standardization/`. It uses AI agents + deterministic solvers to improve financial data extraction quality overnight.
+
+| Doc | Purpose |
+|-----|---------|
+| `docs/autonomous-system/architecture.md` | How the system works now (components, CQS, decision gates) |
+| `docs/autonomous-system/roadmap.md` | History, run log, consensus sessions, Phase 6 milestones |
+
+**Skills:**
+- `/update-autonomous-docs` — Update the 2 docs above after implementing changes
+- `/consult-consensus` — Run multi-model consensus (GPT-5.4 + Gemini 3.1) on a topic
+
+**Key entry points:**
+```python
+from edgar.xbrl.standardization.tools.auto_eval import compute_cqs, identify_gaps
+from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight
+from edgar.xbrl.standardization.tools.auto_eval_dashboard import show_dashboard
+```
 
 ## Development
 
 | Task | Reference |
 |------|-----------|
+| Autonomous system | `docs/autonomous-system/architecture.md` |
+| Roadmap & milestones | `docs/autonomous-system/roadmap.md` |
 | Verification | `docs/verification-guide.md` |
 | Constitution | `docs/verification-constitution.md` |
-| Roadmap | `docs/verification-roadmap.md` |
+| Verification roadmap | `docs/verification-roadmap.md` |
 | API examples | `edgar/ai/skills/core/quickstart-by-task.md` |
 | Data objects | `edgar/ai/skills/core/data-objects.md` |
 | Workflows | `edgar/ai/skills/core/workflows.md` |

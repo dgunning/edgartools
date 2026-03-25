@@ -42,15 +42,33 @@ Determine the session number by checking existing files in `docs/autonomous-syst
 
 Enrich the user's topic with the context you gathered in Step 1 — ground it with actual numbers, architecture details, and constraints. The user provides the *what*, you provide the *context*.
 
-Show the user a brief preview of what you'll ask:
+### Choose the Stance Pattern
+
+The stance assignment shapes the kind of feedback you get. Pick the pattern that fits the question:
+
+| Question Type | Pattern | GPT-5.4 Stance | Gemini 3.1 Stance | When to use |
+|---|---|---|---|---|
+| "Should we do X?" | **Dialectic** | for — "Argue what's achievable, propose concrete path" | against — "Challenge assumptions, identify gaps and risks" | Go/no-go decisions, proposals, feature additions |
+| "X vs Y?" | **Champion** | neutral — "Evaluate option X as the stronger choice" | neutral — "Evaluate option Y as the stronger choice" | Comparing two approaches, tools, architectures |
+| "How should we do X?" | **Exploratory** | neutral — "Propose the most practical approach" | neutral — "Propose the most robust approach" | Open-ended design questions, strategy |
+
+Use Dialectic as the default. Switch to Champion when the user is comparing two named alternatives. Switch to Exploratory when there's no clear proposal to argue for or against.
+
+### Preview
+
+Show the user what you'll do before running:
 
 ```
 Consensus Session NNN: [Topic]
+Pattern: [Dialectic/Champion/Exploratory]
 
-I'll consult GPT-5.4 (for stance) and Gemini 3.1 (against stance) on:
-[2-3 sentence summary of the question]
+GPT-5.4: [stance] — [stance_prompt summary]
+Gemini 3.1: [stance] — [stance_prompt summary]
 
-Key context I'll share:
+Question:
+[2-3 sentence summary]
+
+Key context:
 - [bullet 1]
 - [bullet 2]
 - ...
@@ -62,13 +80,29 @@ Wait for confirmation, then proceed.
 
 ## Step 3: Run the PAL Consensus Tool
 
-Use the `mcp__pal__consensus` tool with this configuration:
+Use the `mcp__pal__consensus` tool. Set the models array based on the stance pattern chosen above.
 
-**Models:**
+**Dialectic example:**
 ```json
 [
   {"model": "openai/gpt-5.4", "stance": "for", "stance_prompt": "Argue what's achievable and propose concrete improvements"},
   {"model": "google/gemini-3.1-pro-preview", "stance": "against", "stance_prompt": "Challenge assumptions, identify fundamental gaps and risks"}
+]
+```
+
+**Champion example** (X vs Y):
+```json
+[
+  {"model": "openai/gpt-5.4", "stance": "neutral", "stance_prompt": "Evaluate [Option X] as the stronger choice. Argue its merits and address its weaknesses."},
+  {"model": "google/gemini-3.1-pro-preview", "stance": "neutral", "stance_prompt": "Evaluate [Option Y] as the stronger choice. Argue its merits and address its weaknesses."}
+]
+```
+
+**Exploratory example:**
+```json
+[
+  {"model": "openai/gpt-5.4", "stance": "neutral", "stance_prompt": "Propose the most practical, implementable approach. Prioritize speed and simplicity."},
+  {"model": "google/gemini-3.1-pro-preview", "stance": "neutral", "stance_prompt": "Propose the most robust, future-proof approach. Prioritize correctness and scalability."}
 ]
 ```
 
@@ -110,7 +144,8 @@ Create a file at `docs/autonomous-system/consensus/NNN-YYYY-MM-DD-topic.md` with
 # Consensus Session NNN: [Topic]
 
 **Date:** YYYY-MM-DD
-**Models:** GPT-5.4 (for), Gemini 3.1 Pro (against), Claude Opus 4.6 (moderator)
+**Pattern:** [Dialectic/Champion/Exploratory]
+**Models:** GPT-5.4 ([stance]), Gemini 3.1 Pro ([stance]), Claude Opus 4.6 (moderator)
 **Continuation ID:** [from PAL response]
 **Trigger:** [What prompted this session — implementation, issue, eval results, etc.]
 
