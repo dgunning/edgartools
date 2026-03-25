@@ -1,6 +1,6 @@
 ---
 name: consult-consensus
-description: "Run a multi-model consensus session (GPT-5.4 + Gemini 3.1) on the autonomous system's current state, issues, or architectural decisions via PAL MCP. Use whenever you need outside perspective — after implementing features, hitting limitations, getting new eval scores, or making strategic decisions. Saves the consensus for future review. Use when the user says 'get consensus', 'consult models', 'run consensus', 'outside feedback', 'what do the models think', or when you've just completed a significant implementation and want validation."
+description: "Run a multi-model consensus session (GPT-5.4 + Gemini 3.1) via PAL MCP on a user-specified topic. Only trigger when the user explicitly says 'get consensus' followed by their topic. This is a manual-only skill — never trigger proactively or on behalf of the user."
 allowed-tools: Read, Edit, Write, Bash(git log:*), Bash(git diff:*), Bash(mkdir:*), Bash(ls:*), Bash(date:*), Glob, Grep, mcp__pal__consensus, mcp__pal__chat, mcp__pal__listmodels
 ---
 
@@ -36,12 +36,11 @@ Summarize what you found in 5-10 bullet points. This becomes the basis for the c
 
 ## Step 2: Formulate the Consultation
 
+The user will provide the topic when they invoke the skill (e.g., "get consensus on whether LIS should be binary or continuous"). Use their topic as the anchor — don't invent a different question.
+
 Determine the session number by checking existing files in `docs/autonomous-system/consensus/`. The next number is one higher than the highest existing session number.
 
-Write a clear, specific question or proposal for the external models. Good consultations are:
-- **Specific**: "Should we implement LIS as a binary gate or a continuous score?" not "What should we do next?"
-- **Grounded**: Include the actual numbers (CQS, EF-CQS), the actual architecture, the actual constraints
-- **Actionable**: Ask for concrete recommendations, not general advice
+Enrich the user's topic with the context you gathered in Step 1 — ground it with actual numbers, architecture details, and constraints. The user provides the *what*, you provide the *context*.
 
 Show the user a brief preview of what you'll ask:
 
