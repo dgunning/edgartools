@@ -184,6 +184,11 @@ These persist across all sessions and guide all future work:
 5. **~90-95% autonomous ceiling** — tail 5-10% needs human review (all sessions agree)
 6. **Scale order: scoring → metrics → companies** — fix measurement before expanding (Session 004)
 7. **Single source of truth: these 2 docs** — `architecture.md` (how) + `roadmap.md` (what/when)
+8. **Subscription-grade threshold: EF-CQS >= 0.95 overall, >= 0.99 on headline metrics** — Revenue, NetIncome, TotalAssets, TotalLiabilities, Equity, OperatingIncome, OperatingCashFlow, EPS (Session 005)
+9. **No scaling past 100 until EF-CQS >= 0.95** with multi-period validation on base cohort (Session 005)
+10. **Internal override must never set publish_confidence="high"** — useful for diagnostics, not customer-facing publication (Session 005)
+11. **Quarterly data (10-Q) is a separate product milestone** — do not bundle with annual data readiness (Session 005)
+12. **Customer metadata (provenance, data dictionary, confidence API) is pre-launch requirement** — not post-launch enhancement (Session 005)
 
 ---
 
