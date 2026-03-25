@@ -4,18 +4,144 @@
 Extracts 11 fields from the cover page of 424B* filings using
 a combination of filing metadata and text regex patterns.
 
+The cover page is isolated using keyword-based boundary detection
+rather than a fixed character cutoff, reducing false positives.
+
 Validation results: 89% overall, near-zero true failures.
 """
 
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
 __all__ = ['extract_cover_page_fields', 'extract_underwriting_from_text']
+
+# ---------------------------------------------------------------------------
+# Cover page boundary detection
+# ---------------------------------------------------------------------------
+
+# How many characters to scan when looking for the cover page end.
+_COVER_PAGE_SCAN_LIMIT = 15_000
+
+# Section headers that mark the start of the body (after the cover page).
+_BODY_HEADERS = re.compile(
+    r"^[\s*#]*(?:"
+    r"ABOUT\s+THIS\s+PROSPECTUS"
+    r"|FORWARD[\s-]LOOKING\s+STATEMENTS"
+    r"|RISK\s+FACTORS"
+    r"|SUMMARY"
+    r"|USE\s+OF\s+PROCEEDS"
+    r"|PROSPECTUS\s+SUPPLEMENT\s+SUMMARY"
+    r")[\s*]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def _find_cover_page_end(text: str) -> Optional[int]:
+    """
+    Find where the cover page ends using keyword boundaries.
+
+    Strategy (in priority order):
+      1. "The date of this prospectus [supplement] is" — most common marker.
+         Takes the *last* occurrence and ends at the next blank line.
+      2. "TABLE OF CONTENTS" — unambiguous boundary.
+      3. First major section header (ABOUT THIS PROSPECTUS, RISK FACTORS, etc.).
+      4. "Neither the Securities and Exchange Commission..." anchor,
+         then scan forward for a date line.
+      5. Return None (caller uses scan-limit fallback).
+    """
+    scan = text[:_COVER_PAGE_SCAN_LIMIT]
+
+    # Minimum position threshold — matches near the very start of the
+    # document are artifacts of HTML-to-text conversion, not real boundaries.
+    _MIN_POS = 500
+
+    # Strategy 1 (highest priority): "The date of this prospectus..."
+    date_pos = _find_date_line_end(scan)
+    if date_pos is not None:
+        return date_pos
+
+    # Strategy 2: TABLE OF CONTENTS
+    toc_match = re.search(
+        r"^[\s*#]*TABLE\s+OF\s+CONTENTS[\s*]*$",
+        scan,
+        flags=re.IGNORECASE | re.MULTILINE,
+    )
+    if toc_match and toc_match.start() > _MIN_POS:
+        return toc_match.start()
+
+    # Strategy 3: First major section header
+    header_match = _BODY_HEADERS.search(scan)
+    if header_match and header_match.start() > _MIN_POS:
+        return header_match.start()
+
+    # Strategy 4: SEC disclaimer anchor → scan for date
+    sec_pos = _find_sec_disclaimer_date(scan)
+    if sec_pos is not None:
+        return sec_pos
+
+    return None
+
+
+def _find_date_line_end(scan: str) -> Optional[int]:
+    """Find last 'The date of this prospectus/supplement is ...' and return
+    the position of the next blank line after it."""
+    date_pat = r"The\s+date\s+of\s+this\s+(?:prospectus|supplement)(?:\s+supplement)?\s+is\b"
+    last = None
+    for m in re.finditer(date_pat, scan, flags=re.IGNORECASE):
+        last = m
+
+    if last is None:
+        return None
+
+    after = last.end()
+    blank = re.search(r"(?:\r?\n)[ \t]*(?:\r?\n)", scan[after:])
+    if blank:
+        return after + blank.start()
+    return min(after + 200, len(scan))
+
+
+def _find_sec_disclaimer_date(scan: str) -> Optional[int]:
+    """Find the SEC disclaimer anchor and scan forward for a date line."""
+    anchor_tokens = (
+        "Neither the Securities and Exchange Commission "
+        "nor any state securities commission has approved or disapproved of"
+    ).split()
+    anchor_pat = r"\b" + r"\s+".join(re.escape(t) for t in anchor_tokens) + r"\b"
+    anchor_match = re.search(anchor_pat, scan, flags=re.IGNORECASE)
+
+    if not anchor_match:
+        return None
+
+    months = (
+        r"Jan(?:uary)?\.?|Feb(?:ruary)?\.?|Mar(?:ch)?\.?|Apr(?:il)?\.?|"
+        r"May\.?|Jun(?:e)?\.?|Jul(?:y)?\.?|Aug(?:ust)?\.?|"
+        r"Sep(?:t(?:ember)?)?\.?|Oct(?:ober)?\.?|Nov(?:ember)?\.?|Dec(?:ember)?\.?"
+    )
+    date_re = re.compile(
+        rf"\b(?:{months})\s+\d{{1,2}}(?:st|nd|rd|th)?\s*,?\s+\d{{4}}\b",
+        flags=re.IGNORECASE,
+    )
+
+    search_start = anchor_match.end()
+    for line_match in re.finditer(r"[^\n]+", scan[search_start:]):
+        line = line_match.group().strip()
+        if line and date_re.search(line):
+            return search_start + line_match.end()
+
+    return None
+
+
+def _isolate_cover_page(text: str) -> str:
+    """Return the cover page portion of the filing text."""
+    end = _find_cover_page_end(text)
+    if end is not None:
+        return text[:end].rstrip()
+    return text[:_COVER_PAGE_SCAN_LIMIT]
 
 
 def extract_cover_page_fields(filing: 'Filing', document=None) -> dict:
@@ -33,7 +159,7 @@ def extract_cover_page_fields(filing: 'Filing', document=None) -> dict:
         text = doc.text() if doc else ''
     except Exception:
         text = ''
-    cover = text[:15000]
+    cover = _isolate_cover_page(text)
 
     result: dict = {}
 
@@ -203,7 +329,7 @@ def extract_underwriting_from_text(filing: 'Filing', document=None) -> list:
         return []
 
     results = []
-    cover = text[:8000]
+    cover = _isolate_cover_page(text)
 
     # Signal: Cover page role label + agent name
     for pattern, role in _COVER_ROLE_PATTERNS:
