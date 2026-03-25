@@ -102,6 +102,17 @@ class StandardizedMetric:
     source: str   # 'tree', 'facts', 'ai', 'industry', 'derived', 'excluded'
     notes: Optional[str] = None
     is_excluded: bool = False
+    # Data dictionary metadata
+    definition: Optional[str] = None
+    statement_family: Optional[str] = None
+    unit: Optional[str] = None
+    sign_convention: Optional[str] = None
+    # Provenance and quality indicators
+    publish_confidence: Optional[str] = None    # "high" | "medium" | "low" | "unverified"
+    evidence_tier: Optional[str] = None         # "sec_confirmed" | "yfinance_confirmed" | "self_validated" | "unverified"
+    period_end: Optional[str] = None            # ISO date of the fiscal period end
+    accession_number: Optional[str] = None      # SEC filing accession number
+    is_golden_master: bool = False
 
     @property
     def has_value(self) -> bool:
@@ -217,12 +228,16 @@ class StandardizedFinancials:
                 'source': m.source,
                 'is_excluded': m.is_excluded,
                 'notes': m.notes,
+                'publish_confidence': m.publish_confidence,
+                'evidence_tier': m.evidence_tier,
+                'period_end': m.period_end,
+                'is_golden_master': m.is_golden_master,
             }
             for name, m in self._metrics.items()
         }
 
     def to_dataframe(self):
-        """Export as a pandas DataFrame with one row per metric."""
+        """Export as a pandas DataFrame with one row per metric, including quality metadata."""
         import pandas as pd
         rows = []
         for name, m in self._metrics.items():
@@ -234,6 +249,10 @@ class StandardizedFinancials:
                 'confidence': m.confidence,
                 'source': m.source,
                 'is_excluded': m.is_excluded,
+                'publish_confidence': m.publish_confidence,
+                'evidence_tier': m.evidence_tier,
+                'period_end': m.period_end,
+                'is_golden_master': m.is_golden_master,
             })
         return pd.DataFrame(rows)
 
@@ -262,7 +281,7 @@ class StandardizedFinancials:
         )
         table.add_column("Metric", style="cyan", min_width=28)
         table.add_column("Value", justify="right", min_width=14)
-        table.add_column("Confidence", justify="center", min_width=10)
+        table.add_column("Quality", justify="center", min_width=8)
         table.add_column("Source", min_width=8)
 
         for section_name, metric_names in METRIC_SECTIONS.items():
@@ -285,19 +304,23 @@ class StandardizedFinancials:
                     val_text = _format_value(m.value)
                 else:
                     val_text = "—"
-                # Confidence color
-                if m.confidence >= 0.95:
-                    conf_style = "green"
-                elif m.confidence >= 0.70:
-                    conf_style = "yellow"
+                # Quality indicator based on publish_confidence
+                pc = m.publish_confidence or "unverified"
+                if pc == "high":
+                    quality_text = Text("HIGH", style="bold green")
+                elif pc == "medium":
+                    quality_text = Text("MED", style="yellow")
+                elif pc == "low":
+                    quality_text = Text("LOW", style="red")
                 else:
-                    conf_style = "red"
-                conf_text = Text(f"{m.confidence:.0%}", style=conf_style) if m.value is not None else Text("")
+                    quality_text = Text("—", style="dim")
+                if m.value is None:
+                    quality_text = Text("")
 
                 table.add_row(
                     f"    {name}",
                     val_text,
-                    conf_text,
+                    quality_text,
                     m.source if m.value is not None else "",
                 )
 
@@ -461,7 +484,21 @@ def extract_standardized_financials(filing, ticker: str) -> Optional['Standardiz
     # 5. Calculate derived metrics
     _calculate_derived_metrics(metrics)
 
-    # 6. Wrap in StandardizedFinancials
+    # 6. Enrich with data dictionary (cached, no network calls)
+    try:
+        from edgar.xbrl.standardization.config_loader import load_data_dictionary
+        data_dict = load_data_dictionary()
+        for metric_name, m in metrics.items():
+            dd_entry = data_dict.get(metric_name)
+            if dd_entry:
+                m.definition = dd_entry.description
+                m.statement_family = dd_entry.statement_family
+                m.unit = dd_entry.unit
+                m.sign_convention = dd_entry.sign_convention
+    except Exception as e:
+        log.warning(f"Data dictionary enrichment failed: {e}")
+
+    # 7. Wrap in StandardizedFinancials
     return StandardizedFinancials(
         metrics=metrics,
         company_name=company_name,

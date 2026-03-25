@@ -13,6 +13,10 @@ import logging
 from datetime import datetime
 from typing import Dict, List, Optional
 
+# SLA targets — shared between dashboard display and compliance checks
+EF_CQS_TARGET = 0.95
+HEADLINE_EF_TARGET = 0.99
+
 from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
 from edgar.xbrl.standardization.tools.auto_eval import (
     CQSResult,
@@ -75,11 +79,13 @@ def _show_rich_dashboard(
         border_style="cyan",
     ))
 
-    # Section 1: Current CQS
-    console.print("\n[bold]Current CQS Status[/bold]")
+    # Section 1: Current Quality Status
+    console.print("\n[bold]Quality Status[/bold]")
     try:
         cqs = compute_cqs(eval_cohort=QUICK_EVAL_COHORT, snapshot_mode=True)
         _render_cqs_panel(console, cqs)
+        # SLA Compliance Indicators
+        _render_sla_compliance(console, cqs)
     except Exception as e:
         console.print(f"  [red]Error computing CQS: {e}[/red]")
 
@@ -122,7 +128,7 @@ def _show_rich_dashboard(
 
 
 def _render_cqs_panel(console, cqs: CQSResult):
-    """Render CQS as a Rich panel."""
+    """Render CQS as a Rich panel with EF-CQS as headline."""
     from rich.table import Table
     from rich import box
 
@@ -131,20 +137,86 @@ def _render_cqs_panel(console, cqs: CQSResult):
     table.add_column("Value", justify="right")
 
     veto_str = " [red]VETOED[/red]" if cqs.vetoed else ""
-    table.add_row("CQS", f"[bold cyan]{cqs.cqs:.4f}[/bold cyan]{veto_str}")
+
+    # EF-CQS is the headline metric (primary KPI)
+    ef_color = "green" if cqs.ef_cqs >= EF_CQS_TARGET else ("yellow" if cqs.ef_cqs >= 0.85 else "red")
+    table.add_row("EF-CQS", f"[bold {ef_color}]{cqs.ef_cqs:.4f}[/bold {ef_color}]{veto_str}")
+    table.add_row("", "")  # spacer
+
+    # Sub-scores
+    table.add_row("RFA Rate", f"{cqs.rfa_rate:.1%}")
+    table.add_row("SMA Rate", f"{cqs.sma_rate:.1%}")
+    table.add_row("SA-CQS", f"{cqs.sa_cqs:.4f}")
+    table.add_row("", "")  # spacer
+
+    # Traditional CQS components
+    table.add_row("CQS (composite)", f"[dim]{cqs.cqs:.4f}[/dim]")
     table.add_row("Pass Rate", f"{cqs.pass_rate:.1%}")
     table.add_row("Mean Variance", f"{cqs.mean_variance:.1f}%")
     table.add_row("Coverage", f"{cqs.coverage_rate:.1%}")
     table.add_row("Golden Masters", f"{cqs.golden_master_rate:.1%}")
     table.add_row("Regressions", f"{cqs.total_regressions}")
+    table.add_row("Explained Gaps", f"{cqs.explained_variance_count}")
+    table.add_row("", "")  # spacer
     table.add_row("Companies", f"{cqs.companies_evaluated}")
     table.add_row("Duration", f"{cqs.duration_seconds:.1f}s")
-    table.add_row("", "")  # spacer
-    table.add_row("EF-CQS", f"[green]{cqs.ef_cqs:.4f}[/green]")
-    table.add_row("SA-CQS", f"[yellow]{cqs.sa_cqs:.4f}[/yellow]")
-    table.add_row("Explained Gaps", f"{cqs.explained_variance_count}")
+
+    # Unverified metrics count
+    unverified = sum(cs.unverified_count for cs in cqs.company_scores.values())
+    if unverified:
+        table.add_row("", "")
+        table.add_row("Unverified Metrics", f"{unverified}")
 
     console.print(table)
+
+
+def _render_sla_compliance(console, cqs: CQSResult):
+    """Render SLA compliance indicators."""
+    from rich.table import Table
+    from rich import box
+
+    table = Table(box=box.SIMPLE, show_header=True, padding=(0, 2))
+    table.add_column("SLA Check", style="bold", min_width=25)
+    table.add_column("Value", justify="right", min_width=8)
+    table.add_column("Target", justify="right", min_width=8)
+    table.add_column("Status", justify="center", min_width=8)
+
+    # EF-CQS overall
+    ef_ok = cqs.ef_cqs >= EF_CQS_TARGET
+    table.add_row(
+        "EF-CQS (overall)",
+        f"{cqs.ef_cqs:.4f}",
+        f">= {EF_CQS_TARGET:.4f}",
+        "[green]PASS[/green]" if ef_ok else "[red]FAIL[/red]",
+    )
+
+    # Headline EF Rate
+    headline_ef = cqs.headline_ef_rate
+    headline_ok = headline_ef >= HEADLINE_EF_TARGET
+    table.add_row(
+        "Headline EF Rate",
+        f"{headline_ef:.4f}",
+        f">= {HEADLINE_EF_TARGET:.4f}",
+        "[green]PASS[/green]" if headline_ok else "[red]FAIL[/red]",
+    )
+
+    # Zero regressions
+    reg_ok = cqs.total_regressions == 0
+    table.add_row(
+        "Zero Regressions",
+        str(cqs.total_regressions),
+        "0",
+        "[green]PASS[/green]" if reg_ok else "[red]FAIL[/red]",
+    )
+
+    # Overall SLA
+    all_pass = ef_ok and headline_ok and reg_ok
+    console.print(table)
+    if all_pass:
+        console.print("  [bold green]SLA: COMPLIANT[/bold green]")
+    else:
+        console.print("  [bold red]SLA: NOT YET COMPLIANT[/bold red]")
+    console.print()
 
 
 def _render_experiments_table(console, experiments: List[Dict]):
@@ -218,6 +290,11 @@ def _render_session_stats(console, experiments: List[Dict], session_id: Optional
     if total > 0:
         success_rate = kept / total * 100
         console.print(f"  Success rate: {success_rate:.0f}%")
+
+    # Show LIS-based KEEP count if available
+    lis_keeps = sum(1 for e in experiments if e.get("decision") == "KEEP" and "LIS KEEP" in e.get("notes", ""))
+    if lis_keeps > 0:
+        console.print(f"  LIS-based KEEPs: [green]{lis_keeps}[/green] (would have been discarded by CQS alone)")
 
 
 def _render_graveyard_patterns(console, graveyard: List[Dict]):

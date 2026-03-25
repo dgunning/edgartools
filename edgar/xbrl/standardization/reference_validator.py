@@ -79,11 +79,28 @@ class ValidationResult:
     period_end: Optional[str] = None         # ISO date
     unit: Optional[str] = None               # "USD", "shares", "pure"
     fact_decimals: Optional[int] = None      # XBRL decimals attribute
+    # Evidence tier: how the reference value was sourced
+    evidence_tier: str = "unverified"        # "sec_confirmed" | "yfinance_confirmed" | "self_validated" | "unverified"
     # Extraction evidence for diagnostic drilling
     resolution_type: str = "none"            # "direct" | "composite" | "industry" | "none"
     components_used: Optional[list] = None   # XBRL concepts used in extraction
     components_missing: Optional[list] = None  # Expected components not found
     company_industry: Optional[str] = None   # Industry resolved for this company
+
+
+@dataclass
+class MultiPeriodResult:
+    """Result of validating a mapping across multiple fiscal periods."""
+    ticker: str
+    metric: str
+    periods_checked: int           # How many periods we attempted
+    periods_passed: int            # How many passed validation
+    periods_failed: int            # How many failed validation
+    periods_missing: int           # How many had no data
+    is_stable: bool                # True if all checked periods pass
+    validated_fiscal_periods: List[str]   # List of fiscal period end dates that passed
+    period_details: List[Dict]     # Per-period detail: {period, value, ref_value, variance, pass}
+    detail: str                    # Human-readable summary
 
 
 @dataclass
@@ -274,7 +291,7 @@ class ReferenceValidator:
         config: Optional[MappingConfig] = None,
         tolerance_pct: float = 15.0,  # 15% tolerance for matching
         snapshot_mode: bool = False,
-        use_sec_facts: bool = False,
+        use_sec_facts: bool = True,
     ):
         self.config = config or get_config()
         self.tolerance = tolerance_pct / 100.0
@@ -287,7 +304,22 @@ class ReferenceValidator:
 
         if yf is None and not snapshot_mode:
             print("Warning: yfinance not installed. Install with: pip install yfinance")
-    
+
+    @staticmethod
+    def _compute_variance_pct(actual: float, reference: float) -> float:
+        """Compute percentage variance between actual and reference values."""
+        if reference != 0:
+            return abs(actual - reference) / abs(reference) * 100
+        return 100.0 if actual != 0 else 0.0
+
+    def _get_metric_tolerance(self, metric: str) -> float:
+        """Get validation tolerance for a metric (from config or default 20%)."""
+        if self.config:
+            mc = self.config.get_metric(metric)
+            if mc and mc.validation_tolerance:
+                return mc.validation_tolerance
+        return 20.0
+
     def _is_composite_metric(self, metric: str) -> bool:
         """Check if a metric should use composite extraction.
 
@@ -1127,17 +1159,63 @@ class ReferenceValidator:
             else:
                 validation.internal_status = internal_result.status
 
+        # SEC-Native Primacy: Try SEC facts FIRST for every metric.
+        # This pre-computes SEC reference values so they're available during
+        # the validation loop below. SEC facts are the authoritative source;
+        # yfinance is corroboration, not truth.
+        sec_values: Dict[str, Optional[float]] = {}
+        for metric in validations:
+            sec_values[metric] = self._get_sec_facts_value(ticker, metric)
+
         # Update MappingResult objects based on validation
         for metric, validation in validations.items():
             if metric not in results:
                 continue
 
             result = results[metric]
+            sec_value = sec_values.get(metric)
+            yf_value = validation.reference_value  # From validate_company (yfinance)
 
+            # --- Pre-compute SEC variance (used for evidence_tier and mismatch override) ---
+            sec_var = None
+            tol = self._get_metric_tolerance(metric)
+            if sec_value is not None and validation.xbrl_value is not None:
+                sec_var = self._compute_variance_pct(validation.xbrl_value, sec_value)
+            sec_confirms = sec_var is not None and sec_var <= tol
+
+            # --- Determine evidence_tier ---
+            if validation.status == "excluded":
+                validation.evidence_tier = "sec_confirmed"
+            elif sec_confirms:
+                validation.evidence_tier = "sec_confirmed"
+                if not validation.rfa_pass:
+                    validation.rfa_pass = True
+                    validation.rfa_source = "sec_facts"
+            elif sec_var is not None and not sec_confirms and yf_value is not None:
+                validation.evidence_tier = "yfinance_confirmed"
+            elif yf_value is not None:
+                validation.evidence_tier = "yfinance_confirmed"
+            else:
+                validation.evidence_tier = "unverified"
+
+            # --- Update validation status ---
             if validation.status == "match":
                 result.validation_status = "valid"
                 result.validation_notes = "Value matches reference"
             elif validation.status == "mismatch":
+                # SEC facts confirm our extraction — override yfinance mismatch
+                if sec_confirms:
+                        # SEC confirms our extraction — override yfinance mismatch
+                        validation.status = "match"
+                        validation.is_valid = True
+                        validation.rfa_pass = True
+                        validation.rfa_source = "sec_facts"
+                        validation.evidence_tier = "sec_confirmed"
+                        result.validation_status = "valid"
+                        result.validation_notes = f"SEC facts confirm extraction (sec_var {sec_var:.1f}%, yf mismatch)"
+                        logger.info(f"[SEC PRIMACY] {ticker}:{metric} — SEC confirms, overriding yf mismatch")
+                        continue
+
                 # SMART RETRY: For OperatingIncome, try calculation if direct tag failed
                 retry_successful = False
                 if metric == 'OperatingIncome' and xbrl is not None:
@@ -1154,6 +1232,7 @@ class ReferenceValidator:
                             "External mismatch but internal accounting equations pass — "
                             "reference data likely stale or using different methodology"
                         )
+                        validation.evidence_tier = "self_validated"
                         logger.info(
                             f"[INTERNAL OVERRIDE] {ticker}:{metric} — "
                             f"internal pass overrides external mismatch"
@@ -1164,30 +1243,29 @@ class ReferenceValidator:
                         result.validation_notes = f"Value mismatch: {validation.notes}"
                         result.confidence_level = ConfidenceLevel.INVALID
             elif validation.status == "missing_ref":
-                # Try SEC Company Facts API as fallback reference
-                sec_value = self._get_sec_facts_value(ticker, metric)
-                if sec_value is not None and validation.xbrl_value is not None:
-                    variance = abs(validation.xbrl_value - sec_value) / abs(sec_value) * 100 if sec_value != 0 else (100.0 if validation.xbrl_value != 0 else 0.0)
+                # SEC facts as primary reference (already fetched above)
+                if sec_var is not None:
                     validation.reference_value = sec_value
-                    validation.variance_pct = variance
-                    metric_config = self.config.get_metric(metric) if self.config else None
-                    tol = (metric_config.validation_tolerance if metric_config and metric_config.validation_tolerance else 20.0)
-                    if variance <= tol:
+                    validation.variance_pct = sec_var
+                    if sec_confirms:
                         validation.status = "match"
                         validation.is_valid = True
                         validation.rfa_pass = True
                         validation.rfa_source = "sec_facts"
+                        validation.evidence_tier = "sec_confirmed"
                         result.validation_status = "valid"
                         result.validation_notes = f"SEC facts reference match (variance {variance:.1f}%)"
                         logger.info(f"[SEC FACTS] {ticker}:{metric} — SEC reference match ({variance:.1f}%)")
                     else:
                         validation.status = "mismatch"
                         validation.is_valid = False
+                        validation.evidence_tier = "sec_confirmed"  # SEC had a value, just didn't match
                         result.validation_status = "invalid"
                         result.validation_notes = f"SEC facts reference mismatch (variance {variance:.1f}%)"
                 else:
                     result.validation_status = "unverified"
                     result.validation_notes = "No reference data available — cannot validate"
+                    validation.evidence_tier = "unverified"
             elif validation.status == "mapping_needed":
                 result.validation_status = "pending"
                 result.validation_notes = "Mapping required"
@@ -1221,6 +1299,7 @@ class ReferenceValidator:
 
         Levels:
         - high: Known concept + reference match + internal equations pass
+                (but NEVER for self_validated evidence — that's an internal override)
         - medium: Known concept + reference match OR internal equations pass
         - low: Mapped but unvalidated, or high variance
         - unverified: No reference data, no internal validation
@@ -1237,7 +1316,18 @@ class ReferenceValidator:
 
         internal_ok = validation.internal_status in ("VALID_INTERNAL", "VALID_PARTIAL")
 
+        # Guardrail: internal override (self_validated) can never produce "high"
+        # confidence. If the only reason we're marking this "valid" is because
+        # internal accounting equations pass but external references disagree,
+        # cap at "medium" — it might be right, but we can't guarantee it.
+        is_self_validated = validation.evidence_tier == "self_validated"
+        # Also detect the internal override fingerprint in notes
+        if result.validation_notes and "internal accounting equations pass" in result.validation_notes:
+            is_self_validated = True
+
         if has_ref_match and has_known_concept and internal_ok:
+            if is_self_validated:
+                return "medium"  # Capped: cannot trust internal-only for "high"
             return "high"
         elif has_ref_match:
             return "medium"
@@ -1513,6 +1603,140 @@ class ReferenceValidator:
             logger.debug(f"SEC facts lookup failed for {ticker}:{metric}: {e}")
             self._sec_facts_cache[ticker] = None
             return None
+
+    def validate_mapping_across_periods(
+        self,
+        ticker: str,
+        metric: str,
+        concept: str,
+        n_periods: int = 3,
+    ) -> 'MultiPeriodResult':
+        """
+        Validate a mapping across multiple fiscal periods (10-K filings).
+
+        For each of the N most recent 10-Ks, extracts the metric value using
+        the orchestrator pipeline and validates against SEC facts for that period.
+
+        Args:
+            ticker: Company ticker.
+            metric: Metric name (e.g., "Revenue").
+            concept: XBRL concept to validate.
+            n_periods: Number of fiscal periods to check (default 3).
+
+        Returns:
+            MultiPeriodResult with pass/fail for each period.
+        """
+        from edgar.xbrl.standardization.tools.validate_multi_period import get_last_n_10ks
+
+        period_details = []
+        validated_fiscal_periods = []
+
+        filings = get_last_n_10ks(ticker, n_periods)
+        if not filings:
+            return MultiPeriodResult(
+                ticker=ticker,
+                metric=metric,
+                periods_checked=0,
+                periods_passed=0,
+                periods_failed=0,
+                periods_missing=0,
+                is_stable=False,
+                validated_fiscal_periods=[],
+                period_details=[],
+                detail=f"No 10-K filings found for {ticker}",
+            )
+
+        periods_passed = 0
+        periods_failed = 0
+        periods_missing = 0
+
+        for filing in filings:
+            period_end = filing.period_of_report
+            period_key = period_end.strftime("%Y-%m-%d") if period_end else "unknown"
+
+            try:
+                xbrl_obj = filing.xbrl()
+                if not xbrl_obj:
+                    periods_missing += 1
+                    period_details.append({
+                        "period": period_key, "value": None, "ref_value": None,
+                        "variance": None, "pass": False, "reason": "no XBRL data",
+                    })
+                    continue
+
+                # Extract value using the same extraction logic
+                xbrl_value = self._extract_xbrl_value(xbrl_obj, concept)
+                if xbrl_value is None:
+                    periods_missing += 1
+                    period_details.append({
+                        "period": period_key, "value": None, "ref_value": None,
+                        "variance": None, "pass": False, "reason": "concept not found",
+                    })
+                    continue
+
+                # Get reference from SEC facts for this period
+                sec_value = self._get_sec_facts_value(ticker, metric)
+                ref_value = sec_value
+
+                if ref_value is None:
+                    # Fallback to yfinance for this period
+                    stock = None if self._snapshot_mode else self._get_stock(ticker)
+                    self._current_ticker = ticker
+                    ref_value = self._get_yfinance_value(
+                        stock, metric, target_date=period_end
+                    )
+
+                if ref_value is None:
+                    periods_missing += 1
+                    period_details.append({
+                        "period": period_key, "value": xbrl_value, "ref_value": None,
+                        "variance": None, "pass": False, "reason": "no reference data",
+                    })
+                    continue
+
+                variance = self._compute_variance_pct(xbrl_value, ref_value)
+                passed = variance <= self._get_metric_tolerance(metric)
+
+                if passed:
+                    periods_passed += 1
+                    validated_fiscal_periods.append(period_key)
+                else:
+                    periods_failed += 1
+
+                period_details.append({
+                    "period": period_key, "value": xbrl_value, "ref_value": ref_value,
+                    "variance": round(variance, 1), "pass": passed,
+                    "reason": "match" if passed else f"variance {variance:.1f}%",
+                })
+
+            except Exception as e:
+                periods_missing += 1
+                period_details.append({
+                    "period": period_key, "value": None, "ref_value": None,
+                    "variance": None, "pass": False, "reason": f"error: {e}",
+                })
+
+        periods_checked = len(filings)
+        is_stable = periods_passed >= min(n_periods, periods_checked) and periods_failed == 0
+
+        detail_parts = [f"{periods_passed}/{periods_checked} periods passed"]
+        if periods_failed > 0:
+            detail_parts.append(f"{periods_failed} failed")
+        if periods_missing > 0:
+            detail_parts.append(f"{periods_missing} missing")
+
+        return MultiPeriodResult(
+            ticker=ticker,
+            metric=metric,
+            periods_checked=periods_checked,
+            periods_passed=periods_passed,
+            periods_failed=periods_failed,
+            periods_missing=periods_missing,
+            is_stable=is_stable,
+            validated_fiscal_periods=validated_fiscal_periods,
+            period_details=period_details,
+            detail="; ".join(detail_parts),
+        )
 
     def _extract_xbrl_value(
         self,

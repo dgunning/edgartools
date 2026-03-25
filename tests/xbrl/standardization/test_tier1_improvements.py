@@ -740,17 +740,17 @@ class TestInternalValidation:
 class TestSECFactsReference:
     """SEC Company Facts API as second reference source."""
 
-    def test_sec_facts_disabled_by_default(self):
-        """SEC facts lookup is off by default."""
+    def test_sec_facts_enabled_by_default(self):
+        """SEC facts lookup is on by default (SEC-native primacy)."""
         from edgar.xbrl.standardization.reference_validator import ReferenceValidator
         rv = ReferenceValidator()
-        assert rv._use_sec_facts is False
-
-    def test_sec_facts_enabled_flag(self):
-        """SEC facts lookup can be enabled via constructor."""
-        from edgar.xbrl.standardization.reference_validator import ReferenceValidator
-        rv = ReferenceValidator(use_sec_facts=True)
         assert rv._use_sec_facts is True
+
+    def test_sec_facts_can_be_disabled(self):
+        """SEC facts lookup can be disabled via constructor."""
+        from edgar.xbrl.standardization.reference_validator import ReferenceValidator
+        rv = ReferenceValidator(use_sec_facts=False)
+        assert rv._use_sec_facts is False
         assert hasattr(rv, '_get_sec_facts_value')
         assert hasattr(rv, '_sec_facts_cache')
 

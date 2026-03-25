@@ -276,3 +276,61 @@ def get_known_concepts(metric: str) -> List[str]:
     config = get_config()
     m = config.get_metric(metric)
     return m.known_concepts if m else []
+
+
+@dataclass
+class DataDictionaryEntry:
+    """A single entry in the data dictionary."""
+    name: str
+    display_name: str
+    description: str
+    statement_family: str
+    unit: str
+    sign_convention: str
+    metric_tier: str  # "headline" | "secondary" | "derived"
+    source_concepts: List[str] = field(default_factory=list)
+    composite_formula: Optional[str] = None
+    exclusions: List[str] = field(default_factory=list)
+
+
+# Singleton instance for data dictionary
+_data_dictionary: Optional[Dict[str, DataDictionaryEntry]] = None
+
+
+def load_data_dictionary(reload: bool = False) -> Dict[str, DataDictionaryEntry]:
+    """
+    Load the data dictionary from config/data_dictionary.yaml.
+
+    Returns a dict mapping metric name -> DataDictionaryEntry.
+    Cached after first load.
+    """
+    global _data_dictionary
+    if _data_dictionary is not None and not reload:
+        return _data_dictionary
+
+    dict_path = Path(__file__).parent / "config" / "data_dictionary.yaml"
+    if not dict_path.exists():
+        log.warning(f"Data dictionary not found at {dict_path}")
+        return {}
+
+    with open(dict_path, 'r') as f:
+        raw = yaml.safe_load(f)
+
+    entries = {}
+    for name, defn in raw.get("metrics", {}).items():
+        entries[name] = DataDictionaryEntry(
+            name=name,
+            display_name=defn.get("display_name", name),
+            description=defn.get("description", ""),
+            statement_family=defn.get("statement_family", ""),
+            unit=defn.get("unit", "USD"),
+            sign_convention=defn.get("sign_convention", "positive"),
+            metric_tier=defn.get("metric_tier", "secondary"),
+            source_concepts=defn.get("source_concepts", []),
+            composite_formula=defn.get("composite_formula"),
+            exclusions=defn.get("exclusions", []),
+        )
+
+    _data_dictionary = entries
+    log.info(f"Loaded data dictionary: {len(entries)} metrics")
+    return entries

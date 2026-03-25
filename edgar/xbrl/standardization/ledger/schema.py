@@ -177,6 +177,10 @@ class GoldenMaster:
     avg_variance_pct: float = 0.0
     max_variance_pct: float = 0.0
 
+    # Fiscal year-end dates where this mapping was confirmed valid against
+    # SEC facts or yfinance (distinct from run-based validated_periods)
+    validated_fiscal_periods: List[str] = field(default_factory=list)
+
     # Status
     is_active: bool = True
     created_at: str = ""

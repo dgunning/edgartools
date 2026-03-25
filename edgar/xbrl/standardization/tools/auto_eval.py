@@ -298,6 +298,23 @@ def _get_ticker_industry(ticker: str, config) -> str:
 
 
 # =============================================================================
+# HEADLINE METRICS — the most critical metrics for subscription-grade quality.
+# These must achieve >= 0.99 EF rate before launch.
+# =============================================================================
+
+HEADLINE_METRICS = [
+    "Revenue",
+    "NetIncome",
+    "TotalAssets",
+    "OperatingCashFlow",
+    "StockholdersEquity",
+    "OperatingIncome",
+    "EPS",
+    "TotalLiabilities",
+]
+
+
+# =============================================================================
 # DATA CLASSES
 # =============================================================================
 
@@ -330,6 +347,7 @@ class CompanyCQS:
     failed_metric_refs: Dict[str, Optional[float]] = field(default_factory=dict)  # metric -> reference_value for failed metrics
     regressed_metrics: List[str] = field(default_factory=list)  # Metrics that regressed from golden
     disputed_count: int = 0  # Metrics excluded due to reference_disputed
+    headline_ef_rate: float = 0.0  # EF rate for headline metrics only (target: >= 0.99)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -433,6 +451,8 @@ class CQSResult:
     # RFA/SMA sub-scores
     rfa_rate: float = 0.0   # Reported Fact Accuracy aggregate
     sma_rate: float = 0.0   # Standardized Metric Accuracy aggregate
+    # Headline metrics (subscription-grade targets)
+    headline_ef_rate: float = 0.0  # EF rate for headline metrics only (target: >= 0.99)
 
     # Per-company breakdown
     company_scores: Dict[str, CompanyCQS] = field(default_factory=dict)
@@ -459,14 +479,148 @@ class CQSResult:
         """One-line summary."""
         veto = " [VETOED]" if self.vetoed else ""
         return (
-            f"CQS={self.cqs:.4f}{veto} | "
-            f"EF={self.ef_cqs:.4f} SA={self.sa_cqs:.4f} "
-            f"RFA={self.rfa_rate:.4f} SMA={self.sma_rate:.4f} | "
-            f"pass={self.pass_rate:.1%} var={self.mean_variance:.1f}% "
+            f"EF={self.ef_cqs:.4f} headline={self.headline_ef_rate:.4f}{veto} | "
+            f"RFA={self.rfa_rate:.4f} SMA={self.sma_rate:.4f} SA={self.sa_cqs:.4f} | "
+            f"CQS={self.cqs:.4f} pass={self.pass_rate:.1%} var={self.mean_variance:.1f}% "
             f"cov={self.coverage_rate:.1%} golden={self.golden_master_rate:.1%} "
             f"regress={self.total_regressions} | "
             f"{self.companies_evaluated} cos, {self.duration_seconds:.1f}s"
         )
+
+
+@dataclass
+class LISResult:
+    """
+    Localized Impact Score — targeted decision metric for single-metric fixes.
+
+    Global CQS at 0.9957 produces ~0.0003 delta for single-metric fixes,
+    below the noise floor. LIS checks only what matters:
+    1. Did the target metric improve?
+    2. Did any other metric regress?
+    3. Is overall pass_rate non-regressing?
+
+    When lis_pass is True, the autonomous loop can skip the global CQS
+    improvement check (which would discard correct fixes).
+    """
+    target_improved: bool          # Target metric now passes (was in failed_metrics)
+    target_metric_improved: bool   # More specific: the exact target metric improved
+    zero_regressions: bool         # No new regressions introduced
+    lis_pass: bool                 # Overall LIS decision: improved AND no regressions
+    target_delta_pp: float         # Target company pass_rate delta in percentage points
+    detail: str                    # Human-readable explanation
+
+
+def compute_lis(
+    baseline_result: CQSResult,
+    target_ticker: str,
+    target_metric: str,
+    new_company_cqs: 'CompanyCQS',
+    multi_period: bool = False,
+) -> LISResult:
+    """
+    Compute Localized Impact Score for a single-metric fix.
+
+    Checks whether a config change fixed the target metric without
+    introducing regressions. This replaces the global CQS improvement
+    check for company-scoped changes.
+
+    Args:
+        baseline_result: CQS result before the change.
+        target_ticker: The ticker being targeted.
+        target_metric: The metric being fixed.
+        new_company_cqs: The new CompanyCQS for the target company after the change.
+        multi_period: If True, run multi-period validation (slower, requires network).
+                      Default True for overnight runs, False for interactive use.
+
+    Returns:
+        LISResult with pass/fail decision and detail.
+    """
+    baseline_company = baseline_result.company_scores.get(target_ticker)
+    if baseline_company is None:
+        return LISResult(
+            target_improved=False,
+            target_metric_improved=False,
+            zero_regressions=True,
+            lis_pass=False,
+            target_delta_pp=0.0,
+            detail=f"No baseline data for {target_ticker}",
+        )
+
+    # (a) Target metric no longer in failed_metrics
+    was_failing = target_metric in baseline_company.failed_metrics
+    now_passing = target_metric not in new_company_cqs.failed_metrics
+    target_metric_improved = was_failing and now_passing
+
+    # (b) No new regressions
+    new_regressions = new_company_cqs.regression_count - baseline_company.regression_count
+    zero_regressions = new_regressions <= 0
+
+    # (c) Pass rate non-regressing
+    pass_rate_ok = new_company_cqs.pass_rate >= baseline_company.pass_rate - 0.001
+
+    # Target company improved (broader check: pass_rate went up or stayed level with metric fix)
+    target_improved = (
+        new_company_cqs.pass_rate >= baseline_company.pass_rate
+        or target_metric_improved
+    )
+
+    # Delta in percentage points
+    target_delta_pp = (new_company_cqs.pass_rate - baseline_company.pass_rate) * 100
+
+    # LIS passes if: target metric fixed + no regressions + pass_rate non-regressing
+    lis_pass = target_metric_improved and zero_regressions and pass_rate_ok
+
+    detail_parts = []
+    if target_metric_improved:
+        detail_parts.append(f"{target_metric} fixed (was failing, now passing)")
+    elif was_failing:
+        detail_parts.append(f"{target_metric} still failing")
+    else:
+        detail_parts.append(f"{target_metric} was not failing")
+
+    if not zero_regressions:
+        detail_parts.append(f"{new_regressions} new regression(s)")
+    if not pass_rate_ok:
+        detail_parts.append(f"pass_rate regressed ({baseline_company.pass_rate:.1%} -> {new_company_cqs.pass_rate:.1%})")
+
+    # Optional multi-period validation: if LIS passes single-period,
+    # also check that the mapping holds across 3+ annual filings.
+    # This catches algebraic coincidences where a mapping works for one year
+    # but not historically.
+    if multi_period and lis_pass:
+        try:
+            from edgar.xbrl.standardization.reference_validator import ReferenceValidator
+            validator = ReferenceValidator(use_sec_facts=True)
+            # Get the concept from the new company's mapping (if available)
+            # We don't have direct access to the concept here, but we can
+            # use the validate_mapping_across_periods which uses the orchestrator
+            mp_result = validator.validate_mapping_across_periods(
+                target_ticker, target_metric, concept="", n_periods=3,
+            )
+            if not mp_result.is_stable:
+                lis_pass = False
+                detail_parts.append(
+                    f"multi-period FAIL: {mp_result.detail}"
+                )
+            else:
+                detail_parts.append(
+                    f"multi-period OK: {mp_result.periods_passed}/{mp_result.periods_checked}"
+                )
+        except Exception as e:
+            # Multi-period is best-effort — don't block LIS on errors
+            logger.debug(f"Multi-period validation error for {target_ticker}:{target_metric}: {e}")
+            detail_parts.append(f"multi-period skipped: {e}")
+
+    detail = "; ".join(detail_parts)
+
+    return LISResult(
+        target_improved=target_improved,
+        target_metric_improved=target_metric_improved,
+        zero_regressions=zero_regressions,
+        lis_pass=lis_pass,
+        target_delta_pp=target_delta_pp,
+        detail=detail,
+    )
 
 
 def list_regressions(cqs_result: CQSResult) -> List[Tuple[str, str]]:
@@ -854,6 +1008,8 @@ def _compute_company_cqs(
     failed_metrics = []
     failed_metric_refs = {}
     disputed_count = 0
+    headline_ef_pass = 0
+    headline_ef_total = 0
 
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
@@ -918,6 +1074,15 @@ def _compute_company_cqs(
             # Tree-resolved with no validation = EF pass (trusted source)
             ef_pass_count += 1
 
+        # Track headline metrics separately
+        if metric in HEADLINE_METRICS and result.source != MappingSource.CONFIG:
+            if result.validation_status != "unverified":
+                headline_ef_total += 1
+                if val_result and val_result.ef_pass:
+                    headline_ef_pass += 1
+                elif result.is_mapped and result.source == MappingSource.TREE and not val_result:
+                    headline_ef_pass += 1
+
         # Check golden master status
         if (ticker, metric) in golden_set:
             golden_count += 1
@@ -932,15 +1097,13 @@ def _compute_company_cqs(
     sa_pass_rate = sa_pass_count / effective_total if effective_total > 0 else 0.0
     rfa_pass_rate = rfa_pass_count / effective_total if effective_total > 0 else 0.0
     sma_pass_rate = sma_pass_count / effective_total if effective_total > 0 else 0.0
+    headline_ef_rate = headline_ef_pass / headline_ef_total if headline_ef_total > 0 else 0.0
 
-    # Per-company CQS — stability_rate (golden masters = multi-period stable)
-    # replaces golden_master_rate with higher weight to reward multi-period consistency
-    stability_rate = golden_master_rate  # Golden masters require min_periods=3
     cqs = (
         0.45 * pass_rate
         + 0.20 * max(0, 1 - mean_variance / 100)
         + 0.15 * coverage_rate
-        + 0.15 * stability_rate
+        + 0.15 * golden_master_rate
         + 0.05 * (1.0 if regression_count == 0 else 0.0)
     )
 
@@ -975,6 +1138,7 @@ def _compute_company_cqs(
         failed_metric_refs=failed_metric_refs,
         regressed_metrics=regressed_metrics,
         disputed_count=disputed_count,
+        headline_ef_rate=headline_ef_rate,
     )
 
 
@@ -1011,6 +1175,7 @@ def _aggregate_cqs(
     rfa_rate = sum(s.rfa_pass_rate for s in scores) / n
     sma_rate = sum(s.sma_pass_rate for s in scores) / n
     explained_variance_count = sum(s.explained_variance_count for s in scores)
+    headline_ef_rate = sum(s.headline_ef_rate for s in scores) / n
 
     # Collect all regressed metrics across companies
     all_regressed = []
@@ -1018,13 +1183,11 @@ def _aggregate_cqs(
         for m in cs.regressed_metrics:
             all_regressed.append((ticker, m))
 
-    # Compute composite CQS — stability_rate replaces golden_master_rate
-    stability_rate = golden_master_rate
     raw_cqs = (
         0.45 * pass_rate
         + 0.20 * max(0, 1 - mean_variance / 100)
         + 0.15 * coverage_rate
-        + 0.15 * stability_rate
+        + 0.15 * golden_master_rate
         + 0.05 * (1 - regression_rate)
     )
 
@@ -1049,6 +1212,7 @@ def _aggregate_cqs(
         explained_variance_count=explained_variance_count,
         rfa_rate=rfa_rate,
         sma_rate=sma_rate,
+        headline_ef_rate=headline_ef_rate,
         companies_evaluated=n,
         total_metrics=total_metrics,
         total_mapped=sum(s.metrics_mapped for s in scores),
@@ -1530,24 +1694,32 @@ def print_cqs_report(result: CQSResult):
     """Print a formatted CQS report to console."""
     print()
     print("=" * 70)
-    print("COMPOSITE QUALITY SCORE (CQS) REPORT")
+    print("EXTRACTION QUALITY REPORT")
     print("=" * 70)
 
     veto_str = " ** HARD VETO — REGRESSIONS DETECTED **" if result.vetoed else ""
-    print(f"\n  CQS: {result.cqs:.4f}{veto_str}")
-    print(f"  EF-CQS (Extraction Fidelity):       {result.ef_cqs:.4f}")
-    print(f"  SA-CQS (Standardization Alignment):  {result.sa_cqs:.4f}")
+    # EF-CQS is the headline metric
+    ef_status = "PASS" if result.ef_cqs >= 0.95 else "BELOW TARGET"
+    print(f"\n  EF-CQS (Extraction Fidelity):  {result.ef_cqs:.4f}  [{ef_status}]{veto_str}")
+    print(f"  RFA Rate (Reported Fact):       {result.rfa_rate:.4f}")
+    print(f"  SMA Rate (Semantic Mapping):    {result.sma_rate:.4f}")
+    print(f"  SA-CQS (Standardization):       {result.sa_cqs:.4f}")
+    print(f"  CQS (composite):                {result.cqs:.4f}")
+    headline_status = "PASS" if result.headline_ef_rate >= 0.99 else "BELOW TARGET"
+    print(f"  Headline EF Rate:               {result.headline_ef_rate:.4f}  [{headline_status}]")
     print()
 
     print("  Sub-metrics:")
-    print(f"    Pass Rate:          {result.pass_rate:.1%}  (weight: 0.50)")
+    print(f"    Pass Rate:          {result.pass_rate:.1%}  (weight: 0.45)")
     print(f"    Mean Variance:      {result.mean_variance:.1f}%  (weight: 0.20, inverted)")
     print(f"    Coverage Rate:      {result.coverage_rate:.1%}  (weight: 0.15)")
-    print(f"    Golden Master Rate: {result.golden_master_rate:.1%}  (weight: 0.10)")
+    print(f"    Stability Rate:     {result.golden_master_rate:.1%}  (weight: 0.15)")
     print(f"    Regression Rate:    {result.regression_rate:.1%}  (weight: 0.05, inverted)")
     print()
     print(f"    EF Pass Rate:       {result.ef_pass_rate:.1%}")
     print(f"    SA Pass Rate:       {result.sa_pass_rate:.1%}")
+    print(f"    RFA Rate:           {result.rfa_rate:.1%}")
+    print(f"    SMA Rate:           {result.sma_rate:.1%}")
     print(f"    Explained Gaps:     {result.explained_variance_count}")
     print()
 
@@ -1562,12 +1734,12 @@ def print_cqs_report(result: CQSResult):
     if result.company_scores:
         print()
         print("  Per-Company Breakdown:")
-        print(f"    {'Ticker':<8} {'CQS':>6} {'EF':>6} {'SA':>6} {'Pass':>6} {'Cov':>6} {'Var%':>6} {'Reg':>4}")
+        print(f"    {'Ticker':<8} {'EF':>6} {'RFA':>6} {'SMA':>6} {'Pass':>6} {'Cov':>6} {'Var%':>6} {'Reg':>4}")
         print("    " + "-" * 56)
         for ticker in sorted(result.company_scores.keys()):
             cs = result.company_scores[ticker]
             print(
-                f"    {ticker:<8} {cs.cqs:>6.3f} {cs.ef_cqs:>5.1%} {cs.sa_cqs:>5.1%} "
+                f"    {ticker:<8} {cs.ef_cqs:>5.1%} {cs.rfa_pass_rate:>5.1%} {cs.sma_pass_rate:>5.1%} "
                 f"{cs.pass_rate:>5.1%} {cs.coverage_rate:>5.1%} "
                 f"{cs.mean_variance:>5.1f} {cs.regression_count:>4d}"
             )

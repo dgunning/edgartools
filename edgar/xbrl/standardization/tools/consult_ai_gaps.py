@@ -12,6 +12,8 @@ Usage inside Claude Code:
         save_agent_responses, load_agent_responses,
         run_agent_benchmark, BenchmarkConfig, BenchmarkResult,
         print_benchmark_comparison,
+        # AI caller factory
+        make_openrouter_caller, MODEL_REGISTRY, DEFAULT_API_MODEL,
         # Typed action pipeline
         TypedAction, ACTION_VOCABULARY,
         parse_typed_action, compile_action, validate_action_preflight,
@@ -19,9 +21,10 @@ Usage inside Claude Code:
     )
 
     # Step 2a: Generate AI proposals
+    caller, cost_tracker = make_openrouter_caller()
     proposals = consult_ai_gaps(
         manifest_path=Path("company_mappings/gap_manifests/manifest_xyz.json"),
-        ai_caller=lambda prompt, model: mcp__pal__chat(prompt=prompt, model=model),
+        ai_caller=caller,
     )
 
     # Step 2b: Evaluate through CQS gates
@@ -32,6 +35,7 @@ Usage inside Claude Code:
 
 import json
 import logging
+import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -64,6 +68,87 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
 from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
 
 logger = logging.getLogger(__name__)
+
+# =============================================================================
+# MODEL REGISTRY & AI CALLER FACTORY
+# =============================================================================
+
+MODEL_REGISTRY = {
+    "gemini-flash": "google/gemini-3-flash-preview",
+}
+DEFAULT_API_MODEL = "gemini-flash"
+
+
+def make_openrouter_caller(
+    default_model: str = DEFAULT_API_MODEL,
+    temperature: float = 0.1,
+    max_tokens: int = 4096,
+) -> Tuple[Callable[[str, str], Optional[str]], Dict]:
+    """Create an AI caller using OpenRouter API.
+
+    Returns (caller, cost_tracker) tuple where caller matches the
+    ai_caller contract: Callable[[str, str], Optional[str]].
+
+    Model parameter accepts abstract names (resolved via MODEL_REGISTRY)
+    or raw OpenRouter model IDs.
+
+    Requires OPENROUTER_API_KEY environment variable.
+    """
+    try:
+        from openai import OpenAI
+    except ImportError:
+        raise ImportError(
+            "openai package required for OpenRouter caller. "
+            "Install with: pip install openai"
+        )
+
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "OPENROUTER_API_KEY environment variable not set. "
+            "Get your key at: https://openrouter.ai/keys"
+        )
+
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+
+    cost_tracker: Dict[str, Any] = {"total_cost": 0.0, "calls": 0}
+
+    def _call(prompt: str, model: str) -> Optional[str]:
+        resolved = MODEL_REGISTRY.get(model, model)
+        try:
+            response = client.chat.completions.create(
+                model=resolved,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        except Exception as e:
+            logger.warning(f"  OpenRouter API error: {e}")
+            return None
+
+        content = response.choices[0].message.content if response.choices else None
+
+        # Extract cost from OpenRouter usage metadata
+        usage = getattr(response, "usage", None)
+        if usage:
+            raw = getattr(usage, "model_extra", None) or {}
+            call_cost = raw.get("cost", 0.0)
+            if call_cost:
+                cost_tracker["total_cost"] += call_cost
+                cost_tracker["calls"] += 1
+                logger.info(
+                    f"  API cost: ${call_cost:.4f} "
+                    f"(cumulative: ${cost_tracker['total_cost']:.4f})"
+                )
+            else:
+                cost_tracker["calls"] += 1
+
+        return content
+
+    return _call, cost_tracker
 
 
 def _strip_json_fences(text: str) -> str:
@@ -773,7 +858,7 @@ def consult_ai_gaps(
     Args:
         manifest_path: Path to the gap manifest JSON.
         ai_caller: Callable(prompt, model) -> response_text.
-            In Claude Code, this wraps mcp__pal__chat.
+            Use make_openrouter_caller() for the default implementation.
         max_gaps: Max gaps to process (0 = all).
 
     Returns:
@@ -961,9 +1046,10 @@ COP_OUT_TYPES = {ChangeType.ADD_DIVERGENCE, ChangeType.ADD_EXCLUSION}
 class BenchmarkConfig:
     """Configuration for a single benchmark arm."""
     prompt_builder: Callable[[UnresolvedGap], str]
-    model: str      # "sonnet", "opus", etc.
+    model: str      # Abstract name from MODEL_REGISTRY or raw model ID
     label: str      # Human-readable name for comparison table
     use_typed_actions: bool = False  # Use typed action pipeline
+    backend: str = "api"  # "api" (OpenRouter) or "agent" (Claude Code subagent)
 
 
 @dataclass

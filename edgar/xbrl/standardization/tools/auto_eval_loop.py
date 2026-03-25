@@ -37,8 +37,10 @@ from edgar.xbrl.standardization.ledger.schema import (
 )
 from edgar.xbrl.standardization.tools.auto_eval import (
     CQSResult,
+    LISResult,
     MetricGap,
     compute_cqs,
+    compute_lis,
     compute_cqs_incremental,
     compute_cqs_incremental_batch,
     is_change_company_scoped,
@@ -59,6 +61,10 @@ from edgar.xbrl.standardization.tools.auto_solver import AutoSolver
 from edgar.xbrl.standardization.tools.capability_registry import classify_gap_disposition
 
 logger = logging.getLogger(__name__)
+
+# Decision gate thresholds
+EF_CQS_TOLERANCE = 0.001      # EF-CQS non-regression epsilon
+CQS_RELAXED_TOLERANCE = 0.0001  # CQS tolerance for relaxed (target-improved) gate
 
 # Tier 1 config files — the ONLY files the auto-eval loop may modify
 CONFIG_DIR = Path(__file__).parent.parent / "config"
@@ -194,15 +200,24 @@ def _apply_decision_gates(
     max_company_drop: float,
     duration: float,
     change: Optional['ConfigChange'] = None,
+    lis_result: Optional[LISResult] = None,
 ) -> ExperimentDecision:
     """
     Shared decision logic for experiment evaluation.
 
     Returns VETO/DISCARD/KEEP decision based on regression checks,
     per-company drops, CQS improvement, and EF-CQS gate.
+
+    When lis_result is provided and lis_pass is True, the global CQS
+    improvement check is skipped. This prevents correct single-metric fixes
+    from being discarded due to CQS noise floor (~0.0003 at CQS 0.9957).
+
+    Hard veto (regressions), per-company drop check, and EF-CQS
+    non-regression gate remain unchanged regardless of LIS.
+
     Callers handle revert/cleanup.
     """
-    # Check for hard veto (NEW regressions only)
+    # Check for hard veto (NEW regressions only) — ALWAYS enforced
     new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
     if new_regressions > 0:
         return ExperimentDecision(
@@ -213,7 +228,7 @@ def _apply_decision_gates(
             duration_seconds=duration,
         )
 
-    # Check per-company drops
+    # Check per-company drops — ALWAYS enforced
     company_deltas: Dict[str, float] = {}
     for ticker, new_score in new_cqs.company_scores.items():
         old_score = baseline_cqs.company_scores.get(ticker)
@@ -230,14 +245,54 @@ def _apply_decision_gates(
                     duration_seconds=duration,
                 )
 
-    # Check for CQS improvement
+    # LIS gate: if LIS passes, skip global CQS improvement check
+    # This is the key innovation — LIS proves the fix is correct locally,
+    # so we don't need the global CQS to also improve (it can't detect
+    # single-metric changes at 0.9957 scale).
+    if lis_result is not None and lis_result.lis_pass:
+        logger.info(
+            f"[LIS GATE] LIS passed for {target_tickers[0] if target_tickers else '?'}: "
+            f"{lis_result.detail} | delta={lis_result.target_delta_pp:+.1f}pp"
+        )
+        # Still check EF-CQS non-regression
+        if new_cqs.ef_cqs < baseline_cqs.ef_cqs - EF_CQS_TOLERANCE:
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"EF-CQS regression despite LIS pass: {baseline_cqs.ef_cqs:.4f} -> {new_cqs.ef_cqs:.4f}",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
+
+        delta = new_cqs.cqs - baseline_cqs.cqs
+        reason = (
+            f"LIS KEEP: {lis_result.detail} | "
+            f"global CQS {baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f} ({delta:+.4f})"
+        )
+        if change and target_tickers:
+            logger.info(
+                f"[LIS KEEP] metric={change.target_metric}, target={target_tickers[0]}, "
+                f"delta_pp={lis_result.target_delta_pp:+.1f}, global_delta={delta:+.4f}"
+            )
+        return ExperimentDecision(
+            decision=Decision.KEEP,
+            cqs_before=baseline_cqs.cqs,
+            cqs_after=new_cqs.cqs,
+            reason=reason,
+            company_deltas=company_deltas,
+            duration_seconds=duration,
+            new_cqs_result=new_cqs,
+        )
+
+    # Check for CQS improvement (original logic, used when LIS is not available or didn't pass)
     if target_improved:
         logger.info(
             f"[RELAXED GATE] Target {target_tickers[0]} improved, "
             f"using non-regression gate: global CQS {baseline_cqs.cqs:.4f} -> {new_cqs.cqs:.4f} "
             f"(threshold: >= {baseline_cqs.cqs - 0.0001:.4f})"
         )
-        if new_cqs.cqs < baseline_cqs.cqs - 0.0001:
+        if new_cqs.cqs < baseline_cqs.cqs - CQS_RELAXED_TOLERANCE:
             return ExperimentDecision(
                 decision=Decision.DISCARD,
                 cqs_before=baseline_cqs.cqs,
@@ -908,9 +963,23 @@ def evaluate_experiment(
 
     duration = time.time() - start_time
 
+    # Compute LIS for company-scoped changes with a single target
+    lis_result = None
+    if len(target_tickers) == 1 and change.target_metric:
+        target = target_tickers[0]
+        new_target_cqs = new_cqs.company_scores.get(target)
+        if new_target_cqs is not None:
+            lis_result = compute_lis(
+                baseline_cqs, target, change.target_metric, new_target_cqs,
+            )
+            logger.info(
+                f"[LIS] {target}:{change.target_metric} -> "
+                f"pass={lis_result.lis_pass}, detail={lis_result.detail}"
+            )
+
     decision = _apply_decision_gates(
         baseline_cqs, new_cqs, target_improved, target_tickers,
-        max_company_drop, duration, change,
+        max_company_drop, duration, change, lis_result,
     )
     if decision.decision != Decision.KEEP:
         revert_config_change(change)
@@ -1036,9 +1105,20 @@ def evaluate_experiment_in_memory(
 
     duration = time.time() - start_time
 
+    # Compute LIS for company-scoped changes with a single target
+    lis_result = None
+    target_tickers_list = [t.strip() for t in change.target_companies.split(",") if t.strip()]
+    if len(target_tickers_list) == 1 and change.target_metric:
+        target = target_tickers_list[0]
+        new_target_cqs = new_cqs.company_scores.get(target)
+        if new_target_cqs is not None:
+            lis_result = compute_lis(
+                baseline_cqs, target, change.target_metric, new_target_cqs,
+            )
+
     return _apply_decision_gates(
         baseline_cqs, new_cqs, target_improved, target_tickers,
-        max_company_drop, duration,
+        max_company_drop, duration, lis_result=lis_result,
     )
 
 
@@ -2530,7 +2610,19 @@ def run_overnight(
                 if current_baseline.cqs > report.cqs_peak:
                     report.cqs_peak = current_baseline.cqs
 
-                logger.info(f"KEPT: {change.target_metric} — CQS now {current_baseline.cqs:.4f}")
+                # Convergence monitoring: log headline_ef_rate after each KEEP
+                headline_ef = getattr(current_baseline, 'headline_ef_rate', 0.0)
+                logger.info(
+                    f"KEPT: {change.target_metric} — "
+                    f"EF-CQS={current_baseline.ef_cqs:.4f} "
+                    f"headline_ef={headline_ef:.4f} "
+                    f"CQS={current_baseline.cqs:.4f}"
+                )
+                if headline_ef >= 0.99 and current_baseline.ef_cqs >= 0.95:
+                    logger.info(
+                        f"TARGET MET: headline_ef_rate={headline_ef:.4f} >= 0.99 "
+                        f"AND ef_cqs={current_baseline.ef_cqs:.4f} >= 0.95"
+                    )
                 # Fast path: derive gaps instead of re-running identify_gaps()
                 graveyard_counts = _get_graveyard_counts(ledger)
                 use_fast_path_gaps = derive_gaps_from_cqs(current_baseline, graveyard_counts)

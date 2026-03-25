@@ -987,6 +987,9 @@ companies:
           '
         review_date: '2026-04-26'
     notes: Healthcare conglomerate - pharmaceuticals, medical devices, consumer health
+    metric_overrides:
+      ResearchAndDevelopment:
+        preferred_concept: us-gaap:ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost
   UNH:
     name: UnitedHealth Group Incorporated
     cik: 731766
@@ -1995,6 +1998,10 @@ companies:
     street_view_notes:
       ShortTermDebt: 'Hybrid: Commercial GAAP + Dealer Street View'
     notes: Hybrid bank - commercial + significant dealer/trading operations
+    metric_overrides:
+      ShareRepurchases:
+        sign_negate: true
+        notes: Sign convention differs from yfinance (XBRL=31591000000, ref=-34591000000)
   GS:
     name: Goldman Sachs Group, Inc.
     cik: 886982
@@ -2675,9 +2682,9 @@ companies:
       OperatingIncome:
         form_types:
         - 10-K
-        variance_pct: 82.9
-        reason: Utility regulatory accounting — operating income definition differs
-        skip_validation: true
+        variance_pct: 124.3
+        reason: 'Value drifted: golden=4428000000.0, current=756000000.0'
+        skip_validation: false
         added_date: '2026-03-19'
       ShortTermDebt:
         form_types:

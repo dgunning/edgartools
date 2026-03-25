@@ -1,0 +1,420 @@
+# Data Dictionary: Standardized Financial Metrics
+#
+# Each metric includes its definition, statement family, unit convention,
+# source concepts, and tier classification. This is the authoritative
+# reference for what each metric means and how it is computed.
+#
+# Tiers:
+#   headline: Must achieve >= 99% extraction fidelity (subscription-grade critical)
+#   secondary: Must achieve >= 95% extraction fidelity
+#   derived: Computed from other metrics, not extracted directly
+
+version: "1.0"
+
+metrics:
+
+  # =========================================================================
+  # INCOME STATEMENT
+  # =========================================================================
+
+  Revenue:
+    display_name: "Revenue"
+    description: "Total revenues from the sale of goods and services, net of returns and allowances."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "Revenues"
+      - "RevenueFromContractWithCustomerExcludingAssessedTax"
+      - "SalesRevenueNet"
+
+  COGS:
+    display_name: "Cost of Goods Sold"
+    description: "Direct costs attributable to the production of goods and services sold."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "CostOfGoodsAndServicesSold"
+      - "CostOfRevenue"
+
+  GrossProfit:
+    display_name: "Gross Profit"
+    description: "Revenue minus cost of goods sold. Measures profitability before operating expenses."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "GrossProfit"
+    composite_formula: "Revenue - COGS"
+
+  SGA:
+    display_name: "Selling, General & Administrative"
+    description: "Operating expenses for selling, general, and administrative activities."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "SellingGeneralAndAdministrativeExpense"
+
+  ResearchAndDevelopment:
+    display_name: "Research & Development"
+    description: "Expenses for research and development activities."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "ResearchAndDevelopmentExpense"
+
+  OperatingIncome:
+    display_name: "Operating Income"
+    description: "Income from core business operations, before interest and taxes."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "OperatingIncomeLoss"
+    composite_formula: "GrossProfit - SGA - R&D (when direct tag unavailable)"
+
+  InterestExpense:
+    display_name: "Interest Expense"
+    description: "Cost of borrowing, including interest on debt obligations."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "InterestExpense"
+
+  IncomeTaxExpense:
+    display_name: "Income Tax Expense"
+    description: "Provision for income taxes, including current and deferred."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "IncomeTaxExpenseBenefit"
+
+  PretaxIncome:
+    display_name: "Pretax Income"
+    description: "Income before provision for income taxes."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+
+  NetIncome:
+    display_name: "Net Income"
+    description: "Total earnings after all expenses, taxes, and adjustments. Bottom line of the income statement."
+    statement_family: "income_statement"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "NetIncomeLoss"
+      - "ProfitLoss"
+
+  # =========================================================================
+  # PER-SHARE METRICS
+  # =========================================================================
+
+  EarningsPerShareBasic:
+    display_name: "Earnings Per Share (Basic)"
+    description: "Net income divided by weighted average shares outstanding (basic)."
+    statement_family: "per_share"
+    unit: "USD/share"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "EarningsPerShareBasic"
+
+  EarningsPerShareDiluted:
+    display_name: "Earnings Per Share (Diluted)"
+    description: "Net income divided by weighted average diluted shares outstanding."
+    statement_family: "per_share"
+    unit: "USD/share"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "EarningsPerShareDiluted"
+    exclusions:
+      - "Banking companies may report differently"
+
+  DividendPerShare:
+    display_name: "Dividend Per Share"
+    description: "Cash dividends declared per common share."
+    statement_family: "per_share"
+    unit: "USD/share"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "CommonStockDividendsPerShareDeclared"
+
+  WeightedAverageSharesDiluted:
+    display_name: "Weighted Average Shares (Diluted)"
+    description: "Weighted average number of diluted shares outstanding during the period."
+    statement_family: "per_share"
+    unit: "shares"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "WeightedAverageNumberOfDilutedSharesOutstanding"
+
+  # =========================================================================
+  # CASH FLOW STATEMENT
+  # =========================================================================
+
+  OperatingCashFlow:
+    display_name: "Operating Cash Flow"
+    description: "Net cash provided by operating activities."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "NetCashProvidedByUsedInOperatingActivities"
+
+  Capex:
+    display_name: "Capital Expenditures"
+    description: "Cash spent on purchasing or improving long-term assets."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "negative"
+    metric_tier: "secondary"
+    source_concepts:
+      - "PaymentsToAcquirePropertyPlantAndEquipment"
+
+  InvestingCashFlow:
+    display_name: "Investing Cash Flow"
+    description: "Net cash used in or provided by investing activities."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "varies"
+    metric_tier: "secondary"
+    source_concepts:
+      - "NetCashProvidedByUsedInInvestingActivities"
+
+  FinancingCashFlow:
+    display_name: "Financing Cash Flow"
+    description: "Net cash used in or provided by financing activities."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "varies"
+    metric_tier: "secondary"
+    source_concepts:
+      - "NetCashProvidedByUsedInFinancingActivities"
+
+  DepreciationAmortization:
+    display_name: "Depreciation & Amortization"
+    description: "Non-cash charges for depreciation of tangible assets and amortization of intangible assets."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "DepreciationDepletionAndAmortization"
+      - "DepreciationAndAmortization"
+
+  StockBasedCompensation:
+    display_name: "Stock-Based Compensation"
+    description: "Non-cash expense for equity-based employee compensation."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "ShareBasedCompensation"
+
+  DividendsPaid:
+    display_name: "Dividends Paid"
+    description: "Cash dividends paid to shareholders."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "negative"
+    metric_tier: "secondary"
+    source_concepts:
+      - "PaymentsOfDividendsCommonStock"
+      - "PaymentsOfDividends"
+
+  ShareRepurchases:
+    display_name: "Share Repurchases"
+    description: "Cash used to buy back company shares (treasury stock)."
+    statement_family: "cash_flow"
+    unit: "USD"
+    sign_convention: "negative"
+    metric_tier: "secondary"
+    source_concepts:
+      - "PaymentsForRepurchaseOfCommonStock"
+
+  # =========================================================================
+  # BALANCE SHEET - ASSETS
+  # =========================================================================
+
+  TotalAssets:
+    display_name: "Total Assets"
+    description: "Sum of all current and non-current assets owned by the company."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "Assets"
+
+  CashAndEquivalents:
+    display_name: "Cash & Equivalents"
+    description: "Cash on hand and short-term liquid investments readily convertible to cash."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "CashAndCashEquivalentsAtCarryingValue"
+      - "CashCashEquivalentsAndShortTermInvestments"
+
+  AccountsReceivable:
+    display_name: "Accounts Receivable"
+    description: "Amounts owed to the company by customers for goods or services delivered."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "AccountsReceivableNetCurrent"
+
+  Inventory:
+    display_name: "Inventory"
+    description: "Raw materials, work-in-progress, and finished goods held for sale."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "InventoryNet"
+    exclusions:
+      - "Banks and financial services companies"
+
+  CurrentAssets:
+    display_name: "Current Assets"
+    description: "Assets expected to be converted to cash or used within one year."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "AssetsCurrent"
+
+  PropertyPlantEquipment:
+    display_name: "Property, Plant & Equipment"
+    description: "Net book value of tangible long-lived assets used in operations."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "PropertyPlantAndEquipmentNet"
+
+  Goodwill:
+    display_name: "Goodwill"
+    description: "Excess of acquisition cost over fair value of net identifiable assets acquired."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "Goodwill"
+
+  IntangibleAssets:
+    display_name: "Intangible Assets"
+    description: "Non-physical assets such as patents, trademarks, and customer relationships."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "IntangibleAssetsNetExcludingGoodwill"
+
+  # =========================================================================
+  # BALANCE SHEET - LIABILITIES & EQUITY
+  # =========================================================================
+
+  CurrentLiabilities:
+    display_name: "Current Liabilities"
+    description: "Obligations due within one year."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "LiabilitiesCurrent"
+
+  TotalLiabilities:
+    display_name: "Total Liabilities"
+    description: "Sum of all current and non-current obligations."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "Liabilities"
+
+  ShortTermDebt:
+    display_name: "Short-Term Debt"
+    description: "Debt obligations due within one year."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "ShortTermBorrowings"
+      - "DebtCurrent"
+
+  LongTermDebt:
+    display_name: "Long-Term Debt"
+    description: "Debt obligations due after one year."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "LongTermDebtNoncurrent"
+      - "LongTermDebt"
+
+  AccountsPayable:
+    display_name: "Accounts Payable"
+    description: "Amounts owed to suppliers for goods and services received."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "secondary"
+    source_concepts:
+      - "AccountsPayableCurrent"
+
+  StockholdersEquity:
+    display_name: "Stockholders' Equity"
+    description: "Total equity attributable to shareholders (assets minus liabilities)."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "positive"
+    metric_tier: "headline"
+    source_concepts:
+      - "StockholdersEquity"
+      - "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+
+  RetainedEarnings:
+    display_name: "Retained Earnings"
+    description: "Cumulative net income retained in the company rather than paid as dividends."
+    statement_family: "balance_sheet"
+    unit: "USD"
+    sign_convention: "varies"
+    metric_tier: "secondary"
+    source_concepts:
+      - "RetainedEarningsAccumulatedDeficit"
