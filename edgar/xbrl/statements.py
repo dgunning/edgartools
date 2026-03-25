@@ -750,6 +750,15 @@ class Statement:
         rendered_statement = self.render()
         return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
+    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = False) -> str:
+        """Render this statement as GitHub-Flavored Markdown.
+
+        Args:
+            detail: 'minimal' (table only), 'standard' (with header), 'full' (header + footer)
+            optimize_for_llm: Simplify output for LLM consumption
+        """
+        return self.render().to_markdown(detail=detail, optimize_for_llm=optimize_for_llm)
+
     def to_context(self, detail: str = 'standard') -> str:
         """
         AI-optimized context string.
@@ -1996,6 +2005,36 @@ class StatementLineItem:
             return []
         from edgar.xbrl.notes import get_notes_for_concept
         return get_notes_for_concept(self.concept, xbrl)
+
+    def to_markdown(self, include_note: bool = True) -> str:
+        """Render this line item as markdown with formatted values and optional note link.
+
+        Args:
+            include_note: Include a blockquote linking to the related Note
+        """
+        parts = []
+
+        # Format values with period labels from the rendered statement header
+        cells = self._row.cells or []
+        formatted_pairs = []
+        for cell in cells:
+            if cell.value is not None and cell.value != "":
+                formatted_val = str(cell.formatter(cell.value))
+                if formatted_val:
+                    formatted_pairs.append(formatted_val)
+
+        if formatted_pairs:
+            parts.append(f"**{self.label}**: {', '.join(formatted_pairs)}")
+        else:
+            parts.append(f"**{self.label}**")
+
+        # Note reference
+        if include_note:
+            note = self.note
+            if note:
+                parts.append(f"> Related: Note {note.number} \u2014 {note.title}")
+
+        return '\n\n'.join(parts)
 
     def __repr__(self):
         concept_str = f", concept='{self.concept}'" if self.concept else ""
