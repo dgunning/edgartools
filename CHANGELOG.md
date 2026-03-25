@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.26.0] - 2026-03-25
+
+### Added
+
+- **CORRESP/UPLOAD correspondence support** — New `Correspondence` and `CorrespondenceThread` classes parse SEC correspondence filings with automatic classification (company_response, acceleration_request, sec_comment, review_complete, no_review) and metadata extraction (file number, referenced form, fiscal year). `Filing.correspondence()` works on any filing type to find related SEC review threads via file number
+
+- **Point-in-Time mode for EntityFacts** — `EntityFacts.to_dataframe()` now accepts a `pit_mode` parameter that includes `filing_date` and `form_type` columns, enabling lookahead-bias-free backtesting by filtering on `filing_date <= as_of_date` ([#697](https://github.com/dgunning/edgartools/issues/697))
+
+- **S-3 fee table parser, shelf capacity, and prospectus sections** — Registration fee table extraction from EX-FILING FEES exhibits (Exhibit 107) supporting 5 HTML format variations. `ShelfLifecycle.shelf_capacity` and `.total_offering_capacity` expose registered amounts. `Prospectus424B.sections` provides section-level text access with 16 prospectus section patterns ([#728](https://github.com/dgunning/edgartools/issues/728), partial)
+
+- **TTM unification on EntityFacts** — Unified TTM access on `EntityFacts` with streamlined `Company` delegation. TTM-ready facts are cached for performance. Quarter labels now use fiscal year (PR [#721](https://github.com/dgunning/edgartools/pull/721), ghedo44)
+
+### Fixed
+
+- **TOC named-anchor targets** — Table-of-contents anchor matching centralized and now correctly resolves named-anchor targets ([#727](https://github.com/dgunning/edgartools/pull/727))
+
+- **Revenue in income statement dedup** — Revenue now included in the promoted income statement deduplication set
+
+- **Shares concepts preserved in statements** — Shares-denominated concepts (EPS, shares outstanding) are no longer dropped from income statements during unit filtering (PR [#725](https://github.com/dgunning/edgartools/pull/725), ghedo44)
+
+- **TypeError in `_get_statement_concepts`** — Fixed crash when statement type is `None` by using `or ''` fallback instead of relying on `dict.get()` default
+
+- **Unit filter documentation** — Docstrings updated to reflect native-unit filtering behavior
+
+### Improved
+
+- **EntityFacts memory usage reduced 27%** — String interning deduplicates high-repetition fields (taxonomy, unit, fiscal_period, form_type, concept) from ~99K objects to ~1.6K. Per-concept work hoisted out of per-fact loop, dimensions default changed to `None`, period index key caching added. Measured on AAPL: 20.5 MB → 15.0 MB
+
+### Data
+
+- Bundled ticker and CUSIP reference data refreshed (10,652→10,769 tickers, deduplicated CUSIPs)
+
 ## [5.25.1] - 2026-03-19
 
 ### Added
