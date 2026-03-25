@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Point-in-Time mode for EntityFacts** — `EntityFacts.to_dataframe()` now accepts a `pit_mode` parameter that includes `filing_date` and `form_type` columns, enabling lookahead-bias-free backtesting by filtering on `filing_date <= as_of_date` ([#697](https://github.com/dgunning/edgartools/issues/697))
 
-- **S-3 fee table parser, shelf capacity, and prospectus sections** — Registration fee table extraction from EX-FILING FEES exhibits (Exhibit 107) supporting 5 HTML format variations. `ShelfLifecycle.shelf_capacity` and `.total_offering_capacity` expose registered amounts. `Prospectus424B.sections` provides section-level text access with 16 prospectus section patterns ([#728](https://github.com/dgunning/edgartools/issues/728), partial)
+- **S-3 shelf registration data object** — New `RegistrationS3` class with fee table extraction from EX-FILING FEES exhibits (Exhibit 107) supporting 5 HTML format variations, `ShelfLifecycle` with shelf capacity and offering capacity properties, prospectus section access with 16 section patterns, and auto-shelf detection for well-known seasoned issuers ([#728](https://github.com/dgunning/edgartools/issues/728))
 
 - **TTM unification on EntityFacts** — Unified TTM access on `EntityFacts` with streamlined `Company` delegation. TTM-ready facts are cached for performance. Quarter labels now use fiscal year (PR [#721](https://github.com/dgunning/edgartools/pull/721), ghedo44)
 
