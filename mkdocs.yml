@@ -6,6 +6,9 @@ repo_name: dgunning/edgartools
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/nav-enhance.js
+
 markdown_extensions:
   - admonition
   - attr_list
