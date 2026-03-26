@@ -82,7 +82,6 @@ class TOCAnalyzer:
                 # Part headers in 10-Q TOCs typically appear as separate rows: "Part I", "Part II"
                 part_match = part_pattern.match(text)
                 if part_match:
-                    # print(f"Found part header: {text} - setting current part context to {part_match.group(1).upper()}")
                     # Update current part context
                     current_part = f"Part {part_match.group(1).upper()}"
                     # Don't create a section for the part header itself
