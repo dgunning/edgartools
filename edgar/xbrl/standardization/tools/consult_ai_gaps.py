@@ -1310,6 +1310,46 @@ class AIDispatchReport:
     escalated: int
     model_counts: Dict[str, int] = field(default_factory=dict)
     not_onboarded_skipped: int = 0
+    auto_resolved: int = 0
+
+
+AUTO_RESOLVE_VARIANCE_THRESHOLD = 2.0  # percent
+
+
+def _try_auto_resolve(
+    enriched_candidates: List['CandidateConcept'],
+    gap: 'UnresolvedGap',
+) -> Optional[str]:
+    """O9: Return JSON response string if auto-resolvable, else None.
+
+    Auto-resolves when a candidate has:
+    - extracted_value is not None
+    - delta_pct < AUTO_RESOLVE_VARIANCE_THRESHOLD (2%)
+    - concept starts with 'us-gaap:' (standard taxonomy only)
+
+    Returns a JSON string matching the typed action format so that
+    collect_typed_proposals() processes it identically to AI responses.
+    """
+    for c in enriched_candidates:
+        if c.extracted_value is None:
+            continue
+        if c.delta_pct is None or c.delta_pct >= AUTO_RESOLVE_VARIANCE_THRESHOLD:
+            continue
+        if not c.concept.startswith('us-gaap:'):
+            continue
+        # Auto-resolve: emit typed action JSON
+        return json.dumps({
+            "action": "MAP_CONCEPT",
+            "ticker": gap.ticker,
+            "metric": gap.metric,
+            "params": {"concept": c.concept},
+            "rationale": (
+                f"Auto-resolved via value match: extracted={c.extracted_value:,.0f}, "
+                f"delta={c.delta_pct:.1f}%"
+            ),
+            "confidence": 0.95,
+        })
+    return None
 
 
 def dispatch_ai_gaps(
@@ -1396,6 +1436,7 @@ def dispatch_ai_gaps(
     cache_hits = 0
     api_calls = 0
     escalated = 0
+    auto_resolved = 0
     model_counts: Dict[str, int] = {}
 
     responses: List[Tuple[UnresolvedGap, Optional[str]]] = []
@@ -1414,8 +1455,20 @@ def dispatch_ai_gaps(
             responses.append((gap, cache[key]))
             continue
 
-        # O3: Prompt enrichment with discover_concepts()
-        candidates_text = _build_candidates_context(gap)
+        # O3+O7: Prompt enrichment with value-aware candidates
+        candidates_text, enriched_candidates = _build_candidates_context(gap)
+
+        # O9: Auto-resolve if value search found a close us-gaap: match
+        auto_action = _try_auto_resolve(enriched_candidates, gap)
+        if auto_action is not None:
+            auto_resolved += 1
+            responses.append((gap, auto_action))
+            print(
+                f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> AUTO-RESOLVE",
+                flush=True,
+            )
+            continue
+
         prompt = build_typed_action_prompt(gap, candidates_text=candidates_text)
         print(
             f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> {model} (api call)",
@@ -1456,6 +1509,7 @@ def dispatch_ai_gaps(
         escalated=escalated,
         model_counts=model_counts,
         not_onboarded_skipped=not_onboarded_skipped,
+        auto_resolved=auto_resolved,
     )
 
     return proposals, report
@@ -1486,7 +1540,7 @@ class AIEvalReport:
 def _format_candidate_concepts(metric: str, ticker: str, top_k: int = 5) -> str:
     """Fetch concept candidates from filing and format for prompt inclusion.
 
-    Shared implementation for both UnresolvedGap and MetricGap callers.
+    Simplified version without value enrichment — used by retry logic (O5).
     """
     from edgar.xbrl.standardization.tools.discover_concepts import discover_concepts
     try:
@@ -1509,9 +1563,97 @@ def _format_candidate_concepts(metric: str, ticker: str, top_k: int = 5) -> str:
         return ""
 
 
-def _build_candidates_context(gap: UnresolvedGap) -> str:
-    """O3: Fetch concept candidates for an UnresolvedGap."""
-    return _format_candidate_concepts(gap.metric, gap.ticker)
+# O7: Module-level cache for EntityFacts per ticker
+_sec_facts_cache: Dict[str, Optional[Any]] = {}
+
+
+def _extract_candidate_value(ticker: str, concept: str) -> Optional[float]:
+    """O7: Extract a concept's latest FY value from SEC Company Facts.
+
+    Caches EntityFacts per ticker (~0.5s first call, ~0ms thereafter).
+    Returns the numeric value if found, else None.
+    """
+    if ticker not in _sec_facts_cache:
+        try:
+            from edgar import Company
+            facts = Company(ticker).get_facts()
+            _sec_facts_cache[ticker] = facts
+        except Exception:
+            _sec_facts_cache[ticker] = None
+
+    facts = _sec_facts_cache[ticker]
+    if facts is None:
+        return None
+
+    try:
+        fact = facts.get_annual_fact(concept)
+        if fact is not None:
+            return float(fact.numeric_value)
+    except Exception:
+        pass
+    return None
+
+
+def _build_candidates_context(
+    gap: 'UnresolvedGap',
+) -> Tuple[str, List['CandidateConcept']]:
+    """O3+O7: Build value-enriched candidate list and formatted text for AI prompt.
+
+    Calls discover_concepts with reference_value (O8), then enriches name-based
+    candidates missing extracted_value by looking up values from SEC Company Facts.
+
+    Returns:
+        Tuple of (formatted_text, enriched_candidates_list).
+    """
+    from edgar.xbrl.standardization.tools.discover_concepts import (
+        discover_concepts,
+        CandidateConcept,
+    )
+    try:
+        candidates = discover_concepts(
+            metric_name=gap.metric,
+            ticker=gap.ticker,
+            reference_value=gap.reference_value,
+            top_k=10,
+        )
+    except Exception as e:
+        logger.debug(f"discover_concepts failed for {gap.ticker}:{gap.metric}: {e}")
+        return "", []
+
+    if not candidates:
+        return "", []
+
+    # Enrich name-based candidates (up to 5 lookups) with extracted values
+    lookup_attempts = 0
+    for c in candidates:
+        if c.extracted_value is not None:
+            continue  # Already has value (e.g., from value_match)
+        if lookup_attempts >= 5:
+            break
+        value = _extract_candidate_value(gap.ticker, c.concept)
+        if value is not None:
+            c.extracted_value = value
+            if gap.reference_value and abs(gap.reference_value) > 0:
+                c.delta_pct = round(
+                    abs(value - gap.reference_value) / abs(gap.reference_value) * 100, 2
+                )
+        lookup_attempts += 1
+
+    # Format as evidence table
+    ref_val = gap.reference_value
+    lines = ["\n## Candidate Concepts (with extracted values)"]
+    lines.append("| Concept | Value | Ref Value | Delta% | Source |")
+    lines.append("|---------|-------|-----------|--------|--------|")
+    for c in candidates[:10]:
+        val_str = f"${c.extracted_value:,.0f}" if c.extracted_value is not None else "None"
+        ref_str = f"${ref_val:,.0f}" if ref_val is not None else "N/A"
+        delta_str = f"{c.delta_pct:.1f}%" if c.delta_pct is not None else "—"
+        lines.append(f"| {c.concept} | {val_str} | {ref_str} | {delta_str} | {c.source} |")
+    lines.append(
+        "\nChoose from candidates with the lowest Delta%. "
+        "If none fit, propose a different concept.\n"
+    )
+    return "\n".join(lines), candidates
 
 
 def _select_model_for_gap(gap: MetricGap) -> str:

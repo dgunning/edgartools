@@ -20,6 +20,8 @@ from typing import List, Optional, Dict, Any, Set
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 
+import pandas as pd
+
 from edgar import Company, use_local_storage
 from edgar.xbrl.xbrl import XBRL
 
@@ -28,10 +30,12 @@ from edgar.xbrl.xbrl import XBRL
 class CandidateConcept:
     """A candidate concept for a target metric."""
     concept: str           # Full concept name (e.g., "us-gaap:Revenue")
-    source: str           # "calc_tree" | "facts" | "both"
+    source: str           # "calc_tree" | "facts" | "both" | "value_match"
     confidence: float     # 0.0 - 1.0
     reasoning: str        # Why this matched
     tree_context: Optional[Dict] = None  # Parent, weight, etc. if from calc tree
+    extracted_value: Optional[float] = None   # Actual value from SEC facts
+    delta_pct: Optional[float] = None         # Variance from reference (%)
 
 
 # Regex patterns for prefix stripping
@@ -64,13 +68,14 @@ def discover_concepts(
     facts_df=None,
     ticker: Optional[str] = None,
     known_concepts: Optional[List[str]] = None,
-    top_k: int = 10
+    top_k: int = 10,
+    reference_value: Optional[float] = None,
 ) -> List[CandidateConcept]:
     """
     Search both calc trees AND facts for matching concepts.
-    
+
     This is a REUSABLE TOOL for AI agents to use when static mapping fails.
-    
+
     Args:
         metric_name: Target metric name (e.g., "IntangibleAssets", "Capex")
         xbrl: Optional XBRL object with calculation trees
@@ -78,20 +83,23 @@ def discover_concepts(
         ticker: Optional company ticker (will fetch facts_df if not provided)
         known_concepts: Optional list of known concept names to prioritize
         top_k: Maximum number of candidates to return
-        
+        reference_value: Optional reference value for reverse value search (O8).
+            When provided, also searches for concepts whose extracted value
+            matches this reference within tolerance.
+
     Returns:
         List of CandidateConcept, ranked by confidence
     """
     candidates = []
     found_concepts: Set[str] = set()
-    
+
     # Search calculation trees
     if xbrl is not None:
         tree_candidates = _search_calc_trees(metric_name, xbrl, known_concepts)
         for c in tree_candidates:
             found_concepts.add(c.concept)
         candidates.extend(tree_candidates)
-    
+
     # Search facts
     if facts_df is not None or ticker is not None:
         if facts_df is None and ticker is not None:
@@ -102,16 +110,109 @@ def discover_concepts(
                 facts_df = facts.to_dataframe()
             except Exception as e:
                 facts_df = None
-        
+
         if facts_df is not None:
             facts_candidates = _search_facts(
                 metric_name, facts_df, known_concepts, found_concepts
             )
+            for c in facts_candidates:
+                found_concepts.add(c.concept)
             candidates.extend(facts_candidates)
-    
+
+    # O8: Reverse value search — find concepts by matching extracted value
+    if reference_value is not None and facts_df is not None and abs(reference_value) > 0:
+        value_candidates = _search_by_value(reference_value, facts_df, found_concepts)
+        candidates.extend(value_candidates)
+
     # Sort by confidence and return top_k
     candidates.sort(key=lambda x: x.confidence, reverse=True)
     return candidates[:top_k]
+
+
+def _search_by_value(
+    reference_value: float,
+    facts_df: pd.DataFrame,
+    already_found: Set[str],
+    tolerance_pct: float = 20.0,
+) -> List[CandidateConcept]:
+    """O8: Reverse value search — find concepts whose extracted value matches reference.
+
+    Searches the facts DataFrame for concepts with numeric values close to the
+    reference value. Pure vectorized DataFrame filter — ~10ms for ~5000 concepts,
+    zero API calls.
+
+    Args:
+        reference_value: The target value to match (e.g., from yfinance).
+        facts_df: DataFrame from Company.get_facts().to_dataframe().
+        already_found: Concepts already found by name-based search (excluded).
+        tolerance_pct: Maximum allowed variance percentage (default 20%).
+
+    Returns:
+        List of CandidateConcept with source="value_match".
+    """
+    candidates = []
+    try:
+        df = facts_df
+        # Filter for FY period and non-null numeric values
+        has_period = 'fiscal_period' in df.columns
+        has_value = 'numeric_value' in df.columns
+        if not has_value:
+            return candidates
+
+        if has_period:
+            df = df[df['fiscal_period'] == 'FY']
+        df = df[df['numeric_value'].notna()]
+
+        if df.empty:
+            return candidates
+
+        # Group by concept, take latest fiscal_year per concept
+        if 'fiscal_year' in df.columns:
+            idx = df.groupby('concept')['fiscal_year'].idxmax()
+            df = df.loc[idx]
+        else:
+            df = df.drop_duplicates(subset='concept', keep='last')
+
+        # Compute variance
+        abs_ref = abs(reference_value)
+        df = df.copy()
+        df['_variance'] = (df['numeric_value'] - reference_value).abs() / abs_ref * 100
+
+        # Keep rows within tolerance
+        df = df[df['_variance'] <= tolerance_pct]
+
+        # Exclude already-found concepts
+        if already_found:
+            df = df[~df['concept'].isin(already_found)]
+
+        # Sort by variance ascending (closest match first)
+        df = df.sort_values('_variance')
+
+        for _, row in df.iterrows():
+            variance = row['_variance']
+            value = float(row['numeric_value'])
+
+            # Map confidence by variance band
+            if variance < 2.0:
+                confidence = 0.95
+            elif variance < 10.0:
+                confidence = 0.80
+            else:
+                confidence = 0.65
+
+            candidates.append(CandidateConcept(
+                concept=row['concept'],
+                source="value_match",
+                confidence=confidence,
+                reasoning=f"Value match: extracted={value:,.0f}, ref={reference_value:,.0f}, delta={variance:.1f}%",
+                extracted_value=value,
+                delta_pct=round(variance, 2),
+            ))
+
+    except Exception:
+        pass
+
+    return candidates
 
 
 def _search_calc_trees(

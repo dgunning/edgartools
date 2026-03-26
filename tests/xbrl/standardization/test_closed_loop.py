@@ -115,7 +115,7 @@ def _make_proposal(ticker="AAPL", metric="Revenue") -> ProposalRecord:
 )
 @patch(
     "edgar.xbrl.standardization.tools.consult_ai_gaps._build_candidates_context",
-    return_value="",
+    return_value=("", []),
 )
 class TestDispatchAIGaps:
 
@@ -337,6 +337,117 @@ class TestDispatchAIGaps:
 
         assert report.model_counts.get("gemini-flash", 0) >= 1
         assert report.model_counts.get("sonnet", 0) >= 1
+
+
+# =============================================================================
+# GROUP 1b: O9 Auto-Resolve Tests
+# =============================================================================
+
+class TestAutoResolve:
+    """Tests for O9: auto-resolve from value search."""
+
+    @pytest.mark.fast
+    def test_auto_resolve_skips_ai(self, tmp_path):
+        """When _build_candidates_context returns a close us-gaap match, AI is skipped."""
+        from edgar.xbrl.standardization.tools.discover_concepts import CandidateConcept
+
+        close_candidate = CandidateConcept(
+            concept="us-gaap:Revenues",
+            source="value_match",
+            confidence=0.95,
+            reasoning="Value match",
+            extracted_value=99.5e9,
+            delta_pct=0.5,
+        )
+
+        gaps = [_make_unresolved_gap(ticker="AAPL", metric="Revenue")]
+        manifest = _make_manifest(gaps)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest.to_dict()))
+
+        call_count = {"n": 0}
+
+        def counting_caller(prompt, model):
+            call_count["n"] += 1
+            return None
+
+        with patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._is_company_onboarded",
+            return_value=True,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._build_candidates_context",
+            return_value=("table text", [close_candidate]),
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.get_config_fingerprint",
+            return_value="abc123",
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.load_agent_responses",
+            return_value={},
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.save_agent_responses",
+        ):
+            proposals, report = dispatch_ai_gaps(
+                manifest_path=manifest_path,
+                ai_caller=counting_caller,
+            )
+
+        assert report.auto_resolved == 1
+        assert report.api_calls == 0
+        assert call_count["n"] == 0
+        assert len(proposals) == 1
+        assert proposals[0].proposal.new_value == "us-gaap:Revenues"
+
+    @pytest.mark.fast
+    def test_auto_resolve_rejects_extension_concepts(self, tmp_path):
+        """Candidate with <2% variance but non-us-gaap prefix should NOT auto-resolve."""
+        from edgar.xbrl.standardization.tools.discover_concepts import CandidateConcept
+
+        extension_candidate = CandidateConcept(
+            concept="aapl:CustomRevenue",
+            source="value_match",
+            confidence=0.95,
+            reasoning="Value match",
+            extracted_value=100.1e9,
+            delta_pct=0.1,
+        )
+
+        gaps = [_make_unresolved_gap(ticker="AAPL", metric="Revenue")]
+        manifest = _make_manifest(gaps)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest.to_dict()))
+
+        caller = _mock_ai_caller({
+            "action": "MAP_CONCEPT",
+            "ticker": "AAPL",
+            "metric": "Revenue",
+            "params": {"concept": "us-gaap:Revenue"},
+            "rationale": "test",
+            "confidence": 0.9,
+        })
+
+        with patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._is_company_onboarded",
+            return_value=True,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._build_candidates_context",
+            return_value=("table text", [extension_candidate]),
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.get_config_fingerprint",
+            return_value="abc123",
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.load_agent_responses",
+            return_value={},
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.save_agent_responses",
+        ):
+            proposals, report = dispatch_ai_gaps(
+                manifest_path=manifest_path,
+                ai_caller=caller,
+            )
+
+        # Extension concept should not auto-resolve — falls through to AI call
+        assert report.auto_resolved == 0
+        assert report.api_calls == 1
 
 
 # =============================================================================

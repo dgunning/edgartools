@@ -211,6 +211,7 @@ class TestClosedLoopValidation:
         assert report.api_calls >= 0
         assert report.dead_end_skipped >= 0
         assert report.not_onboarded_skipped >= 0  # O2
+        assert report.auto_resolved >= 0  # O9
 
         # At least one outcome occurred (accounting for O2 skips)
         assert (report.valid_proposals + report.escalated + report.preflight_rejected + report.not_onboarded_skipped) >= 1, (
@@ -384,6 +385,7 @@ class TestClosedLoopValidation:
         print(f"    Total gaps:     {dispatch_report.total_gaps}")
         print(f"    Actionable:     {dispatch_report.actionable_gaps}")
         print(f"    Not-onboarded:  {dispatch_report.not_onboarded_skipped}")
+        print(f"    Auto-resolved:  {dispatch_report.auto_resolved}")
         print(f"    Proposals:      {dispatch_report.valid_proposals}")
         print(f"    Resolution:     {resolution_rate:.1f}%")
         print()
