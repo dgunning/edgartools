@@ -1996,16 +1996,16 @@ def _do_retry(
         return
 
     # Parse retry response through typed action pipeline
-    action = parse_typed_action(response)
+    action = parse_typed_action(response, target, pr.proposal.target_metric)
     if action is None:
         return
 
-    change = compile_action(action, pr.gap)
+    change = compile_action(action)
     if change is None:
         return
 
-    ok, reason = validate_action_preflight(action, pr.gap)
-    if not ok:
+    preflight_err = validate_action_preflight(action)
+    if preflight_err is not None:
         return
 
     # Pre-screen the retry proposal
