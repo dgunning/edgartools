@@ -21,7 +21,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
-| AI | Deterministic solver + Lead Agent closed loop (planned) | |
+| AI | Deterministic solver + Lead Agent closed loop (`run_closed_loop()`) | |
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
 
@@ -245,9 +245,8 @@ For each 50-company batch:
 ```
 
 **Key files:**
-- `run_overnight()` — Step 1 deterministic solver + GapManifest output
-- `consult_ai_gaps.py` — `build_typed_action_prompt()`, `collect_typed_proposals()`, `evaluate_ai_proposals()`
-- `auto_eval_loop.py` — `load_gap_manifest()`, `evaluate_experiment()`
+- `auto_eval_loop.py` — `run_closed_loop()` (orchestrator), `run_batch_expansion()` (scaling), `run_overnight()` (deterministic solver)
+- `consult_ai_gaps.py` — `dispatch_ai_gaps()` (AI dispatch), `evaluate_ai_proposals_live()` (AI CQS gate), `build_typed_action_prompt()`, `collect_typed_proposals()`
 
 **Rules:**
 - AI proposals go through the same CQS/LIS gate as deterministic proposals — no bypass

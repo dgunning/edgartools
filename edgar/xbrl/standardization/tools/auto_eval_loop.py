@@ -4606,3 +4606,346 @@ class TeamSession:
         from edgar.xbrl.standardization.tools.auto_eval_checkpoint import print_team_dashboard
         print_team_dashboard()
         return "Dashboard printed"
+
+
+# =============================================================================
+# PHASE 7: CLOSED-LOOP ORCHESTRATION
+# =============================================================================
+
+@dataclass
+class ClosedLoopReport:
+    """Summary of run_closed_loop() — deterministic + AI pipeline."""
+    session_id: str
+    started_at: str
+    finished_at: str
+    duration_hours: float
+    eval_cohort: List[str]
+
+    # Phase 1: Deterministic
+    det_kept: int = 0
+    det_discarded: int = 0
+    det_cqs_start: float = 0.0
+    det_cqs_end: float = 0.0
+    det_ef_cqs_start: float = 0.0
+    det_ef_cqs_end: float = 0.0
+    gap_manifest_path: str = ""
+    unresolved_count: int = 0
+
+    # Phase 2: AI
+    ai_gaps_dispatched: int = 0
+    ai_proposals_generated: int = 0
+    ai_kept: int = 0
+    ai_discarded: int = 0
+    ai_cqs_start: float = 0.0
+    ai_cqs_end: float = 0.0
+    ai_ef_cqs_start: float = 0.0
+    ai_ef_cqs_end: float = 0.0
+
+    # Combined
+    total_kept: int = 0
+    cqs_start: float = 0.0
+    cqs_end: float = 0.0
+    ef_cqs_start: float = 0.0
+    ef_cqs_end: float = 0.0
+
+
+def run_closed_loop(
+    eval_cohort: Optional[List[str]] = None,
+    duration_hours: float = 8.0,
+    ai_caller: Optional[Callable[[str, str], Optional[str]]] = None,
+    max_workers: int = 2,
+    use_sec_facts: bool = True,
+    max_ai_gaps: int = 0,
+    dead_end_threshold: int = 6,
+) -> ClosedLoopReport:
+    """Orchestrate deterministic solver + AI resolution in sequence.
+
+    Phase 1: run_overnight() with deterministic propose_change().
+    Phase 2: dispatch_ai_gaps() + evaluate_ai_proposals_live() on unresolved gaps.
+
+    Args:
+        eval_cohort: Companies to evaluate. Defaults to QUICK_EVAL_COHORT.
+        duration_hours: Total time budget (40% deterministic, 60% AI).
+        ai_caller: AI callable. If None, creates one via make_openrouter_caller().
+        max_workers: Parallel workers for CQS computation.
+        use_sec_facts: Whether to use SEC XBRL facts.
+        max_ai_gaps: Max AI gaps to process (0 = all).
+        dead_end_threshold: Skip gaps with graveyard_count >= this value.
+
+    Returns:
+        ClosedLoopReport with combined results.
+    """
+    cohort = eval_cohort or QUICK_EVAL_COHORT
+    start_time = time.time()
+    session_id = f"closed_loop_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    ledger = ExperimentLedger()
+
+    print(f"[SESSION] CLOSED LOOP: {session_id} | {len(cohort)} companies | {duration_hours}h budget", flush=True)
+
+    report = ClosedLoopReport(
+        session_id=session_id,
+        started_at=datetime.now().isoformat(),
+        finished_at="",
+        duration_hours=0.0,
+        eval_cohort=cohort,
+    )
+
+    # ---- PHASE 1: DETERMINISTIC SOLVER ----
+    det_hours = duration_hours * 0.4
+    print(f"[PHASE 1] DETERMINISTIC SOLVER ({det_hours:.1f}h budget)", flush=True)
+
+    det_report = run_overnight(
+        duration_hours=det_hours,
+        eval_cohort=cohort,
+        propose_fn=propose_change,
+        max_workers=max_workers,
+        use_sec_facts=use_sec_facts,
+        ledger=ledger,
+    )
+
+    report.det_kept = det_report.experiments_kept
+    report.det_discarded = det_report.experiments_discarded + det_report.experiments_vetoed
+    report.det_cqs_start = det_report.cqs_start
+    report.det_cqs_end = det_report.cqs_end
+    report.det_ef_cqs_start = det_report.ef_cqs_start
+    report.det_ef_cqs_end = det_report.ef_cqs_end
+    report.cqs_start = det_report.cqs_start
+    report.ef_cqs_start = det_report.ef_cqs_start
+    report.gap_manifest_path = det_report.gap_manifest_path
+    report.unresolved_count = det_report.unresolved_count
+
+    print(
+        f"[PHASE 1] COMPLETE: {det_report.experiments_kept}/{det_report.experiments_total} kept, "
+        f"{det_report.unresolved_count} unresolved",
+        flush=True,
+    )
+
+    def _finalize_det_only(reason: str) -> ClosedLoopReport:
+        """Finalize report when AI phase is skipped."""
+        print(f"[PHASE 2] SKIPPED: {reason}", flush=True)
+        report.total_kept = report.det_kept
+        report.cqs_end = report.det_cqs_end
+        report.ef_cqs_end = report.det_ef_cqs_end
+        report.finished_at = datetime.now().isoformat()
+        report.duration_hours = (time.time() - start_time) / 3600
+        return report
+
+    if not det_report.gap_manifest_path:
+        return _finalize_det_only("No unresolved gaps")
+
+    # ---- PHASE 2a: AI DISPATCH ----
+    from edgar.xbrl.standardization.tools.consult_ai_gaps import (
+        dispatch_ai_gaps,
+        evaluate_ai_proposals_live,
+        make_openrouter_caller,
+    )
+
+    if ai_caller is None:
+        ai_caller, _cost = make_openrouter_caller()
+
+    manifest_path = Path(det_report.gap_manifest_path)
+    print(f"[PHASE 2] AI RESOLUTION ({report.unresolved_count} gaps)", flush=True)
+
+    proposals, dispatch_report = dispatch_ai_gaps(
+        manifest_path=manifest_path,
+        ai_caller=ai_caller,
+        session_id=session_id,
+        max_gaps=max_ai_gaps,
+        dead_end_threshold=dead_end_threshold,
+    )
+
+    report.ai_gaps_dispatched = dispatch_report.actionable_gaps - dispatch_report.dead_end_skipped
+    report.ai_proposals_generated = dispatch_report.valid_proposals
+
+    if not proposals:
+        return _finalize_det_only("No valid AI proposals generated")
+
+    # ---- PHASE 2b: AI EVALUATION ----
+    print(f"[PHASE 2] EVALUATING {len(proposals)} proposals", flush=True)
+
+    ai_baseline = compute_cqs(
+        eval_cohort=cohort,
+        snapshot_mode=True,
+        ledger=ledger,
+        max_workers=max_workers,
+        use_sec_facts=use_sec_facts,
+    )
+
+    ai_eval_report = evaluate_ai_proposals_live(
+        proposals=proposals,
+        baseline_cqs=ai_baseline,
+        eval_cohort=cohort,
+        ledger=ledger,
+        max_workers=max_workers,
+        session_id=session_id,
+        use_sec_facts=use_sec_facts,
+    )
+
+    report.ai_kept = ai_eval_report.kept
+    report.ai_discarded = ai_eval_report.discarded + ai_eval_report.vetoed
+    report.ai_cqs_start = ai_eval_report.cqs_start
+    report.ai_cqs_end = ai_eval_report.cqs_end
+    report.ai_ef_cqs_start = ai_eval_report.ef_cqs_start
+    report.ai_ef_cqs_end = ai_eval_report.ef_cqs_end
+    print(f"[PHASE 2] COMPLETE: {ai_eval_report.kept}/{ai_eval_report.proposals_total} kept", flush=True)
+
+    # ---- COMBINED ----
+    report.total_kept = report.det_kept + report.ai_kept
+    report.cqs_end = ai_eval_report.cqs_end
+    report.ef_cqs_end = ai_eval_report.ef_cqs_end
+    report.finished_at = datetime.now().isoformat()
+    report.duration_hours = (time.time() - start_time) / 3600
+
+    ef_delta = report.ef_cqs_end - report.ef_cqs_start
+    print("=" * 60, flush=True)
+    print(
+        f"SESSION COMPLETE: EF-CQS {report.ef_cqs_start:.4f} -> "
+        f"{report.ef_cqs_end:.4f} ({ef_delta:+.4f})",
+        flush=True,
+    )
+    print("=" * 60, flush=True)
+
+    return report
+
+
+@dataclass
+class BatchResult:
+    """Result of a single batch in run_batch_expansion()."""
+    batch_index: int
+    tickers: List[str]
+    ef_cqs: float
+    graduated: bool
+    error: Optional[str] = None
+
+
+@dataclass
+class BatchExpansionReport:
+    """Summary of run_batch_expansion()."""
+    total_batches: int
+    graduated: int
+    failed: int
+    results: List[BatchResult] = field(default_factory=list)
+    ef_cqs_overall: float = 0.0
+
+
+def run_batch_expansion(
+    total_cohort: Optional[List[str]] = None,
+    batch_size: int = 50,
+    graduation_ef_cqs: float = 0.80,
+    max_batches: int = 10,
+    duration_hours_per_batch: float = 2.0,
+    ai_caller: Optional[Callable[[str, str], Optional[str]]] = None,
+    max_workers: int = 2,
+    use_sec_facts: bool = True,
+    skip_precondition: bool = False,
+) -> BatchExpansionReport:
+    """Scale the closed loop across company batches.
+
+    Splits a large cohort into batches, runs run_closed_loop() on each,
+    and graduates batches that meet the EF-CQS threshold.
+
+    Args:
+        total_cohort: Full list of tickers. Defaults to EXPANSION_COHORT_500.
+        batch_size: Companies per batch.
+        graduation_ef_cqs: EF-CQS threshold for graduation.
+        max_batches: Maximum number of batches to process.
+        duration_hours_per_batch: Time budget per batch.
+        ai_caller: AI callable. If None, creates one via make_openrouter_caller().
+        max_workers: Parallel workers for CQS computation.
+        use_sec_facts: Whether to use SEC XBRL facts.
+        skip_precondition: Skip the base cohort EF-CQS precondition check.
+
+    Returns:
+        BatchExpansionReport with per-batch results.
+    """
+    if total_cohort is None:
+        total_cohort = list(EXPANSION_COHORT_500)
+
+    # Precondition: base cohort must be at 0.95+ before large expansion
+    if len(total_cohort) > 100 and not skip_precondition:
+        base_cqs = compute_cqs(
+            eval_cohort=QUICK_EVAL_COHORT,
+            snapshot_mode=True,
+            max_workers=max_workers,
+            use_sec_facts=use_sec_facts,
+        )
+        if base_cqs.ef_cqs < 0.95:
+            raise ValueError(
+                f"Base cohort EF-CQS ({base_cqs.ef_cqs:.4f}) < 0.95. "
+                f"Fix base quality before expanding to {len(total_cohort)} companies."
+            )
+
+    # Split into batches (simple chunking)
+    batches = [
+        total_cohort[i:i + batch_size]
+        for i in range(0, len(total_cohort), batch_size)
+    ]
+    if max_batches > 0:
+        batches = batches[:max_batches]
+
+    # Create shared AI caller
+    if ai_caller is None:
+        from edgar.xbrl.standardization.tools.consult_ai_gaps import make_openrouter_caller
+        ai_caller, _cost = make_openrouter_caller()
+
+    report = BatchExpansionReport(total_batches=len(batches), graduated=0, failed=0)
+
+    for i, batch in enumerate(batches):
+        print(f"\n[BATCH {i+1}/{len(batches)}] {len(batch)} companies: {batch[:5]}...", flush=True)
+
+        try:
+            loop_report = run_closed_loop(
+                eval_cohort=batch,
+                duration_hours=duration_hours_per_batch,
+                ai_caller=ai_caller,
+                max_workers=max_workers,
+                use_sec_facts=use_sec_facts,
+            )
+
+            graduated = loop_report.ef_cqs_end >= graduation_ef_cqs
+            result = BatchResult(
+                batch_index=i,
+                tickers=batch,
+                ef_cqs=loop_report.ef_cqs_end,
+                graduated=graduated,
+            )
+
+            if graduated:
+                report.graduated += 1
+                print(
+                    f"[BATCH {i+1}] GRADUATED: EF-CQS {loop_report.ef_cqs_end:.4f} "
+                    f">= {graduation_ef_cqs}",
+                    flush=True,
+                )
+            else:
+                report.failed += 1
+                print(
+                    f"[BATCH {i+1}] NOT GRADUATED: EF-CQS {loop_report.ef_cqs_end:.4f} "
+                    f"< {graduation_ef_cqs}",
+                    flush=True,
+                )
+
+        except Exception as e:
+            logger.warning(f"Batch {i+1} failed: {e}")
+            result = BatchResult(
+                batch_index=i,
+                tickers=batch,
+                ef_cqs=0.0,
+                graduated=False,
+                error=str(e),
+            )
+            report.failed += 1
+
+        report.results.append(result)
+
+    # Overall EF-CQS: average of graduated batches
+    graduated_scores = [r.ef_cqs for r in report.results if r.graduated]
+    report.ef_cqs_overall = sum(graduated_scores) / len(graduated_scores) if graduated_scores else 0.0
+
+    print(
+        f"\n[EXPANSION] COMPLETE: {report.graduated}/{report.total_batches} graduated, "
+        f"avg EF-CQS {report.ef_cqs_overall:.4f}",
+        flush=True,
+    )
+
+    return report

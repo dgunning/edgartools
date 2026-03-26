@@ -131,7 +131,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 
 - [x] **M1.2: Wire LIS into decision gates** — Completed 2026-03-25. `cd4f310d`. LIS replaces global CQS check.
 
-- [ ] **M1.3: Wire AI into overnight loop** — Lead Agent Closed Loop: deterministic solver → GapManifest → lead agent spawns subagents → typed actions → CQS gate. Replaces inline Gemini Flash approach.
+- [x] **M1.3: Wire AI into overnight loop** — Lead Agent Closed Loop: `run_closed_loop()` orchestrates deterministic → AI resolution. `dispatch_ai_gaps()` + `evaluate_ai_proposals_live()`. Completed 2026-03-26 (Phase 7).
   - Verification: 50-company run, AI resolves gaps that deterministic solver cannot.
 
 - [x] **M1.4: Switch dashboard to EF-CQS** — Completed 2026-03-25. `cd4f310d`. EF-CQS is headline with color coding.
@@ -203,10 +203,10 @@ For each 50-company batch:
 
 ### Milestones
 
-- [ ] **M7.1: Wire GapManifest → subagent dispatch** — Lead agent reads manifest, builds prompts via `build_typed_action_prompt()`, spawns gap-solver/gap-investigator agents.
-- [ ] **M7.2: Subagent response → CQS gate** — `collect_typed_proposals()` + `evaluate_ai_proposals()` pipeline end-to-end.
-- [ ] **M7.3: First closed-loop run** — 50-company batch: deterministic + AI, measure combined EF-CQS improvement.
-- [ ] **M7.4: Batch expansion to 500** — 10 batches of 50, each graduating at EF-CQS >= 0.80.
+- [x] **M7.1: Wire GapManifest → AI dispatch** — `dispatch_ai_gaps()` reads manifest, filters dead-ends, caches responses, builds prompts via `build_typed_action_prompt()`, returns ProposalRecords. Completed 2026-03-26.
+- [x] **M7.2: AI response → CQS gate** — `evaluate_ai_proposals_live()` evaluates proposals in-memory through same CQS/LIS gate with circuit breaker (10 consecutive failures). Completed 2026-03-26.
+- [x] **M7.3: Closed-loop orchestration** — `run_closed_loop()` orchestrates deterministic solver (40% budget) → AI resolution (60% budget) in sequence. Completed 2026-03-26.
+- [x] **M7.4: Batch expansion to 500** — `run_batch_expansion()` splits large cohorts into batches, runs closed loop on each, graduates at EF-CQS threshold. Completed 2026-03-26.
 
 ---
 

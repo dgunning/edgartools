@@ -18,6 +18,9 @@ Usage inside Claude Code:
         TypedAction, ACTION_VOCABULARY,
         parse_typed_action, compile_action, validate_action_preflight,
         build_typed_action_prompt, collect_typed_proposals,
+        # Phase 7: Closed-loop AI dispatch & evaluation
+        dispatch_ai_gaps, AIDispatchReport,
+        evaluate_ai_proposals_live, AIEvalReport,
     )
 
     # Step 2a: Generate AI proposals
@@ -42,6 +45,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from edgar.xbrl.standardization.tools.auto_eval import (
+    CQSResult,
     MetricGap,
     compute_cqs,
 )
@@ -75,6 +79,8 @@ logger = logging.getLogger(__name__)
 
 MODEL_REGISTRY = {
     "gemini-flash": "google/gemini-3-flash-preview",
+    "sonnet": "anthropic/claude-sonnet-4",
+    "opus": "anthropic/claude-opus-4",
 }
 DEFAULT_API_MODEL = "gemini-flash"
 
@@ -597,10 +603,14 @@ def collect_typed_proposals(
 
 
 def _select_model(gap: UnresolvedGap) -> str:
-    """Select AI model based on gap difficulty and agent type."""
+    """Select AI model based on gap difficulty and agent type.
+
+    Returns abstract model names resolved by MODEL_REGISTRY in make_openrouter_caller().
+    Standard gaps use gemini-flash (cheap/fast), hard gaps use sonnet (more capable).
+    """
     if gap.difficulty_tier == "hard" or gap.ai_agent_type == "pattern_learner":
-        return "opus"
-    return "sonnet"
+        return "sonnet"
+    return "gemini-flash"
 
 
 def _metric_gap_from_unresolved(gap: UnresolvedGap) -> MetricGap:
@@ -1269,3 +1279,281 @@ def print_benchmark_comparison(results: List[BenchmarkResult]) -> None:
         table.add_row(label, *values)
 
     Console().print(table)
+
+
+# =============================================================================
+# PHASE 7: CLOSED-LOOP AI DISPATCH & EVALUATION
+# =============================================================================
+
+@dataclass
+class AIDispatchReport:
+    """Summary of dispatch_ai_gaps() — how many gaps were sent to AI and what came back."""
+    session_id: str
+    total_gaps: int
+    actionable_gaps: int
+    dead_end_skipped: int
+    cache_hits: int
+    api_calls: int
+    valid_proposals: int
+    preflight_rejected: int
+    escalated: int
+    model_counts: Dict[str, int] = field(default_factory=dict)
+
+
+def dispatch_ai_gaps(
+    manifest_path: Path,
+    ai_caller: Callable[[str, str], Optional[str]],
+    session_id: Optional[str] = None,
+    max_gaps: int = 0,
+    dead_end_threshold: int = 6,
+) -> Tuple[List[ProposalRecord], AIDispatchReport]:
+    """Read a GapManifest, filter gaps, call AI, return ProposalRecords.
+
+    Composes existing functions into a single dispatch pipeline:
+    load_gap_manifest -> filter_actionable_gaps -> dead-end filter ->
+    cache check -> build_typed_action_prompt -> ai_caller -> collect_typed_proposals.
+
+    Args:
+        manifest_path: Path to gap manifest JSON from run_overnight().
+        ai_caller: Callable(prompt, model) -> response_text.
+        session_id: Override session ID (defaults to manifest's session_id).
+        max_gaps: Max gaps to process (0 = all).
+        dead_end_threshold: Skip gaps with graveyard_count >= this value.
+
+    Returns:
+        Tuple of (proposals, AIDispatchReport).
+    """
+    manifest = load_gap_manifest(manifest_path)
+
+    # Config drift check
+    current_fingerprint = get_config_fingerprint()
+    if current_fingerprint != manifest.config_fingerprint:
+        logger.warning(
+            f"Config fingerprint drifted since manifest was written "
+            f"({manifest.config_fingerprint} -> {current_fingerprint}). "
+            f"Proposals may be stale."
+        )
+
+    sid = session_id or manifest.session_id
+
+    from edgar.xbrl.standardization.tools.capability_registry import filter_actionable_gaps
+
+    actionable = filter_actionable_gaps(manifest.gaps)
+    actionable_count = len(actionable)
+
+    dead_end_skipped = 0
+    filtered = []
+    for gap in actionable:
+        if gap.graveyard_count >= dead_end_threshold:
+            dead_end_skipped += 1
+            logger.info(
+                f"Dead-end skip: {gap.ticker}:{gap.metric} "
+                f"(graveyard={gap.graveyard_count} >= {dead_end_threshold})"
+            )
+        else:
+            filtered.append(gap)
+
+    if max_gaps > 0:
+        filtered = filtered[:max_gaps]
+
+    cache = load_agent_responses(sid)
+    cache_hits = 0
+    api_calls = 0
+    escalated = 0
+    model_counts: Dict[str, int] = {}
+
+    responses: List[Tuple[UnresolvedGap, Optional[str]]] = []
+    for i, gap in enumerate(filtered):
+        key = _gap_key(gap)
+        model = _select_model(gap)
+        model_counts[model] = model_counts.get(model, 0) + 1
+
+        # Cache check
+        if key in cache:
+            cache_hits += 1
+            print(
+                f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> {model} (cached)",
+                flush=True,
+            )
+            responses.append((gap, cache[key]))
+            continue
+
+        # Build prompt and call AI
+        prompt = build_typed_action_prompt(gap)
+        print(
+            f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> {model} (api call)",
+            flush=True,
+        )
+
+        try:
+            response = ai_caller(prompt, model)
+        except Exception as e:
+            logger.warning(f"AI call failed for {gap.ticker}:{gap.metric}: {e}")
+            response = None
+
+        api_calls += 1
+        responses.append((gap, response))
+
+    # Parse into proposals (collect_typed_proposals handles save internally)
+    proposals, preflight_rejected = collect_typed_proposals(responses, sid)
+
+    # Count escalations by parsing JSON (not string matching)
+    for _gap, resp in responses:
+        if resp:
+            try:
+                data = json.loads(_strip_json_fences(resp))
+                if data.get("action") == "ESCALATE":
+                    escalated += 1
+            except (json.JSONDecodeError, AttributeError):
+                pass
+
+    report = AIDispatchReport(
+        session_id=sid,
+        total_gaps=len(manifest.gaps),
+        actionable_gaps=actionable_count,
+        dead_end_skipped=dead_end_skipped,
+        cache_hits=cache_hits,
+        api_calls=api_calls,
+        valid_proposals=len(proposals),
+        preflight_rejected=preflight_rejected,
+        escalated=escalated,
+        model_counts=model_counts,
+    )
+
+    return proposals, report
+
+
+@dataclass
+class AIEvalReport:
+    """Summary of evaluate_ai_proposals_live() — in-memory CQS gate results."""
+    session_id: str
+    proposals_total: int
+    kept: int
+    discarded: int
+    vetoed: int
+    cqs_start: float
+    cqs_end: float
+    ef_cqs_start: float
+    ef_cqs_end: float
+    stopped_early: bool = False
+    stop_reason: str = ""
+    config_diffs: List[str] = field(default_factory=list)
+    final_baseline: Optional['CQSResult'] = None
+
+
+def evaluate_ai_proposals_live(
+    proposals: List[ProposalRecord],
+    baseline_cqs: 'CQSResult',
+    eval_cohort: List[str],
+    ledger: Optional[ExperimentLedger] = None,
+    max_workers: int = 2,
+    session_id: str = "",
+    use_sec_facts: bool = True,
+    max_consecutive_failures: int = 10,
+) -> AIEvalReport:
+    """Evaluate AI proposals in-memory through the standard CQS gate.
+
+    Like evaluate_ai_proposals() but takes proposals and baseline directly
+    (no disk I/O), adds circuit breaker, and returns AIEvalReport with
+    final_baseline for chaining into the next pipeline stage.
+
+    Args:
+        proposals: ProposalRecords from dispatch_ai_gaps().
+        baseline_cqs: CQS result to use as starting baseline.
+        eval_cohort: Companies to evaluate on.
+        ledger: ExperimentLedger for experiment logging.
+        max_workers: Parallel workers for CQS computation.
+        session_id: Session identifier for logging.
+        use_sec_facts: Whether to use SEC XBRL facts.
+        max_consecutive_failures: Circuit breaker threshold.
+
+    Returns:
+        AIEvalReport with evaluation results and final_baseline.
+    """
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    report = AIEvalReport(
+        session_id=session_id,
+        proposals_total=len(proposals),
+        kept=0,
+        discarded=0,
+        vetoed=0,
+        cqs_start=baseline_cqs.cqs,
+        cqs_end=baseline_cqs.cqs,
+        ef_cqs_start=baseline_cqs.ef_cqs,
+        ef_cqs_end=baseline_cqs.ef_cqs,
+    )
+
+    current_baseline = baseline_cqs
+    consecutive_failures = 0
+
+    for i, pr in enumerate(proposals):
+        # Circuit breaker
+        if consecutive_failures >= max_consecutive_failures:
+            report.stopped_early = True
+            report.stop_reason = (
+                f"Circuit breaker: {consecutive_failures} consecutive failures"
+            )
+            print(f"  CIRCUIT BREAKER: {report.stop_reason}", flush=True)
+            break
+
+        change = pr.proposal
+        print(
+            f"  [{i+1}/{len(proposals)}] Evaluating: "
+            f"{change.target_companies}:{change.target_metric} "
+            f"[{change.change_type.value}]",
+            flush=True,
+        )
+
+        result = evaluate_experiment(
+            change, current_baseline,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+            max_workers=max_workers,
+            use_sec_facts=use_sec_facts,
+        )
+
+        log_experiment(change, result, ledger, run_id=session_id)
+
+        if result.decision == Decision.KEEP:
+            report.kept += 1
+            report.config_diffs.append(change.to_diff_string())
+            consecutive_failures = 0
+            if result.new_cqs_result is not None:
+                current_baseline = result.new_cqs_result
+            else:
+                current_baseline = compute_cqs(
+                    eval_cohort=eval_cohort,
+                    snapshot_mode=True,
+                    ledger=ledger,
+                    max_workers=max_workers,
+                    use_sec_facts=use_sec_facts,
+                )
+            ef_delta = current_baseline.ef_cqs - report.ef_cqs_start
+            print(
+                f"  >>> AI KEEP #{report.kept}: "
+                f"{change.target_companies}:{change.target_metric} | "
+                f"EF-CQS {current_baseline.ef_cqs:.4f} ({ef_delta:+.4f})",
+                flush=True,
+            )
+
+        elif result.decision == Decision.VETO:
+            report.vetoed += 1
+            consecutive_failures += 1
+            print(f"  VETO: {change.target_metric} — {result.reason}", flush=True)
+
+        else:
+            report.discarded += 1
+            consecutive_failures += 1
+            print(
+                f"  DISC: {change.target_companies}:{change.target_metric} "
+                f"— {result.reason}",
+                flush=True,
+            )
+
+    report.cqs_end = current_baseline.cqs
+    report.ef_cqs_end = current_baseline.ef_cqs
+    report.final_baseline = current_baseline
+
+    return report
