@@ -14,6 +14,7 @@ Intent-based tools for SEC filing analysis:
 - edgar_screen: Discover companies by industry/exchange/state
 - edgar_fund: Fund, ETF, BDC, money market data
 - edgar_proxy: Executive compensation and governance
+- edgar_notes: Notes and disclosures behind financial statement numbers
 """
 
 from edgar.ai.mcp.tools.base import (

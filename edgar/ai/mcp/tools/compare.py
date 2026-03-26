@@ -293,7 +293,7 @@ async def _compare_company(
         # Compute revenue growth if requested (uses time_series for YoY)
         if "growth" in metrics:
             try:
-                ts = facts.time_series("Revenue", periods=periods + 1)
+                ts = facts.time_series("Revenue", periods=(periods + 1) * 5)
                 if ts is not None and not ts.empty:
                     # Filter to annual periods only
                     annual_ts = ts[ts['fiscal_period'] == 'FY'] if annual else ts

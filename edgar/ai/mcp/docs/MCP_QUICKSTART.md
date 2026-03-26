@@ -161,6 +161,17 @@ If the server is running with `--transport streamable-http`:
 
 Replace `localhost:8000` with your server's host and port for remote deployments.
 
+### Claude Code (CLI)
+
+```bash
+claude mcp add edgartools -- uvx --from "edgartools[ai]" edgartools-mcp
+```
+
+Set your SEC identity:
+```bash
+export EDGAR_IDENTITY="Your Name your.email@example.com"
+```
+
 ### Cline (VS Code Extension)
 
 **Configuration File:** `.vscode/cline_mcp_settings.json` in your project
@@ -226,7 +237,7 @@ Get company profile, financials, recent filings, and ownership in one call.
 - `identifier` (required): Company ticker, CIK, or name
 - `include`: Sections to return: `profile`, `financials`, `filings`, `ownership`
 - `periods` (default: 4): Number of financial periods
-- `annual` (default: true): Annual vs quarterly data
+- `period`: `annual` (default), `quarterly`, or `ttm` (trailing twelve months)
 
 #### 2. edgar_search
 Search for companies or filings.
@@ -279,7 +290,7 @@ Compare companies side-by-side or analyze an industry.
 - `metrics`: Metrics to compare (e.g., `revenue`, `net_income`)
 - `periods` (default: 4): Number of periods
 
-#### 5. edgar_ownership
+#### 6. edgar_ownership
 Insider transactions or fund portfolios.
 
 **Example prompts:**
@@ -288,10 +299,10 @@ Insider transactions or fund portfolios.
 
 **Parameters:**
 - `identifier` (required): Company ticker, CIK, or fund CIK
-- `analysis_type`: `insiders`, `fund_portfolio`, or `portfolio_diff`
+- `analysis_type` (required): `insiders`, `fund_portfolio`, or `portfolio_diff`
 - `limit` (default: 20): Max results
 
-#### 6. edgar_monitor
+#### 7. edgar_monitor
 Get the latest SEC filings in real-time.
 
 **Example prompts:**
@@ -302,7 +313,7 @@ Get the latest SEC filings in real-time.
 - `form`: Filter by form type (e.g., `8-K`, `4`)
 - `limit` (default: 20): Max results
 
-#### 7. edgar_trends
+#### 8. edgar_trends
 Get financial time series with growth rates.
 
 **Example prompts:**
@@ -314,7 +325,7 @@ Get financial time series with growth rates.
 - `concepts`: Metrics to track (e.g., `revenue`, `net_income`, `eps`)
 - `periods` (default: 5): Number of periods
 
-#### 8. edgar_screen
+#### 9. edgar_screen
 Discover companies by industry, exchange, or state.
 
 **Example prompts:**
@@ -323,11 +334,12 @@ Discover companies by industry, exchange, or state.
 
 **Parameters:**
 - `industry`: Industry keyword
+- `sic`: Exact SIC code (integer)
 - `exchange`: Exchange name (e.g., `NYSE`, `Nasdaq`)
 - `state`: State of incorporation (2-letter code)
-- `limit` (default: 20): Max results
+- `limit` (default: 25): Max results
 
-#### 9. edgar_text_search
+#### 10. edgar_text_search
 Full-text search across SEC filing content.
 
 **Example prompts:**
@@ -340,7 +352,7 @@ Full-text search across SEC filing content.
 - `forms`: Filter by form types (e.g., `["8-K", "10-K"]`)
 - `start_date`: Start date filter
 
-#### 10. edgar_fund
+#### 11. edgar_fund
 Get fund, ETF, BDC, and money market fund data.
 
 **Example prompts:**
@@ -354,7 +366,7 @@ Get fund, ETF, BDC, and money market fund data.
 - `query`: Search text for fund or BDC name
 - `limit` (default: 20): Max results
 
-#### 11. edgar_proxy
+#### 12. edgar_proxy
 Get executive compensation and governance data from DEF 14A proxy statements.
 
 **Example prompts:**
@@ -364,6 +376,19 @@ Get executive compensation and governance data from DEF 14A proxy statements.
 **Parameters:**
 - `identifier` (required): Company ticker, CIK, or name
 - `filing_index` (default: 0): Which proxy filing (0=latest)
+
+#### 13. edgar_notes
+Drill into financial statement notes and disclosures — the detail behind the numbers.
+
+**Example prompts:**
+- "Show me Apple's revenue recognition policy"
+- "What are Tesla's debt maturities from their latest 10-K notes?"
+
+**Parameters:**
+- `identifier` (required): Company ticker, CIK, or name
+- `topic`: Note topic to search for (e.g., "revenue", "debt", "leases", "contingencies"). Omit for table of contents.
+- `form` (default: "10-K"): Filing form type. Use "10-Q" for quarterly notes.
+- `detail` (default: "standard"): `minimal` (titles only), `standard` (context + tables), or `full` (includes DataFrame data)
 
 ## Environment Variables
 
@@ -526,7 +551,7 @@ python -m edgar.ai --test
 ```
 Testing EdgarTools MCP Server Configuration...
 
-✓ EdgarTools v4.18.0 imports successfully
+✓ EdgarTools v5.26.0 imports successfully
 ✓ MCP framework available
 ✓ EDGAR_IDENTITY configured: Your Name your@email.com
 ✓ Core EdgarTools functionality available
@@ -542,7 +567,7 @@ If any checks fail, the test will show specific error messages and installation 
    ```bash
    python -m edgar.ai
    ```
-   You should see: `Starting EdgarTools MCP Server v4.18.0`
+   You should see: `Starting EdgarTools MCP Server v5.26.0`
 
 2. **Configure your MCP client** (see configurations above)
 
@@ -617,8 +642,7 @@ If you're currently using the old `run_mcp_server.py` entry point, here's how to
 
 ## Next Steps
 
-- Read the [full MCP documentation](../../../docs-internal/features/edgartools-mcp-ai-support.md) for advanced features
-- See [AI package structure](../../../docs-internal/features/ai-mcp-package-structure-plan.md) for architecture details
+- Read the [documentation](https://dgunning.github.io/edgartools/ai/) for the full tools reference and workflow guides
 - Explore example notebooks showing MCP workflows
 
 ## Support

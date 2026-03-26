@@ -131,7 +131,12 @@ nav:
   # AI - MCP server & skills for AI agents
   # ==========================================
   - AI Integration:
-    - "MCP Server & Skills": ai-integration.md
+    - Overview: ai/index.md
+    - MCP Server:
+      - Setup: ai/mcp-setup.md
+      - Tools Reference: ai/mcp-tools.md
+      - Workflows: ai/mcp-workflows.md
+    - Skills: ai/skills.md
 
   # ==========================================
   # NOTEBOOKS - Interactive Colab tutorials
