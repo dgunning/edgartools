@@ -120,25 +120,60 @@ After [setting up the MCP server](mcp-setup.md), try these three prompts to see 
 
 > *"Tell me about Nvidia -- profile and recent financials"*
 
-**What Claude does:** Calls `edgar_company` with `identifier="NVDA"` and `include=["profile", "financials"]`. Returns company details, latest financial statements, and key metrics.
+Claude calls `edgar_company` and returns:
 
-**What to look for:** Revenue figures, growth rates, and filing dates. These are live from EDGAR, not Claude's training data.
+```json
+{
+  "company": "NVIDIA CORP",
+  "profile": {
+    "industry": "Semiconductors & Related Devices",
+    "exchanges": ["Nasdaq"],
+    "shares_outstanding": 24300000000
+  },
+  "financials": {
+    "periods": 4,
+    "period_type": "annual",
+    "income_statement": "FY 2026 | FY 2025 | FY 2024 | FY 2023 ..."
+  }
+}
+```
+
+**What to look for:** Revenue figures and filing dates. These are live from EDGAR, not Claude's training data. If you see current fiscal years, it's working.
 
 ### 2. Live filings
 
 > *"What 8-K filings were submitted to the SEC in the last hour?"*
 
-**What Claude does:** Calls `edgar_monitor` with `form="8-K"`. Returns the most recent material event filings.
+Claude calls `edgar_monitor` and returns:
 
-**What to look for:** Filing timestamps, company names, and event types. This is real-time SEC data.
+```json
+{
+  "filings": [
+    {"form": "8-K", "filed": "2026-03-26", "company": "Haymaker Acquisition Corp. 4"},
+    {"form": "8-K", "filed": "2026-03-26", "company": "GUOCHUN INTERNATIONAL INC."},
+    {"form": "8-K", "filed": "2026-03-26", "company": "Quoin Pharmaceuticals, Ltd."}
+  ]
+}
+```
 
-### 3. Insider activity
+**What to look for:** Today's date in the `filed` field. These are filings that just hit the SEC's servers.
 
-> *"Have any Apple insiders bought or sold shares recently?"*
+### 3. Executive compensation
 
-**What Claude does:** Calls `edgar_ownership` with `identifier="AAPL"` and `analysis_type="insiders"`. Returns recent Form 4 transactions.
+> *"What is Apple's CEO compensation?"*
 
-**What to look for:** Transaction types (purchase vs sale), share amounts, prices, and whether trades are under 10b5-1 plans.
+Claude calls `edgar_proxy` and returns:
+
+```json
+{
+  "company": "Apple Inc.",
+  "ceo": {"name": "Mr. Cook", "total_comp": 74294811, "actually_paid": 108423733},
+  "pay_vs_performance": {"company_tsr": 233.88, "peer_tsr": 279.51},
+  "performance_measures": ["Net Sales", "Operating Income", "Relative TSR"]
+}
+```
+
+**What to look for:** Structured compensation data extracted from XBRL-tagged proxy statements -- not scraped text.
 
 !!! tip "Be specific about using EDGAR"
     If Claude answers from its training data instead of calling tools, be explicit: *"Using your SEC tools, check EDGAR for..."*

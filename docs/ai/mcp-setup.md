@@ -6,37 +6,35 @@ Get the EdgarTools MCP server running in under 2 minutes. Once connected, Claude
 
 ### Claude Desktop
 
-Add to your config file and restart Claude Desktop:
+**Step 1: Install EdgarTools**
 
-#### uvx (recommended -- zero install)
-
-No Python installation needed. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/).
-
-```json
-{
-  "mcpServers": {
-    "edgartools": {
-      "command": "uvx",
-      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
-      "env": {
-        "EDGAR_IDENTITY": "Your Name your.email@example.com"
-      }
-    }
-  }
-}
+```bash
+pip install "edgartools[ai]"
 ```
 
-If you get a "spawn uvx ENOENT" error on macOS, use the full path (find it with `which uvx`).
+**Step 2: Find your Python path**
 
-#### Python
+Claude Desktop launches the MCP server as a subprocess. It does not inherit your shell's PATH, so you need the full path to your Python binary:
 
-Requires `pip install "edgartools[ai]"` first.
+```bash
+which python3
+```
+
+Note the output (e.g., `/usr/local/bin/python3` or `/opt/homebrew/bin/python3`).
+
+**Step 3: Configure Claude Desktop**
+
+Open Claude Desktop → Settings → Developer → Edit Config:
+
+![Claude Desktop Developer Settings](../images/claude-desktop-developer-settings.png)
+
+Add this to your config, replacing the `command` with the full path from Step 2:
 
 ```json
 {
   "mcpServers": {
     "edgartools": {
-      "command": "python3",
+      "command": "/usr/local/bin/python3",
       "args": ["-m", "edgar.ai"],
       "env": {
         "EDGAR_IDENTITY": "Your Name your.email@example.com"
@@ -46,14 +44,57 @@ Requires `pip install "edgartools[ai]"` first.
 }
 ```
 
-On Windows, use `python` instead of `python3`.
+On Windows, use `python` (usually already on PATH):
+
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "python",
+      "args": ["-m", "edgar.ai"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
 
 **Config file location:**
 
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-Or: Claude Desktop → Settings → Developer → Edit Config.
+**Step 4: Restart and verify**
+
+Restart Claude Desktop (quit fully, then relaunch). You should see **edgartools** appear in your connectors:
+
+![EdgarTools MCP Connected](../images/claude-desktop-mcp-connected.png)
+
+Try asking: *"What did Apple file with the SEC this quarter?"*
+
+!!! tip "Why the full path?"
+    Claude Desktop runs MCP servers as subprocesses with a minimal system PATH (`/usr/local/bin`, `/usr/bin`, `/bin`). If your Python is installed via Homebrew, pyenv, conda, or another tool, Claude Desktop won't find it by name alone. Using the full path avoids "spawn python3 ENOENT" errors.
+
+#### Alternative: uvx (no pip install needed)
+
+If you have [uv](https://docs.astral.sh/uv/getting-started/installation/) installed, `uvx` runs the server in an isolated environment without installing edgartools globally. Find the full path with `which uvx`:
+
+```json
+{
+  "mcpServers": {
+    "edgartools": {
+      "command": "/Users/yourname/.local/bin/uvx",
+      "args": ["--from", "edgartools[ai]", "edgartools-mcp"],
+      "env": {
+        "EDGAR_IDENTITY": "Your Name your.email@example.com"
+      }
+    }
+  }
+}
+```
+
+Replace `/Users/yourname/.local/bin/uvx` with the actual path from `which uvx`.
 
 ### Claude Code
 
@@ -66,23 +107,23 @@ Set your SEC identity:
 export EDGAR_IDENTITY="Your Name your.email@example.com"
 ```
 
+Claude Code runs in your shell environment, so `uvx` works by name -- no full path needed.
+
 ### Verify
 
-Before configuring any client, confirm the server works:
+Confirm the server starts correctly from your terminal:
 
 ```bash
-uvx --from "edgartools[ai]" edgartools-mcp --test
+python3 -m edgar.ai --test
 ```
 
 ```
-✓ EdgarTools v5.26.0 imports successfully
+✓ EdgarTools v5.26.1 imports successfully
 ✓ MCP framework available
 ✓ 13 tools registered
 ✓ EDGAR_IDENTITY configured
 ✓ All checks passed — MCP server is ready to run
 ```
-
-After configuring Claude Desktop, look for the MCP tools icon in the bottom-right of the chat input. Try asking: *"What did Apple file with the SEC this quarter?"*
 
 ## EDGAR_IDENTITY
 
@@ -179,6 +220,18 @@ EXPOSE 8000
 
 ## Troubleshooting
 
+**"spawn python3 ENOENT" or "spawn uvx ENOENT"**
+
+Claude Desktop can't find the binary. Use the full path in your config:
+
+```bash
+# Find the right path
+which python3    # e.g., /opt/homebrew/bin/python3
+which uvx        # e.g., /Users/you/.local/bin/uvx
+```
+
+Then use that full path as the `command` in your config. This is the most common setup issue on macOS.
+
 **"EDGAR_IDENTITY environment variable is required"**
 
 Add your name and email to the `env` section of your MCP config.
@@ -187,19 +240,24 @@ Add your name and email to the `env` section of your MCP config.
 
 Install with AI extras: `pip install "edgartools[ai]"`
 
-**"spawn python ENOENT" (macOS)**
+**"Output validation error: outputSchema defined but no structured output returned"**
 
-Use `python3` instead of `python`, or specify the full path (find it with `which python3`).
+You're running EdgarTools v5.25.1 or earlier. Upgrade: `pip install --upgrade edgartools`
 
 **MCP server not appearing in Claude Desktop**
 
 1. Verify JSON syntax in your config file
-2. Restart Claude Desktop completely (quit and relaunch)
-3. Run `edgartools-mcp --test` to verify server health
+2. Restart Claude Desktop completely (quit and relaunch -- not just close the window)
+3. Check the logs at `~/Library/Logs/Claude/mcp-server-edgartools.log` for errors
+4. Run `python3 -m edgar.ai --test` to verify server health
 
 **Claude answers questions without calling any tools**
 
 Claude may use its training data instead of querying EDGAR. Be specific: *"Using your SEC tools, show me Apple's latest 10-K financials"* or *"Check EDGAR for Tesla's recent insider transactions."*
+
+**Server running old version after upgrade**
+
+If using `uvx`, clear its cache: `uvx --refresh --from "edgartools[ai]" edgartools-mcp --test`. If using `pip`, verify the right Python is being used: check `command` in your config points to the same Python where you installed edgartools.
 
 ## Migration from Legacy Setup
 

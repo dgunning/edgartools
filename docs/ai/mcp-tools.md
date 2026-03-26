@@ -38,6 +38,25 @@ Start here for any company question. Returns profile, financials, recent filings
 - "Show me Apple's profile and latest financials"
 - "Get Microsoft's recent filings and ownership data"
 
+??? example "Example response"
+
+    ```json
+    {
+      "company": "NVIDIA CORP",
+      "profile": {
+        "tickers": ["NVDA"],
+        "industry": "Semiconductors & Related Devices",
+        "exchanges": ["Nasdaq"],
+        "shares_outstanding": 24300000000
+      },
+      "financials": {
+        "periods": 4,
+        "period_type": "annual",
+        "income_statement": "FY 2026 | FY 2025 | FY 2024 | FY 2023 ..."
+      }
+    }
+    ```
+
 ### edgar_search
 
 Search for companies or filings by metadata.
@@ -103,6 +122,20 @@ See what was filed with the SEC in the last few minutes. No other financial data
 - "What SEC filings were just submitted?"
 - "Show me recent 8-K filings"
 
+??? example "Example response"
+
+    ```json
+    {
+      "filings": [
+        {"accession_number": "0001104659-26-034967", "form": "8-K", "filed": "2026-03-26", "company": "Haymaker Acquisition Corp. 4"},
+        {"accession_number": "0001765048-26-000002", "form": "8-K", "filed": "2026-03-26", "company": "GUOCHUN INTERNATIONAL INC."},
+        {"accession_number": "0001104659-26-034951", "form": "8-K", "filed": "2026-03-26", "company": "Quoin Pharmaceuticals, Ltd."}
+      ],
+      "count": 3,
+      "form_filter": "8-K"
+    }
+    ```
+
 ---
 
 ## Examine
@@ -127,6 +160,19 @@ Two ways to specify the filing:
 
 - "Show me Apple's latest 10-K"
 - "What's in filing 0000320193-23-000077?"
+
+??? example "Example response"
+
+    ```json
+    {
+      "accession_number": "0000320193-25-000079",
+      "form": "10-K",
+      "company": "Apple Inc.",
+      "filed": "2025-10-31",
+      "data_object_type": "TenK",
+      "context": "Revenue: $416.2B | Net Income: $112.0B | Total Assets: $359.2B\n\nSECTIONS: Item 1, Item 1A, Item 1B, Item 1C, Item 2, Item 3, ..."
+    }
+    ```
 
 ### edgar_read
 
@@ -172,6 +218,24 @@ Drill into the notes and disclosures behind financial statement numbers. Use thi
 - "What does Apple's debt note say?"
 - "Show me Tesla's revenue recognition policy"
 
+??? example "Example response"
+
+    ```json
+    {
+      "company": "Apple Inc. [AAPL]",
+      "total_notes": 16,
+      "topic": "debt",
+      "notes": [{
+        "number": 9,
+        "title": "Debt",
+        "expands": ["Commercial paper", "Term debt"],
+        "expands_statements": ["BalanceSheet", "CashFlowStatement"],
+        "tables": [{"title": "Debt (Tables)"}],
+        "context": "NOTE 9: Debt\n\nCommercial Paper\n\nThe Company issues unsecured short-term promissory notes..."
+      }]
+    }
+    ```
+
 ---
 
 ## Analyze
@@ -193,6 +257,29 @@ Financial time series with year-over-year and quarter-over-quarter growth rates.
 - "Show me Apple's revenue trend over 8 years"
 - "What is Microsoft's EPS growth trajectory?"
 
+??? example "Example response"
+
+    ```json
+    {
+      "company": "MICROSOFT CORP",
+      "period_type": "annual",
+      "trends": {
+        "revenue": {
+          "values": [
+            {"value": 375000000000, "period": "2025"},
+            {"value": 245122000000, "period": "2024"},
+            {"value": 211915000000, "period": "2023"}
+          ],
+          "growth_rates": [
+            {"period": "2025", "growth": "53.0%"},
+            {"period": "2024", "growth": "15.7%"}
+          ],
+          "cagr": "33.0%"
+        }
+      }
+    }
+    ```
+
 ### edgar_compare
 
 Compare companies side-by-side or analyze an industry.
@@ -210,6 +297,18 @@ Compare companies side-by-side or analyze an industry.
 
 - "Compare Apple, Microsoft, and Google on revenue and net income"
 - "How do the top semiconductor companies compare?"
+
+??? example "Example response"
+
+    ```json
+    {
+      "companies": [
+        {"identifier": "AAPL", "name": "Apple Inc.", "metrics": {"revenue": 416161000000, "net_margin": "26.9%", "gross_margin": "46.9%"}},
+        {"identifier": "MSFT", "name": "MICROSOFT CORP", "metrics": {"revenue": 375000000000, "net_margin": "27.2%", "gross_margin": "69.9%"}},
+        {"identifier": "GOOGL", "name": "Alphabet Inc.", "metrics": {"revenue": 405640000000, "net_margin": "27.8%", "gross_margin": "58.3%"}}
+      ]
+    }
+    ```
 
 ### edgar_ownership
 
@@ -257,6 +356,20 @@ Executive compensation and pay-vs-performance from DEF 14A proxy statements.
 
 - "What is Apple's CEO compensation?"
 - "Show me Microsoft's pay vs performance data"
+
+??? example "Example response"
+
+    ```json
+    {
+      "company": "Apple Inc.",
+      "form": "DEF 14A",
+      "filing_date": "2026-01-08",
+      "ceo": {"name": "Mr. Cook", "total_comp": 74294811, "actually_paid": 108423733},
+      "neo_average": {"total_comp": 23812358, "actually_paid": 34125743},
+      "pay_vs_performance": {"company_tsr": 233.88, "peer_tsr": 279.51, "net_income": 112010000000},
+      "performance_measures": ["Net Sales", "Operating Income", "Relative TSR"]
+    }
+    ```
 
 ---
 

@@ -6,25 +6,70 @@ EdgarTools gives AI agents direct access to every SEC filing, financial statemen
 
 Once connected, you just talk to Claude. No special syntax. No tool names to memorize.
 
-**"Compare Microsoft and Google's revenue growth over the last 5 years"**
+---
 
-Claude pulls XBRL-sourced revenue data for both companies, computes year-over-year growth rates, and presents a side-by-side table.
+**"What is Apple's CEO compensation?"**
 
-**"Has any insider at CrowdStrike sold shares in the last 30 days?"**
+Claude returns structured data from Apple's latest proxy statement -- in 0.3 seconds:
 
-Claude returns Form 4 transactions -- who sold, how many shares, at what price, and whether it was a planned 10b5-1 trade or a discretionary sale.
+```json
+{
+  "company": "Apple Inc.",
+  "form": "DEF 14A",
+  "ceo": {"name": "Mr. Cook", "total_comp": 74294811, "actually_paid": 108423733},
+  "pay_vs_performance": {"company_tsr": 233.88, "peer_tsr": 279.51, "net_income": 112010000000}
+}
+```
+
+---
+
+**"Compare Apple, Microsoft, and Google on revenue and margins"**
+
+Claude pulls XBRL financials for all three and computes margins side-by-side:
+
+```json
+{
+  "companies": [
+    {"name": "Apple Inc.",      "revenue": 416161000000, "net_margin": "26.9%", "gross_margin": "46.9%"},
+    {"name": "MICROSOFT CORP",  "revenue": 375000000000, "net_margin": "27.2%", "gross_margin": "69.9%"},
+    {"name": "Alphabet Inc.",   "revenue": 405640000000, "net_margin": "27.8%", "gross_margin": "58.3%"}
+  ]
+}
+```
+
+---
 
 **"Show me what 8-Ks were filed in the last hour"**
 
-Claude queries the SEC's live filing feed and filters for material events -- earnings releases, leadership changes, acquisitions -- as they hit the SEC's servers.
+Claude queries the SEC's live filing feed -- these are filings from *today*:
 
-**"Read the risk factors from Tesla's latest 10-K"**
+```json
+{
+  "filings": [
+    {"form": "8-K", "filed": "2026-03-26", "company": "Haymaker Acquisition Corp. 4"},
+    {"form": "8-K", "filed": "2026-03-26", "company": "GUOCHUN INTERNATIONAL INC."},
+    {"form": "8-K", "filed": "2026-03-26", "company": "Quoin Pharmaceuticals, Ltd."}
+  ]
+}
+```
 
-Claude finds the latest 10-K, extracts Item 1A -- Risk Factors, and returns structured text. No 200-page PDF.
+---
 
 **"What does Apple's debt note say?"**
 
-Claude drills into the notes and disclosures behind the balance sheet, returning debt terms, maturities, and covenants -- the detail that explains *why* the numbers are what they are.
+Claude drills into the notes behind the balance sheet -- which line items the note explains, structured tables, and the narrative:
+
+```json
+{
+  "notes": [{
+    "number": 9,
+    "title": "Debt",
+    "expands": ["Commercial paper", "Term debt"],
+    "expands_statements": ["BalanceSheet", "CashFlowStatement"],
+    "context": "The Company issues unsecured short-term promissory notes pursuant to a commercial paper program..."
+  }]
+}
+```
 
 ## Two Ways to Use AI with EdgarTools
 
