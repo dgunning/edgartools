@@ -151,8 +151,6 @@ async def list_tools() -> list[Tool]:
             "description": info["description"],
             "inputSchema": info["schema"],
         }
-        if "output_schema" in info:
-            kwargs["outputSchema"] = info["output_schema"]
         tools.append(Tool(**kwargs))
     return tools
 
