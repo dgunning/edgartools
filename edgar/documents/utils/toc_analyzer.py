@@ -82,6 +82,7 @@ class TOCAnalyzer:
                 # Part headers in 10-Q TOCs typically appear as separate rows: "Part I", "Part II"
                 part_match = part_pattern.match(text)
                 if part_match:
+                    # print(f"Found part header: {text} - setting current part context to {part_match.group(1).upper()}")
                     # Update current part context
                     current_part = f"Part {part_match.group(1).upper()}"
                     # Don't create a section for the part header itself
@@ -93,6 +94,12 @@ class TOCAnalyzer:
 
                     # Try to find item number in preceding context (for table-based TOCs)
                     preceding_item = self._extract_preceding_item_label(link)
+
+                    # Infer current part from surrounding TOC row context when part headers
+                    # are standalone rows without links (common in some 10-K filings).
+                    inferred_part = self._infer_part_from_row_context(link)
+                    if inferred_part:
+                        current_part = inferred_part
 
                     # Check if this looks like a section reference (check text, anchor ID, and context)
                     if self._is_section_link(text, anchor_id, preceding_item):
@@ -207,6 +214,49 @@ class TOCAnalyzer:
             pass
 
         return ''
+
+    def _infer_part_from_row_context(self, link_element) -> Optional[str]:
+        """
+        Infer part context from nearby table rows.
+
+        Many TOCs place part headers ("PART I", "PART II", ...) in standalone
+        rows that do not contain links. This method finds the nearest preceding
+        sibling row with a part marker and returns it as context for the current
+        linked item row.
+        """
+        part_pattern = re.compile(r'^\s*PART\s+([IVX]+)\b', re.IGNORECASE)
+
+        try:
+            # Find containing row for this link.
+            current = link_element
+            row = None
+            for _ in range(10):
+                parent = current.getparent()
+                if parent is None:
+                    break
+                if parent.tag == 'tr':
+                    row = parent
+                    break
+                current = parent
+
+            if row is None:
+                return None
+
+            # Search backwards through previous rows for a standalone part header.
+            prev = row.getprevious()
+            while prev is not None:
+                if prev.tag == 'tr':
+                    prev_text = (prev.text_content() or '').strip()
+                    part_match = part_pattern.match(prev_text)
+                    if part_match:
+                        return f"Part {part_match.group(1).upper()}"
+
+                prev = prev.getprevious()
+
+        except Exception:
+            return None
+
+        return None
 
     def _is_section_link(self, text: str, anchor_id: str = '', preceding_item: str = '') -> bool:
         """
