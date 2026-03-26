@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.26.1] - 2026-03-26
+
+### Fixed
+
+- **MCP tool definitions: `outputSchema` removed** — `outputSchema` was included in all MCP tool definitions, which is not part of the MCP protocol spec. Claude Desktop rejected every tool call, blocking all MCP usage entirely. Removing the field restores full MCP functionality ([#735](https://github.com/dgunning/edgartools/issues/735))
+
+- **`edgar_notes` next-steps reference** — `edgar_notes` referenced a non-existent tool name in its `next_steps` guidance; corrected to a valid tool
+
+- **`edgar_screen` state filter silently dropped** — State filter was silently discarded on queries that specified only an exchange (no SIC code), causing state-filtered screening to return unfiltered results
+
+- **`edgar_compare` growth metrics broken** — Growth metric calculation failed because `time_series` fetched insufficient periods; fetch count increased to ensure enough data points are available
+
+### Improved
+
+- **MCP documentation reorganised** — `ai-integration.md` split into five focused pages (`ai/index.md`, `ai/mcp-setup.md`, `ai/mcp-tools.md`, `ai/mcp-workflows.md`, `ai/skills.md`) for easier navigation. Parameter defaults and required-field annotations corrected across all pages
+
 ## [5.26.0] - 2026-03-25
 
 ### Added
