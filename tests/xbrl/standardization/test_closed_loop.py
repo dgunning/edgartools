@@ -109,10 +109,18 @@ def _make_proposal(ticker="AAPL", metric="Revenue") -> ProposalRecord:
 # GROUP 1: dispatch_ai_gaps
 # =============================================================================
 
+@patch(
+    "edgar.xbrl.standardization.tools.consult_ai_gaps._is_company_onboarded",
+    return_value=True,
+)
+@patch(
+    "edgar.xbrl.standardization.tools.consult_ai_gaps._build_candidates_context",
+    return_value="",
+)
 class TestDispatchAIGaps:
 
     @pytest.mark.fast
-    def test_filters_dead_end_gaps(self, tmp_path):
+    def test_filters_dead_end_gaps(self, mock_candidates, mock_onboarded, tmp_path):
         """Gaps with graveyard >= threshold are skipped."""
         gaps = [
             _make_unresolved_gap(ticker="AAPL", graveyard_count=7),
@@ -151,7 +159,7 @@ class TestDispatchAIGaps:
         assert report.api_calls == 1
 
     @pytest.mark.fast
-    def test_filters_scoring_inert_gaps(self, tmp_path):
+    def test_filters_scoring_inert_gaps(self, mock_candidates, mock_onboarded, tmp_path):
         """Gaps with scoring_inert disposition are filtered by filter_actionable_gaps."""
         gaps = [
             _make_unresolved_gap(ticker="AAPL", disposition="scoring_inert"),
@@ -187,7 +195,7 @@ class TestDispatchAIGaps:
         assert report.actionable_gaps == 1  # Only JPM is actionable
 
     @pytest.mark.fast
-    def test_cache_hits_skip_api_call(self, tmp_path):
+    def test_cache_hits_skip_api_call(self, mock_candidates, mock_onboarded, tmp_path):
         """Cached responses are reused, no API call made."""
         gaps = [_make_unresolved_gap(ticker="AAPL")]
         manifest = _make_manifest(gaps)
@@ -228,7 +236,7 @@ class TestDispatchAIGaps:
         assert call_count["n"] == 0
 
     @pytest.mark.fast
-    def test_typed_action_pipeline_produces_proposals(self, tmp_path):
+    def test_typed_action_pipeline_produces_proposals(self, mock_candidates, mock_onboarded, tmp_path):
         """Valid MAP_CONCEPT JSON -> ProposalRecord."""
         gaps = [_make_unresolved_gap(ticker="XOM", metric="GrossProfit")]
         manifest = _make_manifest(gaps)
@@ -264,7 +272,7 @@ class TestDispatchAIGaps:
         assert proposals[0].proposal.new_value == "us-gaap:GrossProfit"
 
     @pytest.mark.fast
-    def test_invalid_responses_produce_zero_proposals(self, tmp_path):
+    def test_invalid_responses_produce_zero_proposals(self, mock_candidates, mock_onboarded, tmp_path):
         """Garbage text from AI -> 0 proposals."""
         gaps = [_make_unresolved_gap()]
         manifest = _make_manifest(gaps)
@@ -292,7 +300,7 @@ class TestDispatchAIGaps:
         assert len(proposals) == 0
 
     @pytest.mark.fast
-    def test_model_routing_standard_vs_hard(self, tmp_path):
+    def test_model_routing_standard_vs_hard(self, mock_candidates, mock_onboarded, tmp_path):
         """Standard gaps -> gemini-flash, hard gaps -> sonnet."""
         gaps = [
             _make_unresolved_gap(ticker="AAPL", difficulty_tier="standard"),
@@ -336,6 +344,47 @@ class TestDispatchAIGaps:
 # =============================================================================
 
 class TestEvaluateAIProposalsLive:
+    """Tests for evaluate_ai_proposals_live with O1-O6 optimizations.
+
+    All tests patch:
+    - evaluate_experiment_in_memory (O4 pre-screen) to return KEEP → falls through to full eval
+    - get_config (O4 baseline config) to return a mock
+    - evaluate_experiment (full disk eval)
+    - log_experiment
+    """
+
+    def _eval_patches(self, pre_screen_decision=None, full_decision=None):
+        """Context manager stacking all required patches."""
+        from contextlib import ExitStack
+
+        if pre_screen_decision is None:
+            pre_screen_decision = ExperimentDecision(
+                decision=Decision.KEEP, cqs_before=0.95, cqs_after=0.96, reason="OK",
+            )
+
+        stack = ExitStack()
+        # O4 imports are local (inside function body), patch at source module
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.evaluate_experiment_in_memory",
+            return_value=pre_screen_decision,
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.config_loader.get_config",
+            return_value=MagicMock(),
+        ))
+        if full_decision is not None:
+            stack.enter_context(patch(
+                "edgar.xbrl.standardization.tools.consult_ai_gaps.evaluate_experiment",
+                return_value=full_decision,
+            ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.log_experiment",
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.apply_change_to_config",
+            return_value=MagicMock(),
+        ))
+        return stack
 
     @pytest.mark.fast
     def test_keep_updates_baseline(self):
@@ -352,12 +401,7 @@ class TestEvaluateAIProposalsLive:
             new_cqs_result=new_cqs,
         )
 
-        with patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.evaluate_experiment",
-            return_value=keep_decision,
-        ), patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.log_experiment",
-        ):
+        with self._eval_patches(full_decision=keep_decision):
             report = evaluate_ai_proposals_live(
                 proposals=proposals,
                 baseline_cqs=baseline,
@@ -369,8 +413,8 @@ class TestEvaluateAIProposalsLive:
         assert report.ef_cqs_end == 0.91
 
     @pytest.mark.fast
-    def test_discard_does_not_advance_baseline(self):
-        """DISCARDED proposal leaves baseline unchanged."""
+    def test_discard_via_prescreen(self):
+        """DISCARDED at pre-screen leaves baseline unchanged."""
         proposals = [_make_proposal()]
         baseline = _make_cqs_result(cqs=0.95, ef_cqs=0.90)
 
@@ -381,12 +425,7 @@ class TestEvaluateAIProposalsLive:
             reason="No improvement",
         )
 
-        with patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.evaluate_experiment",
-            return_value=discard_decision,
-        ), patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.log_experiment",
-        ):
+        with self._eval_patches(pre_screen_decision=discard_decision):
             report = evaluate_ai_proposals_live(
                 proposals=proposals,
                 baseline_cqs=baseline,
@@ -394,12 +433,13 @@ class TestEvaluateAIProposalsLive:
             )
 
         assert report.discarded == 1
+        assert report.pre_screen_filtered == 1
         assert report.cqs_end == 0.95  # Unchanged
 
     @pytest.mark.fast
-    def test_circuit_breaker_at_10_failures(self):
-        """15 proposals all DISCARD, only 10 evaluated before circuit breaker."""
-        proposals = [_make_proposal(ticker=f"T{i}", metric=f"M{i}") for i in range(15)]
+    def test_discard_at_full_eval(self):
+        """DISCARDED at full eval (after pre-screen KEEP) leaves baseline unchanged."""
+        proposals = [_make_proposal()]
         baseline = _make_cqs_result(cqs=0.95, ef_cqs=0.90)
 
         discard_decision = ExperimentDecision(
@@ -409,12 +449,31 @@ class TestEvaluateAIProposalsLive:
             reason="No improvement",
         )
 
-        with patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.evaluate_experiment",
-            return_value=discard_decision,
-        ), patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.log_experiment",
-        ):
+        with self._eval_patches(full_decision=discard_decision):
+            report = evaluate_ai_proposals_live(
+                proposals=proposals,
+                baseline_cqs=baseline,
+                eval_cohort=["AAPL"],
+            )
+
+        assert report.discarded == 1
+        assert report.pre_screen_filtered == 0  # Passed pre-screen
+        assert report.cqs_end == 0.95  # Unchanged
+
+    @pytest.mark.fast
+    def test_per_company_circuit_breaker(self):
+        """Per-company breaker: 15 proposals same ticker, 10 discarded then company exhausted."""
+        proposals = [_make_proposal(ticker="AAPL", metric=f"M{i}") for i in range(15)]
+        baseline = _make_cqs_result(cqs=0.95, ef_cqs=0.90)
+
+        discard_decision = ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=0.95,
+            cqs_after=0.94,
+            reason="No improvement",
+        )
+
+        with self._eval_patches(pre_screen_decision=discard_decision):
             report = evaluate_ai_proposals_live(
                 proposals=proposals,
                 baseline_cqs=baseline,
@@ -423,8 +482,9 @@ class TestEvaluateAIProposalsLive:
             )
 
         assert report.stopped_early is True
-        assert "Circuit breaker" in report.stop_reason
-        assert report.discarded == 10  # Only 10 evaluated
+        assert "exhausted" in report.stop_reason.lower()
+        assert report.discarded == 10
+        assert "AAPL" in report.companies_exhausted
 
     @pytest.mark.fast
     def test_returns_final_baseline_for_chaining(self):
@@ -441,12 +501,7 @@ class TestEvaluateAIProposalsLive:
             new_cqs_result=new_cqs,
         )
 
-        with patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.evaluate_experiment",
-            return_value=keep_decision,
-        ), patch(
-            "edgar.xbrl.standardization.tools.consult_ai_gaps.log_experiment",
-        ):
+        with self._eval_patches(full_decision=keep_decision):
             report = evaluate_ai_proposals_live(
                 proposals=proposals,
                 baseline_cqs=baseline,
@@ -455,6 +510,32 @@ class TestEvaluateAIProposalsLive:
 
         assert report.final_baseline is not None
         assert report.final_baseline.cqs == 0.96
+
+    @pytest.mark.fast
+    def test_new_report_fields_present(self):
+        """New O1-O6 report fields are populated."""
+        proposals = [_make_proposal()]
+        baseline = _make_cqs_result(cqs=0.95, ef_cqs=0.90)
+
+        keep_decision = ExperimentDecision(
+            decision=Decision.KEEP,
+            cqs_before=0.95,
+            cqs_after=0.96,
+            reason="OK",
+            new_cqs_result=_make_cqs_result(cqs=0.96, ef_cqs=0.91),
+        )
+
+        with self._eval_patches(full_decision=keep_decision):
+            report = evaluate_ai_proposals_live(
+                proposals=proposals,
+                baseline_cqs=baseline,
+                eval_cohort=["AAPL"],
+            )
+
+        assert isinstance(report.companies_exhausted, list)
+        assert report.pre_screen_filtered >= 0
+        assert report.retries >= 0
+        assert report.retry_kept >= 0
 
 
 # =============================================================================

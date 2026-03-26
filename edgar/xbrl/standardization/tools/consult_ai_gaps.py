@@ -461,7 +461,7 @@ def _build_difficulty_context(gap: UnresolvedGap) -> str:
 # TYPED ACTION PROMPT (Phase 3)
 # =============================================================================
 
-def build_typed_action_prompt(gap: UnresolvedGap) -> str:
+def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> str:
     """Build an AI prompt that requests a TypedAction JSON response.
 
     Key differences from build_consultation_prompt():
@@ -469,6 +469,10 @@ def build_typed_action_prompt(gap: UnresolvedGap) -> str:
     - Lists available actions from ACTION_VOCABULARY
     - Does NOT include file paths, YAML paths, or config structure
     - Asks for confidence score (0-1)
+
+    Args:
+        gap: The unresolved gap to build a prompt for.
+        candidates_text: Optional O3 enrichment from discover_concepts().
     """
     evidence_context = _build_evidence_context(gap)
     graveyard_text = _build_graveyard_text(gap)
@@ -494,6 +498,7 @@ def build_typed_action_prompt(gap: UnresolvedGap) -> str:
 {difficulty_context}
 ## Prior Failed Attempts ({gap.graveyard_count} total)
 {graveyard_text}
+{candidates_text}
 
 ## Available Actions
 {actions_section}
@@ -1285,6 +1290,12 @@ def print_benchmark_comparison(results: List[BenchmarkResult]) -> None:
 # PHASE 7: CLOSED-LOOP AI DISPATCH & EVALUATION
 # =============================================================================
 
+# Retry eligibility: skip retry if gap impact < this threshold (1%)
+RETRY_IMPACT_THRESHOLD = 0.01
+# Structural failure marker — not retryable
+_STRUCTURAL_FAILURE_PREFIX = "Failed to apply"
+
+
 @dataclass
 class AIDispatchReport:
     """Summary of dispatch_ai_gaps() — how many gaps were sent to AI and what came back."""
@@ -1298,6 +1309,7 @@ class AIDispatchReport:
     preflight_rejected: int
     escalated: int
     model_counts: Dict[str, int] = field(default_factory=dict)
+    not_onboarded_skipped: int = 0
 
 
 def dispatch_ai_gaps(
@@ -1353,6 +1365,30 @@ def dispatch_ai_gaps(
         else:
             filtered.append(gap)
 
+    # O2: Prerequisite-aware gap routing — skip not-onboarded companies
+    from edgar.xbrl.standardization.config_loader import get_config
+    onboarding_config = get_config()
+    not_onboarded_skipped = 0
+    gaps_by_ticker: Dict[str, List[UnresolvedGap]] = {}
+    for gap in filtered:
+        gaps_by_ticker.setdefault(gap.ticker, []).append(gap)
+
+    onboarded_filtered = []
+    for ticker, ticker_gaps in gaps_by_ticker.items():
+        if _is_company_onboarded(ticker, ticker_gaps, config=onboarding_config):
+            onboarded_filtered.extend(ticker_gaps)
+        else:
+            not_onboarded_skipped += len(ticker_gaps)
+            logger.info(
+                f"Not-onboarded skip: {ticker} ({len(ticker_gaps)} gaps) — "
+                f"company not in config or no resolved mappings"
+            )
+            print(
+                f"  SKIP {ticker}: not onboarded ({len(ticker_gaps)} gaps)",
+                flush=True,
+            )
+    filtered = onboarded_filtered
+
     if max_gaps > 0:
         filtered = filtered[:max_gaps]
 
@@ -1378,8 +1414,9 @@ def dispatch_ai_gaps(
             responses.append((gap, cache[key]))
             continue
 
-        # Build prompt and call AI
-        prompt = build_typed_action_prompt(gap)
+        # O3: Prompt enrichment with discover_concepts()
+        candidates_text = _build_candidates_context(gap)
+        prompt = build_typed_action_prompt(gap, candidates_text=candidates_text)
         print(
             f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> {model} (api call)",
             flush=True,
@@ -1418,6 +1455,7 @@ def dispatch_ai_gaps(
         preflight_rejected=preflight_rejected,
         escalated=escalated,
         model_counts=model_counts,
+        not_onboarded_skipped=not_onboarded_skipped,
     )
 
     return proposals, report
@@ -1439,6 +1477,105 @@ class AIEvalReport:
     stop_reason: str = ""
     config_diffs: List[str] = field(default_factory=list)
     final_baseline: Optional['CQSResult'] = None
+    companies_exhausted: List[str] = field(default_factory=list)
+    retries: int = 0
+    retry_kept: int = 0
+    pre_screen_filtered: int = 0
+
+
+def _format_candidate_concepts(metric: str, ticker: str, top_k: int = 5) -> str:
+    """Fetch concept candidates from filing and format for prompt inclusion.
+
+    Shared implementation for both UnresolvedGap and MetricGap callers.
+    """
+    from edgar.xbrl.standardization.tools.discover_concepts import discover_concepts
+    try:
+        candidates = discover_concepts(metric_name=metric, ticker=ticker, top_k=top_k)
+        if not candidates:
+            return ""
+        lines = ["\n## Candidate Concepts (from filing data)"]
+        for c in candidates[:top_k]:
+            lines.append(
+                f"- **{c.concept}** (source: {c.source}, confidence: {c.confidence:.2f}): "
+                f"{c.reasoning}"
+            )
+        lines.append(
+            "\nChoose from these candidates when possible. "
+            "If none fit, propose a different concept.\n"
+        )
+        return "\n".join(lines)
+    except Exception as e:
+        logger.debug(f"discover_concepts failed for {ticker}:{metric}: {e}")
+        return ""
+
+
+def _build_candidates_context(gap: UnresolvedGap) -> str:
+    """O3: Fetch concept candidates for an UnresolvedGap."""
+    return _format_candidate_concepts(gap.metric, gap.ticker)
+
+
+def _select_model_for_gap(gap: MetricGap) -> str:
+    """Select AI model for a MetricGap (used by retry logic)."""
+    if gap.graveyard_count >= 3:
+        return "sonnet"
+    return "gemini-flash"
+
+
+def _build_retry_prompt(
+    gap: MetricGap,
+    original_change: ConfigChange,
+    discard_reason: str,
+    candidates_text: str,
+) -> str:
+    """O5: Build a retry prompt that includes prior attempt feedback."""
+    return f"""You are an XBRL standardization expert. A prior proposal was DISCARDED. Learn from the failure.
+
+## Gap Details
+- Ticker: {gap.ticker}, Metric: {gap.metric}
+- Reference value (yfinance): {gap.reference_value}
+- Extracted value (XBRL): {gap.xbrl_value}
+- Current variance: {gap.current_variance}%
+- Gap type: {gap.gap_type}
+
+## Prior Attempt (DISCARDED)
+- Action: {original_change.change_type.value}
+- Value: {original_change.new_value}
+- Rationale: {original_change.rationale}
+- **Discard reason: {discard_reason}**
+
+Do NOT re-propose the same concept or approach.
+{candidates_text}
+## Available Actions
+- MAP_CONCEPT (params: concept): Map metric to a specific XBRL concept
+- ADD_FORMULA (params: components): Define composite formula
+- FIX_SIGN_CONVENTION (params: none): Fix sign negation
+- ADD_EXCLUSION (params: none): Exclude metric for this company
+- ESCALATE (params: none): Flag for human review
+
+## Response Format (strict JSON only — no markdown fences)
+{{
+  "action": "MAP_CONCEPT",
+  "ticker": "{gap.ticker}",
+  "metric": "{gap.metric}",
+  "params": {{"concept": "us-gaap:ExampleConcept"}},
+  "rationale": "Why this different approach will work",
+  "confidence": 0.85
+}}
+
+Return ONLY the JSON object."""
+
+
+def _is_company_onboarded(ticker: str, gaps: List[UnresolvedGap], config=None) -> bool:
+    """O2: Check if a company has a functional mapping layer.
+
+    A company is "not onboarded" only if it's absent from the config entirely.
+    Companies in config with unresolved gaps are still considered onboarded —
+    those gaps are what the AI should attempt to fix.
+    """
+    if config is None:
+        from edgar.xbrl.standardization.config_loader import get_config
+        config = get_config()
+    return config.get_company(ticker) is not None
 
 
 def evaluate_ai_proposals_live(
@@ -1450,12 +1587,14 @@ def evaluate_ai_proposals_live(
     session_id: str = "",
     use_sec_facts: bool = True,
     max_consecutive_failures: int = 10,
+    ai_caller: Optional[Callable[[str, str], Optional[str]]] = None,
 ) -> AIEvalReport:
     """Evaluate AI proposals in-memory through the standard CQS gate.
 
     Like evaluate_ai_proposals() but takes proposals and baseline directly
-    (no disk I/O), adds circuit breaker, and returns AIEvalReport with
-    final_baseline for chaining into the next pipeline stage.
+    (no disk I/O), adds per-company circuit breaker, in-memory pre-screen,
+    retry-with-feedback, and returns AIEvalReport with final_baseline for
+    chaining into the next pipeline stage.
 
     Args:
         proposals: ProposalRecords from dispatch_ai_gaps().
@@ -1465,13 +1604,23 @@ def evaluate_ai_proposals_live(
         max_workers: Parallel workers for CQS computation.
         session_id: Session identifier for logging.
         use_sec_facts: Whether to use SEC XBRL facts.
-        max_consecutive_failures: Circuit breaker threshold.
+        max_consecutive_failures: Per-company circuit breaker threshold.
+        ai_caller: Optional AI caller for retry-with-feedback (O5).
 
     Returns:
         AIEvalReport with evaluation results and final_baseline.
     """
+    from edgar.xbrl.standardization.tools.auto_eval_loop import (
+        evaluate_experiment_in_memory,
+        apply_change_to_config,
+    )
+    from edgar.xbrl.standardization.config_loader import get_config
+
     if ledger is None:
         ledger = ExperimentLedger()
+
+    # O6: Sort proposals by estimated_impact (highest first)
+    proposals.sort(key=lambda pr: -pr.gap.estimated_impact)
 
     report = AIEvalReport(
         session_id=session_id,
@@ -1486,26 +1635,98 @@ def evaluate_ai_proposals_live(
     )
 
     current_baseline = baseline_cqs
-    consecutive_failures = 0
+
+    # O1: Per-company circuit breaker (replaces global consecutive_failures)
+    PER_COMPANY_THRESHOLD = max_consecutive_failures
+    failures_by_company: Dict[str, int] = {}
+    skipped_companies: set = set()
+    all_companies = {pr.proposal.target_companies.strip() for pr in proposals}
+
+    # O4: In-memory config baseline for pre-screen
+    baseline_config = get_config(reload=True)
+
+    # O5: Track retried gaps to prevent double-retry
+    retried_gaps: set = set()
 
     for i, pr in enumerate(proposals):
-        # Circuit breaker
-        if consecutive_failures >= max_consecutive_failures:
+        change = pr.proposal
+        target = change.target_companies.strip()
+
+        # O1: Global circuit breaker — all companies exhausted
+        if skipped_companies and skipped_companies >= all_companies:
             report.stopped_early = True
             report.stop_reason = (
-                f"Circuit breaker: {consecutive_failures} consecutive failures"
+                f"All companies exhausted: {sorted(skipped_companies)}"
             )
             print(f"  CIRCUIT BREAKER: {report.stop_reason}", flush=True)
             break
 
-        change = pr.proposal
+        # O1: Skip companies that have exhausted their circuit breaker
+        if target in skipped_companies:
+            print(
+                f"  [{i+1}/{len(proposals)}] SKIP (company exhausted): "
+                f"{target}:{change.target_metric}",
+                flush=True,
+            )
+            continue
+
         print(
             f"  [{i+1}/{len(proposals)}] Evaluating: "
-            f"{change.target_companies}:{change.target_metric} "
+            f"{target}:{change.target_metric} "
             f"[{change.change_type.value}]",
             flush=True,
         )
 
+        # O4: In-memory pre-screen before expensive disk eval
+        pre_screen_result = evaluate_experiment_in_memory(
+            change, current_baseline, baseline_config,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+            use_sec_facts=use_sec_facts,
+        )
+
+        if pre_screen_result.decision in (Decision.DISCARD, Decision.VETO):
+            report.pre_screen_filtered += 1
+            if pre_screen_result.decision == Decision.VETO:
+                report.vetoed += 1
+            else:
+                report.discarded += 1
+            failures_by_company[target] = failures_by_company.get(target, 0) + 1
+            if failures_by_company[target] >= PER_COMPANY_THRESHOLD:
+                skipped_companies.add(target)
+                report.companies_exhausted.append(target)
+                print(
+                    f"  PRE-SCREEN {pre_screen_result.decision.value.upper()}: "
+                    f"{target}:{change.target_metric} — {pre_screen_result.reason} "
+                    f"[company exhausted]",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"  PRE-SCREEN {pre_screen_result.decision.value.upper()}: "
+                    f"{target}:{change.target_metric} — {pre_screen_result.reason}",
+                    flush=True,
+                )
+
+            # O5: Retry-with-feedback for high-impact discards
+            if (
+                pre_screen_result.decision == Decision.DISCARD
+                and ai_caller is not None
+                and pr.gap.estimated_impact > RETRY_IMPACT_THRESHOLD
+                and f"{target}:{change.target_metric}" not in retried_gaps
+                and target not in skipped_companies
+                and _STRUCTURAL_FAILURE_PREFIX not in (pre_screen_result.reason or "")
+            ):
+                _do_retry(
+                    pr, pre_screen_result.reason or "", current_baseline,
+                    baseline_config, eval_cohort, ledger, ai_caller,
+                    report, retried_gaps, failures_by_company,
+                    skipped_companies, PER_COMPANY_THRESHOLD,
+                    max_workers, use_sec_facts, session_id,
+                )
+            continue
+
+        # Pre-screen passed — run full disk-based evaluation
         result = evaluate_experiment(
             change, current_baseline,
             eval_cohort=eval_cohort,
@@ -1519,7 +1740,7 @@ def evaluate_ai_proposals_live(
         if result.decision == Decision.KEEP:
             report.kept += 1
             report.config_diffs.append(change.to_diff_string())
-            consecutive_failures = 0
+            failures_by_company[target] = 0  # O1: reset on success
             if result.new_cqs_result is not None:
                 current_baseline = result.new_cqs_result
             else:
@@ -1530,6 +1751,8 @@ def evaluate_ai_proposals_live(
                     max_workers=max_workers,
                     use_sec_facts=use_sec_facts,
                 )
+            # O4: Keep in-memory config in sync
+            baseline_config = apply_change_to_config(change, baseline_config)
             ef_delta = current_baseline.ef_cqs - report.ef_cqs_start
             print(
                 f"  >>> AI KEEP #{report.kept}: "
@@ -1540,20 +1763,138 @@ def evaluate_ai_proposals_live(
 
         elif result.decision == Decision.VETO:
             report.vetoed += 1
-            consecutive_failures += 1
+            failures_by_company[target] = failures_by_company.get(target, 0) + 1
+            if failures_by_company[target] >= PER_COMPANY_THRESHOLD:
+                skipped_companies.add(target)
+                report.companies_exhausted.append(target)
             print(f"  VETO: {change.target_metric} — {result.reason}", flush=True)
 
         else:
             report.discarded += 1
-            consecutive_failures += 1
+            failures_by_company[target] = failures_by_company.get(target, 0) + 1
+            if failures_by_company[target] >= PER_COMPANY_THRESHOLD:
+                skipped_companies.add(target)
+                report.companies_exhausted.append(target)
             print(
-                f"  DISC: {change.target_companies}:{change.target_metric} "
+                f"  DISC: {target}:{change.target_metric} "
                 f"— {result.reason}",
                 flush=True,
             )
+
+            # O5: Retry-with-feedback for high-impact discards
+            if (
+                ai_caller is not None
+                and pr.gap.estimated_impact > RETRY_IMPACT_THRESHOLD
+                and f"{target}:{change.target_metric}" not in retried_gaps
+                and target not in skipped_companies
+                and _STRUCTURAL_FAILURE_PREFIX not in (result.reason or "")
+            ):
+                _do_retry(
+                    pr, result.reason or "", current_baseline,
+                    baseline_config, eval_cohort, ledger, ai_caller,
+                    report, retried_gaps, failures_by_company,
+                    skipped_companies, PER_COMPANY_THRESHOLD,
+                    max_workers, use_sec_facts, session_id,
+                )
 
     report.cqs_end = current_baseline.cqs
     report.ef_cqs_end = current_baseline.ef_cqs
     report.final_baseline = current_baseline
 
     return report
+
+
+def _do_retry(
+    pr: ProposalRecord,
+    discard_reason: str,
+    current_baseline: 'CQSResult',
+    baseline_config,
+    eval_cohort: List[str],
+    ledger: ExperimentLedger,
+    ai_caller: Callable[[str, str], Optional[str]],
+    report: AIEvalReport,
+    retried_gaps: set,
+    failures_by_company: Dict[str, int],
+    skipped_companies: set,
+    per_company_threshold: int,
+    max_workers: int,
+    use_sec_facts: bool,
+    session_id: str,
+) -> None:
+    """O5: Retry a discarded proposal with feedback and concept candidates.
+
+    Modifies report, retried_gaps, failures_by_company, skipped_companies in place.
+    """
+    from edgar.xbrl.standardization.tools.auto_eval_loop import (
+        evaluate_experiment_in_memory,
+        apply_change_to_config,
+    )
+
+    target = pr.proposal.target_companies.strip()
+    gap_key = f"{target}:{pr.proposal.target_metric}"
+    retried_gaps.add(gap_key)
+    report.retries += 1
+
+    # Build retry prompt with feedback
+    candidates_text = _format_candidate_concepts(pr.gap.metric, pr.gap.ticker)
+    retry_prompt = _build_retry_prompt(
+        pr.gap, pr.proposal, discard_reason, candidates_text,
+    )
+
+    model = _select_model_for_gap(pr.gap)
+    print(f"  RETRY: {gap_key} (impact={pr.gap.estimated_impact:.3f})", flush=True)
+
+    try:
+        response = ai_caller(retry_prompt, model)
+    except Exception as e:
+        logger.warning(f"Retry AI call failed for {gap_key}: {e}")
+        return
+
+    if response is None:
+        return
+
+    # Parse retry response through typed action pipeline
+    action = parse_typed_action(response)
+    if action is None:
+        return
+
+    change = compile_action(action, pr.gap)
+    if change is None:
+        return
+
+    ok, reason = validate_action_preflight(action, pr.gap)
+    if not ok:
+        return
+
+    # Pre-screen the retry proposal
+    pre_screen = evaluate_experiment_in_memory(
+        change, current_baseline, baseline_config,
+        eval_cohort=eval_cohort,
+        ledger=ledger,
+        use_sec_facts=use_sec_facts,
+    )
+
+    if pre_screen.decision == Decision.KEEP:
+        # Full disk eval to confirm
+        result = evaluate_experiment(
+            change, current_baseline,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+            max_workers=max_workers,
+            use_sec_facts=use_sec_facts,
+        )
+        log_experiment(change, result, ledger, run_id=session_id)
+
+        if result.decision == Decision.KEEP:
+            report.kept += 1
+            report.retry_kept += 1
+            report.config_diffs.append(change.to_diff_string())
+            failures_by_company[target] = 0
+            print(
+                f"  >>> RETRY KEEP: {gap_key}",
+                flush=True,
+            )
+        else:
+            print(f"  RETRY DISC (full eval): {gap_key}", flush=True)
+    else:
+        print(f"  RETRY DISC (pre-screen): {gap_key}", flush=True)

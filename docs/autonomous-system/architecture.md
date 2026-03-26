@@ -190,6 +190,10 @@ These persist across all sessions and guide all future work:
 10. **Internal override must never set publish_confidence="high"** — useful for diagnostics, not customer-facing publication (Session 005)
 11. **Quarterly data (10-Q) is a separate product milestone** — do not bundle with annual data readiness (Session 005)
 12. **Customer metadata (provenance, data dictionary, confidence API) is pre-launch requirement** — not post-launch enhancement (Session 005)
+13. **Per-company circuit breaker replaces global** — one unmapped company must never block evaluation of others (Session 006)
+14. **AI prompts must include filing evidence** — run `discover_concepts()` pre-dispatch, include top 3-5 candidates. AI ranks, not guesses (Session 006)
+15. **Retry-with-feedback over upfront multi-proposal** — 1 proposal + 1 feedback retry beats 3 blind guesses. VALIDATE cost dominates AI cost (Session 006)
+16. **In-memory pre-screen before full CQS gate** — `evaluate_experiment_in_memory()` as fast filter; only survivors pay full ~85s measurement (Session 006)
 
 ---
 

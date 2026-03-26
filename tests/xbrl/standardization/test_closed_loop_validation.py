@@ -210,10 +210,11 @@ class TestClosedLoopValidation:
         assert report.actionable_gaps <= report.total_gaps
         assert report.api_calls >= 0
         assert report.dead_end_skipped >= 0
+        assert report.not_onboarded_skipped >= 0  # O2
 
-        # At least one outcome occurred
-        assert (report.valid_proposals + report.escalated + report.preflight_rejected) >= 1, (
-            "Expected at least one outcome (proposal, escalation, or rejection)"
+        # At least one outcome occurred (accounting for O2 skips)
+        assert (report.valid_proposals + report.escalated + report.preflight_rejected + report.not_onboarded_skipped) >= 1, (
+            "Expected at least one outcome (proposal, escalation, rejection, or not-onboarded skip)"
         )
 
         # All proposals are well-formed
@@ -237,6 +238,7 @@ class TestClosedLoopValidation:
         print(f"  Total gaps:       {report.total_gaps}")
         print(f"  Actionable:       {report.actionable_gaps}")
         print(f"  Dead-end skipped: {report.dead_end_skipped}")
+        print(f"  Not-onboarded:    {report.not_onboarded_skipped}")
         print(f"  Cache hits:       {report.cache_hits}")
         print(f"  API calls:        {report.api_calls}")
         print(f"  Valid proposals:  {report.valid_proposals}")
@@ -335,6 +337,17 @@ class TestClosedLoopValidation:
             f"config_diffs count ({len(eval_report.config_diffs)}) != kept ({eval_report.kept})"
         )
 
+        # O1: companies_exhausted is a list
+        assert isinstance(eval_report.companies_exhausted, list)
+
+        # O4: pre_screen_filtered is non-negative
+        assert eval_report.pre_screen_filtered >= 0
+
+        # O5: retry counts are non-negative, retry_kept <= retries
+        assert eval_report.retries >= 0
+        assert eval_report.retry_kept >= 0
+        assert eval_report.retry_kept <= eval_report.retries
+
         # ---- Structured Summary ----
         total_cost = cost_tracker.get("total_cost", 0)
         total_elapsed = t_measure + t_resolve + t_validate
@@ -370,13 +383,18 @@ class TestClosedLoopValidation:
         print(f"  Dispatch:")
         print(f"    Total gaps:     {dispatch_report.total_gaps}")
         print(f"    Actionable:     {dispatch_report.actionable_gaps}")
+        print(f"    Not-onboarded:  {dispatch_report.not_onboarded_skipped}")
         print(f"    Proposals:      {dispatch_report.valid_proposals}")
         print(f"    Resolution:     {resolution_rate:.1f}%")
         print()
         print(f"  Evaluation:")
-        print(f"    KEEP:     {eval_report.kept}")
+        print(f"    KEEP:     {eval_report.kept} (retry: {eval_report.retry_kept})")
         print(f"    DISCARD:  {eval_report.discarded}")
         print(f"    VETO:     {eval_report.vetoed}")
+        print(f"    Pre-screened: {eval_report.pre_screen_filtered}")
+        print(f"    Retries:  {eval_report.retries}")
+        if eval_report.companies_exhausted:
+            print(f"    Exhausted: {eval_report.companies_exhausted}")
         if eval_report.stopped_early:
             print(f"    STOPPED:  {eval_report.stop_reason}")
         print()
