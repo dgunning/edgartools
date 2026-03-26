@@ -15,15 +15,17 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.9957 | 2026-03-24 |
-| EF-CQS | 0.8491 | 2026-03-24 |
-| SA-CQS | 0.8459 | 2026-03-24 |
+| CQS | 0.9073 | 2026-03-26 |
+| EF-CQS | 0.6711 | 2026-03-26 |
+| SA-CQS | 0.6018 | 2026-03-26 |
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived | |
-| Reference | yfinance + SEC XBRL API | |
-| AI | Gemini Flash via OpenRouter + typed actions | |
+| Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
+| AI | Deterministic solver + Lead Agent closed loop (planned) | |
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
+
+**Note on EF-CQS drop (0.85→0.67):** Phase 1-8 implementation (`cd4f310d`) tightened EF scoring (stricter concept correctness), and SEC-native primacy (`use_sec_facts=True` default) raised the evidence bar further. This is honest scoring, not a regression in extraction quality. The old 0.85 was measured under a looser regime.
 
 ---
 
@@ -82,8 +84,7 @@ CQS = 0.45 * pass_rate
 
 ### Decision Gate
 
-Currently: global CQS comparison (`new_cqs > baseline_cqs`).
-Target (M1): **LIS (Localized Impact Score)** — target metric improved + zero regressions for that company. Key file: `auto_eval_loop.py:_apply_decision_gates()`.
+**LIS (Localized Impact Score)** — target metric improved + zero regressions for that company. Implemented in `auto_eval_loop.py:compute_lis()`. CQS remains as monitoring metric, not a gate.
 
 Safety invariants:
 - New regressions are a hard veto
@@ -223,6 +224,37 @@ MEASURE → DIAGNOSE → PRIORITIZE → FIX → VALIDATE → RECORD → loop
 | **C2** | AI-assisted (concept discovery + typed action) | ~30% |
 | **C3** | Human/engineering (extension concepts, parser gaps) | ~36% |
 
+### Lead Agent Closed Loop
+
+The expansion workflow for scaling to 500 companies. The lead Claude Code agent orchestrates deterministic + AI resolution in batches.
+
+```
+For each 50-company batch:
+  1. DETERMINISTIC: run_overnight(propose_fn=propose_change)
+     → Resolves C1 gaps (known patterns, solver formulas)
+     → Produces GapManifest JSON with all unresolved gaps
+
+  2. AI RESOLUTION: Lead agent reads GapManifest, spawns subagents
+     → gap-solver (standard gaps: semantic_mapper, reference_auditor)
+     → gap-investigator (hard gaps: pattern_learner, regression_investigator)
+     → Each subagent returns TypedAction JSON
+     → Lead agent feeds through: parse_typed_action() → compile_action()
+       → evaluate_experiment() (same CQS gate)
+
+  3. GRADUATE: If batch EF-CQS >= 0.80, promote and move to next batch
+```
+
+**Key files:**
+- `run_overnight()` — Step 1 deterministic solver + GapManifest output
+- `consult_ai_gaps.py` — `build_typed_action_prompt()`, `collect_typed_proposals()`, `evaluate_ai_proposals()`
+- `auto_eval_loop.py` — `load_gap_manifest()`, `evaluate_experiment()`
+
+**Rules:**
+- AI proposals go through the same CQS/LIS gate as deterministic proposals — no bypass
+- Each batch must reach EF-CQS >= 0.80 before expanding to the next 50
+- Gaps with 6+ graveyard entries are skipped (dead-end filtering)
+- TypedAction vocabulary is finite (7 actions) — AI cannot invent new action types
+
 ### Quick Start
 
 ```python
@@ -243,9 +275,20 @@ print_gap_report(gaps)
 ### Running Overnight
 
 ```python
-from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight
+from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight, propose_change
+from edgar.xbrl.standardization.tools.auto_eval import EXPANSION_COHORT_50
 from edgar.xbrl.standardization.tools.auto_eval_dashboard import show_dashboard
 
-report = run_overnight(duration_hours=7.5, max_workers=4)
+report = run_overnight(
+    duration_hours=5.0,
+    eval_cohort=EXPANSION_COHORT_50,
+    propose_fn=propose_change,
+    max_workers=2,
+)
 show_dashboard()
+```
+
+Progress is printed to stdout with structured markers. Monitor with:
+```bash
+grep -E "ITERATION|KEEP|DISC|VETO|BASELINE|SESSION|TARGET" overnight_run.log
 ```

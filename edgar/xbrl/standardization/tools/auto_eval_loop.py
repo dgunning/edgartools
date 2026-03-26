@@ -843,7 +843,7 @@ def evaluate_experiment(
     ledger: Optional[ExperimentLedger] = None,
     max_company_drop: float = 5.0,
     max_workers: int = 1,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> ExperimentDecision:
     """
     Evaluate a single config change experiment.
@@ -997,7 +997,7 @@ def evaluate_experiment_in_memory(
     eval_cohort: Optional[List[str]] = None,
     ledger: Optional[ExperimentLedger] = None,
     max_company_drop: float = 5.0,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> ExperimentDecision:
     """
     Evaluate a config change using in-memory config. No disk writes, no locks.
@@ -2298,7 +2298,7 @@ def tournament_eval(
     change: ConfigChange,
     baseline_cqs: CQSResult,
     ledger: Optional[ExperimentLedger] = None,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> ExperimentDecision:
     """
     Two-stage tournament evaluation for overfitting protection.
@@ -2400,7 +2400,7 @@ def run_overnight(
     max_workers: int = 1,
     escalation_threshold: int = 3,
     eval_cohort: Optional[List[str]] = None,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> OvernightReport:
     """
     Run an overnight auto-eval session.
@@ -2442,6 +2442,15 @@ def run_overnight(
     start_time = time.time()
     deadline = start_time + duration_hours * 3600
 
+    def _progress(msg: str, level: str = "INFO"):
+        """Print structured progress to stdout with timestamp and elapsed time."""
+        elapsed = time.time() - start_time
+        h, m = int(elapsed // 3600), int((elapsed % 3600) // 60)
+        remaining = max(0, deadline - time.time())
+        rh, rm = int(remaining // 3600), int((remaining % 3600) // 60)
+        ts = datetime.now().strftime('%H:%M:%S')
+        print(f"[{ts}] [{level:>5}] [{h}h{m:02d}m/{rh}h{rm:02d}m left] {msg}", flush=True)
+
     report = OvernightReport(
         session_id=session_id,
         started_at=datetime.now().isoformat(),
@@ -2451,6 +2460,8 @@ def run_overnight(
     )
 
     # Step 1: Baseline CQS
+    _progress(f"SESSION START: {session_id} | {len(cohort)} companies | {duration_hours}h budget")
+    _progress(f"PHASE 1: Computing baseline CQS...")
     logger.info(f"Session {session_id}: Establishing baseline on {len(cohort)} companies...")
     baseline = compute_cqs(
         eval_cohort=cohort,
@@ -2464,6 +2475,13 @@ def run_overnight(
     report.ef_cqs_start = baseline.ef_cqs
     report.sa_cqs_start = baseline.sa_cqs
     current_baseline = baseline
+    _progress(
+        f"BASELINE: EF-CQS={baseline.ef_cqs:.4f} | SA-CQS={baseline.sa_cqs:.4f} | "
+        f"CQS={baseline.cqs:.4f} | headline_ef={getattr(baseline, 'headline_ef_rate', 0.0):.4f}"
+    )
+    _progress(f"PHASE 2: Starting experiment loop")
+
+    iteration = 0  # Track loop iterations for progress
 
     # Subtype failure tracker — for GPT escalation in propose_fn
     tracker = _SubtypeFailureTracker(escalation_threshold=escalation_threshold)
@@ -2478,10 +2496,18 @@ def run_overnight(
 
     # Step 2: Main experiment loop
     while time.time() < deadline:
+        iteration += 1
+        _progress(
+            f"ITERATION {iteration}: kept={report.experiments_kept} "
+            f"disc={report.experiments_discarded} veto={report.experiments_vetoed} "
+            f"consec_fail={consecutive_failures}/{max_consecutive_failures}"
+        )
+
         # Check circuit breakers
         if consecutive_failures >= max_consecutive_failures:
             report.stopped_early = True
             report.stop_reason = f"Circuit breaker: {consecutive_failures} consecutive failures"
+            _progress(f"CIRCUIT BREAKER: {report.stop_reason}", "WARN")
             logger.warning(report.stop_reason)
             break
 
@@ -2491,6 +2517,7 @@ def run_overnight(
                 f"Circuit breaker: CQS dropped >0.02 "
                 f"({report.cqs_start:.4f} -> {current_baseline.cqs:.4f})"
             )
+            _progress(f"CIRCUIT BREAKER: {report.stop_reason}", "WARN")
             logger.warning(report.stop_reason)
             break
 
@@ -2498,7 +2525,9 @@ def run_overnight(
         if use_fast_path_gaps is not None:
             gaps = use_fast_path_gaps
             use_fast_path_gaps = None
+            _progress(f"Using {len(gaps)} fast-path gaps (skipped identify_gaps)")
         else:
+            _progress(f"Identifying gaps (full eval)...")
             gaps, cqs_result = identify_gaps(
                 eval_cohort=cohort,
                 snapshot_mode=True,
@@ -2507,10 +2536,12 @@ def run_overnight(
                 use_sec_facts=use_sec_facts,
             )
             current_baseline = cqs_result
+            _progress(f"Found {len(gaps)} gaps | EF-CQS={current_baseline.ef_cqs:.4f}")
 
         if not gaps:
             report.stopped_early = True
             report.stop_reason = "No gaps remaining"
+            _progress(f"DONE: {report.stop_reason}")
             logger.info(report.stop_reason)
             break
 
@@ -2526,7 +2557,8 @@ def run_overnight(
         made_progress = False
         experiments_before = report.experiments_total
         null_proposals = 0
-        for gap in gaps:
+        _progress(f"Processing {len(gaps)} gaps...")
+        for gap_idx, gap in enumerate(gaps, 1):
             if time.time() >= deadline:
                 break
 
@@ -2565,6 +2597,10 @@ def run_overnight(
             report.experiments_total += 1
             if change.change_type == ChangeType.ADD_STANDARDIZATION:
                 report.solver_proposals += 1
+            _progress(
+                f"  Gap {gap_idx}/{len(gaps)}: {gap.ticker}:{gap.metric} "
+                f"[{change.change_type.value}] — evaluating..."
+            )
 
             if dry_run:
                 logger.info(f"[DRY RUN] Would apply: {change.to_diff_string()}")
@@ -2612,6 +2648,12 @@ def run_overnight(
 
                 # Convergence monitoring: log headline_ef_rate after each KEEP
                 headline_ef = getattr(current_baseline, 'headline_ef_rate', 0.0)
+                ef_delta = current_baseline.ef_cqs - report.ef_cqs_start
+                _progress(
+                    f"  >>> KEEP #{report.experiments_kept}: {gap.ticker}:{gap.metric} | "
+                    f"EF-CQS={current_baseline.ef_cqs:.4f} ({ef_delta:+.4f}) | "
+                    f"headline_ef={headline_ef:.4f} | CQS={current_baseline.cqs:.4f}"
+                )
                 logger.info(
                     f"KEPT: {change.target_metric} — "
                     f"EF-CQS={current_baseline.ef_cqs:.4f} "
@@ -2619,6 +2661,10 @@ def run_overnight(
                     f"CQS={current_baseline.cqs:.4f}"
                 )
                 if headline_ef >= 0.99 and current_baseline.ef_cqs >= 0.95:
+                    _progress(
+                        f"  TARGET MET: headline_ef={headline_ef:.4f} >= 0.99 "
+                        f"AND ef_cqs={current_baseline.ef_cqs:.4f} >= 0.95"
+                    )
                     logger.info(
                         f"TARGET MET: headline_ef_rate={headline_ef:.4f} >= 0.99 "
                         f"AND ef_cqs={current_baseline.ef_cqs:.4f} >= 0.95"
@@ -2634,12 +2680,14 @@ def run_overnight(
                 report.experiments_vetoed += 1
                 consecutive_failures += 1
                 tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
+                _progress(f"  VETO: {gap.ticker}:{gap.metric} — {result.reason}", "WARN")
                 logger.warning(f"VETOED: {change.target_metric} — {result.reason}")
 
             else:
                 report.experiments_discarded += 1
                 consecutive_failures += 1
                 tracker.record_failure(gap.ticker, gap.metric, gap.hv_subtype)
+                _progress(f"  DISC: {gap.ticker}:{gap.metric} — {result.reason}")
                 logger.info(f"DISCARDED: {change.target_metric} — {result.reason}")
 
         # Fix 2: Only increment if no experiments were even attempted this iteration
@@ -2649,6 +2697,7 @@ def run_overnight(
                 # Fix 3: All gaps tried but none could produce a proposal — stop spinning
                 report.stopped_early = True
                 report.stop_reason = f"All {null_proposals} gaps exhausted (no viable proposals)"
+                _progress(f"EXHAUSTED: {report.stop_reason}", "WARN")
                 logger.warning(report.stop_reason)
                 consecutive_failures = max_consecutive_failures  # Force circuit breaker
             elif propose_fn is not None:
@@ -2660,6 +2709,24 @@ def run_overnight(
     report.cqs_end = current_baseline.cqs
     report.ef_cqs_end = current_baseline.ef_cqs
     report.sa_cqs_end = current_baseline.sa_cqs
+
+    # Print final summary to stdout
+    ef_delta = report.ef_cqs_end - report.ef_cqs_start
+    _progress("=" * 60)
+    _progress(f"SESSION COMPLETE: {session_id}")
+    _progress(f"  Duration:     {report.duration_hours:.1f}h")
+    _progress(f"  EF-CQS:       {report.ef_cqs_start:.4f} -> {report.ef_cqs_end:.4f} ({ef_delta:+.4f})")
+    _progress(f"  SA-CQS:       {report.sa_cqs_start:.4f} -> {report.sa_cqs_end:.4f}")
+    _progress(f"  CQS:          {report.cqs_start:.4f} -> {report.cqs_end:.4f}")
+    _progress(f"  Experiments:  {report.experiments_total} total, "
+              f"{report.experiments_kept} kept, "
+              f"{report.experiments_discarded} discarded, "
+              f"{report.experiments_vetoed} vetoed")
+    if report.stopped_early:
+        _progress(f"  Stop reason:  {report.stop_reason}")
+    if report.unresolved_count > 0:
+        _progress(f"  Unresolved:   {report.unresolved_count} gaps -> {report.gap_manifest_path}")
+    _progress("=" * 60)
 
     # Emit gap manifest for Step 2 (AI consultation)
     if unresolved_gaps:

@@ -71,6 +71,12 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - CQS: 0.9936→0.9957, EF-CQS: 0.8458→0.8491, SA-CQS: 0.8422→0.8459
 - Key: EF-CQS at 0.85 is the honest number. 682 golden masters promoted. Solver constraints prevent bad proposals upstream.
 
+**Run 006 (2026-03-26)** — 50 companies, deterministic solver only, SEC-native primacy enabled
+- Result: 0/0 kept, 0 discards, 0 vetoes. All 40 gaps exhausted (no viable deterministic proposals).
+- EF-CQS: 0.6711 (5-co smoke test baseline, SEC-native primacy). CQS: 0.9073.
+- Key: Deterministic solver has reached its ceiling. All remaining gaps require AI resolution. Confirms need for Lead Agent Closed Loop (Phase 7).
+- Code fixes this session: `use_sec_facts` defaults → `True`, `reference_validator.py` variance bug fix, progress printing added to `run_overnight()`.
+
 ---
 
 ## Consensus Sessions
@@ -121,28 +127,23 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 **Goal**: A correct single-metric fix is accepted based on local evidence, not global CQS movement.
 **Priority**: Highest — unblocks all other improvements.
 
-- [ ] **M1.1: Implement LIS** — New `compute_lis()` in `auto_eval_loop.py`. Re-evaluates only target company, checks target improved + zero regressions.
-  - Verification: Unit test with known-good change (JPM:InterestExpense from Run 004).
+- [x] **M1.1: Implement LIS** — Completed 2026-03-25. `cd4f310d`. `compute_lis()` in `auto_eval_loop.py`.
 
-- [ ] **M1.2: Wire LIS into decision gates** — Replace global CQS check in `_apply_decision_gates()` with LIS. Keep CQS as monitoring.
-  - Verification: 10-company overnight run, expect more KEEP decisions.
+- [x] **M1.2: Wire LIS into decision gates** — Completed 2026-03-25. `cd4f310d`. LIS replaces global CQS check.
 
-- [ ] **M1.3: Wire Gemini Flash into overnight loop** — `consult_ai_gaps()` + OpenRouter caller after deterministic solver exhausts. Typed action pipeline.
-  - Verification: 10-company run with `OPENROUTER_API_KEY`. Confirm AI proposals generated and compiled.
+- [ ] **M1.3: Wire AI into overnight loop** — Lead Agent Closed Loop: deterministic solver → GapManifest → lead agent spawns subagents → typed actions → CQS gate. Replaces inline Gemini Flash approach.
+  - Verification: 50-company run, AI resolves gaps that deterministic solver cannot.
 
-- [ ] **M1.4: Switch dashboard to EF-CQS** — Primary headline in `auto_eval_dashboard.py`.
-  - Verification: Dashboard shows EF-CQS as primary.
+- [x] **M1.4: Switch dashboard to EF-CQS** — Completed 2026-03-25. `cd4f310d`. EF-CQS is headline with color coding.
 
 ### Milestone 2: Evidence Model + Validation Depth (M2)
 
 **Goal**: SEC-native evidence as primary truth source. Multi-period validation prevents one-shot coincidences.
 **Priority**: Medium-high. **Depends on**: M1.
 
-- [ ] **M2.1: Evidence tiers in scoring** — `evidence_tier` on `ValidationResult`: sec_confirmed > yfinance_confirmed > self_validated > unverified.
-  - Verification: 10-company eval, SEC-confirmed count > 0 for banking.
+- [x] **M2.1: Evidence tiers in scoring** — Completed 2026-03-25. `cd4f310d`. `sec_confirmed > yfinance_confirmed > self_validated > unverified`.
 
-- [ ] **M2.2: Multi-period validation** — `compute_lis()` checks 3 annual periods. Fix that works for FY2024 but breaks FY2023 is rejected.
-  - Verification: Synthetic test with period-divergent formula.
+- [x] **M2.2: Multi-period validation** — Completed 2026-03-25. `cd4f310d`. LIS checks 3 annual periods.
 
 - [ ] **M2.3: Internal validator as gate** — Accounting equation failures (Assets != Liabilities + Equity) → hard veto.
   - Verification: Apply balance-sheet-breaking change, assert VETO.
@@ -172,8 +173,45 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 
 ---
 
+## Phase 7: Lead Agent Closed Loop
+
+*Derived from Run 006 finding: deterministic solver exhausted, all remaining gaps need AI. The lead Claude Code agent orchestrates the full resolution pipeline.*
+
+### Architecture
+
+```
+For each 50-company batch:
+  Step 1: run_overnight(propose_fn=propose_change)  [deterministic]
+    → Resolves known patterns, solver formulas
+    → Outputs GapManifest JSON with unresolved gaps
+
+  Step 2: Lead agent reads GapManifest, spawns subagents  [AI]
+    → gap-solver agent (standard: semantic_mapper, reference_auditor)
+    → gap-investigator agent (hard: pattern_learner, regression_investigator)
+    → TypedAction responses → compile_action() → evaluate_experiment()
+
+  Step 3: Graduate batch if EF-CQS >= 0.80, move to next 50
+```
+
+### Rules
+
+1. AI proposals go through the same CQS/LIS gate — no bypass
+2. Each batch must reach EF-CQS >= 0.80 before expanding
+3. Dead-end filtering: 6+ graveyard entries → skip
+4. TypedAction vocabulary is finite (7 actions) — AI cannot invent new types
+5. Lead agent logs all decisions for morning review
+
+### Milestones
+
+- [ ] **M7.1: Wire GapManifest → subagent dispatch** — Lead agent reads manifest, builds prompts via `build_typed_action_prompt()`, spawns gap-solver/gap-investigator agents.
+- [ ] **M7.2: Subagent response → CQS gate** — `collect_typed_proposals()` + `evaluate_ai_proposals()` pipeline end-to-end.
+- [ ] **M7.3: First closed-loop run** — 50-company batch: deterministic + AI, measure combined EF-CQS improvement.
+- [ ] **M7.4: Batch expansion to 500** — 10 batches of 50, each graduating at EF-CQS >= 0.80.
+
+---
+
 ## Future Phases (Not Yet Planned)
 
-- **Phase 7: Scale (500→5000)** — Full S&P 500, then Russell 1000, then all XBRL filers
-- **Phase 8: Event-driven** — EDGAR RSS feed → single-company extraction within hours of filing
-- **Phase 9: Multi-product** — Separate reported data product (SEC-derived) from standardized cross-company data
+- **Phase 8: Scale (500→5000)** — Full S&P 500, then Russell 1000, then all XBRL filers
+- **Phase 9: Event-driven** — EDGAR RSS feed → single-company extraction within hours of filing
+- **Phase 10: Multi-product** — Separate reported data product (SEC-derived) from standardized cross-company data

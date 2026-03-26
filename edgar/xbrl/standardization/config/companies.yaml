@@ -1995,6 +1995,7 @@ companies:
     - SGA
     - AccountsReceivable
     - AccountsPayable
+    - ResearchAndDevelopment
     street_view_notes:
       ShortTermDebt: 'Hybrid: Commercial GAAP + Dealer Street View'
     notes: Hybrid bank - commercial + significant dealer/trading operations

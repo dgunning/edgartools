@@ -1254,14 +1254,14 @@ class ReferenceValidator:
                         validation.rfa_source = "sec_facts"
                         validation.evidence_tier = "sec_confirmed"
                         result.validation_status = "valid"
-                        result.validation_notes = f"SEC facts reference match (variance {variance:.1f}%)"
-                        logger.info(f"[SEC FACTS] {ticker}:{metric} — SEC reference match ({variance:.1f}%)")
+                        result.validation_notes = f"SEC facts reference match (variance {sec_var:.1f}%)"
+                        logger.info(f"[SEC FACTS] {ticker}:{metric} — SEC reference match ({sec_var:.1f}%)")
                     else:
                         validation.status = "mismatch"
                         validation.is_valid = False
                         validation.evidence_tier = "sec_confirmed"  # SEC had a value, just didn't match
                         result.validation_status = "invalid"
-                        result.validation_notes = f"SEC facts reference mismatch (variance {variance:.1f}%)"
+                        result.validation_notes = f"SEC facts reference mismatch (variance {sec_var:.1f}%)"
                 else:
                     result.validation_status = "unverified"
                     result.validation_notes = "No reference data available — cannot validate"

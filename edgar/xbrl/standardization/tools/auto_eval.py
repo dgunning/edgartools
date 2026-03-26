@@ -665,7 +665,7 @@ def compute_cqs(
     ledger=None,
     max_workers: Optional[int] = None,
     config=None,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> CQSResult:
     """
     Compute the Composite Quality Score for a cohort of companies.
@@ -788,7 +788,7 @@ def compute_cqs_incremental(
     eval_cohort: Optional[List[str]] = None,
     ledger=None,
     max_workers: Optional[int] = None,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> CQSResult:
     """Incrementally recompute CQS after a config change.
 
@@ -890,7 +890,7 @@ def compute_cqs_incremental_batch(
     eval_cohort: Optional[List[str]] = None,
     ledger=None,
     max_workers: Optional[int] = None,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> CQSResult:
     """Incrementally recompute CQS after multiple company-scoped changes.
 
@@ -1305,7 +1305,7 @@ def identify_gaps(
     max_graveyard: int = 3,
     max_workers: Optional[int] = None,
     config=None,
-    use_sec_facts: bool = False,
+    use_sec_facts: bool = True,
 ) -> Tuple[List[MetricGap], CQSResult]:
     """
     Run evaluation and identify gaps ranked by CQS impact.

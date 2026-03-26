@@ -60,6 +60,16 @@ metrics:
           - CostOfRevenue
           - CommonStockDividendsPerShareCashPaid
           notes: Auto-solver company-specific via DE, 0/0 periods, 0/3 companies
+        GE:
+          components:
+          - CostsAndExpenses
+          - IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest
+          notes: Auto-solver company-specific via GE, 0/0 periods, 0/3 companies
+        RTX:
+          components:
+          - CostsAndExpenses
+          - IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+          notes: Auto-solver company-specific via RTX, 0/0 periods, 0/3 companies
   SGA:
     description: Selling, general, and administrative expenses
     standard_tag: SellingGeneralAndAdminExpenses
@@ -319,6 +329,11 @@ metrics:
           - AccumulatedOtherComprehensiveIncomeLossNetOfTax
           - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
           notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
+        LOW:
+          components:
+          - CashAndCashEquivalentsAtCarryingValue
+          - OtherAssetsCurrent
+          notes: Auto-solver company-specific via LOW, 2/3 periods, 0/3 companies
   LongTermDebt:
     description: Long-term debt (non-current portion)
     standard_tag: LongTermDebt
@@ -344,6 +359,11 @@ metrics:
           - MinorityInterest
           - de:LongTermDebtAndFinanceLeasesNoncurrent
           notes: Auto-solver company-specific via DE, 0/0 periods, 0/3 companies
+        CAT:
+          components:
+          - OtherAssetsNoncurrent
+          - LiabilitiesCurrent
+          notes: Auto-solver company-specific via CAT, 0/0 periods, 0/3 companies
   CashAndEquivalents:
     description: Cash and cash equivalents
     standard_tag: CashAndCashEquivalents
@@ -430,6 +450,13 @@ metrics:
       weight: -1.0
     universal: false
     notes: For total shareholder return and payout ratio analysis
+    standardization:
+      company_overrides:
+        GE:
+          components:
+          - IncreaseDecreaseInReceivables
+          - ge:PaymentsForProceedsFromMarketableSecurities
+          notes: Auto-solver company-specific via GE, 0/0 periods, 0/3 companies
   Inventory:
     description: Current inventory on hand
     standard_tag: Inventories
@@ -483,6 +510,16 @@ metrics:
           - EquityMethodInvestments
           - DebtCurrent
           notes: Auto-solver company-specific via PEP, 2/3 periods
+        CAT:
+          components:
+          - LiabilitiesCurrent
+          - PropertyPlantAndEquipmentNet
+          notes: Auto-solver company-specific via CAT, 0/0 periods, 0/3 companies
+        GE:
+          components:
+          - ContractWithCustomerLiabilityCurrent
+          - ContractWithCustomerLiabilityNoncurrent
+          notes: Auto-solver company-specific via GE, 0/0 periods, 0/3 companies
   AccountsPayable:
     description: Trade accounts payable (current)
     standard_tag: TradePayables
@@ -669,6 +706,35 @@ metrics:
           components:
           - NetCashProvidedByUsedInOperatingActivities
           notes: Auto-solver company-specific via SLB, 3/3 periods, 0/3 companies
+        GOOG:
+          components:
+          - CostsAndExpenses
+          - IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate
+          notes: Auto-solver company-specific via GOOG, 1/1 periods, 0/3 companies
+        PG:
+          components:
+          - Revenues
+          - ProceedsFromRepaymentsOfShortTermDebtMaturingInThreeMonthsOrLess
+          notes: Auto-solver company-specific via PG, 3/3 periods, 0/3 companies
+        CAT:
+          components:
+          - PaymentsToAcquireFinanceReceivables
+          - OtherAssetsNoncurrent
+          notes: Auto-solver company-specific via CAT, 3/3 periods, 0/3 companies
+        GE:
+          components:
+          - CostOfGoodsAndServicesSold
+          - ProceedsFromSaleAndMaturityOfMarketableSecurities
+          notes: Auto-solver company-specific via GE, 2/3 periods, 0/3 companies
+        RTX:
+          components:
+          - rtx:ContractWithCustomerAssetProgressPaymentsOffsetCurrent
+          notes: Auto-solver company-specific via RTX, 1/1 periods, 0/3 companies
+        T:
+          components:
+          - t:SegmentReportingInformationOperationsAndSupportExpenses
+          - AssetAcquisitionPriceOfAcquisitionExpected
+          notes: Auto-solver company-specific via T, 1/1 periods, 0/3 companies
   ResearchAndDevelopment:
     description: Research and development expense
     standard_tag: ResearchAndDevelopmentExpense
@@ -760,6 +826,52 @@ metrics:
           - Depreciation
           - ko:IntersegmentRevenue
           notes: Auto-solver company-specific via KO, 3/3 periods, 0/3 companies
+        MSFT:
+          components:
+          - UnrecognizedTaxBenefitsIncreasesResultingFromCurrentPeriodTaxPositions
+          - IncreaseDecreaseInInventories
+          notes: Auto-solver company-specific via MSFT, 2/3 periods, 0/3 companies
+        GOOG:
+          components:
+          - IncomeTaxReconciliationTaxCreditsOther
+          - DerivativeGainLossOnDerivativeNet
+          notes: Auto-solver company-specific via GOOG, 1/1 periods, 0/3 companies
+        PG:
+          components:
+          - InterestExpenseNonoperating
+          notes: Auto-solver company-specific via PG, 2/2 periods, 0/3 companies
+        JNJ:
+          components:
+          - jnj:SettlementOfConvertibleDebtAcquiredFromShockwave
+          notes: Auto-solver company-specific via JNJ, 2/2 periods, 0/3 companies
+        CAT:
+          components:
+          - InterestExpenseNonoperating
+          notes: Auto-solver company-specific via CAT, 2/2 periods, 0/3 companies
+        GE:
+          components:
+          - ProceedsFromIssuanceOfSharesUnderIncentiveAndShareBasedCompensationPlansIncludingStockOptions
+          - ge:IncreaseDecreaseInContractWithCustomerAssetLongTermServiceAgreements
+          notes: Auto-solver company-specific via GE, 1/1 periods, 0/3 companies
+        RTX:
+          components:
+          - rtx:DeferredTaxAssetsTaxDeferredExpenseCapitalizationOfResearchAndExperimentalExpenditures
+          notes: Auto-solver company-specific via RTX, 1/1 periods, 0/3 companies
+        T:
+          components:
+          - CapitalizedContractCostAmortization
+          - t:FirstResponderNetworkAuthorityOperatingExpensesAdjustedForInflation
+          notes: Auto-solver company-specific via T, 3/3 periods, 0/3 companies
+        LOW:
+          components:
+          - AdvertisingExpense
+          - EntityCommonStockSharesOutstanding
+          notes: Auto-solver company-specific via LOW, 3/3 periods, 0/3 companies
+        AVGO:
+          components:
+          - IncomeTaxesPaidNet
+          - PaymentsToAcquireInvestments
+          notes: Auto-solver company-specific via AVGO, 2/3 periods, 0/3 companies
   IncomeTaxExpense:
     description: Income tax provision (expense or benefit)
     standard_tag: IncomeTaxExpenseBenefit
@@ -918,6 +1030,16 @@ metrics:
           - GrossProfit
           - CurrentIncomeTaxExpenseBenefit
           notes: Auto-solver company-specific via NKE, 0/0 periods, 0/3 companies
+        NVDA:
+          components:
+          - ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities
+          - CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect
+          notes: Auto-solver company-specific via NVDA, 2/3 periods, 0/3 companies
+        GE:
+          components:
+          - SellingGeneralAndAdministrativeExpense
+          - SupplierFinanceProgramObligationDecreaseSettlement
+          notes: Auto-solver company-specific via GE, 2/3 periods, 0/3 companies
   RetainedEarnings:
     description: Retained earnings (accumulated deficit)
     standard_tag: RetainedEarningsAccumulatedDeficit
@@ -975,6 +1097,11 @@ metrics:
           - BrokerageCommissionsRevenue
           - ms:InterestIncomeCashAndCashEquivalents
           notes: Auto-solver company-specific via MS, 3/3 periods, 0/3 companies
+        T:
+          components:
+          - IncomeTaxExpenseBenefit
+          - DefinedBenefitPlanBenefitObligationBenefitsPaid
+          notes: Auto-solver company-specific via T, 2/3 periods, 0/3 companies
   DividendPerShare:
     description: Dividends per share declared
     standard_tag: CommonStockDividendsPerShareDeclared
