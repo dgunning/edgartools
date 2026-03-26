@@ -194,6 +194,9 @@ These persist across all sessions and guide all future work:
 14. **AI prompts must include filing evidence** — run `discover_concepts()` pre-dispatch, include top 3-5 candidates. AI ranks, not guesses (Session 006)
 15. **Retry-with-feedback over upfront multi-proposal** — 1 proposal + 1 feedback retry beats 3 blind guesses. VALIDATE cost dominates AI cost (Session 006)
 16. **In-memory pre-screen before full CQS gate** — `evaluate_experiment_in_memory()` as fast filter; only survivors pay full ~85s measurement (Session 006)
+17. **Value-grounded prompts are mandatory** — AI must see `concept | extracted_value | delta_pct` for every candidate, not just name/confidence (Session 007)
+18. **Reverse value search belongs in the deterministic layer** — search facts for concepts matching the reference value as a DataFrame filter, not as an agent operation (Session 007)
+19. **Three-tier dispatch: deterministic → enriched API → local agent** — value-aware discovery first, Gemini Flash with evidence table second, local agents only for residuals (Session 007)
 
 ---
 
