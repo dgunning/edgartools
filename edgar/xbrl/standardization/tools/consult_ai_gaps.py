@@ -415,13 +415,133 @@ _load_metrics_config._cache = None
 _load_metrics_config._mtime = None
 
 
-def validate_action_preflight(action: TypedAction) -> Optional[str]:
+# =============================================================================
+# STATEMENT FAMILY HELPERS (O17, O18, O20)
+# =============================================================================
+
+# Maps metrics.yaml statement codes → human labels
+_STATEMENT_LABELS = {
+    "INCOME": "Income Statement",
+    "OPERATIONS": "Income Statement",
+    "BALANCE": "Balance Sheet",
+    "FINANCIAL_POSITION": "Balance Sheet",
+    "CASHFLOW": "Cash Flow Statement",
+}
+
+# Maps metrics.yaml codes to canonical families for comparison
+_STATEMENT_FAMILY_NORMALIZE = {
+    "OPERATIONS": "INCOME",
+    "FINANCIAL_POSITION": "BALANCE",
+}
+
+# Maps sections.py return values → canonical families
+_SECTION_TO_FAMILY = {
+    "IncomeStatement": "INCOME",
+    "BalanceSheet": "BALANCE",
+    "CashFlowStatement": "CASHFLOW",
+}
+
+# Expected concept class for each metric (used in O17 prompt context)
+_METRIC_CONCEPT_CLASS = {
+    "Revenue": "revenue / top-line sales",
+    "COGS": "cost of goods or services sold",
+    "SGA": "selling, general & administrative expense",
+    "OperatingIncome": "operating income / operating profit",
+    "PretaxIncome": "income before income taxes",
+    "NetIncome": "net income / net earnings",
+    "OperatingCashFlow": "cash from operating activities",
+    "Capex": "capital expenditures / purchases of PP&E",
+    "TotalAssets": "total assets",
+    "Goodwill": "goodwill (intangible asset from acquisitions)",
+    "IntangibleAssets": "intangible assets (patents, trademarks, etc.)",
+    "ShortTermDebt": "short-term borrowings / current debt",
+    "LongTermDebt": "long-term debt / non-current borrowings",
+    "CashAndEquivalents": "cash and cash equivalents",
+    "WeightedAverageSharesDiluted": "diluted weighted-average shares outstanding",
+    "StockBasedCompensation": "stock-based / share-based compensation expense",
+    "DividendsPaid": "cash dividends paid",
+    "Inventory": "inventory (raw materials, WIP, finished goods)",
+    "AccountsReceivable": "trade accounts receivable",
+    "AccountsPayable": "trade accounts payable",
+    "DepreciationAmortization": "depreciation and amortization expense",
+    "GrossProfit": "gross profit (revenue minus COGS)",
+    "ResearchAndDevelopment": "research and development expense",
+    "InterestExpense": "interest expense",
+    "IncomeTaxExpense": "income tax expense / provision",
+    "EarningsPerShareDiluted": "diluted earnings per share",
+    "EarningsPerShareBasic": "basic earnings per share",
+    "CurrentAssets": "total current assets",
+    "CurrentLiabilities": "total current liabilities",
+    "TotalLiabilities": "total liabilities",
+    "StockholdersEquity": "total stockholders' equity",
+    "PropertyPlantEquipment": "property, plant & equipment (net)",
+    "RetainedEarnings": "retained earnings / accumulated deficit",
+    "InvestingCashFlow": "cash from investing activities",
+    "FinancingCashFlow": "cash from financing activities",
+    "ShareRepurchases": "treasury stock repurchases",
+    "DividendPerShare": "dividends per share",
+    "FreeCashFlow": "free cash flow (operating CF minus capex)",
+    "TangibleAssets": "tangible assets (total assets minus intangibles)",
+    "NetDebt": "net debt (total debt minus cash)",
+    "EBITDA": "earnings before interest, taxes, depreciation & amortization",
+    "WorkingCapital": "working capital (current assets minus current liabilities)",
+    "TotalDebt": "total debt (short-term + long-term)",
+}
+
+
+def _get_statement_family_for_metric(metric: str) -> List[str]:
+    """Get the statement family codes for a metric from metrics.yaml tree_hints.
+
+    Returns normalized family codes (e.g., ["INCOME"]) with OPERATIONS→INCOME
+    and FINANCIAL_POSITION→BALANCE normalization applied. Falls back to [] if
+    the metric or tree_hints are not found.
+    """
+    try:
+        cfg = _load_metrics_config()
+        statements = (
+            cfg.get("metrics", {})
+            .get(metric, {})
+            .get("tree_hints", {})
+            .get("statements", [])
+        )
+        # Normalize: OPERATIONS→INCOME, FINANCIAL_POSITION→BALANCE
+        return list({
+            _STATEMENT_FAMILY_NORMALIZE.get(s, s) for s in statements
+        })
+    except Exception:
+        return []
+
+
+def _get_candidate_statement(concept: str) -> Optional[str]:
+    """Map an XBRL concept to its canonical statement family.
+
+    Uses sections.get_statement_for_concept() which returns strings like
+    "IncomeStatement", "BalanceSheet", "CashFlowStatement". Normalizes
+    to "INCOME"/"BALANCE"/"CASHFLOW" for comparison with metric families.
+
+    Returns None if the concept is unknown (caller should keep, not filter).
+    """
+    from edgar.xbrl.standardization.sections import get_statement_for_concept
+    try:
+        stmt = get_statement_for_concept(concept)
+        if stmt is None:
+            return None
+        return _SECTION_TO_FAMILY.get(stmt)
+    except Exception:
+        return None
+
+
+def validate_action_preflight(action: TypedAction, gap: Optional['UnresolvedGap'] = None) -> Optional[str]:
     """Pre-CQS validation. Returns None if valid, error string if invalid.
 
     Checks:
     - Duplicate concept (already in known_concepts)
+    - O20: Identical to current mapping (no-op)
+    - O20: Cross-statement concept (statement family mismatch)
     """
     if action.action == "MAP_CONCEPT":
+        proposed = action.params.get("concept", "")
+
         try:
             metrics_cfg = _load_metrics_config()
             existing = (
@@ -429,13 +549,33 @@ def validate_action_preflight(action: TypedAction) -> Optional[str]:
                 .get(action.metric, {})
                 .get("known_concepts", [])
             )
-            if action.params.get("concept") in existing:
+            if proposed in existing:
                 return (
-                    f"Concept '{action.params['concept']}' already in "
+                    f"Concept '{proposed}' already in "
                     f"{action.metric}.known_concepts"
                 )
         except Exception as e:
             logger.debug(f"Preflight concept check failed: {e}")
+
+        # O20: Reject if identical to current mapping (no-op)
+        if gap is not None and gap.current_concept:
+            if normalize_concept(proposed) == normalize_concept(gap.current_concept):
+                return (
+                    f"Proposed concept '{proposed}' is identical to current mapping "
+                    f"'{gap.current_concept}' — would be a no-op"
+                )
+
+        # O20: Reject if concept belongs to wrong statement family
+        candidate_stmt = _get_candidate_statement(normalize_concept(proposed))
+        if candidate_stmt is not None:
+            metric_families = _get_statement_family_for_metric(action.metric)
+            if metric_families and candidate_stmt not in metric_families:
+                family_labels = [_STATEMENT_LABELS.get(f, f) for f in metric_families]
+                candidate_label = _STATEMENT_LABELS.get(candidate_stmt, candidate_stmt)
+                return (
+                    f"Concept '{proposed}' belongs to {candidate_label} "
+                    f"but metric {action.metric} requires {', '.join(family_labels)}"
+                )
 
     return None
 
@@ -446,14 +586,19 @@ def validate_action_preflight(action: TypedAction) -> Optional[str]:
 
 def _build_evidence_context(gap: UnresolvedGap) -> str:
     """Build the extraction evidence section for AI prompts."""
+    lines = []
+    if gap.current_concept:
+        lines.append(f"- Currently mapped to: {gap.current_concept}")
+        if gap.xbrl_value is not None:
+            lines.append(f"- Current extracted value: {gap.xbrl_value:,.0f}")
     if gap.resolution_type != "none":
-        return (
-            f"- Resolution type: {gap.resolution_type}\n"
-            f"- Components used: {gap.components_used}\n"
-            f"- Components missing: {gap.components_missing}\n"
-            f"- Company industry: {gap.company_industry}\n"
-        )
-    return "- No extraction evidence available\n"
+        lines.append(f"- Resolution type: {gap.resolution_type}")
+        lines.append(f"- Components used: {gap.components_used}")
+        lines.append(f"- Components missing: {gap.components_missing}")
+        lines.append(f"- Company industry: {gap.company_industry}")
+    if not lines:
+        return "- No extraction evidence available\n"
+    return "\n".join(lines) + "\n"
 
 
 def _build_graveyard_text(gap: UnresolvedGap) -> str:
@@ -488,6 +633,55 @@ def _build_difficulty_context(gap: UnresolvedGap) -> str:
     )
 
 
+def _build_metric_context(gap: UnresolvedGap) -> str:
+    """O17: Build metric context section with statement family and concept class."""
+    lines = []
+    families = _get_statement_family_for_metric(gap.metric)
+    if families:
+        labels = [_STATEMENT_LABELS.get(f, f) for f in families]
+        unique_labels = list(dict.fromkeys(labels))  # dedupe preserving order
+        lines.append(f"- Statement family: {', '.join(unique_labels)}")
+
+    concept_class = _METRIC_CONCEPT_CLASS.get(gap.metric)
+    if concept_class:
+        lines.append(f"- Expected concept class: {concept_class}")
+
+    if not lines:
+        return ""
+
+    constraint = (
+        "The proposed concept MUST belong to the same financial statement "
+        "as the target metric. A concept from a different statement is almost "
+        "certainly a coincidental numeric match, not a semantic match."
+    )
+    lines.append(f"- **Constraint**: {constraint}")
+
+    return "\n## Metric Context\n" + "\n".join(lines) + "\n"
+
+
+def _build_gap_type_guidance(gap: UnresolvedGap) -> str:
+    """O19: Build guidance specific to gap type (high_variance vs unmapped)."""
+    if gap.gap_type == "high_variance" and gap.current_concept:
+        var_str = f"{gap.current_variance:.1f}" if gap.current_variance is not None else "?"
+        return (
+            f"\n## Gap Type Guidance\n"
+            f"The current concept ({gap.current_concept}) is already extracting a value "
+            f"but differs from reference by {var_str}%.\n"
+            f"- If the current concept IS the most semantically accurate for this metric, "
+            f"use **DOCUMENT_DIVERGENCE** — the company's filing simply reports a different "
+            f"value than the reference source.\n"
+            f"- Only propose MAP_CONCEPT if you identify a concept that is both semantically "
+            f"correct AND closer to the reference value.\n"
+        )
+    elif gap.gap_type == "unmapped":
+        return (
+            "\n## Gap Type Guidance\n"
+            "No concept is currently mapped for this metric. "
+            "Find the best semantically matching concept from the candidates.\n"
+        )
+    return ""
+
+
 # =============================================================================
 # TYPED ACTION PROMPT (Phase 3)
 # =============================================================================
@@ -508,6 +702,8 @@ def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> 
     evidence_context = _build_evidence_context(gap)
     graveyard_text = _build_graveyard_text(gap)
     difficulty_context = _build_difficulty_context(gap)
+    metric_context = _build_metric_context(gap)
+    gap_type_guidance = _build_gap_type_guidance(gap)
 
     action_lines = []
     for name, spec in ACTION_VOCABULARY.items():
@@ -527,6 +723,8 @@ def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> 
 - Root cause: {gap.root_cause}
 {evidence_context}
 {difficulty_context}
+{metric_context}
+{gap_type_guidance}
 ## Prior Failed Attempts ({gap.graveyard_count} total)
 {graveyard_text}
 {candidates_text}
@@ -604,7 +802,7 @@ def collect_typed_proposals(
             )
             continue
 
-        preflight_err = validate_action_preflight(typed_action)
+        preflight_err = validate_action_preflight(typed_action, gap=gap)
         if preflight_err is not None:
             preflight_rejected += 1
             logger.info(
@@ -1721,6 +1919,21 @@ def _build_candidates_context(
                 )
         lookup_attempts += 1
 
+    # O18: Pre-filter candidates whose statement family doesn't match the metric
+    metric_families = _get_statement_family_for_metric(gap.metric)
+    if metric_families:
+        filtered = []
+        for c in candidates:
+            candidate_stmt = _get_candidate_statement(c.concept)
+            if candidate_stmt is not None and candidate_stmt not in metric_families:
+                logger.debug(
+                    f"O18 pre-filter: removing {c.concept} ({candidate_stmt}) "
+                    f"for metric {gap.metric} (requires {metric_families})"
+                )
+                continue
+            filtered.append(c)
+        candidates = filtered
+
     # Format as evidence table
     ref_val = gap.reference_value
     lines = ["\n## Candidate Concepts (with extracted values)"]
@@ -1732,8 +1945,12 @@ def _build_candidates_context(
         delta_str = f"{c.delta_pct:.1f}%" if c.delta_pct is not None else "—"
         lines.append(f"| {c.concept} | {val_str} | {ref_str} | {delta_str} | {c.source} |")
     lines.append(
-        "\nChoose from candidates with the lowest Delta%. "
-        "If none fit, propose a different concept.\n"
+        "\n**Semantic correctness is required.** A concept MUST represent the same "
+        "financial meaning as the target metric. Prefer a semantically correct concept "
+        "with slightly worse Delta% over a semantically wrong concept with perfect "
+        "numeric match. Low Delta% alone does not validate a concept — coincidental "
+        "numeric matches across unrelated line items are common.\n"
+        "If no candidate is semantically correct, use DOCUMENT_DIVERGENCE or ESCALATE.\n"
     )
     return "\n".join(lines), candidates
 

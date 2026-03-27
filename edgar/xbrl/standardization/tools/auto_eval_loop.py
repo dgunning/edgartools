@@ -3555,6 +3555,7 @@ class UnresolvedGap:
     components_used: List[str] = field(default_factory=list)
     components_missing: List[str] = field(default_factory=list)
     company_industry: Optional[str] = None
+    current_concept: Optional[str] = None
 
     # Graveyard history (denormalized from SQLite)
     graveyard_entries: List[Dict] = field(default_factory=list)
@@ -3583,6 +3584,7 @@ class UnresolvedGap:
             "components_used": self.components_used,
             "components_missing": self.components_missing,
             "company_industry": self.company_industry,
+            "current_concept": self.current_concept,
             "graveyard_entries": self.graveyard_entries,
             "ai_agent_type": self.ai_agent_type,
             "difficulty_tier": self.difficulty_tier,
@@ -3607,6 +3609,7 @@ class UnresolvedGap:
             components_used=d.get("components_used", []),
             components_missing=d.get("components_missing", []),
             company_industry=d.get("company_industry"),
+            current_concept=d.get("current_concept"),
             graveyard_entries=d.get("graveyard_entries", []),
             ai_agent_type=d.get("ai_agent_type", ""),
             difficulty_tier=d.get("difficulty_tier", "standard"),
@@ -3744,6 +3747,11 @@ def _build_unresolved_gap(
         components_missing = []
         company_industry = None
 
+    # O16: Extract current concept from extraction evidence
+    current_concept = None
+    if evidence and evidence.components_used:
+        current_concept = evidence.components_used[0]
+
     # Filter graveyard to entries matching this ticker, keep only relevant fields
     graveyard = [
         {k: v for k, v in entry.items() if k in (
@@ -3770,6 +3778,7 @@ def _build_unresolved_gap(
         components_used=components_used,
         components_missing=components_missing,
         company_industry=company_industry,
+        current_concept=current_concept,
         graveyard_entries=graveyard,
         ai_agent_type=agent_type.value,
         difficulty_tier=_compute_difficulty_tier(gap),

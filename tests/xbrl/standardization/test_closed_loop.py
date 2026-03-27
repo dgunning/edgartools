@@ -35,6 +35,14 @@ from edgar.xbrl.standardization.tools.consult_ai_gaps import (
     TypedAction,
     compile_action,
     normalize_concept,
+    validate_action_preflight,
+    build_typed_action_prompt,
+    _build_evidence_context,
+    _build_metric_context,
+    _build_gap_type_guidance,
+    _build_candidates_context,
+    _get_statement_family_for_metric,
+    _get_candidate_statement,
     dispatch_ai_gaps,
     evaluate_ai_proposals_live,
     _is_peer_regression,
@@ -53,6 +61,7 @@ def _make_unresolved_gap(
     disposition="config_fixable",
     difficulty_tier="standard",
     gap_type="high_variance",
+    current_concept=None,
 ) -> UnresolvedGap:
     return UnresolvedGap(
         ticker=ticker,
@@ -64,6 +73,7 @@ def _make_unresolved_gap(
         reference_value=100e9,
         xbrl_value=95e9,
         current_variance=5.0,
+        current_concept=current_concept,
     )
 
 
@@ -1413,3 +1423,274 @@ class TestCompileActionRouting:
         )
         downgraded = _downgrade_to_company_scope(original, "JPM")
         assert downgraded.new_value == {"preferred_concept": "GrossProfit"}  # Normalized
+
+
+# =============================================================================
+# GROUP 7: O15-O20 — Semantic AI Prompt Redesign
+# =============================================================================
+
+class TestO15SemanticInstruction:
+
+    @pytest.mark.fast
+    def test_candidates_instruction_is_semantic_not_numerical(self):
+        """O15: 'lowest Delta%' gone, semantic correctness instruction present."""
+        gap = _make_unresolved_gap(metric="Revenue")
+        from edgar.xbrl.standardization.tools.discover_concepts import CandidateConcept
+        candidates = [
+            CandidateConcept(
+                concept="Revenues", source="name_match",
+                confidence=0.9, reasoning="name",
+                extracted_value=100e9, delta_pct=0.5,
+            ),
+        ]
+        with patch(
+            "edgar.xbrl.standardization.tools.discover_concepts.discover_concepts",
+            return_value=candidates,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._extract_candidate_value",
+            return_value=None,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._get_candidate_statement",
+            return_value=None,
+        ):
+            text, _ = _build_candidates_context(gap)
+
+        assert "lowest Delta%" not in text
+        assert "Semantic correctness is required" in text
+        assert "DOCUMENT_DIVERGENCE" in text
+
+
+class TestO16CurrentConcept:
+
+    @pytest.mark.fast
+    def test_evidence_includes_current_concept(self):
+        """O16: prompt shows current mapping and extracted value."""
+        gap = _make_unresolved_gap(
+            metric="Revenue",
+            current_concept="Revenues",
+        )
+        text = _build_evidence_context(gap)
+        assert "Currently mapped to: Revenues" in text
+        assert "Current extracted value:" in text
+
+    @pytest.mark.fast
+    def test_evidence_without_current_concept(self):
+        """O16: no current concept still works."""
+        gap = _make_unresolved_gap(metric="Revenue")
+        gap.resolution_type = "none"
+        gap.current_concept = None
+        text = _build_evidence_context(gap)
+        assert "No extraction evidence" in text
+
+    @pytest.mark.fast
+    def test_current_concept_in_to_dict_from_dict(self):
+        """O16: current_concept round-trips through serialization."""
+        gap = _make_unresolved_gap(current_concept="Revenues")
+        d = gap.to_dict()
+        assert d["current_concept"] == "Revenues"
+        restored = UnresolvedGap.from_dict(d)
+        assert restored.current_concept == "Revenues"
+
+    @pytest.mark.fast
+    def test_from_dict_backward_compat(self):
+        """O16: from_dict without current_concept key defaults to None."""
+        d = _make_unresolved_gap().to_dict()
+        d.pop("current_concept", None)
+        restored = UnresolvedGap.from_dict(d)
+        assert restored.current_concept is None
+
+
+class TestO17MetricContext:
+
+    @pytest.mark.fast
+    def test_metric_context_includes_statement_family(self):
+        """O17: statement family appears in prompt for Revenue (INCOME)."""
+        gap = _make_unresolved_gap(metric="Revenue")
+        text = _build_metric_context(gap)
+        assert "Income Statement" in text
+        assert "Constraint" in text
+
+    @pytest.mark.fast
+    def test_metric_context_includes_concept_class(self):
+        """O17: expected concept class appears for known metrics."""
+        gap = _make_unresolved_gap(metric="AccountsReceivable")
+        text = _build_metric_context(gap)
+        assert "trade accounts receivable" in text
+
+    @pytest.mark.fast
+    def test_metric_context_in_full_prompt(self):
+        """O17: metric context injected into build_typed_action_prompt."""
+        gap = _make_unresolved_gap(metric="TotalAssets")
+        prompt = build_typed_action_prompt(gap)
+        assert "Balance Sheet" in prompt
+        assert "total assets" in prompt
+
+
+class TestO18CandidatePrefilter:
+
+    @pytest.mark.fast
+    def test_candidate_prefilter_removes_cross_statement(self):
+        """O18: income concept removed for balance metric."""
+        gap = _make_unresolved_gap(metric="TotalAssets")  # BALANCE
+        from edgar.xbrl.standardization.tools.discover_concepts import CandidateConcept
+        candidates = [
+            CandidateConcept(
+                concept="Assets", source="name_match",
+                confidence=0.9, reasoning="name",
+                extracted_value=500e9, delta_pct=1.0,
+            ),
+            CandidateConcept(
+                concept="ComprehensiveIncomeNetOfTax", source="value_match",
+                confidence=0.8, reasoning="value",
+                extracted_value=100e9, delta_pct=0.1,
+            ),
+        ]
+        with patch(
+            "edgar.xbrl.standardization.tools.discover_concepts.discover_concepts",
+            return_value=candidates,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._extract_candidate_value",
+            return_value=None,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._get_candidate_statement",
+            side_effect=lambda c: "BALANCE" if c == "Assets" else "INCOME",
+        ):
+            text, remaining = _build_candidates_context(gap)
+
+        concepts = [c.concept for c in remaining]
+        assert "Assets" in concepts
+        assert "ComprehensiveIncomeNetOfTax" not in concepts
+
+    @pytest.mark.fast
+    def test_candidate_prefilter_keeps_unknown_statement(self):
+        """O18: unknown-statement concept kept (don't over-filter)."""
+        gap = _make_unresolved_gap(metric="TotalAssets")  # BALANCE
+        from edgar.xbrl.standardization.tools.discover_concepts import CandidateConcept
+        candidates = [
+            CandidateConcept(
+                concept="CustomAssetConcept", source="name_match",
+                confidence=0.7, reasoning="custom",
+                extracted_value=500e9, delta_pct=2.0,
+            ),
+        ]
+        with patch(
+            "edgar.xbrl.standardization.tools.discover_concepts.discover_concepts",
+            return_value=candidates,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._extract_candidate_value",
+            return_value=None,
+        ), patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._get_candidate_statement",
+            return_value=None,  # Unknown
+        ):
+            text, remaining = _build_candidates_context(gap)
+
+        assert len(remaining) == 1
+        assert remaining[0].concept == "CustomAssetConcept"
+
+
+class TestO19GapTypeGuidance:
+
+    @pytest.mark.fast
+    def test_high_variance_prompt_has_divergence_guidance(self):
+        """O19: DOCUMENT_DIVERGENCE instruction present for high_variance."""
+        gap = _make_unresolved_gap(
+            gap_type="high_variance",
+            current_concept="InterestExpense",
+        )
+        text = _build_gap_type_guidance(gap)
+        assert "DOCUMENT_DIVERGENCE" in text
+        assert "current concept" in text
+
+    @pytest.mark.fast
+    def test_unmapped_prompt_has_find_concept_guidance(self):
+        """O19: unmapped guidance present."""
+        gap = _make_unresolved_gap(gap_type="unmapped")
+        text = _build_gap_type_guidance(gap)
+        assert "No concept is currently mapped" in text
+
+    @pytest.mark.fast
+    def test_high_variance_without_current_concept_no_guidance(self):
+        """O19: high_variance with no current_concept returns empty."""
+        gap = _make_unresolved_gap(gap_type="high_variance")
+        text = _build_gap_type_guidance(gap)
+        assert text == ""
+
+
+class TestO20PreflightRejection:
+
+    @pytest.mark.fast
+    def test_preflight_rejects_identical_concept(self):
+        """O20: same-as-current → rejected."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="HD",
+            metric="InterestExpense",
+            params={"concept": "us-gaap:InterestExpense"},
+            rationale="test",
+        )
+        gap = _make_unresolved_gap(
+            ticker="HD",
+            metric="InterestExpense",
+            current_concept="InterestExpense",
+        )
+        err = validate_action_preflight(action, gap=gap)
+        assert err is not None
+        assert "no-op" in err
+
+    @pytest.mark.fast
+    def test_preflight_rejects_cross_statement_concept(self):
+        """O20: statement mismatch → rejected."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="CAT",
+            metric="AccountsReceivable",
+            params={"concept": "ComprehensiveIncomeNetOfTax"},
+            rationale="test",
+        )
+        gap = _make_unresolved_gap(
+            ticker="CAT",
+            metric="AccountsReceivable",
+        )
+        with patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._get_candidate_statement",
+            return_value="INCOME",
+        ):
+            err = validate_action_preflight(action, gap=gap)
+        assert err is not None
+        assert "Income Statement" in err
+
+    @pytest.mark.fast
+    def test_preflight_passes_valid_concept(self):
+        """O20: valid concept passes all checks."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="AAPL",
+            metric="Revenue",
+            params={"concept": "RevenueFromSalesOfGoods"},
+            rationale="test",
+        )
+        gap = _make_unresolved_gap(
+            ticker="AAPL",
+            metric="Revenue",
+            current_concept="RevenueFromContractWithCustomerExcludingAssessedTax",
+        )
+        with patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._get_candidate_statement",
+            return_value="INCOME",
+        ):
+            err = validate_action_preflight(action, gap=gap)
+        assert err is None
+
+    @pytest.mark.fast
+    def test_preflight_no_gap_backward_compat(self):
+        """O20: without gap param, old behavior works."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="AAPL",
+            metric="Revenue",
+            params={"concept": "NewConcept"},
+            rationale="test",
+        )
+        err = validate_action_preflight(action)
+        assert err is None
