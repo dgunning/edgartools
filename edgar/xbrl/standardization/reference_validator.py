@@ -1020,8 +1020,17 @@ class ReferenceValidator:
 
             # SA SCORING: Compute composite value via standardization formula
             if validation.variance_type == "standardized" and xbrl is not None and ref_value is not None:
+                logger.debug(
+                    "[SA GATE] %s:%s — variance_type=%s",
+                    ticker, metric, validation.variance_type,
+                )
                 sa_result = self._compute_sa_composite(metric, ticker, xbrl, ref_value)
-                if sa_result is not None:
+                if sa_result is None:
+                    logger.debug(
+                        "[SA GATE] %s:%s — sa_result=None (no components found)",
+                        ticker, metric,
+                    )
+                else:
                     sa_composite_value, sa_variance_frac, sa_pass = sa_result
                     validation.sa_value = sa_composite_value
                     validation.sa_variance_pct = sa_variance_frac * 100
@@ -2318,10 +2327,13 @@ class ReferenceValidator:
 
         std_config = metric_config.standardization
         formula_components = None
+        tier = None
 
         company_overrides = std_config.get("company_overrides", {})
         if ticker in company_overrides:
             formula_components = company_overrides[ticker].get("components")
+            if formula_components:
+                tier = "company"
 
         if formula_components is None:
             sector_overrides = std_config.get("sector_overrides", {})
@@ -2330,10 +2342,20 @@ class ReferenceValidator:
                 sector_key = company_config.industry.title()
                 if sector_key in sector_overrides:
                     formula_components = sector_overrides[sector_key].get("components")
+                    if formula_components:
+                        tier = "sector"
 
         if formula_components is None:
             default_formula = std_config.get("default", {})
             formula_components = default_formula.get("components")
+            if formula_components:
+                tier = "default"
+
+        if formula_components:
+            logger.debug(
+                "[SA RESOLVE] %s:%s — tier=%s, components=%s",
+                ticker, metric, tier, formula_components,
+            )
 
         return formula_components if formula_components else None
 
@@ -2362,13 +2384,24 @@ class ReferenceValidator:
         # Sum absolute values of each component
         composite = 0.0
         components_found = 0
+        component_values = {}
         for component in formula_components:
             val = self._extract_xbrl_value(xbrl, component)
             if val is not None:
                 composite += abs(val)
                 components_found += 1
+            component_values[component] = val
+
+        logger.debug(
+            "[SA COMPONENTS] %s:%s — %s",
+            ticker, metric, component_values,
+        )
 
         if components_found == 0:
+            logger.debug(
+                "[SA COMPOSITE] %s:%s — ABORT: 0/%d components found",
+                ticker, metric, len(formula_components),
+            )
             return None
 
         abs_ref = abs(ref_value)
@@ -2377,6 +2410,13 @@ class ReferenceValidator:
 
         variance_fraction = abs(composite - abs_ref) / abs_ref
         sa_pass = variance_fraction <= tolerance
+
+        logger.debug(
+            "[SA COMPOSITE] %s:%s — composite=%.2f, ref=%.2f, "
+            "variance=%.4f, sa_pass=%s, found=%d/%d",
+            ticker, metric, composite, abs_ref, variance_fraction,
+            sa_pass, components_found, len(formula_components),
+        )
 
         return (composite, variance_fraction, sa_pass)
 

@@ -235,6 +235,16 @@ def _apply_decision_gates(
         if old_score:
             delta_pp = (new_score.pass_rate - old_score.pass_rate) * 100
             company_deltas[ticker] = delta_pp
+            if abs(delta_pp) > 1.0:  # Log significant movements (>1pp)
+                logger.debug(
+                    "[COMPANY DELTA] %s — %.1fpp (pass_rate %.4f->%.4f, "
+                    "valid %d/%d->%d/%d, re_evaluated=%s)",
+                    ticker, delta_pp,
+                    old_score.pass_rate, new_score.pass_rate,
+                    old_score.metrics_valid, old_score.metrics_total,
+                    new_score.metrics_valid, new_score.metrics_total,
+                    ticker in target_tickers,
+                )
             if delta_pp < -max_company_drop:
                 return ExperimentDecision(
                     decision=Decision.DISCARD,
@@ -1049,6 +1059,10 @@ def evaluate_experiment_in_memory(
         target_baseline = baseline_cqs.company_scores.get(target)
 
         if target_baseline is not None:
+            logger.debug(
+                "[PRE-SCREEN] %s — baseline_cqs=%.4f, pass_rate=%.4f",
+                target, target_baseline.cqs, target_baseline.pass_rate,
+            )
             try:
                 target_cqs = compute_cqs(
                     eval_cohort=[target],
@@ -1069,6 +1083,12 @@ def evaluate_experiment_in_memory(
 
             target_new = target_cqs.company_scores.get(target)
             if target_new and target_new.cqs <= target_baseline.cqs:
+                logger.debug(
+                    "[PRE-SCREEN DETAIL] %s — new_cqs=%.4f, new_pass_rate=%.4f, "
+                    "new_mean_var=%.1f, new_valid=%d/%d",
+                    target, target_new.cqs, target_new.pass_rate,
+                    target_new.mean_variance, target_new.metrics_valid, target_new.metrics_total,
+                )
                 return ExperimentDecision(
                     decision=Decision.DISCARD,
                     cqs_before=target_baseline.cqs,
@@ -1082,6 +1102,10 @@ def evaluate_experiment_in_memory(
     # Full cohort eval — use incremental CQS for company-scoped changes (Phase 2a)
     try:
         if is_change_company_scoped(change) and baseline_cqs.company_scores:
+            logger.debug(
+                "[EVAL PATH] incremental — type=%s, targets=%s",
+                change.change_type.value, change.target_companies,
+            )
             new_cqs = compute_cqs_incremental(
                 baseline_result=baseline_cqs,
                 change=change,
@@ -1091,6 +1115,10 @@ def evaluate_experiment_in_memory(
                 use_sec_facts=use_sec_facts,
             )
         else:
+            logger.debug(
+                "[EVAL PATH] full cohort — type=%s, company_scoped=%s",
+                change.change_type.value, is_change_company_scoped(change),
+            )
             new_cqs = compute_cqs(
                 eval_cohort=eval_cohort,
                 snapshot_mode=True,
