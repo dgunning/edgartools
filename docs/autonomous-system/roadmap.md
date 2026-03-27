@@ -117,6 +117,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 010 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt effectiveness: semantic-first ranking, current mapping context, candidate pre-filtering, divergence path | All implemented |
 | 011 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | In-memory config bugs: ADD_COMPANY_OVERRIDE flattening, ADD_FORMULA format mismatch, ADD_DIVERGENCE wrong field, round-trip tests | All implemented |
 | 012 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Post-O21 root cause: _compute_sa_composite black box, PFE -100pp cross-company regression, diagnostic-first approach | Action items created |
+| 013 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Pipeline architecture flaws: MappingSource.CONFIG overload, Strategy 0 silent fallthrough, AI resolver duplication. Diagnostic-confirmed root causes for 0% KEEP rate. | O33-O38 implemented |
 
 ### Session 004 Unanimous Agreements
 
@@ -150,6 +151,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 010 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `aaee647d-238c-4be6-a755-5b455486d9bb` |
 | 011 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `ba2f82ae-e8f2-4d1c-bd01-29e40d721c42` |
 | 012 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `06acd7c0-fc3d-4945-8c81-a52b77a4eef5` |
+| 013 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `edb0fb8f-3b1e-4124-8021-f61b882a865c` |
 
 ---
 
@@ -255,6 +257,7 @@ For each 50-company batch:
 - [x] **M7.15: Hardening (O24-O25)** — Warning on empty ticker in ADD_KNOWN_VARIANCE. ValueError (not warning) on unsupported in-memory change types. Completed 2026-03-27.
 - [x] **M7.16: Round-trip consumption tests (O26)** — 6 tests verifying compile → apply_in_memory → config structure matches consumer expectations. Completed 2026-03-27.
 - [x] **M7.17: Stale cache invalidation (O27)** — Deleted pre-O16 `measure_cache.json` with `current_concept=None` entries. Completed 2026-03-27.
+- [x] **M7.18: MappingSource.OVERRIDE + Strategy 0 hard failure (O33-O38)** — New `OVERRIDE` enum value separates company overrides from exclusions. Strategy 0 returns OVERRIDE (not CONFIG), so validator and CQS process overrides normally instead of auto-passing. Strategy 0 hard failure returns `ConfidenceLevel.INVALID` when preferred_concept not found (no silent fallthrough to Strategy 1). Completed 2026-03-27.
 
 ---
 

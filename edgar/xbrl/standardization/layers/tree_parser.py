@@ -134,10 +134,10 @@ class TreeParser:
             if preferred:
                 # Support both single string and list of fallback concepts
                 preferred_list = preferred if isinstance(preferred, list) else [preferred]
+
+                # Phase 1: Cheap calc-tree lookup (O(1) dict check per pref)
                 for pref in preferred_list:
-                    # Strip namespace for calc tree lookup
                     pref_clean = pref.split(':')[-1] if ':' in pref else pref
-                    # Check if concept exists in calculation trees
                     if pref_clean in all_concepts:
                         concept_ref = pref if ':' in pref else f"us-gaap:{pref}"
                         return MappingResult(
@@ -147,11 +147,13 @@ class TreeParser:
                             concept=concept_ref,
                             confidence=0.98,
                             confidence_level=ConfidenceLevel.HIGH,
-                            source=MappingSource.CONFIG,
+                            source=MappingSource.OVERRIDE,
                             reasoning=f"Company override: preferred_concept={pref}",
                             tree_context=self._get_tree_context(xbrl, pref_clean)
                         )
-                    # Also check facts (concept may not be in calc trees)
+
+                # Phase 2: Facts lookup (only if no calc-tree hit)
+                for pref in preferred_list:
                     matched = self._verify_concept_in_facts(xbrl, pref)
                     if matched:
                         return MappingResult(
@@ -161,9 +163,24 @@ class TreeParser:
                             concept=matched,
                             confidence=0.95,
                             confidence_level=ConfidenceLevel.HIGH,
-                            source=MappingSource.CONFIG,
+                            source=MappingSource.OVERRIDE,
                             reasoning=f"Company override (facts-verified): preferred_concept={pref}"
                         )
+
+                # Hard failure: do not silently fall through to Strategy 1
+                logger.warning(
+                    "Strategy 0 MISS: preferred_concept=%s not found in "
+                    "calc trees or facts for %s:%s",
+                    preferred_list, ticker, metric_name
+                )
+                return MappingResult(
+                    metric=metric_name,
+                    company=ticker,
+                    fiscal_period=fiscal_period,
+                    confidence_level=ConfidenceLevel.INVALID,
+                    source=MappingSource.OVERRIDE,
+                    reasoning=f"Override MISS: preferred_concept={preferred_list} not in calc trees or facts"
+                )
 
         # Strategy 1: Direct match against known concepts
         # IMPORTANT: Skip direct matching for composite metrics - they require aggregation

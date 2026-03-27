@@ -1127,6 +1127,52 @@
       "documented_discrepancies": 0,
       "new_concepts": [],
       "new_discrepancies": []
+    },
+    {
+      "run_id": "pipeline-test-batch",
+      "timestamp": "2026-03-27T19:49:00.682972",
+      "companies": [
+        "AAPL",
+        "MSFT"
+      ],
+      "company_count": 2,
+      "total_metrics": 8,
+      "mapped_metrics": 6,
+      "excluded_metrics": 0,
+      "raw_coverage_pct": 75.0,
+      "adjusted_coverage_pct": 75.0,
+      "matched_count": 6,
+      "trusted_count": 0,
+      "discrepancy_count": 0,
+      "universal_concepts": 0,
+      "industry_rules": 0,
+      "company_specific_rules": 0,
+      "documented_discrepancies": 0,
+      "new_concepts": [],
+      "new_discrepancies": []
+    },
+    {
+      "run_id": "pipeline-test-batch",
+      "timestamp": "2026-03-27T20:00:06.543185",
+      "companies": [
+        "AAPL",
+        "MSFT"
+      ],
+      "company_count": 2,
+      "total_metrics": 8,
+      "mapped_metrics": 6,
+      "excluded_metrics": 0,
+      "raw_coverage_pct": 75.0,
+      "adjusted_coverage_pct": 75.0,
+      "matched_count": 6,
+      "trusted_count": 0,
+      "discrepancy_count": 0,
+      "universal_concepts": 0,
+      "industry_rules": 0,
+      "company_specific_rules": 0,
+      "documented_discrepancies": 0,
+      "new_concepts": [],
+      "new_discrepancies": []
     }
   ]
 }

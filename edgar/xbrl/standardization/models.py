@@ -21,7 +21,8 @@ class MappingSource(Enum):
     AI = "ai"               # Layer 2: AI semantic mapper
     TEMPORAL = "temporal"   # Layer 3: Temporal tracker
     MANUAL = "manual"       # Manual override
-    CONFIG = "config"       # From known_concepts in config
+    CONFIG = "config"       # From known_concepts in config (exclusions only)
+    OVERRIDE = "override"   # Company-specific preferred_concept override (validated normally)
     INDUSTRY = "industry"   # Layer 4: Sector-specific logic
     UNKNOWN = "unknown"     # Not mapped
 

@@ -159,7 +159,7 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 | `reference_validator.py` | Validation against yfinance + SEC API |
 | `internal_validator.py` | Accounting equation consistency checks |
 | `ledger/schema.py` | SQLite experiment ledger schema |
-| `models.py` | MappingResult, MappingSource, ConfidenceLevel |
+| `models.py` | MappingResult, MappingSource (CONFIG=exclusion, OVERRIDE=company override), ConfidenceLevel |
 | `config_loader.py` | YAML config loading |
 
 ---
@@ -216,6 +216,11 @@ These persist across all sessions and guide all future work:
 36. **Round-trip consumption tests are mandatory for config mutation code** — prevents future drift between in-memory and disk paths (Session 011)
 37. **Diagnostic-first for complex pipeline issues** — when CQS shows exactly zero movement, instrument first, fix second. Code reading alone is insufficient for multi-layer pipeline bugs (Session 012)
 38. **`_compute_sa_composite()` is the evaluation bottleneck** — formula pipeline is wired end-to-end but this function is a black box. Needs logging for components found/missing, composite value, promotion decision (Session 012)
+39. **`MappingSource.OVERRIDE` is mandatory** — company overrides must be validated against reference data, not auto-passed. `CONFIG` is reserved for excluded metrics only (Session 013)
+40. **Strategy 0 hard failure on missing override** — if `preferred_concept` is set but not found in calc trees or facts, return `ConfidenceLevel.INVALID`. Do not silently fall through to Strategy 1 (Session 013)
+41. **AI resolver role is semantic adjudication, not concept hunting** — deterministic solver owns discovery; AI owns judgment (DOCUMENT_DIVERGENCE, semantic choice, formula design). AI prompt must include WHY deterministic rejected each candidate (Session 013)
+42. **Overrides search facts, not just calc trees** — calc linkbases are notoriously incomplete. Override primacy means search across all data sources before declaring failure (Session 013)
+43. **EF and SA verification should be decoupled long-term** — "correct GAAP concept" (EF) and "matches yfinance aggregate" (SA) are different questions. Conflating them causes correct extractions to fail CQS gates. Phase 2 work (Session 013)
 
 ---
 
