@@ -16,7 +16,7 @@ Usage inside Claude Code:
         make_openrouter_caller, MODEL_REGISTRY, DEFAULT_API_MODEL,
         # Typed action pipeline
         TypedAction, ACTION_VOCABULARY,
-        parse_typed_action, compile_action, validate_action_preflight,
+        parse_typed_action, compile_action, normalize_concept, validate_action_preflight,
         build_typed_action_prompt, collect_typed_proposals,
         # Phase 7: Closed-loop AI dispatch & evaluation
         dispatch_ai_gaps, AIDispatchReport,
@@ -261,19 +261,49 @@ def parse_typed_action(
 # ACTION COMPILER (Phase 2)
 # =============================================================================
 
-def compile_action(action: TypedAction) -> Optional[ConfigChange]:
+def normalize_concept(concept: str) -> str:
+    """Strip namespace prefix from XBRL concept for config storage.
+
+    Config stores bare names (e.g., 'GrossProfit' not 'us-gaap:GrossProfit')
+    because the tree parser strips namespaces when building its concept index.
+    """
+    return concept.split(':')[-1] if ':' in concept else concept
+
+
+def compile_action(action: TypedAction, gap: Optional['UnresolvedGap'] = None) -> Optional[ConfigChange]:
     """Translate a TypedAction into a ConfigChange with correct YAML paths.
 
     This is the layer that knows the config schema. The AI never needs to.
     Returns None for ESCALATE actions (logged, not applied).
-    """
 
+    Args:
+        action: The typed action from AI or auto-resolve.
+        gap: Optional gap context for routing decisions. When provided,
+             high_variance gaps route MAP_CONCEPT to company-scoped overrides
+             instead of global concept additions.
+    """
     if action.action == "MAP_CONCEPT":
+        concept = normalize_concept(action.params["concept"])
+
+        # O13: Route by gap type — high_variance needs company-scoped override
+        if gap is not None and gap.gap_type == "high_variance":
+            return ConfigChange(
+                file="companies.yaml",
+                change_type=ChangeType.ADD_COMPANY_OVERRIDE,
+                yaml_path=f"companies.{action.ticker}.metric_overrides.{action.metric}",
+                new_value={"preferred_concept": concept},
+                rationale=f"[AI/typed] {action.rationale}",
+                target_metric=action.metric,
+                target_companies=action.ticker,
+                source="ai_agent",
+            )
+
+        # Default (unmapped or no gap context): global concept addition
         return ConfigChange(
             file="metrics.yaml",
             change_type=ChangeType.ADD_CONCEPT,
             yaml_path=f"metrics.{action.metric}.known_concepts",
-            new_value=action.params["concept"],
+            new_value=concept,
             rationale=f"[AI/typed] {action.rationale}",
             target_metric=action.metric,
             target_companies=action.ticker,
@@ -566,7 +596,7 @@ def collect_typed_proposals(
             logger.info(f"Skipping {gap.ticker}:{gap.metric} — invalid typed action")
             continue
 
-        change = compile_action(typed_action)
+        change = compile_action(typed_action, gap=gap)
         if change is None:
             logger.info(
                 f"Skipping {gap.ticker}:{gap.metric} — "
@@ -1352,7 +1382,7 @@ def _downgrade_to_company_scope(
     Uses the battle-tested Strategy 0 mechanism (tree_parser.py:129-166)
     which reads preferred_concept from companies.{ticker}.metric_overrides.{metric}.
     """
-    concept = original_change.new_value  # e.g., "us-gaap:GrossProfit"
+    concept = normalize_concept(original_change.new_value)
     metric = original_change.target_metric
     return ConfigChange(
         file="companies.yaml",

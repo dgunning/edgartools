@@ -92,7 +92,7 @@ def filter_actionable_gaps(gaps: List['UnresolvedGap']) -> List['UnresolvedGap']
             skipped += 1
             logger.info(
                 f"Skipping {gap.ticker}:{gap.metric} — disposition={gap.disposition} "
-                f"(root_cause={gap.root_cause})"
+                f"(root_cause={gap.root_cause}, ref={gap.reference_value})"
             )
         else:
             actionable.append(gap)

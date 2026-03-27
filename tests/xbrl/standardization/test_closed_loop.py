@@ -32,6 +32,9 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
 from edgar.xbrl.standardization.tools.consult_ai_gaps import (
     AIDispatchReport,
     AIEvalReport,
+    TypedAction,
+    compile_action,
+    normalize_concept,
     dispatch_ai_gaps,
     evaluate_ai_proposals_live,
     _is_peer_regression,
@@ -274,8 +277,10 @@ class TestDispatchAIGaps:
 
         assert report.valid_proposals == 1
         assert len(proposals) == 1
-        assert proposals[0].proposal.change_type == ChangeType.ADD_CONCEPT
-        assert proposals[0].proposal.new_value == "us-gaap:GrossProfit"
+        # O13: high_variance gap → company override (not global ADD_CONCEPT)
+        assert proposals[0].proposal.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+        # O12: namespace stripped
+        assert proposals[0].proposal.new_value == {"preferred_concept": "GrossProfit"}
 
     @pytest.mark.fast
     def test_invalid_responses_produce_zero_proposals(self, mock_candidates, mock_onboarded, tmp_path):
@@ -401,7 +406,9 @@ class TestAutoResolve:
         assert report.api_calls == 0
         assert call_count["n"] == 0
         assert len(proposals) == 1
-        assert proposals[0].proposal.new_value == "us-gaap:Revenues"
+        # O13: high_variance → company override; O12: namespace stripped
+        assert proposals[0].proposal.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+        assert proposals[0].proposal.new_value == {"preferred_concept": "Revenues"}
 
     @pytest.mark.fast
     def test_auto_resolve_rejects_extension_concepts(self, tmp_path):
@@ -1121,7 +1128,7 @@ class TestDowngradeToCompanyScope:
         assert downgraded.file == "companies.yaml"
         assert downgraded.change_type == ChangeType.ADD_COMPANY_OVERRIDE
         assert downgraded.yaml_path == "companies.XOM.metric_overrides.GrossProfit"
-        assert downgraded.new_value == {"preferred_concept": "us-gaap:GrossProfit"}
+        assert downgraded.new_value == {"preferred_concept": "GrossProfit"}  # O12: normalized
         assert downgraded.target_metric == "GrossProfit"
         assert downgraded.target_companies == "XOM"
         assert "O11 downgrade" in downgraded.rationale
@@ -1275,3 +1282,134 @@ class TestDowngradeIntegration:
         assert report.downgrade_kept == 0
         # O5 retry should have been called since downgrade failed
         assert mock_retry.called
+
+
+# =============================================================================
+# GROUP 5: O12 — Namespace Normalization
+# =============================================================================
+
+class TestNormalizeConcept:
+
+    @pytest.mark.fast
+    def test_strips_us_gaap_prefix(self):
+        assert normalize_concept("us-gaap:GrossProfit") == "GrossProfit"
+
+    @pytest.mark.fast
+    def test_strips_dei_prefix(self):
+        assert normalize_concept("dei:EntityCommonStockSharesOutstanding") == "EntityCommonStockSharesOutstanding"
+
+    @pytest.mark.fast
+    def test_strips_ifrs_prefix(self):
+        assert normalize_concept("ifrs-full:Revenue") == "Revenue"
+
+    @pytest.mark.fast
+    def test_bare_name_unchanged(self):
+        assert normalize_concept("GrossProfit") == "GrossProfit"
+
+    @pytest.mark.fast
+    def test_empty_string(self):
+        assert normalize_concept("") == ""
+
+
+class TestCompileActionNormalization:
+
+    @pytest.mark.fast
+    def test_compile_action_normalizes_concept(self):
+        """MAP_CONCEPT with namespace prefix produces bare concept in ConfigChange."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="AAPL",
+            metric="GrossProfit",
+            params={"concept": "us-gaap:GrossProfit"},
+            rationale="test",
+        )
+        change = compile_action(action)
+        assert change is not None
+        assert change.new_value == "GrossProfit"  # Bare, not "us-gaap:GrossProfit"
+
+    @pytest.mark.fast
+    def test_compile_action_bare_concept_unchanged(self):
+        """MAP_CONCEPT with bare concept passes through unchanged."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="AAPL",
+            metric="Revenue",
+            params={"concept": "Revenues"},
+            rationale="test",
+        )
+        change = compile_action(action)
+        assert change is not None
+        assert change.new_value == "Revenues"
+
+
+# =============================================================================
+# GROUP 6: O13 — Gap-Aware Compiler Routing
+# =============================================================================
+
+class TestCompileActionRouting:
+
+    @pytest.mark.fast
+    def test_routes_unmapped_to_global(self):
+        """unmapped gap → ADD_CONCEPT in metrics.yaml."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="AAPL",
+            metric="Revenue",
+            params={"concept": "us-gaap:Revenues"},
+            rationale="test",
+        )
+        gap = _make_unresolved_gap(ticker="AAPL", metric="Revenue", gap_type="unmapped")
+        change = compile_action(action, gap=gap)
+        assert change is not None
+        assert change.file == "metrics.yaml"
+        assert change.change_type == ChangeType.ADD_CONCEPT
+        assert change.new_value == "Revenues"  # Normalized
+
+    @pytest.mark.fast
+    def test_routes_high_variance_to_override(self):
+        """high_variance gap → ADD_COMPANY_OVERRIDE in companies.yaml with preferred_concept."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="JPM",
+            metric="GrossProfit",
+            params={"concept": "us-gaap:GrossProfit"},
+            rationale="test",
+        )
+        gap = _make_unresolved_gap(ticker="JPM", metric="GrossProfit", gap_type="high_variance")
+        change = compile_action(action, gap=gap)
+        assert change is not None
+        assert change.file == "companies.yaml"
+        assert change.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+        assert change.new_value == {"preferred_concept": "GrossProfit"}
+        assert change.yaml_path == "companies.JPM.metric_overrides.GrossProfit"
+
+    @pytest.mark.fast
+    def test_no_gap_defaults_to_global(self):
+        """No gap context (backward compat) → ADD_CONCEPT in metrics.yaml."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="AAPL",
+            metric="Revenue",
+            params={"concept": "us-gaap:Revenues"},
+            rationale="test",
+        )
+        change = compile_action(action)  # No gap argument
+        assert change is not None
+        assert change.file == "metrics.yaml"
+        assert change.change_type == ChangeType.ADD_CONCEPT
+
+    @pytest.mark.fast
+    def test_downgrade_normalizes_concept(self):
+        """O11 downgrade path also normalizes namespace prefix."""
+        original = ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_CONCEPT,
+            yaml_path="metrics.GrossProfit.known_concepts",
+            new_value="us-gaap:GrossProfit",  # Pre-normalization value
+            rationale="test",
+            target_metric="GrossProfit",
+            target_companies="JPM",
+            source="ai_agent",
+        )
+        downgraded = _downgrade_to_company_scope(original, "JPM")
+        assert downgraded.new_value == {"preferred_concept": "GrossProfit"}  # Normalized
