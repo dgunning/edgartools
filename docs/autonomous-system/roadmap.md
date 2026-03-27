@@ -77,6 +77,17 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - Key: Deterministic solver has reached its ceiling. All remaining gaps require AI resolution. Confirms need for Lead Agent Closed Loop (Phase 7).
 - Code fixes this session: `use_sec_facts` defaults → `True`, `reference_validator.py` variance bug fix, progress printing added to `run_overnight()`.
 
+**Run 007 (2026-03-26)** — 19 min, 10 companies, value-grounded AI consultation (O7-O9)
+- Result: 0/4 kept, 4 discards (3 pre-screened), 1 retry. **3 auto-resolved** (O9), 2 API calls, $0.006 total cost.
+- CQS: 0.9121→0.9121, EF-CQS: 0.6349→0.6349.
+- Key: O8+O9 correctly find value-matching concepts and skip API calls (60% budget saved). CQS gate rejects because auto-resolved concepts cause cross-company regressions (e.g., `us-gaap:GrossProfit` for XOM causes PFE to drop -100pp). Root cause: concepts need company-scoped application, not global. Value search works; scoping is the next blocker.
+
+**Run 008 (2026-03-27)** — 5.6 min, 10 companies, manifest caching (O10) + deterministic downgrade (O11)
+- Result: 0/3 kept, 3 discards (all pre-screened), 0 downgrade attempts. 2 auto-resolved (O9), 2 API calls, $0.003 total cost.
+- CQS: 0.9121→0.9121, EF-CQS: 0.6349→0.6349.
+- O10 cache: second run MEASURE 245s→0s (cache hit confirmed).
+- Key: **All proposals are no-ops** — two compiler bugs prevent AI proposals from reaching extraction. (1) Namespace mismatch: `us-gaap:X` in config vs bare `X` in tree parser index. (2) Wrong action type: MAP_CONCEPT→ADD_CONCEPT for high_variance gaps (already mapped, need Strategy 0 preferred_concept override). Session 009 consensus: gap-aware compiler (O12-O14).
+
 ---
 
 ## Consensus Sessions
@@ -89,7 +100,9 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 004 | 2026-03-24 | GPT-5.4 + Gemini 3.1 | Autonomous architecture: LIS, evidence tiers, two-tier AI | Phase 6 created |
 | 005 | 2026-03-25 | GPT-5.4 + Gemini 3.1 | Subscription-grade readiness: accuracy thresholds, SEC-native primacy, product requirements | Action items created |
 | 006 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Closed-loop pipeline optimization: prompt enrichment, per-company circuit breaker, retry-with-feedback, in-memory pre-screen | All implemented |
-| 007 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Value-grounded AI consultation: reverse value search, evidence table prompts, three-tier dispatch | Action items created |
+| 007 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Value-grounded AI consultation: reverse value search, evidence table prompts, three-tier dispatch | All implemented |
+| 008 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Manifest caching & cross-company regression: fingerprint-gated cache, deterministic downgrade (global-first, auto-scope on regression) | Action items created |
+| 009 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Compiler architecture flaws: namespace mismatch, gap-aware routing, actionability filter fix | Unanimous consensus |
 
 ### Session 004 Unanimous Agreements
 
@@ -118,6 +131,8 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | Benchmark-Gemini | 2026-03-24 | Gemini 3.1 | `261ad1fa-b6a3-421a-949e-a760cb93bac9` |
 | 005 | 2026-03-25 | GPT-5.4 + Gemini 3.1 | `58885999-a3b7-445c-91ca-346bfaeb0fdb` |
 | 006 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | `0ad231f4-2c76-4211-a617-aacf2486f61d` |
+| 008 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | `043aa8af-8c71-4f85-b496-15066abb64d3` |
+| 009 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `35d790f6-7f49-482f-b4a9-abb07d076867` |
 
 ---
 
@@ -210,6 +225,9 @@ For each 50-company batch:
 - [x] **M7.2: AI response → CQS gate** — `evaluate_ai_proposals_live()` evaluates proposals in-memory through same CQS/LIS gate with circuit breaker (10 consecutive failures). Completed 2026-03-26.
 - [x] **M7.3: Closed-loop orchestration** — `run_closed_loop()` orchestrates deterministic solver (40% budget) → AI resolution (60% budget) in sequence. Completed 2026-03-26.
 - [x] **M7.4: Batch expansion to 500** — `run_batch_expansion()` splits large cohorts into batches, runs closed loop on each, graduates at EF-CQS threshold. Completed 2026-03-26.
+- [x] **M7.5: Reverse value search (O8)** — `_search_by_value()` in `discover_concepts.py` finds concepts by matching extracted value to reference. `CandidateConcept` extended with `extracted_value` and `delta_pct`. Completed 2026-03-26. `f1fe3e91`.
+- [x] **M7.6: Value-enriched prompts (O7)** — `_build_candidates_context()` returns evidence table (`concept | value | ref | delta% | source`) + enriched candidate list. AI sees numerical evidence, not just concept names. Completed 2026-03-26. `f1fe3e91`.
+- [x] **M7.7: Auto-resolve from value search (O9)** — `_try_auto_resolve()` emits typed action for `us-gaap:` concepts with <2% variance, skipping API call. `auto_resolved` field on `AIDispatchReport`. Completed 2026-03-26. `f1fe3e91`.
 
 ---
 

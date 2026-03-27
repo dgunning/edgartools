@@ -146,7 +146,7 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 | `tools/auto_eval_dashboard.py` | Morning review terminal dashboard |
 | `tools/auto_solver.py` | Subset-sum formula discovery |
 | `tools/consult_ai_gaps.py` | AI consultation pipeline, typed actions, OpenRouter caller |
-| `tools/discover_concepts.py` | Search calc trees + facts for concept candidates |
+| `tools/discover_concepts.py` | Search calc trees + facts + reverse value search for concept candidates |
 | `tools/verify_mapping.py` | Value comparison against yfinance |
 | `tools/learn_mappings.py` | Cross-company pattern discovery |
 | `tools/auto_eval_checkpoint.py` | Checkpoint I/O and team dashboard |
@@ -197,6 +197,13 @@ These persist across all sessions and guide all future work:
 17. **Value-grounded prompts are mandatory** — AI must see `concept | extracted_value | delta_pct` for every candidate, not just name/confidence (Session 007)
 18. **Reverse value search belongs in the deterministic layer** — search facts for concepts matching the reference value as a DataFrame filter, not as an agent operation (Session 007)
 19. **Three-tier dispatch: deterministic → enriched API → local agent** — value-aware discovery first, Gemini Flash with evidence table second, local agents only for residuals (Session 007)
+20. **Cache gap manifest when config fingerprint unchanged** — don't re-run 250s MEASURE for DISCARD iterations. Invalidate only on KEEP (Session 008)
+21. **Global-first, scoped-fallback for concept mappings** — try MAP_CONCEPT globally, auto-downgrade to ADD_COMPANY_OVERRIDE on peer regression at pre-screen level (Session 008)
+22. **Deterministic Downgrade at pre-screen, not full CQS gate** — fast enough (~1s) to try both scopes without significant validation cost (Session 008)
+23. **Compiler must be gap-aware** — `compile_action(action, gap)` signature. AI emits semantic intent, compiler owns scope + namespace translation (Session 009)
+24. **Namespace normalization at compiler boundary** — strip `us-gaap:` prefix via `.split(':')[-1]` before writing to any config. Bare names are the canonical form (Session 009)
+25. **MAP_CONCEPT routes by gap type** — unmapped → global ADD_CONCEPT, high_variance → company-scoped ADD_COMPANY_OVERRIDE with preferred_concept (Session 009)
+26. **Unmapped gaps are actionable by default** — only filter out engineering_backlog / forbidden-by-industry (Session 009)
 
 ---
 
@@ -241,12 +248,14 @@ For each 50-company batch:
      → Resolves C1 gaps (known patterns, solver formulas)
      → Produces GapManifest JSON with all unresolved gaps
 
-  2. AI RESOLUTION: Lead agent reads GapManifest, spawns subagents
-     → gap-solver (standard gaps: semantic_mapper, reference_auditor)
-     → gap-investigator (hard gaps: pattern_learner, regression_investigator)
-     → Each subagent returns TypedAction JSON
-     → Lead agent feeds through: parse_typed_action() → compile_action()
-       → evaluate_experiment() (same CQS gate)
+  2. AI RESOLUTION: Three-tier dispatch (O7-O9)
+     Tier 1: Auto-resolve — reverse value search finds us-gaap: concepts
+             with <2% variance, emits typed action without API call
+     Tier 2: Enriched API — Gemini Flash with value-enriched evidence table
+             (concept | extracted_value | ref_value | delta_pct | source)
+     Tier 3: Local agents — gap-solver / gap-investigator for residuals
+     → All tiers produce TypedAction JSON
+     → parse_typed_action() → compile_action() → CQS gate
 
   3. GRADUATE: If batch EF-CQS >= 0.80, promote and move to next batch
 ```

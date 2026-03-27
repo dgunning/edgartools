@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock, patch, PropertyMock
 
-from edgar.xbrl.standardization.tools.auto_eval import CQSResult, MetricGap
+from edgar.xbrl.standardization.tools.auto_eval import CQSResult, CompanyCQS, MetricGap
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
     ChangeType,
     ConfigChange,
@@ -24,12 +24,18 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
     UnresolvedGap,
     GAP_MANIFESTS_DIR,
     QUICK_EVAL_COHORT,
+    save_measure_cache,
+    load_measure_cache,
+    MEASURE_CACHE_PATH,
+    get_config_fingerprint,
 )
 from edgar.xbrl.standardization.tools.consult_ai_gaps import (
     AIDispatchReport,
     AIEvalReport,
     dispatch_ai_gaps,
     evaluate_ai_proposals_live,
+    _is_peer_regression,
+    _downgrade_to_company_scope,
 )
 
 
@@ -912,3 +918,360 @@ class TestRunBatchExpansion:
                 ai_caller=lambda p, m: None,
                 skip_precondition=False,
             )
+
+
+# =============================================================================
+# GROUP 5: O10 — Manifest Caching
+# =============================================================================
+
+def _make_real_cqs_result(cqs=0.95, ef_cqs=0.90, company_tickers=None) -> CQSResult:
+    """Build a real CQSResult (not a MagicMock) for serialization tests."""
+    company_scores = {}
+    for ticker in (company_tickers or ["AAPL"]):
+        company_scores[ticker] = CompanyCQS(
+            ticker=ticker, pass_rate=0.9, mean_variance=5.0,
+            coverage_rate=0.95, golden_master_rate=0.8,
+            regression_count=0, metrics_total=20, metrics_mapped=19,
+            metrics_valid=18, metrics_excluded=1, cqs=cqs,
+        )
+    return CQSResult(
+        pass_rate=0.9, mean_variance=5.0, coverage_rate=0.95,
+        golden_master_rate=0.8, regression_rate=0.0,
+        cqs=cqs, companies_evaluated=len(company_scores),
+        total_metrics=20, total_mapped=19, total_valid=18,
+        total_regressions=0, ef_cqs=ef_cqs,
+        company_scores=company_scores,
+        regressed_metrics=[("AAPL", "Revenue")],
+    )
+
+
+class TestCQSResultRoundTrip:
+
+    @pytest.mark.fast
+    def test_cqs_result_round_trips(self):
+        """CQSResult.to_dict() -> CQSResult.from_dict() preserves all fields."""
+        original = _make_real_cqs_result(cqs=0.9575, ef_cqs=0.9123, company_tickers=["AAPL", "JPM"])
+        d = original.to_dict()
+        restored = CQSResult.from_dict(d)
+
+        assert restored.cqs == original.cqs
+        assert restored.ef_cqs == original.ef_cqs
+        assert restored.pass_rate == original.pass_rate
+        assert restored.companies_evaluated == original.companies_evaluated
+        assert restored.total_metrics == original.total_metrics
+        assert len(restored.company_scores) == 2
+        assert isinstance(restored.company_scores["AAPL"], CompanyCQS)
+        assert restored.company_scores["AAPL"].ticker == "AAPL"
+        assert restored.company_scores["JPM"].pass_rate == 0.9
+        # Regressed metrics round-trip as tuples
+        assert restored.regressed_metrics == [("AAPL", "Revenue")]
+
+    @pytest.mark.fast
+    def test_from_dict_handles_json_round_trip(self):
+        """CQSResult survives JSON serialization (the real cache path)."""
+        original = _make_real_cqs_result()
+        json_str = json.dumps(original.to_dict())
+        d = json.loads(json_str)
+        restored = CQSResult.from_dict(d)
+        assert restored.cqs == original.cqs
+        assert restored.regressed_metrics == [("AAPL", "Revenue")]
+
+
+class TestMeasureCache:
+
+    @pytest.mark.fast
+    def test_measure_cache_hit(self, tmp_path):
+        """save_measure_cache() then load_measure_cache() with matching config returns result."""
+        cqs = _make_real_cqs_result()
+        manifest_path = tmp_path / "manifest_test.json"
+        manifest_path.write_text("{}")  # Dummy manifest file
+        cohort = ["AAPL", "JPM"]
+
+        with patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.MEASURE_CACHE_PATH",
+            tmp_path / "cache.json",
+        ), patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.get_config_fingerprint",
+            return_value="abc123",
+        ):
+            save_measure_cache(manifest_path, cqs, cohort)
+            result = load_measure_cache(cohort)
+
+        assert result is not None
+        path, restored_cqs = result
+        assert path == manifest_path
+        assert restored_cqs.cqs == cqs.cqs
+        assert restored_cqs.ef_cqs == cqs.ef_cqs
+
+    @pytest.mark.fast
+    def test_measure_cache_miss_fingerprint(self, tmp_path):
+        """Changed config fingerprint -> cache miss."""
+        cqs = _make_real_cqs_result()
+        manifest_path = tmp_path / "manifest_test.json"
+        manifest_path.write_text("{}")
+        cohort = ["AAPL"]
+
+        fingerprints = iter(["abc123", "xyz789"])
+
+        with patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.MEASURE_CACHE_PATH",
+            tmp_path / "cache.json",
+        ), patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.get_config_fingerprint",
+            side_effect=lambda: next(fingerprints),
+        ):
+            save_measure_cache(manifest_path, cqs, cohort)
+            result = load_measure_cache(cohort)
+
+        assert result is None
+
+    @pytest.mark.fast
+    def test_measure_cache_miss_cohort(self, tmp_path):
+        """Different cohort -> cache miss."""
+        cqs = _make_real_cqs_result()
+        manifest_path = tmp_path / "manifest_test.json"
+        manifest_path.write_text("{}")
+
+        with patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.MEASURE_CACHE_PATH",
+            tmp_path / "cache.json",
+        ), patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.get_config_fingerprint",
+            return_value="abc123",
+        ):
+            save_measure_cache(manifest_path, cqs, ["AAPL"])
+            result = load_measure_cache(["AAPL", "JPM"])  # Different cohort
+
+        assert result is None
+
+
+# =============================================================================
+# GROUP 6: O11 — Deterministic Downgrade
+# =============================================================================
+
+class TestPeerRegression:
+
+    @pytest.mark.fast
+    def test_peer_regression_detected(self):
+        """Returns True when target improved but peer regressed."""
+        decision = ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=0.95,
+            cqs_after=0.94,
+            reason="Company PFE dropped -5.0pp",
+            company_deltas={"XOM": 3.0, "PFE": -5.0, "AAPL": 0.0},
+        )
+        assert _is_peer_regression(decision, "XOM") is True
+
+    @pytest.mark.fast
+    def test_peer_regression_not_detected_when_target_regresses(self):
+        """Returns False when target itself regressed (not a scoping issue)."""
+        decision = ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=0.95,
+            cqs_after=0.94,
+            reason="Target regressed",
+            company_deltas={"XOM": -3.0, "PFE": -5.0},
+        )
+        assert _is_peer_regression(decision, "XOM") is False
+
+    @pytest.mark.fast
+    def test_peer_regression_not_detected_on_keep(self):
+        """Returns False for KEEP decisions (no downgrade needed)."""
+        decision = ExperimentDecision(
+            decision=Decision.KEEP,
+            cqs_before=0.95,
+            cqs_after=0.96,
+            reason="Improved",
+            company_deltas={"XOM": 3.0, "PFE": -0.5},
+        )
+        assert _is_peer_regression(decision, "XOM") is False
+
+    @pytest.mark.fast
+    def test_peer_regression_not_detected_small_delta(self):
+        """Returns False when peer delta is small (>= -1.0)."""
+        decision = ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=0.95,
+            cqs_after=0.94,
+            reason="No improvement",
+            company_deltas={"XOM": 2.0, "PFE": -0.5},
+        )
+        assert _is_peer_regression(decision, "XOM") is False
+
+
+class TestDowngradeToCompanyScope:
+
+    @pytest.mark.fast
+    def test_downgrade_creates_correct_config_change(self):
+        """Downgrade produces ADD_COMPANY_OVERRIDE with preferred_concept."""
+        original = ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_CONCEPT,
+            yaml_path="metrics.GrossProfit.known_concepts",
+            new_value="us-gaap:GrossProfit",
+            rationale="AI found concept",
+            target_metric="GrossProfit",
+            target_companies="XOM",
+            source="ai_agent",
+        )
+
+        downgraded = _downgrade_to_company_scope(original, "XOM")
+
+        assert downgraded.file == "companies.yaml"
+        assert downgraded.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+        assert downgraded.yaml_path == "companies.XOM.metric_overrides.GrossProfit"
+        assert downgraded.new_value == {"preferred_concept": "us-gaap:GrossProfit"}
+        assert downgraded.target_metric == "GrossProfit"
+        assert downgraded.target_companies == "XOM"
+        assert "O11 downgrade" in downgraded.rationale
+        assert downgraded.source == "ai_agent"
+
+
+class TestDowngradeIntegration:
+
+    @pytest.mark.fast
+    def test_downgrade_keeps_on_peer_regression(self):
+        """Full integration: peer regression -> downgrade -> KEEP."""
+        proposals = [_make_proposal(ticker="XOM", metric="GrossProfit")]
+        baseline = _make_cqs_result(
+            cqs=0.95, ef_cqs=0.90,
+            company_scores={
+                "XOM": MagicMock(pass_rate=0.85),
+                "PFE": MagicMock(pass_rate=0.90),
+            },
+        )
+
+        # Pre-screen returns DISCARD with peer regression
+        pre_screen_discard = ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=0.95,
+            cqs_after=0.94,
+            reason="Company PFE dropped -5.0pp",
+            company_deltas={"XOM": 3.0, "PFE": -5.0},
+        )
+
+        # Downgrade pre-screen returns KEEP
+        downgrade_prescreen_keep = ExperimentDecision(
+            decision=Decision.KEEP,
+            cqs_before=0.95,
+            cqs_after=0.96,
+            reason="OK",
+        )
+
+        # Full disk eval of downgrade returns KEEP
+        new_cqs = _make_cqs_result(cqs=0.96, ef_cqs=0.91)
+        downgrade_full_keep = ExperimentDecision(
+            decision=Decision.KEEP,
+            cqs_before=0.95,
+            cqs_after=0.96,
+            reason="OK",
+            new_cqs_result=new_cqs,
+        )
+
+        # evaluate_experiment_in_memory is called twice:
+        # 1) original pre-screen -> DISCARD (peer regression)
+        # 2) downgraded pre-screen -> KEEP
+        in_memory_side_effects = [pre_screen_discard, downgrade_prescreen_keep]
+
+        from contextlib import ExitStack
+        stack = ExitStack()
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.evaluate_experiment_in_memory",
+            side_effect=in_memory_side_effects,
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.config_loader.get_config",
+            return_value=MagicMock(),
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.evaluate_experiment",
+            return_value=downgrade_full_keep,
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.log_experiment",
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.apply_change_to_config",
+            return_value=MagicMock(),
+        ))
+
+        with stack:
+            report = evaluate_ai_proposals_live(
+                proposals=proposals,
+                baseline_cqs=baseline,
+                eval_cohort=["XOM", "PFE"],
+            )
+
+        assert report.downgrade_attempted == 1
+        assert report.downgrade_kept == 1
+        assert report.kept == 1
+
+    @pytest.mark.fast
+    def test_downgrade_falls_through_to_retry(self):
+        """When downgrade also fails, O5 retry should still be attempted."""
+        proposal = _make_proposal(ticker="XOM", metric="GrossProfit")
+        # Set high impact so O5 retry triggers
+        proposal.gap.estimated_impact = 0.05
+        proposals = [proposal]
+        baseline = _make_cqs_result(
+            cqs=0.95, ef_cqs=0.90,
+            company_scores={
+                "XOM": MagicMock(pass_rate=0.85),
+                "PFE": MagicMock(pass_rate=0.90),
+            },
+        )
+
+        # Pre-screen returns DISCARD with peer regression
+        pre_screen_discard = ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=0.95,
+            cqs_after=0.94,
+            reason="Company PFE dropped -5.0pp",
+            company_deltas={"XOM": 3.0, "PFE": -5.0},
+        )
+
+        # Downgrade pre-screen also returns DISCARD
+        downgrade_discard = ExperimentDecision(
+            decision=Decision.DISCARD,
+            cqs_before=0.95,
+            cqs_after=0.94,
+            reason="Still no improvement after downgrade",
+        )
+
+        in_memory_side_effects = [pre_screen_discard, downgrade_discard]
+
+        from contextlib import ExitStack
+        stack = ExitStack()
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.evaluate_experiment_in_memory",
+            side_effect=in_memory_side_effects,
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.config_loader.get_config",
+            return_value=MagicMock(),
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps.log_experiment",
+        ))
+        stack.enter_context(patch(
+            "edgar.xbrl.standardization.tools.auto_eval_loop.apply_change_to_config",
+            return_value=MagicMock(),
+        ))
+
+        # Mock _do_retry to track if it's called
+        with stack, patch(
+            "edgar.xbrl.standardization.tools.consult_ai_gaps._do_retry",
+        ) as mock_retry:
+            # Provide ai_caller to enable O5 retry path
+            report = evaluate_ai_proposals_live(
+                proposals=proposals,
+                baseline_cqs=baseline,
+                eval_cohort=["XOM", "PFE"],
+                ai_caller=lambda p, m: None,
+            )
+
+        assert report.downgrade_attempted == 1
+        assert report.downgrade_kept == 0
+        # O5 retry should have been called since downgrade failed
+        assert mock_retry.called

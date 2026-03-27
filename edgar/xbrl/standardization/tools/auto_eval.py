@@ -352,6 +352,11 @@ class CompanyCQS:
     def to_dict(self) -> dict:
         return asdict(self)
 
+    @classmethod
+    def from_dict(cls, d: dict) -> 'CompanyCQS':
+        """Reconstruct from to_dict() output."""
+        return cls(**d)
+
 
 @dataclass
 class ExtractionEvidence:
@@ -474,6 +479,20 @@ class CQSResult:
         d['company_scores'] = {k: v.to_dict() if isinstance(v, CompanyCQS) else v
                                for k, v in self.company_scores.items()}
         return d
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'CQSResult':
+        """Reconstruct from to_dict() output. TimingBreakdown is dropped (not needed for cache)."""
+        d = dict(d)  # Preserve caller's dict
+        company_scores = {
+            k: CompanyCQS.from_dict(v)
+            for k, v in d.pop('company_scores', {}).items()
+        }
+        d.pop('timing', None)
+        d['company_scores'] = company_scores
+        # Convert regressed_metrics list of lists back to tuples
+        d['regressed_metrics'] = [tuple(x) for x in d.get('regressed_metrics', [])]
+        return cls(**d)
 
     def summary(self) -> str:
         """One-line summary."""

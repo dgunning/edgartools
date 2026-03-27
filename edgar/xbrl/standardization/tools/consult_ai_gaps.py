@@ -55,6 +55,7 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
     ChangeType,
     ConfigChange,
     Decision,
+    ExperimentDecision,
     OvernightReport,
     ProposalRecord,
     TIER1_CONFIGS,
@@ -1316,6 +1317,55 @@ class AIDispatchReport:
 AUTO_RESOLVE_VARIANCE_THRESHOLD = 2.0  # percent
 
 
+# =============================================================================
+# O11: DETERMINISTIC DOWNGRADE (global → company-scoped)
+# =============================================================================
+
+def _is_peer_regression(
+    decision: 'ExperimentDecision',
+    target_ticker: str,
+) -> bool:
+    """Detect: target company improved (or neutral) but peer(s) regressed.
+
+    This is the signature of a global ADD_CONCEPT that helps the target
+    but breaks other companies. The fix is to scope it to company-level.
+    """
+    if decision.decision != Decision.DISCARD:
+        return False
+    if not decision.company_deltas:
+        return False
+    target_delta = decision.company_deltas.get(target_ticker, 0.0)
+    if target_delta < -1.0:
+        return False  # Target itself regressed — not a scoping issue
+    for ticker, delta in decision.company_deltas.items():
+        if ticker != target_ticker and delta < -1.0:
+            return True
+    return False
+
+
+def _downgrade_to_company_scope(
+    original_change: 'ConfigChange',
+    target_ticker: str,
+) -> 'ConfigChange':
+    """O11: Convert global ADD_CONCEPT to company-scoped preferred_concept override.
+
+    Uses the battle-tested Strategy 0 mechanism (tree_parser.py:129-166)
+    which reads preferred_concept from companies.{ticker}.metric_overrides.{metric}.
+    """
+    concept = original_change.new_value  # e.g., "us-gaap:GrossProfit"
+    metric = original_change.target_metric
+    return ConfigChange(
+        file="companies.yaml",
+        change_type=ChangeType.ADD_COMPANY_OVERRIDE,
+        yaml_path=f"companies.{target_ticker}.metric_overrides.{metric}",
+        new_value={"preferred_concept": concept},
+        rationale=f"[O11 downgrade] Global caused peer regression; scoped to {target_ticker}",
+        target_metric=metric,
+        target_companies=target_ticker,
+        source=original_change.source,
+    )
+
+
 def _try_auto_resolve(
     enriched_candidates: List['CandidateConcept'],
     gap: 'UnresolvedGap',
@@ -1535,6 +1585,8 @@ class AIEvalReport:
     retries: int = 0
     retry_kept: int = 0
     pre_screen_filtered: int = 0
+    downgrade_attempted: int = 0
+    downgrade_kept: int = 0
 
 
 def _format_candidate_concepts(metric: str, ticker: str, top_k: int = 5) -> str:
@@ -1850,6 +1902,17 @@ def evaluate_ai_proposals_live(
                     flush=True,
                 )
 
+            # O11: Deterministic Downgrade for peer regression
+            if pre_screen_result.decision == Decision.DISCARD:
+                dg = _try_downgrade(
+                    change, target, pre_screen_result, current_baseline,
+                    baseline_config, eval_cohort, ledger, report,
+                    failures_by_company, max_workers, use_sec_facts, session_id,
+                )
+                if dg is not None:
+                    current_baseline, baseline_config = dg
+                    continue
+
             # O5: Retry-with-feedback for high-impact discards
             if (
                 pre_screen_result.decision == Decision.DISCARD
@@ -1923,6 +1986,16 @@ def evaluate_ai_proposals_live(
                 flush=True,
             )
 
+            # O11: Deterministic Downgrade for peer regression (full eval path)
+            dg = _try_downgrade(
+                change, target, result, current_baseline,
+                baseline_config, eval_cohort, ledger, report,
+                failures_by_company, max_workers, use_sec_facts, session_id,
+            )
+            if dg is not None:
+                current_baseline, baseline_config = dg
+                continue
+
             # O5: Retry-with-feedback for high-impact discards
             if (
                 ai_caller is not None
@@ -1944,6 +2017,65 @@ def evaluate_ai_proposals_live(
     report.final_baseline = current_baseline
 
     return report
+
+
+def _try_downgrade(
+    change: ConfigChange,
+    target: str,
+    decision: 'ExperimentDecision',
+    current_baseline: 'CQSResult',
+    baseline_config,
+    eval_cohort: List[str],
+    ledger: ExperimentLedger,
+    report: AIEvalReport,
+    failures_by_company: Dict[str, int],
+    max_workers: int,
+    use_sec_facts: bool,
+    session_id: str,
+) -> Optional[Tuple['CQSResult', Any]]:
+    """O11: Try converting global ADD_CONCEPT to company-scoped override on peer regression.
+
+    Returns (new_baseline, new_config) on KEEP, None on failure.
+    Mutates report counters and failures_by_company in place.
+    """
+    from edgar.xbrl.standardization.tools.auto_eval_loop import (
+        evaluate_experiment_in_memory,
+        apply_change_to_config,
+    )
+
+    if change.change_type != ChangeType.ADD_CONCEPT:
+        return None
+    if not _is_peer_regression(decision, target):
+        return None
+
+    report.downgrade_attempted += 1
+    downgraded = _downgrade_to_company_scope(change, target)
+    dg_result = evaluate_experiment_in_memory(
+        downgraded, current_baseline, baseline_config,
+        eval_cohort=eval_cohort, ledger=ledger, use_sec_facts=use_sec_facts,
+    )
+    if dg_result.decision != Decision.KEEP:
+        print(f"  O11 DOWNGRADE DISC: {target}:{change.target_metric}", flush=True)
+        return None
+
+    full_result = evaluate_experiment(
+        downgraded, current_baseline,
+        eval_cohort=eval_cohort, ledger=ledger,
+        max_workers=max_workers, use_sec_facts=use_sec_facts,
+    )
+    log_experiment(downgraded, full_result, ledger, run_id=session_id)
+    if full_result.decision != Decision.KEEP:
+        print(f"  O11 DOWNGRADE DISC: {target}:{change.target_metric}", flush=True)
+        return None
+
+    report.kept += 1
+    report.downgrade_kept += 1
+    report.config_diffs.append(downgraded.to_diff_string())
+    failures_by_company[target] = 0
+    new_baseline = full_result.new_cqs_result if full_result.new_cqs_result is not None else current_baseline
+    new_config = apply_change_to_config(downgraded, baseline_config)
+    print(f"  >>> O11 DOWNGRADE KEEP: {target}:{change.target_metric}", flush=True)
+    return new_baseline, new_config
 
 
 def _do_retry(

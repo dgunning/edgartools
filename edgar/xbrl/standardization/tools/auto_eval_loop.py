@@ -3658,6 +3658,46 @@ class GapManifest:
 GAP_MANIFESTS_DIR = Path(__file__).parent.parent / "company_mappings" / "gap_manifests"
 
 
+# =============================================================================
+# O10: FINGERPRINT-GATED MANIFEST CACHING
+# =============================================================================
+
+MEASURE_CACHE_PATH = GAP_MANIFESTS_DIR / "measure_cache.json"
+
+
+def save_measure_cache(manifest_path: Path, baseline_cqs: CQSResult, eval_cohort: List[str]) -> None:
+    """Save MEASURE results keyed by config fingerprint for cache reuse."""
+    data = {
+        "config_fingerprint": get_config_fingerprint(),
+        "created_at": datetime.now().isoformat(),
+        "manifest_path": str(manifest_path),
+        "baseline_cqs": baseline_cqs.to_dict(),
+        "eval_cohort": sorted(eval_cohort),
+    }
+    MEASURE_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MEASURE_CACHE_PATH.write_text(json.dumps(data, indent=2, default=str))
+    logger.info(f"[O10] Saved measure cache (fingerprint={data['config_fingerprint']})")
+
+
+def load_measure_cache(eval_cohort: List[str]) -> Optional[Tuple[Path, CQSResult]]:
+    """Load cached MEASURE results if config fingerprint and cohort match."""
+    if not MEASURE_CACHE_PATH.exists():
+        return None
+    try:
+        data = json.loads(MEASURE_CACHE_PATH.read_text())
+    except (json.JSONDecodeError, OSError):
+        return None
+    if data.get("config_fingerprint") != get_config_fingerprint():
+        return None
+    if sorted(data.get("eval_cohort", [])) != sorted(eval_cohort):
+        return None
+    manifest_path = Path(data["manifest_path"])
+    if not manifest_path.exists():
+        return None
+    baseline = CQSResult.from_dict(data["baseline_cqs"])
+    return manifest_path, baseline
+
+
 def save_gap_manifest(manifest: GapManifest, path: Path) -> None:
     """Save a gap manifest to JSON."""
     path.parent.mkdir(parents=True, exist_ok=True)
