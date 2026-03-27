@@ -88,6 +88,12 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - O10 cache: second run MEASURE 245s→0s (cache hit confirmed).
 - Key: **All proposals are no-ops** — two compiler bugs prevent AI proposals from reaching extraction. (1) Namespace mismatch: `us-gaap:X` in config vs bare `X` in tree parser index. (2) Wrong action type: MAP_CONCEPT→ADD_CONCEPT for high_variance gaps (already mapped, need Strategy 0 preferred_concept override). Session 009 consensus: gap-aware compiler (O12-O14).
 
+**Run 009 (2026-03-27)** — 1.8 min, 10 companies, gap-aware compiler (O12-O14)
+- Result: 0/4 kept, 4 discards (all pre-screened), 0 auto-resolved, 4 API calls, $0.003 total cost.
+- CQS: 0.9121→0.9121, EF-CQS: 0.6349→0.6349.
+- O12-O14 confirmed working: proposals now compile to correct action types (`add_company_override` for high_variance, bare concept names). Compiler pipeline is end-to-end correct.
+- Key: **0% KEEP rate persists — problem shifted from compiler to AI prompt quality**. Four failure modes identified: (1) Semantic nonsense: AI picks `ReverseRepurchaseAgreements` for IntangibleAssets because 0% delta. (2) No-op: AI proposes same concept already mapped (HD:InterestExpense). (3) Worse mapping: AI picks PPE Gross when Net is closer (MSFT). (4) Wrong statement family: AI picks `ComprehensiveIncomeNetOfTax` for AccountsReceivable. Root cause: prompt says "lowest Delta%" without semantic constraint, doesn't show current mapping. Session 010 consensus: prompt redesign (O15-O20).
+
 ---
 
 ## Consensus Sessions
@@ -102,7 +108,8 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 006 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Closed-loop pipeline optimization: prompt enrichment, per-company circuit breaker, retry-with-feedback, in-memory pre-screen | All implemented |
 | 007 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Value-grounded AI consultation: reverse value search, evidence table prompts, three-tier dispatch | All implemented |
 | 008 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Manifest caching & cross-company regression: fingerprint-gated cache, deterministic downgrade (global-first, auto-scope on regression) | Action items created |
-| 009 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Compiler architecture flaws: namespace mismatch, gap-aware routing, actionability filter fix | Unanimous consensus |
+| 009 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Compiler architecture flaws: namespace mismatch, gap-aware routing, actionability filter fix | All implemented |
+| 010 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt effectiveness: semantic-first ranking, current mapping context, candidate pre-filtering, divergence path | Unanimous consensus |
 
 ### Session 004 Unanimous Agreements
 
@@ -133,6 +140,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 006 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | `0ad231f4-2c76-4211-a617-aacf2486f61d` |
 | 008 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | `043aa8af-8c71-4f85-b496-15066abb64d3` |
 | 009 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `35d790f6-7f49-482f-b4a9-abb07d076867` |
+| 010 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `aaee647d-238c-4be6-a755-5b455486d9bb` |
 
 ---
 
