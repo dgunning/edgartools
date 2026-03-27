@@ -28,7 +28,10 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import (
     load_measure_cache,
     MEASURE_CACHE_PATH,
     get_config_fingerprint,
+    apply_change_to_config,
 )
+from edgar.xbrl.standardization.models import CompanyConfig, MetricConfig
+from edgar.xbrl.standardization.config_loader import MappingConfig
 from edgar.xbrl.standardization.tools.consult_ai_gaps import (
     AIDispatchReport,
     AIEvalReport,
@@ -1694,3 +1697,175 @@ class TestO20PreflightRejection:
         )
         err = validate_action_preflight(action)
         assert err is None
+
+
+# =============================================================================
+# GROUP: Round-Trip Consumption Tests (O21-O23)
+# =============================================================================
+
+def _make_test_config(ticker="HD", metric_name="InterestExpense", **company_kwargs):
+    """Build a minimal MappingConfig for round-trip tests."""
+    company = CompanyConfig(
+        ticker=ticker,
+        name="Test Co",
+        cik=12345,
+        **company_kwargs,
+    )
+    metric = MetricConfig(
+        name=metric_name,
+        description="Test metric",
+        known_concepts=[metric_name],
+    )
+    return MappingConfig(
+        version="test",
+        metrics={metric_name: metric},
+        companies={ticker: company},
+        defaults={},
+    )
+
+
+class TestRoundTripConsumption:
+    """O26: Verify compile → apply_in_memory → config consumed correctly."""
+
+    @pytest.mark.fast
+    def test_add_company_override_round_trip(self):
+        """O21: MAP_CONCEPT (high_variance) → apply → metric_overrides[metric] keyed correctly."""
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="HD",
+            metric="InterestExpense",
+            params={"concept": "us-gaap:InterestExpenseDebt"},
+            rationale="test override",
+        )
+        gap = _make_unresolved_gap(ticker="HD", metric="InterestExpense", gap_type="high_variance")
+        change = compile_action(action, gap=gap)
+        assert change is not None
+        assert change.change_type == ChangeType.ADD_COMPANY_OVERRIDE
+
+        config = _make_test_config()
+        result = apply_change_to_config(change, config)
+
+        # TreeParser checks: metric_name in company_config.metric_overrides
+        assert "InterestExpense" in result.companies["HD"].metric_overrides
+        override = result.companies["HD"].metric_overrides["InterestExpense"]
+        assert "preferred_concept" in override
+
+    @pytest.mark.fast
+    def test_add_company_override_preserves_sign_negate(self):
+        """O21 edge case: adding preferred_concept doesn't clobber existing sign_negate."""
+        config = _make_test_config(
+            metric_overrides={"InterestExpense": {"sign_negate": True}},
+        )
+        assert config.companies["HD"].metric_overrides["InterestExpense"]["sign_negate"] is True
+
+        action = TypedAction(
+            action="MAP_CONCEPT",
+            ticker="HD",
+            metric="InterestExpense",
+            params={"concept": "InterestExpenseDebt"},
+            rationale="test",
+        )
+        gap = _make_unresolved_gap(ticker="HD", metric="InterestExpense", gap_type="high_variance")
+        change = compile_action(action, gap=gap)
+        result = apply_change_to_config(change, config)
+
+        override = result.companies["HD"].metric_overrides["InterestExpense"]
+        assert override["sign_negate"] is True, "sign_negate was clobbered"
+        assert "preferred_concept" in override, "preferred_concept not added"
+
+    @pytest.mark.fast
+    def test_add_formula_round_trip(self):
+        """O22: ADD_FORMULA → dict format → apply → standardization populated."""
+        action = TypedAction(
+            action="ADD_FORMULA",
+            ticker="CAT",
+            metric="AccountsReceivable",
+            params={
+                "scope": "default",
+                "components": ["us-gaap:AccountsReceivableNetCurrent", "us-gaap:FinancingReceivableNetCurrent"],
+            },
+            rationale="test formula",
+        )
+        change = compile_action(action)
+        assert change is not None
+        assert change.change_type == ChangeType.ADD_STANDARDIZATION
+        # O22 contract: new_value must be a dict
+        assert isinstance(change.new_value, dict)
+        assert "scope" in change.new_value
+        assert "components" in change.new_value
+        # Components should be namespace-stripped
+        for c in change.new_value["components"]:
+            assert ":" not in c, f"namespace prefix not stripped: {c}"
+
+        config = _make_test_config(ticker="CAT", metric_name="AccountsReceivable")
+        result = apply_change_to_config(change, config)
+
+        metric = result.metrics["AccountsReceivable"]
+        assert metric.standardization is not None
+        assert "default" in metric.standardization
+        assert len(metric.standardization["default"]["components"]) == 2
+
+    @pytest.mark.fast
+    def test_add_formula_company_scope(self):
+        """O22: scope='company' → company_overrides.{ticker} in standardization."""
+        action = TypedAction(
+            action="ADD_FORMULA",
+            ticker="CAT",
+            metric="AccountsReceivable",
+            params={
+                "scope": "company",
+                "components": ["AccountsReceivableNetCurrent"],
+            },
+            rationale="test company scope",
+        )
+        change = compile_action(action)
+        assert change.new_value["scope"] == "company:CAT"
+
+        config = _make_test_config(ticker="CAT", metric_name="AccountsReceivable")
+        result = apply_change_to_config(change, config)
+
+        metric = result.metrics["AccountsReceivable"]
+        assert metric.standardization is not None
+        assert "company_overrides" in metric.standardization
+        assert "CAT" in metric.standardization["company_overrides"]
+
+    @pytest.mark.fast
+    def test_add_divergence_round_trip(self):
+        """O23: DOCUMENT_DIVERGENCE → known_divergences[metric], NOT metric_overrides."""
+        action = TypedAction(
+            action="DOCUMENT_DIVERGENCE",
+            ticker="GS",
+            metric="IntangibleAssets",
+            params={
+                "reason": "GS reports intangibles net of amortization",
+                "variance_pct": 12.5,
+            },
+            rationale="test divergence",
+        )
+        change = compile_action(action)
+        assert change is not None
+        assert change.change_type == ChangeType.ADD_DIVERGENCE
+
+        config = _make_test_config(ticker="GS", metric_name="IntangibleAssets")
+        result = apply_change_to_config(change, config)
+
+        # Must go to known_divergences, not metric_overrides
+        assert "IntangibleAssets" in result.companies["GS"].known_divergences
+        assert result.companies["GS"].metric_overrides == {}, "divergence leaked into metric_overrides"
+
+    @pytest.mark.fast
+    def test_compile_formula_format_is_dict(self):
+        """O22 contract: ADD_FORMULA new_value is always a dict with scope + components."""
+        action = TypedAction(
+            action="ADD_FORMULA",
+            ticker="MSFT",
+            metric="PPE",
+            params={
+                "scope": "default",
+                "components": ["PropertyPlantAndEquipmentNet"],
+            },
+            rationale="test",
+        )
+        change = compile_action(action)
+        assert isinstance(change.new_value, dict), f"Expected dict, got {type(change.new_value)}"
+        assert set(change.new_value.keys()) == {"scope", "components"}

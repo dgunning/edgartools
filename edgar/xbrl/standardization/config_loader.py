@@ -154,6 +154,7 @@ class ConfigLoader:
                 legacy_ciks=data.get("legacy_ciks", []),
                 exclude_metrics=data.get("exclude_metrics", []),
                 metric_overrides=data.get("metric_overrides", {}),
+                known_divergences=data.get("known_divergences", {}),
                 notes=data.get("notes"),
                 fiscal_year_end=data.get("fiscal_year_end", "December"),
                 industry=data.get("industry"),

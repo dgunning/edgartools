@@ -15,9 +15,9 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.9073 | 2026-03-26 |
-| EF-CQS | 0.6711 | 2026-03-26 |
-| SA-CQS | 0.6018 | 2026-03-26 |
+| CQS | 0.9121 | 2026-03-27 |
+| EF-CQS | 0.6349 | 2026-03-27 |
+| SA-CQS | 0.6018 | 2026-03-27 |
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
@@ -204,6 +204,18 @@ These persist across all sessions and guide all future work:
 24. **Namespace normalization at compiler boundary** — strip `us-gaap:` prefix via `.split(':')[-1]` before writing to any config. Bare names are the canonical form (Session 009)
 25. **MAP_CONCEPT routes by gap type** — unmapped → global ADD_CONCEPT, high_variance → company-scoped ADD_COMPANY_OVERRIDE with preferred_concept (Session 009)
 26. **Unmapped gaps are actionable by default** — only filter out engineering_backlog / forbidden-by-industry (Session 009)
+27. **Semantic correctness over numerical match** — AI must choose concepts by financial meaning, not lowest Delta%. Coincidental numeric matches across unrelated line items are common (Session 010)
+28. **Prompt must show current mapping** — `current_concept` field on UnresolvedGap, extracted from `ExtractionEvidence.components_used[0]`. AI needs to know what's already mapped to avoid no-ops (Session 010)
+29. **Statement family constraint is enforced at 3 layers** — prompt context (O17), candidate pre-filter (O18), and preflight validation (O20). A balance sheet concept cannot resolve an income statement metric (Session 010)
+30. **DOCUMENT_DIVERGENCE is the correct terminal action for verified-concept high-variance gaps** — when the current concept IS semantically correct but the value differs from yfinance, the filing simply reports differently (Session 010)
+31. **Preflight catches no-ops before CQS evaluation** — reject proposals identical to current mapping or from wrong statement family. Saves ~85s per rejected proposal (Session 010)
+32. **In-memory config mutations use `target_metric` as canonical key** — not `yaml_path` parsing. Matches TreeParser consumption at line 131 (Session 011)
+33. **`compile_action` is the strict contract boundary** — all action types emit well-formed dict payloads; in-memory/disk consumers are dumb writers (Session 011)
+34. **`setdefault().update()` for metric_overrides** — preserves existing keys (sign_negate) when adding new override properties (Session 011)
+35. **Divergences get their own CompanyConfig field** — `known_divergences: Dict[str, Dict]` separates extraction hints from evaluation bypasses (Session 011)
+36. **Round-trip consumption tests are mandatory for config mutation code** — prevents future drift between in-memory and disk paths (Session 011)
+37. **Diagnostic-first for complex pipeline issues** — when CQS shows exactly zero movement, instrument first, fix second. Code reading alone is insufficient for multi-layer pipeline bugs (Session 012)
+38. **`_compute_sa_composite()` is the evaluation bottleneck** — formula pipeline is wired end-to-end but this function is a black box. Needs logging for components found/missing, composite value, promotion decision (Session 012)
 
 ---
 
@@ -248,14 +260,17 @@ For each 50-company batch:
      → Resolves C1 gaps (known patterns, solver formulas)
      → Produces GapManifest JSON with all unresolved gaps
 
-  2. AI RESOLUTION: Three-tier dispatch (O7-O9)
+  2. AI RESOLUTION: Three-tier dispatch (O7-O9) + semantic prompt (O15-O20)
      Tier 1: Auto-resolve — reverse value search finds us-gaap: concepts
              with <2% variance, emits typed action without API call
-     Tier 2: Enriched API — Gemini Flash with value-enriched evidence table
-             (concept | extracted_value | ref_value | delta_pct | source)
+     Tier 2: Enriched API — Gemini Flash with semantic prompt:
+             - Statement family constraint + concept class (O17)
+             - Current mapping context (O16)
+             - Pre-filtered candidates (cross-statement removed, O18)
+             - Gap-type guidance (DOCUMENT_DIVERGENCE for high_variance, O19)
      Tier 3: Local agents — gap-solver / gap-investigator for residuals
      → All tiers produce TypedAction JSON
-     → parse_typed_action() → compile_action() → CQS gate
+     → parse_typed_action() → compile_action() → preflight (O20) → CQS gate
 
   3. GRADUATE: If batch EF-CQS >= 0.80, promote and move to next batch
 ```

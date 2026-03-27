@@ -94,6 +94,11 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - O12-O14 confirmed working: proposals now compile to correct action types (`add_company_override` for high_variance, bare concept names). Compiler pipeline is end-to-end correct.
 - Key: **0% KEEP rate persists — problem shifted from compiler to AI prompt quality**. Four failure modes identified: (1) Semantic nonsense: AI picks `ReverseRepurchaseAgreements` for IntangibleAssets because 0% delta. (2) No-op: AI proposes same concept already mapped (HD:InterestExpense). (3) Worse mapping: AI picks PPE Gross when Net is closer (MSFT). (4) Wrong statement family: AI picks `ComprehensiveIncomeNetOfTax` for AccountsReceivable. Root cause: prompt says "lowest Delta%" without semantic constraint, doesn't show current mapping. Session 010 consensus: prompt redesign (O15-O20).
 
+**Run 010 (2026-03-27)** — 42s, 10 companies, semantic AI prompt redesign (O15-O20)
+- Result: 0/3 kept, 3 discards (all pre-screened), 0 preflight rejected, 4 API calls, $0.004 total cost.
+- CQS: 0.9121→0.9121, EF-CQS: 0.6349→0.6349.
+- Key: **Qualitative breakthrough — 100% of proposals are now semantically correct**. Before: `ReverseRepurchaseAgreements` for IntangibleAssets, `ComprehensiveIncomeNetOfTax` for AccountsReceivable. After: `Goodwill + IntangibleAssetsNetExcludingGoodwill` (correct formula), `AccountsReceivableNetCurrent + FinanceReceivablesNetCurrent` (correct composite for CAT's financial services division). MSFT:PPE proposes Gross with valid Net vs Gross reasoning. HD:InterestExpense proposes `InterestExpense` (different from current `InterestExpenseNonoperating`). **Bottleneck shifted from prompt quality to CQS evaluation layer** — proposals are semantically right but CQS pre-screen shows no improvement. Next steps: ADD_FORMULA `scope` param fix, company-scoped formula compilation, DOCUMENT_DIVERGENCE as terminal action.
+
 ---
 
 ## Consensus Sessions
@@ -109,7 +114,9 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 007 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Value-grounded AI consultation: reverse value search, evidence table prompts, three-tier dispatch | All implemented |
 | 008 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | Manifest caching & cross-company regression: fingerprint-gated cache, deterministic downgrade (global-first, auto-scope on regression) | Action items created |
 | 009 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Compiler architecture flaws: namespace mismatch, gap-aware routing, actionability filter fix | All implemented |
-| 010 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt effectiveness: semantic-first ranking, current mapping context, candidate pre-filtering, divergence path | Unanimous consensus |
+| 010 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt effectiveness: semantic-first ranking, current mapping context, candidate pre-filtering, divergence path | All implemented |
+| 011 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | In-memory config bugs: ADD_COMPANY_OVERRIDE flattening, ADD_FORMULA format mismatch, ADD_DIVERGENCE wrong field, round-trip tests | All implemented |
+| 012 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Post-O21 root cause: _compute_sa_composite black box, PFE -100pp cross-company regression, diagnostic-first approach | Action items created |
 
 ### Session 004 Unanimous Agreements
 
@@ -141,6 +148,8 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 008 | 2026-03-26 | GPT-5.4 + Gemini 3.1 | `043aa8af-8c71-4f85-b496-15066abb64d3` |
 | 009 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `35d790f6-7f49-482f-b4a9-abb07d076867` |
 | 010 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `aaee647d-238c-4be6-a755-5b455486d9bb` |
+| 011 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `ba2f82ae-e8f2-4d1c-bd01-29e40d721c42` |
+| 012 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `06acd7c0-fc3d-4945-8c81-a52b77a4eef5` |
 
 ---
 
@@ -236,6 +245,16 @@ For each 50-company batch:
 - [x] **M7.5: Reverse value search (O8)** — `_search_by_value()` in `discover_concepts.py` finds concepts by matching extracted value to reference. `CandidateConcept` extended with `extracted_value` and `delta_pct`. Completed 2026-03-26. `f1fe3e91`.
 - [x] **M7.6: Value-enriched prompts (O7)** — `_build_candidates_context()` returns evidence table (`concept | value | ref | delta% | source`) + enriched candidate list. AI sees numerical evidence, not just concept names. Completed 2026-03-26. `f1fe3e91`.
 - [x] **M7.7: Auto-resolve from value search (O9)** — `_try_auto_resolve()` emits typed action for `us-gaap:` concepts with <2% variance, skipping API call. `auto_resolved` field on `AIDispatchReport`. Completed 2026-03-26. `f1fe3e91`.
+- [x] **M7.8: Semantic prompt mandate (O15)** — Replace "lowest Delta%" instruction with semantic correctness requirement. DOCUMENT_DIVERGENCE fallback for no semantic match. Completed 2026-03-27. `93acf55b`.
+- [x] **M7.9: Current mapping context (O16)** — `current_concept` field on `UnresolvedGap`, populated from `ExtractionEvidence.components_used[0]`, displayed in AI prompt. Completed 2026-03-27. `93acf55b`.
+- [x] **M7.10: Statement family constraint (O17)** — `_build_metric_context()` adds statement family, concept class, and constraint to prompt. 42 metrics covered by `_METRIC_CONCEPT_CLASS` dict. Completed 2026-03-27. `93acf55b`.
+- [x] **M7.11: Candidate pre-filter (O18)** — Cross-statement candidates removed before AI sees them. Unknown-statement candidates kept (don't over-filter). Completed 2026-03-27. `93acf55b`.
+- [x] **M7.12: DOCUMENT_DIVERGENCE guidance (O19)** — `_build_gap_type_guidance()` for high_variance (current concept may be correct) vs unmapped (find new concept). Completed 2026-03-27. `93acf55b`.
+- [x] **M7.13: Preflight no-op rejection (O20)** — `validate_action_preflight(action, gap)` rejects proposals identical to current mapping or from wrong statement family. Completed 2026-03-27. `93acf55b`.
+- [x] **M7.14: In-memory config bug fixes (O21-O23)** — Three bugs in `apply_change_to_config()`: ADD_COMPANY_OVERRIDE wrote to wrong dict key (fixed with `setdefault(target_metric, {}).update()`), ADD_FORMULA compiled as list not dict (fixed in `compile_action()`), ADD_DIVERGENCE wrote to `metric_overrides` instead of `known_divergences` (new `CompanyConfig.known_divergences` field). Completed 2026-03-27.
+- [x] **M7.15: Hardening (O24-O25)** — Warning on empty ticker in ADD_KNOWN_VARIANCE. ValueError (not warning) on unsupported in-memory change types. Completed 2026-03-27.
+- [x] **M7.16: Round-trip consumption tests (O26)** — 6 tests verifying compile → apply_in_memory → config structure matches consumer expectations. Completed 2026-03-27.
+- [x] **M7.17: Stale cache invalidation (O27)** — Deleted pre-O16 `measure_cache.json` with `current_concept=None` entries. Completed 2026-03-27.
 
 ---
 

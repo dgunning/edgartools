@@ -313,20 +313,19 @@ def compile_action(action: TypedAction, gap: Optional['UnresolvedGap'] = None) -
     elif action.action == "ADD_FORMULA":
         scope = action.params.get("scope", "default")
         components = action.params["components"]
+        # Normalize scope for consumer: "company" → "company:{ticker}"
         if scope == "company":
-            yaml_path = (
-                f"metrics.{action.metric}.standardization."
-                f"company_overrides.{action.ticker}.components"
-            )
+            normalized_scope = f"company:{action.ticker}"
         else:
-            yaml_path = (
-                f"metrics.{action.metric}.standardization.default.components"
-            )
+            normalized_scope = scope
         return ConfigChange(
             file="metrics.yaml",
             change_type=ChangeType.ADD_STANDARDIZATION,
-            yaml_path=yaml_path,
-            new_value=components,
+            yaml_path=f"metrics.{action.metric}.standardization",
+            new_value={
+                "scope": normalized_scope,
+                "components": [normalize_concept(c) for c in components],
+            },
             rationale=f"[AI/typed] {action.rationale}",
             target_metric=action.metric,
             target_companies=action.ticker,

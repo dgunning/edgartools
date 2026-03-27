@@ -2251,6 +2251,11 @@ class ReferenceValidator:
                     # Explained variance — don't penalize CQS but track
                     variance_type = "explained"
 
+        # Check company-specific known divergences
+        if company_config and metric in company_config.known_divergences:
+            variance_type = "explained"
+
+        if metric_config:
             # Check for standardization formula (composite value)
             formula_components = self._resolve_formula_components(metric, ticker)
             if formula_components:

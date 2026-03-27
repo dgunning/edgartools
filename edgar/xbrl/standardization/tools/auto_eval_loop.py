@@ -804,6 +804,11 @@ def apply_change_to_config(change: ConfigChange, config) -> 'MappingConfig':
                     "variance_pct": kv_data.get("variance_pct", 0),
                     "reason": kv_data.get("reason", "Auto-solver discovered formula"),
                 }
+            else:
+                logger.warning(
+                    f"apply_change_to_config: ADD_KNOWN_VARIANCE for "
+                    f"{change.target_metric} has empty ticker key"
+                )
 
     elif change.change_type == ChangeType.ADD_TREE_HINT:
         metric = new_config.metrics.get(change.target_metric)
@@ -818,16 +823,17 @@ def apply_change_to_config(change: ConfigChange, config) -> 'MappingConfig':
     elif change.change_type == ChangeType.ADD_COMPANY_OVERRIDE:
         company = new_config.companies.get(change.target_companies)
         if company and isinstance(change.new_value, dict):
-            company.metric_overrides.update(change.new_value)
+            company.metric_overrides.setdefault(change.target_metric, {}).update(change.new_value)
 
     elif change.change_type == ChangeType.ADD_DIVERGENCE:
         company = new_config.companies.get(change.target_companies)
         if company and isinstance(change.new_value, dict):
-            company.metric_overrides.update(change.new_value)
+            company.known_divergences.setdefault(change.target_metric, {}).update(change.new_value)
 
     elif change.change_type in (ChangeType.REMOVE_PATTERN, ChangeType.MODIFY_VALUE):
-        # These are rare in auto-eval; fall through without mutation
-        logger.warning(f"apply_change_to_config: {change.change_type} not supported in-memory")
+        raise ValueError(
+            f"apply_change_to_config: {change.change_type} not supported in-memory"
+        )
 
     return new_config
 

@@ -1070,7 +1070,8 @@ def _compute_company_cqs(
         # Collect variance and EF/SA from validation results
         val_result = validations.get(metric)
         if val_result and val_result.variance_pct is not None:
-            variances.append(abs(val_result.variance_pct))
+            if val_result.variance_type != "explained":
+                variances.append(abs(val_result.variance_pct))
 
         # Detect reference_disputed -- exclude from pass/fail
         if val_result and hasattr(val_result, 'notes') and val_result.notes:

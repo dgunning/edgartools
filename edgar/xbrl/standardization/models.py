@@ -227,6 +227,7 @@ class CompanyConfig:
     legacy_ciks: List[int] = field(default_factory=list)
     exclude_metrics: List[str] = field(default_factory=list)
     metric_overrides: Dict[str, Dict] = field(default_factory=dict)
+    known_divergences: Dict[str, Dict] = field(default_factory=dict)
     notes: Optional[str] = None
     fiscal_year_end: str = "December"
     industry: Optional[str] = None  # e.g., "financial_services", "technology"
