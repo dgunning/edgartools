@@ -17,7 +17,7 @@ from edgar.files.html import Document
 from edgar.files.htmltools import ChunkedDocument, adjust_for_empty_items, chunks2df, detect_decimal_items
 from edgar.richtools import repr_rich, rich_to_text
 
-__all__ = ['CurrentReport', 'EightK', 'SixK']
+__all__ = ['CurrentReport', 'EightK']
 
 
 def _normalize_item_number(item_str: str) -> str:
@@ -281,7 +281,7 @@ class CurrentReport(CompanyReport):
     })
 
     def __init__(self, filing):
-        assert filing.form in ['8-K', '8-K/A', '6-K', '6-K/A'], f"This form should be an 8-K but was {filing.form}"
+        assert filing.form in ['8-K', '8-K/A'], f"This form should be an 8-K but was {filing.form}"
         super().__init__(filing)
         self._cached_filing_text = None
 
@@ -828,6 +828,5 @@ class CurrentReport(CompanyReport):
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-# Aliases for the current report
+# Alias for the current report
 EightK = CurrentReport
-SixK = CurrentReport

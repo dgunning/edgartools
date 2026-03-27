@@ -268,7 +268,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :return:
     """
     from edgar.beneficial_ownership import Schedule13D, Schedule13G
-    from edgar.company_reports import CurrentReport, EightK, TenK, TenQ, TwentyF
+    from edgar.company_reports import CurrentReport, EightK, SixK, TenK, TenQ, TwentyF
     from edgar.effect import Effect
     from edgar.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
@@ -276,7 +276,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     from edgar.ownership import Form3, Form4, Form5, Ownership
 
     if matches_form(sec_filing, "6-K"):
-        return CurrentReport(sec_filing)
+        return SixK(sec_filing)
     if matches_form(sec_filing, "8-K"):
         return EightK(sec_filing)
     elif matches_form(sec_filing, "10-Q"):

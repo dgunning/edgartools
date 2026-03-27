@@ -32,10 +32,9 @@ def test_current_report_inherits_from_company_report():
     assert 'cash_flow_statement' in CompanyReport.__dict__, "Should have cash_flow_statement property"
 
 @pytest.mark.regression
-def test_sixk_alias_inherits_financial_properties():
-    """Test that SixK alias also has access to the financial properties"""
-    # Test that SixK is actually CurrentReport
-    assert SixK is CurrentReport, "SixK should be an alias for CurrentReport"
+def test_sixk_has_financial_properties():
+    """Test that SixK has access to financial properties"""
+    assert hasattr(SixK, 'financials'), "SixK should have financials property"
 
 
 @pytest.mark.regression
@@ -45,54 +44,39 @@ def test_eightk_alias_inherits_financial_properties():
     assert EightK is CurrentReport, "EightK should be an alias for CurrentReport"
 
 @pytest.mark.regression
-def test_current_report_accepts_both_6k_and_8k():
-    """Test that CurrentReport accepts both 6-K and 8-K form types"""
-    # Test with 6-K - should not raise assertion error in __init__
-    mock_filing_6k = Mock()
-    mock_filing_6k.form = "6-K"
-    
-    try:
-        report_6k = CurrentReport(mock_filing_6k)
-        success_6k = True
-    except AssertionError:
-        success_6k = False
-    
-    assert success_6k, "CurrentReport should accept 6-K forms"
-    
-    # Test with 8-K - should not raise assertion error in __init__
+def test_current_report_accepts_8k_and_sixk_accepts_6k():
+    """Test that CurrentReport accepts 8-K and SixK accepts 6-K"""
+    # Test with 8-K
     mock_filing_8k = Mock()
     mock_filing_8k.form = "8-K"
-    
+
     try:
-        report_8k = CurrentReport(mock_filing_8k)
-        success_8k = True
+        CurrentReport(mock_filing_8k)
     except AssertionError:
-        success_8k = False
-    
-    assert success_8k, "CurrentReport should accept 8-K forms"
+        pytest.fail("CurrentReport should accept 8-K forms")
+
+    # Test with 6-K via SixK
+    mock_filing_6k = Mock()
+    mock_filing_6k.form = "6-K"
+
+    try:
+        SixK(mock_filing_6k)
+    except AssertionError:
+        pytest.fail("SixK should accept 6-K forms")
 
 @pytest.mark.regression
-def test_current_report_financial_properties_callable():
+def test_sixk_financial_properties_callable():
     """Test that the financial properties can be accessed without raising AttributeError"""
-    # Create a mock filing with minimal required methods
     mock_filing = Mock()
     mock_filing.form = "6-K"
-    mock_filing.attachments = []  # Must be iterable for earnings extraction
+    mock_filing.attachments = []
 
-    # Mock the Financials.extract method to return None (no financial data available)
     from unittest.mock import patch
-    with patch('edgar.company_reports.Financials.extract', return_value=None):
-        report = CurrentReport(mock_filing)
-        
-        # These should not raise AttributeError, even if they return None
+    with patch('edgar.financials.Financials.extract', return_value=None):
+        report = SixK(mock_filing)
+
         try:
             financials = report.financials
-            income_stmt = report.income_statement
-            balance_sheet = report.balance_sheet
-            cash_flow = report.cash_flow_statement
-            
-            # All should be None or valid objects, but no AttributeError
-            success = True
         except AttributeError as e:
             pytest.fail(f"AttributeError raised when accessing financial properties: {e}")
             
@@ -110,19 +94,14 @@ def test_real_filing_integration():
             # Try to get recent filings from a major foreign company that files 6-Ks
             company = Company("ASML")  # ASML Holding N.V. - Dutch company that files 6-Ks
             filings = company.get_filings(form="6-K")[:1]  # Get just 1 filing
-            
+
             if filings:
                 filing = filings[0]
-                report = CurrentReport(filing)
-                
+                report = filing.obj()
+
                 # Should not raise AttributeError
                 financials = report.financials
                 assert hasattr(report, 'financials')
-                
-                # Test individual statements
-                income_stmt = report.income_statement
-                balance_sheet = report.balance_sheet
-                cash_flow = report.cash_flow_statement
                 
                 print(f"Integration test passed with {filing.form} filing")
             else:
@@ -136,17 +115,9 @@ def test_real_filing_integration():
 
 
 if __name__ == "__main__":
-    # Run the basic tests that don't require network access
     test_current_report_inherits_from_company_report()
-    test_sixk_alias_inherits_financial_properties()
+    test_sixk_has_financial_properties()
     test_eightk_alias_inherits_financial_properties()
-    test_current_report_accepts_both_6k_and_8k()
-    test_current_report_financial_properties_callable()
+    test_current_report_accepts_8k_and_sixk_accepts_6k()
+    test_sixk_financial_properties_callable()
     print("All basic tests passed!")
-    
-    # Try integration test
-    try:
-        test_real_filing_integration()
-        print("Integration test also passed!")
-    except Exception as e:
-        print(f"Integration test skipped: {e}")
