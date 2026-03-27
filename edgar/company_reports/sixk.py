@@ -355,7 +355,7 @@ class SixK:
         if detail == 'standard':
             return "\n".join(lines)
 
-        # Full — include exhibit details
+        # Full — include exhibit details and primary document text
         if self.exhibits:
             lines.append("")
             lines.append("EXHIBIT DETAILS:")
@@ -364,5 +364,22 @@ class SixK:
                 desc = att.description or ''
                 doc_name = att.document or ''
                 lines.append(f"  {doc_type}: {desc} [{doc_name}]")
+
+        # Include primary document text (cover page — always short)
+        try:
+            from lxml import html as lxml_html
+            html = self._filing.html()
+            if html:
+                tree = lxml_html.fromstring(html)
+                cover_text = tree.text_content().strip()
+                # Clean up excessive whitespace
+                cover_text = re.sub(r'\n{3,}', '\n\n', cover_text)
+                cover_text = re.sub(r'[ \t]+', ' ', cover_text)
+                if cover_text:
+                    lines.append("")
+                    lines.append("COVER PAGE TEXT:")
+                    lines.append(cover_text)
+        except Exception:
+            pass
 
         return "\n".join(lines)
