@@ -10,9 +10,12 @@ Key capabilities:
 3. Validate using calculation weights (sum check)
 """
 
+import logging
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 from edgar import Company, set_identity
 from edgar.xbrl.xbrl import XBRL
