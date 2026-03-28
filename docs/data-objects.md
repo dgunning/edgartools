@@ -308,6 +308,25 @@ deal.discount_rate                         # underwriting fee as fraction of pri
 
 ---
 
+## Registration Statements (S-1 / F-1)
+
+Parse IPO and registration statement filings to extract offering type, cover page data, fee tables, dilution, capitalization, and underwriting details.
+
+```python
+s1 = filing.obj()                         # RegistrationS1
+s1.offering_type                          # S1OfferingType.IPO
+s1.total_offering                         # total registered amount ($)
+s1.fee_table                              # parsed Exhibit 107 fee table
+s1.takedowns                              # 424B filings under this registration
+s1.effective_date                         # when declared effective
+```
+
+Supports S-1, S-1/A, F-1, and F-1/A.
+
+[:octicons-arrow-right-24: Registration Statements guide](guides/registration-s1-data-object-guide.md)
+
+---
+
 ## Shelf Registrations (S-3 / F-3)
 
 Parse shelf registration statements to extract offering capacity, filer category, fee tables, and navigate to 424B takedowns.
@@ -338,12 +357,22 @@ drs.registration_number                    # '377-09148'
 drs.is_amendment                           # True for DRS/A
 ```
 
-Filter DRS filings by underlying type:
+[:octicons-arrow-right-24: Draft Registrations guide](guides/drs-data-object-guide.md)
+
+---
+
+## Effectiveness Notices (EFFECT)
+
+Track when a registration statement is declared effective by the SEC and navigate back to the source filing.
 
 ```python
-filings = get_filings(form="DRS")
-s1_drafts = [f for f in filings if f.obj().underlying_form == 'S-1']
+effect = filing.obj()                      # Effect
+effect.effective_date                      # '2024-06-15'
+effect.source_submission_type              # 'S-1'
+source = effect.get_source_filing()        # Filing object for the S-1
 ```
+
+[:octicons-arrow-right-24: Effectiveness Notices guide](guides/effect-data-object-guide.md)
 
 ---
 
