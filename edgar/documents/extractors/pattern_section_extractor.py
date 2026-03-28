@@ -655,6 +655,32 @@ class SectionExtractor:
 
         return False
 
+    @staticmethod
+    def _looks_like_section_header(text: str) -> bool:
+        """
+        Check if bold paragraph text looks like a filing section header.
+
+        Filters out non-header bold text (e.g., "February 2026 Distribution")
+        that would otherwise pollute the headers list and cause narrow section
+        boundaries.
+
+        Matches: Item X.XX, SIGNATURES, PART I/II, EXHIBITS, FINANCIAL STATEMENTS
+        """
+        stripped = text.strip()
+        if not stripped or len(stripped) > 300:
+            return False
+        return bool(re.match(
+            r'^\s*(?:Item|ITEM)\s+\d'
+            r'|^\s*SIGNATURE'
+            r'|^\s*PART\s+[IV]'
+            r'|^\s*EXHIBIT'
+            r'|^\s*FINANCIAL\s+STATEMENTS'
+            r'|^\s*FORWARD[\s-]LOOKING'
+            r'|^\s*RISK\s+FACTORS'
+            r'|^\s*(?:TABLE\s+OF\s+CONTENTS|INDEX)',
+            stripped, re.IGNORECASE
+        ))
+
     def _is_main_section_header(self, text: str) -> bool:
         """
         Check if header text looks like a main section header vs a cross-reference.
@@ -971,7 +997,7 @@ class SectionExtractor:
             for node in paragraph_nodes:
                 if self._is_bold(node):
                     text = node.text()
-                    if text:
+                    if text and self._looks_like_section_header(text):
                         position = self._get_node_position(node, document)
                         headers.append((node, text, position))
 

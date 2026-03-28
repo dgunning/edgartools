@@ -77,22 +77,22 @@ def _extract_items_from_text(text: str) -> List[str]:
         - GitHub Issue: #462
         - Beads Issue: edgartools-k1k
     """
-    # Extract items that appear at the start of lines only.
+    # Extract items that appear at the start of lines (with optional leading whitespace).
     # This ensures consistency with _extract_item_content_from_text which
     # requires items to be at line starts for content extraction.
     #
     # Pattern matches "Item X" or "Item X.XX" at start of line
     # This will match:
     # - "Item 1" (standalone)
+    # - "  Item 1" (indented — common in HTML-to-text conversion)
     # - "Item 1-Item 4" (only Item 1, since it's at line start)
     # - "Item 2.02" (modern format)
     #
     # This will NOT match:
-    # - "  Item 1" (indented, not at line start)
     # - "Item 1-Item 4" (Item 4, not at line start)
     # - Mid-sentence references to items
     pattern = re.compile(
-        r'^Item\s+(\d+\.?\s*\d*)',
+        r'^\s*Item\s+(\d+\.?\s*\d*)',
         re.IGNORECASE | re.MULTILINE
     )
     matches = pattern.findall(text)
@@ -158,7 +158,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Pattern matches: "Item 9", "Item 9.", "Item 9:", "Item 9.02", etc.
     # Must be at start of line (^) to avoid false positives
     item_pattern = re.compile(
-        rf'^(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
+        rf'^\s*(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
         re.IGNORECASE | re.MULTILINE
     )
 
@@ -171,7 +171,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Step 3: Find end position
     # Look for next "Item X" pattern
     next_item_pattern = re.compile(
-        r'^Item\s+\d+\.?\s*\d*[\s\.:\-]',
+        r'^\s*Item\s+\d+\.?\s*\d*[\s\.:\-]',
         re.IGNORECASE | re.MULTILINE
     )
     next_match = next_item_pattern.search(
