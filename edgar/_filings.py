@@ -1600,11 +1600,17 @@ class Filing:
                 ownership: Ownership = self.obj()
                 html = ownership.to_html()
             else:
-                xml_obj = self.obj()
-                if xml_obj and hasattr(xml_obj, 'to_html'):
-                    rendered = xml_obj.to_html()
-                    if rendered:
-                        return rendered
+                # Only call self.obj() for XML-native forms (XmlFiling, etc.)
+                # that have to_html() rendering. Skip for HTML-based data objects
+                # (S-1, S-3, 424B, etc.) whose from_filing() calls html(),
+                # which would cause infinite recursion.
+                from edgar.xmlfiling import XML_FILING_FORMS
+                if self.form in XML_FILING_FORMS:
+                    xml_obj = self.obj()
+                    if xml_obj and hasattr(xml_obj, 'to_html'):
+                        rendered = xml_obj.to_html()
+                        if rendered:
+                            return rendered
                 html = self.homepage.primary_html_document.download()
         if isinstance(html, bytes):
             try:
