@@ -264,6 +264,7 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'SBSE-A': ('XmlFiling', 'security-based swap entity registration (annual)'),
         'SBSE-W': ('XmlFiling', 'security-based swap entity withdrawal'),
         'ATS-N-C': ('XmlFiling', 'ATS cessation of operations'),
+        '24F-2NT': ('FundFeeNotice', 'annual notice of securities sold'),
     }
 
     if base_form in form_map:
@@ -384,6 +385,10 @@ def obj(sec_filing: Filing) -> Optional[object]:
 
     elif matches_form(sec_filing, CORRESPONDENCE_FORMS):
         return Correspondence.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, "24F-2NT"):
+        from edgar.funds.twentyfourf import FundFeeNotice
+        return FundFeeNotice.from_filing(sec_filing)
 
     else:
         from edgar.xmlfiling import XML_FILING_FORMS, XmlFiling

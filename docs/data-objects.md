@@ -232,6 +232,21 @@ npx.votes                                  # vote records by proposal
 
 ---
 
+## Fund Fee Notices (24F-2NT)
+
+Track fund sales volumes, redemptions, and SEC registration fees across the investment company universe.
+
+```python
+notice = filing.obj()                      # FundFeeNotice
+notice.aggregate_sales                     # total securities sold ($)
+notice.net_sales                           # sales minus redemptions ($)
+notice.registration_fee                    # fee due to SEC ($)
+notice.series                              # list of fund series reported
+notice.fiscal_year_end                     # e.g., '12/31/2025'
+```
+
+---
+
 ## ABS Distribution Reports (Form 10-D)
 
 Extract structured CMBS loan and property data from asset-backed securities distribution reports.

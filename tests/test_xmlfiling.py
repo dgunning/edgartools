@@ -84,8 +84,10 @@ class TestXmlFilingForms:
         assert 'TA-1/A' in XML_FILING_FORMS
 
     def test_form_count(self):
-        # Each form + its /A variant
-        assert len(XML_FILING_FORMS) == len(_XSLT_PREFIXES) * 2
+        # Each base XmlFiling form + its /A variant
+        # Note: _XSLT_PREFIXES may have extra entries from subclasses (e.g., FundFeeNotice)
+        # but XML_FILING_FORMS only includes the forms registered at xmlfiling import time
+        assert len(XML_FILING_FORMS) == 9 * 2  # 9 base forms handled by generic XmlFiling
 
 
 class TestObjInfo:

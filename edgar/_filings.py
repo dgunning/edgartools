@@ -1600,14 +1600,11 @@ class Filing:
                 ownership: Ownership = self.obj()
                 html = ownership.to_html()
             else:
-                from edgar.xmlfiling import XML_FILING_FORMS
-                if self.form in XML_FILING_FORMS:
-                    xml_obj = self.obj()
-                    if xml_obj and hasattr(xml_obj, 'to_html'):
-                        rendered = xml_obj.to_html()
-                        if rendered:
-                            html = rendered
-                            return html
+                xml_obj = self.obj()
+                if xml_obj and hasattr(xml_obj, 'to_html'):
+                    rendered = xml_obj.to_html()
+                    if rendered:
+                        return rendered
                 html = self.homepage.primary_html_document.download()
         if isinstance(html, bytes):
             try:
