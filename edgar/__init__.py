@@ -255,6 +255,15 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'UPLOAD': ('Correspondence', 'SEC-to-company correspondence'),
         'DRS': ('DraftRegistrationStatement', 'draft registration statement'),
         'DRS/A': ('DraftRegistrationStatement', 'draft registration statement (amendment)'),
+        'X-17A-5': ('XmlFiling', 'broker-dealer financial report'),
+        'TA-1': ('XmlFiling', 'transfer agent registration'),
+        'TA-2': ('XmlFiling', 'transfer agent annual report'),
+        'TA-W': ('XmlFiling', 'transfer agent withdrawal'),
+        'CFPORTAL': ('XmlFiling', 'crowdfunding portal registration'),
+        'SBSE': ('XmlFiling', 'security-based swap entity registration'),
+        'SBSE-A': ('XmlFiling', 'security-based swap entity registration (annual)'),
+        'SBSE-W': ('XmlFiling', 'security-based swap entity withdrawal'),
+        'ATS-N-C': ('XmlFiling', 'ATS cessation of operations'),
     }
 
     if base_form in form_map:
@@ -375,6 +384,11 @@ def obj(sec_filing: Filing) -> Optional[object]:
 
     elif matches_form(sec_filing, CORRESPONDENCE_FORMS):
         return Correspondence.from_filing(sec_filing)
+
+    else:
+        from edgar.xmlfiling import XML_FILING_FORMS, XmlFiling
+        if sec_filing.form in XML_FILING_FORMS:
+            return XmlFiling.from_filing(sec_filing)
 
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:
