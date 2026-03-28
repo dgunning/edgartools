@@ -123,74 +123,98 @@ class TestRegistrationS1Solidion:
     def solidion(self):
         from edgar import find
         f = find("0001213900-26-015175")
+        if f is None:
+            pytest.skip("Could not fetch filing from SEC")
         return f.obj()
 
+    @pytest.mark.vcr
     def test_returns_registration_s1(self, solidion):
         assert isinstance(solidion, RegistrationS1)
 
+    @pytest.mark.vcr
     def test_form_is_s1(self, solidion):
         assert solidion.form == "S-1"
 
+    @pytest.mark.vcr
     def test_company_name(self, solidion):
         assert "Solidion" in solidion.company
 
+    @pytest.mark.vcr
     def test_offering_type_is_ipo(self, solidion):
         assert solidion.offering_type == S1OfferingType.IPO
 
+    @pytest.mark.vcr
     def test_state_of_incorporation(self, solidion):
         assert solidion.cover_page.state_of_incorporation == "Delaware"
 
+    @pytest.mark.vcr
     def test_sic_code(self, solidion):
         assert solidion.cover_page.sic_code == "3359"
 
+    @pytest.mark.vcr
     def test_ein(self, solidion):
         assert solidion.cover_page.ein == "87-1993879"
 
+    @pytest.mark.vcr
     def test_registration_number(self, solidion):
         assert solidion.cover_page.registration_number == "333-293402"
 
+    @pytest.mark.vcr
     def test_non_accelerated_filer(self, solidion):
         assert solidion.cover_page.is_non_accelerated_filer is True
 
+    @pytest.mark.vcr
     def test_smaller_reporting_company(self, solidion):
         assert solidion.cover_page.is_smaller_reporting_company is True
 
+    @pytest.mark.vcr
     def test_emerging_growth_company(self, solidion):
         assert solidion.cover_page.is_emerging_growth_company is True
 
+    @pytest.mark.vcr
     def test_large_accelerated_filer_false(self, solidion):
         assert solidion.cover_page.is_large_accelerated_filer is False
 
+    @pytest.mark.vcr
     def test_rule_415_false(self, solidion):
         assert solidion.cover_page.is_rule_415 is False
 
+    @pytest.mark.vcr
     def test_fee_table_exists(self, solidion):
         assert solidion.fee_table is not None
 
+    @pytest.mark.vcr
     def test_total_offering(self, solidion):
         assert solidion.total_offering == 14490000.0
 
+    @pytest.mark.vcr
     def test_net_fee(self, solidion):
         assert solidion.net_fee == 2001.07
 
+    @pytest.mark.vcr
     def test_securities_count(self, solidion):
         assert len(solidion.securities) == 3
 
+    @pytest.mark.vcr
     def test_confidence_high(self, solidion):
         assert solidion.cover_page.confidence == "high"
 
+    @pytest.mark.vcr
     def test_is_not_amendment(self, solidion):
         assert solidion.is_amendment is False
 
+    @pytest.mark.vcr
     def test_rich_display(self, solidion):
         rich_output = solidion.__rich__()
         assert rich_output is not None
 
+    @pytest.mark.vcr
     def test_to_context(self, solidion):
         ctx = solidion.to_context()
         assert "Solidion" in ctx
         assert "IPO" in ctx or "Initial Public Offering" in ctx
 
+    @pytest.mark.vcr
     def test_str(self, solidion):
         s = str(solidion)
         assert "RegistrationS1" in s
@@ -205,20 +229,27 @@ class TestRegistrationS1BestSpac:
     def spac(self):
         from edgar import find
         f = find("0001213900-26-025801")
+        if f is None:
+            pytest.skip("Could not fetch filing from SEC")
         return f.obj()
 
+    @pytest.mark.vcr
     def test_returns_registration_s1(self, spac):
         assert isinstance(spac, RegistrationS1)
 
+    @pytest.mark.vcr
     def test_offering_type_is_spac(self, spac):
         assert spac.offering_type == S1OfferingType.SPAC
 
+    @pytest.mark.vcr
     def test_state_bvi(self, spac):
         assert "British Virgin Islands" in spac.cover_page.state_of_incorporation
 
+    @pytest.mark.vcr
     def test_sic_code(self, spac):
         assert spac.cover_page.sic_code == "6770"
 
+    @pytest.mark.vcr
     def test_total_offering(self, spac):
         assert spac.total_offering == 129375000.0
 
@@ -231,39 +262,52 @@ class TestRegistrationS1Wolfspeed:
     def wolfspeed(self):
         from edgar import find
         f = find("0001193125-26-098748")
+        if f is None:
+            pytest.skip("Could not fetch filing from SEC")
         return f.obj()
 
+    @pytest.mark.vcr
     def test_returns_registration_s1(self, wolfspeed):
         assert isinstance(wolfspeed, RegistrationS1)
 
+    @pytest.mark.vcr
     def test_offering_type_is_resale(self, wolfspeed):
         assert wolfspeed.offering_type == S1OfferingType.RESALE
 
+    @pytest.mark.vcr
     def test_state_delaware(self, wolfspeed):
         assert wolfspeed.cover_page.state_of_incorporation == "Delaware"
 
+    @pytest.mark.vcr
     def test_sic_code(self, wolfspeed):
         assert wolfspeed.cover_page.sic_code == "3674"
 
+    @pytest.mark.vcr
     def test_ein(self, wolfspeed):
         assert wolfspeed.cover_page.ein == "56-1572719"
 
+    @pytest.mark.vcr
     def test_large_accelerated_filer(self, wolfspeed):
         assert wolfspeed.cover_page.is_large_accelerated_filer is True
 
+    @pytest.mark.vcr
     def test_accelerated_filer_false(self, wolfspeed):
         assert wolfspeed.cover_page.is_accelerated_filer is False
 
+    @pytest.mark.vcr
     def test_rule_415_true(self, wolfspeed):
         assert wolfspeed.cover_page.is_rule_415 is True
 
+    @pytest.mark.vcr
     def test_total_offering(self, wolfspeed):
         assert wolfspeed.total_offering == pytest.approx(573310592.82, rel=0.01)
 
+    @pytest.mark.vcr
     def test_rich_display(self, wolfspeed):
         rich_output = wolfspeed.__rich__()
         assert rich_output is not None
 
+    @pytest.mark.vcr
     def test_to_context_full(self, wolfspeed):
         ctx = wolfspeed.to_context(detail='full')
         assert "Resale" in ctx
@@ -304,8 +348,11 @@ class TestObjInfo:
 @pytest.mark.network
 class TestObjDispatch:
 
+    @pytest.mark.vcr
     def test_s1_returns_registration_s1(self):
         from edgar import find
         f = find("0001213900-26-015175")
+        if f is None:
+            pytest.skip("Could not fetch filing from SEC")
         obj = f.obj()
         assert isinstance(obj, RegistrationS1)
