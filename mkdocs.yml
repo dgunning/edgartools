@@ -99,6 +99,7 @@ nav:
     - Money Market Funds (N-MFP): guides/moneymarketfund-data-object-guide.md
     - Fund Census (N-CEN): guides/fundcensus-data-object-guide.md
     - Fund Shareholder Reports (N-CSR): guides/fundshareholderreport-data-object-guide.md
+    - Fund Fee Notices (24F-2NT): guides/twentyfourf-data-object-guide.md
     - Proxy Statements (DEF 14A): guides/proxystatement-data-object-guide.md
     - Private Offerings (Form D): guides/formd-data-object-guide.md
     - Crowdfunding (Form C): guides/formc-data-object-guide.md

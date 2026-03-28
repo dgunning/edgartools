@@ -245,6 +245,8 @@ notice.series                              # list of fund series reported
 notice.fiscal_year_end                     # e.g., '12/31/2025'
 ```
 
+[:octicons-arrow-right-24: Fund Fee Notices guide](guides/twentyfourf-data-object-guide.md)
+
 ---
 
 ## ABS Distribution Reports (Form 10-D)
