@@ -42,7 +42,8 @@ _XSLT_PREFIXES: dict[str, str] = {
     'TA-1':     'xslFTA1X01',
     'TA-2':     'xslFTA2X01',
     'TA-W':     'xslFTAWX01',
-    # MA/MA-W excluded — reserved for MunicipalAdvisorForm family (edgartools-bvx2)
+    'MA':       'xslFormMA_X01',
+    'MA-W':     'xslFormMA-W_X01',
     'CFPORTAL': 'xslCFPORTAL_X01',
     'SBSE':     'xslSBSE_X01',
     'SBSE-A':   'xslSBSE-A_X01',
@@ -62,6 +63,8 @@ _FORM_DESCRIPTIONS: dict[str, str] = {
     'TA-1':     'Transfer Agent Registration',
     'TA-2':     'Transfer Agent Annual Report',
     'TA-W':     'Transfer Agent Withdrawal',
+    'MA':       'Municipal Advisor Firm Registration',
+    'MA-W':     'Municipal Advisor Withdrawal',
     'CFPORTAL': 'Crowdfunding Portal Registration',
     'SBSE':     'Security-Based Swap Entity Registration',
     'SBSE-A':   'Security-Based Swap Entity Registration (Annual)',

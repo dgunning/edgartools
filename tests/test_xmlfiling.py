@@ -87,14 +87,14 @@ class TestXmlFilingForms:
         # Each base XmlFiling form + its /A variant
         # Note: _XSLT_PREFIXES may have extra entries from subclasses (e.g., FundFeeNotice)
         # but XML_FILING_FORMS only includes the forms registered at xmlfiling import time
-        assert len(XML_FILING_FORMS) == 9 * 2  # 9 base forms handled by generic XmlFiling
+        assert len(XML_FILING_FORMS) == 11 * 2  # 11 base forms handled by generic XmlFiling
 
 
 class TestObjInfo:
 
     def test_xml_filing_forms_registered(self):
         from edgar import get_obj_info
-        for form in ['X-17A-5', 'TA-1', 'TA-2', 'CFPORTAL', 'SBSE']:
+        for form in ['X-17A-5', 'TA-1', 'TA-2', 'MA', 'CFPORTAL', 'SBSE']:
             has_obj, class_name, desc = get_obj_info(form)
             assert has_obj is True, f"{form} not registered"
             assert class_name == 'XmlFiling', f"{form} has wrong class: {class_name}"

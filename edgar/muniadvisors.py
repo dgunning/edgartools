@@ -317,7 +317,7 @@ class MunicipalAdvisorForm:
 
     @classmethod
     def from_filing(cls, filing):
-        assert filing.form in ['MA', 'MA/A', 'MA-I', 'MA-I/A'], f"This form should be a Form 144 but was {filing.form}"
+        assert filing.form in ['MA-I', 'MA-I/A'], f"Expected MA-I form but was {filing.form}"
         xml = filing.xml()
 
         if xml:

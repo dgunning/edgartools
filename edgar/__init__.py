@@ -259,6 +259,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'TA-1': ('XmlFiling', 'transfer agent registration'),
         'TA-2': ('XmlFiling', 'transfer agent annual report'),
         'TA-W': ('XmlFiling', 'transfer agent withdrawal'),
+        'MA': ('XmlFiling', 'municipal advisor firm registration'),
+        'MA-W': ('XmlFiling', 'municipal advisor withdrawal'),
         'CFPORTAL': ('XmlFiling', 'crowdfunding portal registration'),
         'SBSE': ('XmlFiling', 'security-based swap entity registration'),
         'SBSE-A': ('XmlFiling', 'security-based swap entity registration (annual)'),
