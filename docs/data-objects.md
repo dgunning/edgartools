@@ -276,6 +276,48 @@ deal.discount_rate                         # underwriting fee as fraction of pri
 
 ---
 
+## Draft Registration Statements (DRS)
+
+Identify the underlying form type of confidential draft registrations before they go public.
+
+```python
+drs = filing.obj()                         # DraftRegistrationStatement
+drs.underlying_form                        # 'S-1', 'F-1', 'S-4', '20-F', 'Form 10', etc.
+drs.underlying_object                      # delegated RegistrationS1 (if S-1/F-1)
+drs.registration_number                    # '377-09148'
+drs.is_amendment                           # True for DRS/A
+```
+
+Filter DRS filings by underlying type:
+
+```python
+filings = get_filings(form="DRS")
+s1_drafts = [f for f in filings if f.obj().underlying_form == 'S-1']
+```
+
+---
+
+## Regulatory Registrations (XML Forms)
+
+Generic access to broker-dealer reports, transfer agent filings, crowdfunding portals, swap entity registrations, and other XML-based regulatory forms.
+
+```python
+xf = filing.obj()                          # XmlFiling
+xf['brokerDealerName']                     # deep key lookup into XML data
+xf.form_data                               # full dict of parsed XML
+xf.to_html()                               # SEC's official rendered view
+```
+
+| Form | Description |
+|------|-------------|
+| X-17A-5 | Broker-dealer financial report |
+| TA-1 / TA-2 | Transfer agent registration and annual report |
+| CFPORTAL | Crowdfunding portal registration |
+| SBSE / SBSE-A | Security-based swap entity registration |
+| ATS-N-C | Alternative trading system cessation |
+
+---
+
 ## How it works
 
 Call `filing.obj()` on any supported filing. EdgarTools detects the form type, parses the raw HTML/XML/XBRL, and returns the right data object. If a filing type isn't supported yet, you'll get an `UnsupportedFilingTypeError`.
