@@ -253,6 +253,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '424B8': ('Prospectus424B', 'prospectus supplement'),
         'CORRESP': ('Correspondence', 'company-to-SEC correspondence'),
         'UPLOAD': ('Correspondence', 'SEC-to-company correspondence'),
+        'DRS': ('DraftRegistrationStatement', 'draft registration statement'),
+        'DRS/A': ('DraftRegistrationStatement', 'draft registration statement (amendment)'),
     }
 
     if base_form in form_map:
@@ -336,6 +338,10 @@ def obj(sec_filing: Filing) -> Optional[object]:
             return FormD.from_xml(xml)
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, "DRS"):
+        from edgar.offerings.drs import DraftRegistrationStatement
+        return DraftRegistrationStatement.from_filing(sec_filing)
 
     elif matches_form(sec_filing, ['S-1', 'F-1']):
         from edgar.offerings.registration_s1 import RegistrationS1
