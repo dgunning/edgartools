@@ -49,6 +49,7 @@ from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, fin
 from edgar.funds.ncen import NCEN_FORMS, FundCensus
 from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
 from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
+from edgar.funds.prospectus497k import PROSPECTUS497K_FORMS, Prospectus497K
 from edgar.funds.reports import NPORT_FORMS, FundReport
 from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
 
@@ -244,6 +245,10 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'S-3ASR/A': ('RegistrationS3', 'automatic shelf registration (amendment)'),
         'S-3D': ('RegistrationS3', 'shelf registration statement'),
         'S-3DPOS': ('RegistrationS3', 'shelf registration statement'),
+        'F-3': ('RegistrationS3', 'F-3 foreign shelf registration'),
+        'F-3/A': ('RegistrationS3', 'F-3 foreign shelf registration (amendment)'),
+        'F-3ASR': ('RegistrationS3', 'F-3 automatic shelf registration'),
+        'F-3ASR/A': ('RegistrationS3', 'F-3 automatic shelf registration (amendment)'),
         '424B1': ('Prospectus424B', 'prospectus (exchange offer / IPO)'),
         '424B2': ('Prospectus424B', 'prospectus (structured note / debt)'),
         '424B3': ('Prospectus424B', 'prospectus (resale / rights offering)'),
@@ -267,6 +272,7 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'SBSE-W': ('XmlFiling', 'security-based swap entity withdrawal'),
         'ATS-N-C': ('XmlFiling', 'ATS cessation of operations'),
         '24F-2NT': ('FundFeeNotice', 'annual notice of securities sold'),
+        '497K': ('Prospectus497K', 'fund summary prospectus with fees and performance'),
     }
 
     if base_form in form_map:
@@ -359,13 +365,16 @@ def obj(sec_filing: Filing) -> Optional[object]:
         from edgar.offerings.registration_s1 import RegistrationS1
         return RegistrationS1.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ['S-3', 'S-3ASR', 'S-3D', 'S-3DPOS']):
+    elif matches_form(sec_filing, ['S-3', 'S-3ASR', 'S-3D', 'S-3DPOS', 'F-3', 'F-3ASR']):
         from edgar.offerings.registration_s3 import RegistrationS3
         return RegistrationS3.from_filing(sec_filing)
 
     elif matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):
         from edgar.offerings.prospectus import Prospectus424B
         return Prospectus424B.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, PROSPECTUS497K_FORMS):
+        return Prospectus497K.from_filing(sec_filing)
 
     elif matches_form(sec_filing, NCEN_FORMS):
         return FundCensus.from_filing(sec_filing)

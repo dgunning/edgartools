@@ -166,6 +166,21 @@ form144.securities                         # security details
 
 ---
 
+## Fund Summary Prospectus (497K)
+
+Parse mutual fund and ETF summary prospectuses with fee tables, expense examples, and average annual returns.
+
+```python
+prospectus = filing.obj()                  # Prospectus497K
+prospectus.fees                            # expense ratios per share class
+prospectus.performance                     # average annual returns (1yr/5yr/10yr)
+prospectus.best_quarter                    # (8.80%, 'December 31, 2023')
+```
+
+[:octicons-arrow-right-24: Fund Summary Prospectus guide](guides/prospectus497k-data-object-guide.md)
+
+---
+
 ## Fund Shareholder Reports (N-CSR / N-CSRS)
 
 Parse certified annual and semiannual shareholder reports with expense ratios, performance data, and share class details.
@@ -290,6 +305,24 @@ deal.discount_rate                         # underwriting fee as fraction of pri
 ```
 
 [:octicons-arrow-right-24: Prospectus Supplements guide](guides/prospectus424b-data-object-guide.md)
+
+---
+
+## Shelf Registrations (S-3 / F-3)
+
+Parse shelf registration statements to extract offering capacity, filer category, fee tables, and navigate to 424B takedowns.
+
+```python
+s3 = filing.obj()                         # RegistrationS3
+s3.offering_type                          # S3OfferingType.UNIVERSAL_SHELF
+s3.total_offering                         # total registered amount ($)
+s3.fee_table                              # parsed Exhibit 107 fee table
+s3.takedowns                              # 424B filings under this shelf
+```
+
+Supports S-3, S-3/A, S-3ASR, S-3D, S-3DPOS, F-3, F-3/A, F-3ASR, and F-3ASR/A.
+
+[:octicons-arrow-right-24: Shelf Registrations guide](guides/registration-s3-data-object-guide.md)
 
 ---
 
