@@ -118,6 +118,9 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 011 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | In-memory config bugs: ADD_COMPANY_OVERRIDE flattening, ADD_FORMULA format mismatch, ADD_DIVERGENCE wrong field, round-trip tests | All implemented |
 | 012 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Post-O21 root cause: _compute_sa_composite black box, PFE -100pp cross-company regression, diagnostic-first approach | Action items created |
 | 013 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | Pipeline architecture flaws: MappingSource.CONFIG overload, Strategy 0 silent fallthrough, AI resolver duplication. Diagnostic-confirmed root causes for 0% KEEP rate. | O33-O38 implemented |
+| 014 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt benchmarking: two-layer eval (semantic vs CQS), fix evaluator before prompt, DOCUMENT_DIVERGENCE exception mode, 12-case gold set | Action items created |
+| 015 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt & context overhaul: scope enum enforcement, explicit escalation triggers, formula constraints, solver annotations. 25%→60%+ compile-valid target. | O41-O46 planned |
+| 016 | 2026-03-28 | GPT-5.4 + Gemini 3.1 | Formula engine limitations & auto-solver quality: signed components in _compute_sa_composite, kill brute-force solver, override isolation bug, graveyard replay strategy | Action items created |
 
 ### Session 004 Unanimous Agreements
 
@@ -152,6 +155,9 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 011 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `ba2f82ae-e8f2-4d1c-bd01-29e40d721c42` |
 | 012 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `06acd7c0-fc3d-4945-8c81-a52b77a4eef5` |
 | 013 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `edb0fb8f-3b1e-4124-8021-f61b882a865c` |
+| 014 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `10bcb2eb-98b7-4b0c-95c7-9e0d233ccf33` |
+| 015 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `5b47500e-0e10-4f75-878a-5a2a079c284e` |
+| 016 | 2026-03-28 | GPT-5.4 + Gemini 3.1 | `73e496f4-f35c-4a18-bc02-09703b72814b` |
 
 ---
 

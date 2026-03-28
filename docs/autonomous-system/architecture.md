@@ -221,6 +221,9 @@ These persist across all sessions and guide all future work:
 41. **AI resolver role is semantic adjudication, not concept hunting** — deterministic solver owns discovery; AI owns judgment (DOCUMENT_DIVERGENCE, semantic choice, formula design). AI prompt must include WHY deterministic rejected each candidate (Session 013)
 42. **Overrides search facts, not just calc trees** — calc linkbases are notoriously incomplete. Override primacy means search across all data sources before declaring failure (Session 013)
 43. **EF and SA verification should be decoupled long-term** — "correct GAAP concept" (EF) and "matches yfinance aggregate" (SA) are different questions. Conflating them causes correct extractions to fail CQS gates. Phase 2 work (Session 013)
+44. **Do not optimize prompts against a broken evaluator** — verify evaluator behavior first (re-run through fixed pipeline), then iterate on prompts with human-adjudicated ground truth (Session 014)
+45. **Benchmark harness scores semantic correctness independently of CQS** — action accuracy and concept accuracy measured against human ground truth, not CQS delta (Session 014)
+46. **DOCUMENT_DIVERGENCE needs a CQS exception mode** — if AI proposes justified divergence, CQS must not penalize under strict matching. Evaluation architecture change, not prompt change (Session 014)
 
 ---
 

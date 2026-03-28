@@ -103,6 +103,15 @@ class AutoSolver:
         "CASHFLOW": ["CashFlowStatement"],
     }
 
+    # Semantic blacklist: concepts that should never appear in composite formulas
+    # (non-financial or operationally meaningless in aggregation context)
+    SEMANTIC_BLACKLIST = {
+        "BeverageServingsConsumedPerDay",
+        "NumberOfEmployees",
+        "NumberOfStores",
+        "EntityCommonStockSharesOutstanding",
+    }
+
     # Statement family mapping: which statements to search for each metric
     METRIC_STATEMENT_FAMILIES = {
         "DepreciationAmortization": ["CASHFLOW"],
@@ -252,13 +261,17 @@ class AutoSolver:
                     combo_concepts = [concept_list[i] for i in combo_indices]
                     combo_values = [value_list[i] for i in combo_indices]
 
+                    # Semantic blacklist: reject nonsense concepts
+                    if any(c in self.SEMANTIC_BLACKLIST for c in combo_concepts):
+                        continue
+
                     # Statement family constraint: for 2+ component formulas,
-                    # at least one component must be a known concept from the same
-                    # statement family. This prevents algebraic coincidences across
-                    # unrelated financial statements.
+                    # ALL components must be known concepts from the same statement
+                    # family. This prevents algebraic coincidences across unrelated
+                    # financial statements.
                     if size > 1 and related_concepts:
-                        if not any(c in related_concepts for c in combo_concepts):
-                            continue  # Skip: no component from same statement family
+                        if not all(c in related_concepts for c in combo_concepts):
+                            continue  # Skip: not all components from same family
 
                     # Phase B: Inline multi-period constraint
                     periods_checked = 1  # Primary period always counts
@@ -295,6 +308,10 @@ class AutoSolver:
                 for combo_indices in combinations(range(len(concept_list)), size):
                     combo_concepts = [concept_list[i] for i in combo_indices]
                     combo_values = [value_list[i] for i in combo_indices]
+
+                    # Semantic blacklist: reject nonsense concepts
+                    if any(c in self.SEMANTIC_BLACKLIST for c in combo_concepts):
+                        continue
 
                     # Try subtracting each single element from the sum of the rest
                     for neg_idx in range(len(combo_values)):

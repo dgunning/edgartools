@@ -14,6 +14,7 @@ Key invariants:
 6. Circuit breaker: 10 consecutive failures stops the session
 """
 
+import ast
 import fcntl
 import hashlib
 import json
@@ -1229,6 +1230,163 @@ def log_to_graveyard(
 
     ledger.record_graveyard(entry)
     return entry.experiment_id
+
+
+# =============================================================================
+# GRAVEYARD REPLAY
+# =============================================================================
+
+def replay_graveyard_proposals(
+    metric_filter: Optional[str] = None,
+    max_entries: int = 50,
+    dry_run: bool = False,
+    eval_cohort: Optional[List[str]] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Re-evaluate previously rejected graveyard proposals with the current engine.
+
+    After a fundamental engine change (e.g., signed formula support), proposals
+    that were correctly rejected may now produce correct results. This function
+    replays those proposals to find flipped decisions (DISCARD → KEEP).
+
+    Args:
+        metric_filter: Only replay entries for this metric (optional).
+        max_entries: Maximum graveyard entries to replay.
+        dry_run: If True, evaluate but don't apply KEEP changes.
+        eval_cohort: Companies to evaluate on (defaults to QUICK_EVAL_COHORT).
+
+    Returns:
+        List of dicts with replay results:
+        {experiment_id, metric, ticker, old_decision, new_decision, reason}
+    """
+    ledger = ExperimentLedger()
+    entries = ledger.get_graveyard_entries(
+        target_metric=metric_filter, limit=max_entries,
+    )
+
+    if not entries:
+        logger.info("[REPLAY] No graveyard entries to replay.")
+        return []
+
+    if eval_cohort is None:
+        eval_cohort = QUICK_EVAL_COHORT
+
+    # Compute baseline CQS once
+    baseline_cqs = compute_cqs(
+        eval_cohort=eval_cohort,
+        snapshot_mode=True,
+        use_ai=False,
+        ledger=ledger,
+    )
+
+    from edgar.xbrl.standardization.config_loader import get_config
+    baseline_config = get_config(reload=True)
+
+    results = []
+    flipped = 0
+
+    for entry in entries:
+        config_diff = entry.get("config_diff", "")
+        target_metric = entry.get("target_metric", "")
+        target_companies = entry.get("target_companies", "")
+        experiment_id = entry.get("experiment_id", "")
+
+        # Reconstruct ConfigChange from stored diff
+        change = _reconstruct_change_from_diff(config_diff, target_metric, target_companies)
+        if change is None:
+            results.append({
+                "experiment_id": experiment_id,
+                "metric": target_metric,
+                "ticker": target_companies,
+                "old_decision": "DISCARD",
+                "new_decision": "SKIP",
+                "reason": "Could not reconstruct ConfigChange from diff",
+            })
+            continue
+
+        # Re-evaluate with current engine
+        decision = evaluate_experiment_in_memory(
+            change=change,
+            baseline_cqs=baseline_cqs,
+            baseline_config=baseline_config,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+        )
+
+        new_decision = decision.decision.value
+        old_decision = entry.get("discard_reason", "DISCARD")
+
+        if decision.decision == Decision.KEEP:
+            flipped += 1
+            if not dry_run:
+                # Apply the change
+                try:
+                    apply_config_change(change)
+                    logger.info(
+                        "[REPLAY KEEP] %s:%s — applying change (was: %s)",
+                        target_companies, target_metric, old_decision,
+                    )
+                    # Clear graveyard entry for this metric+ticker
+                    ledger.clear_graveyard_entries(target_metric, target_companies)
+                except Exception as e:
+                    logger.warning("[REPLAY] Failed to apply change: %s", e)
+
+        results.append({
+            "experiment_id": experiment_id,
+            "metric": target_metric,
+            "ticker": target_companies,
+            "old_decision": old_decision,
+            "new_decision": new_decision,
+            "reason": decision.reason,
+            "cqs_delta": decision.cqs_delta,
+        })
+
+    logger.info(
+        "[REPLAY] Done: %d entries replayed, %d flipped to KEEP%s",
+        len(results), flipped, " (dry run)" if dry_run else "",
+    )
+    return results
+
+
+def _reconstruct_change_from_diff(
+    config_diff: str, target_metric: str, target_companies: str,
+) -> Optional[ConfigChange]:
+    """Reconstruct a ConfigChange from a graveyard diff string.
+
+    The diff format is: [change_type] file:yaml_path\\n  old: ...\\n  new: ...\\n  reason: ...
+    """
+    match = re.match(
+        r"\[(\w+)\]\s+(\S+?):(\S+)\n\s+old:\s*(.*?)\n\s+new:\s*(.*?)\n\s+reason:\s*(.*)",
+        config_diff,
+        re.DOTALL,
+    )
+    if not match:
+        return None
+
+    change_type_str, file_name, yaml_path, old_val, new_val, rationale = match.groups()
+
+    try:
+        change_type = ChangeType(change_type_str)
+    except ValueError:
+        return None
+
+    # Parse new_value — try JSON-like parsing for dicts/lists
+    new_value = new_val.strip()
+    try:
+        new_value = ast.literal_eval(new_value)
+    except (ValueError, SyntaxError):
+        pass  # Keep as string
+
+    return ConfigChange(
+        file=file_name,
+        change_type=change_type,
+        yaml_path=yaml_path,
+        new_value=new_value,
+        rationale=f"[REPLAY] {rationale.strip()}",
+        target_metric=target_metric,
+        target_companies=target_companies,
+        source="replay",
+    )
 
 
 # =============================================================================

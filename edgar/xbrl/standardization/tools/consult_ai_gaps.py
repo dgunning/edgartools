@@ -177,7 +177,7 @@ ACTION_VOCABULARY = {
     },
     "ADD_FORMULA": {
         "required_params": ["components", "scope"],
-        "description": "Add a composite formula (sum of components)",
+        "description": "Add a composite formula. Components: strings (weight=+1.0) or {'concept': 'X', 'weight': -1.0}. scope MUST be 'company' or 'global'. Max 3 components.",
     },
     "EXCLUDE_METRIC": {
         "required_params": ["reason_code"],
@@ -238,6 +238,31 @@ def parse_typed_action(
                 logger.warning(
                     f"TypedAction {action_name} missing required param: {req}"
                 )
+                return None
+
+        # O42: Validate param values, not just presence
+        if action_name == "ADD_FORMULA":
+            scope = params.get("scope", "")
+            if scope not in ("company", "global"):
+                logger.warning(
+                    f"TypedAction ADD_FORMULA invalid scope: '{scope}' "
+                    f"(must be 'company' or 'global')"
+                )
+                return None
+            components = params.get("components", [])
+            if not isinstance(components, list) or len(components) > 4:
+                logger.warning(
+                    f"TypedAction ADD_FORMULA invalid components: "
+                    f"{len(components) if isinstance(components, list) else 'not a list'}"
+                )
+                return None
+            # Validate each component format: str or {"concept": "X", ...}
+            for c in components:
+                if isinstance(c, str):
+                    continue
+                if isinstance(c, dict) and "concept" in c:
+                    continue
+                logger.warning(f"TypedAction ADD_FORMULA invalid component: {c}")
                 return None
 
         return TypedAction(
@@ -313,6 +338,15 @@ def compile_action(action: TypedAction, gap: Optional['UnresolvedGap'] = None) -
     elif action.action == "ADD_FORMULA":
         scope = action.params.get("scope", "default")
         components = action.params["components"]
+
+        def _normalize_component(c):
+            """Normalize concept names in formula components (str or weighted dict)."""
+            if isinstance(c, str):
+                return normalize_concept(c)
+            elif isinstance(c, dict):
+                return {"concept": normalize_concept(c["concept"]), "weight": float(c.get("weight", 1.0))}
+            return c
+
         # Normalize scope for consumer: "company" → "company:{ticker}"
         if scope == "company":
             normalized_scope = f"company:{action.ticker}"
@@ -324,7 +358,7 @@ def compile_action(action: TypedAction, gap: Optional['UnresolvedGap'] = None) -
             yaml_path=f"metrics.{action.metric}.standardization",
             new_value={
                 "scope": normalized_scope,
-                "components": [normalize_concept(c) for c in components],
+                "components": [_normalize_component(c) for c in components],
             },
             rationale=f"[AI/typed] {action.rationale}",
             target_metric=action.metric,
@@ -681,6 +715,30 @@ def _build_gap_type_guidance(gap: UnresolvedGap) -> str:
     return ""
 
 
+def _build_industry_constraints(gap: UnresolvedGap) -> str:
+    """O44: Build industry constraint warnings for banking and other archetypes."""
+    if not gap.company_industry:
+        return ""
+    industry = gap.company_industry.lower()
+    if industry != "banking":
+        return ""
+    industry_path = Path(__file__).parent.parent / "config" / "industry_metrics.yaml"
+    try:
+        with open(industry_path) as f:
+            industry_config = yaml.safe_load(f) or {}
+        forbidden = industry_config.get("banking", {}).get("forbidden_metrics", [])
+    except Exception:
+        forbidden = []
+    if gap.metric in forbidden:
+        return (
+            f"\n## Industry Constraint\n"
+            f"**WARNING:** {gap.metric} is on the banking forbidden_metrics list. "
+            f"Banking companies typically do not report this metric in a way that "
+            f"matches yfinance's definition. You should strongly consider ESCALATE.\n"
+        )
+    return f"\n## Industry Context\nCompany industry: banking\n"
+
+
 # =============================================================================
 # TYPED ACTION PROMPT (Phase 3)
 # =============================================================================
@@ -703,6 +761,7 @@ def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> 
     difficulty_context = _build_difficulty_context(gap)
     metric_context = _build_metric_context(gap)
     gap_type_guidance = _build_gap_type_guidance(gap)
+    industry_constraints = _build_industry_constraints(gap)
 
     action_lines = []
     for name, spec in ACTION_VOCABULARY.items():
@@ -724,6 +783,7 @@ def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> 
 {difficulty_context}
 {metric_context}
 {gap_type_guidance}
+{industry_constraints}
 ## Prior Failed Attempts ({gap.graveyard_count} total)
 {graveyard_text}
 {candidates_text}
@@ -731,10 +791,17 @@ def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> 
 ## Available Actions
 {actions_section}
 
-## Engine Capabilities
-- The engine supports sign negation via FIX_SIGN_CONVENTION (no params needed).
-- Composite formulas sum their components; use ADD_FORMULA for multi-concept metrics.
-- ESCALATE if you believe no config change can resolve this gap.
+## Engine Capabilities & Constraints
+- Sign negation: FIX_SIGN_CONVENTION (no params needed).
+- Composite formulas: ADD_FORMULA sums components ONLY. No subtraction. Max 3 components.
+  scope must be "company" (applies to this ticker only) or "global" (applies to all).
+- ESCALATE if no config change can resolve this gap.
+
+## Escalation Triggers — you MUST ESCALATE when:
+- reference_value is None (no ground truth to validate against)
+- The metric is structurally inapplicable to this company's industry (e.g., PPE for banks)
+- 4+ prior failed attempts with semantic regressions
+- No candidate concept is a genuine semantic match (value-only coincidences don't count)
 
 ## Response Format (strict JSON only — no markdown fences)
 {{
@@ -746,16 +813,26 @@ def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> 
   "confidence": 0.85
 }}
 
-## Worked Example
-For a gap where XOM:GrossProfit is missing, if you find the XBRL concept
-"us-gaap:GrossProfit" reports the correct value:
+## Worked Examples
+
+Example 1 — ADD_FORMULA (composite metric, company-scoped):
 {{
-  "action": "MAP_CONCEPT",
-  "ticker": "XOM",
-  "metric": "GrossProfit",
-  "params": {{"concept": "us-gaap:GrossProfit"}},
-  "rationale": "XOM reports GrossProfit directly in XBRL",
+  "action": "ADD_FORMULA",
+  "ticker": "CAT",
+  "metric": "IntangibleAssets",
+  "params": {{"components": ["us-gaap:Goodwill", "us-gaap:IntangibleAssetsNetExcludingGoodwill"], "scope": "company"}},
+  "rationale": "CAT splits intangibles into Goodwill + IntangibleAssetsNet on balance sheet",
   "confidence": 0.90
+}}
+
+Example 2 — ESCALATE (banking forbidden metric):
+{{
+  "action": "ESCALATE",
+  "ticker": "JPM",
+  "metric": "PropertyPlantEquipment",
+  "params": {{"reason": "PPE is structurally inapplicable to banking; premises buried in OtherAssets"}},
+  "rationale": "Banking companies do not report PPE in a way that matches yfinance's industrial definition",
+  "confidence": 0.95
 }}
 
 IMPORTANT: Do NOT re-propose anything found in the prior failed attempts above.
@@ -1944,12 +2021,13 @@ def _build_candidates_context(
         delta_str = f"{c.delta_pct:.1f}%" if c.delta_pct is not None else "—"
         lines.append(f"| {c.concept} | {val_str} | {ref_str} | {delta_str} | {c.source} |")
     lines.append(
-        "\n**Semantic correctness is required.** A concept MUST represent the same "
-        "financial meaning as the target metric. Prefer a semantically correct concept "
-        "with slightly worse Delta% over a semantically wrong concept with perfect "
-        "numeric match. Low Delta% alone does not validate a concept — coincidental "
-        "numeric matches across unrelated line items are common.\n"
-        "If no candidate is semantically correct, use DOCUMENT_DIVERGENCE or ESCALATE.\n"
+        "\n**All candidates above were already evaluated by deterministic solvers "
+        "and did not resolve the gap.** Reasons include: concept not found in "
+        "calculation trees, cross-company regression risk, or variance exceeding "
+        "threshold. Your job is semantic adjudication — pick the best available "
+        "option or ESCALATE if none is semantically valid.\n"
+        "Low Delta% alone does not validate a concept — coincidental numeric "
+        "matches across unrelated line items are common.\n"
     )
     return "\n".join(lines), candidates
 

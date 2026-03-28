@@ -1049,6 +1049,17 @@ def _compute_company_cqs(
             unverified_metrics_list.append(metric)
             continue  # Don't count in any denominator or numerator
 
+        # Single validation lookup per metric
+        val_result = validations.get(metric)
+
+        # Handle documented divergences — exclude from pass/fail scoring
+        # (no penalty, no unearned credit; still counts as mapped)
+        if val_result and val_result.variance_type == "explained":
+            if result.is_mapped:
+                mapped += 1
+            explained_variance_count += 1
+            continue  # Skip pass/fail/golden evaluation
+
         if result.is_mapped:
             mapped += 1
 
@@ -1064,14 +1075,11 @@ def _compute_company_cqs(
         # Track failed metrics for derive_gaps_from_cqs fast path
         if result.validation_status != "valid" and result.source != MappingSource.CONFIG:
             failed_metrics.append(metric)
-            val_for_ref = validations.get(metric)
-            failed_metric_refs[metric] = val_for_ref.reference_value if val_for_ref else None
+            failed_metric_refs[metric] = val_result.reference_value if val_result else None
 
-        # Collect variance and EF/SA from validation results
-        val_result = validations.get(metric)
+        # Collect variance from validation results
         if val_result and val_result.variance_pct is not None:
-            if val_result.variance_type != "explained":
-                variances.append(abs(val_result.variance_pct))
+            variances.append(abs(val_result.variance_pct))
 
         # Detect reference_disputed -- exclude from pass/fail
         if val_result and hasattr(val_result, 'notes') and val_result.notes:
@@ -1088,8 +1096,6 @@ def _compute_company_cqs(
                 rfa_pass_count += 1
             if val_result.sma_pass:
                 sma_pass_count += 1
-            if val_result.variance_type == "explained":
-                explained_variance_count += 1
         elif result.is_mapped and result.source == MappingSource.TREE:
             # Tree-resolved with no validation = EF pass (trusted source)
             ef_pass_count += 1
@@ -1107,8 +1113,8 @@ def _compute_company_cqs(
         if (ticker, metric) in golden_set:
             golden_count += 1
 
-    # Compute sub-metrics (exclude disputed + unverified metrics from denominators)
-    effective_total = total - disputed_count - unverified_count
+    # Compute sub-metrics (exclude disputed + unverified + documented divergence from denominators)
+    effective_total = total - disputed_count - unverified_count - explained_variance_count
     pass_rate = valid / effective_total if effective_total > 0 else 0.0
     mean_variance = sum(variances) / len(variances) if variances else 0.0
     coverage_rate = min(1.0, mapped / effective_total) if effective_total > 0 else 0.0

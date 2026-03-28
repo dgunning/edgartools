@@ -2312,14 +2312,28 @@ class ReferenceValidator:
             sma_pass=sma_pass,
         )
     
-    def _resolve_formula_components(self, metric: str, ticker: str) -> Optional[List[str]]:
+    @staticmethod
+    def _parse_component(component) -> Tuple[str, float]:
+        """Parse a formula component into (concept_name, weight).
+
+        Supports:
+            str → (concept_name, +1.0)   (backward compatible)
+            dict {"concept": "X", "weight": -1.0} → ("X", -1.0)
+        """
+        if isinstance(component, str):
+            return (component, 1.0)
+        elif isinstance(component, dict):
+            return (component["concept"], float(component.get("weight", 1.0)))
+        raise ValueError(f"Invalid component format: {component}")
+
+    def _resolve_formula_components(self, metric: str, ticker: str) -> Optional[List[Tuple[str, float]]]:
         """
         Resolve standardization formula components for a metric+ticker.
 
         Resolution order: company override > sector override > default.
 
         Returns:
-            List of XBRL concept names, or None if no formula configured.
+            List of (concept_name, weight) tuples, or None if no formula configured.
         """
         metric_config = self.config.get_metric(metric) if self.config else None
         if not metric_config or not metric_config.standardization:
@@ -2356,8 +2370,9 @@ class ReferenceValidator:
                 "[SA RESOLVE] %s:%s — tier=%s, components=%s",
                 ticker, metric, tier, formula_components,
             )
+            return [self._parse_component(c) for c in formula_components]
 
-        return formula_components if formula_components else None
+        return None
 
     def _compute_sa_composite(
         self,
@@ -2381,16 +2396,16 @@ class ReferenceValidator:
         if not formula_components:
             return None
 
-        # Sum absolute values of each component
+        # Sum weighted component values (supports subtraction via negative weights)
         composite = 0.0
         components_found = 0
         component_values = {}
-        for component in formula_components:
-            val = self._extract_xbrl_value(xbrl, component)
+        for concept, weight in formula_components:
+            val = self._extract_xbrl_value(xbrl, concept)
             if val is not None:
-                composite += abs(val)
+                composite += val * weight
                 components_found += 1
-            component_values[component] = val
+            component_values[concept] = val
 
         logger.debug(
             "[SA COMPONENTS] %s:%s — %s",
@@ -2404,17 +2419,17 @@ class ReferenceValidator:
             )
             return None
 
-        abs_ref = abs(ref_value)
-        if abs_ref == 0:
+        # Variance: compare signed composite to signed reference
+        if ref_value == 0:
             return (composite, 0.0, True)
 
-        variance_fraction = abs(composite - abs_ref) / abs_ref
+        variance_fraction = abs(composite - ref_value) / abs(ref_value)
         sa_pass = variance_fraction <= tolerance
 
         logger.debug(
             "[SA COMPOSITE] %s:%s — composite=%.2f, ref=%.2f, "
             "variance=%.4f, sa_pass=%s, found=%d/%d",
-            ticker, metric, composite, abs_ref, variance_fraction,
+            ticker, metric, composite, ref_value, variance_fraction,
             sa_pass, components_found, len(formula_components),
         )
 

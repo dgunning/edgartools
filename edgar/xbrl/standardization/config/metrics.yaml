@@ -735,6 +735,13 @@ metrics:
           - t:SegmentReportingInformationOperationsAndSupportExpenses
           - AssetAcquisitionPriceOfAcquisitionExpected
           notes: Auto-solver company-specific via T, 1/1 periods, 0/3 companies
+      default:
+        components:
+        - concept: Revenues
+          weight: 1.0
+        - concept: CostOfGoodsAndServicesSold
+          weight: -1.0
+        notes: "GrossProfit = Revenue - COGS (signed formula)"
   ResearchAndDevelopment:
     description: Research and development expense
     standard_tag: ResearchAndDevelopmentExpense
