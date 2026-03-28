@@ -4,7 +4,7 @@ description: Parse SEC S-3 shelf registration statements with Python. Extract of
 
 # S-3 Shelf Registration: Parse SEC Filings with Python
 
-S-3 filings are shelf registration statements that allow companies to register securities for future offering. Rather than registering each deal separately, a company files an S-3 once and then draws down from it over three years. EdgarTools parses S-3, S-3/A, S-3ASR, S-3D, and S-3DPOS filings into a `RegistrationS3` object.
+S-3 filings are shelf registration statements that allow companies to register securities for future offering. Rather than registering each deal separately, a company files an S-3 once and then draws down from it over three years. EdgarTools parses S-3, S-3/A, S-3ASR, S-3D, S-3DPOS, and their foreign private issuer equivalents (F-3, F-3/A, F-3ASR, F-3ASR/A) into a `RegistrationS3` object.
 
 ```python
 from edgar import find
@@ -232,8 +232,12 @@ You can also navigate this in reverse -- starting from a 424B prospectus back to
 | `S-3ASR/A` | Amendment to an automatic shelf |
 | `S-3D` | Shelf for dividend reinvestment plans |
 | `S-3DPOS` | Post-effective amendment for DRIPs |
+| `F-3` | Foreign private issuer shelf registration |
+| `F-3/A` | Amendment to a foreign shelf registration |
+| `F-3ASR` | Foreign automatic shelf registration |
+| `F-3ASR/A` | Amendment to a foreign automatic shelf |
 
-All variants are dispatched automatically by `filing.obj()`.
+All variants are dispatched automatically by `filing.obj()`. F-3 forms are the foreign private issuer equivalent of S-3 and use the same `RegistrationS3` class.
 
 ---
 
