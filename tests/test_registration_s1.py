@@ -288,6 +288,18 @@ class TestObjInfo:
         assert has_obj is True
         assert class_name == "RegistrationS1"
 
+    def test_get_obj_info_f1(self):
+        from edgar import get_obj_info
+        has_obj, class_name, description = get_obj_info("F-1")
+        assert has_obj is True
+        assert class_name == "RegistrationS1"
+
+    def test_get_obj_info_f1a(self):
+        from edgar import get_obj_info
+        has_obj, class_name, description = get_obj_info("F-1/A")
+        assert has_obj is True
+        assert class_name == "RegistrationS1"
+
 
 @pytest.mark.network
 class TestObjDispatch:

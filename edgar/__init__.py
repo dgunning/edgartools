@@ -236,6 +236,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'DEFM14A': ('ProxyStatement', 'merger-related proxy statement'),
         'S-1': ('RegistrationS1', 'S-1 registration statement'),
         'S-1/A': ('RegistrationS1', 'S-1 registration statement (amendment)'),
+        'F-1': ('RegistrationS1', 'F-1 foreign registration statement'),
+        'F-1/A': ('RegistrationS1', 'F-1 foreign registration statement (amendment)'),
         'S-3': ('RegistrationS3', 'shelf registration statement'),
         'S-3/A': ('RegistrationS3', 'shelf registration statement (amendment)'),
         'S-3ASR': ('RegistrationS3', 'automatic shelf registration'),
@@ -335,7 +337,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ['S-1']):
+    elif matches_form(sec_filing, ['S-1', 'F-1']):
         from edgar.offerings.registration_s1 import RegistrationS1
         return RegistrationS1.from_filing(sec_filing)
 
