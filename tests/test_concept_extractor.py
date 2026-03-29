@@ -6,7 +6,7 @@ Uses AAPL 10-Q fixtures at tests/fixtures/attachments/aapl/20250329/R*.htm.
 import pytest
 from pathlib import Path
 
-from edgar.sgml.concept_extractor import ConceptRow, ConceptReport, extract_concepts_from_report
+from edgar.sgml.concept_extractor import ConceptRow, ConceptReport, extract_concepts_from_report, parse_numeric
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "attachments" / "aapl" / "20250329"
 
@@ -49,16 +49,21 @@ class TestConceptReportParsing:
         assert len(balance_sheet) > 0
 
     def test_period_headers_income(self, income_statement):
-        # 3 Months Ended + 6 Months Ended = 4 periods
+        # 3 Months Ended + 6 Months Ended = 4 periods, now with group prefix
         assert len(income_statement.period_headers) == 4
-        assert 'Mar. 29, 2025' in income_statement.period_headers
-        assert 'Mar. 30, 2024' in income_statement.period_headers
+        assert '3 Months Ended Mar. 29, 2025' in income_statement.period_headers
+        assert '6 Months Ended Mar. 29, 2025' in income_statement.period_headers
 
     def test_period_headers_balance_sheet(self, balance_sheet):
-        # Balance sheet has 2 instant dates
+        # Balance sheet has 2 instant dates (no group headers)
         assert len(balance_sheet.period_headers) == 2
         assert 'Mar. 29, 2025' in balance_sheet.period_headers
         assert 'Sep. 28, 2024' in balance_sheet.period_headers
+
+    def test_period_headers_are_unique(self, income_statement):
+        """With structured periods, all headers should now be unique."""
+        headers = income_statement.period_headers
+        assert len(headers) == len(set(headers))
 
 
 class TestConceptRowExtraction:
@@ -181,6 +186,53 @@ class TestConceptReportMethods:
         assert rows == []
 
 
+class TestScaling:
+    """Test scaling factor extraction from title headers."""
+
+    def test_currency_scaling_millions(self, income_statement):
+        assert income_statement.currency_scaling == 1_000_000
+
+    def test_shares_scaling_thousands(self, income_statement):
+        assert income_statement.shares_scaling == 1_000
+
+    def test_balance_sheet_scaling(self, balance_sheet):
+        assert balance_sheet.currency_scaling == 1_000_000
+
+    def test_currency(self, income_statement):
+        assert income_statement.currency == 'USD'
+
+
+class TestNumericValues:
+    """Test numeric value parsing on ConceptRow."""
+
+    def test_numeric_value(self, income_statement):
+        row = income_statement.rows[0]  # Net sales
+        assert row.numeric_value == 95359.0
+
+    def test_numeric_value_ground_truth(self, income_statement):
+        """Ground truth: AAPL Q2 FY2025 revenue = $95,359M displayed."""
+        row = income_statement.rows[0]
+        assert row.numeric_value == 95359.0
+        # Scaled to raw XBRL value
+        raw = row.numeric_value * income_statement.currency_scaling
+        assert raw == 95_359_000_000
+
+    def test_numeric_value_negative(self, income_statement):
+        rows = income_statement.get_by_concept('us-gaap_NonoperatingIncomeExpense')
+        assert rows[0].numeric_value == -279.0
+
+    def test_numeric_values_dict(self, income_statement):
+        row = income_statement.rows[0]
+        nv = row.numeric_values
+        assert isinstance(nv, dict)
+        assert len(nv) == 4
+        assert all(isinstance(v, float) for v in nv.values())
+
+    def test_abstract_row_no_numeric(self, income_statement):
+        rows = income_statement.get_by_concept('us-gaap_OperatingExpensesAbstract')
+        assert rows[0].numeric_value is None
+
+
 class TestEdgeCases:
     """Test edge cases and robustness."""
 
@@ -194,11 +246,13 @@ class TestEdgeCases:
         report = extract_concepts_from_report('<html><body><p>No table</p></body></html>')
         assert len(report) == 0
 
-    def test_duplicate_period_headers_disambiguated(self, income_statement):
-        """When the same date appears for 3-month and 6-month periods, values dict should have all 4 entries."""
+    def test_structured_period_headers_all_values(self, income_statement):
+        """With structured periods, all 4 values should be captured without disambiguation."""
         row = income_statement.rows[0]  # Net sales
-        # Should have 4 values (2 unique dates x 2 period spans)
         assert len(row.values) == 4
+        # Keys should be structured: "3 Months Ended Mar. 29, 2025" etc.
+        assert any('3 Months' in k for k in row.values.keys())
+        assert any('6 Months' in k for k in row.values.keys())
 
     def test_all_fixture_reports_parse(self):
         """Every R*.htm in the fixture directory should parse without error."""

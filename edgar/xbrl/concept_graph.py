@@ -19,12 +19,12 @@ Usage:
 """
 from typing import Dict, List, Optional, TYPE_CHECKING
 
-from rich import box
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
 from edgar.richtools import repr_rich
+from edgar.sgml.concept_extractor import parse_numeric
 
 if TYPE_CHECKING:
     from edgar.sgml.metalinks import MetaLinks, MetaLinksReport, TagDefinition
@@ -120,6 +120,17 @@ class Concept:
             if not row.is_dimensional and not row.is_abstract and row.values:
                 return dict(row.values)
         return {}
+
+    @property
+    def numeric_value(self) -> Optional[float]:
+        """Latest period value as a float, or None."""
+        v = self.value
+        return parse_numeric(v) if v else None
+
+    @property
+    def numeric_values(self) -> Dict[str, Optional[float]]:
+        """All period values parsed as floats."""
+        return {k: parse_numeric(v) for k, v in self.values.items()}
 
     @property
     def all_values(self) -> List[Dict[str, str]]:
@@ -442,7 +453,7 @@ class ConceptGraph:
                 root_concept = self._get_or_create_concept(root_tag.tag_id)
                 if not root_concept or not root_concept.value:
                     continue
-                parent_val = _parse_numeric(root_concept.value)
+                parent_val = parse_numeric(root_concept.value)
                 if parent_val is None:
                     continue
                 children = self._metalinks.get_calculation_children(root_tag.tag_id, meta_report.role)
@@ -453,7 +464,7 @@ class ConceptGraph:
                     if not child_concept or not child_concept.value:
                         all_parsed = False
                         break
-                    child_val = _parse_numeric(child_concept.value)
+                    child_val = parse_numeric(child_concept.value)
                     if child_val is None:
                         all_parsed = False
                         break
@@ -517,18 +528,3 @@ class ConceptGraph:
         return cls(metalinks, concept_reports, report_key_to_meta)
 
 
-def _parse_numeric(value_str: str) -> Optional[float]:
-    """Parse a display value like '$ 95,359' or '(279)' into a float."""
-    if not value_str:
-        return None
-    # Remove currency symbols, commas, spaces
-    cleaned = value_str.replace('$', '').replace(',', '').replace(' ', '').strip()
-    # Handle parenthetical negatives
-    if cleaned.startswith('(') and cleaned.endswith(')'):
-        cleaned = '-' + cleaned[1:-1]
-    # Handle explicit negatives
-    cleaned = cleaned.replace('−', '-')  # unicode minus
-    try:
-        return float(cleaned)
-    except ValueError:
-        return None

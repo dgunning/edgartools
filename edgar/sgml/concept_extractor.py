@@ -26,12 +26,38 @@ from typing import Dict, List, Optional
 
 from bs4 import BeautifulSoup, Tag
 
-__all__ = ['ConceptRow', 'ConceptReport', 'extract_concepts_from_report']
+__all__ = ['ConceptRow', 'ConceptReport', 'extract_concepts_from_report', 'parse_numeric']
 
 _DEFREF_RE = re.compile(r"defref_([^'\"]+)")
 _TOTAL_CLASSES = frozenset({'reu', 'rou'})
 _HEADER_CLASSES = frozenset({'rh'})
 _DATA_CLASSES = frozenset({'re', 'ro', 'reu', 'rou', 'rh'})
+
+_SCALING_MAP = {
+    'millions': 1_000_000,
+    'thousands': 1_000,
+    'billions': 1_000_000_000,
+    'hundreds': 100,
+}
+
+
+def parse_numeric(value_str: str) -> Optional[float]:
+    """
+    Parse a display value like '$ 95,359' or '(279)' into a float.
+
+    Handles currency symbols, commas, parenthetical negatives, and unicode minus.
+    Returns None for empty or non-numeric strings.
+    """
+    if not value_str:
+        return None
+    cleaned = value_str.replace('$', '').replace(',', '').replace(' ', '').strip()
+    if cleaned.startswith('(') and cleaned.endswith(')'):
+        cleaned = '-' + cleaned[1:-1]
+    cleaned = cleaned.replace('−', '-')  # unicode minus
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
 
 
 @dataclass
@@ -63,6 +89,18 @@ class ConceptRow:
         """True if this is a dimensional header (axis=member pattern)."""
         return '=' in self.concept_id
 
+    @property
+    def numeric_value(self) -> Optional[float]:
+        """First period value as a float, or None."""
+        if not self.values:
+            return None
+        return parse_numeric(next(iter(self.values.values())))
+
+    @property
+    def numeric_values(self) -> Dict[str, Optional[float]]:
+        """All period values parsed as floats."""
+        return {k: parse_numeric(v) for k, v in self.values.items()}
+
     def __repr__(self):
         val_str = f", values={len(self.values)}" if self.values else ""
         return f"ConceptRow({self.concept_id}, label={self.label!r}{val_str})"
@@ -74,6 +112,9 @@ class ConceptReport:
     title: str
     period_headers: List[str]
     rows: List[ConceptRow]
+    currency: str = 'USD'
+    currency_scaling: int = 1
+    shares_scaling: int = 1
 
     @property
     def concepts(self) -> List[str]:
@@ -173,12 +214,16 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
     if not report_table:
         return ConceptReport(title='', period_headers=[], rows=[])
 
-    # Extract title from the header cell
+    # Extract title and scaling from the header cell
     title = ''
+    currency = 'USD'
+    currency_scaling = 1
+    shares_scaling = 1
     tl = report_table.find('th', class_='tl')
     if tl:
         strong = tl.find('strong')
         if strong:
+            full_header = strong.get_text()
             # Title is the first line (before <br>)
             title_parts = []
             for child in strong.children:
@@ -189,24 +234,50 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
                     title_parts.append(text.strip())
             title = ' '.join(title_parts).strip()
             if not title:
-                title = strong.get_text(strip=True)
+                title = full_header.strip()
+            # Parse scaling from lines after <br>
+            # e.g., "shares in Thousands, $ in Millions"
+            header_lower = full_header.lower()
+            for word, factor in _SCALING_MAP.items():
+                if f'$ in {word}' in header_lower or f'$in {word}' in header_lower:
+                    currency_scaling = factor
+                if f'shares in {word}' in header_lower:
+                    shares_scaling = factor
 
     # Extract period headers from <th class="th"> cells.
-    # Skip group-spanning headers (colspan > 1) like "3 Months Ended";
-    # keep only leaf-level date headers that align with value columns.
+    # Group-spanning headers (colspan > 1) like "3 Months Ended" are captured
+    # and prefixed to leaf headers for structured period identification.
+    group_headers: List[tuple] = []  # (text, colspan)
     period_headers = []
     for th in report_table.find_all('th', class_='th'):
+        div = th.find('div')
+        text = div.get_text(strip=True) if div else th.get_text(strip=True)
+        if not text:
+            continue
         colspan = th.get('colspan')
         if colspan:
             try:
-                if int(colspan) > 1:
-                    continue
+                cs = int(colspan)
             except ValueError:
-                continue
-        div = th.find('div')
-        text = div.get_text(strip=True) if div else th.get_text(strip=True)
-        if text:
-            period_headers.append(text)
+                cs = 1
+        else:
+            cs = 1
+        if cs > 1:
+            group_headers.append((text, cs))
+        else:
+            # Find which group this leaf header belongs to
+            prefix = ''
+            col_pos = len(period_headers)
+            offset = 0
+            for grp_text, grp_span in group_headers:
+                if offset <= col_pos < offset + grp_span:
+                    prefix = grp_text
+                    break
+                offset += grp_span
+            if prefix:
+                period_headers.append(f"{prefix} {text}")
+            else:
+                period_headers.append(text)
 
     # Extract data rows
     rows = []
@@ -267,4 +338,7 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
         title=title,
         period_headers=period_headers,
         rows=rows,
+        currency=currency,
+        currency_scaling=currency_scaling,
+        shares_scaling=shares_scaling,
     )

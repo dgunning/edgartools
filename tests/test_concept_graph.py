@@ -8,7 +8,8 @@ from pathlib import Path
 
 from edgar.sgml.metalinks import MetaLinks
 from edgar.sgml.concept_extractor import extract_concepts_from_report
-from edgar.xbrl.concept_graph import Concept, ConceptGraph, _parse_numeric
+from edgar.sgml.concept_extractor import parse_numeric
+from edgar.xbrl.concept_graph import Concept, ConceptGraph
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "attachments" / "aapl" / "20250329"
 
@@ -263,28 +264,52 @@ class TestValidation:
         assert valid_count >= len(results) * 0.5
 
 
+class TestNumericValues:
+
+    def test_concept_numeric_value(self, graph):
+        c = graph['us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax']
+        assert c.numeric_value == 95359.0
+
+    def test_concept_numeric_values(self, graph):
+        c = graph['us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax']
+        nv = c.numeric_values
+        assert isinstance(nv, dict)
+        assert len(nv) > 0
+        assert all(isinstance(v, (float, type(None))) for v in nv.values())
+
+    def test_negative_numeric_value(self, graph):
+        c = graph['us-gaap_NonoperatingIncomeExpense']
+        if c and c.numeric_value is not None:
+            assert c.numeric_value == -279.0
+
+    def test_abstract_has_no_numeric_value(self, graph):
+        c = graph['us-gaap_OperatingExpensesAbstract']
+        if c:
+            assert c.numeric_value is None
+
+
 class TestParseNumeric:
 
     def test_positive(self):
-        assert _parse_numeric('$ 95,359') == 95359.0
+        assert parse_numeric('$ 95,359') == 95359.0
 
     def test_negative_parens(self):
-        assert _parse_numeric('(279)') == -279.0
+        assert parse_numeric('(279)') == -279.0
 
     def test_decimal(self):
-        assert _parse_numeric('$ 1.65') == 1.65
+        assert parse_numeric('$ 1.65') == 1.65
 
     def test_plain_number(self):
-        assert _parse_numeric('14,994,082') == 14994082.0
+        assert parse_numeric('14,994,082') == 14994082.0
 
     def test_empty(self):
-        assert _parse_numeric('') is None
+        assert parse_numeric('') is None
 
     def test_non_numeric(self):
-        assert _parse_numeric('N/A') is None
+        assert parse_numeric('N/A') is None
 
     def test_unicode_minus(self):
-        assert _parse_numeric('−279') == -279.0
+        assert parse_numeric('−279') == -279.0
 
 
 class TestDisplay:
