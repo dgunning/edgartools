@@ -552,9 +552,11 @@ def preprocess_currency_cells(table_soup):
                 next_cell.string = txt + clean_text(next_cell.get_text())
                 # Adjust colspan (next cell now spans both positions)
                 next_cell["colspan"] = str(int(next_cell.get("colspan", 1)) + 1)
-                # Remove the $ cell
+                # Remove the $ cell and re-snapshot to avoid stale references
                 cell.decompose()
-            i += 1
+                cells = row.find_all(["td", "th"])
+            else:
+                i += 1
 
 
 def preprocess_percent_cells(table_soup):
@@ -594,7 +596,7 @@ def build_row_values(cells, max_cols):
     row_values = []
     for cell in cells:
         try:
-            colspan = int(cell.get("colspan", 1))
+            colspan = max(1, min(int(cell.get("colspan", 1)), 256))
         except (TypeError, ValueError):
             colspan = 1
         txt = clean_text(cell.get_text(" ", strip=True)).replace("|", r"\|")
@@ -646,7 +648,7 @@ def html_to_json(table_soup):
         cells = row.find_all(["th", "td"])
         if not cells:
             continue
-        width = sum(int(cell.get("colspan", 1)) for cell in cells)
+        width = sum(max(1, min(int(cell.get("colspan", 1)), 256)) for cell in cells)
         widths.append(width)
         max_cols = max(max_cols, width)
 

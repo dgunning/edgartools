@@ -14,6 +14,7 @@ Usage:
     >>> tenk.notes['Debt'].to_context()   # AI-optimized context
 """
 import re
+import uuid
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from rich import box
@@ -764,8 +765,9 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
         # Replace each <table> with a placeholder, then process_content the
         # whole document for text/headings, and splice tables back in.
         placeholders = {}
+        run_id = uuid.uuid4().hex[:12]
         for i, table_tag in enumerate(html_tables):
-            marker = f'__TABLE_PLACEHOLDER_{i}__'
+            marker = f'__TBLPH_{run_id}_{i}__'
             table_html = str(table_tag)
 
             # Try pipe-table conversion for this individual table

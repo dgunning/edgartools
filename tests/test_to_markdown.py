@@ -8,10 +8,9 @@ Covers:
 - StatementLineItem.to_markdown(): values + note reference
 - Note.to_markdown(): tables, narrative, policies, details, detail levels
 - Notes.to_markdown(): full document, focus filtering
-- TenK/TenQ.to_context(output_format='markdown'): wired through _focused_context
+- CompanyReport._focused_context(): text context generation
 """
 import re
-from dataclasses import field
 from unittest.mock import Mock, MagicMock, patch
 
 import pytest
@@ -259,8 +258,8 @@ class TestRenderedStatementToMarkdown:
             _row('Cash', [50000, 40000]),
         ]
         rs = _rendered_statement(rows=rows)
-        md_normal = rs.to_markdown()
-        md_llm = rs.to_markdown(optimize_for_llm=True)
+        md_normal = rs.to_markdown(optimize_for_llm=False)
+        md_llm = rs.to_markdown()  # optimize_for_llm=True is now the default
         assert 'ASSETS' in md_normal
         assert 'ASSETS' not in md_llm
         assert 'Cash' in md_llm
@@ -515,14 +514,14 @@ class TestNotesToMarkdown:
 
 
 # ===========================================================================
-# to_context(output_format='markdown') integration
+# _focused_context integration
 # ===========================================================================
 
-class TestToContextMarkdownFormat:
+class TestFocusedContext:
 
     @pytest.mark.fast
-    def test_focused_context_text_default(self):
-        """format='text' (default) should return plain text, not markdown."""
+    def test_focused_context_returns_text(self):
+        """_focused_context should return plain text context."""
         from edgar.company_reports._base import CompanyReport
         report = Mock(spec=CompanyReport)
         report.form = '10-K'
@@ -530,18 +529,6 @@ class TestToContextMarkdownFormat:
         report.notes = _make_notes_collection(5)
         report.period_of_report = '2024-12-31'
 
-        # Call _focused_context directly
         result = CompanyReport._focused_context(report, focus='Debt', detail='minimal')
         assert '10-K: Test Corp' in result
-        assert '## Debt' in result  # text mode uses ## for topic headers
-
-    @pytest.mark.fast
-    def test_focused_context_markdown_format(self):
-        """output_format='markdown' should delegate to Notes.to_markdown()."""
-        from edgar.company_reports._base import CompanyReport
-        report = Mock(spec=CompanyReport)
-        report.notes = _make_notes_collection(5)
-
-        result = CompanyReport._focused_context(report, focus='Debt', detail='minimal', output_format='markdown')
-        assert '# Notes to Financial Statements' in result
-        assert 'Note 3: Debt' in result
+        assert '## Debt' in result

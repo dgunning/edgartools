@@ -750,7 +750,7 @@ class Statement:
         rendered_statement = self.render()
         return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
-    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = False) -> str:
+    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = True) -> str:
         """Render this statement as GitHub-Flavored Markdown.
 
         Args:

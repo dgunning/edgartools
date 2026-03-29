@@ -656,7 +656,7 @@ class RenderedStatement:
         except ImportError:
             return "Pandas is required for DataFrame conversion"
 
-    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = False) -> str:
+    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = True) -> str:
         """Convert to a GitHub-Flavored Markdown table.
 
         Args:
