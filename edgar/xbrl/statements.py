@@ -750,6 +750,15 @@ class Statement:
         rendered_statement = self.render()
         return str(rendered_statement)  # Delegates to RenderedStatement.__str__()
 
+    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = False) -> str:
+        """Render this statement as GitHub-Flavored Markdown.
+
+        Args:
+            detail: 'minimal' (table only), 'standard' (with header), 'full' (header + footer)
+            optimize_for_llm: Simplify output for LLM consumption
+        """
+        return self.render().to_markdown(detail=detail, optimize_for_llm=optimize_for_llm)
+
     def to_context(self, detail: str = 'standard') -> str:
         """
         AI-optimized context string.
@@ -1899,9 +1908,10 @@ class Statement:
             return None
 
         label_lower = label.lower()
+        columns = rendered.header.columns if rendered.header else []
         for row in rendered.rows:
             if row.label.lower() == label_lower:
-                return StatementLineItem(row, self.xbrl)
+                return StatementLineItem(row, self.xbrl, columns=columns)
 
         return None
 
@@ -1947,7 +1957,8 @@ class Statement:
                 scored.append((4, row))
 
         scored.sort(key=lambda x: x[0])
-        return [StatementLineItem(row, self.xbrl) for _, row in scored]
+        columns = rendered.header.columns if rendered.header else []
+        return [StatementLineItem(row, self.xbrl, columns=columns) for _, row in scored]
 
 
 class StatementLineItem:
@@ -1963,11 +1974,12 @@ class StatementLineItem:
         >>> item.notes        # → [Note, ...] (all related notes)
         >>> item.values       # {'instant_2024-12-31': 98071000000, ...}
     """
-    __slots__ = ('_row', '_xbrl')
+    __slots__ = ('_row', '_xbrl', '_columns')
 
-    def __init__(self, row, xbrl):
+    def __init__(self, row, xbrl, columns=None):
         self._row = row
         self._xbrl = xbrl
+        self._columns = columns or []
 
     @property
     def label(self) -> str:
@@ -1996,6 +2008,40 @@ class StatementLineItem:
             return []
         from edgar.xbrl.notes import get_notes_for_concept
         return get_notes_for_concept(self.concept, xbrl)
+
+    def to_markdown(self, include_note: bool = True) -> str:
+        """Render this line item as markdown with formatted values and optional note link.
+
+        Args:
+            include_note: Include a blockquote linking to the related Note
+        """
+        parts = []
+
+        # Format values with period labels from the rendered statement header
+        cells = self._row.cells or []
+        columns = self._columns or []
+        formatted_pairs = []
+        for i, cell in enumerate(cells):
+            if cell.value is not None and cell.value != "":
+                formatted_val = str(cell.formatter(cell.value))
+                if formatted_val:
+                    if i < len(columns) and columns[i]:
+                        formatted_pairs.append(f"{formatted_val} ({columns[i]})")
+                    else:
+                        formatted_pairs.append(formatted_val)
+
+        if formatted_pairs:
+            parts.append(f"**{self.label}**: {', '.join(formatted_pairs)}")
+        else:
+            parts.append(f"**{self.label}**")
+
+        # Note reference
+        if include_note:
+            note = self.note
+            if note:
+                parts.append(f"> Related: Note {note.number} \u2014 {note.title}")
+
+        return '\n\n'.join(parts)
 
     def __repr__(self):
         concept_str = f", concept='{self.concept}'" if self.concept else ""

@@ -349,7 +349,8 @@ class TenK(CompanyReport):
     def __str__(self):
         return f"""TenK('{self.company}')"""
 
-    def to_context(self, detail: str = 'standard', focus: 'str | list[str] | None' = None) -> str:
+    def to_context(self, detail: str = 'standard', focus: 'str | list[str] | None' = None,
+                   output_format: str = 'text') -> str:
         """
         AI-optimized context string.
 
@@ -358,10 +359,11 @@ class TenK(CompanyReport):
             focus: Optional topic or list of topics for cross-cutting context.
                    When set, returns statement lines + note + policy for that topic.
                    Example: focus='debt' or focus=['debt', 'revenue']
+            output_format: 'text' (default) or 'markdown' for GFM with pipe tables
         """
         # Handle focus mode — cross-cutting topic context
         if focus:
-            return self._focused_context(focus, detail)
+            return self._focused_context(focus, detail, output_format=output_format)
 
         from edgar.display.formatting import format_currency_short
 

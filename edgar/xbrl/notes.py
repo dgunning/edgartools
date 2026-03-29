@@ -201,6 +201,71 @@ class Note:
 
         return "\n".join(lines)
 
+    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = True) -> str:
+        """Render this note as GitHub-Flavored Markdown.
+
+        Args:
+            detail: 'minimal' (title + table names), 'standard' (+ tables + narrative),
+                    'full' (+ policies + details)
+            optimize_for_llm: Use LLM-optimized table formatting via process_content()
+        """
+        parts = []
+        parts.append(f"## Note {self.number}: {self.title}")
+
+        # Expands metadata
+        expands = self.expands
+        if expands:
+            parts.append(f"**Expands:** {', '.join(expands)}")
+        expands_stmts = self.expands_statements
+        if expands_stmts:
+            parts.append(f"**From:** {', '.join(expands_stmts)}")
+
+        if detail == 'minimal':
+            # Minimal: just title + table names list
+            if self.tables:
+                table_names = [_extract_table_name(t, self.short_name) for t in self.tables]
+                parts.append("**Tables:** " + ", ".join(table_names))
+            return '\n\n'.join(part for part in parts if part)
+
+        # Tables — always included for standard and full
+        for table_stmt in self.tables:
+            table_name = _extract_table_name(table_stmt, self.short_name)
+            parts.append(f"### {table_name}")
+            md = _render_statement_to_markdown(table_stmt, table_name, optimize_for_llm)
+            if md:
+                parts.append(md)
+
+        # Narrative — extract from HTML with tables stripped to avoid duplication
+        note_html = self.html
+        if note_html:
+            narrative = _extract_narrative_markdown(note_html, optimize_for_llm)
+            if narrative:
+                parts.append("### Narrative")
+                parts.append(narrative)
+        elif self.text:
+            # Fallback: plain text if no HTML available
+            parts.append("### Narrative")
+            parts.append(self.text)
+
+        # Policies — full only
+        if detail == 'full':
+            for policy_stmt in self.policies:
+                policy_name = _extract_table_name(policy_stmt, self.short_name)
+                parts.append(f"### Policy: {policy_name}")
+                policy_text = policy_stmt.text()
+                if policy_text:
+                    parts.append(policy_text)
+
+            # Details — full only
+            for detail_stmt in self.details:
+                detail_name = _extract_table_name(detail_stmt, self.short_name)
+                parts.append(f"### {detail_name}")
+                md = _render_statement_to_markdown(detail_stmt, detail_name, optimize_for_llm)
+                if md:
+                    parts.append(md)
+
+        return '\n\n'.join(part for part in parts if part)
+
     def __rich__(self):
         parts = []
 
@@ -500,6 +565,48 @@ class Notes:
         """Notes that have child tables."""
         return [n for n in self._notes if n.has_tables]
 
+    def to_markdown(self, detail: str = 'standard', focus=None, optimize_for_llm: bool = True) -> str:
+        """Render all notes as a single GitHub-Flavored Markdown document.
+
+        Args:
+            detail: 'minimal' (titles only), 'standard' (+ tables + narrative), 'full' (everything)
+            focus: Optional topic string or list of topics to filter notes (uses search())
+            optimize_for_llm: Use LLM-optimized table formatting
+        """
+        header_parts = ["# Notes to Financial Statements"]
+        subtitle_bits = []
+        if self.entity_name:
+            subtitle_bits.append(self.entity_name)
+        if self.form:
+            subtitle_bits.append(self.form)
+        if self.period:
+            subtitle_bits.append(f"Period ending {self.period}")
+        if subtitle_bits:
+            header_parts.append(f"**{' · '.join(subtitle_bits)}**")
+
+        # Select notes
+        notes_to_render = self._notes
+        if focus:
+            if isinstance(focus, str):
+                focus = [focus]
+            seen = set()
+            notes_to_render = []
+            for topic in focus:
+                for note in self.search(topic):
+                    if note.number not in seen:
+                        seen.add(note.number)
+                        notes_to_render.append(note)
+
+        # Render each note
+        note_parts = []
+        for note in notes_to_render:
+            note_parts.append(note.to_markdown(detail=detail, optimize_for_llm=optimize_for_llm))
+
+        header = '\n\n'.join(header_parts)
+        if note_parts:
+            return header + '\n\n---\n\n' + '\n\n---\n\n'.join(note_parts)
+        return header
+
     def to_context(self, detail: str = 'standard', focus: Optional[List[str]] = None) -> str:
         """
         AI-optimized context string for all notes.
@@ -595,6 +702,181 @@ class Notes:
 
 # === Helpers ===
 
+
+def _is_garbled_markdown(md: str) -> bool:
+    """Detect if process_content() produced garbled output from a complex table.
+
+    Checks for signs of broken colspan parsing:
+    - Header cells with merged data values (digits + separators in headers > 40 chars)
+    - Excessive placeholder column names (col_N pattern)
+    """
+    lines = md.split('\n')
+    for line in lines:
+        if '|' not in line or '---' in line:
+            continue
+        cells = [c.strip() for c in line.split('|') if c.strip()]
+        for cell in cells:
+            # Skip the label column and normal header names
+            if cell in ('label', ''):
+                continue
+            # Header cells with merged values: long + contain digits + separator chars
+            # Legitimate headers: "Jun 30, 2025" (13 chars), "FY 2024" (7 chars)
+            # Garbled headers: "2025 - Effective Interest Rate - $86,781 - 4,500" (48 chars)
+            if len(cell) > 40 and any(ch.isdigit() for ch in cell) and ' - ' in cell:
+                return True
+    # Count placeholder column names (col_N) in header rows
+    placeholder_count = 0
+    for line in lines[:3]:
+        if '|' in line:
+            placeholder_count += len(re.findall(r'\bcol_\d+\b', line))
+    if placeholder_count > 5:
+        return True
+    return False
+
+
+def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
+                                  optimize_for_llm: bool) -> Optional[str]:
+    """Render a sub-table/detail Statement to markdown with fallback.
+
+    A single XBRL table Statement may contain multiple HTML <table> tags.
+    Each is processed individually: clean ones become pipe tables, garbled
+    ones (complex colspans) fall back to aligned plain text. Non-table
+    content (headings, paragraphs, footnotes) is preserved between tables.
+    """
+    html = stmt.text(raw_html=True)
+    if not html:
+        plain = stmt.text()
+        return plain if plain else None
+
+    if not optimize_for_llm:
+        plain = stmt.text()
+        return plain if plain else None
+
+    try:
+        from bs4 import BeautifulSoup, NavigableString
+        from edgar.markdown import process_content
+        soup = BeautifulSoup(html, 'html.parser')
+        html_tables = soup.find_all('table')
+
+        if not html_tables:
+            return process_content(html, section_title=section_title) or None
+
+        # Replace each <table> with a placeholder, then process_content the
+        # whole document for text/headings, and splice tables back in.
+        placeholders = {}
+        for i, table_tag in enumerate(html_tables):
+            marker = f'__TABLE_PLACEHOLDER_{i}__'
+            table_html = str(table_tag)
+
+            # Try pipe-table conversion for this individual table
+            md = process_content(table_html, section_title=section_title)
+            if md and not _is_garbled_markdown(md):
+                placeholders[marker] = md
+            else:
+                # Garbled — use aligned plain text
+                plain = _html_table_to_plain_text(table_tag)
+                placeholders[marker] = plain or ''
+
+            # Replace the tag in the soup with a text marker
+            table_tag.replace_with(NavigableString(f'\n{marker}\n'))
+
+        # Now process the modified HTML (text + placeholders) for headings/paragraphs
+        modified_html = str(soup)
+        text_md = process_content(modified_html)
+
+        # Splice table renderings back in place of placeholders
+        if text_md:
+            result = text_md
+            for marker, table_md in placeholders.items():
+                result = result.replace(marker, f'\n\n{table_md}\n\n' if table_md else '')
+        else:
+            # No text content — just join the tables
+            result = '\n\n'.join(md for md in placeholders.values() if md)
+
+        # Clean up excessive blank lines
+        result = re.sub(r'\n{3,}', '\n\n', result).strip()
+        return result if result else None
+
+    except (ValueError, TypeError, AttributeError, KeyError) as e:
+        log.warning(f"Per-table rendering failed for '{section_title}': {e}")
+        plain = stmt.text()
+        return plain if plain else None
+
+
+def _html_table_to_plain_text(table_tag) -> Optional[str]:
+    """Convert a BeautifulSoup <table> tag to aligned plain text.
+
+    Extracts rows and pads columns for readable alignment when pipe-table
+    conversion fails due to complex colspans.
+    """
+    rows = table_tag.find_all('tr')
+    if not rows:
+        return None
+
+    matrix = []
+    for row in rows:
+        cells = row.find_all(['td', 'th'])
+        row_text = [c.get_text(strip=True) for c in cells]
+        if any(row_text):  # Skip fully empty rows
+            matrix.append(row_text)
+
+    if not matrix:
+        return None
+
+    # Determine max columns and pad
+    max_cols = max(len(r) for r in matrix)
+    for r in matrix:
+        r.extend([''] * (max_cols - len(r)))
+
+    # Calculate column widths
+    col_widths = [0] * max_cols
+    for r in matrix:
+        for i, val in enumerate(r):
+            col_widths[i] = max(col_widths[i], len(val))
+
+    # Build aligned text
+    lines = []
+    for r in matrix:
+        line = '  '.join(val.ljust(col_widths[i]) for i, val in enumerate(r))
+        lines.append(line.rstrip())
+
+    return '\n'.join(lines)
+
+
+def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[str]:
+    """Extract narrative text from note HTML, stripping tables to avoid duplication.
+
+    Tables are rendered separately via sub-table Statements, so we strip them
+    from the TextBlock HTML before extracting narrative text.
+    """
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Remove all <table> elements — they're rendered separately
+        for table_tag in soup.find_all('table'):
+            table_tag.decompose()
+
+        remaining = str(soup).strip()
+        if not remaining or remaining in ('<html></html>', ''):
+            return None
+
+        if optimize_for_llm:
+            from edgar.markdown import process_content
+            md = process_content(remaining)
+            return md if md and md.strip() else None
+        else:
+            # Plain text extraction
+            text = soup.get_text(separator=' ', strip=True)
+            # Fix missing spaces between adjacent spans (e.g., "hadno" → "had no")
+            text = re.sub(r'([a-z])([A-Z$])', r'\1 \2', text)
+            text = re.sub(r'(\w)([$])', r'\1 \2', text)
+            return text if text.strip() else None
+    except (ValueError, TypeError, AttributeError, KeyError) as e:
+        log.warning(f"Narrative extraction failed: {e}")
+        return None
+
+
 def _extract_short_name(definition: str) -> str:
     """Extract a clean short name from a definition string.
 
@@ -672,8 +954,8 @@ def _append_statement_lines(lines: list, statement: 'Statement', indent: int = 4
             if label:
                 lines.append(f"{prefix}{label}: {val_str}")
                 count += 1
-    except Exception as e:
-        log.debug(f"Failed to render statement lines for {statement.role_or_type}: {e}")
+    except (ValueError, TypeError, AttributeError, KeyError) as e:
+        log.warning(f"Failed to render statement lines for {statement.role_or_type}: {e}")
 
 
 # Suffixes for structural XBRL concepts (not real financial data)

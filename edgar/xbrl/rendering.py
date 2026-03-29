@@ -656,41 +656,68 @@ class RenderedStatement:
         except ImportError:
             return "Pandas is required for DataFrame conversion"
 
-    def to_markdown(self) -> str:
-        """Convert to a markdown table representation"""
+    def to_markdown(self, detail: str = 'standard', optimize_for_llm: bool = False) -> str:
+        """Convert to a GitHub-Flavored Markdown table.
+
+        Args:
+            detail: 'minimal' (table only), 'standard' (with header), 'full' (header + footer)
+            optimize_for_llm: When True, drop abstract-only rows with no values
+        """
+        import re as _re
         lines = []
 
-        # Add title as a header
-        lines.append(f"## {self.title}")
-        lines.append("")
+        # Clean title — remove internal terminology
+        clean_title = self.title.replace("(Standardized)", "").strip()
 
-        # Add subtitle info if available
-        if self.fiscal_period_indicator or self.units_note:
-            subtitle_parts = []
-            if self.fiscal_period_indicator:
-                subtitle_parts.append(f"**{self.fiscal_period_indicator}**")
-            if self.units_note:
-                # Remove rich formatting tags from units note
-                clean_units = self.units_note.replace('[italic]', '').replace('[/italic]', '')
-                subtitle_parts.append(f"*{clean_units}*")
-
-            lines.append(" ".join(subtitle_parts))
+        if detail != 'minimal':
+            # Header: ## Statement Title
+            lines.append(f"## {clean_title}")
             lines.append("")
 
-        # Create header row
+            # Company + ticker subtitle
+            company_name = self.metadata.get('company_name', '')
+            ticker = self.metadata.get('ticker', '')
+            if company_name:
+                subtitle = f"**{company_name}**"
+                if ticker:
+                    subtitle += f" ({ticker.upper()})"
+                lines.append(subtitle)
+                lines.append("")
+
+            # Fiscal period + units
+            if self.fiscal_period_indicator or self.units_note:
+                subtitle_parts = []
+                if self.fiscal_period_indicator:
+                    subtitle_parts.append(f"**{self.fiscal_period_indicator}**")
+                if self.units_note:
+                    # Strip ALL Rich markup tags
+                    clean_units = _re.sub(r'\[/?[^\]]+\]', '', self.units_note)
+                    subtitle_parts.append(f"*{clean_units}*")
+                lines.append(" ".join(subtitle_parts))
+                lines.append("")
+
+        # Column header row — right-align numeric columns
         header = [""] + self.header.columns
         lines.append("| " + " | ".join(header) + " |")
 
-        # Add separator row
-        separator = ["---"] + ["---" for _ in self.header.columns]
+        separator = ["---"] + ["---:" for _ in self.header.columns]
         lines.append("| " + " | ".join(separator) + " |")
 
-        # Add data rows
-        for row in self.rows:
-            # Handle indentation for row label
-            indent = "  " * row.level
+        # Non-breaking space for indentation (regular spaces stripped in pipe cells)
+        NBSP = "\u00A0"
 
-            # Format row label based on properties
+        for row in self.rows:
+            # Optionally skip abstract rows with no values
+            if optimize_for_llm and row.is_abstract:
+                has_values = any(
+                    cell.value is not None and cell.value != ""
+                    for cell in row.cells
+                )
+                if not has_values:
+                    continue
+
+            indent = (NBSP * 2) * row.level
+
             if row.is_abstract:
                 label = f"**{indent}{row.label}**"
             elif row.is_dimension:
@@ -698,7 +725,6 @@ class RenderedStatement:
             else:
                 label = f"{indent}{row.label}"
 
-            # Format cell values
             cell_values = []
             for cell in row.cells:
                 cell_value = cell.formatter(cell.value)
@@ -709,9 +735,19 @@ class RenderedStatement:
                 else:
                     cell_values.append(cell_value)
 
-            # Add the row
             row_data = [label] + cell_values
             lines.append("| " + " | ".join(row_data) + " |")
+
+        # Footer for 'full' detail
+        if detail == 'full':
+            lines.append("")
+            clean_units = ""
+            if self.units_note:
+                clean_units = _re.sub(r'\[/?[^\]]+\]', '', self.units_note)
+            footer_parts = ["*Source: SEC XBRL*"]
+            if clean_units:
+                footer_parts.append(f"*{clean_units}*")
+            lines.append(" · ".join(footer_parts))
 
         return "\n".join(lines)
 
