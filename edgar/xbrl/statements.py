@@ -1908,9 +1908,10 @@ class Statement:
             return None
 
         label_lower = label.lower()
+        columns = rendered.header.columns if rendered.header else []
         for row in rendered.rows:
             if row.label.lower() == label_lower:
-                return StatementLineItem(row, self.xbrl)
+                return StatementLineItem(row, self.xbrl, columns=columns)
 
         return None
 
@@ -1956,7 +1957,8 @@ class Statement:
                 scored.append((4, row))
 
         scored.sort(key=lambda x: x[0])
-        return [StatementLineItem(row, self.xbrl) for _, row in scored]
+        columns = rendered.header.columns if rendered.header else []
+        return [StatementLineItem(row, self.xbrl, columns=columns) for _, row in scored]
 
 
 class StatementLineItem:
@@ -1972,11 +1974,12 @@ class StatementLineItem:
         >>> item.notes        # → [Note, ...] (all related notes)
         >>> item.values       # {'instant_2024-12-31': 98071000000, ...}
     """
-    __slots__ = ('_row', '_xbrl')
+    __slots__ = ('_row', '_xbrl', '_columns')
 
-    def __init__(self, row, xbrl):
+    def __init__(self, row, xbrl, columns=None):
         self._row = row
         self._xbrl = xbrl
+        self._columns = columns or []
 
     @property
     def label(self) -> str:
@@ -2016,12 +2019,16 @@ class StatementLineItem:
 
         # Format values with period labels from the rendered statement header
         cells = self._row.cells or []
+        columns = self._columns or []
         formatted_pairs = []
-        for cell in cells:
+        for i, cell in enumerate(cells):
             if cell.value is not None and cell.value != "":
                 formatted_val = str(cell.formatter(cell.value))
                 if formatted_val:
-                    formatted_pairs.append(formatted_val)
+                    if i < len(columns) and columns[i]:
+                        formatted_pairs.append(f"{formatted_val} ({columns[i]})")
+                    else:
+                        formatted_pairs.append(formatted_val)
 
         if formatted_pairs:
             parts.append(f"**{self.label}**: {', '.join(formatted_pairs)}")

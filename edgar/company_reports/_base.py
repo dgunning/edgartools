@@ -199,7 +199,7 @@ class CompanyReport:
         if item_text:
             print(item_text)
 
-    def _focused_context(self, focus, detail: str = 'standard', format: str = 'text') -> str:
+    def _focused_context(self, focus, detail: str = 'standard', output_format: str = 'text') -> str:
         """Generate cross-cutting context for specific topic(s).
 
         Pulls statement line items, note content, and policies together.
@@ -207,7 +207,7 @@ class CompanyReport:
         Args:
             focus: Topic or list of topics
             detail: 'minimal', 'standard', or 'full'
-            format: 'text' (default) or 'markdown' for GFM pipe tables
+            output_format: 'text' (default) or 'markdown' for GFM pipe tables
         """
         if isinstance(focus, str):
             focus = [focus]
@@ -215,7 +215,7 @@ class CompanyReport:
         notes = self.notes
 
         # Markdown mode: delegate to Notes.to_markdown with focus filtering
-        if format == 'markdown' and notes:
+        if output_format == 'markdown' and notes:
             return notes.to_markdown(detail=detail, focus=focus, optimize_for_llm=True)
 
         # Text mode (original behavior)

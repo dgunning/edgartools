@@ -1,4 +1,4 @@
-﻿"""
+"""
 Markdown formatting utilities for financial data.
 
 Converts HTML tables, XBRL data, and structured records into

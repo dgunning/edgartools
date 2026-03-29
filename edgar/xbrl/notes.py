@@ -797,8 +797,8 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
         result = re.sub(r'\n{3,}', '\n\n', result).strip()
         return result if result else None
 
-    except Exception as e:
-        log.debug(f"Per-table rendering failed for '{section_title}': {e}")
+    except (ValueError, TypeError, AttributeError, KeyError) as e:
+        log.warning(f"Per-table rendering failed for '{section_title}': {e}")
         plain = stmt.text()
         return plain if plain else None
 
@@ -872,8 +872,8 @@ def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[s
             text = re.sub(r'([a-z])([A-Z$])', r'\1 \2', text)
             text = re.sub(r'(\w)([$])', r'\1 \2', text)
             return text if text.strip() else None
-    except Exception as e:
-        log.debug(f"Narrative extraction failed: {e}")
+    except (ValueError, TypeError, AttributeError, KeyError) as e:
+        log.warning(f"Narrative extraction failed: {e}")
         return None
 
 
@@ -954,8 +954,8 @@ def _append_statement_lines(lines: list, statement: 'Statement', indent: int = 4
             if label:
                 lines.append(f"{prefix}{label}: {val_str}")
                 count += 1
-    except Exception as e:
-        log.debug(f"Failed to render statement lines for {statement.role_or_type}: {e}")
+    except (ValueError, TypeError, AttributeError, KeyError) as e:
+        log.warning(f"Failed to render statement lines for {statement.role_or_type}: {e}")
 
 
 # Suffixes for structural XBRL concepts (not real financial data)

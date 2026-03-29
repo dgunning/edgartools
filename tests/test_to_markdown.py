@@ -8,7 +8,7 @@ Covers:
 - StatementLineItem.to_markdown(): values + note reference
 - Note.to_markdown(): tables, narrative, policies, details, detail levels
 - Notes.to_markdown(): full document, focus filtering
-- TenK/TenQ.to_context(format='markdown'): wired through _focused_context
+- TenK/TenQ.to_context(output_format='markdown'): wired through _focused_context
 """
 import re
 from dataclasses import field
@@ -310,11 +310,12 @@ class TestStatementLineItemToMarkdown:
         ]
         row = StatementRow(label='Goodwill', level=0, cells=cells,
                            metadata={'concept': 'us-gaap_Goodwill'})
-        item = StatementLineItem(row, xbrl=None)
+        columns = ['2024-09-28', '2023-09-30']
+        item = StatementLineItem(row, xbrl=None, columns=columns)
         md = item.to_markdown(include_note=False)
         assert '**Goodwill**' in md
-        assert '67,886' in md
-        assert '65,413' in md
+        assert '67,886 (2024-09-28)' in md
+        assert '65,413 (2023-09-30)' in md
 
     @pytest.mark.fast
     def test_with_note_reference(self):
@@ -324,7 +325,7 @@ class TestStatementLineItemToMarkdown:
                            metadata={'concept': 'us-gaap_Goodwill'})
         mock_note = _make_note(number=7, title='Goodwill and Intangible Assets')
 
-        item = StatementLineItem(row, xbrl=None)
+        item = StatementLineItem(row, xbrl=None, columns=['2024-09-28'])
 
         with patch.object(StatementLineItem, 'note', new_callable=lambda: property(lambda self: mock_note)):
             md = item.to_markdown(include_note=True)
@@ -514,7 +515,7 @@ class TestNotesToMarkdown:
 
 
 # ===========================================================================
-# to_context(format='markdown') integration
+# to_context(output_format='markdown') integration
 # ===========================================================================
 
 class TestToContextMarkdownFormat:
@@ -536,11 +537,11 @@ class TestToContextMarkdownFormat:
 
     @pytest.mark.fast
     def test_focused_context_markdown_format(self):
-        """format='markdown' should delegate to Notes.to_markdown()."""
+        """output_format='markdown' should delegate to Notes.to_markdown()."""
         from edgar.company_reports._base import CompanyReport
         report = Mock(spec=CompanyReport)
         report.notes = _make_notes_collection(5)
 
-        result = CompanyReport._focused_context(report, focus='Debt', detail='minimal', format='markdown')
+        result = CompanyReport._focused_context(report, focus='Debt', detail='minimal', output_format='markdown')
         assert '# Notes to Financial Statements' in result
         assert 'Note 3: Debt' in result
