@@ -49,6 +49,7 @@ from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, fin
 from edgar.funds.ncen import NCEN_FORMS, FundCensus
 from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
 from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
+from edgar.funds.prospectus497k import PROSPECTUS497K_FORMS, Prospectus497K
 from edgar.funds.reports import NPORT_FORMS, FundReport
 from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
 
@@ -87,6 +88,7 @@ from edgar.storage import (
     use_datamule_storage,
     use_local_storage,
 )
+from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence, CorrespondenceThread, CorrespondenceType
 from edgar.search.efts import EFTSResult, EFTSSearch, search_filings
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
@@ -233,6 +235,20 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'DEF 14A': ('ProxyStatement', 'proxy statement with executive compensation'),
         'DEFA14A': ('ProxyStatement', 'additional proxy soliciting materials'),
         'DEFM14A': ('ProxyStatement', 'merger-related proxy statement'),
+        'S-1': ('RegistrationS1', 'S-1 registration statement'),
+        'S-1/A': ('RegistrationS1', 'S-1 registration statement (amendment)'),
+        'F-1': ('RegistrationS1', 'F-1 foreign registration statement'),
+        'F-1/A': ('RegistrationS1', 'F-1 foreign registration statement (amendment)'),
+        'S-3': ('RegistrationS3', 'shelf registration statement'),
+        'S-3/A': ('RegistrationS3', 'shelf registration statement (amendment)'),
+        'S-3ASR': ('RegistrationS3', 'automatic shelf registration'),
+        'S-3ASR/A': ('RegistrationS3', 'automatic shelf registration (amendment)'),
+        'S-3D': ('RegistrationS3', 'shelf registration statement'),
+        'S-3DPOS': ('RegistrationS3', 'shelf registration statement'),
+        'F-3': ('RegistrationS3', 'F-3 foreign shelf registration'),
+        'F-3/A': ('RegistrationS3', 'F-3 foreign shelf registration (amendment)'),
+        'F-3ASR': ('RegistrationS3', 'F-3 automatic shelf registration'),
+        'F-3ASR/A': ('RegistrationS3', 'F-3 automatic shelf registration (amendment)'),
         '424B1': ('Prospectus424B', 'prospectus (exchange offer / IPO)'),
         '424B2': ('Prospectus424B', 'prospectus (structured note / debt)'),
         '424B3': ('Prospectus424B', 'prospectus (resale / rights offering)'),
@@ -240,6 +256,23 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '424B5': ('Prospectus424B', 'prospectus (shelf takedown / ATM / PIPE)'),
         '424B7': ('Prospectus424B', 'prospectus (WKSI base update)'),
         '424B8': ('Prospectus424B', 'prospectus supplement'),
+        'CORRESP': ('Correspondence', 'company-to-SEC correspondence'),
+        'UPLOAD': ('Correspondence', 'SEC-to-company correspondence'),
+        'DRS': ('DraftRegistrationStatement', 'draft registration statement'),
+        'DRS/A': ('DraftRegistrationStatement', 'draft registration statement (amendment)'),
+        'X-17A-5': ('XmlFiling', 'broker-dealer financial report'),
+        'TA-1': ('XmlFiling', 'transfer agent registration'),
+        'TA-2': ('XmlFiling', 'transfer agent annual report'),
+        'TA-W': ('XmlFiling', 'transfer agent withdrawal'),
+        'MA': ('XmlFiling', 'municipal advisor firm registration'),
+        'MA-W': ('XmlFiling', 'municipal advisor withdrawal'),
+        'CFPORTAL': ('XmlFiling', 'crowdfunding portal registration'),
+        'SBSE': ('XmlFiling', 'security-based swap entity registration'),
+        'SBSE-A': ('XmlFiling', 'security-based swap entity registration (annual)'),
+        'SBSE-W': ('XmlFiling', 'security-based swap entity withdrawal'),
+        'ATS-N-C': ('XmlFiling', 'ATS cessation of operations'),
+        '24F-2NT': ('FundFeeNotice', 'annual notice of securities sold'),
+        '497K': ('Prospectus497K', 'fund summary prospectus with fees and performance'),
     }
 
     if base_form in form_map:
@@ -259,7 +292,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     :return:
     """
     from edgar.beneficial_ownership import Schedule13D, Schedule13G
-    from edgar.company_reports import CurrentReport, EightK, TenK, TenQ, TwentyF
+    from edgar.company_reports import CurrentReport, EightK, SixK, TenK, TenQ, TwentyF
     from edgar.effect import Effect
     from edgar.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
@@ -267,7 +300,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     from edgar.ownership import Form3, Form4, Form5, Ownership
 
     if matches_form(sec_filing, "6-K"):
-        return CurrentReport(sec_filing)
+        return SixK(sec_filing)
     if matches_form(sec_filing, "8-K"):
         return EightK(sec_filing)
     elif matches_form(sec_filing, "10-Q"):
@@ -324,9 +357,24 @@ def obj(sec_filing: Filing) -> Optional[object]:
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
 
+    elif matches_form(sec_filing, "DRS"):
+        from edgar.offerings.drs import DraftRegistrationStatement
+        return DraftRegistrationStatement.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ['S-1', 'F-1']):
+        from edgar.offerings.registration_s1 import RegistrationS1
+        return RegistrationS1.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ['S-3', 'S-3ASR', 'S-3D', 'S-3DPOS', 'F-3', 'F-3ASR']):
+        from edgar.offerings.registration_s3 import RegistrationS3
+        return RegistrationS3.from_filing(sec_filing)
+
     elif matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):
         from edgar.offerings.prospectus import Prospectus424B
         return Prospectus424B.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, PROSPECTUS497K_FORMS):
+        return Prospectus497K.from_filing(sec_filing)
 
     elif matches_form(sec_filing, NCEN_FORMS):
         return FundCensus.from_filing(sec_filing)
@@ -345,6 +393,18 @@ def obj(sec_filing: Filing) -> Optional[object]:
 
     elif matches_form(sec_filing, PROXY_FORMS):
         return ProxyStatement.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, CORRESPONDENCE_FORMS):
+        return Correspondence.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, "24F-2NT"):
+        from edgar.funds.twentyfourf import FundFeeNotice
+        return FundFeeNotice.from_filing(sec_filing)
+
+    else:
+        from edgar.xmlfiling import XML_FILING_FORMS, XmlFiling
+        if sec_filing.form in XML_FILING_FORMS:
+            return XmlFiling.from_filing(sec_filing)
 
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:

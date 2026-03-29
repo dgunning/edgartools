@@ -19,6 +19,7 @@ from rich.text import Text
 from edgar.documents.nodes import Node, SectionNode
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.types import SearchResult, XBRLFact
+from edgar.documents.utils.anchor_targets import find_anchor_targets, is_anchor_match
 from edgar.richtools import repr_rich
 
 logger = logging.getLogger(__name__)
@@ -255,8 +256,8 @@ class Section:
 
             boundary = extractor.section_boundaries[self.name]
 
-            # Find start anchor
-            start_elements = tree.xpath(f'//*[@id="{boundary.anchor_id}"]')
+            # Find start anchor by id or legacy name attribute
+            start_elements = find_anchor_targets(tree, boundary.anchor_id)
             if not start_elements:
                 return ""
 
@@ -268,15 +269,13 @@ class Section:
                 if not hasattr(el, 'get'):
                     continue
 
-                el_id = el.get('id', '')
-
                 # Check if we've reached the start anchor
-                if el_id == boundary.anchor_id:
+                if is_anchor_match(el, boundary.anchor_id):
                     in_range = True
                     continue
 
                 # Check if we've reached the end boundary
-                if boundary.end_element_id and el_id == boundary.end_element_id:
+                if boundary.end_element_id and is_anchor_match(el, boundary.end_element_id):
                     break
 
                 # Collect elements in range

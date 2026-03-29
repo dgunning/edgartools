@@ -304,6 +304,30 @@ class TestEntityFacts:
         grouped = df.groupby('fiscal_year')['numeric_value'].count()
         assert len(grouped) > 0
     
+    def test_to_dataframe_pit_mode(self, entity_facts):
+        """Test Point-in-Time mode includes filing_date and form_type"""
+        df = entity_facts.to_dataframe(pit_mode=True)
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+
+        # PIT mode should include filing_date and form_type as standard columns
+        assert 'filing_date' in df.columns, "pit_mode should include filing_date"
+        assert 'form_type' in df.columns, "pit_mode should include form_type"
+
+        # Standard columns should still be present
+        for col in ['concept', 'label', 'numeric_value', 'period_end', 'fiscal_year']:
+            assert col in df.columns
+
+        # Verify filing_date has actual values
+        assert df['filing_date'].notna().any(), "filing_date should have non-null values"
+
+    def test_to_dataframe_pit_mode_off_excludes_filing_date(self, entity_facts):
+        """Default mode should NOT include filing_date in standard columns"""
+        df = entity_facts.to_dataframe()
+        assert 'filing_date' not in df.columns
+        assert 'form_type' not in df.columns
+
     def test_income_statement(self, entity_facts):
         """Test getting income statement data"""
         # Use annual=False since test data has quarterly data (annual needs >= 5 facts per period)
@@ -1206,6 +1230,37 @@ class TestEntityFactsParser:
         
         # Should have chosen the 10-K value (1002000)
         assert income_stmt.loc["Revenue", q1_cols[0]] == 1002000.0
+
+    def test_income_statement_includes_weighted_average_shares_concept(self):
+        """Test income_statement includes weighted-average shares concept when present in facts."""
+        facts = [
+            FinancialFact(
+                concept="us-gaap:WeightedAverageNumberOfSharesOutstandingBasic",
+                taxonomy="us-gaap",
+                label="Weighted Average Number Of Shares Outstanding Basic",
+                value=1234567,
+                numeric_value=1234567.0,
+                unit="shares",
+                period_type="duration",
+                period_start=date(2024, 1, 1),
+                period_end=date(2024, 3, 31),
+                fiscal_year=2024,
+                fiscal_period="Q1",
+                filing_date=date(2024, 4, 15),
+                form_type="10-Q",
+                statement_type="IncomeStatement",
+                data_quality=DataQuality.HIGH
+            ),
+        ]
+
+        entity_facts = EntityFacts(cik=123456, name="Test Co", facts=facts)
+        income_stmt = entity_facts.income_statement(as_dataframe=True, annual=False)
+
+        assert not income_stmt.empty
+        assert any(
+            "weighted" in str(idx).lower() and "shares" in str(idx).lower()
+            for idx in income_stmt.index
+        )
     
     def test_financial_statement_formatting(self):
         """Test FinancialStatement formatting functionality"""

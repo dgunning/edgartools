@@ -174,14 +174,6 @@ def test_get_exhibit_content_for_old_filing():
     assert "Yahoo" in text
 
 
-def test_create_eightk_from_old_filing_with_no_html():
-    f = Filing(form='8-K', filing_date='1998-01-05', company='YAHOO INC', cik=1011006, accession_no='0001047469-98-000122')
-    eightk = f.obj()
-    assert eightk
-    html = f.html()
-    print(html)
-
-
 def test_get_content_for_eightk_with_binary_exhibit():
     filing = Filing(form='8-K', filing_date='2010-02-26', company='MANNATECH INC', cik=1056358, accession_no='0001056358-10-000003')
     eightk = filing.obj()

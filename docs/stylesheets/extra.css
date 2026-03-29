@@ -1,5 +1,17 @@
 /* EdgarTools -- Premium theme */
 
+/* ── Page width ── */
+@media screen and (min-width: 76.25em) {
+  .md-grid {
+    max-width: 75rem;   /* default is 61rem */
+  }
+}
+
+/* ── Body text readability ── */
+.md-typeset {
+  line-height: 1.8;  /* default is ~1.6 */
+}
+
 /* ── Tabs bar ── */
 .md-tabs__link {
   font-size: 0.78rem;
@@ -12,22 +24,42 @@
 /* Wider sidebar to prevent text wrapping */
 @media screen and (min-width: 76.25em) {
   .md-sidebar--primary {
-    width: 14rem;
+    width: 16rem;
   }
   .md-sidebar--primary .md-sidebar__inner {
-    width: 14rem;
+    width: 16rem;
+    padding-right: calc(100% - 15.4rem);  /* default is calc(100% - 11.5rem) */
+  }
+  .md-sidebar--secondary {
+    width: 16rem;
+  }
+  .md-sidebar--secondary .md-sidebar__inner {
+    width: 16rem;
+    padding-right: calc(100% - 15.4rem);
   }
 }
 
-/* All nav links */
+/* All nav links — tighter vertical rhythm */
 .md-nav__link {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
+}
+@media screen and (min-width: 76.25em) {
+  .md-nav__link {
+    margin-top: 0.45em;  /* default is 0.625em */
+  }
+}
+
+/* Dim the form codes e.g. "(8-K)", "(N-PORT)" wrapped by JS */
+.md-sidebar .nav-form-code {
+  color: var(--md-default-fg-color--lighter);
+  font-size: 0.9em;
+  font-weight: 400;
 }
 
 /* Section group labels (e.g. "XBRL Deep Dive", "Storage") */
 .md-nav__item--section > .md-nav__link {
   font-weight: 700;
-  font-size: 0.65rem;
+  font-size: 0.70rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--md-default-fg-color--light);

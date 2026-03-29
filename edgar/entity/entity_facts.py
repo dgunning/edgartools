@@ -162,7 +162,6 @@ class EntityFacts:
         self._ticker = ticker
         self._sic_resolver = None
         self._fact_index = self._build_indices()
-        self._cache = {}
 
     def _resolve_industry_info(self):
         """Lazily resolve SIC code and ticker for industry-specific statement enhancements.
@@ -183,37 +182,49 @@ class EntityFacts:
 
     def _build_indices(self) -> Dict[str, Dict]:
         """Build optimized indices for fast querying"""
-        indices = {
-            'by_concept': defaultdict(list),
-            'by_period': defaultdict(list),
-            'by_statement': defaultdict(list),
-            'by_form': defaultdict(list),
-            'by_fiscal_year': defaultdict(list),
-            'by_fiscal_period': defaultdict(list)
-        }
+        by_concept = defaultdict(list)
+        by_period = defaultdict(list)
+        by_statement = defaultdict(list)
+        by_form = defaultdict(list)
+        by_fiscal_year = defaultdict(list)
+        by_fiscal_period = defaultdict(list)
+
+        # Cache period key strings: only ~50-100 unique keys across 20K+ facts
+        _period_key_cache: Dict[tuple, str] = {}
 
         for fact in self._facts:
             # Index by concept
-            indices['by_concept'][fact.concept].append(fact)
+            by_concept[fact.concept].append(fact)
             if fact.label:
-                indices['by_concept'][fact.label.lower()].append(fact)
+                by_concept[fact.label.lower()].append(fact)
 
-            # Index by period
-            period_key = f"{fact.fiscal_year}-{fact.fiscal_period}"
-            indices['by_period'][period_key].append(fact)
+            # Index by period (intern keys to avoid 24K+ redundant string allocations)
+            pk_tuple = (fact.fiscal_year, fact.fiscal_period)
+            period_key = _period_key_cache.get(pk_tuple)
+            if period_key is None:
+                period_key = f"{fact.fiscal_year}-{fact.fiscal_period}"
+                _period_key_cache[pk_tuple] = period_key
+            by_period[period_key].append(fact)
 
             # Index by fiscal year and period
-            indices['by_fiscal_year'][fact.fiscal_year].append(fact)
-            indices['by_fiscal_period'][fact.fiscal_period].append(fact)
+            by_fiscal_year[fact.fiscal_year].append(fact)
+            by_fiscal_period[fact.fiscal_period].append(fact)
 
             # Index by statement type
             if fact.statement_type:
-                indices['by_statement'][fact.statement_type].append(fact)
+                by_statement[fact.statement_type].append(fact)
 
             # Index by form type
-            indices['by_form'][fact.form_type].append(fact)
+            by_form[fact.form_type].append(fact)
 
-        return indices
+        return {
+            'by_concept': by_concept,
+            'by_period': by_period,
+            'by_statement': by_statement,
+            'by_form': by_form,
+            'by_fiscal_year': by_fiscal_year,
+            'by_fiscal_period': by_fiscal_period,
+        }
 
     def __len__(self) -> int:
         """Return the total number of facts"""
@@ -234,7 +245,8 @@ class EntityFacts:
 
     def to_dataframe(self,
                      include_metadata: bool = False,
-                     columns: Optional[List[str]] = None) -> pd.DataFrame:
+                     columns: Optional[List[str]] = None,
+                     pit_mode: bool = False) -> pd.DataFrame:
         """
         Export all facts to a pandas DataFrame for analysis.
 
@@ -244,6 +256,10 @@ class EntityFacts:
         Args:
             include_metadata: Include filing references and data quality metadata (default: False)
             columns: Specific columns to include. If None, includes standard columns.
+            pit_mode: Point-in-Time mode for backtesting. When True, includes filing_date
+                and form_type as standard columns and preserves all fact versions
+                (no period deduplication), enabling lookahead-bias-free analysis.
+                Sort order becomes (concept, period_end, filing_date).
 
         Returns:
             DataFrame with one row per fact, sorted by concept and period_end
@@ -260,10 +276,12 @@ class EntityFacts:
             Custom columns for specific analysis:
             >>> df_slim = facts.to_dataframe(columns=['concept', 'fiscal_year', 'numeric_value'])
 
-            Filter and analyze:
-            >>> df = annual_facts.to_dataframe()
-            >>> revenue = df[df['concept'].str.contains('Revenue')]
-            >>> print(revenue[['fiscal_year', 'numeric_value']])
+            Point-in-Time mode for backtesting:
+            >>> df = facts.to_dataframe(pit_mode=True)
+            >>> # Get revenue as known on a specific date
+            >>> as_of = '2024-10-15'
+            >>> revenue = df[(df['concept'] == 'Revenues') & (df['filing_date'] <= as_of)]
+            >>> latest = revenue.sort_values('filing_date').groupby('period_end').last()
         """
         # Build records from facts
         records = []
@@ -280,6 +298,11 @@ class EntityFacts:
                 'fiscal_year': fact.fiscal_year,
                 'fiscal_period': fact.fiscal_period
             }
+
+            # PIT mode: include filing_date and form_type as standard columns
+            if pit_mode:
+                record['filing_date'] = fact.filing_date
+                record['form_type'] = fact.form_type
 
             # Add metadata if requested
             if include_metadata:
@@ -311,6 +334,9 @@ class EntityFacts:
                 sort_cols.append('concept')
             if 'period_end' in df.columns:
                 sort_cols.append('period_end')
+            # PIT mode: sort by filing_date too for temporal ordering
+            if pit_mode and 'filing_date' in df.columns:
+                sort_cols.append('filing_date')
             if sort_cols:
                 df = df.sort_values(sort_cols).reset_index(drop=True)
 
@@ -1053,7 +1079,7 @@ class EntityFacts:
         Args:
             concept_name: The canonical concept name (e.g., 'revenue', 'capex', 'operating_lease_payments')
             period: Optional period in format "YYYY-QN" or "YYYY-FY"
-            unit: Optional unit filter (defaults to USD if not specified)
+            unit: Optional unit filter (defaults to the fact's native unit, e.g., USD or shares)
             return_metadata: If True, return dict with value and metadata (tag used, etc.)
 
         Returns:
@@ -1091,9 +1117,11 @@ class EntityFacts:
             warnings.warn(hint, stacklevel=2)
             return None
 
-        # Use the existing _get_standardized_concept_value infrastructure
-        # Try each synonym in priority order
-        target_unit = unit or 'USD'
+        # Try each synonym in priority order.
+        # If unit is not specified, do not force USD: share/count concepts
+        # (for example weighted-average shares) should resolve with their
+        # native units.
+        target_unit = unit
         synonyms_tried = []
 
         # Suppress warnings from get_fact() during synonym resolution

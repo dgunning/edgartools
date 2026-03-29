@@ -107,6 +107,11 @@ async def edgar_screen(
             if df is not None:
                 if 'state_of_incorporation' in df.columns:
                     df = df[df['state_of_incorporation'] == state.upper()]
+                else:
+                    # df lacks state column (e.g., exchange-only query) — intersect with state data
+                    state_df = get_companies_by_state(state.upper())
+                    if state_df is not None and not state_df.empty:
+                        df = df[df['cik'].isin(state_df['cik'])]
             else:
                 df = get_companies_by_state(state.upper())
 

@@ -125005,9 +125005,9 @@
   },
   "PaymentsToDevelopSoftware": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "PurchaseOfIntangibleAssets"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchase of Intangible Assets",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -128626,9 +128626,9 @@
   },
   "PaymentsForSoftware": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "PurchaseOfIntangibleAssets"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchase of Intangible Assets",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,

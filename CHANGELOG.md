@@ -5,7 +5,91 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [5.27.0] - 2026-03-28
+
+### Added
+
+- **Dedicated 6-K data object** — New `SixK` class replaces the `CurrentReport` alias for Form 6-K (Report of Foreign Private Issuer). Extracts cover page metadata (commission file number, report month, annual report form, content description), provides exhibit access, press release filtering, and IFRS financials when present. Includes `to_context()` with cover page text at `full` detail level
+
+- **S-1/F-1 registration statement data object** — New `RegistrationS1` class for S-1 and F-1 registration statements with cover page extraction, prospectus section access, and amendment support
+
+- **DRS draft registration statement data object** — New `DraftRegistrationStatement` class for confidential draft registration statements (DRS/DRS-A)
+
+- **Generic XML filing data object** — New `XmlFiling` class for XML+XSLT SEC forms (X-17A-5, TA-1, TA-2, SBSE, ATS-N-C, CFPORTAL, etc.) with automatic XSLT rendering
+
+- **24F-2NT fund fee notice data object** — New `FundFeeNotice` class for annual notices of securities sold by registered investment companies
+
+- **497K fund summary prospectus data object** — New `Prospectus497K` class for 497K fund summary prospectus filings
+
+- **F-1/F-1A foreign registration support** — `RegistrationS1` now accepts F-1 and F-1/A forms for foreign private issuer IPO registrations
+
+- **F-3 foreign shelf registration support** — `RegistrationS3` now accepts F-3, F-3/A, and F-3ASR forms
+
+- **EightK improvements** — New `content_type` property classifying 8-K filings (earnings, cybersecurity, restructuring, etc.), `is_amendment` property, `get_exhibit()` and `get_exhibits()` methods, and context-aware `to_context()` that adjusts available actions based on content type
+
+### Fixed
+
+- **8-K section boundary captures full body text** — HTMLParser section detection now correctly extends section boundaries past table-wrapped item headings to include all body paragraphs until the next section ([#733](https://github.com/dgunning/edgartools/issues/733))
+
+- **gaap_mappings: PaymentsToDevelopSoftware and PaymentsForSoftware** — Both were incorrectly mapped to `NetCashFromInvestingActivities` (section total) instead of `PurchaseOfIntangibleAssets` (component line item) ([#739](https://github.com/dgunning/edgartools/issues/739))
+
+- **Infinite recursion in html() for XML-primary filings** — `html()` no longer recurses when the primary document of S-1/S-3 filings is XML rather than HTML
+
+- **MunicipalAdvisorForm assert narrowed** — Assert restricted to MA-I only; MA form now routes to `XmlFiling`
+
+### Documentation
+
+- New data object guides: Form 6-K, S-1, DRS, EFFECT, 24F-2NT, XML filings
+- F-3 foreign shelf registration forms added to S-3 guide
+- MCP docs rewritten with real examples and corrected setup instructions
+
+## [5.26.1] - 2026-03-26
+
+### Fixed
+
+- **MCP tool definitions: `outputSchema` removed** — `outputSchema` was included in all MCP tool definitions, which is not part of the MCP protocol spec. Claude Desktop rejected every tool call, blocking all MCP usage entirely. Removing the field restores full MCP functionality ([#735](https://github.com/dgunning/edgartools/issues/735))
+
+- **`edgar_notes` next-steps reference** — `edgar_notes` referenced a non-existent tool name in its `next_steps` guidance; corrected to a valid tool
+
+- **`edgar_screen` state filter silently dropped** — State filter was silently discarded on queries that specified only an exchange (no SIC code), causing state-filtered screening to return unfiltered results
+
+- **`edgar_compare` growth metrics broken** — Growth metric calculation failed because `time_series` fetched insufficient periods; fetch count increased to ensure enough data points are available
+
+### Improved
+
+- **MCP documentation reorganised** — `ai-integration.md` split into five focused pages (`ai/index.md`, `ai/mcp-setup.md`, `ai/mcp-tools.md`, `ai/mcp-workflows.md`, `ai/skills.md`) for easier navigation. Parameter defaults and required-field annotations corrected across all pages
+
+## [5.26.0] - 2026-03-25
+
+### Added
+
+- **CORRESP/UPLOAD correspondence support** — New `Correspondence` and `CorrespondenceThread` classes parse SEC correspondence filings with automatic classification (company_response, acceleration_request, sec_comment, review_complete, no_review) and metadata extraction (file number, referenced form, fiscal year). `Filing.correspondence()` works on any filing type to find related SEC review threads via file number
+
+- **Point-in-Time mode for EntityFacts** — `EntityFacts.to_dataframe()` now accepts a `pit_mode` parameter that includes `filing_date` and `form_type` columns, enabling lookahead-bias-free backtesting by filtering on `filing_date <= as_of_date` ([#697](https://github.com/dgunning/edgartools/issues/697))
+
+- **S-3 shelf registration data object** — New `RegistrationS3` class with fee table extraction from EX-FILING FEES exhibits (Exhibit 107) supporting 5 HTML format variations, `ShelfLifecycle` with shelf capacity and offering capacity properties, prospectus section access with 16 section patterns, and auto-shelf detection for well-known seasoned issuers ([#728](https://github.com/dgunning/edgartools/issues/728))
+
+- **TTM unification on EntityFacts** — Unified TTM access on `EntityFacts` with streamlined `Company` delegation. TTM-ready facts are cached for performance. Quarter labels now use fiscal year (PR [#721](https://github.com/dgunning/edgartools/pull/721), ghedo44)
+
+### Fixed
+
+- **TOC named-anchor targets** — Table-of-contents anchor matching centralized and now correctly resolves named-anchor targets ([#727](https://github.com/dgunning/edgartools/pull/727))
+
+- **Revenue in income statement dedup** — Revenue now included in the promoted income statement deduplication set
+
+- **Shares concepts preserved in statements** — Shares-denominated concepts (EPS, shares outstanding) are no longer dropped from income statements during unit filtering (PR [#725](https://github.com/dgunning/edgartools/pull/725), ghedo44)
+
+- **TypeError in `_get_statement_concepts`** — Fixed crash when statement type is `None` by using `or ''` fallback instead of relying on `dict.get()` default
+
+- **Unit filter documentation** — Docstrings updated to reflect native-unit filtering behavior
+
+### Improved
+
+- **EntityFacts memory usage reduced 27%** — String interning deduplicates high-repetition fields (taxonomy, unit, fiscal_period, form_type, concept) from ~99K objects to ~1.6K. Per-concept work hoisted out of per-fact loop, dimensions default changed to `None`, period index key caching added. Measured on AAPL: 20.5 MB → 15.0 MB
+
+### Data
+
+- Bundled ticker and CUSIP reference data refreshed (10,652→10,769 tickers, deduplicated CUSIPs)
 
 ## [5.25.1] - 2026-03-19
 

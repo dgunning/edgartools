@@ -1600,6 +1600,17 @@ class Filing:
                 ownership: Ownership = self.obj()
                 html = ownership.to_html()
             else:
+                # Only call self.obj() for XML-native forms (XmlFiling, etc.)
+                # that have to_html() rendering. Skip for HTML-based data objects
+                # (S-1, S-3, 424B, etc.) whose from_filing() calls html(),
+                # which would cause infinite recursion.
+                from edgar.xmlfiling import XML_FILING_FORMS
+                if self.form in XML_FILING_FORMS:
+                    xml_obj = self.obj()
+                    if xml_obj and hasattr(xml_obj, 'to_html'):
+                        rendered = xml_obj.to_html()
+                        if rendered:
+                            return rendered
                 html = self.homepage.primary_html_document.download()
         if isinstance(html, bytes):
             try:
@@ -2098,6 +2109,45 @@ class Filing:
         file_number = filings[0].file_number
         return company.get_filings(file_number=file_number,
                                    sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")])
+
+    def correspondence(self) -> Optional['CorrespondenceThread']:
+        """Get the correspondence thread for this filing.
+
+        Works on ANY filing type (not just CORRESP/UPLOAD). For example,
+        calling correspondence() on a 10-K will find any SEC review
+        correspondence related to that 10-K via file_number.
+
+        Returns:
+            CorrespondenceThread or None if no correspondence found.
+        """
+        from edgar.correspondence import Correspondence, CorrespondenceThread, CorrespondenceType, CORRESPONDENCE_FORMS
+
+        # If this is already a correspondence filing, parse and get its thread
+        if self.form in CORRESPONDENCE_FORMS:
+            c = Correspondence.from_filing(self)
+            return c.thread
+
+        # For other filings, build a synthetic Correspondence with the file_number
+        # from EDGAR metadata and delegate to CorrespondenceThread
+        company = self.get_entity()
+        if not company:
+            return None
+
+        filings = company.get_filings(accession_number=self.accession_no)
+        if not filings or filings.empty:
+            return None
+        file_number = filings[0].file_number
+        if not file_number:
+            return None
+
+        # Create a minimal Correspondence to anchor the thread search
+        anchor = Correspondence(
+            filing=self,
+            body=None,
+            correspondence_type=CorrespondenceType.COMPANY_LETTER,
+            referenced_file_number=file_number,
+        )
+        return CorrespondenceThread.from_correspondence(anchor)
 
     def __hash__(self):
         return hash(self.accession_no)

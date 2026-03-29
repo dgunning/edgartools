@@ -275,11 +275,12 @@ class TestConfigRequirement:
 class TestBoldParagraphFallback:
     """Test bold paragraph fallback detection - Issue #1ho additional improvement."""
 
-    def test_is_bold_helper_detects_bold_700(self):
-        """_is_bold() should detect font-weight: 700."""
-        html = """
+    @pytest.mark.parametrize("weight", ["700", "bold"])
+    def test_is_bold_helper_detects_bold(self, weight):
+        """_is_bold() should detect font-weight: 700 and font-weight: bold."""
+        html = f"""
         <html><body>
-        <p style="font-weight: 700">Item 2.02</p>
+        <p style="font-weight: {weight}">Item 2.02</p>
         </body></html>
         """
 
@@ -291,25 +292,7 @@ class TestBoldParagraphFallback:
 
         para = doc.root.find_first(lambda n: isinstance(n, ParagraphNode))
         assert para is not None, "Should find paragraph"
-        assert extractor._is_bold(para), "Should detect font-weight: 700 as bold"
-
-    def test_is_bold_helper_detects_bold_keyword(self):
-        """_is_bold() should detect font-weight: bold."""
-        html = """
-        <html><body>
-        <p style="font-weight: bold">Item 2.02</p>
-        </body></html>
-        """
-
-        config = ParserConfig(form='8-K')
-        doc = parse_html(html, config)
-
-        from edgar.documents.nodes import ParagraphNode
-        extractor = SectionExtractor('8-K')
-
-        para = doc.root.find_first(lambda n: isinstance(n, ParagraphNode))
-        assert para is not None, "Should find paragraph"
-        assert extractor._is_bold(para), "Should detect font-weight: bold keyword"
+        assert extractor._is_bold(para), f"Should detect font-weight: {weight} as bold"
 
     def test_is_bold_helper_rejects_normal_weight(self):
         """_is_bold() should reject normal font weights."""
@@ -418,38 +401,3 @@ class TestBoldParagraphRealWorld:
                 f"Detection method should be 'pattern' (got {section.detection_method})"
 
 
-class TestImprovementMetrics:
-    """Document the improvement from the bug fix."""
-
-    def test_success_rate_improvement(self):
-        """Bug fix improved 8-K section detection from 14% → 85% success rate."""
-        # Before fix:
-        # - 1 out of 7 test filings worked = 14% success
-        # - Only "Onstream Media 2011" detected sections
-
-        # After fix:
-        # - 6 out of 7 test filings work = 85% success
-        # - Only "Harbinger Group 2011" partial due to trailing period
-
-        # This test documents the improvement for posterity
-        before_success_rate = 0.14  # 1/7 filings
-        after_success_rate = 0.85   # 6/7 filings (estimated)
-        improvement = after_success_rate - before_success_rate
-
-        assert improvement >= 0.70, \
-            f"Bug fix should improve success rate by at least 70% (got {improvement*100:.0f}%)"
-
-    def test_bold_paragraph_improvement(self):
-        """Bold paragraph fallback improved detection from 45% → 50%."""
-        # Additional improvement after initial fix:
-        # - Before bold paragraph fallback: 45% (100 random 8-K sample)
-        # - After bold paragraph fallback: 50% (100 random 8-K sample)
-        # - Limited by missing patterns (only 6/45 8-K items defined)
-
-        # This test documents the additional improvement
-        before_bold_fix = 0.45
-        after_bold_fix = 0.50
-        improvement = after_bold_fix - before_bold_fix
-
-        assert improvement >= 0.049, \
-            f"Bold paragraph fallback should improve by at least 5% (got {improvement*100:.1f}%)"

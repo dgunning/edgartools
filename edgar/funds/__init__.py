@@ -41,6 +41,7 @@ from edgar.funds.data import FundData, get_fund_information, is_fund_ticker, par
 from edgar.funds.ncen import NCEN_FORMS, FundCensus
 from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
 from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
+from edgar.funds.prospectus497k import PROSPECTUS497K_FORMS, Prospectus497K
 from edgar.funds.reports import NPORT_FORMS, CurrentMetric, FundReport, get_fund_portfolio_from_filing
 
 
@@ -142,6 +143,10 @@ __all__ = [
     # Fund shareholder report (N-CSR / N-CSRS)
     'FundShareholderReport',
     'NCSR_FORMS',
+
+    # Fund summary prospectus (497K)
+    'Prospectus497K',
+    'PROSPECTUS497K_FORMS',
 
     # Legacy compatibility
     'get_fund_with_filings',

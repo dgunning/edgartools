@@ -11,7 +11,7 @@ from typing import List, Optional
 # Performance optimization: use set for O(1) lookups
 COMPANY_FORMS = {
     # Registration statements
-    "S-1", "S-3", "S-4", "S-8", "S-11",
+    "S-1", "S-3", "S-4", "S-8", "S-11", "DRS",
     # Foreign issuers registration forms
     "F-1", "F-3", "F-4", "F-6", "F-7", "F-8", "F-9", "F-10", "F-80",
     # Foreign form amendments and effectiveness
@@ -98,7 +98,7 @@ INDIVIDUAL_FORMS = {
     # Tender offer schedules
     "SC TO-I", "SC TO-C", "SC TO-T",
     # Investment adviser representatives
-    "ADV-E", "DRS"
+    "ADV-E"
 }
 
 # All known form types for validation

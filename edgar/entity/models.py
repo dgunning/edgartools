@@ -64,7 +64,7 @@ class FinancialFact:
 
     # Optional XBRL specifics
     context_ref: Optional[str] = None
-    dimensions: Dict[str, str] = field(default_factory=dict)
+    dimensions: Optional[Dict[str, str]] = None  # None instead of empty dict to save ~1.5 MB per company
     statement_type: Optional[str] = None
     line_item_sequence: Optional[int] = None
 

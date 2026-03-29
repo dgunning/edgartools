@@ -10,6 +10,8 @@ from typing import Dict, List, Optional, Tuple
 
 from lxml import html as lxml_html
 
+from edgar.documents.utils.anchor_targets import find_anchor_targets
+
 
 @dataclass
 class TOCSection:
@@ -95,7 +97,7 @@ class TOCAnalyzer:
                     # Check if this looks like a section reference (check text, anchor ID, and context)
                     if self._is_section_link(text, anchor_id, preceding_item):
                         # Verify target exists
-                        target_elements = tree.xpath(f'//*[@id="{anchor_id}"]')
+                        target_elements = find_anchor_targets(tree, anchor_id)
                         if target_elements:
                             # Try to extract item number from: anchor ID > preceding context > text
                             normalized_name = self._normalize_section_name(text, anchor_id, preceding_item)

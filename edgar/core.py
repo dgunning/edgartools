@@ -676,13 +676,20 @@ def initialize_rich_logging():
         handlers=[RichHandler(rich_tracebacks=True)]
     )
 
-    # Turn down 3rd party logging
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.getLogger("httpxthrottlecache").setLevel(logging.WARNING)
-    logging.getLogger("pyrate_limiter").setLevel(
-        logging.CRITICAL
-    )  # TODO: Temporary, until next pyrate_limiter update that reduces the spurious "async" message
+    # Third-party loggers already suppressed at module level
 
+
+# Suppress noisy third-party loggers by default.
+# Users can override after import: logging.getLogger("httpx").setLevel(logging.DEBUG)
+_NOISY_LOGGERS = {
+    "httpx": logging.WARNING,
+    "httpxthrottlecache": logging.WARNING,
+    "pyrate_limiter": logging.CRITICAL,  # Emits spurious "async" messages at WARNING
+}
+for _logger_name, _level in _NOISY_LOGGERS.items():
+    _lg = logging.getLogger(_logger_name)
+    if _lg.level == logging.NOTSET:  # Only set if user hasn't already configured
+        _lg.setLevel(_level)
 
 # Turn on rich logging if the environment variable is set
 if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':

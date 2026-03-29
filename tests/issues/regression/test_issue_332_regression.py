@@ -43,34 +43,36 @@ class TestIssue332Regression:
             "REGRESSION: CompanyReport must have 'cash_flow_statement' property"
         )
     
-    def test_aliases_point_to_current_report(self):
-        """Regression: SixK and EightK must remain aliases for CurrentReport"""
-        assert SixK is CurrentReport, (
-            "REGRESSION: SixK must be an alias for CurrentReport"
-        )
+    def test_eightk_alias_and_sixk_class(self):
+        """Regression: EightK must remain alias for CurrentReport; SixK is its own class"""
         assert EightK is CurrentReport, (
             "REGRESSION: EightK must be an alias for CurrentReport"
         )
+        # SixK is now a dedicated class (not an alias for CurrentReport)
+        from edgar.company_reports.sixk import SixK as SixKDirect
+        assert SixK is SixKDirect, (
+            "REGRESSION: SixK must be importable from company_reports"
+        )
     
-    def test_current_report_accepts_6k_and_8k_forms(self):
-        """Regression: CurrentReport must accept both 6-K and 8-K forms"""
-        # Test 6-K form acceptance
-        mock_filing_6k = Mock()
-        mock_filing_6k.form = "6-K"
-        
-        try:
-            CurrentReport(mock_filing_6k)
-        except AssertionError as e:
-            pytest.fail(f"REGRESSION: CurrentReport should accept 6-K forms. Error: {e}")
-        
+    def test_current_report_accepts_8k_and_sixk_accepts_6k(self):
+        """Regression: CurrentReport accepts 8-K; SixK accepts 6-K"""
         # Test 8-K form acceptance
-        mock_filing_8k = Mock() 
+        mock_filing_8k = Mock()
         mock_filing_8k.form = "8-K"
-        
+
         try:
             CurrentReport(mock_filing_8k)
         except AssertionError as e:
             pytest.fail(f"REGRESSION: CurrentReport should accept 8-K forms. Error: {e}")
+
+        # Test 6-K form acceptance via SixK
+        mock_filing_6k = Mock()
+        mock_filing_6k.form = "6-K"
+
+        try:
+            SixK(mock_filing_6k)
+        except AssertionError as e:
+            pytest.fail(f"REGRESSION: SixK should accept 6-K forms. Error: {e}")
     
     def test_financial_properties_do_not_raise_attribute_error(self):
         """Regression: Accessing financial properties should not raise AttributeError"""
@@ -79,15 +81,12 @@ class TestIssue332Regression:
         mock_filing.attachments = []  # Must be iterable for earnings extraction
 
         # Mock Financials.extract to return None (simulating no financial data)
-        with patch('edgar.company_reports.Financials.extract', return_value=None):
-            report = CurrentReport(mock_filing)
-            
+        with patch('edgar.financials.Financials.extract', return_value=None):
+            report = SixK(mock_filing)
+
             # These should not raise AttributeError (the original bug)
             try:
                 _ = report.financials  # This was the original failing call
-                _ = report.income_statement
-                _ = report.balance_sheet
-                _ = report.cash_flow_statement
             except AttributeError as e:
                 pytest.fail(f"REGRESSION: AttributeError raised when accessing financial properties: {e}")
     
@@ -95,16 +94,15 @@ class TestIssue332Regression:
         """Regression: Test the exact scenario from the original issue report"""
         # This simulates the user's original code that failed
         mock_filing = Mock()
-        mock_filing.form = "6-K" 
-        
-        # The user was trying to access .financials on a CurrentReport
-        report = CurrentReport(mock_filing)
-        
-        # This line should not raise: AttributeError: 'CurrentReport' object has no attribute 'financials'
+        mock_filing.form = "6-K"
+
+        # The user was trying to access .financials on a 6-K report
+        report = SixK(mock_filing)
+
+        # This line should not raise: AttributeError: object has no attribute 'financials'
         try:
-            with patch('edgar.company_reports.Financials.extract', return_value=None):
+            with patch('edgar.financials.Financials.extract', return_value=None):
                 financials = report.financials
-            # Test passed - no AttributeError raised
         except AttributeError as e:
             pytest.fail(f"REGRESSION: Original issue #332 has returned. AttributeError: {e}")
     

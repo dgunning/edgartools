@@ -1004,7 +1004,7 @@ def _get_statement_concepts(xbrl: 'XBRL') -> Dict[str, Dict[str, set]]:
         category = Statements.classify_statement(stmt)
         if category != 'statement':
             continue
-        stmt_type = stmt.get('type', '')
+        stmt_type = stmt.get('type') or ''
         if 'Parenthetical' in stmt_type:
             continue
         tree = xbrl.presentation_trees.get(stmt['role'])

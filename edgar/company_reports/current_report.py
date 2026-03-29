@@ -17,7 +17,7 @@ from edgar.files.html import Document
 from edgar.files.htmltools import ChunkedDocument, adjust_for_empty_items, chunks2df, detect_decimal_items
 from edgar.richtools import repr_rich, rich_to_text
 
-__all__ = ['CurrentReport', 'EightK', 'SixK']
+__all__ = ['CurrentReport', 'EightK']
 
 
 def _normalize_item_number(item_str: str) -> str:
@@ -77,22 +77,22 @@ def _extract_items_from_text(text: str) -> List[str]:
         - GitHub Issue: #462
         - Beads Issue: edgartools-k1k
     """
-    # Extract items that appear at the start of lines only.
+    # Extract items that appear at the start of lines (with optional leading whitespace).
     # This ensures consistency with _extract_item_content_from_text which
     # requires items to be at line starts for content extraction.
     #
     # Pattern matches "Item X" or "Item X.XX" at start of line
     # This will match:
     # - "Item 1" (standalone)
+    # - "  Item 1" (indented — common in HTML-to-text conversion)
     # - "Item 1-Item 4" (only Item 1, since it's at line start)
     # - "Item 2.02" (modern format)
     #
     # This will NOT match:
-    # - "  Item 1" (indented, not at line start)
     # - "Item 1-Item 4" (Item 4, not at line start)
     # - Mid-sentence references to items
     pattern = re.compile(
-        r'^Item\s+(\d+\.?\s*\d*)',
+        r'^\s*Item\s+(\d+\.?\s*\d*)',
         re.IGNORECASE | re.MULTILINE
     )
     matches = pattern.findall(text)
@@ -158,7 +158,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Pattern matches: "Item 9", "Item 9.", "Item 9:", "Item 9.02", etc.
     # Must be at start of line (^) to avoid false positives
     item_pattern = re.compile(
-        rf'^(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
+        rf'^\s*(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
         re.IGNORECASE | re.MULTILINE
     )
 
@@ -171,7 +171,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Step 3: Find end position
     # Look for next "Item X" pattern
     next_item_pattern = re.compile(
-        r'^Item\s+\d+\.?\s*\d*[\s\.:\-]',
+        r'^\s*Item\s+\d+\.?\s*\d*[\s\.:\-]',
         re.IGNORECASE | re.MULTILINE
     )
     next_match = next_item_pattern.search(
@@ -211,6 +211,14 @@ class CurrentReport(CompanyReport):
         "ITEM 1.03": {
             "Title": "Bankruptcy or Receivership",
             "Description": "Reports any bankruptcy or receivership."
+        },
+        "ITEM 1.04": {
+            "Title": "Mine Safety Disclosures",
+            "Description": "Reports information required by Section 1503(a) of the Dodd-Frank Act."
+        },
+        "ITEM 1.05": {
+            "Title": "Material Cybersecurity Incidents",
+            "Description": "Reports material cybersecurity incidents as required by SEC rules effective December 2023."
         },
         "ITEM 2.01": {"Title": "Completion of Acquisition or Disposition of Assets",
                       "Description": "Reports the completion of an acquisition or disposition of a significant " +
@@ -274,6 +282,10 @@ class CurrentReport(CompanyReport):
                       "Description": "Reports on the failure to make a required distribution."},
         "ITEM 6.05": {"Title": "Securities Act Updating Disclosure",
                       "Description": "Reports on Securities Act updating disclosure."},
+        "ITEM 7.01": {"Title": "Regulation FD Disclosure",
+                      "Description": "Reports information disclosed under Regulation FD."},
+        "ITEM 8.01": {"Title": "Other Events",
+                      "Description": "Reports any material events not specifically covered by other items."},
         "ITEM 9.01": {
             "Title": "Financial Statements and Exhibits",
             "Description": "Reports financial statements and other exhibits related to the events reported in the 8-K."
@@ -281,7 +293,7 @@ class CurrentReport(CompanyReport):
     })
 
     def __init__(self, filing):
-        assert filing.form in ['8-K', '8-K/A', '6-K', '6-K/A'], f"This form should be an 8-K but was {filing.form}"
+        assert filing.form in ['8-K', '8-K/A'], f"This form should be an 8-K but was {filing.form}"
         super().__init__(filing)
         self._cached_filing_text = None
 
@@ -341,8 +353,93 @@ class CurrentReport(CompanyReport):
             return self.document.sections
         return {}
 
+    @cached_property
+    def content_type(self) -> str:
+        """
+        Classify this 8-K by its primary purpose.
+
+        Returns one of: 'earnings', 'director_change', 'shareholder_vote',
+        'material_agreement', 'regulation_fd', 'debt_offering', 'restructuring',
+        'governance', 'cybersecurity', 'asset_change', 'auditor_change', 'other'
+        """
+        items_set = set()
+        for item in self.items:
+            num = item.replace('Item ', '').strip()
+            items_set.add(num)
+
+        if '2.02' in items_set:
+            return 'earnings'
+        if '1.05' in items_set:
+            return 'cybersecurity'
+        if '2.05' in items_set or '2.06' in items_set:
+            return 'restructuring'
+        if '2.01' in items_set:
+            return 'asset_change'
+        if '4.01' in items_set or '4.02' in items_set:
+            return 'auditor_change'
+        if '5.07' in items_set:
+            return 'shareholder_vote'
+        if '1.01' in items_set:
+            return 'material_agreement'
+        if '5.02' in items_set:
+            return 'director_change'
+        if any(i in items_set for i in ('5.03', '5.05', '5.06')):
+            return 'governance'
+        # For 7.01 and 8.01, check exhibit types for debt offering signals
+        if '7.01' in items_set or '8.01' in items_set:
+            exhibit_types = {att.document_type for att in self._filing.attachments if att.document_type}
+            if 'EX-1.1' in exhibit_types or any(t.startswith('EX-4.') for t in exhibit_types):
+                return 'debt_offering'
+            if '7.01' in items_set:
+                return 'regulation_fd'
+            return 'other'
+        return 'other'
+
+    @property
+    def is_amendment(self) -> bool:
+        """True if this is an 8-K/A amendment."""
+        return self._filing.form == '8-K/A'
+
+    def get_exhibit(self, exhibit_type: str):
+        """
+        Get a specific exhibit by type (e.g., 'EX-99.1', 'EX-10.1').
+
+        Returns:
+            Attachment object or None
+        """
+        for att in self._filing.attachments:
+            if att.document_type == exhibit_type:
+                return att
+        return None
+
+    def get_exhibits(self, prefix: str = None):
+        """
+        Get content exhibits, optionally filtered by type prefix (e.g., 'EX-99').
+
+        Excludes XBRL infrastructure files, graphics, and the primary 8-K document.
+        """
+        skip_prefixes = ('EX-101', 'GRAPHIC', 'HTML', 'JS', 'CSS', 'XML', 'JSON', 'ZIP')
+        result = []
+        for att in self._filing.attachments:
+            dt = att.document_type
+            if not dt or dt.startswith(skip_prefixes):
+                continue
+            if dt in ('8-K', '8-K/A'):
+                continue
+            if prefix and not dt.startswith(prefix):
+                continue
+            result.append(att)
+        return result
+
     @property
     def has_press_release(self):
+        """True if this filing has a press release exhibit tied to an earnings event.
+
+        For Item 7.01-only filings (Reg FD), EX-99 attachments are typically
+        investor presentations, not press releases.
+        """
+        if not any('2.02' in item for item in self.items):
+            return False
         return self.press_releases is not None
 
     @property
@@ -546,7 +643,10 @@ class CurrentReport(CompanyReport):
             # Extract items using shared helper (eliminates code duplication)
             item_pattern = re.compile(r'(Item\s+\d+\.\s*\d+)', re.IGNORECASE)
             items = extract_items_from_sections(self.sections, item_pattern)
-            if items:
+            # Validate: modern 8-K items should have decimal points (e.g., "Item 8.01").
+            # If no items contain a dot, the parser likely misidentified them
+            # (e.g., Amazon-style "ITEM 8.01." parsed as "Item 8").
+            if items and any('.' in item for item in items):
                 return items
 
         # Strategy 2: Fallback to old chunked_document parser
@@ -738,6 +838,15 @@ class CurrentReport(CompanyReport):
         except Exception:
             pass
 
+        # Content type
+        try:
+            lines.append(f"Content Type: {self.content_type}")
+        except Exception:
+            pass
+
+        if self.is_amendment:
+            lines.append("Amendment: Yes (8-K/A)")
+
         # Items reported
         try:
             items = self.items
@@ -791,17 +900,19 @@ class CurrentReport(CompanyReport):
         except Exception:
             pass
 
-        # Available actions
+        # Available actions — context-aware
         lines.append("")
         lines.append("AVAILABLE ACTIONS:")
         lines.append("  [item_number]            Get text for specific item")
         lines.append("  .items                   All reported item numbers")
-        lines.append("  .press_releases          Press release attachments")
-        lines.append("  .earnings                Parsed earnings release")
-        lines.append("  .income_statement        Income statement (from earnings)")
-        lines.append("  .balance_sheet           Balance sheet (from earnings)")
+        lines.append("  .content_type            Filing classification")
+        if self.content_type == 'earnings':
+            lines.append("  .press_releases          Press release attachments")
+            lines.append("  .earnings                Parsed earnings release")
+            lines.append("  .income_statement        Income statement (from earnings)")
+            lines.append("  .balance_sheet           Balance sheet (from earnings)")
+        lines.append("  .get_exhibit(type)       Get exhibit by type (e.g., 'EX-99.1')")
         lines.append("  .text()                  Full filing text content")
-        lines.append("  .document                Parsed HTML document")
 
         if detail == 'standard':
             return "\n".join(lines)
@@ -828,6 +939,5 @@ class CurrentReport(CompanyReport):
     def __repr__(self):
         return repr_rich(self.__rich__())
 
-# Aliases for the current report
+# Alias for the current report
 EightK = CurrentReport
-SixK = CurrentReport

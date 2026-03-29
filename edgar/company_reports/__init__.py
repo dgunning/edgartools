@@ -12,7 +12,8 @@ from edgar.company_reports._structures import (
     ItemOnlyFilingStructure,
     is_valid_item_for_filing,
 )
-from edgar.company_reports.current_report import CurrentReport, EightK, SixK
+from edgar.company_reports.current_report import CurrentReport, EightK
+from edgar.company_reports.sixk import SixK
 from edgar.company_reports.auditor import AuditorInfo
 from edgar.company_reports.press_release import PressRelease, PressReleases
 from edgar.company_reports.subsidiaries import Subsidiary, SubsidiaryList

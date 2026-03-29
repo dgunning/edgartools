@@ -50,6 +50,23 @@ class TestToolSchemas:
             assert "properties" in schema, f"{name} schema missing 'properties'"
             assert "required" in schema, f"{name} schema missing 'required'"
 
+    def test_no_output_schema_advertised(self):
+        """Tools must not advertise outputSchema — causes validation errors in Claude Desktop (GH#735).
+
+        MCP spec: if outputSchema is declared, responses must use structured content.
+        Our tools return TextContent (JSON text), so advertising outputSchema is invalid.
+        """
+        from edgar.ai.mcp.server import _import_tools
+        from edgar.ai.mcp.tools.base import TOOLS
+
+        _import_tools()
+
+        for name, info in TOOLS.items():
+            assert "output_schema" not in info, (
+                f"{name} advertises output_schema — this breaks Claude Desktop. "
+                "Remove it; tools return TextContent, not structured output."
+            )
+
     def test_required_params_exist_in_properties(self):
         """All required params are also defined in properties."""
         from edgar.ai.mcp.server import _import_tools
