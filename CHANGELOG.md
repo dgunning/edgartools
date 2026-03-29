@@ -5,7 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [5.27.0] - 2026-03-28
+
+### Added
+
+- **Dedicated 6-K data object** — New `SixK` class replaces the `CurrentReport` alias for Form 6-K (Report of Foreign Private Issuer). Extracts cover page metadata (commission file number, report month, annual report form, content description), provides exhibit access, press release filtering, and IFRS financials when present. Includes `to_context()` with cover page text at `full` detail level
+
+- **S-1/F-1 registration statement data object** — New `RegistrationS1` class for S-1 and F-1 registration statements with cover page extraction, prospectus section access, and amendment support
+
+- **DRS draft registration statement data object** — New `DraftRegistrationStatement` class for confidential draft registration statements (DRS/DRS-A)
+
+- **Generic XML filing data object** — New `XmlFiling` class for XML+XSLT SEC forms (X-17A-5, TA-1, TA-2, SBSE, ATS-N-C, CFPORTAL, etc.) with automatic XSLT rendering
+
+- **24F-2NT fund fee notice data object** — New `FundFeeNotice` class for annual notices of securities sold by registered investment companies
+
+- **497K fund summary prospectus data object** — New `Prospectus497K` class for 497K fund summary prospectus filings
+
+- **F-1/F-1A foreign registration support** — `RegistrationS1` now accepts F-1 and F-1/A forms for foreign private issuer IPO registrations
+
+- **F-3 foreign shelf registration support** — `RegistrationS3` now accepts F-3, F-3/A, and F-3ASR forms
+
+- **EightK improvements** — New `content_type` property classifying 8-K filings (earnings, cybersecurity, restructuring, etc.), `is_amendment` property, `get_exhibit()` and `get_exhibits()` methods, and context-aware `to_context()` that adjusts available actions based on content type
+
+### Fixed
+
+- **8-K section boundary captures full body text** — HTMLParser section detection now correctly extends section boundaries past table-wrapped item headings to include all body paragraphs until the next section ([#733](https://github.com/dgunning/edgartools/issues/733))
+
+- **gaap_mappings: PaymentsToDevelopSoftware and PaymentsForSoftware** — Both were incorrectly mapped to `NetCashFromInvestingActivities` (section total) instead of `PurchaseOfIntangibleAssets` (component line item) ([#739](https://github.com/dgunning/edgartools/issues/739))
+
+- **Infinite recursion in html() for XML-primary filings** — `html()` no longer recurses when the primary document of S-1/S-3 filings is XML rather than HTML
+
+- **MunicipalAdvisorForm assert narrowed** — Assert restricted to MA-I only; MA form now routes to `XmlFiling`
+
+### Documentation
+
+- New data object guides: Form 6-K, S-1, DRS, EFFECT, 24F-2NT, XML filings
+- F-3 foreign shelf registration forms added to S-3 guide
+- MCP docs rewritten with real examples and corrected setup instructions
 
 ## [5.26.1] - 2026-03-26
 
