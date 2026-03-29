@@ -656,7 +656,9 @@ class TestPortfolioInvestmentsPeriodAndQuality:
         assert dq.total_investments == 2
         assert dq.fair_value_coverage == 1.0  # Both have fair value
         assert dq.cost_coverage == 0.5  # Only one has cost
-        assert dq.interest_rate_coverage == 0.5  # Only one has rate
+        assert dq.interest_rate_coverage == 1.0  # 1 of 1 debt investments has rate
+        assert dq.debt_count == 1
+        assert dq.equity_count == 1
 
     def test_empty_portfolio_data_quality(self):
         """Test data_quality for empty portfolio."""

@@ -56,6 +56,12 @@ from edgar.bdc.investments import (
     PortfolioInvestment,
     PortfolioInvestments,
 )
+from edgar.bdc.nonaccrual import (
+    NonAccrualInvestment,
+    NonAccrualResult,
+    extract_nonaccrual,
+    extract_nonaccrual_batch,
+)
 from edgar.bdc.reference import (
     BDCEntities,
     BDCEntity,
@@ -91,6 +97,11 @@ __all__ = [
     'DataQuality',
     'PortfolioInvestment',
     'PortfolioInvestments',
+    # Non-accrual extraction
+    'NonAccrualInvestment',
+    'NonAccrualResult',
+    'extract_nonaccrual',
+    'extract_nonaccrual_batch',
     # Search
     'BDCSearchIndex',
     'BDCSearchResults',
