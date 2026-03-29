@@ -251,6 +251,66 @@ class FilingViewer:
         from edgar.xbrl.viewer_validation import compare_viewer_to_xbrl
         return compare_viewer_to_xbrl(self, xbrl, tolerance=tolerance)
 
+    def compare_context(self, xbrl, statement: str = 'balance_sheet') -> str:
+        """
+        Generate an LLM-ready comparison prompt between viewer and XBRL.
+
+        Outputs both the SEC viewer rendering and the XBRL statement as text,
+        side by side, so an LLM can identify discrepancies that numeric
+        comparison might miss (labels, ordering, missing items).
+
+        Args:
+            xbrl: XBRL object from filing.xbrl()
+            statement: Statement method name ('balance_sheet', 'income_statement',
+                       'cashflow_statement', 'comprehensive_income')
+
+        Returns:
+            Formatted text prompt comparing both renderings
+        """
+        lines = [
+            "Compare the SEC Viewer rendering (ground truth) against the XBRL parser output.",
+            "Identify any differences in values, labels, line items, or ordering.",
+            "The SEC Viewer is the authoritative source — flag any XBRL discrepancies.",
+            "",
+        ]
+
+        # Find the matching viewer report
+        stmt_keywords = {
+            'income_statement': 'OPERATIONS',
+            'balance_sheet': 'BALANCE SHEET',
+            'cashflow_statement': 'CASH FLOW',
+            'comprehensive_income': 'COMPREHENSIVE',
+        }
+        keyword = stmt_keywords.get(statement, statement.upper())
+        viewer_text = None
+        for vr in self.financial_statements:
+            if keyword in vr.short_name.upper():
+                viewer_text = vr.text()
+                lines.append(f"--- SEC VIEWER: {vr.short_name} ---")
+                break
+
+        if viewer_text:
+            lines.append(viewer_text)
+        else:
+            lines.append(f"(No viewer report found matching '{statement}')")
+
+        lines.append("")
+
+        # Get XBRL statement text
+        try:
+            stmt_obj = getattr(xbrl.statements, statement)()
+            if stmt_obj:
+                from edgar.richtools import rich_to_text
+                xbrl_text = rich_to_text(stmt_obj.render())
+                lines.append(f"--- XBRL PARSER: {statement} ---")
+                lines.append(xbrl_text)
+            else:
+                lines.append(f"(XBRL statement '{statement}' not found)")
+        except Exception as e:
+            lines.append(f"(Error getting XBRL statement: {e})")
+
+        return '\n'.join(lines)
+
     # --- Display ---
 
     def view(self, report_name: Optional[str] = None):
