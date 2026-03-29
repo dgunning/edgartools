@@ -1918,6 +1918,21 @@ class Filing:
             return self.reports.statements
 
     @cached_property
+    def viewer(self):
+        """
+        Get the SEC Interactive Data Viewer for this filing.
+
+        Returns a FilingViewer with categorized report navigation,
+        concept-annotated data, and a navigable concept graph.
+        Requires an XBRL filing with MetaLinks.json in the SGML bundle.
+
+        Returns:
+            FilingViewer if MetaLinks.json is available, None otherwise
+        """
+        from edgar.xbrl.viewer import FilingViewer
+        return FilingViewer.from_filing(self)
+
+    @cached_property
     def index_headers(self) -> IndexHeaders:
         """
         Get the index headers for the filing. This is a listing of all the files in the filing directory
