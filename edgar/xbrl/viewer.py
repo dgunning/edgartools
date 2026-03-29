@@ -232,6 +232,25 @@ class FilingViewer:
         """Validate calculation trees sum correctly."""
         return self.concepts.validate(tolerance=tolerance)
 
+    def compare(self, xbrl, tolerance: float = 1.0):
+        """
+        Compare viewer values against XBRL parser output.
+
+        The viewer (R*.htm) is treated as ground truth. Each concept+period
+        in the viewer's financial statements is matched against the XBRL
+        parser's output. Values are compared in display units.
+
+        Args:
+            xbrl: XBRL object from filing.xbrl()
+            tolerance: Maximum allowed difference in display units
+                       (default 1.0 = ±$1M for filings in millions)
+
+        Returns:
+            ComparisonResults with match rate, mismatches, and to_dataframe()
+        """
+        from edgar.xbrl.viewer_validation import compare_viewer_to_xbrl
+        return compare_viewer_to_xbrl(self, xbrl, tolerance=tolerance)
+
     # --- Display ---
 
     def view(self, report_name: Optional[str] = None):
