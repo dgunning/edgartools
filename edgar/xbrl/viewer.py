@@ -394,8 +394,8 @@ class FilingViewer:
         """
         Create a FilingViewer from a Filing object.
 
-        Returns None if the filing doesn't have MetaLinks.json
-        (older or non-XBRL filings).
+        Returns None if the filing doesn't have the required XBRL viewer data.
+        Check ``FilingViewer.viewer_support(filing)`` for a diagnostic message.
         """
         sgml = filing.sgml()
         if not sgml:
@@ -408,3 +408,19 @@ class FilingViewer:
             return None
         metalinks = MetaLinks.parse(metalinks_content)
         return cls(sgml, filing_summary, metalinks)
+
+    @staticmethod
+    def viewer_support(filing) -> str:
+        """
+        Diagnose why a filing may not support the viewer.
+
+        Returns a human-readable message explaining viewer availability.
+        """
+        sgml = filing.sgml()
+        if not sgml:
+            return "No SGML submission bundle available for this filing."
+        if not sgml.filing_summary:
+            return "No FilingSummary.xml found — this filing has no interactive data."
+        if not sgml.get_content('MetaLinks.json'):
+            return "No MetaLinks.json found — this filing predates the SEC viewer metadata (pre-2012) or is not XBRL."
+        return "Viewer is supported for this filing."

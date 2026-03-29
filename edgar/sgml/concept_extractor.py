@@ -50,7 +50,7 @@ def parse_numeric(value_str: str) -> Optional[float]:
     """
     if not value_str:
         return None
-    cleaned = value_str.replace('$', '').replace(',', '').replace(' ', '').strip()
+    cleaned = value_str.replace('$', '').replace(',', '').replace('%', '').replace(' ', '').strip()
     if cleaned.startswith('(') and cleaned.endswith(')'):
         cleaned = '-' + cleaned[1:-1]
     cleaned = cleaned.replace('−', '-')  # unicode minus

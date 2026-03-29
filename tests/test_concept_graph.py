@@ -263,6 +263,23 @@ class TestValidation:
         # Most calculation trees should sum correctly (allow some rounding)
         assert valid_count >= len(results) * 0.5
 
+    def test_validate_is_recursive(self, graph):
+        """Validation should check sub-totals, not just roots."""
+        results = graph.validate()
+        # Should have more results than just roots — sub-totals checked too
+        parent_ids = [r['parent'].id for r in results]
+        # AssetsCurrent should appear as a validated parent (it's a sub-total, not a root)
+        assert 'us-gaap_AssetsCurrent' in parent_ids or len(results) > 5
+
+    def test_validate_no_duplicates(self, graph):
+        """Each parent should appear at most once per role."""
+        results = graph.validate()
+        seen = set()
+        for r in results:
+            key = (r['parent'].id, r['role'])
+            assert key not in seen, f"Duplicate validation for {key}"
+            seen.add(key)
+
 
 class TestNumericValues:
 
@@ -310,6 +327,42 @@ class TestParseNumeric:
 
     def test_unicode_minus(self):
         assert parse_numeric('−279') == -279.0
+
+
+class TestToDataFrame:
+
+    def test_to_dataframe_returns_df(self, graph):
+        import pandas as pd
+        df = graph.to_dataframe()
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) > 0
+
+    def test_to_dataframe_columns(self, graph):
+        df = graph.to_dataframe()
+        assert 'concept_id' in df.columns
+        assert 'label' in df.columns
+        assert 'crdr' in df.columns
+        assert 'value' in df.columns
+        assert 'report' in df.columns
+
+    def test_to_dataframe_with_category(self, graph):
+        df_all = graph.to_dataframe()
+        df_stmts = graph.to_dataframe(category='Statements')
+        assert len(df_stmts) < len(df_all)
+        assert len(df_stmts) > 0
+
+    def test_to_dataframe_has_numeric_values(self, graph):
+        df = graph.to_dataframe(category='Statements')
+        # Should have numeric values for most rows
+        non_null = df['value'].notna().sum()
+        assert non_null > 0
+
+    def test_to_dataframe_revenue_ground_truth(self, graph):
+        df = graph.to_dataframe(category='Statements')
+        revenue_rows = df[df['concept_id'] == 'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax']
+        assert len(revenue_rows) >= 1
+        assert revenue_rows.iloc[0]['value'] == 95359.0
+        assert revenue_rows.iloc[0]['crdr'] == 'credit'
 
 
 class TestDisplay:

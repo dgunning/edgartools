@@ -437,52 +437,78 @@ class ConceptGraph:
         """
         Validate calculation trees by checking if children sum to parent.
 
+        Recursively walks the full calculation tree for every statement role,
+        checking every parent-children relationship — not just roots.
+
         Returns a list of validation results, each with:
-            - parent: Concept
-            - expected: parent value
-            - computed: sum of children
-            - difference: expected - computed
-            - valid: True if within tolerance
+            - parent: Concept (the parent being checked)
+            - role: str (report short name)
+            - expected: float (parent's value)
+            - computed: float (weighted sum of children)
+            - difference: float (expected - computed)
+            - valid: bool (True if within tolerance)
         """
         results = []
-        # Find all calculation roots across statement roles
         statement_reports = self._metalinks.get_reports_by_category('Statements')
         for meta_report in statement_reports:
+            visited = set()
             roots = self._metalinks.get_calculation_roots(meta_report.role)
             for root_tag in roots:
-                root_concept = self._get_or_create_concept(root_tag.tag_id)
-                if not root_concept or not root_concept.value:
-                    continue
-                parent_val = parse_numeric(root_concept.value)
-                if parent_val is None:
-                    continue
-                children = self._metalinks.get_calculation_children(root_tag.tag_id, meta_report.role)
-                child_sum = 0.0
-                all_parsed = True
-                for child_tag in children:
-                    child_concept = self._get_or_create_concept(child_tag.tag_id)
-                    if not child_concept or not child_concept.value:
-                        all_parsed = False
-                        break
-                    child_val = parse_numeric(child_concept.value)
-                    if child_val is None:
-                        all_parsed = False
-                        break
-                    entry = child_tag.calculation_in(meta_report.role)
-                    weight = entry.weight if entry else 1.0
-                    child_sum += child_val * weight
-                if not all_parsed:
-                    continue
-                diff = parent_val - child_sum
-                results.append({
-                    'parent': root_concept,
-                    'role': meta_report.short_name,
-                    'expected': parent_val,
-                    'computed': child_sum,
-                    'difference': diff,
-                    'valid': abs(diff) <= tolerance,
-                })
+                self._validate_recursive(
+                    root_tag.tag_id, meta_report.role, meta_report.short_name,
+                    tolerance, results, visited
+                )
         return results
+
+    def _validate_recursive(self, tag_id: str, role: str, role_name: str,
+                            tolerance: float, results: list, visited: set):
+        """Recursively validate a concept and all its calculation descendants."""
+        if tag_id in visited:
+            return
+        visited.add(tag_id)
+
+        children_tags = self._metalinks.get_calculation_children(tag_id, role)
+        if not children_tags:
+            return  # Leaf — nothing to validate
+
+        parent_concept = self._get_or_create_concept(tag_id)
+        if not parent_concept:
+            return
+        parent_val = parent_concept.numeric_value
+        if parent_val is None:
+            return
+
+        child_sum = 0.0
+        all_parsed = True
+        for child_tag in children_tags:
+            child_concept = self._get_or_create_concept(child_tag.tag_id)
+            if not child_concept:
+                all_parsed = False
+                break
+            child_val = child_concept.numeric_value
+            if child_val is None:
+                all_parsed = False
+                break
+            entry = child_tag.calculation_in(role)
+            weight = entry.weight if entry else 1.0
+            child_sum += child_val * weight
+
+        if all_parsed:
+            diff = parent_val - child_sum
+            results.append({
+                'parent': parent_concept,
+                'role': role_name,
+                'expected': parent_val,
+                'computed': child_sum,
+                'difference': diff,
+                'valid': abs(diff) <= tolerance,
+            })
+
+        # Recurse into children
+        for child_tag in children_tags:
+            self._validate_recursive(
+                child_tag.tag_id, role, role_name, tolerance, results, visited
+            )
 
     # --- Stats ---
 
@@ -500,6 +526,55 @@ class ConceptGraph:
         self._ensure_concept_rows_built()
         return sum(1 for rows in self._concept_to_rows.values()
                    if any(r.values for r in rows))
+
+    def to_dataframe(self, category: Optional[str] = None):
+        """
+        Export concepts with values as a pandas DataFrame.
+
+        Args:
+            category: Optional filter — 'Statements', 'Notes', 'Details', etc.
+
+        Returns:
+            DataFrame with columns: concept_id, label, crdr, value, numeric_value, report
+        """
+        import pandas as pd
+        rows = []
+        self._ensure_concept_rows_built()
+
+        # Determine which report keys to include
+        if category:
+            target_keys = {
+                rkey for rkey, meta in self._report_key_to_meta.items()
+                if meta.menu_cat == category
+            }
+        else:
+            target_keys = set(self._concept_reports.keys())
+
+        seen = set()
+        for rkey in target_keys:
+            report = self._concept_reports.get(rkey)
+            if not report:
+                continue
+            meta = self._report_key_to_meta.get(rkey)
+            report_name = meta.short_name if meta else rkey
+            for crow in report.rows:
+                if crow.is_abstract or crow.is_dimensional:
+                    continue
+                row_key = (crow.concept_id, rkey)
+                if row_key in seen:
+                    continue
+                seen.add(row_key)
+                tag = self._metalinks.get_tag(crow.concept_id)
+                rows.append({
+                    'concept_id': crow.concept_id,
+                    'label': crow.label,
+                    'crdr': tag.crdr if tag else None,
+                    'value': crow.numeric_value,
+                    'display_value': next(iter(crow.values.values()), None) if crow.values else None,
+                    'report': report_name,
+                })
+
+        return pd.DataFrame(rows)
 
     def __len__(self):
         return self.tag_count
