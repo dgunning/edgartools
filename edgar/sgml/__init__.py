@@ -1,3 +1,4 @@
+from edgar.sgml.concept_extractor import ConceptReport, ConceptRow, extract_concepts_from_report
 from edgar.sgml.filing_summary import FilingSummary, Report, Reports, Statements
 from edgar.sgml.metalinks import MetaLinks, TagDefinition
 from edgar.sgml.sgml_common import FilingSGML, iter_documents, list_documents
