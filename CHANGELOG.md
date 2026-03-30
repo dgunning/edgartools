@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.28.0] - 2026-03-30
+
+### Added
+
+- **FilingViewer — SEC Interactive Data Viewer** — New `FilingViewer` class provides access to the SEC's interactive XBRL viewer for any filing. Parses MetaLinks.json for concept-level metadata, extracts R*.htm viewer reports, and exposes structured period headers, numeric values, and scaling information
+
+- **ConceptGraph — navigable XBRL knowledge graph** — New `ConceptGraph` class builds a traversable graph of XBRL concepts and their relationships, enabling structured navigation across the taxonomy hierarchy
+
+- **BDC non-accrual extraction** — New `extract_nonaccrual()` function in `edgar.bdc.nonaccrual` extracts non-accrual investment data from BDC XBRL filings using three layered strategies: XBRL footnotes (investment-level detail), custom XBRL concepts (rate only), and standard us-gaap aggregate fallback
+
+- **to_markdown() for LLM drill-down** — Notes, disclosures, and financial drill-down objects now expose `to_markdown()` for LLM-optimized output ([#732](https://github.com/dgunning/edgartools/issues/732))
+
+- **compare_context() for LLM-based validation** — New method on XBRL objects for cross-validating parsed values against SEC viewer output using an LLM judge
+
+- **Cross-validation bridge between SEC Viewer and XBRL parser** — `FilingViewer` and the XBRL parser can now be reconciled programmatically, with `to_dataframe()` and diagnostic outputs for systematic validation
+
+- **MetaLinks.json parser** — Full parser for the SEC XBRL viewer's MetaLinks.json metadata file, exposing concept-level role, label, and calculation arc data
+
+### Fixed
+
+- **Abbreviations and inline spacing preserved in iXBRL text extraction** — Text extraction from iXBRL documents no longer splits abbreviations like `U.S.` into `U. S.` or `D.C.` into `D. C.`. Affects all inline XBRL filings ([#734](https://github.com/dgunning/edgartools/issues/734))
+
+- **TOC part metadata parsing** — Table of contents part metadata is now correctly extracted ([#737](https://github.com/dgunning/edgartools/issues/737)) — contributed by external PR
+
+- **Ruff code quality: 533 issues resolved** — Full codebase pass fixing lint, f-string, and style issues including a `LinkBlock.get_text()` f-string bug ([#740](https://github.com/dgunning/edgartools/issues/740))
+
+### Documentation
+
+- New SEC Viewer guide with full API reference for `FilingViewer` and `ConceptGraph`
+- BDC guide updated with non-accrual analysis section and examples
+- AI integration docs updated with expanded `to_context()` and `to_markdown()` coverage
+
 ## [5.27.0] - 2026-03-28
 
 ### Added
