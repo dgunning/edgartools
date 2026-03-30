@@ -343,9 +343,21 @@ class DocumentBuilder:
                 text_node.set_metadata('original_tag', tag)
                 return text_node
 
-        elif tag in ['ix:nonNumeric', 'ix:continuation']:
-            # IXBRL elements that can contain complex content including tables
-            # Process as container to allow proper table parsing
+        elif tag in ['ix:nonnumeric', 'ix:continuation']:
+            # IXBRL elements can contain simple inline text (e.g., "S." in "U.S.")
+            # or complex content including tables. Treat as inline when simple,
+            # as container when complex to preserve table structure.
+            has_block_children = any(
+                child.tag in self.BLOCK_ELEMENTS or child.tag in ('table', 'div', 'p')
+                for child in element if hasattr(child, 'tag')
+            )
+            if not has_block_children:
+                text = self._get_element_text(element)
+                if text:
+                    text_node = TextNode(content=text, style=style)
+                    text_node.set_metadata('original_tag', tag)
+                    text_node.set_metadata('inline', True)
+                    return text_node
             return ContainerNode(tag_name=tag, style=style)
 
         # Default: create container for unknown elements

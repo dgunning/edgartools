@@ -52,7 +52,11 @@ class HTMLPreprocessor:
             # Whitespace normalization
             'multiple_spaces': re.compile(r'[ \t]+'),
             'multiple_newlines': re.compile(r'\n{3,}'),
-            'spaces_around_tags': re.compile(r'\s*(<[^>]+>)\s*'),
+            # Whitespace around tags: preserve spaces between adjacent tags (word boundaries)
+            # but strip spaces between text content and tag boundaries
+            'spaces_between_tags': re.compile(r'(?<=>)\s+(?=<)'),
+            'spaces_before_tags': re.compile(r'(?<!>)\s+(?=<)'),
+            'spaces_after_tags': re.compile(r'(?<=>)\s+(?!<)'),
 
             # Block element newlines - combined pattern for opening tags
             'block_open_tags': re.compile(
@@ -78,7 +82,7 @@ class HTMLPreprocessor:
             # Common issues
             'multiple_br': re.compile(r'(<br\s*/?>[\s\n]*){3,}', re.IGNORECASE),
             'space_before_punct': re.compile(r'\s+([.,;!?])'),
-            'missing_space_after_punct': re.compile(r'([.,;!?])([A-Z])'),
+            'missing_space_after_punct': re.compile(r'(?<=\w{2})([.!?])([A-Z])'),
         }
 
     def process(self, html: str) -> str:
@@ -203,8 +207,12 @@ class HTMLPreprocessor:
         # Replace multiple newlines with double newline
         html = self._compiled_patterns['multiple_newlines'].sub('\n\n', html)
 
-        # Remove spaces around tags
-        html = self._compiled_patterns['spaces_around_tags'].sub(r'\1', html)
+        # Normalize whitespace around tags:
+        # 1. Collapse whitespace between adjacent tags to single space (preserves word boundaries)
+        # 2. Strip whitespace between text content and tags
+        html = self._compiled_patterns['spaces_between_tags'].sub(' ', html)
+        html = self._compiled_patterns['spaces_before_tags'].sub('', html)
+        html = self._compiled_patterns['spaces_after_tags'].sub('', html)
 
         # Add newlines around block elements for readability
         # Using combined patterns instead of looping over individual tags

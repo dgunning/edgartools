@@ -330,9 +330,11 @@ class TextExtractor:
 
         # Fix spacing around punctuation
         text = re.sub(r'\s+([.,;!?])', r'\1', text)
-        # Add space after punctuation only when followed by a letter (not digits)
-        # This preserves item numbers like "Item 2.02" and decimals like "100.5"
-        text = re.sub(r'([.,;!?])(?=[A-Za-z])', r'\1 ', text)
+        # Add space after comma/semicolon followed by any letter
+        text = re.sub(r'([,;])([A-Za-z])', r'\1 \2', text)
+        # Add space after sentence-ending punctuation followed by a capital letter,
+        # but only when preceded by 2+ word chars (to preserve abbreviations like U.S., D.C.)
+        text = re.sub(r'(?<=\w{2})([.!?])([A-Z])', r'\1 \2', text)
 
         # Remove extra spaces
         text = re.sub(r' {2,}', ' ', text)
