@@ -40,7 +40,7 @@ class TokenOptimizer:
 
         # Define priority order for content retention
         priority_keys = [
-            'concept', 'value', 'period', 'context', 
+            'concept', 'value', 'period', 'context',
             'quality', 'confidence', 'source'
         ]
 
@@ -160,7 +160,7 @@ class AIEnabled(ABC):
     """
 
     @abstractmethod
-    def to_llm_context(self, detail_level: str = 'standard', 
+    def to_llm_context(self, detail_level: str = 'standard',
                       max_tokens: Optional[int] = None) -> Dict[str, Any]:
         """
         Convert object to LLM-optimized context.
@@ -229,7 +229,7 @@ def enhance_financial_fact_llm_context(fact, detail_level='standard', max_tokens
 
         # Add value interpretation
         interpretation = SemanticEnricher.interpret_value(
-            fact.concept, 
+            fact.concept,
             fact.numeric_value or fact.value,
             fact.unit,
             fact.period_type

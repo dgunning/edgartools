@@ -1082,7 +1082,7 @@ class StatementResolver:
 
         return [], None, 0.0
 
-    def find_statement(self, statement_type: str, is_parenthetical: bool = False, 
+    def find_statement(self, statement_type: str, is_parenthetical: bool = False,
                       category_filter: Optional[StatementCategory] = None) -> Tuple[List[Dict[str, Any]], Optional[str], str, float]:
         """
         Find a statement by type, with multi-layered fallback approach.

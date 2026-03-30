@@ -12,7 +12,7 @@ from edgar.documents.table_nodes import TableNode
 class MarkdownRenderer:
     """
     Renders parsed documents to Markdown format.
-    
+
     Features:
     - Preserves document structure
     - Handles tables with proper formatting
@@ -29,7 +29,7 @@ class MarkdownRenderer:
                  wrap_width: Optional[int] = None):
         """
         Initialize markdown renderer.
-        
+
         Args:
             include_metadata: Include metadata annotations
             include_toc: Generate table of contents
@@ -52,10 +52,10 @@ class MarkdownRenderer:
     def render(self, document: Document) -> str:
         """
         Render document to Markdown.
-        
+
         Args:
             document: Document to render
-            
+
         Returns:
             Markdown formatted text
         """
@@ -91,10 +91,10 @@ class MarkdownRenderer:
     def render_node(self, node: Node) -> str:
         """
         Render a specific node to Markdown.
-        
+
         Args:
             node: Node to render
-            
+
         Returns:
             Markdown formatted text
         """
@@ -372,7 +372,7 @@ class MarkdownRenderer:
         # Join with appropriate separator
         if self._in_table:
             return " ".join(parts)
-        elif any(isinstance(child, (HeadingNode, ParagraphNode, TableNode, ListNode)) 
+        elif any(isinstance(child, (HeadingNode, ParagraphNode, TableNode, ListNode))
                 for child in node.children):
             return "\n\n".join(parts)
         else:
@@ -520,7 +520,7 @@ class MarkdownRenderer:
 
         return expanded[:target_columns]
 
-    def _identify_content_columns(self, expanded_headers: List[List[str]], 
+    def _identify_content_columns(self, expanded_headers: List[List[str]],
                                  expanded_data_rows: List[List[str]]) -> List[int]:
         """Identify which columns actually contain meaningful content."""
         if not expanded_headers and not expanded_data_rows:
@@ -584,7 +584,7 @@ class MarkdownRenderer:
                     combined[col] = column_values[0].replace('\n', ' ')
                 else:
                     # Skip generic terms like "Year Ended" if we have something more specific
-                    specific_values = [v for v in column_values 
+                    specific_values = [v for v in column_values
                                      if v.lower() not in ['year ended', 'years ended']]
                     if specific_values:
                         combined[col] = specific_values[0].replace('\n', ' ')

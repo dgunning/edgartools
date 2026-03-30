@@ -71,7 +71,7 @@ def validate_canonical_source(source_dir: Path) -> Dict:
                     with open(filepath) as f:
                         data = json.load(f)
                         count = len(data)
-                except:
+                except (OSError, json.JSONDecodeError, ValueError):
                     pass
             results['files'][filename] = {
                 'exists': True,
@@ -226,7 +226,7 @@ def list_available(canonical_source: Path, industry_source: Path):
     available = get_available_industry_extensions(industry_source)
     if not available:
         print("  No industry extensions found.")
-        print(f"\n  Run learning first:")
+        print("\n  Run learning first:")
         print("    python -m edgar.entity.training.run_industry_learning --industry banking")
     else:
         for industry, info in available.items():

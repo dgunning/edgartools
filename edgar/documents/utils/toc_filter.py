@@ -10,23 +10,23 @@ import re
 def filter_toc_links(text: str) -> str:
     """
     Filter out repetitive navigation links from text.
-    
+
     This replicates the old parser's behavior of removing repetitive
     navigation links that appear throughout SEC filings.
-    
+
     Based on analysis of 12+ SEC filings across different companies:
     - Average of 47.9 "Table of Contents" links per filing (575 total found)
     - Oracle 10-K shows 230 "Index to Financial Statements" vs 83 in old parser
     - Safe to filter without losing legitimate content
-    
+
     Patterns filtered:
     - "Table of Contents" (exact match)
-    - "Index to Financial Statements"  
+    - "Index to Financial Statements"
     - "Index to Exhibits"
-    
+
     Args:
         text: Input text to filter
-        
+
     Returns:
         Text with navigation links removed
     """
@@ -38,7 +38,7 @@ def filter_toc_links(text: str) -> str:
         r'^Table of Contents$',
         r'^INDEX TO FINANCIAL STATEMENTS$',
         r'^Index to Financial Statements$',
-        r'^INDEX TO EXHIBITS$', 
+        r'^INDEX TO EXHIBITS$',
         r'^Index to Exhibits$',
     ]
 
@@ -59,10 +59,10 @@ def filter_toc_links(text: str) -> str:
 def get_toc_link_stats(text: str) -> dict:
     """
     Get statistics about navigation links in text for debugging/analysis.
-    
+
     Args:
         text: Input text to analyze
-        
+
     Returns:
         Dict with counts and examples of navigation patterns
     """
@@ -72,7 +72,7 @@ def get_toc_link_stats(text: str) -> dict:
     # All navigation patterns we filter
     patterns = {
         'Table of Contents': re.compile(r'^Table of Contents$', re.IGNORECASE),
-        'Index to Financial Statements': re.compile(r'^Index to Financial Statements$', re.IGNORECASE), 
+        'Index to Financial Statements': re.compile(r'^Index to Financial Statements$', re.IGNORECASE),
         'Index to Exhibits': re.compile(r'^Index to Exhibits$', re.IGNORECASE),
     }
 

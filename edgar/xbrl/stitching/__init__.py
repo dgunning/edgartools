@@ -1,8 +1,8 @@
 """
 XBRL Statement Stitching Package
 
-This package provides functionality to combine multiple XBRL statements 
-across different time periods into a unified view, handling concept 
+This package provides functionality to combine multiple XBRL statements
+across different time periods into a unified view, handling concept
 consistency issues and normalizing data representation.
 """
 
@@ -16,7 +16,7 @@ from edgar.xbrl.stitching.xbrls import XBRLS
 
 __all__ = [
     'XBRLS',
-    'StatementStitcher', 
+    'StatementStitcher',
     'stitch_statements',
     'determine_optimal_periods',
     'render_stitched_statement',

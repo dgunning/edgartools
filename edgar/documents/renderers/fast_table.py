@@ -90,7 +90,7 @@ class TableStyle:
 class FastTableRenderer:
     """
     High-performance table renderer optimized for speed.
-    
+
     Features:
     - 30x+ faster than Rich table rendering
     - Professional, readable output
@@ -212,7 +212,7 @@ class FastTableRenderer:
     def _combine_headers(self, headers: List[List[str]]) -> List[str]:
         """
         Combine multi-row headers intelligently.
-        
+
         For SEC tables, this prioritizes specific dates/periods over generic labels.
         """
         if not headers:
@@ -241,7 +241,7 @@ class FastTableRenderer:
                     combined[col] = values[0]
                 else:
                     # Skip generic terms like "Year Ended" if we have something more specific
-                    specific_values = [v for v in values 
+                    specific_values = [v for v in values
                                      if v.lower() not in {'year ended', 'years ended', 'period ended'}]
                     combined[col] = specific_values[0] if specific_values else values[0]
 
@@ -267,7 +267,7 @@ class FastTableRenderer:
     def _identify_meaningful_columns(self, all_rows: List[List[str]], max_cols: int) -> List[int]:
         """
         Identify columns that contain meaningful content (not just spacing).
-        
+
         Returns:
             List of column indices that have meaningful content
         """
@@ -318,11 +318,11 @@ class FastTableRenderer:
     def _filter_row_to_columns(self, row: List[str], column_indices: List[int]) -> List[str]:
         """
         Filter a row to only include the specified column indices.
-        
+
         Args:
             row: Original row data
             column_indices: List of column indices to keep
-            
+
         Returns:
             Filtered row with only the specified columns
         """
@@ -341,7 +341,7 @@ class FastTableRenderer:
     def _merge_related_columns(self, headers: List[str], rows: List[List[str]]) -> tuple:
         """
         Merge related columns (e.g., currency symbols with their amounts).
-        
+
         Returns:
             Tuple of (merged_headers, merged_rows)
         """
@@ -394,7 +394,7 @@ class FastTableRenderer:
     def _should_merge_columns(self, headers: List[str], rows: List[List[str]], left_idx: int, right_idx: int) -> bool:
         """
         Determine if two adjacent columns should be merged.
-        
+
         Returns:
             True if columns should be merged
         """
@@ -531,7 +531,7 @@ class FastTableRenderer:
 
         return '\n'.join(lines)
 
-    def _format_row(self, row: List[str], col_widths: List[int], 
+    def _format_row(self, row: List[str], col_widths: List[int],
                    alignments: List[Alignment]) -> str:
         """Format a single row with proper alignment and padding."""
         cells = []
@@ -641,10 +641,10 @@ class FastTableRenderer:
 def create_fast_renderer(style: str = "pipe") -> FastTableRenderer:
     """
     Create a FastTableRenderer with predefined style.
-    
+
     Args:
         style: Style name ("pipe", "minimal")
-    
+
     Returns:
         Configured FastTableRenderer instance
     """
@@ -657,11 +657,11 @@ def create_fast_renderer(style: str = "pipe") -> FastTableRenderer:
 def render_table_fast(table_node, style: str = "pipe") -> str:
     """
     Convenience function to quickly render a table.
-    
+
     Args:
         table_node: TableNode instance
         style: Style name ("pipe", "minimal")
-    
+
     Returns:
         Formatted table string
     """

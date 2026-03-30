@@ -47,14 +47,14 @@ __all__ = [
 def parse_html(html: str, config: Optional[ParserConfig] = None) -> Document:
     """
     Convenience function for parsing HTML.
-    
+
     Args:
         html: HTML content to parse
         config: Optional parser configuration
-        
+
     Returns:
         Parsed Document object
-        
+
     Example:
         >>> document = parse_html(html_content)
         >>> print(document.text()[:100])

@@ -411,8 +411,8 @@ class Entity(SecFiler):
         Get the entity's filings and optionally filter by multiple criteria.
 
         This method has a special behavior for loading filings. When first called,
-        it only loads the most recent filings. If trigger_full_load=True, it will 
-        automatically fetch all historical filings from the SEC (potentially making 
+        it only loads the most recent filings. If trigger_full_load=True, it will
+        automatically fetch all historical filings from the SEC (potentially making
         multiple API calls) as needed.
 
         Args:
@@ -483,7 +483,7 @@ class Entity(SecFiler):
         except NoCompanyFactsFound:
             return None
 
-    def get_structured_statement(self, 
+    def get_structured_statement(self,
                                 statement_type: str,
                                 fiscal_year: Optional[int] = None,
                                 fiscal_period: Optional[str] = None,
@@ -919,7 +919,7 @@ class Company(Entity):
 
     @property
     def shares_outstanding(self) -> Optional[float]:
-        """Get the shares outstanding for this company.""" 
+        """Get the shares outstanding for this company."""
         facts = self.facts
         if facts:
             return facts.shares_outstanding

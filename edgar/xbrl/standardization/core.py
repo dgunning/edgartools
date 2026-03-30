@@ -721,7 +721,7 @@ class ConceptMapper:
         serializable_mappings = {}
         for std_concept, mappings in self.pending_mappings.items():
             serializable_mappings[std_concept] = [
-                {"concept": c, "confidence": conf, "label": lbl} 
+                {"concept": c, "confidence": conf, "label": lbl}
                 for c, conf, lbl in mappings
             ]
 
@@ -1100,13 +1100,13 @@ def create_default_mappings_file(file_path: str) -> None:
     # Create a minimal set of mappings to get started
     minimal_mappings = {
         StandardConcept.REVENUE.value: [
-            "us-gaap_Revenue", 
+            "us-gaap_Revenue",
             "us-gaap_SalesRevenueNet",
             "us-gaap_Revenues"
         ],
         StandardConcept.NET_INCOME.value: [
             "us-gaap_NetIncome",
-            "us-gaap_NetIncomeLoss", 
+            "us-gaap_NetIncomeLoss",
             "us-gaap_ProfitLoss"
         ],
         StandardConcept.TOTAL_ASSETS.value: [

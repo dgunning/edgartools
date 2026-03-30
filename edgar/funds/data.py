@@ -1,7 +1,7 @@
 """
 Data structures and functions for working with fund data.
 
-This module provides the FundData class and related functions for 
+This module provides the FundData class and related functions for
 accessing and manipulating fund data.
 """
 import logging
@@ -118,10 +118,10 @@ def parse_fund_data(series_sgml_data: str) -> pd.DataFrame:
 
     # Rename columns for consistency
     return (df.rename(columns={
-            "OWNER-CIK": "CIK", 
-            "SERIES-ID": "SeriesID", 
+            "OWNER-CIK": "CIK",
+            "SERIES-ID": "SeriesID",
             "SERIES-NAME": "Fund",
-            "CLASS-CONTRACT-ID": "ContractID", 
+            "CLASS-CONTRACT-ID": "ContractID",
             "CLASS-CONTRACT-NAME": "Class",
             "CLASS-CONTRACT-TICKER-SYMBOL": "Ticker"
         })
@@ -261,7 +261,7 @@ class _FundClassOrSeries:
     """
     Internal base class for fund classes and series.
 
-    Not part of the public API - use the FundClass and FundSeries classes 
+    Not part of the public API - use the FundClass and FundSeries classes
     from edgar.funds.core instead.
     """
     _SENTINEL = object()
@@ -834,8 +834,8 @@ def get_fund_information(header):
         # Try our direct implementation first
         header_text = header.text
         series_and_classes_contracts_text = re.search(
-            r'<SERIES-AND-CLASSES-CONTRACTS-DATA>(.*?)</SERIES-AND-CLASSES-CONTRACTS-DATA>', 
-            header_text, 
+            r'<SERIES-AND-CLASSES-CONTRACTS-DATA>(.*?)</SERIES-AND-CLASSES-CONTRACTS-DATA>',
+            header_text,
             re.DOTALL
         )
 

@@ -76,7 +76,7 @@ def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
 
 def apply_split_adjustments(facts: List[FinancialFact], splits: List[Dict[str, Any]]) -> List[FinancialFact]:
     """Apply retrospective split adjustments to per-share and share-count facts.
-    
+
     Adjusts:
     - Per-share metrics (EPS, Dividend/Share): Divided by cumulative ratio
     - Share counts (Shares Outstanding): Multiplied by cumulative ratio
@@ -127,9 +127,9 @@ def apply_split_adjustments(facts: List[FinancialFact], splits: List[Dict[str, A
         # Clone and replace
         # Note: We depend on FinancialFact being a dataclass or having replace method
         try:
-            new_f = replace(f, 
-                            value=new_val, 
-                            numeric_value=new_val, 
+            new_f = replace(f,
+                            value=new_val,
+                            numeric_value=new_val,
                             calculation_context=f"split_adj_ratio_{cum_ratio:.2f}")
             adjusted_facts.append(new_f)
         except TypeError:

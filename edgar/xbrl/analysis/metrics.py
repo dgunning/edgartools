@@ -129,7 +129,7 @@ class AltmanZScore(FinancialMetrics):
         revenue = self._get_value(StandardConcept.REVENUE, "IncomeStatement")
 
         # Check if we have all required values
-        if not all([working_capital, total_assets, retained_earnings, ebit, 
+        if not all([working_capital, total_assets, retained_earnings, ebit,
                     market_value, total_liabilities, revenue]):
             return None
 
@@ -189,7 +189,7 @@ class BeneishMScore(FinancialMetrics):
     def calculate(self) -> Optional[MetricResult]:
         """Calculate Beneish M-Score.
 
-        M-Score = -4.84 + 0.92*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI 
+        M-Score = -4.84 + 0.92*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI
                   - 0.172*SGAI + 4.679*TATA - 0.327*LVGI
 
         where:

@@ -218,18 +218,18 @@ class TTMStatementBuilder:
         max_periods: int = 8
     ) -> TTMStatement:
         """Internal helper to build shared TTM statement logic.
-        
+
         Args:
             statement_method: Bound method to get multi-period statement (e.g. self.facts.income_statement)
             statement_type: Type label for the TTM statement
             as_of: TTM calculation date
-            
+
         Returns:
             Constructed TTMStatement
 
         """
         # Get multi-period statement to get structure
-        # We always fetch at least 8 periods to ensure enough quarters are available 
+        # We always fetch at least 8 periods to ensure enough quarters are available
         # to calculate a trailing 4-quarter rolling sum for TTM calculation.
         multi_period = statement_method(periods=max(max_periods, 8), annual=False)
 

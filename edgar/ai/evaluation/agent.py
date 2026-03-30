@@ -1045,7 +1045,7 @@ def main():
                 print(f"  [{status}] {tc.name}({json.dumps(tc.arguments)[:80]})")
             print(f"\nFinal answer ({len(result.trace.final_answer)} chars):")
             print(result.trace.final_answer[:1000])
-            print(f"\nScores:")
+            print("\nScores:")
             print(f"  Tool Selection: {result.score.tool_selection:.3f}")
             print(f"  Answer Quality: {result.score.answer_quality:.3f}")
             print(f"  Efficiency:     {result.score.efficiency:.3f}")

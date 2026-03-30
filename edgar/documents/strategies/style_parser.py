@@ -12,7 +12,7 @@ from edgar.documents.utils import get_cache_manager
 class StyleParser:
     """
     Parser for CSS style attributes.
-    
+
     Handles inline styles and converts them to Style objects.
     """
 
@@ -35,10 +35,10 @@ class StyleParser:
     def parse(self, style_string: str) -> Style:
         """
         Parse CSS style string into Style object.
-        
+
         Args:
             style_string: CSS style string (e.g., "font-size: 14px; color: red")
-            
+
         Returns:
             Parsed Style object
         """
@@ -334,11 +334,11 @@ class StyleParser:
     def merge_styles(self, base: Style, override: Style) -> Style:
         """
         Merge two styles with override taking precedence.
-        
+
         Args:
             base: Base style
             override: Override style
-            
+
         Returns:
             Merged style
         """

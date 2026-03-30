@@ -132,8 +132,8 @@ class FinancialFact:
         """
         Generate a display-friendly period key based on actual period dates.
 
-        This method creates period keys like "Q1 2024" based on the actual period 
-        covered by the data, not the filing year. It uses the period_end date to 
+        This method creates period keys like "Q1 2024" based on the actual period
+        covered by the data, not the filing year. It uses the period_end date to
         determine the calendar year and quarter.
 
         Returns:

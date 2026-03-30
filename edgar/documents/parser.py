@@ -24,7 +24,7 @@ from edgar.documents.utils.html_utils import create_lxml_parser, remove_xml_decl
 class HTMLParser:
     """
     Main HTML parser class.
-    
+
     Orchestrates the parsing pipeline with configurable strategies
     and processors.
     """
@@ -32,7 +32,7 @@ class HTMLParser:
     def __init__(self, config: Optional[ParserConfig] = None):
         """
         Initialize parser with configuration.
-        
+
         Args:
             config: Parser configuration
         """
@@ -80,13 +80,13 @@ class HTMLParser:
     def parse(self, html: Union[str, bytes]) -> Document:
         """
         Parse HTML into Document.
-        
+
         Args:
             html: HTML content as string or bytes
-            
+
         Returns:
             Parsed Document object
-            
+
         Raises:
             DocumentTooLargeError: If document exceeds size limit
             HTMLParsingError: If parsing fails
@@ -331,10 +331,10 @@ class HTMLParser:
     def parse_file(self, file_path: str) -> Document:
         """
         Parse HTML from file.
-        
+
         Args:
             file_path: Path to HTML file
-            
+
         Returns:
             Parsed Document object
         """
@@ -349,10 +349,10 @@ class HTMLParser:
     def parse_url(self, url: str) -> Document:
         """
         Parse HTML from URL.
-        
+
         Args:
             url: URL to fetch and parse
-            
+
         Returns:
             Parsed Document object
         """

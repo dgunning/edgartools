@@ -1,7 +1,7 @@
 """
 Section extraction for SEC filings using Table of Contents analysis.
 
-This system uses TOC structure to extract specific sections like "Item 1", 
+This system uses TOC structure to extract specific sections like "Item 1",
 "Item 1A", etc. from SEC filings. This approach works consistently across
 all SEC filings regardless of whether they use semantic anchors or generated IDs.
 """
@@ -36,7 +36,7 @@ class SectionBoundary:
 class SECSectionExtractor:
     """
     Extract specific sections from SEC filings using Table of Contents analysis.
-    
+
     This uses TOC structure to identify section boundaries and extract content
     between them. Works consistently for all SEC filings.
     """
@@ -51,7 +51,7 @@ class SECSectionExtractor:
     def _analyze_sections(self) -> None:
         """
         Analyze the document using TOC structure to identify section boundaries.
-        
+
         This creates a map of section names to their anchor positions using
         Table of Contents analysis, which works for all SEC filings.
         """
@@ -66,7 +66,7 @@ class SECSectionExtractor:
         if not toc_mapping:
             return  # No sections found
 
-        # Handle XML declaration issues  
+        # Handle XML declaration issues
         if html_content.startswith('<?xml'):
             html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
 
@@ -124,11 +124,11 @@ class SECSectionExtractor:
     def get_available_sections(self) -> List[str]:
         """
         Get list of available sections that can be extracted.
-        
+
         Returns:
             List of section names
         """
-        return sorted(self.section_boundaries.keys(), 
+        return sorted(self.section_boundaries.keys(),
                      key=lambda x: self.section_boundaries[x].anchor_id)
 
     def get_section_text(self, section_name: str,
@@ -399,7 +399,7 @@ class SECSectionExtractor:
         search_start = start_pos + len(match.group())
 
         # Find next ITEM or PART header
-        next_item_pattern = rf'ITEM[\s&#;0-9xnbsp]*\d+[A-Z]?\.?\s*[A-Z]'
+        next_item_pattern = r'ITEM[\s&#;0-9xnbsp]*\d+[A-Z]?\.?\s*[A-Z]'
         next_match = re.search(next_item_pattern, html_content[search_start:], re.IGNORECASE)
 
         if next_match:
@@ -456,10 +456,10 @@ class SECSectionExtractor:
     def get_section_info(self, section_name: str) -> Optional[Dict]:
         """
         Get detailed information about a section.
-        
+
         Args:
             section_name: Section name to look up
-            
+
         Returns:
             Dict with section metadata
         """

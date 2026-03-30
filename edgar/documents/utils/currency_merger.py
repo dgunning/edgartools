@@ -12,11 +12,11 @@ from edgar.documents.utils.table_matrix import MatrixCell, TableMatrix
 class CurrencyColumnMerger:
     """
     Detects and merges currency symbol columns with their value columns.
-    
+
     SEC filings often split currency values into two cells:
     - Cell 1: "$" (left-aligned)
     - Cell 2: "224.11" (right-aligned)
-    
+
     This class detects this pattern and merges them into "$224.11"
     """
 
@@ -34,7 +34,7 @@ class CurrencyColumnMerger:
     def detect_currency_pairs(self) -> List[Tuple[int, int]]:
         """
         Detect column pairs that should be merged (currency symbol + value).
-        
+
         Returns:
             List of (symbol_col, value_col) pairs to merge
         """
@@ -54,7 +54,7 @@ class CurrencyColumnMerger:
     def _is_currency_column(self, col_idx: int) -> bool:
         """
         Check if a column contains only currency symbols.
-        
+
         A currency column typically:
         - Contains only currency symbols or empty cells
         - Has very narrow width (1-3 characters)
@@ -71,7 +71,7 @@ class CurrencyColumnMerger:
                 text = cell.original_cell.text().strip()
 
                 # Skip header rows (first 2 rows typically)
-                if row_idx < 2 and text and not text in self.CURRENCY_SYMBOLS:
+                if row_idx < 2 and text and text not in self.CURRENCY_SYMBOLS:
                     header_rows += 1
                     continue
 
@@ -128,7 +128,7 @@ class CurrencyColumnMerger:
     def _verify_pairing(self, symbol_col: int, value_col: int) -> bool:
         """
         Verify that symbol and value columns are consistently paired.
-        
+
         They should have content in the same rows (when symbol present, value present).
         """
         paired_rows = 0
@@ -164,7 +164,7 @@ class CurrencyColumnMerger:
     def apply_merges(self) -> 'TableMatrix':
         """
         Create a new matrix with currency columns merged.
-        
+
         Returns:
             New TableMatrix with merged columns
         """
@@ -245,7 +245,7 @@ class CurrencyColumnMerger:
     def _merge_cell_content(self, symbol_cell: MatrixCell, value_cell: MatrixCell) -> str:
         """
         Merge symbol and value cell contents.
-        
+
         Returns:
             Merged content like "$224.11" or original value if no symbol
         """

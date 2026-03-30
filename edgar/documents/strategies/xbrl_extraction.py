@@ -12,7 +12,7 @@ from edgar.documents.types import XBRLFact
 class XBRLExtractor:
     """
     Extracts XBRL facts from inline XBRL (iXBRL) documents.
-    
+
     Handles:
     - ix:nonFraction, ix:nonNumeric facts
     - Context and unit resolution
@@ -47,10 +47,10 @@ class XBRLExtractor:
     def extract_context(self, element: HtmlElement) -> Optional[Dict[str, Any]]:
         """
         Extract XBRL context from element.
-        
+
         Args:
             element: HTML element that might contain XBRL
-            
+
         Returns:
             XBRL metadata if found
         """

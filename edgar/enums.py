@@ -3,7 +3,7 @@ Type definitions for EdgarTools parameters with limited value sets.
 
 This module provides StrEnum types for common EdgarTools parameters to enable:
 - IDE autocomplete and better developer experience
-- Parameter validation with helpful error messages  
+- Parameter validation with helpful error messages
 - Type safety while maintaining backwards compatibility
 
 Examples:
@@ -64,7 +64,7 @@ class FormType(StrEnum):
 
     # Most common periodic reports
     ANNUAL_REPORT = "10-K"
-    QUARTERLY_REPORT = "10-Q" 
+    QUARTERLY_REPORT = "10-Q"
     ANNUAL_REPORT_AMENDED = "10-K/A"
     QUARTERLY_REPORT_AMENDED = "10-Q/A"
 
@@ -84,7 +84,7 @@ class FormType(StrEnum):
 
     # Registration statements (most common)
     REGISTRATION_S1 = "S-1"
-    REGISTRATION_S3 = "S-3" 
+    REGISTRATION_S3 = "S-3"
     REGISTRATION_S4 = "S-4"
     REGISTRATION_S8 = "S-8"
 
@@ -129,7 +129,7 @@ class PeriodType(StrEnum):
     QUARTERLY = "quarterly"     # Quarterly reporting periods (3-month periods)
     MONTHLY = "monthly"         # Monthly reporting periods (rarely used)
 
-    # Special period types  
+    # Special period types
     TTM = "ttm"                # Trailing Twelve Months
     YTD = "ytd"                # Year to Date
 
@@ -151,7 +151,7 @@ class StatementType(StrEnum):
     # Primary financial statements (The Big Four)
     INCOME_STATEMENT = "income_statement"           # Profit & Loss Statement
     BALANCE_SHEET = "balance_sheet"                 # Statement of Financial Position
-    CASH_FLOW = "cash_flow_statement"              # Statement of Cash Flows  
+    CASH_FLOW = "cash_flow_statement"              # Statement of Cash Flows
     CHANGES_IN_EQUITY = "changes_in_equity"        # Statement of Changes in Equity
 
     # Comprehensive income statement
@@ -389,8 +389,8 @@ def fuzzy_match(value: str, valid_options: Set[str], threshold: float = 0.6) -> 
 
     # Get close matches using difflib with adjusted threshold
     matches = difflib.get_close_matches(
-        value_lower, 
-        [opt.lower() for opt in valid_options], 
+        value_lower,
+        [opt.lower() for opt in valid_options],
         n=3,  # Limit to top 3 to avoid overwhelming users
         cutoff=adjusted_threshold
     )
@@ -418,19 +418,19 @@ def _is_missing_hyphen(value: str, option: str) -> bool:
 
 def _is_missing_character(value: str, option: str) -> bool:
     """Check if value is missing exactly one character from option."""
-    return (len(value) == len(option) - 1 and 
+    return (len(value) == len(option) - 1 and
             all(char in option for char in value))
 
 
 def _is_extra_character(value: str, option: str) -> bool:
     """Check if value has exactly one extra character compared to option."""
-    return (len(value) == len(option) + 1 and 
+    return (len(value) == len(option) + 1 and
             all(char in value for char in option))
 
 
 def _is_single_substitution(value: str, option: str) -> bool:
     """Check if strings differ by exactly one character substitution."""
-    return (len(value) == len(option) and 
+    return (len(value) == len(option) and
             sum(c1 != c2 for c1, c2 in zip(value, option, strict=False)) == 1)
 
 
@@ -438,7 +438,7 @@ def _is_transposed_characters(value: str, option: str) -> bool:
     """Check if strings differ by exactly one pair of transposed adjacent characters."""
     if len(value) != len(option) or len(value) < 2:
         return False
-    return any(value[:i] + value[i+1] + value[i] + value[i+2:] == option 
+    return any(value[:i] + value[i+1] + value[i] + value[i+2:] == option
                for i in range(len(value)-1))
 
 
@@ -460,7 +460,7 @@ def detect_common_typos(value: str, valid_options: Set[str]) -> List[str]:
     typo_patterns = [
         (_is_case_mismatch, "case mismatch"),
         (_is_missing_hyphen, "missing hyphen"),
-        (_is_missing_character, "missing character"), 
+        (_is_missing_character, "missing character"),
         (_is_extra_character, "extra character"),
         (_is_single_substitution, "character substitution"),
         (_is_transposed_characters, "transposed characters")
@@ -478,8 +478,8 @@ def detect_common_typos(value: str, valid_options: Set[str]) -> List[str]:
     return suggestions[:3]  # Return top 3 suggestions
 
 
-def enhanced_validate(value: Any, 
-                     valid_options: Set[str], 
+def enhanced_validate(value: Any,
+                     valid_options: Set[str],
                      parameter_name: str,
                      enum_type: Optional[type] = None,
                      context_hint: Optional[str] = None) -> str:
@@ -581,8 +581,8 @@ def validate_form_type(form: Union[FormType, str]) -> str:
         TypeError: For wrong parameter types
     """
     return enhanced_validate(
-        form, 
-        _CACHED_FORM_TYPES, 
+        form,
+        _CACHED_FORM_TYPES,
         "form type",
         enum_type=FormType,
         context_hint="Common forms: '10-K' (annual), '10-Q' (quarterly), '8-K' (current report)."
@@ -604,8 +604,8 @@ def validate_period_type(period: Union[PeriodType, str]) -> str:
         TypeError: For wrong parameter types
     """
     return enhanced_validate(
-        period, 
-        _CACHED_PERIOD_TYPES, 
+        period,
+        _CACHED_PERIOD_TYPES,
         "period type",
         enum_type=PeriodType,
         context_hint="Common periods: 'annual' (full year), 'quarterly' (3 months), 'ttm' (trailing 12 months)."
@@ -627,8 +627,8 @@ def validate_statement_type(statement: Union[StatementType, str]) -> str:
         TypeError: For wrong parameter types
     """
     return enhanced_validate(
-        statement, 
-        _CACHED_STATEMENT_TYPES, 
+        statement,
+        _CACHED_STATEMENT_TYPES,
         "statement type",
         enum_type=StatementType,
         context_hint="Primary statements: 'income_statement' (P&L), 'balance_sheet' (financial position), 'cash_flow_statement' (cash movements)."
@@ -657,7 +657,7 @@ def _get_form_display_name(form: Union[FormType, str]) -> str:
 
 PERIODIC_FORMS = [
     FormType.ANNUAL_REPORT,
-    FormType.QUARTERLY_REPORT, 
+    FormType.QUARTERLY_REPORT,
     FormType.ANNUAL_REPORT_AMENDED,
     FormType.QUARTERLY_REPORT_AMENDED
 ]
@@ -730,7 +730,7 @@ ALL_PERIODS = [
 ]
 """
 Complete collection of all available period types.
-Includes standard reporting periods (annual, quarterly, monthly) and 
+Includes standard reporting periods (annual, quarterly, monthly) and
 special calculation periods (TTM, YTD).
 """
 
@@ -746,7 +746,7 @@ PRIMARY_STATEMENTS = [
 Collection of the four primary financial statements required by GAAP.
 These form the core of financial reporting and analysis:
 - Income Statement: Revenue, expenses, and net income
-- Balance Sheet: Assets, liabilities, and equity at a point in time  
+- Balance Sheet: Assets, liabilities, and equity at a point in time
 - Cash Flow Statement: Cash receipts and payments by activity
 - Changes in Equity: Movements in shareholders' equity accounts
 """
@@ -791,5 +791,5 @@ ALL_STATEMENTS = PRIMARY_STATEMENTS + [StatementType.COMPREHENSIVE_INCOME] + ANA
 
 # Cached validation sets to avoid recreating on every validation call
 _CACHED_FORM_TYPES = set(FormType.__members__.values())
-_CACHED_PERIOD_TYPES = set(PeriodType.__members__.values()) 
+_CACHED_PERIOD_TYPES = set(PeriodType.__members__.values())
 _CACHED_STATEMENT_TYPES = set(StatementType.__members__.values())

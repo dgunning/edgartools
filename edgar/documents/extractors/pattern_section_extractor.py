@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class SectionExtractor:
     """
     Extracts logical sections from documents.
-    
+
     Identifies document sections like:
     - Business Overview (Item 1)
     - Risk Factors (Item 1A)
@@ -510,7 +510,7 @@ class SectionExtractor:
     def __init__(self, form: Optional[str] = None):
         """
         Initialize section extractor.
-        
+
         Args:
             form: Type of filing (10-K, 10-Q, 8-K, etc.)
         """
@@ -1226,8 +1226,8 @@ class SectionExtractor:
 
         return matched_sections
 
-    def _find_section_end(self, 
-                         section_index: int, 
+    def _find_section_end(self,
+                         section_index: int,
                          headers: List[Tuple[Node, str, int]],
                          document: Document) -> int:
         """Find where section ends."""

@@ -260,8 +260,8 @@ class LinkBlock(Block):
         self.src = src
         self.inline: bool = True
 
-    def get_text(self) -> str:    
-        return '<{self.tag} alt="{self.alt}" src="{self.src}">'
+    def get_text(self) -> str:
+        return f'<{self.tag} alt="{self.alt}" src="{self.src}">'
 
     def to_markdown(self, prefix_src:str=""):
         return f"![alt  {self.alt}]({prefix_src}/{self.src})\n"
@@ -596,7 +596,7 @@ def extract_and_format_content(element) -> List[Block]:
         return [
                 LinkBlock(text=str(element),
                           tag=element.name,
-                          element=element.name, 
+                          element=element.name,
                           alt=element.get('alt'),
                           src=element.get('src'),
                           text_type='string')

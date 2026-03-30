@@ -59,7 +59,7 @@ class StatementStitcher:
     """
     Combines multiple statements across time periods into a unified view.
 
-    This class handles the complexities of combining financial statements 
+    This class handles the complexities of combining financial statements
     from different periods, including:
     - Normalizing concepts that change over time
     - Aligning periods correctly
@@ -71,7 +71,7 @@ class StatementStitcher:
         """Types of period views available for stitched statements"""
         RECENT_PERIODS = "Most Recent Periods"
         RECENT_YEARS = "Recent Years"
-        THREE_YEAR_COMPARISON = "Three-Year Comparison" 
+        THREE_YEAR_COMPARISON = "Three-Year Comparison"
         THREE_QUARTERS = "Three Recent Quarters"
         ANNUAL_COMPARISON = "Annual Comparison"
         QUARTERLY_TREND = "Quarterly Trend"
@@ -97,8 +97,8 @@ class StatementStitcher:
         self.concept_to_label_map = {}  # Maps concept IDs to label keys (persists across statements)
 
     def stitch_statements(
-        self, 
-        statements: List[Dict[str, Any]], 
+        self,
+        statements: List[Dict[str, Any]],
         period_type: Union[PeriodType, str] = PeriodType.RECENT_PERIODS,
         max_periods: Optional[int] = None,
         standard: bool = True
@@ -257,7 +257,7 @@ class StatementStitcher:
         return sorted(all_periods, key=lambda x: x[1], reverse=True)
 
     def _select_periods(
-        self, 
+        self,
         all_periods: List[Tuple[str, Union[str,datetime]]],
         period_type: Union[PeriodType, str],
         max_periods: int

@@ -477,7 +477,7 @@ class FinancialRatios:
                 )
             ],
 
-            # Operating Income calculation 
+            # Operating Income calculation
             StandardConcept.OPERATING_INCOME: [
                 ConceptEquivalent(
                     target_concept=StandardConcept.OPERATING_INCOME,
@@ -610,7 +610,7 @@ class FinancialRatios:
         This allows inspection of the raw data before ratio calculation.
 
         Args:
-            ratio_type: Type of ratio to get data for ('current', 'operating_margin', 
+            ratio_type: Type of ratio to get data for ('current', 'operating_margin',
                        'return_on_assets', 'gross_margin', 'leverage')
 
         Returns:
@@ -716,7 +716,7 @@ class FinancialRatios:
         if isinstance(optional_concepts_dict, list):
             # Convert list to dict using default values
             optional_concepts_dict = {
-                concept: default_values.get(concept, 0.0) 
+                concept: default_values.get(concept, 0.0)
                 for concept in optional_concepts_dict
             }
 

@@ -832,7 +832,7 @@ def html_to_text(html: str) -> str:
 
 
 def _format_period_labels(
-    periods_to_display: List[Tuple[str, str]], 
+    periods_to_display: List[Tuple[str, str]],
     entity_info: Dict[str, Any],
     statement_type: str,
     show_date_range: bool = False
@@ -842,7 +842,7 @@ def _format_period_labels(
 
     This function processes period keys and labels to create human-readable period labels
     for financial statements. When show_date_range=True, duration periods are displayed
-    with both start and end dates (e.g., "Jan 1, 2023 - Mar 31, 2023"). When 
+    with both start and end dates (e.g., "Jan 1, 2023 - Mar 31, 2023"). When
     show_date_range=False (default), only the end date is shown (e.g., "Mar 31, 2023").
 
     The function handles various input formats:
@@ -1203,8 +1203,8 @@ def _format_period_labels(
 
 
 def _create_units_note(
-    is_monetary_statement: bool, 
-    dominant_scale: int, 
+    is_monetary_statement: bool,
+    dominant_scale: int,
     shares_scale: Optional[int]
 ) -> str:
     """
@@ -1583,7 +1583,7 @@ def render_statement(
     is_monetary_statement = statement_type in ['BalanceSheet', 'IncomeStatement', 'CashFlowStatement']
 
     # Format period headers, but keep original tuples for now (we'll use the fully parsed objects later)
-    # These are now PeriodData objects but we'll continue with string period_keys for compatibility 
+    # These are now PeriodData objects but we'll continue with string period_keys for compatibility
     formatted_period_objects_initial, fiscal_period_indicator = _format_period_labels(
         periods_to_display, entity_info, statement_type, show_date_range
     )

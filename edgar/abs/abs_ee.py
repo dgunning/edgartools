@@ -205,11 +205,11 @@ class AutoLeaseAssetData:
 
                 if elem is not None and elem.text:
                     value = elem.text.strip()
-                    if parser == str:
+                    if parser is str:
                         row[col_name] = value
-                    elif parser == int:
+                    elif parser is int:
                         row[col_name] = self._safe_int(value)
-                    elif parser == float:
+                    elif parser is float:
                         row[col_name] = self._safe_float(value)
                     elif parser == '_parse_date':
                         row[col_name] = self._parse_date(value)

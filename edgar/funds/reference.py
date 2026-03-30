@@ -114,7 +114,7 @@ class FundReferenceData:
 
         # Process companies (distinct CIKs)
         company_df = df.drop_duplicates(subset=['cik'])[
-            ['cik', 'company_name', 'entity_org_type', 'file_number', 
+            ['cik', 'company_name', 'entity_org_type', 'file_number',
              'address_1', 'address_2', 'city', 'state', 'zip_code']
         ].fillna('')
 
@@ -298,13 +298,13 @@ class FundReferenceData:
         name_fragment = name_fragment.lower()
 
         if search_type == 'company':
-            return [company for company in self._companies.values() 
+            return [company for company in self._companies.values()
                     if name_fragment in company.name.lower()]
         elif search_type == 'series':
-            return [series for series in self._series.values() 
+            return [series for series in self._series.values()
                    if name_fragment in series.name.lower()]
         elif search_type == 'class':
-            return [cls for cls in self._classes.values() 
+            return [cls for cls in self._classes.values()
                    if name_fragment in cls.name.lower()]
         else:
             raise ValueError(f"Invalid search_type: {search_type}")

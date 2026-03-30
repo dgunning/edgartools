@@ -31,7 +31,7 @@ class DetectionThresholds:
 class ParserConfig:
     """
     Configuration for HTML parser.
-    
+
     Attributes:
         max_document_size: Maximum document size in bytes
         streaming_threshold: Document size threshold for streaming mode

@@ -52,7 +52,7 @@ class SearchResult:
 class DocumentSearch:
     """
     Search functionality for parsed documents.
-    
+
     Supports various search modes and options.
     """
 
@@ -77,7 +77,7 @@ class DocumentSearch:
         # Type index: map node types to nodes
         self.type_index: Dict[NodeType, List[Node]] = {}
 
-        # Semantic index: map semantic types to nodes  
+        # Semantic index: map semantic types to nodes
         self.semantic_index: Dict[SemanticType, List[Node]] = {}
 
         # Build indices
@@ -102,7 +102,7 @@ class DocumentSearch:
                     self.semantic_index[node.semantic_type] = []
                 self.semantic_index[node.semantic_type].append(node)
 
-    def search(self, 
+    def search(self,
               query: str,
               mode: SearchMode = SearchMode.TEXT,
               case_sensitive: bool = False,
@@ -112,7 +112,7 @@ class DocumentSearch:
               in_section: Optional[str] = None) -> List[SearchResult]:
         """
         Search document.
-        
+
         Args:
             query: Search query
             mode: Search mode
@@ -121,7 +121,7 @@ class DocumentSearch:
             limit: Maximum results to return
             node_types: Limit search to specific node types
             in_section: Limit search to specific section
-            
+
         Returns:
             List of search results
         """
@@ -445,18 +445,18 @@ class DocumentSearch:
 
         return nodes
 
-    def find_tables(self, 
+    def find_tables(self,
                    caption_pattern: Optional[str] = None,
                    min_rows: Optional[int] = None,
                    min_cols: Optional[int] = None) -> List[TableNode]:
         """
         Find tables matching criteria.
-        
+
         Args:
             caption_pattern: Regex pattern for caption
             min_rows: Minimum number of rows
             min_cols: Minimum number of columns
-            
+
         Returns:
             List of matching tables
         """

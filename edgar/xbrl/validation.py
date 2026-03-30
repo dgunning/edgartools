@@ -105,7 +105,7 @@ class ValidationResult:
         # Status header
         header = Text()
         header.append(f" {status_symbol} ", style=f"bold {status_color}")
-        header.append(f"Validation: ", style="bold")
+        header.append("Validation: ", style="bold")
         header.append(status, style=f"bold {status_color}")
         sections.append(header)
 

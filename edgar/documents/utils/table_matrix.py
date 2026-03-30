@@ -20,7 +20,7 @@ class MatrixCell:
 class TableMatrix:
     """
     Build a 2D matrix representation of table with proper handling of merged cells.
-    
+
     This class converts a table with colspan/rowspan into a regular 2D grid
     where each merged cell occupies multiple positions in the matrix.
     """
@@ -67,7 +67,7 @@ class TableMatrix:
         self._calculate_dimensions(all_rows)
 
         # Initialize matrix
-        self.matrix = [[MatrixCell() for _ in range(self.col_count)] 
+        self.matrix = [[MatrixCell() for _ in range(self.col_count)]
                        for _ in range(self.row_count)]
 
         # Second pass: place cells in matrix
@@ -138,8 +138,8 @@ class TableMatrix:
                                     has_comma_separator and
                                     digit_ratio > 0.5 and  # More than 50% digits
                                     not cell_text.startswith('$') and
-                                    not any(month in cell_text.lower() for month in 
-                                           ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+                                    not any(month in cell_text.lower() for month in
+                                           ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
                                             'jul', 'aug', 'sep', 'oct', 'nov', 'dec']) and
                                     row_idx > 1)  # Not a header row (allow for multi-row headers)
 
@@ -243,11 +243,11 @@ class TableMatrix:
     def get_cell(self, row_idx: int, col_idx: int) -> Optional[Cell]:
         """
         Get a cell at specific position in the matrix.
-        
+
         Args:
             row_idx: Row index
             col_idx: Column index
-            
+
         Returns:
             Cell at position or None if out of bounds
         """
@@ -266,7 +266,7 @@ class TableMatrix:
     def get_expanded_row(self, row_idx: int) -> List[Optional[Cell]]:
         """
         Get a row with cells expanded to match column count.
-        
+
         For cells with colspan > 1, the cell appears in the first position
         and None in subsequent positions.
         """
@@ -293,7 +293,7 @@ class TableMatrix:
         """
         Get indices of columns that contain actual data (not spacing).
         Uses strategy similar to old parser - keeps single empty columns for spacing.
-        
+
         Returns:
             List of column indices that contain data
         """
@@ -353,7 +353,7 @@ class TableMatrix:
         """
         Create a new matrix with spacing columns removed.
         Also handles colspan-generated duplicate columns and misalignment.
-        
+
         Returns:
             New TableMatrix with only data columns
         """
@@ -554,9 +554,9 @@ class TableMatrix:
                             # Dates, years, text descriptions, etc.
                             if any([
                                 len(text) > 3 and not text.replace(',', '').replace('.', '').isdigit(),  # Non-trivial text
-                                any(month in text for month in ['January', 'February', 'March', 'April', 'May', 'June', 
+                                any(month in text for month in ['January', 'February', 'March', 'April', 'May', 'June',
                                                                 'July', 'August', 'September', 'October', 'November', 'December']),
-                                any(month in text for month in ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                any(month in text for month in ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                                                                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']),
                                 '20' in text and any(c.isdigit() for c in text),  # Likely contains year
                             ]):
@@ -766,7 +766,7 @@ class TableMatrix:
     def to_cell_grid(self) -> List[List[Optional[Cell]]]:
         """
         Convert matrix to a simple 2D grid of cells.
-        
+
         Returns:
             2D list where each position contains either a Cell or None
         """
@@ -813,7 +813,7 @@ class ColumnAnalyzer:
     def identify_spacing_columns(self) -> List[int]:
         """
         Identify columns used only for spacing.
-        
+
         Returns:
             List of column indices that are spacing columns
         """
@@ -831,7 +831,7 @@ class ColumnAnalyzer:
         """
         Check if a column is used for spacing.
         Only mark as spacing if column is completely empty.
-        
+
         Criteria:
         - Column has absolutely no content across all rows
         """
@@ -850,7 +850,7 @@ class ColumnAnalyzer:
     def get_clean_column_indices(self) -> List[int]:
         """
         Get indices of non-spacing columns.
-        
+
         Returns:
             List of column indices that contain actual data
         """

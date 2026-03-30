@@ -393,7 +393,7 @@ class MultiPeriodStatement:
 
         return df
 
-    def to_llm_context(self, 
+    def to_llm_context(self,
                        include_metadata: bool = True,
                        include_hierarchy: bool = False,
                        flatten_values: bool = True) -> Dict[str, Any]:
@@ -549,7 +549,7 @@ class MultiPeriodStatement:
         """Get clean statement type name for LLM context."""
         type_map = {
             "IncomeStatement": "income_statement",
-            "BalanceSheet": "balance_sheet", 
+            "BalanceSheet": "balance_sheet",
             "CashFlow": "cash_flow",
             "CashFlowStatement": "cash_flow"
         }
@@ -1126,7 +1126,7 @@ class MultiPeriodItem:
 
         if value is not None:
             # Check if this is a per-share amount
-            is_per_share = any(indicator in self.concept.lower() or indicator in self.label.lower() 
+            is_per_share = any(indicator in self.concept.lower() or indicator in self.label.lower()
                              for indicator in ['pershare', 'per share', 'earnings per', 'eps'])
 
             if is_per_share:
@@ -1373,7 +1373,7 @@ class EnhancedStatementBuilder:
     ESSENTIAL_CONCEPTS = {
         'BalanceSheet': {
             # Working Capital
-            'AccountsReceivable', 'AccountsReceivableNetCurrent', 
+            'AccountsReceivable', 'AccountsReceivableNetCurrent',
             'Inventory', 'InventoryNet',
             'AccountsPayable', 'AccountsPayableCurrent',
             # Debt
@@ -1427,7 +1427,7 @@ class EnhancedStatementBuilder:
         'ShortTermBorrowings': 'ShortTermDebt',
         # Depreciation concepts
         'DepreciationDepletionAndAmortization': 'DepreciationAndAmortization',
-        # Capital expenditure concepts  
+        # Capital expenditure concepts
         'PaymentsToAcquirePropertyPlantAndEquipment': 'CapitalExpenditures',
         'CapitalExpendituresIncurredButNotYetPaid': 'CapitalExpenditures',
         # Dividend concepts
@@ -2157,7 +2157,7 @@ class EnhancedStatementBuilder:
         """
         Create a single deduplicated revenue item by combining multiple revenue concepts.
 
-        This method implements revenue deduplication for the Facts API path, similar to 
+        This method implements revenue deduplication for the Facts API path, similar to
         what was done for XBRL processing. It combines revenue from different concepts
         across periods to show comprehensive revenue data. When no explicit revenue
         concepts exist, it attempts to calculate revenue from GrossProfit + CostOfRevenue.
@@ -2432,7 +2432,7 @@ class EnhancedStatementBuilder:
             # Balance Sheet
             'Debt', 'Receivable', 'Payable', 'Inventory', 'Investment',
             'Deferred', 'Accrued', 'Prepaid', 'Goodwill', 'Intangible',
-            # Income Statement  
+            # Income Statement
             'Revenue', 'Sales', 'Cost', 'Expense', 'Income', 'Profit', 'Loss',
             'Research', 'Marketing', 'Administrative', 'Interest', 'Tax',
             # Cash Flow
@@ -2450,7 +2450,7 @@ class EnhancedStatementBuilder:
         label_lower = (label or '').lower()
         return any(ind in concept_lower or ind in label_lower for ind in indicators)
 
-    def _add_calculated_metrics(self, 
+    def _add_calculated_metrics(self,
                                period_maps: Dict[str, Dict[str, FinancialFact]],
                                periods: List[str],
                                existing_items: List[MultiPeriodItem]) -> List[MultiPeriodItem]:
@@ -2459,7 +2459,7 @@ class EnhancedStatementBuilder:
 
         # Check if GrossProfit exists in items
         has_gross_profit = any(
-            self._find_item_by_concept(item, 'GrossProfit') 
+            self._find_item_by_concept(item, 'GrossProfit')
             for item in existing_items
         )
 
@@ -2542,7 +2542,7 @@ class EnhancedStatementBuilder:
         if not has_any_value and item.children:
             # Check if this should be aggregated
             should_aggregate = (
-                item.is_total or 
+                item.is_total or
                 'total' in item.label.lower() or
                 (not item.is_abstract and self._should_aggregate_children(item))
             )

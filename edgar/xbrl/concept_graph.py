@@ -260,7 +260,7 @@ class Concept:
         if self.is_root:
             children = self.children
             if children:
-                calc_text = Text(f"\nCalculation root. Children:", style="dim")
+                calc_text = Text("\nCalculation root. Children:", style="dim")
                 for child in children[:8]:
                     weight_str = f"weight: {child.weight}" if child.weight else ""
                     crdr_str = child.crdr or "n/a"

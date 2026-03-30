@@ -375,7 +375,7 @@ class EntityFacts:
         """Creates a rich representation providing an at-a-glance view of company facts."""
         # Title
         title = Text.assemble(
-            "📊 ", 
+            "📊 ",
             (self.name, "bold green"),
             " Financial Facts"
         )
@@ -1112,8 +1112,8 @@ class EntityFacts:
 
         if group is None:
             hint = f"Unknown concept '{concept_name}'."
-            hint += f"\n  Use list_supported_concepts() to see available concept names,"
-            hint += f"\n  or search_concepts() to search this company's raw XBRL tags."
+            hint += "\n  Use list_supported_concepts() to see available concept names,"
+            hint += "\n  or search_concepts() to search this company's raw XBRL tags."
             warnings.warn(hint, stacklevel=2)
             return None
 

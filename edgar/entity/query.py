@@ -70,7 +70,7 @@ class FactQuery:
             # Case-insensitive partial matching
             concept_lower = concept.lower()
             self._filters.append(
-                lambda f: concept_lower in f.concept.lower() or 
+                lambda f: concept_lower in f.concept.lower() or
                          (f.label and concept_lower in f.label.lower())
             )
         return self
@@ -707,7 +707,7 @@ class FactQuery:
         has only one value per period in the resulting pivot table.
 
         Args:
-            return_statement: If True, return FinancialStatement wrapper; 
+            return_statement: If True, return FinancialStatement wrapper;
                             if False, return raw DataFrame
 
         Returns:
@@ -766,8 +766,8 @@ class FactQuery:
             column_sort_keys[key] = sort_key
 
         # Sort columns by date (newest first)
-        sorted_columns = sorted(pivot.columns, 
-                              key=lambda x: column_sort_keys.get(x, (date.min, 0)), 
+        sorted_columns = sorted(pivot.columns,
+                              key=lambda x: column_sort_keys.get(x, (date.min, 0)),
                               reverse=True)
         pivot = pivot[sorted_columns]
 
@@ -828,7 +828,7 @@ class FactQuery:
         Format period label for professional investors.
 
         Hedge funds and institutional investors typically expect:
-        - Quarterly (3M): "Q2 2024" 
+        - Quarterly (3M): "Q2 2024"
         - Year-to-date (9M): "9M 2024" or "YTD Q3 2024"
         - Annual (12M): "FY 2024"
         - Clear indication of period length

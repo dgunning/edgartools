@@ -31,10 +31,10 @@ class AnchorCache:
     def get_navigation_patterns(self, html_content: str) -> Optional[Set[str]]:
         """
         Get cached navigation patterns for HTML content.
-        
+
         Args:
             html_content: HTML to analyze
-            
+
         Returns:
             Set of navigation patterns or None if not cached
         """
@@ -61,7 +61,7 @@ class AnchorCache:
     def cache_navigation_patterns(self, html_content: str, patterns: Set[str]) -> None:
         """
         Cache navigation patterns for HTML content.
-        
+
         Args:
             html_content: HTML content
             patterns: Navigation patterns to cache
@@ -91,15 +91,15 @@ class AnchorCache:
 _anchor_cache = AnchorCache()
 
 
-def get_cached_navigation_patterns(html_content: str, 
+def get_cached_navigation_patterns(html_content: str,
                                  force_analyze: bool = False) -> Set[str]:
     """
     Get navigation patterns with caching.
-    
+
     Args:
         html_content: HTML to analyze
         force_analyze: Force re-analysis even if cached
-        
+
     Returns:
         Set of navigation link texts to filter
     """
@@ -120,13 +120,13 @@ def get_cached_navigation_patterns(html_content: str,
 def _analyze_navigation_minimal(html_content: str, min_frequency: int = 5) -> Set[str]:
     """
     Minimal navigation analysis using regex instead of full HTML parsing.
-    
+
     This avoids BeautifulSoup overhead by using regex to find anchor patterns.
     """
     patterns = set()
 
     # Find all anchor links with regex (faster than BeautifulSoup)
-    anchor_pattern = re.compile(r'<a[^>]*href\s*=\s*["\']#([^"\']*)["\'][^>]*>(.*?)</a>', 
+    anchor_pattern = re.compile(r'<a[^>]*href\s*=\s*["\']#([^"\']*)["\'][^>]*>(.*?)</a>',
                                re.IGNORECASE | re.DOTALL)
 
     link_counts = Counter()
@@ -150,14 +150,14 @@ def _analyze_navigation_minimal(html_content: str, min_frequency: int = 5) -> Se
 def filter_with_cached_patterns(text: str, html_content: Optional[str] = None) -> str:
     """
     Filter text using cached navigation patterns.
-    
+
     Preserves first occurrences of patterns (document structure headers)
     while filtering out repeated navigation links.
-    
+
     Args:
         text: Text to filter
         html_content: HTML for pattern analysis (optional)
-        
+
     Returns:
         Filtered text
     """

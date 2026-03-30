@@ -78,7 +78,7 @@ class FilingDirectory:
 """
  Represent the SEC filing headers of a filing.
 
- The headers are extracted from the HTML file of the filing. This is the file  `<accession-number>-index-headers.html` 
+ The headers are extracted from the HTML file of the filing. This is the file  `<accession-number>-index-headers.html`
 
 """
 

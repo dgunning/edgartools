@@ -600,7 +600,7 @@ class Sections(Dict[str, Section]):
 class Document:
     """
     Main document class.
-    
+
     Represents a parsed HTML document with methods for content extraction,
     search, and transformation.
     """
@@ -682,7 +682,7 @@ class Document:
             self._xbrl_facts = self._extract_xbrl_facts()
         return self._xbrl_facts
 
-    def text(self, 
+    def text(self,
              clean: bool = True,
              include_tables: bool = True,
              include_metadata: bool = False,
@@ -690,7 +690,7 @@ class Document:
              table_max_col_width: Optional[int] = None) -> str:
         """
         Extract text from document.
-        
+
         Args:
             clean: Clean and normalize text
             include_tables: Include table content in text
@@ -699,12 +699,12 @@ class Document:
             table_max_col_width: Maximum column width for table rendering (default: 200).
                                 Set higher (e.g., 500) to avoid truncating long table labels,
                                 or None for unlimited width. Useful for AI/LLM processing.
-            
+
         Returns:
             Extracted text
         """
         # Use cache if available and parameters match
-        if (self._text_cache is not None and 
+        if (self._text_cache is not None and
             clean and not include_tables and not include_metadata and max_length is None):
             return self._text_cache
 
@@ -723,7 +723,7 @@ class Document:
         )
         text = extractor.extract(self)
 
-        # Apply navigation link filtering when cleaning 
+        # Apply navigation link filtering when cleaning
         if clean:
             # Use cached/integrated navigation filtering (optimized approach)
             try:
@@ -817,22 +817,22 @@ class Document:
             return section.text()
         return None
 
-    def get_sec_section(self, section_name: str, clean: bool = True, 
+    def get_sec_section(self, section_name: str, clean: bool = True,
                        include_subsections: bool = True) -> Optional[str]:
         """
         Extract content from a specific SEC filing section using anchor analysis.
-        
+
         Args:
             section_name: Section name (e.g., "Item 1", "Item 1A", "Part I")
             clean: Whether to apply text cleaning and navigation filtering
             include_subsections: Whether to include subsections
-            
+
         Returns:
             Section text content or None if section not found
-            
+
         Examples:
             >>> doc.get_sec_section("Item 1")  # Business description
-            >>> doc.get_sec_section("Item 1A") # Risk factors  
+            >>> doc.get_sec_section("Item 1A") # Risk factors
             >>> doc.get_sec_section("Item 7")  # MD&A
         """
         # Lazy-load section extractor
@@ -847,10 +847,10 @@ class Document:
     def get_available_sec_sections(self) -> List[str]:
         """
         Get list of SEC sections available for extraction.
-        
+
         Returns:
             List of section names that can be passed to get_sec_section()
-            
+
         Example:
             >>> sections = doc.get_available_sec_sections()
             >>> print(sections)
@@ -865,10 +865,10 @@ class Document:
     def get_sec_section_info(self, section_name: str) -> Optional[Dict]:
         """
         Get detailed information about an SEC section.
-        
+
         Args:
             section_name: Section name to look up
-            
+
         Returns:
             Dict with section metadata including anchor info
         """
@@ -887,10 +887,10 @@ class Document:
     def to_json(self, include_content: bool = True) -> Dict[str, Any]:
         """
         Convert document to JSON.
-        
+
         Args:
             include_content: Include full content or just structure
-            
+
         Returns:
             JSON-serializable dictionary
         """
@@ -926,7 +926,7 @@ class Document:
     def to_dataframe(self) -> 'pd.DataFrame':
         """
         Convert document tables to pandas DataFrame.
-        
+
         Returns a DataFrame with all tables concatenated.
         """
         import pandas as pd
@@ -951,11 +951,11 @@ class Document:
     def chunks(self, chunk_size: int = 512, overlap: int = 128) -> Iterator['DocumentChunk']:
         """
         Generate document chunks for processing.
-        
+
         Args:
             chunk_size: Target chunk size in tokens
             overlap: Overlap between chunks
-            
+
         Yields:
             Document chunks
         """
@@ -963,25 +963,25 @@ class Document:
         extractor = ChunkExtractor(chunk_size=chunk_size, overlap=overlap)
         return extractor.extract(self)
 
-    def prepare_for_llm(self, 
+    def prepare_for_llm(self,
                        max_tokens: int = 4000,
                        preserve_structure: bool = True,
                        focus_sections: Optional[List[str]] = None) -> 'LLMDocument':
         """
         Prepare document for LLM processing.
-        
+
         Args:
             max_tokens: Maximum tokens
             preserve_structure: Preserve document structure
             focus_sections: Sections to focus on
-            
+
         Returns:
             LLM-optimized document
         """
         from edgar.documents.ai.llm_optimizer import LLMOptimizer
         optimizer = LLMOptimizer()
         return optimizer.optimize(
-            self, 
+            self,
             max_tokens=max_tokens,
             preserve_structure=preserve_structure,
             focus_sections=focus_sections
@@ -1063,7 +1063,7 @@ class Document:
     def validate(self) -> List[str]:
         """
         Validate document structure.
-        
+
         Returns list of validation issues.
         """
         issues = []
@@ -1111,7 +1111,7 @@ class DocumentChunk:
         }
 
 
-@dataclass 
+@dataclass
 class LLMDocument:
     """Document optimized for LLM processing."""
     content: str

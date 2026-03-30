@@ -224,17 +224,17 @@ class StatementTypeSelector:
         instant_periods.sort(key=lambda x: x['date'], reverse=True)
         return [instant_periods[0]]
 
-    def select_income_statement_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date], 
+    def select_income_statement_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date],
                                       fiscal_period: str) -> List[Dict]:
         """Select duration periods for income statements"""
         return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period)
 
-    def select_cash_flow_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date], 
+    def select_cash_flow_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date],
                                fiscal_period: str) -> List[Dict]:
         """Select duration periods for cash flow statements"""
         return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period)
 
-    def _select_duration_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date], 
+    def _select_duration_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date],
                                fiscal_period: str) -> List[Dict]:
         """Common logic for selecting duration periods"""
         # Filter for duration periods only
@@ -349,8 +349,8 @@ class StatementTypeSelector:
 class PeriodMetadataEnricher:
     """Handles period metadata enrichment"""
 
-    def enrich_period_metadata(self, period: Dict, xbrl_index: int, entity_info: Dict, 
-                              doc_period_end_date: Optional[date], fiscal_period: str, 
+    def enrich_period_metadata(self, period: Dict, xbrl_index: int, entity_info: Dict,
+                              doc_period_end_date: Optional[date], fiscal_period: str,
                               fiscal_year: str) -> Dict[str, Any]:
         """Add comprehensive metadata to period"""
         period_metadata = {
@@ -371,7 +371,7 @@ class PeriodMetadataEnricher:
         else:  # duration
             period_metadata['start_date'] = parse_date(period['start_date'])
             period_metadata['end_date'] = parse_date(period['end_date'])
-            period_metadata['duration_days'] = period.get('duration_days', 
+            period_metadata['duration_days'] = period.get('duration_days',
                 (period_metadata['end_date'] - period_metadata['start_date']).days)
             period_metadata['display_date'] = format_date(period_metadata['end_date'])
 
@@ -435,7 +435,7 @@ class PeriodOptimizer:
         self.enricher = PeriodMetadataEnricher()
         self.deduplicator = PeriodDeduplicator()
 
-    def determine_optimal_periods(self, xbrl_list: List[XBRL], statement_type: str, 
+    def determine_optimal_periods(self, xbrl_list: List[XBRL], statement_type: str,
                                  max_periods: Optional[int] = None) -> List[Dict[str, Any]]:
         """Main entry point - orchestrates the entire process"""
         max_periods = max_periods or self.config.max_periods_default
@@ -502,8 +502,8 @@ class PeriodOptimizer:
             logger.warning("Failed to parse document_period_end_date: %s", e)
             return None
 
-    def _select_periods_for_statement_type(self, xbrl: XBRL, statement_type: str, 
-                                         doc_period_end_date: Optional[date], 
+    def _select_periods_for_statement_type(self, xbrl: XBRL, statement_type: str,
+                                         doc_period_end_date: Optional[date],
                                          fiscal_period: str) -> List[Dict]:
         """Select periods based on statement type"""
         if statement_type == 'BalanceSheet':
@@ -535,7 +535,7 @@ class PeriodOptimizer:
 
         return enriched_periods
 
-    def _deduplicate_and_limit(self, periods: List[Dict[str, Any]], max_periods: int, 
+    def _deduplicate_and_limit(self, periods: List[Dict[str, Any]], max_periods: int,
                               statement_type: str) -> List[Dict[str, Any]]:
         """Deduplicate, sort, and limit periods"""
         # Sort periods chronologically

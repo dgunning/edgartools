@@ -114,7 +114,7 @@ class XBRLS:
             self._stitched_facts_view = StitchedFactsView(self)
         return self._stitched_facts_view
 
-    def query(self, 
+    def query(self,
               max_periods: int = 8,
               standardize: bool = True,
               statement_types: Optional[List[str]] = None,
@@ -139,8 +139,8 @@ class XBRLS:
         })
         return self.facts.query(**kwargs)
 
-    def get_statement(self, statement_type: str, 
-                     max_periods: int = 8, 
+    def get_statement(self, statement_type: str,
+                     max_periods: int = 8,
                      standard: bool = True,
                      use_optimal_periods: bool = True,
                      include_dimensions: bool = False) -> Dict[str, Any]:
@@ -178,8 +178,8 @@ class XBRLS:
 
         return result
 
-    def render_statement(self, statement_type: str, 
-                        max_periods: int = 8, 
+    def render_statement(self, statement_type: str,
+                        max_periods: int = 8,
                         standardize: bool = True,
                         use_optimal_periods: bool = True,
                         show_date_range: bool = False,
@@ -203,8 +203,8 @@ class XBRLS:
         statement = StitchedStatement(self, statement_type, max_periods, standardize, use_optimal_periods, include_dimensions)
         return statement.render(show_date_range=show_date_range)
 
-    def to_dataframe(self, statement_type: str, 
-                    max_periods: int = 8, 
+    def to_dataframe(self, statement_type: str,
+                    max_periods: int = 8,
                     standardize: bool = True) -> pd.DataFrame:
         """
         Convert a stitched statement to a pandas DataFrame.
@@ -228,12 +228,12 @@ class XBRLS:
 
         Returns:
             List of period information dictionaries, each containing:
-            - 'type': 'instant' or 'duration'  
+            - 'type': 'instant' or 'duration'
             - 'key': period key (e.g., 'instant_2024-09-28', 'duration_2024-01-01_2024-09-28')
             - 'label': human-readable label
             For instant periods:
             - 'date': end date as 'YYYY-MM-DD'
-            For duration periods:  
+            For duration periods:
             - 'start_date': start date as 'YYYY-MM-DD'
             - 'end_date': end date as 'YYYY-MM-DD'
             - 'days': duration in days

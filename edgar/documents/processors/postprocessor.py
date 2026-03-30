@@ -13,7 +13,7 @@ from edgar.documents.types import NodeType
 class DocumentPostprocessor:
     """
     Postprocesses parsed documents to improve quality.
-    
+
     Handles:
     - Adjacent node merging
     - Empty node removal
@@ -29,10 +29,10 @@ class DocumentPostprocessor:
     def process(self, document: Document) -> Document:
         """
         Postprocess document.
-        
+
         Args:
             document: Parsed document
-            
+
         Returns:
             Processed document
         """
@@ -152,7 +152,7 @@ class DocumentPostprocessor:
     def _can_merge_with(self, node1: Node, node2: Node) -> bool:
         """Check if two nodes can be merged."""
         # Must be same type
-        if type(node1) != type(node2):
+        if type(node1) is not type(node2):
             return False
 
         # Must have compatible styles

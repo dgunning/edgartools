@@ -131,13 +131,13 @@ class VirtualPresentationTree:
                     seen.add(id(node))
 
             # Add any remaining nodes not in original order
-            remaining_nodes = [node for node in self.all_nodes.values() 
+            remaining_nodes = [node for node in self.all_nodes.values()
                              if node not in nodes_in_order]
             remaining_nodes.sort(key=lambda x: x.original_index)
             nodes_in_order.extend(remaining_nodes)
         else:
             # Fall back to sorting by original index
-            nodes_in_order = sorted(self.all_nodes.values(), 
+            nodes_in_order = sorted(self.all_nodes.values(),
                                   key=lambda x: x.original_index)
 
         # Build hierarchy using a parent stack approach
@@ -230,7 +230,7 @@ class VirtualPresentationTree:
             if not any(term in parent_label for term in ['earnings', 'shares', 'per share']):
                 return False
 
-        # Interest expense items should not be children of non-interest items  
+        # Interest expense items should not be children of non-interest items
         if 'interest expense' in child_label:
             if 'interest' not in parent_label and 'nonoperating' not in parent_label:
                 return False

@@ -1781,8 +1781,8 @@ class Statement:
 
         return trends
 
-    def _analyze_balance_sheet_trends(self, data: List[Dict[str, Any]], 
-                                     trends: Dict[str, List[float]], 
+    def _analyze_balance_sheet_trends(self, data: List[Dict[str, Any]],
+                                     trends: Dict[str, List[float]],
                                      period: str) -> None:
         """Analyze balance sheet trends."""
         metrics = {
@@ -1798,8 +1798,8 @@ class Statement:
                     trends[metric_name] = []
                 trends[metric_name].append(value)
 
-    def _analyze_income_statement_trends(self, data: List[Dict[str, Any]], 
-                                        trends: Dict[str, List[float]], 
+    def _analyze_income_statement_trends(self, data: List[Dict[str, Any]],
+                                        trends: Dict[str, List[float]],
                                         period: str) -> None:
         """Analyze income statement trends."""
         metrics = {
@@ -2055,7 +2055,7 @@ class Statements:
     """
     High-level interface for working with XBRL financial statements.
 
-    This class provides a user-friendly way to access and manipulate 
+    This class provides a user-friendly way to access and manipulate
     financial statements extracted from XBRL data.
     """
 

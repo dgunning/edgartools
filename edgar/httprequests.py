@@ -473,7 +473,7 @@ Custom CA bundle is configured but verification still failed. Check:
     certifi_path = diag.certifi_path or "/path/to/certifi/cacert.pem"
 
     if category == SSLErrorCategory.CORPORATE_NETWORK:
-        return f"""
+        return """
 Solutions:
 ----------
 

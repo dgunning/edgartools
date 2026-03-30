@@ -11,7 +11,7 @@ from edgar.documents.utils.html_utils import remove_xml_declaration
 class HTMLPreprocessor:
     """
     Preprocesses HTML to fix common issues and normalize content.
-    
+
     Handles:
     - Character encoding issues
     - Malformed HTML
@@ -84,10 +84,10 @@ class HTMLPreprocessor:
     def process(self, html: str) -> str:
         """
         Preprocess HTML content.
-        
+
         Args:
             html: Raw HTML content
-            
+
         Returns:
             Cleaned HTML ready for parsing
         """

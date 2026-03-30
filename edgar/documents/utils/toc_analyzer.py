@@ -27,7 +27,7 @@ class TOCSection:
 class TOCAnalyzer:
     """
     Analyzes Table of Contents structure to map section names to anchor IDs.
-    
+
     This enables section extraction for filings where anchor IDs are generated
     rather than semantic (like API filings vs local HTML files).
     """

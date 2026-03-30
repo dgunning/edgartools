@@ -121,7 +121,7 @@ def classify_duration(days: int) -> str:
         return "Period"
 
 
-def determine_dominant_scale(statement_data: List[Dict[str, Any]], 
+def determine_dominant_scale(statement_data: List[Dict[str, Any]],
                              periods_to_display: List[Tuple[str, str]]) -> int:
     """
     Determine the dominant scale (thousands, millions, billions) for a statement.
@@ -146,7 +146,7 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
         # Skip items that appear to be share counts or ratios
         label_lower = item['label'].lower()
         if any(keyword in label_lower for keyword in [
-            'shares', 'share', 'stock', 'eps', 'earnings per share', 
+            'shares', 'share', 'stock', 'eps', 'earnings per share',
             'weighted average', 'number of', 'per common share', 'per share',
             'per basic', 'per diluted', 'outstanding', 'issued',
             'ratio', 'margin', 'percentage', 'rate', 'per cent'
@@ -200,7 +200,7 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
         # Skip items that appear to be share counts or ratios
         label_lower = item['label'].lower()
         if any(keyword in label_lower for keyword in [
-            'shares', 'share', 'stock', 'eps', 'earnings per share', 
+            'shares', 'share', 'stock', 'eps', 'earnings per share',
             'weighted average', 'number of', 'per common share', 'per share',
             'per basic', 'per diluted', 'outstanding', 'issued',
             'ratio', 'margin', 'percentage', 'rate', 'per cent'

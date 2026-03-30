@@ -540,8 +540,8 @@ def demo_blue_options():
     ]
 
     for name, color in blues:
-        cik_preview = Text(f"0000320193", style=color)
-        accession_preview = Text(f"0000320193-24-000081", style=color)
+        cik_preview = Text("0000320193", style=color)
+        accession_preview = Text("0000320193-24-000081", style=color)
         table.add_row(name, cik_preview, accession_preview)
 
     return table
@@ -613,7 +613,7 @@ def demo_background_fills():
     for label, fg, bg in headers:
         style = f"{fg} on {bg}" if bg else fg
         # Use Padding with expand=True for full-width background
-        header_text = Padding(f"  ASSETS  ", (0, 0), style=style, expand=True)
+        header_text = Padding("  ASSETS  ", (0, 0), style=style, expand=True)
         console.print(f"  {label}:")
         console.print(header_text)
         console.print()

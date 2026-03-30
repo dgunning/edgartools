@@ -144,7 +144,7 @@ class FinancialTableExtractor:
         if len(headers) >= 2:
             # Check if first column has label-like patterns
             first_header_lower = headers[0].lower() if headers[0] else ''
-            first_is_label = any(pattern in first_header_lower for pattern in 
+            first_is_label = any(pattern in first_header_lower for pattern in
                                ['entity', 'line item', 'information', 'abstract', 'cover page',
                                 'detail', 'description', 'item'])
 
@@ -159,13 +159,13 @@ class FinancialTableExtractor:
                         first_col_values.append(row[0].lower())
 
                 # More comprehensive patterns for vertical tables
-                entity_patterns = ['entity', 'document', 'registrant', 'address', 
+                entity_patterns = ['entity', 'document', 'registrant', 'address',
                                  'file number', 'incorporation', 'fiscal', 'telephone',
                                  'securities', 'trading', 'exchange', 'ticker']
 
                 # Count how many rows match entity patterns
                 pattern_matches = sum(
-                    any(pattern in val for pattern in entity_patterns) 
+                    any(pattern in val for pattern in entity_patterns)
                     for val in first_col_values
                 )
 

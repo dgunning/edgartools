@@ -213,10 +213,10 @@ class TableNode(Node, CacheableMixin):
     def render(self, width: Optional[int] = None) -> RichTable:
         """
         Render table using rich.table.Table for beautiful console output.
-        
+
         Args:
             width: Optional max width for the table
-            
+
         Returns:
             Rich Table object for console rendering
         """
@@ -436,10 +436,10 @@ class TableNode(Node, CacheableMixin):
         """
         Calculate optimal column widths based on actual content.
         Creates compact tables that fit their content naturally.
-        
+
         Args:
             matrix: TableMatrix with the table data
-            
+
         Returns:
             List of optimal column widths
         """
@@ -562,11 +562,11 @@ class TableNode(Node, CacheableMixin):
     def _calculate_smart_widths(self, matrix, table_width: Optional[int] = None) -> List[int]:
         """
         Calculate smart column widths for complex tables.
-        
+
         Args:
             matrix: TableMatrix with the table data
             table_width: Optional target table width (used as maximum, not target)
-            
+
         Returns:
             List of column widths
         """
@@ -723,8 +723,8 @@ class TableNode(Node, CacheableMixin):
 
             # Sort columns by width (largest first) for reduction
             # But prioritize reducing text columns before numeric columns
-            width_indices = sorted(range(len(final_widths)), 
-                                   key=lambda i: (col_types[i] != 'text', final_widths[i]), 
+            width_indices = sorted(range(len(final_widths)),
+                                   key=lambda i: (col_types[i] != 'text', final_widths[i]),
                                    reverse=True)
 
             for idx in width_indices:
@@ -766,7 +766,7 @@ class TableNode(Node, CacheableMixin):
     def _calculate_optimal_widths(self, matrix) -> List[int]:
         """
         Calculate optimal column widths based on content.
-        
+
         Returns:
             List of optimal widths for each column
         """
@@ -1095,8 +1095,8 @@ class TableNode(Node, CacheableMixin):
         ]
 
         header_text = ' '.join(
-            cell.text().lower() 
-            for row in self.headers 
+            cell.text().lower()
+            for row in self.headers
             for cell in row
         )
 

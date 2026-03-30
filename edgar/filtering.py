@@ -106,8 +106,8 @@ def filter_by_ticker(data: pa.Table,
     return filter_by_cik(data, cik=ciks)
 
 
-def filter_by_year(data: pa.Table, 
-                   year: Union[int, List[int]], 
+def filter_by_year(data: pa.Table,
+                   year: Union[int, List[int]],
                    date_col: str = 'filing_date') -> pa.Table:
     """Filter data by year(s)
 
@@ -154,9 +154,9 @@ def filter_by_year(data: pa.Table,
     return data.filter(combined_filter)
 
 
-def filter_by_quarter(data: pa.Table, 
-                      year: Union[int, List[int]], 
-                      quarter: Union[int, List[int]], 
+def filter_by_quarter(data: pa.Table,
+                      year: Union[int, List[int]],
+                      quarter: Union[int, List[int]],
                       date_col: str = 'filing_date') -> pa.Table:
     """Filter data by specific year-quarter combinations
 
@@ -175,7 +175,7 @@ def filter_by_quarter(data: pa.Table,
     # Quarter date ranges
     quarter_ranges = {
         1: ("01-01", "03-31"),
-        2: ("04-01", "06-30"), 
+        2: ("04-01", "06-30"),
         3: ("07-01", "09-30"),
         4: ("10-01", "12-31")
     }

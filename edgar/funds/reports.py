@@ -809,7 +809,7 @@ class FundReport:
 
     def swaps_data(self) -> pd.DataFrame:
         """Return detailed swap derivatives data with directional receive/pay fields"""
-        swaps = [inv for inv in self.investments 
+        swaps = [inv for inv in self.investments
                 if inv.is_derivative and inv.derivative_info and inv.derivative_info.swap_derivative]
 
         if len(swaps) == 0:
@@ -886,7 +886,7 @@ class FundReport:
 
     def swaptions_data(self) -> pd.DataFrame:
         """Return detailed swaptions (SWO) derivatives data with unified base fields and nested swap info"""
-        swaptions = [inv for inv in self.investments 
+        swaptions = [inv for inv in self.investments
                     if inv.is_derivative and inv.derivative_info and inv.derivative_info.swaption_derivative]
 
         if len(swaptions) == 0:
@@ -961,7 +961,7 @@ class FundReport:
 
     def options_data(self) -> pd.DataFrame:
         """Return detailed options derivatives data with clear separation of option vs underlying data"""
-        options = [inv for inv in self.investments 
+        options = [inv for inv in self.investments
                   if inv.is_derivative and inv.derivative_info and inv.derivative_info.option_derivative]
 
         if len(options) == 0:
@@ -1014,7 +1014,7 @@ class FundReport:
 
                 # Calculate exchange rate from forward amounts
                 fwd_exchange_rate = None
-                if (fwd.amount_sold and fwd.amount_purchased and 
+                if (fwd.amount_sold and fwd.amount_purchased and
                     abs(fwd.amount_sold) > 0 and abs(fwd.amount_purchased) > 0):
                     fwd_exchange_rate = abs(fwd.amount_sold) / abs(fwd.amount_purchased)
 
@@ -1022,7 +1022,7 @@ class FundReport:
                 row_data.update({
                     "nested_fwd_currency_sold": fwd.currency_sold,
                     "nested_fwd_amount_sold": fwd.amount_sold,
-                    "nested_fwd_currency_purchased": fwd.currency_purchased,  
+                    "nested_fwd_currency_purchased": fwd.currency_purchased,
                     "nested_fwd_amount_purchased": fwd.amount_purchased,
                     "nested_fwd_settlement_date": fwd.settlement_date,
                     "nested_fwd_internal_id": fwd.deriv_addl_identifier,
@@ -1086,7 +1086,7 @@ class FundReport:
 
     def forwards_data(self) -> pd.DataFrame:
         """Return detailed forward derivatives data with unified base fields"""
-        forwards = [inv for inv in self.investments 
+        forwards = [inv for inv in self.investments
                    if inv.is_derivative and inv.derivative_info and inv.derivative_info.forward_derivative]
 
         if len(forwards) == 0:
@@ -1114,7 +1114,7 @@ class FundReport:
 
     def futures_data(self) -> pd.DataFrame:
         """Return detailed futures derivatives data with unified base fields"""
-        futures = [inv for inv in self.investments 
+        futures = [inv for inv in self.investments
                   if inv.is_derivative and inv.derivative_info and inv.derivative_info.future_derivative]
 
         if len(futures) == 0:

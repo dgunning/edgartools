@@ -13,7 +13,7 @@ from edgar.documents.table_nodes import TableNode
 class TextExtractor:
     """
     Extracts text from documents with configurable options.
-    
+
     Supports:
     - Clean text extraction for AI/NLP
     - Table inclusion/exclusion
@@ -32,7 +32,7 @@ class TextExtractor:
                  table_max_col_width: Optional[int] = None):
         """
         Initialize text extractor.
-        
+
         Args:
             clean: Clean and normalize text
             include_tables: Include table content
@@ -57,10 +57,10 @@ class TextExtractor:
     def extract(self, document: Document) -> str:
         """
         Extract text from document.
-        
+
         Args:
             document: Document to extract from
-            
+
         Returns:
             Extracted text
         """
@@ -109,7 +109,7 @@ class TextExtractor:
         # Handle based on node type - like old parser's block.get_text()
         if isinstance(node, TableNode):
             if self.include_tables:
-                # Tables render themselves - preserve their formatting 
+                # Tables render themselves - preserve their formatting
                 self._extract_table(node, parts)
 
         elif isinstance(node, HeadingNode):
@@ -214,7 +214,7 @@ class TextExtractor:
             table_text = renderer.render_table_node(table)
         else:
             table_text = table.text()
-            
+
         if table_text:
             # Tables render their own formatting - don't apply text cleaning to preserve alignment
             parts.append(table_text)  # Keep original spacing and alignment

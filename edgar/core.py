@@ -182,7 +182,7 @@ def set_identity(user_identity: str):
     log.info("Identity of the Edgar REST client set to [%s]", user_identity)
 
     from edgar.httpclient import close_clients
-    close_clients() # close any httpx clients, to reset the identity. 
+    close_clients() # close any httpx clients, to reset the identity.
 
 
 identity_prompt = """
@@ -194,8 +194,8 @@ See https://www.sec.gov/os/accessing-edgar-data
 
 This can be set in the environment variable [bold green]EDGAR_IDENTITY[/bold green].
 
-1. Set an OS environment variable 
-    [bold]EDGAR_IDENTITY=[green]Name email@domain.com[/green][/bold] 
+1. Set an OS environment variable
+    [bold]EDGAR_IDENTITY=[green]Name email@domain.com[/green][/bold]
 2. Or a Python environment variable
     import os
     [bold]os.environ['EDGAR_IDENTITY']=[green]"Name email@domain.com"[/green][/bold]
@@ -633,8 +633,8 @@ def has_html_content(content: str) -> bool:
 T = TypeVar('T')
 R = TypeVar('R')
 
-def parallel_thread_map(func: Callable[[T], R], 
-                        items: Iterable[T], 
+def parallel_thread_map(func: Callable[[T], R],
+                        items: Iterable[T],
                         **kwargs) -> List[R]:
     """
     Run a function in parallel across multiple items using ThreadPoolExecutor.

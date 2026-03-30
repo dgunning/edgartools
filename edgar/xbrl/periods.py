@@ -183,7 +183,7 @@ def generate_period_view(view_config: Dict[str, Any], periods: List[Dict], is_an
     }
 
 
-def generate_mixed_view(view_config: Dict[str, Any], ytd_periods: List[Dict], 
+def generate_mixed_view(view_config: Dict[str, Any], ytd_periods: List[Dict],
                        quarterly_periods: List[Dict]) -> Optional[Dict[str, Any]]:
     """Generate a mixed view combining YTD and quarterly periods.
 
@@ -383,7 +383,7 @@ def determine_periods_to_display(
 
                     if is_fiscal_year_end and fiscal_year_focus:
                         # For fiscal year end, find the previous fiscal year end period
-                        prev_fiscal_year = int(fiscal_year_focus) - 1 if isinstance(fiscal_year_focus, 
+                        prev_fiscal_year = int(fiscal_year_focus) - 1 if isinstance(fiscal_year_focus,
                                                                                (int, str)) and str(
                             fiscal_year_focus).isdigit() else current_date.year - 1
 
@@ -476,12 +476,12 @@ def determine_periods_to_display(
                         break
 
                     # For annual reports, only add periods that are close to fiscal year end
-                    if (is_annual_report and fiscal_year_end_month is not None and 
+                    if (is_annual_report and fiscal_year_end_month is not None and
                             fiscal_year_end_day is not None):
                         try:
                             period_date = datetime.strptime(period['date'], '%Y-%m-%d').date()
                             # Only add periods close to fiscal year end
-                            if (period_date.month != fiscal_year_end_month or 
+                            if (period_date.month != fiscal_year_end_month or
                                     abs(period_date.day - fiscal_year_end_day) > 15):
                                 continue  # Skip periods that aren't fiscal year ends
                         except (ValueError, TypeError):
@@ -619,7 +619,7 @@ def determine_periods_to_display(
                                 qp_end = datetime.strptime(qp['end_date'], '%Y-%m-%d').date()
                                 recent_end = datetime.strptime(recent_quarterly['end_date'], '%Y-%m-%d').date()
                                 # Same quarter, previous year (within 15 days tolerance)
-                                if (qp_end.year == current_year - 1 and 
+                                if (qp_end.year == current_year - 1 and
                                     qp_end.month == recent_end.month and
                                     abs(qp_end.day - recent_end.day) <= 15):
                                     selected_periods.append(qp)

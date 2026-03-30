@@ -40,7 +40,7 @@ class RevenueDeduplicator:
     # Additional revenue-related concepts that might cause duplicates
     REVENUE_RELATED_CONCEPTS = {
         'RevenueFromContractWithCustomerExcludingAssessedTax',
-        'Revenues', 
+        'Revenues',
         'Revenue',
         'SalesRevenueNet',
         'TotalRevenuesAndGains',
@@ -325,7 +325,7 @@ class RevenueDeduplicator:
         return 50
 
     @classmethod
-    def get_deduplication_stats(cls, original_items: List[Dict[str, Any]], 
+    def get_deduplication_stats(cls, original_items: List[Dict[str, Any]],
                               deduplicated_items: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Generate statistics about the deduplication process.

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import List
 
 
-@dataclass 
+@dataclass
 class StatementNotFound(Exception):
     """Exception raised when a statement cannot be resolved with sufficient confidence."""
     statement_type: str

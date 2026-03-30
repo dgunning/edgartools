@@ -3,7 +3,7 @@ Financial Statement wrapper classes with rich display and concept-aware formatti
 
 This module provides Statement classes that wrap pandas DataFrames with:
 - Intelligent formatting based on financial concept types
-- Rich display for professional presentation  
+- Rich display for professional presentation
 - Access to underlying data for calculations
 - LLM-ready context generation
 """
@@ -72,8 +72,8 @@ class FinancialStatement:
         'liabilities': ConceptFormatting(decimal_places=0, show_currency=True, scale_display=False),
     }
 
-    def __init__(self, 
-                 data: pd.DataFrame, 
+    def __init__(self,
+                 data: pd.DataFrame,
                  statement_type: str,
                  entity_name: str = "",
                  period_lengths: Optional[List[str]] = None,
@@ -174,15 +174,15 @@ class FinancialStatement:
         # Add period warning if mixed
         if self.mixed_periods:
             html += """
-            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; 
+            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7;
                        padding: 8px; margin-bottom: 10px; border-radius: 4px;">
-                <strong>⚠️ Mixed Period Lengths:</strong> This statement contains periods of different lengths 
+                <strong>⚠️ Mixed Period Lengths:</strong> This statement contains periods of different lengths
                 ({periods}). Consider filtering to comparable periods for accurate analysis.
             </div>
             """.format(periods=', '.join(self.period_lengths))
 
         # Add the formatted table
-        html += formatted_data.to_html(classes='financial-statement', 
+        html += formatted_data.to_html(classes='financial-statement',
                                      table_id='fs-table',
                                      escape=False)
 
@@ -485,7 +485,7 @@ class FinancialStatement:
         """Get the index of the underlying data."""
         return self.data.index
 
-    @property 
+    @property
     def empty(self) -> bool:
         """Check if the underlying DataFrame is empty."""
         return self.data.empty

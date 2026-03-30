@@ -15,7 +15,7 @@ from edgar.documents.types import NodeType, SemanticType, Style
 class Node(ABC):
     """
     Base node class for document tree.
-    
+
     All nodes in the document inherit from this class and implement
     the abstract methods for text and HTML generation.
     """
@@ -85,7 +85,7 @@ class Node(ABC):
     def xpath(self, expression: str) -> List['Node']:
         """
         Simple XPath-like node selection.
-        
+
         Supports:
         - //node_type - Find all nodes of type
         - /node_type - Direct children of type
@@ -349,7 +349,7 @@ class ContainerNode(Node, CacheableMixin):
         return ''
 
 
-@dataclass 
+@dataclass
 class SectionNode(ContainerNode):
     """Document section node."""
     type: NodeType = field(default=NodeType.SECTION, init=False)

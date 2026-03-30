@@ -61,12 +61,12 @@ from .core import get_edgar_data_directory
 MAX_SUBMISSIONS_AGE_SECONDS = 30  # Check for submissions every 30 seconds (reduced from 10 min for Issue #471)
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes
 
-# rules are regular expressions matching the request url path: 
+# rules are regular expressions matching the request url path:
 # The value determines whether it is cached or not:
 # - int > 0: how many seconds it'll be considered valid. During this time, the cached object will not be revalidated.
 # - False or 0: Do not cache
 # - True: Cache forever, never revalidate
-# - None: Determine cachability using response cache headers only. 
+# - None: Determine cachability using response cache headers only.
 #
 # Note that: revalidation consumes rate limit "hit", but will be served from cache if the data hasn't changed.
 

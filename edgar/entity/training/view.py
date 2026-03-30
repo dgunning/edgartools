@@ -90,7 +90,7 @@ def render_summary_panel(summary: dict, stats: dict) -> Panel:
         try:
             dt = datetime.fromisoformat(timestamp)
             timestamp = dt.strftime("%Y-%m-%d %H:%M:%S")
-        except:
+        except (ValueError, TypeError):
             pass
 
     lines = [

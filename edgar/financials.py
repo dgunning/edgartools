@@ -187,7 +187,7 @@ class Financials:
 
             # Filter out abstract rows - they never have values
             if 'abstract' in df.columns:
-                df = df[df['abstract'] == False].copy()
+                df = df[~df['abstract']].copy()
 
             # Get period columns
             period_columns = [col for col in df.columns
@@ -269,7 +269,7 @@ class Financials:
 
             # Filter out abstract rows - they never have values
             if 'abstract' in df.columns:
-                df = df[df['abstract'] == False].copy()
+                df = df[~df['abstract']].copy()
 
             # Find the concept using pattern matching
             for pattern in concept_patterns:
@@ -353,7 +353,7 @@ class Financials:
             Net income value if found, None otherwise
 
         Example:
-            >>> company = Company('AAPL')  
+            >>> company = Company('AAPL')
             >>> financials = company.get_financials()
             >>> net_income = financials.get_net_income()
         """
@@ -361,7 +361,7 @@ class Financials:
             r'Net Income$',                    # Exact match
             r'^Net Income',                    # Starts with
             r'Net Income.*Common',             # Net income attributable to common
-            r'Net Income.*Shareholders',       # Net income attributable to shareholders  
+            r'Net Income.*Shareholders',       # Net income attributable to shareholders
             r'Profit.*Loss',                   # International variations
             r'Net Earnings'                    # Alternative terminology
         ]
@@ -412,13 +412,13 @@ class Financials:
 
         Example:
             >>> company = Company('AAPL')
-            >>> financials = company.get_financials()  
+            >>> financials = company.get_financials()
             >>> total_assets = financials.get_total_assets()
         """
         patterns = [
             r'Total Assets$',      # Exact match
             r'^Total Assets',      # Starts with
-            r'Assets$'             # Just "Assets" 
+            r'Assets$'             # Just "Assets"
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -703,7 +703,7 @@ class Financials:
         metrics['operating_income'] = self.get_operating_income()
         metrics['net_income'] = self.get_net_income()
 
-        # Balance Sheet Metrics  
+        # Balance Sheet Metrics
         metrics['total_assets'] = self.get_total_assets()
         metrics['total_liabilities'] = self.get_total_liabilities()
         metrics['stockholders_equity'] = self.get_stockholders_equity()
@@ -730,7 +730,7 @@ class Financials:
 
         if metrics['total_liabilities'] and metrics['total_assets']:
             try:
-                metrics['debt_to_assets'] = metrics['total_liabilities'] / metrics['total_assets'] 
+                metrics['debt_to_assets'] = metrics['total_liabilities'] / metrics['total_assets']
             except (TypeError, ZeroDivisionError):
                 metrics['debt_to_assets'] = None
         else:

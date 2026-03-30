@@ -343,7 +343,7 @@ class Item:
     def tables(self) -> List[Table]:
         """Get all tables within this item."""
         return [
-            Table(node) for node in self.content_nodes 
+            Table(node) for node in self.content_nodes
             if node.type == 'table'
         ]
 
@@ -562,7 +562,7 @@ class DocumentIndex:
         for i, (item_name, node_idx, heading_node) in enumerate(item_headings):
             # Find content nodes
             start_idx = node_idx + 1
-            end_idx = (item_headings[i+1][1] 
+            end_idx = (item_headings[i+1][1]
                       if i+1 < len(item_headings) else len(document.nodes))
             content_nodes = document.nodes[start_idx:end_idx]
 
@@ -705,7 +705,7 @@ class DocumentIndex:
                         title = item_info['title'].strip()
                         # Check if the title appears together with the item name
                         if (f"{item_name} {title}".upper() in node_content.upper() or
-                            title.upper() in node_content.upper() and 
+                            title.upper() in node_content.upper() and
                             "ITEM" in node_content.upper()):
 
                             content = f"{item_name} {title}".strip()
@@ -814,7 +814,7 @@ class DocumentIndex:
                     # 1. Should be relatively short
                     # 2. Should start with the matched pattern
                     # 3. Should not be part of a longer paragraph
-                    if (len(first_line) < 100 and 
+                    if (len(first_line) < 100 and
                         first_line.lower().startswith(match.group(1).lower()) and
                         len(first_line.split()) < 15):
 
@@ -861,7 +861,7 @@ class DocumentIndex:
             # - Normal format: "Item 1." or "ITEM 1"
             # - Oracle format: "ITEM 1." or "Item 1"
             # - With periods: "Item 1." or without "Item 1"
-            # - With trailing spaces: "Item 1 " 
+            # - With trailing spaces: "Item 1 "
             # - With different spacing: "Item1" or "ITEM  1"
             return re.compile(r'(item\s*\d+[A-Za-z]?)\.?\s*', re.IGNORECASE)
         elif filing_type in ('8-K', '8-K/A', '6-K', '6-K/A'):
@@ -914,7 +914,7 @@ class FilingDocument:
     def tables(self) -> List[Table]:
         """Get all tables in the document."""
         return [
-            Table(node) for node in self._document.nodes 
+            Table(node) for node in self._document.nodes
             if node.type == 'table'
         ]
 

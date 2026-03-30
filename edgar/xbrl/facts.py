@@ -78,8 +78,8 @@ class FactQuery:
         """
         Filter facts by element label.
 
-        This method searches across different label fields, including both the standardized label 
-        (if standardization was applied) and the original label. This ensures you can query by either 
+        This method searches across different label fields, including both the standardized label
+        (if standardization was applied) and the original label. This ensures you can query by either
         the standardized label or the original company-specific label.
 
         Args:
@@ -251,7 +251,7 @@ class FactQuery:
         This method provides intelligent matching for dimension names and values, handling
         common XBRL formatting variations including:
         - Namespace prefixes (us-gaap:, srt:, etc.)
-        - Underscore vs colon separators  
+        - Underscore vs colon separators
         - Partial dimension names
 
         Args:
@@ -264,7 +264,7 @@ class FactQuery:
         Examples:
             # These are all equivalent:
             .by_dimension("srt_ProductOrServiceAxis", "us-gaap:ServiceMember")
-            .by_dimension("srt:ProductOrServiceAxis", "us-gaap_ServiceMember") 
+            .by_dimension("srt:ProductOrServiceAxis", "us-gaap_ServiceMember")
             .by_dimension("ProductOrServiceAxis", "ServiceMember")
         """
         if dimension is None:

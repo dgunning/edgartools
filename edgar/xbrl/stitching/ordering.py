@@ -241,7 +241,7 @@ class FinancialStatementTemplates:
 
         Args:
             item_concept: The XBRL concept (e.g., "us-gaap:Revenue")
-            item_label: The display label (e.g., "Contract Revenue") 
+            item_label: The display label (e.g., "Contract Revenue")
             statement_type: Type of statement ("IncomeStatement", "BalanceSheet", etc.)
 
         Returns:
@@ -282,7 +282,7 @@ class FinancialStatementTemplates:
         Normalize XBRL concept for matching.
 
         Handles variations in concept format:
-        - "us-gaap:Revenue" vs "us-gaap_Revenue" 
+        - "us-gaap:Revenue" vs "us-gaap_Revenue"
         - Case sensitivity
         - Namespace prefixes
         """
@@ -445,7 +445,7 @@ class SemanticPositioning:
             # Revenue indicators
             if any(term in concept_lower for term in ['revenue', 'sales']) and not any(term in concept_lower for term in ['cost', 'expense']):
                 return "revenue"
-            # Cost indicators  
+            # Cost indicators
             elif any(term in concept_lower for term in ['cost of', 'cogs']):
                 return "cost"
             # Gross profit
@@ -666,7 +666,7 @@ class StatementOrderingManager:
 
                 # IMPORTANT: If we found a template position for a concept,
                 # also apply it to the corresponding label (and vice versa)
-                # This ensures consistent ordering regardless of whether the 
+                # This ensures consistent ordering regardless of whether the
                 # stitcher uses concept or label as the key
                 if is_concept and corresponding_label and corresponding_label in concepts:
                     template_order[corresponding_label] = template_pos
@@ -675,7 +675,7 @@ class StatementOrderingManager:
 
         return template_order
 
-    def _apply_reference_ordering(self, concepts: set, statements: List[Dict], 
+    def _apply_reference_ordering(self, concepts: set, statements: List[Dict],
                                  template_positioned: Dict[str, float]) -> Dict[str, float]:
         """Apply reference statement ordering for remaining concepts"""
         reference_order = self.reference_strategy.establish_reference_order(statements)
@@ -701,7 +701,7 @@ class StatementOrderingManager:
 
         return final_order
 
-    def _consolidate_section_ordering(self, semantic_positioned: Dict[str, float], 
+    def _consolidate_section_ordering(self, semantic_positioned: Dict[str, float],
                                      template_positioned: Dict[str, float],
                                      statements: List[Dict]) -> Dict[str, float]:
         """
@@ -757,7 +757,7 @@ class StatementOrderingManager:
                     section_base_pos = 950.0
 
                 # Ensure all items in this section stay grouped together
-                for i, item in enumerate(sorted(section_template_items, 
+                for i, item in enumerate(sorted(section_template_items,
                                                key=lambda x: template_items.get(x, 999.0))):
                     final_ordering[item] = section_base_pos + i * 0.1
 
@@ -823,7 +823,7 @@ class StatementOrderingManager:
         # For labels, use fuzzy matching
         return self._labels_match(concept, template_concept)
 
-    def _get_section_ranges(self, final_ordering: Dict[str, float], 
+    def _get_section_ranges(self, final_ordering: Dict[str, float],
                            template_sections: Dict[str, List[str]]) -> List[Tuple[float, float, str]]:
         """Get the position ranges occupied by each template section"""
         ranges = []
@@ -838,7 +838,7 @@ class StatementOrderingManager:
 
         return sorted(ranges)
 
-    def _find_insertion_point(self, desired_position: float, 
+    def _find_insertion_point(self, desired_position: float,
                              section_ranges: List[Tuple[float, float, str]]) -> float:
         """Find appropriate insertion point that doesn't break template sections"""
 

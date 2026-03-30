@@ -48,14 +48,14 @@ class StitchedFactsView:
             return getattr(self.xbrls.xbrl_list[0], 'entity_name', 'Unknown Entity')
         return 'Unknown Entity'
 
-    @property 
+    @property
     def document_type(self):
         """Get document type from entity info."""
         return self.xbrls.entity_info.get('document_type', 'Multi-Period Stitched')
 
-    def get_facts(self, 
-                  max_periods: int = 8, 
-                  standard: bool = True, 
+    def get_facts(self,
+                  max_periods: int = 8,
+                  standard: bool = True,
                   statement_types: Optional[List[str]] = None) -> List[Dict[str, Any]]:
         """
         Extract facts from stitched statements.
@@ -74,7 +74,7 @@ class StitchedFactsView:
             return self._facts_cache
 
         statement_types = statement_types or [
-            'IncomeStatement', 'BalanceSheet', 'CashFlowStatement', 
+            'IncomeStatement', 'BalanceSheet', 'CashFlowStatement',
             'StatementOfEquity', 'ComprehensiveIncome'
         ]
 
@@ -105,8 +105,8 @@ class StitchedFactsView:
 
         return all_facts
 
-    def _extract_facts_from_stitched_data(self, 
-                                          stitched_data: Dict[str, Any], 
+    def _extract_facts_from_stitched_data(self,
+                                          stitched_data: Dict[str, Any],
                                           statement_type: str) -> List[Dict[str, Any]]:
         """
         Convert stitched statement data back to fact-like records for querying.
@@ -298,7 +298,7 @@ class StitchedFactQuery(FactQuery):
         """
         # Query both the standardized label and original concept
         self._filters.append(
-            lambda f: (f.get('label') == concept_name or 
+            lambda f: (f.get('label') == concept_name or
                       concept_name.lower() in f.get('label', '').lower() or
                       concept_name.lower() in f.get('concept', '').lower())
         )
@@ -533,8 +533,8 @@ class StitchedFactQuery(FactQuery):
         # Create pivot table with concepts as rows and periods as columns
         if 'concept' in df.columns and 'period_end' in df.columns and 'numeric_value' in df.columns:
             trend_df = df.pivot_table(
-                index=['label', 'concept'], 
-                columns='period_end', 
+                index=['label', 'concept'],
+                columns='period_end',
                 values='numeric_value',
                 aggfunc='first'
             )
@@ -590,7 +590,7 @@ class StitchedFactQuery(FactQuery):
 
         # Order columns
         first_columns = [col for col in
-                         ['concept', 'label', 'original_label', 'value', 'numeric_value', 
+                         ['concept', 'label', 'original_label', 'value', 'numeric_value',
                           'period_start', 'period_end', 'decimals', 'statement_type', 'fiscal_period']
                          if col in df.columns]
         columns = first_columns + [col for col in df.columns

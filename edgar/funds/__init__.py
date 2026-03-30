@@ -50,7 +50,7 @@ def get_fund_with_filings(identifier: str):
     """
     Get fund with filings for backward compatibility.
 
-    This function is maintained for backward compatibility with the 
+    This function is maintained for backward compatibility with the
     legacy funds.py module. New code should use:
 
     - Fund.get_filings() to get filings for a fund
@@ -120,7 +120,7 @@ __all__ = [
     'resolve_fund_identifier',
 
     # Functions now implemented directly in the package
-    'get_fund_information', 
+    'get_fund_information',
     'is_fund_ticker',
     'parse_fund_data',
 

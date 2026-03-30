@@ -50,7 +50,7 @@ def count_facts_for_period(xbrl_instance, period_key: str, statement_type: Optio
             if period_data.get('type') == 'instant' and period_data.get('instant') == period_date:
                 fact_count += 1
         elif period_type == 'duration':
-            if (period_data.get('type') == 'duration' and 
+            if (period_data.get('type') == 'duration' and
                 period_data.get('startDate') == start_date and
                 period_data.get('endDate') == end_date):
                 fact_count += 1
@@ -67,7 +67,7 @@ def get_essential_concepts_for_statement(statement_type: str) -> Set[str]:
     essential_concepts = {
         'BalanceSheet': {
             # Core balance sheet items
-            'Assets', 'AssetsCurrent', 
+            'Assets', 'AssetsCurrent',
             'Liabilities', 'LiabilitiesCurrent',
             'StockholdersEquity', 'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
             # Common important items
@@ -94,7 +94,7 @@ def get_essential_concepts_for_statement(statement_type: str) -> Set[str]:
         'CashFlowStatement': {
             # Core cash flow items
             'NetCashProvidedByUsedInOperatingActivities',
-            'NetCashProvidedByUsedInInvestingActivities', 
+            'NetCashProvidedByUsedInInvestingActivities',
             'NetCashProvidedByUsedInFinancingActivities',
             'CashAndCashEquivalentsPeriodIncreaseDecrease',
             # Common important items
@@ -173,7 +173,7 @@ def check_period_data_quality(xbrl_instance, period_key: str, statement_type: st
                             found_essentials.add(concept)
                             concept_found = True
                     else:
-                        if (period_data.get('type') == 'duration' and 
+                        if (period_data.get('type') == 'duration' and
                             period_data.get('startDate') == start_date and
                             period_data.get('endDate') == end_date):
                             found_essentials.add(concept)
@@ -237,8 +237,8 @@ def check_period_data_quality(xbrl_instance, period_key: str, statement_type: st
     }
 
 
-def filter_periods_with_data(xbrl_instance, periods: List[Tuple[str, str]], 
-                            statement_type: str, 
+def filter_periods_with_data(xbrl_instance, periods: List[Tuple[str, str]],
+                            statement_type: str,
                             min_fact_count: int = 10) -> List[Tuple[str, str]]:
     """
     Filter periods to only include those with sufficient data.
@@ -275,7 +275,7 @@ def determine_investor_preferred_periods(xbrl_instance, statement_type: str) -> 
 
     For Annual Reports:
     1. Current fiscal year
-    2. Prior fiscal year (YoY comparison) 
+    2. Prior fiscal year (YoY comparison)
     3. Two years ago (3-year trend)
 
     For Quarterly Reports:
@@ -293,8 +293,8 @@ def determine_investor_preferred_periods(xbrl_instance, statement_type: str) -> 
 
     # Filter for data availability
     periods_with_data = filter_periods_with_data(
-        xbrl_instance, 
-        base_periods, 
+        xbrl_instance,
+        base_periods,
         statement_type,
         min_fact_count=10
     )

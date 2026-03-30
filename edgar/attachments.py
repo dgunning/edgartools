@@ -550,7 +550,7 @@ class Attachments:
             if doc.display_extension == ".html" or doc.display_extension == '.htm':
                 return doc
         """
-        Most filings have html primary documents. Some don't. 
+        Most filings have html primary documents. Some don't.
         E.g. Form's 3,4,5 do when loaded directly from edgar but not when loaded from local files
         However, there are unusual filings with endings like ".fil" that require a return. So return the first one
         """

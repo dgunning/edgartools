@@ -129,7 +129,7 @@ def set_local_storage_path(path: Union[str, Path]) -> None:
         >>> # First create the directory
         >>> os.makedirs("/tmp/edgar_data", exist_ok=True)
         >>> set_local_storage_path("/tmp/edgar_data")
-        >>> 
+        >>>
         >>> # Or use an existing directory
         >>> set_local_storage_path(Path.home() / "Documents")
     """
@@ -357,10 +357,10 @@ def download_filings(filing_date: Optional[str] = None,
                         log.warning('Skipping %s. Already exists', bulk_file_directory)
                         continue
 
-                # Optimization: If we have specific accession numbers, check if all the ones 
+                # Optimization: If we have specific accession numbers, check if all the ones
                 # for this specific filing date already exist locally
                 if accession_numbers and filings is not None:
-                    # Convert YYYYMMDD to YYYY-MM-DD format 
+                    # Convert YYYYMMDD to YYYY-MM-DD format
                     formatted_date = f"{filing_date_str[:4]}-{filing_date_str[4:6]}-{filing_date_str[6:8]}"
 
                     # Filter accession numbers to only those for this specific filing date
@@ -474,7 +474,7 @@ def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], 
         undashed_accession = file_accession.replace('-', '')
 
         # Check if this file matches our filter
-        matches_filter = (undashed_accession in normalized_accession_numbers or 
+        matches_filter = (undashed_accession in normalized_accession_numbers or
                          file_accession in accession_numbers)
 
         # Check if this file existed before this extraction

@@ -44,7 +44,7 @@ PROFESSIONAL_SCHEME = {
     "regular_item": "",
     "low_confidence_item": "italic",  # Use italic instead of dim
     "positive_value": "green",
-    "negative_value": "red", 
+    "negative_value": "red",
     "total_value_prefix": "bold",
     "separator": "blue",
     "company_name": "bold bright_white",

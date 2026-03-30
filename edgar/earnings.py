@@ -1337,7 +1337,7 @@ class EarningsRelease:
         Returns:
             String optimized for LLM input
         """
-        lines = [f"=== Earnings Release ==="]
+        lines = ["=== Earnings Release ==="]
         lines.append(f"Document: {self.attachment.document}")
         lines.append(f"Scale: {self.detected_scale.name.lower()}")
         lines.append("")

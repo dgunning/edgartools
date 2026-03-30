@@ -68,7 +68,7 @@ def extract_dates(date_str: str) -> Tuple[Optional[datetime.datetime], Optional[
     except ValueError as e:
         raise InvalidDateException(f"""
         Cannot extract a date or date range from string {date_str}
-        Provide either 
+        Provide either
             1. A date in the format "YYYY-MM-DD" e.g. "2022-10-27"
             2. A date range in the format "YYYY-MM-DD:YYYY-MM-DD" e.g. "2022-10-01:2022-10-27"
             3. A partial date range "YYYY-MM-DD:" to specify dates after the value e.g.  "2022-10-01:"

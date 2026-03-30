@@ -189,7 +189,7 @@ class StructuredStatement:
         # Statement type mapping for better display
         statement_names = {
             'IncomeStatement': 'Income Statement',
-            'BalanceSheet': 'Balance Sheet', 
+            'BalanceSheet': 'Balance Sheet',
             'CashFlow': 'Cash Flow Statement',
             'StatementsOfComprehensiveIncome': 'Comprehensive Income',
             'StatementsOfShareholdersEquity': 'Shareholders Equity'
@@ -407,7 +407,7 @@ class StatementBuilder:
         self.canonical_structures = load_canonical_structures()
         self.virtual_trees = load_virtual_trees()
 
-    def build_statement(self, 
+    def build_statement(self,
                        facts: List[FinancialFact],
                        statement_type: str,
                        fiscal_year: Optional[int] = None,
@@ -440,7 +440,7 @@ class StatementBuilder:
         if use_canonical and statement_type in self.virtual_trees:
             # Build using canonical structure
             items = self._build_with_canonical(
-                fact_map, 
+                fact_map,
                 self.virtual_trees[statement_type],
                 include_missing
             )
@@ -468,7 +468,7 @@ class StatementBuilder:
             facts_total=len(facts)
         )
 
-    def _filter_facts(self, facts: List[FinancialFact], 
+    def _filter_facts(self, facts: List[FinancialFact],
                      statement_type: str,
                      fiscal_year: Optional[int],
                      fiscal_period: Optional[str]) -> List[FinancialFact]:
@@ -525,7 +525,7 @@ class StatementBuilder:
         # Process root nodes
         for root_concept in virtual_tree.get('roots', []):
             item = self._build_canonical_item(
-                root_concept, 
+                root_concept,
                 virtual_tree['nodes'],
                 fact_map,
                 processed,
@@ -685,7 +685,7 @@ class StatementBuilder:
 
         return items
 
-    def _build_fact_item(self, concept: str, 
+    def _build_fact_item(self, concept: str,
                         fact_map: Dict[str, FinancialFact],
                         hierarchy: Dict[str, List[str]],
                         depth: int = 0) -> Optional[StatementItem]:

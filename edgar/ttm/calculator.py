@@ -414,16 +414,16 @@ class TTMCalculator:
 
     def _is_additive_concept(self, fact: FinancialFact) -> bool:
         """Check if a fact represents an additive concept (safe for derivation).
-        
+
         Derivation (e.g., Q4 = FY - YTD_9M) relies on the concept being additive over time.
         Non-additive concepts cannot be subtracted to find a period-specific value.
-        
+
         Returns False for:
         - Instant facts (Assets, Equity) - point-in-time, not flows
         - Share counts (UnitType.SHARES) - not additive
         - Ratios/Rates (UnitType.RATIO) - averages, not sums
         - Per-share metrics (EPS) - derived from Income/Shares, shares change
-        
+
         Returns True for:
         - Duration monetary flows (Revenue, Net Income) - truly additive
         """

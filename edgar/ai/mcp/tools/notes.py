@@ -122,7 +122,7 @@ async def edgar_notes(
         if not filings or len(filings) == 0:
             return error(
                 f"No {form} filings found for {company}",
-                suggestions=[f"Try form='10-Q' for quarterly", "Use edgar_search to check available filings"]
+                suggestions=["Try form='10-Q' for quarterly", "Use edgar_search to check available filings"]
             )
         filing = filings[0]
     except Exception as e:
@@ -205,7 +205,7 @@ async def edgar_notes(
         return success(
             result,
             next_steps=[
-                f"Use edgar_notes with topic='debt' (or any note title) to drill into a specific note",
+                "Use edgar_notes with topic='debt' (or any note title) to drill into a specific note",
                 f"Use edgar_company with include=['financials'] for {company} financial data",
             ]
         )

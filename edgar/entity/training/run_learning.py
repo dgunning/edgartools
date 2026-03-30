@@ -986,12 +986,12 @@ class ConceptLearner:
         logger.info(f"Generated outputs in {output_dir}")
         logger.info(f"  - learned_mappings.json: {len(learned_mappings)} concepts")
         logger.info(f"  - virtual_trees.json: {len(virtual_trees)} statement types")
-        logger.info(f"  - statement_mappings_v1.json")
-        logger.info(f"  - canonical_structures.json")
-        logger.info(f"  - learning_summary.json")
-        logger.info(f"  - structural_learning_report.md")
+        logger.info("  - statement_mappings_v1.json")
+        logger.info("  - canonical_structures.json")
+        logger.info("  - learning_summary.json")
+        logger.info("  - structural_learning_report.md")
         logger.info(f"  - concept_linkages.json: {linkages['metadata']['multi_statement_concepts']} multi-statement concepts")
-        logger.info(f"  - learning_statistics.json: comprehensive stats with outliers")
+        logger.info("  - learning_statistics.json: comprehensive stats with outliers")
 
         return summary
 
@@ -1211,7 +1211,7 @@ def main():
     print("="*50)
     print(f"Companies processed: {summary['successful_companies']}/{summary['companies_processed']}")
     print(f"Total observations: {summary['total_observations']}")
-    print(f"Canonical concepts by statement:")
+    print("Canonical concepts by statement:")
     for stmt, count in summary['canonical_concepts'].items():
         print(f"  - {stmt}: {count}")
     print(f"\nOutput files written to: {output_dir}")

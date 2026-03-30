@@ -361,7 +361,7 @@ def _extract_8k_section(obj, section: str) -> Optional[str]:
                 return "This 8-K does not contain earnings data."
             parts = []
             if hasattr(obj, 'earnings') and obj.earnings:
-                parts.append(f"Earnings data available")
+                parts.append("Earnings data available")
             for name, method in [("Income Statement", "income_statement"),
                                  ("Balance Sheet", "balance_sheet"),
                                  ("Cash Flow", "cash_flow_statement")]:

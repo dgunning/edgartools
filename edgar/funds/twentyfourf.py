@@ -288,7 +288,7 @@ class FundFeeNotice(XmlFiling):
 
     def __rich__(self):
         title = f"{self.fund_name or self.company}  {self.filing_date}"
-        subtitle = f"24F-2NT  Annual Notice of Securities Sold"
+        subtitle = "24F-2NT  Annual Notice of Securities Sold"
 
         t = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
         t.add_column("field", style="bold deep_sky_blue1", min_width=22)

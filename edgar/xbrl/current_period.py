@@ -1,7 +1,7 @@
 """
 Current Period API - Convenient access to current period financial data.
 
-This module provides the CurrentPeriodView class that offers simplified access 
+This module provides the CurrentPeriodView class that offers simplified access
 to the most recent period's financial data without comparative information,
 addressing GitHub issue #425.
 
@@ -198,7 +198,7 @@ class CurrentPeriodView:
         """
         # Statements that use instant periods (point in time)
         instant_statements = {
-            'BalanceSheet', 
+            'BalanceSheet',
             'StatementOfEquity',
             'StatementOfFinancialPosition'
         }
@@ -206,7 +206,7 @@ class CurrentPeriodView:
         # Statements that use duration periods (period of time)
         duration_statements = {
             'IncomeStatement',
-            'CashFlowStatement', 
+            'CashFlowStatement',
             'ComprehensiveIncome',
             'StatementOfOperations',
             'StatementOfCashFlows'
@@ -808,7 +808,7 @@ class CurrentPeriodView:
 
                 if raw_data:
                     # Count items with values
-                    items_with_values = sum(1 for item in raw_data 
+                    items_with_values = sum(1 for item in raw_data
                                           if period_for_stmt in item.get('values', {}))
 
                     info['statements'][stmt_type] = {

@@ -66,7 +66,7 @@ __all__ = [
 class MarketCapTier(Enum):
     """Market cap tiers for company classification."""
     LARGE_CAP = "large_cap"      # Usually > $10B
-    MID_CAP = "mid_cap"          # Usually $2B - $10B  
+    MID_CAP = "mid_cap"          # Usually $2B - $10B
     SMALL_CAP = "small_cap"      # Usually $300M - $2B
     MICRO_CAP = "micro_cap"      # Usually < $300M
 
@@ -400,12 +400,12 @@ def get_popular_companies(tier: Optional[PopularityTier] = None) -> pd.DataFrame
 
         # Merge to get exchange information
         result = popular_df.merge(
-            all_companies[['cik', 'exchange']], 
-            on='cik', 
+            all_companies[['cik', 'exchange']],
+            on='cik',
             how='left'
         )
 
-        # Fill missing exchanges with 'Unknown' 
+        # Fill missing exchanges with 'Unknown'
         result['exchange'] = result['exchange'].fillna('Unknown')
 
         # Apply tier filtering
@@ -425,8 +425,8 @@ def get_popular_companies(tier: Optional[PopularityTier] = None) -> pd.DataFrame
 
 
 def get_random_sample(
-    companies: Optional[pd.DataFrame] = None, 
-    n: int = 100, 
+    companies: Optional[pd.DataFrame] = None,
+    n: int = 100,
     random_state: Optional[int] = None
 ) -> pd.DataFrame:
     """
@@ -508,7 +508,7 @@ def get_stratified_sample(
             # Sample from this category
             if len(category_companies) > 0:
                 category_sample = get_random_sample(
-                    category_companies, 
+                    category_companies,
                     min(category_n, len(category_companies)),
                     random_state
                 )
@@ -882,7 +882,7 @@ def get_faang_companies() -> pd.DataFrame:
 def get_tech_giants() -> pd.DataFrame:
     """Get major technology companies."""
     tech_tickers = [
-        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 
+        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA',
         'NFLX', 'ADBE', 'CRM', 'ORCL', 'INTC', 'CSCO'
     ]
     return filter_companies(get_all_companies(), ticker_list=tech_tickers)

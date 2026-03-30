@@ -9,7 +9,7 @@ from edgar.documents.strategies.xbrl_extraction import XBRLExtractor
 
 __all__ = [
     'DocumentBuilder',
-    'HeaderDetectionStrategy', 
+    'HeaderDetectionStrategy',
     'TableProcessor',
     'XBRLExtractor'
 ]

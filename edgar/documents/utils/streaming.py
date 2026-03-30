@@ -20,7 +20,7 @@ from edgar.documents.types import SemanticType
 class StreamingParser:
     """
     Streaming parser for large HTML documents.
-    
+
     Processes documents in chunks to minimize memory usage
     while maintaining parse quality.
     """
@@ -34,7 +34,7 @@ class StreamingParser:
     def __init__(self, config: ParserConfig, strategies: Dict[str, Any]):
         """
         Initialize streaming parser.
-        
+
         Args:
             config: Parser configuration
             strategies: Parsing strategies to use

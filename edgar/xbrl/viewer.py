@@ -369,7 +369,7 @@ class FilingViewer:
         custom_count = self._metalinks.stats.get('key_custom', 0)
         parts.append(Text(f"\nConcepts: {tag_count} tags ({std_count} standard, {custom_count} custom)", style="dim"))
 
-        title = f"SEC Viewer"
+        title = "SEC Viewer"
         return Panel(
             Group(*parts),
             title=f"[bold]{title}[/bold]",

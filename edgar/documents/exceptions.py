@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional
 class ParsingError(Exception):
     """Base exception for parsing errors."""
 
-    def __init__(self, 
-                 message: str, 
+    def __init__(self,
+                 message: str,
                  context: Optional[Dict[str, Any]] = None,
                  suggestions: Optional[list] = None):
         super().__init__(message)

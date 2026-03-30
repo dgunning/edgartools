@@ -28,7 +28,7 @@ from edgar.documents.types import ParseContext, SemanticType, Style
 class DocumentBuilder:
     """
     Builds Document node tree from parsed HTML.
-    
+
     Handles the conversion of HTML elements into structured nodes
     with proper hierarchy and metadata.
     """
@@ -47,7 +47,7 @@ class DocumentBuilder:
         'small', 'mark', 'del', 'ins', 'sub', 'sup',
         'code', 'kbd', 'var', 'samp', 'abbr', 'cite',
         'q', 'time', 'font',
-        # IXBRL inline elements for simple values - should not break text flow  
+        # IXBRL inline elements for simple values - should not break text flow
         'ix:nonfraction', 'ix:footnote', 'ix:fraction'
     }
 
@@ -61,7 +61,7 @@ class DocumentBuilder:
     def __init__(self, config: ParserConfig, strategies: Dict[str, Any]):
         """
         Initialize document builder.
-        
+
         Args:
             config: Parser configuration
             strategies: Dictionary of parsing strategies
@@ -78,10 +78,10 @@ class DocumentBuilder:
     def build(self, tree: HtmlElement) -> DocumentNode:
         """
         Build document from HTML tree.
-        
+
         Args:
             tree: Parsed HTML tree
-            
+
         Returns:
             Document root node
         """
@@ -106,11 +106,11 @@ class DocumentBuilder:
     def _process_element(self, element: HtmlElement, parent: Node) -> Optional[Node]:
         """
         Process HTML element into node.
-        
+
         Args:
             element: HTML element to process
             parent: Parent node
-            
+
         Returns:
             Created node or None if skipped
         """
@@ -357,7 +357,7 @@ class DocumentBuilder:
         # Get text content first - all page numbers should be short
         text_content = element.text_content().strip()
 
-        # Must be short content (1-8 chars to handle "Page X" format) 
+        # Must be short content (1-8 chars to handle "Page X" format)
         if len(text_content) > 8 or len(text_content) == 0:
             return False
 

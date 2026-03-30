@@ -334,7 +334,7 @@ class ContextualDetector(HeaderDetector):
 class HeaderDetectionStrategy:
     """
     Multi-strategy header detection.
-    
+
     Combines multiple detection methods with weighted voting.
     """
 
@@ -365,11 +365,11 @@ class HeaderDetectionStrategy:
     def detect(self, element: HtmlElement, context: ParseContext) -> Optional[HeaderInfo]:
         """
         Detect if element is a header using multiple strategies.
-        
+
         Args:
             element: HTML element to check
             context: Current parsing context
-            
+
         Returns:
             HeaderInfo if element is detected as header, None otherwise
         """
