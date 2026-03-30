@@ -326,10 +326,10 @@ class Section:
         """
         Parse section name to extract part and item identifiers.
 
-        Handles both 10-Q part-aware names and 10-K simple names.
+        Handles both internal underscore names and display-style TOC names.
 
         Args:
-            section_name: Section identifier (e.g., "part_i_item_1", "item_1a", "risk_factors")
+            section_name: Section identifier (e.g., "part_i_item_1", "item_1a", "Item 1A", "Part II Item 9A")
 
         Returns:
             Tuple of (part, item) where:
@@ -343,22 +343,30 @@ class Section:
             ("II", "1A")
             >>> Section.parse_section_name("item_7")
             (None, "7")
+            >>> Section.parse_section_name("Item 7A")
+            (None, "7A")
+            >>> Section.parse_section_name("Part II Item 9A")
+            ("II", "9A")
             >>> Section.parse_section_name("risk_factors")
             (None, None)
         """
         import re
 
-        section_lower = section_name.lower()
+        section_lower = section_name.lower().strip()
 
-        # Match 10-Q format: "part_i_item_1", "part_ii_item_1a"
-        part_item_match = re.match(r'part_([ivx]+)_item_(\d+[a-z]?)', section_lower)
+        # Match part-aware formats:
+        # - "part_i_item_1", "part_ii_item_1a"
+        # - "Part I Item 1", "Part II Item 9A"
+        part_item_match = re.match(r'part[\s_]+([ivx]+)[\s_]+item[\s_]+(\d+[a-z]?)\b', section_lower)
         if part_item_match:
             part_roman = part_item_match.group(1).upper()
             item_num = part_item_match.group(2).upper()
             return (part_roman, item_num)
 
-        # Match 10-K format: "item_1", "item_1a", "item_7"
-        item_match = re.match(r'item_(\d+[a-z]?)', section_lower)
+        # Match item-only formats:
+        # - "item_1", "item_1a", "item_7"
+        # - "Item 1", "Item 1A", "Item 7A"
+        item_match = re.match(r'item[\s_]+(\d+[a-z]?)\b', section_lower)
         if item_match:
             item_num = item_match.group(1).upper()
             return (None, item_num)

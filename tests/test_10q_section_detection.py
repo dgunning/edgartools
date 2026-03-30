@@ -111,6 +111,14 @@ class TestSectionParsing:
         assert Section.parse_section_name('item_1') == (None, '1')
         assert Section.parse_section_name('item_1a') == (None, '1A')
         assert Section.parse_section_name('item_7') == (None, '7')
+        assert Section.parse_section_name('Item 5') == (None, '5')
+        assert Section.parse_section_name('Item 1A') == (None, '1A')
+
+    def test_parse_display_style_part_item_name(self):
+        """Test parsing display-style part+item names from TOC analyzers."""
+        from edgar.documents.document import Section
+
+        assert Section.parse_section_name('Part II Item 9A') == ('II', '9A')
 
     def test_parse_non_item_section_name(self):
         """Test parsing non-item section names."""
