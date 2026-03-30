@@ -25,6 +25,7 @@ Usage::
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
@@ -51,15 +52,32 @@ CONCEPT_NONACCRUAL_LOANS_FV = (
     'us-gaap:FairValueOptionLoansHeldAsAssetsAggregateAmountInNonaccrualStatus'
 )
 
-# Text patterns indicating non-accrual status in footnotes.
-# "non-income producing" alone is NOT included — that's a broader category
-# covering equity/warrants that are structurally non-income-producing.
-# MAIN uses "Non-accrual and non-income producing" which still matches
-# on the "non-accrual" substring.
-NONACCRUAL_PATTERNS = [
-    'non-accrual',
-    'nonaccrual',
-    'non accrual',
+# Negation patterns — footnotes that explicitly deny non-accrual status.
+# These must be checked BEFORE affirmative patterns.
+# Examples: "there were no investments on non-accrual status",
+#           "the Company had no portfolio company investment on non-accrual"
+NEGATION_PATTERNS = [
+    r'\bno\s+(?:investments?|loans?|portfolio\s+company).{0,40}non[- ]?accrual',
+    r'\bnone\b.{0,40}non[- ]?accrual',
+    r'(?:were|was|is|are)\s+not\s+(?:on\s+)?non[- ]?accrual',
+    r'did\s+not\s+have\s+any.{0,40}non[- ]?accrual',
+    r'\bzero\b.{0,40}non[- ]?accrual',
+    r'there\s+were\s+no.{0,40}non[- ]?accrual',
+]
+
+# Affirmative patterns — footnotes that directly state an investment is on non-accrual.
+# Uses a whitelist approach: a footnote must contain an explicit affirmative statement
+# to be treated as a non-accrual flag. This avoids false positives from rollforward
+# tables or policy disclosures that mention "non-accrual" in passing.
+AFFIRMATIVE_PATTERNS = [
+    r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual\s+status',
+    r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual(?:\s|[,.])',
+    r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual\s+status',
+    r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual(?:\s|[,.])',
+    r'(?:loan|debt|investment)\s+was\s+(?:on|placed\s+on)\s+non[- ]?accrual',
+    r'(?:loan|debt|investment)\s+is\s+(?:on|currently\s+on)\s+non[- ]?accrual',
+    r'^non[- ]?accrual\s+and\s+non[- ]?income',
+    r'the\s+investment\s+is\s+on\s+non[- ]?accrual',
 ]
 
 
@@ -260,6 +278,11 @@ def extract_nonaccrual(
     if xbrl is None:
         return None
 
+    # Use filing's reporting period as anchor when no explicit period given.
+    # This avoids resolving to filing dates or DEI dates instead of balance sheet dates.
+    if period is None:
+        period = getattr(filing, 'period_of_report', None)
+
     return _extract_nonaccrual_from_xbrl(
         xbrl,
         period=period,
@@ -294,9 +317,13 @@ def _extract_nonaccrual_from_xbrl(
         f['fact_id']: f for f in all_facts if f.get('fact_id')
     }
 
-    # Determine period
+    # Determine period — _determine_latest_instant is only reached when
+    # extract_nonaccrual couldn't provide a period_of_report anchor
     if period is None:
         period = _determine_latest_instant(all_facts)
+    else:
+        # Validate that the provided period has investment data, fall back if not
+        period = _determine_latest_instant(all_facts, anchor_period=period)
     if period is None:
         return None
 
@@ -372,10 +399,19 @@ def _extract_from_footnotes(
             continue
 
         text_lower = footnote.text.lower()
-        if not any(pattern in text_lower for pattern in NONACCRUAL_PATTERNS):
+
+        # Skip footnotes that explicitly deny non-accrual status.
+        # e.g., "there were no investments on non-accrual status"
+        if any(re.search(p, text_lower) for p in NEGATION_PATTERNS):
             continue
 
-        # This footnote marks non-accrual investments.
+        # Require an explicit affirmative statement about non-accrual status.
+        # This avoids false positives from rollforward tables or policy
+        # disclosures that mention "non-accrual" in passing.
+        if not any(re.search(p, text_lower) for p in AFFIRMATIVE_PATTERNS):
+            continue
+
+        # This footnote affirms non-accrual status for linked investments.
         # Follow related_fact_ids to find linked investment facts.
         for fact_id in footnote.related_fact_ids:
             enriched = fact_by_id.get(fact_id)
@@ -529,26 +565,47 @@ def _resolve_filing(source, form: str = "10-K"):
         raise TypeError(f"Expected Filing or BDCEntity, got {type(source).__name__}")
 
 
-def _determine_latest_instant(facts: List[dict]) -> Optional[str]:
-    """Find the most recent period_instant that has investment data.
+def _determine_latest_instant(facts: List[dict], anchor_period: Optional[str] = None) -> Optional[str]:
+    """Find the best period_instant for investment data extraction.
 
-    Uses only facts on the InvestmentIdentifierAxis to avoid picking up
-    DEI or other metadata dates (e.g. 2026-02-28 for a 2025-12-31 filing).
+    When *anchor_period* is provided (typically from ``filing.period_of_report``),
+    it is used directly if investment facts exist on that date.  This avoids
+    resolving to filing dates, DEI dates, or other non-balance-sheet instants.
+
+    When no anchor is given or the anchor has no investment data, falls back to
+    the most common instant among investment facts (not max, which is susceptible
+    to outlier dates like filing dates).
     """
-    instants = set()
+    # Collect instants that have investment data
+    from collections import Counter
+    investment_instants: Counter = Counter()
     for f in facts:
         pi = f.get('period_instant')
         if pi and f.get(DIM_KEY):
-            instants.add(pi)
-    if not instants:
-        # Fallback: any instant period
-        for f in facts:
-            pi = f.get('period_instant')
-            if pi:
-                instants.add(pi)
-    if not instants:
+            investment_instants[pi] += 1
+
+    # If anchor period has investment data, use it directly
+    if anchor_period and anchor_period in investment_instants:
+        return anchor_period
+
+    # Pick the most common instant among investment facts
+    if investment_instants:
+        return investment_instants.most_common(1)[0][0]
+
+    # Fallback: no investment-dimensioned facts at all.
+    # Use anchor if it has any facts, otherwise pick the most common instant.
+    all_instants: Counter = Counter()
+    for f in facts:
+        pi = f.get('period_instant')
+        if pi:
+            all_instants[pi] += 1
+    if not all_instants:
         return None
-    return max(instants)
+
+    if anchor_period and anchor_period in all_instants:
+        return anchor_period
+
+    return all_instants.most_common(1)[0][0]
 
 
 def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decimal]:

@@ -107,13 +107,42 @@ class TestHelperFunctions:
         assert _determine_latest_instant(facts) == '2025-12-31'
 
     def test_determine_latest_instant_falls_back_when_no_dimensions(self):
-        """Fallback: when no facts have the dimension, uses any instant."""
+        """Fallback: when no facts have the dimension, uses most common instant."""
         facts = [
+            {'period_instant': '2024-12-31'},
             {'period_instant': '2024-12-31'},
             {'period_instant': '2025-12-31'},
             {'period_instant': '2024-06-30'},
         ]
+        # 2024-12-31 appears twice — most common wins
+        assert _determine_latest_instant(facts) == '2024-12-31'
+
+    def test_determine_latest_instant_uses_anchor_period(self):
+        """Anchor period from filing.period_of_report takes precedence."""
+        dim_key = 'dim_us-gaap_InvestmentIdentifierAxis'
+        facts = [
+            {'period_instant': '2025-12-31', dim_key: 'inv_1'},
+            {'period_instant': '2025-12-31', dim_key: 'inv_2'},
+            {'period_instant': '2026-03-20', dim_key: 'inv_3'},
+        ]
+        # Without anchor, most common (2025-12-31) wins
         assert _determine_latest_instant(facts) == '2025-12-31'
+        # With anchor matching investment data, uses anchor
+        assert _determine_latest_instant(facts, anchor_period='2025-12-31') == '2025-12-31'
+        # Anchor with no investment data falls back to most common
+        assert _determine_latest_instant(facts, anchor_period='2024-12-31') == '2025-12-31'
+
+    def test_determine_latest_instant_anchor_fallback_no_dimensions(self):
+        """Anchor period used even when no investment-dimensioned facts exist."""
+        facts = [
+            {'period_instant': '2025-12-31'},
+            {'period_instant': '2025-12-31'},
+            {'period_instant': '2026-03-10'},
+        ]
+        # Anchor exists in all_instants, use it
+        assert _determine_latest_instant(facts, anchor_period='2025-12-31') == '2025-12-31'
+        # Anchor not in facts, fall back to most common
+        assert _determine_latest_instant(facts, anchor_period='2024-12-31') == '2025-12-31'
 
     def test_determine_latest_instant_empty(self):
         assert _determine_latest_instant([]) is None
