@@ -72,52 +72,56 @@ class TOCAnalyzer:
 
             toc_sections = []
             current_part = None  # Track current part context for 10-Q filings
-            part_pattern = re.compile(r'^\s*Part\s+([IVX]+)\b', re.IGNORECASE)
 
             for link in anchor_links:
                 href = link.get('href', '').strip()
                 text = (link.text_content() or '').strip()
 
+                # Only internal anchors can define TOC section boundaries.
+                if not href.startswith('#'):
+                    continue
+
+                if not text:
+                    continue
+
                 # Check if this link or its row represents a part header
                 # Part headers in 10-Q TOCs typically appear as separate rows: "Part I", "Part II"
-                part_match = part_pattern.match(text)
-                if part_match:
+                explicit_part = self._extract_part_context(text)
+                if explicit_part and not re.search(r'item\s+\d+[a-z]?', text, re.IGNORECASE):
                     # Update current part context
-                    current_part = f"Part {part_match.group(1).upper()}"
+                    current_part = explicit_part
                     # Don't create a section for the part header itself
                     continue
 
-                # Look for internal anchor links
-                if href.startswith('#') and text:
-                    anchor_id = href[1:]  # Remove #
+                anchor_id = href[1:]  # Remove #
 
-                    # Try to find item number in preceding context (for table-based TOCs)
-                    preceding_item = self._extract_preceding_item_label(link)
+                # Try to find item number in preceding context (for table-based TOCs)
+                preceding_item = self._extract_preceding_item_label(link)
 
-                    # Infer current part from surrounding TOC row context when part headers
-                    # are standalone rows without links (common in some 10-K filings).
-                    inferred_part = self._infer_part_from_row_context(link)
-                    if inferred_part:
-                        current_part = inferred_part
+                # Infer current part from surrounding TOC row context when part headers
+                # are standalone rows without links (common in some 10-K filings).
+                inferred_part = self._infer_part_from_row_context(link)
+                if inferred_part:
+                    current_part = inferred_part
 
-                    # Check if this looks like a section reference (check text, anchor ID, and context)
-                    if self._is_section_link(text, anchor_id, preceding_item):
-                        # Verify target exists
-                        target_elements = find_anchor_targets(tree, anchor_id)
-                        if target_elements:
-                            # Try to extract item number from: anchor ID > preceding context > text
-                            normalized_name = self._normalize_section_name(text, anchor_id, preceding_item)
-                            section_type, order = self._get_section_type_and_order(normalized_name)
+                # Check if this looks like a section reference (check text, anchor ID, and context)
+                if self._is_section_link(text, anchor_id, preceding_item):
+                    # Verify target exists
+                    target_elements = find_anchor_targets(tree, anchor_id)
+                    if target_elements:
+                        # Try to extract item number from: anchor ID > preceding context > text
+                        normalized_name = self._normalize_section_name(text, anchor_id, preceding_item)
+                        section_type, order = self._get_section_type_and_order(normalized_name)
 
-                            toc_section = TOCSection(
-                                name=text,
-                                anchor_id=anchor_id,
-                                normalized_name=normalized_name,
-                                section_type=section_type,
-                                order=order,
-                                part=current_part  # Assign current part context
-                            )
-                            toc_sections.append(toc_section)
+                        toc_section = TOCSection(
+                            name=text,
+                            anchor_id=anchor_id,
+                            normalized_name=normalized_name,
+                            section_type=section_type,
+                            order=order,
+                            part=current_part  # Assign current part context
+                        )
+                        toc_sections.append(toc_section)
 
             # Build mapping prioritizing the most standard section names
             section_mapping = self._build_section_mapping(toc_sections)
@@ -214,6 +218,14 @@ class TOCAnalyzer:
 
         return ''
 
+    def _extract_part_context(self, text: str) -> Optional[str]:
+        """Extract normalized part label from text, e.g., "Part II"."""
+        part_match = re.match(r'^\s*part\s+([ivx]+)\b', text, re.IGNORECASE)
+        if not part_match:
+            return None
+
+        return f"Part {part_match.group(1).upper()}"
+
     def _infer_part_from_row_context(self, link_element) -> Optional[str]:
         """
         Infer part context from nearby table rows.
@@ -223,7 +235,7 @@ class TOCAnalyzer:
         sibling row with a part marker and returns it as context for the current
         linked item row.
         """
-        part_pattern = re.compile(r'^\s*PART\s+([IVX]+)\b', re.IGNORECASE)
+        max_rows_to_scan = 200
 
         try:
             # Find containing row for this link.
@@ -243,12 +255,25 @@ class TOCAnalyzer:
 
             # Search backwards through previous rows for a standalone part header.
             prev = row.getprevious()
-            while prev is not None:
+            rows_scanned = 0
+            while prev is not None and rows_scanned < max_rows_to_scan:
+                rows_scanned += 1
+
                 if prev.tag == 'tr':
-                    prev_text = (prev.text_content() or '').strip()
-                    part_match = part_pattern.match(prev_text)
-                    if part_match:
-                        return f"Part {part_match.group(1).upper()}"
+                    # Check each cell separately to avoid row text concatenation
+                    # artifacts like "PART I3" when a page number is in another cell.
+                    cells = prev.xpath('./td|./th')
+                    if cells:
+                        for cell in cells:
+                            cell_text = (cell.text_content() or '').strip()
+                            part = self._extract_part_context(cell_text)
+                            if part:
+                                return part
+                    else:
+                        prev_text = (prev.text_content() or '').strip()
+                        part = self._extract_part_context(prev_text)
+                        if part:
+                            return part
 
                 prev = prev.getprevious()
 
