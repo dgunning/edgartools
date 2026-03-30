@@ -144,20 +144,135 @@ company.docs.search("financials")  # Search for specific topics
 
 Available on: `Company`, `Filing`, `Filings`, `XBRL`, `Statement`
 
-### .to_context() Method
+### to_context()
 
-Token-efficient output optimized for LLM context windows:
+`to_context()` produces token-efficient structured text for LLM context windows. All financial objects support it, with a `detail` parameter that controls verbosity.
 
 ```python
-company = Company("AAPL")
+from edgar import Company
 
-# Control detail level
-company.to_context(detail='minimal')    # ~100 tokens
-company.to_context(detail='standard')   # ~300 tokens (default)
-company.to_context(detail='full')       # ~500 tokens
+company = Company("MSFT")
+financials = company.get_financials()
 
-# Hard token limit
-company.to_context(max_tokens=200)
+# Control token budget
+financials.income_statement().to_context('minimal')    # ~100 tokens: entity + period + line item count
+financials.income_statement().to_context('standard')   # ~300 tokens (default): adds key line items
+financials.income_statement().to_context('full')       # ~500+ tokens: all rows
 ```
 
-Available on: `Company`, `Filing`, `Filings`, `XBRL`, `Statement`, and most data objects.
+The same pattern works for notes:
+
+```python
+tenk = company.get_filings(form="10-K").latest().obj()
+notes = tenk.notes
+
+notes.to_context('minimal')                          # note titles only
+notes.to_context('standard')                        # + tables + narrative excerpt
+notes['Debt'].to_context('full')                    # everything for one note
+```
+
+**Objects with `to_context()`:**
+
+| Object | `detail` levels | Notes |
+|--------|----------------|-------|
+| `Statement` | minimal / standard / full | Key line items at standard+ |
+| `Note` | minimal / standard / full | Tables + narrative + policies |
+| `Notes` | minimal / standard / full | `focus=` param filters to relevant notes |
+| `RenderedStatement` | minimal / standard / full | Same as Statement |
+| `FilingViewer` | standard / full | SEC viewer navigation context |
+| `NonAccrualResult` | minimal / standard / full | BDC non-accrual analysis context |
+
+### to_markdown()
+
+`to_markdown()` renders financial data as GitHub-Flavored Markdown. Use it when you want formatted output for RAG retrieval, document stores, or direct inclusion in LLM prompts.
+
+```python
+from edgar import Company
+
+company = Company("JPM")
+financials = company.get_financials()
+
+# Full income statement as markdown -- company header + GFM table
+md = financials.income_statement().to_markdown()
+
+# Minimal: table only, no company header (good for chunking)
+md = financials.income_statement().to_markdown(detail='minimal')
+
+# Full: adds source attribution footer
+md = financials.income_statement().to_markdown(detail='full')
+```
+
+The `optimize_for_llm=True` default removes abstract header rows that have no values, keeping tables compact. Set `optimize_for_llm=False` to preserve the full hierarchy.
+
+**For notes**, `to_markdown()` renders tables and prose together:
+
+```python
+tenk = company.get_filings(form="10-K").latest().obj()
+
+# All notes as one markdown document
+md = tenk.notes.to_markdown()
+
+# Focus on specific topics (searches note titles)
+md = tenk.notes.to_markdown(focus='Debt')
+md = tenk.notes.to_markdown(focus=['Debt', 'Revenue'])
+
+# One note
+md = tenk.notes['Income Taxes'].to_markdown(detail='full')
+```
+
+**Individual line items** include a note reference when available:
+
+```python
+stmt = financials.balance_sheet()
+goodwill = stmt['Goodwill']
+print(goodwill.to_markdown())
+# **Goodwill**: 67,886 (2024-09-28), 65,413 (2023-09-30)
+#
+# > Related: Note 7 — Goodwill and Intangible Assets
+```
+
+**Objects with `to_markdown()`:**
+
+| Object | `detail` levels | Key options |
+|--------|----------------|-------------|
+| `Statement` | minimal / standard / full | `optimize_for_llm=True` |
+| `RenderedStatement` | minimal / standard / full | `optimize_for_llm=True` |
+| `Note` | minimal / standard / full | `optimize_for_llm=True` |
+| `Notes` | minimal / standard / full | `focus=` to filter notes |
+| `StatementLineItem` | n/a | `include_note=True` |
+
+### Choosing Between to_context() and to_markdown()
+
+Use `to_context()` when you want **navigation context** -- the LLM needs to understand what's available and where values come from. It uses a compact key-value format and includes discovery hints like "AVAILABLE ACTIONS".
+
+Use `to_markdown()` when you want **content** -- the actual numbers and text in a format suitable for display, storage, or retrieval. It produces standard GFM tables that most LLMs render correctly.
+
+For RAG pipelines:
+
+- Chunk and embed `to_markdown()` output to represent financial statement content
+- Use `to_context()` for the system prompt when you want the LLM to understand document structure before receiving retrieved chunks
+- `Notes.to_markdown(focus='Debt')` is effective for retrieval because it co-locates related tables and narrative
+
+### compare_context()
+
+`FilingViewer.compare_context()` generates an LLM-ready prompt comparing the SEC's own viewer rendering against your XBRL parser output. This is useful for validating that parsed statements match the authoritative SEC display.
+
+```python
+from edgar import Company
+
+filing = Company("GS").get_filings(form="10-K").latest()
+viewer = filing.viewer()
+xbrl = filing.xbrl()
+
+# Get a comparison prompt for the balance sheet
+prompt = viewer.compare_context(xbrl, statement='balance_sheet')
+
+# Pass to an LLM for validation
+# The prompt includes both renderings side by side with instructions
+# to flag any discrepancies in values, labels, or ordering
+print(prompt[:500])
+```
+
+Available statements: `'balance_sheet'`, `'income_statement'`, `'cashflow_statement'`, `'comprehensive_income'`.
+
+The SEC viewer is treated as the authoritative source. The prompt instructs the LLM to flag anything in the XBRL output that differs.
