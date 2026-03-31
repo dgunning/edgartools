@@ -726,6 +726,16 @@ companies:
     archetype: A
     fiscal_year_end: January
     notes: Retail corporation - discount stores, hypermarkets
+    known_divergences:
+      PropertyPlantEquipment:
+        reason: The current mapping us-gaap:PropertyPlantAndEquipmentNet ($119.9B)
+          is the semantically correct Balance Sheet line item for Walmart. The reference
+          value ($139.7B) likely includes Finance Lease Right-of-Use Assets, which
+          under ASC 842 are often reported separately from PPE on the face of the
+          Balance Sheet but aggregated by third-party data providers. Since the primary
+          XBRL concept for PPE Net is already correctly identified, this is a reporting
+          divergence.
+        variance_pct: 14.109116417568574
   COST:
     name: Costco Wholesale Corporation
     cik: 909832
@@ -1996,6 +2006,7 @@ companies:
     - AccountsReceivable
     - AccountsPayable
     - ResearchAndDevelopment
+    - GrossProfit
     street_view_notes:
       ShortTermDebt: 'Hybrid: Commercial GAAP + Dealer Street View'
     notes: Hybrid bank - commercial + significant dealer/trading operations

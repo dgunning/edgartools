@@ -741,7 +741,7 @@ metrics:
           weight: 1.0
         - concept: CostOfGoodsAndServicesSold
           weight: -1.0
-        notes: "GrossProfit = Revenue - COGS (signed formula)"
+        notes: GrossProfit = Revenue - COGS (signed formula)
   ResearchAndDevelopment:
     description: Research and development expense
     standard_tag: ResearchAndDevelopmentExpense
@@ -879,6 +879,11 @@ metrics:
           - IncomeTaxesPaidNet
           - PaymentsToAcquireInvestments
           notes: Auto-solver company-specific via AVGO, 2/3 periods, 0/3 companies
+        WMT:
+          components:
+          - InterestExpenseDebt
+          - wmt:FinanceLeaseAndFinancingObligationInterestExpense
+          notes: Auto-solver company-specific via WMT, 2/3 periods, 0/3 companies
   IncomeTaxExpense:
     description: Income tax provision (expense or benefit)
     standard_tag: IncomeTaxExpenseBenefit
