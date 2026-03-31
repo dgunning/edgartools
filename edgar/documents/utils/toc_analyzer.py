@@ -124,7 +124,7 @@ class TOCAnalyzer:
                         toc_sections.append(toc_section)
 
             # Build mapping prioritizing the most standard section names
-            section_mapping = self._build_section_mapping(toc_sections)
+            section_mapping = self._build_section_mapping(toc_sections, tree=tree)
 
         except Exception:
             # Return empty mapping on error - fallback to other methods
@@ -477,12 +477,17 @@ class TOCAnalyzer:
 
         return result
 
-    def _build_section_mapping(self, toc_sections: List[TOCSection]) -> Dict[str, str]:
+    def _build_section_mapping(self, toc_sections: List[TOCSection],
+                               tree=None) -> Dict[str, str]:
         """Build final section mapping, handling duplicates intelligently.
 
         For 10-Q filings with part context, generates part-aware section names
         like "part_i_item_1" and "part_ii_item_1" to distinguish sections
         with the same item number across different parts.
+
+        When duplicate entries exist for the same section (e.g., "Item 1." and
+        "Business" both normalizing to "Item 1"), validates anchors by checking
+        if the target content matches the expected item heading.
         """
         # Sort sections by order
         toc_sections.sort(key=lambda x: x.order)
@@ -502,14 +507,48 @@ class TOCAnalyzer:
                 # 10-K filings: use normalized name as-is
                 section_name = section.normalized_name
 
-            # Skip if we already have this section (prefer first occurrence)
             if section_name in seen_names:
+                # Duplicate: validate which anchor is better.
+                # Some TOCs have split links: "Item 1." → wrong anchor,
+                # "Business" → correct anchor. Check if the new anchor's
+                # target content matches the expected section heading.
+                if tree is not None and section_name in mapping:
+                    existing_anchor = mapping[section_name]
+                    new_anchor = section.anchor_id
+                    if existing_anchor != new_anchor:
+                        if self._anchor_matches_heading(tree, new_anchor, section.normalized_name):
+                            if not self._anchor_matches_heading(tree, existing_anchor, section.normalized_name):
+                                # New anchor is better — replace
+                                mapping[section_name] = new_anchor
                 continue
 
             mapping[section_name] = section.anchor_id
             seen_names.add(section_name)
 
         return mapping
+
+    def _anchor_matches_heading(self, tree, anchor_id: str, expected_name: str) -> bool:
+        """Check if the content near an anchor target matches the expected section heading."""
+        targets = find_anchor_targets(tree, anchor_id)
+        if not targets:
+            return False
+
+        target = targets[0]
+        # Look at the next few elements for a heading that matches
+        try:
+            following = target.xpath('following::*[string-length(normalize-space(text())) > 3][position() <= 3]')
+            for el in following:
+                el_text = (el.text_content() or '').strip().upper()[:80]
+                # Extract item pattern from expected name (e.g., "Item 1" → "ITEM 1")
+                item_match = re.search(r'item\s+(\d+[a-z]?)', expected_name, re.IGNORECASE)
+                if item_match:
+                    item_pattern = f'ITEM {item_match.group(1).upper()}'
+                    if item_pattern in el_text:
+                        return True
+        except Exception:
+            pass
+
+        return False
 
     def get_section_suggestions(self, html_content: str) -> List[str]:
         """Get list of available sections that can be extracted."""
