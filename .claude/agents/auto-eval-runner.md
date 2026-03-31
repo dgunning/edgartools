@@ -280,7 +280,6 @@ Workers propose AND evaluate on their sub-cohort using in-memory config copies. 
 ```python
 from edgar.xbrl.standardization.tools.auto_eval_loop import (
     propose_and_evaluate_loop, propose_change,
-    make_escalation_propose_fn,
 )
 from edgar.xbrl.standardization.tools.auto_eval import SUB_COHORT_A
 from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
@@ -290,7 +289,7 @@ ledger = ExperimentLedger()
 # Propose AND evaluate on sub-cohort (in-memory, no disk writes)
 evaluated = propose_and_evaluate_loop(
     eval_cohort=SUB_COHORT_A,
-    propose_fn=propose_change,  # or make_escalation_propose_fn(gpt_caller=...)
+    propose_fn=propose_change,
     ledger=ledger,
     max_workers=2,
     worker_id="worker_A",

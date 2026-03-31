@@ -91,23 +91,25 @@ report = run_overnight(
 print_overnight_report(report)
 ```
 
-### Run on Large Cohort (50 companies) with GPT Escalation
+### Run on Large Cohort (50 companies)
 
 ```python
-from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight, make_escalation_propose_fn
+from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight, propose_change
 from edgar.xbrl.standardization.tools.auto_eval import EXPANSION_COHORT_50
 from edgar.xbrl.standardization.tools.auto_eval_dashboard import print_overnight_report
 
 report = run_overnight(
     duration_hours=24,
     eval_cohort=EXPANSION_COHORT_50,  # 50 companies across 7 sectors
-    propose_fn=make_escalation_propose_fn(escalation_threshold=3),
+    propose_fn=propose_change,
     max_workers=1,
 )
 print_overnight_report(report)
 ```
 
 When `eval_cohort` has >=20 companies, tournament mode is auto-disabled (direct eval on the full cohort is sufficient to prevent overfitting).
+
+AI resolution of hard gaps is handled by `run_closed_loop()` Phase 2, which dispatches unresolved gaps to the OpenRouter AI path (gemini-flash-3 / claude-sonnet-4).
 
 ### Dry Run (Preview Only)
 
@@ -126,8 +128,7 @@ print_overnight_report(report)
 | `dry_run` | False | Preview proposals without applying |
 | `snapshot_mode` | True | Use cached yfinance data |
 | `eval_cohort` | QUICK_EVAL_COHORT | List of tickers to evaluate. Use EXPANSION_COHORT_50 for broad coverage |
-| `escalation_threshold` | 3 | Subtype failures before GPT-5.4 escalation |
-| `propose_fn` | None | Proposal function. Use `propose_change` (deterministic) or `make_escalation_propose_fn()` (with GPT escalation) |
+| `propose_fn` | None | Proposal function. Use `propose_change` for deterministic proposals. AI resolution is via `run_closed_loop()` Phase 2. |
 
 ## Focus Areas
 
