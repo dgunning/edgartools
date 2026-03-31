@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.28.1] - 2026-03-31
+
+### Fixed
+
+- **TOC section detection for split-link filings** — Filings where TOC item labels and descriptive titles link to different anchors (e.g., TSLA 10-K) now validate anchor targets against expected section headings, picking the correct anchor ([#742](https://github.com/dgunning/edgartools/issues/742))
+
+- **Non-accrual extraction false positives** — Footnotes that explicitly deny non-accrual status (e.g., "there were no investments on non-accrual status") are no longer treated as positive matches. Replaced naive substring matching with two-stage negation-then-affirmation classification. Scored 50/50 on synthetic variations
+
+- **Non-accrual period resolution** — `extract_nonaccrual()` now uses `filing.period_of_report` as anchor for period selection instead of picking the max instant date, which could resolve to filing dates or DEI dates instead of balance sheet dates. ARCC now correctly resolves to 2025-12-31
+
 ## [5.28.0] - 2026-03-30
 
 ### Added
