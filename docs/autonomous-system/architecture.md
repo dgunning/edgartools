@@ -15,9 +15,12 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.8300 | 2026-04-01 |
-| EF-CQS | 0.8577 | 2026-04-01 |
+| CQS | 0.8166 | 2026-04-01 |
+| EF-CQS | 0.8512 | 2026-04-01 |
 | SA-CQS | 0.7471 | 2026-04-01 |
+| Raw CQS | 0.7782 | 2026-04-01 |
+| Data Completeness | 82.1% | 2026-04-01 |
+| Extraction Failed | 16 | 2026-04-01 |
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
@@ -25,7 +28,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
 
-**Note on CQS/EF-CQS values:** Numbers above are from 5-company QUICK_EVAL_COHORT with `use_sec_facts=True`. Post-Gap-Resolution-018: banking forbidden expanded (CurrentAssets, CurrentLiabilities), WMT R&D excluded, JNJ Capex and JPM ShareRepurchases documented as known_divergences. Gaps reduced 9→6. 100-company CQS is 0.9121 (last measured 2026-03-27).
+**Note on CQS/EF-CQS values:** Numbers above are from 50-company EXPANSION_COHORT_50 with `use_sec_facts=True`. Post-Consensus-018 scoring integrity reform: `extraction_failed` exclusions now penalized (16 across 14 companies). CQS dropped 0.8215→0.8166 (honest scoring). Exclusion premium: +0.0383. 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
 
 ---
 
@@ -93,6 +96,8 @@ CQS = 0.45 * pass_rate
 **EF/SA Gate Decoupling (O53)** — Decision gates are now change-type-aware via `_GATE_APPLICABILITY`. Concept changes check EF only; formula changes check SA only; divergence/exclusion changes skip both EF/SA (they don't affect extraction). Hard veto and per-company drop checks always apply.
 
 **Forbidden Metrics in CQS (O57)** — Industry-forbidden metrics (e.g., GrossProfit for energy companies) are excluded from CQS scoring, not just the gap list. `_build_forbidden_by_ticker()` computes exclusions from `industry_metrics.yaml`.
+
+**Scoring Integrity (Consensus 018)** — `exclude_metrics` is now `Dict[str, Dict[str, str]]` with mandatory `reason` field. Three tiers via `ExclusionReason` enum: `not_applicable` (free pass), `extraction_failed` (penalty — counts as failure), `semantic_mismatch` (free pass). 156 entries classified: 134 not_applicable, 22 extraction_failed. New diagnostic metrics: Raw CQS (all free passes treated as failures), Data Completeness (actually-extracted values / total possible). `_build_exclusion_reasons_by_ticker()` pre-computes per ticker.
 
 **Divergence Guardrail** — `_should_allow_divergence()` requires >= 2 prior concept-level graveyard attempts before allowing ADD_DIVERGENCE proposals. Reference-changed regressions are exempt.
 
@@ -171,7 +176,7 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 | `reference_validator.py` | Validation against yfinance + SEC API |
 | `internal_validator.py` | Accounting equation consistency checks |
 | `ledger/schema.py` | SQLite experiment ledger schema |
-| `models.py` | MappingResult, MappingSource (CONFIG=exclusion, OVERRIDE=company override), ConfidenceLevel |
+| `models.py` | MappingResult, MappingSource (CONFIG=exclusion, OVERRIDE=company override), ConfidenceLevel, ExclusionReason |
 | `config_loader.py` | YAML config loading |
 
 ---
@@ -242,7 +247,7 @@ These persist across all sessions and guide all future work:
 50. **Derivation planner uses accounting identities** — GrossProfit = Revenue - COGS, TotalLiabilities = Assets - Equity. Deterministic engine discovers company-specific concepts from calc tree, not AI guessing (Session 017)
 51. **Industry pre-exclusion before eval loop** — structurally inapplicable metrics (GrossProfit for energy, CurrentAssets for banks) excluded via industry_metrics.yaml before entering auto-eval, avoiding gate evaluation entirely (Session 017)
 52. **Per-metric gate isolation** — replace global EF-CQS regression check with impacted-cell regression. Only re-evaluate target metric and dependents, not all 37 metrics (Session 017)
-53. **Scoring integrity reform needed** — `exclude_metrics` conflates "not applicable" (legitimate) with "extraction failed" (hides real failures). 4-component reform: (1) Raw CQS as transitional diagnostic, (2) mandatory `reason` field on exclude_metrics, (3) classification tiers with differentiated scoring (`extraction_failed` counts as failure), (4) Data Completeness Rate. 22 of 49 COGS exclusions are suspected extraction failures. (Consensus 018)
+53. **Scoring integrity reform implemented** — `exclude_metrics` now `Dict` with `ExclusionReason` enum (`not_applicable`/`extraction_failed`/`semantic_mismatch`). 22 extraction_failed exclusions penalized in CQS. Raw CQS + Data Completeness diagnostics added. 50-company CQS 0.8215→0.8166 (honest drop). `cc33e20c`, `eddd1f14`. (Consensus 018)
 
 ---
 
