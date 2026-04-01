@@ -241,13 +241,12 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     # Some FDUS labels leak relationship-prefix fragments into the company
     # name, e.g. "Investmnts Suited Connector LLC" or
     # "InvesAffiliate Investments Medsurant Holdings LLC".
-    identifier = re.sub(
-        r'^(?:InvesAffiliate Investments|Investmnts|Investments)\s+',
+    normalized_identifier = re.sub(
+        r'^(?:InvesAffiliate Investments|Investmnts)\s+',
         '',
         identifier,
         flags=re.IGNORECASE,
     )
-    company_name = identifier
 
     # Try FDUS prose format:
     # "Non-control/Non-affiliate Investments Company Name LLC Industry First Lien Debt ..."
@@ -264,10 +263,11 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
         r'Revolving Loan|Term Loan|Unsecured Debt|Unsecured Loan|'
         r'Common Equity|Preferred Equity|Warrant|Warrants'
         r')\b',
-        identifier,
+        normalized_identifier,
         re.IGNORECASE,
     )
     if fdus_match:
+        company_name = normalized_identifier
         investment_type = fdus_match.group('instrument').strip()
         body = fdus_match.group('body').strip()
 
