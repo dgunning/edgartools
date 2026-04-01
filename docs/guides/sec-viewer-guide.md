@@ -1,48 +1,38 @@
 ---
-description: Access the SEC Interactive Data Viewer programmatically with Python. Navigate XBRL concepts, calculation trees, and validate financial data using edgartools.
+description: Navigate SEC XBRL filings programmatically with Python. Access interactive data viewer concepts, calculation trees, and validation using edgartools.
 ---
 
-# SEC Viewer: Programmatic Access to SEC Interactive Data with Python
+# SEC Viewer: Navigate XBRL Financial Data with Python
 
-EdgarTools gives Python users direct access to the same Interactive Data Viewer the SEC displays on its website. The `filing.viewer` property parses MetaLinks.json and the R*.htm report files from a filing's SGML bundle, producing a navigable graph of every tagged XBRL concept with full calculation structure and FASB documentation.
-
-## Quick Start
+Every SEC filing with XBRL data has an Interactive Data Viewer on the SEC website — a structured view of financial statements, concepts, and calculation trees. EdgarTools gives you programmatic access to the same data.
 
 ```python
 from edgar import Company
 
-# Get a filing
 filing = Company("MSFT").get_filings(form="10-K").latest()
-
-# Access the viewer
 viewer = filing.viewer
-
-# See what's available
 print(viewer)
 ```
 
-The viewer organizes reports into the same categories shown on the SEC website: Financial Statements, Notes, Policies, Tables, and Details.
+![SEC Viewer overview panel for MSFT 10-K, showing categorized reports and concept counts](../images/viewer-overview.webp)
 
-```
-SEC Viewer
+With three lines of code you have access to every tagged concept in the filing, the calculation structure behind each total, and the FASB definition for each line item.
 
-FINANCIAL STATEMENTS (5)
-   2  Consolidated Balance Sheets                             R2.htm
-   3  Consolidated Statements of Income                      R3.htm
-   4  Consolidated Statements of Comprehensive Income        R4.htm
-   5  Consolidated Statements of Cash Flows                  R5.htm
-   6  Consolidated Statements of Stockholders' Equity        R6.htm
+## What You Can Do With the Viewer
 
-NOTES (42)
-   7  Summary of Significant Accounting Policies             R7.htm
-   ...
+The viewer is most useful for four tasks:
 
-Concepts: 847 tags (721 standard, 126 custom)
-```
+**Inspect a specific number.** When you see a line item in a financial statement and want to know exactly how it's defined, what it rolls up to, and where else it appears, `viewer['ConceptLabel']` answers all of those at once.
+
+**Trace a total back to its components.** Every aggregate in GAAP filings has a calculation tree. `concept.children` shows the additive and subtractive components; `concept.calculation_tree()` shows the full recursive decomposition.
+
+**Verify data quality.** `viewer.validate()` checks whether each total in the filing's calculation tree actually equals the sum of its children — surfacing any arithmetic inconsistencies in the filing itself.
+
+**Cross-check the XBRL parser.** `viewer.compare(xbrl)` matches the SEC's own rendering against edgartools' XBRL parser output, giving you a match rate and a list of any discrepancies.
 
 ## Browse Reports by Category
 
-The five category properties mirror the SEC viewer's navigation tabs:
+The viewer organizes a filing's reports into five categories, matching the navigation tabs on the SEC website:
 
 ```python
 # Financial statements (income statement, balance sheet, cash flows, etc.)
@@ -77,7 +67,7 @@ viewer.view("Income Statement")
 Or call `.view()` directly on a `ViewerReport`:
 
 ```python
-income = viewer.financial_statements[1]  # Usually the income statement
+income = viewer.financial_statements[0]
 income.view()
 ```
 
@@ -95,64 +85,53 @@ income.view()
 
 ## Look Up Concepts
 
-The viewer's `[]` operator searches across all concepts by label or tag ID:
+The `[]` operator searches across all concepts by label or tag ID:
 
 ```python
-# By label (case-sensitive partial match)
-revenue = viewer['Revenue']
-assets = viewer['Assets']
-eps = viewer['Earnings Per Share, Basic']
-
-# By tag ID
+# By tag ID (precise)
 assets = viewer['us-gaap_Assets']
+revenue = viewer['us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax']
+
+# By label (case-sensitive partial match)
+eps = viewer['Earnings Per Share, Basic']
 ```
 
-A concept's display in the terminal shows its value, FASB definition, and calculation relationships:
+A concept panel shows its value, where it appears, calculation relationships, and FASB definition:
 
 ```python
-print(viewer['Revenue'])
+print(viewer['us-gaap_Assets'])
 ```
 
+![Concept panel for us-gaap_Assets showing value, balance sheet placement, and calculation children](../images/viewer-concept-assets.webp)
+
+```python
+print(viewer['us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax'])
 ```
-┌─ us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax ─┐
-│ Label: Revenue          Balance: credit                         │
-│ Full: Revenue from Contract with Customer...  Type: monetary    │
-│                                                                  │
-│ Value: $ 211,915                                                 │
-│                                                                  │
-│ Appears in:                                                      │
-│   · Consolidated Statements of Income                           │
-│                                                                  │
-│ Calculation root. Children:                                      │
-│   + Product (credit, weight: 1.0)                               │
-│   + Service and Other (credit, weight: 1.0)                     │
-│                                                                  │
-│ Amount of revenue excluding tax assessed by a governmental ...   │
-└──────────────────────────────────────────────────────────────────┘
-```
+
+![Concept panel for Revenue showing value, income statement placement, and FASB definition](../images/viewer-concept-revenue.webp)
 
 ### Concept properties
 
 ```python
-c = viewer['Revenue']
+c = viewer['us-gaap_Assets']
 
-c.id             # 'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax'
-c.label          # 'Revenue' (terse label)
-c.full_label     # 'Revenue from Contract with Customer, Excluding Assessed Tax'
-c.crdr           # 'credit'
+c.id             # 'us-gaap_Assets'
+c.label          # 'Assets' (terse label)
+c.full_label     # 'Assets'
+c.crdr           # 'debit'
 c.xbrltype       # 'monetaryItemType'
 c.documentation  # Full FASB definition text
 c.is_standard    # True (us-gaap taxonomy)
 c.is_monetary    # True
 
 # Values
-c.value          # '$ 211,915' (display string, latest period)
-c.numeric_value  # 211915.0 (float, in display units)
-c.values         # {'Jun. 30, 2024': '$ 211,915', 'Jun. 30, 2023': '$ 198,270', ...}
-c.numeric_values # {'Jun. 30, 2024': 211915.0, ...}
+c.value          # '619,003' (display string, latest period)
+c.numeric_value  # 619003.0 (float, in display units)
+c.values         # {'Jun. 30, 2025': '619,003', 'Jun. 30, 2024': '512,163', ...}
+c.numeric_values # {'Jun. 30, 2025': 619003.0, ...}
 
 # Where it appears
-c.statements     # ['Consolidated Statements of Income']
+c.statements     # ['BALANCE SHEETS']
 c.notes          # ['Revenue Recognition']
 c.report_names   # All report names across every category
 ```
@@ -162,11 +141,11 @@ c.report_names   # All report names across every category
 The R*.htm viewer files display monetary values in the units specified in the filing (often millions or thousands). To get the raw XBRL value:
 
 ```python
-report = viewer.financial_statements[1]
+report = viewer.financial_statements[0]
 scaling = report.concept_report.currency_scaling  # e.g., 1_000_000
 
-c = viewer['Revenue']
-raw_value = c.numeric_value * scaling             # 211_915_000_000
+c = viewer['us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax']
+raw_value = c.numeric_value * scaling             # 281_724_000_000
 ```
 
 ## Navigate Calculation Trees
@@ -174,7 +153,7 @@ raw_value = c.numeric_value * scaling             # 211_915_000_000
 Every total in a financial statement can be decomposed into its components via the calculation tree:
 
 ```python
-total_assets = viewer['Assets']
+total_assets = viewer['us-gaap_Assets']
 
 # Is this a root (no parent)?
 total_assets.is_root       # True
@@ -186,8 +165,10 @@ for child in total_assets.children:
 ```
 
 ```
-Current Assets: $ 184,406  (weight: 1.0)
-Noncurrent Assets: $ 302,983  (weight: 1.0)
+Assets, Current: 184,406  (weight: 1.0)
+Property and equipment, net...: 130,133  (weight: 1.0)
+Operating lease right-of-use assets: 25,640  (weight: 1.0)
+...
 ```
 
 Children can themselves have children. Use `calculation_tree()` for the full recursive structure:
@@ -200,7 +181,7 @@ tree = total_assets.calculation_tree(max_depth=3)
 A non-root concept shows its parent:
 
 ```python
-current_assets = viewer['Assets, Current']
+current_assets = viewer['us-gaap_AssetsCurrent']
 current_assets.is_root   # False
 current_assets.parent    # Concept('Assets')
 current_assets.weight    # 1.0
@@ -301,13 +282,52 @@ prompt = viewer.compare_context(xbrl, 'balance_sheet')
 
 Pass `prompt` to any LLM for a natural-language audit of the two renderings.
 
-## Export Concepts to DataFrame
+## The Concept Graph
 
-`viewer.concepts` is a `ConceptGraph` that can be exported:
+`viewer.concepts` returns a `ConceptGraph` — a navigable knowledge graph of every tagged XBRL concept in the filing. It combines tag definitions from MetaLinks.json (credit/debit, calculation trees, FASB documentation) with the actual values from R*.htm reports.
 
 ```python
 graph = viewer.concepts
+print(graph)  # ConceptGraph(tags=847, reports=62)
+```
 
+### Look up concepts directly
+
+The graph supports the same `[]` lookup as the viewer itself:
+
+```python
+revenue = graph['Revenue']
+assets = graph['us-gaap_Assets']
+
+# Or by exact concept ID
+concept = graph.concept('us-gaap_NetIncomeLoss')
+```
+
+### Search across all concepts
+
+```python
+results = graph.search('goodwill')
+for concept in results:
+    print(f"{concept.label}: {concept.value}")
+
+# Filter by category
+debt_concepts = graph.search('debt', category='Notes')
+```
+
+### Validate calculation trees
+
+The graph can verify that every parent-children calculation relationship adds up:
+
+```python
+issues = graph.validate(tolerance=0.5)
+for r in issues:
+    if not r['valid']:
+        print(f"{r['parent'].label}: expected {r['expected']:.0f}, got {r['computed']:.0f}")
+```
+
+### Export to DataFrame
+
+```python
 # All concepts with values
 df = graph.to_dataframe()
 # Columns: concept_id, label, crdr, value, display_value, report
@@ -319,13 +339,26 @@ notes_df  = graph.to_dataframe(category='Notes')
 
 The `value` column contains the parsed numeric value in display units (millions or thousands, per the filing).
 
-Stats on the graph:
+### Graph stats
 
 ```python
-len(graph)                     # Total tag count from MetaLinks.json
-graph.report_count             # Number of R*.htm reports parsed
+len(graph)                       # Total tag count from MetaLinks.json
+graph.report_count               # Number of R*.htm reports parsed
 graph.concept_count_with_values  # Concepts that appear in at least one report
 ```
+
+### ConceptGraph reference
+
+| Property / Method | Returns | Description |
+|-------------------|---------|-------------|
+| `graph['label']` | `Concept` | Look up by label or tag ID |
+| `graph.concept(id)` | `Concept` | Look up by exact concept ID |
+| `graph.search(query, category)` | `List[Concept]` | Search by keyword across labels, docs, and IDs |
+| `graph.validate(tolerance)` | `List[dict]` | Check all calculation trees sum correctly |
+| `graph.to_dataframe(category)` | `pd.DataFrame` | Export concepts with values |
+| `len(graph)` | `int` | Total tag count from MetaLinks.json |
+| `graph.report_count` | `int` | Number of R*.htm reports parsed |
+| `graph.concept_count_with_values` | `int` | Concepts with at least one value |
 
 ## Check Viewer Availability
 
@@ -360,7 +393,7 @@ viewer.to_context()              # Standard detail
 viewer.to_context(detail='full') # Includes available actions
 
 # Individual concept
-c = viewer['Revenue']
+c = viewer['us-gaap_Assets']
 c.to_context()               # id, label, balance, value, definition
 c.to_context(detail='full')  # Adds components, appearances, FASB references
 ```

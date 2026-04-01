@@ -128,6 +128,7 @@ nav:
       - Dimensions: xbrl/concepts/dimension-handling.md
       - Standardization: xbrl/concepts/standardization.md
       - Footnotes: guides/xbrl-footnotes.md
+      - SEC Interactive Viewer: guides/sec-viewer-guide.md
 
   # ==========================================
   # AI - MCP server & skills for AI agents
