@@ -40,36 +40,36 @@ class MappingConfig:
         """Get metrics marked as universal."""
         return [name for name, m in self.metrics.items() if m.universal]
     
-    def get_excluded_metrics_for_company(self, ticker: str) -> List[str]:
+    def get_excluded_metrics_for_company(self, ticker: str) -> Dict[str, Dict[str, str]]:
         """Get all excluded metrics for a company (company-specific + industry).
-        
+
         Combines:
-        1. Company-specific excludes from company config
-        2. Industry-based excludes (auto-detected from SEC SIC code, or manual fallback)
-        
+        1. Industry-based excludes (always reason=not_applicable)
+        2. Company-specific excludes (override industry if present)
+
         Args:
             ticker: Company ticker (e.g., 'JPM')
-            
+
         Returns:
-            List of metric names to exclude for this company
+            Dict mapping metric name -> {"reason": "...", "notes": "..."}
         """
+        result: Dict[str, Dict[str, str]] = {}
         company = self.get_company(ticker)
-        excluded = set()
-        
-        # Company-specific exclusions (from company config)
-        if company and company.exclude_metrics:
-            excluded.update(company.exclude_metrics)
-        
+
         # Get industry - auto-detect from SIC or use manual config
         industry = self._get_industry_for_company(ticker, company)
-        
-        # Industry-based exclusions
+
+        # Industry-based exclusions (always not_applicable)
         if industry:
             industry_exclusions = self.defaults.get('industry_exclusions', {})
-            industry_metrics = industry_exclusions.get(industry, [])
-            excluded.update(industry_metrics)
-        
-        return list(excluded)
+            for metric in industry_exclusions.get(industry, []):
+                result[metric] = {"reason": "not_applicable", "notes": f"Industry exclusion ({industry})"}
+
+        # Company-specific exclusions (override industry if present)
+        if company and company.exclude_metrics:
+            result.update(company.exclude_metrics)
+
+        return result
     
     def _get_industry_for_company(self, ticker: str, company: Optional[CompanyConfig] = None) -> Optional[str]:
         """Get industry for a company, preferring manual config over network calls.
@@ -147,12 +147,20 @@ class ConfigLoader:
         # Parse companies
         companies = {}
         for ticker, data in companies_data.get("companies", {}).items():
+            # Handle both legacy list and new dict format for exclude_metrics
+            raw_excludes = data.get("exclude_metrics", {})
+            if isinstance(raw_excludes, list):
+                # Auto-convert legacy list format → dict with not_applicable default
+                exclude_metrics = {m: {"reason": "not_applicable", "notes": ""} for m in raw_excludes}
+            else:
+                exclude_metrics = raw_excludes or {}
+
             companies[ticker] = CompanyConfig(
                 ticker=ticker,
                 name=data.get("name", ""),
                 cik=data.get("cik", 0),
                 legacy_ciks=data.get("legacy_ciks", []),
-                exclude_metrics=data.get("exclude_metrics", []),
+                exclude_metrics=exclude_metrics,
                 metric_overrides=data.get("metric_overrides", {}),
                 known_divergences=data.get("known_divergences", {}),
                 notes=data.get("notes"),

@@ -114,6 +114,12 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - CQS: 0.8237→0.8293 (+0.0056), EF-CQS: 0.8425→0.8558 (+0.0133), SA-CQS: 0.7633→0.7588.
 - Key: **O57 forbidden metrics fix confirmed** — XOM down from 3 gaps to 1 (LongTermDebt explained_variance only). XOM:GrossProfit/OperatingIncome no longer penalize CQS. O55 derivation planner wired (`company_results=True` on all WMT gaps) but WMT:GrossProfit/TotalLiabilities still unmapped — component metrics (Revenue, COGS) need resolution first. Divergence guardrail active (no premature divergence proposals).
 
+**Run 014 (2026-04-01)** — 30 min, 5 companies, Gap Resolution 018 + auto-eval loop
+- Config changes: banking forbidden (CurrentAssets, CurrentLiabilities), WMT exclude (R&D), JNJ Capex divergence, JPM ShareRepurchases divergence (6 graveyard attempts exhausted).
+- Auto-eval loop: 0/3 kept, 3 discards (JPM:ShareRepurchases, WMT:GrossProfit, WMT:IntangibleAssets). Derivation planner proposals did not improve CQS.
+- CQS: 0.8293→0.8300 (+0.0007), EF-CQS: 0.8558→0.8577 (+0.0019). Gaps: 9→6. Explained variance: 2→3.
+- Key: **Consensus 018 (deep-consensus)** identified structural scoring integrity issue: `exclude_metrics` conflates "not applicable" with "extraction failed." 22/49 COGS exclusions are suspected extraction failures. 4-component reform plan agreed. Commit: `9a76d90c`.
+
 ---
 
 ## Consensus Sessions
@@ -137,6 +143,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 015 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt & context overhaul: scope enum enforcement, explicit escalation triggers, formula constraints, solver annotations. 25%→60%+ compile-valid target. | O41-O46 planned |
 | 016 | 2026-03-28 | GPT-5.4 + Gemini 3.1 | Formula engine limitations & auto-solver quality: signed components in _compute_sa_composite, kill brute-force solver, override isolation bug, graveyard replay strategy | Action items created |
 | 017 | 2026-04-01 | Claude Code deep-consensus (advocate/critic/deepthinker) | Autonomous structural gap resolution: EF/SA decoupling, divergence as terminal outcome, derivation planner, evidence pack, industry pre-exclusion, per-metric gate isolation | O53-O58 implemented |
+| 018 | 2026-04-01 | Claude Code deep-consensus (advocate/critic/deepthinker) | CQS scoring integrity: exclude_metrics conflates "not applicable" with "extraction failed." 4-component reform: Raw CQS diagnostic, reason field, classification tiers, Data Completeness Rate. 22/49 COGS exclusions flagged as extraction failures. | Action items created |
 
 ### Session 004 Unanimous Agreements
 
@@ -175,6 +182,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 015 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `5b47500e-0e10-4f75-878a-5a2a079c284e` |
 | 016 | 2026-03-28 | GPT-5.4 + Gemini 3.1 | `73e496f4-f35c-4a18-bc02-09703b72814b` |
 | 017 | 2026-04-01 | GPT-5.4 + Gemini 3.1 | `c91c90e7-8886-4df2-9893-d40f31a27958` |
+| 018 | 2026-04-01 | Claude Code deep-consensus | `15aa9993-4b9f-4598-bdca-fd5cf29f3788` |
 
 ---
 
@@ -285,6 +293,7 @@ For each 50-company batch:
 - [x] **M7.20: Dead MCP/GPT escalation path removal** — Removed unreachable MCP/GPT code from auto-eval loop. Completed 2026-03-31. `74da0e6f`.
 - [x] **M7.21: Graveyard replay** — `replay_graveyard_proposals()` re-evaluates previously rejected proposals after engine changes. Broke 0% KEEP rate: 17/36 flipped. Completed 2026-03-31. `6fda5fad`.
 - [x] **M7.22: Consensus 017 + post-review fixes (O53-O58)** — EF/SA gate decoupling (`_GATE_APPLICABILITY`), forbidden metrics excluded from CQS scoring (`_build_forbidden_by_ticker()`), derivation planner wired into `propose_change()` via `MetricGap.company_results`, divergence guardrail (`_should_allow_divergence()`). CQS 0.8237→0.8293, EF-CQS 0.8425→0.8558. Completed 2026-04-01. `514fea2f`.
+- [x] **M7.23: Gap Resolution 018** — Config-only fixes: banking forbidden (CurrentAssets, CurrentLiabilities), WMT exclude (R&D), JNJ Capex known_divergence (wont_fix), JPM ShareRepurchases known_divergence (wont_fix, 6 graveyard). Gaps 9→6, CQS 0.8293→0.8300, EF-CQS 0.8558→0.8577. Completed 2026-04-01. `9a76d90c`.
 
 ---
 

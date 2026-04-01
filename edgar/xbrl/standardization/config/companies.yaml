@@ -10,13 +10,19 @@ companies:
     name: Amazon.com, Inc.
     cik: 1018724
     exclude_metrics:
-    - DividendsPaid
+      DividendsPaid:
+        reason: not_applicable
+        notes: Company does not pay dividends
   AAPL:
     name: Apple Inc.
     cik: 320193
     exclude_metrics:
-    - Goodwill
-    - IntangibleAssets
+      Goodwill:
+        reason: not_applicable
+        notes: AAPL reports minimal/no Goodwill
+      IntangibleAssets:
+        reason: not_applicable
+        notes: AAPL reports minimal/no IntangibleAssets
   MSFT:
     name: Microsoft Corporation
     cik: 789019
@@ -32,40 +38,41 @@ companies:
         form_types:
         - 10-K
         - 10-Q
-        reason: '10-for-1 stock split June 10, 2024. XBRL filings before split report
-          pre-split share counts (~2.5B), yfinance reports post-split adjusted values
-          (~25B). Expected variance: 900%+. Structural data mismatch.
+        reason: '10-for-1 stock split June 10, 2024. XBRL filings before split report pre-split share counts (~2.5B), yfinance
+          reports post-split adjusted values (~25B). Expected variance: 900%+. Structural data mismatch.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: wont_fix
-        remediation_notes: 'Would require split adjustment infrastructure in reference_validator.
-          Long-term: add _apply_split_adjustment() method using stock_splits config.
+        remediation_notes: 'Would require split adjustment infrastructure in reference_validator. Long-term: add _apply_split_adjustment()
+          method using stock_splits config.
 
           '
   TSLA:
     name: Tesla, Inc.
     cik: 1318605
     exclude_metrics:
-    - DividendsPaid
-    - IntangibleAssets
+      DividendsPaid:
+        reason: not_applicable
+        notes: Company does not pay dividends
+      IntangibleAssets:
+        reason: not_applicable
+        notes: TSLA has negligible intangible assets
     known_divergences:
       ShortTermDebt:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 100.0
-        reason: 'TSLA DebtCurrent includes items yfinance classifies differently.
-          Structural divergence in current debt classification between XBRL taxonomy
-          and yfinance normalization.
+        reason: 'TSLA DebtCurrent includes items yfinance classifies differently. Structural divergence in current debt classification
+          between XBRL taxonomy and yfinance normalization.
 
           '
         skip_validation: true
         added_date: '2026-03-03'
         remediation_status: deferred
-        remediation_notes: 'Investigate DebtCurrent components vs yfinance Current
-          Debt definition.
+        remediation_notes: 'Investigate DebtCurrent components vs yfinance Current Debt definition.
 
           '
         review_date: '2026-06-03'
@@ -74,8 +81,12 @@ companies:
     name: Meta Platforms, Inc.
     cik: 1326801
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
     metric_overrides:
       Revenue:
         preferred_concept: AdvertisingRevenue
@@ -85,27 +96,28 @@ companies:
     cik: 1108524
     archetype: C
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
     known_divergences:
       Revenue:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 94.0
-        reason: 'Tree parser extracts dimensional/segment sub-component (~$2.2B 10-K,
-          $533M 10-Q) instead of consolidated total ($37.9B 10-K, $10.3B 10-Q). CRM
-          reports revenue by segment (Subscription, Professional Services) with dimensional
-          XBRL. RevenueFromContractWithCustomerExcludingAssessedTax returns segment
-          values.
+        reason: 'Tree parser extracts dimensional/segment sub-component (~$2.2B 10-K, $533M 10-Q) instead of consolidated
+          total ($37.9B 10-K, $10.3B 10-Q). CRM reports revenue by segment (Subscription, Professional Services) with dimensional
+          XBRL. RevenueFromContractWithCustomerExcludingAssessedTax returns segment values.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'Root cause is dimensional extraction returning segment
-          sub-component instead of consolidated total. Needs investigation of dimension
-          filtering logic in tree parser.
+        remediation_notes: 'Root cause is dimensional extraction returning segment sub-component instead of consolidated total.
+          Needs investigation of dimension filtering logic in tree parser.
 
           '
         review_date: '2026-06-04'
@@ -114,16 +126,14 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 84.0
-        reason: 'Extracting quarterly sub-period value ($518M 10-K, $129M 10-Q) instead
-          of annual/full-period total ($3.18B 10-K, $819M 10-Q). Same dimensional/period
-          extraction issue as Revenue.
+        reason: 'Extracting quarterly sub-period value ($518M 10-K, $129M 10-Q) instead of annual/full-period total ($3.18B
+          10-K, $819M 10-Q). Same dimensional/period extraction issue as Revenue.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'Same root cause as Revenue — dimensional/period extraction
-          selecting sub-period.
+        remediation_notes: 'Same root cause as Revenue — dimensional/period extraction selecting sub-period.
 
           '
         review_date: '2026-06-04'
@@ -131,16 +141,14 @@ companies:
         form_types:
         - 10-Q
         variance_pct: 98.7
-        reason: 'Extracting $704M instead of $52.5B. Likely extracting goodwill change
-          (acquisition period adjustment) instead of total balance. Dimensional contamination
-          from segment reporting.
+        reason: 'Extracting $704M instead of $52.5B. Likely extracting goodwill change (acquisition period adjustment) instead
+          of total balance. Dimensional contamination from segment reporting.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'Same dimensional extraction root cause. Goodwill balance
-          needs consolidated total.
+        remediation_notes: 'Same dimensional extraction root cause. Goodwill balance needs consolidated total.
 
           '
         review_date: '2026-06-04'
@@ -148,50 +156,52 @@ companies:
         form_types:
         - 10-Q
         variance_pct: 92.5
-        reason: 'Extracting $4.2B instead of $55.7B. Composite metric affected by
-          same dimensional extraction issue as Goodwill component.
+        reason: 'Extracting $4.2B instead of $55.7B. Composite metric affected by same dimensional extraction issue as Goodwill
+          component.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'Same dimensional extraction root cause affecting Goodwill
-          component of composite.
+        remediation_notes: 'Same dimensional extraction root cause affecting Goodwill component of composite.
 
           '
         review_date: '2026-06-04'
-    notes: Pure SaaS, heavy intangible assets from acquisitions (Slack, Tableau).
-      Dimensional segment reporting causes extraction issues.
+    notes: Pure SaaS, heavy intangible assets from acquisitions (Slack, Tableau). Dimensional segment reporting causes extraction
+      issues.
   ADBE:
     name: Adobe Inc.
     cik: 796343
     archetype: C
     exclude_metrics:
-    - COGS
-    - Inventory
-    - DividendsPaid
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
+      DividendsPaid:
+        reason: not_applicable
+        notes: Company does not pay dividends
     metric_overrides:
       Revenue:
         preferred_concept: RevenueFromContractWithCustomerExcludingAssessedTax
-        notes: ADBE Revenues concept returns $68M (segment sub-component); ASC 606
-          concept has consolidated total
+        notes: ADBE Revenues concept returns $68M (segment sub-component); ASC 606 concept has consolidated total
     known_divergences:
       Revenue:
         form_types:
         - 10-Q
         variance_pct: 98.9
-        reason: 'ADBE 10-Q Revenues concept returns $68M (segment sub-component) instead
-          of $5.99B consolidated quarterly revenue. preferred_concept override to
-          RevenueFromContractWithCustomerExcludingAssessedTax not found in tree for
+        reason: 'ADBE 10-Q Revenues concept returns $68M (segment sub-component) instead of $5.99B consolidated quarterly
+          revenue. preferred_concept override to RevenueFromContractWithCustomerExcludingAssessedTax not found in tree for
           10-Q. Tree parser falls through to Revenues which returns dimensional sub-value.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'Same dimensional extraction issue as CRM. Tree parser
-          returns segment sub-value. 10-K Revenue passes (uses correct concept). Only
-          10-Q affected.
+        remediation_notes: 'Same dimensional extraction issue as CRM. Tree parser returns segment sub-value. 10-K Revenue
+          passes (uses correct concept). Only 10-Q affected.
 
           '
         review_date: '2026-06-04'
@@ -199,16 +209,15 @@ companies:
         form_types:
         - 10-K
         variance_pct: 69.6
-        reason: 'Extracting $3.9B instead of $12.8B. ADBE goodwill may require GoodwillAcquiredDuringPeriod
-          vs total Goodwill disambiguation. Tree parser selecting wrong period or
-          dimensional value.
+        reason: 'Extracting $3.9B instead of $12.8B. ADBE goodwill may require GoodwillAcquiredDuringPeriod vs total Goodwill
+          disambiguation. Tree parser selecting wrong period or dimensional value.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'Investigate ADBE goodwill XBRL structure — may need period-aware
-          extraction to get balance rather than acquisition-period change.
+        remediation_notes: 'Investigate ADBE goodwill XBRL structure — may need period-aware extraction to get balance rather
+          than acquisition-period change.
 
           '
         review_date: '2026-06-04'
@@ -216,38 +225,45 @@ companies:
         form_types:
         - 10-K
         variance_pct: 67.9
-        reason: 'Extracting $4.35B instead of $13.6B. Composite metric affected by
-          Goodwill under-extraction ($3.9B vs $12.8B).
+        reason: 'Extracting $4.35B instead of $13.6B. Composite metric affected by Goodwill under-extraction ($3.9B vs $12.8B).
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'Same root cause as Goodwill — composite IntangibleAssets
-          inherits Goodwill extraction issue.
+        remediation_notes: 'Same root cause as Goodwill — composite IntangibleAssets inherits Goodwill extraction issue.
 
           '
         review_date: '2026-06-04'
-    notes: SaaS transition complete, subscription-based revenue model. Revenues concept
-      returns segment sub-component.
+    notes: SaaS transition complete, subscription-based revenue model. Revenues concept returns segment sub-component.
   SNOW:
     name: Snowflake Inc.
     cik: 1640147
     archetype: C
     fiscal_year_end: January
     exclude_metrics:
-    - COGS
-    - Inventory
-    - DividendsPaid
-    - LongTermDebt
-    - ShortTermDebt
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
+      DividendsPaid:
+        reason: not_applicable
+        notes: Company does not pay dividends
+      LongTermDebt:
+        reason: not_applicable
+        notes: ''
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     known_divergences:
       Capex:
         form_types:
         - 10-K
         variance_pct: 38.9
-        reason: 'PaymentsToAcquirePropertyPlantAndEquipment ($46M) vs yfinance ($76M).
-          May exclude capitalized internal-use software or lease payments.
+        reason: 'PaymentsToAcquirePropertyPlantAndEquipment ($46M) vs yfinance ($76M). May exclude capitalized internal-use
+          software or lease payments.
 
           '
         skip_validation: true
@@ -258,8 +274,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 98.6
-        reason: 'XBRL Goodwill ($15M) vs yfinance ($1.06B). Tree extraction selecting
-          wrong dimensional member or pre-acquisition value.
+        reason: 'XBRL Goodwill ($15M) vs yfinance ($1.06B). Tree extraction selecting wrong dimensional member or pre-acquisition
+          value.
 
           '
         skip_validation: true
@@ -270,8 +286,7 @@ companies:
         form_types:
         - 10-K
         variance_pct: 80.1
-        reason: 'XBRL composite ($293M) vs yfinance ($1.47B). Inherits Goodwill extraction
-          gap.
+        reason: 'XBRL composite ($293M) vs yfinance ($1.47B). Inherits Goodwill extraction gap.
 
           '
         skip_validation: true
@@ -282,8 +297,7 @@ companies:
         form_types:
         - 10-Q
         variance_pct: 100.0
-        reason: 'XBRL returns 0 for 10-Q diluted shares. May be reporting issue or
-          concept mismatch for loss companies (anti-dilutive).
+        reason: 'XBRL returns 0 for 10-Q diluted shares. May be reporting issue or concept mismatch for loss companies (anti-dilutive).
 
           '
         skip_validation: true
@@ -296,16 +310,19 @@ companies:
     cik: 1373715
     archetype: C
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
     known_divergences:
       Revenue:
         form_types:
         - 10-K
         variance_pct: 96.9
-        reason: 'XBRL RevenueFromContractWithCustomer ($338M) captures only a small
-          segment. yfinance ($11.0B) includes all subscription and services revenue.
-          Tree extraction selecting wrong segment/dimensional member.
+        reason: 'XBRL RevenueFromContractWithCustomer ($338M) captures only a small segment. yfinance ($11.0B) includes all
+          subscription and services revenue. Tree extraction selecting wrong segment/dimensional member.
 
           '
         skip_validation: true
@@ -317,8 +334,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 80.0
-        reason: 'XBRL shares ($208M) vs yfinance ($1.04B). Likely pre-stock-split
-          value or dimensional extraction error (5:1 ratio suggests split adjustment).
+        reason: 'XBRL shares ($208M) vs yfinance ($1.04B). Likely pre-stock-split value or dimensional extraction error (5:1
+          ratio suggests split adjustment).
 
           '
         skip_validation: true
@@ -330,8 +347,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 85.7
-        reason: 'XBRL ShareBasedCompensation ($250M) vs yfinance ($1.75B). Tree extraction
-          getting subsidiary or segment-level SBC instead of consolidated.
+        reason: 'XBRL ShareBasedCompensation ($250M) vs yfinance ($1.75B). Tree extraction getting subsidiary or segment-level
+          SBC instead of consolidated.
 
           '
         skip_validation: true
@@ -344,22 +361,24 @@ companies:
     cik: 18230
     archetype: A
     exclude_metrics:
-    - ShortTermDebt
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     known_divergences:
       ShortTermDebt:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 65.0
-        reason: 'Cat Financial subsidiary debt not included in ShortTermBorrowings.
-          yfinance consolidates all debt; XBRL extracts industrial segment only.
+        reason: 'Cat Financial subsidiary debt not included in ShortTermBorrowings. yfinance consolidates all debt; XBRL extracts
+          industrial segment only.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Would require subsidiary-aware extraction or consolidated
-          statement detection. Consider adding segment reconciliation logic.
+        remediation_notes: 'Would require subsidiary-aware extraction or consolidated statement detection. Consider adding
+          segment reconciliation logic.
 
           '
         review_date: '2026-04-26'
@@ -374,8 +393,8 @@ companies:
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Same root cause as ShortTermDebt - Cat Financial subsidiary
-          structure. Fix should address both debt metrics together.
+        remediation_notes: 'Same root cause as ShortTermDebt - Cat Financial subsidiary structure. Fix should address both
+          debt metrics together.
 
           '
         review_date: '2026-04-26'
@@ -384,15 +403,14 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 60.0
-        reason: 'Cat Financial receivables (dealer/customer financing) not included
-          in standard AccountsReceivableNetCurrent.
+        reason: 'Cat Financial receivables (dealer/customer financing) not included in standard AccountsReceivableNetCurrent.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Same root cause as debt metrics - Cat Financial subsidiary
-          structure. Would need segment-aware receivables extraction.
+        remediation_notes: 'Same root cause as debt metrics - Cat Financial subsidiary structure. Would need segment-aware
+          receivables extraction.
 
           '
         review_date: '2026-04-26'
@@ -401,16 +419,14 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 40.0
-        reason: 'Cat Financial investing activities ($3.2B) included in consolidated
-          capex but not in equipment segment PP&E ($2.0B). Same subsidiary contamination
-          as debt metrics.
+        reason: 'Cat Financial investing activities ($3.2B) included in consolidated capex but not in equipment segment PP&E
+          ($2.0B). Same subsidiary contamination as debt metrics.
 
           '
         skip_validation: true
         added_date: '2026-03-03'
         remediation_status: deferred
-        remediation_notes: 'Same root cause as debt metrics - Cat Financial subsidiary
-          structure.
+        remediation_notes: 'Same root cause as debt metrics - Cat Financial subsidiary structure.
 
           '
         review_date: '2026-06-03'
@@ -419,15 +435,14 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 89.0
-        reason: 'Cat Financial D&A ($2.15B consolidated) vs equipment-only D&A ($0.23B).
-          Financial subsidiary leased equipment depreciation dominates consolidated.
+        reason: 'Cat Financial D&A ($2.15B consolidated) vs equipment-only D&A ($0.23B). Financial subsidiary leased equipment
+          depreciation dominates consolidated.
 
           '
         skip_validation: true
         added_date: '2026-03-03'
         remediation_status: deferred
-        remediation_notes: 'Same root cause - Cat Financial subsidiary structure inflates
-          D&A.
+        remediation_notes: 'Same root cause - Cat Financial subsidiary structure inflates D&A.
 
           '
         review_date: '2026-06-03'
@@ -437,22 +452,23 @@ companies:
     cik: 40545
     archetype: A
     exclude_metrics:
-    - AccountsPayable
+      AccountsPayable:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       OperatingIncome:
         form_types:
         - 10-K
         variance_pct: 130.0
-        reason: 'GE''s conglomerate structure with segment reporting leads to extraction
-          issues. Industry logic returns negative values due to incorrect component
-          selection from complex income statement.
+        reason: 'GE''s conglomerate structure with segment reporting leads to extraction issues. Industry logic returns negative
+          values due to incorrect component selection from complex income statement.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Post-Vernova spin-off, GE is now Aerospace-only. Re-evaluate
-          in 2027 when filings reflect simpler structure.
+        remediation_notes: 'Post-Vernova spin-off, GE is now Aerospace-only. Re-evaluate in 2027 when filings reflect simpler
+          structure.
 
           '
         review_date: '2026-04-26'
@@ -462,24 +478,22 @@ companies:
         fiscal_years:
         - 2023
         variance_pct: 100.0
-        reason: '2024 Vernova spin-off (Jan 2024): 2024 10-K restates FY2023 as Aerospace-only,
-          while yfinance holds consolidated (pre-spin) history. Structural mismatch,
-          not extraction failure.
+        reason: '2024 Vernova spin-off (Jan 2024): 2024 10-K restates FY2023 as Aerospace-only, while yfinance holds consolidated
+          (pre-spin) history. Structural mismatch, not extraction failure.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: wont_fix
-        remediation_notes: Apples-to-oranges comparison. Would need spin-off detection
-          to compare restated vs original.
+        remediation_notes: Apples-to-oranges comparison. Would need spin-off detection to compare restated vs original.
       COGS:
         form_types:
         - 10-K
         fiscal_years:
         - 2023
         variance_pct: 100.0
-        reason: '2024 Vernova spin-off restatement: FY2023 COGS restated as Aerospace-only
-          in 2024 10-K, yfinance holds consolidated pre-spin values.
+        reason: '2024 Vernova spin-off restatement: FY2023 COGS restated as Aerospace-only in 2024 10-K, yfinance holds consolidated
+          pre-spin values.
 
           '
         skip_validation: true
@@ -490,9 +504,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 96.0
-        reason: 'Vernova spin-off restated historical capex. XBRL uses PaymentsToAcquireProductiveAssets
-          ($1.6B) vs yfinance ($0.9B). Pre-spin periods show restated aerospace-only
-          values.
+        reason: 'Vernova spin-off restated historical capex. XBRL uses PaymentsToAcquireProductiveAssets ($1.6B) vs yfinance
+          ($0.9B). Pre-spin periods show restated aerospace-only values.
 
           '
         skip_validation: true
@@ -507,8 +520,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 58.0
-        reason: 'Post-Vernova spin-off, D&A restated for aerospace-only. GE uses DepreciationAmortizationAndAccretionNet
-          which captures a different scope than yfinance''s D&A.
+        reason: 'Post-Vernova spin-off, D&A restated for aerospace-only. GE uses DepreciationAmortizationAndAccretionNet which
+          captures a different scope than yfinance''s D&A.
 
           '
         skip_validation: true
@@ -523,8 +536,7 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 47.0
-        reason: 'GE Aerospace AP ($7.9B) includes items yfinance excludes ($4.6B).
-          Post-spin-off balance sheet structure differences.
+        reason: 'GE Aerospace AP ($7.9B) includes items yfinance excludes ($4.6B). Post-spin-off balance sheet structure differences.
 
           '
         skip_validation: true
@@ -575,54 +587,53 @@ companies:
         notes: HON splits D&A on cash flow; DDA is the combined total ($1,334M)
       ShortTermDebt:
         preferred_concept: DebtCurrent
-        notes: HON ShortTermBorrowings ($4.3B) misses LongTermDebtCurrent. DebtCurrent
-          is the total.
+        notes: HON ShortTermBorrowings ($4.3B) misses LongTermDebtCurrent. DebtCurrent is the total.
     known_divergences:
       DepreciationAmortization:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 49.7
-        reason: 'INVESTIGATED 2026-01-27: HON has Depreciation ($671M) in calc tree
-          and DepreciationDepletionAndAmortization ($1,334M) in facts only. Tree parser
-          was matching Depreciation (sub-component) over DDA (combined total).
+        reason: 'INVESTIGATED 2026-01-27: HON has Depreciation ($671M) in calc tree and DepreciationDepletionAndAmortization
+          ($1,334M) in facts only. Tree parser was matching Depreciation (sub-component) over DDA (combined total).
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Added preferred_concept override
-          for HON DepreciationAmortization pointing to DepreciationDepletionAndAmortization.
-          Strategy 0 in tree parser now checks preferred_concept before other strategies,
+        remediation_notes: 'RESOLVED 2026-01-27: Added preferred_concept override for HON DepreciationAmortization pointing
+          to DepreciationDepletionAndAmortization. Strategy 0 in tree parser now checks preferred_concept before other strategies,
           using facts-based verification to find DDA ($1,334M) which matches yfinance.
 
           '
         resolved_date: '2026-01-27'
-    notes: 'Diversified technology and manufacturing. D&A split: Depreciation ($671M)
-      + Amortization ($663M) on cash flow.'
+    notes: 'Diversified technology and manufacturing. D&A split: Depreciation ($671M) + Amortization ($663M) on cash flow.'
   DE:
     name: Deere & Company
     cik: 315189
     archetype: A
     fiscal_year_end: October
     exclude_metrics:
-    - OperatingIncome
-    - ShortTermDebt
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
+      ShortTermDebt:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       OperatingIncome:
         form_types:
         - 10-K
         variance_pct: 70.0
-        reason: 'DE has financial services segment (John Deere Financial) that complicates
-          OperatingIncome extraction. Equipment vs Financial segment reporting creates
-          aggregation challenges.
+        reason: 'DE has financial services segment (John Deere Financial) that complicates OperatingIncome extraction. Equipment
+          vs Financial segment reporting creates aggregation challenges.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Similar to CAT - financial services subsidiary complicates
-          extraction. Would need segment-aware income aggregation.
+        remediation_notes: 'Similar to CAT - financial services subsidiary complicates extraction. Would need segment-aware
+          income aggregation.
 
           '
         review_date: '2026-04-26'
@@ -631,16 +642,14 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 76.0
-        reason: 'John Deere Financial subsidiary debt inflates consolidated DebtCurrent.
-          XBRL extracts $4.2B (equipment only) vs yfinance $20B+ (consolidated). Same
-          financial subsidiary contamination as CAT.
+        reason: 'John Deere Financial subsidiary debt inflates consolidated DebtCurrent. XBRL extracts $4.2B (equipment only)
+          vs yfinance $20B+ (consolidated). Same financial subsidiary contamination as CAT.
 
           '
         skip_validation: true
         added_date: '2026-03-03'
         remediation_status: deferred
-        remediation_notes: 'Same root cause as CAT debt metrics. Would need subsidiary-aware
-          extraction or segment filtering.
+        remediation_notes: 'Same root cause as CAT debt metrics. Would need subsidiary-aware extraction or segment filtering.
 
           '
         review_date: '2026-06-03'
@@ -649,15 +658,14 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 68.0
-        reason: 'John Deere Financial investing activities included in consolidated
-          capex. Equipment segment capex ($1.4B) vs consolidated ($4.2B).
+        reason: 'John Deere Financial investing activities included in consolidated capex. Equipment segment capex ($1.4B)
+          vs consolidated ($4.2B).
 
           '
         skip_validation: true
         added_date: '2026-03-03'
         remediation_status: deferred
-        remediation_notes: 'Financial subsidiary investing cash flows distort capex
-          comparison.
+        remediation_notes: 'Financial subsidiary investing cash flows distort capex comparison.
 
           '
         review_date: '2026-06-03'
@@ -677,15 +685,15 @@ companies:
         form_types:
         - 10-K
         variance_pct: 35.0
-        reason: 'EMR calculation returns negative value due to incorrect component
-          selection. Non-calendar fiscal year and segment structure complicate extraction.
+        reason: 'EMR calculation returns negative value due to incorrect component selection. Non-calendar fiscal year and
+          segment structure complicate extraction.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: investigating
-        remediation_notes: 'Negative value suggests calculation bug rather than structural
-          issue. Investigate tree parser concept selection for EMR''s income statement.
+        remediation_notes: 'Negative value suggests calculation bug rather than structural issue. Investigate tree parser
+          concept selection for EMR''s income statement.
 
           '
         review_date: '2026-02-26'
@@ -695,7 +703,9 @@ companies:
     cik: 101829
     archetype: A
     exclude_metrics:
-    - ShortTermDebt
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     notes: Aerospace and defense company (formerly Raytheon Technologies)
   ASTE:
     name: Astec Industries, Inc.
@@ -713,7 +723,9 @@ companies:
     cik: 21344
     archetype: A
     exclude_metrics:
-    - ShortTermDebt
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     notes: Beverage company - nonalcoholic beverages
   PEP:
     name: PepsiCo, Inc.
@@ -727,16 +739,15 @@ companies:
     fiscal_year_end: January
     notes: Retail corporation - discount stores, hypermarkets
     exclude_metrics:
-      - ResearchAndDevelopment
+      ResearchAndDevelopment:
+        reason: not_applicable
+        notes: Retail company — no R&D spending
     known_divergences:
       PropertyPlantEquipment:
-        reason: The current mapping us-gaap:PropertyPlantAndEquipmentNet ($119.9B)
-          is the semantically correct Balance Sheet line item for Walmart. The reference
-          value ($139.7B) likely includes Finance Lease Right-of-Use Assets, which
-          under ASC 842 are often reported separately from PPE on the face of the
-          Balance Sheet but aggregated by third-party data providers. Since the primary
-          XBRL concept for PPE Net is already correctly identified, this is a reporting
-          divergence.
+        reason: The current mapping us-gaap:PropertyPlantAndEquipmentNet ($119.9B) is the semantically correct Balance Sheet
+          line item for Walmart. The reference value ($139.7B) likely includes Finance Lease Right-of-Use Assets, which under
+          ASC 842 are often reported separately from PPE on the face of the Balance Sheet but aggregated by third-party data
+          providers. Since the primary XBRL concept for PPE Net is already correctly identified, this is a reporting divergence.
         variance_pct: 14.109116417568574
   COST:
     name: Costco Wholesale Corporation
@@ -764,18 +775,16 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 100.0
-        reason: 'XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases,
-          xom:ProductionAndManufacturingExpenses) that don''t map to standard GrossProfit.
-          yfinance calculates OperatingIncome using proprietary normalization. XBRL
+        reason: 'XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases, xom:ProductionAndManufacturingExpenses)
+          that don''t map to standard GrossProfit. yfinance calculates OperatingIncome using proprietary normalization. XBRL
           extraction cannot reliably reproduce yfinance''s calculation.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Energy sector needs dedicated archetype or extraction
-          strategy. Consider adding "Energy" archetype (F?) with industry-specific
-          P&L handling.
+        remediation_notes: 'Energy sector needs dedicated archetype or extraction strategy. Consider adding "Energy" archetype
+          (F?) with industry-specific P&L handling.
 
           '
         review_date: '2026-04-26'
@@ -808,16 +817,15 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 100.0
-        reason: 'CVX uses energy-specific cost structure that doesn''t map to standard
-          GrossProfit/OperatingExpenses. yfinance uses proprietary normalization.
-          XBRL extraction cannot reliably reproduce yfinance''s calculation.
+        reason: 'CVX uses energy-specific cost structure that doesn''t map to standard GrossProfit/OperatingExpenses. yfinance
+          uses proprietary normalization. XBRL extraction cannot reliably reproduce yfinance''s calculation.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Same as XOM - energy sector needs dedicated extraction
-          strategy. Group with XOM, COP, SLB for future Energy archetype implementation.
+        remediation_notes: 'Same as XOM - energy sector needs dedicated extraction strategy. Group with XOM, COP, SLB for
+          future Energy archetype implementation.
 
           '
         review_date: '2026-04-26'
@@ -825,16 +833,14 @@ companies:
         form_types:
         - 10-K
         variance_pct: 1285.0
-        reason: 'XBRL DebtCurrent ($12.7B) includes items yfinance excludes ($4.4B).
-          Energy sector complex capital structure with credit facilities and commercial
-          paper that yfinance normalizes differently.
+        reason: 'XBRL DebtCurrent ($12.7B) includes items yfinance excludes ($4.4B). Energy sector complex capital structure
+          with credit facilities and commercial paper that yfinance normalizes differently.
 
           '
         skip_validation: true
         added_date: '2026-03-03'
         remediation_status: deferred
-        remediation_notes: 'Energy sector capital structure mismatch. Group with energy
-          archetype work.
+        remediation_notes: 'Energy sector capital structure mismatch. Group with energy archetype work.
 
           '
         review_date: '2026-06-03'
@@ -845,9 +851,15 @@ companies:
     archetype: A
     industry: energy
     exclude_metrics:
-    - OperatingIncome
-    - COGS
-    - ShortTermDebt
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
+      COGS:
+        reason: not_applicable
+        notes: Energy company — cost structure differs from COGS
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     metric_overrides:
       Capex:
         preferred_concept: cop:PaymentToAcquireProductiveAssetsAndInvestments
@@ -858,16 +870,15 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 200.0
-        reason: 'COP uses E&P-specific cost structure. Tree parser selects concepts
-          that include items yfinance excludes from OperatingIncome. Energy sector
-          has non-standard income statement format.
+        reason: 'COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from
+          OperatingIncome. Energy sector has non-standard income statement format.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Same as XOM/CVX - energy sector needs dedicated extraction
-          strategy. E&P companies have unique cost structure (exploration, DD&A).
+        remediation_notes: 'Same as XOM/CVX - energy sector needs dedicated extraction strategy. E&P companies have unique
+          cost structure (exploration, DD&A).
 
           '
         review_date: '2026-04-26'
@@ -875,15 +886,14 @@ companies:
         form_types:
         - 10-K
         variance_pct: 97.0
-        reason: 'COP DebtCurrent ($1.03B) vs yfinance ($0.74B). E&P capital structure
-          includes credit facilities that yfinance classifies differently.
+        reason: 'COP DebtCurrent ($1.03B) vs yfinance ($0.74B). E&P capital structure includes credit facilities that yfinance
+          classifies differently.
 
           '
         skip_validation: true
         added_date: '2026-03-03'
         remediation_status: deferred
-        remediation_notes: 'Energy sector capital structure mismatch. Group with energy
-          archetype work.
+        remediation_notes: 'Energy sector capital structure mismatch. Group with energy archetype work.
 
           '
         review_date: '2026-06-03'
@@ -893,18 +903,15 @@ companies:
         - 10-Q
         variance_pct: 913.0
         reason: 'INVESTIGATED 2026-01-27: COP uses company-extension concept cop:PaymentToAcquireProductiveAssetsAndInvestments
-          ($12,118M) for capex. Tree parser was matching ''Assets'' ($122.8B) via
-          loose partial matching.
+          ($12,118M) for capex. Tree parser was matching ''Assets'' ($122.8B) via loose partial matching.
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Three fixes applied: (1) Added preferred_concept
-          override pointing to cop:PaymentToAcquireProductiveAssetsAndInvestments,
-          (2) Implemented Strategy 0 in tree parser to check preferred_concept with
-          facts-based verification for company-extension namespaces, (3) Tightened
-          partial matching to require len >= 15 for reverse substring matches.
+        remediation_notes: 'RESOLVED 2026-01-27: Three fixes applied: (1) Added preferred_concept override pointing to cop:PaymentToAcquireProductiveAssetsAndInvestments,
+          (2) Implemented Strategy 0 in tree parser to check preferred_concept with facts-based verification for company-extension
+          namespaces, (3) Tightened partial matching to require len >= 15 for reverse substring matches.
 
           '
         resolved_date: '2026-01-27'
@@ -915,23 +922,24 @@ companies:
     archetype: A
     industry: energy
     exclude_metrics:
-    - OperatingIncome
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
     known_divergences:
       OperatingIncome:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 150.0
-        reason: 'SLB (oilfield services) uses segment-based reporting that doesn''t
-          aggregate cleanly to a consolidated OperatingIncome. Tree parser selects
-          incorrect concept for total operating income.
+        reason: 'SLB (oilfield services) uses segment-based reporting that doesn''t aggregate cleanly to a consolidated OperatingIncome.
+          Tree parser selects incorrect concept for total operating income.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Same as XOM/CVX/COP - energy sector needs dedicated extraction
-          strategy. Oilfield services segment reporting adds complexity.
+        remediation_notes: 'Same as XOM/CVX/COP - energy sector needs dedicated extraction strategy. Oilfield services segment
+          reporting adds complexity.
 
           '
         review_date: '2026-04-26'
@@ -948,27 +956,23 @@ companies:
         preferred_concept:
         - DepreciationDepletionAndAmortization
         - DepreciationAmortizationAndAccretionNet
-        notes: PBF DepreciationAndAmortization is SG&A fragment ($3.6M); cash flow
-          D&A uses DDA (10-K) or DAANet (10-Q)
+        notes: PBF DepreciationAndAmortization is SG&A fragment ($3.6M); cash flow D&A uses DDA (10-K) or DAANet (10-Q)
     known_divergences:
       DepreciationAmortization:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 97.9
-        reason: 'INVESTIGATED 2026-01-27: PBF DepreciationAndAmortization is dimensional-only
-          (per-segment). Min(axis_sums) picks up SG&A fragment ($13M 10-K, $3.6M 10-Q)
-          instead of consolidated D&A ($643M 10-K, $167M 10-Q). Cash flow statement
-          uses DepreciationDepletionAndAmortization (10-K) and DepreciationAmortizationAndAccretionNet
-          (10-Q).
+        reason: 'INVESTIGATED 2026-01-27: PBF DepreciationAndAmortization is dimensional-only (per-segment). Min(axis_sums)
+          picks up SG&A fragment ($13M 10-K, $3.6M 10-Q) instead of consolidated D&A ($643M 10-K, $167M 10-Q). Cash flow statement
+          uses DepreciationDepletionAndAmortization (10-K) and DepreciationAmortizationAndAccretionNet (10-Q).
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Added preferred_concept list override
-          in companies.yaml [DepreciationDepletionAndAmortization, DepreciationAmortizationAndAccretionNet].
-          Modified tree_parser.py Strategy 0 to support list-based fallback concepts.
+        remediation_notes: 'RESOLVED 2026-01-27: Added preferred_concept list override in companies.yaml [DepreciationDepletionAndAmortization,
+          DepreciationAmortizationAndAccretionNet]. Modified tree_parser.py Strategy 0 to support list-based fallback concepts.
           10-K uses DDA ($643M), 10-Q uses DAANet ($167M). Both match yfinance.
 
           '
@@ -979,22 +983,23 @@ companies:
     cik: 200406
     archetype: A
     exclude_metrics:
-    - OperatingIncome
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
     known_divergences:
       OperatingIncome:
         form_types:
         - 10-K
         variance_pct: 75.0
-        reason: 'JNJ''s segment structure (pharma, devices, consumer) and significant
-          one-time charges/gains create OperatingIncome variance. Tree parser selects
-          concepts that don''t match yfinance''s normalized calculation.
+        reason: 'JNJ''s segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome
+          variance. Tree parser selects concepts that don''t match yfinance''s normalized calculation.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Multi-segment healthcare conglomerate. Post-Kenvue spin-off
-          may simplify structure. Re-evaluate after 2025 filings are available.
+        remediation_notes: 'Multi-segment healthcare conglomerate. Post-Kenvue spin-off may simplify structure. Re-evaluate
+          after 2025 filings are available.
 
           '
         review_date: '2026-04-26'
@@ -1002,8 +1007,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 40.0
-        reason: Pharma capex includes intangible investment (acquired IP, licensing)
-          that yfinance normalizes differently from XBRL PaymentsToAcquirePropertyPlantAndEquipment.
+        reason: Pharma capex includes intangible investment (acquired IP, licensing) that yfinance normalizes differently
+          from XBRL PaymentsToAcquirePropertyPlantAndEquipment.
         skip_validation: false
         remediation_status: wont_fix
     notes: Healthcare conglomerate - pharmaceuticals, medical devices, consumer health
@@ -1020,16 +1025,14 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 78.4
-        reason: 'INVESTIGATED 2026-01-27: UNH 10-K has us-gaap:Revenues = $400,278M
-          as parent concept. Tree parser was selecting sub-component RevenueFromContractWithCustomerExcludingAssessedTax
-          (~$86B) instead of parent Revenues ($400B).
+        reason: 'INVESTIGATED 2026-01-27: UNH 10-K has us-gaap:Revenues = $400,278M as parent concept. Tree parser was selecting
+          sub-component RevenueFromContractWithCustomerExcludingAssessedTax (~$86B) instead of parent Revenues ($400B).
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Reordered metrics.yaml Revenue known_concepts
-          to put Revenues before RevenueFromContractWithCustomerExcludingAssessedTax.
+        remediation_notes: 'RESOLVED 2026-01-27: Reordered metrics.yaml Revenue known_concepts to put Revenues before RevenueFromContractWithCustomerExcludingAssessedTax.
           Tree parser now matches parent total first. Same fix as PFE.
 
           '
@@ -1038,32 +1041,31 @@ companies:
         form_types:
         - 10-Q
         variance_pct: 99.9
-        reason: 'INVESTIGATED 2026-01-27: UNH 10-Q DividendsPaid extracted $2M instead
-          of $2B. Two root causes: (1) Zero-day duration facts (dividend declaration
-          dates like duration_2025-09-23_2025-09-23 with value $2,002M) were treated
-          as period flows. (2) _derive_quarterly_value compared filing to itself because
-          date filter included current filing date, yielding zero derivation.
+        reason: 'INVESTIGATED 2026-01-27: UNH 10-Q DividendsPaid extracted $2M instead of $2B. Two root causes: (1) Zero-day
+          duration facts (dividend declaration dates like duration_2025-09-23_2025-09-23 with value $2,002M) were treated
+          as period flows. (2) _derive_quarterly_value compared filing to itself because date filter included current filing
+          date, yielding zero derivation.
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Two fixes in reference_validator.py:
-          (1) Exclude period_days==0 facts from duration extraction (0-day "point-in-time"
-          facts are declarations, not flows). (2) Use day_before date in _derive_quarterly_value
-          to prevent self-comparison. UNH DividendsPaid now extracts ~$2B matching
-          yfinance.
+        remediation_notes: 'RESOLVED 2026-01-27: Two fixes in reference_validator.py: (1) Exclude period_days==0 facts from
+          duration extraction (0-day "point-in-time" facts are declarations, not flows). (2) Use day_before date in _derive_quarterly_value
+          to prevent self-comparison. UNH DividendsPaid now extracts ~$2B matching yfinance.
 
           '
         resolved_date: '2026-01-27'
-    notes: 'Healthcare/insurance company. Revenue structure: Premiums ($309B) + Contract
-      ($86B) + Investment ($5B) = $400B total.'
+    notes: 'Healthcare/insurance company. Revenue structure: Premiums ($309B) + Contract ($86B) + Investment ($5B) = $400B
+      total.'
   LLY:
     name: Eli Lilly and Company
     cik: 59478
     archetype: A
     exclude_metrics:
-    - OperatingIncome
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
     metric_overrides:
       Capex:
         preferred_concept: PaymentsToAcquireOtherPropertyPlantAndEquipment
@@ -1074,20 +1076,17 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 40.0
-        reason: 'INVESTIGATED 2026-01-27: LLY tree parser fails to find Capex in calc
-          tree, falling back to industry_logic DefaultExtractor.extract_capex() which
-          sums PP&E + Intangibles + Software. This composite over/under-counts vs
-          yfinance (39.8% under on 10-K, 88.5% over on 10-Q).
+        reason: 'INVESTIGATED 2026-01-27: LLY tree parser fails to find Capex in calc tree, falling back to industry_logic
+          DefaultExtractor.extract_capex() which sums PP&E + Intangibles + Software. This composite over/under-counts vs yfinance
+          (39.8% under on 10-K, 88.5% over on 10-Q).
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Added preferred_concept override
-          for LLY Capex pointing to PaymentsToAcquireOtherPropertyPlantAndEquipment
-          ($5.06B). Bypasses broken industry_logic composite. Note: yfinance reference
-          data was unavailable during validation; manual verification confirms correct
-          XBRL concept extraction.
+        remediation_notes: 'RESOLVED 2026-01-27: Added preferred_concept override for LLY Capex pointing to PaymentsToAcquireOtherPropertyPlantAndEquipment
+          ($5.06B). Bypasses broken industry_logic composite. Note: yfinance reference data was unavailable during validation;
+          manual verification confirms correct XBRL concept extraction.
 
           '
         resolved_date: '2026-01-27'
@@ -1101,17 +1100,15 @@ companies:
         form_types:
         - 10-K
         variance_pct: 350.0
-        reason: 'PFE has significant COVID vaccine related charges and R&D capitalization
-          that affect OperatingIncome comparability. Industry logic calculation returns
-          negative values due to incorrect expense aggregation.
+        reason: 'PFE has significant COVID vaccine related charges and R&D capitalization that affect OperatingIncome comparability.
+          Industry logic calculation returns negative values due to incorrect expense aggregation.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'COVID-related one-time charges distort comparisons. May
-          normalize in future filings as pandemic impact fades. Also investigate negative
-          value bug in calculation.
+        remediation_notes: 'COVID-related one-time charges distort comparisons. May normalize in future filings as pandemic
+          impact fades. Also investigate negative value bug in calculation.
 
           '
         review_date: '2026-04-26'
@@ -1119,48 +1116,45 @@ companies:
         form_types:
         - 10-K
         variance_pct: 99.3
-        reason: 'INVESTIGATED 2026-01-27: Tree parser concept priority issue. PFE
-          2024 10-K has us-gaap:Revenues = $63,627M as parent concept. Tree parser
-          was selecting RevenueFromContractWithCustomerExcludingAssessedTax (sub-component
+        reason: 'INVESTIGATED 2026-01-27: Tree parser concept priority issue. PFE 2024 10-K has us-gaap:Revenues = $63,627M
+          as parent concept. Tree parser was selecting RevenueFromContractWithCustomerExcludingAssessedTax (sub-component
           ~$55B) instead of parent Revenues ($63.6B).
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Reordered metrics.yaml Revenue known_concepts
-          to put Revenues before RevenueFromContractWithCustomerExcludingAssessedTax.
+        remediation_notes: 'RESOLVED 2026-01-27: Reordered metrics.yaml Revenue known_concepts to put Revenues before RevenueFromContractWithCustomerExcludingAssessedTax.
           Tree parser now matches parent total first.
 
           '
         resolved_date: '2026-01-27'
-    notes: 'Pharmaceutical and biotechnology company. Revenue split: ASC 606 contract
-      + collaborative arrangement.'
+    notes: 'Pharmaceutical and biotechnology company. Revenue split: ASC 606 contract + collaborative arrangement.'
   UPS:
     name: United Parcel Service, Inc.
     cik: 1090727
     archetype: A
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: Transportation company — expense-by-nature format, no COGS line
     known_divergences:
       NetIncome:
         form_types:
         - 10-Q
         variance_pct: 188.4
-        reason: 'INVESTIGATED 2026-01-27: UPS 10-Q NetIncome extracted $3.8B (YTD
-          9-month) instead of $1.3B (single quarter). NetIncome was not in QUARTERLY_DERIVABLE_METRICS,
-          so no quarterly derivation was attempted. Period filter fell through to
-          YTD value.
+        reason: 'INVESTIGATED 2026-01-27: UPS 10-Q NetIncome extracted $3.8B (YTD 9-month) instead of $1.3B (single quarter).
+          NetIncome was not in QUARTERLY_DERIVABLE_METRICS, so no quarterly derivation was attempted. Period filter fell through
+          to YTD value.
 
           '
         skip_validation: false
         added_date: '2026-01-27'
         remediation_status: resolved
-        remediation_notes: 'RESOLVED 2026-01-27: Added NetIncome (and other income
-          statement metrics: Revenue, COGS, SGA, OperatingIncome, PretaxIncome) to
-          QUARTERLY_DERIVABLE_METRICS in reference_validator.py. Quarterly derivation
-          now attempts strict 90-day extraction first, then YTD derivation (current_YTD
-          - prior_YTD). UPS NetIncome 10-Q now extracts ~$1.3B matching yfinance.
+        remediation_notes: 'RESOLVED 2026-01-27: Added NetIncome (and other income statement metrics: Revenue, COGS, SGA,
+          OperatingIncome, PretaxIncome) to QUARTERLY_DERIVABLE_METRICS in reference_validator.py. Quarterly derivation now
+          attempts strict 90-day extraction first, then YTD derivation (current_YTD - prior_YTD). UPS NetIncome 10-Q now extracts
+          ~$1.3B matching yfinance.
 
           '
         resolved_date: '2026-01-27'
@@ -1171,28 +1165,28 @@ companies:
     archetype: A
     fiscal_year_end: May
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: Transportation company — expense-by-nature format, no COGS line
     known_divergences:
       COGS:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 20.0
-        reason: 'INVESTIGATED 2026-01-27: FDX uses expense-by-nature presentation
-          (PurchasedTransportation, Labor, Fuel, etc.) with no CostOfRevenue or CostOfGoodsAndServicesSold
-          concept. Only CostsAndExpenses (total opex $70.4B) exists. Tree parser was
-          matching CostsAndExpenses ($82.7B including segment duplication) as COGS.
+        reason: 'INVESTIGATED 2026-01-27: FDX uses expense-by-nature presentation (PurchasedTransportation, Labor, Fuel, etc.)
+          with no CostOfRevenue or CostOfGoodsAndServicesSold concept. Only CostsAndExpenses (total opex $70.4B) exists. Tree
+          parser was matching CostsAndExpenses ($82.7B including segment duplication) as COGS.
 
           '
         skip_validation: true
         added_date: '2026-01-27'
         remediation_status: wont_fix
-        remediation_notes: 'FDX structurally has no COGS — expense-by-nature format
-          typical of transportation companies. Excluded COGS from FDX validation.
+        remediation_notes: 'FDX structurally has no COGS — expense-by-nature format typical of transportation companies. Excluded
+          COGS from FDX validation.
 
           '
-    notes: Courier delivery services. Expense-by-nature income statement (no gross
-      profit line).
+    notes: Courier delivery services. Expense-by-nature income statement (no gross profit line).
   BA:
     name: The Boeing Company
     cik: 12927
@@ -1203,17 +1197,15 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 100.0
-        reason: 'Boeing has significant non-recurring program charges (737 MAX, 787)
-          that distort operating income comparisons. These charges create large swings
-          that don''t reflect normal operating performance.
+        reason: 'Boeing has significant non-recurring program charges (737 MAX, 787) that distort operating income comparisons.
+          These charges create large swings that don''t reflect normal operating performance.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Program charges are ongoing operational reality for BA.
-          yfinance may exclude/include differently. Consider normalizing for special
-          items or accepting divergence as structural.
+        remediation_notes: 'Program charges are ongoing operational reality for BA. yfinance may exclude/include differently.
+          Consider normalizing for special items or accepting divergence as structural.
 
           '
         review_date: '2026-04-26'
@@ -1223,29 +1215,43 @@ companies:
     cik: 1067983
     archetype: A
     exclude_metrics:
-    - COGS
-    - Capex
-    - OperatingIncome
-    - LongTermDebt
-    - WeightedAverageSharesDiluted
-    - StockBasedCompensation
-    - AccountsPayable
+      COGS:
+        reason: not_applicable
+        notes: Insurance/conglomerate — COGS not applicable
+      Capex:
+        reason: not_applicable
+        notes: Insurance company — minimal Capex
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
+      LongTermDebt:
+        reason: not_applicable
+        notes: ''
+      WeightedAverageSharesDiluted:
+        reason: not_applicable
+        notes: ''
+      StockBasedCompensation:
+        reason: not_applicable
+        notes: ''
+      AccountsPayable:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       Revenue:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 24.2
-        reason: 'BRK conglomerate structure: XBRL Revenues ($321.6B) captures insurance
-          premiums + railroad + manufacturing but misses some segments. yfinance ($424.2B)
-          includes all consolidated revenue. Structural conglomerate extraction gap.
+        reason: 'BRK conglomerate structure: XBRL Revenues ($321.6B) captures insurance premiums + railroad + manufacturing
+          but misses some segments. yfinance ($424.2B) includes all consolidated revenue. Structural conglomerate extraction
+          gap.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
-        remediation_notes: 'BRK is the most complex conglomerate in the universe.
-          Structural extraction gap requires segment-aware aggregation.
+        remediation_notes: 'BRK is the most complex conglomerate in the universe. Structural extraction gap requires segment-aware
+          aggregation.
 
           '
         review_date: '2026-09-04'
@@ -1254,8 +1260,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 20.5
-        reason: 'XBRL Assets ($917.8B) vs yfinance ($1.15T). Missing insurance subsidiary
-          assets or dimensional filtering excluding some segments.
+        reason: 'XBRL Assets ($917.8B) vs yfinance ($1.15T). Missing insurance subsidiary assets or dimensional filtering
+          excluding some segments.
 
           '
         skip_validation: true
@@ -1267,8 +1273,7 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 32.2
-        reason: 'XBRL Goodwill ($56.9B) vs yfinance ($83.9B). Missing subsidiary goodwill
-          from insurance or other segments.
+        reason: 'XBRL Goodwill ($56.9B) vs yfinance ($83.9B). Missing subsidiary goodwill from insurance or other segments.
 
           '
         skip_validation: true
@@ -1292,8 +1297,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 46.1
-        reason: 'XBRL ShortTermBorrowings ($1.3B) vs yfinance ($2.4B). Insurance subsidiary
-          debt not captured in standard extraction.
+        reason: 'XBRL ShortTermBorrowings ($1.3B) vs yfinance ($2.4B). Insurance subsidiary debt not captured in standard
+          extraction.
 
           '
         skip_validation: true
@@ -1305,8 +1310,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 35.5
-        reason: 'XBRL NotesReceivableNet ($27.8B) vs yfinance ($43.1B). Insurance
-          receivables and reinsurance recoverables may not be captured.
+        reason: 'XBRL NotesReceivableNet ($27.8B) vs yfinance ($43.1B). Insurance receivables and reinsurance recoverables
+          may not be captured.
 
           '
         skip_validation: true
@@ -1318,32 +1323,35 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 96.8
-        reason: 'XBRL DDA ($411M corporate only) vs yfinance ($12.9B consolidated
-          including BNSF railroad, utilities, manufacturing subsidiaries).
+        reason: 'XBRL DDA ($411M corporate only) vs yfinance ($12.9B consolidated including BNSF railroad, utilities, manufacturing
+          subsidiaries).
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
         review_date: '2026-09-04'
-    notes: Insurance conglomerate. BRK-A and BRK-B share same CIK. Uses BRK-B ticker
-      for yfinance. Most complex conglomerate - structural extraction gaps expected.
+    notes: Insurance conglomerate. BRK-A and BRK-B share same CIK. Uses BRK-B ticker for yfinance. Most complex conglomerate
+      - structural extraction gaps expected.
   MET:
     name: MetLife, Inc.
     cik: 1099219
     archetype: A
     exclude_metrics:
-    - COGS
-    - Capex
+      COGS:
+        reason: not_applicable
+        notes: Insurance/conglomerate — COGS not applicable
+      Capex:
+        reason: not_applicable
+        notes: Insurance company — minimal Capex
     known_divergences:
       Revenue:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 62.8
-        reason: 'XBRL Revenues ($26.1B) captures only a portion of insurance revenue.
-          yfinance ($70.1B) includes all premiums, investment income, and fee income.
-          Structural insurance revenue aggregation gap.
+        reason: 'XBRL Revenues ($26.1B) captures only a portion of insurance revenue. yfinance ($70.1B) includes all premiums,
+          investment income, and fee income. Structural insurance revenue aggregation gap.
 
           '
         skip_validation: true
@@ -1355,8 +1363,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 71.4
-        reason: 'XBRL ShortTermBorrowings ($133M) vs yfinance ($465M). Insurance subsidiary
-          short-term obligations not fully captured.
+        reason: 'XBRL ShortTermBorrowings ($133M) vs yfinance ($465M). Insurance subsidiary short-term obligations not fully
+          captured.
 
           '
         skip_validation: true
@@ -1367,9 +1375,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 82.7
-        reason: 'XBRL JuniorSubordinatedNotes ($3.2B) vs yfinance ($18.2B). Wrong
-          concept selected — captures only junior subordinated notes instead of total
-          LTD.
+        reason: 'XBRL JuniorSubordinatedNotes ($3.2B) vs yfinance ($18.2B). Wrong concept selected — captures only junior
+          subordinated notes instead of total LTD.
 
           '
         skip_validation: true
@@ -1382,15 +1389,19 @@ companies:
     cik: 5272
     archetype: A
     exclude_metrics:
-    - COGS
-    - Capex
+      COGS:
+        reason: not_applicable
+        notes: Insurance/conglomerate — COGS not applicable
+      Capex:
+        reason: not_applicable
+        notes: Insurance company — minimal Capex
     known_divergences:
       LongTermDebt:
         form_types:
         - 10-K
         variance_pct: 100.0
-        reason: 'XBRL LongTermDebt returns $0 vs yfinance $8.9B. AIG may use non-standard
-          debt concepts or dimensional reporting for debt.
+        reason: 'XBRL LongTermDebt returns $0 vs yfinance $8.9B. AIG may use non-standard debt concepts or dimensional reporting
+          for debt.
 
           '
         skip_validation: true
@@ -1402,9 +1413,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 81.5
-        reason: 'XBRL ReceivablesNetCurrent ($1.9B) vs yfinance ($10.5B). Insurance
-          receivables (premiums receivable, reinsurance recoverables) not captured
-          by standard AR concepts.
+        reason: 'XBRL ReceivablesNetCurrent ($1.9B) vs yfinance ($10.5B). Insurance receivables (premiums receivable, reinsurance
+          recoverables) not captured by standard AR concepts.
 
           '
         skip_validation: true
@@ -1415,8 +1425,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 83.0
-        reason: 'XBRL AccountsPayableCurrent ($1.0B) vs yfinance ($6.1B). Insurance
-          payables (claims payable, policy liabilities) differ from standard AP.
+        reason: 'XBRL AccountsPayableCurrent ($1.0B) vs yfinance ($6.1B). Insurance payables (claims payable, policy liabilities)
+          differ from standard AP.
 
           '
         skip_validation: true
@@ -1429,17 +1439,23 @@ companies:
     cik: 753308
     archetype: A
     exclude_metrics:
-    - COGS
-    - IntangibleAssets
-    - ShortTermDebt
+      COGS:
+        reason: not_applicable
+        notes: ''
+      IntangibleAssets:
+        reason: not_applicable
+        notes: ''
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     known_divergences:
       Revenue:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 100.0
-        reason: 'XBRL selects wrong concept (DisposalGroupGain/EquityMethodInvestments).
-          Utility holding company revenue not captured by standard tree extraction.
+        reason: 'XBRL selects wrong concept (DisposalGroupGain/EquityMethodInvestments). Utility holding company revenue not
+          captured by standard tree extraction.
 
           '
         skip_validation: true
@@ -1450,8 +1466,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 78.3
-        reason: 'XBRL OperatingExpenses ($17.6B) vs yfinance COGS ($9.9B). Wrong concept
-          used — captures all opex instead of cost of goods.
+        reason: 'XBRL OperatingExpenses ($17.6B) vs yfinance COGS ($9.9B). Wrong concept used — captures all opex instead
+          of cost of goods.
 
           '
         skip_validation: true
@@ -1463,8 +1479,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 19.7
-        reason: 'XBRL CapitalExpendituresIncurredButNotYetPaid vs standard Capex concept.
-          Subsidiary-level extraction captures partial capex.
+        reason: 'XBRL CapitalExpendituresIncurredButNotYetPaid vs standard Capex concept. Subsidiary-level extraction captures
+          partial capex.
 
           '
         skip_validation: true
@@ -1476,8 +1492,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 48.4
-        reason: 'XBRL Assets ($98B) vs yfinance ($190B). Subsidiary-level extraction
-          — captures FPL subsidiary but not full consolidated NEE.
+        reason: 'XBRL Assets ($98B) vs yfinance ($190B). Subsidiary-level extraction — captures FPL subsidiary but not full
+          consolidated NEE.
 
           '
         skip_validation: true
@@ -1511,8 +1527,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 83.0
-        reason: 'Subsidiary-level LongTermDebtCurrent ($1.7B) vs consolidated ($9.9B).
-          Utility holding company multi-entity debt structure.
+        reason: 'Subsidiary-level LongTermDebtCurrent ($1.7B) vs consolidated ($9.9B). Utility holding company multi-entity
+          debt structure.
 
           '
         skip_validation: true
@@ -1524,8 +1540,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 99.4
-        reason: 'XBRL LongTermDebtNoncurrent ($436M) vs yfinance ($72.4B). Extreme
-          subsidiary-level extraction — only captures one subsidiary''s LTD.
+        reason: 'XBRL LongTermDebtNoncurrent ($436M) vs yfinance ($72.4B). Extreme subsidiary-level extraction — only captures
+          one subsidiary''s LTD.
 
           '
         skip_validation: true
@@ -1548,17 +1564,16 @@ companies:
         form_types:
         - 10-Q
         variance_pct: 516.9
-        reason: 'XBRL PaymentsOfDividends ($7.2B) vs yfinance ($1.2B). Likely capturing
-          intercompany dividend payments in addition to external dividends.
+        reason: 'XBRL PaymentsOfDividends ($7.2B) vs yfinance ($1.2B). Likely capturing intercompany dividend payments in
+          addition to external dividends.
 
           '
         skip_validation: true
         added_date: '2026-03-04'
         remediation_status: deferred
         review_date: '2026-09-04'
-    notes: Electric power and energy infrastructure company. Utility holding company
-      — XBRL extracts at subsidiary level, causing systematic undercount vs consolidated
-      yfinance data.
+    notes: Electric power and energy infrastructure company. Utility holding company — XBRL extracts at subsidiary level,
+      causing systematic undercount vs consolidated yfinance data.
   DUK:
     name: Duke Energy Corporation
     cik: 1326160
@@ -1569,8 +1584,7 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 78.6
-        reason: 'Subsidiary-level CostOfGoodsAndServicesSold ($3.3B) vs consolidated
-          ($15.2B).
+        reason: 'Subsidiary-level CostOfGoodsAndServicesSold ($3.3B) vs consolidated ($15.2B).
 
           '
         skip_validation: true
@@ -1664,8 +1678,7 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 82.2
-        reason: 'XBRL EnergyRelatedInventoryCoal captures only coal inventory, missing
-          other energy inventory types.
+        reason: 'XBRL EnergyRelatedInventoryCoal captures only coal inventory, missing other energy inventory types.
 
           '
         skip_validation: true
@@ -1696,8 +1709,8 @@ companies:
         added_date: '2026-03-04'
         remediation_status: deferred
         review_date: '2026-09-04'
-    notes: Electric power holding company. Subsidiary-level XBRL extraction causes
-      systematic undercount vs consolidated yfinance data.
+    notes: Electric power holding company. Subsidiary-level XBRL extraction causes systematic undercount vs consolidated yfinance
+      data.
   SO:
     name: Southern Company
     cik: 92122
@@ -1779,8 +1792,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 22.7
-        reason: 'Minor variance: XBRL AllocatedShareBasedCompensation ($102M) vs yfinance
-          ($132M). Subsidiary vs consolidated gap.
+        reason: 'Minor variance: XBRL AllocatedShareBasedCompensation ($102M) vs yfinance ($132M). Subsidiary vs consolidated
+          gap.
 
           '
         skip_validation: true
@@ -1792,8 +1805,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 88.5
-        reason: 'XBRL EnergyRelatedInventoryNaturalGasInStorage ($388M) captures only
-          gas inventory vs yfinance total inventory ($3.4B).
+        reason: 'XBRL EnergyRelatedInventoryNaturalGasInStorage ($388M) captures only gas inventory vs yfinance total inventory
+          ($3.4B).
 
           '
         skip_validation: true
@@ -1811,22 +1824,26 @@ companies:
         added_date: '2026-03-04'
         remediation_status: deferred
         review_date: '2026-09-04'
-    notes: Electric utility holding company. Subsidiary-level XBRL extraction causes
-      systematic undercount vs consolidated yfinance data.
+    notes: Electric utility holding company. Subsidiary-level XBRL extraction causes systematic undercount vs consolidated
+      yfinance data.
   AMT:
     name: American Tower Corporation
     cik: 1053507
     archetype: A
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: REIT — no cost of goods sold
+      Inventory:
+        reason: not_applicable
+        notes: REIT/Utility — no inventory
     known_divergences:
       OperatingIncome:
         form_types:
         - 10-K
         variance_pct: 76.1
-        reason: 'industry_logic OperatingIncome ($1.1B) vs yfinance ($4.5B). REIT
-          subsidiary- level extraction or REIT-specific income calculation differs.
+        reason: 'industry_logic OperatingIncome ($1.1B) vs yfinance ($4.5B). REIT subsidiary- level extraction or REIT-specific
+          income calculation differs.
 
           '
         skip_validation: true
@@ -1837,8 +1854,7 @@ companies:
         form_types:
         - 10-K
         variance_pct: 56.2
-        reason: 'XBRL Assets ($26.8B) vs yfinance ($61.1B). Subsidiary-level extraction
-          for tower infrastructure REIT.
+        reason: 'XBRL Assets ($26.8B) vs yfinance ($61.1B). Subsidiary-level extraction for tower infrastructure REIT.
 
           '
         skip_validation: true
@@ -1861,8 +1877,7 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 100.0
-        reason: 'XBRL LongTermDebt returns $0 vs yfinance $32.8B. REIT debt structure
-          not captured by standard concept.
+        reason: 'XBRL LongTermDebt returns $0 vs yfinance $32.8B. REIT debt structure not captured by standard concept.
 
           '
         skip_validation: true
@@ -1874,8 +1889,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 87.3
-        reason: 'PaymentsOfDividendsMinorityInterest ($391M) captures only minority
-          interest dividends vs yfinance total ($3.1B). REITs have high dividend payouts.
+        reason: 'PaymentsOfDividendsMinorityInterest ($391M) captures only minority interest dividends vs yfinance total ($3.1B).
+          REITs have high dividend payouts.
 
           '
         skip_validation: true
@@ -1886,8 +1901,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 65.6
-        reason: 'DepreciationAmortizationAndAccretionNet (-$730M) vs yfinance ($2.1B).
-          Negative value indicates accretion netting.
+        reason: 'DepreciationAmortizationAndAccretionNet (-$730M) vs yfinance ($2.1B). Negative value indicates accretion
+          netting.
 
           '
         skip_validation: true
@@ -1922,8 +1937,12 @@ companies:
     cik: 1045609
     archetype: A
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: REIT — no cost of goods sold
+      Inventory:
+        reason: not_applicable
+        notes: REIT/Utility — no inventory
     known_divergences:
       OperatingIncome:
         form_types:
@@ -1938,8 +1957,8 @@ companies:
         form_types:
         - 10-K
         variance_pct: 107.7
-        reason: 'XBRL Goodwill ($1.6B) vs yfinance IntangibleAssets ($765M). Overcounting
-          — XBRL includes goodwill in intangible assets composite metric.
+        reason: 'XBRL Goodwill ($1.6B) vs yfinance IntangibleAssets ($765M). Overcounting — XBRL includes goodwill in intangible
+          assets composite metric.
 
           '
         skip_validation: true
@@ -1952,17 +1971,24 @@ companies:
     cik: 1063761
     archetype: A
     exclude_metrics:
-    - COGS
-    - Inventory
-    - ShortTermDebt
-    - AccountsPayable
+      COGS:
+        reason: not_applicable
+        notes: REIT — no cost of goods sold
+      Inventory:
+        reason: not_applicable
+        notes: REIT/Utility — no inventory
+      ShortTermDebt:
+        reason: not_applicable
+        notes: ''
+      AccountsPayable:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       OperatingIncome:
         form_types:
         - 10-K
         variance_pct: 73.0
-        reason: 'industry_logic OperatingIncome ($836M) vs yfinance ($3.1B). REIT
-          income structure differs from standard industrial.
+        reason: 'industry_logic OperatingIncome ($836M) vs yfinance ($3.1B). REIT income structure differs from standard industrial.
 
           '
         skip_validation: true
@@ -1974,8 +2000,8 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 15.1
-        reason: 'ProfitLoss ($2.7B) vs yfinance NetIncomeLoss ($2.4B). XBRL uses ProfitLoss
-          which includes non-controlling interest attributable to operating partnership.
+        reason: 'ProfitLoss ($2.7B) vs yfinance NetIncomeLoss ($2.4B). XBRL uses ProfitLoss which includes non-controlling
+          interest attributable to operating partnership.
 
           '
         skip_validation: true
@@ -1987,8 +2013,7 @@ companies:
         - 10-K
         - 10-Q
         variance_pct: 86.9
-        reason: 'PaymentsOfDividendsMinorityInterest ($399M) captures only minority
-          interest dividends vs yfinance total ($3.0B).
+        reason: 'PaymentsOfDividendsMinorityInterest ($399M) captures only minority interest dividends vs yfinance total ($3.0B).
 
           '
         skip_validation: true
@@ -2011,12 +2036,24 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
-    - AccountsReceivable
-    - AccountsPayable
-    - ResearchAndDevelopment
-    - GrossProfit
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
+      AccountsReceivable:
+        reason: not_applicable
+        notes: Banking company — AccountsReceivable not applicable
+      AccountsPayable:
+        reason: not_applicable
+        notes: Banking company — AccountsPayable not applicable
+      ResearchAndDevelopment:
+        reason: not_applicable
+        notes: Banking company — ResearchAndDevelopment not applicable
+      GrossProfit:
+        reason: not_applicable
+        notes: ''
     street_view_notes:
       ShortTermDebt: 'Hybrid: Commercial GAAP + Dealer Street View'
     notes: Hybrid bank - commercial + significant dealer/trading operations
@@ -2029,10 +2066,9 @@ companies:
         form_types:
         - 10-K
         variance_pct: 35.0
-        reason: JPM XBRL PaymentsForRepurchaseOfCommonStock ($18.8B) captures only
-          common stock buybacks. yfinance reference ($28.7B) includes preferred stock
-          repurchases and treasury stock adjustments. 6 graveyard attempts exhausted
-          all concept and formula approaches.
+        reason: JPM XBRL PaymentsForRepurchaseOfCommonStock ($18.8B) captures only common stock buybacks. yfinance reference
+          ($28.7B) includes preferred stock repurchases and treasury stock adjustments. 6 graveyard attempts exhausted all
+          concept and formula approaches.
         skip_validation: false
         remediation_status: wont_fix
   GS:
@@ -2047,16 +2083,22 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 25.0
     exclude_metrics:
-    - COGS
-    - SGA
-    - Inventory
-    - AccountsPayable
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
+      Inventory:
+        reason: not_applicable
+        notes: Banking company — Inventory not applicable
+      AccountsPayable:
+        reason: not_applicable
+        notes: Banking company — AccountsPayable not applicable
     street_view_notes:
-      ShortTermDebt: Includes Net Repos (~$90B) for economic leverage view. GAAP extraction
-        excludes Repos for yfinance validation.
+      ShortTermDebt: Includes Net Repos (~$90B) for economic leverage view. GAAP extraction excludes Repos for yfinance validation.
       CashAndEquivalents: Includes Segregated Cash for regulatory liquidity view.
-    notes: Dealer bank - high trading assets, low loan book. Street View differs from
-      GAAP for leverage analysis.
+    notes: Dealer bank - high trading assets, low loan book. Street View differs from GAAP for leverage analysis.
   MS:
     name: Morgan Stanley
     cik: 895421
@@ -2068,14 +2110,23 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 25.0
     exclude_metrics:
-    - COGS
-    - SGA
-    - Inventory
-    - AccountsPayable
-    - AccountsReceivable
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
+      Inventory:
+        reason: not_applicable
+        notes: Banking company — Inventory not applicable
+      AccountsPayable:
+        reason: not_applicable
+        notes: Banking company — AccountsPayable not applicable
+      AccountsReceivable:
+        reason: not_applicable
+        notes: Banking company — AccountsReceivable not applicable
     street_view_notes:
-      ShortTermDebt: Includes Net Repos for economic leverage view. GAAP extraction
-        excludes Repos for yfinance validation.
+      ShortTermDebt: Includes Net Repos for economic leverage view. GAAP extraction excludes Repos for yfinance validation.
       CashAndEquivalents: Includes Restricted Cash (~$30B) per Street analyst convention.
     notes: Dealer bank - wealth management + institutional securities.
   WFC:
@@ -2090,32 +2141,32 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
     street_view_notes:
-      ShortTermDebt: Street View excludes TradingLiabilities for clean economic debt
-        measure.
+      ShortTermDebt: Street View excludes TradingLiabilities for clean economic debt measure.
     known_divergences:
       ShortTermDebt:
         form_types:
         - 10-K
         variance_pct: 53.5
-        reason: '10-K uses Bottom-Up (CP + FHLB + OtherSTB + CPLTD = $20.8B). yfinance
-          likely uses STB - Repos without CPLTD (~$13.6B). Methodological difference,
-          not extraction bug. 10-Q passes perfectly (-0.9% variance).
+        reason: '10-K uses Bottom-Up (CP + FHLB + OtherSTB + CPLTD = $20.8B). yfinance likely uses STB - Repos without CPLTD
+          (~$13.6B). Methodological difference, not extraction bug. 10-Q passes perfectly (-0.9% variance).
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Methodological difference between GAAP (with CPLTD) and
-          yfinance. 10-Q passes, only 10-K fails. May need form-specific extraction
-          logic.
+        remediation_notes: 'Methodological difference between GAAP (with CPLTD) and yfinance. 10-Q passes, only 10-K fails.
+          May need form-specific extraction logic.
 
           '
         review_date: '2026-04-26'
-    notes: 'Commercial bank - high loan book, traditional banking model. Uses wfc:
-      namespace for repos.'
+    notes: 'Commercial bank - high loan book, traditional banking model. Uses wfc: namespace for repos.'
   C:
     name: Citigroup Inc.
     cik: 831001
@@ -2130,11 +2181,21 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
-    - Inventory
-    - AccountsPayable
-    - AccountsReceivable
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
+      Inventory:
+        reason: not_applicable
+        notes: Banking company — Inventory not applicable
+      AccountsPayable:
+        reason: not_applicable
+        notes: Banking company — AccountsPayable not applicable
+      AccountsReceivable:
+        reason: not_applicable
+        notes: Banking company — AccountsReceivable not applicable
     street_view_notes:
       ShortTermDebt: 'Hybrid: Commercial GAAP + Dealer Street View'
     notes: Hybrid bank - global commercial + investment banking operations.
@@ -2152,10 +2213,18 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
-    - Inventory
-    - AccountsPayable
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
+      Inventory:
+        reason: not_applicable
+        notes: Banking company — Inventory not applicable
+      AccountsPayable:
+        reason: not_applicable
+        notes: Banking company — AccountsPayable not applicable
     street_view_notes:
       ShortTermDebt: 'Hybrid: Commercial GAAP + Dealer Street View'
     notes: Hybrid bank - one of the Big Four with Merrill Lynch operations.
@@ -2171,30 +2240,31 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
     known_divergences:
       ShortTermDebt:
         form_types:
         - 10-K
         variance_pct: 104.0
-        reason: 'YFinance annual data (~$7.6B) differs significantly from quarterly
-          (~$15B). Our 10-K extraction is consistent with quarterly. This is a yfinance
-          data quality issue - their annual aggregation doesn''t match their quarterly
+        reason: 'YFinance annual data (~$7.6B) differs significantly from quarterly (~$15B). Our 10-K extraction is consistent
+          with quarterly. This is a yfinance data quality issue - their annual aggregation doesn''t match their quarterly
           reports.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Likely yfinance data quality issue. Our extraction is
-          internally consistent (10-K matches 10-Q). Consider adding secondary reference
-          source validation.
+        remediation_notes: 'Likely yfinance data quality issue. Our extraction is internally consistent (10-K matches 10-Q).
+          Consider adding secondary reference source validation.
 
           '
         review_date: '2026-04-26'
-    notes: Regional commercial bank - traditional banking model. STB already excludes
-      repos.
+    notes: Regional commercial bank - traditional banking model. STB already excludes repos.
   BK:
     name: Bank of New York Mellon Corporation
     cik: 1390777
@@ -2206,12 +2276,15 @@ companies:
       safe_fallback: false
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
     street_view_notes:
       CashAndEquivalents: Includes Fed Deposits via company-extension tags (bk:InterestBearingDepositsInFederalReserve).
-    notes: Custodial bank - repos not in yfinance Current Debt. NO fuzzy fallback
-      for STB.
+    notes: Custodial bank - repos not in yfinance Current Debt. NO fuzzy fallback for STB.
   STT:
     name: State Street Corporation
     cik: 93751
@@ -2223,31 +2296,32 @@ companies:
       safe_fallback: false
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
     known_divergences:
       ShortTermDebt:
         form_types:
         - 10-K
         - 10-Q
         variance_pct: 3006.0
-        reason: '10-K: Tree fallback returns $144B (contaminated custody assets).
-          ADR-012''s $100B guard should reject but is inconsistent across years. 10-Q:
-          DebtCurrent fallback ($12.2B) vs yfinance''s narrower definition (~$9.8B).
-          Both are extraction/definition issues, not bugs.
+        reason: '10-K: Tree fallback returns $144B (contaminated custody assets). ADR-012''s $100B guard should reject but
+          is inconsistent across years. 10-Q: DebtCurrent fallback ($12.2B) vs yfinance''s narrower definition (~$9.8B). Both
+          are extraction/definition issues, not bugs.
 
           '
         skip_validation: true
         added_date: '2026-01-26'
         remediation_status: deferred
-        remediation_notes: 'Custodial banks have unique liability structure. STT has
-          no clean ShortTermBorrowings concept. Need custodial-specific extraction
-          or accept as structural N/A for this sub-archetype.
+        remediation_notes: 'Custodial banks have unique liability structure. STT has no clean ShortTermBorrowings concept.
+          Need custodial-specific extraction or accept as structural N/A for this sub-archetype.
 
           '
         review_date: '2026-04-26'
-    notes: Custodial bank - asset servicing and management. NO ShortTermBorrowings
-      or ShortTermDebtTypeAxis in filings.
+    notes: Custodial bank - asset servicing and management. NO ShortTermBorrowings or ShortTermDebtTypeAxis in filings.
   PNC:
     name: PNC Financial Services Group, Inc.
     cik: 713676
@@ -2260,15 +2334,21 @@ companies:
       safe_fallback: true
     validation_tolerance_pct: 20.0
     exclude_metrics:
-    - COGS
-    - SGA
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
     notes: Regional commercial bank - traditional banking model.
   HD:
     name: HOME DEPOT, INC.
     cik: 354950
     fiscal_year_end: February
     exclude_metrics:
-    - ShortTermDebt
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2289,14 +2369,22 @@ companies:
     cik: 1403161
     fiscal_year_end: September
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
   ABBV:
     name: AbbVie Inc.
     cik: 1551152
     exclude_metrics:
-    - COGS
-    - ShortTermDebt
+      COGS:
+        reason: not_applicable
+        notes: ''
+      ShortTermDebt:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       OperatingIncome:
         form_types:
@@ -2377,7 +2465,9 @@ companies:
     cik: 320187
     fiscal_year_end: May
     exclude_metrics:
-    - OperatingIncome
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
   SBUX:
     name: STARBUCKS CORP
     cik: 829224
@@ -2401,10 +2491,18 @@ companies:
     name: Mastercard Inc
     cik: 1141391
     exclude_metrics:
-    - COGS
-    - ShortTermDebt
-    - Inventory
-    - Capex
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      ShortTermDebt:
+        reason: extraction_failed
+        notes: ShortTermDebt extraction gap — debt exists but extraction fails
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
+      Capex:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2418,7 +2516,9 @@ companies:
     cik: 858877
     fiscal_year_end: July
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: extraction_failed
+        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2438,7 +2538,9 @@ companies:
     name: INTERNATIONAL BUSINESS MACHINES CORP
     cik: 51143
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: extraction_failed
+        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2451,8 +2553,12 @@ companies:
     name: INTEL CORP
     cik: 50863
     exclude_metrics:
-    - COGS
-    - OperatingIncome
+      COGS:
+        reason: extraction_failed
+        notes: Hardware/semi company reports CostOfRevenue — extraction should work
+      OperatingIncome:
+        reason: extraction_failed
+        notes: Dual-listed in exclude + known_divergences — extraction gap
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2472,7 +2578,9 @@ companies:
     name: ADVANCED MICRO DEVICES INC
     cik: 2488
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: extraction_failed
+        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2493,7 +2601,9 @@ companies:
     cik: 1730168
     fiscal_year_end: November
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: extraction_failed
+        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2518,14 +2628,22 @@ companies:
     name: TEXAS INSTRUMENTS INC
     cik: 97476
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: extraction_failed
+        notes: Hardware/semi company reports CostOfRevenue — extraction should work
   NFLX:
     name: NETFLIX INC
     cik: 1065280
     exclude_metrics:
-    - Inventory
-    - DividendsPaid
-    - Goodwill
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
+      DividendsPaid:
+        reason: not_applicable
+        notes: Company does not pay dividends
+      Goodwill:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2553,13 +2671,17 @@ companies:
     cik: 1341439
     fiscal_year_end: May
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: ''
   ACN:
     name: Accenture plc
     cik: 1467373
     fiscal_year_end: August
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2580,7 +2702,9 @@ companies:
     cik: 896878
     fiscal_year_end: July
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2593,7 +2717,9 @@ companies:
     name: AMGEN INC
     cik: 318154
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       OperatingIncome:
         form_types:
@@ -2606,8 +2732,12 @@ companies:
     name: Merck & Co., Inc.
     cik: 310158
     exclude_metrics:
-    - COGS
-    - OperatingIncome
+      COGS:
+        reason: not_applicable
+        notes: ''
+      OperatingIncome:
+        reason: not_applicable
+        notes: ''
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2631,53 +2761,99 @@ companies:
     name: GILEAD SCIENCES, INC.
     cik: 882095
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: ''
   AXP:
     name: AMERICAN EXPRESS CO
     cik: 4962
     exclude_metrics:
-    - COGS
-    - Capex
-    - OperatingIncome
-    - SGA
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Pure services/platform company — no cost of goods
+      Capex:
+        reason: not_applicable
+        notes: ''
+      OperatingIncome:
+        reason: not_applicable
+        notes: ''
+      SGA:
+        reason: not_applicable
+        notes: ''
+      Inventory:
+        reason: not_applicable
+        notes: Services company — no physical inventory
   BLK:
     name: BlackRock, Inc.
     cik: 2012383
     exclude_metrics:
-    - COGS
-    - Capex
-    - OperatingIncome
-    - SGA
-    - Inventory
-    - ShortTermDebt
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      Capex:
+        reason: not_applicable
+        notes: ''
+      OperatingIncome:
+        reason: not_applicable
+        notes: ''
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
+      Inventory:
+        reason: not_applicable
+        notes: Banking company — Inventory not applicable
+      ShortTermDebt:
+        reason: not_applicable
+        notes: ''
   SCHW:
     name: SCHWAB CHARLES CORP
     cik: 316709
     exclude_metrics:
-    - COGS
-    - Capex
-    - OperatingIncome
-    - SGA
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Banking company — COGS not applicable
+      Capex:
+        reason: not_applicable
+        notes: ''
+      OperatingIncome:
+        reason: not_applicable
+        notes: ''
+      SGA:
+        reason: not_applicable
+        notes: Banking company — SGA not applicable
+      Inventory:
+        reason: not_applicable
+        notes: Banking company — Inventory not applicable
   CB:
     name: Chubb Ltd
     cik: 896159
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: Insurance/conglomerate — COGS not applicable
   CI:
     name: Cigna Group
     cik: 1739940
     exclude_metrics:
-    - COGS
+      COGS:
+        reason: not_applicable
+        notes: ''
   CME:
     name: CME GROUP INC.
     cik: 1156375
     exclude_metrics:
-    - COGS
-    - Capex
-    - OperatingIncome
-    - SGA
+      COGS:
+        reason: not_applicable
+        notes: ''
+      Capex:
+        reason: not_applicable
+        notes: ''
+      OperatingIncome:
+        reason: not_applicable
+        notes: ''
+      SGA:
+        reason: not_applicable
+        notes: ''
   PYPL:
     name: PayPal Holdings, Inc.
     cik: 1633917
@@ -2701,13 +2877,19 @@ companies:
     name: VERTEX PHARMACEUTICALS INC / MA
     cik: 875320
     exclude_metrics:
-    - DividendsPaid
+      DividendsPaid:
+        reason: not_applicable
+        notes: ''
   EQIX:
     name: EQUINIX INC
     cik: 1101239
     exclude_metrics:
-    - COGS
-    - Capex
+      COGS:
+        reason: not_applicable
+        notes: REIT — no cost of goods sold
+      Capex:
+        reason: not_applicable
+        notes: ''
   D:
     name: DOMINION ENERGY, INC
     cik: 715957
@@ -2730,7 +2912,9 @@ companies:
     name: COMCAST CORP
     cik: 1166691
     exclude_metrics:
-    - Inventory
+      Inventory:
+        reason: not_applicable
+        notes: ''
   VZ:
     name: VERIZON COMMUNICATIONS INC
     cik: 732712
@@ -2773,29 +2957,51 @@ companies:
     name: NORFOLK SOUTHERN CORP
     cik: 702165
     exclude_metrics:
-    - Goodwill
-    - IntangibleAssets
+      Goodwill:
+        reason: not_applicable
+        notes: NSC reports minimal/no Goodwill
+      IntangibleAssets:
+        reason: not_applicable
+        notes: NSC reports minimal/no IntangibleAssets
   ICE:
     name: Intercontinental Exchange, Inc.
     cik: 1571949
     exclude_metrics:
-    - COGS
-    - Capex
-    - OperatingIncome
-    - SGA
-    - ShortTermDebt
+      COGS:
+        reason: not_applicable
+        notes: ''
+      Capex:
+        reason: not_applicable
+        notes: ''
+      OperatingIncome:
+        reason: not_applicable
+        notes: ''
+      SGA:
+        reason: not_applicable
+        notes: ''
+      ShortTermDebt:
+        reason: not_applicable
+        notes: ''
   AON:
     name: Aon plc
     cik: 315293
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Insurance/conglomerate — COGS not applicable
+      Inventory:
+        reason: not_applicable
+        notes: ''
   MMC:
     name: MARSH & MCLENNAN COMPANIES, INC.
     cik: 62709
     exclude_metrics:
-    - COGS
-    - Inventory
+      COGS:
+        reason: not_applicable
+        notes: Insurance/conglomerate — COGS not applicable
+      Inventory:
+        reason: not_applicable
+        notes: ''
   TGT:
     name: TARGET CORP
     cik: 27419
@@ -2835,7 +3041,9 @@ companies:
         skip_validation: true
         added_date: '2026-03-19'
     exclude_metrics:
-    - DividendsPaid
+      DividendsPaid:
+        reason: not_applicable
+        notes: Company does not pay dividends
   SYK:
     name: STRYKER CORP
     cik: 310764
@@ -2846,7 +3054,9 @@ companies:
     name: MOODYS CORP /DE/
     cik: 1059556
     exclude_metrics:
-    - Inventory
+      Inventory:
+        reason: not_applicable
+        notes: ''
   ITW:
     name: ILLINOIS TOOL WORKS INC
     cik: 49826
@@ -3034,8 +3244,7 @@ cohorts:
     - FDX
     - BA
     archetype: A
-    description: Standard Industrial companies across 6 sectors (includes MAG7 as
-      benchmark)
+    description: Standard Industrial companies across 6 sectors (includes MAG7 as benchmark)
     metrics:
     - Revenue
     - OperatingIncome

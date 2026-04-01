@@ -36,6 +36,13 @@ class ConfidenceLevel(Enum):
     INVALID = "invalid" # Validation failed
 
 
+class ExclusionReason(str, Enum):
+    """Why a metric is excluded for a company (Consensus 018)."""
+    NOT_APPLICABLE = "not_applicable"          # Metric genuinely doesn't apply (e.g., banking COGS)
+    EXTRACTION_FAILED = "extraction_failed"    # Metric should work but extraction can't handle it
+    SEMANTIC_MISMATCH = "semantic_mismatch"    # XBRL concept doesn't match yfinance definition
+
+
 class FailurePattern(Enum):
     """
     Classification of extraction failures for systematic handling.
@@ -226,17 +233,24 @@ class CompanyConfig:
     name: str
     cik: int
     legacy_ciks: List[int] = field(default_factory=list)
-    exclude_metrics: List[str] = field(default_factory=list)
+    exclude_metrics: Dict[str, Dict[str, str]] = field(default_factory=dict)
+    # Keys are metric names, values are {"reason": "...", "notes": "..."}
+    # Valid reasons: "not_applicable", "extraction_failed", "semantic_mismatch"
     metric_overrides: Dict[str, Dict] = field(default_factory=dict)
     known_divergences: Dict[str, Dict] = field(default_factory=dict)
     notes: Optional[str] = None
     fiscal_year_end: str = "December"
     industry: Optional[str] = None  # e.g., "financial_services", "technology"
     validation_tolerance_pct: Optional[float] = None  # Company-specific tolerance override
-    
+
     def should_skip_metric(self, metric: str) -> bool:
         """Check if a metric should be skipped for this company."""
-        return metric in self.exclude_metrics
+        return metric in self.exclude_metrics  # dict `in` checks keys
+
+    def get_exclusion_reason(self, metric: str) -> Optional[str]:
+        """Get the exclusion reason for a metric, or None if not excluded."""
+        entry = self.exclude_metrics.get(metric)
+        return entry.get("reason") if entry else None
 
 
 @dataclass

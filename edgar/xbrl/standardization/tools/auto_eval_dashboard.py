@@ -158,6 +158,16 @@ def _render_cqs_panel(console, cqs: CQSResult):
     table.add_row("Regressions", f"{cqs.total_regressions}")
     table.add_row("Explained Gaps", f"{cqs.explained_variance_count}")
     table.add_row("", "")  # spacer
+
+    # Scoring Integrity (Consensus 018)
+    exclusion_premium = cqs.cqs - cqs.raw_cqs
+    table.add_row("Raw CQS", f"[dim]{cqs.raw_cqs:.4f}[/dim]  (exclusion premium: +{exclusion_premium:.4f})")
+    dcr_color = "green" if cqs.data_completeness >= 0.85 else ("yellow" if cqs.data_completeness >= 0.70 else "red")
+    table.add_row("Data Completeness", f"[{dcr_color}]{cqs.data_completeness:.1%}[/{dcr_color}]")
+    if cqs.total_extraction_failed > 0:
+        table.add_row("Extraction Failed", f"[red]{cqs.total_extraction_failed}[/red]")
+    table.add_row("", "")  # spacer
+
     table.add_row("Companies", f"{cqs.companies_evaluated}")
     table.add_row("Duration", f"{cqs.duration_seconds:.1f}s")
 

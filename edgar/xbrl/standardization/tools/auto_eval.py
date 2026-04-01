@@ -17,7 +17,7 @@ import time
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Tuple
 
-from edgar.xbrl.standardization.models import MappingResult, MappingSource
+from edgar.xbrl.standardization.models import MappingResult, MappingSource, ExclusionReason
 
 logger = logging.getLogger(__name__)
 
@@ -348,6 +348,10 @@ class CompanyCQS:
     regressed_metrics: List[str] = field(default_factory=list)  # Metrics that regressed from golden
     disputed_count: int = 0  # Metrics excluded due to reference_disputed
     headline_ef_rate: float = 0.0  # EF rate for headline metrics only (target: >= 0.99)
+    # Scoring integrity (Consensus 018)
+    raw_cqs: float = 0.0              # CQS without exclusion/divergence treatment
+    data_completeness: float = 0.0     # metrics_valid / total_possible (no exclusions from denom)
+    extraction_failed_count: int = 0   # Count of extraction_failed exclusions
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -459,6 +463,10 @@ class CQSResult:
     sma_rate: float = 0.0   # Standardized Metric Accuracy aggregate
     # Headline metrics (subscription-grade targets)
     headline_ef_rate: float = 0.0  # EF rate for headline metrics only (target: >= 0.99)
+    # Scoring integrity (Consensus 018)
+    raw_cqs: float = 0.0              # Aggregate raw CQS (exclusions treated as failures)
+    data_completeness: float = 0.0     # Aggregate data completeness
+    total_extraction_failed: int = 0   # Total extraction_failed exclusions
 
     # Per-company breakdown
     company_scores: Dict[str, CompanyCQS] = field(default_factory=dict)
@@ -732,6 +740,9 @@ def compute_cqs(
     # O57: Pre-compute forbidden metrics per ticker for CQS scoring
     forbidden_by_ticker = _build_forbidden_by_ticker(all_results, orchestrator)
 
+    # Build exclusion reasons per ticker (Consensus 018)
+    exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(eval_cohort, orchestrator)
+
     # Compute per-company scores
     company_scores: Dict[str, CompanyCQS] = {}
 
@@ -739,6 +750,7 @@ def compute_cqs(
         company_scores[ticker] = _compute_company_cqs(
             ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {}),
             forbidden_metrics=forbidden_by_ticker.get(ticker),
+            exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
         )
 
     # Aggregate across companies
@@ -883,6 +895,9 @@ def compute_cqs_incremental(
     # O57: Pre-compute forbidden metrics for affected tickers
     forbidden_by_ticker = _build_forbidden_by_ticker(affected_in_cohort, orchestrator)
 
+    # Build exclusion reasons per ticker (Consensus 018)
+    exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(affected_in_cohort, orchestrator)
+
     # Build updated company_scores: start from baseline, substitute affected
     updated_scores = dict(baseline_result.company_scores)
     for ticker in affected_in_cohort:
@@ -893,6 +908,7 @@ def compute_cqs_incremental(
                 golden_set,
                 orchestrator.validation_results.get(ticker, {}),
                 forbidden_metrics=forbidden_by_ticker.get(ticker),
+                exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
             )
 
     # Re-aggregate with the updated matrix
@@ -990,6 +1006,9 @@ def compute_cqs_incremental_batch(
     # O57: Pre-compute forbidden metrics for affected tickers
     forbidden_by_ticker = _build_forbidden_by_ticker(affected_in_cohort, orchestrator)
 
+    # Build exclusion reasons per ticker (Consensus 018)
+    exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(affected_in_cohort, orchestrator)
+
     updated_scores = dict(baseline_result.company_scores)
     for ticker in affected_in_cohort:
         if ticker in updated_results:
@@ -999,6 +1018,7 @@ def compute_cqs_incremental_batch(
                 golden_set,
                 orchestrator.validation_results.get(ticker, {}),
                 forbidden_metrics=forbidden_by_ticker.get(ticker),
+                exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
             )
 
     result = _aggregate_cqs(updated_scores, baseline_result.cqs, time.time() - start_time)
@@ -1021,6 +1041,7 @@ def _compute_company_cqs(
     golden_set: set,
     validations: dict,
     forbidden_metrics: Optional[set] = None,
+    exclusion_reasons: Optional[Dict[str, Dict[str, str]]] = None,
 ) -> CompanyCQS:
     """Compute CQS sub-metrics for a single company."""
     total = 0
@@ -1043,16 +1064,30 @@ def _compute_company_cqs(
     disputed_count = 0
     headline_ef_pass = 0
     headline_ef_total = 0
+    extraction_failed_count = 0
 
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
             excluded += 1
-            # Count exclusions as correctly handled — the system identified
-            # this metric as non-applicable for the company and excluded it.
             total += 1
-            valid += 1
-            mapped += 1
-            ef_pass_count += 1
+
+            # Look up exclusion reason
+            reason = ExclusionReason.NOT_APPLICABLE  # default
+            if exclusion_reasons and metric in exclusion_reasons:
+                raw = exclusion_reasons[metric].get("reason", "not_applicable")
+                try:
+                    reason = ExclusionReason(raw)
+                except ValueError:
+                    reason = ExclusionReason.NOT_APPLICABLE
+
+            if reason == ExclusionReason.EXTRACTION_FAILED:
+                # Penalty: counts as total but NOT valid/mapped/ef_pass
+                extraction_failed_count += 1
+            else:
+                # Legitimate exclusion: free pass (current behavior)
+                valid += 1
+                mapped += 1
+                ef_pass_count += 1
             continue
 
         # O57 Fix: Forbidden metrics get same treatment as CONFIG exclusions
@@ -1148,19 +1183,27 @@ def _compute_company_cqs(
     sma_pass_rate = sma_pass_count / effective_total if effective_total > 0 else 0.0
     headline_ef_rate = headline_ef_pass / headline_ef_total if headline_ef_total > 0 else 0.0
 
-    cqs = (
-        0.45 * pass_rate
-        + 0.20 * max(0, 1 - mean_variance / 100)
-        + 0.15 * coverage_rate
-        + 0.15 * golden_master_rate
-        + 0.05 * (1.0 if regression_count == 0 else 0.0)
-    )
+    cqs = _cqs_formula(pass_rate, mean_variance, coverage_rate, golden_master_rate, regression_count)
 
     # EF-CQS: extraction fidelity component (concept found correctly)
     ef_cqs = ef_pass_rate
 
     # SA-CQS: standardization alignment (value matches yfinance)
     sa_cqs = sa_pass_rate
+
+    # Raw CQS: all CONFIG exclusions treated as failures (honest baseline)
+    # Subtract the free passes that legitimate exclusions got
+    legitimate_exclusion_passes = excluded - extraction_failed_count
+    raw_valid = valid - legitimate_exclusion_passes
+    raw_mapped = mapped - legitimate_exclusion_passes
+    raw_pass_rate = raw_valid / effective_total if effective_total > 0 else 0.0
+    raw_coverage_rate = min(1.0, raw_mapped / effective_total) if effective_total > 0 else 0.0
+    raw_cqs = _cqs_formula(raw_pass_rate, mean_variance, raw_coverage_rate, golden_master_rate, regression_count)
+
+    # Data completeness: actually-extracted valid metrics / total possible (excludes free passes)
+    total_possible = len(metrics)  # All metrics attempted for this company
+    real_valid = valid - legitimate_exclusion_passes  # Only count truly extracted values
+    data_completeness = real_valid / total_possible if total_possible > 0 else 0.0
 
     return CompanyCQS(
         ticker=ticker,
@@ -1188,6 +1231,9 @@ def _compute_company_cqs(
         regressed_metrics=regressed_metrics,
         disputed_count=disputed_count,
         headline_ef_rate=headline_ef_rate,
+        raw_cqs=raw_cqs,
+        data_completeness=data_completeness,
+        extraction_failed_count=extraction_failed_count,
     )
 
 
@@ -1232,7 +1278,7 @@ def _aggregate_cqs(
         for m in cs.regressed_metrics:
             all_regressed.append((ticker, m))
 
-    raw_cqs = (
+    agg_cqs = (
         0.45 * pass_rate
         + 0.20 * max(0, 1 - mean_variance / 100)
         + 0.15 * coverage_rate
@@ -1244,6 +1290,11 @@ def _aggregate_cqs(
     ef_cqs = sum(s.ef_cqs for s in scores) / n
     sa_cqs = sum(s.sa_cqs for s in scores) / n
 
+    # Scoring integrity aggregates (Consensus 018)
+    agg_raw_cqs = sum(s.raw_cqs for s in scores) / n
+    agg_data_completeness = sum(s.data_completeness for s in scores) / n
+    total_extraction_failed = sum(s.extraction_failed_count for s in scores)
+
     # Note: regression veto logic moved to evaluate_experiment() which compares
     # new vs baseline regression counts. _aggregate_cqs computes honest scores.
 
@@ -1253,7 +1304,7 @@ def _aggregate_cqs(
         coverage_rate=coverage_rate,
         golden_master_rate=golden_master_rate,
         regression_rate=regression_rate,
-        cqs=raw_cqs,
+        cqs=agg_cqs,
         ef_cqs=ef_cqs,
         sa_cqs=sa_cqs,
         ef_pass_rate=ef_pass_rate,
@@ -1262,6 +1313,9 @@ def _aggregate_cqs(
         rfa_rate=rfa_rate,
         sma_rate=sma_rate,
         headline_ef_rate=headline_ef_rate,
+        raw_cqs=agg_raw_cqs,
+        data_completeness=agg_data_completeness,
+        total_extraction_failed=total_extraction_failed,
         companies_evaluated=n,
         total_metrics=total_metrics,
         total_mapped=sum(s.metrics_mapped for s in scores),
@@ -1382,6 +1436,23 @@ def _build_forbidden_by_ticker(tickers, orchestrator) -> Dict[str, set]:
     return result
 
 
+def _build_exclusion_reasons_by_ticker(tickers, orchestrator) -> Dict[str, Dict[str, Dict[str, str]]]:
+    """Pre-compute exclusion reasons per ticker for scoring integrity (Consensus 018)."""
+    return {ticker: orchestrator.config.get_excluded_metrics_for_company(ticker) for ticker in tickers}
+
+
+def _cqs_formula(pass_rate: float, mean_variance: float, coverage_rate: float,
+                 golden_master_rate: float, regression_count: int) -> float:
+    """Compute CQS from sub-metrics. Single source of truth for the formula weights."""
+    return (
+        0.45 * pass_rate
+        + 0.20 * max(0, 1 - mean_variance / 100)
+        + 0.15 * coverage_rate
+        + 0.15 * golden_master_rate
+        + 0.05 * (1.0 if regression_count == 0 else 0.0)
+    )
+
+
 def _is_metric_forbidden_fast(metric: str, ticker: str, config=None) -> bool:
     """Check if metric is forbidden by the company's industry archetype (in-memory).
 
@@ -1461,12 +1532,14 @@ def identify_gaps(
 
     # O57: Pre-compute forbidden metrics per ticker (reused for both CQS scoring and gap filtering)
     forbidden_by_ticker = _build_forbidden_by_ticker(all_results, orchestrator)
+    exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(eval_cohort, orchestrator)
 
     company_scores: Dict[str, 'CompanyCQS'] = {}
     for ticker, metrics in all_results.items():
         company_scores[ticker] = _compute_company_cqs(
             ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {}),
             forbidden_metrics=forbidden_by_ticker.get(ticker),
+            exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
         )
 
     cqs_result = _aggregate_cqs(company_scores, None, time.time() - start_time)

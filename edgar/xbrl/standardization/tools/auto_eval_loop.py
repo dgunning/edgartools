@@ -159,6 +159,22 @@ class AIAgentRouter:
         return None
 
 
+def _resolve_exclusion_entry(new_value) -> tuple:
+    """Extract (metric_name, reason, notes) from an ADD_EXCLUSION new_value.
+
+    new_value can be a plain metric name string or a dict with metric/reason/notes.
+    """
+    if isinstance(new_value, dict) and "reason" in new_value:
+        metric_name = new_value.get("metric", "")
+        reason = new_value.get("reason", "not_applicable")
+        notes = new_value.get("notes", "Auto-proposed by solver")
+    else:
+        metric_name = new_value if isinstance(new_value, str) else str(new_value)
+        reason = "not_applicable"
+        notes = "Auto-proposed by solver"
+    return metric_name, reason, notes
+
+
 @dataclass
 class ConfigChange:
     """Describes a proposed YAML configuration modification."""
@@ -576,14 +592,18 @@ def apply_config_change(change: ConfigChange) -> None:
                 raise ValueError(f"Expected list at {change.yaml_path}, got {type(parent[target_key])}")
 
         elif change.change_type == ChangeType.ADD_EXCLUSION:
-            # Add to exclude_metrics list
+            # Add to exclude_metrics dict (Consensus 018: dict format with reason)
             if target_key not in parent:
-                parent[target_key] = []
+                parent[target_key] = {}
+            # Handle legacy list format — convert to dict
             if isinstance(parent[target_key], list):
-                if change.new_value not in parent[target_key]:
-                    parent[target_key].append(change.new_value)
+                parent[target_key] = {m: {"reason": "not_applicable", "notes": ""} for m in parent[target_key]}
+            if isinstance(parent[target_key], dict):
+                metric_name, reason, notes = _resolve_exclusion_entry(change.new_value)
+                if metric_name not in parent[target_key]:
+                    parent[target_key][metric_name] = {"reason": reason, "notes": notes}
             else:
-                raise ValueError(f"Expected list at {change.yaml_path}")
+                raise ValueError(f"Expected dict at {change.yaml_path}")
 
         elif change.change_type == ChangeType.ADD_DIVERGENCE:
             # Add a known_divergences entry (dict)
@@ -775,8 +795,10 @@ def apply_change_to_config(change: ConfigChange, config) -> 'MappingConfig':
 
     elif change.change_type == ChangeType.ADD_EXCLUSION:
         company = new_config.companies.get(change.target_companies)
-        if company and change.new_value not in company.exclude_metrics:
-            company.exclude_metrics.append(change.new_value)
+        if company:
+            metric_name, reason, notes = _resolve_exclusion_entry(change.new_value)
+            if metric_name not in company.exclude_metrics:
+                company.exclude_metrics[metric_name] = {"reason": reason, "notes": notes}
 
     elif change.change_type == ChangeType.ADD_STANDARDIZATION:
         metric = new_config.metrics.get(change.target_metric)
