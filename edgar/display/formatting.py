@@ -163,40 +163,109 @@ def yes_no(value: bool) -> str:
     return "Yes" if value else "No"
 
 
-def reverse_name(name):
-    # Split the name into parts
+# ── Surname prefixes that should stay attached to the last name ────────
+_SURNAME_PREFIXES = frozenset({
+    'VAN', 'VON', 'DE', 'DEL', 'DI', 'DU', 'DA', 'DAS', 'DOS', 'LA', 'LE',
+    'LES', 'EL', 'AL', 'ST', 'SAN', 'DEN', 'DER', 'TEN', 'TER',
+})
+
+# Suffixes stripped from the main name and appended at the end
+_SUFFIXES = frozenset({
+    'JR', 'JR.', 'SR', 'SR.', 'II', 'III', 'IV',
+    'MD', 'MD.', 'M.D.', 'PHD', 'PHD.', 'PH.D.', 'PH.D',
+    'DDS', 'DDS,', 'DR', 'DR.', 'ESQ', 'ESQ.', 'CPA', 'CPA.',
+    'ET', 'AL', 'AL.',
+})
+
+# Titles that can appear as a prefix (first token) — removed, not appended
+_TITLE_PREFIXES = frozenset({'DR', 'DR.', 'PROF', 'PROF.', 'REV', 'REV.'})
+
+# Pre-computed normalized sets (avoid rebuilding per call)
+_SUFFIXES_NORM = frozenset(s.rstrip('.,') for s in _SUFFIXES)
+_TITLE_PREFIXES_NORM = frozenset(t.rstrip('.') for t in _TITLE_PREFIXES)
+
+
+def _titlecase_part(part: str) -> str:
+    """Title-case a name part, handling apostrophes (O'Brien) and hyphens."""
+    if "'" in part:
+        idx = part.index("'")
+        return part[:idx + 1].title() + part[idx + 1:].title()
+    if "-" in part:
+        return "-".join(seg.title() for seg in part.split("-"))
+    return part.title()
+
+
+def reverse_name(name: str) -> str:
+    """Reverse an SEC-style "LAST FIRST [MIDDLE] [SUFFIX]" name to "First [Middle] Last [Suffix]".
+
+    Handles multi-word surnames (Van, De, Del …), professional suffixes (Jr, III, MD, PhD …),
+    title prefixes (Dr, Judge …), and mixed-case input.
+    """
     parts = name.split()
 
-    # Return immediately if there's only one name part
-    if len(parts) == 1:
-        return parts[0].title()
+    if len(parts) <= 1:
+        return parts[0].title() if parts else name
 
-    # Handle the cases where there's a 'Jr', 'Sr', 'II', 'III', 'MD', etc., or 'ET AL'
-    special_parts = ['Jr', 'JR', 'Sr', 'SR', 'II', 'III', 'MD', 'ET', 'AL', 'et', 'al']
-    special_parts_with_period = [part + '.' for part in special_parts if part not in ['II', 'III']] + special_parts
-    special_part_indices = [i for i, part in enumerate(parts) if part in special_parts_with_period or (
-            i > 0 and parts[i - 1].rstrip('.') + ' ' + part.rstrip('.') == 'ET AL')]
+    # ── 1. Strip title prefix (DR SMITH JOHN → SMITH JOHN, remember DR) ──
+    title_prefix = None
+    if parts[0].upper().rstrip('.') in _TITLE_PREFIXES_NORM:
+        title_prefix = parts[0]
+        parts = parts[1:]
+        if len(parts) <= 1:
+            result = _titlecase_part(parts[0]) if parts else ""
+            return f"{_titlecase_part(title_prefix)} {result}".strip() if title_prefix else result
 
-    # Extract the special parts and the main name parts
-    special_parts_list = [parts[i] for i in special_part_indices]
-    main_name_parts = [part for i, part in enumerate(parts) if i not in special_part_indices]
+    # ── 2. Strip trailing suffixes (JR, III, MD, ET AL …) ──
+    suffixes: list[str] = []
+    while len(parts) > 1 and parts[-1].upper().rstrip('.,') in _SUFFIXES_NORM:
+        suffixes.insert(0, parts.pop())
 
-    # Handle initials in the name
-    if len(main_name_parts) > 2 and (('.' in main_name_parts[-2] or len(main_name_parts[-2]) == 1)):
-        main_name_parts = [' '.join(main_name_parts[:-2]).title()] + [
-            f"{main_name_parts[-1].title()} {main_name_parts[-2]}"]
-    else:
-        main_name_parts = [part.title() if len(part) > 2 else part for part in main_name_parts]
+    # Handle "ET AL" as a unit — if we popped "AL" check if previous is "ET"
+    if suffixes and suffixes[0].upper().rstrip('.') == 'AL' and parts and parts[-1].upper().rstrip('.') == 'ET':
+        suffixes.insert(0, parts.pop())
 
-    # Reverse the main name parts
-    reversed_main_parts = [part for part in main_name_parts[1:]] + [main_name_parts[0]]
-    reversed_name = " ".join(reversed_main_parts)
+    if len(parts) <= 1:
+        result = _titlecase_part(parts[0]) if parts else ""
+        if suffixes:
+            result += " " + " ".join(suffixes)
+        return result
 
-    # Append the special parts to the reversed name, maintaining their original case
-    if special_parts_list:
-        reversed_name += " " + " ".join(special_parts_list)
+    # ── 3. Detect multi-word surname at the start ──
+    # Consume leading tokens that are known surname prefixes
+    surname_end = 0
+    while surname_end < len(parts) - 1 and parts[surname_end].upper() in _SURNAME_PREFIXES:
+        surname_end += 1
+    # The token at surname_end is always part of the surname (it's the core last name)
+    surname_end += 1
 
-    return reversed_name
+    # Guard: if we consumed everything as surname, fall back to first-token-only
+    if surname_end >= len(parts):
+        surname_end = 1
+
+    surname_parts = parts[:surname_end]
+    given_parts = parts[surname_end:]
+
+    # ── 3b. Reorder displaced initials ──────────────────────────────
+    # SEC sometimes stores "LAST INITIAL FIRST" (e.g. "Bennett C Frank",
+    # "Borninkhof K. Michelle").  Detect when the first given-name token
+    # is a single-char initial and the next token is a full name, then swap.
+    if (len(given_parts) >= 2
+            and (len(given_parts[0].rstrip('.')) == 1)
+            and len(given_parts[1]) > 1):
+        # Swap: move the full first name before the initial
+        given_parts = [given_parts[1], given_parts[0]] + given_parts[2:]
+
+    # ── 4. Title-case and assemble ──
+    formatted_given = " ".join(_titlecase_part(p) for p in given_parts)
+    formatted_surname = " ".join(_titlecase_part(p) for p in surname_parts)
+
+    result = f"{formatted_given} {formatted_surname}"
+    if suffixes:
+        result += " " + " ".join(suffixes)
+    if title_prefix:
+        result = f"{_titlecase_part(title_prefix)} {result}"
+
+    return result
 
 
 def accession_number_text(accession: str) -> Text:
