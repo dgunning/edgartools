@@ -390,6 +390,7 @@ class MetricGap:
     extraction_evidence: Optional[ExtractionEvidence] = None  # Diagnostic evidence from validator
     hv_subtype: Optional[str] = None  # "hv_missing_component" | "hv_wrong_concept" | "hv_missing_industry" | "hv_period_mismatch"
     root_cause: Optional[str] = None  # Detailed root cause from taxonomy
+    company_results: Optional[Dict] = None  # Orchestrator results for derivation planner
 
     @property
     def fix_tier(self) -> str:
@@ -728,12 +729,16 @@ def compute_cqs(
     golden_masters = ledger.get_all_golden_masters(active_only=True)
     golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
 
+    # O57: Pre-compute forbidden metrics per ticker for CQS scoring
+    forbidden_by_ticker = _build_forbidden_by_ticker(all_results, orchestrator)
+
     # Compute per-company scores
     company_scores: Dict[str, CompanyCQS] = {}
 
     for ticker, metrics in all_results.items():
         company_scores[ticker] = _compute_company_cqs(
-            ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {})
+            ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {}),
+            forbidden_metrics=forbidden_by_ticker.get(ticker),
         )
 
     # Aggregate across companies
@@ -768,6 +773,7 @@ _COMPANY_SCOPED_CHANGES = frozenset([
     "add_known_variance",
     "add_company_override",
     "set_industry",
+    "add_divergence",
 ])
 
 # Change types that can affect ALL companies (must use full eval)
@@ -777,7 +783,6 @@ _GLOBAL_SCOPED_CHANGES = frozenset([
     "add_standardization",
     "remove_pattern",
     "modify_value",
-    "add_divergence",
 ])
 
 
@@ -875,6 +880,9 @@ def compute_cqs_incremental(
     golden_masters = ledger.get_all_golden_masters(active_only=True)
     golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
 
+    # O57: Pre-compute forbidden metrics for affected tickers
+    forbidden_by_ticker = _build_forbidden_by_ticker(affected_in_cohort, orchestrator)
+
     # Build updated company_scores: start from baseline, substitute affected
     updated_scores = dict(baseline_result.company_scores)
     for ticker in affected_in_cohort:
@@ -884,6 +892,7 @@ def compute_cqs_incremental(
                 updated_results[ticker],
                 golden_set,
                 orchestrator.validation_results.get(ticker, {}),
+                forbidden_metrics=forbidden_by_ticker.get(ticker),
             )
 
     # Re-aggregate with the updated matrix
@@ -978,6 +987,9 @@ def compute_cqs_incremental_batch(
     golden_masters = ledger.get_all_golden_masters(active_only=True)
     golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
 
+    # O57: Pre-compute forbidden metrics for affected tickers
+    forbidden_by_ticker = _build_forbidden_by_ticker(affected_in_cohort, orchestrator)
+
     updated_scores = dict(baseline_result.company_scores)
     for ticker in affected_in_cohort:
         if ticker in updated_results:
@@ -986,6 +998,7 @@ def compute_cqs_incremental_batch(
                 updated_results[ticker],
                 golden_set,
                 orchestrator.validation_results.get(ticker, {}),
+                forbidden_metrics=forbidden_by_ticker.get(ticker),
             )
 
     result = _aggregate_cqs(updated_scores, baseline_result.cqs, time.time() - start_time)
@@ -1007,6 +1020,7 @@ def _compute_company_cqs(
     metrics: Dict[str, MappingResult],
     golden_set: set,
     validations: dict,
+    forbidden_metrics: Optional[set] = None,
 ) -> CompanyCQS:
     """Compute CQS sub-metrics for a single company."""
     total = 0
@@ -1035,6 +1049,15 @@ def _compute_company_cqs(
             excluded += 1
             # Count exclusions as correctly handled — the system identified
             # this metric as non-applicable for the company and excluded it.
+            total += 1
+            valid += 1
+            mapped += 1
+            ef_pass_count += 1
+            continue
+
+        # O57 Fix: Forbidden metrics get same treatment as CONFIG exclusions
+        if forbidden_metrics and metric in forbidden_metrics:
+            excluded += 1
             total += 1
             valid += 1
             mapped += 1
@@ -1323,6 +1346,69 @@ def record_eval_results(
 # GAP ANALYSIS
 # =============================================================================
 
+# Cache for industry_metrics.yaml (loaded once per process)
+_industry_metrics_cache: Optional[dict] = None
+
+
+def _load_industry_metrics() -> dict:
+    """Load industry_metrics.yaml with module-level caching."""
+    global _industry_metrics_cache
+    if _industry_metrics_cache is not None:
+        return _industry_metrics_cache
+
+    import yaml
+    from pathlib import Path
+
+    path = Path(__file__).parent.parent / "config" / "industry_metrics.yaml"
+    if not path.exists():
+        _industry_metrics_cache = {}
+        return _industry_metrics_cache
+
+    with open(path, 'r') as f:
+        _industry_metrics_cache = yaml.safe_load(f) or {}
+    return _industry_metrics_cache
+
+
+def _build_forbidden_by_ticker(tickers, orchestrator) -> Dict[str, set]:
+    """Pre-compute forbidden metrics per ticker from industry archetypes."""
+    industry_metrics = _load_industry_metrics()
+    result: Dict[str, set] = {}
+    for ticker in tickers:
+        company = orchestrator.config.get_company(ticker) if orchestrator.config else None
+        industry = (company.industry or "").lower() if company and company.industry else ""
+        result[ticker] = set(
+            industry_metrics.get(industry, {}).get("forbidden_metrics", [])
+        )
+    return result
+
+
+def _is_metric_forbidden_fast(metric: str, ticker: str, config=None) -> bool:
+    """Check if metric is forbidden by the company's industry archetype (in-memory).
+
+    Fast version that uses in-memory config objects instead of reading YAML files
+    on every call. Used by identify_gaps() for pre-exclusion filtering.
+
+    Lookup path:
+    1. Get company industry from MappingConfig.companies[ticker].industry
+    2. Look up industry archetype in industry_metrics.yaml (cached)
+    3. Check if metric is in archetype's forbidden_metrics list
+    """
+    if config is None:
+        from edgar.xbrl.standardization.config_loader import MappingConfig, get_config
+        config = get_config()
+
+    company = config.get_company(ticker)
+    if not company or not company.industry:
+        return False
+
+    industry = company.industry.lower()
+
+    industry_metrics = _load_industry_metrics()
+    archetype = industry_metrics.get(industry, {})
+    forbidden = archetype.get("forbidden_metrics", [])
+    return metric in forbidden
+
+
 def identify_gaps(
     eval_cohort: Optional[List[str]] = None,
     snapshot_mode: bool = True,
@@ -1373,10 +1459,14 @@ def identify_gaps(
     golden_masters = ledger.get_all_golden_masters(active_only=True)
     golden_set = {(gm.ticker, gm.metric) for gm in golden_masters}
 
+    # O57: Pre-compute forbidden metrics per ticker (reused for both CQS scoring and gap filtering)
+    forbidden_by_ticker = _build_forbidden_by_ticker(all_results, orchestrator)
+
     company_scores: Dict[str, 'CompanyCQS'] = {}
     for ticker, metrics in all_results.items():
         company_scores[ticker] = _compute_company_cqs(
-            ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {})
+            ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {}),
+            forbidden_metrics=forbidden_by_ticker.get(ticker),
         )
 
     cqs_result = _aggregate_cqs(company_scores, None, time.time() - start_time)
@@ -1386,7 +1476,7 @@ def identify_gaps(
     # Get graveyard counts per metric
     graveyard_counts = _get_graveyard_counts(ledger)
 
-    # Build gap list (reusing golden_set from CQS computation above)
+    # Build gap list (reusing golden_set and forbidden_by_ticker from above)
     gaps: List[MetricGap] = []
 
     for ticker, metrics in all_results.items():
@@ -1394,9 +1484,15 @@ def identify_gaps(
         company_total = sum(
             1 for r in metrics.values() if r.source != MappingSource.CONFIG
         )
+        forbidden = forbidden_by_ticker.get(ticker, set())
 
         for metric, result in metrics.items():
             if result.source == MappingSource.CONFIG:
+                continue
+
+            # O57: Pre-exclude forbidden metrics before gap classification
+            if metric in forbidden:
+                logger.debug(f"O57 pre-exclude: {ticker}:{metric} (forbidden by industry archetype)")
                 continue
 
             gap = _classify_gap(
@@ -1404,6 +1500,8 @@ def identify_gaps(
                 golden_set, company_total, graveyard_counts
             )
             if gap is not None:
+                # O55: Attach orchestrator results for derivation planner
+                gap.company_results = metrics
                 gaps.append(gap)
 
     # Sort by estimated impact (highest first), skip dead ends

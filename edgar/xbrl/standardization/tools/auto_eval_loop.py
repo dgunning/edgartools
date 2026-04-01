@@ -65,7 +65,25 @@ logger = logging.getLogger(__name__)
 
 # Decision gate thresholds
 EF_CQS_TOLERANCE = 0.001      # EF-CQS non-regression epsilon
+SA_CQS_TOLERANCE = 0.001      # SA-CQS non-regression epsilon (for formula changes)
 CQS_RELAXED_TOLERANCE = 0.0001  # CQS tolerance for relaxed (target-improved) gate
+
+# O53: Gate applicability — which regression checks apply per change type.
+# "ef" = Extraction Fidelity gate, "sa" = Structural Accuracy gate.
+# Divergence/exclusion changes skip both EF/SA checks (they don't affect extraction).
+# Hard veto (regressions) and per-company drop check ALWAYS apply regardless.
+_GATE_APPLICABILITY = {
+    "add_concept": {"ef"},              # Concept changes: EF gate only
+    "add_company_override": {"ef"},     # Company overrides: EF gate only
+    "add_tree_hint": {"ef"},            # Tree hints: EF gate only
+    "add_standardization": {"sa"},      # Formula changes: SA gate only
+    "add_divergence": set(),            # Divergence: skip both EF/SA
+    "add_exclusion": set(),             # Exclusion: skip both EF/SA
+    "add_known_variance": set(),        # Known variance: skip both EF/SA
+    "set_industry": set(),              # Industry: skip both EF/SA
+    "remove_pattern": {"ef", "sa"},     # Pattern removal: both gates
+    "modify_value": {"ef", "sa"},       # Value modification: both gates
+}
 
 # Tier 1 config files — the ONLY files the auto-eval loop may modify
 CONFIG_DIR = Path(__file__).parent.parent / "config"
@@ -207,17 +225,26 @@ def _apply_decision_gates(
     Shared decision logic for experiment evaluation.
 
     Returns VETO/DISCARD/KEEP decision based on regression checks,
-    per-company drops, CQS improvement, and EF-CQS gate.
+    per-company drops, CQS improvement, and EF/SA-CQS gates.
+
+    O53: EF and SA gates are now change-type-aware via _GATE_APPLICABILITY.
+    Divergence/exclusion changes skip both EF/SA checks since they don't
+    affect extraction fidelity or structural accuracy.
 
     When lis_result is provided and lis_pass is True, the global CQS
     improvement check is skipped. This prevents correct single-metric fixes
     from being discarded due to CQS noise floor (~0.0003 at CQS 0.9957).
 
-    Hard veto (regressions), per-company drop check, and EF-CQS
-    non-regression gate remain unchanged regardless of LIS.
+    Hard veto (regressions) and per-company drop check ALWAYS apply
+    regardless of change type or LIS.
 
     Callers handle revert/cleanup.
     """
+    # O53: Determine which gates apply for this change type
+    if change is not None:
+        applicable_gates = _GATE_APPLICABILITY.get(change.change_type.value, {"ef", "sa"})
+    else:
+        applicable_gates = {"ef", "sa"}  # Conservative default: apply all gates
     # Check for hard veto (NEW regressions only) — ALWAYS enforced
     new_regressions = new_cqs.total_regressions - baseline_cqs.total_regressions
     if new_regressions > 0:
@@ -265,8 +292,8 @@ def _apply_decision_gates(
             f"[LIS GATE] LIS passed for {target_tickers[0] if target_tickers else '?'}: "
             f"{lis_result.detail} | delta={lis_result.target_delta_pp:+.1f}pp"
         )
-        # Still check EF-CQS non-regression
-        if new_cqs.ef_cqs < baseline_cqs.ef_cqs - EF_CQS_TOLERANCE:
+        # O53: Only check EF-CQS if applicable for this change type
+        if "ef" in applicable_gates and new_cqs.ef_cqs < baseline_cqs.ef_cqs - EF_CQS_TOLERANCE:
             return ExperimentDecision(
                 decision=Decision.DISCARD,
                 cqs_before=baseline_cqs.cqs,
@@ -323,8 +350,8 @@ def _apply_decision_gates(
                 duration_seconds=duration,
             )
 
-    # EF-CQS gate: KEEP requires EF-CQS did not decrease
-    if new_cqs.ef_cqs < baseline_cqs.ef_cqs - 0.001:
+    # O53: EF-CQS gate — only if applicable for this change type
+    if "ef" in applicable_gates and new_cqs.ef_cqs < baseline_cqs.ef_cqs - EF_CQS_TOLERANCE:
         return ExperimentDecision(
             decision=Decision.DISCARD,
             cqs_before=baseline_cqs.cqs,
@@ -333,6 +360,18 @@ def _apply_decision_gates(
             company_deltas=company_deltas,
             duration_seconds=duration,
         )
+
+    # O53: SA-CQS gate — only if applicable for this change type
+    if "sa" in applicable_gates:
+        if new_cqs.sa_cqs < baseline_cqs.sa_cqs - SA_CQS_TOLERANCE:
+            return ExperimentDecision(
+                decision=Decision.DISCARD,
+                cqs_before=baseline_cqs.cqs,
+                cqs_after=new_cqs.cqs,
+                reason=f"SA-CQS regression: {baseline_cqs.sa_cqs:.4f} -> {new_cqs.sa_cqs:.4f}",
+                company_deltas=company_deltas,
+                duration_seconds=duration,
+            )
 
     # SUCCESS
     delta = new_cqs.cqs - baseline_cqs.cqs
@@ -1120,7 +1159,7 @@ def evaluate_experiment_in_memory(
 
     return _apply_decision_gates(
         baseline_cqs, new_cqs, target_improved, target_tickers,
-        max_company_drop, duration, lis_result=lis_result,
+        max_company_drop, duration, change=change, lis_result=lis_result,
     )
 
 
@@ -1529,6 +1568,22 @@ def _propose_regression_fix(
     return None
 
 
+def _should_allow_divergence(gap: MetricGap, graveyard_entries: List[Dict]) -> bool:
+    """Check if a divergence annotation is justified by prior concept-level attempts.
+
+    Requires at least 2 prior concept-level attempts in the graveyard before
+    allowing divergence. This prevents the AI from labeling hard metrics as
+    "divergent" to inflate CQS without actually trying to fix extraction.
+    """
+    MIN_ATTEMPTS = 2
+    concept_attempts = sum(
+        1 for e in graveyard_entries
+        if any(kw in e.get("config_diff", "").lower()
+               for kw in ("add_concept", "add_company_override", "add_standardization"))
+    )
+    return concept_attempts >= MIN_ATTEMPTS
+
+
 # =============================================================================
 # PROPOSAL GENERATION (Phase 3)
 # =============================================================================
@@ -1557,6 +1612,19 @@ def propose_change(
         config_dir = CONFIG_DIR
 
     # Dead-end filtering is handled by identify_gaps() — no redundant check here
+
+    # O55: Check if this metric can be derived from accounting identities
+    from edgar.xbrl.standardization.tools.derivation_planner import (
+        ACCOUNTING_IDENTITIES, derive_formula_from_identity, to_config_change,
+    )
+    if gap.metric in ACCOUNTING_IDENTITIES and gap.gap_type in ("unmapped", "high_variance"):
+        if gap.company_results is not None:
+            proposal = derive_formula_from_identity(gap.ticker, gap.metric, gap.company_results)
+            if proposal is not None and proposal.is_complete:
+                change = to_config_change(proposal)
+                if change is not None:
+                    return change
+        logger.debug(f"O55: {gap.ticker}:{gap.metric} derivation incomplete, falling through")
 
     # Check what's already been tried
     tried_concepts = set()
@@ -1604,7 +1672,14 @@ def propose_change(
         logger.info(f"Skipping explained variance: {gap.ticker}:{gap.metric}")
         return None
     elif gap.gap_type == "regression":
-        return _propose_regression_fix(gap, config_dir)
+        change = _propose_regression_fix(gap, config_dir)
+        # Divergence guardrail: require prior concept attempts before allowing divergence
+        if change and change.change_type == ChangeType.ADD_DIVERGENCE:
+            is_reference_changed = "reference changed" in (change.rationale or "").lower()
+            if not is_reference_changed and not _should_allow_divergence(gap, graveyard_entries):
+                logger.info(f"Divergence guardrail: {gap.ticker}:{gap.metric} blocked — insufficient concept attempts")
+                return _propose_via_solver(gap)
+        return change
 
     return None
 
