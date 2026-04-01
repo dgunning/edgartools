@@ -19,6 +19,21 @@ from edgar.dates import extract_dates
 from edgar.httprequests import download_bulk_data, download_datafile, download_text
 from edgar.urls import build_company_tickers_exchange_url, build_company_tickers_url, build_mutual_fund_tickers_url, build_ticker_url
 
+def _run_coroutine(coroutine):
+    """Run an async coroutine, handling the case where an event loop is already running (e.g. Jupyter)."""
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        import nest_asyncio
+        nest_asyncio.apply()
+        return loop.run_until_complete(coroutine)
+    else:
+        return asyncio.run(coroutine)
+
+
 __all__ = ['download_edgar_data',
            'get_edgar_data_directory',
            'use_local_storage',
@@ -171,7 +186,7 @@ def download_facts(disable_progress: bool = False) -> Path:
         disable_progress: If True, suppress progress bars. Defaults to False.
     """
 
-    return asyncio.run(download_facts_async(client = None, disable_progress=disable_progress))
+    return _run_coroutine(download_facts_async(client=None, disable_progress=disable_progress))
 
 async def download_submissions_async(client: Optional[AsyncClient], disable_progress: bool = False) -> Path:
     """
@@ -194,7 +209,7 @@ def download_submissions(disable_progress: bool = False) -> Path:
     Args:
         disable_progress: If True, suppress progress bars. Defaults to False.
     """
-    return asyncio.run(download_submissions_async(client = None, disable_progress=disable_progress))
+    return _run_coroutine(download_submissions_async(client=None, disable_progress=disable_progress))
 
 def download_ticker_data(reference_data_directory: Path):
     """
@@ -377,7 +392,7 @@ def download_filings(filing_date: Optional[str] = None,
                 if accession_numbers and bulk_file_directory.exists():
                     existing_files = {str(f) for f in bulk_file_directory.glob('*.nc')}
 
-                path = asyncio.run(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory, disable_progress=disable_progress))
+                path = _run_coroutine(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory, disable_progress=disable_progress))
                 log.info('Downloaded feed file to %s', path)
                 total_feed_files_downloaded += 1
 
