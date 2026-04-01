@@ -726,6 +726,8 @@ companies:
     archetype: A
     fiscal_year_end: January
     notes: Retail corporation - discount stores, hypermarkets
+    exclude_metrics:
+      - ResearchAndDevelopment
     known_divergences:
       PropertyPlantEquipment:
         reason: The current mapping us-gaap:PropertyPlantAndEquipmentNet ($119.9B)
@@ -996,6 +998,14 @@ companies:
 
           '
         review_date: '2026-04-26'
+      Capex:
+        form_types:
+        - 10-K
+        variance_pct: 40.0
+        reason: Pharma capex includes intangible investment (acquired IP, licensing)
+          that yfinance normalizes differently from XBRL PaymentsToAcquirePropertyPlantAndEquipment.
+        skip_validation: false
+        remediation_status: wont_fix
     notes: Healthcare conglomerate - pharmaceuticals, medical devices, consumer health
     metric_overrides:
       ResearchAndDevelopment:
@@ -2014,6 +2024,17 @@ companies:
       ShareRepurchases:
         sign_negate: true
         notes: Sign convention differs from yfinance (XBRL=31591000000, ref=-34591000000)
+    known_divergences:
+      ShareRepurchases:
+        form_types:
+        - 10-K
+        variance_pct: 35.0
+        reason: JPM XBRL PaymentsForRepurchaseOfCommonStock ($18.8B) captures only
+          common stock buybacks. yfinance reference ($28.7B) includes preferred stock
+          repurchases and treasury stock adjustments. 6 graveyard attempts exhausted
+          all concept and formula approaches.
+        skip_validation: false
+        remediation_status: wont_fix
   GS:
     name: Goldman Sachs Group, Inc.
     cik: 886982
