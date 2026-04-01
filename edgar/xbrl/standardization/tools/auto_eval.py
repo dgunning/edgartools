@@ -21,6 +21,9 @@ from edgar.xbrl.standardization.models import MappingResult, MappingSource, Excl
 
 logger = logging.getLogger(__name__)
 
+# Pre-built lookup for ExclusionReason enum values (avoids try/except in hot path)
+_EXCLUSION_REASON_MAP = {e.value: e for e in ExclusionReason}
+
 
 # =============================================================================
 # COHORT DEFINITIONS
@@ -1065,6 +1068,7 @@ def _compute_company_cqs(
     headline_ef_pass = 0
     headline_ef_total = 0
     extraction_failed_count = 0
+    forbidden_pass_count = 0
 
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
@@ -1072,13 +1076,10 @@ def _compute_company_cqs(
             total += 1
 
             # Look up exclusion reason
-            reason = ExclusionReason.NOT_APPLICABLE  # default
+            reason = ExclusionReason.NOT_APPLICABLE
             if exclusion_reasons and metric in exclusion_reasons:
                 raw = exclusion_reasons[metric].get("reason", "not_applicable")
-                try:
-                    reason = ExclusionReason(raw)
-                except ValueError:
-                    reason = ExclusionReason.NOT_APPLICABLE
+                reason = _EXCLUSION_REASON_MAP.get(raw, ExclusionReason.NOT_APPLICABLE)
 
             if reason == ExclusionReason.EXTRACTION_FAILED:
                 # Penalty: counts as total but NOT valid/mapped/ef_pass
@@ -1097,6 +1098,7 @@ def _compute_company_cqs(
             valid += 1
             mapped += 1
             ef_pass_count += 1
+            forbidden_pass_count += 1
             continue
 
         total += 1
@@ -1191,19 +1193,17 @@ def _compute_company_cqs(
     # SA-CQS: standardization alignment (value matches yfinance)
     sa_cqs = sa_pass_rate
 
-    # Raw CQS: all CONFIG exclusions treated as failures (honest baseline)
-    # Subtract the free passes that legitimate exclusions got
-    legitimate_exclusion_passes = excluded - extraction_failed_count
-    raw_valid = valid - legitimate_exclusion_passes
-    raw_mapped = mapped - legitimate_exclusion_passes
+    # Raw CQS: all free passes (CONFIG exclusions + forbidden) treated as failures
+    all_free_passes = (excluded - extraction_failed_count) + forbidden_pass_count
+    raw_valid = valid - all_free_passes
+    raw_mapped = mapped - all_free_passes
     raw_pass_rate = raw_valid / effective_total if effective_total > 0 else 0.0
     raw_coverage_rate = min(1.0, raw_mapped / effective_total) if effective_total > 0 else 0.0
     raw_cqs = _cqs_formula(raw_pass_rate, mean_variance, raw_coverage_rate, golden_master_rate, regression_count)
 
-    # Data completeness: actually-extracted valid metrics / total possible (excludes free passes)
-    total_possible = len(metrics)  # All metrics attempted for this company
-    real_valid = valid - legitimate_exclusion_passes  # Only count truly extracted values
-    data_completeness = real_valid / total_possible if total_possible > 0 else 0.0
+    # Data completeness: actually-extracted valid metrics / total possible (excludes all free passes)
+    total_possible = len(metrics)
+    data_completeness = raw_valid / total_possible if total_possible > 0 else 0.0
 
     return CompanyCQS(
         ticker=ticker,
@@ -1278,6 +1278,8 @@ def _aggregate_cqs(
         for m in cs.regressed_metrics:
             all_regressed.append((ticker, m))
 
+    # Note: intentionally NOT using _cqs_formula here — aggregate uses continuous
+    # regression_rate (0-1) while per-company _cqs_formula uses binary regression_count.
     agg_cqs = (
         0.45 * pass_rate
         + 0.20 * max(0, 1 - mean_variance / 100)
