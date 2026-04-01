@@ -1953,10 +1953,13 @@ def _extract_candidate_value(ticker: str, concept: str) -> Optional[float]:
 def _build_candidates_context(
     gap: 'UnresolvedGap',
 ) -> Tuple[str, List['CandidateConcept']]:
-    """O3+O7: Build value-enriched candidate list and formatted text for AI prompt.
+    """O3+O7+O56: Build value-enriched candidate list and formatted text for AI prompt.
 
     Calls discover_concepts with reference_value (O8), then enriches name-based
     candidates missing extracted_value by looking up values from SEC Company Facts.
+
+    O56 additions: appends tree structure (parent/weight/statement), extension
+    concept warnings, and accounting relationship context to the evidence pack.
 
     Returns:
         Tuple of (formatted_text, enriched_candidates_list).
@@ -2029,6 +2032,70 @@ def _build_candidates_context(
         "Low Delta% alone does not validate a concept — coincidental numeric "
         "matches across unrelated line items are common.\n"
     )
+
+    # O56: Tree structure section — parent→child relationships with weights
+    tree_lines = []
+    for c in candidates[:10]:
+        if c.tree_context:
+            parent = c.tree_context.get('parent')
+            weight = c.tree_context.get('weight', 1.0)
+            stmt = c.tree_context.get('statement', 'unknown')
+            parent_name = (
+                parent.element_id
+                if hasattr(parent, 'element_id')
+                else str(parent) if parent else 'ROOT'
+            )
+            sign = '+' if weight >= 0 else '-'
+            tree_lines.append(
+                f"  {sign} {c.concept} (parent: {parent_name}, statement: {stmt})"
+            )
+
+    if tree_lines:
+        lines.append("\n## Calculation Tree Structure")
+        lines.append(
+            "Shows parent→child relationships. "
+            "Sign indicates weight in parent's calculation."
+        )
+        lines.extend(tree_lines)
+
+    # O56: Extension concept flag — distinguish us-gaap from company extensions
+    extension_concepts = [
+        c for c in candidates[:10]
+        if ':' in c.concept and not c.concept.startswith('us-gaap')
+    ]
+    if extension_concepts:
+        lines.append("\n## Extension Concepts (company-specific)")
+        lines.append(
+            "These are NOT standard us-gaap concepts — "
+            "they are company-specific extensions:"
+        )
+        for c in extension_concepts:
+            prefix = (
+                c.concept.split(':')[0]
+                if ':' in c.concept
+                else c.concept.split('_')[0]
+            )
+            lines.append(f"  - {c.concept} (namespace: {prefix})")
+        lines.append(
+            "**Warning:** Extension concepts cannot be used "
+            "for cross-company standardization."
+        )
+
+    # O56: Accounting relationship context for AI
+    # Derived from derivation_planner.ACCOUNTING_IDENTITIES to avoid duplication
+    from edgar.xbrl.standardization.tools.derivation_planner import ACCOUNTING_IDENTITIES
+    related = [comp for comp, _sign in ACCOUNTING_IDENTITIES.get(gap.metric, [])]
+    if related:
+        lines.append("\n## Accounting Relationships")
+        lines.append(
+            f"{gap.metric} is typically derived from or related to: "
+            f"{', '.join(related)}"
+        )
+        lines.append(
+            "If the company already has mappings for these, "
+            "consider using a formula instead of a direct concept."
+        )
+
     return "\n".join(lines), candidates
 
 

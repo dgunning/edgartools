@@ -134,6 +134,27 @@ reits:
       calculation: "Revenue - PropertyOperatingExpenses"
       notes: "Excludes depreciation (phantom expense for RE)"
 
+# Energy (SIC 1300-1389, 2911-2999)
+energy:
+  sic_ranges: [[1300, 1389], [2911, 2999]]
+
+  forbidden_metrics:
+    - GrossProfit             # Energy companies use cost structure that doesn't map to standard GrossProfit
+    - OperatingIncome         # Replaced by industry-specific operating measures
+
+  required_alternatives:
+    ExplorationExpense:
+      replaces: ResearchAndDevelopment
+      notes: "E&P exploration costs"
+
+  concept_mapping:
+    COGS:
+      counterpart: ProductionCosts
+      xbrl_concepts:
+        - ProductionRelatedExpenses
+        - CrudeOilAndNaturalGasProductionExpenses
+      notes: "Energy cost of extraction/production"
+
 # Default (All other sectors)
 default:
   concept_mapping:

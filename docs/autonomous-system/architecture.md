@@ -15,17 +15,17 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.9121 | 2026-03-27 |
-| EF-CQS | 0.6349 | 2026-03-27 |
-| SA-CQS | 0.6018 | 2026-03-27 |
+| CQS | 0.8293 | 2026-04-01 |
+| EF-CQS | 0.8558 | 2026-04-01 |
+| SA-CQS | 0.7588 | 2026-04-01 |
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
-| AI | Deterministic solver + Lead Agent closed loop (`run_closed_loop()`) | |
+| AI | Deterministic solver + Lead Agent closed loop (`run_closed_loop()`) + Graveyard replay (`replay_graveyard_proposals()`) | |
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
 
-**Note on EF-CQS drop (0.85→0.67):** Phase 1-8 implementation (`cd4f310d`) tightened EF scoring (stricter concept correctness), and SEC-native primacy (`use_sec_facts=True` default) raised the evidence bar further. This is honest scoring, not a regression in extraction quality. The old 0.85 was measured under a looser regime.
+**Note on CQS/EF-CQS values:** Numbers above are from 5-company QUICK_EVAL_COHORT with `use_sec_facts=True`. Post-consensus-017 fixes: forbidden metrics excluded from CQS scoring (O57), derivation planner wired (O55), divergence guardrail added. 100-company CQS is 0.9121 (last measured 2026-03-27).
 
 ---
 
@@ -86,12 +86,23 @@ CQS = 0.45 * pass_rate
 
 **LIS (Localized Impact Score)** — target metric improved + zero regressions for that company. Implemented in `auto_eval_loop.py:compute_lis()`. CQS remains as monitoring metric, not a gate.
 
+**Signed Formula Engine** — `_compute_sa_composite()` supports weighted components with positive and negative signs (e.g., GrossProfit = Revenue - COGS). Enabled by Consensus 016 (O49-O52). `6fda5fad`.
+
+**Graveyard Replay** — `replay_graveyard_proposals()` re-evaluates previously rejected proposals after engine changes. Broke the 0% KEEP rate: 17/36 proposals flipped to KEEP with the signed engine.
+
+**EF/SA Gate Decoupling (O53)** — Decision gates are now change-type-aware via `_GATE_APPLICABILITY`. Concept changes check EF only; formula changes check SA only; divergence/exclusion changes skip both EF/SA (they don't affect extraction). Hard veto and per-company drop checks always apply.
+
+**Forbidden Metrics in CQS (O57)** — Industry-forbidden metrics (e.g., GrossProfit for energy companies) are excluded from CQS scoring, not just the gap list. `_build_forbidden_by_ticker()` computes exclusions from `industry_metrics.yaml`.
+
+**Divergence Guardrail** — `_should_allow_divergence()` requires >= 2 prior concept-level graveyard attempts before allowing ADD_DIVERGENCE proposals. Reference-changed regressions are exempt.
+
 Safety invariants:
 - New regressions are a hard veto
 - No single company drops >5pp in pass_rate
 - Circuit breaker: 10 consecutive failures stops the session
 - All changes are git-recoverable
 - Graveyard prevents loops (6+ failed attempts → skip)
+- Divergence requires prior concept attempts (prevents CQS inflation)
 
 ### Experiment Ledger
 
@@ -146,6 +157,7 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 | `tools/auto_eval_dashboard.py` | Morning review terminal dashboard |
 | `tools/auto_solver.py` | Subset-sum formula discovery |
 | `tools/consult_ai_gaps.py` | AI consultation pipeline, typed actions, OpenRouter caller |
+| `tools/derivation_planner.py` | Derive computed metrics from accounting identities (GrossProfit = Revenue - COGS) |
 | `tools/discover_concepts.py` | Search calc trees + facts + reverse value search for concept candidates |
 | `tools/verify_mapping.py` | Value comparison against yfinance |
 | `tools/learn_mappings.py` | Cross-company pattern discovery |
@@ -224,6 +236,12 @@ These persist across all sessions and guide all future work:
 44. **Do not optimize prompts against a broken evaluator** — verify evaluator behavior first (re-run through fixed pipeline), then iterate on prompts with human-adjudicated ground truth (Session 014)
 45. **Benchmark harness scores semantic correctness independently of CQS** — action accuracy and concept accuracy measured against human ground truth, not CQS delta (Session 014)
 46. **DOCUMENT_DIVERGENCE needs a CQS exception mode** — if AI proposes justified divergence, CQS must not penalize under strict matching. Evaluation architecture change, not prompt change (Session 014)
+47. **EF and SA must be decoupled in the decision gate** — a correct EF mapping (right XBRL concept) should not be rejected because SA (yfinance match) regressed. EF-only regression check for concept changes, SA-only for formula changes (Session 017)
+48. **Divergence and exclusion are first-class terminal outcomes** — LIS must award positive delta when gap transitions from "mismatch/unmapped" to "documented divergence" or "valid exclusion" (Session 017)
+49. **AI must never invent concept names** — filing-aware discovery (calc trees + facts + reverse value search) must precede any proposal. AI ranks discovered candidates (Session 017)
+50. **Derivation planner uses accounting identities** — GrossProfit = Revenue - COGS, TotalLiabilities = Assets - Equity. Deterministic engine discovers company-specific concepts from calc tree, not AI guessing (Session 017)
+51. **Industry pre-exclusion before eval loop** — structurally inapplicable metrics (GrossProfit for energy, CurrentAssets for banks) excluded via industry_metrics.yaml before entering auto-eval, avoiding gate evaluation entirely (Session 017)
+52. **Per-metric gate isolation** — replace global EF-CQS regression check with impacted-cell regression. Only re-evaluate target metric and dependents, not all 37 metrics (Session 017)
 
 ---
 

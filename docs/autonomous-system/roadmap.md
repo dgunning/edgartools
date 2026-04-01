@@ -99,6 +99,21 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - CQS: 0.9121→0.9121, EF-CQS: 0.6349→0.6349.
 - Key: **Qualitative breakthrough — 100% of proposals are now semantically correct**. Before: `ReverseRepurchaseAgreements` for IntangibleAssets, `ComprehensiveIncomeNetOfTax` for AccountsReceivable. After: `Goodwill + IntangibleAssetsNetExcludingGoodwill` (correct formula), `AccountsReceivableNetCurrent + FinanceReceivablesNetCurrent` (correct composite for CAT's financial services division). MSFT:PPE proposes Gross with valid Net vs Gross reasoning. HD:InterestExpense proposes `InterestExpense` (different from current `InterestExpenseNonoperating`). **Bottleneck shifted from prompt quality to CQS evaluation layer** — proposals are semantically right but CQS pre-screen shows no improvement. Next steps: ADD_FORMULA `scope` param fix, company-scoped formula compilation, DOCUMENT_DIVERGENCE as terminal action.
 
+**Run 011 (2026-03-31)** — ~90 min, 5 companies, graveyard replay + signed formula engine
+- Result: 17/36 graveyard proposals flipped DISCARD→KEEP. After semantic review: 3 applied, 2 false positives reverted.
+- CQS: 0.8224→0.8237, Pass Rate: 94.7%→94.7%
+- Key: **Broke the 0% KEEP rate.** Signed formula engine (Consensus 016, O49-O52) unlocked 17 previously rejected proposals. Applied: WMT:InterestExpense (company formula), WMT:PropertyPlantEquipment (known_divergences), JPM:GrossProfit (bank exclusion). Reverted: WMT:IntangibleAssets (AccruedLiabilitiesCurrent — semantic false positive), GrossProfit:NetCashProvidedByUsedInOperatingActivities (cash flow ≠ gross profit). Commit: `6fda5fad`.
+
+**Run 012 (2026-03-31)** — ~25 min, 5 companies, direct AI dispatch via OpenRouter
+- Result: 0/5 kept, 5 discards (2 pre-screened, 3 full eval), 0 vetoes. 5 AI proposals from 8 gaps, $0.008 cost.
+- CQS: 0.8237→0.8237, EF-CQS: 0.8425→0.8425.
+- Key: AI proposals semantically reasonable but gate rejected all. 8 structural gaps identified across 4 categories: missing XBRL concepts (4), yfinance aggregation differences (2), industry exclusions (2). Deep-consensus review (Claude Code agent team: advocate/critic/deepthinker) conducted to design resolution architecture. See `017-2026-04-01-autonomous-structural-gap-resolution.md`.
+
+**Run 013 (2026-04-01)** — 168s, 5 companies, post-consensus-017 verification eval
+- Result: Verification only (no experiment loop). 9 gaps identified.
+- CQS: 0.8237→0.8293 (+0.0056), EF-CQS: 0.8425→0.8558 (+0.0133), SA-CQS: 0.7633→0.7588.
+- Key: **O57 forbidden metrics fix confirmed** — XOM down from 3 gaps to 1 (LongTermDebt explained_variance only). XOM:GrossProfit/OperatingIncome no longer penalize CQS. O55 derivation planner wired (`company_results=True` on all WMT gaps) but WMT:GrossProfit/TotalLiabilities still unmapped — component metrics (Revenue, COGS) need resolution first. Divergence guardrail active (no premature divergence proposals).
+
 ---
 
 ## Consensus Sessions
@@ -121,6 +136,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 014 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt benchmarking: two-layer eval (semantic vs CQS), fix evaluator before prompt, DOCUMENT_DIVERGENCE exception mode, 12-case gold set | Action items created |
 | 015 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | AI prompt & context overhaul: scope enum enforcement, explicit escalation triggers, formula constraints, solver annotations. 25%→60%+ compile-valid target. | O41-O46 planned |
 | 016 | 2026-03-28 | GPT-5.4 + Gemini 3.1 | Formula engine limitations & auto-solver quality: signed components in _compute_sa_composite, kill brute-force solver, override isolation bug, graveyard replay strategy | Action items created |
+| 017 | 2026-04-01 | Claude Code deep-consensus (advocate/critic/deepthinker) | Autonomous structural gap resolution: EF/SA decoupling, divergence as terminal outcome, derivation planner, evidence pack, industry pre-exclusion, per-metric gate isolation | O53-O58 implemented |
 
 ### Session 004 Unanimous Agreements
 
@@ -158,6 +174,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 014 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `10bcb2eb-98b7-4b0c-95c7-9e0d233ccf33` |
 | 015 | 2026-03-27 | GPT-5.4 + Gemini 3.1 | `5b47500e-0e10-4f75-878a-5a2a079c284e` |
 | 016 | 2026-03-28 | GPT-5.4 + Gemini 3.1 | `73e496f4-f35c-4a18-bc02-09703b72814b` |
+| 017 | 2026-04-01 | GPT-5.4 + Gemini 3.1 | `c91c90e7-8886-4df2-9893-d40f31a27958` |
 
 ---
 
@@ -264,6 +281,10 @@ For each 50-company batch:
 - [x] **M7.16: Round-trip consumption tests (O26)** — 6 tests verifying compile → apply_in_memory → config structure matches consumer expectations. Completed 2026-03-27.
 - [x] **M7.17: Stale cache invalidation (O27)** — Deleted pre-O16 `measure_cache.json` with `current_concept=None` entries. Completed 2026-03-27.
 - [x] **M7.18: MappingSource.OVERRIDE + Strategy 0 hard failure (O33-O38)** — New `OVERRIDE` enum value separates company overrides from exclusions. Strategy 0 returns OVERRIDE (not CONFIG), so validator and CQS process overrides normally instead of auto-passing. Strategy 0 hard failure returns `ConfidenceLevel.INVALID` when preferred_concept not found (no silent fallthrough to Strategy 1). Completed 2026-03-27.
+- [x] **M7.19: Signed formula engine (O49-O52)** — `_compute_sa_composite()` supports weighted components with positive/negative signs. Enables subtraction formulas (GrossProfit = Revenue - COGS). Solver constraints updated. Completed 2026-03-28. `36f1c763`.
+- [x] **M7.20: Dead MCP/GPT escalation path removal** — Removed unreachable MCP/GPT code from auto-eval loop. Completed 2026-03-31. `74da0e6f`.
+- [x] **M7.21: Graveyard replay** — `replay_graveyard_proposals()` re-evaluates previously rejected proposals after engine changes. Broke 0% KEEP rate: 17/36 flipped. Completed 2026-03-31. `6fda5fad`.
+- [x] **M7.22: Consensus 017 + post-review fixes (O53-O58)** — EF/SA gate decoupling (`_GATE_APPLICABILITY`), forbidden metrics excluded from CQS scoring (`_build_forbidden_by_ticker()`), derivation planner wired into `propose_change()` via `MetricGap.company_results`, divergence guardrail (`_should_allow_divergence()`). CQS 0.8237→0.8293, EF-CQS 0.8425→0.8558. Completed 2026-04-01. `514fea2f`.
 
 ---
 
