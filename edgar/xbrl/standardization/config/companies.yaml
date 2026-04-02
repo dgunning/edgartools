@@ -255,8 +255,8 @@ companies:
         reason: not_applicable
         notes: ''
       ShortTermDebt:
-        reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
+        reason: not_applicable
+        notes: SNOW has no debt — yfinance Current Debt = None
     known_divergences:
       Capex:
         form_types:
@@ -363,7 +363,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
+        notes: 'Composite: needs ShortTermBorrowings + CommercialPaper + LongTermDebtCurrent. yfinance=2.6B. Phase C composite
+          fix.'
     known_divergences:
       ShortTermDebt:
         form_types:
@@ -614,6 +615,10 @@ companies:
     archetype: A
     fiscal_year_end: October
     exclude_metrics:
+      OperatingIncome:
+        reason: not_applicable
+        notes: DE financial services division includes InterestExpense in CostsAndExpenses; OperatingIncomeLoss in XBRL ($2.7B)
+          structurally differs from yfinance ($8.4B). Not config-fixable.
       ShortTermDebt:
         reason: not_applicable
         notes: ''
@@ -702,7 +707,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
+        notes: ShortTermBorrowings=04M but yfinance=.6B — likely missing LongTermDebtCurrent component. Phase C composite
+          fix.
     notes: Aerospace and defense company (formerly Raytheon Technologies)
   ASTE:
     name: Astec Industries, Inc.
@@ -722,7 +728,7 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
+        notes: 'Composite: CommercialPaper=.5B + OtherShortTermBorrowings=6M but yfinance=.4B. Phase C composite fix.'
     notes: Beverage company - nonalcoholic beverages
   PEP:
     name: PepsiCo, Inc.
@@ -851,9 +857,6 @@ companies:
       COGS:
         reason: not_applicable
         notes: Energy company — cost structure differs from COGS
-      ShortTermDebt:
-        reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
     metric_overrides:
       Capex:
         preferred_concept: cop:PaymentToAcquireProductiveAssetsAndInvestments
@@ -972,6 +975,10 @@ companies:
     name: Johnson & Johnson
     cik: 200406
     archetype: A
+    exclude_metrics:
+      OperatingIncome:
+        reason: not_applicable
+        notes: JNJ does not tag OperatingIncomeLoss in XBRL. Segment-based reporting only.
     known_divergences:
       OperatingIncome:
         form_types:
@@ -1048,6 +1055,10 @@ companies:
     name: Eli Lilly and Company
     cik: 59478
     archetype: A
+    exclude_metrics:
+      OperatingIncome:
+        reason: not_applicable
+        notes: LLY does not tag OperatingIncomeLoss in XBRL. Only NonoperatingIncomeExpense exists.
     metric_overrides:
       Capex:
         preferred_concept: PaymentsToAcquireOtherPropertyPlantAndEquipment
@@ -1427,7 +1438,8 @@ companies:
         notes: ''
       ShortTermDebt:
         reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
+        notes: 'Composite: CommercialPaper=.0B + OtherShortTermBorrowings=08M + LongTermDebtCurrent=M but yfinance=.1B. Phase
+          C composite fix.'
     known_divergences:
       Revenue:
         form_types:
@@ -2328,7 +2340,7 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
+        notes: 'Composite: CommercialPaper=.5B but yfinance=.9B includes LongTermDebtCurrent. Phase C composite fix.'
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2444,6 +2456,10 @@ companies:
     name: NIKE, Inc.
     cik: 320187
     fiscal_year_end: May
+    exclude_metrics:
+      OperatingIncome:
+        reason: not_applicable
+        notes: NKE does not tag OperatingIncomeLoss in XBRL. Only OtherNonoperatingIncomeExpense exists.
   SBUX:
     name: STARBUCKS CORP
     cik: 829224
@@ -2470,9 +2486,6 @@ companies:
       COGS:
         reason: not_applicable
         notes: Pure services/platform company — no cost of goods
-      ShortTermDebt:
-        reason: extraction_failed
-        notes: ShortTermDebt extraction gap — debt exists but extraction fails
       Inventory:
         reason: not_applicable
         notes: Services company — no physical inventory
