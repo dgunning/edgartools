@@ -140,15 +140,16 @@ class TestClassifyBusinessCategory:
         )
         assert result == 'BDC'
 
-    def test_classify_bdc_by_name_pattern(self):
-        """Test BDC classification via name pattern."""
+    def test_classify_bdc_requires_forms(self):
+        """Test BDC classification requires BDC forms, not just name pattern."""
         result = classify_business_category(
             sic=None,
             entity_type='operating',
             name='Main Street Capital Corporation',
             form_types={'10-K', '10-Q'}
         )
-        assert result == 'BDC'
+        # Without N-2 forms, "Capital Corporation" alone is no longer sufficient
+        assert result == 'Operating Company'
 
     def test_classify_investment_manager(self):
         """Test Investment Manager classification."""
@@ -319,3 +320,143 @@ class TestBusinessCategoryParametrized:
         company = Company(ticker)
         assert company.business_category == expected_category, \
             f"{ticker} expected {expected_category}, got {company.business_category}"
+
+
+class TestIssue561Misclassifications:
+    """Regression tests for issue #561 — business_category misclassifications.
+
+    Four categories of fixes:
+    1. ETFs with "ETF" in name but no investment company forms → ETF
+    2. Commodity trusts/funds with SIC 6200s → ETF
+    3. SPACs with non-6770 SIC codes → SPAC (by name pattern)
+    4. Churchill Capital Corp IX → not BDC (removed "CAPITAL CORP" name pattern)
+    """
+
+    # Issue 1: ETFs with "ETF" in name, no investment company forms
+    @pytest.mark.parametrize("name,sic", [
+        ("Goldman Sachs Physical Gold ETF", 6211),
+        ("ARK 21Shares Bitcoin ETF", 6211),
+        ("Bitwise Bitcoin ETF", 6211),
+        ("Grayscale Bitcoin Mini Trust ETF", 6211),
+        ("Invesco Galaxy Bitcoin ETF", 6211),
+    ])
+    def test_crypto_commodity_etf_by_name(self, name, sic):
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'ETF'
+
+    # Issue 2: Commodity trusts/funds, SIC 6200s
+    @pytest.mark.parametrize("name,sic", [
+        ("GraniteShares Gold Trust", 6211),
+        ("Grayscale Bitcoin Cash Trust BCH", 6211),
+        ("United States Brent Oil Fund LP", 6221),
+        ("WisdomTree Bitcoin Fund", 6211),
+        ("Teucrium Commodity Trust", 6221),
+    ])
+    def test_commodity_trust_fund_by_name_and_sic(self, name, sic):
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'ETF'
+
+    # Issue 2b: Royalty trusts should NOT be classified as ETF
+    def test_royalty_trust_stays_operating_company(self):
+        result = classify_business_category(
+            sic=6211, entity_type='operating',
+            name='BP Prudhoe Bay Royalty Trust',
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'Operating Company'
+
+    # Issue 3: SPACs with non-6770 SIC
+    @pytest.mark.parametrize("name,sic", [
+        ("Altenergy Acquisition Corp", 3711),
+        ("Alpha Star Acquisition Corp", 7389),
+        ("Athena Technology Acquisition Corp II", 4911),
+        ("Best SPAC I Acquisition Corp", 8200),
+        ("Greenfield Acquisition Company", 5411),    # "Acquisition Co" variant
+        ("Vertex Acquisition Inc", 3674),             # "Acquisition Inc" variant
+    ])
+    def test_spac_by_name(self, name, sic):
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'SPAC'
+
+    # Issue 4: Churchill Capital Corp IX should NOT be BDC
+    def test_churchill_capital_not_bdc(self):
+        result = classify_business_category(
+            sic=6770, entity_type='operating',
+            name='Churchill Capital Corp IX Cayman',
+            form_types={'10-K', '10-Q'}
+        )
+        # SIC 6770 → SPAC (caught by step 1, not BDC)
+        assert result == 'SPAC'
+
+    def test_churchill_capital_non_spac_sic_not_bdc(self):
+        """If Churchill had a non-SPAC SIC, still shouldn't be BDC."""
+        result = classify_business_category(
+            sic=6199, entity_type='operating',
+            name='Churchill Capital Corp IX Cayman',
+            form_types={'10-K', '10-Q'}
+        )
+        assert result != 'BDC'
+
+    # Verify existing BDC detection still works (forms-based)
+    def test_real_bdc_with_forms(self):
+        result = classify_business_category(
+            sic=None, entity_type='operating',
+            name='Ares Capital Corporation',
+            form_types={'10-K', '10-Q', 'N-2'},
+        )
+        assert result == 'BDC'
+
+    def test_real_bdc_main_street(self):
+        result = classify_business_category(
+            sic=None, entity_type='operating',
+            name='Main Street Capital Corporation',
+            form_types={'10-K', '10-Q', 'N-2'},
+        )
+        assert result == 'BDC'
+
+    # Guard: Investment manager with "ETF" in name is NOT classified as ETF
+    def test_etf_manager_stays_investment_manager(self):
+        result = classify_business_category(
+            sic=6211, entity_type='operating',
+            name='ETF Managers Group',
+            form_types={'10-K', '10-Q', '13F-HR'}
+        )
+        assert result == 'Investment Manager'
+
+    # Guard: operating companies with "Trust" outside SIC 6200s are NOT affected
+    def test_operating_trust_outside_broker_sic(self):
+        result = classify_business_category(
+            sic=3571, entity_type='operating',
+            name='Northern Trust Corporation',
+            form_types={'10-K', '10-Q', '8-K'}
+        )
+        assert result == 'Operating Company'
+
+    # Guard: "Fund" in name with non-broker SIC stays Operating Company
+    def test_fund_name_non_broker_sic(self):
+        result = classify_business_category(
+            sic=5411, entity_type='operating',
+            name='FundTech Solutions Inc',
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'Operating Company'
+
+    # Guard: broker-dealer with "Trust" in legal name
+    def test_broker_trust_subsidiary(self):
+        """A broker-dealer trust subsidiary should not become ETF."""
+        result = classify_business_category(
+            sic=6211, entity_type='operating',
+            name='Morgan Stanley Securities Trust',
+            form_types={'10-K', '10-Q', '13F-HR'}
+        )
+        # SIC 6211 + 13F → Investment Manager (caught before fund/trust heuristic)
+        assert result == 'Investment Manager'

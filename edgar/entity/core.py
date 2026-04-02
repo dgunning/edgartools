@@ -797,7 +797,11 @@ class Company(Entity):
             >>> Company('JPM').business_category
             'Bank'
         """
-        from edgar.entity.categorization import classify_business_category
+        from edgar.entity.categorization import BusinessCategory, classify_business_category
+
+        # Check authoritative BDC signal first (814- file number)
+        if getattr(self.data, 'is_bdc', False):
+            return BusinessCategory.BDC.value
 
         form_types = self._get_form_types()
         entity_type = getattr(self.data, 'entity_type', None)

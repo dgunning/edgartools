@@ -7,10 +7,13 @@ based on SIC codes, form types, entity type, and name patterns.
 The classification uses a multi-signal approach with priority hierarchy:
 1. Definitive SIC codes (REIT, SPAC, Bank, Insurance)
 2. Investment company forms (ETF, Mutual Fund, Closed-End Fund)
-3. BDC indicators (N-2 forms, name patterns)
-4. Investment manager indicators (13F, SIC)
-5. Holding company (SIC 6719)
-6. Default to Operating Company
+3. SPAC name patterns (Acquisition Corp, Blank Check, etc.)
+4. BDC indicators (N-2 forms only)
+5. Investment manager indicators (13F, SIC)
+6. Holding company (SIC 6719)
+7. "ETF" in name (catches crypto/commodity ETFs)
+8. SIC 6200s + fund/trust name (commodity trusts, crypto trusts)
+9. Default to Operating Company
 """
 
 from enum import Enum
@@ -29,6 +32,7 @@ __all__ = [
     'INVESTMENT_COMPANY_FORMS',
     'BDC_FORMS',
     'INVESTMENT_MANAGER_FORMS',
+    'SPAC_NAME_PATTERNS',
 ]
 
 
@@ -142,10 +146,23 @@ ETF_FUND_FAMILIES: Set[str] = {
     'ARK',
 }
 
+# SPAC name patterns — high confidence, standard naming conventions
+SPAC_NAME_PATTERNS: list[str] = [
+    'ACQUISITION CORP',    # Most common SPAC naming pattern
+    'ACQUISITION CO',      # Catches "Acquisition Company", "Acquisition Co"
+    'ACQUISITION INC',     # Less common variant
+    'BLANK CHECK',         # SEC standard term for SPACs
+]
+
 
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
+def _is_spac_by_name(name_upper: str) -> bool:
+    """Check if company name matches known SPAC patterns."""
+    return any(pattern in name_upper for pattern in SPAC_NAME_PATTERNS)
+
 
 def _parse_sic(sic: Optional[Union[int, str]]) -> Optional[int]:
     """
@@ -201,6 +218,7 @@ def classify_business_category(
     """
     # Convert SIC to integer for comparison
     sic_int = _parse_sic(sic)
+    name_upper = name.upper() if name else ''
 
     # Step 1: Check definitive SIC codes
     if sic_int is not None:
@@ -223,25 +241,42 @@ def classify_business_category(
     if has_primary_investment_forms:
         return _classify_investment_company_type(entity_type, name)
 
-    # Step 3: Check BDC signals (operating company with BDC forms or name pattern)
-    if _is_bdc(entity_type, name, form_types):
+    # Step 3: SPAC name patterns — before BDC to avoid false positives
+    if _is_spac_by_name(name_upper):
+        return BusinessCategory.SPAC.value
+
+    # Step 4: Check BDC signals (forms only — no name pattern)
+    if _is_bdc(entity_type, form_types):
         return BusinessCategory.BDC.value
 
-    # Step 4: Check investment manager signals
+    # Step 5: Check investment manager signals
     if _is_investment_manager(sic_int, form_types):
         return BusinessCategory.INVESTMENT_MANAGER.value
 
-    # Step 5: Check holding company
+    # Step 6: Check holding company
     if sic_int is not None and sic_int in SIC_CODES_HOLDING_COMPANY:
         return BusinessCategory.HOLDING_COMPANY.value
 
-    # Step 6: Default to operating company
+    # Step 7: "ETF" in name — catches crypto/commodity ETFs
+    # that don't file investment company forms (N-CSR, NPORT-P).
+    # Placed after Investment Manager to avoid catching "ETF Managers Group" etc.
+    if 'ETF' in name_upper:
+        return BusinessCategory.ETF.value
+
+    # Step 8: SIC 6200s + fund/trust name → ETF
+    # Commodity trusts, crypto trusts, commodity fund LPs
+    # Excludes royalty trusts (oil & gas income vehicles, not ETFs)
+    if sic_int is not None and 6200 <= sic_int < 6300:
+        if ('TRUST' in name_upper or 'FUND' in name_upper) and 'ROYALTY' not in name_upper:
+            return BusinessCategory.ETF.value
+
+    # Step 9: Default to operating company
     # Most SEC filers are operating companies unless classified otherwise
     # entity_type='operating' or missing/empty entity_type defaults to Operating Company
     if entity_type in ('operating', '', None):
         return BusinessCategory.OPERATING_COMPANY.value
 
-    # Step 7: Unknown (rare - only for explicitly non-operating entities without other classification)
+    # Step 10: Unknown (rare - only for explicitly non-operating entities without other classification)
     return BusinessCategory.UNKNOWN.value
 
 
@@ -294,20 +329,16 @@ def _classify_investment_company_type(
 
 def _is_bdc(
     entity_type: Optional[str],
-    name: str,
     form_types: Set[str]
 ) -> bool:
     """
     Check if company is a Business Development Company.
 
-    BDCs are unique:
-    - Entity type is 'operating' (not 'investment')
-    - File some investment company forms (N-2, N-23C-2)
-    - Usually have "Capital Corp" in name
+    BDCs are identified by filing BDC-specific forms (N-2, N-2ASR, N-23C-2)
+    while having entity_type='operating'.
 
     Args:
         entity_type: Entity type from SEC
-        name: Company name
         form_types: Set of form types filed by this company
 
     Returns:
@@ -317,17 +348,8 @@ def _is_bdc(
     if entity_type != 'operating':
         return False
 
-    # Check for BDC-specific forms
-    has_bdc_forms = bool(form_types & BDC_FORMS)
-    if has_bdc_forms:
-        return True
-
-    # Name pattern: "Capital Corp" or "Capital Corporation"
-    name_upper = name.upper() if name else ''
-    if 'CAPITAL CORP' in name_upper:
-        return True
-
-    return False
+    # Check for BDC-specific forms only
+    return bool(form_types & BDC_FORMS)
 
 
 def _is_investment_manager(
@@ -354,12 +376,7 @@ def _is_investment_manager(
     # Check for investment-related SIC codes
     inv_sic = sic is not None and sic in SIC_CODES_INVESTMENT_MANAGER
 
-    # Strong signal: both 13F and investment SIC
-    if has_13f and inv_sic:
-        return True
-
-    # Investment SIC alone is a signal
-    if inv_sic:
-        return True
-
-    return False
+    # Require both 13F and investment SIC for confident classification.
+    # SIC alone is insufficient — SIC 6211 is shared by commodity trusts,
+    # crypto ETFs, and broker-dealers that aren't investment managers.
+    return has_13f and inv_sic
