@@ -614,9 +614,6 @@ companies:
     archetype: A
     fiscal_year_end: October
     exclude_metrics:
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
       ShortTermDebt:
         reason: not_applicable
         notes: ''
@@ -975,10 +972,6 @@ companies:
     name: Johnson & Johnson
     cik: 200406
     archetype: A
-    exclude_metrics:
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
     known_divergences:
       OperatingIncome:
         form_types:
@@ -1055,10 +1048,6 @@ companies:
     name: Eli Lilly and Company
     cik: 59478
     archetype: A
-    exclude_metrics:
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
     metric_overrides:
       Capex:
         preferred_concept: PaymentsToAcquireOtherPropertyPlantAndEquipment
@@ -1215,9 +1204,6 @@ companies:
       Capex:
         reason: not_applicable
         notes: Insurance company — minimal Capex
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
       LongTermDebt:
         reason: not_applicable
         notes: ''
@@ -2458,10 +2444,6 @@ companies:
     name: NIKE, Inc.
     cik: 320187
     fiscal_year_end: May
-    exclude_metrics:
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
   SBUX:
     name: STARBUCKS CORP
     cik: 829224
@@ -2509,10 +2491,6 @@ companies:
     name: CISCO SYSTEMS, INC.
     cik: 858877
     fiscal_year_end: July
-    exclude_metrics:
-      COGS:
-        reason: extraction_failed
-        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2531,10 +2509,6 @@ companies:
   IBM:
     name: INTERNATIONAL BUSINESS MACHINES CORP
     cik: 51143
-    exclude_metrics:
-      COGS:
-        reason: extraction_failed
-        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2546,13 +2520,6 @@ companies:
   INTC:
     name: INTEL CORP
     cik: 50863
-    exclude_metrics:
-      COGS:
-        reason: extraction_failed
-        notes: Hardware/semi company reports CostOfRevenue — extraction should work
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2571,10 +2538,6 @@ companies:
   AMD:
     name: ADVANCED MICRO DEVICES INC
     cik: 2488
-    exclude_metrics:
-      COGS:
-        reason: extraction_failed
-        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2594,10 +2557,6 @@ companies:
     name: Broadcom Inc.
     cik: 1730168
     fiscal_year_end: November
-    exclude_metrics:
-      COGS:
-        reason: extraction_failed
-        notes: Hardware/semi company reports CostOfRevenue — extraction should work
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2621,10 +2580,6 @@ companies:
   TXN:
     name: TEXAS INSTRUMENTS INC
     cik: 97476
-    exclude_metrics:
-      COGS:
-        reason: extraction_failed
-        notes: Hardware/semi company reports CostOfRevenue — extraction should work
   NFLX:
     name: NETFLIX INC
     cik: 1065280
