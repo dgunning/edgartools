@@ -528,6 +528,123 @@ class TestInvestmentIdentifierParsing:
         assert company == 'Smith & Jones LLC'
         assert inv_type == 'Equity'
 
+    def test_parse_fdus_first_lien_debt_format(self):
+        """Test parsing FDUS prose identifier with industry label."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investments Donovan Food Brokerage, LLC '
+            'Business Services First Lien Debt Variable Index Spread (S + 6.00%) Variable Index Floor (2.00%) '
+            'Rate Cash 10.29% Rate PIK 0.00% Investment date 2/23/2024 Maturity 2/23/2029'
+        )
+        assert company == 'Donovan Food Brokerage, LLC'
+        assert inv_type == 'First Lien Debt'
+
+    def test_parse_fdus_with_plain_inc_suffix(self):
+        """Test parsing FDUS prose identifier when the company ends with Inc."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investments Quest Software US Holdings Inc. '
+            'Information Technology Services First Lien Debt Variable Index Spread (S + 1.00%) Variable Index '
+            'Floor (0.50%) Rate Cash 15.31% Rate PIK 6.75% Investment date 8/11/2025 Maturity 2/1/2030'
+        )
+        assert company == 'Quest Software US Holdings Inc.'
+        assert inv_type == 'First Lien Debt'
+
+    def test_parse_fdus_affiliate_with_parenthetical_alias(self):
+        """Test parsing FDUS affiliate identifier with a parenthetical alias."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Affiliate Investments Spectra A&D Acquisition, Inc. '
+            '(fka FDS Avionics Corp.) Aerospace & Defense Manufacturing First Lien Debt Variable Index Spread '
+            '(S + 6.00%) Variable Index Floor(1.00%) Rate Cash 10.26% Rate PIK 0.00% Investment date 2/12/2021 '
+            'Maturity 2/11/2026'
+        )
+        assert company == 'Spectra A&D Acquisition, Inc. (fka FDS Avionics Corp.)'
+        assert inv_type == 'First Lien Debt'
+
+    def test_parse_fdus_common_equity_format(self):
+        """Test parsing FDUS affiliate identifier with equity instrument."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Affiliate Investments Pfanstiehl Inc Health Products '
+            'Common Equity (2,550 units) Investment date 3/29/2013'
+        )
+        assert company == 'Pfanstiehl Inc'
+        assert inv_type == 'Common Equity'
+
+    def test_parse_fdus_subordinated_without_debt_suffix(self):
+        """Test parsing FDUS subordinated instrument labels that omit 'Debt'."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investments Pinnergy, Ltd. '
+            'Oil & Gas Services Subordinated Rate Cash 10.00% Rate PIK 0.00% '
+            'Investment date 6/30/2022 Maturity 6/30/2027'
+        )
+        assert company == 'Pinnergy, Ltd.'
+        assert inv_type == 'Subordinated'
+
+    def test_parse_fdus_without_investments_in_prefix(self):
+        """Test parsing FDUS labels whose relationship prefix omits 'Investments'."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate AMOpportunities, Inc. '
+            'Information Technology Services First Lien Debt Cash 12.50% Rate PIK 0.00% '
+            'Investment date 3/12/2025 Maturity 3/12/2029'
+        )
+        assert company == 'AMOpportunities, Inc.'
+        assert inv_type == 'First Lien Debt'
+
+    def test_parse_fdus_revolving_loan_with_parenthetical_alias(self):
+        """Test parsing FDUS revolving loan labels with a parenthetical alias."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investments Ad Info Parent, Inc. '
+            '(dba MediaRadar) Information Technology Services Revolving Loan ($1,442 unfunded commitment) '
+            'Variable Index Spread (S + 5.25%) Variable Index Floor (1.00%) Rate Cash 9.25% Rate PIK 0.00% '
+            'Investment date 11/1/2023 Maturity 9/16/2029'
+        )
+        assert company == 'Ad Info Parent, Inc. (dba MediaRadar)'
+        assert inv_type == 'Revolving Loan'
+
+    def test_parse_fdus_warrant_label(self):
+        """Test parsing FDUS warrant labels with unit counts."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investments United Biologics, LLC '
+            'Healthcare Services Warrant (57,469 units) Investment date 3/5/2012'
+        )
+        assert company == 'United Biologics, LLC'
+        assert inv_type == 'Warrant'
+
+    def test_parse_fdus_control_common_equity_label(self):
+        """Test parsing FDUS control investment labels."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Control Investments US GreenFiber LLC '
+            'Building Products Manufacturing Common Equity (2,522 units) Investment Date 7/3/2014'
+        )
+        assert company == 'US GreenFiber LLC'
+        assert inv_type == 'Common Equity'
+
+    def test_parse_fdus_duplicate_instrument_after_company(self):
+        """Test parsing FDUS labels that repeat the instrument after an unfunded commitment."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investments Detechtion Holdings, LLC '
+            'First Lien Debt ($1,250 unfunded commitments) Information Technology Services First Lien Debt '
+            'Variable Index Spread (S + 5.75%) Variable Index Floor (2.25%) Rate Cash 10.04% Rate PIK 2.50% '
+            'Investment date 6/21/2023 Maturity 6/21/2028'
+        )
+        assert company == 'Detechtion Holdings, LLC'
+        assert inv_type == 'First Lien Debt'
+
+    def test_parse_fdus_truncated_investments_prefix_typo(self):
+        """Test parsing a leaked/truncated relationship prefix in the company name."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investmnts Suited Connector LLC '
+            'Information Technology Services Common Equity (97,808 units) Investment date 12/1/2021'
+        )
+        assert company == 'Suited Connector LLC'
+        assert inv_type == 'Common Equity'
+
+    def test_parse_fdus_leaked_affiliate_prefix_fragment(self):
+        """Test parsing a leaked prefix fragment before the company name."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Affiliate InvesAffiliate Investments Medsurant Holdings LLC '
+            'Healthcare Services Preferred Equity (84,997 units) Investment date 4/12/2011'
+        )
+        assert company == 'Medsurant Holdings LLC'
+        assert inv_type == 'Preferred Equity'
 
 class TestPortfolioInvestmentsIntegration:
     """Integration tests for portfolio investments."""

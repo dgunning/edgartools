@@ -42,7 +42,9 @@ CONCEPT_NONACCRUAL_LOANS_FV = 'us-gaap:FairValueOptionLoansHeldAsAssetsAggregate
 # Known investment types for parsing (order matters - more specific first)
 INVESTMENT_TYPES = [
     # Secured Debt (used by some BDCs like Main Street)
+    'First lien debt',
     'First lien secured debt',
+    'Second lien debt',
     'Second lien secured debt',
     'Senior secured debt',
     'Secured debt',
@@ -211,7 +213,8 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     Handles multiple formats:
     1. ARCC format: "Company Name, First lien senior secured loan"
     2. HTGC format: "Debt Investments Software and Armis, Inc., Senior Secured, Maturity Date..."
-    3. Category rollups: "Debt Investments Software (52.80%)" - treated as Unknown type
+    3. FDUS format: "Non-control/Non-affiliate Investments Company LLC Industry First Lien Debt ..."
+    4. Category rollups: "Debt Investments Software (52.80%)" - treated as Unknown type
 
     Args:
         dimension_label: The full dimension label, e.g.,
@@ -234,6 +237,73 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
 
     company_name = identifier
     investment_type = "Unknown"
+
+    # Some FDUS labels leak relationship-prefix fragments into the company
+    # name, e.g. "Investmnts Suited Connector LLC" or
+    # "InvesAffiliate Investments Medsurant Holdings LLC".
+    normalized_identifier = re.sub(
+        r'^(?:InvesAffiliate Investments|Investmnts)\s+',
+        '',
+        identifier,
+        flags=re.IGNORECASE,
+    )
+
+    # Try FDUS prose format:
+    # "Non-control/Non-affiliate Investments Company Name LLC Industry First Lien Debt ..."
+    # Some labels omit the trailing "Investments" and some use bare "Subordinated".
+    fdus_match = re.match(
+        r'^(?P<prefix>'
+        r'Non-control/Non-affiliate(?: Investments| Investmnts)?|'
+        r'Affiliate(?: Investments| InvesAffiliate Investments)?|'
+        r'Control(?: Investments)?'
+        r')\s+'
+        r'(?P<body>.+?)\s+'
+        r'(?P<instrument>'
+        r'First Lien Debt|Second Lien Debt|Subordinated Debt|Subordinated|'
+        r'Revolving Loan|Term Loan|Unsecured Debt|Unsecured Loan|'
+        r'Common Equity|Preferred Equity|Warrant|Warrants'
+        r')\b',
+        normalized_identifier,
+        re.IGNORECASE,
+    )
+    if fdus_match:
+        company_name = normalized_identifier
+        investment_type = fdus_match.group('instrument').strip()
+        body = fdus_match.group('body').strip()
+
+        if re.match(
+            r'^.*\b('
+            r'LLC|L\.L\.C\.|LLP|L\.P\.|LP|Ltd|Limited|Inc|Corp|Co|'
+            r'Corporation|Company|Holdings|Partners|Group|PLC'
+            r')\.?(?:\s*\([^)]*\))?$',
+            body,
+            re.IGNORECASE,
+        ):
+            return identifier, body, investment_type
+
+        # FDUS places an industry label between the company name and instrument.
+        # Prefer a company-like prefix ending in a legal suffix, followed by one
+        # or more title-cased industry words.
+        entity_match = re.match(
+            r'^(?P<company>.*\b(?:'
+            r'LLC|L\.L\.C\.|LLP|L\.P\.|LP|Ltd|Limited|Inc|Corp|Co|'
+            r'Corporation|Company|Holdings|Partners|Group|PLC'
+            r')\.?(?:\s*\([^)]*\))?)'
+            r'(?:\s+[A-Z&][A-Za-z&:/-]*)+$',
+            body,
+            re.IGNORECASE,
+        )
+        if entity_match:
+            company_name = entity_match.group('company').strip()
+        else:
+            company_name = re.sub(
+                r'\s+[A-Z][A-Za-z&:/-]*(?:\s+[A-Z][A-Za-z&:/-]*){0,3}$',
+                '',
+                body,
+            ).strip()
+            if not company_name:
+                company_name = body
+        return identifier, company_name, investment_type
 
     # Try pipe-separated format (e.g., "Company | Type" or "Company, Type | Industry")
     # Some BDCs (Blue Owl) put instrument type after pipe; others (FSK) put GICS
