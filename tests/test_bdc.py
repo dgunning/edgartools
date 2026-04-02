@@ -628,6 +628,24 @@ class TestInvestmentIdentifierParsing:
         assert company == 'Detechtion Holdings, LLC'
         assert inv_type == 'First Lien Debt'
 
+    def test_parse_fdus_truncated_investments_prefix_typo(self):
+        """Test parsing a leaked/truncated relationship prefix in the company name."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Non-control/Non-affiliate Investmnts Suited Connector LLC '
+            'Information Technology Services Common Equity (97,808 units) Investment date 12/1/2021'
+        )
+        assert company == 'Suited Connector LLC'
+        assert inv_type == 'Common Equity'
+
+    def test_parse_fdus_leaked_affiliate_prefix_fragment(self):
+        """Test parsing a leaked prefix fragment before the company name."""
+        identifier, company, inv_type = _parse_investment_identifier(
+            'us-gaap:InvestmentIdentifierAxis: Affiliate InvesAffiliate Investments Medsurant Holdings LLC '
+            'Healthcare Services Preferred Equity (84,997 units) Investment date 4/12/2011'
+        )
+        assert company == 'Medsurant Holdings LLC'
+        assert inv_type == 'Preferred Equity'
+
 class TestPortfolioInvestmentsIntegration:
     """Integration tests for portfolio investments."""
 

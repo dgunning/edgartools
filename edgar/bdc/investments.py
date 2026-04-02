@@ -254,7 +254,7 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     fdus_match = re.match(
         r'^(?P<prefix>'
         r'Non-control/Non-affiliate(?: Investments| Investmnts)?|'
-        r'Affiliate(?: Investments)?|'
+        r'Affiliate(?: Investments| InvesAffiliate Investments)?|'
         r'Control(?: Investments)?'
         r')\s+'
         r'(?P<body>.+?)\s+'
