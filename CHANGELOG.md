@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.28.2] - 2026-04-02
+
+### Added
+
+- **FDUS investment parser** — Add support for FDUS BDC investment parsing ([#747](https://github.com/dgunning/edgartools/issues/747))
+
+### Fixed
+
+- **business_category misclassifications** — Fix ETFs, SPACs, commodity trusts, and BDCs being misclassified. Adds SPAC name pattern detection, "ETF" name check for crypto/commodity ETFs, SIC 6200s fund/trust heuristic, removes over-broad "CAPITAL CORP" BDC name pattern, and uses authoritative 814- file number for BDC detection ([#561](https://github.com/dgunning/edgartools/issues/561))
+
+- **to_dataframe() missing columns** — `to_dataframe()` now includes both quarterly and YTD columns when a filing contains both, instead of silently dropping one ([#743](https://github.com/dgunning/edgartools/issues/743))
+
+- **13F values not normalized** — Normalize 13F holdings values to dollars across all periods ([#749](https://github.com/dgunning/edgartools/issues/749))
+
+- **obj() routing for Schedule 13D/G** — `obj()` now correctly routes SC 13D/G forms to Schedule13D/13G parsers ([#748](https://github.com/dgunning/edgartools/issues/748))
+
+- **find_ticker() wrong result** — Fix wrong company ticker returned for CIK 1506307 ([#745](https://github.com/dgunning/edgartools/issues/745))
+
+- **download_filings in Jupyter** — Support `download_filings` in Jupyter notebook environments ([#744](https://github.com/dgunning/edgartools/issues/744))
+
+- **reverse_name** — Replace with improved implementation for more accurate name reversal
+
+- **Punctuation normalization** — Fix handling of digits and percent signs in text extraction
+
+### Documentation
+
+- Improve SEC Viewer guide with images, ConceptGraph section, and nav entry
+
 ## [5.28.1] - 2026-03-31
 
 ### Fixed
