@@ -155,6 +155,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 017 | 2026-04-01 | Claude Code deep-consensus (advocate/critic/deepthinker) | Autonomous structural gap resolution: EF/SA decoupling, divergence as terminal outcome, derivation planner, evidence pack, industry pre-exclusion, per-metric gate isolation | O53-O58 implemented |
 | 018 | 2026-04-01 | Claude Code deep-consensus (advocate/critic/deepthinker) | CQS scoring integrity: exclude_metrics conflates "not applicable" with "extraction failed." 4-component reform: Raw CQS diagnostic, reason field, classification tiers, Data Completeness Rate. 22/49 COGS exclusions flagged as extraction failures. | Action items created |
 | 019 | 2026-04-02 | Claude Code deep-consensus (advocate/critic/deepthinker) | Subscription-grade strategy: formula pollution (102 auto-solver overrides), golden master gap, extraction failures. "Diagnose, Then Fix" sequential phases with decision gates. Target: CQS 0.95+. Config-only ceiling reached. | All phases completed |
+| 020 | 2026-04-02 | GPT-5.4 + Gemini 3.1 + Claude deep-consensus | Scoring Integrity Sprint: parallel tracks (scoring fixes + expansion prep), yfinance exits EF scoring, SA-CQS→WARNING, per-metric/per-company quality tiers, CQS v2 version bump | Action items created |
 
 ### Session 004 Unanimous Agreements
 
@@ -194,6 +195,8 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 016 | 2026-03-28 | GPT-5.4 + Gemini 3.1 | `73e496f4-f35c-4a18-bc02-09703b72814b` |
 | 017 | 2026-04-01 | GPT-5.4 + Gemini 3.1 | `c91c90e7-8886-4df2-9893-d40f31a27958` |
 | 018 | 2026-04-01 | Claude Code deep-consensus | `15aa9993-4b9f-4598-bdca-fd5cf29f3788` |
+| 019 | 2026-04-02 | Claude Code deep-consensus | (internal session, no PAL ID) |
+| 020 | 2026-04-02 | GPT-5.4 + Gemini 3.1 | `e7a3720a-e1ae-4ef5-81ae-81022be20f39` |
 
 ---
 
@@ -310,8 +313,33 @@ For each 50-company batch:
 
 ---
 
+## Phase 8: Expansion Prep (Track B — Consensus 020)
+
+*Defines quality tiers and gating criteria for scaling beyond 100 companies. Parallel to Track A (scoring fixes).*
+
+### Milestones
+
+- [ ] **M8.1: Define metric importance tiers** — Core 8 metrics (Revenue, NetIncome, TotalAssets, TotalLiabilities, Equity, OperatingIncome, OperatingCashFlow, EPS) at 0.99 EF-CQS, Extended metrics at 0.95, Exploratory best-effort. Weighted CQS formula.
+- [ ] **M8.2: Per-company EF-CQS histogram** — Generate EF-CQS distribution across 100-company cohort. Identify outlier companies dragging overall score. Dashboard integration.
+- [ ] **M8.3: Quality tier classification** — verified (EF-CQS >= 0.95) / provisional (0.80-0.95) / excluded (<0.80). Only verified companies included in published data. Provisional companies flagged for investigation.
+- [ ] **M8.4: CQS v2 documentation** — Document scoring model changes (yfinance backdoor removal, SA demotion, FACTS_SEARCH source). Version bump tracking for reproducibility.
+
+---
+
+## Phase 9: Extraction Completion (Track C — Consensus 020)
+
+*Resolves remaining extraction failures and validates golden masters under corrected scoring.*
+
+### Milestones
+
+- [ ] **M9.1: Composite ShortTermDebt engine** — 5 remaining companies (CAT, RTX, KO, NEE, HD) need composite extraction for ShortTermDebt. DimensionalAggregator pattern from CRM/ADBE/SNOW/NOW as reference.
+- [ ] **M9.2: Golden master revalidation** — Re-run golden master validation under CQS v2 scoring (no yfinance backdoor, SA as diagnostic). Some golden masters may flip — investigate and update.
+- [ ] **M9.3: Per-company formula validation harness** — Test formulas across 3+ fiscal years per company. Multi-period bug fix (Consensus 020 Step 1) enables this. Ensures formulas aren't overfitting to a single period.
+
+---
+
 ## Future Phases (Not Yet Planned)
 
-- **Phase 8: Scale (500→5000)** — Full S&P 500, then Russell 1000, then all XBRL filers
-- **Phase 9: Event-driven** — EDGAR RSS feed → single-company extraction within hours of filing
-- **Phase 10: Multi-product** — Separate reported data product (SEC-derived) from standardized cross-company data
+- **Phase 10: Scale (500→5000)** — Full S&P 500 (gated by M8.3 quality tiers), then Russell 1000, then all XBRL filers
+- **Phase 11: Event-driven** — EDGAR RSS feed → single-company extraction within hours of filing
+- **Phase 12: Multi-product** — Separate reported data product (SEC-derived) from standardized cross-company data

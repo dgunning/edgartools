@@ -20,7 +20,7 @@ except ImportError:
     yf = None
 
 from .config_loader import get_config, MappingConfig
-from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern
+from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern, EFPassReason
 from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components, get_total_concepts, get_subcomponents
 from .layers.dimensional_aggregator import DimensionalAggregator
 from edgar import Company
@@ -86,6 +86,8 @@ class ValidationResult:
     components_used: Optional[list] = None   # XBRL concepts used in extraction
     components_missing: Optional[list] = None  # Expected components not found
     company_industry: Optional[str] = None   # Industry resolved for this company
+    # Consensus 020: EF-pass path tracking for scoring integrity diagnostics
+    ef_pass_reason: Optional[str] = None     # EFPassReason enum value (known_concept, tree_source, facts_search, none)
 
 
 @dataclass
@@ -1564,12 +1566,16 @@ class ReferenceValidator:
 
         return None
 
-    def _get_sec_facts_value(self, ticker: str, metric: str) -> Optional[float]:
+    def _get_sec_facts_value(self, ticker: str, metric: str, fiscal_year: Optional[int] = None) -> Optional[float]:
         """Get reference value from SEC Company Facts API as yfinance fallback.
 
         Uses the existing EntityFacts infrastructure to query data.sec.gov/api/xbrl/.
         Tries known_concepts from metrics.yaml config until a value is found.
         Results are cached per-ticker for the lifetime of this validator.
+
+        Args:
+            fiscal_year: If provided, returns the value for that specific fiscal year.
+                         If None, returns the most recent value (backwards compatible).
         """
         if not self._use_sec_facts:
             return None
@@ -1600,7 +1606,7 @@ class ReferenceValidator:
             for concept in metric_config.known_concepts[:5]:
                 qualified = f"us-gaap:{concept}" if ":" not in concept else concept
                 try:
-                    fact = facts.get_annual_fact(qualified)
+                    fact = facts.get_annual_fact(qualified, fiscal_year=fiscal_year)
                     if fact is not None and getattr(fact, 'numeric_value', None) is not None:
                         return float(fact.numeric_value)
                 except Exception as e:
@@ -1683,8 +1689,9 @@ class ReferenceValidator:
                     })
                     continue
 
-                # Get reference from SEC facts for this period
-                sec_value = self._get_sec_facts_value(ticker, metric)
+                # Get reference from SEC facts for this period (Consensus 020: pass fiscal year)
+                fy = period_end.year if period_end else None
+                sec_value = self._get_sec_facts_value(ticker, metric, fiscal_year=fy)
                 ref_value = sec_value
 
                 if ref_value is None:
@@ -2236,13 +2243,23 @@ class ReferenceValidator:
         # (b) resolved via tree parser (Layer 1), or (c) validated against reference.
         # Layer 2 (AI/facts search) and company formulas need validation confirmation.
         ef_pass = False
+        ef_pass_reason = EFPassReason.NONE
+        _SOURCE_EF_REASON = {
+            MappingSource.TREE: EFPassReason.TREE_SOURCE,
+            MappingSource.FACTS_SEARCH: EFPassReason.FACTS_SEARCH,
+        }
         if result.is_mapped:
             if metric_config and result.concept and metric_config.matches_concept(result.concept):
-                ef_pass = True  # Known canonical concept
-            elif result.source == MappingSource.TREE:
-                ef_pass = True  # Tree parser resolution (presentation tree match)
-            elif is_match:
-                ef_pass = True  # Value confirmed against reference
+                ef_pass = True
+                ef_pass_reason = EFPassReason.KNOWN_CONCEPT
+            elif result.source in _SOURCE_EF_REASON:
+                ef_pass = True
+                ef_pass_reason = _SOURCE_EF_REASON[result.source]
+            # Consensus 020 (O60): yfinance value_match removed from EF scoring.
+            # EF measures extraction fidelity (did we find the right XBRL concept?),
+            # not yfinance compatibility. value_match backdoor was masking concept errors.
+        logger.debug("EF-PATH: %s:%s -> %s (source=%s, concept=%s)",
+                     ticker, metric, ef_pass_reason.value, result.source, result.concept)
 
         # SA (Standardization Alignment): Does the value match yfinance?
         # Check if we have a standardization formula or known_variance for this metric
@@ -2290,8 +2307,8 @@ class ReferenceValidator:
         if result.is_mapped:
             if metric_config and result.concept and metric_config.matches_concept(result.concept):
                 sma_pass = True   # Known canonical concept
-            elif result.source == MappingSource.TREE:
-                sma_pass = True   # Tree parser = semantic match
+            elif result.source in (MappingSource.TREE, MappingSource.FACTS_SEARCH):
+                sma_pass = True   # Tree parser or facts search = semantic match
 
         return ValidationResult(
             metric=metric,
@@ -2310,6 +2327,7 @@ class ReferenceValidator:
             rfa_pass=rfa_pass,
             rfa_source=rfa_source,
             sma_pass=sma_pass,
+            ef_pass_reason=ef_pass_reason.value,
         )
     
     @staticmethod

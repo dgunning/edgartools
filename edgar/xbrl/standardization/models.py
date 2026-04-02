@@ -23,6 +23,7 @@ class MappingSource(Enum):
     MANUAL = "manual"       # Manual override
     CONFIG = "config"       # From known_concepts in config (exclusions only)
     OVERRIDE = "override"   # Company-specific preferred_concept override (validated normally)
+    FACTS_SEARCH = "facts_search"  # Layer 2: Facts database search (not from calc tree)
     INDUSTRY = "industry"   # Layer 4: Sector-specific logic
     UNKNOWN = "unknown"     # Not mapped
 
@@ -34,6 +35,14 @@ class ConfidenceLevel(Enum):
     LOW = "low"         # < 0.70
     NONE = "none"       # Not mapped
     INVALID = "invalid" # Validation failed
+
+
+class EFPassReason(str, Enum):
+    """Why a metric passed (or didn't pass) EF scoring (Consensus 020)."""
+    KNOWN_CONCEPT = "known_concept"    # Concept is in known_concepts for this metric
+    TREE_SOURCE = "tree_source"        # Resolved via tree parser (Layer 1)
+    FACTS_SEARCH = "facts_search"      # Resolved via facts search (Layer 2)
+    NONE = "none"                      # Did not pass EF
 
 
 class ExclusionReason(str, Enum):

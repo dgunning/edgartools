@@ -21,6 +21,9 @@ from edgar.xbrl.standardization.models import MappingResult, MappingSource, Excl
 
 logger = logging.getLogger(__name__)
 
+# Consensus 020 (O64): Scoring version bump — tracks scoring model changes
+CQS_SCORING_VERSION = "v2"  # v2: removed yfinance backdoor from EF, SA demoted to WARNING
+
 # Pre-built lookup for ExclusionReason enum values (avoids try/except in hot path)
 _EXCLUSION_REASON_MAP = {e.value: e for e in ExclusionReason}
 
@@ -1156,8 +1159,8 @@ def _compute_company_cqs(
                 rfa_pass_count += 1
             if val_result.sma_pass:
                 sma_pass_count += 1
-        elif result.is_mapped and result.source == MappingSource.TREE:
-            # Tree-resolved with no validation = EF pass (trusted source)
+        elif result.is_mapped and result.source in (MappingSource.TREE, MappingSource.FACTS_SEARCH):
+            # Tree-resolved or facts-search-resolved with no validation = EF pass (trusted source)
             ef_pass_count += 1
 
         # Track headline metrics separately
@@ -1166,7 +1169,7 @@ def _compute_company_cqs(
                 headline_ef_total += 1
                 if val_result and val_result.ef_pass:
                     headline_ef_pass += 1
-                elif result.is_mapped and result.source == MappingSource.TREE and not val_result:
+                elif result.is_mapped and result.source in (MappingSource.TREE, MappingSource.FACTS_SEARCH) and not val_result:
                     headline_ef_pass += 1
 
         # Check golden master status

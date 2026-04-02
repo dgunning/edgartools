@@ -65,24 +65,24 @@ logger = logging.getLogger(__name__)
 
 # Decision gate thresholds
 EF_CQS_TOLERANCE = 0.001      # EF-CQS non-regression epsilon
-SA_CQS_TOLERANCE = 0.001      # SA-CQS non-regression epsilon (for formula changes)
 CQS_RELAXED_TOLERANCE = 0.0001  # CQS tolerance for relaxed (target-improved) gate
 
 # O53: Gate applicability — which regression checks apply per change type.
-# "ef" = Extraction Fidelity gate, "sa" = Structural Accuracy gate.
-# Divergence/exclusion changes skip both EF/SA checks (they don't affect extraction).
+# "ef" = Extraction Fidelity gate.
+# Consensus 020 (O61): SA removed from all gates — demoted to diagnostic WARNING.
+# Divergence/exclusion changes skip EF checks (they don't affect extraction).
 # Hard veto (regressions) and per-company drop check ALWAYS apply regardless.
 _GATE_APPLICABILITY = {
     "add_concept": {"ef"},              # Concept changes: EF gate only
     "add_company_override": {"ef"},     # Company overrides: EF gate only
     "add_tree_hint": {"ef"},            # Tree hints: EF gate only
-    "add_standardization": {"sa"},      # Formula changes: SA gate only
-    "add_divergence": set(),            # Divergence: skip both EF/SA
-    "add_exclusion": set(),             # Exclusion: skip both EF/SA
-    "add_known_variance": set(),        # Known variance: skip both EF/SA
-    "set_industry": set(),              # Industry: skip both EF/SA
-    "remove_pattern": {"ef", "sa"},     # Pattern removal: both gates
-    "modify_value": {"ef", "sa"},       # Value modification: both gates
+    "add_standardization": set(),       # Formula changes: SA was here, now diagnostic only
+    "add_divergence": set(),            # Divergence: skip EF
+    "add_exclusion": set(),             # Exclusion: skip EF
+    "add_known_variance": set(),        # Known variance: skip EF
+    "set_industry": set(),              # Industry: skip EF
+    "remove_pattern": {"ef"},           # Pattern removal: EF gate only
+    "modify_value": {"ef"},             # Value modification: EF gate only
 }
 
 # Tier 1 config files — the ONLY files the auto-eval loop may modify
@@ -377,17 +377,9 @@ def _apply_decision_gates(
             duration_seconds=duration,
         )
 
-    # O53: SA-CQS gate — only if applicable for this change type
-    if "sa" in applicable_gates:
-        if new_cqs.sa_cqs < baseline_cqs.sa_cqs - SA_CQS_TOLERANCE:
-            return ExperimentDecision(
-                decision=Decision.DISCARD,
-                cqs_before=baseline_cqs.cqs,
-                cqs_after=new_cqs.cqs,
-                reason=f"SA-CQS regression: {baseline_cqs.sa_cqs:.4f} -> {new_cqs.sa_cqs:.4f}",
-                company_deltas=company_deltas,
-                duration_seconds=duration,
-            )
+    # Consensus 020 (O61): SA-CQS no longer gates proposals.
+    # SA measures yfinance-compatibility, not extraction correctness.
+    # SA-CQS is still computed and reported in dashboard/logs as a diagnostic.
 
     # SUCCESS
     delta = new_cqs.cqs - baseline_cqs.cqs

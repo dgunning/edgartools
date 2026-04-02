@@ -177,13 +177,15 @@ class TestO53GateApplicability:
         from edgar.xbrl.standardization.tools.auto_eval_loop import _GATE_APPLICABILITY
         assert _GATE_APPLICABILITY["add_concept"] == {"ef"}
 
-    def test_standardization_has_sa_only(self):
+    def test_standardization_has_no_gates(self):
+        """Consensus 020 (O61): SA demoted to WARNING, no longer gates add_standardization."""
         from edgar.xbrl.standardization.tools.auto_eval_loop import _GATE_APPLICABILITY
-        assert _GATE_APPLICABILITY["add_standardization"] == {"sa"}
+        assert _GATE_APPLICABILITY["add_standardization"] == set()
 
-    def test_sa_cqs_tolerance_exists(self):
-        from edgar.xbrl.standardization.tools.auto_eval_loop import SA_CQS_TOLERANCE
-        assert SA_CQS_TOLERANCE == 0.001
+    def test_sa_cqs_tolerance_removed(self):
+        """Consensus 020 (O61): SA_CQS_TOLERANCE removed — SA no longer gates."""
+        import edgar.xbrl.standardization.tools.auto_eval_loop as loop
+        assert not hasattr(loop, 'SA_CQS_TOLERANCE')
 
     def test_change_passed_to_decision_gates(self):
         """evaluate_experiment_in_memory must pass change= to _apply_decision_gates."""

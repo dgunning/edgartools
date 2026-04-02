@@ -16,11 +16,13 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 | Metric | Value | Updated |
 |--------|-------|---------|
 | CQS | 0.8180 | 2026-04-02 |
-| EF-CQS | 0.8528 | 2026-04-02 |
-| SA-CQS | 0.7660 | 2026-04-02 |
-| Raw CQS | 0.7675 | 2026-04-02 |
-| Data Completeness | 80.1% | 2026-04-02 |
+| EF-CQS | 0.8329 | 2026-04-02 |
+| SA-CQS (diagnostic) | 0.7660 | 2026-04-02 |
+| Headline EF | 86.9% | 2026-04-02 |
+| EF Pass Rate | 83.3% | 2026-04-02 |
+| RFA Rate | 86.5% | 2026-04-02 |
 | Extraction Failed | 5 | 2026-04-02 |
+| Scoring Version | v2 | 2026-04-02 |
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
@@ -28,7 +30,9 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
 
-**Note on CQS/EF-CQS values:** Numbers above are from 50-company EXPANSION_COHORT_50 with `use_sec_facts=True`. Post-Consensus-019 Phase A: 102 auto-solver formula overrides purged from metrics.yaml, 12 extraction_failed exclusions removed (COGS/6 + OperatingIncome/6). SA-CQS improved +0.019 (formula pollution was dragging accuracy). Phase B: OperatingIncome structural gaps classified (DE/JNJ/LLY/NKE as not_applicable), ShortTermDebt triage (SNOW=not_applicable, COP/MA exclusions removed, 5 composite issues remain). Phase C: Accounting-identity formulas tested (OperatingIncome, TotalLiabilities) but SA-CQS dropped -0.030 — reverted. XBRL component sums don't match yfinance aggregation. Dimensional extraction already working (DimensionalAggregator handles CRM/ADBE/SNOW/NOW). Config-only ceiling reached; next gains require multi-period golden masters or per-company formula validation. 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
+**Scoring model: CQS v2** (Consensus 020). Changes: (1) yfinance `is_match` backdoor removed from EF scoring — EF now measures extraction fidelity only (known_concept, tree_source, facts_search paths). (2) SA-CQS demoted from decision gate to diagnostic WARNING — SA measures yfinance-compatibility, not extraction correctness. (3) `FACTS_SEARCH` is a distinct `MappingSource` — no longer mislabeled as TREE. (4) Multi-period validation passes fiscal_year to SEC Facts API. (5) `ef_pass_reason` field added to `ValidationResult` for scoring path diagnostics.
+
+**Note on CQS/EF-CQS values:** CQS v2 baseline measured on 50-company EXPANSION_COHORT_50 with `snapshot_mode=True`. EF-CQS dropped 0.8528→0.8329 (honest: yfinance backdoor removed). EF-pass path distribution: 95.1% known_concept, 1.6% tree_source, 0.1% facts_search, 3.1% none (132 EF failures = real concept gaps). SA-CQS 0.7660 unchanged (still computed, no longer gating). Zero regressions. Config-only ceiling reached; next gains require multi-period golden masters or per-company formula validation. 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
 
 ---
 
@@ -248,6 +252,15 @@ These persist across all sessions and guide all future work:
 51. **Industry pre-exclusion before eval loop** — structurally inapplicable metrics (GrossProfit for energy, CurrentAssets for banks) excluded via industry_metrics.yaml before entering auto-eval, avoiding gate evaluation entirely (Session 017)
 52. **Per-metric gate isolation** — replace global EF-CQS regression check with impacted-cell regression. Only re-evaluate target metric and dependents, not all 37 metrics (Session 017)
 53. **Scoring integrity reform implemented** — `exclude_metrics` now `Dict` with `ExclusionReason` enum (`not_applicable`/`extraction_failed`/`semantic_mismatch`). 22 extraction_failed exclusions penalized in CQS. Raw CQS + Data Completeness diagnostics added. 50-company CQS 0.8215→0.8166 (honest drop). `cc33e20c`, `eddd1f14`. (Consensus 018)
+54. **Parallel tracks: scoring + expansion** — Scoring fixes (Track A) and expansion prep (Track B) proceed in parallel. Track A is foundation; Track B defines quality tiers. (Consensus 020, O59)
+55. **yfinance exits EF scoring path** — `is_match` backdoor removed from EF-CQS. EF now measures extraction fidelity only: known_concept, tree_source, or facts_search. value_match logged as diagnostic. (Consensus 020, O60)
+56. **SA-CQS demoted to WARNING** — SA no longer gates proposals. Kept as diagnostic for tracking market-vendor alignment. Phase C proved accounting-correct formulas DECREASE SA-CQS. (Consensus 020, O61)
+57. **Per-metric importance tiers planned** — Core 8 metrics at 0.99, Extended at 0.95, Exploratory best-effort. Revenue, NetIncome, TotalAssets, TotalLiabilities, Equity, OperatingIncome, OperatingCashFlow, EPS are Core. (Consensus 020, O62)
+58. **Per-company quality tiers planned** — verified/provisional/excluded classification based on per-company EF-CQS histogram. Gates 500-company expansion. (Consensus 020, O63)
+59. **CQS v2 scoring version** — `CQS_SCORING_VERSION = "v2"` in auto_eval.py. Tracks scoring model changes for reproducibility. (Consensus 020, O64)
+60. **Measurement pass gates execution** — Step 0 ef_pass_reason tracking must run before removing backdoor. Data-driven decision on backfill vs remove. (Consensus 020, O65)
+61. **FACTS_SEARCH is a distinct MappingSource** — Layer 2 facts search results no longer mislabeled as TREE (Layer 1). Both trusted for EF scoring. (Consensus 020)
+62. **Multi-period validation uses period-specific SEC Facts** — `_get_sec_facts_value()` now accepts `fiscal_year` parameter. Each period compared against its own reference value, not just the most recent. (Consensus 020)
 
 ---
 

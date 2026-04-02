@@ -101,7 +101,7 @@ class FactsSearcher:
                     concept=concept,
                     confidence=confidence,
                     confidence_level=self._get_confidence_level(confidence),
-                    source=MappingSource.TREE,  # Mark as TREE since it's from XBRL
+                    source=MappingSource.FACTS_SEARCH,  # Layer 2: found in facts, not in calc tree
                     reasoning=f"Found in facts (not in calc tree): {reasoning}"
                 )
                 print(f"    ✓ {metric_name}: {concept}")
