@@ -17,6 +17,12 @@ See: https://github.com/dgunning/edgartools/issues/582
 import pytest
 
 
+def _find_column(df, date_prefix):
+    """Find a column that starts with the given date (e.g. '2018-12-31' matches '2018-12-31 (FY)')."""
+    matches = [c for c in df.columns if c.startswith(date_prefix)]
+    return matches[0] if matches else None
+
+
 class TestIssue582BIODataframeLoss:
     """Test that BIO filings don't lose data during DataFrame conversion."""
 
@@ -51,14 +57,17 @@ class TestIssue582BIODataframeLoss:
         non_abstract = df[df['abstract'] == False]
 
         # Check that 2018-12-31 has values (this was the column that was being zeroed out)
-        assert '2018-12-31' in df.columns, "2018-12-31 column should exist"
-        non_null_2018 = non_abstract['2018-12-31'].notna().sum()
-        assert non_null_2018 > 10, f"2018-12-31 should have >10 non-null values, got {non_null_2018}"
+        # Column may include period qualifier e.g. "2018-12-31 (FY)"
+        col_2018 = _find_column(df, '2018-12-31')
+        assert col_2018 is not None, "2018-12-31 column should exist"
+        non_null_2018 = non_abstract[col_2018].notna().sum()
+        assert non_null_2018 > 10, f"{col_2018} should have >10 non-null values, got {non_null_2018}"
 
         # Also check prior periods still work
-        if '2017-12-31' in df.columns:
-            non_null_2017 = non_abstract['2017-12-31'].notna().sum()
-            assert non_null_2017 > 10, f"2017-12-31 should have >10 non-null values, got {non_null_2017}"
+        col_2017 = _find_column(df, '2017-12-31')
+        if col_2017 is not None:
+            non_null_2017 = non_abstract[col_2017].notna().sum()
+            assert non_null_2017 > 10, f"{col_2017} should have >10 non-null values, got {non_null_2017}"
 
     @pytest.mark.network
     def test_bio_2020_current_period_has_data(self, bio_2020_xbrl):
@@ -73,9 +82,10 @@ class TestIssue582BIODataframeLoss:
         non_abstract = df[df['abstract'] == False]
 
         # Check that 2019-12-31 has values
-        assert '2019-12-31' in df.columns, "2019-12-31 column should exist"
-        non_null_2019 = non_abstract['2019-12-31'].notna().sum()
-        assert non_null_2019 > 10, f"2019-12-31 should have >10 non-null values, got {non_null_2019}"
+        col_2019 = _find_column(df, '2019-12-31')
+        assert col_2019 is not None, "2019-12-31 column should exist"
+        non_null_2019 = non_abstract[col_2019].notna().sum()
+        assert non_null_2019 > 10, f"{col_2019} should have >10 non-null values, got {non_null_2019}"
 
     @pytest.mark.network
     def test_view_standard_also_works(self, bio_2019_xbrl):
@@ -87,9 +97,10 @@ class TestIssue582BIODataframeLoss:
         non_abstract = df[df['abstract'] == False]
 
         # Check that 2018-12-31 has values
-        assert '2018-12-31' in df.columns, "2018-12-31 column should exist"
-        non_null_2018 = non_abstract['2018-12-31'].notna().sum()
-        assert non_null_2018 > 10, f"2018-12-31 should have >10 non-null values, got {non_null_2018}"
+        col_2018 = _find_column(df, '2018-12-31')
+        assert col_2018 is not None, "2018-12-31 column should exist"
+        non_null_2018 = non_abstract[col_2018].notna().sum()
+        assert non_null_2018 > 10, f"{col_2018} should have >10 non-null values, got {non_null_2018}"
 
     @pytest.mark.network
     def test_revenue_has_values_for_all_periods(self, bio_2019_xbrl):
@@ -107,7 +118,8 @@ class TestIssue582BIODataframeLoss:
         revenue = revenue_rows.iloc[0]
 
         # Check all period columns have values
-        for col in ['2018-12-31', '2017-12-31', '2016-12-31']:
-            if col in df.columns:
+        for date_prefix in ['2018-12-31', '2017-12-31', '2016-12-31']:
+            col = _find_column(df, date_prefix)
+            if col is not None:
                 assert revenue[col] is not None and revenue[col] > 0, \
                     f"Revenue should have a positive value for {col}, got {revenue[col]}"
