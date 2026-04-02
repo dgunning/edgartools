@@ -15,12 +15,12 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.8166 | 2026-04-01 |
-| EF-CQS | 0.8512 | 2026-04-01 |
-| SA-CQS | 0.7471 | 2026-04-01 |
-| Raw CQS | 0.7782 | 2026-04-01 |
-| Data Completeness | 82.1% | 2026-04-01 |
-| Extraction Failed | 16 | 2026-04-01 |
+| CQS | 0.8169 | 2026-04-02 |
+| EF-CQS | 0.8499 | 2026-04-02 |
+| SA-CQS | 0.7659 | 2026-04-02 |
+| Raw CQS | 0.7675 | 2026-04-02 |
+| Data Completeness | 80.0% | 2026-04-02 |
+| Extraction Failed | 7 | 2026-04-02 |
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
@@ -28,7 +28,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
 
-**Note on CQS/EF-CQS values:** Numbers above are from 50-company EXPANSION_COHORT_50 with `use_sec_facts=True`. Post-Consensus-018 scoring integrity reform: `extraction_failed` exclusions now penalized (16 across 14 companies). CQS dropped 0.8215→0.8166 (honest scoring). Exclusion premium: +0.0383. 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
+**Note on CQS/EF-CQS values:** Numbers above are from 50-company EXPANSION_COHORT_50 with `use_sec_facts=True`. Post-Consensus-019 Phase A: 102 auto-solver formula overrides purged from metrics.yaml, 12 extraction_failed exclusions removed (COGS/6 + OperatingIncome/6). SA-CQS improved +0.019 (formula pollution was dragging accuracy). Only 7 ShortTermDebt extraction_failed exclusions remain. 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
 
 ---
 
