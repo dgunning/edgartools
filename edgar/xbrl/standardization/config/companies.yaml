@@ -851,9 +851,6 @@ companies:
     archetype: A
     industry: energy
     exclude_metrics:
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
       COGS:
         reason: not_applicable
         notes: Energy company — cost structure differs from COGS
@@ -921,10 +918,6 @@ companies:
     cik: 87347
     archetype: A
     industry: energy
-    exclude_metrics:
-      OperatingIncome:
-        reason: extraction_failed
-        notes: Dual-listed in exclude + known_divergences — extraction gap
     known_divergences:
       OperatingIncome:
         form_types:
@@ -1214,6 +1207,7 @@ companies:
     name: Berkshire Hathaway Inc.
     cik: 1067983
     archetype: A
+    industry: insurance
     exclude_metrics:
       COGS:
         reason: not_applicable
