@@ -1073,6 +1073,46 @@ class Statement:
         if not periods_to_display:
             return pd.DataFrame()
 
+        # Pre-compute column names from period keys, disambiguating collisions
+        # (e.g., Q2 and YTD both ending on the same date)
+        _period_column_names = {}
+        _end_date_counts = {}
+        for period_key, period_label in periods_to_display:
+            parts = period_key.split('_')
+            if period_key.startswith('duration_') and len(parts) >= 3:
+                end_date = parts[2]
+            elif period_key.startswith('instant_') and len(parts) >= 2:
+                end_date = parts[1]
+            else:
+                _period_column_names[period_key] = period_label
+                continue
+            _end_date_counts[end_date] = _end_date_counts.get(end_date, 0) + 1
+            _period_column_names[period_key] = end_date  # tentative
+
+        # Add (Qn) / (YTD) suffixes where end dates collide
+        if any(c > 1 for c in _end_date_counts.values()):
+            for period_key, period_label in periods_to_display:
+                parts = period_key.split('_')
+                if period_key.startswith('duration_') and len(parts) >= 3:
+                    start_date, end_date = parts[1], parts[2]
+                    if _end_date_counts.get(end_date, 0) > 1:
+                        try:
+                            d0 = datetime.strptime(start_date, '%Y-%m-%d')
+                            d1 = datetime.strptime(end_date, '%Y-%m-%d')
+                            days = (d1 - d0).days
+                            if 80 <= days <= 100:
+                                month = d1.month
+                                q = "Q1" if month <= 3 or month == 12 else \
+                                    "Q2" if month <= 6 else \
+                                    "Q3" if month <= 9 else "Q4"
+                                _period_column_names[period_key] = f"{end_date} ({q})"
+                            elif 175 <= days <= 285:
+                                _period_column_names[period_key] = f"{end_date} (YTD)"
+                            elif days > 350:
+                                _period_column_names[period_key] = f"{end_date} (FY)"
+                        except (ValueError, TypeError):
+                            pass
+
         # Build DataFrame rows
         df_rows = []
 
@@ -1163,25 +1203,17 @@ class Statement:
             # Add period values (raw from instance document)
             values_dict = item.get('values', {})
             for period_key, period_label in periods_to_display:
-                # Use end date as column name (more concise than full label)
-                # Extract date from period_key (e.g., "duration_2016-09-25_2017-09-30" → "2017-09-30")
+                column_name = _period_column_names.get(period_key, period_label)
+                # Extract start/end dates for equity statement logic
                 start_date = None
                 end_date = None
                 if '_' in period_key:
                     parts = period_key.split('_')
                     if len(parts) >= 3:
-                        # Duration period: duration_START_END
                         start_date = parts[1]
                         end_date = parts[2]
-                        column_name = end_date
                     elif len(parts) == 2:
-                        # Instant period: instant_DATE
                         end_date = parts[1]
-                        column_name = end_date
-                    else:
-                        column_name = period_label
-                else:
-                    column_name = period_label
 
                 # Use raw value from instance document
                 value = values_dict.get(period_key)

@@ -41,7 +41,7 @@ def test_coin_10q_q3_2024_cash_flow_has_comparative_periods():
 
     # Get period columns (date-format columns only, not metadata)
     # After Issue #463, metadata columns (balance, weight, preferred_sign) are included
-    date_pattern = r'^\d{4}-\d{2}-\d{2}$'
+    date_pattern = r'^\d{4}-\d{2}-\d{2}'
     period_columns = [col for col in df.columns if re.match(date_pattern, col)]
 
     print(f"Period (date) columns: {period_columns}")
@@ -101,7 +101,7 @@ def test_coin_10q_q3_2024_income_statement_has_comparative_periods():
     print(f"Columns: {df.columns.tolist()}")
 
     # Get period columns (date-format columns only, not metadata)
-    date_pattern = r'^\d{4}-\d{2}-\d{2}$'
+    date_pattern = r'^\d{4}-\d{2}-\d{2}'
     period_columns = [col for col in df.columns if re.match(date_pattern, col)]
 
     print(f"Period (date) columns: {period_columns}")
@@ -157,7 +157,7 @@ def test_coin_10q_q3_2024_balance_sheet_still_works():
     print(f"Columns: {df.columns.tolist()}")
 
     # Get period columns (date-format columns only)
-    date_pattern = r'^\d{4}-\d{2}-\d{2}$'
+    date_pattern = r'^\d{4}-\d{2}-\d{2}'
     period_columns = [col for col in df.columns if re.match(date_pattern, col)]
 
     print(f"Period (date) columns: {period_columns}")

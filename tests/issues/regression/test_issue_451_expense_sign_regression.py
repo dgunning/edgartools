@@ -23,6 +23,14 @@ from edgar import Company
 from edgar.xbrl.xbrl import XBRL
 
 
+def _find_date_column(df, date_prefix):
+    """Find the first column that starts with the given date (handles suffixes like (Q2), (YTD))."""
+    for col in df.columns:
+        if col.startswith(date_prefix):
+            return col
+    return date_prefix  # fall back to exact match
+
+
 @pytest.fixture(scope="module")
 def apple_10k_2020():
     """Apple 10-K for fiscal year 2020."""
@@ -43,7 +51,7 @@ class TestIssue451ExpenseSignConsistency:
     """Test that expense and cost metrics have consistent positive signs."""
 
     def test_income_tax_expense_positive_in_10k(self, apple_10k_2020):
-        """Test that Income Tax Expense is positive in 10-K."""
+        """Test that Income Tax Expense is positive in AAPL Q3 2020 10-Q."""
         stmt = apple_10k_2020.statements.income_statement()
         df = stmt.to_dataframe()
 
@@ -54,13 +62,13 @@ class TestIssue451ExpenseSignConsistency:
         assert not rows.empty, "Income Tax Expense not found in income statement"
 
         row = rows.iloc[0]
-        value = row['2020-06-27']
+        value = row[_find_date_column(df, '2020-06-27')]
 
         assert value > 0, f"Income Tax Expense should be positive, got {value}"
-        assert value == pytest.approx(7452000000.0), f"Expected 7,452,000,000, got {value}"
+        assert value == pytest.approx(1884000000.0), f"Expected 1,884,000,000 (Q2), got {value}"
 
     def test_income_tax_expense_positive_in_10q(self, apple_10q_2020_q2):
-        """Test that Income Tax Expense is positive in 10-Q."""
+        """Test that Income Tax Expense is positive in AAPL Q1 2020 10-Q."""
         stmt = apple_10q_2020_q2.statements.income_statement()
         df = stmt.to_dataframe()
 
@@ -71,13 +79,13 @@ class TestIssue451ExpenseSignConsistency:
         assert not rows.empty, "Income Tax Expense not found in income statement"
 
         row = rows.iloc[0]
-        value = row['2020-03-28']
+        value = row[_find_date_column(df, '2020-03-28')]
 
         assert value > 0, f"Income Tax Expense should be positive, got {value}"
-        assert value == pytest.approx(5568000000.0), f"Expected 5,568,000,000, got {value}"
+        assert value == pytest.approx(1886000000.0), f"Expected 1,886,000,000 (Q1), got {value}"
 
     def test_cost_of_goods_and_services_positive_in_10k(self, apple_10k_2020):
-        """Test that Cost of Goods and Services Sold is positive in 10-K."""
+        """Test that Cost of Goods and Services Sold is positive in AAPL Q3 2020 10-Q."""
         stmt = apple_10k_2020.statements.income_statement()
         df = stmt.to_dataframe()
 
@@ -88,13 +96,13 @@ class TestIssue451ExpenseSignConsistency:
         assert not rows.empty, "Cost of Goods and Services Sold not found in income statement"
 
         row = rows.iloc[0]
-        value = row['2020-06-27']
+        value = row[_find_date_column(df, '2020-06-27')]
 
         assert value > 0, f"Cost of Goods and Services Sold should be positive, got {value}"
-        assert value == pytest.approx(129550000000.0), f"Expected 129,550,000,000, got {value}"
+        assert value == pytest.approx(37005000000.0), f"Expected 37,005,000,000 (Q2), got {value}"
 
     def test_cost_of_goods_and_services_positive_in_10q(self, apple_10q_2020_q2):
-        """Test that Cost of Goods and Services Sold is positive in 10-Q."""
+        """Test that Cost of Goods and Services Sold is positive in AAPL Q1 2020 10-Q."""
         stmt = apple_10q_2020_q2.statements.income_statement()
         df = stmt.to_dataframe()
 
@@ -105,10 +113,10 @@ class TestIssue451ExpenseSignConsistency:
         assert not rows.empty, "Cost of Goods and Services Sold not found in income statement"
 
         row = rows.iloc[0]
-        value = row['2020-03-28']
+        value = row[_find_date_column(df, '2020-03-28')]
 
         assert value > 0, f"Cost of Goods and Services Sold should be positive, got {value}"
-        assert value == pytest.approx(92545000000.0), f"Expected 92,545,000,000, got {value}"
+        assert value == pytest.approx(35943000000.0), f"Expected 35,943,000,000 (Q1), got {value}"
 
     def test_operating_expenses_remain_positive(self, apple_10k_2020):
         """Test that Operating Expenses remain positive (should already be positive)."""
@@ -121,7 +129,7 @@ class TestIssue451ExpenseSignConsistency:
 
         if not rows.empty:
             row = rows.iloc[0]
-            value = row['2020-06-27']
+            value = row[_find_date_column(df, '2020-06-27')]
 
             if value is not None and isinstance(value, (int, float)):
                 assert value > 0, f"Operating Expenses should be positive, got {value}"
@@ -143,8 +151,8 @@ class TestIssue451ExpenseSignConsistency:
         rows_q = rows_q[(rows_q['dimension'] == False) & (rows_q['abstract'] == False)]
 
         if not rows_k.empty and not rows_q.empty:
-            value_k = rows_k.iloc[0]['2020-06-27']
-            value_q = rows_q.iloc[0]['2020-03-28']
+            value_k = rows_k.iloc[0][_find_date_column(df_k, '2020-06-27')]
+            value_q = rows_q.iloc[0][_find_date_column(df_q, '2020-03-28')]
 
             # Both should have the same sign (positive)
             assert (value_k > 0) == (value_q > 0), \
@@ -158,8 +166,8 @@ class TestIssue451ExpenseSignConsistency:
         rows_q = rows_q[(rows_q['dimension'] == False) & (rows_q['abstract'] == False)]
 
         if not rows_k.empty and not rows_q.empty:
-            value_k = rows_k.iloc[0]['2020-06-27']
-            value_q = rows_q.iloc[0]['2020-03-28']
+            value_k = rows_k.iloc[0][_find_date_column(df_k, '2020-06-27')]
+            value_q = rows_q.iloc[0][_find_date_column(df_q, '2020-03-28')]
 
             # Both should have the same sign (positive)
             assert (value_k > 0) == (value_q > 0), \
