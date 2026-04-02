@@ -363,8 +363,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: needs ShortTermBorrowings + CommercialPaper + LongTermDebtCurrent. yfinance=2.6B. Phase C composite
-          fix.'
+        notes: 'Composite: needs ShortTermBorrowings + CommercialPaper + LongTermDebtCurrent.
+          yfinance CurrentDebt=12.6B. Phase C composite fix.'
     known_divergences:
       ShortTermDebt:
         form_types:
@@ -707,8 +707,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: ShortTermBorrowings=04M but yfinance=.6B — likely missing LongTermDebtCurrent component. Phase C composite
-          fix.
+        notes: 'ShortTermBorrowings=204M but yfinance CurrentDebt=3.6B. Likely missing
+          LongTermDebtCurrent component. Phase C composite fix.'
     notes: Aerospace and defense company (formerly Raytheon Technologies)
   ASTE:
     name: Astec Industries, Inc.
@@ -728,7 +728,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: CommercialPaper=.5B + OtherShortTermBorrowings=6M but yfinance=.4B. Phase C composite fix.'
+        notes: 'Composite: CommercialPaper=1.5B + OtherShortTermBorrowings=56M but yfinance
+          CurrentDebt=3.4B. Phase C composite fix.'
     notes: Beverage company - nonalcoholic beverages
   PEP:
     name: PepsiCo, Inc.
@@ -1438,8 +1439,8 @@ companies:
         notes: ''
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: CommercialPaper=.0B + OtherShortTermBorrowings=08M + LongTermDebtCurrent=M but yfinance=.1B. Phase
-          C composite fix.'
+        notes: 'Composite: CommercialPaper=2.0B + OtherShortTermBorrowings=608M + LongTermDebtCurrent=9M
+          but yfinance CurrentDebt=6.1B. Phase C composite fix.'
     known_divergences:
       Revenue:
         form_types:
@@ -2340,7 +2341,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: CommercialPaper=.5B but yfinance=.9B includes LongTermDebtCurrent. Phase C composite fix.'
+        notes: 'Composite: CommercialPaper=4.5B but yfinance CurrentDebt=4.9B includes
+          LongTermDebtCurrent. Phase C composite fix.'
     known_divergences:
       IntangibleAssets:
         form_types:
