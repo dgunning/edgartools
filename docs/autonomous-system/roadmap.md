@@ -125,7 +125,9 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - Formula purge: 102 Auto-solver company_overrides deleted from 21 metrics. 3 defaults preserved (GrossProfit, EPS Diluted, EPS Basic). All had "0/3 companies" validation failure.
 - Config fixes: COP/SLB OperatingIncome exclusions removed (energy-forbidden handles), BRK-B industry=insurance added, COGS exclusions removed (CSCO/IBM/INTC/AMD/AVGO/TXN), OperatingIncome exclusions removed (DE/JNJ/LLY/BRK-B/NKE/INTC).
 - CQS: 0.8166→0.8169, EF-CQS: 0.8512→0.8499, SA-CQS: 0.7471→0.7659 (+0.019). Extraction failed: 22→7 (only ShortTermDebt cluster remains).
-- Key: **SA-CQS +0.019 despite removing 102 formulas** — confirms formula pollution was hurting accuracy. INTC extraction_failed=0 (was blocked). Commits: `295de9aa`, `2b775dc6`.
+- Phase B: OperatingIncome structural gaps (DE/JNJ/LLY/NKE → not_applicable, concept absent from XBRL). ShortTermDebt triage: SNOW=not_applicable, COP/MA exclusions removed (matching concepts found), 5 composite issues (CAT/HD/KO/NEE/RTX) deferred to Phase C.
+- Final: CQS=0.8180, EF-CQS=0.8528, SA-CQS=0.7660. Extraction failed: 22→5.
+- Key: **SA-CQS +0.019 despite removing 102 formulas** — confirms formula pollution was hurting accuracy. INTC extraction_failed=0 (was blocked). Commits: `295de9aa`, `2b775dc6`, `4e351943`.
 
 ---
 
@@ -303,7 +305,7 @@ For each 50-company batch:
 - [x] **M7.22: Consensus 017 + post-review fixes (O53-O58)** — EF/SA gate decoupling (`_GATE_APPLICABILITY`), forbidden metrics excluded from CQS scoring (`_build_forbidden_by_ticker()`), derivation planner wired into `propose_change()` via `MetricGap.company_results`, divergence guardrail (`_should_allow_divergence()`). CQS 0.8237→0.8293, EF-CQS 0.8425→0.8558. Completed 2026-04-01. `514fea2f`.
 - [x] **M7.23: Gap Resolution 018** — Config-only fixes: banking forbidden (CurrentAssets, CurrentLiabilities), WMT exclude (R&D), JNJ Capex known_divergence (wont_fix), JPM ShareRepurchases known_divergence (wont_fix, 6 graveyard). Gaps 9→6, CQS 0.8293→0.8300, EF-CQS 0.8558→0.8577. Completed 2026-04-01. `9a76d90c`.
 - [x] **M7.24: CQS Scoring Integrity Reform (Consensus 018)** — `exclude_metrics` schema changed from `List[str]` to `Dict[str, Dict]` with `ExclusionReason` enum. 156 entries backfilled: 134 not_applicable, 22 extraction_failed. extraction_failed exclusions now penalized in CQS (not free passes). New diagnostics: Raw CQS, Data Completeness, extraction_failed_count. 50-company eval: CQS 0.8215→0.8166 (honest), 16 penalties across 14 companies. Helpers extracted: `_cqs_formula`, `_build_exclusion_reasons_by_ticker`, `_resolve_exclusion_entry`. 15 tests. Completed 2026-04-01. `cc33e20c`, `eddd1f14`.
-- [x] **M7.25: Consensus 019 Day 1 + Phase A** — Formula pollution purge: 102 Auto-solver company_overrides deleted (all "0/3 companies" validation failures). Kill-switch confirmed SA-CQS delta = -0.003 (flat). INTC COGS trace: CONFIG exclusion blocks working extraction. 12 extraction_failed exclusions removed (COGS/6 + OperatingIncome/6). BRK-B industry=insurance. CQS 0.8166→0.8169, SA-CQS 0.7471→0.7659 (+0.019). Extraction failed: 22→7. Completed 2026-04-02. `295de9aa`, `2b775dc6`.
+- [x] **M7.25: Consensus 019 Day 1 + Phase A + Phase B** — Formula purge (102 Auto-solver overrides deleted), kill-switch confirmed SA-CQS flat. INTC COGS trace: CONFIG exclusion blocks working extraction. Phase A: 12 extraction_failed exclusions removed (COGS/6 + OperatingIncome/6). Phase B: OperatingIncome structural gaps classified (DE/JNJ/LLY/NKE → not_applicable), ShortTermDebt triage (SNOW=not_applicable, COP/MA removed, 5 composite deferred). CQS 0.8166→0.8180, EF 0.8512→0.8528, SA 0.7471→0.7660 (+0.019). Extraction failed: 22→5. Completed 2026-04-02. `295de9aa`, `2b775dc6`, `4e351943`.
 
 ---
 
