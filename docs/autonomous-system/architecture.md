@@ -28,7 +28,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
 
-**Note on CQS/EF-CQS values:** Numbers above are from 50-company EXPANSION_COHORT_50 with `use_sec_facts=True`. Post-Consensus-019 Phase A: 102 auto-solver formula overrides purged from metrics.yaml, 12 extraction_failed exclusions removed (COGS/6 + OperatingIncome/6). SA-CQS improved +0.019 (formula pollution was dragging accuracy). Phase B: OperatingIncome structural gaps classified (DE/JNJ/LLY/NKE as not_applicable), ShortTermDebt triage (SNOW=not_applicable, COP/MA exclusions removed, 5 composite issues remain for Phase C). 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
+**Note on CQS/EF-CQS values:** Numbers above are from 50-company EXPANSION_COHORT_50 with `use_sec_facts=True`. Post-Consensus-019 Phase A: 102 auto-solver formula overrides purged from metrics.yaml, 12 extraction_failed exclusions removed (COGS/6 + OperatingIncome/6). SA-CQS improved +0.019 (formula pollution was dragging accuracy). Phase B: OperatingIncome structural gaps classified (DE/JNJ/LLY/NKE as not_applicable), ShortTermDebt triage (SNOW=not_applicable, COP/MA exclusions removed, 5 composite issues remain). Phase C: Accounting-identity formulas tested (OperatingIncome, TotalLiabilities) but SA-CQS dropped -0.030 — reverted. XBRL component sums don't match yfinance aggregation. Dimensional extraction already working (DimensionalAggregator handles CRM/ADBE/SNOW/NOW). Config-only ceiling reached; next gains require multi-period golden masters or per-company formula validation. 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
 
 ---
 
