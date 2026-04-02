@@ -212,7 +212,9 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         '13F-HR': ('ThirteenF', 'institutional holdings'),
         '13F-HR/A': ('ThirteenF', 'institutional holdings'),
         'SCHEDULE 13D': ('Schedule13D', 'beneficial ownership report (5%+ stake, active)'),
+        'SC 13D': ('Schedule13D', 'beneficial ownership report (5%+ stake, active)'),
         'SCHEDULE 13G': ('Schedule13G', 'beneficial ownership report (5%+ stake, passive)'),
+        'SC 13G': ('Schedule13G', 'beneficial ownership report (5%+ stake, passive)'),
         '144': ('Form144', 'restricted stock sale notice'),
         'MA-I': ('MunicipalAdvisorForm', 'municipal advisor registration'),
         '3': ('Form3', 'initial insider ownership'),
@@ -342,9 +344,9 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return Form5(**Ownership.parse_xml(xml))
-    elif matches_form(sec_filing, ["SCHEDULE 13D"]):
+    elif matches_form(sec_filing, ["SCHEDULE 13D", "SC 13D"]):
         return Schedule13D.from_filing(sec_filing)
-    elif matches_form(sec_filing, ["SCHEDULE 13G"]):
+    elif matches_form(sec_filing, ["SCHEDULE 13G", "SC 13G"]):
         return Schedule13G.from_filing(sec_filing)
     elif matches_form(sec_filing, "EFFECT"):
         xml = sec_filing.xml()
