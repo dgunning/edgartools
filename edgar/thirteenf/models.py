@@ -25,6 +25,10 @@ __all__ = [
 
 THIRTEENF_FORMS = ['13F-HR', "13F-HR/A", "13F-NT", "13F-NT/A", "13F-CTR", "13F-CTR/A"]
 
+# The SEC changed 13F XML schema around Q4 2022: <value> went from thousands to dollars.
+# Filings with report_period on or before this date have values in thousands.
+_13F_VALUE_IN_THOUSANDS_CUTOFF = datetime(2022, 9, 30)
+
 
 def format_date(date: Union[str, datetime]) -> str:
     if isinstance(date, str):
@@ -352,10 +356,16 @@ class ThirteenF:
         if self.has_infotable():
             # Try XML format first
             if self.infotable_xml:
-                return parse_infotable_xml(self.infotable_xml)
+                df = parse_infotable_xml(self.infotable_xml)
             # Fall back to TXT format
             elif self.infotable_txt:
-                return parse_infotable_txt(self.infotable_txt)
+                df = parse_infotable_txt(self.infotable_txt)
+            else:
+                return None
+            # Normalize pre-Q4 2022 values from thousands to dollars
+            if df is not None and len(df) > 0 and self._value_in_thousands:
+                df['Value'] = df['Value'] * 1000
+            return df
         return None
 
     @cached_property
@@ -468,10 +478,13 @@ class ThirteenF:
 
     @property
     def total_value(self):
-        """Total value of holdings in thousands of dollars"""
+        """Total value of holdings in dollars"""
         if self.primary_form_information:
-            return self.primary_form_information.summary_page.total_value
-        # For TXT-only filings, calculate from infotable
+            value = self.primary_form_information.summary_page.total_value
+            if value and self._value_in_thousands:
+                return value * 1000
+            return value
+        # For TXT-only filings, calculate from infotable (already normalized)
         infotable = self.infotable
         if infotable is not None and len(infotable) > 0:
             return Decimal(int(infotable['Value'].sum()))
@@ -509,6 +522,22 @@ class ThirteenF:
             if summary_page and summary_page.other_managers:
                 return summary_page.other_managers
         return []
+
+    @property
+    def _report_period_dt(self) -> Optional[datetime]:
+        """Report period as a datetime (for internal comparisons)."""
+        if self.primary_form_information:
+            return self.primary_form_information.report_period
+        if hasattr(self.filing, 'period_of_report') and self.filing.period_of_report:
+            por = self.filing.period_of_report
+            return datetime.strptime(por, "%Y-%m-%d") if isinstance(por, str) else por
+        return None
+
+    @property
+    def _value_in_thousands(self) -> bool:
+        """True if this filing's values are in thousands (pre-Q4 2022 schema)."""
+        dt = self._report_period_dt
+        return dt is not None and dt <= _13F_VALUE_IN_THOUSANDS_CUTOFF
 
     @property
     def report_period(self):

@@ -33,7 +33,7 @@ def test_thirteenf_from_filing_with_multiple_related_filing_on_same_day():
     print()
     print(thirteenF)
     assert thirteenF.total_holdings == 6
-    assert thirteenF.total_value == Decimal('11019796')
+    assert thirteenF.total_value == Decimal('11019796000')
 
     assert thirteenF.primary_form_information.signature.name == 'Steven Goulart'
     assert thirteenF.signer == 'Steven Goulart'
@@ -86,7 +86,7 @@ def test_thirteenf_holdings():
     print()
     thirteenF = ThirteenF(MetLife13F)
     assert thirteenF.total_holdings == 6
-    assert thirteenF.total_value == Decimal('11019796')
+    assert thirteenF.total_value == Decimal('11019796000')
     assert thirteenF.primary_form_information.signature.name == 'Steven Goulart'
 
 
@@ -603,7 +603,7 @@ def test_manager_properties_integration_with_existing_code():
     
     # New properties should not interfere with existing functionality
     assert thirteenF.total_holdings == 6
-    assert thirteenF.total_value == Decimal('11019796')
+    assert thirteenF.total_value == Decimal('11019796000')
     assert thirteenF.has_infotable()
     
     # New properties should work alongside existing ones
