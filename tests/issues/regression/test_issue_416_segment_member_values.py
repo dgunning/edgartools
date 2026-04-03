@@ -120,8 +120,10 @@ def test_dimensional_revenue_breakdown():
     assert len(found_segments) >= 1, f"Expected to find basic segment types, found: {found_segments}"
     
     # Verify all revenue rows have non-zero values for recent period
+    # Column now includes period qualifier e.g. "2025-06-30 (FY)"
+    col_2025 = next(c for c in df.columns if c.startswith('2025-06-30'))
     for _, row in revenue_rows.iterrows():
-        value = row['2025-06-30']
+        value = row[col_2025]
         assert isinstance(value, (int, float)) and value > 0, \
             f"Revenue segment '{row['label']}' should have positive value, got: {value}"
 
