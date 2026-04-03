@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Wrong quarter labels for non-calendar fiscal years** — Quarter labels in financial statement columns now use the company's fiscal year end month instead of hardcoded calendar months. Affects companies like AAPL (Sep FY), WMT (Jan FY), NKE (May FY). Also, `to_dataframe()` now always includes period-type suffixes (Q1/Q2/Q3/Q4/YTD/FY) on all duration columns, not just when end dates collide ([#752](https://github.com/dgunning/edgartools/issues/752), [#753](https://github.com/dgunning/edgartools/issues/753))
+
 - **business_category misclassifications** — Fix ETFs, SPACs, commodity trusts, and BDCs being misclassified. Adds SPAC name pattern detection, "ETF" name check for crypto/commodity ETFs, SIC 6200s fund/trust heuristic, removes over-broad "CAPITAL CORP" BDC name pattern, and uses authoritative 814- file number for BDC detection ([#561](https://github.com/dgunning/edgartools/issues/561))
 
 - **to_dataframe() missing columns** — `to_dataframe()` now includes both quarterly and YTD columns when a filing contains both, instead of silently dropping one ([#743](https://github.com/dgunning/edgartools/issues/743))

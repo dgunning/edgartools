@@ -1073,10 +1073,8 @@ class Statement:
         if not periods_to_display:
             return pd.DataFrame()
 
-        # Pre-compute column names from period keys, disambiguating collisions
-        # (e.g., Q2 and YTD both ending on the same date)
+        # Pre-compute column names from period keys
         _period_column_names = {}
-        _end_date_counts = {}
         for period_key, period_label in periods_to_display:
             parts = period_key.split('_')
             if period_key.startswith('duration_') and len(parts) >= 3:
@@ -1086,7 +1084,6 @@ class Statement:
             else:
                 _period_column_names[period_key] = period_label
                 continue
-            _end_date_counts[end_date] = _end_date_counts.get(end_date, 0) + 1
             _period_column_names[period_key] = end_date  # tentative
 
         # Add (Qn) / (YTD) / (FY) suffixes for duration periods
