@@ -1089,36 +1089,34 @@ class Statement:
             _end_date_counts[end_date] = _end_date_counts.get(end_date, 0) + 1
             _period_column_names[period_key] = end_date  # tentative
 
-        # Add (Qn) / (YTD) suffixes where end dates collide
-        if any(c > 1 for c in _end_date_counts.values()):
-            for period_key, period_label in periods_to_display:
-                parts = period_key.split('_')
-                if period_key.startswith('duration_') and len(parts) >= 3:
-                    start_date, end_date = parts[1], parts[2]
-                    if _end_date_counts.get(end_date, 0) > 1:
-                        try:
-                            d0 = datetime.strptime(start_date, '%Y-%m-%d')
-                            d1 = datetime.strptime(end_date, '%Y-%m-%d')
-                            days = (d1 - d0).days
-                            if 80 <= days <= 100:
-                                fy_end_month = None
-                                if hasattr(self, 'xbrl') and self.xbrl and hasattr(self.xbrl, 'entity_info') and self.xbrl.entity_info:
-                                    fy_end_month = self.xbrl.entity_info.get('fiscal_year_end_month')
-                                if fy_end_month:
-                                    month_offset = (d1.month - fy_end_month - 1) % 12
-                                    q = f"Q{(month_offset // 3) + 1}"
-                                else:
-                                    month = d1.month
-                                    q = "Q1" if month <= 3 or month == 12 else \
-                                        "Q2" if month <= 6 else \
-                                        "Q3" if month <= 9 else "Q4"
-                                _period_column_names[period_key] = f"{end_date} ({q})"
-                            elif 175 <= days <= 285:
-                                _period_column_names[period_key] = f"{end_date} (YTD)"
-                            elif days > 350:
-                                _period_column_names[period_key] = f"{end_date} (FY)"
-                        except (ValueError, TypeError):
-                            pass
+        # Add (Qn) / (YTD) / (FY) suffixes for duration periods
+        for period_key, period_label in periods_to_display:
+            parts = period_key.split('_')
+            if period_key.startswith('duration_') and len(parts) >= 3:
+                start_date, end_date = parts[1], parts[2]
+                try:
+                    d0 = datetime.strptime(start_date, '%Y-%m-%d')
+                    d1 = datetime.strptime(end_date, '%Y-%m-%d')
+                    days = (d1 - d0).days
+                    if 80 <= days <= 100:
+                        fy_end_month = None
+                        if hasattr(self, 'xbrl') and self.xbrl and hasattr(self.xbrl, 'entity_info') and self.xbrl.entity_info:
+                            fy_end_month = self.xbrl.entity_info.get('fiscal_year_end_month')
+                        if fy_end_month:
+                            month_offset = (d1.month - fy_end_month - 1) % 12
+                            q = f"Q{(month_offset // 3) + 1}"
+                        else:
+                            month = d1.month
+                            q = "Q1" if month <= 3 or month == 12 else \
+                                "Q2" if month <= 6 else \
+                                "Q3" if month <= 9 else "Q4"
+                        _period_column_names[period_key] = f"{end_date} ({q})"
+                    elif 175 <= days <= 285:
+                        _period_column_names[period_key] = f"{end_date} (YTD)"
+                    elif days > 350:
+                        _period_column_names[period_key] = f"{end_date} (FY)"
+                except (ValueError, TypeError):
+                    pass
 
         # Build DataFrame rows
         df_rows = []

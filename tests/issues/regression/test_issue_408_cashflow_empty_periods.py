@@ -141,7 +141,7 @@ class TestCashFlowEmptyPeriods:
 
         # After v4.20.1, dynamic thresholds may filter more aggressively
         # Check that at least one of the expected meaningful periods is included
-        expected_periods = ['2018-03-31 (Q1)', '2018-03-31', '2017-12-30 (Q1)']
+        expected_periods = ['2018-03-31 (Q1)', '2018-03-31', '2017-12-30 (Q1)', '2018-03-31 (YTD)', '2017-04-01 (YTD)']
         has_meaningful_period = any(expected in data_cols for expected in expected_periods)
         assert has_meaningful_period, f"At least one meaningful period should be included. Got: {data_cols}"
 

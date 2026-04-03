@@ -283,7 +283,9 @@ def test_cashflow_statement_totals():
                      "us-gaap_NetCashProvidedByUsedInInvestingActivities",
                      "us-gaap_NetCashProvidedByUsedInFinancingActivities"]
     idx = df.concept.isin(main_concepts)
-    cols = ["concept", "label", "2024-12-31"]
+    # Column now includes period qualifier e.g. "2024-12-31 (FY)"
+    fy_col = next(c for c in df.columns if c.startswith('2024-12-31'))
+    cols = ["concept", "label", fy_col]
     cash_totals = df[idx][cols]
     assert len(cash_totals) == 3
     print(cash_totals)
