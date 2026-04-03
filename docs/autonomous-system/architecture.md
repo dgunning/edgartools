@@ -16,14 +16,14 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 | Metric | Value | Updated |
 |--------|-------|---------|
 | CQS | 0.8300 | 2026-04-03 |
-| EF-CQS | 0.8690 | 2026-04-03 |
-| Weighted EF-CQS | 0.8672 | 2026-04-03 |
+| EF-CQS | 0.8740 | 2026-04-04 |
+| Weighted EF-CQS | ~0.87 | 2026-04-04 |
 | SA-CQS (diagnostic) | 0.8597 | 2026-04-03 |
-| Headline EF | 90.0% | 2026-04-03 |
-| EF Pass Rate | 86.9% | 2026-04-03 |
-| Extraction Failed | 0 | 2026-04-03 |
-| Explained Variance | 112 (known_divergences properly excluded from scoring) | 2026-04-03 |
-| Remaining Failures | 44 (was 103 pre-Phase 10) | 2026-04-03 |
+| Headline EF | ~91% | 2026-04-04 |
+| EF Pass Rate | 87.4% | 2026-04-04 |
+| Extraction Failed | 0 | 2026-04-04 |
+| Explained Variance | 141 (112 Phase 10 + 29 Phase 11) | 2026-04-04 |
+| Remaining Gaps | 72 (4 unmapped, 7 validation_failure, 32 high_variance, 29 explained) | 2026-04-04 |
 | Company Tiers | 0 verified / 46 provisional / 4 excluded (DE, XOM, GE, COP) | 2026-04-03 |
 | Scoring Version | v2 + tier weighting (M8.1) + known_divergences fix + quality tiers (M8.3) | 2026-04-03 |
 | Companies | 100 (50 evaluated) | |
@@ -35,7 +35,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **Scoring model: CQS v2** (Consensus 020). Changes: (1) yfinance `is_match` backdoor removed from EF scoring — EF now measures extraction fidelity only (known_concept, tree_source, facts_search paths). (2) SA-CQS demoted from decision gate to diagnostic WARNING — SA measures yfinance-compatibility, not extraction correctness. (3) `FACTS_SEARCH` is a distinct `MappingSource` — no longer mislabeled as TREE. (4) Multi-period validation passes fiscal_year to SEC Facts API. (5) `ef_pass_reason` field added to `ValidationResult` for scoring path diagnostics.
 
-**Note on CQS/EF-CQS values:** Phase 10 (2026-04-03) achieved EF-CQS 0.8690 (+3.8pp from 0.8311) through: (1) importance tier assignments persisted as Python constant fallback in `config_loader.py`, (2) Phase 10 company overrides applied programmatically (ShortTermDebt DebtCurrent for 5 companies, GrossProfit/R&D/CurrentAssets not_applicable exclusions for 30+ companies, 60+ known_divergences for structural mismatches), (3) known_divergences bug fix, (4) closed-loop auto-eval (2 SA formula fixes kept), (5) company quality tier classification. Result: 112 explained variances, 44 remaining failures (down from 103). Company tiers: 0 verified / 46 provisional / 4 excluded.
+**Note on CQS/EF-CQS values:** Phase 11 (2026-04-04) achieved EF-CQS 0.8740 (+0.0056 from 0.8684) through hands-on investigation of all 108 gaps. Key findings: (1) 4 Phase 10 ShortTermDebt overrides were wrong (set `preferred_concept=DebtCurrent` for companies that don't have this concept — removed), (2) 32 not_applicable exclusions added after verifying concepts absent from XBRL (TotalLiabilities for 11 companies, GrossProfit for 6, DividendPerShare for 4, etc.), (3) 22 known_divergences added for structural mismatches (PPE+operating leases, D&A scope, bank share repurchases). See `gap-investigation-report.md` for full 108-gap investigation table.
 
 ---
 

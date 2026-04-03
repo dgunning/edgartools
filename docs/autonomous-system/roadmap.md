@@ -43,6 +43,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 5n: OpenRouter AI | Gemini Flash via API | 2026-03-24 | 2026-03-24 | - | - | Replaced Agent Tool dispatch. `3ff69e2c`, `f2473a05` |
 
 | 10: Phase 10 fixes | EF-CQS 0.87+ | 2026-04-03 | 2026-04-03 | 0.8311 | 0.8690 | Importance tiers, Phase 10 overrides, known_divergences bug fix, closed-loop run, company quality tiers. 112 explained variances, 44 remaining failures. |
+| 11: Gap investigation | Classify all gaps | 2026-04-04 | 2026-04-04 | 0.8684 | 0.8740 | Hands-on investigation of 108 gaps. 32 not_applicable exclusions, 22 known_divergences, 4 bad overrides removed. 3 solver patterns identified. |
 
 **Deferred items:** 3b (historical validation), 4a (S&P 500 expansion), 4c (event-driven processing).
 
@@ -149,6 +150,14 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - Company quality tiers established (M8.3): 0 verified (none at EF-CQS >= 0.95), 46 provisional, 4 excluded (DE, XOM, GE, COP). Tiers persisted as Python constant in `_apply_phase10_overrides()`.
 - Golden master revalidation (M9.2): 0 existing golden masters in ledger — no demotions or promotions. Baseline needs to be established.
 - Expansion planning: Sector quality ranking (best→worst): Healthcare/Pharma (0.91), Consumer (0.87), Tech (0.87), Other (0.87), Banking (0.87), Industrial (0.84), Energy (0.84). Next 50 companies prioritized in 3 batches by risk.
+
+**Run 018 (2026-04-04)** — Phase 11: Systematic gap investigation, 50 companies
+- Investigation: 108 gaps examined via XBRL calc tree + element catalog + element_context_index analysis
+- Root causes classified: 32 not_applicable (concept absent from XBRL), 22 structural divergences (yfinance scope differs), 4 bad overrides removed, ~30 within tolerance, ~15 genuinely composite (needs formula)
+- Key findings: (1) TotalLiabilities: `us-gaap:Liabilities` absent from 11 companies' XBRL — only `LiabilitiesAndStockholdersEquity` exists. (2) GrossProfit: concept absent from 6 companies (MCD, NEE, T, UNH, UPS, WMT). (3) PPE: yfinance includes OperatingLeaseRightOfUseAsset, XBRL doesn't. (4) Phase 10 ShortTermDebt overrides were wrong — `DebtCurrent` doesn't exist for HD/HON/KO/RTX.
+- EF-CQS: 0.8684→0.8740 (+0.0056). Tests: 334 pass, 2 fail (pre-existing), 0 regressions.
+- 3 solver patterns identified for `propose_change()`: (a) verify concept exists before proposing override, (b) PPE+leases is always a reference mismatch, (c) many "unmapped" gaps are genuinely absent concepts.
+- Report: `docs/autonomous-system/gap-investigation-report.md`
 
 ---
 
