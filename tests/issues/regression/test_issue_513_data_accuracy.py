@@ -72,12 +72,15 @@ class TestIssue513NFLX2012TenK:
         df = statement.to_dataframe()
 
         # Should now include 2012 data (the current fiscal year for this filing)
-        assert '2012-12-31' in df.columns, \
-            "Should include 2012-12-31 (current fiscal year after fix)"
+        # Column may include period qualifier e.g. "2012-12-31 (FY)"
+        has_2012 = any(c.startswith('2012-12-31') for c in df.columns)
+        assert has_2012, \
+            f"Should include 2012-12-31 (current fiscal year after fix), got columns: {[c for c in df.columns if c[:4].isdigit()]}"
 
         # Should also include 2011 as prior year comparison
-        assert '2011-12-31' in df.columns, \
-            "Should include 2011-12-31 (prior year comparison)"
+        has_2011 = any(c.startswith('2011-12-31') for c in df.columns)
+        assert has_2011, \
+            f"Should include 2011-12-31 (prior year comparison), got columns: {[c for c in df.columns if c[:4].isdigit()]}"
 
     def test_period_selection_excludes_multi_year_periods(self):
         """Period selection should not select multi-year cumulative periods"""

@@ -57,10 +57,12 @@ def test_msft_segment_member_values():
     assert len(service_and_other) > 0, "Expected to find 'Service and Other' dimensional fact"
     
     # Verify service revenue has actual values (not empty/NaN)
+    # Column now includes period qualifier e.g. "2025-06-30 (FY)"
     service_row = service_and_other.iloc[0]
-    value_2025 = service_row['2025-06-30']
+    col_2025 = next(c for c in df.columns if c.startswith('2025-06-30'))
+    value_2025 = service_row[col_2025]
     assert value_2025 != '' and value_2025 is not None, f"Service revenue should have actual value, got: {value_2025}"
-    
+
     # The "Service and Other" value should be a large number (>$100B for Microsoft)
     assert isinstance(value_2025, (int, float)) and value_2025 > 100_000_000_000, \
         f"Service and Other revenue should be >$100B, got: {value_2025}"
