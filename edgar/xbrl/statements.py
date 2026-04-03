@@ -1101,10 +1101,17 @@ class Statement:
                             d1 = datetime.strptime(end_date, '%Y-%m-%d')
                             days = (d1 - d0).days
                             if 80 <= days <= 100:
-                                month = d1.month
-                                q = "Q1" if month <= 3 or month == 12 else \
-                                    "Q2" if month <= 6 else \
-                                    "Q3" if month <= 9 else "Q4"
+                                fy_end_month = None
+                                if hasattr(self, 'xbrl') and self.xbrl and hasattr(self.xbrl, 'entity_info') and self.xbrl.entity_info:
+                                    fy_end_month = self.xbrl.entity_info.get('fiscal_year_end_month')
+                                if fy_end_month:
+                                    month_offset = (d1.month - fy_end_month - 1) % 12
+                                    q = f"Q{(month_offset // 3) + 1}"
+                                else:
+                                    month = d1.month
+                                    q = "Q1" if month <= 3 or month == 12 else \
+                                        "Q2" if month <= 6 else \
+                                        "Q3" if month <= 9 else "Q4"
                                 _period_column_names[period_key] = f"{end_date} ({q})"
                             elif 175 <= days <= 285:
                                 _period_column_names[period_key] = f"{end_date} (YTD)"

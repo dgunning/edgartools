@@ -977,15 +977,21 @@ def _format_period_labels(
 
                 # Determine quarter number for quarterly periods
                 if 80 <= duration_days <= 100:  # Quarterly period
-                    month = end_date_obj.month
-                    if month <= 3 or month == 12:
-                        q_num = "Q1"
-                    elif month <= 6:
-                        q_num = "Q2"
-                    elif month <= 9:
-                        q_num = "Q3"
+                    fy_end_month = entity_info.get('fiscal_year_end_month') if entity_info else None
+                    if fy_end_month:
+                        month_offset = (end_date_obj.month - fy_end_month - 1) % 12
+                        q_num = f"Q{(month_offset // 3) + 1}"
                     else:
-                        q_num = "Q4"
+                        # Fallback to calendar quarters if no fiscal year info
+                        month = end_date_obj.month
+                        if month <= 3 or month == 12:
+                            q_num = "Q1"
+                        elif month <= 6:
+                            q_num = "Q2"
+                        elif month <= 9:
+                            q_num = "Q3"
+                        else:
+                            q_num = "Q4"
             except (ValueError, TypeError, IndexError):
                 pass
         # For instant periods, extract the date
