@@ -2418,8 +2418,9 @@ class ReferenceValidator:
         if company_config and metric in company_config.known_divergences:
             variance_type = "explained"
 
-        if metric_config:
+        if metric_config and variance_type != "explained":
             # Check for standardization formula (composite value)
+            # Only override if not already explained by known_divergence
             formula_components = self._resolve_formula_components(metric, ticker)
             if formula_components:
                     variance_type = "standardized"
