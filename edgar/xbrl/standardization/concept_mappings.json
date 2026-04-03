@@ -86,7 +86,7 @@
     "us-gaap_InterestExpense",
     "us-gaap_InterestIncomeExpenseNet"
   ],
-    "Interest Expense (operating)": [
+  "Interest Expense (operating)": [
     "us-gaap_InterestExpenseOperating"
   ],
   "Interest Expense (non-operating)": [
@@ -124,7 +124,7 @@
   "Basic Net Income Available to Common Shareholders": [
     "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic"
   ],
-    "Diluted Net Income Available to Common Shareholders": [
+  "Diluted Net Income Available to Common Shareholders": [
     "us-gaap_NetIncomeLossAvailableToCommonStockholdersDiluted"
   ],
   "Accumulated Other Comprehensive Income/Loss": [
@@ -179,7 +179,7 @@
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
   ],
-    "Total Non Current Assets": [
+  "Total Non Current Assets": [
     "us-gaap_AssetsNoncurrent"
   ],
   "Property, Plant and Equipment": [
@@ -219,7 +219,7 @@
   "Total Current Liabilities": [
     "us-gaap_LiabilitiesCurrent"
   ],
-    "Total Non Current Liabilities": [
+  "Total Non Current Liabilities": [
     "us-gaap_LiabilitiesNoncurrent"
   ],
   "Long Term Debt": [
@@ -296,7 +296,8 @@
     "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
   ],
   "Payments for Property, Plant and Equipment": [
-    "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"
+    "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment",
+    "us-gaap_PaymentsToAcquireProductiveAssets"
   ],
   "Payments of Dividends": [
     "us-gaap_PaymentsOfDividends"
@@ -339,9 +340,8 @@
   ],
   "Other Liabilities": [
     "us-gaap_OtherLiabilities"
-
   ],
-    "Other Current Liabilities": [
+  "Other Current Liabilities": [
     "us-gaap_OtherLiabilitiesCurrent"
   ],
   "Other Non Current Liabilities": [

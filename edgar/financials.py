@@ -497,7 +497,7 @@ class Financials:
 
     def get_capital_expenditures(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get capital expenditures from the cash flow statement using standardized labels.
+        Get capital expenditures from the cash flow statement using standardized XBRL concepts.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -505,12 +505,20 @@ class Financials:
         Returns:
             Capital expenditures value if found, None otherwise
         """
+        # First try concept-based search using standardization mappings
+        result = self._get_standardized_concept_by_xbrl(
+            'cashflow',
+            ['Payments for Property, Plant and Equipment'],
+            period_offset
+        )
+
+        if result is not None:
+            return result
+
+        # Fallback to label-based search for edge cases
         patterns = [
             r'Capital Expenditures',
             r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
-            r'Property.*Plant.*Equipment',
-            r'Payments.*Property',
-            r'Acquisitions.*Property',
             r'Purchase.*Property',
             r'Capex'
         ]
