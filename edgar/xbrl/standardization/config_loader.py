@@ -329,6 +329,14 @@ class ConfigLoader:
                             "remediation_status": "deferred",
                         }
 
+        # Company quality tiers (Phase 10, Step 6)
+        # Based on EF-CQS evaluation on 2026-04-03.
+        # excluded: ef_cqs < 0.80, provisional: >= 0.80, verified: >= 0.95
+        _excluded = {"DE", "XOM", "GE", "COP"}
+        for ticker, cc in companies.items():
+            if cc.quality_tier is None:
+                cc.quality_tier = "excluded" if ticker in _excluded else "provisional"
+
     def _load_gaap_mappings(self) -> Dict[str, List[str]]:
         """Load upstream GAAP mappings and build a reverse index: standard_tag -> [gaap_concept, ...].
 

@@ -42,7 +42,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 5m: Live benchmark | 50-company harness | 2026-03-24 | 2026-03-24 | - | - | 2-arm: typed vs raw control. `1f8ff896` |
 | 5n: OpenRouter AI | Gemini Flash via API | 2026-03-24 | 2026-03-24 | - | - | Replaced Agent Tool dispatch. `3ff69e2c`, `f2473a05` |
 
-| 10: Phase 10 fixes | EF-CQS 0.87+ | 2026-04-03 | 2026-04-03 | 0.8311 | 0.8684 | Importance tiers (Python constant), Phase 10 overrides (30+ exclusions, 60+ divergences), known_divergences bug fix. 112 explained variances, 45 remaining failures. |
+| 10: Phase 10 fixes | EF-CQS 0.87+ | 2026-04-03 | 2026-04-03 | 0.8311 | 0.8690 | Importance tiers, Phase 10 overrides, known_divergences bug fix, closed-loop run, company quality tiers. 112 explained variances, 44 remaining failures. |
 
 **Deferred items:** 3b (historical validation), 4a (S&P 500 expansion), 4c (event-driven processing).
 
@@ -140,6 +140,15 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - Remaining: 45 failures across 17 metrics. Biggest clusters: ShortTermDebt(6), LongTermDebt(5), COGS(5), PropertyPlantEquipment(4), Revenue(4), ShareRepurchases(4)
 - Key: **known_divergences were broken for unmapped metrics** — `_compute_company_cqs` didn't receive known_divergences set, and formula check in `_compare_values` overrode "explained" variance_type. Bug fix unlocked 112 explained variances. Core metrics: 5 failures (all TotalLiabilities), extended: 18, exploratory: 21.
 - Commit: `02f044ed`.
+
+**Run 017 (2026-04-03)** — Closed loop + company quality tiers
+- 50 companies, `run_closed_loop()` with 1h budget
+- Phase 1 (deterministic): 2/2 experiments kept (BLK:DepreciationAmortization, AMZN:PropertyPlantEquipment — SA formula additions). 94 gaps identified, most without actionable proposals.
+- Phase 2 (AI): SKIPPED — no unresolved gaps requiring AI dispatch.
+- EF-CQS: 0.8690, CQS: 0.8300, SA-CQS: 0.8597, headline_ef: 0.9001
+- Company quality tiers established (M8.3): 0 verified (none at EF-CQS >= 0.95), 46 provisional, 4 excluded (DE, XOM, GE, COP). Tiers persisted as Python constant in `_apply_phase10_overrides()`.
+- Golden master revalidation (M9.2): 0 existing golden masters in ledger — no demotions or promotions. Baseline needs to be established.
+- Expansion planning: Sector quality ranking (best→worst): Healthcare/Pharma (0.91), Consumer (0.87), Tech (0.87), Other (0.87), Banking (0.87), Industrial (0.84), Energy (0.84). Next 50 companies prioritized in 3 batches by risk.
 
 ---
 
@@ -332,7 +341,7 @@ For each 50-company batch:
 
 - [x] **M8.1: Define metric importance tiers** — Completed 2026-04-03. `02f044ed`. 8 core, 14 extended, 1 derived, 14 exploratory. Tiers persisted as `_DEFAULT_IMPORTANCE_TIERS` Python constant in config_loader.py. weighted_ef_cqs=0.8666.
 - [ ] **M8.2: Per-company EF-CQS histogram** — Generate EF-CQS distribution across 100-company cohort. Identify outlier companies dragging overall score. Dashboard integration.
-- [ ] **M8.3: Quality tier classification** — verified (EF-CQS >= 0.95) / provisional (0.80-0.95) / excluded (<0.80). Only verified companies included in published data. Provisional companies flagged for investigation.
+- [x] **M8.3: Quality tier classification** — Completed 2026-04-03. 0 verified / 46 provisional / 4 excluded (DE, XOM, GE, COP). Tiers persisted as Python constant in `_apply_phase10_overrides()`. `classify_company_tiers()` recomputes dynamically from CQS result.
 - [ ] **M8.4: CQS v2 documentation** — Document scoring model changes (yfinance backdoor removal, SA demotion, FACTS_SEARCH source). Version bump tracking for reproducibility.
 
 ---
@@ -344,7 +353,7 @@ For each 50-company batch:
 ### Milestones
 
 - [x] **M9.1: Composite ShortTermDebt engine** — Completed 2026-04-03. `02f044ed`. Used DebtCurrent preferred_concept override instead of composite engine. Applied programmatically via `_apply_phase10_overrides()` in config_loader.py for CAT/RTX/KO/NEE/HD. All 5 companies now pass ShortTermDebt validation.
-- [ ] **M9.2: Golden master revalidation** — Re-run golden master validation under CQS v2 scoring (no yfinance backdoor, SA as diagnostic). Some golden masters may flip — investigate and update.
+- [x] **M9.2: Golden master revalidation** — Completed 2026-04-03. No existing golden masters in ledger — baseline not yet established. `compare_golden_master_sets()` functional, returns empty sets. Golden master construction deferred until verified companies exist (EF-CQS >= 0.95).
 - [ ] **M9.3: Per-company formula validation harness** — Test formulas across 3+ fiscal years per company. Multi-period bug fix (Consensus 020 Step 1) enables this. Ensures formulas aren't overfitting to a single period.
 
 ---
