@@ -23,6 +23,7 @@ from edgar.xbrl.standardization.tools.auto_eval import (
     compute_cqs,
     print_cqs_report,
     QUICK_EVAL_COHORT,
+    classify_company_tiers,
 )
 from edgar.xbrl.standardization.tools.auto_eval_loop import OvernightReport
 
@@ -80,6 +81,7 @@ def _show_rich_dashboard(
     ))
 
     # Section 1: Current Quality Status
+    cqs = None
     console.print("\n[bold]Quality Status[/bold]")
     try:
         cqs = compute_cqs(eval_cohort=QUICK_EVAL_COHORT, snapshot_mode=True)
@@ -123,6 +125,10 @@ def _show_rich_dashboard(
             console.print(f"    {ticker}: {by_ticker[ticker]} metrics")
     else:
         console.print("  [dim]No golden masters yet.[/dim]")
+
+    # Section 6: Company EF-CQS Histogram (M8.2)
+    if cqs is not None:
+        _render_company_histogram(console, cqs)
 
     console.print()
 
@@ -227,6 +233,97 @@ def _render_sla_compliance(console, cqs: CQSResult):
     else:
         console.print("  [bold red]SLA: NOT YET COMPLIANT[/bold red]")
     console.print()
+
+
+def _render_company_histogram(console, cqs: CQSResult):
+    """Render ASCII histogram of per-company EF-CQS distribution + worst companies."""
+    from rich.table import Table
+    from rich import box
+
+    if not cqs.company_scores:
+        return
+
+    console.print("\n[bold]Company EF-CQS Distribution[/bold]")
+
+    # Bucket companies
+    buckets = {"<0.70": [], "0.70-0.80": [], "0.80-0.90": [], "0.90-0.95": [], "0.95+": []}
+    for ticker, cs in cqs.company_scores.items():
+        ef = cs.ef_cqs
+        if ef < 0.70:
+            buckets["<0.70"].append(ticker)
+        elif ef < 0.80:
+            buckets["0.70-0.80"].append(ticker)
+        elif ef < 0.90:
+            buckets["0.80-0.90"].append(ticker)
+        elif ef < 0.95:
+            buckets["0.90-0.95"].append(ticker)
+        else:
+            buckets["0.95+"].append(ticker)
+
+    # ASCII bar chart
+    max_count = max(len(v) for v in buckets.values()) if buckets else 1
+    bar_scale = 40 / max(max_count, 1)
+    colors = {"<0.70": "red", "0.70-0.80": "red", "0.80-0.90": "yellow", "0.90-0.95": "yellow", "0.95+": "green"}
+
+    for label, tickers in buckets.items():
+        count = len(tickers)
+        bar_len = int(count * bar_scale)
+        bar = "\u2588" * bar_len
+        color = colors[label]
+        console.print(f"  {label:>9}  [{color}]{bar}[/{color}] {count}")
+
+    # Weighted EF-CQS (M8.1)
+    if cqs.weighted_ef_cqs > 0:
+        console.print(f"\n  Weighted EF-CQS (tier-weighted): [bold]{cqs.weighted_ef_cqs:.4f}[/bold]")
+
+    # Worst companies drilldown (bottom 10)
+    sorted_companies = sorted(cqs.company_scores.items(), key=lambda x: x[1].ef_cqs)
+    bottom = sorted_companies[:10]
+
+    console.print("\n  [bold]Worst Companies (by EF-CQS):[/bold]")
+    table = Table(box=box.SIMPLE, show_lines=False, padding=(0, 1))
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Ticker", width=8)
+    table.add_column("EF-CQS", justify="right", width=8)
+    table.add_column("W-EF", justify="right", width=8)
+    table.add_column("Failed", width=40)
+
+    for i, (ticker, cs) in enumerate(bottom, 1):
+        ef_color = "red" if cs.ef_cqs < 0.80 else ("yellow" if cs.ef_cqs < 0.90 else "dim")
+        failed_str = ", ".join(cs.failed_metrics[:5])
+        if len(cs.failed_metrics) > 5:
+            failed_str += f" (+{len(cs.failed_metrics) - 5})"
+        table.add_row(
+            str(i),
+            ticker,
+            f"[{ef_color}]{cs.ef_cqs:.4f}[/{ef_color}]",
+            f"{cs.weighted_ef_cqs:.4f}",
+            failed_str,
+        )
+
+    console.print(table)
+
+    # Tier summary
+    _render_tier_summary(console, cqs)
+
+
+def _render_tier_summary(console, cqs: CQSResult):
+    """Render company quality tier distribution and expansion readiness."""
+    tiers = classify_company_tiers(cqs)
+    counts = {"verified": 0, "provisional": 0, "excluded": 0}
+    for tier in tiers.values():
+        counts[tier] = counts.get(tier, 0) + 1
+
+    total = len(tiers)
+    console.print("\n[bold]Company Quality Tiers[/bold]")
+    console.print(f"  [green]Verified[/green]:    {counts['verified']:>3} / {total}  (ef_cqs >= 0.95, headline >= 0.99)")
+    console.print(f"  [yellow]Provisional[/yellow]: {counts['provisional']:>3} / {total}  (ef_cqs >= 0.80)")
+    console.print(f"  [red]Excluded[/red]:    {counts['excluded']:>3} / {total}  (ef_cqs < 0.80)")
+
+    # Expansion readiness
+    readiness = counts["verified"] / total * 100 if total > 0 else 0
+    ready_color = "green" if readiness >= 80 else ("yellow" if readiness >= 50 else "red")
+    console.print(f"\n  Expansion Readiness: [{ready_color}]{readiness:.0f}%[/{ready_color}] verified")
 
 
 def _render_experiments_table(console, experiments: List[Dict]):

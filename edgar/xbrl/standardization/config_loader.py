@@ -137,6 +137,7 @@ class ConfigLoader:
                 standardization=data.get("standardization"),
                 known_variances=data.get("known_variances"),
                 sign_convention=data.get("sign_convention"),
+                importance_tier=data.get("importance_tier", "exploratory"),
             )
 
         # Expand known_concepts using upstream GAAP mappings
@@ -166,7 +167,8 @@ class ConfigLoader:
                 notes=data.get("notes"),
                 fiscal_year_end=data.get("fiscal_year_end", "December"),
                 industry=data.get("industry"),
-                validation_tolerance_pct=data.get("validation_tolerance_pct")
+                validation_tolerance_pct=data.get("validation_tolerance_pct"),
+                quality_tier=data.get("quality_tier"),
             )
         
         # Get defaults

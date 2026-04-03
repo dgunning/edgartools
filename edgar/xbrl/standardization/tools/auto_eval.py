@@ -14,7 +14,7 @@ Key design:
 
 import logging
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, fields, asdict
 from typing import Dict, List, Optional, Tuple
 
 from edgar.xbrl.standardization.models import MappingResult, MappingSource, ExclusionReason
@@ -319,6 +319,36 @@ HEADLINE_METRICS = [
     "TotalLiabilities",
 ]
 
+# =============================================================================
+# METRIC IMPORTANCE TIERS — config-driven 3-tier scoring (M8.1)
+# Targets and weights for tier-weighted EF-CQS computation.
+# =============================================================================
+
+TIER_TARGETS = {"core": 0.99, "extended": 0.95, "exploratory": 0.80}
+TIER_WEIGHTS = {"core": 3.0, "extended": 2.0, "exploratory": 1.0}
+
+
+def get_metrics_by_tier(config) -> Dict[str, List[str]]:
+    """Group metric names by their importance_tier from config.
+
+    Args:
+        config: MappingConfig instance.
+
+    Returns:
+        Dict mapping tier name -> list of metric names.
+        Derived-tier metrics are excluded (not scored directly).
+    """
+    tiers: Dict[str, List[str]] = {"core": [], "extended": [], "exploratory": []}
+    for name, mc in config.metrics.items():
+        tier = mc.importance_tier
+        if tier == "derived":
+            continue
+        if tier in tiers:
+            tiers[tier].append(name)
+        else:
+            tiers["exploratory"].append(name)
+    return tiers
+
 
 # =============================================================================
 # DATA CLASSES
@@ -358,14 +388,18 @@ class CompanyCQS:
     raw_cqs: float = 0.0              # CQS without exclusion/divergence treatment
     data_completeness: float = 0.0     # metrics_valid / total_possible (no exclusions from denom)
     extraction_failed_count: int = 0   # Count of extraction_failed exclusions
+    # Tier-weighted EF-CQS (M8.1) — runs parallel to ef_cqs, does NOT replace it
+    weighted_ef_cqs: float = 0.0       # EF pass rate weighted by metric importance tier
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict) -> 'CompanyCQS':
-        """Reconstruct from to_dict() output."""
-        return cls(**d)
+        """Reconstruct from to_dict() output, tolerating missing fields."""
+        valid_fields = {f.name for f in fields(cls)}
+        filtered = {k: v for k, v in d.items() if k in valid_fields}
+        return cls(**filtered)
 
 
 @dataclass
@@ -473,6 +507,8 @@ class CQSResult:
     raw_cqs: float = 0.0              # Aggregate raw CQS (exclusions treated as failures)
     data_completeness: float = 0.0     # Aggregate data completeness
     total_extraction_failed: int = 0   # Total extraction_failed exclusions
+    # Tier-weighted EF-CQS (M8.1)
+    weighted_ef_cqs: float = 0.0       # EF pass rate weighted by metric importance tier
 
     # Per-company breakdown
     company_scores: Dict[str, CompanyCQS] = field(default_factory=dict)
@@ -497,7 +533,7 @@ class CQSResult:
 
     @classmethod
     def from_dict(cls, d: dict) -> 'CQSResult':
-        """Reconstruct from to_dict() output. TimingBreakdown is dropped (not needed for cache)."""
+        """Reconstruct from to_dict() output, tolerating missing/extra fields."""
         d = dict(d)  # Preserve caller's dict
         company_scores = {
             k: CompanyCQS.from_dict(v)
@@ -507,7 +543,10 @@ class CQSResult:
         d['company_scores'] = company_scores
         # Convert regressed_metrics list of lists back to tuples
         d['regressed_metrics'] = [tuple(x) for x in d.get('regressed_metrics', [])]
-        return cls(**d)
+        valid_fields = {f.name for f in fields(cls)}
+        filtered = {k: v for k, v in d.items() if k in valid_fields}
+        filtered['company_scores'] = company_scores
+        return cls(**filtered)
 
     def summary(self) -> str:
         """One-line summary."""
@@ -749,6 +788,12 @@ def compute_cqs(
     # Build exclusion reasons per ticker (Consensus 018)
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(eval_cohort, orchestrator)
 
+    # Pre-build metric tier map once for all companies (M8.1)
+    _tier_map = {
+        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
+        for name, mc in orchestrator.config.metrics.items()
+    } if orchestrator.config else {}
+
     # Compute per-company scores
     company_scores: Dict[str, CompanyCQS] = {}
 
@@ -757,6 +802,7 @@ def compute_cqs(
             ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {}),
             forbidden_metrics=forbidden_by_ticker.get(ticker),
             exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
+            metric_tier_map=_tier_map,
         )
 
     # Aggregate across companies
@@ -904,6 +950,12 @@ def compute_cqs_incremental(
     # Build exclusion reasons per ticker (Consensus 018)
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(affected_in_cohort, orchestrator)
 
+    # Pre-build metric tier map once (M8.1)
+    _tier_map = {
+        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
+        for name, mc in orchestrator.config.metrics.items()
+    } if orchestrator.config else {}
+
     # Build updated company_scores: start from baseline, substitute affected
     updated_scores = dict(baseline_result.company_scores)
     for ticker in affected_in_cohort:
@@ -915,6 +967,7 @@ def compute_cqs_incremental(
                 orchestrator.validation_results.get(ticker, {}),
                 forbidden_metrics=forbidden_by_ticker.get(ticker),
                 exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
+                metric_tier_map=_tier_map,
             )
 
     # Re-aggregate with the updated matrix
@@ -1015,6 +1068,12 @@ def compute_cqs_incremental_batch(
     # Build exclusion reasons per ticker (Consensus 018)
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(affected_in_cohort, orchestrator)
 
+    # Pre-build metric tier map once (M8.1)
+    _tier_map = {
+        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
+        for name, mc in orchestrator.config.metrics.items()
+    } if orchestrator.config else {}
+
     updated_scores = dict(baseline_result.company_scores)
     for ticker in affected_in_cohort:
         if ticker in updated_results:
@@ -1025,6 +1084,7 @@ def compute_cqs_incremental_batch(
                 orchestrator.validation_results.get(ticker, {}),
                 forbidden_metrics=forbidden_by_ticker.get(ticker),
                 exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
+                metric_tier_map=_tier_map,
             )
 
     result = _aggregate_cqs(updated_scores, baseline_result.cqs, time.time() - start_time)
@@ -1048,6 +1108,7 @@ def _compute_company_cqs(
     validations: dict,
     forbidden_metrics: Optional[set] = None,
     exclusion_reasons: Optional[Dict[str, Dict[str, str]]] = None,
+    metric_tier_map: Optional[Dict[str, str]] = None,
 ) -> CompanyCQS:
     """Compute CQS sub-metrics for a single company."""
     total = 0
@@ -1072,6 +1133,10 @@ def _compute_company_cqs(
     headline_ef_total = 0
     extraction_failed_count = 0
     forbidden_pass_count = 0
+    # Tier-weighted tracking (M8.1)
+    tier_ef_pass: Dict[str, int] = {"core": 0, "extended": 0, "exploratory": 0}
+    tier_ef_total: Dict[str, int] = {"core": 0, "extended": 0, "exploratory": 0}
+    _metric_tier_map = metric_tier_map or {}
 
     for metric, result in metrics.items():
         if result.source == MappingSource.CONFIG:
@@ -1149,28 +1214,37 @@ def _compute_company_cqs(
             if 'reference suspect' in (val_result.notes or '').lower():
                 disputed_count += 1
 
+        # EF pass determination — single source of truth for all EF accumulators
+        ef_passed = (
+            (val_result.ef_pass if val_result else False)
+            or (result.is_mapped and result.source in (MappingSource.TREE, MappingSource.FACTS_SEARCH) and not val_result)
+        )
+
         # EF/SA/RFA/SMA scoring from validation results
+        if ef_passed:
+            ef_pass_count += 1
         if val_result:
-            if val_result.ef_pass:
-                ef_pass_count += 1
             if val_result.sa_pass:
                 sa_pass_count += 1
             if val_result.rfa_pass:
                 rfa_pass_count += 1
             if val_result.sma_pass:
                 sma_pass_count += 1
-        elif result.is_mapped and result.source in (MappingSource.TREE, MappingSource.FACTS_SEARCH):
-            # Tree-resolved or facts-search-resolved with no validation = EF pass (trusted source)
-            ef_pass_count += 1
 
         # Track headline metrics separately
         if metric in HEADLINE_METRICS and result.source != MappingSource.CONFIG:
             if result.validation_status != "unverified":
                 headline_ef_total += 1
-                if val_result and val_result.ef_pass:
+                if ef_passed:
                     headline_ef_pass += 1
-                elif result.is_mapped and result.source in (MappingSource.TREE, MappingSource.FACTS_SEARCH) and not val_result:
-                    headline_ef_pass += 1
+
+        # Track tier-weighted EF (M8.1)
+        _tier = _metric_tier_map.get(metric, "exploratory")
+        if _tier in tier_ef_total and result.source != MappingSource.CONFIG:
+            if result.validation_status != "unverified":
+                tier_ef_total[_tier] += 1
+                if ef_passed:
+                    tier_ef_pass[_tier] += 1
 
         # Check golden master status
         if (ticker, metric) in golden_set:
@@ -1208,6 +1282,18 @@ def _compute_company_cqs(
     total_possible = len(metrics)
     data_completeness = raw_valid / total_possible if total_possible > 0 else 0.0
 
+    # Tier-weighted EF-CQS (M8.1): weighted average of per-tier EF rates
+    weighted_num = 0.0
+    weighted_den = 0.0
+    for tier_name in ("core", "extended", "exploratory"):
+        t_total = tier_ef_total[tier_name]
+        if t_total > 0:
+            t_rate = tier_ef_pass[tier_name] / t_total
+            w = TIER_WEIGHTS.get(tier_name, 1.0)
+            weighted_num += w * t_rate
+            weighted_den += w
+    weighted_ef_cqs = weighted_num / weighted_den if weighted_den > 0 else ef_cqs
+
     return CompanyCQS(
         ticker=ticker,
         pass_rate=pass_rate,
@@ -1237,6 +1323,7 @@ def _compute_company_cqs(
         raw_cqs=raw_cqs,
         data_completeness=data_completeness,
         extraction_failed_count=extraction_failed_count,
+        weighted_ef_cqs=weighted_ef_cqs,
     )
 
 
@@ -1294,6 +1381,7 @@ def _aggregate_cqs(
     # EF-CQS and SA-CQS (simple averages across companies)
     ef_cqs = sum(s.ef_cqs for s in scores) / n
     sa_cqs = sum(s.sa_cqs for s in scores) / n
+    weighted_ef_cqs = sum(s.weighted_ef_cqs for s in scores) / n
 
     # Scoring integrity aggregates (Consensus 018)
     agg_raw_cqs = sum(s.raw_cqs for s in scores) / n
@@ -1321,6 +1409,7 @@ def _aggregate_cqs(
         raw_cqs=agg_raw_cqs,
         data_completeness=agg_data_completeness,
         total_extraction_failed=total_extraction_failed,
+        weighted_ef_cqs=weighted_ef_cqs,
         companies_evaluated=n,
         total_metrics=total_metrics,
         total_mapped=sum(s.metrics_mapped for s in scores),
@@ -1331,6 +1420,165 @@ def _aggregate_cqs(
         vetoed=False,
         regressed_metrics=all_regressed,
     )
+
+
+# =============================================================================
+# COMPANY QUALITY TIER CLASSIFICATION (M8.3)
+# =============================================================================
+
+def classify_company_tiers(cqs_result: CQSResult) -> Dict[str, str]:
+    """Classify companies into quality tiers based on EF-CQS and headline EF rate.
+
+    Rules:
+        verified:    ef_cqs >= 0.95 AND headline_ef_rate >= 0.99
+        provisional: ef_cqs >= 0.80
+        excluded:    ef_cqs < 0.80
+
+    Args:
+        cqs_result: CQSResult with per-company scores.
+
+    Returns:
+        Dict mapping ticker -> quality tier string.
+    """
+    tiers: Dict[str, str] = {}
+    for ticker, cs in cqs_result.company_scores.items():
+        if cs.ef_cqs >= 0.95 and cs.headline_ef_rate >= 0.99:
+            tiers[ticker] = "verified"
+        elif cs.ef_cqs >= 0.80:
+            tiers[ticker] = "provisional"
+        else:
+            tiers[ticker] = "excluded"
+    return tiers
+
+
+def update_company_tiers(
+    cqs_result: CQSResult,
+    dry_run: bool = True,
+) -> Dict[str, str]:
+    """Classify companies and optionally write quality_tier to companies.yaml.
+
+    Args:
+        cqs_result: CQSResult with per-company scores.
+        dry_run: If True, only return classifications without writing.
+
+    Returns:
+        Dict mapping ticker -> quality tier string.
+    """
+    import yaml
+    from pathlib import Path
+
+    tiers = classify_company_tiers(cqs_result)
+
+    if dry_run:
+        return tiers
+
+    companies_path = Path(__file__).parent.parent / "config" / "companies.yaml"
+    with open(companies_path, 'r') as f:
+        data = yaml.safe_load(f)
+
+    for ticker, tier in tiers.items():
+        if ticker in data.get("companies", {}):
+            data["companies"][ticker]["quality_tier"] = tier
+
+    with open(companies_path, 'w') as f:
+        yaml.dump(data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+
+    logger.info(f"Updated quality_tier for {len(tiers)} companies in companies.yaml")
+    return tiers
+
+
+def compare_golden_master_sets(cqs_result: CQSResult, ledger=None) -> Dict[str, List[Tuple[str, str]]]:
+    """Compare current golden master status against CQS v2 scores (M9.2).
+
+    Returns dict with:
+        promoted: [(ticker, metric)] — newly qualifying as golden
+        demoted:  [(ticker, metric)] — previously golden, now failing
+        stable:   [(ticker, metric)] — golden and still passing
+    """
+    from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    golden_masters = ledger.get_all_golden_masters(active_only=True)
+
+    # Pre-build per-ticker lookup for O(1) access
+    golden_by_ticker: Dict[str, set] = {}
+    for gm in golden_masters:
+        golden_by_ticker.setdefault(gm.ticker, set()).add(gm.metric)
+
+    result: Dict[str, List[Tuple[str, str]]] = {"promoted": [], "demoted": [], "stable": []}
+
+    for ticker, cs in cqs_result.company_scores.items():
+        ticker_golden = golden_by_ticker.get(ticker, set())
+        failed_set = set(cs.failed_metrics)
+
+        for metric in failed_set:
+            if metric in ticker_golden:
+                result["demoted"].append((ticker, metric))
+
+        for metric in ticker_golden:
+            if metric not in failed_set:
+                result["stable"].append((ticker, metric))
+
+    return result
+
+
+def diagnose_composite_metric(
+    ticker: str,
+    metric: str,
+    fiscal_years: Optional[List[int]] = None,
+    tolerance_pct: float = 15.0,
+) -> Dict:
+    """Primary entry point for debugging composite metric extraction (M9.3).
+
+    Creates a ReferenceValidator with current config and validates the metric's
+    formula across multiple fiscal years.
+
+    Args:
+        ticker: Company ticker (e.g. "CAT").
+        metric: Metric name (e.g. "ShortTermDebt").
+        fiscal_years: List of fiscal years to check. Defaults to [2024, 2023, 2022].
+        tolerance_pct: Variance tolerance percentage.
+
+    Returns:
+        Dict with diagnosis info: formula_result, config_status, recommendation.
+    """
+    from edgar.xbrl.standardization.config_loader import get_config
+    from edgar.xbrl.standardization.reference_validator import ReferenceValidator
+
+    config = get_config(reload=True)
+    metric_config = config.get_metric(metric)
+    company_config = config.get_company(ticker)
+
+    validator = ReferenceValidator(config=config)
+    formula_result = validator.validate_formula_across_periods(
+        ticker, metric, fiscal_years=fiscal_years, tolerance_pct=tolerance_pct,
+    )
+
+    # Build diagnosis
+    diagnosis = {
+        "ticker": ticker,
+        "metric": metric,
+        "is_composite": metric_config.is_composite if metric_config else False,
+        "importance_tier": metric_config.importance_tier if metric_config else "unknown",
+        "has_override": metric in (company_config.metric_overrides if company_config else {}),
+        "is_excluded": company_config.should_skip_metric(metric) if company_config else False,
+        "has_divergence": metric in (company_config.known_divergences if company_config else {}),
+        "formula_result": formula_result,
+    }
+
+    # Recommendation
+    if formula_result.is_stable:
+        diagnosis["recommendation"] = "Formula stable — no changes needed"
+    elif formula_result.periods_checked == 0:
+        diagnosis["recommendation"] = "No formula configured — consider adding standardization formula or preferred_concept override"
+    elif formula_result.periods_passed > 0:
+        diagnosis["recommendation"] = f"Partially stable ({formula_result.periods_passed}/{formula_result.periods_checked}) — check failing periods for component gaps"
+    else:
+        diagnosis["recommendation"] = "Formula unstable — investigate component availability across periods"
+
+    return diagnosis
 
 
 # =============================================================================
@@ -1539,12 +1787,19 @@ def identify_gaps(
     forbidden_by_ticker = _build_forbidden_by_ticker(all_results, orchestrator)
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(eval_cohort, orchestrator)
 
+    # Pre-build metric tier map once (M8.1)
+    _tier_map = {
+        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
+        for name, mc in orchestrator.config.metrics.items()
+    } if orchestrator.config else {}
+
     company_scores: Dict[str, 'CompanyCQS'] = {}
     for ticker, metrics in all_results.items():
         company_scores[ticker] = _compute_company_cqs(
             ticker, metrics, golden_set, orchestrator.validation_results.get(ticker, {}),
             forbidden_metrics=forbidden_by_ticker.get(ticker),
             exclusion_reasons=exclusion_reasons_by_ticker.get(ticker),
+            metric_tier_map=_tier_map,
         )
 
     cqs_result = _aggregate_cqs(company_scores, None, time.time() - start_time)

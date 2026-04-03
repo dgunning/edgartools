@@ -12,7 +12,7 @@ import logging
 import os
 from typing import Dict, List, Optional, Tuple, Union
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 try:
     import yfinance as yf
@@ -103,6 +103,20 @@ class MultiPeriodResult:
     validated_fiscal_periods: List[str]   # List of fiscal period end dates that passed
     period_details: List[Dict]     # Per-period detail: {period, value, ref_value, variance, pass}
     detail: str                    # Human-readable summary
+
+
+@dataclass
+class FormulaValidationResult:
+    """Result of validating a composite formula across multiple fiscal periods (M9.3)."""
+    ticker: str
+    metric: str
+    periods_checked: int
+    periods_passed: int
+    is_stable: bool                                    # True if all checked periods pass
+    component_stability: Dict[str, Dict] = field(default_factory=dict)  # component -> {found, missing, values}
+    period_details: List[Dict] = field(default_factory=list)  # Per-period: {period, composite_value, ref_value, variance, components, pass}
+    formula_tier: str = "default"                       # "company" | "sector" | "default"
+    detail: str = ""
 
 
 @dataclass
@@ -1752,6 +1766,129 @@ class ReferenceValidator:
             validated_fiscal_periods=validated_fiscal_periods,
             period_details=period_details,
             detail="; ".join(detail_parts),
+        )
+
+    def validate_formula_across_periods(
+        self,
+        ticker: str,
+        metric: str,
+        fiscal_years: Optional[List[int]] = None,
+        tolerance_pct: float = 15.0,
+    ) -> FormulaValidationResult:
+        """Validate a composite formula across multiple fiscal years (M9.3).
+
+        Resolves the formula for the metric+ticker, then checks each fiscal year
+        to see if the summed components match the reference value.
+
+        Args:
+            ticker: Company ticker.
+            metric: Metric name (e.g. "ShortTermDebt").
+            fiscal_years: List of fiscal years to check. Defaults to last 3.
+            tolerance_pct: Variance tolerance for pass/fail.
+
+        Returns:
+            FormulaValidationResult with per-period details and stability assessment.
+        """
+        from edgar import Company
+
+        if fiscal_years is None:
+            fiscal_years = [2024, 2023, 2022]
+
+        formula_components = self._resolve_formula_components(metric, ticker)
+        formula_tier = "default"
+        if formula_components is None:
+            # No formula configured — check for preferred_concept in overrides
+            return FormulaValidationResult(
+                ticker=ticker, metric=metric,
+                periods_checked=0, periods_passed=0,
+                is_stable=False,
+                detail="No composite formula configured for this metric+ticker",
+            )
+
+        # Determine formula tier
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if metric_config and metric_config.standardization:
+            std = metric_config.standardization
+            company_config = self.config.get_company(ticker) if self.config else None
+            if ticker in std.get("company_overrides", {}):
+                formula_tier = "company"
+            elif company_config and company_config.industry and company_config.industry.title() in std.get("sector_overrides", {}):
+                formula_tier = "sector"
+
+        period_details = []
+        component_tracker: Dict[str, Dict] = {}
+        periods_passed = 0
+
+        # Hoist invariants outside the loop
+        company = Company(ticker)
+        stock = None if self._snapshot_mode else self._get_stock(ticker)
+        self._current_ticker = ticker
+        ref_value = self._get_yfinance_value(stock, metric)
+
+        for fy in fiscal_years:
+            try:
+                filing = company.get_filings(form="10-K").filter(date=f"{fy}-01-01:{fy}-12-31")
+                if not filing or len(filing) == 0:
+                    period_details.append({"period": str(fy), "status": "missing", "notes": "No 10-K found"})
+                    continue
+
+                xbrl = filing[0].xbrl()
+                if xbrl is None:
+                    period_details.append({"period": str(fy), "status": "missing", "notes": "No XBRL data"})
+                    continue
+
+                # Extract each component
+                composite_value = 0.0
+                components_found = {}
+                components_missing = []
+
+                for concept, weight in formula_components:
+                    val = self._extract_xbrl_value(xbrl, concept)
+                    if val is not None:
+                        composite_value += weight * val
+                        components_found[concept] = val
+                        component_tracker.setdefault(concept, {"found": 0, "missing": 0, "values": []})
+                        component_tracker[concept]["found"] += 1
+                        component_tracker[concept]["values"].append(val)
+                    else:
+                        components_missing.append(concept)
+                        component_tracker.setdefault(concept, {"found": 0, "missing": 0, "values": []})
+                        component_tracker[concept]["missing"] += 1
+
+                variance = None
+                passed = False
+
+                if ref_value is not None and ref_value != 0:
+                    variance = abs(composite_value - ref_value) / abs(ref_value) * 100
+                    passed = variance <= tolerance_pct
+                    if passed:
+                        periods_passed += 1
+
+                period_details.append({
+                    "period": str(fy),
+                    "composite_value": composite_value,
+                    "ref_value": ref_value,
+                    "variance_pct": variance,
+                    "pass": passed,
+                    "components_found": components_found,
+                    "components_missing": components_missing,
+                })
+            except Exception as e:
+                period_details.append({"period": str(fy), "status": "error", "notes": str(e)})
+
+        periods_checked = sum(1 for d in period_details if d.get("status") != "missing" and d.get("status") != "error")
+        is_stable = periods_checked > 0 and periods_passed == periods_checked
+
+        return FormulaValidationResult(
+            ticker=ticker,
+            metric=metric,
+            periods_checked=periods_checked,
+            periods_passed=periods_passed,
+            is_stable=is_stable,
+            component_stability=component_tracker,
+            period_details=period_details,
+            formula_tier=formula_tier,
+            detail=f"{periods_passed}/{periods_checked} periods passed (tier={formula_tier})",
         )
 
     def _extract_xbrl_value(

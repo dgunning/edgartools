@@ -21,10 +21,10 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 | Headline EF | 86.9% | 2026-04-02 |
 | EF Pass Rate | 83.3% | 2026-04-02 |
 | RFA Rate | 86.5% | 2026-04-02 |
-| Extraction Failed | 5 | 2026-04-02 |
-| Scoring Version | v2 | 2026-04-02 |
+| Extraction Failed | 0 (5→0 via M9.1 ShortTermDebt fixes) | 2026-04-03 |
+| Scoring Version | v2 + tier weighting (M8.1) | 2026-04-03 |
 | Companies | 100 | |
-| Metrics | 37 base + 3 derived | |
+| Metrics | 37 base + 3 derived (8 core / 14 extended / 14 exploratory / 1 derived) | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
 | AI | Deterministic solver + Lead Agent closed loop (`run_closed_loop()`) + Graveyard replay (`replay_graveyard_proposals()`) | |
 
@@ -73,6 +73,41 @@ CQS = 0.45 * pass_rate
 **Sub-scores:**
 - **EF-CQS** (Extraction Fidelity) — Did we find the right XBRL concept? Passes only for known_concepts, tree-resolved, or reference-confirmed.
 - **SA-CQS** (Standardization Alignment) — Can we reproduce yfinance's aggregated number? Uses composite formula evaluation.
+- **Weighted EF-CQS** (M8.1) — Tier-weighted variant of EF-CQS. Core metrics weighted 3x, extended 2x, exploratory 1x. Runs parallel to EF-CQS for comparison.
+
+### Metric Importance Tiers (M8.1)
+
+Each metric has an `importance_tier` in `metrics.yaml`:
+
+| Tier | Count | Weight | Target | Metrics |
+|------|-------|--------|--------|---------|
+| **core** | 8 | 3.0 | 0.99 | Revenue, NetIncome, TotalAssets, OperatingCashFlow, StockholdersEquity, OperatingIncome, EarningsPerShareDiluted, TotalLiabilities |
+| **extended** | 14 | 2.0 | 0.95 | COGS, SGA, PretaxIncome, Capex, LongTermDebt, CashAndEquivalents, GrossProfit, CurrentAssets, CurrentLiabilities, IncomeTaxExpense, DepreciationAmortization, InterestExpense, WeightedAverageSharesDiluted, RetainedEarnings |
+| **exploratory** | 14 | 1.0 | 0.80 | Goodwill, IntangibleAssets, ShortTermDebt, StockBasedCompensation, DividendsPaid, Inventory, AccountsReceivable, AccountsPayable, ResearchAndDevelopment, PropertyPlantEquipment, InvestingCashFlow, FinancingCashFlow, ShareRepurchases, DividendPerShare |
+| **derived** | 1 | — | — | EarningsPerShareBasic (not scored directly) |
+
+**Weighted EF-CQS formula:**
+```
+weighted_ef_cqs = Σ(tier_weight × tier_ef_rate) / Σ(tier_weight)
+```
+
+### Company Quality Tiers (M8.3)
+
+Companies are classified based on CQS scores:
+
+| Tier | Criteria | Meaning |
+|------|----------|---------|
+| **verified** | ef_cqs ≥ 0.95 AND headline_ef_rate ≥ 0.99 | Ready for production/expansion |
+| **provisional** | ef_cqs ≥ 0.80 | Functional but needs improvement |
+| **excluded** | ef_cqs < 0.80 | Not ready — needs investigation |
+
+Stored as `quality_tier` field in `companies.yaml`. Updated via `update_company_tiers()`.
+
+### Formula Validation Harness (M9.3)
+
+`diagnose_composite_metric(ticker, metric)` validates composite formulas across multiple fiscal years. Entry point for debugging composites like ShortTermDebt, IntangibleAssets, DepreciationAmortization.
+
+`validate_formula_across_periods()` on `ReferenceValidator` resolves formula components (company → sector → default) and checks per-period stability.
 
 ### Multi-Layer Mapping Engine
 

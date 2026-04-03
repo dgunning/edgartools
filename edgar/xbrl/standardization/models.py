@@ -222,6 +222,7 @@ class MetricConfig:
     standardization: Optional[Dict[str, Any]] = None  # Composite formula rules for SA scoring
     known_variances: Optional[Dict[str, Any]] = None  # Per-company explained variance records
     sign_convention: Optional[str] = None  # "negate" to flip XBRL sign before comparison
+    importance_tier: str = "exploratory"  # "core" | "extended" | "exploratory" | "derived"
 
     def matches_concept(self, concept: str) -> bool:
         """Check if a concept matches this metric's known concepts."""
@@ -251,6 +252,7 @@ class CompanyConfig:
     fiscal_year_end: str = "December"
     industry: Optional[str] = None  # e.g., "financial_services", "technology"
     validation_tolerance_pct: Optional[float] = None  # Company-specific tolerance override
+    quality_tier: Optional[str] = None  # "verified" | "provisional" | "excluded"
 
     def should_skip_metric(self, metric: str) -> bool:
         """Check if a metric should be skipped for this company."""
