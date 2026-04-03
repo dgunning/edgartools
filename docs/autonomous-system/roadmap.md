@@ -42,6 +42,8 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 5m: Live benchmark | 50-company harness | 2026-03-24 | 2026-03-24 | - | - | 2-arm: typed vs raw control. `1f8ff896` |
 | 5n: OpenRouter AI | Gemini Flash via API | 2026-03-24 | 2026-03-24 | - | - | Replaced Agent Tool dispatch. `3ff69e2c`, `f2473a05` |
 
+| 10: Phase 10 fixes | EF-CQS 0.87+ | 2026-04-03 | 2026-04-03 | 0.8311 | 0.8684 | Importance tiers (Python constant), Phase 10 overrides (30+ exclusions, 60+ divergences), known_divergences bug fix. 112 explained variances, 45 remaining failures. |
+
 **Deferred items:** 3b (historical validation), 4a (S&P 500 expansion), 4c (event-driven processing).
 
 ---
@@ -129,6 +131,15 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - Final: CQS=0.8180, EF-CQS=0.8528, SA-CQS=0.7660. Extraction failed: 22→5.
 - Phase C: Accounting-identity formulas tested (OperatingIncome=GP-SGA-R&D, TotalLiabilities=Current+NonCurrent) — SA-CQS dropped -0.030, **reverted**. XBRL component sums don't match yfinance aggregation. Dimensional extraction already working (DimensionalAggregator handles CRM/ADBE/SNOW/NOW, no Python changes needed). 500-company expansion blocked (EF-CQS 0.8528 < 0.90 target).
 - Key: **SA-CQS +0.019 despite removing 102 formulas** — confirms formula pollution was hurting accuracy. Config-only ceiling reached. Next gains: multi-period golden masters (+0.08-0.12 CQS), per-company formula validation, concept-matching improvements. Commits: `295de9aa`, `2b775dc6`, `4e351943`, `b365a35a`.
+
+**Run 016 (2026-04-03)** — Phase 10: EF-CQS 0.8311 → 0.8684, known_divergences fix + importance tiers
+- 50 companies, snapshot_mode=True
+- Three changes: (1) importance tier assignments as Python constant in config_loader.py (WSL YAML persistence workaround), (2) Phase 10 company overrides (ShortTermDebt DebtCurrent for CAT/RTX/KO/NEE/HD, GrossProfit/R&D/CurrentAssets not_applicable for 30+ companies, 60+ known_divergences), (3) known_divergences bug fix in auto_eval.py + reference_validator.py
+- EF-CQS: 0.8311→0.8684 (+3.7pp), weighted_ef_cqs: 0.8189→0.8666 (+4.8pp), headline_ef_rate: 0.8624→0.9001 (+3.8pp)
+- Extraction failed: 5→0, explained variance: 0→112, total failures: 103→45 (-56%)
+- Remaining: 45 failures across 17 metrics. Biggest clusters: ShortTermDebt(6), LongTermDebt(5), COGS(5), PropertyPlantEquipment(4), Revenue(4), ShareRepurchases(4)
+- Key: **known_divergences were broken for unmapped metrics** — `_compute_company_cqs` didn't receive known_divergences set, and formula check in `_compare_values` overrode "explained" variance_type. Bug fix unlocked 112 explained variances. Core metrics: 5 failures (all TotalLiabilities), extended: 18, exploratory: 21.
+- Commit: `02f044ed`.
 
 ---
 
@@ -319,7 +330,7 @@ For each 50-company batch:
 
 ### Milestones
 
-- [ ] **M8.1: Define metric importance tiers** — Core 8 metrics (Revenue, NetIncome, TotalAssets, TotalLiabilities, Equity, OperatingIncome, OperatingCashFlow, EPS) at 0.99 EF-CQS, Extended metrics at 0.95, Exploratory best-effort. Weighted CQS formula.
+- [x] **M8.1: Define metric importance tiers** — Completed 2026-04-03. `02f044ed`. 8 core, 14 extended, 1 derived, 14 exploratory. Tiers persisted as `_DEFAULT_IMPORTANCE_TIERS` Python constant in config_loader.py. weighted_ef_cqs=0.8666.
 - [ ] **M8.2: Per-company EF-CQS histogram** — Generate EF-CQS distribution across 100-company cohort. Identify outlier companies dragging overall score. Dashboard integration.
 - [ ] **M8.3: Quality tier classification** — verified (EF-CQS >= 0.95) / provisional (0.80-0.95) / excluded (<0.80). Only verified companies included in published data. Provisional companies flagged for investigation.
 - [ ] **M8.4: CQS v2 documentation** — Document scoring model changes (yfinance backdoor removal, SA demotion, FACTS_SEARCH source). Version bump tracking for reproducibility.
@@ -332,7 +343,7 @@ For each 50-company batch:
 
 ### Milestones
 
-- [ ] **M9.1: Composite ShortTermDebt engine** — 5 remaining companies (CAT, RTX, KO, NEE, HD) need composite extraction for ShortTermDebt. DimensionalAggregator pattern from CRM/ADBE/SNOW/NOW as reference.
+- [x] **M9.1: Composite ShortTermDebt engine** — Completed 2026-04-03. `02f044ed`. Used DebtCurrent preferred_concept override instead of composite engine. Applied programmatically via `_apply_phase10_overrides()` in config_loader.py for CAT/RTX/KO/NEE/HD. All 5 companies now pass ShortTermDebt validation.
 - [ ] **M9.2: Golden master revalidation** — Re-run golden master validation under CQS v2 scoring (no yfinance backdoor, SA as diagnostic). Some golden masters may flip — investigate and update.
 - [ ] **M9.3: Per-company formula validation harness** — Test formulas across 3+ fiscal years per company. Multi-period bug fix (Consensus 020 Step 1) enables this. Ensures formulas aren't overfitting to a single period.
 

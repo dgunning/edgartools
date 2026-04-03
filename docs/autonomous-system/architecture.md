@@ -16,13 +16,16 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 | Metric | Value | Updated |
 |--------|-------|---------|
 | CQS | 0.8180 | 2026-04-02 |
-| EF-CQS | 0.8329 | 2026-04-02 |
+| EF-CQS | 0.8684 | 2026-04-03 |
+| Weighted EF-CQS | 0.8666 | 2026-04-03 |
 | SA-CQS (diagnostic) | 0.7660 | 2026-04-02 |
-| Headline EF | 86.9% | 2026-04-02 |
-| EF Pass Rate | 83.3% | 2026-04-02 |
+| Headline EF | 90.0% | 2026-04-03 |
+| EF Pass Rate | 86.8% | 2026-04-03 |
 | RFA Rate | 86.5% | 2026-04-02 |
-| Extraction Failed | 0 (5→0 via M9.1 ShortTermDebt fixes) | 2026-04-03 |
-| Scoring Version | v2 + tier weighting (M8.1) | 2026-04-03 |
+| Extraction Failed | 0 | 2026-04-03 |
+| Explained Variance | 112 (known_divergences properly excluded from scoring) | 2026-04-03 |
+| Remaining Failures | 45 (was 103 pre-Phase 10) | 2026-04-03 |
+| Scoring Version | v2 + tier weighting (M8.1) + known_divergences fix | 2026-04-03 |
 | Companies | 100 | |
 | Metrics | 37 base + 3 derived (8 core / 14 extended / 14 exploratory / 1 derived) | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
@@ -32,7 +35,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **Scoring model: CQS v2** (Consensus 020). Changes: (1) yfinance `is_match` backdoor removed from EF scoring — EF now measures extraction fidelity only (known_concept, tree_source, facts_search paths). (2) SA-CQS demoted from decision gate to diagnostic WARNING — SA measures yfinance-compatibility, not extraction correctness. (3) `FACTS_SEARCH` is a distinct `MappingSource` — no longer mislabeled as TREE. (4) Multi-period validation passes fiscal_year to SEC Facts API. (5) `ef_pass_reason` field added to `ValidationResult` for scoring path diagnostics.
 
-**Note on CQS/EF-CQS values:** CQS v2 baseline measured on 50-company EXPANSION_COHORT_50 with `snapshot_mode=True`. EF-CQS dropped 0.8528→0.8329 (honest: yfinance backdoor removed). EF-pass path distribution: 95.1% known_concept, 1.6% tree_source, 0.1% facts_search, 3.1% none (132 EF failures = real concept gaps). SA-CQS 0.7660 unchanged (still computed, no longer gating). Zero regressions. Config-only ceiling reached; next gains require multi-period golden masters or per-company formula validation. 100-company CQS is 0.9121 (last measured 2026-03-27, pre-reform).
+**Note on CQS/EF-CQS values:** Phase 10 (2026-04-03) achieved EF-CQS 0.8684 (+3.7pp from 0.8311) through three changes: (1) importance tier assignments persisted as Python constant fallback in `config_loader.py`, (2) Phase 10 company overrides applied programmatically (ShortTermDebt DebtCurrent for 5 companies, GrossProfit/R&D/CurrentAssets not_applicable exclusions for 30+ companies, 60+ known_divergences for structural mismatches), (3) known_divergences bug fix — unmapped metrics with known_divergences now properly treated as "explained" in CQS scoring (was broken: `_compute_company_cqs` didn't receive known_divergences set, and formula check overrode "explained" variance_type). Result: 112 explained variances, 45 remaining failures (down from 103). Core metrics: 5 failures, extended: 18, exploratory: 21.
 
 ---
 
@@ -77,7 +80,7 @@ CQS = 0.45 * pass_rate
 
 ### Metric Importance Tiers (M8.1)
 
-Each metric has an `importance_tier` in `metrics.yaml`:
+Each metric has an `importance_tier` defined in `_DEFAULT_IMPORTANCE_TIERS` constant in `config_loader.py` (with YAML fallback):
 
 | Tier | Count | Weight | Target | Metrics |
 |------|-------|--------|--------|---------|
