@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.28.3] - 2026-04-03
+
+### Fixed
+
+- **Wrong quarter labels for non-calendar fiscal years** — Quarter labels in financial statement columns now use the company's fiscal year end month instead of hardcoded calendar months. Affects companies like AAPL (Sep FY), WMT (Jan FY), NKE (May FY) ([#752](https://github.com/dgunning/edgartools/issues/752))
+
+- **Period-type suffixes always present on DataFrame columns** — `to_dataframe()` now always includes period-type suffixes (Q1/Q2/Q3/Q4/YTD/FY) on all duration columns, not just when end dates collide ([#753](https://github.com/dgunning/edgartools/issues/753))
+
+- **Incorrect Q4 fiscal year label for Jan-Mar FYE companies** — Companies with fiscal years ending in January through March (e.g., WMT) now receive the correct Q4/FY label rather than a label belonging to the following calendar year ([#754](https://github.com/dgunning/edgartools/issues/754))
+
+- **Capex extraction broken by label regex** — Capital expenditure extraction now uses XBRL concept names (`PaymentsToAcquirePropertyPlantAndEquipment`, etc.) instead of fragile label regex matching, making it robust across filings with varied label text ([#756](https://github.com/dgunning/edgartools/issues/756))
+
 ## [5.28.2] - 2026-04-02
 
 ### Added
@@ -12,8 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FDUS investment parser** — Add support for FDUS BDC investment parsing ([#747](https://github.com/dgunning/edgartools/issues/747))
 
 ### Fixed
-
-- **Wrong quarter labels for non-calendar fiscal years** — Quarter labels in financial statement columns now use the company's fiscal year end month instead of hardcoded calendar months. Affects companies like AAPL (Sep FY), WMT (Jan FY), NKE (May FY). Also, `to_dataframe()` now always includes period-type suffixes (Q1/Q2/Q3/Q4/YTD/FY) on all duration columns, not just when end dates collide ([#752](https://github.com/dgunning/edgartools/issues/752), [#753](https://github.com/dgunning/edgartools/issues/753))
 
 - **business_category misclassifications** — Fix ETFs, SPACs, commodity trusts, and BDCs being misclassified. Adds SPAC name pattern detection, "ETF" name check for crypto/commodity ETFs, SIC 6200s fund/trust heuristic, removes over-broad "CAPITAL CORP" BDC name pattern, and uses authoritative 814- file number for BDC detection ([#561](https://github.com/dgunning/edgartools/issues/561))
 
