@@ -788,19 +788,9 @@ def compute_cqs(
     # Build exclusion reasons per ticker (Consensus 018)
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(eval_cohort, orchestrator)
 
-    # Pre-build metric tier map once for all companies (M8.1)
-    _tier_map = {
-        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
-        for name, mc in orchestrator.config.metrics.items()
-    } if orchestrator.config else {}
-
-    # Pre-build known_divergences per ticker for explained variance scoring
-    _kd_by_ticker = {}
-    if orchestrator.config:
-        for t in eval_cohort:
-            cc = orchestrator.config.get_company(t)
-            if cc and cc.known_divergences:
-                _kd_by_ticker[t] = set(cc.known_divergences.keys())
+    # Pre-build per-ticker lookup dicts (M8.1 + Phase 10)
+    _tier_map = _build_metric_tier_map(orchestrator)
+    _kd_by_ticker = _build_known_divergences_by_ticker(eval_cohort, orchestrator)
 
     # Compute per-company scores
     company_scores: Dict[str, CompanyCQS] = {}
@@ -960,18 +950,8 @@ def compute_cqs_incremental(
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(affected_in_cohort, orchestrator)
 
     # Pre-build metric tier map once (M8.1)
-    _tier_map = {
-        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
-        for name, mc in orchestrator.config.metrics.items()
-    } if orchestrator.config else {}
-
-    # Pre-build known_divergences per ticker
-    _kd_by_ticker = {}
-    if orchestrator.config:
-        for t in affected_in_cohort:
-            cc = orchestrator.config.get_company(t)
-            if cc and cc.known_divergences:
-                _kd_by_ticker[t] = set(cc.known_divergences.keys())
+    _tier_map = _build_metric_tier_map(orchestrator)
+    _kd_by_ticker = _build_known_divergences_by_ticker(affected_in_cohort, orchestrator)
 
     # Build updated company_scores: start from baseline, substitute affected
     updated_scores = dict(baseline_result.company_scores)
@@ -1087,18 +1067,8 @@ def compute_cqs_incremental_batch(
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(affected_in_cohort, orchestrator)
 
     # Pre-build metric tier map once (M8.1)
-    _tier_map = {
-        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
-        for name, mc in orchestrator.config.metrics.items()
-    } if orchestrator.config else {}
-
-    # Pre-build known_divergences per ticker
-    _kd_by_ticker = {}
-    if orchestrator.config:
-        for t in affected_in_cohort:
-            cc = orchestrator.config.get_company(t)
-            if cc and cc.known_divergences:
-                _kd_by_ticker[t] = set(cc.known_divergences.keys())
+    _tier_map = _build_metric_tier_map(orchestrator)
+    _kd_by_ticker = _build_known_divergences_by_ticker(affected_in_cohort, orchestrator)
 
     updated_scores = dict(baseline_result.company_scores)
     for ticker in affected_in_cohort:
@@ -1211,8 +1181,7 @@ def _compute_company_cqs(
         # Handle documented divergences — exclude from pass/fail scoring
         # (no penalty, no unearned credit; still counts as mapped)
         is_explained = (val_result and val_result.variance_type == "explained")
-        # Also treat as explained if metric has known_divergence but no val_result
-        # (unmapped metrics with documented structural divergences)
+        # Unmapped metrics never get a val_result, so check known_divergences directly
         if not is_explained and known_divergences and metric in known_divergences:
             is_explained = True
         if is_explained:
@@ -1727,6 +1696,27 @@ def _build_exclusion_reasons_by_ticker(tickers, orchestrator) -> Dict[str, Dict[
     return {ticker: orchestrator.config.get_excluded_metrics_for_company(ticker) for ticker in tickers}
 
 
+def _build_known_divergences_by_ticker(tickers, orchestrator) -> Dict[str, set]:
+    """Pre-compute known divergence metric sets per ticker for explained variance scoring."""
+    result: Dict[str, set] = {}
+    if orchestrator.config:
+        for t in tickers:
+            cc = orchestrator.config.get_company(t)
+            if cc and cc.known_divergences:
+                result[t] = set(cc.known_divergences.keys())
+    return result
+
+
+def _build_metric_tier_map(orchestrator) -> Dict[str, str]:
+    """Pre-compute metric importance tier map (derived → exploratory for scoring)."""
+    if not orchestrator.config:
+        return {}
+    return {
+        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
+        for name, mc in orchestrator.config.metrics.items()
+    }
+
+
 def _cqs_formula(pass_rate: float, mean_variance: float, coverage_rate: float,
                  golden_master_rate: float, regression_count: int) -> float:
     """Compute CQS from sub-metrics. Single source of truth for the formula weights."""
@@ -1821,18 +1811,8 @@ def identify_gaps(
     exclusion_reasons_by_ticker = _build_exclusion_reasons_by_ticker(eval_cohort, orchestrator)
 
     # Pre-build metric tier map once (M8.1)
-    _tier_map = {
-        name: (mc.importance_tier if mc.importance_tier != "derived" else "exploratory")
-        for name, mc in orchestrator.config.metrics.items()
-    } if orchestrator.config else {}
-
-    # Pre-build known_divergences per ticker
-    _kd_by_ticker = {}
-    if orchestrator.config:
-        for t in eval_cohort:
-            cc = orchestrator.config.get_company(t)
-            if cc and cc.known_divergences:
-                _kd_by_ticker[t] = set(cc.known_divergences.keys())
+    _tier_map = _build_metric_tier_map(orchestrator)
+    _kd_by_ticker = _build_known_divergences_by_ticker(eval_cohort, orchestrator)
 
     company_scores: Dict[str, 'CompanyCQS'] = {}
     for ticker, metrics in all_results.items():

@@ -323,7 +323,7 @@ class ConfigLoader:
                         cc.known_divergences[metric] = {
                             "form_types": ["10-K"],
                             "variance_pct": var_pct,
-                            "reason": f"Phase 10: structural extraction mismatch.",
+                            "reason": "Phase 10: structural extraction mismatch.",
                             "skip_validation": True,
                             "added_date": "2026-04-03",
                             "remediation_status": "deferred",

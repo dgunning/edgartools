@@ -2423,10 +2423,8 @@ class ReferenceValidator:
             # Only override if not already explained by known_divergence
             formula_components = self._resolve_formula_components(metric, ticker)
             if formula_components:
-                    variance_type = "standardized"
-                    # SA scoring happens in the caller (which has access to xbrl)
-                    # Here we just record the formula existence
-                    sa_pass = is_match  # Will be refined when SA computation is wired
+                variance_type = "standardized"
+                sa_pass = is_match
 
         # SA defaults to raw match when no standardization formula exists
         if sa_pass is None:
