@@ -472,10 +472,7 @@ class DefaultExtractor(IndustryExtractor):
     industry_name = "default"
     
     def extract_short_term_debt(self, xbrl, facts_df) -> ExtractedMetric:
-        # Standard composite: sum of short-term debt components
-        # LongTermDebtCurrent has fallbacks: many companies use
-        # LongTermDebtAndCapitalLeaseObligationsCurrent or
-        # LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths instead.
+        # Many companies use alternative concepts for current portion of LT debt
         ltdc_candidates = [
             ('LongTermDebtCurrent', 'us-gaap:LongTermDebtCurrent'),
             ('LongTermDebtAndCapitalLeaseObligationsCurrent', 'us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent'),
@@ -486,17 +483,14 @@ class DefaultExtractor(IndustryExtractor):
         found_any = False
         used_concept = None
 
-        # Try LongTermDebtCurrent with fallbacks
         for name, concept in ltdc_candidates:
             val = self._get_fact_value(facts_df, name)
             if val is not None:
                 total += val
                 found_any = True
-                if used_concept is None:
-                    used_concept = concept
-                break  # Use first found fallback
+                used_concept = concept
+                break
 
-        # Add CommercialPaper and ShortTermBorrowings
         for name, concept in [('CommercialPaper', 'us-gaap:CommercialPaper'),
                                ('ShortTermBorrowings', 'us-gaap:ShortTermBorrowings')]:
             val = self._get_fact_value(facts_df, name)

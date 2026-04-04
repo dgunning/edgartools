@@ -2252,15 +2252,7 @@ class ReferenceValidator:
             weighted_total = 0.0
             weighted_found = 0
             for concept_or_list, weight in formula_components:
-                # Support fallback concept lists: try each until one is found
-                if isinstance(concept_or_list, list):
-                    candidates = [c if ':' in c else f"us-gaap:{c}" for c in concept_or_list]
-                    val = self._extract_xbrl_value(xbrl, candidates)
-                    label = concept_or_list[0]  # Use primary for logging
-                else:
-                    label = concept_or_list
-                    concept_full = concept_or_list if ':' in concept_or_list else f"us-gaap:{concept_or_list}"
-                    val = self._extract_xbrl_value(xbrl, concept_full)
+                label, val = self._extract_formula_concept(xbrl, concept_or_list)
                 if val is not None:
                     weighted_total += val * weight
                     weighted_found += 1
@@ -2375,19 +2367,17 @@ class ReferenceValidator:
                 notes="Mapping found, value extraction pending"
             )
         
-        # Apply sign convention: metric-level first, then company override
+        # Apply sign convention and scale factor
         metric_config = self.config.get_metric(metric) if self.config else None
         company_config = self.config.get_company(ticker) if self.config else None
+        override = company_config.metric_overrides.get(metric) if company_config else None
+
         if metric_config and metric_config.sign_convention == "negate":
             xbrl_value = -xbrl_value
-        elif company_config and metric in company_config.metric_overrides:
-            override = company_config.metric_overrides[metric]
-            if override.get('sign_negate'):
-                xbrl_value = -xbrl_value
+        elif override and override.get('sign_negate'):
+            xbrl_value = -xbrl_value
 
-        # Apply scale factor if specified (e.g., MCD reports shares in millions)
-        if company_config and metric in company_config.metric_overrides:
-            override = company_config.metric_overrides[metric]
+        if override:
             sf = override.get('scale_factor')
             if sf is not None:
                 xbrl_value = xbrl_value * sf
@@ -2506,7 +2496,23 @@ class ReferenceValidator:
         )
     
     @staticmethod
-    def _parse_component(component) -> Tuple:
+    def _qualify_concept(concept: str) -> str:
+        """Add us-gaap: prefix if no namespace present."""
+        return concept if ':' in concept else f"us-gaap:{concept}"
+
+    def _extract_formula_concept(self, xbrl, concept_or_list) -> Tuple[str, Optional[float]]:
+        """Extract value for a formula concept (string or fallback list).
+
+        Returns (label, value) where label is the primary concept name for logging.
+        """
+        if isinstance(concept_or_list, list):
+            candidates = [self._qualify_concept(c) for c in concept_or_list]
+            return concept_or_list[0], self._extract_xbrl_value(xbrl, candidates)
+        qualified = self._qualify_concept(concept_or_list)
+        return concept_or_list, self._extract_xbrl_value(xbrl, qualified)
+
+    @staticmethod
+    def _parse_component(component) -> Tuple[Union[str, List[str]], float]:
         """Parse a formula component into (concept_or_list, weight).
 
         Supports:
@@ -2599,14 +2605,7 @@ class ReferenceValidator:
         components_found = 0
         component_values = {}
         for concept_or_list, weight in formula_components:
-            # Support fallback concept lists
-            if isinstance(concept_or_list, list):
-                candidates = [c if ':' in c else f"us-gaap:{c}" for c in concept_or_list]
-                val = self._extract_xbrl_value(xbrl, candidates)
-                label = concept_or_list[0]
-            else:
-                label = concept_or_list
-                val = self._extract_xbrl_value(xbrl, concept_or_list)
+            label, val = self._extract_formula_concept(xbrl, concept_or_list)
             if val is not None:
                 composite += val * weight
                 components_found += 1
