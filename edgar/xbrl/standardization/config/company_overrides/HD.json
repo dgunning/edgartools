@@ -8,15 +8,6 @@
   },
   "quality_tier": "provisional",
   "known_divergences": {
-    "ShortTermDebt": {
-      "form_types": [
-        "10-K"
-      ],
-      "variance_pct": 95.0,
-      "reason": "Phase 11: Only CommercialPaper in XBRL. yfinance includes current portion of LT debt. Needs composite formula.",
-      "skip_validation": true,
-      "added_date": "2026-04-03"
-    },
     "PropertyPlantEquipment": {
       "form_types": [
         "10-K"
