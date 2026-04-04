@@ -473,24 +473,39 @@ class DefaultExtractor(IndustryExtractor):
     
     def extract_short_term_debt(self, xbrl, facts_df) -> ExtractedMetric:
         # Standard composite: sum of short-term debt components
-        concepts = [
+        # LongTermDebtCurrent has fallbacks: many companies use
+        # LongTermDebtAndCapitalLeaseObligationsCurrent or
+        # LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths instead.
+        ltdc_candidates = [
             ('LongTermDebtCurrent', 'us-gaap:LongTermDebtCurrent'),
-            ('CommercialPaper', 'us-gaap:CommercialPaper'),
-            ('ShortTermBorrowings', 'us-gaap:ShortTermBorrowings'),
+            ('LongTermDebtAndCapitalLeaseObligationsCurrent', 'us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent'),
+            ('LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths', 'us-gaap:LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths'),
         ]
-        
+
         total = 0.0
         found_any = False
         used_concept = None
-        
-        for name, concept in concepts:
+
+        # Try LongTermDebtCurrent with fallbacks
+        for name, concept in ltdc_candidates:
             val = self._get_fact_value(facts_df, name)
             if val is not None:
                 total += val
                 found_any = True
                 if used_concept is None:
                     used_concept = concept
-        
+                break  # Use first found fallback
+
+        # Add CommercialPaper and ShortTermBorrowings
+        for name, concept in [('CommercialPaper', 'us-gaap:CommercialPaper'),
+                               ('ShortTermBorrowings', 'us-gaap:ShortTermBorrowings')]:
+            val = self._get_fact_value(facts_df, name)
+            if val is not None:
+                total += val
+                found_any = True
+                if used_concept is None:
+                    used_concept = concept
+
         return ExtractedMetric(
             standard_name="ShortTermDebt",
             industry_counterpart=None,

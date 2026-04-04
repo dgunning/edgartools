@@ -298,6 +298,11 @@ class ReferenceValidator:
             'IndefiniteLivedTrademarks',  # KO uses this instead
             'OtherIntangibleAssetsNet',
         ],
+        'LongTermDebtCurrent': [
+            'LongTermDebtCurrent',
+            'LongTermDebtAndCapitalLeaseObligationsCurrent',
+            'LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths',
+        ],
         # Note: FiniteLivedIntangibleAssetsNet moved to subcomponents in _defaults.json
         # (summed with IndefiniteLivedIntangibleAssetsExcludingGoodwill, not an alternative)
     }
@@ -2379,6 +2384,13 @@ class ReferenceValidator:
             override = company_config.metric_overrides[metric]
             if override.get('sign_negate'):
                 xbrl_value = -xbrl_value
+
+        # Apply scale factor if specified (e.g., MCD reports shares in millions)
+        if company_config and metric in company_config.metric_overrides:
+            override = company_config.metric_overrides[metric]
+            sf = override.get('scale_factor')
+            if sf is not None:
+                xbrl_value = xbrl_value * sf
 
         # Both values exist, compare using absolute values
         # (sign conventions differ between XBRL and yfinance for cash flows)

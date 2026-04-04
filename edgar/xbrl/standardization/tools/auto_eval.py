@@ -916,6 +916,8 @@ _REFERENCE_MISMATCHES: Dict[Tuple[str, str], str] = {
     ("CAT", "AccountsReceivable"): "yfinance includes CAT Financial receivables",
     ("UNH", "AccountsPayable"): "yfinance includes medical claims payable",
     ("AVGO", "ShareRepurchases"): "September FYE timing mismatch",
+    ("BAC", "ShareRepurchases"): "common only vs total — yfinance includes preferred (11.1%)",
+    ("C", "ShareRepurchases"): "common only vs total — yfinance includes preferred (27.4%)",
     ("GS", "ShareRepurchases"): "common only vs total (21.6%)",
     ("RTX", "StockBasedCompensation"): "yfinance includes broader compensation scope",
     ("T", "IntangibleAssets"): "yfinance includes FCC spectrum licenses",

@@ -1,10 +1,5 @@
 {
-  "metric_overrides": {
-    "ShortTermDebt": {
-      "preferred_concept": "DebtCurrent",
-      "notes": "Phase 10: Use DebtCurrent."
-    }
-  },
+  "metric_overrides": {},
   "exclude_metrics": {
     "ResearchAndDevelopment": {
       "reason": "not_applicable",

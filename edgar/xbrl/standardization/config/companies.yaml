@@ -586,9 +586,6 @@ companies:
       DepreciationAmortization:
         preferred_concept: DepreciationDepletionAndAmortization
         notes: HON splits D&A on cash flow; DDA is the combined total ($1,334M)
-      ShortTermDebt:
-        preferred_concept: DebtCurrent
-        notes: HON ShortTermBorrowings ($4.3B) misses LongTermDebtCurrent. DebtCurrent is the total.
     known_divergences:
       DepreciationAmortization:
         form_types:
