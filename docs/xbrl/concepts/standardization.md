@@ -122,7 +122,7 @@ The number of standardized concepts varies by provider:
 | `RetirementRelatedNonCurrentLiabilities` | Retirement Related Liabilities, Non-Current | 18 | `AssetRetirementObligation`, `DeferredCompensationLiabilityClassifiedNoncurrent`, `DeferredCompensationLiabilityCurrentAndNoncurrent`, ... |
 | `OperatingLeaseNonCurrentDebtEquivalent` | Operating Lease Liability, Non-Current | 3 | `OperatingLeaseLiability`, `OperatingLeaseLiabilityNoncurrent`, `OperatingLeaseLiabilityStatementOfFinancialPositionExtensibleList` |
 | `OngoingOperatingProvisions(WarrantiesEtc)` | Warranty and Other Provisions | 22 | `ContractWithCustomerRefundLiability`, `ContractWithCustomerRefundLiabilityNoncurrent`, `CustomerAdvancesAndDeposits`, ... |
-| `DefinteLivedOperatingProvisions(DecommissioningEtc)` | Asset Retirement Obligations | 10 | `AccruedCappingClosurePostClosureAndEnvironmentalCosts`, `AccruedCappingClosurePostClosureAndEnvironmentalCostsNoncurrent`, `AssetRetirementObligationsNoncurrent`, ... |
+| `DefiniteLivedOperatingProvisions(DecommissioningEtc)` | Asset Retirement Obligations | 10 | `AccruedCappingClosurePostClosureAndEnvironmentalCosts`, `AccruedCappingClosurePostClosureAndEnvironmentalCostsNoncurrent`, `AssetRetirementObligationsNoncurrent`, ... |
 | `RestructuringProvisions` | Restructuring Provisions | 2 | `RestructuringReserve`, `RestructuringReserveNoncurrent` |
 | `NonCurrentLiabilitiesTotal` | Total Non-Current Liabilities | 1 | `LiabilitiesNoncurrent` |
 | `Liabilities` | Total Liabilities | 1 | `Liabilities` |
@@ -155,7 +155,7 @@ The number of standardized concepts varies by provider:
 
 | Standard Concept | Display Name | XBRL Tags | Examples |
 |------------------|--------------|-----------|----------|
-| `ResearchAndDevelopementExpenses` | Research and Development Expense | 6 | `ExplorationExpense`, `ResearchAndDevelopmentAssetAcquiredOtherThanThroughBusinessCombinationWrittenOff`, `ResearchAndDevelopmentExpense`, ... |
+| `ResearchAndDevelopmentExpenses` | Research and Development Expense | 6 | `ExplorationExpense`, `ResearchAndDevelopmentAssetAcquiredOtherThanThroughBusinessCombinationWrittenOff`, `ResearchAndDevelopmentExpense`, ... |
 | `SellingGeneralAndAdminExpenses` | Selling, General and Administrative Expense | 16 | `CommunicationsAndInformationTechnology`, `GeneralAndAdministrativeExpense`, `GeneralInsuranceExpense`, ... |
 | `MarketingExpenses` | Marketing Expense | 4 | `AdvertisingExpense`, `CooperativeAdvertisingExpense`, `MarketingAndAdvertisingExpense`, ... |
 | `DepreciationExpense` | Depreciation Expense | 13 | `CapitalizedComputerSoftwareAmortization`, `CapitalizedComputerSoftwareImpairments`, `CostDepreciationAmortizationAndDepletion`, ... |
@@ -286,7 +286,7 @@ Following the ASC 842 lease accounting standard, the taxonomy includes:
 The taxonomy distinguishes between:
 
 - **Ongoing Provisions**: `OngoingOperatingProvisions(WarrantiesEtc)` - recurring obligations
-- **Definite-Lived Provisions**: `DefinteLivedOperatingProvisions(DecommissioningEtc)` - asset retirement
+- **Definite-Lived Provisions**: `DefiniteLivedOperatingProvisions(DecommissioningEtc)` - asset retirement
 - **Restructuring**: `RestructuringProvisions` - one-time reorganization costs
 
 ---

@@ -274,7 +274,7 @@ class UnmappedTagLogger:
             ("net sales", "IncomeStatement"): ("Revenue", 0.80),
             # Expense patterns
             ("cost of", "IncomeStatement"): ("CostOfGoodsAndServicesSold", 0.70),
-            ("research", "IncomeStatement"): ("ResearchAndDevelopementExpenses", 0.75),
+            ("research", "IncomeStatement"): ("ResearchAndDevelopmentExpenses", 0.75),
             ("selling", "IncomeStatement"): ("SellingGeneralAndAdminExpenses", 0.70),
             # Asset patterns
             ("cash", "BalanceSheet"): ("CashAndMarketableSecurities", 0.75),

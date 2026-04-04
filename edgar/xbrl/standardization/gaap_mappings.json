@@ -15716,7 +15716,7 @@
   },
   "ResearchAndDevelopmentExpense": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ],
     "display_name": "Research and Development Expense",
     "statement": "IncomeStatement",
@@ -15732,7 +15732,7 @@
     "industry_overrides": {
       "Aero": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15741,7 +15741,7 @@
       },
       "Agric": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15750,7 +15750,7 @@
       },
       "Autos": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15759,7 +15759,7 @@
       },
       "Banks": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15768,7 +15768,7 @@
       },
       "BldMt": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15777,7 +15777,7 @@
       },
       "BusSv": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15786,7 +15786,7 @@
       },
       "Chems": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15795,7 +15795,7 @@
       },
       "Chips": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15804,7 +15804,7 @@
       },
       "Comps": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15813,7 +15813,7 @@
       },
       "Drugs": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15822,7 +15822,7 @@
       },
       "ElcEq": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15831,7 +15831,7 @@
       },
       "Fin": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15840,7 +15840,7 @@
       },
       "Food": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15849,7 +15849,7 @@
       },
       "Fun": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15858,7 +15858,7 @@
       },
       "Gold": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15867,7 +15867,7 @@
       },
       "Guns": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15876,7 +15876,7 @@
       },
       "Hlth": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15885,7 +15885,7 @@
       },
       "Hshld": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15894,7 +15894,7 @@
       },
       "Insur": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15903,7 +15903,7 @@
       },
       "LabEq": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15912,7 +15912,7 @@
       },
       "Mach": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15921,7 +15921,7 @@
       },
       "Meals": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15930,7 +15930,7 @@
       },
       "MedEq": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15939,7 +15939,7 @@
       },
       "Mines": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15948,7 +15948,7 @@
       },
       "Oil": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15957,7 +15957,7 @@
       },
       "Other": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15966,7 +15966,7 @@
       },
       "Paper": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15975,7 +15975,7 @@
       },
       "PerSv": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15984,7 +15984,7 @@
       },
       "RlEst": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -15993,7 +15993,7 @@
       },
       "Rtail": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -16002,7 +16002,7 @@
       },
       "Rubbr": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -16011,7 +16011,7 @@
       },
       "Ships": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -16020,7 +16020,7 @@
       },
       "Steel": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -16029,7 +16029,7 @@
       },
       "Telcm": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -16038,7 +16038,7 @@
       },
       "Toys": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -16047,7 +16047,7 @@
       },
       "Trans": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -16056,7 +16056,7 @@
       },
       "Whlsl": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -77100,7 +77100,7 @@
   },
   "ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ],
     "display_name": "Research and Development Expense",
     "statement": "IncomeStatement",
@@ -77116,7 +77116,7 @@
     "industry_overrides": {
       "Chips": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -77125,7 +77125,7 @@
       },
       "Drugs": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -77134,7 +77134,7 @@
       },
       "MedEq": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -82120,7 +82120,7 @@
   },
   "ResearchAndDevelopmentInProcess": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ],
     "display_name": "Research and Development Expense",
     "statement": "IncomeStatement",
@@ -82524,7 +82524,7 @@
   },
   "ExplorationExpense": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ],
     "display_name": "Research and Development Expense",
     "statement": "IncomeStatement",
@@ -82540,7 +82540,7 @@
     "industry_overrides": {
       "Gold": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -82549,7 +82549,7 @@
       },
       "Mines": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -82558,7 +82558,7 @@
       },
       "Oil": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -82864,7 +82864,7 @@
   },
   "RegulatoryLiabilityNoncurrent": {
     "standard_tags": [
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
@@ -82880,7 +82880,7 @@
     "industry_overrides": {
       "Util": {
         "standard_tags": [
-          "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+          "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
         ],
         "display_name": "Asset Retirement Obligations",
         "section": "Non-Current Liabilities",
@@ -88918,7 +88918,7 @@
   },
   "ResearchAndDevelopmentAssetAcquiredOtherThanThroughBusinessCombinationWrittenOff": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ],
     "display_name": "Research and Development Expense",
     "statement": "IncomeStatement",
@@ -90885,7 +90885,7 @@
   },
   "ResearchAndDevelopmentExpenseSoftwareExcludingAcquiredInProcessCost": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ],
     "display_name": "Research and Development Expense",
     "statement": "IncomeStatement",
@@ -91642,7 +91642,7 @@
   },
   "LitigationReserveNoncurrent": {
     "standard_tags": [
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
@@ -91658,7 +91658,7 @@
     "industry_overrides": {
       "Drugs": {
         "standard_tags": [
-          "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+          "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
         ],
         "display_name": "Asset Retirement Obligations",
         "section": "Non-Current Liabilities",
@@ -94336,7 +94336,7 @@
   },
   "MineReclamationAndClosingLiabilityNoncurrent": {
     "standard_tags": [
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
@@ -94352,7 +94352,7 @@
     "industry_overrides": {
       "Gold": {
         "standard_tags": [
-          "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+          "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
         ],
         "display_name": "Asset Retirement Obligations",
         "section": "Non-Current Liabilities",
@@ -97812,7 +97812,7 @@
   },
   "AccruedCappingClosurePostClosureAndEnvironmentalCostsNoncurrent": {
     "standard_tags": [
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
@@ -97828,7 +97828,7 @@
     "industry_overrides": {
       "Other": {
         "standard_tags": [
-          "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+          "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
         ],
         "display_name": "Asset Retirement Obligations",
         "section": "Non-Current Liabilities",
@@ -98032,7 +98032,7 @@
   "AccruedCappingClosurePostClosureAndEnvironmentalCosts": {
     "standard_tags": [
       "OtherNonOperatingCurrentLiabilities",
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Other Non-Operating Current Liabilities",
     "statement": "BalanceSheet",
@@ -98421,7 +98421,7 @@
   },
   "OilAndGasReclamationLiabilityNoncurrent": {
     "standard_tags": [
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
@@ -100715,7 +100715,7 @@
   },
   "SpentNuclearFuelObligationNoncurrent": {
     "standard_tags": [
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
@@ -101669,7 +101669,7 @@
   },
   "DecommissioningLiabilityNoncurrent": {
     "standard_tags": [
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
@@ -110549,7 +110549,7 @@
   "LiabilityForAsbestosAndEnvironmentalClaimsGross": {
     "standard_tags": [
       "OtherNonOperatingCurrentLiabilities",
-      "DefinteLivedOperatingProvisions(DecommissioningEtc)"
+      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
     ],
     "display_name": "Other Non-Operating Current Liabilities",
     "statement": "BalanceSheet",
@@ -135900,7 +135900,7 @@
   },
   "ifrs:ResearchAndDevelopmentExpense": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ],
     "display_name": "Research and Development Expense",
     "statement": "IncomeStatement",
@@ -135916,7 +135916,7 @@
     "industry_overrides": {
       "Aero": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135925,7 +135925,7 @@
       },
       "Agric": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135934,7 +135934,7 @@
       },
       "Autos": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135943,7 +135943,7 @@
       },
       "Banks": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135952,7 +135952,7 @@
       },
       "BldMt": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135961,7 +135961,7 @@
       },
       "BusSv": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135970,7 +135970,7 @@
       },
       "Chems": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135979,7 +135979,7 @@
       },
       "Chips": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135988,7 +135988,7 @@
       },
       "Comps": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -135997,7 +135997,7 @@
       },
       "Drugs": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136006,7 +136006,7 @@
       },
       "ElcEq": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136015,7 +136015,7 @@
       },
       "Fin": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136024,7 +136024,7 @@
       },
       "Food": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136033,7 +136033,7 @@
       },
       "Fun": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136042,7 +136042,7 @@
       },
       "Gold": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136051,7 +136051,7 @@
       },
       "Guns": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136060,7 +136060,7 @@
       },
       "Hlth": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136069,7 +136069,7 @@
       },
       "Hshld": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136078,7 +136078,7 @@
       },
       "Insur": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136087,7 +136087,7 @@
       },
       "LabEq": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136096,7 +136096,7 @@
       },
       "Mach": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136105,7 +136105,7 @@
       },
       "Meals": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136114,7 +136114,7 @@
       },
       "MedEq": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136123,7 +136123,7 @@
       },
       "Mines": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136132,7 +136132,7 @@
       },
       "Oil": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136141,7 +136141,7 @@
       },
       "Other": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136150,7 +136150,7 @@
       },
       "Paper": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136159,7 +136159,7 @@
       },
       "PerSv": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136168,7 +136168,7 @@
       },
       "RlEst": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136177,7 +136177,7 @@
       },
       "Rtail": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136186,7 +136186,7 @@
       },
       "Rubbr": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136195,7 +136195,7 @@
       },
       "Ships": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136204,7 +136204,7 @@
       },
       "Steel": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136213,7 +136213,7 @@
       },
       "Telcm": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136222,7 +136222,7 @@
       },
       "Toys": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136231,7 +136231,7 @@
       },
       "Trans": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -136240,7 +136240,7 @@
       },
       "Whlsl": {
         "standard_tags": [
-          "ResearchAndDevelopementExpenses"
+          "ResearchAndDevelopmentExpenses"
         ],
         "display_name": "Research and Development Expense",
         "section": "Operating Expenses",
@@ -137172,7 +137172,7 @@
   },
   "ifrs-full_ResearchAndDevelopmentExpense": {
     "standard_tags": [
-      "ResearchAndDevelopementExpenses"
+      "ResearchAndDevelopmentExpenses"
     ]
   },
   "ifrs-full_OperatingExpense": {

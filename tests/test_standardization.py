@@ -386,7 +386,7 @@ def test_ifrs_tag_standardization():
     assert idx.get_standard_concept("ifrs-full_ProfitLossBeforeTax") == "PretaxIncomeLoss"
     assert idx.get_standard_concept("ifrs-full_ProfitLoss") == "ProfitLoss"
     assert idx.get_standard_concept("ifrs-full_ProfitLossFromOperatingActivities") == "OperatingIncomeLoss"
-    assert idx.get_standard_concept("ifrs-full_ResearchAndDevelopmentExpense") == "ResearchAndDevelopementExpenses"
+    assert idx.get_standard_concept("ifrs-full_ResearchAndDevelopmentExpense") == "ResearchAndDevelopmentExpenses"
 
     # Balance sheet
     assert idx.get_standard_concept("ifrs-full_Assets") == "Assets"
