@@ -15,21 +15,21 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.8300 | 2026-04-04 |
-| EF-CQS | 0.8740 | 2026-04-04 |
-| Pure EF | ~0.93+ (excl. reference mismatches) | 2026-04-04 |
+| CQS | 0.8272 (100-co) / 0.8383 (50-co) | 2026-04-04 |
+| EF-CQS | 0.8544 (100-co) / 0.8740 (50-co) | 2026-04-04 |
+| Pure EF | 0.8476 (100-co) / 0.8623 (50-co) | 2026-04-04 |
 | Weighted EF-CQS | ~0.87 | 2026-04-04 |
 | SA-CQS (diagnostic) | 0.8597 | 2026-04-03 |
-| Headline EF | ~91% | 2026-04-04 |
-| EF Pass Rate | 87.4% | 2026-04-04 |
+| Headline EF | 88.6% (100-co) / 90.0% (50-co) | 2026-04-04 |
+| EF Pass Rate | 96.2% (100-co) / 98.0% (50-co) | 2026-04-04 |
 | Extraction Failed | 0 | 2026-04-04 |
-| Explained Variance | 141 | 2026-04-04 |
-| TotalLiabilities | Composite formula active (L&SE - SE) | 2026-04-04 |
-| Company Tiers | 0 verified / 46 provisional / 4 excluded (DE, XOM, GE, COP) | 2026-04-03 |
+| Explained Variance | 81 reference mismatches | 2026-04-04 |
+| TotalLiabilities | Composite formula fixed + fallback concepts (11/11 pass) | 2026-04-04 |
+| Company Tiers | 100 companies: ~85 provisional, ~4 structural, 11 below 0.80 | 2026-04-04 |
 | Scoring Version | v2 + tier weighting (M8.1) + known_divergences fix + quality tiers (M8.3) | 2026-04-03 |
-| Industry Sections | 13 (banking, insurance, reits, energy + 8 new) | 2026-04-04 |
-| Config Architecture | Per-company JSON overrides (51 files), config_loader.py 484 lines | 2026-04-04 |
-| Companies | 100 (50 evaluated) | |
+| Industry Sections | 13 (banking, insurance, reits, energy + 8 new) + 17 new company mappings | 2026-04-04 |
+| Config Architecture | Per-company JSON overrides (52 files), config_loader.py 484 lines | 2026-04-04 |
+| Companies | 100 (100 evaluated) | |
 | Metrics | 37 base + 3 derived (8 core / 14 extended / 14 exploratory / 1 derived) | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
 | AI | Deterministic solver + Lead Agent closed loop (`run_closed_loop()`) + Graveyard replay (`replay_graveyard_proposals()`) | |
@@ -38,7 +38,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **Scoring model: CQS v2** (Consensus 020). Changes: (1) yfinance `is_match` backdoor removed from EF scoring — EF now measures extraction fidelity only (known_concept, tree_source, facts_search paths). (2) SA-CQS demoted from decision gate to diagnostic WARNING — SA measures yfinance-compatibility, not extraction correctness. (3) `FACTS_SEARCH` is a distinct `MappingSource` — no longer mislabeled as TREE. (4) Multi-period validation passes fiscal_year to SEC Facts API. (5) `ef_pass_reason` field added to `ValidationResult` for scoring path diagnostics.
 
-**Note on CQS/EF-CQS values:** Phase 11 achieved EF-CQS 0.8740 through investigation of all 108 gaps. Consensus 021 then restructured the config system: (1) Phase 10/11 Python overrides (543 lines) migrated to 51 per-company JSON files in `config/company_overrides/`, (2) 8 new industry sections added to `industry_metrics.yaml` (securities, asset_management, financial_services, telecom, utilities, transportation, franchise, health_insurance), (3) TotalLiabilities composite formula (L&SE - SE) recovers 11 previously excluded companies, (4) `compute_pure_ef()` measures extraction fidelity excluding 78 reference-standard mismatches.
+**Note on CQS/EF-CQS values:** Phase 13 expanded from 50 to 100 companies with EF-CQS 0.8544 (quality gate >= 0.85 passed). Original 50-company EF-CQS maintained at 0.8740 (zero regressions). Key Phase 13 fixes: (1) TotalLiabilities composite formula bug fixed (YAML nesting `formula.components` → `components`) + fallback from NCI equity to `StockholdersEquity` for AMZN/MCD/NKE, (2) PFE OperatingIncome classified as reference mismatch (impairment scope), (3) MCD shares `scale_factor` fix (iXBRL millions), (4) BAC/C ShareRepurchases classified as reference mismatch (preferred stock), (5) ShortTermDebt composite expanded with `LongTermDebtCurrent` fallback concepts (HD/HON/KO/RTX/CAT all pass), (6) Industry map expanded with 17 new companies for 100-co cohort, (7) 50 new companies onboarded with reports.
 
 ---
 

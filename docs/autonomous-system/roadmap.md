@@ -45,6 +45,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 10: Phase 10 fixes | EF-CQS 0.87+ | 2026-04-03 | 2026-04-03 | 0.8311 | 0.8690 | Importance tiers, Phase 10 overrides, known_divergences bug fix, closed-loop run, company quality tiers. 112 explained variances, 44 remaining failures. |
 | 11: Gap investigation | Classify all gaps | 2026-04-04 | 2026-04-04 | 0.8684 | 0.8740 | Hands-on investigation of 108 gaps. 32 not_applicable exclusions, 22 known_divergences, 4 bad overrides removed. 3 solver patterns identified. |
 | 12: Config collapse | Scalable config | 2026-04-04 | 2026-04-04 | 0.8740 | 0.8740 | Consensus 021. config_loader 916→484 lines. 51 per-company JSON overrides. 8 new industry sections. TotalLiabilities composite. Pure EF metric. `docs/metric-definitions.md`. |
+| 13: Path to 0.95 | 100-co expansion | 2026-04-04 | 2026-04-04 | 0.8740 | 0.8544 (100-co) | TL composite fix (+2.82pp), 3 bug fixes (PFE/MCD/BAC-C), ShortTermDebt composite (5 cos), 50 new companies onboarded, 100-co quality gate passed (>= 0.85). |
 
 **Deferred items:** 3b (historical validation), 4a (S&P 500 expansion), 4c (event-driven processing).
 
@@ -159,6 +160,16 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - EF-CQS: 0.8684→0.8740 (+0.0056). Tests: 334 pass, 2 fail (pre-existing), 0 regressions.
 - 3 solver patterns identified for `propose_change()`: (a) verify concept exists before proposing override, (b) PPE+leases is always a reference mismatch, (c) many "unmapped" gaps are genuinely absent concepts.
 - Report: `docs/autonomous-system/gap-investigation-report.md`
+
+**Run 019 (2026-04-04)** — Phase 13: Path to EF-CQS 0.95, 100 companies
+- Phase A: TotalLiabilities composite formula bug fixed (YAML `formula.components` nesting → `components`, fallback from NCI equity to `StockholdersEquity`). 11/11 companies pass. EF-CQS: 0.8445→0.8727 (+2.82pp).
+- Phase B: 3 bug investigations completed. PFE:OperatingIncome = reference mismatch (impairment scope). MCD:WeightedAverageSharesDiluted = iXBRL scale_factor fix. BAC/C:ShareRepurchases = reference mismatch (preferred stock).
+- Phase B verification: EF-CQS 0.8740, 334 tests pass, zero regressions.
+- Phase C: ShortTermDebt composite feasibility confirmed. All 5 companies (HD/HON/KO/RTX/CAT) pass with 0% variance using `LongTermDebtCurrent` fallback concepts.
+- Phase D: Industry map expanded (17 new entries), 50 companies onboarded in 3 waves, 100-company CQS evaluated.
+- 100-co results: EF-CQS 0.8544 (passes 0.85 gate), pass_rate 96.2%, 81 reference mismatches, 11 companies below 0.80 (MMC empty snapshot, D/SPG/XOM/NOC/GE/AMT/COP/VZ/BRK-B/REGN structural).
+- 50-co regression check: EF-CQS 0.8740 maintained (zero regressions).
+- Commits: `aa735b72`, `4615092f`, `59f26c92`, `65e76e53`, `f58030e3`, `2ddbe88b`, `a9ed1233`, `8b5601d2`, `9d40c991`.
 
 ---
 
