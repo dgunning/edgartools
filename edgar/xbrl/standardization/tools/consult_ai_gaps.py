@@ -1,6 +1,11 @@
 """
 AI Consultation Module: Step 2 of the two-step auto-eval architecture.
 
+.. deprecated::
+    AI dispatch achieved 0% KEEP rate — all AI-generated proposals were rejected
+    by CQS gates. Use manual investigation or regression_monitor.py instead.
+    See Consensus 022 for decision rationale.
+
 Reads a gap manifest (JSON) produced by run_overnight() Step 1, dispatches
 each unresolved gap to an AI model for proposal generation, then evaluates
 proposals through the standard CQS gates.

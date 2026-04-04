@@ -438,6 +438,9 @@ class DataDictionaryEntry:
     source_concepts: List[str] = field(default_factory=list)
     composite_formula: Optional[str] = None
     exclusions: List[str] = field(default_factory=list)
+    known_limitations: Optional[str] = None
+    reference_standard_notes: Optional[str] = None
+    coverage_rate: Optional[float] = None
 
 
 # Singleton instance for data dictionary
@@ -476,6 +479,9 @@ def load_data_dictionary(reload: bool = False) -> Dict[str, DataDictionaryEntry]
             source_concepts=defn.get("source_concepts", []),
             composite_formula=defn.get("composite_formula"),
             exclusions=defn.get("exclusions", []),
+            known_limitations=defn.get("known_limitations"),
+            reference_standard_notes=defn.get("reference_standard_notes"),
+            coverage_rate=defn.get("coverage_rate"),
         )
 
     _data_dictionary = entries

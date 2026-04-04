@@ -1,6 +1,11 @@
 """
 Auto-Eval Loop: Deterministic experiment infrastructure for config changes.
 
+.. deprecated::
+    Improvement loop exhausted since Run 011 (19 consecutive runs with zero net
+    improvements). Use regression_monitor.py for ongoing quality monitoring.
+    See Consensus 022 for decision rationale.
+
 This is the mechanical experiment loop — safely modify YAML configs, measure CQS,
 and rollback on failure. No AI here; just the infrastructure for the agentic engine
 (Phase 3) to use.

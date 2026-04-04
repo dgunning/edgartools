@@ -16,7 +16,7 @@ import contextlib
 import io
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from rich.table import Table
 from rich.text import Text
@@ -29,21 +29,28 @@ log = logging.getLogger(__name__)
 # Metric display sections
 METRIC_SECTIONS = {
     'Income Statement': [
-        'Revenue', 'COGS', 'SGA', 'OperatingIncome', 'PretaxIncome', 'NetIncome'
+        'Revenue', 'COGS', 'GrossProfit', 'SGA', 'OperatingIncome',
+        'InterestExpense', 'IncomeTaxExpense', 'PretaxIncome', 'NetIncome',
     ],
     'Cash Flow': [
         'OperatingCashFlow', 'Capex', 'FreeCashFlow',
-        'DepreciationAmortization', 'StockBasedCompensation', 'DividendsPaid'
+        'DepreciationAmortization', 'StockBasedCompensation', 'DividendsPaid',
+        'ShareRepurchases',
     ],
     'Balance Sheet - Assets': [
-        'TotalAssets', 'CashAndEquivalents', 'AccountsReceivable',
-        'Inventory', 'Goodwill', 'IntangibleAssets', 'TangibleAssets'
+        'TotalAssets', 'CurrentAssets', 'CashAndEquivalents', 'AccountsReceivable',
+        'Inventory', 'Goodwill', 'IntangibleAssets', 'TangibleAssets',
     ],
     'Balance Sheet - Liabilities': [
-        'ShortTermDebt', 'LongTermDebt', 'NetDebt', 'AccountsPayable'
+        'TotalLiabilities', 'CurrentLiabilities', 'ShortTermDebt',
+        'LongTermDebt', 'NetDebt', 'AccountsPayable',
+    ],
+    'Balance Sheet - Equity': [
+        'StockholdersEquity', 'RetainedEarnings',
     ],
     'Per-Share': [
-        'WeightedAverageSharesDiluted'
+        'EarningsPerShareBasic', 'EarningsPerShareDiluted',
+        'DividendPerShare', 'WeightedAverageSharesDiluted',
     ],
 }
 
@@ -55,6 +62,15 @@ DERIVED_METRICS = {
     'FreeCashFlow': ('OperatingCashFlow', 'Capex'),       # OCF - abs(Capex)
     'TangibleAssets': ('TotalAssets', 'IntangibleAssets'),  # TotalAssets - IntangibleAssets
     'NetDebt': ('ShortTermDebt', 'LongTermDebt', 'CashAndEquivalents'),  # STD + LTD - Cash
+}
+
+# Canonical confidence ranking (higher = more trustworthy)
+_CONFIDENCE_RANK = {
+    "not_applicable": -1,
+    "unverified": 0,
+    "low": 1,
+    "medium": 2,
+    "high": 3,
 }
 
 # Metrics that should be negative (outflows) per street sign convention
@@ -86,6 +102,18 @@ _PROPERTY_NAMES = {
     'NetDebt': 'net_debt',
     'AccountsPayable': 'accounts_payable',
     'WeightedAverageSharesDiluted': 'weighted_average_shares_diluted',
+    'GrossProfit': 'gross_profit',
+    'InterestExpense': 'interest_expense',
+    'IncomeTaxExpense': 'income_tax_expense',
+    'TotalLiabilities': 'total_liabilities',
+    'CurrentLiabilities': 'current_liabilities',
+    'CurrentAssets': 'current_assets',
+    'StockholdersEquity': 'stockholders_equity',
+    'RetainedEarnings': 'retained_earnings',
+    'EarningsPerShareBasic': 'earnings_per_share_basic',
+    'EarningsPerShareDiluted': 'earnings_per_share_diluted',
+    'DividendPerShare': 'dividend_per_share',
+    'ShareRepurchases': 'share_repurchases',
 }
 
 # Reverse lookup: snake_case -> metric name
@@ -199,7 +227,8 @@ class StandardizedFinancials:
     def balance_sheet_metrics(self) -> List[StandardizedMetric]:
         assets = [self._metrics[m] for m in METRIC_SECTIONS['Balance Sheet - Assets'] if m in self._metrics]
         liabilities = [self._metrics[m] for m in METRIC_SECTIONS['Balance Sheet - Liabilities'] if m in self._metrics]
-        return assets + liabilities
+        equity = [self._metrics[m] for m in METRIC_SECTIONS['Balance Sheet - Equity'] if m in self._metrics]
+        return assets + liabilities + equity
 
     # --- Stats ---
 
@@ -352,10 +381,67 @@ def _format_value(value: Optional[float]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Tier 1: Lightweight confidence computation (always-on, no network)
+# ---------------------------------------------------------------------------
+
+def _compute_lightweight_confidence(
+    metric: StandardizedMetric,
+    config=None,
+    company_config=None,
+) -> Tuple[str, str]:
+    """
+    Compute publish_confidence and evidence_tier from extraction metadata alone.
+
+    This is a pure heuristic — no network calls, no reference validation.
+    Returns (publish_confidence, evidence_tier).
+
+    Levels:
+    - high: tree-resolved + known concept + no divergence
+    - medium: mapped via tree/facts/industry (or known divergence)
+    - low: has value but unverified source
+    - unverified: no value or unmapped
+    - not_applicable: excluded metric
+    """
+    if metric.is_excluded:
+        return ("not_applicable", "excluded")
+
+    if metric.value is None:
+        return ("unverified", "unverified")
+
+    source = metric.source
+
+    evidence_map = {"tree": "tree_confirmed", "facts_search": "facts_search",
+                    "industry": "industry", "derived": "derived"}
+    evidence = evidence_map.get(source, "unverified")
+
+    is_known_concept = False
+    if config and metric.concept:
+        metric_config = config.get_metric(metric.name)
+        if metric_config and metric_config.matches_concept(metric.concept):
+            is_known_concept = True
+
+    has_divergence = False
+    if company_config:
+        known_div = getattr(company_config, 'known_divergences', None)
+        if known_div and metric.name in known_div:
+            has_divergence = True
+
+    if source == "tree" and is_known_concept and not has_divergence:
+        return ("high", evidence)
+
+    if source in ("tree", "facts_search", "industry"):
+        return ("medium", evidence)
+
+    return ("low", evidence)
+
+
+# ---------------------------------------------------------------------------
 # Pipeline: extract_standardized_financials
 # ---------------------------------------------------------------------------
 
-def extract_standardized_financials(filing, ticker: str) -> Optional['StandardizedFinancials']:
+def extract_standardized_financials(
+    filing, ticker: str, validate: bool = False,
+) -> Optional['StandardizedFinancials']:
     """
     Extract standardized financials from a filing using the deterministic pipeline.
 
@@ -365,11 +451,14 @@ def extract_standardized_financials(filing, ticker: str) -> Optional['Standardiz
         3. Layer 2: FactsSearcher gap filling
         4. Value extraction via ReferenceValidator helpers
         5. Sign conventions & derived metrics
-        6. Wrap in StandardizedFinancials
+        6. Confidence signals (Tier 1 heuristic, always-on)
+        7. Optional Tier 2 validation (requires yfinance snapshots)
 
     Args:
         filing: A Filing object (10-K or 10-Q)
         ticker: Company ticker symbol
+        validate: If True, run Tier 2 reference validation (slower, more rigorous).
+                  Can upgrade Tier 1 confidence levels.
 
     Returns:
         StandardizedFinancials or None if XBRL is unavailable
@@ -507,6 +596,40 @@ def extract_standardized_financials(filing, ticker: str) -> Optional['Standardiz
             div = company_config.known_divergences.get(metric_name)
             if div:
                 m.divergence_notes = div.get("reason")
+
+    # 6c. Compute Tier 1 lightweight confidence for every metric
+    for metric_name, m in metrics.items():
+        pc, et = _compute_lightweight_confidence(m, config=config, company_config=company_config)
+        m.publish_confidence = pc
+        m.evidence_tier = et
+
+    # 6d. Populate provenance fields
+    period_of_report_val = getattr(filing, 'period_of_report', None)
+    accession_no_val = getattr(filing, 'accession_no', None) or getattr(filing, 'accession_number', None)
+    if period_of_report_val or accession_no_val:
+        period_str = str(period_of_report_val) if period_of_report_val else None
+        for m in metrics.values():
+            m.period_end = period_str
+            m.accession_number = accession_no_val
+
+    # 6e. Tier 2 validation (opt-in) — can upgrade Tier 1 confidence
+    if validate:
+        try:
+            filing_date = getattr(filing, 'filing_date', None)
+            validations = validator.validate_company(
+                ticker, combined_results, xbrl=xbrl,
+                filing_date=filing_date, form_type=form_type,
+            )
+            for metric_name, val_result in validations.items():
+                m = metrics.get(metric_name)
+                if m and val_result.publish_confidence:
+                    tier1_rank = _CONFIDENCE_RANK.get(m.publish_confidence, -1)
+                    tier2_rank = _CONFIDENCE_RANK.get(val_result.publish_confidence, -1)
+                    if tier2_rank > tier1_rank:
+                        m.publish_confidence = val_result.publish_confidence
+                        m.evidence_tier = val_result.evidence_tier or m.evidence_tier
+        except Exception as e:
+            log.warning(f"Tier 2 validation failed for {ticker}: {e}")
 
     # 7. Wrap in StandardizedFinancials
     return StandardizedFinancials(

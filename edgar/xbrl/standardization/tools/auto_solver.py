@@ -1,6 +1,10 @@
 """
 Auto-Solver: Discovers yfinance's composite formulas by searching XBRL facts.
 
+.. deprecated::
+    Deterministic solver ceiling reached. Config-only changes no longer improve
+    extraction quality. See Consensus 019/022 for decision rationale.
+
 When Standardization Alignment (SA) shows a gap between our raw XBRL extraction
 and yfinance's aggregated number, the Auto-Solver performs a bounded combinatorial
 search to discover which combination of XBRL facts sums to yfinance's value.

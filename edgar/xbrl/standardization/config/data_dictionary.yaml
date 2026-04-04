@@ -28,6 +28,9 @@ metrics:
       - "Revenues"
       - "RevenueFromContractWithCustomerExcludingAssessedTax"
       - "SalesRevenueNet"
+    known_limitations: null
+    reference_standard_notes: "Matches us-gaap:Revenues or us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+    coverage_rate: 1.0
 
   COGS:
     display_name: "Cost of Goods Sold"
@@ -81,6 +84,9 @@ metrics:
     source_concepts:
       - "OperatingIncomeLoss"
     composite_formula: "GrossProfit - SGA - R&D (when direct tag unavailable)"
+    known_limitations: "GAAP as reported includes impairment charges. Banking companies may exclude from extraction."
+    reference_standard_notes: "us-gaap:OperatingIncomeLoss. Falls back to composite when direct concept absent."
+    coverage_rate: 0.92
 
   InterestExpense:
     display_name: "Interest Expense"
@@ -121,6 +127,9 @@ metrics:
     metric_tier: "headline"
     source_concepts:
       - "NetIncomeLoss"
+    known_limitations: null
+    reference_standard_notes: "us-gaap:NetIncomeLoss (attributable to parent entity)"
+    coverage_rate: 1.0
       - "ProfitLoss"
 
   # =========================================================================
@@ -148,6 +157,9 @@ metrics:
       - "EarningsPerShareDiluted"
     exclusions:
       - "Banking companies may report differently"
+    known_limitations: null
+    reference_standard_notes: "GAAP diluted as reported. us-gaap:EarningsPerShareDiluted."
+    coverage_rate: 0.98
 
   DividendPerShare:
     display_name: "Dividend Per Share"
@@ -182,6 +194,9 @@ metrics:
     metric_tier: "headline"
     source_concepts:
       - "NetCashProvidedByUsedInOperatingActivities"
+    known_limitations: null
+    reference_standard_notes: "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+    coverage_rate: 1.0
 
   Capex:
     display_name: "Capital Expenditures"
@@ -268,6 +283,9 @@ metrics:
     metric_tier: "headline"
     source_concepts:
       - "Assets"
+    known_limitations: null
+    reference_standard_notes: "us-gaap:Assets — universally reported by all SEC filers"
+    coverage_rate: 1.0
 
   CashAndEquivalents:
     display_name: "Cash & Equivalents"
@@ -365,6 +383,9 @@ metrics:
     metric_tier: "headline"
     source_concepts:
       - "Liabilities"
+    known_limitations: "~11% of companies use composite formula (LiabilitiesAndStockholdersEquity minus StockholdersEquity) because us-gaap:Liabilities is absent"
+    reference_standard_notes: "Composite: LiabilitiesAndStockholdersEquity minus StockholdersEquity (NCI-inclusive preferred)"
+    coverage_rate: 0.95
 
   ShortTermDebt:
     display_name: "Short-Term Debt"
@@ -408,6 +429,9 @@ metrics:
     source_concepts:
       - "StockholdersEquity"
       - "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+    known_limitations: "NCI-inclusive when available, parent-only fallback. May diverge from yfinance for companies with significant NCI."
+    reference_standard_notes: "Prefers StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest, falls back to StockholdersEquity"
+    coverage_rate: 0.98
 
   RetainedEarnings:
     display_name: "Retained Earnings"

@@ -113,6 +113,8 @@ class _FinancialDB:
                     confidence       REAL,
                     source           TEXT,
                     is_excluded      INTEGER NOT NULL DEFAULT 0,
+                    publish_confidence TEXT,
+                    evidence_tier    TEXT,
                     FOREIGN KEY (accession_number) REFERENCES filing_registry(accession_number)
                 )
             ''')
@@ -125,6 +127,14 @@ class _FinancialDB:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_period ON financial_metrics(fiscal_period)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_metric ON financial_metrics(metric)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_period_metric ON financial_metrics(fiscal_period, metric)')
+
+            # Migration: add confidence columns to existing databases
+            cursor.execute("PRAGMA table_info(financial_metrics)")
+            existing_columns = {row[1] for row in cursor.fetchall()}
+            if 'publish_confidence' not in existing_columns:
+                cursor.execute('ALTER TABLE financial_metrics ADD COLUMN publish_confidence TEXT')
+            if 'evidence_tier' not in existing_columns:
+                cursor.execute('ALTER TABLE financial_metrics ADD COLUMN evidence_tier TEXT')
 
             conn.commit()
 
@@ -185,11 +195,14 @@ class _FinancialDB:
                 cursor.execute(
                     '''INSERT OR REPLACE INTO financial_metrics
                        (accession_number, ticker, fiscal_period, form_type,
-                        metric, value, concept, confidence, source, is_excluded)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                        metric, value, concept, confidence, source, is_excluded,
+                        publish_confidence, evidence_tier)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                     (accession_number, ticker, fiscal_period, form_type,
                      m.name, m.value, m.concept, m.confidence, m.source,
-                     1 if m.is_excluded else 0)
+                     1 if m.is_excluded else 0,
+                     m.publish_confidence,
+                     m.evidence_tier)
                 )
             conn.commit()
 
@@ -220,7 +233,7 @@ class _FinancialDB:
         query = '''
             SELECT ticker, fiscal_period, form_type, metric,
                    value, concept, confidence, source, is_excluded,
-                   accession_number
+                   accession_number, publish_confidence, evidence_tier
             FROM financial_metrics
             WHERE confidence >= ?
               AND is_excluded = 0
@@ -258,7 +271,8 @@ class _FinancialDB:
             return pd.DataFrame(columns=[
                 'ticker', 'fiscal_period', 'form_type', 'metric',
                 'value', 'concept', 'confidence', 'source',
-                'is_excluded', 'accession_number'
+                'is_excluded', 'accession_number',
+                'publish_confidence', 'evidence_tier',
             ])
 
         return pd.DataFrame([dict(r) for r in rows])
