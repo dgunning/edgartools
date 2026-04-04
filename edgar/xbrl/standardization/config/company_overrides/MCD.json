@@ -5,6 +5,13 @@
       "notes": "No R&D line item"
     }
   },
+  "metric_overrides": {
+    "WeightedAverageSharesDiluted": {
+      "preferred_concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "scale_factor": 1000000,
+      "notes": "MCD reports shares in millions in iXBRL (scale=6). Parser stores raw 721.9 instead of 721900000."
+    }
+  },
   "known_divergences": {
     "GrossProfit": {
       "form_types": [
@@ -31,15 +38,6 @@
       ],
       "variance_pct": 80.0,
       "reason": "Phase 11: yfinance D&A scope differs from XBRL concept.",
-      "skip_validation": true,
-      "added_date": "2026-04-03"
-    },
-    "WeightedAverageSharesDiluted": {
-      "form_types": [
-        "10-K"
-      ],
-      "variance_pct": 100.0,
-      "reason": "Phase 11: Extraction returns 0. Period alignment or scaling issue.",
       "skip_validation": true,
       "added_date": "2026-04-03"
     }
