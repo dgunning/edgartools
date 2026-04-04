@@ -920,6 +920,8 @@ _REFERENCE_MISMATCHES: Dict[Tuple[str, str], str] = {
     ("RTX", "StockBasedCompensation"): "yfinance includes broader compensation scope",
     ("T", "IntangibleAssets"): "yfinance includes FCC spectrum licenses",
     ("CVX", "CashAndEquivalents"): "XBRL includes restricted cash, yfinance excludes",
+    # OperatingIncome structural mismatch
+    ("PFE", "OperatingIncome"): "XBRL OperatingIncomeLoss includes impairment/restructuring charges that yfinance Operating Income excludes",
 }
 
 # Pre-indexed count by ticker for O(1) lookup in compute_pure_ef()

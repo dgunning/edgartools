@@ -15,9 +15,10 @@
         "10-K"
       ],
       "variance_pct": 25.0,
-      "reason": "Phase 11: Negative extraction vs positive ref. Wrong concept or sign convention.",
+      "reason": "XBRL OperatingIncomeLoss includes impairment/restructuring charges (write-downs, asset impairments, restructuring costs) that yfinance Operating Income excludes. XBRL=-17.94B vs yf=14.83B reflects structural scope difference, not extraction error.",
       "skip_validation": true,
-      "added_date": "2026-04-03"
+      "added_date": "2026-04-03",
+      "remediation_status": "reference_mismatch"
     }
   },
   "quality_tier": "provisional"
