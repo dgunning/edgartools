@@ -1,90 +1,93 @@
 {
-  "ticker": "QCOM",
-  "cik": 804328,
-  "company_name": "QUALCOMM INC/DE",
+  "ticker": "MCO",
+  "cik": 1059556,
+  "company_name": "MOODYS CORP /DE/",
   "archetype": "A",
-  "sic_code": "3663",
-  "fiscal_year_end": "September",
-  "draft_yaml": "  QCOM:\n    name: \"QUALCOMM INC/DE\"\n    cik: 804328\n    fiscal_year_end: \"September\"",
+  "sic_code": "7320",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  MCO:\n    name: \"MOODYS CORP /DE/\"\n    cik: 1059556\n    exclude_metrics:\n      - COGS\n      - Capex\n      - CurrentAssets\n      - CurrentLiabilities\n      - Goodwill\n      - GrossProfit\n      - IntangibleAssets\n      - Inventory\n      - OperatingIncome\n      - SGA",
   "metrics_passed": [
     "Revenue",
-    "COGS",
-    "OperatingIncome",
     "NetIncome",
     "OperatingCashFlow",
-    "Capex",
     "TotalAssets",
     "Goodwill",
     "IntangibleAssets",
+    "ShortTermDebt",
     "LongTermDebt",
     "CashAndEquivalents",
     "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
     "DividendsPaid",
-    "Inventory",
     "AccountsReceivable",
     "AccountsPayable",
     "DepreciationAmortization",
-    "ResearchAndDevelopment",
-    "InterestExpense",
     "IncomeTaxExpense",
     "EarningsPerShareDiluted",
     "EarningsPerShareBasic",
-    "CurrentAssets",
-    "CurrentLiabilities",
     "TotalLiabilities",
     "StockholdersEquity",
-    "PropertyPlantEquipment",
     "RetainedEarnings",
     "InvestingCashFlow",
     "FinancingCashFlow",
     "ShareRepurchases"
   ],
   "metrics_failed": [
-    "SGA",
     "PretaxIncome",
-    "ShortTermDebt",
-    "GrossProfit",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "PropertyPlantEquipment",
     "DividendPerShare"
   ],
-  "metrics_excluded": [],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
   "failures": {
-    "SGA": {
-      "metric": "SGA",
-      "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3110000000.0,
-      "reference_value": null,
-      "variance_pct": null,
-      "pattern": "unknown"
-    },
     "PretaxIncome": {
       "metric": "PretaxIncome",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 12663000000.0,
+      "xbrl_value": 2699000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "ShortTermDebt": {
-      "metric": "ShortTermDebt",
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 0.0,
+      "xbrl_value": null,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "GrossProfit": {
-      "metric": "GrossProfit",
+    "InterestExpense": {
+      "metric": "InterestExpense",
       "reason": "No XBRL value extracted but reference exists",
       "xbrl_value": null,
-      "reference_value": 24546000000.0,
+      "reference_value": 339000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 872000000.0,
       "variance_pct": null,
       "pattern": "extraction_error"
     },
     "DividendPerShare": {
       "metric": "DividendPerShare",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3.48,
+      "xbrl_value": 3.4,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -94,5 +97,5 @@
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-04-04T09:55:03.056785"
+  "timestamp": "2026-04-04T09:59:30.139626"
 }

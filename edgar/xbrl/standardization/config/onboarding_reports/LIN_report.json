@@ -5,18 +5,18 @@
   "archetype": "A",
   "sic_code": "2810",
   "fiscal_year_end": "December",
-  "draft_yaml": "  LIN:\n    name: \"LINDE PLC\"\n    cik: 1707925\n    known_divergences:\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 62.4\n        reason: \"Variance: 62.4% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "draft_yaml": "  LIN:\n    name: \"LINDE PLC\"\n    cik: 1707925\n    exclude_metrics:\n      - COGS\n      - Goodwill\n      - IntangibleAssets\n      - Inventory\n    known_divergences:\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 63.1\n        reason: \"Variance: 63.1% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
   "metrics_passed": [
+    "Revenue",
     "COGS",
-    "SGA",
     "OperatingIncome",
-    "PretaxIncome",
     "NetIncome",
     "OperatingCashFlow",
     "Capex",
     "TotalAssets",
     "Goodwill",
     "IntangibleAssets",
+    "LongTermDebt",
     "CashAndEquivalents",
     "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
@@ -24,43 +24,86 @@
     "Inventory",
     "AccountsReceivable",
     "AccountsPayable",
-    "DepreciationAmortization"
+    "DepreciationAmortization",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
   ],
   "metrics_failed": [
-    "Revenue",
+    "SGA",
+    "PretaxIncome",
     "ShortTermDebt",
-    "LongTermDebt"
+    "GrossProfit",
+    "DividendPerShare"
   ],
-  "metrics_excluded": [],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
   "failures": {
-    "Revenue": {
-      "metric": "Revenue",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 33986000000.0,
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3337000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 8569000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
     },
     "ShortTermDebt": {
       "metric": "ShortTermDebt",
-      "reason": "Variance: 62.4% (tolerance: 15%)",
+      "reason": "Variance: 63.1% (tolerance: 15%)",
       "xbrl_value": 10244000000.0,
-      "reference_value": 6306000000.0,
-      "variance_pct": 62.44846178242943,
+      "reference_value": 6280000000.0,
+      "variance_pct": 63.12101910828025,
       "pattern": "unknown"
     },
-    "LongTermDebt": {
-      "metric": "LongTermDebt",
+    "GrossProfit": {
+      "metric": "GrossProfit",
       "reason": "No XBRL value extracted but reference exists",
       "xbrl_value": null,
-      "reference_value": 20683000000.0,
+      "reference_value": 15862000000.0,
       "variance_pct": null,
       "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 5.56,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
     }
   },
   "remediation_complexity": "needs_review",
-  "snapshot_created": true,
+  "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-03-04T19:18:13.283360"
+  "timestamp": "2026-04-04T09:56:34.102670"
 }

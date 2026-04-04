@@ -1,11 +1,11 @@
 {
-  "ticker": "QCOM",
-  "cik": 804328,
-  "company_name": "QUALCOMM INC/DE",
-  "archetype": "A",
-  "sic_code": "3663",
-  "fiscal_year_end": "September",
-  "draft_yaml": "  QCOM:\n    name: \"QUALCOMM INC/DE\"\n    cik: 804328\n    fiscal_year_end: \"September\"",
+  "ticker": "MU",
+  "cik": 723125,
+  "company_name": "MICRON TECHNOLOGY INC",
+  "archetype": "C",
+  "sic_code": "3674",
+  "fiscal_year_end": "August",
+  "draft_yaml": "  MU:\n    name: \"MICRON TECHNOLOGY INC\"\n    cik: 723125\n    fiscal_year_end: \"August\"",
   "metrics_passed": [
     "Revenue",
     "COGS",
@@ -25,6 +25,7 @@
     "AccountsReceivable",
     "AccountsPayable",
     "DepreciationAmortization",
+    "GrossProfit",
     "ResearchAndDevelopment",
     "InterestExpense",
     "IncomeTaxExpense",
@@ -44,15 +45,17 @@
     "SGA",
     "PretaxIncome",
     "ShortTermDebt",
-    "GrossProfit",
     "DividendPerShare"
   ],
-  "metrics_excluded": [],
+  "metrics_excluded": [
+    "COGS",
+    "DividendsPaid"
+  ],
   "failures": {
     "SGA": {
       "metric": "SGA",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3110000000.0,
+      "xbrl_value": 1205000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -60,7 +63,7 @@
     "PretaxIncome": {
       "metric": "PretaxIncome",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 12663000000.0,
+      "xbrl_value": 9654000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -68,23 +71,15 @@
     "ShortTermDebt": {
       "metric": "ShortTermDebt",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 0.0,
+      "xbrl_value": 560000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "GrossProfit": {
-      "metric": "GrossProfit",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 24546000000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
     "DividendPerShare": {
       "metric": "DividendPerShare",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3.48,
+      "xbrl_value": 0.46,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -94,5 +89,5 @@
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-04-04T09:55:03.056785"
+  "timestamp": "2026-04-04T09:55:30.947966"
 }

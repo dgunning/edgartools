@@ -1,11 +1,11 @@
 {
-  "ticker": "AMD",
-  "cik": 2488,
-  "company_name": "ADVANCED MICRO DEVICES INC",
-  "archetype": "C",
-  "sic_code": "3674",
+  "ticker": "ORLY",
+  "cik": 898173,
+  "company_name": "O REILLY AUTOMOTIVE INC",
+  "archetype": "A",
+  "sic_code": "5531",
   "fiscal_year_end": "December",
-  "draft_yaml": "  AMD:\n    name: \"ADVANCED MICRO DEVICES INC\"\n    cik: 2488",
+  "draft_yaml": "  ORLY:\n    name: \"O REILLY AUTOMOTIVE INC\"\n    cik: 898173\n    exclude_metrics:\n      - COGS\n      - Goodwill\n      - IntangibleAssets\n      - Inventory",
   "metrics_passed": [
     "Revenue",
     "COGS",
@@ -18,44 +18,52 @@
     "IntangibleAssets",
     "LongTermDebt",
     "CashAndEquivalents",
-    "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
     "Inventory",
     "AccountsReceivable",
+    "AccountsPayable",
     "DepreciationAmortization",
     "GrossProfit",
-    "ResearchAndDevelopment",
     "InterestExpense",
     "IncomeTaxExpense",
-    "EarningsPerShareDiluted",
-    "EarningsPerShareBasic",
     "CurrentAssets",
     "CurrentLiabilities",
     "TotalLiabilities",
     "StockholdersEquity",
-    "PropertyPlantEquipment",
     "RetainedEarnings",
     "InvestingCashFlow",
-    "FinancingCashFlow"
+    "FinancingCashFlow",
+    "ShareRepurchases"
   ],
   "metrics_failed": [
     "SGA",
     "PretaxIncome",
     "ShortTermDebt",
+    "WeightedAverageSharesDiluted",
     "DividendsPaid",
-    "AccountsPayable",
-    "ShareRepurchases",
+    "ResearchAndDevelopment",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "PropertyPlantEquipment",
     "DividendPerShare"
   ],
   "metrics_excluded": [
     "COGS",
-    "DividendsPaid"
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
   ],
   "failures": {
     "SGA": {
       "metric": "SGA",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 2783000000.0,
+      "xbrl_value": 5303332000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -63,7 +71,7 @@
     "PretaxIncome": {
       "metric": "PretaxIncome",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 2022000000.0,
+      "xbrl_value": 3045064000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -71,10 +79,18 @@
     "ShortTermDebt": {
       "metric": "ShortTermDebt",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 0.0,
+      "xbrl_value": 200000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
+    },
+    "WeightedAverageSharesDiluted": {
+      "metric": "WeightedAverageSharesDiluted",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 880575000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
     },
     "DividendsPaid": {
       "metric": "DividendsPaid",
@@ -84,19 +100,35 @@
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "AccountsPayable": {
-      "metric": "AccountsPayable",
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "EarningsPerShareDiluted": {
+      "metric": "EarningsPerShareDiluted",
       "reason": "No XBRL value extracted but reference exists",
       "xbrl_value": null,
-      "reference_value": 2466000000.0,
+      "reference_value": 2.710667,
       "variance_pct": null,
       "pattern": "extraction_error"
     },
-    "ShareRepurchases": {
-      "metric": "ShareRepurchases",
+    "EarningsPerShareBasic": {
+      "metric": "EarningsPerShareBasic",
       "reason": "No XBRL value extracted but reference exists",
       "xbrl_value": null,
-      "reference_value": -1590000000.0,
+      "reference_value": 2.727333,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 7929794000.0,
       "variance_pct": null,
       "pattern": "extraction_error"
     },
@@ -113,5 +145,5 @@
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-04-04T09:54:49.667215"
+  "timestamp": "2026-04-04T09:56:22.296234"
 }

@@ -5,15 +5,19 @@
   "archetype": "A",
   "sic_code": "3823",
   "fiscal_year_end": "December",
-  "draft_yaml": "  DHR:\n    name: \"DANAHER CORP /DE/\"\n    cik: 313616\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 69.0\n        reason: \"Variance: 69.0% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "draft_yaml": "  DHR:\n    name: \"DANAHER CORP /DE/\"\n    cik: 313616\n    exclude_metrics:\n      - COGS\n      - Goodwill\n      - IntangibleAssets\n      - Inventory",
   "metrics_passed": [
     "Revenue",
     "COGS",
-    "SGA",
     "OperatingIncome",
-    "PretaxIncome",
     "NetIncome",
     "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
     "CashAndEquivalents",
     "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
@@ -21,70 +25,69 @@
     "Inventory",
     "AccountsReceivable",
     "AccountsPayable",
-    "DepreciationAmortization"
+    "DepreciationAmortization",
+    "GrossProfit",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
   ],
   "metrics_failed": [
-    "Capex",
-    "TotalAssets",
+    "SGA",
+    "PretaxIncome",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
     "Goodwill",
     "IntangibleAssets",
-    "ShortTermDebt",
-    "LongTermDebt"
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
   ],
-  "metrics_excluded": [],
   "failures": {
-    "Capex": {
-      "metric": "Capex",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": -1156000000.0,
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 7759000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "TotalAssets": {
-      "metric": "TotalAssets",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 83464000000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "Goodwill": {
-      "metric": "Goodwill",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 43151000000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "IntangibleAssets": {
-      "metric": "IntangibleAssets",
-      "reason": "Variance: 69.0% (tolerance: 15%)",
-      "xbrl_value": 18873000000.0,
-      "reference_value": 60968000000.0,
-      "variance_pct": 69.04441674320955,
       "pattern": "unknown"
     },
-    "ShortTermDebt": {
-      "metric": "ShortTermDebt",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 2000000.0,
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 4646000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
     },
-    "LongTermDebt": {
-      "metric": "LongTermDebt",
-      "reason": "No XBRL value extracted but reference exists",
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
       "xbrl_value": null,
-      "reference_value": 18416000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
     }
   },
   "remediation_complexity": "needs_review",
-  "snapshot_created": true,
+  "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-03-04T19:18:03.183340"
+  "timestamp": "2026-04-04T09:58:45.215634"
 }

@@ -5,23 +5,13 @@
   "archetype": "B",
   "sic_code": "6200",
   "fiscal_year_end": "December",
-  "draft_yaml": "  CME:\n    name: \"CME GROUP INC.\"\n    cik: 1156375\n    exclude_metrics:\n      - COGS\n      - Capex\n      - OperatingIncome\n      - SGA",
+  "draft_yaml": "  CME:\n    name: \"CME GROUP INC.\"\n    cik: 1156375\n    exclude_metrics:\n      - COGS\n      - Capex\n      - CurrentAssets\n      - CurrentLiabilities\n      - GrossProfit\n      - Inventory\n      - OperatingIncome\n      - SGA\n      - ShortTermDebt\n    known_divergences:\n      DepreciationAmortization:\n        form_types: [\"10-K\"]\n        variance_pct: 65.8\n        reason: \"Variance: 65.8% (tolerance: 30%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 56.3\n        reason: \"Variance: 56.3% (tolerance: 25%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
   "metrics_passed": [
-    "SGA",
-    "PretaxIncome",
-    "Inventory"
-  ],
-  "metrics_failed": [
     "Revenue",
-    "COGS",
-    "OperatingIncome",
     "NetIncome",
     "OperatingCashFlow",
-    "Capex",
     "TotalAssets",
     "Goodwill",
-    "IntangibleAssets",
-    "ShortTermDebt",
     "LongTermDebt",
     "CashAndEquivalents",
     "WeightedAverageSharesDiluted",
@@ -29,163 +19,90 @@
     "DividendsPaid",
     "AccountsReceivable",
     "AccountsPayable",
-    "DepreciationAmortization"
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "PretaxIncome",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "DepreciationAmortization",
+    "ResearchAndDevelopment",
+    "DividendPerShare"
   ],
   "metrics_excluded": [
     "COGS",
     "SGA",
     "OperatingIncome",
-    "Capex"
+    "Capex",
+    "ShortTermDebt",
+    "Inventory",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
   ],
   "failures": {
-    "Revenue": {
-      "metric": "Revenue",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 6520600000.0,
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 350900000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "COGS": {
-      "metric": "COGS",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 907000000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "OperatingIncome": {
-      "metric": "OperatingIncome",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 4229500000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "NetIncome": {
-      "metric": "NetIncome",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 4072200000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "OperatingCashFlow": {
-      "metric": "OperatingCashFlow",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 4277100000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "Capex": {
-      "metric": "Capex",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": -83500000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "TotalAssets": {
-      "metric": "TotalAssets",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 198424200000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "Goodwill": {
-      "metric": "Goodwill",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 10514700000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
     },
     "IntangibleAssets": {
       "metric": "IntangibleAssets",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 30300700000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
+      "reason": "Variance: 56.3% (tolerance: 25%)",
+      "xbrl_value": 13308500000.0,
+      "reference_value": 30483800000.0,
+      "variance_pct": 56.342385135711424,
+      "pattern": "unknown"
     },
     "ShortTermDebt": {
       "metric": "ShortTermDebt",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
+      "reason": "Structural divergence (100% variance)",
+      "xbrl_value": 1499800000.0,
       "reference_value": 749800000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "LongTermDebt": {
-      "metric": "LongTermDebt",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 3422300000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "CashAndEquivalents": {
-      "metric": "CashAndEquivalents",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 4416900000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "WeightedAverageSharesDiluted": {
-      "metric": "WeightedAverageSharesDiluted",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 359944000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "StockBasedCompensation": {
-      "metric": "StockBasedCompensation",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 94800000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "DividendsPaid": {
-      "metric": "DividendsPaid",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": -3933000000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "AccountsReceivable": {
-      "metric": "AccountsReceivable",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 639200000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "AccountsPayable": {
-      "metric": "AccountsPayable",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 71800000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
+      "variance_pct": 100.02667377967458,
+      "pattern": "structural"
     },
     "DepreciationAmortization": {
       "metric": "DepreciationAmortization",
-      "reason": "No XBRL value extracted but reference exists",
+      "reason": "Variance: 65.8% (tolerance: 30%)",
+      "xbrl_value": 115100000.0,
+      "reference_value": 336800000.0,
+      "variance_pct": 65.82541567695962,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
       "xbrl_value": null,
-      "reference_value": 330900000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 10.4,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
     }
   },
-  "remediation_complexity": "needs_review",
-  "snapshot_created": true,
+  "remediation_complexity": "structural",
+  "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-03-04T19:23:45.476347"
+  "timestamp": "2026-04-04T09:57:38.664409"
 }

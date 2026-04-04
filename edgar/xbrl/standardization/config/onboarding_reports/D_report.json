@@ -1,11 +1,11 @@
 {
-  "ticker": "DIS",
-  "cik": 1744489,
-  "company_name": "Walt Disney Co",
+  "ticker": "D",
+  "cik": 715957,
+  "company_name": "DOMINION ENERGY, INC",
   "archetype": "A",
-  "sic_code": "7990",
-  "fiscal_year_end": "September",
-  "draft_yaml": "  DIS:\n    name: \"Walt Disney Co\"\n    cik: 1744489\n    fiscal_year_end: \"September\"\n    exclude_metrics:\n      - COGS\n      - GrossProfit\n      - Inventory\n    known_divergences:\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 26.9\n        reason: \"Variance: 26.9% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
+  "sic_code": "4911",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  D:\n    name: \"DOMINION ENERGY, INC\"\n    cik: 715957\n    exclude_metrics:\n      - GrossProfit\n      - Inventory\n    known_divergences:\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 88.0\n        reason: \"Variance: 88.0% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
   "metrics_passed": [
     "Revenue",
     "COGS",
@@ -19,13 +19,10 @@
     "LongTermDebt",
     "CashAndEquivalents",
     "WeightedAverageSharesDiluted",
-    "StockBasedCompensation",
     "DividendsPaid",
-    "Inventory",
+    "AccountsReceivable",
     "AccountsPayable",
-    "DepreciationAmortization",
     "InterestExpense",
-    "IncomeTaxExpense",
     "EarningsPerShareDiluted",
     "EarningsPerShareBasic",
     "CurrentAssets",
@@ -33,7 +30,6 @@
     "TotalLiabilities",
     "StockholdersEquity",
     "PropertyPlantEquipment",
-    "RetainedEarnings",
     "InvestingCashFlow",
     "FinancingCashFlow",
     "ShareRepurchases"
@@ -42,9 +38,11 @@
     "SGA",
     "OperatingIncome",
     "PretaxIncome",
-    "AccountsReceivable",
-    "GrossProfit",
+    "StockBasedCompensation",
+    "DepreciationAmortization",
     "ResearchAndDevelopment",
+    "IncomeTaxExpense",
+    "RetainedEarnings",
     "DividendPerShare"
   ],
   "metrics_excluded": [
@@ -56,42 +54,42 @@
     "SGA": {
       "metric": "SGA",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 16501000000.0,
+      "xbrl_value": 731000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
     "OperatingIncome": {
       "metric": "OperatingIncome",
-      "reason": "Variance: 26.9% (tolerance: 15%)",
-      "xbrl_value": 17551000000.0,
-      "reference_value": 13832000000.0,
-      "variance_pct": 26.886928860613068,
+      "reason": "Variance: 88.0% (tolerance: 15%)",
+      "xbrl_value": 391000000.0,
+      "reference_value": 3247000000.0,
+      "variance_pct": 87.95811518324608,
       "pattern": "unknown"
     },
     "PretaxIncome": {
       "metric": "PretaxIncome",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 12003000000.0,
+      "xbrl_value": 2182000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "AccountsReceivable": {
-      "metric": "AccountsReceivable",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 10434000000.0,
+    "StockBasedCompensation": {
+      "metric": "StockBasedCompensation",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 53000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
     },
-    "GrossProfit": {
-      "metric": "GrossProfit",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 35659000000.0,
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2345000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
     },
     "ResearchAndDevelopment": {
       "metric": "ResearchAndDevelopment",
@@ -101,10 +99,26 @@
       "variance_pct": null,
       "pattern": "unknown"
     },
+    "IncomeTaxExpense": {
+      "metric": "IncomeTaxExpense",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 411000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "RetainedEarnings": {
+      "metric": "RetainedEarnings",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1641000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
     "DividendPerShare": {
       "metric": "DividendPerShare",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 0.5,
+      "xbrl_value": 2.67,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -114,5 +128,5 @@
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-04-04T09:56:06.006189"
+  "timestamp": "2026-04-04T09:55:39.147982"
 }

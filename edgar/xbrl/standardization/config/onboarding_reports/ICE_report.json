@@ -1,18 +1,15 @@
 {
-  "ticker": "QCOM",
-  "cik": 804328,
-  "company_name": "QUALCOMM INC/DE",
-  "archetype": "A",
-  "sic_code": "3663",
-  "fiscal_year_end": "September",
-  "draft_yaml": "  QCOM:\n    name: \"QUALCOMM INC/DE\"\n    cik: 804328\n    fiscal_year_end: \"September\"",
+  "ticker": "ICE",
+  "cik": 1571949,
+  "company_name": "Intercontinental Exchange, Inc.",
+  "archetype": "B",
+  "sic_code": "6200",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  ICE:\n    name: \"Intercontinental Exchange, Inc.\"\n    cik: 1571949\n    exclude_metrics:\n      - COGS\n      - Capex\n      - CurrentAssets\n      - CurrentLiabilities\n      - GrossProfit\n      - Inventory\n      - OperatingIncome\n      - SGA\n      - ShortTermDebt",
   "metrics_passed": [
     "Revenue",
-    "COGS",
-    "OperatingIncome",
     "NetIncome",
     "OperatingCashFlow",
-    "Capex",
     "TotalAssets",
     "Goodwill",
     "IntangibleAssets",
@@ -21,70 +18,66 @@
     "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
     "DividendsPaid",
-    "Inventory",
     "AccountsReceivable",
     "AccountsPayable",
     "DepreciationAmortization",
-    "ResearchAndDevelopment",
     "InterestExpense",
     "IncomeTaxExpense",
     "EarningsPerShareDiluted",
     "EarningsPerShareBasic",
-    "CurrentAssets",
-    "CurrentLiabilities",
     "TotalLiabilities",
     "StockholdersEquity",
     "PropertyPlantEquipment",
     "RetainedEarnings",
     "InvestingCashFlow",
-    "FinancingCashFlow",
-    "ShareRepurchases"
+    "FinancingCashFlow"
   ],
   "metrics_failed": [
-    "SGA",
     "PretaxIncome",
-    "ShortTermDebt",
-    "GrossProfit",
+    "ResearchAndDevelopment",
+    "ShareRepurchases",
     "DividendPerShare"
   ],
-  "metrics_excluded": [],
+  "metrics_excluded": [
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "ShortTermDebt",
+    "Inventory",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
   "failures": {
-    "SGA": {
-      "metric": "SGA",
-      "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3110000000.0,
-      "reference_value": null,
-      "variance_pct": null,
-      "pattern": "unknown"
-    },
     "PretaxIncome": {
       "metric": "PretaxIncome",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 12663000000.0,
+      "xbrl_value": 3628000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "ShortTermDebt": {
-      "metric": "ShortTermDebt",
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 0.0,
+      "xbrl_value": null,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "GrossProfit": {
-      "metric": "GrossProfit",
+    "ShareRepurchases": {
+      "metric": "ShareRepurchases",
       "reason": "No XBRL value extracted but reference exists",
       "xbrl_value": null,
-      "reference_value": 24546000000.0,
+      "reference_value": -81000000.0,
       "variance_pct": null,
       "pattern": "extraction_error"
     },
     "DividendPerShare": {
       "metric": "DividendPerShare",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3.48,
+      "xbrl_value": 1.8,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -94,5 +87,5 @@
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-04-04T09:55:03.056785"
+  "timestamp": "2026-04-04T09:57:27.684930"
 }

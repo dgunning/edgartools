@@ -1,14 +1,13 @@
 {
-  "ticker": "QCOM",
-  "cik": 804328,
-  "company_name": "QUALCOMM INC/DE",
+  "ticker": "CSX",
+  "cik": 277948,
+  "company_name": "CSX CORP",
   "archetype": "A",
-  "sic_code": "3663",
-  "fiscal_year_end": "September",
-  "draft_yaml": "  QCOM:\n    name: \"QUALCOMM INC/DE\"\n    cik: 804328\n    fiscal_year_end: \"September\"",
+  "sic_code": "4011",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  CSX:\n    name: \"CSX CORP\"\n    cik: 277948\n    exclude_metrics:\n      - COGS\n      - Inventory",
   "metrics_passed": [
     "Revenue",
-    "COGS",
     "OperatingIncome",
     "NetIncome",
     "OperatingCashFlow",
@@ -16,16 +15,12 @@
     "TotalAssets",
     "Goodwill",
     "IntangibleAssets",
+    "ShortTermDebt",
     "LongTermDebt",
     "CashAndEquivalents",
     "WeightedAverageSharesDiluted",
-    "StockBasedCompensation",
     "DividendsPaid",
-    "Inventory",
-    "AccountsReceivable",
-    "AccountsPayable",
     "DepreciationAmortization",
-    "ResearchAndDevelopment",
     "InterestExpense",
     "IncomeTaxExpense",
     "EarningsPerShareDiluted",
@@ -43,16 +38,30 @@
   "metrics_failed": [
     "SGA",
     "PretaxIncome",
-    "ShortTermDebt",
+    "StockBasedCompensation",
+    "AccountsReceivable",
+    "AccountsPayable",
     "GrossProfit",
+    "ResearchAndDevelopment",
     "DividendPerShare"
   ],
-  "metrics_excluded": [],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
   "failures": {
     "SGA": {
       "metric": "SGA",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3110000000.0,
+      "xbrl_value": null,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -60,31 +69,55 @@
     "PretaxIncome": {
       "metric": "PretaxIncome",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 12663000000.0,
+      "xbrl_value": 4555000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "ShortTermDebt": {
-      "metric": "ShortTermDebt",
+    "StockBasedCompensation": {
+      "metric": "StockBasedCompensation",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 0.0,
+      "xbrl_value": 40000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
+    },
+    "AccountsReceivable": {
+      "metric": "AccountsReceivable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 996000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "AccountsPayable": {
+      "metric": "AccountsPayable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1118000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
     },
     "GrossProfit": {
       "metric": "GrossProfit",
       "reason": "No XBRL value extracted but reference exists",
       "xbrl_value": null,
-      "reference_value": 24546000000.0,
+      "reference_value": 5353000000.0,
       "variance_pct": null,
       "pattern": "extraction_error"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
     },
     "DividendPerShare": {
       "metric": "DividendPerShare",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3.48,
+      "xbrl_value": null,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -94,5 +127,5 @@
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-04-04T09:55:03.056785"
+  "timestamp": "2026-04-04T09:55:37.733847"
 }

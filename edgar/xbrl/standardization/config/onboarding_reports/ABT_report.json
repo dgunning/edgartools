@@ -5,94 +5,84 @@
   "archetype": "C",
   "sic_code": "2834",
   "fiscal_year_end": "December",
-  "draft_yaml": "  ABT:\n    name: \"ABBOTT LABORATORIES\"\n    cik: 1800\n    known_divergences:\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 50.5\n        reason: \"Variance: 50.5% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "draft_yaml": "  ABT:\n    name: \"ABBOTT LABORATORIES\"\n    cik: 1800\n    exclude_metrics:\n      - COGS\n      - DividendsPaid\n      - Inventory\n      - LongTermDebt\n      - ShortTermDebt",
   "metrics_passed": [
+    "Revenue",
     "COGS",
-    "SGA",
-    "PretaxIncome",
+    "OperatingIncome",
+    "NetIncome",
     "OperatingCashFlow",
     "Capex",
+    "TotalAssets",
     "Goodwill",
     "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
     "CashAndEquivalents",
     "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
     "DividendsPaid",
     "Inventory",
     "AccountsReceivable",
-    "AccountsPayable"
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "GrossProfit",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
   ],
   "metrics_failed": [
-    "Revenue",
-    "OperatingIncome",
-    "NetIncome",
-    "TotalAssets",
+    "SGA",
+    "PretaxIncome",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
     "ShortTermDebt",
     "LongTermDebt",
-    "DepreciationAmortization"
+    "DividendsPaid"
   ],
-  "metrics_excluded": [],
   "failures": {
-    "Revenue": {
-      "metric": "Revenue",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 44328000000.0,
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 11697000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "OperatingIncome": {
-      "metric": "OperatingIncome",
-      "reason": "Variance: 15.2% (tolerance: 15%)",
-      "xbrl_value": 6825000000.0,
-      "reference_value": 8053000000.0,
-      "variance_pct": 15.248975537066931,
       "pattern": "unknown"
     },
-    "NetIncome": {
-      "metric": "NetIncome",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 6524000000.0,
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 7013000000.0,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "TotalAssets": {
-      "metric": "TotalAssets",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 86713000000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "ShortTermDebt": {
-      "metric": "ShortTermDebt",
-      "reason": "Variance: 50.5% (tolerance: 15%)",
-      "xbrl_value": 1500000000.0,
-      "reference_value": 3033000000.0,
-      "variance_pct": 50.54401582591493,
       "pattern": "unknown"
     },
-    "LongTermDebt": {
-      "metric": "LongTermDebt",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 9896000000.0,
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2.24,
+      "reference_value": null,
       "variance_pct": null,
-      "pattern": "extraction_error"
-    },
-    "DepreciationAmortization": {
-      "metric": "DepreciationAmortization",
-      "reason": "No XBRL value extracted but reference exists",
-      "xbrl_value": null,
-      "reference_value": 3116000000.0,
-      "variance_pct": null,
-      "pattern": "extraction_error"
+      "pattern": "unknown"
     }
   },
   "remediation_complexity": "needs_review",
-  "snapshot_created": true,
+  "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-03-04T19:17:53.607822"
+  "timestamp": "2026-04-04T09:57:51.790331"
 }

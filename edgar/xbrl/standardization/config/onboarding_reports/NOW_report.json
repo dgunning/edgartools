@@ -1,14 +1,13 @@
 {
-  "ticker": "QCOM",
-  "cik": 804328,
-  "company_name": "QUALCOMM INC/DE",
-  "archetype": "A",
-  "sic_code": "3663",
-  "fiscal_year_end": "September",
-  "draft_yaml": "  QCOM:\n    name: \"QUALCOMM INC/DE\"\n    cik: 804328\n    fiscal_year_end: \"September\"",
+  "ticker": "NOW",
+  "cik": 1373715,
+  "company_name": "ServiceNow, Inc.",
+  "archetype": "C",
+  "sic_code": "7372",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  NOW:\n    name: \"ServiceNow, Inc.\"\n    cik: 1373715\n    exclude_metrics:\n      - COGS\n      - Inventory",
   "metrics_passed": [
     "Revenue",
-    "COGS",
     "OperatingIncome",
     "NetIncome",
     "OperatingCashFlow",
@@ -18,23 +17,18 @@
     "IntangibleAssets",
     "LongTermDebt",
     "CashAndEquivalents",
-    "WeightedAverageSharesDiluted",
     "StockBasedCompensation",
-    "DividendsPaid",
-    "Inventory",
     "AccountsReceivable",
     "AccountsPayable",
     "DepreciationAmortization",
+    "GrossProfit",
     "ResearchAndDevelopment",
     "InterestExpense",
     "IncomeTaxExpense",
-    "EarningsPerShareDiluted",
-    "EarningsPerShareBasic",
     "CurrentAssets",
     "CurrentLiabilities",
     "TotalLiabilities",
     "StockholdersEquity",
-    "PropertyPlantEquipment",
     "RetainedEarnings",
     "InvestingCashFlow",
     "FinancingCashFlow",
@@ -44,15 +38,25 @@
     "SGA",
     "PretaxIncome",
     "ShortTermDebt",
-    "GrossProfit",
+    "WeightedAverageSharesDiluted",
+    "DividendsPaid",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "PropertyPlantEquipment",
     "DividendPerShare"
   ],
-  "metrics_excluded": [],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "DividendsPaid"
+  ],
   "failures": {
     "SGA": {
       "metric": "SGA",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3110000000.0,
+      "xbrl_value": 3854000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -60,7 +64,7 @@
     "PretaxIncome": {
       "metric": "PretaxIncome",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 12663000000.0,
+      "xbrl_value": 1738000000.0,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -68,23 +72,55 @@
     "ShortTermDebt": {
       "metric": "ShortTermDebt",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 0.0,
+      "xbrl_value": null,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
     },
-    "GrossProfit": {
-      "metric": "GrossProfit",
+    "WeightedAverageSharesDiluted": {
+      "metric": "WeightedAverageSharesDiluted",
       "reason": "No XBRL value extracted but reference exists",
       "xbrl_value": null,
-      "reference_value": 24546000000.0,
+      "reference_value": 1040000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendsPaid": {
+      "metric": "DividendsPaid",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "EarningsPerShareDiluted": {
+      "metric": "EarningsPerShareDiluted",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1.368,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "EarningsPerShareBasic": {
+      "metric": "EarningsPerShareBasic",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1.384,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2456000000.0,
       "variance_pct": null,
       "pattern": "extraction_error"
     },
     "DividendPerShare": {
       "metric": "DividendPerShare",
       "reason": "No reference data available (metric may not exist for this company)",
-      "xbrl_value": 3.48,
+      "xbrl_value": null,
       "reference_value": null,
       "variance_pct": null,
       "pattern": "unknown"
@@ -94,5 +130,5 @@
   "snapshot_created": false,
   "extraction_ran": true,
   "error": null,
-  "timestamp": "2026-04-04T09:55:03.056785"
+  "timestamp": "2026-04-04T09:57:21.418574"
 }
