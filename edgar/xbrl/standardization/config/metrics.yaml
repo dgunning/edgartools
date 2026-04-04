@@ -499,13 +499,14 @@ metrics:
     - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
     standardization:
       default:
-        formula:
-          components:
-          - concept: LiabilitiesAndStockholdersEquity
-            weight: 1.0
-          - concept: StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
-            weight: -1.0
-          notes: TL = L&SE - SE (NCI-inclusive for scope consistency)
+        components:
+        - concept: LiabilitiesAndStockholdersEquity
+          weight: 1.0
+        - concepts:
+          - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+          - StockholdersEquity
+          weight: -1.0
+        notes: TL = L&SE - SE (try NCI-inclusive first, fall back to StockholdersEquity)
   StockholdersEquity:
     description: Total stockholders equity including noncontrolling interest
     standard_tag: StockholdersEquity

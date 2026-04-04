@@ -2246,15 +2246,22 @@ class ReferenceValidator:
         if formula_components:
             weighted_total = 0.0
             weighted_found = 0
-            for concept, weight in formula_components:
-                concept_full = concept if ':' in concept else f"us-gaap:{concept}"
-                val = self._extract_xbrl_value(xbrl, concept_full)
+            for concept_or_list, weight in formula_components:
+                # Support fallback concept lists: try each until one is found
+                if isinstance(concept_or_list, list):
+                    candidates = [c if ':' in c else f"us-gaap:{c}" for c in concept_or_list]
+                    val = self._extract_xbrl_value(xbrl, candidates)
+                    label = concept_or_list[0]  # Use primary for logging
+                else:
+                    label = concept_or_list
+                    concept_full = concept_or_list if ':' in concept_or_list else f"us-gaap:{concept_or_list}"
+                    val = self._extract_xbrl_value(xbrl, concept_full)
                 if val is not None:
                     weighted_total += val * weight
                     weighted_found += 1
-                    components_used.append(concept)
+                    components_used.append(label)
                 else:
-                    components_missing.append(concept)
+                    components_missing.append(label)
             # Only return if ALL components found (for subtraction formulas,
             # partial results are wrong — e.g., just L&SE without SE)
             if weighted_found == len(formula_components):
@@ -2487,16 +2494,21 @@ class ReferenceValidator:
         )
     
     @staticmethod
-    def _parse_component(component) -> Tuple[str, float]:
-        """Parse a formula component into (concept_name, weight).
+    def _parse_component(component) -> Tuple:
+        """Parse a formula component into (concept_or_list, weight).
 
         Supports:
             str → (concept_name, +1.0)   (backward compatible)
             dict {"concept": "X", "weight": -1.0} → ("X", -1.0)
+            dict {"concepts": ["X", "Y"], "weight": -1.0} → (["X", "Y"], -1.0)
+                 (first found in XBRL wins — fallback concept support)
         """
         if isinstance(component, str):
             return (component, 1.0)
         elif isinstance(component, dict):
+            # Support "concepts" (list) for fallback alternatives
+            if "concepts" in component:
+                return (component["concepts"], float(component.get("weight", 1.0)))
             return (component["concept"], float(component.get("weight", 1.0)))
         raise ValueError(f"Invalid component format: {component}")
 
@@ -2574,12 +2586,19 @@ class ReferenceValidator:
         composite = 0.0
         components_found = 0
         component_values = {}
-        for concept, weight in formula_components:
-            val = self._extract_xbrl_value(xbrl, concept)
+        for concept_or_list, weight in formula_components:
+            # Support fallback concept lists
+            if isinstance(concept_or_list, list):
+                candidates = [c if ':' in c else f"us-gaap:{c}" for c in concept_or_list]
+                val = self._extract_xbrl_value(xbrl, candidates)
+                label = concept_or_list[0]
+            else:
+                label = concept_or_list
+                val = self._extract_xbrl_value(xbrl, concept_or_list)
             if val is not None:
                 composite += val * weight
                 components_found += 1
-            component_values[concept] = val
+            component_values[label] = val
 
         logger.debug(
             "[SA COMPONENTS] %s:%s — %s",
