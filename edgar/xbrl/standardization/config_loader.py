@@ -41,26 +41,29 @@ def _load_industry_metrics() -> dict:
 _COMPANY_INDUSTRY_MAP = {
     # Banking (SIC 6020-6099)
     "JPM": "banking", "BAC": "banking", "GS": "banking", "MS": "banking", "C": "banking",
-    # Securities (SIC 6200-6299)
-    "SCHW": "securities",
+    # Securities / Exchanges (SIC 6200-6299)
+    "SCHW": "securities", "ICE": "securities", "CME": "securities",
     # Asset management (SIC 6726)
     "BLK": "asset_management",
     # Financial services (SIC 6140-6199)
     "AXP": "financial_services", "DE": "financial_services",
+    "SPGI": "financial_services", "MCO": "financial_services",
     # Insurance (SIC 6300-6399)
-    "UNH": "health_insurance",
+    "UNH": "health_insurance", "AON": "insurance", "MMC": "insurance",
     # Energy (SIC 1300-1389, 2911-2999)
     "XOM": "energy", "CVX": "energy", "COP": "energy", "SLB": "energy",
+    # REITs (SIC 6500-6599)
+    "PLD": "reits", "AMT": "reits", "EQIX": "reits", "SPG": "reits",
     # Telecom (SIC 4800-4899)
-    "T": "telecom",
+    "T": "telecom", "VZ": "telecom", "TMUS": "telecom", "CMCSA": "telecom",
     # Utilities (SIC 4900-4999)
-    "NEE": "utilities",
+    "NEE": "utilities", "DUK": "utilities", "SO": "utilities", "D": "utilities",
     # Transportation (SIC 4200-4299)
-    "UPS": "transportation",
+    "UPS": "transportation", "FDX": "transportation", "CSX": "transportation", "NSC": "transportation",
     # Franchise (SIC 5812)
     "MCD": "franchise",
-    # Payment services — use default (no special industry)
-    # "V": None, "MA": None,
+    # Payment services, Standard industrials — use default (no special industry)
+    # "V": None, "MA": None, "AMD": None, "QCOM": None, etc.
 }
 
 # Importance tier assignments — used as fallback when metrics.yaml lacks the field.
