@@ -2240,6 +2240,26 @@ class ReferenceValidator:
                 if value is not None:
                     return value, [total_concept], []
 
+        # Strategy 1.5: Weighted formula from standardization config
+        # (supports subtraction, e.g. TotalLiabilities = L&SE - SE)
+        formula_components = self._resolve_formula_components(metric, ticker) if ticker else None
+        if formula_components:
+            weighted_total = 0.0
+            weighted_found = 0
+            for concept, weight in formula_components:
+                concept_full = concept if ':' in concept else f"us-gaap:{concept}"
+                val = self._extract_xbrl_value(xbrl, concept_full)
+                if val is not None:
+                    weighted_total += val * weight
+                    weighted_found += 1
+                    components_used.append(concept)
+                else:
+                    components_missing.append(concept)
+            # Only return if ALL components found (for subtraction formulas,
+            # partial results are wrong — e.g., just L&SE without SE)
+            if weighted_found == len(formula_components):
+                return weighted_total, components_used, components_missing
+
         # Strategy 2: Component summation
         components = get_composite_components(ticker, metric) if ticker else None
 

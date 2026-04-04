@@ -44,6 +44,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 
 | 10: Phase 10 fixes | EF-CQS 0.87+ | 2026-04-03 | 2026-04-03 | 0.8311 | 0.8690 | Importance tiers, Phase 10 overrides, known_divergences bug fix, closed-loop run, company quality tiers. 112 explained variances, 44 remaining failures. |
 | 11: Gap investigation | Classify all gaps | 2026-04-04 | 2026-04-04 | 0.8684 | 0.8740 | Hands-on investigation of 108 gaps. 32 not_applicable exclusions, 22 known_divergences, 4 bad overrides removed. 3 solver patterns identified. |
+| 12: Config collapse | Scalable config | 2026-04-04 | 2026-04-04 | 0.8740 | 0.8740 | Consensus 021. config_loader 916→484 lines. 51 per-company JSON overrides. 8 new industry sections. TotalLiabilities composite. Pure EF metric. `docs/metric-definitions.md`. |
 
 **Deferred items:** 3b (historical validation), 4a (S&P 500 expansion), 4c (event-driven processing).
 
@@ -185,6 +186,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 018 | 2026-04-01 | Claude Code deep-consensus (advocate/critic/deepthinker) | CQS scoring integrity: exclude_metrics conflates "not applicable" with "extraction failed." 4-component reform: Raw CQS diagnostic, reason field, classification tiers, Data Completeness Rate. 22/49 COGS exclusions flagged as extraction failures. | Action items created |
 | 019 | 2026-04-02 | Claude Code deep-consensus (advocate/critic/deepthinker) | Subscription-grade strategy: formula pollution (102 auto-solver overrides), golden master gap, extraction failures. "Diagnose, Then Fix" sequential phases with decision gates. Target: CQS 0.95+. Config-only ceiling reached. | All phases completed |
 | 020 | 2026-04-02 | GPT-5.4 + Gemini 3.1 + Claude deep-consensus | Scoring Integrity Sprint: parallel tracks (scoring fixes + expansion prep), yfinance exits EF scoring, SA-CQS→WARNING, per-metric/per-company quality tiers, CQS v2 version bump | Action items created |
+| 021 | 2026-04-04 | Claude Code deep-consensus | Subscription-grade strategy: config collapse (industry_metrics.yaml unified authority, per-company JSON overrides, _COMPANY_INDUSTRY_MAP), TotalLiabilities composite (L&SE - SE), Pure EF metric, metric definitions doc | All implemented |
 
 ### Session 004 Unanimous Agreements
 

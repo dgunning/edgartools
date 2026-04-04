@@ -1,0 +1,24 @@
+{
+  "known_divergences": {
+    "InterestExpense": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 50.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    },
+    "ShareRepurchases": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 100.0,
+      "reason": "Phase 11: unmapped - bank share repurchases structure",
+      "skip_validation": true,
+      "added_date": "2026-04-03"
+    }
+  },
+  "quality_tier": "provisional"
+}

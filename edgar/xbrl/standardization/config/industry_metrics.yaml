@@ -37,21 +37,21 @@ banking:
         - InterestExpense
         - InterestExpenseTotal
       notes: "Bank raw material cost is interest paid to depositors"
-    
+
     GrossProfit:
       counterpart: NetInterestIncome
       calculation: "InterestIncome - InterestExpense"
-    
+
     OperatingIncome:
       counterpart: PPNR
       calculation: "NetInterestIncome + NonInterestIncome - NonInterestExpense"
       notes: "Pre-Provision Net Revenue - excludes credit loss provisions"
-    
+
     SGA:
       counterpart: NonInterestExpense
       xbrl_concepts:
         - NoninterestExpense
-    
+
     # Street View: Economic Liquidity (not statutory cash)
     CashAndEquivalents:
       extraction_strategy: "street_cash_composite"
@@ -64,7 +64,7 @@ banking:
         - CashAndCashEquivalentsAtCarryingValue
         - CashAndCashEquivalents
       notes: "Street View: Economic liquidity, not statutory cash"
-    
+
     # Street View: Wholesale Funding (Strict Component Summation)
     ShortTermDebt:
       extraction_strategy: "wholesale_funding_composite"
@@ -103,7 +103,7 @@ insurance:
       xbrl_concepts:
         - BenefitsLossesAndExpenses
         - PolicyholderBenefitsAndClaimsIncurredNet
-    
+
     OperatingIncome:
       counterpart: UnderwritingIncome
       calculation: "Premiums - Claims - UnderwritingExpenses"
@@ -130,7 +130,7 @@ reits:
       xbrl_concepts:
         - RealEstateOperatingExpenses
         - DirectCostsOfRealEstateAndRentalOperations
-    
+
     OperatingIncome:
       counterpart: NOI
       calculation: "Revenue - PropertyOperatingExpenses"
@@ -157,6 +157,74 @@ energy:
         - CrudeOilAndNaturalGasProductionExpenses
       notes: "Energy cost of extraction/production"
 
+# Securities / Brokerage (SIC 6200-6299) — e.g. SCHW
+securities:
+  sic_ranges: [[6200, 6299]]
+  forbidden_metrics:
+    - COGS
+    - SGA
+    - OperatingIncome
+    - Capex
+    - Inventory
+    - GrossProfit
+    - CurrentAssets
+    - CurrentLiabilities
+
+# Asset Management (SIC 6726) — e.g. BLK
+asset_management:
+  sic_ranges: [[6726, 6726]]
+  forbidden_metrics:
+    - COGS
+    - Capex
+    - CurrentAssets
+    - CurrentLiabilities
+    - GrossProfit
+
+# Financial Services (SIC 6140-6199) — e.g. AXP, DE
+financial_services:
+  sic_ranges: [[6140, 6199]]
+  forbidden_metrics:
+    - COGS
+    - SGA
+    - CurrentAssets
+    - CurrentLiabilities
+    - GrossProfit
+
+# Telecom (SIC 4800-4899) — e.g. T
+telecom:
+  sic_ranges: [[4800, 4899]]
+  forbidden_metrics:
+    - COGS
+    - GrossProfit
+    - Inventory
+
+# Utilities (SIC 4900-4999) — e.g. NEE
+utilities:
+  sic_ranges: [[4900, 4999]]
+  forbidden_metrics:
+    - GrossProfit
+    - Inventory
+
+# Transportation (SIC 4200-4299) — e.g. UPS
+transportation:
+  sic_ranges: [[4200, 4299]]
+  forbidden_metrics:
+    - COGS
+
+# Franchise / Quick-Service Restaurants (SIC 5812) — e.g. MCD
+franchise:
+  sic_ranges: [[5812, 5812]]
+  forbidden_metrics:
+    - GrossProfit
+    - COGS
+
+# Health Insurance (SIC 6321-6399) — e.g. UNH
+health_insurance:
+  sic_ranges: [[6321, 6399]]
+  forbidden_metrics:
+    - GrossProfit
+    - ResearchAndDevelopment
+
 # Default (All other sectors)
 default:
   concept_mapping:
@@ -166,7 +234,7 @@ default:
         - PaymentsToAcquireIntangibleAssets
         - PaymentsToDevelopSoftware
       notes: "Expanded to include intangible investments"
-    
+
     OperatingIncome:
       primary: OperatingIncomeLoss
       fallback_calculation: "GrossProfit - ResearchAndDevelopmentExpense - SellingGeneralAndAdministrativeExpense"

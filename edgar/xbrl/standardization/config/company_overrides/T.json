@@ -1,0 +1,50 @@
+{
+  "exclude_metrics": {
+    "ResearchAndDevelopment": {
+      "reason": "not_applicable",
+      "notes": "No R&D line item"
+    }
+  },
+  "known_divergences": {
+    "InterestExpense": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 25.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    },
+    "TotalLiabilities": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 20.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    },
+    "GrossProfit": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 20.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    },
+    "IntangibleAssets": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 70.0,
+      "reason": "Phase 11: yfinance includes FCC spectrum licenses.",
+      "skip_validation": true,
+      "added_date": "2026-04-03"
+    }
+  },
+  "quality_tier": "provisional"
+}

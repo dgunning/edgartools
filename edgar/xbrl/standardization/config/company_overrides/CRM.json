@@ -1,0 +1,14 @@
+{
+  "quality_tier": "provisional",
+  "known_divergences": {
+    "DepreciationAmortization": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 75.0,
+      "reason": "Phase 11: yfinance D&A scope differs from XBRL concept.",
+      "skip_validation": true,
+      "added_date": "2026-04-03"
+    }
+  }
+}

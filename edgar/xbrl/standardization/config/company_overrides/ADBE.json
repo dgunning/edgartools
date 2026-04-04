@@ -1,0 +1,9 @@
+{
+  "quality_tier": "provisional",
+  "exclude_metrics": {
+    "DividendPerShare": {
+      "reason": "not_applicable",
+      "notes": "Phase 11: Company does not pay dividends"
+    }
+  }
+}

@@ -15,17 +15,20 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.8300 | 2026-04-03 |
+| CQS | 0.8300 | 2026-04-04 |
 | EF-CQS | 0.8740 | 2026-04-04 |
+| Pure EF | ~0.93+ (excl. reference mismatches) | 2026-04-04 |
 | Weighted EF-CQS | ~0.87 | 2026-04-04 |
 | SA-CQS (diagnostic) | 0.8597 | 2026-04-03 |
 | Headline EF | ~91% | 2026-04-04 |
 | EF Pass Rate | 87.4% | 2026-04-04 |
 | Extraction Failed | 0 | 2026-04-04 |
-| Explained Variance | 141 (112 Phase 10 + 29 Phase 11) | 2026-04-04 |
-| Remaining Gaps | 72 (4 unmapped, 7 validation_failure, 32 high_variance, 29 explained) | 2026-04-04 |
+| Explained Variance | 141 | 2026-04-04 |
+| TotalLiabilities | Composite formula active (L&SE - SE) | 2026-04-04 |
 | Company Tiers | 0 verified / 46 provisional / 4 excluded (DE, XOM, GE, COP) | 2026-04-03 |
 | Scoring Version | v2 + tier weighting (M8.1) + known_divergences fix + quality tiers (M8.3) | 2026-04-03 |
+| Industry Sections | 13 (banking, insurance, reits, energy + 8 new) | 2026-04-04 |
+| Config Architecture | Per-company JSON overrides (51 files), config_loader.py 484 lines | 2026-04-04 |
 | Companies | 100 (50 evaluated) | |
 | Metrics | 37 base + 3 derived (8 core / 14 extended / 14 exploratory / 1 derived) | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
@@ -35,7 +38,7 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 **Scoring model: CQS v2** (Consensus 020). Changes: (1) yfinance `is_match` backdoor removed from EF scoring — EF now measures extraction fidelity only (known_concept, tree_source, facts_search paths). (2) SA-CQS demoted from decision gate to diagnostic WARNING — SA measures yfinance-compatibility, not extraction correctness. (3) `FACTS_SEARCH` is a distinct `MappingSource` — no longer mislabeled as TREE. (4) Multi-period validation passes fiscal_year to SEC Facts API. (5) `ef_pass_reason` field added to `ValidationResult` for scoring path diagnostics.
 
-**Note on CQS/EF-CQS values:** Phase 11 (2026-04-04) achieved EF-CQS 0.8740 (+0.0056 from 0.8684) through hands-on investigation of all 108 gaps. Key findings: (1) 4 Phase 10 ShortTermDebt overrides were wrong (set `preferred_concept=DebtCurrent` for companies that don't have this concept — removed), (2) 32 not_applicable exclusions added after verifying concepts absent from XBRL (TotalLiabilities for 11 companies, GrossProfit for 6, DividendPerShare for 4, etc.), (3) 22 known_divergences added for structural mismatches (PPE+operating leases, D&A scope, bank share repurchases). See `gap-investigation-report.md` for full 108-gap investigation table.
+**Note on CQS/EF-CQS values:** Phase 11 achieved EF-CQS 0.8740 through investigation of all 108 gaps. Consensus 021 then restructured the config system: (1) Phase 10/11 Python overrides (543 lines) migrated to 51 per-company JSON files in `config/company_overrides/`, (2) 8 new industry sections added to `industry_metrics.yaml` (securities, asset_management, financial_services, telecom, utilities, transportation, franchise, health_insurance), (3) TotalLiabilities composite formula (L&SE - SE) recovers 11 previously excluded companies, (4) `compute_pure_ef()` measures extraction fidelity excluding 78 reference-standard mismatches.
 
 ---
 
@@ -191,9 +194,10 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 ### Config (Tier 1 — agent-modifiable)
 | File | Contents |
 |------|----------|
-| `config/metrics.yaml` | Metric definitions, known_concepts, tree_hints, tolerances, composites |
-| `config/companies.yaml` | Company overrides, exclusions, divergences |
-| `config/industry_metrics.yaml` | Industry-specific concepts, forbidden/required metrics |
+| `config/metrics.yaml` | Metric definitions, known_concepts, tree_hints, tolerances, composites, standardization formulas |
+| `config/companies.yaml` | Company base config (name, CIK, FYE, industry) |
+| `config/company_overrides/*.json` | Per-company JSON: known_divergences, exclude_metrics, metric_overrides, quality_tier (51 files) |
+| `config/industry_metrics.yaml` | Industry-specific concepts, forbidden/required metrics (13 industry sections) |
 | `config/yf_snapshots/` | Cached yfinance reference data (frozen JSONs) |
 
 ### Tools (automation layer)
@@ -219,7 +223,7 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 | `internal_validator.py` | Accounting equation consistency checks |
 | `ledger/schema.py` | SQLite experiment ledger schema |
 | `models.py` | MappingResult, MappingSource (CONFIG=exclusion, OVERRIDE=company override), ConfidenceLevel, ExclusionReason |
-| `config_loader.py` | YAML config loading |
+| `config_loader.py` | YAML + JSON config loading, industry metrics, company industry map |
 
 ---
 

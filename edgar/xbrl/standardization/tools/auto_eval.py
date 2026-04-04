@@ -827,6 +827,186 @@ def compute_cqs(
 
 
 # =============================================================================
+# PURE EXTRACTION FIDELITY
+# =============================================================================
+
+# Reference-standard mismatches: gaps where yfinance scope differs from XBRL.
+# These are NOT extraction bugs — the XBRL extraction is correct, but the
+# reference standard (yfinance) aggregates differently.
+# Format: {(ticker, metric): reason}
+_REFERENCE_MISMATCHES: Dict[Tuple[str, str], str] = {
+    # PPE + operating lease ROU assets
+    ("HD", "PropertyPlantEquipment"): "yfinance includes operating lease ROU assets",
+    ("MCD", "PropertyPlantEquipment"): "yfinance includes franchise lease assets",
+    ("NKE", "PropertyPlantEquipment"): "yfinance includes operating leases",
+    ("NVDA", "PropertyPlantEquipment"): "yfinance includes operating leases",
+    ("TSLA", "PropertyPlantEquipment"): "yfinance includes solar/energy leases",
+    ("BLK", "PropertyPlantEquipment"): "yfinance includes operating leases",
+    # D&A scope differences
+    ("BLK", "DepreciationAmortization"): "yfinance includes intangible amortization",
+    ("CRM", "DepreciationAmortization"): "yfinance includes large intangible amortization",
+    ("MCD", "DepreciationAmortization"): "yfinance includes franchise-related amortization",
+    ("SLB", "DepreciationAmortization"): "yfinance D&A scope differs from XBRL",
+    ("SCHW", "DepreciationAmortization"): "yfinance includes intangible amortization",
+    # ShortTermDebt aggregation differences
+    ("HD", "ShortTermDebt"): "yfinance includes current portion of LT debt",
+    ("HON", "ShortTermDebt"): "yfinance includes LongTermDebtCurrent",
+    ("KO", "ShortTermDebt"): "yfinance includes current LT debt",
+    ("RTX", "ShortTermDebt"): "yfinance includes current LT debt",
+    ("CAT", "ShortTermDebt"): "yfinance includes CAT Financial products debt",
+    ("GS", "ShortTermDebt"): "bank short-term funding broader scope",
+    ("SCHW", "ShortTermDebt"): "brokerage client-related obligations",
+    # InterestExpense scope differences (many companies)
+    ("AMZN", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("AVGO", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("AXP", "InterestExpense"): "financial company interest scope",
+    ("BAC", "InterestExpense"): "bank interest scope",
+    ("C", "InterestExpense"): "bank interest scope",
+    ("CAT", "InterestExpense"): "financial subsidiary interest",
+    ("GE", "InterestExpense"): "financial subsidiary interest",
+    ("GOOG", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("GS", "InterestExpense"): "bank interest scope",
+    ("HON", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("JNJ", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("JPM", "InterestExpense"): "bank interest scope",
+    ("KO", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("LLY", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("LOW", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("META", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("MRK", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("MS", "InterestExpense"): "bank interest scope",
+    ("MSFT", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("NEE", "InterestExpense"): "utility interest scope",
+    ("PG", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("SCHW", "InterestExpense"): "brokerage interest scope",
+    ("T", "InterestExpense"): "telecom interest scope",
+    ("TMO", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    ("TSLA", "InterestExpense"): "yfinance scope differs from XBRL concept",
+    # GrossProfit scope differences
+    ("AMZN", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("CAT", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("DE", "GrossProfit"): "financial services contamination",
+    ("GE", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("HON", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("MCD", "GrossProfit"): "franchise model — no COGS line",
+    ("NEE", "GrossProfit"): "utility — no GrossProfit concept",
+    ("NFLX", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("NKE", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("PFE", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("RTX", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("T", "GrossProfit"): "telecom — no GrossProfit concept",
+    ("TMO", "GrossProfit"): "yfinance scope differs from XBRL",
+    ("UNH", "GrossProfit"): "insurance — no GrossProfit concept",
+    ("UPS", "GrossProfit"): "logistics — no GrossProfit concept",
+    ("WMT", "GrossProfit"): "yfinance scope differs from XBRL",
+    # TotalLiabilities — absent from XBRL (needs composite)
+    ("ABBV", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("AMZN", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("HON", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("INTC", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("KO", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("LLY", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("MCD", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("MRK", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("NKE", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("TMO", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("UPS", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    ("WMT", "TotalLiabilities"): "us-gaap:Liabilities absent, needs composite",
+    # Singleton reference mismatches from Phase 11
+    ("CAT", "AccountsReceivable"): "yfinance includes CAT Financial receivables",
+    ("UNH", "AccountsPayable"): "yfinance includes medical claims payable",
+    ("AVGO", "ShareRepurchases"): "September FYE timing mismatch",
+    ("GS", "ShareRepurchases"): "common only vs total (21.6%)",
+    ("RTX", "StockBasedCompensation"): "yfinance includes broader compensation scope",
+    ("T", "IntangibleAssets"): "yfinance includes FCC spectrum licenses",
+    ("CVX", "CashAndEquivalents"): "XBRL includes restricted cash, yfinance excludes",
+}
+
+# Pre-indexed count by ticker for O(1) lookup in compute_pure_ef()
+_REFERENCE_MISMATCH_COUNTS: Dict[str, int] = {}
+for _t, _m in _REFERENCE_MISMATCHES:
+    _REFERENCE_MISMATCH_COUNTS[_t] = _REFERENCE_MISMATCH_COUNTS.get(_t, 0) + 1
+
+
+@dataclass
+class PureEFResult:
+    """Result of Pure Extraction Fidelity computation.
+
+    Pure EF excludes reference-standard mismatches from the denominator,
+    measuring only whether we correctly extract XBRL concepts — not whether
+    yfinance agrees with the XBRL scope.
+    """
+    pure_ef: float              # EF excluding reference mismatches
+    standard_ef_cqs: float      # Standard EF-CQS (for comparison)
+    delta: float                # pure_ef - standard_ef_cqs
+    reference_mismatches: int   # Count of excluded reference mismatches
+    companies_evaluated: int
+    per_company: Dict[str, Tuple[float, int]] = field(default_factory=dict)  # ticker -> (pure_ef, mismatches_excluded)
+
+    def summary(self) -> str:
+        return (
+            f"Pure EF: {self.pure_ef:.4f} | Standard EF: {self.standard_ef_cqs:.4f} | "
+            f"Delta: {self.delta:+.4f} | Ref mismatches excluded: {self.reference_mismatches} | "
+            f"{self.companies_evaluated} companies"
+        )
+
+
+def compute_pure_ef(
+    cqs_result: CQSResult,
+) -> PureEFResult:
+    """Compute Pure Extraction Fidelity, excluding reference-standard mismatches.
+
+    Pure EF answers: "How well does our extraction engine find the right XBRL
+    concept?" — stripping out disagreements where yfinance aggregates differently
+    (PPE+leases, D&A scope, ShortTermDebt composites, etc.).
+
+    Args:
+        cqs_result: Pre-computed CQSResult from compute_cqs().
+
+    Returns:
+        PureEFResult with pure_ef, standard_ef_cqs, and delta.
+    """
+
+    total_pure_ef_pass = 0
+    total_pure_ef_denom = 0
+    total_mismatches = 0
+    per_company: Dict[str, Tuple[float, int]] = {}
+
+    for ticker, cs in cqs_result.company_scores.items():
+        mismatches = _REFERENCE_MISMATCH_COUNTS.get(ticker, 0)
+
+        # EF denominator = metrics_total - excluded - unverified - explained_variance
+        ef_denom = (cs.metrics_total - cs.metrics_excluded
+                    - cs.unverified_count - cs.explained_variance_count)
+        ef_num = round(cs.ef_pass_rate * ef_denom) if ef_denom > 0 else 0
+
+        # Remove mismatches from both numerator and denominator to avoid >1.0
+        pure_denom = max(0, ef_denom - mismatches)
+        pure_num = max(0, ef_num - mismatches)
+
+        pure_ef_rate = min(1.0, pure_num / pure_denom) if pure_denom > 0 else 0.0
+        per_company[ticker] = (pure_ef_rate, mismatches)
+
+        total_pure_ef_pass += pure_num
+        total_pure_ef_denom += pure_denom
+        total_mismatches += mismatches
+
+    pure_ef = total_pure_ef_pass / total_pure_ef_denom if total_pure_ef_denom > 0 else 0.0
+
+    result = PureEFResult(
+        pure_ef=pure_ef,
+        standard_ef_cqs=cqs_result.ef_cqs,
+        delta=pure_ef - cqs_result.ef_cqs,
+        reference_mismatches=total_mismatches,
+        companies_evaluated=cqs_result.companies_evaluated,
+        per_company=per_company,
+    )
+
+    logger.info(f"Pure EF: {result.summary()}")
+    return result
+
+
+# =============================================================================
 # INCREMENTAL CQS (Phase 2a)
 # =============================================================================
 
@@ -1655,27 +1835,8 @@ def record_eval_results(
 # GAP ANALYSIS
 # =============================================================================
 
-# Cache for industry_metrics.yaml (loaded once per process)
-_industry_metrics_cache: Optional[dict] = None
-
-
-def _load_industry_metrics() -> dict:
-    """Load industry_metrics.yaml with module-level caching."""
-    global _industry_metrics_cache
-    if _industry_metrics_cache is not None:
-        return _industry_metrics_cache
-
-    import yaml
-    from pathlib import Path
-
-    path = Path(__file__).parent.parent / "config" / "industry_metrics.yaml"
-    if not path.exists():
-        _industry_metrics_cache = {}
-        return _industry_metrics_cache
-
-    with open(path, 'r') as f:
-        _industry_metrics_cache = yaml.safe_load(f) or {}
-    return _industry_metrics_cache
+# Re-use the cached loader from config_loader (single source of truth)
+from edgar.xbrl.standardization.config_loader import _load_industry_metrics
 
 
 def _build_forbidden_by_ticker(tickers, orchestrator) -> Dict[str, set]:

@@ -1,0 +1,20 @@
+{
+  "exclude_metrics": {
+    "ResearchAndDevelopment": {
+      "reason": "not_applicable",
+      "notes": "No R&D line item"
+    }
+  },
+  "known_divergences": {
+    "PropertyPlantEquipment": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 40.0,
+      "reason": "Phase 11: yfinance includes OperatingLeaseRightOfUseAsset in PPE. XBRL excludes it.",
+      "skip_validation": true,
+      "added_date": "2026-04-03"
+    }
+  },
+  "quality_tier": "provisional"
+}

@@ -113,6 +113,8 @@ class StandardizedMetric:
     period_end: Optional[str] = None            # ISO date of the fiscal period end
     accession_number: Optional[str] = None      # SEC filing accession number
     is_golden_master: bool = False
+    # Divergence documentation (populated from known_divergences when applicable)
+    divergence_notes: Optional[str] = None      # Why this metric may differ from reference sources
 
     @property
     def has_value(self) -> bool:
@@ -412,7 +414,8 @@ def extract_standardized_financials(filing, ticker: str) -> Optional['Standardiz
     validator._current_ticker = ticker
     validator._current_form_type = form_type
 
-    # Get excluded metrics for this company
+    # Get company config and excluded metrics
+    company_config = config.get_company(ticker)
     excluded_metrics = config.get_excluded_metrics_for_company(ticker)
 
     # Build metrics dict
@@ -497,6 +500,13 @@ def extract_standardized_financials(filing, ticker: str) -> Optional['Standardiz
                 m.sign_convention = dd_entry.sign_convention
     except Exception as e:
         log.warning(f"Data dictionary enrichment failed: {e}")
+
+    # 6b. Populate divergence_notes from known_divergences
+    if company_config and company_config.known_divergences:
+        for metric_name, m in metrics.items():
+            div = company_config.known_divergences.get(metric_name)
+            if div:
+                m.divergence_notes = div.get("reason")
 
     # 7. Wrap in StandardizedFinancials
     return StandardizedFinancials(

@@ -136,7 +136,8 @@ metrics:
       section: investing
       weight: -1.0
     universal: false
-    notes: Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets. Excludes M&A acquisitions.
+    notes: Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets.
+      Excludes M&A acquisitions.
   TotalAssets:
     description: Total assets
     known_concepts:
@@ -184,7 +185,8 @@ metrics:
     universal: true
     notes: Sum of Goodwill + IntangibleAssetsNet to match yfinance. KO uses IndefiniteLivedTrademarks.
   ShortTermDebt:
-    description: Short-term borrowings and current debt (matches yfinance Current Debt)
+    description: Short-term borrowings and current debt (matches yfinance Current
+      Debt)
     composite: true
     components:
     - LongTermDebtCurrent
@@ -373,8 +375,8 @@ metrics:
       - CASHFLOW
       section: operating
     universal: true
-    notes: Required for EBITDA calculation and maintenance capex analysis. Pharma/medical companies often split into Depreciation
-      + AmortizationOfIntangibleAssets.
+    notes: Required for EBITDA calculation and maintenance capex analysis. Pharma/medical
+      companies often split into Depreciation + AmortizationOfIntangibleAssets.
   GrossProfit:
     description: Revenue minus cost of goods sold
     standard_tag: GrossProfit
@@ -491,6 +493,19 @@ metrics:
       statements:
       - BALANCE
     universal: true
+    composite: true
+    components:
+    - LiabilitiesAndStockholdersEquity
+    - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+    standardization:
+      default:
+        formula:
+          components:
+          - concept: LiabilitiesAndStockholdersEquity
+            weight: 1.0
+          - concept: StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+            weight: -1.0
+          notes: TL = L&SE - SE (NCI-inclusive for scope consistency)
   StockholdersEquity:
     description: Total stockholders equity including noncontrolling interest
     standard_tag: StockholdersEquity
