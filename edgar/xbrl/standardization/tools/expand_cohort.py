@@ -200,8 +200,8 @@ def _diagnose_and_fix(
                 graveyard=gap.graveyard_count,
                 reference_value=getattr(gap, 'reference_value', None),
                 xbrl_value=getattr(gap, 'xbrl_value', None),
-                components_found=getattr(gap, 'components_found', 0),
-                components_needed=getattr(gap, 'components_needed', 0),
+                components_found=len(gap.extraction_evidence.components_used) if gap.extraction_evidence else 0,
+                components_needed=(len(gap.extraction_evidence.components_used) + len(gap.extraction_evidence.components_missing)) if gap.extraction_evidence else 0,
             ))
 
     return applied_fixes, unresolved

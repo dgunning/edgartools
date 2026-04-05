@@ -1,12 +1,16 @@
 """Tests for expand_cohort — inner loop of expansion pipeline."""
 import json
+from dataclasses import dataclass, field
+from typing import List, Optional
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 
 from edgar.xbrl.standardization.tools.expand_cohort import (
     run_expand_cohort,
     detect_archetype_gaps,
+    _diagnose_and_fix,
 )
+from edgar.xbrl.standardization.tools.auto_eval import ExtractionEvidence, MetricGap
 
 
 def test_detect_archetype_gaps():
@@ -64,3 +68,53 @@ def test_detect_archetype_gaps_empty_sic():
         {"ticker": "UNKNOWN", "sic_code": None, "archetype": "A"},
     ])
     assert "UNKNOWN" in gaps
+
+
+def test_diagnose_and_fix_components_derived_from_extraction_evidence():
+    """components_found/needed are derived from extraction_evidence, not MetricGap fields."""
+    evidence = ExtractionEvidence(
+        metric="Revenue",
+        ticker="AAPL",
+        components_used=["us-gaap:Revenues", "us-gaap:SalesRevenueNet"],
+        components_missing=["us-gaap:RevenueFromContractWithCustomer"],
+    )
+    gap = MetricGap(
+        ticker="AAPL",
+        metric="Revenue",
+        gap_type="high_variance",
+        estimated_impact=0.1,
+        extraction_evidence=evidence,
+    )
+
+    # _diagnose_and_fix does a local import of identify_gaps; patch the source module
+    with patch("edgar.xbrl.standardization.tools.auto_eval.identify_gaps", return_value=([gap], {})), \
+         patch("edgar.xbrl.standardization.tools.expand_cohort._try_deterministic_fix", return_value=None):
+        _, unresolved = _diagnose_and_fix(["AAPL"], {})
+
+    assert len(unresolved) == 1
+    entry = unresolved[0]
+    # components_found = len(components_used) = 2
+    assert entry.components_found == 2
+    # components_needed = len(components_used) + len(components_missing) = 2 + 1 = 3
+    assert entry.components_needed == 3
+
+
+def test_diagnose_and_fix_components_none_extraction_evidence():
+    """When extraction_evidence is None, components default to 0."""
+    gap = MetricGap(
+        ticker="TSLA",
+        metric="NetIncome",
+        gap_type="unmapped",
+        estimated_impact=0.05,
+        extraction_evidence=None,
+    )
+
+    # _diagnose_and_fix does a local import of identify_gaps; patch the source module
+    with patch("edgar.xbrl.standardization.tools.auto_eval.identify_gaps", return_value=([gap], {})), \
+         patch("edgar.xbrl.standardization.tools.expand_cohort._try_deterministic_fix", return_value=None):
+        _, unresolved = _diagnose_and_fix(["TSLA"], {})
+
+    assert len(unresolved) == 1
+    entry = unresolved[0]
+    assert entry.components_found == 0
+    assert entry.components_needed == 0
