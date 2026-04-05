@@ -125,3 +125,51 @@ def test_classify_root_cause_reference_mismatch():
         xbrl_value=None,
     )
     assert result == "reference_mismatch"
+
+
+def test_build_evidence_from_enriched_gap():
+    """_build_evidence populates all scorer-required fields."""
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    gap = UnresolvedGapEntry(
+        ticker="HD", metric="Revenue", gap_type="high_variance",
+        variance=5.3, root_cause="wrong_concept", graveyard=0,
+        reference_value=100.0, xbrl_value=94.7,
+        components_found=0, components_needed=0,
+    )
+    evidence = _build_evidence(gap)
+
+    assert evidence["variance_pct"] == 5.3
+    assert evidence["reference_value"] == 100.0
+    assert evidence["xbrl_value"] == 94.7
+
+
+def test_build_evidence_sign_error_fields():
+    """Evidence for sign error includes both values for ratio check."""
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    gap = UnresolvedGapEntry(
+        ticker="HD", metric="Depreciation", gap_type="high_variance",
+        variance=200.0, root_cause="sign_error", graveyard=0,
+        reference_value=100.0, xbrl_value=-100.0,
+    )
+    evidence = _build_evidence(gap)
+    assert evidence["xbrl_value"] == -100.0
+    assert evidence["reference_value"] == 100.0
+
+
+def test_build_evidence_composite_fields():
+    """Evidence for composite includes component counts."""
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    gap = UnresolvedGapEntry(
+        ticker="HD", metric="TotalLiabilities", gap_type="unmapped",
+        variance=None, root_cause="needs_composite", graveyard=0,
+        components_found=2, components_needed=3,
+    )
+    evidence = _build_evidence(gap)
+    assert evidence["components_found"] == 2
+    assert evidence["components_needed"] == 3

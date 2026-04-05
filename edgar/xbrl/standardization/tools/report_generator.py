@@ -44,6 +44,11 @@ class UnresolvedGapEntry:
     variance: Optional[float]
     root_cause: str
     graveyard: int = 0
+    # Evidence fields for confidence scorer (not rendered in markdown tables)
+    reference_value: Optional[float] = None
+    xbrl_value: Optional[float] = None
+    components_found: int = 0
+    components_needed: int = 0
 
 
 @dataclass

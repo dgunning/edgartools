@@ -247,6 +247,13 @@ def _build_evidence(gap_entry) -> Dict[str, Any]:
     evidence: Dict[str, Any] = {}
     if gap_entry.variance is not None:
         evidence["variance_pct"] = gap_entry.variance
+    if gap_entry.reference_value is not None:
+        evidence["reference_value"] = gap_entry.reference_value
+    if gap_entry.xbrl_value is not None:
+        evidence["xbrl_value"] = gap_entry.xbrl_value
+    if gap_entry.components_found or gap_entry.components_needed:
+        evidence["components_found"] = gap_entry.components_found
+        evidence["components_needed"] = gap_entry.components_needed
     return evidence
 
 

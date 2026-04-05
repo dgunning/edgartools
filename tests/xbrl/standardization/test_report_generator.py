@@ -106,6 +106,31 @@ def test_generate_cohort_report_empty_sections():
     assert "AAPL" in md
 
 
+def test_roundtrip_with_enriched_gap_entry():
+    """Enriched gap entries roundtrip through markdown without losing base fields."""
+    report_data = CohortReportData(
+        name="enriched-test",
+        status="inner_loop_complete",
+        companies=[],
+        fixes=[],
+        unresolved=[
+            UnresolvedGapEntry(
+                ticker="HD", metric="Revenue", gap_type="high_variance",
+                variance=5.3, root_cause="wrong_concept", graveyard=1,
+                reference_value=100.0, xbrl_value=94.7,
+            ),
+        ],
+    )
+    md = generate_cohort_report(report_data)
+    parsed = parse_cohort_report(md)
+
+    assert len(parsed.unresolved) == 1
+    assert parsed.unresolved[0].ticker == "HD"
+    assert parsed.unresolved[0].variance == 5.3
+    # Note: enriched fields are NOT in markdown, so parsed version has defaults
+    assert parsed.unresolved[0].reference_value is None
+
+
 def test_parse_cohort_report_with_none_variance():
     """Parser handles None variance in unresolved gaps."""
     report_data = CohortReportData(
