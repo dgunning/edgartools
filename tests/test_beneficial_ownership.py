@@ -122,12 +122,11 @@ def test_schedule13d_properties():
 
     schedule = Schedule13D.from_filing(filing)
 
-    # Test total_shares
-    assert schedule.total_shares == 2100000 + 2435000  # Sum of both persons
-    assert schedule.total_shares == 4535000
+    # Test total_shares — overlapping beneficial ownership, max not sum
+    assert schedule.total_shares == 2435000
 
     # Test total_percent
-    assert schedule.total_percent == pytest.approx(8.5 + 9.9, rel=0.01)
+    assert schedule.total_percent == pytest.approx(9.9, rel=0.01)
 
     # Test is_amendment
     assert schedule.is_amendment is False
@@ -480,12 +479,11 @@ def test_joint_filers_vs_separate_positions():
 
     schedule_13d = Schedule13D.from_filing(filing_13d)
 
-    # Person 1: 2,100,000 shares (8.5%)
-    # Person 2: 2,435,000 shares (9.9%)
-    # These are DIFFERENT, so should be summed
-    assert schedule_13d.total_shares == 2100000 + 2435000
-    assert schedule_13d.total_shares == 4535000
-    assert schedule_13d.total_percent == pytest.approx(8.5 + 9.9, rel=0.01)
+    # Person 1: 2,100,000 shares (8.5%) — the partnership
+    # Person 2: 2,435,000 shares (9.9%) — the controlling person
+    # Overlapping beneficial ownership — max not sum
+    assert schedule_13d.total_shares == 2435000
+    assert schedule_13d.total_percent == pytest.approx(9.9, rel=0.01)
 
     # Test 2: Schedule13G with JOINT filers (same share count)
     # This is the existing test data - 2 persons with same shares
@@ -701,10 +699,10 @@ def test_excluded_shares_not_aggregated():
         date_of_event='12/31/2024'
     )
 
-    # Total should be 1,000,000 + 2,000,000 = 3,000,000
+    # Max of included persons: 2,000,000 shares (10.0%)
     # Person 2's 500,000 shares should be excluded
-    assert schedule.total_shares == 3000000
-    assert schedule.total_percent == pytest.approx(15.0, rel=0.01)  # 5.0% + 10.0%
+    assert schedule.total_shares == 2000000
+    assert schedule.total_percent == pytest.approx(10.0, rel=0.01)
 
 
 @pytest.mark.fast
@@ -842,72 +840,41 @@ def test_undeclared_joint_filers_detection():
 
 
 @pytest.mark.fast
-def test_separate_filers_with_different_values():
+def test_total_always_uses_max_never_sum():
     """
-    Test that separate filers with different share amounts are correctly summed.
-    This ensures the joint filer detection doesn't break normal separate filer cases.
+    Invariant: total_shares/total_percent must always equal max() of reporting persons,
+    never sum(). Within a single 13D/G, persons report overlapping beneficial ownership.
+
+    Tests with 3 persons reporting identical values (e.g. Saba Capital → New Germany Fund
+    where 3 persons each report 16.4% — sum would produce 49.2%).
     """
     from edgar.beneficial_ownership.models import Schedule13DItems
 
     filing = Mock()
     filing.form = 'SCHEDULE 13D'
-    filing.filing_date = date(2025, 12, 16)
+    filing.filing_date = date(2025, 1, 2)
 
-    # Three reporting persons with DIFFERENT values (separate filers)
+    # 3 persons each reporting the same 5,370,000 shares (16.4%)
     persons = [
         ReportingPerson(
-            name="Investor A",
-            cik="0001111111",
-            citizenship="US",
-            aggregate_amount=5000000,
-            percent_of_class=10.0,
-            sole_voting_power=5000000,
-            shared_voting_power=0,
-            sole_dispositive_power=5000000,
-            shared_dispositive_power=0,
-            member_of_group=None,
+            name=f"Person {i}", cik=f"000{i}", citizenship="US",
+            aggregate_amount=5370000, percent_of_class=16.4,
+            sole_voting_power=5370000, shared_voting_power=0,
+            sole_dispositive_power=5370000, shared_dispositive_power=0,
             type_of_reporting_person="IN"
-        ),
-        ReportingPerson(
-            name="Investor B",
-            cik="0002222222",
-            citizenship="US",
-            aggregate_amount=3000000,
-            percent_of_class=6.0,
-            sole_voting_power=3000000,
-            shared_voting_power=0,
-            sole_dispositive_power=3000000,
-            shared_dispositive_power=0,
-            member_of_group=None,
-            type_of_reporting_person="IN"
-        ),
-        ReportingPerson(
-            name="Investor C",
-            cik="0003333333",
-            citizenship="Delaware",
-            aggregate_amount=2000000,
-            percent_of_class=4.0,
-            sole_voting_power=2000000,
-            shared_voting_power=0,
-            sole_dispositive_power=2000000,
-            shared_dispositive_power=0,
-            member_of_group=None,
-            type_of_reporting_person="CO"
-        ),
+        )
+        for i in range(1, 4)
     ]
 
     schedule = Schedule13D(
         filing=filing,
-        issuer_info=IssuerInfo(name="Test Company", cik="9999999", cusip="999999999"),
-        security_info=SecurityInfo(title="Common Stock", cusip="999999999"),
+        issuer_info=IssuerInfo(name="Test Fund", cik="0000811882", cusip="643165100"),
+        security_info=SecurityInfo(title="Common Stock", cusip="643165100"),
         reporting_persons=persons,
         items=Schedule13DItems(),
         signatures=[],
-        date_of_event='12/16/2025'
+        date_of_event='01/02/2025'
     )
 
-    # Separate filers should be summed
-    assert schedule.total_shares == 5000000 + 3000000 + 2000000
-    assert schedule.total_shares == 10000000
-    assert schedule.total_percent == pytest.approx(10.0 + 6.0 + 4.0, rel=0.01)
-    assert schedule.total_percent == pytest.approx(20.0, rel=0.01)
+    assert schedule.total_shares == 5370000  # max, not 3 * 5370000
+    assert schedule.total_percent == pytest.approx(16.4, rel=0.01)  # not 49.2%
