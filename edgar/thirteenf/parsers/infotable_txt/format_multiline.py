@@ -37,7 +37,8 @@ def _extract_column_specs(table_text: str):
     lines = table_text.split('\n')
     for i, line in enumerate(lines):
         line_upper = line.upper()
-        if '<S>' in line_upper and '<C>' in line_upper:
+        # Accept lines with <S>+<C> or <C>-only (some filings omit <S>)
+        if '<C>' in line_upper and (line_upper.count('<C>') >= 3 or '<S>' in line_upper):
             positions = [j for j, c in enumerate(line) if c == '<']
             if len(positions) < _MIN_HOLDINGS_COLUMNS:
                 continue
@@ -107,10 +108,11 @@ def _parse_after_cusip(data_parts):
 
     try:
         value_str = data_parts[0].replace(',', '').replace('$', '')
-        shares_str = data_parts[1].replace(',', '')
+        shares_str = data_parts[1].replace(',', '').replace('$', '')
 
-        value = int(value_str) if value_str and value_str != '-' else 0
-        shares = float(shares_str) if shares_str and shares_str != '-' else 0
+        # Handle decimal values (some filings report exact dollar amounts)
+        value = int(float(value_str)) if value_str and value_str != '-' else 0
+        shares = int(float(shares_str)) if shares_str and shares_str != '-' else 0
 
         # Parse voting columns from the end (look for numeric values)
         voting_values = []
@@ -324,13 +326,170 @@ def _parse_table_with_columns(table_text: str):
     return parsed_rows
 
 
+def _parse_text_regex_fallback(text: str):
+    """
+    Regex-based fallback parser for filings without <S>/<C> marker lines.
+
+    Scans each line for a valid 9-char CUSIP, uses it as an anchor to split
+    the line into name+class (before) and numeric data (after).
+    Handles two-line formats where shares/voting appear on the next line.
+
+    Returns list of row dicts.
+    """
+    parsed_rows = []
+    pending_issuer_parts = []
+    pending_row = None  # Row awaiting continuation data from next line
+
+    lines = text.split('\n')
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        upper = stripped.upper()
+
+        # Skip headers and separators
+        if any(kw in upper for kw in [
+            'NAME OF ISSUER', 'FORM 13F', 'INFORMATION TABLE',
+            'TITLE OF', 'MARKET VALUE', 'COLUMN 1', 'COLUMN 2',
+            'VOTING AUTHORITY', 'SHRS OR', 'PRN AMT', 'DSCRETN',
+            'PRN CALL', 'ASSET NAME', '13F HOLDINGS',
+            '<CAPTION>', '<S>', '<C>', '<PAGE>', '<TABLE>', '</TABLE>',
+        ]):
+            continue
+        # Skip single-word header keywords
+        if upper in ('VALUE', 'SHARES', 'CUSIP', 'NONE', 'SOLE', 'SHARED'):
+            continue
+        if all(c in '- =_' for c in stripped):
+            continue
+        if upper.startswith('GRAND TOTAL'):
+            break
+
+        # Look for a 9-char CUSIP (no spaces) on this line
+        cusip_match = None
+        cusip = None
+        for m in re.finditer(r'\b([A-Za-z0-9]{9})\b', stripped):
+            candidate = m.group(1)
+            if any(c.isdigit() for c in candidate):
+                cusip_match = m
+                cusip = candidate
+                break
+
+        if cusip_match:
+            # Flush any pending row from a previous CUSIP line
+            if pending_row:
+                parsed_rows.append(pending_row)
+                pending_row = None
+
+            before_cusip = stripped[:cusip_match.start()].strip()
+            after_cusip = stripped[cusip_match.end():].strip()
+
+            before_parts = before_cusip.split()
+
+            if pending_issuer_parts:
+                before_parts = pending_issuer_parts + before_parts
+                pending_issuer_parts = []
+
+            if len(before_parts) < 2:
+                continue
+
+            issuer_name, title_class = _extract_class_and_issuer(before_parts)
+            if not issuer_name:
+                continue
+
+            data_parts = after_cusip.split()
+            parsed = _parse_after_cusip(data_parts)
+            if parsed is not None:
+                row_dict = {
+                    'Issuer': issuer_name,
+                    'Class': title_class,
+                    'Cusip': cusip,
+                    'Type': 'Shares',
+                    'PutCall': '',
+                    **parsed,
+                }
+                parsed_rows.append(row_dict)
+            elif data_parts:
+                # Partial data (e.g., just value) — shares may be on next line
+                try:
+                    value_str = data_parts[0].replace(',', '').replace('$', '')
+                    value = int(float(value_str)) if value_str and value_str != '-' else 0
+                    pending_row = {
+                        'Issuer': issuer_name,
+                        'Class': title_class,
+                        'Cusip': cusip,
+                        'Value': value,
+                        'SharesPrnAmount': 0,
+                        'Type': 'Shares',
+                        'PutCall': '',
+                        'InvestmentDiscretion': '',
+                        'SoleVoting': 0,
+                        'SharedVoting': 0,
+                        'NonVoting': 0,
+                    }
+                except (ValueError, IndexError):
+                    pass
+        else:
+            # No CUSIP on this line
+            # Check if this is a continuation line for a pending row
+            # (starts with digits — shares count)
+            if pending_row and stripped and stripped[0].isdigit():
+                parts = stripped.split()
+                try:
+                    shares_str = parts[0].replace(',', '')
+                    pending_row['SharesPrnAmount'] = int(float(shares_str))
+
+                    # Parse voting from the end
+                    voting_values = []
+                    for i in range(len(parts) - 1, 0, -1):
+                        part = parts[i].replace(',', '').replace('.', '')
+                        if part.replace('-', '').isdigit():
+                            val_str = parts[i].replace(',', '')
+                            try:
+                                voting_values.insert(0, int(float(val_str)) if val_str != '-' else 0)
+                                if len(voting_values) == 3:
+                                    break
+                            except ValueError:
+                                break
+                        else:
+                            break
+
+                    if len(voting_values) >= 1:
+                        pending_row['SoleVoting'] = voting_values[0]
+                    if len(voting_values) >= 2:
+                        pending_row['SharedVoting'] = voting_values[1]
+                    if len(voting_values) >= 3:
+                        pending_row['NonVoting'] = voting_values[2]
+
+                    # Find discretion
+                    for part in parts[1:len(parts) - len(voting_values)]:
+                        if part and part not in ['-', 'SH', 'PRN'] and not part.replace(',', '').replace('.', '').isdigit():
+                            pending_row['InvestmentDiscretion'] = part
+                            break
+                except (ValueError, IndexError):
+                    pass
+
+                parsed_rows.append(pending_row)
+                pending_row = None
+            elif stripped and not stripped[0].isdigit():
+                # Might be a multi-line company name
+                if pending_row:
+                    parsed_rows.append(pending_row)
+                    pending_row = None
+                pending_issuer_parts = stripped.split()
+
+    # Flush final pending row
+    if pending_row:
+        parsed_rows.append(pending_row)
+
+    return parsed_rows
+
+
 def parse_multiline_format(infotable_txt: str) -> pd.DataFrame:
     """
     Parse multiline TXT format (Format 1) information table.
 
-    Uses column positions from <S>/<C> marker lines to extract fields
-    via fixed-width slicing, correctly handling spaced CUSIPs and
-    multi-line company names.
+    Primary strategy: use column positions from <S>/<C> marker lines.
+    Fallback: regex-based CUSIP scanning for filings without markers.
 
     Args:
         infotable_txt: TXT content containing the information table
@@ -347,29 +506,38 @@ def parse_multiline_format(infotable_txt: str) -> pd.DataFrame:
     table_pattern = r'<TABLE>(.*?)</TABLE>'
     tables = re.findall(table_pattern, infotable_txt, re.DOTALL | re.IGNORECASE)
 
-    if len(tables) == 0:
-        return pd.DataFrame()
-
-    # Filter tables: skip managers tables, keep holdings tables.
-    # A managers table has few columns (<6) or contains "FORM 13F FILE".
-    # A holdings table has 6+ columns in its marker line.
-    holdings_tables = []
-    for table_text in tables:
-        specs, _, _ = _extract_column_specs(table_text)
-        if specs and len(specs) >= _MIN_HOLDINGS_COLUMNS:
-            holdings_tables.append(table_text)
-
-    if not holdings_tables:
-        return pd.DataFrame()
-
     parsed_rows = []
 
-    for holdings_table in holdings_tables:
-        # Skip if this is the totals table (very short, < 200 chars)
-        if len(holdings_table.strip()) < 200:
-            continue
+    if tables:
+        # Filter tables: keep those with 6+ column markers (holdings tables)
+        holdings_tables = []
+        remaining_tables = []
+        for table_text in tables:
+            specs, _, _ = _extract_column_specs(table_text)
+            if specs and len(specs) >= _MIN_HOLDINGS_COLUMNS:
+                holdings_tables.append(table_text)
+            else:
+                remaining_tables.append(table_text)
 
-        rows = _parse_table_with_columns(holdings_table)
+        # Primary: column-position parsing on tables with markers
+        for holdings_table in holdings_tables:
+            if len(holdings_table.strip()) < 200:
+                continue
+            rows = _parse_table_with_columns(holdings_table)
+            parsed_rows.extend(rows)
+
+        # Fallback: regex parsing on tables without sufficient markers
+        if not parsed_rows:
+            for table_text in remaining_tables:
+                if len(table_text.strip()) < 200:
+                    continue
+                rows = _parse_text_regex_fallback(table_text)
+                parsed_rows.extend(rows)
+
+    # Final fallback: no <TABLE> tags at all — parse raw text after header
+    if not parsed_rows:
+        text_after_header = infotable_txt[match.start():]
+        rows = _parse_text_regex_fallback(text_after_header)
         parsed_rows.extend(rows)
 
     if not parsed_rows:
