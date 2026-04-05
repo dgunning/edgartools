@@ -189,6 +189,16 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - 17 new tests (8 NCI scope, 9 YAML migration). All pass. Pre-existing failures unchanged (test_signed_formula, test_closed_loop).
 - EF-CQS: 0.9302 (unchanged — config-only migration, no extraction changes). config_loader.py: ~52 lines removed.
 
+**Run 022 (2026-04-06)** — Phase 4: Merge to main + post-merge baseline measurement
+- Merged feature/ai-concept-mapping to main (754 commits, 14 phases). Tagged `v0.93-phase14`.
+- Three-tier quality gating wired into expansion pipeline: verified (>=0.95), provisional (0.80-0.94), needs_investigation (<0.80). Replaces binary graduated/needs_investigation.
+- CompanyResult dataclass updated with quality_tier field. 3 boundary-condition tests added. 11/11 expand_cohort tests pass.
+- Post-merge CQS baseline (all 123 companies): EF-CQS=0.8492, CQS=0.8239. 1709s runtime.
+- Quality tier breakdown: 0 verified, 113 provisional, 10 needs_investigation.
+- Bottom 5: MMC (0.18), STT (0.36), CI (0.69), D (0.76), XOM (0.78). MMC and STT are newly onboarded outliers.
+- Run 020's 0.9302 was on EXPANSION_COHORT_100 (50 deeply-tuned + 50 expansion). All-123 baseline is lower due to untuned outliers.
+- Pre-existing test failures: 20 (4 signed_formula, 15 golden_masters, 1 closed_loop_e2e). None caused by merge.
+
 ---
 
 ## Consensus Sessions
