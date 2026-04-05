@@ -1640,17 +1640,23 @@ def classify_company_tiers(cqs_result: CQSResult) -> Dict[str, str]:
 def update_company_tiers(
     cqs_result: CQSResult,
     dry_run: bool = True,
+    config_dir: Optional["Path"] = None,
 ) -> Dict[str, str]:
-    """Classify companies and optionally write quality_tier to companies.yaml.
+    """Classify companies and optionally write quality_tier to JSON overrides.
+
+    Writes per-company quality_tier to JSON override files at
+    ``{config_dir}/company_overrides/{TICKER}.json``, preserving any
+    existing override content.  companies.yaml is never modified.
 
     Args:
         cqs_result: CQSResult with per-company scores.
         dry_run: If True, only return classifications without writing.
+        config_dir: Root config directory. Defaults to the package config dir.
 
     Returns:
         Dict mapping ticker -> quality tier string.
     """
-    import yaml
+    import json
     from pathlib import Path
 
     tiers = classify_company_tiers(cqs_result)
@@ -1658,18 +1664,23 @@ def update_company_tiers(
     if dry_run:
         return tiers
 
-    companies_path = Path(__file__).parent.parent / "config" / "companies.yaml"
-    with open(companies_path, 'r') as f:
-        data = yaml.safe_load(f)
+    if config_dir is None:
+        config_dir = Path(__file__).parent.parent / "config"
+
+    overrides_dir = Path(config_dir) / "company_overrides"
+    overrides_dir.mkdir(parents=True, exist_ok=True)
 
     for ticker, tier in tiers.items():
-        if ticker in data.get("companies", {}):
-            data["companies"][ticker]["quality_tier"] = tier
+        json_path = overrides_dir / f"{ticker}.json"
+        # Preserve existing override content
+        if json_path.exists():
+            data = json.loads(json_path.read_text())
+        else:
+            data = {}
+        data["quality_tier"] = tier
+        json_path.write_text(json.dumps(data, indent=2) + "\n")
 
-    with open(companies_path, 'w') as f:
-        yaml.dump(data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
-
-    logger.info(f"Updated quality_tier for {len(tiers)} companies in companies.yaml")
+    logger.info(f"Updated quality_tier for {len(tiers)} companies in JSON overrides")
     return tiers
 
 

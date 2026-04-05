@@ -30,3 +30,37 @@ def test_industry_loaded_from_json_override(tmp_path):
     config = loader.load()
 
     assert config.get_company("TEST").industry == "banking"
+
+
+def test_update_company_tiers_writes_json_not_yaml(tmp_path):
+    """Amendment 1: update_company_tiers should write to JSON overrides, not companies.yaml."""
+    import yaml
+    from unittest.mock import MagicMock
+
+    _create_minimal_config(
+        tmp_path,
+        yaml.dump({
+            "version": "1.0",
+            "companies": {"AAPL": {"name": "Apple", "cik": 320193}}
+        }),
+    )
+
+    # Mock CQSResult with one company
+    cqs_result = MagicMock()
+    company_score = MagicMock()
+    company_score.ef_cqs = 0.96
+    company_score.headline_ef_rate = 0.99
+    cqs_result.company_scores = {"AAPL": company_score}
+
+    from edgar.xbrl.standardization.tools.auto_eval import update_company_tiers
+    tiers = update_company_tiers(cqs_result, dry_run=False, config_dir=tmp_path)
+
+    # JSON override should have quality_tier
+    json_path = tmp_path / "company_overrides" / "AAPL.json"
+    assert json_path.exists()
+    data = json.loads(json_path.read_text())
+    assert data["quality_tier"] == "verified"
+
+    # companies.yaml should NOT have quality_tier
+    yaml_data = yaml.safe_load((tmp_path / "companies.yaml").read_text())
+    assert "quality_tier" not in yaml_data["companies"]["AAPL"]
