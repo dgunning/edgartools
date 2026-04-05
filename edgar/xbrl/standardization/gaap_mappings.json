@@ -118064,22 +118064,6 @@
     "first_year": 2019,
     "last_year": 2025
   },
-  "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation": {
-    "standard_tags": [
-      "StockRepurchasesEquity"
-    ],
-    "display_name": "Stock Repurchases (Equity)",
-    "statement": "StatementOfEquity",
-    "section": "Equity Changes",
-    "is_total": false,
-    "confidence": 0.364,
-    "company_count": 962,
-    "occurrence_rate": 0.107,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2019,
-    "last_year": 2025
-  },
   "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures": {
     "standard_tags": [
       "NetCashFromOperatingActivities"
