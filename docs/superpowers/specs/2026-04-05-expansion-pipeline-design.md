@@ -175,7 +175,7 @@ Status: inner_loop_complete | investigation_complete | reviewed
 
 ### Step 4: Validate (After Each Auto-Applied Fix)
 
-- `compute_cqs()` on affected company
+- `compute_cqs_incremental()` on affected company (~20% cost of full eval)
 - If regression: revert fix, move gap to escalation
 - If improved: keep fix, update cohort report
 
@@ -258,26 +258,81 @@ The agent presents one gap at a time with full evidence from the escalation repo
 
 ---
 
+## Deep Consensus Amendments (2026-04-05)
+
+Six amendments from a deep-consensus session (Advocate 8/10, Critic 6/10, Deepthinker synthesis 8/10):
+
+### Amendment 1: companies.yaml read-only during expansion
+
+**Problem:** `companies.yaml` is a single shared file. `update_company_tiers()` writes `quality_tier` back to it. Two worktrees modifying it will conflict.
+
+**Fix:** Pre-populate companies.yaml with all S&P 500 entries (ticker, CIK, name, industry) on main before dispatching worktrees. Move `quality_tier` writes to per-company JSON overrides. Add JSON fallback for `industry` in `_get_industry_for_company()`. ~1 day effort — JSON override loading already handles `exclude_metrics` and `known_divergences`.
+
+### Amendment 2: Per-root-cause confidence thresholds
+
+**Problem:** A single 0.90 threshold conflates high-confidence structural signals with ambiguous semantic judgments.
+
+**Fix:** Per-root-cause thresholds with two-phase calibration:
+
+| Root Cause | Threshold | Basis |
+|------------|-----------|-------|
+| `concept_absent` | 0.85 | Structural: calc tree + facts + element index all empty |
+| `sign_error` | 0.95 | Subtle: sign conventions are context-dependent |
+| `wrong_concept` | 0.90 | Needs peer confirmation via `learn_mappings` |
+| `needs_composite` | 0.90 | Only if ALL components confirmed by derivation_planner |
+| `reference_mismatch` | Never auto-apply | Most ambiguous — always escalate |
+| `reference_disputed` | Never auto-apply | Bad reference data — always escalate |
+
+**Calibration:** Phase A: dry-run against 186 existing gaps pre-deployment (conservative is safe). Phase B: recalibrate after first 50 new companies using fresh representative data.
+
+### Amendment 3: Archetype gap detection in `/expand-cohort`
+
+After SIC-based archetype detection, check if the company's SIC code falls in any `industry_metrics.yaml` section. If not, flag `archetype_gap` in the cohort report. Prevents false failures from structurally inapplicable metrics being scored as extraction failures.
+
+### Amendment 4: Pre-expansion override cleanup
+
+Before scaling to 500 companies, audit the existing 81 per-company JSON overrides. Promote industry-level patterns (e.g., "all tech companies exclude Inventory") to `industry_metrics.yaml`. Target: reduce effective override rate from 81% to ~40-50%.
+
+### Amendment 5: Pattern detection in `/investigate-gaps`
+
+After applying per-company fixes, detect: "Did I apply the same fix to 3+ companies in the same industry?" If yes, flag in the escalation report as a candidate for global promotion during `/review-escalations`. This doesn't violate the "no global config in outer loop" rule — it surfaces patterns for human review.
+
+### Amendment 6: Priority queue in `/investigate-gaps`
+
+Group gaps by (metric, industry) and process highest-leverage groups first: `sort by sum(estimated_impact) * cross_company_count`. A fix that resolves GrossProfit for 20 utility companies is worth 20x more than fixing 1 outlier. Reduces 1,200+ serial tasks to ~100-200 grouped investigations.
+
+### Design Principle (from consensus)
+
+> "The automation of judgment is the hard part, not the automation of workflow steps." The inner loop is infrastructure (mechanical, deterministic). The outer loop is the product (evidence gathering, classification, judgment). Pattern detection and global promotion are the learning mechanism that makes the system improve over time.
+
+---
+
 ## What We Build vs. What Exists
 
 | Component | Status | Work |
 |-----------|--------|------|
 | `onboard_company.py` | Exists | Minor adaptation for structured results |
 | `compute_cqs()` | Exists | None |
+| `compute_cqs_incremental()` | Exists | Use for per-fix validation (Amendment 6) |
 | `identify_gaps()` | Exists | None |
 | `discover_concepts()` | Exists | None |
 | `verify_mapping()` | Exists | None |
 | `learn_mappings()` | Exists | None |
 | `derivation_planner.py` | Exists | None |
+| `hv_reference_suspect` classification | Exists | Route to escalation (Amendment 2) |
 | Config applier (TypedAction -> JSON) | Exists in deprecated code | Extract + simplify from `auto_eval_loop.py` |
+| **companies.yaml migration** | Prerequisite | Move quality_tier + industry fallback to JSON (Amendment 1) |
+| **Pre-expansion override cleanup** | Prerequisite | Audit 81 overrides, promote patterns (Amendment 4) |
 | **Gap investigator** | New | Investigation workflow using existing tools |
-| **Confidence scorer** | New | Rules engine: evidence -> confidence score |
+| **Confidence scorer** | New | Per-root-cause rules engine (Amendment 2) |
+| **Pattern detector** | New | Cross-company fix similarity detection (Amendment 5) |
+| **Priority queue** | New | Gap grouping + impact ranking (Amendment 6) |
 | **Cohort report generator** | New | Markdown writer from CQS + gap data |
 | **Escalation report generator** | New | Markdown writer from investigation results |
-| **`/expand-cohort` skill** | New | Skill file orchestrating inner loop |
-| **`/investigate-gaps` skill** | New | Skill file orchestrating outer loop |
-| **`/review-escalations` skill** | New | Skill file for interactive review |
-| CLAUDE.md | Exists | Add 3-line mention of expansion skills |
+| **`/expand-cohort` skill** | New | Skill file orchestrating inner loop + archetype gap detection |
+| **`/investigate-gaps` skill** | New | Skill file orchestrating outer loop + pattern detection + priority queue |
+| **`/review-escalations` skill** | New | Skill file for interactive review + global pattern promotion |
+| CLAUDE.md | Exists | Add mention of expansion skills |
 
 ## File Locations
 
@@ -285,9 +340,9 @@ The agent presents one gap at a time with full evidence from the escalation repo
 edgar/xbrl/standardization/
   tools/
     expand_cohort.py          # Inner loop orchestration
-    investigate_gaps.py       # Outer loop investigation logic
+    investigate_gaps.py       # Outer loop investigation logic + pattern detection + priority queue
     config_applier.py         # TypedAction -> per-company JSON (extracted from deprecated code)
-    confidence_scorer.py      # Evidence -> confidence rules engine
+    confidence_scorer.py      # Per-root-cause confidence rules engine
     report_generator.py       # Cohort + escalation report markdown writers
   cohort-reports/             # Cohort report markdown files
   escalation-reports/         # Escalation report markdown files
@@ -314,3 +369,4 @@ Add to the "Autonomous System" section:
 3. `/review-escalations` captures patterns that benefit subsequent batches (measurable: fewer gaps per batch over time)
 4. Three parallel worktrees can run `/expand-cohort` + `/investigate-gaps` without merge conflicts
 5. The complete pipeline (all 3 skills) can expand coverage by 50 companies per session
+6. Average company reaches "verified" (EF-CQS >= 0.95) within 3 outer-loop iterations of `/investigate-gaps` + `/review-escalations`
