@@ -17,10 +17,8 @@ import argparse
 import csv
 import random
 import re
-import sys
 import time
-from dataclasses import dataclass, field
-from pathlib import Path
+from dataclasses import dataclass
 
 import requests
 

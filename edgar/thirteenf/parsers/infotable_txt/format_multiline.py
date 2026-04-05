@@ -66,11 +66,6 @@ def _clean_cusip(raw):
     return None
 
 
-def _is_separator_line(line):
-    """Check if line is a separator (dashes, equals, spaces only)."""
-    stripped = line.strip()
-    return bool(stripped) and all(c in '- =_' for c in stripped)
-
 
 def _is_header_or_skip_line(line):
     """Check if a line should be skipped (headers, captions, separators)."""
@@ -194,7 +189,8 @@ def _parse_table_with_columns(table_text: str):
     if colspecs is None:
         return []
 
-    # Column indices (standard 13F layout):
+    # Column indices assume the standard 13F layout mandated by the SEC.
+    # All observed TXT-era filings (2005-2013) follow this order.
     # 0: Name of Issuer, 1: Title of Class, 2: CUSIP Number
     # 3: Market Value, 4: Shares/Principal Amount
     # 5+: Discretion fields, Other Managers, Voting Authority
@@ -235,7 +231,7 @@ def _parse_table_with_columns(table_text: str):
 
         cusip = _clean_cusip(cusip_raw)
         has_cusip = cusip is not None
-        has_value = bool(value_raw and value_raw.replace(',', '').replace('$', '').replace('-', '').strip().isdigit())
+        has_value = bool(value_raw and value_raw.replace(',', '').replace('$', '').replace('-', '').replace('.', '').strip().isdigit())
 
         if has_cusip:
             # This line has a CUSIP — it's a primary data row
@@ -433,41 +429,12 @@ def _parse_text_regex_fallback(text: str):
             # Check if this is a continuation line for a pending row
             # (starts with digits — shares count)
             if pending_row and stripped and stripped[0].isdigit():
-                parts = stripped.split()
-                try:
-                    shares_str = parts[0].replace(',', '')
-                    pending_row['SharesPrnAmount'] = int(float(shares_str))
-
-                    # Parse voting from the end
-                    voting_values = []
-                    for i in range(len(parts) - 1, 0, -1):
-                        part = parts[i].replace(',', '').replace('.', '')
-                        if part.replace('-', '').isdigit():
-                            val_str = parts[i].replace(',', '')
-                            try:
-                                voting_values.insert(0, int(float(val_str)) if val_str != '-' else 0)
-                                if len(voting_values) == 3:
-                                    break
-                            except ValueError:
-                                break
-                        else:
-                            break
-
-                    if len(voting_values) >= 1:
-                        pending_row['SoleVoting'] = voting_values[0]
-                    if len(voting_values) >= 2:
-                        pending_row['SharedVoting'] = voting_values[1]
-                    if len(voting_values) >= 3:
-                        pending_row['NonVoting'] = voting_values[2]
-
-                    # Find discretion
-                    for part in parts[1:len(parts) - len(voting_values)]:
-                        if part and part not in ['-', 'SH', 'PRN'] and not part.replace(',', '').replace('.', '').isdigit():
-                            pending_row['InvestmentDiscretion'] = part
-                            break
-                except (ValueError, IndexError):
-                    pass
-
+                # Reuse _parse_after_cusip by prepending the pending value
+                # so the shares become position 1 (expected by the parser)
+                parts = [str(pending_row['Value'])] + stripped.split()
+                parsed = _parse_after_cusip(parts)
+                if parsed:
+                    pending_row.update(parsed)
                 parsed_rows.append(pending_row)
                 pending_row = None
             elif stripped and not stripped[0].isdigit():
