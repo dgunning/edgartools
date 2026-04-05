@@ -8,6 +8,33 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 
+# Mapping from auto_eval._classify_gap() root causes to expansion pipeline taxonomy.
+# This bridges the existing 13-string taxonomy to the 7-string expansion taxonomy.
+_ROOT_CAUSE_NORMALIZATION = {
+    # Direct matches (no mapping needed)
+    "concept_absent": "concept_absent",
+    "sign_error": "sign_error",
+    "wrong_concept": "wrong_concept",
+    "needs_composite": "needs_composite",
+    "reference_mismatch": "reference_mismatch",
+    "reference_disputed": "reference_disputed",
+    "genuinely_broken": "genuinely_broken",
+    # auto_eval taxonomy -> expansion taxonomy
+    "missing_concept": "concept_absent",
+    "industry_structural": "concept_absent",
+    "formula_needed": "needs_composite",
+    "partial_composite": "needs_composite",
+    "reference_error": "reference_disputed",
+    # These always escalate
+    "regression": "genuinely_broken",
+    "algebraic_coincidence": "genuinely_broken",
+    "scale_mismatch": "genuinely_broken",
+    "explained_variance": "genuinely_broken",
+    "sector_specific": "genuinely_broken",
+    "extension_concept": "genuinely_broken",
+}
+
+
 # Per-root-cause thresholds (Amendment 2, deep-consensus)
 # None = never auto-apply
 ROOT_CAUSE_THRESHOLDS = {
@@ -50,28 +77,30 @@ def score_confidence(
 
     Returns ConfidenceResult with confidence score and auto-apply decision.
     """
-    threshold = ROOT_CAUSE_THRESHOLDS.get(root_cause)
-    action = ROOT_CAUSE_ACTIONS.get(root_cause, "ESCALATE")
+    # Normalize root cause from auto_eval taxonomy
+    normalized = _ROOT_CAUSE_NORMALIZATION.get(root_cause, root_cause)
+    threshold = ROOT_CAUSE_THRESHOLDS.get(normalized)
+    action = ROOT_CAUSE_ACTIONS.get(normalized, "ESCALATE")
 
     if threshold is None:
         # Never auto-apply for this root cause
         return ConfidenceResult(
-            root_cause=root_cause,
+            root_cause=normalized,
             confidence=0.0,
             recommended_action=action,
             auto_apply=False,
-            reasoning=f"Root cause '{root_cause}' always requires human review",
+            reasoning=f"Root cause '{normalized}' always requires human review",
         )
 
     # Calculate confidence based on root cause + evidence
-    confidence = _calculate_confidence(root_cause, evidence)
+    confidence = _calculate_confidence(normalized, evidence)
 
     return ConfidenceResult(
-        root_cause=root_cause,
+        root_cause=normalized,
         confidence=confidence,
         recommended_action=action,
         auto_apply=confidence >= threshold,
-        reasoning=_build_reasoning(root_cause, evidence, confidence, threshold),
+        reasoning=_build_reasoning(normalized, evidence, confidence, threshold),
     )
 
 

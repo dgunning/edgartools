@@ -97,3 +97,55 @@ def test_unknown_root_cause_escalates():
     """Unknown root cause always escalates."""
     result = score_confidence(root_cause="something_weird", evidence={})
     assert result.auto_apply is False
+
+
+def test_normalize_missing_concept_to_concept_absent():
+    """auto_eval 'missing_concept' maps to 'concept_absent'."""
+    result = score_confidence(
+        root_cause="missing_concept",
+        evidence={"in_calc_tree": False, "in_facts": False, "in_element_index": False},
+    )
+    assert result.root_cause == "concept_absent"
+    assert result.recommended_action == "EXCLUDE_METRIC"
+    assert result.auto_apply is True
+
+
+def test_normalize_formula_needed_to_needs_composite():
+    """auto_eval 'formula_needed' maps to 'needs_composite'."""
+    result = score_confidence(
+        root_cause="formula_needed",
+        evidence={"components_found": 3, "components_needed": 3},
+    )
+    assert result.root_cause == "needs_composite"
+    assert result.auto_apply is True
+
+
+def test_normalize_industry_structural_to_concept_absent():
+    """auto_eval 'industry_structural' maps to 'concept_absent'."""
+    result = score_confidence(
+        root_cause="industry_structural",
+        evidence={"in_calc_tree": False, "in_facts": False, "in_element_index": False},
+    )
+    assert result.root_cause == "concept_absent"
+
+
+def test_normalize_scale_mismatch_to_genuinely_broken():
+    """auto_eval 'scale_mismatch' escalates as genuinely_broken."""
+    result = score_confidence(root_cause="scale_mismatch", evidence={})
+    assert result.auto_apply is False
+
+
+def test_normalize_partial_composite_to_needs_composite():
+    """auto_eval 'partial_composite' maps to 'needs_composite'."""
+    result = score_confidence(
+        root_cause="partial_composite",
+        evidence={"components_found": 2, "components_needed": 3},
+    )
+    assert result.root_cause == "needs_composite"
+
+
+def test_normalize_reference_error_to_reference_disputed():
+    """auto_eval 'reference_error' always escalates."""
+    result = score_confidence(root_cause="reference_error", evidence={})
+    assert result.auto_apply is False
+    assert result.recommended_action == "ESCALATE"
