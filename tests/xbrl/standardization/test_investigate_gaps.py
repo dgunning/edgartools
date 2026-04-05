@@ -173,3 +173,63 @@ def test_build_evidence_composite_fields():
     evidence = _build_evidence(gap)
     assert evidence["components_found"] == 2
     assert evidence["components_needed"] == 3
+
+
+def test_full_scoring_path_concept_absent():
+    """Integration: MetricGap-style data flows through to correct auto-apply."""
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.confidence_scorer import score_confidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    # Simulate a gap that came from auto_eval with "missing_concept" root cause
+    gap = UnresolvedGapEntry(
+        ticker="HD", metric="ResearchAndDevelopment", gap_type="unmapped",
+        variance=None, root_cause="missing_concept", graveyard=0,
+        reference_value=None, xbrl_value=None,
+    )
+    evidence = _build_evidence(gap)
+    result = score_confidence(gap.root_cause, evidence)
+
+    # missing_concept normalizes to concept_absent
+    assert result.root_cause == "concept_absent"
+    # No evidence fields populated → defaults to 0.50 < 0.85 threshold
+    # This correctly escalates when we don't have filing-level evidence
+    assert result.auto_apply is False
+
+
+def test_full_scoring_path_sign_error():
+    """Integration: sign error with exact negation auto-applies."""
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.confidence_scorer import score_confidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    gap = UnresolvedGapEntry(
+        ticker="HD", metric="Depreciation", gap_type="high_variance",
+        variance=200.0, root_cause="sign_error", graveyard=0,
+        reference_value=500.0, xbrl_value=-500.0,
+    )
+    evidence = _build_evidence(gap)
+    result = score_confidence(gap.root_cause, evidence)
+
+    assert result.root_cause == "sign_error"
+    assert result.confidence >= 0.95
+    assert result.auto_apply is True
+
+
+def test_full_scoring_path_wrong_concept_with_variance():
+    """Integration: wrong concept with low variance but no peers → escalate."""
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.confidence_scorer import score_confidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    gap = UnresolvedGapEntry(
+        ticker="HD", metric="CashAndEquivalents", gap_type="high_variance",
+        variance=3.0, root_cause="wrong_concept", graveyard=0,
+        reference_value=1000.0, xbrl_value=970.0,
+    )
+    evidence = _build_evidence(gap)
+    result = score_confidence(gap.root_cause, evidence)
+
+    assert result.root_cause == "wrong_concept"
+    # 3% variance, 0 peers → confidence 0.80 < 0.90 threshold
+    assert result.auto_apply is False
