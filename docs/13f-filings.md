@@ -226,6 +226,8 @@ view.data
 
 **Report period vs filing date.** The `report_period` is the quarter end (e.g., 2025-09-30). The `filing_date` can be up to 45 days later.
 
+**Historical filings work too.** 13F filings before Q3 2013 used fixed-width TXT format instead of XML. EdgarTools parses both transparently -- the same `filing.obj()` call works for filings back to 2005. The TXT parser handles spaced CUSIPs, multi-line company names, paginated tables, and multi-manager continuation rows. About 93% of TXT-era filings parse successfully; a small number with unusual formatting may return an empty infotable.
+
 ---
 
 ## Related

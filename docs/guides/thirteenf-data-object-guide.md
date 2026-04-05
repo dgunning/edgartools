@@ -226,7 +226,7 @@ for mgr in report.other_managers:
 
 **Ticker resolution.** Tickers are resolved from CUSIPs. Most resolve correctly, but delisted or obscure securities may show as blank.
 
-**Pre-2013 filings use TXT format.** EdgarTools parses both XML (2013+) and TXT (2012 and earlier) transparently, but older filings may have fewer columns.
+**Pre-2013 filings use TXT format.** Before Q3 2013, 13F information tables were filed as fixed-width TXT rather than XML. EdgarTools parses both formats transparently -- `filing.obj()` returns the same `ThirteenF` object either way. The TXT parser handles spaced CUSIPs (`025816 10 9`), multi-line company names, multi-table paginated filings, and continuation rows for multi-manager assignments. Coverage across the 2005-2013 TXT era is ~93% of filings. The remaining ~7% are unusual formats (HTML tables, tab-delimited, non-standard layouts) that may return an empty infotable.
 
 **13F-NT means no holdings.** Notice filings indicate the manager had nothing to report. `has_infotable()` returns `False`.
 
