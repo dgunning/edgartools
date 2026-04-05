@@ -181,8 +181,7 @@ def run_investigation(
         industry_map[company.ticker] = override.get("industry")
 
     # Process unresolved gaps
-    applied_fix_dicts: List[Dict] = []
-    applied_fix_objects: List[AppliedFix] = []
+    applied_fixes: List[Dict] = []
     escalated_gaps: List[EscalatedGap] = []
 
     for gap_entry in cohort_data.unresolved:
@@ -200,16 +199,10 @@ def run_investigation(
                 "params": _build_fix_params(result, gap_entry),
                 "confidence": result.confidence,
                 "industry": industry_map.get(gap_entry.ticker),
+                "detail": result.reasoning,
             }
             apply_action_to_json(fix, config_dir=resolve_dir)
-            applied_fix_dicts.append(fix)
-            applied_fix_objects.append(AppliedFix(
-                ticker=fix["ticker"],
-                metric=fix["metric"],
-                action=fix["action"],
-                confidence=fix["confidence"],
-                detail=result.reasoning,
-            ))
+            applied_fixes.append(fix)
         else:
             escalated_gaps.append(EscalatedGap(
                 ticker=gap_entry.ticker,
@@ -221,15 +214,20 @@ def run_investigation(
                 recommendation=result.recommended_action,
             ))
 
-    # Detect patterns (uses dicts for industry info)
-    patterns = detect_patterns(applied_fix_dicts)
+    # Detect patterns (same action+metric in 3+ companies of same industry)
+    patterns = detect_patterns(applied_fixes)
     if patterns:
         log.info(f"Detected {len(patterns)} fix patterns for potential global promotion")
 
-    # Generate escalation report (uses AppliedFix objects)
+    # Generate escalation report
     md = generate_escalation_report(
         name=cohort_data.name,
-        auto_fixes=applied_fix_objects,
+        auto_fixes=[
+            AppliedFix(
+                ticker=f["ticker"], metric=f["metric"], action=f["action"],
+                confidence=f["confidence"], detail=f["detail"],
+            ) for f in applied_fixes
+        ],
         escalated_gaps=escalated_gaps,
         ef_cqs_before=0.0,
         ef_cqs_after=0.0,

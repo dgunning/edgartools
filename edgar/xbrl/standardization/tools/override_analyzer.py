@@ -13,10 +13,13 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
+from edgar.xbrl.standardization.config_loader import (
+    _load_industry_metrics,
+    get_industry_sic_ranges,
+)
 
 _CONFIG_DIR = Path(__file__).parent.parent / "config"
 _OVERRIDES_DIR = _CONFIG_DIR / "company_overrides"
-_INDUSTRY_METRICS_PATH = _CONFIG_DIR / "industry_metrics.yaml"
 _COMPANIES_YAML_PATH = _CONFIG_DIR / "companies.yaml"
 _ONBOARDING_DIR = _CONFIG_DIR / "onboarding_reports"
 _REPORT_DIR = Path(__file__).parent.parent / "cohort-reports"
@@ -41,13 +44,10 @@ def _resolve_industry_from_sic(ticker: str) -> Optional[str]:
         sic = data.get("sic_code")
         if not sic:
             return None
-        # Use industry_metrics.yaml SIC ranges directly
-        industry_metrics = yaml.safe_load(_INDUSTRY_METRICS_PATH.read_text()) or {}
+        # Use cached SIC ranges from config_loader
         sic_int = int(sic)
-        for industry_key, config in industry_metrics.items():
-            if not isinstance(config, dict):
-                continue
-            for sic_range in config.get("sic_ranges", []):
+        for industry_key, ranges in get_industry_sic_ranges().items():
+            for sic_range in ranges:
                 if len(sic_range) == 2 and sic_range[0] <= sic_int <= sic_range[1]:
                     return industry_key
         # Fallback: try industry_mappings.json with normalization
@@ -65,9 +65,8 @@ def _resolve_industry_from_sic(ticker: str) -> Optional[str]:
 
 def analyze_overrides() -> str:
     """Analyze all override files and return markdown report."""
-    # Load industry_metrics.yaml
-    with open(_INDUSTRY_METRICS_PATH) as f:
-        industry_metrics = yaml.safe_load(f) or {}
+    # Use cached industry_metrics from config_loader
+    industry_metrics = _load_industry_metrics()
 
     # Build set of existing forbidden metrics per industry
     existing_forbidden: Dict[str, Set[str]] = {}

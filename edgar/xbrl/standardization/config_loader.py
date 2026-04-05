@@ -17,6 +17,7 @@ from .models import MetricConfig, CompanyConfig
 
 # Cache for industry_metrics.yaml (loaded once per process)
 _industry_metrics_cache: Optional[dict] = None
+_sic_ranges_cache: Optional[Dict[str, List[List[int]]]] = None
 
 
 def _load_industry_metrics() -> dict:
@@ -37,12 +38,16 @@ def _load_industry_metrics() -> dict:
 
 def get_industry_sic_ranges() -> Dict[str, List[List[int]]]:
     """Get SIC ranges for all industries from cached industry_metrics.yaml."""
+    global _sic_ranges_cache
+    if _sic_ranges_cache is not None:
+        return _sic_ranges_cache
     data = _load_industry_metrics()
-    return {
+    _sic_ranges_cache = {
         industry: config["sic_ranges"]
         for industry, config in data.items()
         if isinstance(config, dict) and "sic_ranges" in config
     }
+    return _sic_ranges_cache
 
 
 @dataclass
