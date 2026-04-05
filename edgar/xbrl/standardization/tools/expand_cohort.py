@@ -51,6 +51,8 @@ def run_expand_cohort(
         output_dir = _DEFAULT_OUTPUT_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    now = datetime.utcnow()
+
     # Step 1: Onboard
     onboard_results = _onboard_single(tickers, dry_run=dry_run)
 
@@ -89,8 +91,9 @@ def run_expand_cohort(
             notes="",
         ))
 
+    date_str = now.strftime('%Y-%m-%d')
     report_data = CohortReportData(
-        name=f"{cohort_name}-{datetime.utcnow().strftime('%Y-%m-%d')}",
+        name=f"{cohort_name}-{date_str}",
         status="inner_loop_complete",
         companies=companies,
         fixes=[AppliedFix(
@@ -104,7 +107,7 @@ def run_expand_cohort(
     )
 
     md = generate_cohort_report(report_data)
-    report_path = output_dir / f"cohort-{datetime.utcnow().strftime('%Y-%m-%d')}-{cohort_name}.md"
+    report_path = output_dir / f"cohort-{date_str}-{cohort_name}.md"
     report_path.write_text(md)
 
     log.info(f"Cohort report written to {report_path}")
@@ -187,10 +190,7 @@ def _diagnose_and_fix(
         # Try deterministic fixes based on gap type
         fix = _try_deterministic_fix(gap)
         if fix:
-            if config_dir:
-                apply_action_to_json(fix, config_dir=config_dir)
-            else:
-                apply_action_to_json(fix)
+            apply_action_to_json(fix, **({"config_dir": config_dir} if config_dir else {}))
             applied_fixes.append(fix)
         else:
             unresolved.append(UnresolvedGapEntry(

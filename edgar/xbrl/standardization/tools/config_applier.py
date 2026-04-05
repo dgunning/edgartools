@@ -17,9 +17,10 @@ _DEFAULT_CONFIG_DIR = Path(__file__).parent.parent / "config"
 def _load_override(ticker: str, config_dir: Path = _DEFAULT_CONFIG_DIR) -> Dict[str, Any]:
     """Load existing JSON override for a company, or return empty dict."""
     json_path = config_dir / "company_overrides" / f"{ticker}.json"
-    if json_path.exists():
+    try:
         return json.loads(json_path.read_text())
-    return {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
 
 
 def _save_override(ticker: str, data: Dict[str, Any], config_dir: Path = _DEFAULT_CONFIG_DIR):
@@ -95,7 +96,10 @@ def revert_action(
     elif action_type == "DOCUMENT_DIVERGENCE":
         data.get("known_divergences", {}).pop(metric, None)
     elif action_type == "MAP_CONCEPT":
-        data.get("metric_overrides", {}).pop(metric, None)
+        overrides = data.get("metric_overrides", {}).get(metric, {})
+        overrides.pop("preferred_concept", None)
+        if not overrides:
+            data.get("metric_overrides", {}).pop(metric, None)
     elif action_type == "FIX_SIGN_CONVENTION":
         overrides = data.get("metric_overrides", {}).get(metric, {})
         overrides.pop("sign_negate", None)

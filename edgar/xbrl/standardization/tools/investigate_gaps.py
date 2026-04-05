@@ -14,8 +14,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from edgar.xbrl.standardization.tools.confidence_scorer import score_confidence
-from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json
+from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json, _load_override
 from edgar.xbrl.standardization.tools.report_generator import (
+    AppliedFix,
     EscalatedGap,
     generate_escalation_report,
     parse_cohort_report,
@@ -172,13 +173,16 @@ def run_investigation(
     # Parse cohort report
     cohort_data = parse_cohort_report(cohort_report_path.read_text())
 
-    # Build industry map from company results
+    # Enrich industry map from per-company JSON overrides
+    resolve_dir = config_dir or Path(__file__).parent.parent / "config"
     industry_map: Dict[str, Optional[str]] = {}
     for company in cohort_data.companies:
-        industry_map[company.ticker] = None  # Will be enriched from config
+        override = _load_override(company.ticker, resolve_dir)
+        industry_map[company.ticker] = override.get("industry")
 
     # Process unresolved gaps
-    applied_fixes: List[Dict] = []
+    applied_fix_dicts: List[Dict] = []
+    applied_fix_objects: List[AppliedFix] = []
     escalated_gaps: List[EscalatedGap] = []
 
     for gap_entry in cohort_data.unresolved:
@@ -197,11 +201,15 @@ def run_investigation(
                 "confidence": result.confidence,
                 "industry": industry_map.get(gap_entry.ticker),
             }
-            if config_dir:
-                apply_action_to_json(fix, config_dir=config_dir)
-            else:
-                apply_action_to_json(fix)
-            applied_fixes.append(fix)
+            apply_action_to_json(fix, config_dir=resolve_dir)
+            applied_fix_dicts.append(fix)
+            applied_fix_objects.append(AppliedFix(
+                ticker=fix["ticker"],
+                metric=fix["metric"],
+                action=fix["action"],
+                confidence=fix["confidence"],
+                detail=result.reasoning,
+            ))
         else:
             escalated_gaps.append(EscalatedGap(
                 ticker=gap_entry.ticker,
@@ -213,17 +221,17 @@ def run_investigation(
                 recommendation=result.recommended_action,
             ))
 
-    # Detect patterns
-    patterns = detect_patterns(applied_fixes)
+    # Detect patterns (uses dicts for industry info)
+    patterns = detect_patterns(applied_fix_dicts)
     if patterns:
         log.info(f"Detected {len(patterns)} fix patterns for potential global promotion")
 
-    # Generate escalation report
+    # Generate escalation report (uses AppliedFix objects)
     md = generate_escalation_report(
         name=cohort_data.name,
-        auto_fixes=applied_fixes,
+        auto_fixes=applied_fix_objects,
         escalated_gaps=escalated_gaps,
-        ef_cqs_before=0.0,  # Will be populated from measurement
+        ef_cqs_before=0.0,
         ef_cqs_after=0.0,
     )
 
