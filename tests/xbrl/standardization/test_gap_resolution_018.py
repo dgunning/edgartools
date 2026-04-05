@@ -51,9 +51,7 @@ class TestBankingForbiddenMetrics:
         ae._industry_metrics_cache = None
 
         mock_config = MagicMock()
-        mock_company = MagicMock()
-        mock_company.industry = "banking"
-        mock_config.get_company.return_value = mock_company
+        mock_config._get_industry_for_company.return_value = "banking"
 
         assert _is_metric_forbidden_fast("CurrentAssets", "JPM", mock_config) is True
 
@@ -62,9 +60,7 @@ class TestBankingForbiddenMetrics:
         from edgar.xbrl.standardization.tools.auto_eval import _is_metric_forbidden_fast
 
         mock_config = MagicMock()
-        mock_company = MagicMock()
-        mock_company.industry = ""
-        mock_config.get_company.return_value = mock_company
+        mock_config._get_industry_for_company.return_value = None
 
         assert _is_metric_forbidden_fast("CurrentAssets", "AAPL", mock_config) is False
 

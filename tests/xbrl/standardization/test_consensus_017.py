@@ -113,9 +113,7 @@ class TestO57EnergyArchetype:
 
         # Mock config with XOM as energy company
         mock_config = MagicMock()
-        mock_company = MagicMock()
-        mock_company.industry = "energy"
-        mock_config.get_company.return_value = mock_company
+        mock_config._get_industry_for_company.return_value = "energy"
 
         assert _is_metric_forbidden_fast("GrossProfit", "XOM", mock_config) is True
 
@@ -124,9 +122,7 @@ class TestO57EnergyArchetype:
         from edgar.xbrl.standardization.tools.auto_eval import _is_metric_forbidden_fast
 
         mock_config = MagicMock()
-        mock_company = MagicMock()
-        mock_company.industry = ""
-        mock_config.get_company.return_value = mock_company
+        mock_config._get_industry_for_company.return_value = None
 
         assert _is_metric_forbidden_fast("GrossProfit", "AAPL", mock_config) is False
 
@@ -135,7 +131,7 @@ class TestO57EnergyArchetype:
         from edgar.xbrl.standardization.tools.auto_eval import _is_metric_forbidden_fast
 
         mock_config = MagicMock()
-        mock_config.get_company.return_value = None
+        mock_config._get_industry_for_company.return_value = None
 
         assert _is_metric_forbidden_fast("GrossProfit", "UNKNOWN", mock_config) is False
 

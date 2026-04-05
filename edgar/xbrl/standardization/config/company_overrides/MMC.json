@@ -1,24 +1,16 @@
 {
   "exclude_metrics": {
-    "COGS": {
-      "reason": "not_applicable",
-      "notes": "Insurance broker — no cost of goods sold"
-    },
-    "Inventory": {
-      "reason": "not_applicable",
-      "notes": "Insurance broker — no inventory"
-    },
-    "GrossProfit": {
-      "reason": "not_applicable",
-      "notes": "Insurance broker — no gross profit line"
-    },
     "OperatingIncome": {
       "reason": "not_applicable",
-      "notes": "Insurance broker — operating income not comparable"
+      "notes": "Insurance broker \u2014 operating income not comparable"
+    },
+    "ResearchAndDevelopment": {
+      "reason": "not_applicable",
+      "notes": "Concept absent from XBRL filing"
     }
   },
   "known_divergences": {
-    "_note": "All metrics fail validation because yfinance snapshot is empty (no reference data). Extraction itself works — 32/33 concepts mapped."
+    "_note": "All metrics fail validation because yfinance snapshot is empty (no reference data). Extraction itself works \u2014 32/33 concepts mapped."
   },
   "quality_tier": "provisional"
 }

@@ -15,30 +15,26 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.8272 (100-co) / 0.8383 (50-co) | 2026-04-04 |
-| EF-CQS | 0.8544 (100-co) / 0.8740 (50-co) | 2026-04-04 |
-| Pure EF | 0.8476 (100-co) / 0.8623 (50-co) | 2026-04-04 |
-| Weighted EF-CQS | ~0.87 | 2026-04-04 |
-| SA-CQS (diagnostic) | 0.8597 | 2026-04-03 |
-| Headline EF | 88.6% (100-co) / 90.0% (50-co) | 2026-04-04 |
-| EF Pass Rate | 96.2% (100-co) / 98.0% (50-co) | 2026-04-04 |
-| Extraction Failed | 0 | 2026-04-04 |
-| Explained Variance | 81 reference mismatches | 2026-04-04 |
-| TotalLiabilities | Composite formula fixed + fallback concepts (11/11 pass) | 2026-04-04 |
-| Company Tiers | 100 companies: ~85 provisional, ~4 structural, 11 below 0.80 | 2026-04-04 |
-| Scoring Version | v2 + tier weighting (M8.1) + known_divergences fix + quality tiers (M8.3) | 2026-04-03 |
-| Industry Sections | 13 (banking, insurance, reits, energy + 8 new) + 17 new company mappings | 2026-04-04 |
-| Config Architecture | Per-company JSON overrides (52 files), config_loader.py 484 lines | 2026-04-04 |
+| CQS | 0.8235 (100-co) | 2026-04-05 |
+| EF-CQS | 0.9302 (100-co) | 2026-04-05 |
+| Pass Rate | 94.96% (100-co) | 2026-04-05 |
+| Headline EF | 88.6% (100-co) | 2026-04-05 |
+| Extraction Failed | 0 | 2026-04-05 |
+| Remaining Gaps | 186 (105 unmapped, 41 high_variance, 29 validation_failure, 11 explained_variance) | 2026-04-05 |
+| Company Tiers | 100 companies evaluated | 2026-04-05 |
+| Scoring Version | v2 + tier weighting (M8.1) + forbidden_by_ticker bug fix + Phase 14 exclusions | 2026-04-05 |
+| Industry Sections | 13 industry archetypes, 47 company mappings (+10 from Phase 14) | 2026-04-05 |
+| Config Architecture | Per-company JSON overrides (81 files), config_loader.py ~490 lines | 2026-04-05 |
 | Companies | 100 (100 evaluated) | |
 | Metrics | 37 base + 3 derived (8 core / 14 extended / 14 exploratory / 1 derived) | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
-| AI | Deterministic solver + Lead Agent closed loop (`run_closed_loop()`) + Graveyard replay (`replay_graveyard_proposals()`) | |
+| AI | **DEPRECATED** — Autonomous loop retired (Consensus 022). Scoring infrastructure retained. | |
 
 **EF-CQS is the primary KPI** — CQS at 0.98+ is below noise floor for single-metric decisions.
 
 **Scoring model: CQS v2** (Consensus 020). Changes: (1) yfinance `is_match` backdoor removed from EF scoring — EF now measures extraction fidelity only (known_concept, tree_source, facts_search paths). (2) SA-CQS demoted from decision gate to diagnostic WARNING — SA measures yfinance-compatibility, not extraction correctness. (3) `FACTS_SEARCH` is a distinct `MappingSource` — no longer mislabeled as TREE. (4) Multi-period validation passes fiscal_year to SEC Facts API. (5) `ef_pass_reason` field added to `ValidationResult` for scoring path diagnostics.
 
-**Note on CQS/EF-CQS values:** Phase 13 expanded from 50 to 100 companies with EF-CQS 0.8544 (quality gate >= 0.85 passed). Original 50-company EF-CQS maintained at 0.8740 (zero regressions). Key Phase 13 fixes: (1) TotalLiabilities composite formula bug fixed (YAML nesting `formula.components` → `components`) + fallback from NCI equity to `StockholdersEquity` for AMZN/MCD/NKE, (2) PFE OperatingIncome classified as reference mismatch (impairment scope), (3) MCD shares `scale_factor` fix (iXBRL millions), (4) BAC/C ShareRepurchases classified as reference mismatch (preferred stock), (5) ShortTermDebt composite expanded with `LongTermDebtCurrent` fallback concepts (HD/HON/KO/RTX/CAT all pass), (6) Industry map expanded with 17 new companies for 100-co cohort, (7) 50 new companies onboarded with reports.
+**Note on CQS/EF-CQS values:** Phase 14 (subscription-grade pivot) improved EF-CQS from 0.8544 to 0.9302 (+7.6pp). Key changes: (1) `_build_forbidden_by_ticker()` bug fixed — was reading empty `company.industry` instead of `_COMPANY_INDUSTRY_MAP`, causing forbidden metrics to be scored as failures for all 47 industry-mapped companies. (2) Industry map expanded from 37 to 47 companies (+5 banks, +5 insurance including BRK-B). (3) 30 new not_applicable exclusions (R&D for 24 companies, DividendPerShare for 8 growth companies). (4) 3 redundant MMC exclusions removed (covered by insurance forbidden_metrics). (5) Autonomous loop deprecated (Consensus 022), regression_monitor.py added. (6) data_dictionary.yaml populated (37/37 metrics with reference_standard_notes, coverage_rate, known_limitations).
 
 ---
 
@@ -204,10 +200,11 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 | File | Purpose |
 |------|---------|
 | `tools/auto_eval.py` | CQS computation, gap analysis, cohort definitions |
-| `tools/auto_eval_loop.py` | Experiment loop, decision gates, `run_overnight()` |
+| `tools/auto_eval_loop.py` | **DEPRECATED** — Experiment loop, decision gates, `run_overnight()` |
 | `tools/auto_eval_dashboard.py` | Morning review terminal dashboard |
-| `tools/auto_solver.py` | Subset-sum formula discovery |
-| `tools/consult_ai_gaps.py` | AI consultation pipeline, typed actions, OpenRouter caller |
+| `tools/auto_solver.py` | **DEPRECATED** — Subset-sum formula discovery |
+| `tools/consult_ai_gaps.py` | **DEPRECATED** — AI consultation pipeline, typed actions, OpenRouter caller |
+| `tools/regression_monitor.py` | Quarterly regression detection, data contract enforcement |
 | `tools/derivation_planner.py` | Derive computed metrics from accounting identities (GrossProfit = Revenue - COGS) |
 | `tools/discover_concepts.py` | Search calc trees + facts + reverse value search for concept candidates |
 | `tools/verify_mapping.py` | Value comparison against yfinance |
@@ -339,6 +336,8 @@ MEASURE → DIAGNOSE → PRIORITIZE → FIX → VALIDATE → RECORD → loop
 
 ### Lead Agent Closed Loop
 
+> **DEPRECATED (Consensus 022, 2026-04-04):** The closed loop is no longer actively used. The autonomous improvement pipeline has been replaced by quarterly regression monitoring via `regression_monitor.py`. This section is retained for historical reference.
+
 The expansion workflow for scaling to 500 companies. The lead Claude Code agent orchestrates deterministic + AI resolution in batches.
 
 ```
@@ -391,21 +390,16 @@ print_gap_report(gaps)
 
 ### Running Overnight
 
+> **DEPRECATED (Consensus 022, 2026-04-04):** The overnight experiment loop has been replaced by quarterly regression monitoring. Use `regression_monitor.py` for ongoing quality assurance.
+
 ```python
-from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight, propose_change
-from edgar.xbrl.standardization.tools.auto_eval import EXPANSION_COHORT_50
-from edgar.xbrl.standardization.tools.auto_eval_dashboard import show_dashboard
+# DEPRECATED — use regression_monitor.py instead
+# from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight
 
-report = run_overnight(
-    duration_hours=5.0,
-    eval_cohort=EXPANSION_COHORT_50,
-    propose_fn=propose_change,
-    max_workers=2,
-)
-show_dashboard()
-```
+# Current approach: quarterly regression monitoring
+from edgar.xbrl.standardization.tools.regression_monitor import RegressionMonitor
 
-Progress is printed to stdout with structured markers. Monitor with:
-```bash
-grep -E "ITERATION|KEEP|DISC|VETO|BASELINE|SESSION|TARGET" overnight_run.log
+monitor = RegressionMonitor()
+report = monitor.run(eval_cohort=EXPANSION_COHORT_100, snapshot_mode=True)
+monitor.print_report(report)
 ```

@@ -1,0 +1,8 @@
+{
+  "exclude_metrics": {
+    "ResearchAndDevelopment": {
+      "reason": "not_applicable",
+      "notes": "Concept absent from XBRL filing"
+    }
+  }
+}

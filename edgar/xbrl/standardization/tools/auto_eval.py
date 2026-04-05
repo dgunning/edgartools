@@ -1844,12 +1844,17 @@ from edgar.xbrl.standardization.config_loader import _load_industry_metrics
 
 
 def _build_forbidden_by_ticker(tickers, orchestrator) -> Dict[str, set]:
-    """Pre-compute forbidden metrics per ticker from industry archetypes."""
+    """Pre-compute forbidden metrics per ticker from industry archetypes.
+
+    Uses the canonical _get_industry_for_company(network=False) to avoid
+    SEC API calls on the scoring hot path.
+    """
     industry_metrics = _load_industry_metrics()
     result: Dict[str, set] = {}
     for ticker in tickers:
-        company = orchestrator.config.get_company(ticker) if orchestrator.config else None
-        industry = (company.industry or "").lower() if company and company.industry else ""
+        industry = ""
+        if orchestrator.config:
+            industry = (orchestrator.config._get_industry_for_company(ticker, network=False) or "").lower()
         result[ticker] = set(
             industry_metrics.get(industry, {}).get("forbidden_metrics", [])
         )
@@ -1857,8 +1862,11 @@ def _build_forbidden_by_ticker(tickers, orchestrator) -> Dict[str, set]:
 
 
 def _build_exclusion_reasons_by_ticker(tickers, orchestrator) -> Dict[str, Dict[str, Dict[str, str]]]:
-    """Pre-compute exclusion reasons per ticker for scoring integrity (Consensus 018)."""
-    return {ticker: orchestrator.config.get_excluded_metrics_for_company(ticker) for ticker in tickers}
+    """Pre-compute exclusion reasons per ticker for scoring integrity (Consensus 018).
+
+    Uses network=False to avoid SEC API calls on the scoring hot path.
+    """
+    return {ticker: orchestrator.config.get_excluded_metrics_for_company(ticker, network=False) for ticker in tickers}
 
 
 def _build_known_divergences_by_ticker(tickers, orchestrator) -> Dict[str, set]:
@@ -1897,23 +1905,16 @@ def _cqs_formula(pass_rate: float, mean_variance: float, coverage_rate: float,
 def _is_metric_forbidden_fast(metric: str, ticker: str, config=None) -> bool:
     """Check if metric is forbidden by the company's industry archetype (in-memory).
 
-    Fast version that uses in-memory config objects instead of reading YAML files
-    on every call. Used by identify_gaps() for pre-exclusion filtering.
-
-    Lookup path:
-    1. Get company industry from MappingConfig.companies[ticker].industry
-    2. Look up industry archetype in industry_metrics.yaml (cached)
-    3. Check if metric is in archetype's forbidden_metrics list
+    Convenience wrapper used by tests. Production code uses _build_forbidden_by_ticker()
+    for batch pre-computation. Does NOT trigger SEC API network calls.
     """
     if config is None:
-        from edgar.xbrl.standardization.config_loader import MappingConfig, get_config
+        from edgar.xbrl.standardization.config_loader import get_config
         config = get_config()
 
-    company = config.get_company(ticker)
-    if not company or not company.industry:
+    industry = (config._get_industry_for_company(ticker, network=False) or "").lower() if config else ""
+    if not industry:
         return False
-
-    industry = company.industry.lower()
 
     industry_metrics = _load_industry_metrics()
     archetype = industry_metrics.get(industry, {})

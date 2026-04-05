@@ -41,6 +41,7 @@ def _load_industry_metrics() -> dict:
 _COMPANY_INDUSTRY_MAP = {
     # Banking (SIC 6020-6099)
     "JPM": "banking", "BAC": "banking", "GS": "banking", "MS": "banking", "C": "banking",
+    "WFC": "banking", "USB": "banking", "BK": "banking", "STT": "banking", "PNC": "banking",
     # Securities / Exchanges (SIC 6200-6299)
     "SCHW": "securities", "ICE": "securities", "CME": "securities",
     # Asset management (SIC 6726)
@@ -50,6 +51,8 @@ _COMPANY_INDUSTRY_MAP = {
     "SPGI": "financial_services", "MCO": "financial_services",
     # Insurance (SIC 6300-6399)
     "UNH": "health_insurance", "AON": "insurance", "MMC": "insurance",
+    "BRK-B": "insurance",
+    "CI": "health_insurance", "CB": "insurance", "AIG": "insurance", "MET": "insurance",
     # Energy (SIC 1300-1389, 2911-2999)
     "XOM": "energy", "CVX": "energy", "COP": "energy", "SLB": "energy",
     # REITs (SIC 6500-6599)
@@ -111,7 +114,7 @@ class MappingConfig:
         """Get metrics marked as universal."""
         return [name for name, m in self.metrics.items() if m.universal]
     
-    def get_excluded_metrics_for_company(self, ticker: str) -> Dict[str, Dict[str, str]]:
+    def get_excluded_metrics_for_company(self, ticker: str, *, network: bool = True) -> Dict[str, Dict[str, str]]:
         """Get all excluded metrics for a company (company-specific + industry).
 
         Combines (in priority order):
@@ -121,6 +124,7 @@ class MappingConfig:
 
         Args:
             ticker: Company ticker (e.g., 'JPM')
+            network: If False, skip SEC API auto-detection (for scoring hot path)
 
         Returns:
             Dict mapping metric name -> {"reason": "...", "notes": "..."}
@@ -129,7 +133,7 @@ class MappingConfig:
         company = self.get_company(ticker)
 
         # Get industry - auto-detect from SIC or use manual config
-        industry = self._get_industry_for_company(ticker, company)
+        industry = self._get_industry_for_company(ticker, company, network=network)
 
         if industry:
             # Primary: industry_metrics.yaml forbidden_metrics (unified authority)
@@ -150,13 +154,17 @@ class MappingConfig:
 
         return result
     
-    def _get_industry_for_company(self, ticker: str, company: Optional[CompanyConfig] = None) -> Optional[str]:
+    def _get_industry_for_company(self, ticker: str, company: Optional[CompanyConfig] = None, *, network: bool = True) -> Optional[str]:
         """Get industry for a company, preferring in-memory lookups over network calls.
 
         Priority:
         1. _COMPANY_INDUSTRY_MAP (in-memory, authoritative for known companies)
         2. Manual industry from company config in companies.yaml
-        3. Auto-detect from SEC SIC code (requires network — last resort)
+        3. Auto-detect from SEC SIC code (requires network — last resort, skipped when network=False)
+
+        Args:
+            network: If False, skip SEC API auto-detection. Use for scoring hot paths
+                     where speed matters and all known companies are in _COMPANY_INDUSTRY_MAP.
         """
         # Check in-memory map first (no network, no YAML dependency)
         if ticker in _COMPANY_INDUSTRY_MAP:
@@ -165,6 +173,9 @@ class MappingConfig:
         # Check manual config from companies.yaml
         if company and company.industry:
             return company.industry
+
+        if not network:
+            return None
 
         # Fall through to SEC API auto-detection
         try:

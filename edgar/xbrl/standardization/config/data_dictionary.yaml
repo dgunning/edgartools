@@ -42,6 +42,9 @@ metrics:
     source_concepts:
       - "CostOfGoodsAndServicesSold"
       - "CostOfRevenue"
+    known_limitations: "Forbidden for banking, insurance, securities, telecom, transportation, and franchise companies. Service-oriented companies (META, FDX) may use CostOfRevenue instead of CostOfGoodsAndServicesSold. Energy companies may use CrudeOilAndProductPurchases."
+    reference_standard_notes: "Primary: us-gaap:CostOfGoodsAndServicesSold. Alternatives: CostOfRevenue, CostOfGoodsSold, CostOfSales, CostOfServices. Energy: CrudeOilAndProductPurchases. Insurance: BenefitsLossesAndExpenses."
+    coverage_rate: 0.75
 
   GrossProfit:
     display_name: "Gross Profit"
@@ -53,6 +56,9 @@ metrics:
     source_concepts:
       - "GrossProfit"
     composite_formula: "Revenue - COGS"
+    known_limitations: "Forbidden for banking, insurance, securities, energy, utilities, telecom, franchise, financial services, and asset management companies. Many service/tech companies (GOOG, META, MA, V, UPS, WMT) exclude via company overrides. Composite (Revenue - COGS) used when direct tag absent."
+    reference_standard_notes: "us-gaap:GrossProfit. Composite fallback: Revenue - COGS. Banking counterpart: NetInterestIncome. Insurance counterpart: UnderwritingIncome."
+    coverage_rate: 0.65
 
   SGA:
     display_name: "Selling, General & Administrative"
@@ -63,6 +69,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "SellingGeneralAndAdministrativeExpense"
+    known_limitations: "Forbidden for securities and financial services companies. Often split into separate SellingAndMarketingExpense and GeneralAndAdministrativeExpense line items. Banking counterpart: NoninterestExpense."
+    reference_standard_notes: "Primary: us-gaap:SellingGeneralAndAdministrativeExpense. Alternatives: SellingAndMarketingExpense, GeneralAndAdministrativeExpense (may need summation). Banking: NoninterestExpense."
+    coverage_rate: 0.82
 
   ResearchAndDevelopment:
     display_name: "Research & Development"
@@ -73,6 +82,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "ResearchAndDevelopmentExpense"
+    known_limitations: "Forbidden for banking and health insurance companies. ~20 of 52 tracked companies exclude R&D via company overrides (retail, industrials, utilities, financials). Not applicable to companies without R&D programs."
+    reference_standard_notes: "Primary: us-gaap:ResearchAndDevelopmentExpense. Alternatives: ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost, ResearchAndDevelopmentExpenseSoftwareExcludingAcquiredInProcessCost. Energy counterpart: ExplorationExpense."
+    coverage_rate: 0.55
 
   OperatingIncome:
     display_name: "Operating Income"
@@ -97,6 +109,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "InterestExpense"
+    known_limitations: "Validation tolerance of 25% due to varying definitions. Some companies report InterestExpenseDebt (excludes lease interest) vs InterestExpense (all-inclusive). Debt-free companies may report zero."
+    reference_standard_notes: "Primary: us-gaap:InterestExpense. Alternatives: InterestExpenseDebt, InterestAndDebtExpense. For banking, this is the analog of COGS (interest paid to depositors)."
+    coverage_rate: 0.90
 
   IncomeTaxExpense:
     display_name: "Income Tax Expense"
@@ -107,6 +122,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "IncomeTaxExpenseBenefit"
+    known_limitations: "Validation tolerance of 25%. Can be negative (tax benefit) for companies with losses or large deductions. REITs and pass-through entities may report minimal tax expense."
+    reference_standard_notes: "Primary: us-gaap:IncomeTaxExpenseBenefit. Alternative: CurrentIncomeTaxExpenseBenefit (current portion only, excludes deferred)."
+    coverage_rate: 0.97
 
   PretaxIncome:
     display_name: "Pretax Income"
@@ -117,6 +135,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+    known_limitations: "A few companies (AVGO, DE, NFLX) excluded via company overrides due to missing reference data. Very long XBRL concept name makes manual lookups error-prone."
+    reference_standard_notes: "Primary: us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest. Alternatives: IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments, IncomeLossFromContinuingOperationsBeforeIncomeTaxes."
+    coverage_rate: 0.95
 
   NetIncome:
     display_name: "Net Income"
@@ -127,10 +148,10 @@ metrics:
     metric_tier: "headline"
     source_concepts:
       - "NetIncomeLoss"
-    known_limitations: null
-    reference_standard_notes: "us-gaap:NetIncomeLoss (attributable to parent entity)"
-    coverage_rate: 1.0
       - "ProfitLoss"
+    known_limitations: null
+    reference_standard_notes: "us-gaap:NetIncomeLoss (attributable to parent entity). Fallback: us-gaap:ProfitLoss (NCI-inclusive)."
+    coverage_rate: 1.0
 
   # =========================================================================
   # PER-SHARE METRICS
@@ -145,6 +166,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "EarningsPerShareBasic"
+    known_limitations: "Validation tolerance of 15%. Some companies report WeightedAverageNumberOfShareOutstandingBasicAndDiluted (combined basic/diluted). Can be negative for companies with net losses."
+    reference_standard_notes: "us-gaap:EarningsPerShareBasic. Auto-solver validated across multiple sectors and periods."
+    coverage_rate: 0.97
 
   EarningsPerShareDiluted:
     display_name: "Earnings Per Share (Diluted)"
@@ -170,6 +194,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "CommonStockDividendsPerShareDeclared"
+    known_limitations: "Not all companies pay dividends. Growth companies (ADBE, AMZN, NFLX, TSLA) excluded via company overrides. Validation tolerance of 15%."
+    reference_standard_notes: "Primary: us-gaap:CommonStockDividendsPerShareDeclared. Alternative: CommonStockDividendsPerShareCashPaid (actual cash paid vs declared amount)."
+    coverage_rate: 0.60
 
   WeightedAverageSharesDiluted:
     display_name: "Weighted Average Shares (Diluted)"
@@ -180,6 +207,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "WeightedAverageNumberOfDilutedSharesOutstanding"
+    known_limitations: "Validation tolerance of 15%. Some companies use WeightedAverageNumberOfShareOutstandingBasicAndDiluted when basic and diluted are equal. Share count in thousands or millions varies by filer — unit scaling must be verified."
+    reference_standard_notes: "Primary: us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding. Alternative: WeightedAverageNumberOfSharesOutstandingDiluted, WeightedAverageNumberOfShareOutstandingBasicAndDiluted."
+    coverage_rate: 0.98
 
   # =========================================================================
   # CASH FLOW STATEMENT
@@ -207,6 +237,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "PaymentsToAcquirePropertyPlantAndEquipment"
+    known_limitations: "Forbidden for banking, REITs, securities, and asset management companies. Sign convention: reported as negative (cash outflow). Validation tolerance of 40% — pharma/tech may include intangible capex (PaymentsToAcquireIntangibleAssets, PaymentsToDevelopSoftware). Exclude patterns filter out M&A acquisitions."
+    reference_standard_notes: "Primary: us-gaap:PaymentsToAcquirePropertyPlantAndEquipment. Expanded capex includes PaymentsToAcquireIntangibleAssets and PaymentsToDevelopSoftware. Energy: PaymentsToAcquireProductiveAssets, PaymentsToAcquireOilAndGasPropertyAndEquipment."
+    coverage_rate: 0.80
 
   InvestingCashFlow:
     display_name: "Investing Cash Flow"
@@ -217,6 +250,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "NetCashProvidedByUsedInInvestingActivities"
+    known_limitations: "Validation tolerance of 25%. Sign varies (typically negative for growing companies, positive during divestitures). Some companies use ContinuingOperations variant."
+    reference_standard_notes: "Primary: us-gaap:NetCashProvidedByUsedInInvestingActivities. Alternative: NetCashProvidedByUsedInInvestingActivitiesContinuingOperations."
+    coverage_rate: 0.98
 
   FinancingCashFlow:
     display_name: "Financing Cash Flow"
@@ -227,6 +263,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "NetCashProvidedByUsedInFinancingActivities"
+    known_limitations: "Validation tolerance of 25%. Sign varies (negative when repaying debt/buybacks, positive when raising capital). Some companies use ContinuingOperations variant."
+    reference_standard_notes: "Primary: us-gaap:NetCashProvidedByUsedInFinancingActivities. Alternative: NetCashProvidedByUsedInFinancingActivitiesContinuingOperations."
+    coverage_rate: 0.98
 
   DepreciationAmortization:
     display_name: "Depreciation & Amortization"
@@ -238,6 +277,9 @@ metrics:
     source_concepts:
       - "DepreciationDepletionAndAmortization"
       - "DepreciationAndAmortization"
+    known_limitations: "Validation tolerance of 30% — highest among all metrics. Composite metric: pharma/medical companies often split into Depreciation + AmortizationOfIntangibleAssets. Exclude patterns filter out AccumulatedDepreciation (balance sheet). Required for EBITDA calculation."
+    reference_standard_notes: "Primary: us-gaap:DepreciationDepletionAndAmortization. Alternatives: DepreciationAndAmortization, DepreciationAmortizationAndAccretionNet. Composite fallback: Depreciation + AmortizationOfIntangibleAssets."
+    coverage_rate: 0.92
 
   StockBasedCompensation:
     display_name: "Stock-Based Compensation"
@@ -248,6 +290,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "ShareBasedCompensation"
+    known_limitations: "Validation tolerance of 20%. Not all companies have significant SBC — primarily tech and growth companies. Critical for calculating 'Real' Free Cash Flow. Some companies use AllocatedShareBasedCompensationExpense (income statement line) vs ShareBasedCompensation (cash flow add-back)."
+    reference_standard_notes: "Primary: us-gaap:ShareBasedCompensation. Alternatives: AllocatedShareBasedCompensationExpense, StockCompensationExpense, ShareBasedCompensationIncludingDiscontinuedOperations."
+    coverage_rate: 0.85
 
   DividendsPaid:
     display_name: "Dividends Paid"
@@ -259,6 +304,9 @@ metrics:
     source_concepts:
       - "PaymentsOfDividendsCommonStock"
       - "PaymentsOfDividends"
+    known_limitations: "Sign convention: negative (cash outflow). Not all companies pay dividends — growth companies (ADBE, AMZN, NFLX, TSLA) do not. PaymentsOfDividends (broader) may include preferred dividends; PaymentsOfDividendsCommonStock is more precise."
+    reference_standard_notes: "Primary: us-gaap:PaymentsOfDividendsCommonStock. Fallback: us-gaap:PaymentsOfDividends (includes preferred). Alternative: DividendsPaidCommonStock."
+    coverage_rate: 0.60
 
   ShareRepurchases:
     display_name: "Share Repurchases"
@@ -269,6 +317,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "PaymentsForRepurchaseOfCommonStock"
+    known_limitations: "Sign convention: negative (cash outflow). Validation tolerance of 25%. Not all companies have buyback programs — TSLA excluded via company override. Some companies use PaymentsForRepurchaseOfEquity (broader, includes preferred) or StockRepurchasedAndRetiredDuringPeriodValue."
+    reference_standard_notes: "Primary: us-gaap:PaymentsForRepurchaseOfCommonStock. Alternatives: PaymentsForRepurchaseOfEquity, StockRepurchasedAndRetiredDuringPeriodValue."
+    coverage_rate: 0.65
 
   # =========================================================================
   # BALANCE SHEET - ASSETS
@@ -297,6 +348,9 @@ metrics:
     source_concepts:
       - "CashAndCashEquivalentsAtCarryingValue"
       - "CashCashEquivalentsAndShortTermInvestments"
+    known_limitations: "Banking has special extraction strategy (street_cash_composite): CashAndDueFromBanks + InterestBearingDepositsInBanks. Some companies include restricted cash (CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents). Broad concept list with many alternatives makes exact matching complex."
+    reference_standard_notes: "Primary: us-gaap:CashAndCashEquivalentsAtCarryingValue. Broader: CashCashEquivalentsAndShortTermInvestments. Banking: CashAndDueFromBanks + InterestBearingDepositsInBanks. Restricted cash variant: CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents."
+    coverage_rate: 0.97
 
   AccountsReceivable:
     display_name: "Accounts Receivable"
@@ -307,6 +361,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "AccountsReceivableNetCurrent"
+    known_limitations: "Validation tolerance of 25%. Not meaningful for financial services companies. Many alternative concepts exist (ReceivablesNetCurrent, TradeAccountsReceivable, NotesAndAccountsReceivableNet). Rising AR faster than revenue may signal revenue quality issues."
+    reference_standard_notes: "Primary: us-gaap:AccountsReceivableNetCurrent. Alternatives: ReceivablesNetCurrent, TradeAccountsReceivable, AccountsReceivableNet, AccountsNotesAndLoansReceivableNetCurrent, AccountsAndOtherReceivablesNetCurrent."
+    coverage_rate: 0.85
 
   Inventory:
     display_name: "Inventory"
@@ -319,6 +376,9 @@ metrics:
       - "InventoryNet"
     exclusions:
       - "Banks and financial services companies"
+    known_limitations: "Forbidden for banking, insurance, securities, REITs, telecom, and utilities companies. Not applicable to pure service companies. Alternative concepts: Inventories, InventoryFinishedGoods."
+    reference_standard_notes: "Primary: us-gaap:InventoryNet. Alternatives: Inventories, InventoryFinishedGoods. Not reported by financial services, service-only, or asset-light companies."
+    coverage_rate: 0.60
 
   CurrentAssets:
     display_name: "Current Assets"
@@ -329,6 +389,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "AssetsCurrent"
+    known_limitations: "Forbidden for banking, securities, asset management, and financial services companies. Banks use liquidity-based balance sheets without current/non-current distinction. Required for WorkingCapital derived metric."
+    reference_standard_notes: "us-gaap:AssetsCurrent. Not applicable to entities using liquidity-based balance sheet presentation (banks, broker-dealers)."
+    coverage_rate: 0.82
 
   PropertyPlantEquipment:
     display_name: "Property, Plant & Equipment"
@@ -339,6 +402,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "PropertyPlantAndEquipmentNet"
+    known_limitations: "Forbidden for banking companies. Validation tolerance of 20%. Known yfinance divergence: yfinance includes OperatingLeaseRightOfUseAsset in PP&E, while XBRL reports PropertyPlantAndEquipmentNet separately. Not meaningful for asset-light or financial services companies."
+    reference_standard_notes: "Primary: us-gaap:PropertyPlantAndEquipmentNet. Alternative: PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization (includes finance lease ROU assets)."
+    coverage_rate: 0.85
 
   Goodwill:
     display_name: "Goodwill"
@@ -349,6 +415,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "Goodwill"
+    known_limitations: "Not all companies have acquisitions — organic-growth companies report zero goodwill. Exclude patterns filter out GoodwillIncludingGoodwill, GoodwillImpaired, and GoodwillGross to avoid double-counting or non-net values."
+    reference_standard_notes: "us-gaap:Goodwill. Exclude patterns: IncludingGoodwill, Impaired, Gross. Component of IntangibleAssets composite and TangibleAssets derived metric."
+    coverage_rate: 0.80
 
   IntangibleAssets:
     display_name: "Intangible Assets"
@@ -359,6 +428,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "IntangibleAssetsNetExcludingGoodwill"
+    known_limitations: "Not all companies have significant intangible assets. Composite in metrics.yaml: Goodwill + IntangibleAssetsNetExcludingGoodwill + IndefiniteLivedTrademarks (to match yfinance). KO uses IndefiniteLivedTrademarks specifically. Validation tolerance of 25%."
+    reference_standard_notes: "Primary: us-gaap:IntangibleAssetsNetExcludingGoodwill. Composite (yfinance match): Goodwill + IntangibleAssetsNetExcludingGoodwill + IndefiniteLivedTrademarks. Alternatives: FiniteLivedIntangibleAssetsNet, IndefiniteLivedIntangibleAssetsExcludingGoodwill."
+    coverage_rate: 0.75
 
   # =========================================================================
   # BALANCE SHEET - LIABILITIES & EQUITY
@@ -373,6 +445,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "LiabilitiesCurrent"
+    known_limitations: "Forbidden for banking, securities, asset management, and financial services companies. Banks use liquidity-based balance sheets without current/non-current distinction. Required for WorkingCapital derived metric."
+    reference_standard_notes: "us-gaap:LiabilitiesCurrent. Not applicable to entities using liquidity-based balance sheet presentation (banks, broker-dealers)."
+    coverage_rate: 0.82
 
   TotalLiabilities:
     display_name: "Total Liabilities"
@@ -397,6 +472,9 @@ metrics:
     source_concepts:
       - "ShortTermBorrowings"
       - "DebtCurrent"
+    known_limitations: "Highly composite metric — yfinance 'Current Debt' sums multiple short-term debt types. Banking has special wholesale_funding_composite extraction strategy. Dimensional handling set to include_dimensional to capture segment-level data. Many alternative concepts (LongTermDebtCurrent, CommercialPaper, NotesPayable, etc.) make reconciliation complex."
+    reference_standard_notes: "Composite: LongTermDebtCurrent + CommercialPaper + ShortTermBorrowings + others. Banking: wholesale funding composite (excludes TradingLiabilities). Fallback: us-gaap:ShortTermBorrowings or us-gaap:DebtCurrent."
+    coverage_rate: 0.80
 
   LongTermDebt:
     display_name: "Long-Term Debt"
@@ -408,6 +486,9 @@ metrics:
     source_concepts:
       - "LongTermDebtNoncurrent"
       - "LongTermDebt"
+    known_limitations: "LongTermDebtNoncurrent preferred (excludes current portion) over LongTermDebt (includes current portion). Some debt-free companies report zero. LongTermDebtAndCapitalLeaseObligations is a broader concept that includes capital leases."
+    reference_standard_notes: "Primary: us-gaap:LongTermDebtNoncurrent (non-current only). Fallback: us-gaap:LongTermDebt (may include current portion). Alternative: LongTermDebtAndCapitalLeaseObligations."
+    coverage_rate: 0.90
 
   AccountsPayable:
     display_name: "Accounts Payable"
@@ -418,6 +499,9 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "AccountsPayableCurrent"
+    known_limitations: "Not meaningful for some financial services companies — SCHW excluded via company override (yfinance includes client payables, not traditional AP). Exclude patterns in metrics.yaml filter out AccountsPayableAndAccruedLiabilities to avoid double-counting with broader concepts."
+    reference_standard_notes: "Primary: us-gaap:AccountsPayableCurrent. Alternatives: AccountsPayableTradeCurrent, TradeAndOtherPayablesCurrent. Broader (excluded): AccountsPayableAndAccruedLiabilitiesCurrent."
+    coverage_rate: 0.85
 
   StockholdersEquity:
     display_name: "Stockholders' Equity"
@@ -442,3 +526,6 @@ metrics:
     metric_tier: "secondary"
     source_concepts:
       - "RetainedEarningsAccumulatedDeficit"
+    known_limitations: "Validation tolerance of 20%. Sign varies — can be negative (accumulated deficit) for companies with cumulative losses. BLK excluded via company override due to different equity presentation. Some companies with complex equity structures may not break out retained earnings separately."
+    reference_standard_notes: "us-gaap:RetainedEarningsAccumulatedDeficit. Negative values indicate accumulated deficit. Universal for most SEC filers."
+    coverage_rate: 0.95

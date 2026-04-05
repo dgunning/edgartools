@@ -46,6 +46,7 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 11: Gap investigation | Classify all gaps | 2026-04-04 | 2026-04-04 | 0.8684 | 0.8740 | Hands-on investigation of 108 gaps. 32 not_applicable exclusions, 22 known_divergences, 4 bad overrides removed. 3 solver patterns identified. |
 | 12: Config collapse | Scalable config | 2026-04-04 | 2026-04-04 | 0.8740 | 0.8740 | Consensus 021. config_loader 916→484 lines. 51 per-company JSON overrides. 8 new industry sections. TotalLiabilities composite. Pure EF metric. `docs/metric-definitions.md`. |
 | 13: Path to 0.95 | 100-co expansion | 2026-04-04 | 2026-04-04 | 0.8740 | 0.8544 (100-co) | TL composite fix (+2.82pp), 3 bug fixes (PFE/MCD/BAC-C), ShortTermDebt composite (5 cos), 50 new companies onboarded, 100-co quality gate passed (>= 0.85). |
+| 14: Subscription-grade pivot | Data contract + regression monitor | 2026-04-05 | 2026-04-05 | 0.8544 | 0.9302 (100-co) | Loop deprecated (Consensus 022 Option B). forbidden_by_ticker bug fix (+7.6pp), industry map 37→47, 30 not_applicable exclusions, data_dictionary.yaml complete, WSL YAML diagnostics passed. |
 
 **Deferred items:** 3b (historical validation), 4a (S&P 500 expansion), 4c (event-driven processing).
 
@@ -170,6 +171,16 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - 100-co results: EF-CQS 0.8544 (passes 0.85 gate), pass_rate 96.2%, 81 reference mismatches, 11 companies below 0.80 (MMC empty snapshot, D/SPG/XOM/NOC/GE/AMT/COP/VZ/BRK-B/REGN structural).
 - 50-co regression check: EF-CQS 0.8740 maintained (zero regressions).
 - Commits: `aa735b72`, `4615092f`, `59f26c92`, `65e76e53`, `f58030e3`, `2ddbe88b`, `a9ed1233`, `8b5601d2`, `9d40c991`.
+
+**Run 020 (2026-04-05)** — Phase 14: Subscription-grade pivot + extraction bug fixes
+- `_build_forbidden_by_ticker()` bug fixed: was reading empty `company.industry` instead of `_COMPANY_INDUSTRY_MAP`. All 47 industry-mapped companies now correctly excluded from forbidden metrics during CQS scoring.
+- Industry map expanded: 37→47 companies. +5 banks (WFC, USB, BK, STT, PNC), +5 insurance (BRK-B, CI, CB, AIG, MET).
+- Not-applicable exclusions: 30 new (R&D for 24 companies, DividendPerShare for 8 growth companies). 3 redundant MMC exclusions removed.
+- Autonomous loop deprecated (Consensus 022 Option B). regression_monitor.py added. auto_eval_loop.py/auto_solver.py/consult_ai_gaps.py marked DEPRECATED in architecture.md.
+- data_dictionary.yaml fully populated: 37/37 metrics with reference_standard_notes, coverage_rate, known_limitations.
+- WSL YAML diagnostics: all 4 tests passed (round-trip, locking, concurrency, performance). JSON overrides can be migrated to YAML in future.
+- Phase 14 section added to roadmap. Future Phases renumbered to avoid confusion.
+- EF-CQS: 0.8544→0.9302 (+7.6pp). CQS: 0.8228→0.8235. 186 gaps remaining (167 Tier 1A, 3 Tier 1B, 16 Tier 3).
 
 ---
 
@@ -382,8 +393,37 @@ For each 50-company batch:
 
 ---
 
+## Phase 14: Subscription-Grade Pivot
+
+*Consensus 022 decided the autonomous improvement loop's fate: Option B — extract scoring infrastructure, build lightweight regression monitor, let improvement code bit-rot gracefully.*
+
+### Context
+
+At EF-CQS 0.8544 (100 companies), the config-only improvement ceiling was reached. Consensus 021 completed the config architecture (industry_metrics.yaml unified authority, per-company JSON overrides, _COMPANY_INDUSTRY_MAP). Consensus 022 asked: should we keep investing in the autonomous loop, or pivot to product?
+
+**Decision:** Pivot. The autonomous loop (`auto_eval_loop.py`, `auto_solver.py`, `consult_ai_gaps.py`) is deprecated. The scoring infrastructure (`compute_cqs`, `identify_gaps` in `auto_eval.py`) remains active — it powers the regression monitor and data contract enforcement.
+
+### What Was Implemented (commit f24174c7)
+
+1. **Two-tier confidence signals** — `ConfidenceTier.VERIFIED` (golden master + multi-period) and `ConfidenceTier.PROVISIONAL` (single-period pass)
+2. **Data contract** — `DataContract` class with coverage/accuracy/freshness guarantees per metric tier
+3. **Golden master framework** — `GoldenMaster` records with `last_verified`, `verification_method`, `periods_validated`
+4. **Regression monitor** — `RegressionMonitor` class (~200 lines) for quarterly quality checks
+5. **Data dictionary** — `data_dictionary.yaml` with metric definitions, tiers, known limitations
+6. **Deprecation markers** — `auto_eval_loop.py`, `auto_solver.py`, `consult_ai_gaps.py` marked deprecated
+
+### What Remains Active
+
+- `auto_eval.py` — `compute_cqs()`, `identify_gaps()`, cohort definitions, CQS formula
+- `config_loader.py` — Config loading, industry map, importance tiers
+- `orchestrator.py` — Multi-layer mapping engine (core extraction)
+- `reference_validator.py` — Validation against yfinance + SEC API
+- `regression_monitor.py` — Quarterly regression detection (NEW)
+
+---
+
 ## Future Phases (Not Yet Planned)
 
-- **Phase 10: Scale (500→5000)** — Full S&P 500 (gated by M8.3 quality tiers), then Russell 1000, then all XBRL filers
-- **Phase 11: Event-driven** — EDGAR RSS feed → single-company extraction within hours of filing
-- **Phase 12: Multi-product** — Separate reported data product (SEC-derived) from standardized cross-company data
+- **S&P 500 Scale** — Full S&P 500 (gated by quality tiers), then Russell 1000, then all XBRL filers
+- **Event-Driven Processing** — EDGAR RSS feed → single-company extraction within hours of filing
+- **Multi-Product** — Separate reported data product (SEC-derived) from standardized cross-company data
