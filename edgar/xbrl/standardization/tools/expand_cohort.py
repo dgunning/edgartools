@@ -223,7 +223,7 @@ def _try_deterministic_fix(gap) -> Optional[Dict]:
     if gap.root_cause == "sign_error":
         ref = gap.reference_value
         xbrl = gap.xbrl_value
-        if ref and xbrl and ref != 0:
+        if ref is not None and xbrl is not None and ref != 0:
             ratio = xbrl / ref
             if abs(ratio + 1.0) < 0.05:  # within 5% of exact negation
                 return {
