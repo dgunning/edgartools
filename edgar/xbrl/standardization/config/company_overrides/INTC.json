@@ -1,5 +1,3 @@
 {
-  "known_divergences": {},
-  "quality_tier": "provisional",
-  "exclude_metrics": {}
+  "quality_tier": "provisional"
 }

@@ -1,5 +1,4 @@
 {
-  "metric_overrides": {},
   "quality_tier": "provisional",
   "known_divergences": {
     "PropertyPlantEquipment": {

@@ -1,5 +1,4 @@
 {
-  "metric_overrides": {},
   "exclude_metrics": {
     "ResearchAndDevelopment": {
       "reason": "not_applicable",

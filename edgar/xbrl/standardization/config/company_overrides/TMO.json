@@ -21,6 +21,5 @@
       "remediation_status": "deferred"
     }
   },
-  "quality_tier": "provisional",
-  "exclude_metrics": {}
+  "quality_tier": "provisional"
 }
