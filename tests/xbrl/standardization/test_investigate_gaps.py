@@ -233,3 +233,77 @@ def test_full_scoring_path_wrong_concept_with_variance():
     assert result.root_cause == "wrong_concept"
     # 3% variance, 0 peers → confidence 0.80 < 0.90 threshold
     assert result.auto_apply is False
+
+
+def test_peer_count_injected_for_same_industry_gaps():
+    """Gaps sharing (metric, root_cause, industry) get peer_count in evidence."""
+    from collections import defaultdict
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.confidence_scorer import score_confidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    # Two utilities with same wrong_concept gap on GrossProfit (3% variance)
+    gaps = [
+        UnresolvedGapEntry(
+            ticker="D", metric="GrossProfit", gap_type="high_variance",
+            variance=3.0, root_cause="wrong_concept", graveyard=0,
+            reference_value=1000.0, xbrl_value=970.0,
+        ),
+        UnresolvedGapEntry(
+            ticker="NEE", metric="GrossProfit", gap_type="high_variance",
+            variance=3.0, root_cause="wrong_concept", graveyard=0,
+            reference_value=2000.0, xbrl_value=1940.0,
+        ),
+    ]
+    industry_map = {"D": "utilities", "NEE": "utilities"}
+
+    # Simulate two-pass logic (same as run_investigation)
+    peer_groups = defaultdict(list)
+    for g in gaps:
+        key = (g.metric, g.root_cause or "unknown", industry_map.get(g.ticker))
+        peer_groups[key].append(g)
+
+    for g in gaps:
+        evidence = _build_evidence(g)
+        key = (g.metric, g.root_cause or "unknown", industry_map.get(g.ticker))
+        evidence["peer_count"] = len(peer_groups[key]) - 1  # exclude self
+        result = score_confidence(g.root_cause, evidence)
+        # With 1 peer + 3% variance → confidence 0.90 (from _score_wrong_concept)
+        assert result.confidence == 0.90, f"Expected 0.90, got {result.confidence} for {g.ticker}"
+        # 0.90 >= 0.90 threshold → auto_apply!
+        assert result.auto_apply is True, f"Expected auto_apply=True for {g.ticker}"
+
+
+def test_peer_count_zero_for_unique_gaps():
+    """Gap with unique (metric, root_cause, industry) gets peer_count=0."""
+    from collections import defaultdict
+    from edgar.xbrl.standardization.tools.investigate_gaps import _build_evidence
+    from edgar.xbrl.standardization.tools.confidence_scorer import score_confidence
+    from edgar.xbrl.standardization.tools.report_generator import UnresolvedGapEntry
+
+    # Single gap with unique combination — no peers
+    gaps = [
+        UnresolvedGapEntry(
+            ticker="HD", metric="CashAndEquivalents", gap_type="high_variance",
+            variance=3.0, root_cause="wrong_concept", graveyard=0,
+            reference_value=1000.0, xbrl_value=970.0,
+        ),
+    ]
+    industry_map = {"HD": "retail"}
+
+    # Simulate two-pass logic
+    peer_groups = defaultdict(list)
+    for g in gaps:
+        key = (g.metric, g.root_cause or "unknown", industry_map.get(g.ticker))
+        peer_groups[key].append(g)
+
+    g = gaps[0]
+    evidence = _build_evidence(g)
+    key = (g.metric, g.root_cause or "unknown", industry_map.get(g.ticker))
+    evidence["peer_count"] = len(peer_groups[key]) - 1  # exclude self
+
+    assert evidence["peer_count"] == 0
+    result = score_confidence(g.root_cause, evidence)
+    # 3% variance, 0 peers → confidence 0.80 < 0.90 threshold → escalate
+    assert result.confidence == 0.80
+    assert result.auto_apply is False

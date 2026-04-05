@@ -188,11 +188,23 @@ def run_investigation(
     applied_fixes: List[Dict] = []
     escalated_gaps: List[EscalatedGap] = []
 
+    # Pass 1: Group gaps by (metric, root_cause, industry) to compute peer counts
+    peer_groups: Dict[Tuple[str, str, Optional[str]], List] = defaultdict(list)
+    for gap_entry in cohort_data.unresolved:
+        key = (gap_entry.metric, gap_entry.root_cause or "unknown", industry_map.get(gap_entry.ticker))
+        peer_groups[key].append(gap_entry)
+
+    # Pass 2: Score with peer evidence
     for gap_entry in cohort_data.unresolved:
         root_cause = gap_entry.root_cause or "unknown"
 
         # Score confidence
         evidence = _build_evidence(gap_entry)
+
+        # Inject peer count (other companies with same gap in same industry)
+        key = (gap_entry.metric, root_cause, industry_map.get(gap_entry.ticker))
+        evidence["peer_count"] = len(peer_groups[key]) - 1  # exclude self
+
         result = score_confidence(root_cause, evidence)
 
         if result.auto_apply:
