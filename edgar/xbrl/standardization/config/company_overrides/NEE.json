@@ -5,12 +5,6 @@
       "notes": "Phase 10: Use DebtCurrent."
     }
   },
-  "exclude_metrics": {
-    "ResearchAndDevelopment": {
-      "reason": "not_applicable",
-      "notes": "No R&D line item"
-    }
-  },
   "known_divergences": {
     "InterestExpense": {
       "form_types": [

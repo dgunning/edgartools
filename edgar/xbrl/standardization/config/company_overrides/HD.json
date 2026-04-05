@@ -1,11 +1,5 @@
 {
   "metric_overrides": {},
-  "exclude_metrics": {
-    "ResearchAndDevelopment": {
-      "reason": "not_applicable",
-      "notes": "No R&D line item"
-    }
-  },
   "quality_tier": "provisional",
   "known_divergences": {
     "PropertyPlantEquipment": {

@@ -1,9 +1,5 @@
 {
   "exclude_metrics": {
-    "ResearchAndDevelopment": {
-      "reason": "not_applicable",
-      "notes": "No R&D line item"
-    },
     "PretaxIncome": {
       "reason": "not_applicable",
       "notes": "Phase 11: No reference data; metric not reported"

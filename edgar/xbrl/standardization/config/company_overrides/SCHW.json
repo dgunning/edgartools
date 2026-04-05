@@ -1,9 +1,5 @@
 {
   "exclude_metrics": {
-    "ResearchAndDevelopment": {
-      "reason": "not_applicable",
-      "notes": "No R&D line item"
-    },
     "AccountsPayable": {
       "reason": "not_applicable",
       "notes": "Phase 11: Brokerage - yfinance includes client payables, not traditional AP"

@@ -3,10 +3,6 @@
     "OperatingIncome": {
       "reason": "not_applicable",
       "notes": "Insurance broker \u2014 operating income not comparable"
-    },
-    "ResearchAndDevelopment": {
-      "reason": "not_applicable",
-      "notes": "Concept absent from XBRL filing"
     }
   },
   "known_divergences": {

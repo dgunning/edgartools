@@ -1,9 +1,5 @@
 {
   "exclude_metrics": {
-    "ResearchAndDevelopment": {
-      "reason": "not_applicable",
-      "notes": "No R&D line item"
-    },
     "GrossProfit": {
       "reason": "not_applicable",
       "notes": "Phase 11: Logistics - no GrossProfit concept in XBRL"
