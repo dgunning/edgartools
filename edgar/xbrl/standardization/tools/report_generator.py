@@ -25,8 +25,9 @@ from typing import List, Optional
 class CompanyResult:
     ticker: str
     ef_cqs: float
-    status: str       # "graduated" | "needs_investigation" | "failed"
+    status: str       # "verified" | "provisional" | "needs_investigation" | "failed"
     gaps_remaining: int
+    quality_tier: str = ""  # "verified" | "provisional" | "needs_investigation"
     notes: str = ""
 
 

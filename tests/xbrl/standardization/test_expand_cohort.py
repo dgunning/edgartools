@@ -121,6 +121,63 @@ def test_diagnose_and_fix_components_none_extraction_evidence():
     assert entry.components_needed == 0
 
 
+@patch("edgar.xbrl.standardization.tools.expand_cohort._onboard_single")
+@patch("edgar.xbrl.standardization.tools.expand_cohort._measure_cohort")
+@patch("edgar.xbrl.standardization.tools.expand_cohort._diagnose_and_fix")
+def test_quality_tier_verified_at_095(mock_fix, mock_measure, mock_onboard, tmp_path):
+    """Companies at EF-CQS >= 0.95 get 'verified' status."""
+    mock_result = MagicMock()
+    mock_result.error = None
+    mock_onboard.return_value = {"NFLX": mock_result}
+
+    mock_cqs = MagicMock()
+    mock_cqs.ef_cqs = 0.96
+    mock_measure.return_value = {"NFLX": mock_cqs}
+    mock_fix.return_value = ([], [])
+
+    report_path = run_expand_cohort(tickers=["NFLX"], cohort_name="tier-test", output_dir=tmp_path)
+    content = report_path.read_text()
+    assert "verified" in content
+
+
+@patch("edgar.xbrl.standardization.tools.expand_cohort._onboard_single")
+@patch("edgar.xbrl.standardization.tools.expand_cohort._measure_cohort")
+@patch("edgar.xbrl.standardization.tools.expand_cohort._diagnose_and_fix")
+def test_quality_tier_provisional_at_080_to_094(mock_fix, mock_measure, mock_onboard, tmp_path):
+    """Companies at 0.80 <= EF-CQS < 0.95 get 'provisional' status."""
+    mock_result = MagicMock()
+    mock_result.error = None
+    mock_onboard.return_value = {"HD": mock_result}
+
+    mock_cqs = MagicMock()
+    mock_cqs.ef_cqs = 0.88
+    mock_measure.return_value = {"HD": mock_cqs}
+    mock_fix.return_value = ([], [])
+
+    report_path = run_expand_cohort(tickers=["HD"], cohort_name="tier-test", output_dir=tmp_path)
+    content = report_path.read_text()
+    assert "provisional" in content
+
+
+@patch("edgar.xbrl.standardization.tools.expand_cohort._onboard_single")
+@patch("edgar.xbrl.standardization.tools.expand_cohort._measure_cohort")
+@patch("edgar.xbrl.standardization.tools.expand_cohort._diagnose_and_fix")
+def test_quality_tier_needs_investigation_below_080(mock_fix, mock_measure, mock_onboard, tmp_path):
+    """Companies at EF-CQS < 0.80 get 'needs_investigation' status."""
+    mock_result = MagicMock()
+    mock_result.error = None
+    mock_onboard.return_value = {"XYZ": mock_result}
+
+    mock_cqs = MagicMock()
+    mock_cqs.ef_cqs = 0.65
+    mock_measure.return_value = {"XYZ": mock_cqs}
+    mock_fix.return_value = ([], [])
+
+    report_path = run_expand_cohort(tickers=["XYZ"], cohort_name="tier-test", output_dir=tmp_path)
+    content = report_path.read_text()
+    assert "needs_investigation" in content
+
+
 def test_deterministic_fix_sign_error():
     """Sign-inverted gap gets FIX_SIGN_CONVENTION action."""
     gap = MetricGap(

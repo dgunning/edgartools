@@ -81,12 +81,18 @@ def run_expand_cohort(
         ef_cqs = score.ef_cqs if score else 0.0
         gaps = sum(1 for u in unresolved if u.ticker == ticker)
 
-        status = "graduated" if ef_cqs >= 0.80 else "needs_investigation"
+        if ef_cqs >= 0.95:
+            status = "verified"
+        elif ef_cqs >= 0.80:
+            status = "provisional"
+        else:
+            status = "needs_investigation"
         companies.append(CompanyResult(
             ticker=ticker,
             ef_cqs=ef_cqs,
             status=status,
             gaps_remaining=gaps,
+            quality_tier=status,
             notes="",
         ))
 
